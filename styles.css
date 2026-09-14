@@ -4293,10 +4293,8 @@ p,
   padding-block: var(--sekt);
 }
 
-/* Forsta sektionen efter heron far lite extra luft, sa bilden
-   slapper innan rubriken borjar. */
 .house-types {
-  padding-top: calc(var(--sekt) * 1.15);
+  padding-top: clamp(44px, 5vw, 72px);
 }
 
 .house-types__header,
