@@ -3,7 +3,7 @@
 import re, io, os
 
 BAS = "https://dakotakrk.github.io/idealhus/"
-CSS_V = "20260923l"
+CSS_V = "20260923m"
 
 # Husen for den som ska bo i dem, och det vi levererar till andra som
 # bygger. De sag likadana ut i menyn tidigare, som fem jamnstallda val.
@@ -221,6 +221,7 @@ SIDFOT = '''    <footer class="site-footer">
             <a href="kontakt.html">Kontakt</a>
             <a href="attefallshus-regler.html">Attefallshus: reglerna</a>
             <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>
+            <a href="aga-och-hyra-ut.html">Äga och hyra ut</a>
           </nav>
         </div>
 

@@ -24,8 +24,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&family=Source+Sans+3:ital,wght@0,300..700;1,400&display=swap">
     <link rel="preload" as="image" href="images/generated-house-garden-01.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20260923l">
-    <script src="premium.js?v=20260923l" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20260923m">
+    <script src="premium.js?v=20260923m" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork')document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
@@ -339,6 +339,7 @@
             <a href="kontakt.html">Kontakt</a>
             <a href="attefallshus-regler.html">Attefallshus: reglerna</a>
             <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>
+            <a href="aga-och-hyra-ut.html">Äga och hyra ut</a>
           </nav>
         </div>
 
@@ -756,17 +757,23 @@
           var wrap = falt.closest('.field') || falt.closest('.contact-form__check');
           if (!wrap) return;
           wrap.classList.add('field--error');
+          // Skärmläsare ska höra felet på fältet, inte bara se det rött.
+          falt.setAttribute('aria-invalid', 'true');
           if (wrap.querySelector('.field__error')) return;
           var p = document.createElement('span');
           p.className = 'field__error';
+          p.id = 'fel-' + (falt.name || falt.id);
           p.textContent = meddelande;
           wrap.appendChild(p);
+          falt.setAttribute('aria-describedby', p.id);
         }
 
         function rensaFel(falt) {
           var wrap = falt.closest('.field') || falt.closest('.contact-form__check');
           if (!wrap) return;
           wrap.classList.remove('field--error');
+          falt.removeAttribute('aria-invalid');
+          falt.removeAttribute('aria-describedby');
           var p = wrap.querySelector('.field__error');
           if (p) p.remove();
         }

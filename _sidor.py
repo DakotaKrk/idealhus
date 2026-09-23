@@ -46,7 +46,9 @@ def kategorisida(fil, namn, herobild, meta, rubrik, ingress, spann):
     guidelank = ('\n          <p class="category__guide">'
                  '<a href="attefallshus-regler.html">Reglerna för attefallshus ändrades i december 2025: så fungerar de nu</a></p>'
                  '\n          <p class="category__guide"><a href="vad-far-jag-bygga.html">Räkna ut hur stort hus som ryms på din tomt</a></p>'
-                 ) if fil == 'attefallshus.html' else ''
+                 ) if fil == 'attefallshus.html' else (
+                 '\n          <p class="category__guide"><a href="aga-och-hyra-ut.html">Samäga eller hyra ut stugan: kalender och uthyrningskalkyl</a></p>'
+                 if fil in ('fritidshus.html', 'fjallstugor.html') else '')
     # Proffs skiljs av med en linje. Den som jamfor attefallshus mot
     # fritidshus jamfor inte utfackningsvaggar i samma rad.
     def pill(n, f):

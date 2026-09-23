@@ -17,6 +17,9 @@ TEMA = ("    <script>try{var t=new URLSearchParams(location.search).get('tema')|
         "document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>")
 
 FOT_B = FOT_A + '            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>\n'
+AGA_A = '            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>\n          </nav>'
+AGA_B = ('            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>\n'
+         '            <a href="aga-och-hyra-ut.html">Äga och hyra ut</a>\n          </nav>')
 
 
 
@@ -40,6 +43,10 @@ def patcha(fil):
         assert s.count(FOT_A) == 1, fil
         s = s.replace(FOT_A, FOT_B)
 
+
+    if 'href="aga-och-hyra-ut.html">Äga och hyra ut</a>' not in s:
+        assert s.count(AGA_A) == 1, fil
+        s = s.replace(AGA_A, AGA_B)
 
     # Temat sätts innan sidan ritas, annars blinkar den vit för den som
     # valt mörkt läge.

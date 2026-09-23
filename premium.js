@@ -180,7 +180,7 @@
     }).observe(film);
   }
 
-  $$('.malgrupp, .filter').forEach(glidandeMarkering);
+  $$('.malgrupp, .filter, .samagare .hustypval').forEach(glidandeMarkering);
 
   /* --- Mjuk zoom på alla bilder ---------------------------------
      Samma effekt som referensbilderna på startsidan: bilden växer
