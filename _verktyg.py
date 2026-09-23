@@ -73,7 +73,7 @@ FORMULAR = "\n\n".join([
             <legend>Hur mycket komplementbyggnad finns redan på tomten?</legend>
             <p class="kollen__hjalp">Attefallshus, friggebodar och andra lovbefriade byggnader, sammanlagt.</p>
             <div class="kollen__reglage">
-              <input type="range" id="befintligt" name="befintligt" min="0" max="65" step="1" value="0" aria-describedby="befintligt-varde">
+              <input type="range" id="befintligt" name="befintligt" min="0" max="65" step="1" value="0" aria-label="Befintlig komplementbyggnad på tomten, i kvadratmeter" aria-describedby="befintligt-varde">
               <output id="befintligt-varde" for="befintligt">0 m²</output>
             </div>
           </fieldset>''',

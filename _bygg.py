@@ -145,7 +145,7 @@ def head(titel, beskrivning, forladdad=None, fil=None):
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&family=Source+Sans+3:ital,wght@0,300..700;1,400&display=swap">{pre}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&amp;family=Source+Sans+3:ital,wght@0,300..700;1,400&amp;display=swap">{pre}
     <link rel="stylesheet" href="styles.css?v={CSS_V}">
     <script src="premium.js?v={CSS_V}" defer></script>
     <script>try{{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork')document.documentElement.setAttribute('data-tema','mork')}}catch(e){{}}</script>
