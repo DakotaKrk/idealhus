@@ -24,7 +24,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&family=Source+Sans+3:ital,wght@0,300..700;1,400&display=swap">
     <link rel="preload" as="image" href="images/generated-category-attefallshus-wide-01.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20260911l">
+    <link rel="stylesheet" href="styles.css?v=20260923l">
+    <script src="premium.js?v=20260923l" defer></script>
+    <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork')document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -59,7 +61,7 @@
                 <img src="images/generated-category-attefallshus-card.webp" alt="" loading="lazy" decoding="async">
                 <span>
                   <strong>Attefallshus</strong>
-                  <em>Upp till 30 m², utan bygglov</em>
+                  <em>Utan bygglov, 30–50 m²</em>
                 </span>
               </a>
               <a href="fritidshus.html">
@@ -90,6 +92,11 @@
                   <strong>Proffs</strong>
                   <em>Väggar, block och moduler</em>
                 </span>
+              </a>
+              <a class="main-nav__tips" href="vad-far-jag-bygga.html">
+                <span class="main-nav__tips-etikett">Prova</span>
+                <strong>Vad får jag bygga?</strong>
+                <em>Räkna ut vad som ryms på din tomt</em>
               </a>
             </div>
           </div>
@@ -127,6 +134,7 @@
         <a href="referensprojekt.html">Referensprojekt</a>
         <a href="om-oss.html">Om oss</a>
         <a href="kontakt.html">Kontakt</a>
+        <a class="mobile-nav__tips" href="vad-far-jag-bygga.html"><span>Prova</span> Vad får jag bygga?</a>
         <a class="mobile-nav__cta" href="kontakt.html">Begär offert</a>
       </nav>
     </header>
@@ -160,6 +168,7 @@
               Här kan vi beskriva känslan, användningen och de viktigaste
               fördelarna med huset utan att låsa sidan till en färdig produkt.
             </p>
+            <a class="ryms-lank" data-ryms href="vad-far-jag-bygga.html">Ryms huset på din tomt?</a>
           </div>
 
           <dl class="model-specs">
@@ -180,6 +189,61 @@
               <dd>X rum</dd>
             </div>
           </dl>
+        </div>
+      </section>
+
+      <section class="hus3dvy" id="i-3d" hidden>
+        <div class="hus3dvy__inner">
+          <div class="hus3dvy__ord">
+            <p class="section-label section-label--accent">3D och AR</p>
+            <h2 class="hus3dvy__titel">Ställ huset på <em>din tomt</em>.</h2>
+            <p class="hus3dvy__text">
+              Snurra och zooma i modellen. På mobilen kan du ställa huset i
+              full skala på din tomt med kameran, så ser du hur stort det blir
+              där det ska stå.
+            </p>
+            <dl class="hus3dvy__matt">
+              <div><dt>Längd</dt><dd data-3d-langd>–</dd></div>
+              <div><dt>Bredd</dt><dd data-3d-bredd>–</dd></div>
+              <div><dt>Nockhöjd</dt><dd data-3d-nock>–</dd></div>
+            </dl>
+            <div class="konfig" data-konfig>
+              <div class="konfig__grupp">
+                <p class="konfig__etikett">Fasad <span data-konfig-fasadnamn></span></p>
+                <div class="konfig__rad" role="group" aria-label="Fasadens kulör" data-konfig-fasad>
+                  <button type="button" data-farg="#1f1d1b" data-namn="svart" aria-pressed="false" aria-label="Svart" style="--prov:#1f1d1b"></button>
+                  <button type="button" data-farg="#3d3b37" data-namn="grafit" aria-pressed="false" aria-label="Grafit" style="--prov:#3d3b37"></button>
+                  <button type="button" data-farg="#b58f62" data-namn="lärk" aria-pressed="false" aria-label="Lärk" style="--prov:#b58f62"></button>
+                  <button type="button" data-farg="#b3aea4" data-namn="ljusgrå" aria-pressed="false" aria-label="Ljusgrå" style="--prov:#b3aea4"></button>
+                  <button type="button" data-farg="#e3ddd1" data-namn="kritvit" aria-pressed="false" aria-label="Kritvit" style="--prov:#e3ddd1"></button>
+                  <button type="button" data-farg="#7d2f24" data-namn="faluröd" aria-pressed="false" aria-label="Faluröd" style="--prov:#7d2f24"></button>
+                </div>
+              </div>
+              <div class="konfig__grupp">
+                <p class="konfig__etikett">Tak <span data-konfig-taknamn></span></p>
+                <div class="konfig__rad" role="group" aria-label="Takets kulör" data-konfig-tak>
+                  <button type="button" data-farg="#34373a" data-namn="mörkgrå" aria-pressed="true" aria-label="Mörkgrå" style="--prov:#34373a"></button>
+                  <button type="button" data-farg="#141414" data-namn="svart" aria-pressed="false" aria-label="Svart" style="--prov:#141414"></button>
+                  <button type="button" data-farg="#6e3325" data-namn="tegelröd" aria-pressed="false" aria-label="Tegelröd" style="--prov:#6e3325"></button>
+                  <button type="button" data-farg="#5d6b5a" data-namn="mossgrön" aria-pressed="false" aria-label="Mossgrön" style="--prov:#5d6b5a"></button>
+                </div>
+              </div>
+              <label class="konfig__spegel">
+                <input type="checkbox" data-konfig-spegel>
+                <span class="konfig__vaxel" aria-hidden="true"></span>
+                Spegelvänd planlösning
+              </label>
+            </div>
+
+            <p class="hus3dvy__not">
+              Modellen är byggd ur ritningens mått, ytterväggar och takhöjd.
+              Fönstrens placering är ungefärlig, och kulörerna visar hur huset
+              kan se ut - de slutliga väljs i offerten.
+            </p>
+            <p class="hus3dvy__mobil" data-3d-mobil>Öppna sidan på mobilen för att ställa huset på din tomt.</p>
+          </div>
+
+          <div class="hus3dvy__scen" data-3d-scen></div>
         </div>
       </section>
 
@@ -466,20 +530,6 @@
           <p class="site-footer__text">
             Attefallshus &amp; komplementhus med skandinavisk design och hög kvalitet.
           </p>
-          <div class="site-footer__social">
-            <a href="#" aria-label="Idealhus på Facebook" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                <path d="M13.4 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.45 1.55-1.45h1.65V3.68c-.29-.04-1.27-.13-2.42-.13-2.4 0-4.03 1.46-4.03 4.15v2.2H7.45V13h2.7v8h3.25z"/>
-              </svg>
-            </a>
-            <a href="#" aria-label="Idealhus på Instagram" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
-                <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5"/>
-                <circle cx="12" cy="12" r="3.9"/>
-                <circle cx="17.1" cy="6.9" r="1.1" fill="currentColor" stroke="none"/>
-              </svg>
-            </a>
-          </div>
         </div>
 
         <div>
@@ -493,6 +543,7 @@
             <a href="om-oss.html">Om oss</a>
             <a href="kontakt.html">Kontakt</a>
             <a href="attefallshus-regler.html">Attefallshus: reglerna</a>
+            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>
           </nav>
         </div>
 
@@ -578,9 +629,9 @@
           attefallshus: {
             namn: 'Attefallshus',
             modeller: [
-              { namn: 'Huskort 1', bild: 'generated-category-attefallshus-card.webp', yta: 25, rum: 1, lev: 10 },
-              { namn: 'Huskort 2', bild: 'generated-house-forest-01.webp', yta: 27, rum: 2, lev: 10 },
-              { namn: 'Huskort 3', bild: 'generated-house-coast-01.webp', yta: 28, rum: 2, lev: 12 },
+              { namn: 'Huskort 1', bild: 'hus-r2.webp', yta: 26, rum: 1, lev: 10 },
+              { namn: 'Huskort 2', bild: 'hus-r1.webp', yta: 27, rum: 2, lev: 10 },
+              { namn: 'Huskort 3', bild: 'hus-r5.webp', yta: 27, rum: 2, lev: 12 },
               { namn: 'Huskort 4', bild: 'generated-house-garden-01.webp', yta: 30, rum: 2, lev: 12 },
               { namn: 'Huskort 5', bild: 'generated-category-attefallshus-02.webp', yta: 30, rum: 2, lev: 14 },
               { namn: 'Huskort 6', bild: 'generated-house-winter-01.webp', yta: 30, rum: 3, lev: 14 },
@@ -589,8 +640,8 @@
           fritidshus: {
             namn: 'Fritidshus',
             modeller: [
-              { namn: 'Huskort 1', bild: 'generated-category-fritidshus-card.webp', yta: 45, rum: 2, lev: 12 },
-              { namn: 'Huskort 2', bild: 'generated-house-forest-01.webp', yta: 55, rum: 3, lev: 14 },
+              { namn: 'Huskort 1', bild: 'hus-r3.webp', yta: 38, rum: 2, lev: 12 },
+              { namn: 'Huskort 2', bild: 'hus-r4.webp', yta: 45, rum: 2, lev: 14 },
               { namn: 'Huskort 3', bild: 'generated-house-coast-01.webp', yta: 62, rum: 3, lev: 14 },
               { namn: 'Huskort 4', bild: 'generated-house-garden-01.webp', yta: 70, rum: 4, lev: 16 },
               { namn: 'Huskort 5', bild: 'generated-house-meadow-01.webp', yta: 78, rum: 4, lev: 16 },

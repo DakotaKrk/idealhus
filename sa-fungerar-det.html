@@ -24,7 +24,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&family=Source+Sans+3:ital,wght@0,300..700;1,400&display=swap">
     <link rel="preload" as="image" href="images/generated-craft-cladding-01.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20260911l">
+    <link rel="stylesheet" href="styles.css?v=20260923l">
+    <script src="premium.js?v=20260923l" defer></script>
+    <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork')document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -59,7 +61,7 @@
                 <img src="images/generated-category-attefallshus-card.webp" alt="" loading="lazy" decoding="async">
                 <span>
                   <strong>Attefallshus</strong>
-                  <em>Upp till 30 m², utan bygglov</em>
+                  <em>Utan bygglov, 30–50 m²</em>
                 </span>
               </a>
               <a href="fritidshus.html">
@@ -90,6 +92,11 @@
                   <strong>Proffs</strong>
                   <em>Väggar, block och moduler</em>
                 </span>
+              </a>
+              <a class="main-nav__tips" href="vad-far-jag-bygga.html">
+                <span class="main-nav__tips-etikett">Prova</span>
+                <strong>Vad får jag bygga?</strong>
+                <em>Räkna ut vad som ryms på din tomt</em>
               </a>
             </div>
           </div>
@@ -127,6 +134,7 @@
         <a href="referensprojekt.html">Referensprojekt</a>
         <a href="om-oss.html">Om oss</a>
         <a href="kontakt.html">Kontakt</a>
+        <a class="mobile-nav__tips" href="vad-far-jag-bygga.html"><span>Prova</span> Vad får jag bygga?</a>
         <a class="mobile-nav__cta" href="kontakt.html">Begär offert</a>
       </nav>
     </header>
@@ -139,6 +147,17 @@
           <div class="subpage-hero__content">
             <h1 class="subpage-hero__title">Så fungerar det</h1>
             <p class="subpage-hero__meta">Från första samtalet till inflyttning</p>
+          </div>
+        </div>
+
+        <div class="heroscen heroscen--kategori" aria-hidden="true">
+          <div class="heroscen__chip heroscen__chip--a">
+            <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h9"/></svg></span>
+            <p><strong>Sju steg</strong><span>i tre skeden, i ordning</span></p>
+          </div>
+          <div class="heroscen__chip heroscen__chip--b">
+            <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20c.9-3.9 3.9-6 7.5-6s6.6 2.1 7.5 6"/></svg></span>
+            <p><strong>En kontakt</strong><span>hela vägen till nyckeln</span></p>
           </div>
         </div>
       </section>
@@ -160,10 +179,10 @@
 
         <div class="kontakt-direkt">
           <div class="kontakt-direkt__rad">
-            <span class="kontakt-direkt__namn">Anmälan</span>
+            <span class="kontakt-direkt__namn">Lovfritt</span>
             <span class="kontakt-direkt__roll">Attefallshus</span>
             <span class="kontakt-direkt__lankar">
-              <a href="attefallshus.html">Upp till 30 m², inget bygglov</a>
+              <a href="vad-far-jag-bygga.html">30 m² inom detaljplan, 50 m² utanför</a>
             </span>
           </div>
 
@@ -185,13 +204,40 @@
         </div>
       </section>
 
-      <section class="process process--faser">
+      <section class="process process--faser" data-leverans='{"attefallshus": "10\u201314", "fritidshus": "12\u201318", "fjallstugor": "14\u201318", "villor": "20\u201324"}'>
         <div class="process__inre">
-          <p class="process__teckenforklaring">
-            <span><i class="prick prick--vi"></i>Vi gör det</span>
-            <span><i class="prick prick--du"></i>Du gör det</span>
-            <span><i class="prick prick--bada"></i>Tillsammans</span>
-          </p>
+          <div class="processverktyg">
+            <div class="processverktyg__grupp">
+              <p class="processverktyg__etikett">Vem gör vad</p>
+              <div class="vemfilter" role="group" aria-label="Visa steg efter vem som gör dem">
+                <button type="button" data-vem="alla" aria-pressed="true">Alla <small>7</small></button>
+                <button type="button" data-vem="vi" aria-pressed="false"><i class="prick prick--vi"></i>Vi <small>2</small></button>
+                <button type="button" data-vem="du" aria-pressed="false"><i class="prick prick--du"></i>Du <small>2</small></button>
+                <button type="button" data-vem="bada" aria-pressed="false"><i class="prick prick--bada"></i>Tillsammans <small>3</small></button>
+              </div>
+            </div>
+            <div class="processverktyg__grupp">
+              <p class="processverktyg__etikett">Visa för</p>
+              <div class="hustypval" role="group" aria-label="Anpassa stegen efter hustyp">
+                <button type="button" data-typ="alla" aria-pressed="true">Alla hus</button>
+                <button type="button" data-typ="attefallshus" aria-pressed="false">Attefallshus</button>
+                <button type="button" data-typ="fritidshus" aria-pressed="false">Fritidshus</button>
+                <button type="button" data-typ="fjallstugor" aria-pressed="false">Fjällstuga</button>
+                <button type="button" data-typ="villor" aria-pressed="false">Villa</button>
+              </div>
+            </div>
+          </div>
+
+          <nav class="fardplan" aria-label="Stegen">
+            <span class="fardplan__spar" aria-hidden="true"><span></span></span>
+            <a href="#steg-1" data-fard="1"><span>01</span><em>Samtalet</em></a>
+            <a href="#steg-2" data-fard="2"><span>02</span><em>Modell</em></a>
+            <a href="#steg-3" data-fard="3"><span>03</span><em>Lov</em></a>
+            <a href="#steg-4" data-fard="4"><span>04</span><em>Tillverkning</em></a>
+            <a href="#steg-5" data-fard="5"><span>05</span><em>Grund</em></a>
+            <a href="#steg-6" data-fard="6"><span>06</span><em>Montage</em></a>
+            <a href="#steg-7" data-fard="7"><span>07</span><em>Besiktning</em></a>
+          </nav>
 
         <section class="fas">
           <div class="fas__huvud">
@@ -218,7 +264,7 @@
           </div>
 
           <ol class="fassteg">
-            <li class="fassteg__kort">
+            <li class="fassteg__kort" id="steg-1" data-vem="bada" data-steg="1">
               <span class="fassteg__nr">01</span>
               <div class="fassteg__kropp">
                 <div class="fassteg__topp">
@@ -228,7 +274,7 @@
                 <p>Du berättar om tomten, hur huset ska användas och ungefär när du vill vara i gång. Vi säger vad som är möjligt och vad som inte är det. Kostar ingenting och förpliktigar inte till något.</p>
               </div>
             </li>
-            <li class="fassteg__kort">
+            <li class="fassteg__kort" id="steg-2" data-vem="bada" data-steg="2">
               <span class="fassteg__nr">02</span>
               <div class="fassteg__kropp">
                 <div class="fassteg__topp">
@@ -238,7 +284,7 @@
                 <p>Vi går igenom modellerna och gör de anpassningar som betyder något för just din plats. Du får en offert där det står vad som ingår och vad som tillkommer.</p>
               </div>
             </li>
-            <li class="fassteg__kort">
+            <li class="fassteg__kort" id="steg-3" data-vem="du" data-steg="3">
               <span class="fassteg__nr">03</span>
               <div class="fassteg__kropp">
                 <div class="fassteg__topp">
@@ -274,7 +320,7 @@
           </div>
 
           <ol class="fassteg">
-            <li class="fassteg__kort">
+            <li class="fassteg__kort" id="steg-4" data-vem="vi" data-steg="4">
               <span class="fassteg__nr">04</span>
               <div class="fassteg__kropp">
                 <div class="fassteg__topp">
@@ -284,7 +330,7 @@
                 <p>Huset byggs i Sverige, under tak. Väggar, golv och tak monteras i jämn temperatur och fuktnivå i stället för ute i väder och vind. Du får veta var i processen huset befinner sig.</p>
               </div>
             </li>
-            <li class="fassteg__kort">
+            <li class="fassteg__kort" id="steg-5" data-vem="du" data-steg="5">
               <span class="fassteg__nr">05</span>
               <div class="fassteg__kropp">
                 <div class="fassteg__topp">
@@ -324,7 +370,7 @@
           </div>
 
           <ol class="fassteg">
-            <li class="fassteg__kort">
+            <li class="fassteg__kort" id="steg-6" data-vem="vi" data-steg="6">
               <span class="fassteg__nr">06</span>
               <div class="fassteg__kropp">
                 <div class="fassteg__topp">
@@ -334,7 +380,7 @@
                 <p>Huset transporteras till tomten och monteras. Framkomlighet för lastbil och kranbil är det vanligaste som behöver lösas i förväg.</p>
               </div>
             </li>
-            <li class="fassteg__kort">
+            <li class="fassteg__kort" id="steg-7" data-vem="bada" data-steg="7">
               <span class="fassteg__nr">07</span>
               <div class="fassteg__kropp">
                 <div class="fassteg__topp">
@@ -380,6 +426,12 @@
               Berätta vad du funderar på, så återkommer vi med nästa tydliga
               steg. Utan krav och utan säljsnack.
             </p>
+            <ul class="tillit" aria-label="Det du kan räkna med">
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg>Byggt under tak i Sverige</li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.9 3.9-6 7.5-6s6.6 2.1 7.5 6"/></svg>En kontakt hela vägen</li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h9l3.5 3.5v13.5H6zM9 11h6M9 14.5h6M9 18h3.5"/></svg>Offert post för post</li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20h18M6 20V10l6-5 6 5v10M10 20v-5h4v5"/></svg>Anpassat efter din tomt</li>
+            </ul>
           </div>
 
           <div class="kontaktkort">
@@ -417,20 +469,6 @@
           <p class="site-footer__text">
             Attefallshus &amp; komplementhus med skandinavisk design och hög kvalitet.
           </p>
-          <div class="site-footer__social">
-            <a href="#" aria-label="Idealhus på Facebook" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                <path d="M13.4 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.45 1.55-1.45h1.65V3.68c-.29-.04-1.27-.13-2.42-.13-2.4 0-4.03 1.46-4.03 4.15v2.2H7.45V13h2.7v8h3.25z"/>
-              </svg>
-            </a>
-            <a href="#" aria-label="Idealhus på Instagram" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
-                <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5"/>
-                <circle cx="12" cy="12" r="3.9"/>
-                <circle cx="17.1" cy="6.9" r="1.1" fill="currentColor" stroke="none"/>
-              </svg>
-            </a>
-          </div>
         </div>
 
         <div>
@@ -444,6 +482,7 @@
             <a href="om-oss.html">Om oss</a>
             <a href="kontakt.html">Kontakt</a>
             <a href="attefallshus-regler.html">Attefallshus: reglerna</a>
+            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>
           </nav>
         </div>
 

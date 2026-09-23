@@ -19,6 +19,7 @@ SIDOR = [
     ("kontakt.html", "0.8"),
     ("priser.html", "0.8"),
     ("attefallshus-regler.html", "0.8"),
+    ("vad-far-jag-bygga.html", "0.8"),
     ("integritetspolicy.html", "0.3"),
 ]
 

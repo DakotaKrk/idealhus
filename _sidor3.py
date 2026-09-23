@@ -103,6 +103,10 @@ POLICY = '''    <main id="innehall">
                 deras loggar, som alla webbservrar har.</li>
               <li>Typsnitten hämtas från Google Fonts, vilket innebär att din
                 IP-adress skickas till Google när sidan laddas.</li>
+              <li>Trycker du på "Se huset på din tomt" på en Android-telefon
+                öppnas Googles AR-visare, som hämtar husets 3D-modell från
+                sajten. På iPhone sker det i telefonen utan någon tredje part.
+                3D-visningen i webbläsaren använder ingen extern tjänst.</li>
             </ul>
 
             <h2>Dina rättigheter</h2>
@@ -126,27 +130,47 @@ POLICY = '''    <main id="innehall">
 # Prissidan. FYLL I HÄR när priserna är satta - inget annat på sidan behöver
 # röras. Skriv hela strängen, till exempel "Från 450 000 kr".
 # ---------------------------------------------------------------------------
+import _modeller as M  # noqa: E402
+
+# Priset per kategori. Storleken räknas ur modellerna, så den kan inte
+# glida isär från korten. Skriv hela prissträngen, t.ex. "Från 450 000 kr".
 PRISER = [
-    ("Attefallshus", "attefallshus.html", "15–30 m²", "Från X kr"),
-    ("Fritidshus", "fritidshus.html", "40–120 m²", "Från X kr"),
-    ("Fjällstugor", "fjallstugor.html", "38–80 m²", "Från X kr"),
-    ("Villor", "villor.html", "95–170 m²", "Från X kr"),
+    ("Attefallshus", "attefallshus.html", "Från X kr"),
+    ("Fritidshus", "fritidshus.html", "Från X kr"),
+    ("Fjällstugor", "fjallstugor.html", "Från X kr"),
+    ("Villor", "villor.html", "Från X kr"),
 ]
+
+# Vad som krävs, sagt utan belopp. Attefallshus inom måtten är lovfria;
+# övriga kategorier kräver bygglov (se guiden och kategorisidorna).
+LOV = {
+    "Attefallshus": "Inget bygglov inom måtten",
+    "Fritidshus": "Kräver bygglov",
+    "Fjällstugor": "Kräver bygglov",
+    "Villor": "Kräver bygglov",
+}
 
 INGAR = [
-    ("Ritningar och underlag", "Det vi tar fram för att du ska kunna anmäla eller söka lov."),
-    ("Själva huset", "Tillverkat i Sverige, under tak, med de material och den nivå ni kommit överens om."),
-    ("Leverans till tomten", "Transport och lyft på plats, när framkomligheten är löst."),
-    ("Montage", "Huset monteras av oss när det kommit fram."),
-    ("Slutbesiktning", "Genomgång av huset, punktlista och överlämning."),
+    ("Ritningar och underlag", "Det vi tar fram för att du ska kunna anmäla eller söka lov.",
+     "M5 3.5h9.5L19 8v12.5H5zM14.5 3.5V8H19M8.5 12.5h7M8.5 16h5"),
+    ("Själva huset", "Tillverkat i Sverige, under tak, med de material och den nivå ni kommit överens om.",
+     "M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5M10 20v-5h4v5"),
+    ("Leverans till tomten", "Transport och lyft på plats, när framkomligheten är löst.",
+     "M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"),
+    ("Montage", "Huset monteras av oss när det kommit fram.",
+     "M14.5 5.5l4 4-9 9H5.5v-4zM12.5 7.5l4 4"),
+    ("Slutbesiktning", "Genomgång av huset, punktlista och överlämning.",
+     "M9 12.5l2 2 4-4.5M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"),
 ]
 
+# Posterna som tillkommer. Varje post har en nyckel som kostnadskartan
+# använder för att säga "räkna med" eller "troligen liten" utifrån svaren.
 TILLKOMMER = [
-    ("Grunden", "Platta eller plintar ska vara gjuten innan huset kommer. Vad den kostar beror på marken."),
-    ("El, vatten och avlopp", "Framdragning till huset, och anslutningsavgifter till kommunen eller föreningen."),
-    ("Markarbete", "Röjning, schakt och infart om det behövs för att lastbil och kran ska komma fram."),
-    ("Kommunens avgifter", "Avgift för anmälan eller bygglov, och för eventuell strandskyddsdispens."),
-    ("Tillval", "Ändringar i planlösning, ytskikt och inredning utöver det som ingår."),
+    ("grund", "Grunden", "Platta eller plintar ska vara gjuten innan huset kommer. Vad den kostar beror på marken."),
+    ("va", "El, vatten och avlopp", "Framdragning till huset, och anslutningsavgifter till kommunen eller föreningen."),
+    ("mark", "Markarbete", "Röjning, schakt och infart om det behövs för att lastbil och kran ska komma fram."),
+    ("avgift", "Kommunens avgifter", "Avgift för anmälan eller bygglov, och för eventuell strandskyddsdispens."),
+    ("tillval", "Tillval", "Ändringar i planlösning, ytskikt och inredning utöver det som ingår."),
 ]
 
 STYR = [
@@ -158,19 +182,77 @@ STYR = [
 ]
 
 
-def rader(lista):
-    return "\n".join(f'''              <div class="prisrad">
-                <h3>{a}</h3>
-                <p>{b}</p>
-              </div>''' for a, b in lista)
+def _kategori(namn, lank, pris):
+    lista = M.modeller(lank)
+    ytor = [m[2] for m in lista]
+    bild = B.KATEGORI_INFO[namn][0]
+    spann = f"{min(ytor)}–{max(ytor)} m²"
+    return (namn, lank, pris, bild, min(ytor), max(ytor), spann, len(lista))
 
 
-def pristabell():
-    return "\n".join(f'''                  <tr>
-                    <th scope="row"><a href="{lank}">{namn}</a></th>
-                    <td>{yta}</td>
-                    <td>{pris}</td>
-                  </tr>''' for namn, lank, yta, pris in PRISER)
+KATEGORIER_PRIS = [_kategori(*p) for p in PRISER]
+
+
+def priskort():
+    return "\n".join(f"""          <article class="priskort" data-min="{lo}" data-max="{hi}" data-namn="{namn}">
+            <span class="priskort__passar" aria-hidden="true">Passar dig</span>
+            <a class="priskort__bild" href="{lank}"><img src="images/{bild}" alt="" loading="lazy" decoding="async"></a>
+            <div class="priskort__kropp">
+              <h3 class="priskort__namn"><a href="{lank}">{namn}</a></h3>
+              <p class="priskort__spann">{spann} · {antal} modeller</p>
+              <p class="priskort__pris">{pris}</p>
+              <p class="priskort__lov">{LOV[namn]}</p>
+              <a class="priskort__lank" href="{lank}">Se modellerna</a>
+            </div>
+          </article>""" for namn, lank, pris, bild, lo, hi, spann, antal in KATEGORIER_PRIS)
+
+
+def ingar_html():
+    return "\n".join(f"""            <li>
+              <span class="ingar__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="{d}"/></svg></span>
+              <span><strong>{a}</strong>{b}</span>
+            </li>""" for a, b, d in INGAR)
+
+
+def tillkommer_html():
+    return "\n".join(f"""            <li class="post" data-post="{k}">
+              <span class="post__status" data-status>Räkna med</span>
+              <strong>{a}</strong>
+              <span class="post__text">{b}</span>
+              <span class="post__svar" data-svar></span>
+            </li>""" for k, a, b in TILLKOMMER)
+
+
+def styr_html():
+    return "\n".join(f"""          <article class="styrkort">
+            <span class="styrkort__nr">0{i}</span>
+            <h3>{a}</h3>
+            <p>{b}</p>
+          </article>""" for i, (a, b) in enumerate(STYR, 1))
+
+
+def kartfraga(namn, fraga, val):
+    knappar = "\n".join(
+        f'                <label class="kartval"><input type="radio" name="{namn}" value="{v}"{" checked" if i == 0 else ""}><span>{t}</span></label>'
+        for i, (v, t) in enumerate(val))
+    return f"""            <fieldset class="kartfraga">
+              <legend>{fraga}</legend>
+              <div class="kartfraga__rad">
+{knappar}
+              </div>
+            </fieldset>"""
+
+
+KARTFRAGOR = "\n".join([
+    kartfraga("va", "Finns vatten och avlopp framdraget till tomten?",
+              [("ja", "Ja"), ("nej", "Nej"), ("vetej", "Vet inte")]),
+    kartfraga("lutning", "Hur ser marken ut där huset ska stå?",
+              [("plan", "Plan"), ("sluttar", "Sluttande eller berg")]),
+    kartfraga("infart", "Kommer en lastbil ända fram?",
+              [("ja", "Ja"), ("nej", "Nej, eller osäkert")]),
+    kartfraga("vatten", "Ligger tomten nära vatten?",
+              [("nej", "Nej"), ("ja", "Ja")]),
+])
 
 
 PRISSIDA = f'''    <main id="innehall">
@@ -183,105 +265,125 @@ PRISSIDA = f'''    <main id="innehall">
             <p class="subpage-hero__meta">Vad som ingår, vad som tillkommer och vad som styr summan</p>
           </div>
         </div>
+
+        <div class="heroscen heroscen--kategori" aria-hidden="true">
+          <div class="heroscen__chip heroscen__chip--a">
+            <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M5 3.5h9.5L19 8v12.5H5zM8.5 12.5h7M8.5 16h5"/></svg></span>
+            <p><strong>Offert post för post</strong><span>vad som ingår och vad som tillkommer</span></p>
+          </div>
+          <div class="heroscen__chip heroscen__chip--b">
+            <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5"/></svg></span>
+            <p><strong>Hus, leverans, montage</strong><span>ingår i vår del</span></p>
+          </div>
+        </div>
       </section>
 
-      <section class="guide">
-        <div class="guide__inner">
-          <aside class="guide__rail">
-            <div class="guide__snabbsvar">
-              <p class="guide__snabbsvar-etikett">Kort svar</p>
-              <p>
-                Husets pris är en del av totalen. Grund, anslutningar och
-                markarbete ligger utanför och betalas till andra än oss.
-                Räkna med dem från början, så blir det inga överraskningar.
+      <section class="prisintro">
+        <div class="prisintro__inner">
+          <p class="section-label section-label--accent">Priser</p>
+          <h2 class="prisintro__titel">Inget listpris, men <em>inga gissningar</em>.</h2>
+          <p class="prisintro__text">
+            Ett hus har inget listpris på samma sätt som en bil. Men det går
+            att säga vad som ingår, vad som tillkommer och vad som får summan
+            att röra sig, så att du vet vad du jämför när du får offerten.
+          </p>
+        </div>
+      </section>
+
+      <section class="prisvaljare" id="prisnivaer">
+        <div class="prisvaljare__inner">
+          <div class="prisvaljare__topp">
+            <div>
+              <h2 class="prisvaljare__titel">Prisnivåer</h2>
+              <p class="prisvaljare__text">
+                Startpriser per kategori. Vad just ditt hus kostar står i
+                offerten, och den skriver vi när vi vet hur tomten ser ut.
               </p>
             </div>
-
-            <nav class="guide__toc" aria-label="Innehåll på sidan">
-              <p class="guide__toc-etikett">På den här sidan</p>
-              <ol>
-                <li><a href="#prisnivaer">Prisnivåer</a></li>
-                <li><a href="#ingar">Det här ingår</a></li>
-                <li><a href="#tillkommer">Det här tillkommer</a></li>
-                <li><a href="#styr">Vad som styr priset</a></li>
-                <li><a href="#offert">När du får ett pris</a></li>
-              </ol>
-            </nav>
-          </aside>
-
-          <div class="guide__text">
-            <p class="guide__ingress">
-              Ett hus har inget listpris på samma sätt som en bil. Men det går
-              att säga vad som ingår, vad som tillkommer och vad som får
-              summan att röra sig, så att du vet vad du jämför när du får
-              offerten.
-            </p>
-
-            <section class="guide__sektion" id="prisnivaer">
-              <h2>Prisnivåer</h2>
-              <p>
-                Priserna nedan är startpriser för respektive kategori. Vad just
-                ditt hus kostar står i offerten, och den skriver vi när vi vet
-                hur tomten ser ut.
-              </p>
-
-              <div class="matt">
-                <table>
-                  <thead>
-                    <tr>
-                      <th scope="col">Kategori</th>
-                      <th scope="col">Storlek</th>
-                      <th scope="col">Pris</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-{pristabell()}
-                  </tbody>
-                </table>
+            <div class="prisvaljare__reglage">
+              <label for="onskad-yta">Hur stort hus vill du ha?</label>
+              <div class="prisvaljare__rad">
+                <input type="range" id="onskad-yta" min="20" max="170" step="1" value="30">
+                <output for="onskad-yta" data-yta-ut>30 m²</output>
               </div>
-            </section>
-
-            <section class="guide__sektion" id="ingar">
-              <h2>Det här ingår</h2>
-              <div class="prisrader">
-{rader(INGAR)}
-              </div>
-            </section>
-
-            <section class="guide__sektion" id="tillkommer">
-              <h2>Det här tillkommer</h2>
-              <p>
-                Posterna nedan hör till bygget men betalas till andra än oss.
-                Vi säger vad som krävs och när, så att ingenting står och
-                väntar på varandra.
-              </p>
-              <div class="prisrader prisrader--tillkommer">
-{rader(TILLKOMMER)}
-              </div>
-            </section>
-
-            <section class="guide__sektion" id="styr">
-              <h2>Vad som styr priset</h2>
-              <div class="prisrader">
-{rader(STYR)}
-              </div>
-            </section>
-
-            <section class="guide__sektion" id="offert">
-              <h2>När du får ett pris</h2>
-              <p>
-                Efter första samtalet och valet av modell skriver vi en offert
-                där det står vad som ingår och vad som tillkommer, post för
-                post. Hela ordningen finns på
-                <a href="sa-fungerar-det.html">Så fungerar det</a>.
-              </p>
-
-              <p class="guide__vidare">
-                <a class="knapp-fylld" href="kontakt.html">Begär offert</a>
-                <a class="knapp-linje" href="attefallshus.html">Se husmodellerna</a>
-              </p>
-            </section>
+              <p class="prisvaljare__svar" data-yta-svar aria-live="polite"></p>
+            </div>
           </div>
+
+          <div class="priskort-rad">
+{priskort()}
+          </div>
+        </div>
+      </section>
+
+      <section class="kostnadskarta" id="ingar">
+        <div class="kostnadskarta__inner">
+          <div class="kostnadskarta__topp">
+            <p class="section-label section-label--accent">Din kostnadskarta</p>
+            <h2 class="kostnadskarta__titel">Vad ingår, och vad ska du <em>räkna med</em>?</h2>
+            <p class="kostnadskarta__text">
+              Svara på fyra frågor om tomten, så markerar vi vilka poster som
+              troligen blir stora och vilka som kan bli små. Inga belopp - de
+              står i offerten.
+            </p>
+            <p class="kostnadskarta__lank">
+              <a href="vad-far-jag-bygga.html#kolla-marken">Kolla din mark: tomtgräns, jordarter, djup till berg och ledningar</a>
+            </p>
+          </div>
+
+          <form class="kartfragor" id="kostnadskarta" aria-label="Frågor om tomten">
+{KARTFRAGOR}
+          </form>
+
+          <div class="kostnadskarta__kolumner">
+            <div class="ingar">
+              <h3 class="kolumnrubrik"><span class="kolumnrubrik__prick kolumnrubrik__prick--ingar"></span>Det här ingår i vår offert</h3>
+              <ul>
+{ingar_html()}
+              </ul>
+            </div>
+
+            <div class="tillkommer" id="tillkommer">
+              <h3 class="kolumnrubrik"><span class="kolumnrubrik__prick"></span>Det här betalas till andra</h3>
+              <p class="tillkommer__summa" data-karta-summa aria-live="polite"></p>
+              <ul>
+{tillkommer_html()}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="styr" id="styr">
+        <div class="styr__inner">
+          <div class="styr__topp">
+            <p class="section-label">Vad som styr priset</p>
+            <h2 class="styr__titel">Fem saker flyttar summan.</h2>
+          </div>
+          <div class="styr__rad">
+{styr_html()}
+          </div>
+        </div>
+      </section>
+
+      <section class="prisvag" id="offert">
+        <div class="prisvag__inner">
+          <div class="prisvag__topp">
+            <p class="section-label">När du får ett pris</p>
+            <h2 class="prisvag__titel">Tre steg till en offert.</h2>
+          </div>
+          <div class="prisvag__spar" data-steglinje>
+          <span class="prisvag__linje" aria-hidden="true"><span></span></span>
+          <ol class="prisvag__steg">
+            <li><span class="prisvag__nr">1</span><h3>Första samtalet</h3><p>Du berättar om tomten och vad huset ska användas till. Du behöver inte ha bestämt modell eller budget.</p></li>
+            <li><span class="prisvag__nr">2</span><h3>Val av modell</h3><p>Vi går igenom modellerna som passar tomten och vad som behöver anpassas.</p></li>
+            <li><span class="prisvag__nr">3</span><h3>Offert post för post</h3><p>Det står vad som ingår och vad som tillkommer, innan du bestämmer dig. Hela ordningen finns på <a href="sa-fungerar-det.html">Så fungerar det</a>.</p></li>
+          </ol>
+          </div>
+          <p class="prisvag__knappar">
+            <a class="knapp-fylld" href="kontakt.html">Begär offert</a>
+            <a class="knapp-linje" href="vad-far-jag-bygga.html">Vad får jag bygga?</a>
+          </p>
         </div>
       </section>
 
@@ -312,7 +414,7 @@ def bygg():
                    "tillkommer och vad som styr priset.",
                    "generated-materials-01.webp", fil="priser.html")
             + "\n" + B.header("Priser") + "\n" + PRISSIDA + B.SIDFOT + "\n"
-            + B.skript(TOC_SKRIPT))
+            + B.skript())
     io.open("priser.html", "w", encoding="utf-8",
             newline="").write(sida.replace("\n", "\r\n"))
     ut.append("priser.html")

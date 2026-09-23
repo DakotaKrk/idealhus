@@ -24,7 +24,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&family=Source+Sans+3:ital,wght@0,300..700;1,400&display=swap">
     <link rel="preload" as="image" href="images/generated-production-yard-01.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20260911l">
+    <link rel="stylesheet" href="styles.css?v=20260923l">
+    <script src="premium.js?v=20260923l" defer></script>
+    <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork')document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -59,7 +61,7 @@
                 <img src="images/generated-category-attefallshus-card.webp" alt="" loading="lazy" decoding="async">
                 <span>
                   <strong>Attefallshus</strong>
-                  <em>Upp till 30 m², utan bygglov</em>
+                  <em>Utan bygglov, 30–50 m²</em>
                 </span>
               </a>
               <a href="fritidshus.html">
@@ -90,6 +92,11 @@
                   <strong>Proffs</strong>
                   <em>Väggar, block och moduler</em>
                 </span>
+              </a>
+              <a class="main-nav__tips" href="vad-far-jag-bygga.html">
+                <span class="main-nav__tips-etikett">Prova</span>
+                <strong>Vad får jag bygga?</strong>
+                <em>Räkna ut vad som ryms på din tomt</em>
               </a>
             </div>
           </div>
@@ -127,6 +134,7 @@
         <a href="referensprojekt.html">Referensprojekt</a>
         <a href="om-oss.html">Om oss</a>
         <a href="kontakt.html">Kontakt</a>
+        <a class="mobile-nav__tips" href="vad-far-jag-bygga.html"><span>Prova</span> Vad får jag bygga?</a>
         <a class="mobile-nav__cta" href="kontakt.html">Begär offert</a>
       </nav>
     </header>
@@ -257,6 +265,12 @@
               Berätta vad du funderar på, så återkommer vi med nästa tydliga
               steg. Utan krav och utan säljsnack.
             </p>
+            <ul class="tillit" aria-label="Det du kan räkna med">
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg>Byggt under tak i Sverige</li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.9 3.9-6 7.5-6s6.6 2.1 7.5 6"/></svg>En kontakt hela vägen</li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h9l3.5 3.5v13.5H6zM9 11h6M9 14.5h6M9 18h3.5"/></svg>Offert post för post</li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20h18M6 20V10l6-5 6 5v10M10 20v-5h4v5"/></svg>Anpassat efter din tomt</li>
+            </ul>
           </div>
 
           <div class="kontaktkort">
@@ -294,20 +308,6 @@
           <p class="site-footer__text">
             Attefallshus &amp; komplementhus med skandinavisk design och hög kvalitet.
           </p>
-          <div class="site-footer__social">
-            <a href="#" aria-label="Idealhus på Facebook" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                <path d="M13.4 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.45 1.55-1.45h1.65V3.68c-.29-.04-1.27-.13-2.42-.13-2.4 0-4.03 1.46-4.03 4.15v2.2H7.45V13h2.7v8h3.25z"/>
-              </svg>
-            </a>
-            <a href="#" aria-label="Idealhus på Instagram" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
-                <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5"/>
-                <circle cx="12" cy="12" r="3.9"/>
-                <circle cx="17.1" cy="6.9" r="1.1" fill="currentColor" stroke="none"/>
-              </svg>
-            </a>
-          </div>
         </div>
 
         <div>
@@ -321,6 +321,7 @@
             <a href="om-oss.html">Om oss</a>
             <a href="kontakt.html">Kontakt</a>
             <a href="attefallshus-regler.html">Attefallshus: reglerna</a>
+            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>
           </nav>
         </div>
 

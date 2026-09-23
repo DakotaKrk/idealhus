@@ -24,7 +24,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&family=Source+Sans+3:ital,wght@0,300..700;1,400&display=swap">
     <link rel="preload" as="image" href="images/generated-house-meadow-01.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20260911l">
+    <link rel="stylesheet" href="styles.css?v=20260923l">
+    <script src="premium.js?v=20260923l" defer></script>
+    <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork')document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -59,7 +61,7 @@
                 <img src="images/generated-category-attefallshus-card.webp" alt="" loading="lazy" decoding="async">
                 <span>
                   <strong>Attefallshus</strong>
-                  <em>Upp till 30 m², utan bygglov</em>
+                  <em>Utan bygglov, 30–50 m²</em>
                 </span>
               </a>
               <a href="fritidshus.html">
@@ -90,6 +92,11 @@
                   <strong>Proffs</strong>
                   <em>Väggar, block och moduler</em>
                 </span>
+              </a>
+              <a class="main-nav__tips" href="vad-far-jag-bygga.html">
+                <span class="main-nav__tips-etikett">Prova</span>
+                <strong>Vad får jag bygga?</strong>
+                <em>Räkna ut vad som ryms på din tomt</em>
               </a>
             </div>
           </div>
@@ -127,6 +134,7 @@
         <a href="referensprojekt.html">Referensprojekt</a>
         <a href="om-oss.html">Om oss</a>
         <a href="kontakt.html">Kontakt</a>
+        <a class="mobile-nav__tips" href="vad-far-jag-bygga.html"><span>Prova</span> Vad får jag bygga?</a>
         <a class="mobile-nav__cta" href="kontakt.html">Begär offert</a>
       </nav>
     </header>
@@ -138,7 +146,17 @@
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
             <h1 class="subpage-hero__title">Villor</h1>
-            <p class="subpage-hero__meta">Permanentboende med full planlösning · från X m²</p>
+            <p class="subpage-hero__meta">Permanentboende med full planlösning · från 95 m²</p>
+          </div>
+        </div>
+        <div class="heroscen heroscen--kategori" aria-hidden="true">
+          <div class="heroscen__chip heroscen__chip--a">
+            <svg class="matare" viewBox="0 0 120 70"><path class="matare__spar" d="M10 64a50 50 0 0 1 100 0" pathLength="100"/><path class="matare__varde" d="M10 64a50 50 0 0 1 100 0" pathLength="100" style="--varde: 100"/></svg>
+            <p><strong>95–170 m²</strong><span>boyta · 4–7 rum</span></p>
+          </div>
+          <div class="heroscen__chip heroscen__chip--b">
+            <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"/></svg></span>
+            <p><strong>Leverans 20–24 v</strong><span>tillverkat under tak i Sverige</span></p>
           </div>
         </div>
       </section>
@@ -157,19 +175,27 @@
           <div class="category__head">
             <h2>Modeller för permanentboende</h2>
             <p class="category__ingress">Villorna är ritade för att bo i året om. Full planlösning, plats för hela hushållet och de tekniska krav som ställs på ett permanentbostadshus.</p>
-            <p class="category__count">6 modeller</p>
+            <p class="category__count" aria-live="polite">6 modeller</p>
           </div>
 
-          <div class="filter" role="group" aria-label="Filtrera på boyta">
-            <p class="filter__etikett">Boyta</p>
+          <div class="modellrad">
+            <div class="filter" role="group" aria-label="Filtrera på boyta">
+              <p class="filter__etikett">Boyta</p>
           <button type="button" data-min="0" data-max="99999" aria-pressed="true">Alla</button>
-          <button type="button" data-min="0" data-max="29" aria-pressed="false">Under 30 m²</button>
-          <button type="button" data-min="30" data-max="60" aria-pressed="false">30–60 m²</button>
-          <button type="button" data-min="61" data-max="99999" aria-pressed="false">Över 60 m²</button>
+          <button type="button" data-min="95" data-max="125" aria-pressed="false">95–125 m²</button>
+          <button type="button" data-min="140" data-max="170" aria-pressed="false">140–170 m²</button>
+            </div>
+            <div class="filter sortering" role="group" aria-label="Sortera modellerna">
+              <p class="filter__etikett">Sortera</p>
+              <button type="button" data-sort="nr" aria-pressed="true">Förvalt</button>
+              <button type="button" data-sort="minst" aria-pressed="false">Minst</button>
+              <button type="button" data-sort="storst" aria-pressed="false">Störst</button>
+              <button type="button" data-sort="lev" aria-pressed="false">Snabbast</button>
+            </div>
           </div>
 
           <div class="model-grid">
-          <article class="model-card" data-yta="95" data-rum="4">
+          <article class="model-card" data-yta="95" data-rum="4" data-lev="20" data-nr="1" data-namn="Huskort 1" data-bild="generated-house-gabled-01.webp">
             <a class="model-card__media" href="huskort.html?typ=villor&amp;modell=1">
               <img src="images/generated-house-gabled-01.webp" loading="lazy" decoding="async" alt="Huskort 1, villor i svensk natur">
               <span class="model-card__pill" aria-hidden="true">Se huskortet</span>
@@ -179,9 +205,12 @@
               <p class="model-card__yta">95<span>m²</span></p>
             </div>
             <p class="model-card__facts"><span>4 rum</span><span>Leverans 20 v</span></p>
-            <p class="model-card__price">Från X kr</p>
+            <div class="model-card__fot">
+              <p class="model-card__price">Från X kr</p>
+              <button class="jamfor-knapp" type="button" aria-pressed="false">Jämför</button>
+            </div>
           </article>
-          <article class="model-card" data-yta="110" data-rum="5">
+          <article class="model-card" data-yta="110" data-rum="5" data-lev="20" data-nr="2" data-namn="Huskort 2" data-bild="generated-house-garden-01.webp">
             <a class="model-card__media" href="huskort.html?typ=villor&amp;modell=2">
               <img src="images/generated-house-garden-01.webp" loading="lazy" decoding="async" alt="Huskort 2, villor i svensk natur">
               <span class="model-card__pill" aria-hidden="true">Se huskortet</span>
@@ -191,9 +220,12 @@
               <p class="model-card__yta">110<span>m²</span></p>
             </div>
             <p class="model-card__facts"><span>5 rum</span><span>Leverans 20 v</span></p>
-            <p class="model-card__price">Från X kr</p>
+            <div class="model-card__fot">
+              <p class="model-card__price">Från X kr</p>
+              <button class="jamfor-knapp" type="button" aria-pressed="false">Jämför</button>
+            </div>
           </article>
-          <article class="model-card" data-yta="125" data-rum="5">
+          <article class="model-card" data-yta="125" data-rum="5" data-lev="22" data-nr="3" data-namn="Huskort 3" data-bild="generated-house-meadow-01.webp">
             <a class="model-card__media" href="huskort.html?typ=villor&amp;modell=3">
               <img src="images/generated-house-meadow-01.webp" loading="lazy" decoding="async" alt="Huskort 3, villor i svensk natur">
               <span class="model-card__pill" aria-hidden="true">Se huskortet</span>
@@ -203,9 +235,12 @@
               <p class="model-card__yta">125<span>m²</span></p>
             </div>
             <p class="model-card__facts"><span>5 rum</span><span>Leverans 22 v</span></p>
-            <p class="model-card__price">Från X kr</p>
+            <div class="model-card__fot">
+              <p class="model-card__price">Från X kr</p>
+              <button class="jamfor-knapp" type="button" aria-pressed="false">Jämför</button>
+            </div>
           </article>
-          <article class="model-card" data-yta="140" data-rum="6">
+          <article class="model-card" data-yta="140" data-rum="6" data-lev="22" data-nr="4" data-namn="Huskort 4" data-bild="generated-house-coast-01.webp">
             <a class="model-card__media" href="huskort.html?typ=villor&amp;modell=4">
               <img src="images/generated-house-coast-01.webp" loading="lazy" decoding="async" alt="Huskort 4, villor i svensk natur">
               <span class="model-card__pill" aria-hidden="true">Se huskortet</span>
@@ -215,9 +250,12 @@
               <p class="model-card__yta">140<span>m²</span></p>
             </div>
             <p class="model-card__facts"><span>6 rum</span><span>Leverans 22 v</span></p>
-            <p class="model-card__price">Från X kr</p>
+            <div class="model-card__fot">
+              <p class="model-card__price">Från X kr</p>
+              <button class="jamfor-knapp" type="button" aria-pressed="false">Jämför</button>
+            </div>
           </article>
-          <article class="model-card" data-yta="155" data-rum="6">
+          <article class="model-card" data-yta="155" data-rum="6" data-lev="24" data-nr="5" data-namn="Huskort 5" data-bild="generated-house-forest-01.webp">
             <a class="model-card__media" href="huskort.html?typ=villor&amp;modell=5">
               <img src="images/generated-house-forest-01.webp" loading="lazy" decoding="async" alt="Huskort 5, villor i svensk natur">
               <span class="model-card__pill" aria-hidden="true">Se huskortet</span>
@@ -227,9 +265,12 @@
               <p class="model-card__yta">155<span>m²</span></p>
             </div>
             <p class="model-card__facts"><span>6 rum</span><span>Leverans 24 v</span></p>
-            <p class="model-card__price">Från X kr</p>
+            <div class="model-card__fot">
+              <p class="model-card__price">Från X kr</p>
+              <button class="jamfor-knapp" type="button" aria-pressed="false">Jämför</button>
+            </div>
           </article>
-          <article class="model-card" data-yta="170" data-rum="7">
+          <article class="model-card" data-yta="170" data-rum="7" data-lev="24" data-nr="6" data-namn="Huskort 6" data-bild="generated-house-winter-01.webp">
             <a class="model-card__media" href="huskort.html?typ=villor&amp;modell=6">
               <img src="images/generated-house-winter-01.webp" loading="lazy" decoding="async" alt="Huskort 6, villor i svensk natur">
               <span class="model-card__pill" aria-hidden="true">Se huskortet</span>
@@ -239,7 +280,10 @@
               <p class="model-card__yta">170<span>m²</span></p>
             </div>
             <p class="model-card__facts"><span>7 rum</span><span>Leverans 24 v</span></p>
-            <p class="model-card__price">Från X kr</p>
+            <div class="model-card__fot">
+              <p class="model-card__price">Från X kr</p>
+              <button class="jamfor-knapp" type="button" aria-pressed="false">Jämför</button>
+            </div>
           </article>
           </div>
 
@@ -250,6 +294,79 @@
         </div>
       </section>
 
+      <section class="storlek3d" data-skala="170">
+        <div class="storlek3d__inner">
+          <div class="storlek3d__ord">
+            <p class="section-label section-label--accent">Storleken i 3D</p>
+            <h2 class="storlek3d__titel">Så stort är <em data-3d-namn>huskort 1</em>.</h2>
+            <p class="storlek3d__text">
+              Peka på en modell ovanför, eller välj här, så växer huset till
+              rätt yta. Lyft taket för att se golvet i kvadratmeter.
+            </p>
+            <div class="storlek3d__val" role="group" aria-label="Välj modell att visa i 3D">
+              <button type="button" data-3d="1" aria-pressed="true">95 m²</button>
+              <button type="button" data-3d="2" aria-pressed="false">110 m²</button>
+              <button type="button" data-3d="3" aria-pressed="false">125 m²</button>
+              <button type="button" data-3d="4" aria-pressed="false">140 m²</button>
+              <button type="button" data-3d="5" aria-pressed="false">155 m²</button>
+              <button type="button" data-3d="6" aria-pressed="false">170 m²</button>
+            </div>
+            <dl class="storlek3d__fakta">
+              <div><dt>Boyta</dt><dd><strong data-3d-yta>95</strong> m²</dd></div>
+              <div><dt>Rum</dt><dd><strong data-3d-rum>4</strong></dd></div>
+              <div><dt>Parkeringsrutor</dt><dd>≈ <strong data-3d-p>7.6</strong></dd></div>
+            </dl>
+            <p class="storlek3d__not">Parkeringsruta 2,5 × 5 m. Måtten och proportionerna i modellen är ungefärliga.</p>
+          </div>
+
+          <div class="storlek3d__scen" tabindex="0" role="img" aria-label="3D-modell av huset. Dra eller använd piltangenterna för att vrida.">
+            <div class="hus3d">
+              <div class="hus3d__mark"></div>
+              <div class="hus3d__skugga"></div>
+              <div class="hus3d__dack"></div>
+              <div class="hus3d__golv"><span data-3d-golvtext></span></div>
+              <div class="hus3d__vagg hus3d__vagg--fram">
+                <span class="hus3d__glas"></span>
+                <span class="hus3d__dorr"></span>
+              </div>
+              <div class="hus3d__vagg hus3d__vagg--bak"><span class="hus3d__fonster"></span></div>
+              <div class="hus3d__vagg hus3d__vagg--vanster"><span class="hus3d__fonster"></span></div>
+              <div class="hus3d__vagg hus3d__vagg--hoger"><span class="hus3d__fonster"></span></div>
+              <div class="hus3d__tak">
+                <div class="hus3d__takyta"></div>
+                <div class="hus3d__takkant hus3d__takkant--fram"></div>
+                <div class="hus3d__takkant hus3d__takkant--bak"></div>
+                <div class="hus3d__takkant hus3d__takkant--vanster"></div>
+                <div class="hus3d__takkant hus3d__takkant--hoger"></div>
+              </div>
+              <span class="hus3d__matt hus3d__matt--bredd" data-3d-bredd></span>
+              <span class="hus3d__matt hus3d__matt--djup" data-3d-djup></span>
+            </div>
+            <p class="storlek3d__tips" aria-hidden="true">Dra för att vrida</p>
+            <div class="storlek3d__kontroller">
+              <button class="storlek3d__lyft" type="button" aria-pressed="false">Lyft taket</button>
+              <button class="storlek3d__ikon" type="button" data-zoom="-1" aria-label="Zooma ut">−</button>
+              <button class="storlek3d__ikon" type="button" data-zoom="1" aria-label="Zooma in">+</button>
+              <button class="storlek3d__ikon" type="button" data-aterstall aria-label="Återställ vyn">↺</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="jamforbar" hidden>
+        <p><strong data-jamfor-antal>0</strong> hus valda</p>
+        <button class="jamforbar__oppna" type="button">Jämför sida vid sida</button>
+        <button class="jamforbar__rensa" type="button">Rensa</button>
+      </div>
+
+      <dialog class="jamforruta" aria-labelledby="jamfor-rubrik">
+        <div class="jamforruta__topp">
+          <h2 id="jamfor-rubrik">Jämför modeller</h2>
+          <button class="jamforruta__stang" type="button" aria-label="Stäng jämförelsen">×</button>
+        </div>
+        <div class="jamforruta__kolumner"></div>
+      </dialog>
+
       <section class="contact-section" id="kontakt">
         <div class="contact-section__inner">
           <div class="contact-section__intro">
@@ -259,6 +376,12 @@
               Berätta vad du funderar på, så återkommer vi med nästa tydliga
               steg. Utan krav och utan säljsnack.
             </p>
+            <ul class="tillit" aria-label="Det du kan räkna med">
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg>Byggt under tak i Sverige</li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.9 3.9-6 7.5-6s6.6 2.1 7.5 6"/></svg>En kontakt hela vägen</li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h9l3.5 3.5v13.5H6zM9 11h6M9 14.5h6M9 18h3.5"/></svg>Offert post för post</li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20h18M6 20V10l6-5 6 5v10M10 20v-5h4v5"/></svg>Anpassat efter din tomt</li>
+            </ul>
           </div>
 
           <div class="kontaktkort">
@@ -296,20 +419,6 @@
           <p class="site-footer__text">
             Attefallshus &amp; komplementhus med skandinavisk design och hög kvalitet.
           </p>
-          <div class="site-footer__social">
-            <a href="#" aria-label="Idealhus på Facebook" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                <path d="M13.4 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.45 1.55-1.45h1.65V3.68c-.29-.04-1.27-.13-2.42-.13-2.4 0-4.03 1.46-4.03 4.15v2.2H7.45V13h2.7v8h3.25z"/>
-              </svg>
-            </a>
-            <a href="#" aria-label="Idealhus på Instagram" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
-                <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5"/>
-                <circle cx="12" cy="12" r="3.9"/>
-                <circle cx="17.1" cy="6.9" r="1.1" fill="currentColor" stroke="none"/>
-              </svg>
-            </a>
-          </div>
         </div>
 
         <div>
@@ -323,6 +432,7 @@
             <a href="om-oss.html">Om oss</a>
             <a href="kontakt.html">Kontakt</a>
             <a href="attefallshus-regler.html">Attefallshus: reglerna</a>
+            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>
           </nav>
         </div>
 
@@ -684,42 +794,6 @@
         });
       })();
 
-
-      (function () {
-        var grid = document.querySelector('.model-grid');
-        var filter = document.querySelector('.filter');
-        if (!grid || !filter) return;
-
-        var kort = Array.prototype.slice.call(grid.querySelectorAll('.model-card'));
-        var raknare = document.querySelector('.category__count');
-        var tomt = document.createElement('p');
-        tomt.className = 'model-grid__tomt';
-        tomt.hidden = true;
-        tomt.textContent = 'Ingen modell i det spannet ännu. Prova ett annat, eller hör av dig så letar vi tillsammans.';
-        grid.appendChild(tomt);
-
-        function filtrera(min, max) {
-          var kvar = 0;
-          kort.forEach(function (k) {
-            var yta = parseInt(k.getAttribute('data-yta'), 10);
-            var med = isNaN(yta) || (yta >= min && yta <= max);
-            k.hidden = !med;
-            if (med) kvar++;
-          });
-          tomt.hidden = kvar > 0;
-          if (raknare) raknare.textContent = kvar === 1 ? '1 modell' : kvar + ' modeller';
-        }
-
-        filter.addEventListener('click', function (e) {
-          var knapp = e.target.closest('button');
-          if (!knapp) return;
-          filter.querySelectorAll('button').forEach(function (b) {
-            b.setAttribute('aria-pressed', String(b === knapp));
-          });
-          filtrera(parseInt(knapp.dataset.min, 10) || 0,
-                   parseInt(knapp.dataset.max, 10) || 99999);
-        });
-      })();
     </script>
   </body>
 </html>

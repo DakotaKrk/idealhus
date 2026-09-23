@@ -274,6 +274,7 @@ GUIDE = f'''    <main id="innehall">
                 anmälan för installationerna, och det gör nästan alla hus man
                 ska kunna bo i.
               </p>
+              <a class="guide__prova" href="vad-far-jag-bygga.html">Räkna på din tomt</a>
             </div>
 
             <nav class="guide__toc" aria-label="Innehåll på sidan">

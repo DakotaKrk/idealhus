@@ -8767,3 +8767,4920 @@ body::after {
     width: 100%;
   }
 }
+
+/* ============================================================
+   Premiumlyft med idéer från Kaster (2026-09-23)
+   Kaster är samma ägares andra sajt. Härifrån lånas formerna,
+   inte färgerna: allt ligger kvar i loggans varma kulör.
+     1. Svävande menyrad - headern blir ett piller som ligger
+        över sidan, med läsindikatorn inne i pillret.
+     2. "Prova"-kort i husmenyn, som i Kasters meny.
+     3. Skimmer - ett kursivt rubrikord sveper en gång i vy.
+     4. Ringmätare för siffror som betyder något.
+     5. Glöd - mjukt ljus i sandbotten i stället för platt färg.
+     6. Målgruppsväxel i heron (Jag ska bo / Jag bygger åt andra).
+     7. Tomtkollen på startsidan och verktyget "Vad får jag bygga?".
+     8. Tillitsrad i kontaktsektionen.
+   Rörelseregeln gäller: inget rör sig av sig självt i oändlighet.
+   ============================================================ */
+
+/* --- 1. Svävande menyrad ------------------------------------- */
+.site-header {
+  padding: 10px 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: none;
+}
+
+.site-header > * {
+  pointer-events: auto;
+}
+
+/* Pillret är 48 px bredare än innehållet, så loggan hamnar på samma
+   x som rubrikerna under - vänsterkanterna ska ligga i linje. */
+.site-header__inner {
+  width: min(calc(var(--shell) + 48px), 100% - 16px);
+  height: 64px;
+  padding: 0 10px 0 24px;
+  border: 1px solid rgba(35, 32, 25, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  box-shadow: 0 1px 2px rgba(35, 32, 25, 0.05),
+    0 14px 34px -20px rgba(35, 32, 25, 0.42);
+}
+
+.site-header__inner::after {
+  left: 28px;
+  right: 28px;
+}
+
+/* Läsindikatorn ligger nu i pillrets underkant, inte över hela
+   skärmen. Toningen under headern behövs inte - det finns ingen
+   kant längre att mjuka upp. */
+body::before {
+  top: 72px;
+  left: 0;
+  right: 0;
+  width: calc(min(calc(var(--shell) + 48px), 100% - 16px) - 80px);
+  margin-inline: auto;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--logo), #c7a77c);
+}
+
+body::after {
+  content: none;
+}
+
+@media (max-width: 1040px) {
+  .site-header__inner {
+    padding-right: 8px;
+  }
+
+  .mobile-nav {
+    width: min(calc(var(--shell) + 48px), 100% - 16px);
+    margin-top: 8px;
+    padding: 6px 22px 22px;
+    border: 1px solid rgba(35, 32, 25, 0.08);
+    border-radius: 24px;
+    background: #ffffff;
+    box-shadow: 0 30px 60px -24px rgba(24, 20, 14, 0.34);
+    max-height: calc(100dvh - 100px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .site-header {
+    padding: 7px 0;
+  }
+
+  .site-header__inner {
+    height: 56px;
+    padding-left: 16px;
+  }
+
+  body::before {
+    top: 61px;
+  }
+}
+
+@media (max-width: 620px) {
+  .site-header__inner {
+    padding-left: 8px;
+  }
+}
+
+/* --- 2. Prova-kortet ---------------------------------------- */
+.main-nav__tips {
+  margin-top: 8px;
+  padding: 14px 16px 15px;
+  display: grid;
+  gap: 3px;
+  border-radius: var(--radie-liten);
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(214, 186, 150, 0.4), transparent 60%),
+    var(--sand);
+  color: var(--ink);
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+
+.main-nav__tips:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px -18px rgba(35, 32, 25, 0.5);
+}
+
+.main-nav__tips-etikett,
+.mobile-nav__tips span {
+  justify-self: start;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--knapp);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.main-nav__tips strong {
+  margin-top: 6px;
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.main-nav__tips em {
+  font-style: normal;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.mobile-nav a.mobile-nav__tips {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--sand);
+  color: var(--ink);
+}
+
+/* --- 3. Skimmer ---------------------------------------------- */
+/* I vila är ordet enfärgat i loggans ton - båda ändarna av
+   gradienten är samma färg. När det kommer i vy passerar ljuset
+   en gång, från höger till vänster, och stannar. */
+h2 em,
+.skimmer {
+  padding-right: 0.08em;
+  margin-right: -0.08em;
+  background-image: linear-gradient(100deg,
+    var(--logo) 0%, var(--logo) 40%,
+    #dcc29b 50%,
+    var(--logo) 60%, var(--logo) 100%);
+  background-size: 280% 100%;
+  background-position: 100% 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: var(--logo);
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes skimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0% 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  h2 em.syns,
+  .skimmer.syns {
+    animation: skimmer 2.2s var(--ease) 0.15s 1 both;
+  }
+}
+
+/* --- 4. Ringmätare ------------------------------------------- */
+.matarblock {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.matare {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  overflow: visible;
+}
+
+.matare path {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.matare__spar {
+  stroke: rgba(130, 119, 107, 0.16);
+}
+
+.matare__varde {
+  stroke: var(--knapp);
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 1.4s var(--ease) 0.1s;
+}
+
+.matare.syns .matare__varde {
+  stroke-dashoffset: calc(100 - var(--varde));
+}
+
+.matarblock__tal {
+  margin: -46px 0 0;
+  font-family: var(--serif);
+  line-height: 1;
+}
+
+.matarblock__tal strong {
+  font-size: 46px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.matarblock__tal small {
+  font-size: 18px;
+  color: var(--ink-faint);
+}
+
+.matarblock__text {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+/* --- 5. Glöd -------------------------------------------------- */
+.glod {
+  background:
+    radial-gradient(55% 80% at 8% 12%, rgba(214, 186, 150, 0.34), transparent 70%),
+    radial-gradient(45% 70% at 96% 92%, rgba(233, 205, 186, 0.42), transparent 72%),
+    var(--sand);
+}
+
+/* --- 6. Målgruppsväxeln -------------------------------------- */
+.malgrupp {
+  margin: 0 0 22px;
+  padding: 4px;
+  display: inline-flex;
+  gap: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(20, 17, 12, 0.38);
+  animation: riseIn 1s var(--ease) backwards;
+}
+
+.malgrupp button {
+  height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.86);
+  font: 500 14px/1 var(--sans);
+  cursor: pointer;
+  transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+.malgrupp button:hover {
+  color: #ffffff;
+}
+
+.malgrupp button[aria-pressed="true"] {
+  background: #ffffff;
+  color: var(--ink);
+}
+
+.malgrupp button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Bara det valda syns. Visningsvärdet sätts aldrig, bara döljs -
+   då behåller varje element sin egen display, och elementets
+   inhoppsanimering spelas om när det kommer fram igen. */
+.hero:not([data-malgrupp="proffs"]) [data-for="proffs"],
+.hero[data-malgrupp="proffs"] [data-for="privat"] {
+  display: none;
+}
+
+@media (max-width: 620px) {
+  .malgrupp {
+    margin-bottom: 16px;
+  }
+
+  .malgrupp button {
+    height: 32px;
+    padding: 0 13px;
+    font-size: 13px;
+  }
+}
+
+/* --- 7a. Tomtkollen på startsidan ---------------------------- */
+.tomtkoll {
+  width: calc(100% - 24px);
+  margin: 0 12px 12px;
+  border-radius: var(--radie-hero);
+}
+
+.tomtkoll__inner {
+  width: var(--shell);
+  margin: 0 auto;
+  padding: clamp(48px, 6vw, 88px) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: clamp(32px, 6vw, 96px);
+  align-items: center;
+}
+
+.tomtkoll__titel {
+  margin: 0 0 18px;
+  font-family: var(--serif);
+  font-size: clamp(34px, 3.6vw, 54px);
+  font-weight: 400;
+  line-height: 1.04;
+}
+
+.tomtkoll__text {
+  max-width: 34em;
+  margin: 0 0 30px;
+  font-size: 17px;
+  color: var(--ink-soft);
+}
+
+.tomtkoll__matare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.tomtkoll__matare .matarblock {
+  padding: 30px 18px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radie-kort);
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 18px 40px -30px rgba(35, 32, 25, 0.45);
+}
+
+@media (max-width: 820px) {
+  .tomtkoll__inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .tomtkoll__matare {
+    gap: 10px;
+  }
+
+  .tomtkoll__matare .matarblock {
+    padding: 22px 10px 18px;
+  }
+
+  .matarblock__tal strong {
+    font-size: 38px;
+  }
+}
+
+/* --- 7b. Verktyget "Vad får jag bygga?" ---------------------- */
+.kollen-topp {
+  width: calc(100% - 24px);
+  margin: 0 12px;
+  border-radius: var(--radie-hero);
+}
+
+.kollen-topp__inner {
+  width: min(var(--shell), 760px);
+  margin: 0 auto;
+  padding: clamp(56px, 8vw, 112px) 0 clamp(48px, 6vw, 80px);
+  text-align: center;
+}
+
+.kollen-topp__inner .section-label {
+  justify-content: center;
+}
+
+.kollen-topp__titel {
+  margin: 0 0 20px;
+  font-family: var(--serif);
+  font-size: clamp(44px, 5.4vw, 80px);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.kollen-topp__text {
+  margin: 0 auto;
+  max-width: 36em;
+  font-size: 18px;
+  color: var(--ink-soft);
+}
+
+.kollen {
+  padding: clamp(40px, 5vw, 72px) 0 var(--sekt);
+}
+
+.kollen__inner {
+  width: var(--shell);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(32px, 5vw, 80px);
+  align-items: start;
+}
+
+.kollen__fraga {
+  margin: 0;
+  padding: 30px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.kollen__fraga:first-child {
+  padding-top: 0;
+}
+
+.kollen__fraga legend {
+  padding: 0;
+  float: left;
+  width: 100%;
+  font-family: var(--serif);
+  font-size: 25px;
+  line-height: 1.2;
+}
+
+.kollen__fraga legend + * {
+  clear: both;
+}
+
+.kollen__hjalp {
+  margin: 8px 0 0;
+  font-size: 15px;
+  color: var(--ink-faint);
+}
+
+.kollen__rad {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.kollen__val {
+  position: relative;
+  cursor: pointer;
+}
+
+.kollen__val input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.kollen__val span {
+  min-height: 46px;
+  padding: 11px 20px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 15px;
+  color: var(--ink-soft);
+  transition: background-color 0.25s var(--ease), border-color 0.25s var(--ease),
+    color 0.25s var(--ease);
+}
+
+.kollen__val:hover span {
+  border-color: var(--logo);
+  color: var(--ink);
+}
+
+.kollen__val input:checked + span {
+  border-color: var(--knapp);
+  background: var(--knapp);
+  color: #ffffff;
+}
+
+.kollen__val input:focus-visible + span {
+  outline: 2px solid var(--knapp);
+  outline-offset: 3px;
+}
+
+.kollen__reglage {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: center;
+}
+
+.kollen__reglage input {
+  width: 100%;
+  accent-color: var(--knapp);
+}
+
+.kollen__reglage output {
+  min-width: 3.4em;
+  font-family: var(--serif);
+  font-size: 30px;
+  line-height: 1;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.kollen__svar {
+  position: sticky;
+  top: 100px;
+}
+
+.kollen__kort {
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(214, 186, 150, 0.22), transparent 70%),
+    #ffffff;
+  box-shadow: 0 30px 60px -40px rgba(35, 32, 25, 0.5);
+}
+
+.kollen__etikett {
+  margin: 0 0 18px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--logo);
+}
+
+.kollen__matare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.kollen__summa {
+  margin: 24px 0 0;
+  font-family: var(--serif);
+  font-size: 23px;
+  line-height: 1.2;
+}
+
+.kollen__summa:empty {
+  display: none;
+}
+
+.kollen__lista {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+.kollen__punkt {
+  position: relative;
+  padding-left: 22px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.kollen__punkt::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.5em;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--logo);
+}
+
+.kollen__punkt--ok::before {
+  background: #5d7f57;
+}
+
+.kollen__punkt--anmalan::before {
+  background: #b88a3a;
+}
+
+.kollen__punkt--lov::before {
+  background: #a5543c;
+}
+
+.kollen__friskrivning {
+  margin: 22px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 13.5px;
+  color: var(--ink-faint);
+}
+
+.kollen__friskrivning a {
+  color: var(--knapp);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.kollen-hus {
+  padding: 0 0 var(--sekt);
+}
+
+.kollen-hus__inner {
+  width: var(--shell);
+  margin: 0 auto;
+}
+
+.kollen-hus__titel {
+  margin: 0 0 28px;
+  font-family: var(--serif);
+  font-size: clamp(30px, 3vw, 44px);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.kollen-hus__rutnat {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 36px 22px;
+}
+
+.kollen-hus__kort {
+  display: grid;
+  gap: 12px;
+  color: var(--ink);
+}
+
+.kollen-hus__kort img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  object-fit: cover;
+  border-radius: var(--radie-liten);
+  transition: transform 0.5s var(--ease);
+}
+
+.kollen-hus__kort:hover img {
+  transform: scale(1.02);
+}
+
+.kollen-hus__rad {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.kollen-hus__rad strong {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.kollen-hus__yta {
+  font-family: var(--serif);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.kollen-hus__yta small {
+  margin-left: 2px;
+  font-size: 15px;
+  color: var(--ink-faint);
+}
+
+.kollen-hus__fakta {
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+.kollen-hus__tomt {
+  max-width: 40em;
+  font-size: 17px;
+  color: var(--ink-soft);
+}
+
+.kollen-hus__tomt a {
+  color: var(--knapp);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .kollen__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .kollen__svar {
+    position: static;
+  }
+}
+
+.guide__prova {
+  margin-top: 16px;
+  padding: 10px 18px;
+  display: inline-flex;
+  border-radius: 999px;
+  background: var(--knapp);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.25s var(--ease);
+}
+
+.guide__prova:hover {
+  background: var(--knapp-morkare);
+}
+
+/* --- 8. Tillitsraden ----------------------------------------- */
+.tillit {
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  gap: 12px 28px;
+}
+
+.tillit li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+.tillit svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--logo);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 480px) {
+  .tillit {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .matare__varde,
+  .main-nav__tips,
+  .kollen-hus__kort img {
+    transition: none;
+  }
+}
+
+/* ============================================================
+   Premiumlyft 2: rörelse och smarta detaljer (2026-09-23)
+   Styrs av premium.js. Allt här är tillägg - utan skriptet får
+   ingen av klasserna nedan sättas och sidan ser ut som förut.
+   ============================================================ */
+
+/* --- Rubriker reser sig ord för ord ------------------------- */
+.rorelse.delad .ord {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding: 0 0.05em 0.24em;
+  margin: 0 -0.05em -0.24em;
+}
+
+.rorelse.delad .ord > span {
+  display: inline-block;
+  translate: 0 110%;
+  transition: translate 0.95s var(--ease) calc(var(--i) * 55ms);
+}
+
+.rorelse.delad.uppe .ord > span {
+  translate: 0 0;
+}
+
+.rorelse.stiger {
+  opacity: 0;
+  translate: 0 0.35em;
+  transition: opacity 0.9s var(--ease), translate 0.9s var(--ease);
+}
+
+.rorelse.stiger.uppe {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* --- Ljuskägla som följer pekaren ---------------------------- */
+.har-ljus {
+  position: relative;
+}
+
+.ljuskagla {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 240, 216, 0.34), transparent 62%);
+  mix-blend-mode: overlay;
+  transition: opacity 0.45s var(--ease);
+}
+
+.har-ljus:hover .ljuskagla {
+  opacity: 1;
+}
+
+/* På ljusa kort syns inte ett ljust sken - där blir det en varm
+   glöd i stället. */
+.kontaktkort .ljuskagla,
+.matarblock .ljuskagla,
+.main-nav__tips .ljuskagla,
+.vidarekort .ljuskagla,
+.team-kort .ljuskagla {
+  background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(214, 186, 150, 0.3), transparent 65%);
+  mix-blend-mode: multiply;
+}
+
+/* --- Glidande markering ------------------------------------- */
+.har-markor {
+  position: relative;
+  isolation: isolate;
+}
+
+.markor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  border-radius: 999px;
+  background: var(--knapp);
+  box-shadow: 0 1px 2px rgba(26, 22, 15, 0.16),
+    0 10px 20px -12px rgba(26, 22, 15, 0.6);
+  pointer-events: none;
+  transition: transform 0.5s var(--ease), width 0.5s var(--ease),
+    height 0.5s var(--ease);
+}
+
+.malgrupp .markor {
+  background: #ffffff;
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.4);
+}
+
+.filter.har-markor button {
+  background: transparent;
+}
+
+.har-markor button[aria-pressed="true"] {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.filter.filter.har-markor button {
+  background: transparent;
+}
+
+.har-markor button[aria-pressed="true"] {
+  color: #ffffff;
+}
+
+/* --- Drivande ljus ------------------------------------------ */
+.har-drivljus {
+  position: relative;
+  isolation: isolate;
+}
+
+.drivljus {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.drivljus::before,
+.drivljus::after {
+  content: "";
+  position: absolute;
+  width: 70vmax;
+  height: 70vmax;
+  border-radius: 50%;
+}
+
+.drivljus::before {
+  left: -25vmax;
+  top: -35vmax;
+  background: radial-gradient(circle, rgba(214, 186, 150, 0.38), transparent 62%);
+  animation: driva 26s ease-in-out infinite alternate;
+}
+
+.drivljus::after {
+  right: -30vmax;
+  bottom: -40vmax;
+  background: radial-gradient(circle, rgba(236, 206, 184, 0.42), transparent 60%);
+  animation: driva 32s ease-in-out -9s infinite alternate-reverse;
+}
+
+@keyframes driva {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+
+  to {
+    transform: translate(18vmax, 12vmax) scale(1.15);
+  }
+}
+
+.pausad .drivljus::before,
+.pausad .drivljus::after {
+  animation-play-state: paused;
+}
+
+/* --- Kopiera mejladressen ----------------------------------- */
+.kopiera-rad {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.kopiera {
+  flex: none;
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink-faint);
+  font: 500 11.5px/1.4 var(--sans);
+  cursor: pointer;
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease),
+    background-color 0.25s var(--ease);
+}
+
+.kopiera:hover {
+  border-color: var(--logo);
+  color: var(--ink);
+}
+
+.kopiera--klar {
+  border-color: #5d7f57;
+  background: #eef3ea;
+  color: #3f6139;
+}
+
+/* --- Huskortet → verktyget ---------------------------------- */
+.ryms-lank {
+  margin-top: 14px;
+  padding: 12px 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  background:
+    radial-gradient(120% 160% at 100% 0%, rgba(214, 186, 150, 0.45), transparent 60%),
+    var(--sand);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 500;
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+
+.ryms-lank::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--knapp);
+}
+
+.ryms-lank:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px -18px rgba(35, 32, 25, 0.5);
+}
+
+/* --- Verktyget: valt hus och delning ------------------------- */
+.kollen__valt {
+  margin: 22px 0 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.kollen__valt--ja {
+  background: #eef3ea;
+  color: #34512f;
+}
+
+.kollen__valt--nej {
+  background: #f7ebe5;
+  color: #7c3b27;
+}
+
+.kollen__dela {
+  margin-top: 20px;
+  padding: 10px 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--ink-soft);
+  font: 500 14px/1.2 var(--sans);
+  cursor: pointer;
+  transition: border-color 0.25s var(--ease), color 0.25s var(--ease);
+}
+
+.kollen__dela:hover {
+  border-color: var(--logo);
+  color: var(--ink);
+}
+
+/* --- Tipsrutan ---------------------------------------------- */
+.tipsruta {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 35;
+  width: min(330px, calc(100% - 24px));
+  padding: 18px 48px 20px 20px;
+  border: 1px solid rgba(35, 32, 25, 0.08);
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(214, 186, 150, 0.3), transparent 60%),
+    #ffffff;
+  box-shadow: 0 30px 60px -28px rgba(24, 20, 14, 0.45);
+  opacity: 0;
+  translate: 0 16px;
+  transition: opacity 0.45s var(--ease), translate 0.45s var(--ease);
+}
+
+.tipsruta--synlig {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.tipsruta--synlig.tipsruta--undan {
+  opacity: 0;
+  translate: 0 16px;
+  pointer-events: none;
+}
+
+.tipsruta__etikett {
+  margin: 0 0 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--logo);
+}
+
+.tipsruta__text {
+  margin: 0 0 12px;
+  font-family: var(--serif);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.tipsruta__lank {
+  display: inline-flex;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--knapp);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.tipsruta__lank:hover {
+  background: var(--knapp-morkare);
+}
+
+.tipsruta__stang {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.tipsruta__stang:hover {
+  background: var(--sand);
+  color: var(--ink);
+}
+
+.tipsruta__stang svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+@media (max-width: 1040px) {
+  .tipsruta {
+    right: 12px;
+    bottom: 88px;
+  }
+}
+
+@media print {
+  .tipsruta,
+  .drivljus,
+  .ljuskagla {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tipsruta,
+  .markor {
+    transition: none;
+  }
+}
+
+/* --- Proffs: snabblänkar till de tre leveranserna ----------- */
+.process:has(> .proffs-hopp) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: clamp(32px, 6vw, 96px);
+  align-items: center;
+}
+
+.process:has(> .proffs-hopp) .process__head {
+  margin-bottom: 0;
+}
+
+.proffs-hopp {
+  display: grid;
+  gap: 10px;
+}
+
+.proffs-hopp a {
+  padding: 18px 22px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 18px;
+  align-items: baseline;
+  border: 1px solid var(--line);
+  border-radius: var(--radie-kort);
+  background: #ffffff;
+  color: var(--ink);
+  transition: transform 0.35s var(--ease), border-color 0.35s var(--ease),
+    box-shadow 0.35s var(--ease);
+}
+
+.proffs-hopp a:hover {
+  transform: translateX(4px);
+  border-color: var(--logo);
+  box-shadow: 0 16px 30px -24px rgba(35, 32, 25, 0.5);
+}
+
+.proffs-hopp span {
+  grid-row: span 2;
+  font-family: var(--serif);
+  font-size: 30px;
+  line-height: 1;
+  color: var(--logo);
+}
+
+.proffs-hopp strong {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.proffs-hopp em {
+  font-style: normal;
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 860px) {
+  .process:has(> .proffs-hopp) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Prissidan har en bildhero i stället för guidens egen topp - utan
+   luft hamnade texten mot bildens underkant. */
+.subpage-hero + .guide {
+  padding-top: clamp(48px, 6vw, 88px);
+}
+
+/* ============================================================
+   Premiumlyft 3: värme och liv (2026-09-23)
+   Omdömet var "billig, kall och tråkig". Svaret är värme i
+   färgen - koppar och bärnsten bredvid loggans brungrå - och
+   rörelse som svarar på det man gör, som på Kaster.
+   ============================================================ */
+:root {
+  --koppar: #a4602f;
+  --barnsten: #d9a262;
+  --varm-papper: #fdfaf5;
+}
+
+body {
+  background: var(--varm-papper);
+}
+
+/* --- Heron: kanterna ------------------------------------------
+   Filmen ligger förstorad (scale 1.06) för rullningseffekten. En
+   komposerad film klipps inte alltid av overflow + border-radius,
+   så hörnen stack ut. En mask tvingar klippningen. */
+.hero,
+.subpage-hero {
+  -webkit-mask-image: linear-gradient(#000, #000);
+  mask-image: linear-gradient(#000, #000);
+  isolation: isolate;
+}
+
+/* --- Varmare skimmer ------------------------------------------ */
+h2 em,
+.skimmer {
+  background-image: linear-gradient(100deg,
+    #8a5431 0%, var(--koppar) 30%, #e6b67c 50%,
+    var(--koppar) 70%, #8a5431 100%);
+  background-size: 250% 100%;
+  background-position: 100% 0;
+}
+
+body::before {
+  background: linear-gradient(90deg, var(--koppar), var(--barnsten));
+}
+
+.matare__varde {
+  stroke: var(--koppar);
+}
+
+.section-label--accent {
+  color: var(--koppar);
+}
+
+/* --- Målgruppsväxeln, glas ------------------------------------ */
+.hero .malgrupp {
+  position: relative;
+  padding: 5px;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.07));
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    0 14px 34px -16px rgba(0, 0, 0, 0.55);
+}
+
+/* Ett ljus går över glaset då och då - och direkt när man byter. */
+.hero .malgrupp::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent 30%,
+    rgba(255, 255, 255, 0.38) 48%, transparent 66%);
+  translate: -120% 0;
+  pointer-events: none;
+}
+
+.hero .malgrupp.glans::after {
+  animation: glasGlans 0.9s var(--ease) 1;
+}
+
+@keyframes glasGlans {
+  from { translate: -120% 0; }
+  to { translate: 120% 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero .malgrupp:not(.glans)::after {
+    animation: glasGlans 1.6s var(--ease) 2.2s 1;
+  }
+}
+
+.hero .malgrupp button {
+  position: relative;
+  z-index: 1;
+  height: 42px;
+  padding: 0 20px 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  font: 500 14.5px/1 var(--sans);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.45s var(--ease);
+}
+
+.hero .malgrupp button svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hero .malgrupp button:hover {
+  color: #ffffff;
+}
+
+.hero .malgrupp button[aria-pressed="true"],
+.hero .malgrupp button[aria-pressed="true"]:hover {
+  color: var(--ink);
+  background: transparent;
+}
+
+.hero .malgrupp button[aria-pressed="true"] svg {
+  stroke: var(--koppar);
+}
+
+.hero .malgrupp button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: -3px;
+}
+
+.hero .malgrupp .markor {
+  z-index: 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f6eee3 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 8px 22px -8px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.5);
+  transition: transform 0.62s cubic-bezier(0.34, 1.4, 0.64, 1),
+    width 0.62s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+/* Utan skript finns ingen markör - då bär knappen själv färgen. */
+.hero .malgrupp:not(.har-markor) button[aria-pressed="true"] {
+  background: #ffffff;
+}
+
+@media (max-width: 620px) {
+  .hero .malgrupp button {
+    height: 36px;
+    padding: 0 13px 0 11px;
+    gap: 7px;
+    font-size: 13px;
+  }
+
+  .hero .malgrupp button svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Texten som byts glider in i stället för att bara dyka upp. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero [data-for] {
+    animation: bytIn 0.7s var(--ease) both;
+  }
+
+  .hero .hero__actions[data-for] {
+    animation-delay: 0.08s;
+  }
+}
+
+@keyframes bytIn {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+    filter: blur(4px);
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+/* Rubriken fick bara 560 px och bröts på tre rader på stora skärmar. */
+.hero .hero__content {
+  max-width: 720px;
+}
+
+.hero .hero__text {
+  max-width: 560px;
+}
+
+/* --- Svävande glasbubblor i heron ----------------------------- */
+.heroscen {
+  position: absolute;
+  right: clamp(24px, 4vw, 64px);
+  top: 50%;
+  z-index: 2;
+  width: 310px;
+  display: grid;
+  gap: 16px;
+  translate: 0 -50%;
+  pointer-events: none;
+}
+
+.heroscen__chip {
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(40, 32, 24, 0.42), rgba(40, 32, 24, 0.22));
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 20px 40px -22px rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+}
+
+.heroscen__chip--b {
+  margin-left: 48px;
+}
+
+.heroscen__chip p {
+  margin: 0;
+  display: grid;
+  line-height: 1.25;
+}
+
+.heroscen__chip strong {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.heroscen__chip span {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.heroscen__chip .matare {
+  width: 58px;
+  flex: none;
+}
+
+.heroscen__chip .matare path {
+  stroke-width: 11;
+}
+
+.heroscen__chip .matare__spar {
+  stroke: rgba(255, 255, 255, 0.25);
+}
+
+.heroscen__chip .matare__varde {
+  stroke: var(--barnsten);
+}
+
+.heroscen__ikon {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.heroscen__ikon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--koppar);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero .heroscen__chip--a {
+    animation: chipIn 1s var(--ease) 0.9s both, guppa 7s ease-in-out 2s infinite;
+  }
+
+  .hero .heroscen__chip--b {
+    animation: chipIn 1s var(--ease) 1.1s both, guppa 8s ease-in-out 2.4s infinite;
+  }
+
+  .hero.pausad .heroscen__chip {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes chipIn {
+  from {
+    opacity: 0;
+    translate: 40px 0;
+    scale: 0.94;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes guppa {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@media (max-width: 1100px) {
+  .heroscen {
+    display: none;
+  }
+}
+
+/* --- Ordbandet ----------------------------------------------- */
+.ordband {
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden;
+  padding: clamp(22px, 3vw, 38px) 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+
+.ordband__spar {
+  display: flex;
+  width: max-content;
+}
+
+.ordband__spar > div {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+.ordband span {
+  padding: 0 clamp(18px, 2vw, 30px);
+  font-family: var(--serif);
+  font-size: clamp(30px, 4vw, 58px);
+  font-style: italic;
+  line-height: 1.1;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+.ordband span:nth-of-type(2n) {
+  background: linear-gradient(100deg, #8a5431, var(--koppar) 40%, var(--barnsten));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ordband i {
+  font-style: normal;
+  font-size: clamp(16px, 1.6vw, 22px);
+  color: var(--barnsten);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ordband__spar {
+    animation: ordband 48s linear infinite;
+  }
+
+  .ordband.pausad .ordband__spar {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes ordband {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* --- Varm glöd i fler sektioner ------------------------------ */
+.feature-cards,
+.reference-projects {
+  position: relative;
+  isolation: isolate;
+}
+
+.feature-cards::before,
+.reference-projects::before {
+  content: "";
+  position: absolute;
+  inset: 8% 0 auto auto;
+  z-index: -1;
+  width: 55%;
+  height: 70%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(217, 162, 98, 0.16), transparent);
+  pointer-events: none;
+}
+
+.reference-projects::before {
+  inset: auto auto 0 0;
+}
+
+/* --- Knappar med glans --------------------------------------- */
+.knapp-fylld,
+.hero__link--solid,
+.kontaktkort__knapp,
+.tipsruta__lank,
+.guide__prova {
+  background-image: linear-gradient(105deg, transparent 35%,
+    rgba(255, 255, 255, 0.28) 50%, transparent 65%);
+  background-size: 250% 100%;
+  background-position: 130% 0;
+  background-repeat: no-repeat;
+  transition: background-position 0.8s var(--ease), transform 0.35s var(--ease),
+    box-shadow 0.35s var(--ease), background-color 0.35s var(--ease),
+    color 0.35s var(--ease);
+}
+
+.knapp-fylld:hover,
+.hero__link--solid:hover,
+.kontaktkort__knapp:hover,
+.tipsruta__lank:hover,
+.guide__prova:hover {
+  background-position: -30% 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+}
+
+/* ============================================================
+   Svarskorten i formuläret, levande (2026-09-23)
+   Styrs av premium.js (klassen .valgrupp--levande). Idéer från
+   Kasters kort: 3D-lutning efter pekaren, ljus som följer med,
+   och ett tydligt svar när man väljer.
+   ============================================================ */
+
+/* Legenden låg ovanpå fieldsetets överkant - därför gick linjen
+   rakt igenom rubriken på fråga två och lämnade ett hål under. Som
+   flytande element hamnar den i flödet, under linjen. */
+.valgrupp legend {
+  float: left;
+  width: 100%;
+}
+
+.valgrupp legend + * {
+  clear: both;
+}
+
+.valgrupp--besvarad legend::before {
+  content: "✓";
+  font-size: 13px;
+  letter-spacing: 0;
+  color: var(--koppar);
+  animation: bockIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes bockIn {
+  from { scale: 0.2; opacity: 0; }
+  to { scale: 1; opacity: 1; }
+}
+
+.valgrupp--levande .valgrupp__rad {
+  perspective: 900px;
+}
+
+.valgrupp--levande .val span {
+  gap: 12px;
+  padding-left: 12px;
+  overflow: hidden;
+  isolation: isolate;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: border-color 0.35s var(--ease), background 0.35s var(--ease),
+    box-shadow 0.45s var(--ease), transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.valgrupp--levande .val span:hover {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-3px);
+  box-shadow: 0 22px 34px -22px rgba(24, 20, 14, 0.55);
+  transition: border-color 0.35s var(--ease), background 0.35s var(--ease),
+    box-shadow 0.45s var(--ease), transform 0.16s ease-out;
+}
+
+.val__ikon {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--sand);
+  transition: background-color 0.4s var(--ease);
+}
+
+.val__ikon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--koppar);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.4s var(--ease);
+}
+
+.val__glans {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(180px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(217, 162, 98, 0.2), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+  pointer-events: none;
+}
+
+.val span:hover .val__glans {
+  opacity: 1;
+}
+
+/* Valt: kopparram, varm botten och ikonen fylld. */
+.valgrupp--levande .val input:checked + span {
+  border-color: var(--koppar);
+  background: linear-gradient(135deg, #fffaf3, #fbefe1);
+  box-shadow: inset 0 0 0 1px var(--koppar),
+    0 18px 30px -22px rgba(164, 96, 47, 0.7);
+}
+
+.valgrupp--levande .val input:checked + span::before {
+  background: var(--koppar);
+  border-color: var(--koppar);
+}
+
+.val input:checked + span .val__ikon {
+  background: var(--koppar);
+}
+
+.val input:checked + span .val__ikon svg {
+  stroke: #ffffff;
+}
+
+.val--pop {
+  animation: valPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.val--pop .val__ikon {
+  animation: ikonHopp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.val--pop::before {
+  animation: ringPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes valPop {
+  0% { scale: 1; }
+  35% { scale: 0.96; }
+  70% { scale: 1.025; }
+  100% { scale: 1; }
+}
+
+@keyframes ikonHopp {
+  0% { translate: 0 0; rotate: 0deg; }
+  40% { translate: 0 -5px; rotate: -10deg; }
+  100% { translate: 0 0; rotate: 0deg; }
+}
+
+@keyframes ringPop {
+  0% { scale: 0.6; }
+  100% { scale: 1; }
+}
+
+.val__krus {
+  position: absolute;
+  z-index: -1;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: rgba(164, 96, 47, 0.28);
+  pointer-events: none;
+  animation: krus 0.8s var(--ease) forwards;
+}
+
+@keyframes krus {
+  from { scale: 0; opacity: 1; }
+  to { scale: 36; opacity: 0; }
+}
+
+/* Korten fälls upp ur djupet, ett i taget, när frågan kommer i vy. */
+@media (prefers-reduced-motion: no-preference) {
+  .valgrupp--levande:not(.valgrupp--inne) .val span {
+    opacity: 0;
+  }
+
+  .valgrupp--inne .val span {
+    animation: kortUpp 0.8s cubic-bezier(0.22, 1.2, 0.36, 1) calc(var(--i, 0) * 70ms) backwards;
+  }
+
+  .valgrupp--inne .val span.val--pop {
+    animation: valPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+@keyframes kortUpp {
+  from {
+    opacity: 0;
+    rotate: x 38deg;
+    translate: 0 26px;
+  }
+
+  to {
+    opacity: 1;
+    rotate: x 0deg;
+    translate: 0 0;
+  }
+}
+
+.val__tips {
+  margin: 14px 0 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fff7ec, #fbecd9);
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6e4424;
+  animation: bytIn 0.5s var(--ease) both;
+}
+
+.val__tips a {
+  color: var(--koppar);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.val__tips[hidden] {
+  display: none;
+}
+
+/* Ordbandet flyttas bara av kompositorn. */
+.ordband__spar {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .valgrupp--levande .val span {
+    transform: none;
+    transition: border-color 0.35s var(--ease), background 0.35s var(--ease);
+  }
+}
+
+/* Numren 01-04 på korten försvann mot ljusa bilder (03 och 04).
+   En liten mörk glasbricka bär dem oavsett bild. */
+.feature-card__nr {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(28, 22, 16, 0.42);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #ffffff;
+  line-height: 1;
+}
+
+/* --- Mjuk zoom på alla bilder (2026-09-23) --------------------
+   Referensbildernas effekt, överallt: 5 % större på 0,7 s när man
+   pekar på kortet. Övergången bär också avslöjandets ram och ton,
+   annars skulle den ena regeln slå ut den andra. */
+.zoomklipp {
+  overflow: hidden;
+}
+
+/* Dubblerad klass: äldre regler som .model-card:hover .model-card__media
+   img zoomade 2-4,5 % och vägde tyngre. Nu gör alla bilder samma sak. */
+img.zoombild.zoombild {
+  transition: transform 0.7s var(--ease);
+}
+
+.zoomkort:hover img.zoombild.zoombild,
+.zoomkort:focus-visible img.zoombild.zoombild {
+  transform: scale(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zoomkort:hover img.zoombild.zoombild,
+  .zoomkort:focus-visible img.zoombild.zoombild {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   Kategorisidorna, smartare (2026-09-23)
+   Fakta i heron, filter byggt ur modellerna, sortering med
+   glidande omflyttning, kort i 3D, ett hus i 3D som växer med
+   modellen, och jämförelse av upp till tre hus.
+   ============================================================ */
+
+/* --- Glasbubblorna i undersidans hero ------------------------- */
+.subpage-hero .heroscen {
+  top: auto;
+  bottom: clamp(28px, 4vw, 56px);
+  translate: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .subpage-hero .heroscen__chip--a {
+    animation: chipIn 1s var(--ease) 0.5s both, guppa 7s ease-in-out 1.6s infinite;
+  }
+
+  .subpage-hero .heroscen__chip--b {
+    animation: chipIn 1s var(--ease) 0.7s both, guppa 8s ease-in-out 2s infinite;
+  }
+}
+
+/* --- Verktygsraden -------------------------------------------- */
+.modellrad {
+  margin-bottom: 56px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px 28px;
+}
+
+.modellrad .filter {
+  margin-bottom: 0;
+  padding: 6px 8px 6px 18px;
+  border: 1px solid rgba(35, 32, 25, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 12px 30px -24px rgba(35, 32, 25, 0.5);
+  gap: 6px;
+}
+
+.modellrad .filter button {
+  height: 36px;
+  padding: 0 16px;
+  border-color: transparent;
+}
+
+.modellrad .filter button:hover {
+  border-color: transparent;
+}
+
+.modellrad .markor {
+  background: linear-gradient(135deg, var(--koppar), #7d4a26);
+}
+
+.category__count {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 620px) {
+  .modellrad .filter {
+    padding-left: 12px;
+    border-radius: 22px;
+  }
+
+  .modellrad .filter button {
+    padding: 0 12px;
+  }
+}
+
+/* --- Korten i 3D ----------------------------------------------- */
+.model-card__media {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.5s var(--ease);
+  will-change: transform;
+}
+
+.model-card:hover .model-card__media {
+  transition: transform 0.16s ease-out, box-shadow 0.5s var(--ease);
+  box-shadow: 0 30px 50px -30px rgba(35, 32, 25, 0.55);
+}
+
+.model-card__fot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.model-card__fot .model-card__price {
+  margin: 0;
+}
+
+.jamfor-knapp {
+  height: 32px;
+  padding: 0 14px 0 30px;
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--ink-soft);
+  font: 500 13px/1 var(--sans);
+  cursor: pointer;
+  transition: background-color 0.3s var(--ease), color 0.3s var(--ease),
+    border-color 0.3s var(--ease);
+}
+
+.jamfor-knapp::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  translate: 0 -50%;
+  border: 1.5px solid currentColor;
+  border-radius: 4px;
+  transition: background-color 0.3s var(--ease);
+}
+
+.jamfor-knapp:hover {
+  border-color: var(--koppar);
+  color: var(--ink);
+}
+
+.jamfor-knapp[aria-pressed="true"] {
+  border-color: var(--koppar);
+  background: var(--koppar);
+  color: #ffffff;
+}
+
+.jamfor-knapp[aria-pressed="true"]::before {
+  background: #ffffff;
+  box-shadow: inset 0 0 0 2px var(--koppar);
+}
+
+.jamfor-knapp:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* --- 3D-huset -------------------------------------------------- */
+.storlek3d {
+  width: calc(100% - 24px);
+  margin: 0 12px var(--sekt);
+  border-radius: var(--radie-hero);
+  background:
+    radial-gradient(60% 80% at 80% 30%, rgba(217, 162, 98, 0.28), transparent 70%),
+    radial-gradient(50% 60% at 10% 90%, rgba(233, 205, 186, 0.45), transparent 70%),
+    var(--sand);
+  overflow: hidden;
+}
+
+.storlek3d__inner {
+  width: var(--shell);
+  margin: 0 auto;
+  padding: clamp(56px, 7vw, 104px) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
+.storlek3d__titel {
+  margin: 0 0 16px;
+  font-family: var(--serif);
+  font-size: clamp(34px, 3.6vw, 54px);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.storlek3d__text {
+  max-width: 30em;
+  margin: 0 0 26px;
+  font-size: 17px;
+  color: var(--ink-soft);
+}
+
+.storlek3d__val {
+  margin-bottom: 30px;
+  padding: 5px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 12px 30px -24px rgba(35, 32, 25, 0.5);
+}
+
+.storlek3d__val button {
+  position: relative;
+  z-index: 1;
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font: 500 14px/1 var(--sans);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: color 0.35s var(--ease);
+}
+
+.storlek3d__val button[aria-pressed="true"] {
+  color: #ffffff;
+}
+
+.storlek3d__val .markor {
+  background: linear-gradient(135deg, var(--koppar), #7d4a26);
+}
+
+.storlek3d__fakta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.storlek3d__fakta div {
+  padding: 16px 16px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.storlek3d__fakta dt {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.storlek3d__fakta dd {
+  margin: 6px 0 0;
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--ink-soft);
+}
+
+.storlek3d__fakta strong {
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.storlek3d__not {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+/* 3D-scenen ligger i blocket "3D-huset, andra versionen" sist i filen. */
+
+@media (max-width: 900px) {
+  .storlek3d__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .storlek3d__scen {
+    height: 320px;
+  }
+}
+
+@media (max-width: 520px) {
+  .storlek3d__fakta {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .storlek3d__fakta div {
+    padding: 12px 10px;
+  }
+
+  .storlek3d__fakta strong {
+    font-size: 28px;
+  }
+}
+
+/* --- Jämförelsen ---------------------------------------------- */
+.jamforbar {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 36;
+  padding: 8px 8px 8px 22px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(35, 28, 22, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff;
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  translate: -50% 24px;
+  transition: opacity 0.35s var(--ease), translate 0.45s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.jamforbar--synlig {
+  opacity: 1;
+  translate: -50% 0;
+}
+
+.jamforbar p {
+  margin: 0;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.jamforbar button {
+  height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  font: 500 14px/1 var(--sans);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.jamforbar__oppna {
+  background: linear-gradient(135deg, var(--barnsten), var(--koppar));
+  color: #ffffff;
+}
+
+.jamforbar__oppna:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.jamforbar__rensa {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.jamforbar__rensa:hover {
+  color: #ffffff;
+}
+
+@media (max-width: 1040px) {
+  .jamforbar {
+    bottom: 88px;
+  }
+}
+
+.jamforruta {
+  width: min(1000px, calc(100% - 24px));
+  max-height: calc(100dvh - 48px);
+  padding: 0;
+  border: 0;
+  border-radius: 26px;
+  background: var(--varm-papper);
+  color: var(--ink);
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.5);
+}
+
+.jamforruta::backdrop {
+  background: rgba(28, 22, 16, 0.5);
+  backdrop-filter: blur(6px);
+}
+
+.jamforruta[open] {
+  animation: rutaIn 0.5s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+@keyframes rutaIn {
+  from { opacity: 0; transform: perspective(1200px) rotateX(12deg) translateY(30px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+.jamforruta__topp {
+  padding: 24px 28px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.jamforruta__topp h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 400;
+}
+
+.jamforruta__stang {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sand);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.jamforruta__kolumner {
+  padding: 16px 28px 28px;
+  display: grid;
+  grid-template-columns: repeat(var(--antal, 2), minmax(0, 1fr));
+  gap: 18px;
+}
+
+.jamforruta__hus {
+  padding: 12px 12px 18px;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 18px 36px -28px rgba(35, 32, 25, 0.5);
+}
+
+.jamforruta__hus img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.jamforruta__hus h3 {
+  margin: 14px 4px 10px;
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.jamforruta__hus dl {
+  margin: 0 4px;
+  display: grid;
+  gap: 12px;
+}
+
+.jamforruta__hus dt {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.jamforruta__hus dd {
+  margin: 5px 0 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.jamforruta__stapel {
+  height: 8px;
+  border-radius: 99px;
+  background: var(--sand);
+  overflow: hidden;
+}
+
+.jamforruta__stapel span {
+  display: block;
+  height: 100%;
+  width: var(--andel);
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--barnsten), var(--koppar));
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 1s cubic-bezier(0.34, 1.2, 0.64, 1) 0.2s;
+}
+
+.jamforruta__stapel--lag span {
+  background: linear-gradient(90deg, #9cb38f, #5d7f57);
+}
+
+.jamforruta--fylld .jamforruta__stapel span {
+  transform: scaleX(1);
+}
+
+.jamforruta__lank {
+  margin: 16px 4px 0;
+  display: inline-flex;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--knapp);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@media (max-width: 700px) {
+  .jamforruta__kolumner {
+    grid-template-columns: 1fr;
+  }
+
+  .jamforbar {
+    padding-left: 16px;
+    gap: 6px;
+  }
+
+  .jamforbar__rensa {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .model-card__media {
+    transform: none;
+  }
+
+  .jamforruta[open] {
+    animation: none;
+  }
+}
+
+/* Jämförelseraden och tipsrutan delar underkanten - tipset viker. */
+body:has(.jamforbar--synlig) .tipsruta {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ============================================================
+   3D-huset, version 2 (2026-09-23)
+   Mark, trädäck, skugga, sockel, panel som står rätt på alla fyra
+   väggar, glasparti med spröjs och varmt ljus inifrån, dörr, fönster
+   på varje sida och ett tak med tjocklek och takfot. Måtten står på
+   marken. Vridningen sköts av premium.js (dra, tröghet, zoom).
+   Koordinater: huset ligger i planet x/y, z pekar uppåt.
+   ============================================================ */
+.storlek3d__scen {
+  position: relative;
+  height: clamp(380px, 36vw, 500px);
+  display: grid;
+  place-items: center;
+  perspective: 1500px;
+  perspective-origin: 50% 40%;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  border-radius: 24px;
+  outline: none;
+}
+
+.storlek3d__scen--drar {
+  cursor: grabbing;
+}
+
+.storlek3d__scen:focus-visible {
+  box-shadow: 0 0 0 2px var(--koppar);
+}
+
+.hus3d {
+  --w: 230px;
+  --d: 144px;
+  --h: 90px;
+  --m: 33px;
+  --sockel: 6px;
+  --takt: calc(var(--m) * 0.28);
+  position: relative;
+  width: var(--w);
+  height: var(--d);
+  transform-style: preserve-3d;
+  transform: rotateX(60deg) rotateZ(-35deg);
+  transition: width 0.9s cubic-bezier(0.34, 1.3, 0.64, 1),
+    height 0.9s cubic-bezier(0.34, 1.3, 0.64, 1);
+  will-change: transform;
+}
+
+.hus3d--mjuk {
+  transition: width 0.9s cubic-bezier(0.34, 1.3, 0.64, 1),
+    height 0.9s cubic-bezier(0.34, 1.3, 0.64, 1),
+    transform 0.6s var(--ease);
+}
+
+.hus3d > * {
+  position: absolute;
+  transform-style: preserve-3d;
+}
+
+/* --- Mark, skugga, däck ---------------------------------------- */
+.hus3d__mark {
+  left: calc(var(--m) * -3.2);
+  right: calc(var(--m) * -3.2);
+  top: calc(var(--m) * -2.6);
+  bottom: calc(var(--m) * -4.2);
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, rgba(180, 190, 150, 0.55) 0%, rgba(200, 202, 170, 0.45) 45%,
+      rgba(222, 214, 190, 0.35) 72%, rgba(243, 238, 229, 0) 100%);
+  transform: translateZ(-1px);
+}
+
+.hus3d__skugga {
+  left: 2%;
+  right: -6%;
+  top: 4%;
+  bottom: -10%;
+  border-radius: 10px;
+  background: rgba(46, 32, 20, 0.34);
+  filter: blur(10px);
+  transform: translateZ(0);
+}
+
+.hus3d__dack {
+  left: 6%;
+  width: 72%;
+  top: 100%;
+  height: calc(var(--m) * 1.7);
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.12), transparent 30%),
+    repeating-linear-gradient(180deg, #c29667 0 calc(var(--m) * 0.16), #a97f55 calc(var(--m) * 0.16) calc(var(--m) * 0.17));
+  box-shadow: 0 2px 0 #7d5a3a, 0 6px 14px rgba(46, 32, 20, 0.25);
+  transform: translateZ(3px);
+}
+
+/* --- Golvet ----------------------------------------------------- */
+.hus3d__golv {
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background-color: #efe3d0;
+  background-image:
+    linear-gradient(rgba(164, 96, 47, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(164, 96, 47, 0.3) 1px, transparent 1px);
+  background-size: var(--m) var(--m);
+  box-shadow: 0 0 0 3px #3a2f28;
+  transform: translateZ(var(--sockel));
+}
+
+.hus3d__golv span {
+  font-family: var(--serif);
+  font-size: calc(var(--m) * 1.05);
+  color: var(--koppar);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease) 0.2s;
+}
+
+.storlek3d--oppen .hus3d__golv span {
+  opacity: 1;
+}
+
+/* --- Väggarna ---------------------------------------------------- */
+.hus3d__vagg {
+  --panel: repeating-linear-gradient(90deg,
+    rgba(255, 255, 255, 0.07) 0 1px, transparent 1px calc(var(--m) * 0.2));
+  background-color: #3a2f28;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.12)), var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  backface-visibility: visible;
+}
+
+.hus3d__vagg--fram {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: var(--h);
+  transform-origin: bottom center;
+  transform: translateZ(var(--sockel)) rotateX(-90deg);
+}
+
+.hus3d__vagg--bak {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: var(--h);
+  transform-origin: top center;
+  transform: translateZ(var(--sockel)) rotateX(90deg);
+  background-color: #2b231e;
+}
+
+/* Sidoväggarna är vridna kring y - deras x-axel pekar uppåt, så
+   stående panel ritas längs y här. Det var den liggande panelen. */
+.hus3d__vagg--vanster,
+.hus3d__vagg--hoger {
+  --panel: repeating-linear-gradient(180deg,
+    rgba(255, 255, 255, 0.07) 0 1px, transparent 1px calc(var(--m) * 0.2));
+  top: 0;
+  width: var(--h);
+  height: 100%;
+}
+
+.hus3d__vagg--vanster {
+  left: 0;
+  transform-origin: left center;
+  transform: translateZ(var(--sockel)) rotateY(-90deg);
+  background-color: #251e1a;
+}
+
+.hus3d__vagg--hoger {
+  right: 0;
+  transform-origin: right center;
+  transform: translateZ(var(--sockel)) rotateY(90deg);
+  background-color: #33291f;
+}
+
+/* Glaspartiet: golv till tak, spröjs i tre fält, varmt ljus inifrån
+   och en reflex som ligger snett över glaset. */
+.hus3d__glas {
+  position: absolute;
+  left: 10%;
+  width: 54%;
+  top: 12%;
+  bottom: 0;
+  border: 3px solid #15100c;
+  border-bottom: 0;
+  background:
+    linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.4) 44%, transparent 50%),
+    repeating-linear-gradient(90deg, transparent 0 calc(33.333% - 2px), #15100c calc(33.333% - 2px) 33.333%),
+    linear-gradient(180deg, #fff1da 0%, #f6cf98 55%, #db9f5e 100%);
+  box-shadow: 0 0 18px rgba(255, 190, 120, 0.45);
+}
+
+.hus3d__dorr {
+  position: absolute;
+  right: 11%;
+  width: 14%;
+  top: 20%;
+  bottom: 0;
+  background: linear-gradient(180deg, #1d1713, #120e0b);
+  box-shadow: inset 0 0 0 2px #0d0a08;
+}
+
+.hus3d__dorr::after {
+  content: "";
+  position: absolute;
+  left: 16%;
+  top: 52%;
+  width: 3px;
+  height: 14%;
+  border-radius: 2px;
+  background: #c9a67a;
+}
+
+.hus3d__fonster {
+  position: absolute;
+  border: 2px solid #15100c;
+  background:
+    linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.35) 46%, transparent 52%),
+    linear-gradient(180deg, #ffe9c6, #e1a869);
+  box-shadow: 0 0 12px rgba(255, 190, 120, 0.35);
+}
+
+.hus3d__vagg--bak .hus3d__fonster {
+  left: 36%;
+  right: 36%;
+  top: 30%;
+  bottom: 24%;
+}
+
+.hus3d__vagg--vanster .hus3d__fonster {
+  left: 34%;
+  right: 20%;
+  top: 30%;
+  bottom: 30%;
+}
+
+.hus3d__vagg--hoger .hus3d__fonster {
+  left: 20%;
+  right: 34%;
+  top: 28%;
+  bottom: 42%;
+}
+
+/* --- Taket: skiva med tjocklek och takfot -------------------------- */
+.hus3d__tak {
+  inset: calc(var(--m) * -0.32);
+  transform: translateZ(calc(var(--h) + var(--sockel)));
+  transition: transform 0.9s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+.hus3d__tak > div {
+  position: absolute;
+  transition: opacity 0.6s var(--ease);
+}
+
+.hus3d__takyta {
+  inset: 0;
+  transform: translateZ(var(--takt));
+  background:
+    radial-gradient(120% 90% at 20% 10%, rgba(255, 255, 255, 0.09), transparent 60%),
+    linear-gradient(135deg, #2e2621, #3d322b);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.hus3d__takkant {
+  background: linear-gradient(180deg, #4a3d34, #1c1612);
+}
+
+.hus3d__takkant--fram {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: var(--takt);
+  transform-origin: bottom center;
+  transform: rotateX(-90deg);
+}
+
+.hus3d__takkant--bak {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: var(--takt);
+  transform-origin: top center;
+  transform: rotateX(90deg);
+}
+
+.hus3d__takkant--vanster,
+.hus3d__takkant--hoger {
+  top: 0;
+  width: var(--takt);
+  height: 100%;
+  background: linear-gradient(90deg, #1c1612, #4a3d34);
+}
+
+.hus3d__takkant--vanster {
+  left: 0;
+  transform-origin: left center;
+  transform: rotateY(-90deg);
+}
+
+.hus3d__takkant--hoger {
+  right: 0;
+  transform-origin: right center;
+  transform: rotateY(90deg);
+  background: linear-gradient(270deg, #1c1612, #4a3d34);
+}
+
+/* Lyft taket: det stiger och blir genomskinligt. Genomskinligheten
+   ligger på delarna - opacity på själva taket hade plattat till det. */
+.storlek3d--oppen .hus3d__tak {
+  transform: translateZ(calc(var(--h) * 2.4));
+}
+
+.storlek3d--oppen .hus3d__tak > div {
+  opacity: 0.16;
+}
+
+/* --- Måtten på marken ------------------------------------------- */
+.hus3d__matt {
+  font: 600 12px/1 var(--sans);
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  transform: translateZ(2px);
+}
+
+.hus3d__matt--bredd {
+  left: 0;
+  right: 0;
+  top: calc(100% + var(--m) * 2.2);
+  padding-top: 8px;
+  text-align: center;
+  border-top: 1px solid rgba(90, 83, 72, 0.55);
+}
+
+/* Djupmåttet ligger på vänster sida - den som syns från start. */
+.hus3d__matt--djup {
+  top: 0;
+  bottom: 0;
+  right: calc(100% + var(--m) * 0.9);
+  padding-right: 8px;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid rgba(90, 83, 72, 0.55);
+}
+
+.hus3d__matt--bredd::before,
+.hus3d__matt--bredd::after,
+.hus3d__matt--djup::before,
+.hus3d__matt--djup::after {
+  content: "";
+  position: absolute;
+  background: rgba(90, 83, 72, 0.55);
+}
+
+.hus3d__matt--bredd::before,
+.hus3d__matt--bredd::after {
+  top: -5px;
+  width: 1px;
+  height: 9px;
+}
+
+.hus3d__matt--bredd::before { left: 0; }
+.hus3d__matt--bredd::after { right: 0; }
+
+.hus3d__matt--djup::before,
+.hus3d__matt--djup::after {
+  right: -5px;
+  width: 9px;
+  height: 1px;
+}
+
+.hus3d__matt--djup::before { top: 0; }
+.hus3d__matt--djup::after { bottom: 0; }
+
+/* --- Tips och kontroller ------------------------------------------ */
+.storlek3d__tips {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  margin: 0;
+  padding: 8px 16px 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  translate: -50% 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 10px 24px -16px rgba(35, 32, 25, 0.5);
+  font-size: 13px;
+  color: var(--ink-soft);
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease), translate 0.5s var(--ease);
+}
+
+.storlek3d__tips::before {
+  content: "↔";
+  color: var(--koppar);
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .storlek3d__tips::before {
+    animation: tipsVagg 1.8s ease-in-out infinite;
+  }
+
+  .storlek3d.pausad .storlek3d__tips::before {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes tipsVagg {
+  0%, 100% { translate: -3px 0; }
+  50% { translate: 3px 0; }
+}
+
+.storlek3d__tips--borta {
+  opacity: 0;
+  translate: -50% -8px;
+}
+
+.storlek3d__kontroller {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.storlek3d__kontroller .storlek3d__lyft {
+  position: static;
+}
+
+.storlek3d__ikon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(35, 32, 25, 0.1);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ink);
+  font: 500 18px/1 var(--sans);
+  cursor: pointer;
+  box-shadow: 0 10px 22px -16px rgba(35, 32, 25, 0.5);
+  transition: background-color 0.25s var(--ease), transform 0.25s var(--ease);
+}
+
+.storlek3d__ikon:hover {
+  background: #ffffff;
+  transform: translateY(-2px);
+}
+
+.storlek3d__lyft,
+.storlek3d__ikon {
+  touch-action: manipulation;
+}
+
+@media (max-width: 520px) {
+  .hus3d {
+    scale: 0.78;
+  }
+
+  .storlek3d__kontroller {
+    left: 0;
+    justify-content: center;
+  }
+}
+
+.storlek3d__lyft {
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid rgba(35, 32, 25, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ink);
+  font: 500 14px/1 var(--sans);
+  cursor: pointer;
+  box-shadow: 0 10px 22px -16px rgba(35, 32, 25, 0.5);
+  transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+.storlek3d__lyft[aria-pressed="true"] {
+  background: var(--koppar);
+  color: #ffffff;
+}
+
+/* ============================================================
+   Prissidan, ombyggd (2026-09-23)
+   Kasters prisväljare, kort i 3D, en kostnadskarta som svarar på
+   tomten och en steglinje som fylls. Inga belopp som inte finns.
+   ============================================================ */
+.prisintro__inner,
+.prisvaljare__inner,
+.kostnadskarta__inner,
+.styr__inner,
+.prisvag__inner {
+  width: var(--shell);
+  margin: 0 auto;
+}
+
+/* --- Intro ---------------------------------------------------- */
+.prisintro {
+  padding: clamp(64px, 8vw, 120px) 0 clamp(32px, 4vw, 56px);
+}
+
+.prisintro__inner {
+  max-width: 820px;
+  text-align: center;
+}
+
+.prisintro .section-label {
+  justify-content: center;
+}
+
+.prisintro__titel {
+  margin: 0 0 20px;
+  font-family: var(--serif);
+  font-size: clamp(38px, 4.6vw, 66px);
+  font-weight: 400;
+  line-height: 1.04;
+}
+
+.prisintro__text {
+  margin: 0 auto;
+  max-width: 36em;
+  font-size: 18px;
+  color: var(--ink-soft);
+}
+
+/* --- Prisväljaren -------------------------------------------- */
+.prisvaljare {
+  padding: clamp(24px, 3vw, 40px) 0 var(--sekt);
+}
+
+.prisvaljare__topp {
+  margin-bottom: 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 72px);
+  align-items: end;
+}
+
+.prisvaljare__titel {
+  margin: 0 0 12px;
+  font-family: var(--serif);
+  font-size: clamp(34px, 3.4vw, 50px);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.prisvaljare__text {
+  margin: 0;
+  max-width: 30em;
+  color: var(--ink-soft);
+}
+
+.prisvaljare__reglage {
+  padding: 22px 24px;
+  border-radius: 22px;
+  background:
+    radial-gradient(90% 120% at 100% 0%, rgba(217, 162, 98, 0.28), transparent 60%),
+    #ffffff;
+  box-shadow: 0 24px 50px -36px rgba(35, 32, 25, 0.55);
+}
+
+.prisvaljare__reglage label {
+  font-family: var(--serif);
+  font-size: 21px;
+}
+
+.prisvaljare__rad {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 18px;
+}
+
+.prisvaljare__rad input {
+  --andel: 7%;
+  width: 100%;
+  height: 8px;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--barnsten), var(--koppar) var(--andel), var(--sand) var(--andel));
+  outline: none;
+  cursor: pointer;
+}
+
+.prisvaljare__rad input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  border: 4px solid #ffffff;
+  border-radius: 50%;
+  background: var(--koppar);
+  box-shadow: 0 4px 12px rgba(100, 55, 25, 0.4);
+  transition: transform 0.2s var(--ease);
+}
+
+.prisvaljare__rad input::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 4px solid #ffffff;
+  border-radius: 50%;
+  background: var(--koppar);
+  box-shadow: 0 4px 12px rgba(100, 55, 25, 0.4);
+}
+
+.prisvaljare__rad input:active::-webkit-slider-thumb {
+  transform: scale(1.18);
+}
+
+.prisvaljare__rad input:focus-visible {
+  outline: 2px solid var(--koppar);
+  outline-offset: 6px;
+}
+
+.prisvaljare__rad output {
+  min-width: 3.6em;
+  font-family: var(--serif);
+  font-size: 34px;
+  line-height: 1;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.prisvaljare__svar {
+  margin: 12px 0 0;
+  min-height: 3em;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+.priskort-rad {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  perspective: 1200px;
+}
+
+.priskort {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(35, 32, 25, 0.08);
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 18px 40px -34px rgba(35, 32, 25, 0.6);
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.5s var(--ease),
+    border-color 0.5s var(--ease), opacity 0.5s var(--ease);
+}
+
+.priskort:hover {
+  transition: transform 0.16s ease-out, box-shadow 0.5s var(--ease),
+    border-color 0.5s var(--ease), opacity 0.5s var(--ease);
+  box-shadow: 0 30px 50px -30px rgba(35, 32, 25, 0.55);
+}
+
+.priskort::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(217, 162, 98, 0.18), transparent 65%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s var(--ease);
+}
+
+.priskort:hover::after {
+  opacity: 1;
+}
+
+.priskort-rad:has(.priskort--passar) .priskort:not(.priskort--passar) {
+  opacity: 0.62;
+}
+
+.priskort--passar {
+  border-color: var(--koppar);
+  box-shadow: 0 0 0 1px var(--koppar), 0 30px 60px -34px rgba(164, 96, 47, 0.7);
+}
+
+.priskort__passar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--barnsten), var(--koppar));
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0;
+  translate: 0 -8px;
+  scale: 0.9;
+  transition: opacity 0.4s var(--ease), translate 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    scale 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.priskort--passar .priskort__passar {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+}
+
+.priskort__bild {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.priskort__bild img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.priskort__kropp {
+  padding: 20px 20px 22px;
+}
+
+.priskort__namn {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 400;
+}
+
+.priskort__namn a {
+  color: inherit;
+}
+
+.priskort__spann {
+  margin: 4px 0 16px;
+  font-size: 13.5px;
+  color: var(--ink-faint);
+}
+
+.priskort__pris {
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-family: var(--serif);
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.priskort__lov {
+  margin: 6px 0 18px;
+  font-size: 13.5px;
+  color: var(--koppar);
+}
+
+.priskort__lank {
+  display: inline-flex;
+  padding: 9px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  transition: border-color 0.3s var(--ease), background-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+.priskort__lank:hover,
+.priskort--passar .priskort__lank {
+  border-color: var(--koppar);
+  background: var(--koppar);
+  color: #ffffff;
+}
+
+/* --- Kostnadskartan ------------------------------------------- */
+.kostnadskarta {
+  width: calc(100% - 24px);
+  margin: 0 12px;
+  padding: clamp(56px, 7vw, 104px) 0;
+  border-radius: var(--radie-hero);
+  background:
+    radial-gradient(55% 70% at 8% 10%, rgba(214, 186, 150, 0.34), transparent 70%),
+    radial-gradient(45% 60% at 96% 95%, rgba(233, 205, 186, 0.45), transparent 72%),
+    var(--sand);
+}
+
+.kostnadskarta__topp {
+  max-width: 720px;
+  margin-bottom: 34px;
+}
+
+.kostnadskarta__titel,
+.styr__titel,
+.prisvag__titel {
+  margin: 0 0 14px;
+  font-family: var(--serif);
+  font-size: clamp(34px, 3.6vw, 54px);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.kostnadskarta__text {
+  margin: 0;
+  font-size: 17px;
+  color: var(--ink-soft);
+}
+
+.kartfragor {
+  margin-bottom: 36px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.kartfraga {
+  margin: 0;
+  padding: 18px;
+  border: 0;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.kartfraga legend {
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 12px;
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.kartfraga__rad {
+  clear: both;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kartval input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.kartval span {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 14px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background-color 0.3s var(--ease), color 0.3s var(--ease),
+    border-color 0.3s var(--ease), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.kartval span:hover {
+  border-color: var(--koppar);
+}
+
+.kartval input:checked + span {
+  border-color: var(--koppar);
+  background: var(--koppar);
+  color: #ffffff;
+  transform: scale(1.04);
+}
+
+.kartval input:focus-visible + span {
+  outline: 2px solid var(--koppar);
+  outline-offset: 2px;
+}
+
+.kostnadskarta__kolumner {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.ingar,
+.tillkommer {
+  padding: 26px;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 24px 50px -40px rgba(35, 32, 25, 0.6);
+}
+
+.kolumnrubrik {
+  margin: 0 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.kolumnrubrik__prick {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--koppar);
+}
+
+.kolumnrubrik__prick--ingar {
+  background: #5d7f57;
+}
+
+.ingar ul,
+.tillkommer ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.ingar li {
+  padding: 12px 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  border-bottom: 1px solid var(--line);
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+.ingar li:last-child {
+  border-bottom: 0;
+}
+
+.ingar strong {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.ingar__ikon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #eef3ea;
+}
+
+.ingar__ikon svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: #4f6f4a;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tillkommer__summa {
+  margin: -8px 0 16px;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+.post {
+  position: relative;
+  padding: 16px 16px 16px 20px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  border-radius: 16px;
+  background: var(--varm-papper);
+  overflow: hidden;
+  transform-origin: center top;
+  transition: background-color 0.5s var(--ease);
+}
+
+.post::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--koppar);
+  transition: background-color 0.5s var(--ease);
+}
+
+.post strong {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 15.5px;
+  font-weight: 600;
+}
+
+.post__status {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f5e6d6;
+  color: #7a431d;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 0.5s var(--ease), color 0.5s var(--ease);
+}
+
+.post__text {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+.post__svar {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.post[data-niva="stor"] {
+  background: #fbefe4;
+}
+
+.post[data-niva="stor"] .post__status {
+  background: var(--koppar);
+  color: #ffffff;
+}
+
+.post[data-niva="liten"]::before {
+  background: #5d7f57;
+}
+
+.post[data-niva="liten"] .post__status {
+  background: #e4eee0;
+  color: #34512f;
+}
+
+.post[data-niva="kolla"]::before {
+  background: #c9a14a;
+}
+
+.post[data-niva="kolla"] .post__status {
+  background: #f7eccd;
+  color: #6e5314;
+}
+
+.post[data-niva="val"]::before {
+  background: var(--line);
+}
+
+.post[data-niva="val"] .post__status {
+  background: var(--sand);
+  color: var(--ink-soft);
+}
+
+/* --- Vad som styr priset --------------------------------------- */
+.styr {
+  padding: var(--sekt) 0;
+}
+
+.styr__topp {
+  margin-bottom: 30px;
+}
+
+.styr__rad {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  perspective: 1200px;
+}
+
+.styrkort {
+  position: relative;
+  padding: 22px 20px 24px;
+  border: 1px solid rgba(35, 32, 25, 0.07);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 18px 40px -34px rgba(35, 32, 25, 0.6);
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.styrkort:hover {
+  transition: transform 0.16s ease-out;
+}
+
+.styrkort::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(200px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(217, 162, 98, 0.18), transparent 65%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s var(--ease);
+}
+
+.styrkort:hover::after {
+  opacity: 1;
+}
+
+.styrkort__nr {
+  display: block;
+  margin-bottom: 26px;
+  font-family: var(--serif);
+  font-size: 40px;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--barnsten), var(--koppar));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.styrkort h3 {
+  margin: 0 0 8px;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.styrkort p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* --- Tre steg till en offert ------------------------------------- */
+.prisvag {
+  padding: 0 0 var(--sekt);
+}
+
+.prisvag__topp {
+  margin-bottom: 36px;
+}
+
+.prisvag__spar {
+  --fyll: 0;
+  position: relative;
+}
+
+.prisvag__linje {
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  top: 27px;
+  height: 2px;
+  background: var(--line);
+}
+
+.prisvag__linje span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--barnsten), var(--koppar));
+  transform-origin: left center;
+  transform: scaleX(var(--fyll));
+}
+
+.prisvag__steg {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.prisvag__steg li {
+  padding-right: 12px;
+}
+
+.prisvag__nr {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 18px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  background: var(--varm-papper);
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--ink-faint);
+  transition: border-color 0.5s var(--ease), color 0.5s var(--ease),
+    scale 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.prisvag__steg li.tand .prisvag__nr {
+  border-color: var(--koppar);
+  color: var(--koppar);
+  scale: 1.08;
+}
+
+.prisvag__steg h3 {
+  margin: 0 0 8px;
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.prisvag__steg p {
+  margin: 0;
+  max-width: 28em;
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+.prisvag__steg a {
+  color: var(--koppar);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prisvag__knappar {
+  margin: 40px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* --- Mindre skärmar ------------------------------------------- */
+@media (max-width: 1100px) {
+  .priskort-rad {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kartfragor {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .styr__rad {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .prisvaljare__topp,
+  .kostnadskarta__kolumner {
+    grid-template-columns: 1fr;
+  }
+
+  .styr__rad {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prisvag__linje {
+    left: 27px;
+    right: auto;
+    top: 28px;
+    bottom: 28px;
+    width: 2px;
+    height: auto;
+  }
+
+  .prisvag__linje span {
+    width: 100%;
+    height: 100%;
+    transform-origin: center top;
+    transform: scaleY(var(--fyll));
+  }
+
+  .prisvag__steg {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+
+  .prisvag__steg li {
+    padding-left: 76px;
+    position: relative;
+  }
+
+  .prisvag__nr {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .priskort-rad,
+  .kartfragor,
+  .styr__rad {
+    grid-template-columns: 1fr;
+  }
+
+  .ingar,
+  .tillkommer {
+    padding: 20px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .priskort,
+  .styrkort {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   Så fungerar det, lyft (2026-09-23)
+   Verktygsrad (vem gör vad, visa för hustyp), en klistrad
+   färdplan över de sju stegen och stegkort i 3D som tänds.
+   ============================================================ */
+.processverktyg {
+  margin-bottom: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+  align-items: flex-end;
+}
+
+.processverktyg__grupp {
+  display: grid;
+  gap: 8px;
+}
+
+.processverktyg__etikett {
+  margin: 0 0 0 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.vemfilter,
+.hustypval {
+  position: relative;
+  padding: 5px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  border: 1px solid rgba(35, 32, 25, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 12px 30px -24px rgba(35, 32, 25, 0.5);
+}
+
+.vemfilter button,
+.hustypval button {
+  position: relative;
+  z-index: 1;
+  height: 38px;
+  padding: 0 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font: 500 14px/1 var(--sans);
+  cursor: pointer;
+  transition: color 0.35s var(--ease);
+}
+
+.vemfilter small {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--sand);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  transition: background-color 0.35s var(--ease), color 0.35s var(--ease);
+}
+
+.vemfilter button[aria-pressed="true"],
+.hustypval button[aria-pressed="true"] {
+  color: #ffffff;
+}
+
+.vemfilter button[aria-pressed="true"] small {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.vemfilter button[aria-pressed="true"] .prick--vi,
+.vemfilter button[aria-pressed="true"] .prick--bada {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.vemfilter .markor,
+.hustypval .markor {
+  background: linear-gradient(135deg, var(--koppar), #7d4a26);
+}
+
+.vemfilter:not(.har-markor) button[aria-pressed="true"],
+.hustypval:not(.har-markor) button[aria-pressed="true"] {
+  background: var(--koppar);
+}
+
+/* --- Färdplanen ------------------------------------------------ */
+.fardplan {
+  position: sticky;
+  top: 92px;
+  z-index: 6;
+  margin: 0 0 clamp(34px, 4vw, 54px);
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border: 1px solid rgba(35, 32, 25, 0.07);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  box-shadow: 0 18px 40px -30px rgba(35, 32, 25, 0.55);
+}
+
+.fardplan__spar {
+  position: absolute;
+  left: calc(100% / 14 + 14px);
+  right: calc(100% / 14 + 14px);
+  top: 27px;
+  height: 2px;
+  background: var(--line);
+}
+
+.fardplan__spar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--barnsten), var(--koppar));
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.6s var(--ease);
+}
+
+.fardplan a {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  color: var(--ink-faint);
+  transition: color 0.35s var(--ease), opacity 0.35s var(--ease);
+}
+
+.fardplan a span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  background: #ffffff;
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--ink-faint);
+  transition: border-color 0.4s var(--ease), background-color 0.4s var(--ease),
+    color 0.4s var(--ease), scale 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.fardplan a em {
+  font-style: normal;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.fardplan a:hover {
+  color: var(--ink);
+}
+
+.fardplan a.klar span {
+  border-color: var(--koppar);
+  color: var(--koppar);
+}
+
+.fardplan a.aktiv {
+  color: var(--ink);
+}
+
+.fardplan a.aktiv span {
+  border-color: var(--koppar);
+  background: var(--koppar);
+  color: #ffffff;
+  scale: 1.14;
+}
+
+.fardplan a.dampad {
+  opacity: 0.35;
+}
+
+/* --- Stegkorten -------------------------------------------------- */
+.process--faser .fassteg {
+  perspective: 1200px;
+}
+
+.process--faser .fassteg__kort {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1),
+    box-shadow 0.45s var(--ease), filter 0.5s var(--ease);
+}
+
+.process--faser .fassteg__kort:hover {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-3px);
+  transition: transform 0.16s ease-out, box-shadow 0.45s var(--ease), filter 0.5s var(--ease);
+}
+
+.process--faser .fassteg__kort.dampad {
+  filter: grayscale(0.9) opacity(0.4);
+}
+
+.process--faser .fassteg__kort.markerad {
+  box-shadow: inset 0 0 0 1.5px var(--koppar), 0 24px 46px -30px rgba(164, 96, 47, 0.55);
+}
+
+.process--faser .fassteg__kort.tand .fassteg__nr {
+  background: linear-gradient(135deg, var(--barnsten), var(--koppar));
+  color: #ffffff;
+  animation: nrTand 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes nrTand {
+  0% { scale: 0.7; }
+  100% { scale: 1; }
+}
+
+.fassteg__leverans {
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--barnsten), var(--koppar));
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.fassteg__leverans--ny {
+  animation: bockIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.fassteg__leverans[hidden] {
+  display: none;
+}
+
+@media (max-width: 1040px) {
+  .fardplan {
+    top: 80px;
+  }
+}
+
+@media (max-width: 760px) {
+  .fardplan {
+    top: 74px;
+    padding: 8px 10px;
+    border-radius: 22px;
+  }
+
+  .fardplan__spar {
+    top: 24px;
+  }
+
+  .fardplan a span {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+
+  .fardplan a em {
+    display: none;
+  }
+
+  .fardplan a.aktiv em {
+    display: block;
+    position: absolute;
+    top: 36px;
+    font-size: 11px;
+  }
+
+  .fardplan {
+    padding-bottom: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .process--faser .fassteg__kort {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   Huset i 3D och AR (2026-09-23)
+   model-viewer med husen R1-R5 i skala 1:1. På mobil kan huset
+   ställas på tomten med kameran (AR).
+   ============================================================ */
+.hus3dvy {
+  width: calc(100% - 24px);
+  margin: 0 12px var(--sekt);
+  border-radius: var(--radie-hero);
+  background:
+    radial-gradient(60% 80% at 80% 30%, rgba(217, 162, 98, 0.26), transparent 70%),
+    radial-gradient(50% 60% at 10% 90%, rgba(233, 205, 186, 0.45), transparent 70%),
+    var(--sand);
+  overflow: hidden;
+}
+
+.hus3dvy[hidden] {
+  display: none;
+}
+
+.hus3dvy__inner {
+  width: var(--shell);
+  margin: 0 auto;
+  padding: clamp(48px, 6vw, 96px) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(28px, 5vw, 64px);
+  align-items: center;
+}
+
+.hus3dvy__titel {
+  margin: 0 0 16px;
+  font-family: var(--serif);
+  font-size: clamp(34px, 3.6vw, 54px);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.hus3dvy__text {
+  margin: 0 0 24px;
+  max-width: 30em;
+  font-size: 17px;
+  color: var(--ink-soft);
+}
+
+.hus3dvy__matt {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.hus3dvy__matt div {
+  padding: 14px 14px 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.hus3dvy__matt dt {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.hus3dvy__matt dd {
+  margin: 6px 0 0;
+  font-family: var(--serif);
+  font-size: 26px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.hus3dvy__not,
+.hus3dvy__mobil {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.hus3dvy__mobil {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink-soft);
+}
+
+.hus3dvy__mobil::before {
+  content: "";
+  width: 9px;
+  height: 14px;
+  border: 1.5px solid var(--koppar);
+  border-radius: 3px;
+}
+
+.hus3dvy__mobil[hidden] {
+  display: none;
+}
+
+.hus3dvy__scen {
+  position: relative;
+  height: clamp(360px, 40vw, 540px);
+  border-radius: 24px;
+  background:
+    radial-gradient(70% 60% at 50% 40%, rgba(255, 255, 255, 0.8), transparent 75%),
+    rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.hus3dvy__scen model-viewer {
+  width: 100%;
+  height: 100%;
+  --poster-color: transparent;
+  --progress-bar-color: var(--koppar);
+  --progress-bar-height: 3px;
+  background: transparent;
+}
+
+.hus3dvy__laddar {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+.hus3dvy__ar {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  translate: -50% 0;
+  padding: 13px 22px 13px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--barnsten), var(--koppar));
+  color: #ffffff;
+  font: 600 15px/1 var(--sans);
+  box-shadow: 0 16px 34px -14px rgba(120, 65, 25, 0.7);
+  cursor: pointer;
+}
+
+.hus3dvy__ar::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  box-shadow: inset 0 -6px 0 -4px currentColor;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hus3dvy__ar {
+    animation: arPuls 2.6s ease-in-out 1.5s 3;
+  }
+}
+
+@keyframes arPuls {
+  0%, 100% { box-shadow: 0 16px 34px -14px rgba(120, 65, 25, 0.7), 0 0 0 0 rgba(217, 162, 98, 0.5); }
+  50% { box-shadow: 0 16px 34px -14px rgba(120, 65, 25, 0.7), 0 0 0 12px rgba(217, 162, 98, 0); }
+}
+
+/* Märkningen på modellkorten. */
+.model-card__3d {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 4;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: rgba(28, 22, 16, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+
+@media (max-width: 860px) {
+  .hus3dvy__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .hus3dvy__scen {
+    height: 380px;
+  }
+}
+
+@media (max-width: 420px) {
+  .hus3dvy__matt dd {
+    font-size: 21px;
+  }
+}
+/* ============================================================
+   Konfigurator, markkoll, bildfrågan och temaknappen (2026-09-23)
+   ============================================================ */
+
+/* --- Temaknappen i headern ------------------------------------- */
+.temaknapp {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  margin-right: 8px;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  border: 1px solid rgba(35, 32, 25, 0.1);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  overflow: hidden;
+  transition: background-color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+
+.temaknapp:hover {
+  background: rgba(130, 119, 107, 0.12);
+}
+
+.temaknapp svg {
+  position: absolute;
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: translate 0.55s cubic-bezier(0.34, 1.4, 0.64, 1), rotate 0.55s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.3s var(--ease);
+}
+
+.temaknapp__mane {
+  translate: 0 0;
+}
+
+.temaknapp__sol {
+  translate: 0 140%;
+  rotate: -90deg;
+  opacity: 0;
+}
+
+html[data-tema="mork"] .temaknapp {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f6d3a4;
+}
+
+html[data-tema="mork"] .temaknapp__mane {
+  translate: 0 -140%;
+  rotate: 90deg;
+  opacity: 0;
+}
+
+html[data-tema="mork"] .temaknapp__sol {
+  translate: 0 0;
+  rotate: 0deg;
+  opacity: 1;
+}
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@media (max-width: 620px) {
+  .temaknapp {
+    width: 36px;
+    height: 36px;
+    margin-right: 4px;
+  }
+}
+
+/* --- Konfiguratorn i 3D-sektionen ------------------------------- */
+.konfig {
+  margin-top: 22px;
+  padding: 18px;
+  display: grid;
+  gap: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.konfig__etikett {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.konfig__etikett span {
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.konfig__rad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.konfig__rad button {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--prov);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 0 0 0 transparent;
+  cursor: pointer;
+  transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+.konfig__rad button:hover {
+  transform: translateY(-2px);
+}
+
+.konfig__rad button[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 0 0 3px var(--varm-papper), 0 0 0 5px var(--koppar);
+}
+
+.konfig__rad button:focus-visible {
+  outline: 2px solid var(--koppar);
+  outline-offset: 4px;
+}
+
+.konfig__spegel {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.konfig__spegel input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.konfig__vaxel {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex: none;
+  border-radius: 99px;
+  background: var(--line);
+  transition: background-color 0.3s var(--ease);
+}
+
+.konfig__vaxel::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: translate 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.konfig__spegel input:checked + .konfig__vaxel {
+  background: var(--koppar);
+}
+
+.konfig__spegel input:checked + .konfig__vaxel::after {
+  translate: 18px 0;
+}
+
+.konfig__spegel input:focus-visible + .konfig__vaxel {
+  outline: 2px solid var(--koppar);
+  outline-offset: 3px;
+}
+
+/* --- Kolla din mark ------------------------------------------- */
+.markkoll {
+  padding: 0 0 var(--sekt);
+}
+
+.markkoll__inner {
+  width: var(--shell);
+  margin: 0 auto;
+}
+
+.markkoll__topp {
+  max-width: 720px;
+  margin-bottom: 30px;
+}
+
+.markkoll__titel {
+  margin: 0 0 14px;
+  font-family: var(--serif);
+  font-size: clamp(34px, 3.6vw, 54px);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.markkoll__text {
+  margin: 0;
+  font-size: 17px;
+  color: var(--ink-soft);
+}
+
+.markkoll__rad {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  perspective: 1200px;
+}
+
+.markkort {
+  position: relative;
+  padding: 22px 20px 20px;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  border: 1px solid rgba(35, 32, 25, 0.08);
+  border-radius: 20px;
+  background: #ffffff;
+  color: var(--ink);
+  box-shadow: 0 18px 40px -34px rgba(35, 32, 25, 0.6);
+  transition: transform 0.45s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.45s var(--ease), border-color 0.45s var(--ease);
+}
+
+.markkort:hover {
+  transform: translateY(-4px) rotateX(4deg);
+  border-color: var(--koppar);
+  box-shadow: 0 30px 50px -30px rgba(164, 96, 47, 0.5);
+}
+
+.markkort__ikon {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 10px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--barnsten), var(--koppar));
+}
+
+.markkort__ikon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.markkort__kalla {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.markkort strong {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.markkort__text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.markkort__lank {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--koppar);
+}
+
+.markkort__lank::after {
+  content: " ↗";
+}
+
+.markkoll__not {
+  margin: 20px 0 0;
+  max-width: 44em;
+  font-size: 13.5px;
+  color: var(--ink-faint);
+}
+
+.kostnadskarta__lank {
+  margin: 14px 0 0;
+}
+
+.kostnadskarta__lank a {
+  font-weight: 600;
+  color: var(--koppar);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 1000px) {
+  .markkoll__rad {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .markkoll__rad {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Bildfrågan i formuläret ----------------------------------- */
+.bildval__rad {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.bildval {
+  position: relative;
+  cursor: pointer;
+}
+
+.bildval input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.bildval span {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  isolation: isolate;
+  aspect-ratio: 4 / 5;
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px rgba(35, 32, 25, 0.08);
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.4s var(--ease);
+}
+
+.bildval span:hover {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-3px);
+  transition: transform 0.16s ease-out, box-shadow 0.4s var(--ease);
+}
+
+.bildval img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease);
+}
+
+.bildval span:hover img {
+  transform: scale(1.06);
+}
+
+.bildval span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(20, 15, 10, 0.72));
+  pointer-events: none;
+}
+
+.bildval em {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1;
+  font-family: var(--serif);
+  font-size: 18px;
+  font-style: normal;
+  line-height: 1.1;
+  color: #ffffff;
+}
+
+/* Vald: kopparram och en bock i hörnet. */
+.bildval span::before {
+  content: "✓";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--koppar);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  scale: 0;
+  transition: scale 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.bildval input:checked + span {
+  box-shadow: 0 0 0 3px var(--koppar), 0 20px 34px -22px rgba(164, 96, 47, 0.7);
+}
+
+.bildval input:checked + span::before {
+  scale: 1;
+}
+
+.bildval input:focus-visible + span {
+  outline: 2px solid var(--koppar);
+  outline-offset: 3px;
+}
+
+.bildval .val__glans {
+  z-index: 1;
+  mix-blend-mode: overlay;
+}
+
+@media (max-width: 620px) {
+  .bildval__rad {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bildval span {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* === MÖRKT TEMA START (byggs av _morkt.py) === */
+/* Mörkt tema: varmt och mörkt, som en kvällsbild av huset - inte kallt
+   grått. Variablerna gör det mesta; resten är ytor som var vita. */
+html[data-tema="mork"] {
+  color-scheme: dark;
+  --ink: #f1e9dd;
+  --ink-soft: #cfc4b4;
+  --ink-faint: #a69b8d;
+  --paper: #1d1813;
+  --sand: #231d17;
+  --line: #3b3229;
+  --forest: #0f0c0a;
+  --logo: #c2b29d;
+  --knapp: #a4602f;
+  --knapp-morkare: #8c4f24;
+  --varm-papper: #15110d;
+  --yta: #241e18;
+  --yta-glas: rgba(44, 37, 30, 0.82);
+}
+
+html[data-tema="mork"] body {
+  background: var(--varm-papper);
+  color: var(--ink);
+}
+
+html[data-tema="mork"] .category-filter a,
+html[data-tema="mork"] .contact-form .valj__knapp,
+html[data-tema="mork"] .contact-form .valj__knapp:hover,
+html[data-tema="mork"] .contact-form input,
+html[data-tema="mork"] .contact-form select,
+html[data-tema="mork"] .contact-form textarea,
+html[data-tema="mork"] .contact-form__status,
+html[data-tema="mork"] .contact-person__image,
+html[data-tema="mork"] .fardplan a span,
+html[data-tema="mork"] .filter button,
+html[data-tema="mork"] .ingar,
+html[data-tema="mork"] .jamfor-knapp,
+html[data-tema="mork"] .jamfor-knapp[aria-pressed="true"]::before,
+html[data-tema="mork"] .jamforruta__hus,
+html[data-tema="mork"] .kartval span,
+html[data-tema="mork"] .kollen__dela,
+html[data-tema="mork"] .kollen__kort,
+html[data-tema="mork"] .kollen__val span,
+html[data-tema="mork"] .konfig__vaxel::after,
+html[data-tema="mork"] .main-nav__sub,
+html[data-tema="mork"] .markkort,
+html[data-tema="mork"] .mobile-nav,
+html[data-tema="mork"] .model-plan__placeholder,
+html[data-tema="mork"] .model-price__card,
+html[data-tema="mork"] .priskort,
+html[data-tema="mork"] .prisvaljare__reglage,
+html[data-tema="mork"] .proffs-hopp a,
+html[data-tema="mork"] .storlek3d__ikon:hover,
+html[data-tema="mork"] .styrkort,
+html[data-tema="mork"] .tillkommer,
+html[data-tema="mork"] .tipsruta,
+html[data-tema="mork"] .val input:checked + span,
+html[data-tema="mork"] .val span,
+html[data-tema="mork"] .val span::before,
+html[data-tema="mork"] .val__tips,
+html[data-tema="mork"] .valgrupp--levande .val input:checked + span,
+html[data-tema="mork"] .valj__lista {
+  background-color: var(--yta);
+}
+
+html[data-tema="mork"] .cta-bar,
+html[data-tema="mork"] .fardplan,
+html[data-tema="mork"] .hus3dvy__matt div,
+html[data-tema="mork"] .hus3dvy__mobil,
+html[data-tema="mork"] .hustypval,
+html[data-tema="mork"] .kartfraga,
+html[data-tema="mork"] .konfig,
+html[data-tema="mork"] .kopiera,
+html[data-tema="mork"] .modellrad .filter,
+html[data-tema="mork"] .site-header,
+html[data-tema="mork"] .site-header__inner,
+html[data-tema="mork"] .storlek3d__fakta div,
+html[data-tema="mork"] .storlek3d__ikon,
+html[data-tema="mork"] .storlek3d__lyft,
+html[data-tema="mork"] .storlek3d__tips,
+html[data-tema="mork"] .storlek3d__val,
+html[data-tema="mork"] .tomtkoll__matare .matarblock,
+html[data-tema="mork"] .vemfilter {
+  background-color: var(--yta-glas);
+}
+
+/* Valda tillstånd, återställda ovanpå de mörka ytorna. */
+html[data-tema="mork"] .filter button[aria-pressed="true"] {
+  background: var(--knapp);
+}
+html[data-tema="mork"] .val input:checked + span::before {
+  background: var(--knapp);
+}
+html[data-tema="mork"] .kollen__val input:checked + span {
+  background: var(--knapp);
+}
+html[data-tema="mork"] .har-markor button[aria-pressed="true"] {
+  background: transparent;
+}
+html[data-tema="mork"] .hero .malgrupp button[aria-pressed="true"],
+html[data-tema="mork"] .hero .malgrupp button[aria-pressed="true"]:hover {
+  background: transparent;
+}
+html[data-tema="mork"] .valgrupp--levande .val input:checked + span::before {
+  background: var(--koppar);
+}
+html[data-tema="mork"] .val input:checked + span .val__ikon {
+  background: var(--koppar);
+}
+html[data-tema="mork"] .jamfor-knapp[aria-pressed="true"] {
+  background: var(--koppar);
+}
+html[data-tema="mork"] .storlek3d__lyft[aria-pressed="true"] {
+  background: var(--koppar);
+}
+html[data-tema="mork"] .kartval input:checked + span {
+  background: var(--koppar);
+}
+html[data-tema="mork"] .vemfilter button[aria-pressed="true"] small {
+  background: rgba(255, 255, 255, 0.22);
+}
+html[data-tema="mork"] .vemfilter:not(.har-markor) button[aria-pressed="true"],
+html[data-tema="mork"] .hustypval:not(.har-markor) button[aria-pressed="true"] {
+  background: var(--koppar);
+}
+html[data-tema="mork"] .konfig__spegel input:checked + .konfig__vaxel {
+  background: var(--koppar);
+}
+
+/* Headerns piller, menyer och paneler. */
+html[data-tema="mork"] .site-header__inner {
+  background: rgba(30, 25, 20, 0.84);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-tema="mork"] .main-nav__sub,
+html[data-tema="mork"] .mobile-nav,
+html[data-tema="mork"] .jamforruta,
+html[data-tema="mork"] .valj__lista {
+  background: var(--yta);
+  border-color: var(--line);
+}
+
+/* Vita knappar och brickor som ligger på foton behåller mörk text -
+   annars blev texten ljus mot vitt och försvann. */
+html[data-tema="mork"] .hero__link--solid,
+html[data-tema="mork"] .house-card__link,
+html[data-tema="mork"] .model-card__pill,
+html[data-tema="mork"] .hero .malgrupp button[aria-pressed="true"],
+html[data-tema="mork"] .hero .malgrupp button[aria-pressed="true"]:hover {
+  color: #232019;
+}
+
+/* Loggan är en SVG-fil i loggans gråbruna ton - ljusare på mörkt. */
+html[data-tema="mork"] .logo__svg,
+html[data-tema="mork"] .site-footer__logo {
+  filter: brightness(1.75) saturate(0.9);
+}
+
+/* Fält och kort som hade ljusa kanter. */
+html[data-tema="mork"] input,
+html[data-tema="mork"] textarea,
+html[data-tema="mork"] select {
+  background-color: #1b1611;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+html[data-tema="mork"] ::placeholder {
+  color: #8a7f72;
+}
+
+/* Glöden i sektionerna blir svagare och varmare. */
+html[data-tema="mork"] .glod,
+html[data-tema="mork"] .storlek3d,
+html[data-tema="mork"] .hus3dvy,
+html[data-tema="mork"] .kostnadskarta,
+html[data-tema="mork"] .tomtkoll,
+html[data-tema="mork"] .kollen-topp {
+  background:
+    radial-gradient(55% 80% at 8% 12%, rgba(164, 96, 47, 0.18), transparent 70%),
+    radial-gradient(45% 70% at 96% 92%, rgba(217, 162, 98, 0.12), transparent 72%),
+    var(--sand);
+}
+
+/* Skimmerordet och koppar håller sig ljusa nog att läsa. */
+html[data-tema="mork"] h2 em,
+html[data-tema="mork"] .skimmer {
+  background-image: linear-gradient(100deg, #d9a262 0%, #e7b77e 30%, #f6d3a4 50%, #e7b77e 70%, #d9a262 100%);
+}
+
+html[data-tema="mork"] .section-label--accent,
+html[data-tema="mork"] .priskort__lov,
+html[data-tema="mork"] .val__tips a,
+html[data-tema="mork"] .kollen__friskrivning a,
+html[data-tema="mork"] .prisvag__steg a {
+  color: #e2a86a;
+}
+
+/* Bilder tonas ned en aning så att de inte bländar i mörkret. */
+html[data-tema="mork"] main img:not(.logo__svg) {
+  filter: brightness(0.92);
+}
+
+/* 3D-scenerna: ljusare botten bakom modellen så att svarta hus syns. */
+html[data-tema="mork"] .hus3dvy__scen {
+  background: radial-gradient(70% 60% at 50% 40%, rgba(255, 244, 228, 0.16), transparent 75%), rgba(255, 255, 255, 0.04);
+}
+
+/* Övergången mellan teman: färgerna tonar i stället för att slå om. */
+html.tema-byte,
+html.tema-byte * {
+  transition: background-color 0.45s ease, color 0.45s ease, border-color 0.45s ease !important;
+}
+/* === MÖRKT TEMA SLUT === */

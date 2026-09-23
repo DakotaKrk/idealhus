@@ -3,7 +3,7 @@
 import re, io, os
 
 BAS = "https://dakotakrk.github.io/idealhus/"
-CSS_V = "20260911l"
+CSS_V = "20260923l"
 
 # Husen for den som ska bo i dem, och det vi levererar till andra som
 # bygger. De sag likadana ut i menyn tidigare, som fem jamnstallda val.
@@ -28,7 +28,7 @@ PROFFS_ETIKETT = "För dig som bygger"
 # tvingar besokaren att gissa vad skillnaden ar.
 KATEGORI_INFO = {
     "Attefallshus": ("generated-category-attefallshus-card.webp",
-                     "Upp till 30 m², utan bygglov"),
+                     "Utan bygglov, 30–50 m²"),
     "Fritidshus": ("generated-category-fritidshus-card.webp",
                    "För helger och långa somrar"),
     "Fjällstugor": ("generated-category-fjallstuga-card.webp",
@@ -61,6 +61,17 @@ def kategorirad(namn, fil):
             f'              </a>')
 
 
+# Ett verktyg att prova, sist i husmenyn - som "Prova"-kortet i
+# Kasters meny. Den som undrar vilket hus som passar undrar oftast
+# forst hur stort hus som far sta pa tomten.
+TIPSKORT = (
+    '              <a class="main-nav__tips" href="vad-far-jag-bygga.html">\n'
+    '                <span class="main-nav__tips-etikett">Prova</span>\n'
+    '                <strong>Vad får jag bygga?</strong>\n'
+    '                <em>Räkna ut vad som ryms på din tomt</em>\n'
+    '              </a>')
+
+
 def dropdown(aktiv):
     # Raden "Se alla modeller" ar borta. Den gick till attefallshus.html,
     # alltsa en av kategorierna - inte till alla - och stod dessutom
@@ -70,6 +81,7 @@ def dropdown(aktiv):
     rader.append('              <p class="main-nav__sub-etikett '
                  f'main-nav__sub-etikett--delad">{PROFFS_ETIKETT}</p>')
     rader += [kategorirad(n, f) for n, f in KATEGORIER_PROFFS]
+    rader.append(TIPSKORT)
     val = "\n".join(rader)
     klass = "main-nav__link main-nav__toggle"
     if aktiv == "Våra hus":
@@ -135,6 +147,8 @@ def head(titel, beskrivning, forladdad=None, fil=None):
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&family=Source+Sans+3:ital,wght@0,300..700;1,400&display=swap">{pre}
     <link rel="stylesheet" href="styles.css?v={CSS_V}">
+    <script src="premium.js?v={CSS_V}" defer></script>
+    <script>try{{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork')document.documentElement.setAttribute('data-tema','mork')}}catch(e){{}}</script>
     <script type="application/ld+json">
     {{
       "@context": "https://schema.org",
@@ -179,6 +193,7 @@ def header(aktiv):
 
       <nav class="mobile-nav" id="mobile-nav" aria-label="Meny" hidden>
 {mobilmeny()}
+        <a class="mobile-nav__tips" href="vad-far-jag-bygga.html"><span>Prova</span> Vad får jag bygga?</a>
         <a class="mobile-nav__cta" href="kontakt.html">Begär offert</a>
       </nav>
     </header>
@@ -192,20 +207,6 @@ SIDFOT = '''    <footer class="site-footer">
           <p class="site-footer__text">
             Attefallshus &amp; komplementhus med skandinavisk design och hög kvalitet.
           </p>
-          <div class="site-footer__social">
-            <a href="#" aria-label="Idealhus på Facebook" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                <path d="M13.4 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.45 1.55-1.45h1.65V3.68c-.29-.04-1.27-.13-2.42-.13-2.4 0-4.03 1.46-4.03 4.15v2.2H7.45V13h2.7v8h3.25z"/>
-              </svg>
-            </a>
-            <a href="#" aria-label="Idealhus på Instagram" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
-                <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5"/>
-                <circle cx="12" cy="12" r="3.9"/>
-                <circle cx="17.1" cy="6.9" r="1.1" fill="currentColor" stroke="none"/>
-              </svg>
-            </a>
-          </div>
         </div>
 
         <div>
@@ -219,6 +220,7 @@ SIDFOT = '''    <footer class="site-footer">
             <a href="om-oss.html">Om oss</a>
             <a href="kontakt.html">Kontakt</a>
             <a href="attefallshus-regler.html">Attefallshus: reglerna</a>
+            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>
           </nav>
         </div>
 

@@ -11,18 +11,22 @@ Varje modell ar (namn, bild, boyta i m2, rum, leveransveckor).
 Ordningen ar samma som pa sidan: modell 1 ar forst.
 """
 
+# Modellerna med bild hus-r*.webp är riktiga hus, ritade i ritningarna
+# R1-R5 (2026-09-23). Boytan är räknad innanför ytterväggarna, utan loft,
+# och rummen är de som ritningen namnger. Leveranstiden är fortfarande
+# platshållare som de övriga.
 KATEGORIER = {
     "attefallshus": ("Attefallshus", [
-        ("Huskort 1", "generated-category-attefallshus-card.webp", 25, 1, 10),
-        ("Huskort 2", "generated-house-forest-01.webp", 27, 2, 10),
-        ("Huskort 3", "generated-house-coast-01.webp", 28, 2, 12),
+        ("Huskort 1", "hus-r2.webp", 26, 1, 10),       # R2: 8,33 x 3,49 m, sadeltak 30°
+        ("Huskort 2", "hus-r1.webp", 27, 2, 10),       # R1: 7,14 x 4,20 m, sadeltak 24°
+        ("Huskort 3", "hus-r5.webp", 27, 2, 12),       # R5: 7,50 x 4,00 m, pulpettak 2°
         ("Huskort 4", "generated-house-garden-01.webp", 30, 2, 12),
         ("Huskort 5", "generated-category-attefallshus-02.webp", 30, 2, 14),
         ("Huskort 6", "generated-house-winter-01.webp", 30, 3, 14),
     ]),
     "fritidshus": ("Fritidshus", [
-        ("Huskort 1", "generated-category-fritidshus-card.webp", 45, 2, 12),
-        ("Huskort 2", "generated-house-forest-01.webp", 55, 3, 14),
+        ("Huskort 1", "hus-r3.webp", 38, 2, 12),       # R3: 10,83 x 3,90 m, takkupa
+        ("Huskort 2", "hus-r4.webp", 45, 2, 14),       # R4: 12,50 x 3,90 m, takkupa
         ("Huskort 3", "generated-house-coast-01.webp", 62, 3, 14),
         ("Huskort 4", "generated-house-garden-01.webp", 70, 4, 16),
         ("Huskort 5", "generated-house-meadow-01.webp", 78, 4, 16),

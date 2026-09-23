@@ -1,5 +1,7 @@
 # Bygger sa-fungerar-det.html. Kor: python _process.py
 import _bygg as B
+import json
+import _modeller as M
 
 # (rubrik, vem, klass, text)
 STEG = [
@@ -51,7 +53,7 @@ FASER = [('Innan bygget', (1, 3), 'Vi ritar, räknar och tar fram underlaget. Du
 
 
 def fas(namn, spann, ingress, teckning, steg):
-    kort = "\n".join(f'''            <li class="fassteg__kort">
+    kort = "\n".join(f'''            <li class="fassteg__kort" id="steg-{i}" data-vem="{klass}" data-steg="{i}">
               <span class="fassteg__nr">{i:02d}</span>
               <div class="fassteg__kropp">
                 <div class="fassteg__topp">
@@ -81,6 +83,23 @@ def fas(namn, spann, ingress, teckning, steg):
         </section>'''
 
 
+def _lev(typ):
+    lev = [m[4] for m in M.KATEGORIER[typ][1]]
+    return f"{min(lev)}–{max(lev)}"
+
+
+# Leveranstiden per hustyp, ur modellerna. Visas på steg 06 när man
+# väljer hustyp i verktygsraden.
+LEVERANS_JSON = json.dumps({typ: _lev(typ) for typ in M.KATEGORIER})
+
+KORTNAMN = ["Samtalet", "Modell", "Lov", "Tillverkning", "Grund", "Montage", "Besiktning"]
+
+FARDPLAN = "\n".join(
+    f'            <a href="#steg-{i}" data-fard="{i}"><span>{i:02d}</span><em>{n}</em></a>'
+    for i, n in enumerate(KORTNAMN, 1))
+
+ANTAL = {k: sum(1 for s in STEG if s[2] == k) for k in ("vi", "du", "bada")}
+
 faser = "\n\n".join(
     fas(namn, spann, ingress, TECKNINGAR[n],
         [(i, STEG[i - 1]) for i in range(spann[0], spann[1] + 1)])
@@ -94,6 +113,17 @@ KROPP = f'''    <main id="innehall">
           <div class="subpage-hero__content">
             <h1 class="subpage-hero__title">Så fungerar det</h1>
             <p class="subpage-hero__meta">Från första samtalet till inflyttning</p>
+          </div>
+        </div>
+
+        <div class="heroscen heroscen--kategori" aria-hidden="true">
+          <div class="heroscen__chip heroscen__chip--a">
+            <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h9"/></svg></span>
+            <p><strong>Sju steg</strong><span>i tre skeden, i ordning</span></p>
+          </div>
+          <div class="heroscen__chip heroscen__chip--b">
+            <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20c.9-3.9 3.9-6 7.5-6s6.6 2.1 7.5 6"/></svg></span>
+            <p><strong>En kontakt</strong><span>hela vägen till nyckeln</span></p>
           </div>
         </div>
       </section>
@@ -115,10 +145,10 @@ KROPP = f'''    <main id="innehall">
 
         <div class="kontakt-direkt">
           <div class="kontakt-direkt__rad">
-            <span class="kontakt-direkt__namn">Anmälan</span>
+            <span class="kontakt-direkt__namn">Lovfritt</span>
             <span class="kontakt-direkt__roll">Attefallshus</span>
             <span class="kontakt-direkt__lankar">
-              <a href="attefallshus.html">Upp till 30 m², inget bygglov</a>
+              <a href="vad-far-jag-bygga.html">30 m² inom detaljplan, 50 m² utanför</a>
             </span>
           </div>
 
@@ -140,13 +170,34 @@ KROPP = f'''    <main id="innehall">
         </div>
       </section>
 
-      <section class="process process--faser">
+      <section class="process process--faser" data-leverans='{LEVERANS_JSON}'>
         <div class="process__inre">
-          <p class="process__teckenforklaring">
-            <span><i class="prick prick--vi"></i>Vi gör det</span>
-            <span><i class="prick prick--du"></i>Du gör det</span>
-            <span><i class="prick prick--bada"></i>Tillsammans</span>
-          </p>
+          <div class="processverktyg">
+            <div class="processverktyg__grupp">
+              <p class="processverktyg__etikett">Vem gör vad</p>
+              <div class="vemfilter" role="group" aria-label="Visa steg efter vem som gör dem">
+                <button type="button" data-vem="alla" aria-pressed="true">Alla <small>7</small></button>
+                <button type="button" data-vem="vi" aria-pressed="false"><i class="prick prick--vi"></i>Vi <small>{ANTAL["vi"]}</small></button>
+                <button type="button" data-vem="du" aria-pressed="false"><i class="prick prick--du"></i>Du <small>{ANTAL["du"]}</small></button>
+                <button type="button" data-vem="bada" aria-pressed="false"><i class="prick prick--bada"></i>Tillsammans <small>{ANTAL["bada"]}</small></button>
+              </div>
+            </div>
+            <div class="processverktyg__grupp">
+              <p class="processverktyg__etikett">Visa för</p>
+              <div class="hustypval" role="group" aria-label="Anpassa stegen efter hustyp">
+                <button type="button" data-typ="alla" aria-pressed="true">Alla hus</button>
+                <button type="button" data-typ="attefallshus" aria-pressed="false">Attefallshus</button>
+                <button type="button" data-typ="fritidshus" aria-pressed="false">Fritidshus</button>
+                <button type="button" data-typ="fjallstugor" aria-pressed="false">Fjällstuga</button>
+                <button type="button" data-typ="villor" aria-pressed="false">Villa</button>
+              </div>
+            </div>
+          </div>
+
+          <nav class="fardplan" aria-label="Stegen">
+            <span class="fardplan__spar" aria-hidden="true"><span></span></span>
+{FARDPLAN}
+          </nav>
 
 {faser}
         </div>
