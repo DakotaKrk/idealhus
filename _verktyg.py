@@ -201,8 +201,8 @@ KROPP = f'''    <main id="innehall">
           <div class="kollen-hus__rutnat" id="hus-lista"></div>
           <p class="kollen-hus__tomt" id="hus-tomt" hidden>
             Inget av våra hus ryms utan bygglov med de här svaren. Med
-            bygglov kan det bli betydligt större -
-            <a href="villor.html">se villorna</a> eller
+            bygglov kan det bli större -
+            <a href="fritidshus.html">se fritidshusen</a> eller
             <a href="kontakt.html">prata med oss</a>.
           </p>
         </div>

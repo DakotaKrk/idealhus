@@ -16,8 +16,8 @@ KROPP = open("_kontaktkropp.inc", encoding="utf-8").read().replace("__FORMULAR__
 
 ut = (B.head("Kontakt | Idealhus",
              "Kontakta Idealhus om husmodeller, offert och nästa steg. "
-             "Du når Ahmed och Sahand direkt.",
-             "generated-house-garden-01.webp", fil="kontakt.html")
+             "Du når oss direkt.",
+             "hus-r4.webp", fil="kontakt.html")
       + "\n" + B.header("Kontakt") + "\n" + KROPP + B.SIDFOT + "\n"
       + B.skript(FORMSKRIPT))
 

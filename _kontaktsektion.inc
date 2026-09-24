@@ -20,16 +20,8 @@
 
             <div class="contact-section__meta">
               <div>
-                <span class="contact-section__meta-label">Ahmed</span>
-                <a class="contact-section__meta-value" href="mailto:ahmed@idealhus.se">ahmed@idealhus.se</a>
-              </div>
-              <div>
-                <span class="contact-section__meta-label">Sahand</span>
-                <a class="contact-section__meta-value" href="mailto:sahand@idealhus.se">sahand@idealhus.se</a>
-              </div>
-              <div>
-                <span class="contact-section__meta-label">Telefon</span>
-                <a class="contact-section__meta-value" href="tel:+46701234567">070-123 45 67</a>
+                <span class="contact-section__meta-label">E-post</span>
+                <a class="contact-section__meta-value" href="mailto:info@idealhus.se">info@idealhus.se</a>
               </div>
               <div>
                 <span class="contact-section__meta-label">Plats</span>

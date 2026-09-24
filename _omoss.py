@@ -2,11 +2,11 @@
 import _bygg as B
 
 PRINCIPER = [
-    ("Platsen först", "generated-house-coast-01.webp",
+    ("Platsen först", "hus-r1.webp",
      "Vi ritar inte ett hus och letar sedan efter en tomt. Vi börjar i platsen: "
      "väderstreck, utsikt, hur marken lutar och var solen står när ni faktiskt "
      "är där. Samma modell blir olika hus beroende på var den hamnar.",
-     "Modernt hus på svenska klippor vid havet"),
+     "Svart attefallshus på klippor vid havet"),
     ("Varje kvadrat räknas", "generated-interior-01.webp",
      "Ett litet hus ska kännas generöst i vardagen. Det handlar mindre om antal "
      "kvadratmeter och mer om var väggarna står, var ljuset kommer in och vad "
@@ -31,7 +31,7 @@ principblock = "\n\n".join(f'''        <article class="segment__block">
 
 KROPP = f'''    <main id="innehall">
       <section class="subpage-hero">
-        <img class="subpage-hero__image" src="images/generated-production-yard-01.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Svensk produktionsmiljö med attefallshus och trävirke">
+        <img class="subpage-hero__image" src="images/hus-r2.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Attefallshus med lärkpanel på en äng vid vattnet">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
@@ -50,8 +50,7 @@ KROPP = f'''    <main id="innehall">
             dina behov.
           </p>
           <p class="kontakt-topp__brod">
-            Vi formger och bygger attefallshus, fritidshus, fjällstugor och
-            villor. Husen tillverkas i Sverige, under tak, vilket ger jämnare
+            Vi formger och bygger attefallshus och fritidshus. Husen tillverkas i Sverige, under tak, vilket ger jämnare
             kvalitet och kortare beslutsvägar än när tillverkningen ligger långt
             bort. Från första samtalet till inflyttning har du samma kontakt.
           </p>
@@ -70,7 +69,7 @@ KROPP = f'''    <main id="innehall">
             <span class="kontakt-direkt__namn">Fem kategorier</span>
             <span class="kontakt-direkt__roll">Husmodeller</span>
             <span class="kontakt-direkt__lankar">
-              <a href="attefallshus.html">Attefallshus till villor</a>
+              <a href="attefallshus.html">Attefallshus och fritidshus</a>
             </span>
           </div>
 
@@ -92,27 +91,17 @@ KROPP = f'''    <main id="innehall">
         <div class="process__head">
           <h2>Vilka vi är</h2>
           <p>
-            Idealhus drivs av Ahmed och Sahand. Ni når oss direkt, utan växel
+            Idealhus är ett litet företag. Ni når oss direkt, utan växel
             och utan säljorganisation emellan.
           </p>
         </div>
 
         <div class="kontakt-direkt" style="max-width:560px">
           <div class="kontakt-direkt__rad">
-            <span class="kontakt-direkt__namn">Ahmed</span>
-            <span class="kontakt-direkt__roll">Projektledning</span>
+            <span class="kontakt-direkt__namn">Skriv till oss</span>
+            <span class="kontakt-direkt__roll">E-post</span>
             <span class="kontakt-direkt__lankar">
-              <a href="mailto:ahmed@idealhus.se">ahmed@idealhus.se</a>
-              <a href="tel:+46701234567">070-123 45 67</a>
-            </span>
-          </div>
-
-          <div class="kontakt-direkt__rad">
-            <span class="kontakt-direkt__namn">Sahand</span>
-            <span class="kontakt-direkt__roll">Projektledning</span>
-            <span class="kontakt-direkt__lankar">
-              <a href="mailto:sahand@idealhus.se">sahand@idealhus.se</a>
-              <a href="tel:+46701234567">070-123 45 67</a>
+              <a href="mailto:info@idealhus.se">info@idealhus.se</a>
             </span>
           </div>
         </div>
@@ -123,9 +112,9 @@ KROPP = f'''    <main id="innehall">
 '''
 
 ut = (B.head("Om oss | Idealhus",
-             "Idealhus formger och bygger attefallshus, fritidshus, fjällstugor "
-             "och villor med svensk tillverkning.",
-             "generated-production-yard-01.webp", fil="om-oss.html")
+             "Idealhus formger och bygger attefallshus och fritidshus "
+             "med svensk tillverkning.",
+             "hus-r2.webp", fil="om-oss.html")
       + "\n" + B.header("Om oss") + "\n" + KROPP + B.SIDFOT + "\n" + B.skript())
 
 open("om-oss.html", "w", encoding="utf-8", newline="").write(ut.replace("\n", "\r\n"))

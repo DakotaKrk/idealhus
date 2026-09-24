@@ -204,8 +204,8 @@
      Kasters marquee, i antikva: husen och det som gör dem, i en rad
      som glider förbi. Står still utanför skärmen och vid lugn rörelse. */
   (function () {
-    var ord = ['Attefallshus', 'Fritidshus', 'Fjällstugor', 'Villor',
-      'Byggt under tak', 'Svensk tillverkning', 'En kontakt hela vägen'];
+    var ord = ['Attefallshus', 'Fritidshus', 'Byggt under tak', 'Svensk tillverkning',
+      'Offert post för post', 'Anpassat efter din tomt', 'En kontakt hela vägen'];
     var rad = ord.map(function (o) {
       return '<span>' + o + '</span><i>✦</i>';
     }).join('');
@@ -228,8 +228,6 @@
   var IKONER = {
     'Attefallshus': 'M4 11.5 12 5l8 6.5M6.5 10v9.5h11V10M10.5 19.5v-4h3v4',
     'Fritidshus': 'M3 12 10 6l7 6M5 10.5v9h10v-9M19 4.5v2M22 7.5h-2M16 7.5h-2M17 5.2l1.4 1.4M20.6 5.2l-1.4 1.4',
-    'Fjällstuga': 'M2 20h20M4 20l6-10 3 4M13 14l3-5 6 11M8 20v-3.5l2.5-2 2.5 2V20',
-    'Villa': 'M3 11 12 4l9 7M5 9.5V20h14V9.5M9 20v-5h6v5M9 11h2M13 11h2',
     'Vet inte än': 'M9.2 9a3 3 0 1 1 4.3 2.7c-.9.4-1.5 1.1-1.5 2.1v.7M12 17.8v.2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z',
     'Bo året runt': 'M12 3v2M12 19v2M4.2 7.5l1.7 1M18.1 15.5l1.7 1M4.2 16.5l1.7-1M18.1 8.5l1.7-1M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
     'Gästhus': 'M3 18v-7M3 14h18v4M21 18v-4a3 3 0 0 0-3-3h-7v3M7 12.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',
@@ -845,7 +843,7 @@
       attefallshus: ['Anmälan för installationerna',
         'Ett attefallshus inom måtten behöver sedan december 2025 varken bygglov eller anmälan för själva byggnaden. Ska det ha vatten, avlopp, ventilation eller eldstad anmäls installationerna. Vi tar fram underlaget, du lämnar in till kommunen.'],
       annat: ['Bygglov',
-        'Fritidshus, fjällstugor och villor kräver bygglov. Vi tar fram ritningar och underlag, men det är du som är byggherre och söker lovet hos din kommun.']
+        'Fritidshus kräver bygglov. Vi tar fram ritningar och underlag, men det är du som är byggherre och söker lovet hos din kommun.']
     };
     var typKnappar = $$('.hustypval button', sek);
     typKnappar.forEach(function (b) {
@@ -1207,4 +1205,26 @@
       }
     }
   }
+
+  /* --- Hela bilden ---------------------------------------------
+     Husbilderna har en skylt i nedre vänstra hörnet och ska synas
+     hela. Toppbilderna, startsidans höga kort och fördelskorten har
+     en annan form än bilden; där får bilden stå hel och en suddig
+     kopia av samma bild fylla resten (styles.css, .helbild). Kopian
+     är samma fil, så inget laddas två gånger. */
+  $$('.subpage-hero__image, .house-card__image, .feature-card__image').forEach(function (img) {
+    var ram = img.parentNode;
+    var bak = document.createElement('img');
+    bak.className = 'helbild__bak';
+    bak.alt = '';
+    bak.setAttribute('aria-hidden', 'true');
+    bak.decoding = 'async';
+    if (img.getAttribute('loading') === 'lazy') bak.loading = 'lazy';
+    bak.src = img.getAttribute('src');
+    ram.insertBefore(bak, img);
+    ram.classList.add('helbild');
+    // Huskortet byter bild efter modell - kopian följer med.
+    new MutationObserver(function () { bak.src = img.getAttribute('src'); })
+      .observe(img, { attributes: true, attributeFilter: ['src'] });
+  });
 })();

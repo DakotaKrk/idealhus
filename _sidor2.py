@@ -161,7 +161,7 @@ skriv("om-oss.html", "Om oss | Idealhus",
 
         <h2>Vilka vi är</h2>
         <p>
-          Idealhus drivs av Ahmed och Sahand. Ni når oss direkt, utan
+          Idealhus är ett litet företag. Ni når oss direkt, utan
           växel och utan säljorganisation emellan.
         </p>
       </section>
@@ -169,16 +169,9 @@ skriv("om-oss.html", "Om oss | Idealhus",
       <section class="team">
         <div class="team__grid">
           <article class="team-kort">
-            <h3>Ahmed</h3>
-            <p class="team-kort__roll">Projektledning</p>
-            <a href="mailto:ahmed@idealhus.se">ahmed@idealhus.se</a>
-            <a href="tel:+46701234567">070-123 45 67</a>
-          </article>
-          <article class="team-kort">
-            <h3>Sahand</h3>
-            <p class="team-kort__roll">Projektledning</p>
-            <a href="mailto:sahand@idealhus.se">sahand@idealhus.se</a>
-            <a href="tel:+46701234567">070-123 45 67</a>
+            <h3>Skriv till oss</h3>
+            <p class="team-kort__roll">E-post</p>
+            <a href="mailto:info@idealhus.se">info@idealhus.se</a>
           </article>
         </div>
       </section>

@@ -3,15 +3,13 @@
 import re, io, os
 
 BAS = "https://dakotakrk.github.io/idealhus/"
-CSS_V = "20260924a"
+CSS_V = "20260924e"
 
 # Husen for den som ska bo i dem, och det vi levererar till andra som
 # bygger. De sag likadana ut i menyn tidigare, som fem jamnstallda val.
 KATEGORIER_PRIVAT = [
     ("Attefallshus", "attefallshus.html"),
     ("Fritidshus", "fritidshus.html"),
-    ("Fjällstugor", "fjallstugor.html"),
-    ("Villor", "villor.html"),
 ]
 
 KATEGORIER_PROFFS = [
@@ -27,15 +25,11 @@ PROFFS_ETIKETT = "För dig som bygger"
 # Bild och en rad om varje kategori. En rullgardin med bara namn
 # tvingar besokaren att gissa vad skillnaden ar.
 KATEGORI_INFO = {
-    "Attefallshus": ("generated-category-attefallshus-card.webp",
+    "Attefallshus": ("hus-r2.webp",
                      "Utan bygglov, 30–50 m²"),
-    "Fritidshus": ("generated-category-fritidshus-card.webp",
+    "Fritidshus": ("hus-r3.webp",
                    "För helger och långa somrar"),
-    "Fjällstugor": ("generated-category-fjallstuga-card.webp",
-                    "Byggda för snölast och kyla"),
-    "Villor": ("generated-house-gabled-01.webp",
-               "Permanentboende, full planlösning"),
-    "Proffs": ("generated-production-yard-01.webp",
+    "Proffs": ("generated-craft-cladding-01.webp",
                "Väggar, block och moduler"),
 }
 
@@ -44,7 +38,6 @@ MENY = [
     ("__DROPDOWN__", None),
     ("Priser", "priser.html"),
     ("Så fungerar det", "sa-fungerar-det.html"),
-    ("Referensprojekt", "referensprojekt.html"),
     ("Om oss", "om-oss.html"),
     ("Kontakt", "kontakt.html"),
 ]
@@ -139,7 +132,7 @@ def head(titel, beskrivning, forladdad=None, fil=None):
     <meta property="og:site_name" content="Idealhus">
     <meta property="og:title" content="{titel}">
     <meta property="og:description" content="{beskrivning}">
-    <meta property="og:image" content="{BAS}images/{forladdad or 'hero-video-poster.webp'}">
+    <meta property="og:image" content="{BAS}images/{forladdad or 'hus-r2.webp'}">
     <meta property="og:url" content="{BAS}{fil or ''}">
     <meta name="twitter:card" content="summary_large_image">
 
@@ -158,9 +151,9 @@ def head(titel, beskrivning, forladdad=None, fil=None):
       "legalName": "Idealhus AB",
       "url": "{BAS}",
       "logo": "{BAS}images/idealhus_logo.svg",
-      "image": "{BAS}images/hero-video-poster.webp",
-      "email": "ahmed@idealhus.se",
-      "description": "Idealhus formger och bygger attefallshus, fritidshus, fjallstugor och villor med skandinavisk design och svensk tillverkning.",
+      "image": "{BAS}images/hus-r2.webp",
+      "email": "info@idealhus.se",
+      "description": "Idealhus formger och bygger attefallshus och fritidshus med skandinavisk design och svensk tillverkning.",
       "areaServed": "SE"
     }}
     </script>
@@ -216,7 +209,6 @@ SIDFOT = '''    <footer class="site-footer">
             <a href="attefallshus.html">Våra hus</a>
             <a href="priser.html">Priser</a>
             <a href="sa-fungerar-det.html">Så fungerar det</a>
-            <a href="referensprojekt.html">Referensprojekt</a>
             <a href="om-oss.html">Om oss</a>
             <a href="kontakt.html">Kontakt</a>
             <a href="attefallshus-regler.html">Attefallshus: reglerna</a>
@@ -238,9 +230,7 @@ SIDFOT = '''    <footer class="site-footer">
         <div>
           <h2 class="site-footer__heading">Kontakta oss</h2>
           <p class="site-footer__text">
-            <a href="mailto:ahmed@idealhus.se">ahmed@idealhus.se</a><br>
-            <a href="mailto:sahand@idealhus.se">sahand@idealhus.se</a><br>
-            <a href="tel:+46701234567">070-123 45 67</a><br>
+            <a href="mailto:info@idealhus.se">info@idealhus.se</a><br>
             Stockholm, Sverige
           </p>
           <a class="site-footer__button" href="kontakt.html">Boka rådgivning</a>

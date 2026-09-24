@@ -9,12 +9,9 @@ SIDOR = [
     ("", "1.0"),
     ("attefallshus.html", "0.9"),
     ("fritidshus.html", "0.9"),
-    ("fjallstugor.html", "0.9"),
-    ("villor.html", "0.9"),
     ("proffs.html", "0.7"),
     ("huskort.html", "0.6"),
     ("sa-fungerar-det.html", "0.7"),
-    ("referensprojekt.html", "0.7"),
     ("om-oss.html", "0.6"),
     ("kontakt.html", "0.8"),
     ("priser.html", "0.8"),
@@ -43,8 +40,6 @@ KROPP = '''    <main id="innehall">
           <div class="fyrafyra__hus">
             <a href="attefallshus.html">Attefallshus</a>
             <a href="fritidshus.html">Fritidshus</a>
-            <a href="fjallstugor.html">Fjällstugor</a>
-            <a href="villor.html">Villor</a>
             <a href="proffs.html">Proffs</a>
           </div>
         </div>

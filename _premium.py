@@ -23,12 +23,25 @@ AGA_B = ('            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>\n
 
 
 
+AKTIV = {"index.html": "Hem", "huskort.html": "Våra hus", "proffs.html": "Våra hus"}
+
+
 def patcha(fil):
     s = io.open(fil, encoding="utf-8", newline="").read()
     nl = "\r\n" if "\r\n" in s else "\n"
     s = s.replace("\r\n", "\n")
 
     s = re.sub(r'(styles\.css|premium\.js)\?v=\w+', r'\1?v=' + B.CSS_V, s)
+
+    # Menyn och sidfoten tas hela ur mallen (2026-09-24). Att lappa dem
+    # rad för rad lämnade en dubbel länk i sidfoten och glömde
+    # integritetslänken - nu kan de inte glida isär från undersidorna.
+    a = s.index('    <a class="skip"')
+    b = s.index('</header>') + len('</header>')
+    s = s[:a] + B.header(AKTIV[fil]).rstrip('\n') + s[b:]
+    a = s.index('    <footer class="site-footer">')
+    b = s.index('</footer>') + len('</footer>')
+    s = s[:a] + B.SIDFOT.rstrip('\n') + s[b:]
 
     if 'class="main-nav__tips"' not in s:
         start = s.index('id="undermeny-hus">')
@@ -38,15 +51,6 @@ def patcha(fil):
     if 'class="mobile-nav__tips"' not in s:
         assert s.count(MOBIL_A) == 1, fil
         s = s.replace(MOBIL_A, MOBIL_B)
-
-    if 'href="vad-far-jag-bygga.html">Vad får jag bygga?</a>\n          </nav>' not in s:
-        assert s.count(FOT_A) == 1, fil
-        s = s.replace(FOT_A, FOT_B)
-
-
-    if 'href="aga-och-hyra-ut.html">Äga och hyra ut</a>' not in s:
-        assert s.count(AGA_A) == 1, fil
-        s = s.replace(AGA_A, AGA_B)
 
     # Temat sätts innan sidan ritas, annars blinkar den vit för den som
     # valt mörkt läge.

@@ -42,8 +42,7 @@ POLICY = '''    <main id="innehall">
             <p>
               Idealhus AB, organisationsnummer 559123-4567, Stockholm, är
               personuppgiftsansvarig för behandlingen som beskrivs här. Du når
-              oss på <a href="mailto:ahmed@idealhus.se">ahmed@idealhus.se</a>
-              eller <a href="mailto:sahand@idealhus.se">sahand@idealhus.se</a>.
+              oss på <a href="mailto:info@idealhus.se">info@idealhus.se</a>.
             </p>
 
             <h2>Vilka uppgifter vi behandlar</h2>
@@ -154,8 +153,6 @@ import _modeller as M  # noqa: E402
 PRISER = [
     ("Attefallshus", "attefallshus.html", "Från X kr"),
     ("Fritidshus", "fritidshus.html", "Från X kr"),
-    ("Fjällstugor", "fjallstugor.html", "Från X kr"),
-    ("Villor", "villor.html", "Från X kr"),
 ]
 
 # Vad som krävs, sagt utan belopp. Attefallshus inom måtten är lovfria;
@@ -163,8 +160,6 @@ PRISER = [
 LOV = {
     "Attefallshus": "Inget bygglov inom måtten",
     "Fritidshus": "Kräver bygglov",
-    "Fjällstugor": "Kräver bygglov",
-    "Villor": "Kräver bygglov",
 }
 
 INGAR = [
@@ -320,7 +315,7 @@ PRISSIDA = f'''    <main id="innehall">
             <div class="prisvaljare__reglage">
               <label for="onskad-yta">Hur stort hus vill du ha?</label>
               <div class="prisvaljare__rad">
-                <input type="range" id="onskad-yta" min="20" max="170" step="1" value="30">
+                <input type="range" id="onskad-yta" min="20" max="60" step="1" value="30">
                 <output for="onskad-yta" data-yta-ut>30 m²</output>
               </div>
               <p class="prisvaljare__svar" data-yta-svar aria-live="polite"></p>

@@ -14783,6 +14783,223 @@ html .rapport .rapport__logo {
   overflow-wrap: anywhere;
 }
 
+/* --- Prisnivåerna: två kategorier sedan 2026-09-24 ------------------
+   Med fyra kolumner stod de två korten till vänster med ett hål
+   bredvid. Två kolumner fyller raden. */
+@media (min-width: 621px) {
+  .priskort-rad {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* --- Startsidans huskort: tre kort sedan 2026-09-24 ----------------
+   Bara attefallshus, fritidshus och proffs finns kvar. I två kolumner
+   blir det tredje kortet ensamt på halva raden - det får hela. */
+@media (max-width: 900px) {
+  .house-types__grid > .house-card:nth-child(3):last-child {
+    grid-column: span 12;
+  }
+}
+
+/* ============================================================
+   Hela bilden (2026-09-24)
+   Husbilderna har en skylt i nedre vänstra hörnet och ska synas
+   hela - beskurna såg de trasiga ut. Korten får bildens egen form,
+   3:2. Toppbilderna och startsidans höga kort kan inte ha den
+   formen; där står bilden hel och en suddig kopia av samma bild
+   fyller resten. Kopian och klassen .helbild läggs till av
+   premium.js - utan skript är bilderna beskurna som förut.
+   ============================================================ */
+
+/* --- Korten: bildens egen form -------------------------------- */
+.model-card__media img,
+.kollen-hus__kort img,
+.segment__media img,
+.jamforruta__hus img,
+.priskort__bild,
+.bildval span {
+  aspect-ratio: 3 / 2;
+}
+
+.quiet-break__bild img,
+.guidehero__bild img {
+  aspect-ratio: 3 / 2;
+  max-height: none;
+  object-position: center;
+}
+
+.main-nav__sub img {
+  height: auto;
+  aspect-ratio: 3 / 2;
+}
+
+/* Verkstadsbilden i tillverkningsdelen: bildens form i stället för
+   en fast höjd på 400 px. */
+.production__media,
+.production__image {
+  min-height: 0;
+}
+
+.production__image {
+  height: auto;
+  aspect-ratio: 3 / 2;
+}
+
+/* --- Den suddiga kopian ------------------------------------- */
+.helbild__bak {
+  position: absolute;
+  inset: -40px;
+  width: calc(100% + 80px);
+  height: calc(100% + 80px);
+  max-width: none;
+  min-height: 0;
+  display: block;
+  object-fit: cover;
+  filter: blur(34px) saturate(1.15) brightness(0.62);
+  pointer-events: none;
+}
+
+/* --- Undersidornas toppbild ---------------------------------
+   Dator: rubriken till vänster, hela bilden till höger. Bildens
+   bredd räknas ur rutans höjd (containerenheter), så bilden får
+   exakt sin form och rubriken aldrig hamnar över skylten. */
+@media (min-width: 901px) {
+  .subpage-hero.helbild {
+    container-type: size;
+    --bildb: min(58cqw, (100cqh - 64px) * 1.5066);
+  }
+
+  .subpage-hero.helbild .subpage-hero__image {
+    inset: auto;
+    top: 50%;
+    right: clamp(20px, 2.4vw, 36px);
+    width: var(--bildb);
+    height: auto;
+    aspect-ratio: 1600 / 1062;
+    translate: 0 -50%;
+    border-radius: 18px;
+    object-fit: cover;
+    animation: none;
+    box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.65);
+  }
+
+  .subpage-hero.helbild::after {
+    background: linear-gradient(90deg, rgba(20, 16, 12, 0.4) 0%, rgba(20, 16, 12, 0) 55%);
+  }
+
+  .subpage-hero.helbild .subpage-hero__content-wrap {
+    inset: 0 auto 0 clamp(28px, 4vw, 64px);
+    width: calc(100cqw - var(--bildb) - clamp(28px, 4vw, 64px) - clamp(20px, 2.4vw, 36px) - 36px);
+    margin: 0;
+  }
+
+  .subpage-hero.helbild .subpage-hero__title {
+    font-size: clamp(40px, 4.4vw, 76px);
+    overflow-wrap: anywhere;
+  }
+
+  .subpage-hero.helbild .heroscen {
+    left: clamp(28px, 4vw, 64px);
+    right: auto;
+    top: clamp(28px, 3.4vw, 48px);
+    bottom: auto;
+    width: min(310px, calc(100cqw - var(--bildb) - 140px));
+  }
+}
+
+/* Mobil och platta: bilden hel överst, rubriken under. */
+@media (max-width: 900px) {
+  .subpage-hero.helbild {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .subpage-hero.helbild .subpage-hero__image {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1600 / 1062;
+    animation: none;
+  }
+
+  .subpage-hero.helbild::after {
+    display: none;
+  }
+
+  .subpage-hero.helbild .subpage-hero__content-wrap {
+    position: relative;
+    inset: auto;
+    width: auto;
+    margin: 0;
+    padding: 24px clamp(20px, 5vw, 36px) 30px;
+  }
+
+  .subpage-hero.helbild .subpage-hero__meta {
+    margin-bottom: 0;
+  }
+
+  .subpage-hero.helbild .subpage-hero__actions {
+    margin-top: 22px;
+  }
+}
+
+/* --- Startsidans höga kort ------------------------------------
+   Bilden står hel i nederkant, ovanför knappen; rubriken och texten
+   ligger på den suddiga kopian ovanför. */
+.house-card.helbild .house-card__image {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 84px;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 1600 / 1062;
+  object-fit: cover;
+}
+
+/* --- Fördelskorten på startsidan ----------------------------
+   Hela bilden överst och texten under den, på den suddiga kopian,
+   i stället för texten ovanpå bildens nederkant. */
+.feature-card.helbild {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+}
+
+.feature-card.helbild .helbild__bak {
+  z-index: -1;
+}
+
+.feature-card.helbild .feature-card__image {
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 1600 / 1062;
+}
+
+.feature-card.helbild::after {
+  display: none;
+}
+
+.feature-card.helbild .feature-card__content {
+  position: relative;
+  inset: auto;
+  padding: 20px 26px 24px;
+}
+
+.subpage-hero.helbild .helbild__bak,
+.house-card.helbild .helbild__bak {
+  animation: none;
+}
+
 /* === MÖRKT TEMA START (byggs av _morkt.py) === */
 /* Mörkt tema: varmt och mörkt, som en kvällsbild av huset - inte kallt
    grått. Variablerna gör det mesta; resten är ytor som var vita. */

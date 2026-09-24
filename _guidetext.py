@@ -258,7 +258,7 @@ GUIDE = f'''    <main id="innehall">
           </div>
 
           <figure class="guidehero__bild">
-            <img src="images/generated-category-attefallshus-02.webp" width="780" height="1170" loading="eager" decoding="async" alt="Attefallshus med mörk träfasad på en klippa vid vatten">
+            <img src="images/hus-r1.webp" width="1600" height="1062" loading="eager" decoding="async" alt="Svart attefallshus på en klippa vid vatten">
           </figure>
         </div>
       </section>

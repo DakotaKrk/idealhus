@@ -48,7 +48,7 @@ def kategorisida(fil, namn, herobild, meta, rubrik, ingress, spann):
                  '\n          <p class="category__guide"><a href="vad-far-jag-bygga.html">Räkna ut hur stort hus som ryms på din tomt</a></p>'
                  ) if fil == 'attefallshus.html' else (
                  '\n          <p class="category__guide"><a href="aga-och-hyra-ut.html">Samäga eller hyra ut stugan: kalender och uthyrningskalkyl</a></p>'
-                 if fil in ('fritidshus.html', 'fjallstugor.html') else '')
+                 if fil == 'fritidshus.html' else '')
     # Proffs skiljs av med en linje. Den som jamfor attefallshus mot
     # fritidshus jamfor inte utfackningsvaggar i samma rad.
     def pill(n, f):
@@ -67,10 +67,15 @@ def kategorisida(fil, namn, herobild, meta, rubrik, ingress, spann):
     if spann[1][2] >= spann[2][1]:
         spann = spann[:1]
     meta = meta.replace("från X m²", f"från {ytor[0]} m²")
+    # Med få modeller säger ett storleksfilter ingenting - det visas
+    # först när det finns minst fyra hus att sålla bland.
     knappar = "\n".join(
         f'          <button type="button" data-min="{a}" data-max="{b}"'
         f'{" aria-pressed=\"true\"" if i == 0 else " aria-pressed=\"false\""}>{txt}</button>'
         for i, (txt, a, b) in enumerate(spann))
+    boytefilter = ('\n            <div class="filter" role="group" aria-label="Filtrera på boyta">'
+                   '\n              <p class="filter__etikett">Boyta</p>\n' + knappar +
+                   '\n            </div>') if len(modeller) >= 4 else ''
 
     # Varje kort barde tidigare till samma huskort.html utan parameter, sa
     # alla tjugofyra landade pa "Huskort 1". Adressen bar nu kategorin och
@@ -106,11 +111,7 @@ def kategorisida(fil, namn, herobild, meta, rubrik, ingress, spann):
             <p class="category__count" aria-live="polite">{len(modeller)} modeller</p>
           </div>
 
-          <div class="modellrad">
-            <div class="filter" role="group" aria-label="Filtrera på boyta">
-              <p class="filter__etikett">Boyta</p>
-{knappar}
-            </div>
+          <div class="modellrad">{boytefilter}
             <div class="filter sortering" role="group" aria-label="Sortera modellerna">
               <p class="filter__etikett">Sortera</p>
               <button type="button" data-sort="nr" aria-pressed="true">Förvalt</button>
@@ -217,10 +218,6 @@ KORTA_BESKRIVNINGAR = {
         "Sedan december 2025 behövs varken bygglov eller anmälan för själva byggnaden – den snabbaste vägen till ett hus till på tomten.",
     "fritidshus.html":
         "Mer plats på tomten än ett attefallshus, byggda för att bo i över helger, lov och långa somrar. Kräver bygglov.",
-    "fjallstugor.html":
-        "Byggda för snölast, vind och stora temperaturskillnader – konstruktion och isolering anpassade för fjällklimat.",
-    "villor.html":
-        "Ritade för att bo i året om: full planlösning, plats för hela hushållet och kraven som ställs på ett permanentbostadshus.",
 }
 
 SPANN = [("Alla", 0, 99999), ("Under 30 m²", 0, 29), ("30–60 m²", 30, 60), ("Över 60 m²", 61, 99999)]
@@ -228,28 +225,14 @@ SPANN = [("Alla", 0, 99999), ("Under 30 m²", 0, 29), ("30–60 m²", 30, 60), (
 sidor = []
 
 sidor.append(kategorisida(
-    "fritidshus.html", "Fritidshus", "generated-category-fritidshus-wide-01.webp",
+    "fritidshus.html", "Fritidshus", "hus-r3.webp",
     "För helger och långa somrar · från X m²",
     "Modeller för fritidsboende",
     "Fritidshus ger mer plats på tomten än ett attefallshus och kräver bygglov. Här samlar vi modellerna som är gjorda för att bo i över helger, lov och långa somrar.",
     SPANN))
 
 sidor.append(kategorisida(
-    "fjallstugor.html", "Fjällstugor", "generated-category-fjallstuga-wide-01.webp",
-    "Byggda för snölast och kalla vintrar · från X m²",
-    "Modeller för fjällmiljö",
-    "Fjällstugor byggs för hårdare klimat: snölast, vind och stora temperaturskillnader. Konstruktionen och isoleringen skiljer sig därför från våra övriga modeller.",
-    SPANN))
-
-sidor.append(kategorisida(
-    "villor.html", "Villor", "generated-house-meadow-01.webp",
-    "Permanentboende med full planlösning · från X m²",
-    "Modeller för permanentboende",
-    "Villorna är ritade för att bo i året om. Full planlösning, plats för hela hushållet och de tekniska krav som ställs på ett permanentbostadshus.",
-    SPANN))
-
-sidor.append(kategorisida(
-    "attefallshus.html", "Attefallshus", "generated-category-attefallshus-wide-01.webp",
+    "attefallshus.html", "Attefallshus", "hus-r2.webp",
     "Bygglovsbefriat · 30 m² inom detaljplan, 50 m² utanför",
     "Modeller i attefallsstorlek",
     "Sedan december 2025 krävs varken bygglov eller anmälan för själva byggnaden inom måtten, men installationer som vatten och avlopp anmäls fortfarande. Det gör dem till den snabbaste vägen till ett extra hus på tomten.",

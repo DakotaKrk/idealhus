@@ -44,7 +44,7 @@ KALKYL_FALT = "\n".join([
 
 KROPP = f'''    <main id="innehall">
       <section class="subpage-hero">
-        <img class="subpage-hero__image" src="images/generated-category-fjallstuga-wide-01.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Fjällstuga i snötäckt fjällmiljö">
+        <img class="subpage-hero__image" src="images/hus-r3.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Svart fritidshus med takkupa i en tallskog">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
@@ -59,7 +59,7 @@ KROPP = f'''    <main id="innehall">
           <p class="section-label section-label--accent">Verktyg</p>
           <h2 class="againtro__titel">Stugan blir lättare att äga <em>tillsammans</em>.</h2>
           <p class="againtro__text">
-            Många köper fritidshuset eller fjällstugan tillsammans med syskon
+            Många köper fritidshuset tillsammans med syskon
             eller vänner, eller hyr ut de veckor de inte själva är där. Här är
             två verktyg för just det: en kalender som fördelar veckorna
             rättvist, och en kalkyl som visar vad uthyrningen täcker.
@@ -520,7 +520,7 @@ SKRIPT = r'''
 ut = (B.head("Äga och hyra ut | Idealhus",
              "Samäga stugan och räkna på uthyrningen: en kalender som fördelar "
              "årets veckor rättvist och en kalkyl över vad uthyrningen täcker.",
-             "generated-category-fjallstuga-wide-01.webp", fil="aga-och-hyra-ut.html")
+             "hus-r3.webp", fil="aga-och-hyra-ut.html")
       + "\n" + B.header("") + "\n" + KROPP + B.SIDFOT + "\n" + B.skript(SKRIPT))
 
 io.open("aga-och-hyra-ut.html", "w", encoding="utf-8", newline="").write(ut.replace("\n", "\r\n"))

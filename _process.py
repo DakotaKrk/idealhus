@@ -156,7 +156,7 @@ KROPP = f'''    <main id="innehall">
             <span class="kontakt-direkt__namn">Bygglov</span>
             <span class="kontakt-direkt__roll">Övriga hus</span>
             <span class="kontakt-direkt__lankar">
-              <a href="villor.html">Fritidshus, fjällstugor och villor</a>
+              <a href="fritidshus.html">Fritidshus</a>
             </span>
           </div>
 
@@ -164,7 +164,7 @@ KROPP = f'''    <main id="innehall">
             <span class="kontakt-direkt__namn">En kontakt</span>
             <span class="kontakt-direkt__roll">Hela vägen</span>
             <span class="kontakt-direkt__lankar">
-              <a href="kontakt.html">Ahmed eller Sahand</a>
+              <a href="kontakt.html">Kontakta oss</a>
             </span>
           </div>
         </div>
@@ -188,8 +188,6 @@ KROPP = f'''    <main id="innehall">
                 <button type="button" data-typ="alla" aria-pressed="true">Alla hus</button>
                 <button type="button" data-typ="attefallshus" aria-pressed="false">Attefallshus</button>
                 <button type="button" data-typ="fritidshus" aria-pressed="false">Fritidshus</button>
-                <button type="button" data-typ="fjallstugor" aria-pressed="false">Fjällstuga</button>
-                <button type="button" data-typ="villor" aria-pressed="false">Villa</button>
               </div>
             </div>
           </div>
@@ -220,7 +218,7 @@ KROPP = f'''    <main id="innehall">
             <a class="model-price__button" href="proffs.html">Se produktionen</a>
           </div>
           <div class="segment__media">
-            <img src="images/generated-production-yard-01.webp" loading="lazy" decoding="async" alt="Svensk produktionsmiljö med attefallshus och trävirke">
+            <img src="images/generated-craft-saw-01.webp" loading="lazy" decoding="async" alt="Händer som kapar ett trästycke i verkstaden">
           </div>
         </article>
       </section>

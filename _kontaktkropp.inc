@@ -1,6 +1,6 @@
     <main id="innehall">
       <section class="subpage-hero">
-        <img class="subpage-hero__image" src="images/generated-house-garden-01.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Kompakt gästhus med uteplats i trädgård">
+        <img class="subpage-hero__image" src="images/hus-r4.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Ljusgrått fritidshus med takkupa på en äng bland björkar">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
@@ -27,20 +27,10 @@
 
         <div class="kontakt-direkt">
           <div class="kontakt-direkt__rad">
-            <span class="kontakt-direkt__namn">Ahmed</span>
-            <span class="kontakt-direkt__roll">Projektledning</span>
+            <span class="kontakt-direkt__namn">Skriv till oss</span>
+            <span class="kontakt-direkt__roll">E-post</span>
             <span class="kontakt-direkt__lankar">
-              <a href="mailto:ahmed@idealhus.se">ahmed@idealhus.se</a>
-              <a href="tel:+46701234567">070-123 45 67</a>
-            </span>
-          </div>
-
-          <div class="kontakt-direkt__rad">
-            <span class="kontakt-direkt__namn">Sahand</span>
-            <span class="kontakt-direkt__roll">Projektledning</span>
-            <span class="kontakt-direkt__lankar">
-              <a href="mailto:sahand@idealhus.se">sahand@idealhus.se</a>
-              <a href="tel:+46701234567">070-123 45 67</a>
+              <a href="mailto:info@idealhus.se">info@idealhus.se</a>
             </span>
           </div>
 
@@ -66,8 +56,8 @@
 
             <ul class="kontakt-tips">
               <li>
-                <strong>Du får svar av oss två</strong>
-                <span>Ahmed eller Sahand läser förfrågan. Ingen växel emellan.</span>
+                <strong>Du får svar direkt av oss</strong>
+                <span>Vi som bygger husen läser förfrågan själva. Ingen växel emellan.</span>
               </li>
               <li>
                 <strong>Första samtalet</strong>
