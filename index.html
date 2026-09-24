@@ -24,8 +24,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&amp;family=Source+Sans+3:ital,wght@0,300..700;1,400&amp;display=swap">
     <link rel="preload" as="image" href="images/hero-video-poster.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20260924e">
-    <script src="premium.js?v=20260924e" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20260924i">
+    <script src="premium.js?v=20260924i" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork')document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
@@ -416,104 +416,105 @@
             </div>
           </div>
 
-          <ol class="skeden">
-            <li class="skede skede--ett">
-              <a class="skede__yta" href="sa-fungerar-det.html">
-                <span class="skede__bild">
-                  <svg viewBox="0 0 320 150" aria-hidden="true" focusable="false">
-                    <!-- Ritningen pa bordet -->
-                    <rect class="linje" x="54" y="26" width="176" height="106" rx="5"/>
-                    <path class="linje" d="M78 52h128v56H78z"/>
-                    <path class="linje" d="M142 52v56M142 82h64"/>
-                    <path class="hartunn" d="M78 68h26M170 52v12M78 118h60"/>
-                    <!-- Pennan -->
-                    <g class="skede__penna">
-                      <path class="accentfyll" d="M232 108l44-44 13 13-44 44-19 6z"/>
-                      <path class="linje" d="M226 127l19-6"/>
-                    </g>
-                  </svg>
-                </span>
+          <div class="resa" data-resa>
+            <div class="resa__scen">
+              <div class="resa3d" data-skede="1" aria-hidden="true">
+                <div class="resa3d__vrid">
+                  <div class="resa3d__mark"></div>
+                  <div class="resa3d__stolpe resa3d__stolpe--a"></div>
+                  <div class="resa3d__stolpe resa3d__stolpe--b"></div>
+                  <div class="resa3d__stolpe resa3d__stolpe--c"></div>
+                  <div class="resa3d__stolpe resa3d__stolpe--d"></div>
+                  <div class="resa3d__balk resa3d__balk--fram"></div>
+                  <div class="resa3d__balk resa3d__balk--bak"></div>
+                  <div class="resa3d__golv"></div>
+                  <div class="resa3d__innervagg"></div>
+                  <div class="resa3d__vagg resa3d__vagg--bak"><i class="resa3d__fonster resa3d__fonster--b1"></i></div>
+                  <div class="resa3d__gavel resa3d__gavel--vanster"><i class="resa3d__fonster resa3d__fonster--g1"></i></div>
+                  <div class="resa3d__gavel resa3d__gavel--hoger"><i class="resa3d__fonster resa3d__fonster--g2"></i></div>
+                  <div class="resa3d__vagg resa3d__vagg--fram"><i class="resa3d__fonster resa3d__fonster--f1"></i><i class="resa3d__fonster resa3d__fonster--f2"></i><i class="resa3d__dorr"></i></div>
+                  <div class="resa3d__tak resa3d__tak--bak"></div>
+                  <div class="resa3d__tak resa3d__tak--fram"></div>
+                  <div class="resa3d__skorsten"><i></i><i></i><b></b><b></b><b></b></div>
+                  <div class="resa3d__skylt"><span>Idealhus</span></div>
+                  <div class="resa3d__trad resa3d__trad--a"><i></i><i></i></div>
+                  <div class="resa3d__trad resa3d__trad--b"><i></i><i></i></div>
+                  <div class="resa3d__trad resa3d__trad--c"><i></i><i></i></div>
+                  <div class="resa3d__trad resa3d__trad--d"><i></i><i></i></div>
+                </div>
+              </div>
+              <p class="resa__etikett" aria-live="polite"><span class="resa__etikett-nr">01</span><span data-resa-etikett>Ritning och underlag</span></p>
+            </div>
 
-                <span class="skede__nr">1</span>
-                <span class="skede__titel">Innan bygget</span>
-                <span class="skede__text">
-                  Vi ritar, räknar och tar fram underlaget. Reglerna ändrades i
-                  december 2025. Vi säger vad som gäller för din tomt.
-                </span>
-                <span class="skede__steg">
-                  <span><i class="prick prick--bada"></i>Första samtalet</span>
-                  <span><i class="prick prick--bada"></i>Modell och anpassning</span>
-                  <span><i class="prick prick--du"></i>Bygglov eller anmälan</span>
-                </span>
-              </a>
-            </li>
+            <div class="resa__sida">
+              <ol class="resa__lista">
+              <li class="resa__skede" data-skede="1">
+                <button class="resa__knapp" type="button" aria-expanded="true" aria-controls="resa-1">
+                  <span class="resa__nr" aria-hidden="true">01</span>
+                  <span class="resa__titel">Innan bygget</span>
+                  <span class="resa__antal" aria-hidden="true" hidden></span>
+                  <span class="resa__pil" aria-hidden="true"></span>
+                  <span class="resa__tid" aria-hidden="true"><span></span></span>
+                </button>
+                <div class="resa__panel" id="resa-1">
+                  <div class="resa__inre">
+                    <p class="resa__text">Vi ritar, räknar och tar fram underlaget. Reglerna ändrades i december 2025 - vi säger vad som gäller för just din tomt.</p>
+                    <ul class="resa__moment">
+                        <li data-vem="bada"><i class="prick prick--bada"></i>Första samtalet</li>
+                        <li data-vem="bada"><i class="prick prick--bada"></i>Modell och anpassning</li>
+                        <li data-vem="du"><i class="prick prick--du"></i>Bygglov eller anmälan</li>
+                    </ul>
+                    <a class="resa__lank" href="vad-far-jag-bygga.html">Räkna på din tomt</a>
+                  </div>
+                </div>
+              </li>
+              <li class="resa__skede" data-skede="2">
+                <button class="resa__knapp" type="button" aria-expanded="true" aria-controls="resa-2">
+                  <span class="resa__nr" aria-hidden="true">02</span>
+                  <span class="resa__titel">Medan huset byggs</span>
+                  <span class="resa__antal" aria-hidden="true" hidden></span>
+                  <span class="resa__pil" aria-hidden="true"></span>
+                  <span class="resa__tid" aria-hidden="true"><span></span></span>
+                </button>
+                <div class="resa__panel" id="resa-2">
+                  <div class="resa__inre">
+                    <p class="resa__text">Huset växer fram inomhus, i jämn temperatur, och kommer som färdiga delar. Under tiden görs marken redo.</p>
+                    <ul class="resa__moment">
+                        <li data-vem="vi"><i class="prick prick--vi"></i>Tillverkning under tak</li>
+                        <li data-vem="du"><i class="prick prick--du"></i>Grund och anslutningar</li>
+                    </ul>
+                    <a class="resa__lank" href="sa-fungerar-det.html">Se hela processen</a>
+                  </div>
+                </div>
+              </li>
+              <li class="resa__skede" data-skede="3">
+                <button class="resa__knapp" type="button" aria-expanded="true" aria-controls="resa-3">
+                  <span class="resa__nr" aria-hidden="true">03</span>
+                  <span class="resa__titel">På plats</span>
+                  <span class="resa__antal" aria-hidden="true" hidden></span>
+                  <span class="resa__pil" aria-hidden="true"></span>
+                  <span class="resa__tid" aria-hidden="true"><span></span></span>
+                </button>
+                <div class="resa__panel" id="resa-3">
+                  <div class="resa__inre">
+                    <p class="resa__text">Huset kommer på lastbil och monteras på några dagar. Sedan går vi igenom det tillsammans, rum för rum.</p>
+                    <ul class="resa__moment">
+                        <li data-vem="vi"><i class="prick prick--vi"></i>Leverans och montage</li>
+                        <li data-vem="bada"><i class="prick prick--bada"></i>Slutbesiktning</li>
+                    </ul>
+                    <a class="resa__lank" href="kontakt.html">Börja med ett samtal</a>
+                  </div>
+                </div>
+              </li>
+              </ol>
 
-            <li class="skede skede--tva">
-              <a class="skede__yta" href="proffs.html">
-                <span class="skede__bild">
-                  <svg viewBox="0 0 320 150" aria-hidden="true" focusable="false">
-                    <!-- Taket over verkstaden -->
-                    <path class="linje" d="M20 56L160 14l140 42"/>
-                    <path class="hartunn" d="M26 56v76M294 56v76M20 132h280"/>
-                    <!-- Huset som byggs, tydligt innanfor -->
-                    <path class="linje" d="M102 128V90l58-24 58 24v38"/>
-                    <path class="hartunn" d="M130 128v-30M160 128V88M190 128v-30"/>
-                    <!-- Grunden -->
-                    <path class="accentlinje" d="M88 128h144"/>
-                  </svg>
-                </span>
-
-                <span class="skede__nr">2</span>
-                <span class="skede__titel">Medan huset byggs</span>
-                <span class="skede__text">
-                  Huset växer fram inomhus, i jämn temperatur. Under tiden ska
-                  marken vara redo när det kommer.
-                </span>
-                <span class="skede__steg">
-                  <span><i class="prick prick--vi"></i>Tillverkning</span>
-                  <span><i class="prick prick--du"></i>Grund och anslutningar</span>
-                </span>
-              </a>
-            </li>
-
-            <li class="skede skede--tre">
-              <a class="skede__yta" href="sa-fungerar-det.html">
-                <span class="skede__bild">
-                  <svg viewBox="0 0 320 150" aria-hidden="true" focusable="false">
-                    <!-- Huset -->
-                    <path class="linje" d="M96 132V80l64-30 64 30v52"/>
-                    <path class="linje" d="M142 132v-32h36v32"/>
-                    <path class="hartunn" d="M196 68V48h13v26"/>
-                    <!-- Roken kommer nar man pekar pa kortet -->
-                    <path class="rok accentlinje" d="M202 40c7-7 0-14 7-21"/>
-                    <!-- Mark -->
-                    <path class="linje" d="M22 132h276"/>
-                    <!-- Granar: slutna trianglar laser som trad, tva
-                         vinklar over varandra laste som pilar -->
-                    <path class="hartunn trad trad--ett" d="M52 132v-11M34 121h36L52 91zM40 99h24L52 77z"/>
-                    <path class="hartunn trad trad--tva" d="M270 132v-9M255 123h30L270 99zM261 105h18L270 85z"/>
-                  </svg>
-                </span>
-
-                <span class="skede__nr">3</span>
-                <span class="skede__titel">På plats</span>
-                <span class="skede__text">
-                  Huset kommer på lastbil och monteras. Sedan går vi igenom det
-                  tillsammans, rum för rum.
-                </span>
-                <span class="skede__steg">
-                  <span><i class="prick prick--vi"></i>Leverans och montage</span>
-                  <span><i class="prick prick--bada"></i>Slutbesiktning</span>
-                </span>
-              </a>
-            </li>
-          </ol>
-
-          <p class="skeden__teckenforklaring">
-            <span><i class="prick prick--vi"></i>Vi gör det</span>
-            <span><i class="prick prick--du"></i>Du gör det</span>
-            <span><i class="prick prick--bada"></i>Tillsammans</span>
-          </p>
+              <div class="resa__vem" role="group" aria-label="Markera vem som gör vad">
+                <button type="button" data-vem="vi" aria-pressed="false"><i class="prick prick--vi"></i>Vi gör det</button>
+                <button type="button" data-vem="du" aria-pressed="false"><i class="prick prick--du"></i>Du gör det</button>
+                <button type="button" data-vem="bada" aria-pressed="false"><i class="prick prick--bada"></i>Tillsammans</button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

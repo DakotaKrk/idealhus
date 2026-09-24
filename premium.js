@@ -1227,4 +1227,90 @@
     new MutationObserver(function () { bak.src = img.getAttribute('src'); })
       .observe(img, { attributes: true, attributeFilter: ['src'] });
   });
+  /* --- Vägen dit: resan i tre skeden -----------------------------
+     Scenen till vänster bygger huset i takt med skedet: ritning,
+     stomme under tak, klart på tomten. Skedena bläddrar själva när
+     de syns, pausar när man pekar på dem och slutar bläddra när man
+     väljer själv. Vi/Du/Tillsammans markerar vem som gör vad. */
+  (function () {
+    var resa = $('[data-resa]');
+    if (!resa) return;
+    var scen = $('.resa3d', resa);
+    var skeden = $$('.resa__skede', resa);
+    var etikett = $('[data-resa-etikett]', resa);
+    var etikettNr = $('.resa__etikett-nr', resa);
+    var ETIKETT = ['Ritning och underlag', 'Stommen reses under tak', 'Klart på tomten'];
+    var TID = 7000;
+    var aktiv = 0, spelar = !lugn, synlig = false, pekar = false, timer;
+
+    resa.style.setProperty('--resatid', TID + 'ms');
+    resa.classList.add('resa--klar');
+
+    function visa(i) {
+      aktiv = i;
+      scen.setAttribute('data-skede', String(i + 1));
+      resa.setAttribute('data-skede', String(i + 1));
+      etikett.textContent = ETIKETT[i];
+      etikettNr.textContent = '0' + (i + 1);
+      skeden.forEach(function (s, j) {
+        $('.resa__knapp', s).setAttribute('aria-expanded', String(j === i));
+        s.classList.toggle('resa__skede--aktiv', j === i);
+        s.classList.toggle('resa__skede--klar', j < i);
+      });
+      starta();
+    }
+
+    // Tidslinjen startar om för varje skede; när den är full kommer nästa.
+    function starta() {
+      clearTimeout(timer);
+      resa.classList.remove('resa--spelar');
+      if (!spelar || !synlig || pekar) return;
+      void resa.offsetWidth;
+      resa.classList.add('resa--spelar');
+      timer = setTimeout(function () { visa((aktiv + 1) % skeden.length); }, TID);
+    }
+
+    skeden.forEach(function (s, i) {
+      $('.resa__knapp', s).addEventListener('click', function () {
+        spelar = false;
+        visa(i);
+      });
+    });
+
+    resa.addEventListener('pointerenter', function (e) {
+      if (e.pointerType === 'mouse') { pekar = true; starta(); }
+    });
+    resa.addEventListener('pointerleave', function (e) {
+      if (e.pointerType === 'mouse') { pekar = false; starta(); }
+    });
+    resa.addEventListener('focusin', function () { spelar = false; starta(); });
+
+    if (window.IntersectionObserver) {
+      new IntersectionObserver(function (poster) {
+        synlig = poster[0].isIntersecting;
+        starta();
+      }, { threshold: 0.35 }).observe(resa);
+    }
+    pausaUtanforVy(resa);
+    lutaI3D($('.resa__scen', resa), 10);
+
+    var vemKnappar = $$('.resa__vem button', resa);
+    vemKnappar.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var pa = b.getAttribute('aria-pressed') !== 'true';
+        vemKnappar.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b && pa)); });
+        var vem = pa ? b.getAttribute('data-vem') : '';
+        if (vem) resa.setAttribute('data-vem', vem); else resa.removeAttribute('data-vem');
+        // Hur många moment i varje skede som är ens - syns på knappen.
+        skeden.forEach(function (s) {
+          var antal = $('.resa__antal', s);
+          var n = vem ? $$('.resa__moment [data-vem="' + vem + '"]', s).length : 0;
+          antal.textContent = String(n);
+          antal.hidden = !n;
+        });
+      });
+    });
+
+    visa(0);
+  })();
 })();

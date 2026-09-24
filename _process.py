@@ -34,20 +34,47 @@ STEG = [
      "Du har haft samma kontakt hela vägen och vet vem du ringer."),
 ]
 
-import re as _re
-
-
-def _teckningar():
-    """Hamtar de tre teckningarna ur startsidan. En kopia har i filen
-    slutade folja med sa fort nagot andrades i index.html."""
-    html = open("index.html", encoding="utf-8").read().replace("\r\n", "\n")
-    svgar = _re.findall(r'<svg viewBox="0 0 320 150".*?</svg>', html, _re.S)
-    assert len(svgar) == 3, "hittade %d teckningar i index.html" % len(svgar)
-    return ["\n".join(rad[10:] if rad.startswith(" " * 10) else rad
-                      for rad in svg.split("\n")) for svg in svgar]
-
-
-TECKNINGAR = _teckningar()
+# De tre teckningarna (ritningen, verkstaden, huset på plats). De låg
+# förut på startsidan och hämtades därifrån; sedan startsidan fick
+# resan i 3D (2026-09-24) bor de här.
+TECKNINGAR = [
+    '''<svg viewBox="0 0 320 150" aria-hidden="true" focusable="false">
+          <!-- Ritningen pa bordet -->
+          <rect class="linje" x="54" y="26" width="176" height="106" rx="5"/>
+          <path class="linje" d="M78 52h128v56H78z"/>
+          <path class="linje" d="M142 52v56M142 82h64"/>
+          <path class="hartunn" d="M78 68h26M170 52v12M78 118h60"/>
+          <!-- Pennan -->
+          <g class="skede__penna">
+            <path class="accentfyll" d="M232 108l44-44 13 13-44 44-19 6z"/>
+            <path class="linje" d="M226 127l19-6"/>
+          </g>
+        </svg>''',
+    '''<svg viewBox="0 0 320 150" aria-hidden="true" focusable="false">
+          <!-- Taket over verkstaden -->
+          <path class="linje" d="M20 56L160 14l140 42"/>
+          <path class="hartunn" d="M26 56v76M294 56v76M20 132h280"/>
+          <!-- Huset som byggs, tydligt innanfor -->
+          <path class="linje" d="M102 128V90l58-24 58 24v38"/>
+          <path class="hartunn" d="M130 128v-30M160 128V88M190 128v-30"/>
+          <!-- Grunden -->
+          <path class="accentlinje" d="M88 128h144"/>
+        </svg>''',
+    '''<svg viewBox="0 0 320 150" aria-hidden="true" focusable="false">
+          <!-- Huset -->
+          <path class="linje" d="M96 132V80l64-30 64 30v52"/>
+          <path class="linje" d="M142 132v-32h36v32"/>
+          <path class="hartunn" d="M196 68V48h13v26"/>
+          <!-- Roken kommer nar man pekar pa kortet -->
+          <path class="rok accentlinje" d="M202 40c7-7 0-14 7-21"/>
+          <!-- Mark -->
+          <path class="linje" d="M22 132h276"/>
+          <!-- Granar: slutna trianglar laser som trad, tva
+               vinklar over varandra laste som pilar -->
+          <path class="hartunn trad trad--ett" d="M52 132v-11M34 121h36L52 91zM40 99h24L52 77z"/>
+          <path class="hartunn trad trad--tva" d="M270 132v-9M255 123h30L270 99zM261 105h18L270 85z"/>
+        </svg>''',
+]
 
 FASER = [('Innan bygget', (1, 3), 'Vi ritar, räknar och tar fram underlaget. Du är byggherre och lämnar in till kommunen. Vi säger vad som ska med.'), ('Medan huset byggs', (4, 5), 'Huset växer fram inomhus, i jämn temperatur. Under tiden ska marken vara redo när det kommer.'), ('På plats', (6, 7), 'Huset kommer på lastbil och monteras. Sedan går vi igenom det tillsammans, rum för rum.')]
 
