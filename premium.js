@@ -934,6 +934,11 @@
     if (!m || !MATT3D[m[1]]) return;
     var id = m[1];
     sek.hidden = false;
+    // Länkar från verktyget går hit (#i-3d). Sektionen var dold när
+    // webbläsaren letade efter ankaret, så vi hoppar dit själva.
+    if (location.hash === '#i-3d') {
+      requestAnimationFrame(function () { sek.scrollIntoView({ block: 'start' }); });
+    }
     $('[data-3d-langd]', sek).textContent = MATT3D[id][0];
     $('[data-3d-bredd]', sek).textContent = MATT3D[id][1];
     $('[data-3d-nock]', sek).textContent = MATT3D[id][2];

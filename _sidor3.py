@@ -16,7 +16,7 @@ from _guidetext import GUIDE, TOC_SKRIPT, faq_json  # noqa: E402
 POLICY = '''    <main id="innehall">
       <section class="guide-topp">
         <div class="guide-topp__inner">
-          <p class="section-label">Uppdaterad 8 september 2026</p>
+          <p class="section-label">Uppdaterad 24 september 2026</p>
           <h1 class="guide-topp__titel">Integritetspolicy</h1>
           <p class="guide-topp__lead">
             Här står vad som händer med uppgifterna du lämnar när du hör av
@@ -88,15 +88,23 @@ POLICY = '''    <main id="innehall">
 
             <h2>Kakor och statistik</h2>
             <p>
-              Webbplatsen använder inga kakor, sparar ingenting i din
-              webbläsare och har inget verktyg för besöksstatistik. Därför
-              finns här inte heller någon ruta om kakor att klicka bort.
+              Webbplatsen använder inga kakor och har inget verktyg för
+              besöksstatistik. Därför finns här inte heller någon ruta om
+              kakor att klicka bort.
+            </p>
+            <p>
+              Däremot kommer webbplatsen ihåg tre val i din webbläsare (i
+              så kallad localStorage), så att du slipper göra om dem: om du
+              valt ljust eller mörkt läge, om du valt "Jag bygger åt andra"
+              på startsidan och när du senast stängde tipsrutan. De stannar i
+              din webbläsare, skickas aldrig till oss och försvinner om du
+              rensar webbplatsdata.
             </p>
 
             <h2>Uppgifter som lämnar din webbläsare ändå</h2>
             <p>
-              Två saker sker automatiskt när du besöker sidan, som vi vill att
-              du ska känna till:
+              Några saker sker automatiskt eller när du själv använder en
+              funktion, och dem vill vi att du ska känna till:
             </p>
             <ul class="guide__lista">
               <li>Webbplatsen ligger hos GitHub Pages. Din IP-adress syns i
@@ -107,6 +115,15 @@ POLICY = '''    <main id="innehall">
                 öppnas Googles AR-visare, som hämtar husets 3D-modell från
                 sajten. På iPhone sker det i telefonen utan någon tredje part.
                 3D-visningen i webbläsaren använder ingen extern tjänst.</li>
+              <li>Söker du på en adress under "Kolla din mark" på sidan
+                Vad får jag bygga? skickas adressen till OpenStreetMap
+                Foundations söktjänst Nominatim, som svarar med en punkt på
+                kartan. Kartbilderna hämtas från OpenStreetMap, och punkten
+                skickas till Sveriges geologiska undersökning (SGU) för att
+                hämta uppgifterna om marken. Trycker du på "Använd min
+                position" frågar webbläsaren dig först, och positionen går
+                samma väg. Ingenting av detta sparas på webbplatsen, och vi
+                ser aldrig adressen.</li>
             </ul>
 
             <h2>Dina rättigheter</h2>

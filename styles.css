@@ -14093,6 +14093,696 @@ html[data-tema="mork"] {
   }
 }
 
+/* ============================================================
+   Tomtrapport, PDF:en och 3D-märket på husen (2026-09-24)
+   ============================================================ */
+
+/* --- Knapparna under svaret ------------------------------------ */
+.kollen__knappar {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.kollen__knappar .kollen__dela,
+.tomtrapport__knappar .kollen__dela {
+  margin-top: 0;
+}
+
+/* --- Sökrutan --------------------------------------------------- */
+.tomtrapport {
+  margin-bottom: 44px;
+  padding: clamp(18px, 2.4vw, 30px);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background:
+    radial-gradient(70% 90% at 0% 0%, rgba(217, 162, 98, 0.16), transparent 70%),
+    #ffffff;
+  box-shadow: 0 30px 60px -44px rgba(35, 32, 25, 0.55);
+}
+
+.marksok {
+  display: grid;
+  gap: 10px;
+}
+
+.marksok__etikett {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.marksok__rad {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--varm-papper);
+  transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+
+.marksok__rad:focus-within {
+  border-color: var(--koppar);
+  box-shadow: 0 0 0 4px rgba(164, 96, 47, 0.14);
+}
+
+.marksok__rad input,
+html[data-tema="mork"] .marksok__rad input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px;
+  border: 0;
+  background: transparent;
+  font: 400 17px/1.3 var(--sans);
+  color: var(--ink);
+  outline: none;
+}
+
+.marksok__knapp {
+  flex: none;
+  padding: 12px 24px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--knapp);
+  color: #ffffff;
+  font: 600 15px/1.2 var(--sans);
+  cursor: pointer;
+  transition: background-color 0.25s var(--ease), transform 0.25s var(--ease);
+}
+
+.marksok__knapp:hover {
+  background: var(--knapp-morkare);
+}
+
+.marksok__knapp:active {
+  transform: scale(0.97);
+}
+
+.marksok__knapp:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.marksok__knapp:focus-visible,
+.marksok__plats:focus-visible {
+  outline: 2px solid var(--koppar);
+  outline-offset: 3px;
+}
+
+.marksok__plats {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: var(--koppar);
+  font: 600 14px/1.2 var(--sans);
+  cursor: pointer;
+}
+
+.marksok__plats[hidden] {
+  display: none;
+}
+
+.marksok__plats svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.marksok__status {
+  margin: 0;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+.marksok__status:empty {
+  display: none;
+}
+
+/* --- Kartan och svaret ------------------------------------------ */
+.tomtrapport__vy {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: clamp(18px, 2.6vw, 34px);
+  align-items: start;
+  animation: tomtin 0.7s var(--ease) both;
+}
+
+.tomtrapport__vy[hidden] {
+  display: none;
+}
+
+@keyframes tomtin {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+
+.tomtrapport__karta {
+  display: grid;
+  gap: 12px;
+}
+
+.tomtrapport__kartyta {
+  position: relative;
+  height: clamp(320px, 36vw, 460px);
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--sand);
+  isolation: isolate;
+  font: 12px/1.4 var(--sans);
+}
+
+/* Radarn sveper medan SGU:s svar är på väg - den visar en hämtning
+   som faktiskt pågår, och slutar när svaret har kommit. */
+.tomtrapport__kartyta::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: 800;
+  pointer-events: none;
+  background: conic-gradient(from 0deg, rgba(217, 162, 98, 0) 0deg, rgba(217, 162, 98, 0.34) 50deg, rgba(217, 162, 98, 0) 90deg);
+  -webkit-mask: radial-gradient(circle at 50% 50%, #000 0 30%, transparent 48%);
+  mask: radial-gradient(circle at 50% 50%, #000 0 30%, transparent 48%);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+  animation: radarsvep 1.8s linear infinite;
+}
+
+.tomtrapport--laddar .tomtrapport__kartyta::after {
+  opacity: 1;
+}
+
+@keyframes radarsvep {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.tomtrapport__kartrad {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 18px;
+}
+
+.tomtrapport__tips {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ink-faint);
+}
+
+/* Nålen: en prick med två ringar som pulserar ut, snabbare vid hämtning. */
+.tomtnal {
+  position: relative;
+}
+
+.tomtnal__prick {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: var(--koppar);
+  box-shadow: 0 0 0 3px #ffffff, 0 6px 14px rgba(0, 0, 0, 0.35);
+  transition: box-shadow 0.25s var(--ease);
+}
+
+.tomtnal__ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--koppar);
+  border-radius: 50%;
+  opacity: 0;
+  animation: tomtpuls 2.4s var(--ease) infinite;
+}
+
+.tomtnal__ring + .tomtnal__ring {
+  animation-delay: 1.2s;
+}
+
+.tomtrapport--laddar .tomtnal__ring {
+  animation-duration: 1.1s;
+}
+
+@keyframes tomtpuls {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.3);
+    opacity: 0;
+  }
+}
+
+.tomtnal:focus-visible {
+  outline: none;
+}
+
+.tomtnal:focus-visible .tomtnal__prick {
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 6px var(--koppar);
+}
+
+.tomtrapport__fakta {
+  display: grid;
+  gap: 12px;
+}
+
+.tomtrapport__plats {
+  margin: 0 0 4px;
+  display: grid;
+  gap: 2px;
+}
+
+.tomtrapport__plats strong {
+  font-family: var(--serif);
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.tomtrapport__plats span {
+  font-size: 13px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.tomtfakta {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(35, 32, 25, 0.08);
+  border-radius: 18px;
+  background: var(--varm-papper);
+}
+
+.tomtfakta__ikon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--barnsten), var(--koppar));
+}
+
+.tomtfakta__ikon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tomtfakta__innehall {
+  transition: opacity 0.3s var(--ease);
+}
+
+.tomtrapport--laddar .tomtfakta__innehall {
+  opacity: 0.5;
+}
+
+.tomtfakta__rubrik {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.tomtfakta__varde {
+  margin: 2px 0 0;
+  font-family: var(--serif);
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.tomtfakta__text {
+  margin: 6px 0 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.tomtfakta__skelett {
+  display: inline-block;
+  width: 9em;
+  height: 0.8em;
+  border-radius: 6px;
+  vertical-align: middle;
+  background: linear-gradient(90deg, var(--line) 0%, var(--sand) 50%, var(--line) 100%);
+  background-size: 200% 100%;
+  animation: skelett 1.2s linear infinite;
+}
+
+.tomtfakta__skelett--lang {
+  width: 100%;
+  height: 0.7em;
+}
+
+@keyframes skelett {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.tomtrapport__knappar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-top: 4px;
+}
+
+.tomtrapport__prata {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--koppar);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tomtrapport__kalla {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+.markkoll__mer {
+  margin: 0 0 14px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+html[data-tema="mork"] .marksok__plats,
+html[data-tema="mork"] .tomtrapport__prata {
+  color: #e2a86a;
+}
+
+/* Kartan tonas ned i mörkt läge i stället för att lysa vit. */
+html[data-tema="mork"] .tomtrapport__kartyta .leaflet-tile-pane {
+  filter: brightness(0.8) contrast(1.05) saturate(0.85);
+}
+
+html[data-tema="mork"] main .tomtrapport__kartyta img.leaflet-tile {
+  filter: none;
+}
+
+@media (max-width: 860px) {
+  .tomtrapport__vy {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .marksok__rad {
+    flex-direction: column;
+    border-radius: 20px;
+  }
+
+  .marksok__knapp {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tomtrapport__vy,
+  .tomtrapport__kartyta::after,
+  .tomtnal__ring,
+  .tomtfakta__skelett {
+    animation: none;
+  }
+}
+
+/* --- 3D-märket på husen i verktyget ----------------------------- */
+.kollen-hus__bild {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radie-liten);
+}
+
+.kollen-hus__3d {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  padding: 5px 11px 5px 27px;
+  border-radius: 999px;
+  background: rgba(253, 250, 245, 0.9);
+  color: #232019;
+  font: 600 12px/1.2 var(--sans);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.4);
+}
+
+.kollen-hus__3d::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin-top: -5px;
+  border: 1.6px solid var(--koppar);
+  border-radius: 2px;
+  transform: rotate(45deg);
+  animation: kub3d 3.2s var(--ease) infinite;
+}
+
+@keyframes kub3d {
+  50% {
+    transform: rotate(225deg) scale(0.85);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kollen-hus__3d::before {
+    animation: none;
+  }
+}
+
+/* --- PDF:en (webbläsarens utskrift) ------------------------------ */
+.rapport {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm 16mm 18mm;
+  }
+
+  html.rapportlage {
+    color-scheme: light !important;
+  }
+
+  html.rapportlage,
+  html.rapportlage body {
+    background: none !important;
+  }
+
+  html.rapportlage body > *:not(main),
+  html.rapportlage main > *:not(.rapport) {
+    display: none !important;
+  }
+
+  html.rapportlage .rapport {
+    display: block !important;
+  }
+}
+
+.rapport {
+  color: #232019;
+  font: 10.5pt/1.5 var(--sans);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+:where(.rapport) p,
+:where(.rapport) li,
+:where(.rapport) dt,
+:where(.rapport) dd {
+  color: inherit;
+}
+
+.rapport__topp {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10pt;
+  border-bottom: 1pt solid #ded8cd;
+}
+
+html .rapport .rapport__logo {
+  width: 118pt;
+  height: auto;
+  filter: none !important;
+}
+
+.rapport__datum {
+  margin: 0;
+  font-size: 9pt;
+  color: #5a5348;
+}
+
+.rapport__titel {
+  margin: 18pt 0 4pt;
+  font-family: var(--serif);
+  font-size: 30pt;
+  font-weight: 400;
+  line-height: 1.05;
+  color: #232019;
+}
+
+.rapport__adress {
+  margin: 0;
+  color: #5a5348;
+}
+
+.rapport__siffror {
+  display: flex;
+  gap: 12pt;
+  margin: 16pt 0 10pt;
+}
+
+.rapport__siffror div {
+  flex: 1;
+  padding: 10pt 12pt;
+  border: 1pt solid #ded8cd;
+  border-radius: 8pt;
+  background: #faf6ef;
+}
+
+.rapport__siffror strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: 24pt;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.rapport__siffror span {
+  font-size: 9pt;
+  color: #5a5348;
+}
+
+.rapport__summa {
+  margin: 8pt 0 4pt;
+  font-family: var(--serif);
+  font-size: 15pt;
+}
+
+.rapport__valt {
+  margin: 0 0 4pt;
+  font-weight: 600;
+}
+
+.rapport__punkter,
+.rapport__hus {
+  margin: 6pt 0 0;
+  padding-left: 14pt;
+}
+
+.rapport__punkter li,
+.rapport__hus li {
+  margin: 3pt 0;
+}
+
+.rapport__punkt--ok::marker {
+  color: #5d7f57;
+}
+
+.rapport__punkt--anmalan::marker {
+  color: #b88a3a;
+}
+
+.rapport__punkt--lov::marker {
+  color: #a5543c;
+}
+
+.rapport h2 {
+  margin: 16pt 0 6pt;
+  padding-top: 10pt;
+  border-top: 1pt solid #ded8cd;
+  font-family: var(--serif);
+  font-size: 16pt;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #232019;
+  break-after: avoid;
+}
+
+.rapport__fakta,
+.rapport__svar {
+  margin: 0;
+  display: grid;
+  gap: 6pt;
+}
+
+.rapport__fakta div,
+.rapport__svar div {
+  display: grid;
+  grid-template-columns: 32% minmax(0, 1fr);
+  gap: 10pt;
+  break-inside: avoid;
+}
+
+.rapport dt {
+  font-weight: 600;
+}
+
+.rapport dd {
+  margin: 0;
+}
+
+.rapport__kalla {
+  margin: 6pt 0 0;
+  font-size: 8.5pt;
+  color: #5a5348;
+}
+
+.rapport__hus {
+  columns: 2;
+}
+
+.rapport__fot {
+  margin-top: 20pt;
+  padding-top: 10pt;
+  border-top: 1pt solid #ded8cd;
+  font-size: 9pt;
+  color: #5a5348;
+  break-inside: avoid;
+}
+
+.rapport__fot p {
+  margin: 2pt 0;
+  overflow-wrap: anywhere;
+}
+
 /* === MÖRKT TEMA START (byggs av _morkt.py) === */
 /* Mörkt tema: varmt och mörkt, som en kvällsbild av huset - inte kallt
    grått. Variablerna gör det mesta; resten är ytor som var vita. */
@@ -14151,6 +14841,7 @@ html[data-tema="mork"] .storlek3d__ikon:hover,
 html[data-tema="mork"] .styrkort,
 html[data-tema="mork"] .tillkommer,
 html[data-tema="mork"] .tipsruta,
+html[data-tema="mork"] .tomtrapport,
 html[data-tema="mork"] .val input:checked + span,
 html[data-tema="mork"] .val span,
 html[data-tema="mork"] .val span::before,
