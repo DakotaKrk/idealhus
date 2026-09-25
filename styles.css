@@ -15883,6 +15883,339 @@ html[data-tema="mork"] .resa__scen {
   }
 }
 
+/* ============================================================
+   Mobilen: Safari, startsidans topp och mörkt läge (2026-09-25)
+   ============================================================ */
+
+/* Ordbandets kopparord har fast färg i stället för en toning. Safari
+   på iPhone tappar text med toning (background-clip: text) när den
+   ligger i något som rör sig - orden blinkade fram och försvann. */
+.ordband span:nth-of-type(2n) {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  color: var(--koppar);
+}
+
+html[data-tema="mork"] .ordband span:nth-of-type(2n) {
+  color: #e2a86a;
+}
+
+/* Samma sak för rubrikernas kopparord, men bara på iPhone och iPad där
+   felet finns. På dator och Android får ljuset passera som förut. */
+@supports (-webkit-touch-callout: none) {
+  h2 em,
+  .skimmer,
+  .styrkort__nr {
+    background: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    -webkit-text-fill-color: currentColor !important;
+    animation: none !important;
+    color: var(--koppar);
+  }
+
+  html[data-tema="mork"] h2 em,
+  html[data-tema="mork"] .skimmer,
+  html[data-tema="mork"] .styrkort__nr {
+    color: #e2a86a;
+  }
+}
+
+/* Startsidans topp i mobilen: filmen visar den röda fabriken med
+   skylten precis bakom texten. Ett djupare skikt under texten och
+   mörkare glas i växeln gör att texten står fritt från bilden. */
+@media (max-width: 760px) {
+  .hero::after {
+    background: linear-gradient(
+      180deg,
+      rgba(24, 20, 14, 0.34) 0%,
+      rgba(24, 20, 14, 0.12) 16%,
+      rgba(24, 20, 14, 0.58) 42%,
+      rgba(24, 20, 14, 0.8) 70%,
+      rgba(24, 20, 14, 0.88) 100%
+    );
+  }
+
+  .hero__text {
+    text-shadow: 0 1px 14px rgba(0, 0, 0, 0.5);
+  }
+
+  .hero .malgrupp {
+    border-color: rgba(255, 255, 255, 0.26);
+    background: linear-gradient(135deg, rgba(24, 20, 14, 0.46), rgba(24, 20, 14, 0.28));
+  }
+}
+
+/* Mörkt läge: större knapp i mobilen, och en tydlig rad i menyn. */
+.temaknapp {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 620px) {
+  .temaknapp {
+    width: 42px;
+    height: 42px;
+    margin-right: 6px;
+  }
+}
+
+.mobile-nav__tema {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .mobile-nav__tema {
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--sand);
+    color: var(--ink);
+    font: 500 16px/1.2 var(--sans);
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .mobile-nav__tema-ikon {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mobile-nav__tema svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .temavaxel {
+    position: relative;
+    width: 46px;
+    height: 26px;
+    flex: none;
+    border-radius: 99px;
+    background: var(--line);
+    transition: background-color 0.3s var(--ease);
+  }
+
+  .temavaxel::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fdfaf5;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: translate 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .mobile-nav__tema[aria-pressed="true"] .temavaxel {
+    background: var(--koppar);
+  }
+
+  .mobile-nav__tema[aria-pressed="true"] .temavaxel::after {
+    translate: 20px 0;
+  }
+
+  .mobile-nav__tema:focus-visible {
+    outline: 2px solid var(--koppar);
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================================
+   Genomgången 2026-09-25: kontrast, textstorlek och tryckytor
+   Mätt på alla sidor i fem bredder, ljust och mörkt. Små grå och
+   kopparfärgade etiketter låg under 4,5:1, flera var 9-10 px i
+   mobilen, och några knappar var för låga att träffa med tummen.
+   ============================================================ */
+:root {
+  --ink-faint: #6b6358;
+  --etikett: #6b6358;
+  --koppar-text: #8f5227;
+}
+
+html[data-tema="mork"] {
+  --etikett: var(--logo);
+  --koppar-text: #e2a86a;
+}
+
+/* Etiketter i loggans ton (3,9:1) får en mörkare nyans av samma ton. */
+.quiet-break__etikett,
+.fyrafyra .section-label,
+.fas__spann,
+.guide__snabbsvar-etikett,
+.obs__etikett,
+.kollen__etikett,
+.tipsruta__etikett,
+.proffs-hopp span,
+.mobile-nav__grupp > span {
+  color: var(--etikett);
+}
+
+/* Kopparfärgad text: mörkare än kopparn i knappar och linjer. */
+.section-label--accent,
+.markkort__lank,
+.resa__lank,
+.tomtrapport__prata,
+.marksok__plats,
+.kostnadskarta__lank a {
+  color: var(--koppar-text);
+}
+
+/* Länkar i knappens bruna ton blev för mörka i mörkt läge. */
+html[data-tema="mork"] .model-price__lank,
+html[data-tema="mork"] .category__guide a,
+html[data-tema="mork"] .category__prisrad a,
+html[data-tema="mork"] .kollen-hus__tomt a,
+html[data-tema="mork"] .ryms-lank {
+  color: #e2a86a;
+}
+
+/* Kalenderns veckonummer låg på delägarens färg med nedtonad text. */
+.vecka__nr {
+  opacity: 1;
+}
+
+/* Fördelskorten: den vita texten står på en mörk ton, inte direkt på
+   den suddiga bilden - ljusa bilder gav för svag kontrast. */
+.feature-card.helbild .feature-card__content {
+  background: linear-gradient(180deg, rgba(20, 17, 12, 0.5), rgba(20, 17, 12, 0.72));
+}
+
+/* Tryckytor: minst runt 40 px höga där man trycker med tummen. */
+.resa__lank {
+  padding: 10px 0;
+  margin: 6px 0 10px;
+}
+
+.marksok__plats {
+  padding: 10px 2px;
+}
+
+@media (max-width: 620px) {
+  .kopiera {
+    min-height: 34px;
+    padding: 6px 12px;
+  }
+
+  /* Små versala etiketter: minst 12 px i mobilen. */
+  .section-label,
+  .quiet-break__etikett,
+  .contact-section__meta-label,
+  .subpage-hero__meta,
+  .category__count,
+  .filter__etikett,
+  .model-card__3d,
+  .storlek3d__fakta dt,
+  .hus3dvy__matt dt,
+  .kontaktkort__rubrik,
+  .site-footer__heading,
+  .site-footer__etikett,
+  .subpage-hero__actions .hero__link,
+  .kollen__etikett,
+  .marksok__etikett,
+  .markkoll__mer,
+  .markkort__kalla,
+  .processverktyg__etikett,
+  .guide__snabbsvar-etikett,
+  .obs__etikett,
+  .vidare__etikett,
+  .kontakt-direkt__roll,
+  .fas__spann,
+  .contact-form__steg,
+  .production__caption span:first-child,
+  .hero__eyebrow,
+  .guide table th {
+    font-size: 12px;
+  }
+
+  .contact-section__meta-label {
+    letter-spacing: 0.16em;
+  }
+}
+
+/* --- Genomgången, del 2 (2026-09-25) --------------------------- */
+
+/* Etiketter som låste sin färg och storlek med !important. */
+.obs__etikett,
+.vidare__etikett {
+  color: var(--etikett) !important;
+}
+
+/* Kalenderns veckonummer: vit text på en mörkare bricka, så att den
+   går att läsa på alla delägarfärger. */
+.vecka__nr {
+  padding: 0 3px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 620px) {
+  .obs__etikett,
+  .vidare__etikett {
+    font-size: 12px !important;
+  }
+
+  .model-specs dt,
+  .konfig__etikett,
+  .konfig__etikett span {
+    font-size: 12px;
+  }
+
+  .process__vem {
+    font-size: 11.5px;
+  }
+
+  /* Vägen dit: rubriken och ingressen under varandra, inte i två
+     smala spalter. */
+  .vagen__topp {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  /* Startsidans film: fabriken med skylten hamnade bakom rubriken.
+     Utsnittet flyttas åt vänster så att skylten hamnar utanför. */
+  .hero__media {
+    object-position: 12% center;
+  }
+}
+
+/* Formulärets fältetiketter och priskortens etiketter var 10 px. */
+@media (max-width: 620px) {
+  .field label,
+  .model-price__card > span {
+    font-size: 12px;
+  }
+}
+
+html[data-tema="mork"] .kalkyl__not a {
+  color: #e2a86a;
+}
+
+/* Formulärkorten: i två spalter fick texten bara runt 56 px bredd och
+   gled in under ringen ("Attefallsh..."). På smala skärmar en spalt. */
+@media (max-width: 460px) {
+  .valgrupp__rad:not(.bildval__rad) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* === MÖRKT TEMA START (byggs av _morkt.py) === */
 /* Mörkt tema: varmt och mörkt, som en kvällsbild av huset - inte kallt
    grått. Variablerna gör det mesta; resten är ytor som var vita. */
@@ -15940,6 +16273,7 @@ html[data-tema="mork"] .resa__skede,
 html[data-tema="mork"] .samagare__namnrad input,
 html[data-tema="mork"] .storlek3d__ikon:hover,
 html[data-tema="mork"] .styrkort,
+html[data-tema="mork"] .temavaxel::after,
 html[data-tema="mork"] .tillkommer,
 html[data-tema="mork"] .tipsruta,
 html[data-tema="mork"] .tomtrapport,
@@ -16019,6 +16353,9 @@ html[data-tema="mork"] .konfig__spegel input:checked + .konfig__vaxel {
 }
 html[data-tema="mork"] .resa__vem button[aria-pressed="true"] {
   background: rgba(164, 96, 47, 0.1);
+}
+html[data-tema="mork"] .mobile-nav__tema[aria-pressed="true"] .temavaxel {
+  background: var(--koppar);
 }
 
 /* Headerns piller, menyer och paneler. */

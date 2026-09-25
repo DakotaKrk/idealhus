@@ -12,9 +12,7 @@ MOBIL_B = ('        <a class="mobile-nav__tips" href="vad-far-jag-bygga.html">'
            '<span>Prova</span> Vad får jag bygga?</a>\n' + MOBIL_A)
 
 FOT_A = '            <a href="attefallshus-regler.html">Attefallshus: reglerna</a>\n'
-TEMA = ("    <script>try{var t=new URLSearchParams(location.search).get('tema')||"
-        "localStorage.getItem('idealhus-tema');if(t==='mork')"
-        "document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>")
+TEMA = "    " + B.TEMASKRIPT
 
 FOT_B = FOT_A + '            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>\n'
 AGA_A = '            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>\n          </nav>'
@@ -54,9 +52,10 @@ def patcha(fil):
 
     # Temat sätts innan sidan ritas, annars blinkar den vit för den som
     # valt mörkt läge.
-    if "idealhus-tema" not in s:
-        s = re.sub(r'(    <script src="premium\.js\?v=\w+" defer></script>\n)',
-                   lambda m: m.group(1) + TEMA + "\n", s, count=1)
+    # Raden byts alltid mot mallens, så en ändring där når hit också.
+    s = re.sub(r"    <script>try\{var t=new URLSearchParams.*?</script>\n", "", s, count=1)
+    s = re.sub(r'(    <script src="premium\.js\?v=\w+" defer></script>\n)',
+               lambda m: m.group(1) + TEMA + "\n", s, count=1)
 
     io.open(fil, "w", encoding="utf-8", newline="").write(s.replace("\n", nl))
     print(fil)

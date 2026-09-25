@@ -3,7 +3,7 @@
 import re, io, os
 
 BAS = "https://dakotakrk.github.io/idealhus/"
-CSS_V = "20260924i"
+CSS_V = "20260925e"
 
 # Husen for den som ska bo i dem, och det vi levererar till andra som
 # bygger. De sag likadana ut i menyn tidigare, som fem jamnstallda val.
@@ -112,6 +112,15 @@ def mobilmeny():
     return "\n".join(rader)
 
 
+# Temat sätts innan sidan ritas, annars blinkar den vit för den som valt
+# mörkt läge. Har man inte valt följer sidan telefonens eller datorns
+# eget läge (2026-09-25). _premium.py för in samma rad i handsidorna.
+TEMASKRIPT = ("<script>try{var t=new URLSearchParams(location.search).get('tema')||"
+              "localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&"
+              "matchMedia('(prefers-color-scheme: dark)').matches))"
+              "document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>")
+
+
 def head(titel, beskrivning, forladdad=None, fil=None):
     pre = f'\n    <link rel="preload" as="image" href="images/{forladdad}" fetchpriority="high">' if forladdad else ""
     return f'''<!doctype html>
@@ -141,7 +150,7 @@ def head(titel, beskrivning, forladdad=None, fil=None):
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&amp;family=Source+Sans+3:ital,wght@0,300..700;1,400&amp;display=swap">{pre}
     <link rel="stylesheet" href="styles.css?v={CSS_V}">
     <script src="premium.js?v={CSS_V}" defer></script>
-    <script>try{{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork')document.documentElement.setAttribute('data-tema','mork')}}catch(e){{}}</script>
+    {TEMASKRIPT}
     <script type="application/ld+json">
     {{
       "@context": "https://schema.org",

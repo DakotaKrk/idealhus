@@ -314,6 +314,18 @@ SKRIPT = r'''
           var t = f && f.value.trim();
           return t || 'Delägare ' + (i + 1);
         }
+        // Bokstaven i veckan: namnets första bokstav, eller numret om
+        // namnet saknas. Delar två delägare bokstav får de numret efter.
+        function initialAv(i) {
+          var f = $('input[data-i="' + i + '"]', namnfalt);
+          var t = f && f.value.trim();
+          if (!t) return String(i + 1);
+          var b = t.charAt(0).toUpperCase();
+          var samma = $$('input', namnfalt).filter(function (x) {
+            return x.value.trim().charAt(0).toUpperCase() === b;
+          }).length;
+          return samma > 1 ? b + (i + 1) : b;
+        }
         function byggNamnfalt() {
           var gamla = $$('input', namnfalt).map(function (f) { return f.value; });
           namnfalt.innerHTML = '';
@@ -365,7 +377,7 @@ SKRIPT = r'''
             b.setAttribute('data-info', info);
             b.innerHTML = '<span class="vecka__nr">' + v + '</span><span class="vecka__ini" aria-hidden="true"></span>' +
               (r.helg[v] ? '<span class="vecka__helg" aria-hidden="true">★</span>' : '');
-            b.querySelector('.vecka__ini').textContent = nm.charAt(0).toUpperCase();
+            b.querySelector('.vecka__ini').textContent = initialAv(o);
             nat.appendChild(b);
           }
           var q = new URLSearchParams();

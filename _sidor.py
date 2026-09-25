@@ -146,9 +146,9 @@ def kategorisida(fil, namn, herobild, meta, rubrik, ingress, spann):
             <dl class="storlek3d__fakta">
               <div><dt>Boyta</dt><dd><strong data-3d-yta>{modeller[0][2]}</strong> m²</dd></div>
               <div><dt>Rum</dt><dd><strong data-3d-rum>{modeller[0][3]}</strong></dd></div>
-              <div><dt>Parkeringsrutor</dt><dd>≈ <strong data-3d-p>{round(modeller[0][2] / 12.5, 1)}</strong></dd></div>
+              <div><dt>Bilplatser</dt><dd>≈ <strong data-3d-p>{round(modeller[0][2] / 12.5, 1)}</strong></dd></div>
             </dl>
-            <p class="storlek3d__not">Parkeringsruta 2,5 × 5 m. Måtten och proportionerna i modellen är ungefärliga.</p>
+            <p class="storlek3d__not">En bilplats är 2,5 × 5 m. Måtten och proportionerna i modellen är ungefärliga.</p>
           </div>
 
           <div class="storlek3d__scen" tabindex="0" role="img" aria-label="3D-modell av huset. Dra eller använd piltangenterna för att vrida.">

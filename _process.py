@@ -31,7 +31,7 @@ STEG = [
      "och kranbil är det vanligaste som behöver lösas i förväg."),
     ("Slutbesiktning", "Tillsammans", "bada",
      "Genomgång av huset, punktlista på det som ska rättas, och överlämning. "
-     "Du har haft samma kontakt hela vägen och vet vem du ringer."),
+     "Du har haft samma kontakt hela vägen och vet vem du pratar med."),
 ]
 
 # De tre teckningarna (ritningen, verkstaden, huset på plats). De låg

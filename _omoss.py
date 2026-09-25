@@ -66,7 +66,7 @@ KROPP = f'''    <main id="innehall">
           </div>
 
           <div class="kontakt-direkt__rad">
-            <span class="kontakt-direkt__namn">Fem kategorier</span>
+            <span class="kontakt-direkt__namn">Fem hus</span>
             <span class="kontakt-direkt__roll">Husmodeller</span>
             <span class="kontakt-direkt__lankar">
               <a href="attefallshus.html">Attefallshus och fritidshus</a>

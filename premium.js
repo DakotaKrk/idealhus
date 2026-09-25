@@ -484,7 +484,8 @@
         sek.classList.toggle('storlek3d--oppen', upp);
       });
 
-      var START = { vrid: -35, lut: 60, zoom: 1 };
+      // Smala telefoner: huset startar lite mindre, så att måtten ryms.
+      var START = { vrid: -35, lut: 60, zoom: window.innerWidth < 420 ? 0.82 : 1 };
       var vrid = START.vrid, lut = START.lut, zoom = START.zoom;
       var fartV = 0, fartL = 0, drar = false, senX = 0, senY = 0;
       var stilla = performance.now(), synlig = false, raf = null;
@@ -941,6 +942,20 @@
     $('[data-3d-bredd]', sek).textContent = MATT3D[id][1];
     $('[data-3d-nock]', sek).textContent = MATT3D[id][2];
 
+    // Faktalistan överst stod med X för nockhöjd och byggnadsarea. Nock-
+    // höjden och yttermåtten står i ritningen; byggnadsarean räknas inte
+    // ut här - den avgör attefallsgränsen och ska komma från ritningen.
+    $$('.model-specs > div').forEach(function (rad) {
+      var dt = $('dt', rad), dd = $('dd', rad);
+      if (!dt || !dd || dd.textContent.indexOf('X') === -1) return;
+      var namn = dt.textContent.trim();
+      if (namn === 'Nockhöjd') dd.textContent = MATT3D[id][2];
+      if (namn === 'Byggnadsarea') {
+        dt.textContent = 'Yttermått';
+        dd.textContent = MATT3D[id][0].replace(' m', '') + ' × ' + MATT3D[id][1];
+      }
+    });
+
     // En knapp i heron, bredvid Planlösningar och Pris.
     var heroKnappar = $$('.subpage-hero a[href^="#"]');
     if (heroKnappar.length) {
@@ -1069,14 +1084,28 @@
     knapp.innerHTML =
       '<svg class="temaknapp__sol" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>' +
       '<svg class="temaknapp__mane" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+    // Samma val finns som en tydlig rad i mobilmenyn - ikonen i
+    // sidhuvudet är liten att träffa med tummen och lätt att missa.
+    var meny = $('#mobile-nav');
+    var rad = null;
+    if (meny) {
+      rad = document.createElement('button');
+      rad.type = 'button';
+      rad.className = 'mobile-nav__tema';
+      rad.innerHTML = '<span class="mobile-nav__tema-ikon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+        '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Mörkt läge</span>' +
+        '<span class="temavaxel" aria-hidden="true"></span>';
+      meny.insertBefore(rad, $('.mobile-nav__cta', meny));
+    }
     function uppdatera() {
       var mork = html.getAttribute('data-tema') === 'mork';
       knapp.setAttribute('aria-pressed', String(mork));
       knapp.setAttribute('aria-label', mork ? 'Byt till ljust läge' : 'Byt till mörkt läge');
+      if (rad) rad.setAttribute('aria-pressed', String(mork));
       var tc = $('meta[name="theme-color"]');
       if (tc) tc.setAttribute('content', mork ? '#15110d' : '#2c2820');
     }
-    knapp.addEventListener('click', function () {
+    function vaxla() {
       var mork = html.getAttribute('data-tema') !== 'mork';
       if (!lugn) {
         html.classList.add('tema-byte');
@@ -1085,7 +1114,9 @@
       if (mork) html.setAttribute('data-tema', 'mork'); else html.removeAttribute('data-tema');
       lagra.spara('idealhus-tema', mork ? 'mork' : 'ljust');
       uppdatera();
-    });
+    }
+    knapp.addEventListener('click', vaxla);
+    if (rad) rad.addEventListener('click', vaxla);
     yta.insertBefore(knapp, yta.firstChild);
     uppdatera();
   })();
