@@ -3532,6 +3532,12 @@ p,
   order: -1;
 }
 
+@media (min-width: 1041px) {
+  #husblock.segment__block {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+}
+
 .segment__media {
   overflow: hidden;
   border-radius: var(--radie-kort);
