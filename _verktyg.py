@@ -394,7 +394,8 @@ SKRIPT = '''
           var ryms = MODELLER.filter(function (m) { return yta > 0 && m.yta <= yta; })
             .sort(function (a, b) { return b.yta - a.yta; });
           document.getElementById('hus-rubrik').textContent = yta > 0
-            ? (ryms.length + (ryms.length === 1 ? ' modell' : ' modeller') + ' upp till ' + yta + ' m²')
+            ? (ryms.length ? ryms.length + (ryms.length === 1 ? ' modell' : ' modeller') : 'Inga modeller') +
+              ' upp till ' + yta + ' m²'
             : 'Hus som kräver bygglov';
           document.getElementById('hus-lista').innerHTML = ryms.map(husKort).join('');
           document.getElementById('hus-tomt').hidden = ryms.length > 0;

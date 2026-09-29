@@ -1182,9 +1182,14 @@
     var dt = $$('.model-specs dt').filter(function (d) { return d.textContent.trim() === 'Boyta'; })[0];
     var yta = dt && parseInt(dt.nextElementSibling.textContent, 10);
     var namn = $('.subpage-hero__title');
+    // Kategorin först i namnet: "Huskort 2" finns i båda kategorierna.
+    var meta = $('.subpage-hero__meta');
+    var kat = meta ? meta.textContent.split('·')[0].trim() : '';
+    var helt = namn ? namn.textContent.trim() : '';
+    if (helt && /^(Attefallshus|Fritidshus)$/.test(kat)) helt = kat + ', ' + helt.toLowerCase();
     if (yta) {
       ryms.href = 'vad-far-jag-bygga.html?yta=' + yta +
-        (namn ? '&namn=' + encodeURIComponent(namn.textContent.trim()) : '');
+        (helt ? '&namn=' + encodeURIComponent(helt) : '');
     }
   }
 
@@ -1343,5 +1348,29 @@
     });
 
     visa(0);
+  })();
+  /* --- Menyerna: var man är, Esc och bakåtknappen ---------------
+     Länken till sidan man står på märks med aria-current, så att både
+     skärmläsare och mobilmenyn visar var man är. Esc stänger mobil-
+     menyn. Går man bakåt visar webbläsaren sidan ur sitt minne - med
+     menyn öppen och sidan låst - så då stängs den. */
+  (function () {
+    var sidan = location.pathname.split('/').pop() || 'index.html';
+    $$('.main-nav a, .mobile-nav a').forEach(function (a) {
+      if (a.getAttribute('href') === sidan) a.setAttribute('aria-current', 'page');
+    });
+    var knapp = $('.menu-button');
+    var panel = $('#mobile-nav');
+    if (!knapp || !panel) return;
+    function oppen() { return knapp.getAttribute('aria-expanded') === 'true'; }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && oppen()) {
+        knapp.click();
+        knapp.focus();
+      }
+    });
+    window.addEventListener('pageshow', function (e) {
+      if (e.persisted && oppen()) knapp.click();
+    });
   })();
 })();

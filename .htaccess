@@ -1,0 +1,9 @@
+# Idealhus på Loopias webbhotell. Läggs i idealhus.se/public_html.
+#
+# Hållen så enkel som möjligt: den första versionen, med komprimering,
+# cachehuvuden och spärr av byggfiler, gav "500 Internal Server Error"
+# hos Loopia. https tvingas i kundzonen ("Tvinga SSL"), inte här.
+
+# Egen felsida. Den har <base> till sajtens rot, så den fungerar även
+# på djupa adresser som /hus/villor/gammal-lank.
+ErrorDocument 404 /404.html

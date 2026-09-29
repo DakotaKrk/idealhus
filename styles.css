@@ -16216,6 +16216,27 @@ html[data-tema="mork"] .kalkyl__not a {
   }
 }
 
+/* --- Menyerna visar var man är (2026-09-25) ------------------- */
+.mobile-nav a[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.mobile-nav a[aria-current="page"]::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 10px;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: var(--koppar);
+}
+
+.main-nav__sub a[aria-current="page"] strong {
+  color: var(--koppar-text);
+}
+
 /* === MÖRKT TEMA START (byggs av _morkt.py) === */
 /* Mörkt tema: varmt och mörkt, som en kvällsbild av huset - inte kallt
    grått. Variablerna gör det mesta; resten är ytor som var vita. */

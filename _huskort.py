@@ -44,7 +44,17 @@ BLOCK = '''      /* MODELLER:START - skrivs av _huskort.py, andra inte for hand 
 
         var m = typ.modeller[nr - 1];
 
-        document.title = m.namn + ' | Idealhus';
+        // Kategorin med i titeln - "Huskort 2" finns både bland
+        // attefallshusen och fritidshusen.
+        document.title = m.namn + ' \\u2013 ' + typ.namn + ' | Idealhus';
+
+        // Formulärets modellval var alltid "Huskort 1". Nu är det huset
+        // man tittar på som står förvalt.
+        var modellval = document.getElementById('field-model');
+        if (modellval && modellval.options.length) {
+          modellval.options[0].textContent = typ.namn + ', ' + m.namn.toLowerCase();
+          modellval.selectedIndex = 0;
+        }
 
         document.querySelectorAll('[data-model-title]').forEach(function (element) {
           var gemener = element.tagName === 'EM' || element.tagName === 'SPAN';

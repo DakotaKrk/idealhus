@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dakotakrk.github.io/idealhus/sitemap.xml
+Sitemap: https://idealhus.se/sitemap.xml
