@@ -12,11 +12,11 @@ PRINCIPER = [
      "kvadratmeter och mer om var väggarna står, var ljuset kommer in och vad "
      "man ser när man kommer in genom dörren.",
      "Ljus interiör i ett litet hus med smart planering"),
-    ("Material som får leva", "generated-materials-01.webp",
+    ("Material som får leva", "idealhus_trastommar.jpg",
      "Vi väljer naturliga material som åldras vackert i stället för ytskikt som "
      "ska bytas. Trä som gråar jämnt, beslag som håller, detaljer som ser bättre "
      "ut om tio år än dagen de monterades.",
-     "Materialprover med träpanel och fönsterdetalj"),
+     "Trästommar hos Idealhus"),
 ]
 
 principblock = "\n\n".join(f'''        <article class="segment__block">

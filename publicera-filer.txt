@@ -32,7 +32,11 @@ images/hus-r3.webp
 images/hus-r4.webp
 images/hus-r5.webp
 images/idealhus.svg
+images/idealhus_hantverk.jpg
 images/idealhus_logo.svg
+images/idealhus_trastommar.jpg
+images/idealhus_trastommar_002.jpg
+images/idealhus_vaggar_001.jpg
 images/video/hero-video-light.mp4
 modeller/hus-r1.glb
 modeller/hus-r2.glb
