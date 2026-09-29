@@ -16442,8 +16442,10 @@ html[data-tema="mork"] .prisvag__steg a {
   color: #e2a86a;
 }
 
-/* Bilder tonas ned en aning så att de inte bländar i mörkret. */
-html[data-tema="mork"] main img:not(.logo__svg) {
+/* Bilder tonas ned en aning så att de inte bländar i mörkret. Den
+   suddiga kopian bakom hela bilder (.helbild__bak) behåller sitt eget
+   filter - annars blev den skarp och syntes som en extra bild. */
+html[data-tema="mork"] main img:not(.logo__svg, .helbild__bak) {
   filter: brightness(0.92);
 }
 
