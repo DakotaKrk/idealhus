@@ -103,16 +103,17 @@ try {
     $config = $null
     $kod = LaddaUpp $filer $tillfallig
     if ($kod -eq 67) { throw "Loopia godkände inte användarnamnet eller lösenordet (curl 67). Kontrollera lösenordet på FTP-kontot." }
-    if ($kod -ne 0) { throw "Uppladdningen avbröts (curl-kod $kod)." }
+    if ($kod -ne 0) { Logga "Uppladdningen avbröts (curl-kod $kod), kontrollerar vad som kom fram." }
 
-    # Kontrollera och ladda upp igen det som inte blev rätt, upp till tre varv.
-    for ($varv = 1; $varv -le 3; $varv++) {
+    # Kontrollera och ladda upp igen det som inte blev rätt, upp till fem
+    # varv. Ett avbrott här (t.ex. curl 18) fångas av nästa kontroll.
+    for ($varv = 1; $varv -le 5; $varv++) {
         Logga "Kontrollerar filerna på https://$Doman ..."
         $fel = Felaktiga $filer
         if ($fel.Count -eq 0) { break }
         Logga ("{0} filer blev inte rätt, laddar upp dem igen: {1}" -f $fel.Count, ($fel -join ', '))
         $kod = LaddaUpp $fel $tillfallig
-        if ($kod -ne 0) { throw "Omladdningen avbröts (curl-kod $kod)." }
+        if ($kod -ne 0) { Logga "Omladdningen avbröts (curl-kod $kod), försöker igen." }
     }
     $fel = Felaktiga $filer
     if ($fel.Count) { throw ("Dessa filer blev fortfarande inte rätt: " + ($fel -join ', ')) }
