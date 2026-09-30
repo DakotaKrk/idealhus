@@ -64,7 +64,7 @@
 
   if (!lugn && window.IntersectionObserver) {
     $$('main h2, .subpage-hero__title, .kollen-topp__titel, .fyrafyra__titel, .guidehero__titel').forEach(function (h) {
-      if (h.closest('.hero') || h.closest('.kollen__svar')) return;
+      if (h.closest('.hero, .ihtopp') || h.closest('.kollen__svar')) return;
       if (h.id || h.hasAttribute('data-model-title') || h.querySelector('[data-model-title]')) return;
       var bara = Array.prototype.every.call(h.childNodes, function (n) {
         return n.nodeType === 3;
@@ -150,7 +150,7 @@
   }
 
   /* --- Målgruppsväxeln på startsidan ----------------------------- */
-  var hero = $('.hero[data-malgrupp]');
+  var hero = $('.hero[data-malgrupp], .ihtopp[data-malgrupp]');
   if (hero) {
     var knappar = $$('.malgrupp button', hero);
     var satt = function (varde, spara) {
@@ -169,7 +169,7 @@
 
   // Filmen i heron spelas bara när den syns - avkodningen kostar
   // annars bildrutor hela vägen ner genom sidan.
-  var film = $('.hero__media');
+  var film = $('.hero__media, .ihtopp__film');
   if (film && film.tagName === 'VIDEO' && window.IntersectionObserver) {
     new IntersectionObserver(function (poster) {
       if (poster[0].isIntersecting) {
@@ -187,7 +187,7 @@
      lite inne i sin ram när man för pekaren över kortet den sitter
      i. Ramen klipper, så bilden aldrig går utanför sina hörn. */
   $$('main img').forEach(function (img) {
-    if (img.closest('.hero, .subpage-hero, .heroscen, .ordband, .val')) return;
+    if (img.closest('.hero, .ihtopp, .subpage-hero, .heroscen, .ordband, .val, .vag, .hus, .kuliss, .bygget, .virke')) return;
     var ram = img.parentElement;
     if (!ram || img.getBoundingClientRect().width < 120) return;
     var kort = img.closest('a, article, figure, .segment__block, .quiet-break__bild, .guidehero__bild') || ram;
@@ -201,25 +201,7 @@
   });
 
   /* --- Ordbandet ------------------------------------------------
-     Kasters marquee, i antikva: husen och det som gör dem, i en rad
-     som glider förbi. Står still utanför skärmen och vid lugn rörelse. */
-  (function () {
-    var ord = ['Attefallshus', 'Fritidshus', 'Byggt under tak', 'Svensk tillverkning',
-      'Offert post för post', 'Anpassat efter din tomt', 'En kontakt hela vägen'];
-    var rad = ord.map(function (o) {
-      return '<span>' + o + '</span><i>✦</i>';
-    }).join('');
-    var band = document.createElement('div');
-    band.className = 'ordband';
-    band.setAttribute('aria-hidden', 'true');
-    band.innerHTML = '<div class="ordband__spar"><div>' + rad + '</div><div>' + rad + '</div></div>';
-    var efter = $('main > .hero');
-    var fore = $('main > .contact-section') || $('.site-footer');
-    if (efter) efter.insertAdjacentElement('afterend', band);
-    else if (fore && sida !== '404.html') fore.parentNode.insertBefore(band, fore);
-    else return;
-    pausaUtanforVy(band);
-  })();
+     Borttaget 2026-09-30 på kundens begäran - sidan ska se renare ut. */
 
   /* --- Svarskorten i formuläret --------------------------------
      Varje val får en ikon, lutar i 3D efter pekaren som korten på
@@ -331,6 +313,27 @@
     });
   }
 
+  /* --- Kontaktstegen --------------------------------------------
+     Numren poppar fram och guldlinjen mellan dem ritas när listan
+     syns. Stil i design.css 08b. */
+  $$('.contact-section .kontakt-tips').forEach(function (lista) {
+    if (lugn) { lista.classList.add('tips--inne'); return; }
+    narSynligt(lista, function (e) { e.classList.add('tips--inne'); }, 0.3);
+  });
+
+  // Vänsterspalten klistrar bredvid formuläret. Är den högre än
+  // fönstret klistrar den i underkant i stället, så att kontaktkortet
+  // alltid går att se (--klister läses i design.css 08b).
+  $$('.contact-section__intro').forEach(function (intro) {
+    function satt() {
+      var h = intro.offsetHeight;
+      intro.style.setProperty('--klister', Math.min(112, window.innerHeight - h - 24) + 'px');
+    }
+    satt();
+    window.addEventListener('resize', satt, { passive: true });
+    if (window.ResizeObserver) new ResizeObserver(satt).observe(intro);
+  });
+
   /* --- Kategorisidan ------------------------------------------- */
   (function () {
     var grid = $('.model-grid');
@@ -433,159 +436,6 @@
       });
     }
 
-    /* 3D-huset. Ytan blir en rektangel med proportionen 1,6:1, skalad
-       mot kategorins största hus så att skillnaderna syns. Vridningen
-       sköts här i stället för i CSS: man drar i huset, det glider vidare
-       med tröghet när man släpper, och börjar snurra sakta igen efter en
-       stund. Loopen går bara när sektionen syns. */
-    var sek = $('.storlek3d');
-    if (sek) {
-      var hus = $('.hus3d', sek);
-      var scen = $('.storlek3d__scen', sek);
-      var skala = Number(sek.getAttribute('data-skala')) || 30;
-      var pxPerM = 280 / Math.sqrt(skala * 1.6);
-      var komma = function (n) { return (Math.round(n * 10) / 10).toString().replace('.', ','); };
-      var visa = function (k) {
-        var yta = tal(k, 'yta');
-        var bredd = Math.sqrt(yta * 1.6), djup = yta / bredd;
-        hus.style.setProperty('--w', (bredd * pxPerM).toFixed(1) + 'px');
-        hus.style.setProperty('--d', (djup * pxPerM).toFixed(1) + 'px');
-        hus.style.setProperty('--h', (2.7 * pxPerM).toFixed(1) + 'px');
-        hus.style.setProperty('--m', pxPerM.toFixed(2) + 'px');
-        $('[data-3d-yta]', sek).textContent = yta;
-        $('[data-3d-rum]', sek).textContent = tal(k, 'rum');
-        $('[data-3d-p]', sek).textContent = komma(yta / 12.5);
-        $('[data-3d-namn]', sek).textContent = k.getAttribute('data-namn').toLowerCase();
-        $('[data-3d-golvtext]', sek).textContent = yta + ' m²';
-        $('[data-3d-bredd]', sek).textContent = '≈ ' + komma(bredd) + ' m';
-        $('[data-3d-djup]', sek).textContent = '≈ ' + komma(djup) + ' m';
-        $$('[data-3d]', sek).forEach(function (b) {
-          b.setAttribute('aria-pressed', String(b.getAttribute('data-3d') === k.getAttribute('data-nr')));
-        });
-      };
-      var efterNr = function (nr) {
-        return kort.filter(function (k) { return k.getAttribute('data-nr') === String(nr); })[0];
-      };
-      visa(kort[0]);
-      $$('[data-3d]', sek).forEach(function (b) {
-        b.addEventListener('click', function () { visa(efterNr(b.getAttribute('data-3d'))); });
-      });
-      kort.forEach(function (k) {
-        k.addEventListener('pointerenter', function () { visa(k); });
-        k.addEventListener('focusin', function () { visa(k); });
-      });
-      glidandeMarkering($('.storlek3d__val', sek));
-
-      var lyft = $('.storlek3d__lyft', sek);
-      lyft.addEventListener('click', function () {
-        var upp = lyft.getAttribute('aria-pressed') !== 'true';
-        lyft.setAttribute('aria-pressed', String(upp));
-        lyft.textContent = upp ? 'Sänk taket' : 'Lyft taket';
-        sek.classList.toggle('storlek3d--oppen', upp);
-      });
-
-      // Smala telefoner: huset startar lite mindre, så att måtten ryms.
-      var START = { vrid: -35, lut: 60, zoom: window.innerWidth < 420 ? 0.82 : 1 };
-      var vrid = START.vrid, lut = START.lut, zoom = START.zoom;
-      var fartV = 0, fartL = 0, drar = false, senX = 0, senY = 0;
-      var stilla = performance.now(), synlig = false, raf = null;
-      var begr = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
-      var rita = function () {
-        hus.style.transform = 'rotateX(' + lut.toFixed(2) + 'deg) rotateZ(' + vrid.toFixed(2) + 'deg) scale3d(' +
-          zoom + ',' + zoom + ',' + zoom + ')';
-      };
-      var loop = function (t) {
-        raf = null;
-        if (!drar) {
-          if (Math.abs(fartV) > 0.02 || Math.abs(fartL) > 0.02) {
-            vrid += fartV;
-            lut = begr(lut + fartL, 30, 78);
-            fartV *= 0.94;
-            fartL *= 0.88;
-          } else if (!lugn && t - stilla > 2600) {
-            vrid += 0.1;
-          }
-        }
-        rita();
-        if (synlig && !document.hidden) raf = requestAnimationFrame(loop);
-      };
-      var starta = function () { if (!raf && synlig) raf = requestAnimationFrame(loop); };
-      rita();
-
-      var tips = $('.storlek3d__tips', sek);
-      var borjat = function () {
-        stilla = performance.now();
-        if (tips) tips.classList.add('storlek3d__tips--borta');
-      };
-
-      scen.addEventListener('pointerdown', function (e) {
-        if (e.target.closest('button')) return;
-        drar = true;
-        senX = e.clientX; senY = e.clientY;
-        fartV = fartL = 0;
-        scen.setPointerCapture(e.pointerId);
-        scen.classList.add('storlek3d__scen--drar');
-        borjat();
-        starta();
-      });
-      scen.addEventListener('pointermove', function (e) {
-        if (!drar) return;
-        var dx = e.clientX - senX, dy = e.clientY - senY;
-        senX = e.clientX; senY = e.clientY;
-        vrid += dx * 0.45;
-        lut = begr(lut - dy * 0.3, 30, 78);
-        // Farten tas från draget men har ett tak - ett snabbt svep
-        // ska ge ett halvt varv, inte fem.
-        fartV = begr(dx * 0.45, -9, 9);
-        fartL = begr(-dy * 0.3, -3, 3);
-      });
-      var slapp = function () {
-        if (!drar) return;
-        drar = false;
-        stilla = performance.now();
-        scen.classList.remove('storlek3d__scen--drar');
-      };
-      scen.addEventListener('pointerup', slapp);
-      scen.addEventListener('pointercancel', slapp);
-      scen.addEventListener('lostpointercapture', slapp);
-
-      scen.addEventListener('keydown', function (e) {
-        var steg = { ArrowLeft: [-12, 0], ArrowRight: [12, 0], ArrowUp: [0, -6], ArrowDown: [0, 6] }[e.key];
-        if (!steg) return;
-        e.preventDefault();
-        fartV = steg[0] * 0.25;
-        fartL = steg[1] * 0.25;
-        borjat();
-        starta();
-      });
-
-      $$('[data-zoom]', sek).forEach(function (b) {
-        b.addEventListener('click', function () {
-          zoom = begr(Math.round((zoom + Number(b.getAttribute('data-zoom')) * 0.15) * 100) / 100, 0.7, 1.6);
-          hus.classList.add('hus3d--mjuk');
-          borjat();
-          rita();
-        });
-      });
-      $('[data-aterstall]', sek).addEventListener('click', function () {
-        vrid = START.vrid; lut = START.lut; zoom = START.zoom; fartV = fartL = 0;
-        hus.classList.add('hus3d--mjuk');
-        borjat();
-        rita();
-      });
-      hus.addEventListener('transitionend', function (e) {
-        if (e.propertyName === 'transform') hus.classList.remove('hus3d--mjuk');
-      });
-
-      if (window.IntersectionObserver) {
-        new IntersectionObserver(function (poster) {
-          synlig = poster[0].isIntersecting;
-          starta();
-        }).observe(sek);
-      }
-      document.addEventListener('visibilitychange', starta);
-    }
-
     /* Jämför upp till tre hus sida vid sida. */
     var bar = $('.jamforbar');
     var ruta = $('.jamforruta');
@@ -673,54 +523,169 @@
       el.style.setProperty('--ry', '0deg');
     });
   }
-  $$('.priskort, .styrkort').forEach(function (k) { lutaI3D(k, 10); });
+  $$('.pkort').forEach(function (k) { lutaI3D(k, 6); });
 
-  /* --- Prissidan: storleksväljaren ------------------------------
-     Som Kasters prisväljare: ett reglage, och korten svarar med vilken
-     kategori som passar. Inga belopp - bara storlek och vad som krävs. */
+  /* --- Prissidan: storleksskalan ---------------------------------
+     Ett reglage över en linjal med måttparenteser för zonerna (lov),
+     en bubbla som följer knoppen och märken där vi har hus. Under:
+     husen med bild - klick flyttar reglaget dit. Golvytan ritas i
+     isometri (samma sätt som byggscenen på startsidan) med en ruta per
+     kvadratmeter, en bil på sin bilplats och en person för skalan, och
+     växer mjukt till den valda ytan. Inga belopp.
+     Stil i design.css 18, märkning i _sidor3.py. */
   (function () {
     var reglage = $('#onskad-yta');
     if (!reglage) return;
-    var ut = $('[data-yta-ut]');
-    var svar = $('[data-yta-svar]');
-    var kortP = $$('.priskort');
+    var skala = reglage.closest('.prisskala');
+    var linjal = $('.prisskala__linjal', skala);
+    var ut = $('[data-yta-ut]', skala);
+    var bubbla = $('[data-yta-bubbla]', skala);
+    var svar = $('[data-yta-svar]', skala);
+    var lov = $('[data-yta-lov]', skala);
+    var modeller = $$('.prisskala__modell', skala);
+    var hak = $$('.prisskala__hak', skala);
+    var chips = $$('.prisskala__chip', skala);
+    var zoner = $$('.zon', skala);
+    var kortP = $$('.pkort', skala);
+    var golvText = $('[data-yta-golv]', skala);
+    var bilar = $('[data-yta-bilar]', skala);
+    var iso = $('[data-yta-iso]', skala);
+    var tips = $('.prisskala__tips', skala);
+    var min = Number(reglage.min), max = Number(reglage.max);
+    var forraZon = '', forraY = null;
+
+    var PERSON = 'M20 3a8 8 0 1 1 0 16a8 8 0 1 1 0-16zM12 22H28A6 6 0 0 1 34 28V62A3 3 0 0 1 28 62V36H27V115' +
+      'A3.25 3.25 0 0 1 20.5 115V70H19.5V115A3.25 3.25 0 0 1 13 115V36H12V62A3 3 0 0 1 6 62V28A6 6 0 0 1 12 22Z';
+    // Isometrin: x längs golvets långsida, y på djupet, z uppåt (meter).
+    var S = 20, C = 0.8660254;
+    function P(x, y, z) { return [(x - y) * C * S, (x + y) * 0.5 * S - z * S]; }
+    function pts(lista) {
+      return lista.map(function (p) { var q = P(p[0], p[1], p[2]); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
+    }
+    function poly(lista, klass) { return '<polygon class="' + klass + '" points="' + pts(lista) + '"/>'; }
+    function lin(a, b, klass) {
+      var p = P(a[0], a[1], a[2]), q = P(b[0], b[1], b[2]);
+      return '<line class="' + klass + '" x1="' + p[0].toFixed(1) + '" y1="' + p[1].toFixed(1) +
+        '" x2="' + q[0].toFixed(1) + '" y2="' + q[1].toFixed(1) + '"/>';
+    }
+    // En låda: topp och de två sidor som syns (mot +x och +y).
+    function lada(x, y, z, w, d, h, klass) {
+      return poly([[x + w, y, z], [x + w, y + d, z], [x + w, y + d, z + h], [x + w, y, z + h]], klass + ' iso-sida-x') +
+        poly([[x, y + d, z], [x + w, y + d, z], [x + w, y + d, z + h], [x, y + d, z + h]], klass + ' iso-sida-y') +
+        poly([[x, y, z + h], [x + w, y, z + h], [x + w, y + d, z + h], [x, y + d, z + h]], klass + ' iso-topp');
+    }
+    function rita3d(A, etikett) {
+      if (!iso) return;
+      var W = Math.sqrt(A * 1.6), D = A / W, h = 0.25;
+      var x0 = -W / 2, y0 = -D / 2, x1 = W / 2, y1 = D / 2;
+      var s = poly([[x0 + 0.4, y0 + 0.4, 0], [x1 + 0.7, y0 + 0.4, 0], [x1 + 0.7, y1 + 0.7, 0], [x0 + 0.4, y1 + 0.7, 0]], 'iso-skugga');
+      s += lada(x0, y0, 0, W, D, h, 'iso-golv');
+      for (var i = 1; i < W; i++) s += lin([x0 + i, y0, h], [x0 + i, y1, h], 'iso-rut');
+      for (var j = 1; j < D; j++) s += lin([x0, y0 + j, h], [x1, y0 + j, h], 'iso-rut');
+      // Bilplatsen till höger om golvet, bilen i mitten av den.
+      var bx = x1 + 1.6, by = -2.5;
+      s += poly([[bx, by, 0], [bx + 2.5, by, 0], [bx + 2.5, by + 5, 0], [bx, by + 5, 0]], 'iso-plats');
+      s += lada(bx + 0.4, by + 0.55, 0, 1.7, 3.9, 0.72, 'iso-bil');
+      s += lada(bx + 0.52, by + 1.55, 0.72, 1.46, 1.9, 0.5, 'iso-kupe');
+      // Personen (1,8 m) framför golvets främre långsida.
+      var fot = P(x0 + W * 0.34, y1 + 1.7, 0), k = 1.8 * S / 115.25;
+      s += '<path class="iso-person" transform="translate(' + (fot[0] - 20 * k).toFixed(1) + ',' +
+        (fot[1] - 118.25 * k).toFixed(1) + ') scale(' + k.toFixed(4) + ')" d="' + PERSON + '"/>';
+      // Ytan mitt på golvet.
+      var c = P(0, 0, h), bredd = etikett.length * 7.4 + 22;
+      s += '<g class="iso-etikett" transform="translate(' + c[0].toFixed(1) + ',' + c[1].toFixed(1) + ')">' +
+        '<rect x="' + (-bredd / 2).toFixed(1) + '" y="-13" width="' + bredd.toFixed(1) + '" height="26" rx="13"/>' +
+        '<text y="4.5" text-anchor="middle">' + etikett + '</text></g>';
+      iso.innerHTML = s;
+    }
+    var visad = Number(reglage.value), mal = visad, isoRaf = null;
+    function tweena() {
+      isoRaf = null;
+      visad += (mal - visad) * 0.22;
+      if (Math.abs(mal - visad) < 0.02) visad = mal;
+      rita3d(visad, mal + ' m²');
+      if (visad !== mal) isoRaf = requestAnimationFrame(tweena);
+    }
+
     function rita() {
       var y = Number(reglage.value);
-      ut.textContent = y + ' m²';
-      reglage.style.setProperty('--andel', ((y - reglage.min) / (reglage.max - reglage.min) * 100).toFixed(1) + '%');
+      linjal.style.setProperty('--a', ((y - min) / (max - min)).toFixed(4));
+      ut.textContent = y;
+      bubbla.textContent = y + ' m²';
+      golvText.textContent = y + ' m²';
+      bilar.textContent = (Math.round(y / 12.5 * 10) / 10).toString().replace('.', ',');
+      if (forraY !== null && forraY !== y && !lugn) {
+        ut.classList.remove('rulla');
+        void ut.offsetWidth;
+        ut.classList.add('rulla');
+      }
+      forraY = y;
+
+      var bast = Infinity;
+      modeller.forEach(function (m) { bast = Math.min(bast, Math.abs(Number(m.getAttribute('data-yta')) - y)); });
+      function nara(el) { return Math.abs(Number(el.getAttribute('data-yta')) - y) === bast; }
+      modeller.forEach(function (m) { m.classList.toggle('aktiv', nara(m)); });
+      hak.forEach(function (m) { m.classList.toggle('aktiv', nara(m)); });
+      chips.forEach(function (c) { c.hidden = !nara(c); });
+
+      var zon = y <= 30 ? 'a' : y <= 50 ? 'b' : 'c';
+      zoner.forEach(function (z) { z.classList.toggle('aktiv', z.classList.contains('zon--' + zon)); });
+      if (zon !== forraZon) {
+        forraZon = zon;
+        lov.setAttribute('data-zon', zon);
+        lov.textContent = zon === 'a' ? 'Inget bygglov inom måtten'
+          : zon === 'b' ? 'Lovfritt som komplementbostadshus utanför detaljplan, annars bygglov'
+          : 'Bygglov';
+      }
+      svar.textContent = zon === 'a'
+        ? 'Vid ' + y + ' m² passar ett attefallshus. Inom detaljplan får det vara 30 m² utan bygglov.'
+        : zon === 'b'
+          ? 'Som komplementbostadshus kan huset vara lovfritt upp till 50 m², men bara utanför detaljplan.'
+          : 'Vid ' + y + ' m² krävs bygglov.';
+
       var passar = kortP.filter(function (k) {
         return y >= Number(k.getAttribute('data-min')) && y <= Number(k.getAttribute('data-max'));
       });
       if (!passar.length) {
-        var bast = null, avst = Infinity;
+        var avst = Infinity, narmast = null;
         kortP.forEach(function (k) {
           var lo = Number(k.getAttribute('data-min')), hi = Number(k.getAttribute('data-max'));
           var a = y < lo ? lo - y : y - hi;
-          if (a < avst) { avst = a; bast = k; }
+          if (a < avst) { avst = a; narmast = k; }
         });
-        passar = [bast];
+        passar = [narmast];
       }
-      kortP.forEach(function (k) {
-        var med = passar.indexOf(k) > -1;
-        if (med && !k.classList.contains('priskort--passar') && !lugn && k.animate) {
-          k.animate([{ scale: '1' }, { scale: '1.035' }, { scale: '1' }],
-            { duration: 500, easing: 'cubic-bezier(.34,1.56,.64,1)' });
-        }
-        k.classList.toggle('priskort--passar', med);
-      });
-      var namn = passar.map(function (k) { return k.getAttribute('data-namn').toLowerCase(); });
-      var lista = namn.length > 1 ? namn.slice(0, -1).join(', ') + ' och ' + namn[namn.length - 1] : namn[0];
-      if (y <= 30) {
-        svar.textContent = 'Vid ' + y + ' m² passar ett attefallshus. Inom detaljplan får det vara 30 m² utan bygglov.';
-      } else if (y <= 50) {
-        svar.textContent = 'Som komplementbostadshus kan huset vara lovfritt upp till 50 m², men bara utanför detaljplan. Närmast i storlek: ' + lista + '.';
-      } else {
-        svar.textContent = 'Vid ' + y + ' m² krävs bygglov. Närmast i storlek: ' + lista + '.';
-      }
+      kortP.forEach(function (k) { k.classList.toggle('pkort--passar', passar.indexOf(k) > -1); });
+
+      mal = y;
+      if (lugn) { visad = y; rita3d(y, y + ' m²'); } else if (!isoRaf) isoRaf = requestAnimationFrame(tweena);
     }
-    reglage.addEventListener('input', rita);
+    function rort() { if (tips) tips.classList.add('prisskala__tips--borta'); }
+    reglage.addEventListener('input', function () { rort(); rita(); });
+    modeller.forEach(function (m) {
+      m.addEventListener('click', function () {
+        reglage.value = m.getAttribute('data-yta');
+        rort();
+        rita();
+      });
+    });
+    rita3d(visad, visad + ' m²');
     rita();
   })();
+
+  /* --- Prissidan: stämpeln på offerten slås fast när den syns ----- */
+  $$('.offert').forEach(function (o) {
+    if (lugn) { o.classList.add('syns'); return; }
+    narSynligt(o, function (e) { e.classList.add('syns'); }, 0.3);
+  });
+
+  /* --- Prissidan: faktorernas bilder rör sig när de syns ---------- */
+  $$('.faktor').forEach(function (f) {
+    if (lugn) { f.classList.add('syns'); return; }
+    narSynligt(f, function (e) { e.classList.add('syns'); }, 0.35);
+  });
+  var faktorGrid = $('.prisfaktorer__grid');
+  if (faktorGrid && !lugn) pausaUtanforVy(faktorGrid);
 
   /* --- Prissidan: kostnadskartan ------------------------------- */
   (function () {
@@ -735,12 +700,11 @@
       li.setAttribute('data-niva', status);
       $('[data-status]', li).textContent = ETIKETT[status];
       $('[data-svar]', li).textContent = text;
-      if (fore && fore !== status && !lugn && li.animate) {
-        li.animate([
-          { transform: 'perspective(800px) rotateX(0)' },
-          { transform: 'perspective(800px) rotateX(-14deg)', offset: 0.35 },
-          { transform: 'perspective(800px) rotateX(0)' }
-        ], { duration: 600, easing: 'cubic-bezier(.34,1.4,.64,1)' });
+      // Raden som ändras får ett guldsvep och etiketten poppar (design.css 18).
+      if (fore && fore !== status && !lugn) {
+        li.classList.remove('orad--ny');
+        void li.offsetWidth;
+        li.classList.add('orad--ny');
       }
     }
     function rita() {
@@ -797,55 +761,530 @@
     }).observe(spar);
   });
 
-  /* --- Så fungerar det ------------------------------------------ */
-  (function () {
-    var sek = $('.process--faser');
-    if (!sek) return;
-    var kortS = $$('.fassteg__kort', sek);
-    kortS.forEach(function (k) { lutaI3D(k, 7); });
-    $$('.vemfilter, .hustypval', sek).forEach(glidandeMarkering);
+  /* Sju scener i isometri, en per steg (Så fungerar det). Samma
+     projektion och färgskala som byggscenen på startsidan. Varje scen
+     returnerar SVG-innehåll för viewBox 0 0 600 440; rörelserna ligger i
+     design.css (klasserna v-*) och körs bara när scenen är aktiv. */
+  var SCENER = (function () {
+    var S = 26, OX = 300, OY = 250, C = 0.8660254;
+    function P(x, y, z) { return [OX + (x - y) * S * C, OY + (x + y) * S * 0.5 - (z || 0) * S]; }
+    function pts(a) { return a.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' '); }
+    function poly(a, fill, extra) { return '<polygon points="' + pts(a) + '" fill="' + fill + '"' + (extra || '') + '/>'; }
+    function lin(a, farg, b, extra) {
+      return '<polyline points="' + pts(a) + '" fill="none" stroke="' + farg + '" stroke-width="' + b +
+        '" stroke-linecap="round" stroke-linejoin="round"' + (extra || '') + '/>';
+    }
+    function box(x, y, z, dx, dy, dz, f, extra) {
+      var x1 = x + dx, y1 = y + dy, z1 = z + dz;
+      return poly([P(x1, y, z), P(x1, y1, z), P(x1, y1, z1), P(x1, y, z1)], f.x, extra) +
+        poly([P(x, y1, z), P(x1, y1, z), P(x1, y1, z1), P(x, y1, z1)], f.y, extra) +
+        poly([P(x, y, z1), P(x1, y, z1), P(x1, y1, z1), P(x, y1, z1)], f.t, extra);
+    }
+    function g(klass, inne, stil) {
+      return '<g class="' + klass + '"' + (stil ? ' style="' + stil + '"' : '') + '>' + inne + '</g>';
+    }
+    // Mjuk skugga på marken.
+    function skugga(x, y, rx, ry, a) {
+      var p = P(x, y, 0);
+      return '<ellipse cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" rx="' + (rx * S).toFixed(1) +
+        '" ry="' + (ry * S).toFixed(1) + '" fill="url(#v-skugga)" opacity="' + (a || 1) + '"/>';
+    }
+    // Stående cylinder (bord, koppar, stubbar).
+    function cyl(x, y, z, r, h, f) {
+      var b = P(x, y, z), t = P(x, y, z + h), rx = r * S * 1.05, ry = r * S * 0.6;
+      return '<path d="M' + (b[0] - rx).toFixed(1) + ' ' + b[1].toFixed(1) + 'A' + rx.toFixed(1) + ' ' + ry.toFixed(1) +
+        ' 0 0 0 ' + (b[0] + rx).toFixed(1) + ' ' + b[1].toFixed(1) + 'L' + (t[0] + rx).toFixed(1) + ' ' + t[1].toFixed(1) +
+        'L' + (t[0] - rx).toFixed(1) + ' ' + t[1].toFixed(1) + 'Z" fill="' + f.x + '"/>' +
+        '<ellipse cx="' + t[0].toFixed(1) + '" cy="' + t[1].toFixed(1) + '" rx="' + rx.toFixed(1) + '" ry="' + ry.toFixed(1) + '" fill="' + f.t + '"/>';
+    }
+    function gran(x, y, h) {
+      var bas = P(x, y, 0), topp = P(x, y, h), mitt = P(x, y, h * 0.28), b = S * 0.62 * (h / 3);
+      return skugga(x + 0.3, y + 0.3, 0.9 * h / 3, 0.45 * h / 3, 0.8) +
+        poly([[bas[0] - 2.4, bas[1]], [bas[0] + 2.4, bas[1]], [mitt[0] + 2.4, mitt[1]], [mitt[0] - 2.4, mitt[1]]], '#6b4f36') +
+        poly([topp, [mitt[0] - b, mitt[1]], [mitt[0], mitt[1] + b * 0.34]], '#6f9a6a') +
+        poly([topp, [mitt[0], mitt[1] + b * 0.34], [mitt[0] + b, mitt[1]]], '#436b4f');
+    }
+    // Hus med sadeltak: väggar mot +x och +y syns, taknocken går längs x.
+    function hus(x0, y0, x1, y1, ze, zr, f, tak, o) {
+      o = o || 0.3;
+      var ym = (y0 + y1) / 2, h = '';
+      h += box(x0, y0, 0, x1 - x0, y1 - y0, ze, f);
+      h += poly([P(x1, y0, ze), P(x1, y1, ze), P(x1, ym, zr)], f.x);
+      h += poly([P(x0 - o, y0 - o, ze - 0.05), P(x1 + o, y0 - o, ze - 0.05), P(x1 + o, ym, zr), P(x0 - o, ym, zr)], tak.x);
+      h += poly([P(x0 - o, ym, zr), P(x1 + o, ym, zr), P(x1 + o, y1 + o, ze - 0.05), P(x0 - o, y1 + o, ze - 0.05)], tak.t);
+      h += poly([P(x1 + o, ym, zr), P(x1 + o, y1 + o, ze - 0.05), P(x1 + o, y1 + o, ze - 0.2), P(x1 + o, ym, zr - 0.15)], tak.kant);
+      h += poly([P(x1 + o, y0 - o, ze - 0.05), P(x1 + o, ym, zr), P(x1 + o, ym, zr - 0.15), P(x1 + o, y0 - o, ze - 0.2)], tak.kant);
+      return h;
+    }
+    // Fönster i planet y = yv (framsidan) eller x = xv (gaveln).
+    function fonsterY(yv, xa, xb, za, zb, fyll) {
+      return poly([P(xa, yv, za), P(xb, yv, za), P(xb, yv, zb), P(xa, yv, zb)], fyll, ' stroke="#1b1915" stroke-width="1.6"');
+    }
+    function fonsterX(xv, ya, yb, za, zb, fyll) {
+      return poly([P(xv, ya, za), P(xv, yb, za), P(xv, yb, zb), P(xv, ya, zb)], fyll, ' stroke="#1b1915" stroke-width="1.6"');
+    }
 
-    // Vem gör vad: stegen som inte matchar tonas ner, de som matchar
-    // lyfts fram. Filtret ändrar inget innehåll, bara betoningen.
+    var GRAS = { t: 'url(#v-gras)', x: '#5c7a48', y: '#6f8f58' };
+    var JORD = { t: '#a98763', x: '#7a5d41', y: '#8c6c4d' };
+    var GOLV = { t: 'url(#v-golv)', x: '#b99a70', y: '#cdb089' };
+    var BETONG = { t: '#dcd6cb', x: '#a9a297', y: '#bfb8ad' };
+    var VIRKE = { t: '#f3d6a6', x: '#c9975a', y: '#dfb57a' };
+    var KOL = { t: '#4a443d', x: '#27231f', y: '#35302a' };
+    var FASAD = { t: '#3d3832', x: '#24211d', y: '#302b26' };
+    var PAPPER = { t: '#fffdf8', x: '#d8d1c4', y: '#e9e3d7' };
+    var TAK = { t: '#3b3631', x: '#2a2622', kant: '#1b1915' };
+    var LJUSTAK = { t: '#e9e2d4', x: '#cfc6b5', kant: '#b3a994' };
+
+    var DEFS = '<defs>' +
+      '<linearGradient id="v-gras" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a9c98e"/><stop offset="1" stop-color="#7ea267"/></linearGradient>' +
+      '<linearGradient id="v-golv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6ead6"/><stop offset="1" stop-color="#e6d3b3"/></linearGradient>' +
+      '<linearGradient id="v-glas" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef4f9"/><stop offset="1" stop-color="#b8cde0"/></linearGradient>' +
+      '<linearGradient id="v-varm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2d9"/><stop offset="1" stop-color="#f0b56e"/></linearGradient>' +
+      '<radialGradient id="v-skugga"><stop offset="0" stop-color="#1b1915" stop-opacity=".32"/><stop offset="1" stop-color="#1b1915" stop-opacity="0"/></radialGradient>' +
+      '<radialGradient id="v-sken"><stop offset="0" stop-color="#ffcf8a" stop-opacity=".65"/><stop offset="1" stop-color="#ffcf8a" stop-opacity="0"/></radialGradient>' +
+      '</defs>';
+
+    // Rummets två bakväggar med tjocklek och golvlist.
+    function rum() {
+      return poly([P(-5.25, -4.25, 0), P(-5.25, 4, 0), P(-5.25, 4, 3.4), P(-5.25, -4.25, 3.4)], '#ece4d7') +
+        poly([P(-5.25, -4.25, 0), P(5, -4.25, 0), P(5, -4.25, 3.4), P(-5.25, -4.25, 3.4)], '#dfd6c7') +
+        poly([P(-5.25, -4.25, 3.4), P(5, -4.25, 3.4), P(5, -4, 3.4), P(-5, -4, 3.4), P(-5, 4, 3.4), P(-5.25, 4, 3.4)], '#f7f2ea') +
+        poly([P(-5.25, 4, 0), P(-5, 4, 0), P(-5, 4, 3.4), P(-5.25, 4, 3.4)], '#c9bca6') +
+        poly([P(5, -4.25, 0), P(5, -4, 0), P(5, -4, 3.4), P(5, -4.25, 3.4)], '#bfb19a') +
+        lin([P(-5, 4, 0.12), P(-5, -4, 0.12), P(5, -4, 0.12)], '#fffdf8', 2.5);
+    }
+
+    function platta(f, tjock) {
+      return skugga(0.6, 0.6, 6.4, 3.4, 0.9) + box(-5, -4, -(tjock || 0.45), 10, 8, tjock || 0.45, f);
+    }
+    // Pratbubbla (platt, framför scenen).
+    function bubbla(cx, cy, b, h, fyll, text, klass, svans) {
+      var x0 = cx - b / 2, y0 = cy - h / 2, s = svans === 'h' ? 1 : -1;
+      var sx = cx + s * b * 0.22;
+      return g('v-bubbla ' + klass,
+        '<rect x="' + x0 + '" y="' + y0 + '" width="' + b + '" height="' + h + '" rx="' + (h / 2) + '" fill="' + fyll + '" stroke="#1b1915" stroke-width="1.6"/>' +
+        '<path d="M' + (sx - 7) + ' ' + (y0 + h - 1) + 'l' + (s * 4) + ' 12 ' + (s * 8) + '-12z" fill="' + fyll + '" stroke="#1b1915" stroke-width="1.6" stroke-linejoin="round"/>' +
+        '<rect x="' + (sx - 8) + '" y="' + (y0 + h - 3) + '" width="16" height="4" fill="' + fyll + '"/>' + text,
+        'transform-origin:' + sx + 'px ' + (y0 + h + 10) + 'px');
+    }
+
+    /* 1 Första samtalet: ett ljust rum, bord med ritning och kaffe. */
+    function samtal() {
+      var h = DEFS + platta(GOLV);
+      for (var i = -4; i < 4; i += 1.1) h += lin([P(-5, i, 0.01), P(5, i, 0.01)], 'rgba(143,84,36,.12)', 1);
+      h += rum();
+      h += fonsterY(-4, 0.4, 3.8, 1.2, 2.9, 'url(#v-glas)');
+      h += lin([P(2.1, -4, 1.2), P(2.1, -4, 2.9)], '#1b1915', 1.6);
+      // Tavla med en husritning på vänstra väggen.
+      h += poly([P(-5, -2.8, 1.5), P(-5, -0.4, 1.5), P(-5, -0.4, 2.9), P(-5, -2.8, 2.9)], '#fffdf8', ' stroke="#1b1915" stroke-width="1.6"');
+      h += lin([P(-5, -2.3, 1.8), P(-5, -2.3, 2.3), P(-5, -1.6, 2.7), P(-5, -0.9, 2.3), P(-5, -0.9, 1.8), P(-5, -2.3, 1.8)], '#8f5424', 1.6);
+      // Växt i hörnet.
+      h += cyl(-4.1, -3.1, 0, 0.45, 0.8, { x: '#c9975a', t: '#8a6a4b' });
+      h += '<g class="v-blad">' + poly([P(-4.1, -3.1, 0.8), P(-4.8, -3.3, 2.1), P(-4.2, -3.1, 1.2)], '#6f9a6a') +
+        poly([P(-4.1, -3.1, 0.8), P(-3.3, -3.5, 2.3), P(-3.9, -3.2, 1.3)], '#436b4f') +
+        poly([P(-4.1, -3.1, 0.8), P(-4.1, -2.2, 1.9), P(-4.0, -2.9, 1.1)], '#5a8660') + '</g>';
+      // Bordet.
+      h += skugga(0.9, 0.9, 2.2, 1.1);
+      h += box(0.1, 0.2, 0, 0.3, 0.3, 1.4, KOL);
+      h += cyl(0.25, 0.35, 1.4, 1.9, 0.14, { x: '#c9975a', t: '#f3d6a6' });
+      // Stolarna.
+      h += box(-2.6, 0.6, 0, 1, 1, 0.9, KOL) + box(-2.6, 0.6, 0.9, 0.22, 1, 1.1, KOL);
+      h += box(2.2, 2.2, 0, 1, 1, 0.9, KOL) + box(2.2, 3.0, 0.9, 1, 0.22, 1.1, KOL);
+      // På bordet: ritning, laptop, två koppar.
+      h += poly([P(-0.9, -0.4, 1.56), P(0.9, -0.6, 1.56), P(1.2, 0.8, 1.56), P(-0.6, 1.0, 1.56)], '#fffdf8', ' stroke="#c9b391" stroke-width="1"');
+      h += lin([P(-0.4, -0.1, 1.57), P(0.6, -0.2, 1.57), P(0.8, 0.5, 1.57), P(-0.2, 0.6, 1.57), P(-0.4, -0.1, 1.57)], '#8f5424', 1.3);
+      h += box(0.6, 0.8, 1.54, 1.0, 0.7, 0.06, { t: '#b9b3a8', x: '#6f6a62', y: '#8a847a' });
+      h += poly([P(0.6, 0.8, 1.6), P(1.6, 0.8, 1.6), P(1.6, 0.8, 2.3), P(0.6, 0.8, 2.3)], '#2a2622');
+      h += poly([P(0.7, 0.8, 1.68), P(1.5, 0.8, 1.68), P(1.5, 0.8, 2.22), P(0.7, 0.8, 2.22)], 'url(#v-glas)');
+      h += cyl(-0.9, 1.0, 1.54, 0.16, 0.26, { x: '#f7f2ea', t: '#6b4f36' });
+      h += cyl(0.2, -0.9, 1.54, 0.16, 0.26, { x: '#f0b56e', t: '#6b4f36' });
+      var a = P(-0.9, 1.0, 1.95), b = P(0.2, -0.9, 1.95);
+      h += '<path class="v-anga" d="M' + a[0].toFixed(1) + ' ' + a[1].toFixed(1) + 'c-4-6 4-10 0-16s4-10 0-14" pathLength="1"/>';
+      h += '<path class="v-anga v-anga--2" d="M' + b[0].toFixed(1) + ' ' + b[1].toFixed(1) + 'c-4-6 4-10 0-16s4-10 0-14" pathLength="1"/>';
+      // Pratbubblorna.
+      h += bubbla(232, 150, 104, 42, '#fffdf8',
+        '<circle class="v-prick" cx="208" cy="150" r="4" fill="#1b1915"/><circle class="v-prick v-prick--2" cx="232" cy="150" r="4" fill="#1b1915"/><circle class="v-prick v-prick--3" cx="256" cy="150" r="4" fill="#1b1915"/>',
+        'v-bubbla--1', 'h');
+      h += bubbla(400, 112, 150, 46, '#f3d6a6',
+        '<rect x="345" y="102" width="96" height="6" rx="3" fill="#8f5424"/><rect x="345" y="116" width="62" height="6" rx="3" fill="#8f5424" opacity=".55"/>',
+        'v-bubbla--2', 'v');
+      return h;
+    }
+
+    /* 2 Modell och anpassning: ritbord, husmodell, kulörprover. */
+    function modell() {
+      var h = DEFS + platta(GOLV) + rum();
+      // Hylla med pärmar på bakväggen.
+      h += box(-3.8, -4, 2.2, 3.4, 0.5, 0.12, VIRKE);
+      ['#8f5424', '#1b1915', '#6f9a6a', '#b8cde0', '#f0b56e'].forEach(function (f, i) {
+        h += box(-3.6 + i * 0.55, -3.95, 2.32, 0.4, 0.4, 0.75 - (i % 2) * 0.12, { t: f, x: f, y: f }, ' opacity=".92"');
+      });
+      // Ritbordet.
+      h += skugga(0.8, 0.8, 3.4, 1.7);
+      [[-2.6, -1.6], [2.6, -1.6], [2.6, 1.8], [-2.6, 1.8]].forEach(function (k) { h += box(k[0], k[1], 0, 0.22, 0.22, 1.5, KOL); });
+      h += box(-2.9, -1.9, 1.5, 5.8, 4.0, 0.16, VIRKE);
+      // Ritningen med planen som ritas.
+      h += poly([P(-2.5, -1.5, 1.67), P(2.3, -1.5, 1.67), P(2.3, 1.7, 1.67), P(-2.5, 1.7, 1.67)], '#f7fbff', ' stroke="#b8cde0" stroke-width="1"');
+      for (var gx = -2.1; gx < 2.3; gx += 0.4) h += lin([P(gx, -1.5, 1.671), P(gx, 1.7, 1.671)], 'rgba(143,176,207,.35)', 0.6);
+      h += lin([P(-2.1, -1.1, 1.68), P(0.9, -1.1, 1.68), P(0.9, 1.3, 1.68), P(-2.1, 1.3, 1.68), P(-2.1, -1.1, 1.68)], '#2f4f6f', 1.8, ' pathLength="1" class="v-rita"');
+      h += lin([P(-0.6, -1.1, 1.68), P(-0.6, 0.4, 1.68), P(0.9, 0.4, 1.68)], '#2f4f6f', 1.4, ' pathLength="1" class="v-rita v-rita--2"');
+      h += lin([P(-2.1, 1.6, 1.68), P(0.9, 1.6, 1.68)], '#8f5424', 1.2, ' pathLength="1" class="v-rita v-rita--3"');
+      // Husmodellen, taket lyfts för att visa planen.
+      h += skugga(1.9, 0.2, 0.9, 0.45);
+      h += box(1.2, -0.7, 1.67, 1.5, 1.0, 0.55, VIRKE);
+      h += fonsterY(0.3, 1.5, 2.0, 1.85, 2.08, 'url(#v-glas)');
+      h += g('v-modelltak', poly([P(1.1, -0.8, 2.2), P(2.8, -0.8, 2.2), P(2.8, -0.2, 2.6), P(1.1, -0.2, 2.6)], '#2a2622') +
+        poly([P(1.1, -0.2, 2.6), P(2.8, -0.2, 2.6), P(2.8, 0.4, 2.2), P(1.1, 0.4, 2.2)], '#3b3631') +
+        poly([P(2.7, -0.7, 2.22), P(2.7, 0.3, 2.22), P(2.7, -0.2, 2.56)], '#dfb57a'));
+      // Måttband som dras ut längs bordskanten.
+      var m0 = P(-2.5, 2.0, 1.66), m1 = P(2.3, 2.0, 1.66);
+      h += g('v-matt', '<line x1="' + m0[0].toFixed(1) + '" y1="' + m0[1].toFixed(1) + '" x2="' + m1[0].toFixed(1) + '" y2="' + m1[1].toFixed(1) +
+        '" stroke="#f0b56e" stroke-width="5" stroke-linecap="round"/>', 'transform-origin:' + m0[0].toFixed(1) + 'px ' + m0[1].toFixed(1) + 'px');
+      h += box(-2.95, 1.75, 1.5, 0.5, 0.5, 0.35, { t: '#f0b56e', x: '#8f5424', y: '#c9975a' });
+      // Kulörproverna som fläktas ut.
+      var kulor = ['#24211d', '#c9975a', '#e9e2d4', '#6f8f58'];
+      var mitt = [500, 175];
+      h += g('v-flakt', kulor.map(function (f, i) {
+        return '<g class="v-prov" style="--i:' + i + ';--v:' + ((i - 1.5) * 16) + 'deg;transform-origin:' + mitt[0] + 'px ' + mitt[1] + 'px;transform:rotate(var(--v))">' +
+          '<rect x="' + (mitt[0] - 11) + '" y="' + (mitt[1] - 78) + '" width="22" height="80" rx="4" fill="' + f + '" stroke="#1b1915" stroke-width="1.4"/></g>';
+      }).join('') + '<circle cx="' + mitt[0] + '" cy="' + (mitt[1] - 4) + '" r="3.5" fill="#1b1915"/>');
+      return h;
+    }
+
+    /* 3 Bygglov eller anmälan: underlaget stämplas och skickas in. */
+    function lov() {
+      var h = DEFS + platta(BETONG, 0.4);
+      for (var i = -5; i < 5; i += 2) h += lin([P(i, -4, 0.01), P(i, 4, 0.01)], 'rgba(27,25,21,.07)', 1);
+      // Kommunhuset i bakgrunden.
+      h += skugga(-2.2, -2.2, 2.6, 1.3);
+      h += box(-4.4, -3.8, 0, 3.6, 2.6, 0.3, BETONG);
+      h += box(-4.2, -3.6, 0.3, 3.2, 2.2, 2.4, { t: '#efe8dc', x: '#cfc6b5', y: '#e2d9ca' });
+      for (var c = 0; c < 4; c++) h += box(-4.0 + c * 0.9, -1.35, 0.3, 0.22, 0.22, 2.4, { t: '#fffdf8', x: '#d8d1c4', y: '#ece6da' });
+      h += poly([P(-4.4, -1.1, 2.7), P(-0.8, -1.1, 2.7), P(-2.6, -1.1, 3.6)], '#e9e2d4', ' stroke="#b3a994" stroke-width="1.2"');
+      h += box(-4.4, -3.8, 2.7, 3.6, 2.7, 0.18, { t: '#cfc6b5', x: '#a9a297', y: '#bfb8ad' });
+      h += fonsterY(-1.4, -3.5, -3.0, 1.0, 1.9, 'url(#v-glas)') + fonsterY(-1.4, -2.1, -1.6, 1.0, 1.9, 'url(#v-glas)');
+      var fl = P(-2.6, -2.5, 3.3);
+      h += '<line x1="' + fl[0].toFixed(1) + '" y1="' + fl[1].toFixed(1) + '" x2="' + fl[0].toFixed(1) + '" y2="' + (fl[1] - 38).toFixed(1) + '" stroke="#1b1915" stroke-width="1.5"/>';
+      h += '<path class="v-flagga" d="M' + fl[0].toFixed(1) + ' ' + (fl[1] - 38).toFixed(1) + 'h20l-4 6 4 6h-20z" fill="#f0b56e" style="transform-origin:' + fl[0].toFixed(1) + 'px ' + (fl[1] - 32).toFixed(1) + 'px"/>';
+      // Skrivbordet med dokumentbunten.
+      h += skugga(1.8, 1.9, 2.4, 1.2);
+      h += box(0.2, 0.6, 0, 3.4, 2.4, 1.2, VIRKE);
+      [0, 1, 2].forEach(function (k) {
+        h += box(0.8 + k * 0.08, 0.9 - k * 0.06, 1.2 + k * 0.06, 1.7, 1.25, 0.05, PAPPER);
+      });
+      for (var r = 0; r < 4; r++) h += lin([P(1.1, 1.15 + r * 0.24, 1.39), P(2.2 - (r === 3 ? 0.5 : 0), 1.15 + r * 0.24, 1.39)], '#c9b391', 1.4);
+      // Stämpeln: slår ner, lämnar sitt märke.
+      var mark = P(2.05, 1.5, 1.4);
+      h += '<g class="v-stampelmark" style="transform-origin:' + mark[0].toFixed(1) + 'px ' + mark[1].toFixed(1) + 'px">' +
+        '<ellipse cx="' + mark[0].toFixed(1) + '" cy="' + mark[1].toFixed(1) + '" rx="22" ry="12" fill="none" stroke="#8f5424" stroke-width="2.4"/>' +
+        '<path d="M' + (mark[0] - 8).toFixed(1) + ' ' + mark[1].toFixed(1) + 'l5 4 11-8" fill="none" stroke="#8f5424" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>';
+      h += '<ellipse class="v-slag" cx="' + mark[0].toFixed(1) + '" cy="' + mark[1].toFixed(1) + '" rx="26" ry="14" fill="none" stroke="#f0b56e" stroke-width="2" style="transform-origin:' + mark[0].toFixed(1) + 'px ' + mark[1].toFixed(1) + 'px"/>';
+      h += g('v-stampel', cyl(2.05, 1.5, 1.9, 0.42, 0.22, { x: '#8f5424', t: '#c9975a' }) +
+        cyl(2.05, 1.5, 2.12, 0.14, 0.7, { x: '#27231f', t: '#4a443d' }) +
+        cyl(2.05, 1.5, 2.82, 0.3, 0.28, { x: '#27231f', t: '#4a443d' }));
+      // Kuvertet som flyger till kommunen.
+      h += '<path class="v-bana" d="M300 236C214 206 196 112 262 150" fill="none" stroke="#8f5424" stroke-width="1.6" stroke-dasharray="4 6"/>';
+      h += '<g class="v-kuvert" style="transform:translate(262px,150px) scale(.8)"><rect x="-16" y="-11" width="32" height="22" rx="3" fill="#fffdf8" stroke="#1b1915" stroke-width="1.6"/>' +
+        '<path d="M-16 -9l16 11 16-11" fill="none" stroke="#1b1915" stroke-width="1.6" stroke-linejoin="round"/></g>';
+      return h;
+    }
+
+    /* 4 Tillverkning: hallen under tak, väggelement på bänken. */
+    function tillverkning() {
+      var h = DEFS + platta(BETONG, 0.4);
+      h += lin([P(-4.6, 2.8, 0.01), P(4.6, 2.8, 0.01)], '#f0b56e', 3);
+      h += lin([P(-4.6, -3.2, 0.01), P(4.6, -3.2, 0.01)], '#f0b56e', 3);
+      // Pelare och takbalkar (taket syns som konstruktion).
+      [[-4.8, -3.8], [4.5, -3.8], [-4.8, 3.5]].forEach(function (k) { h += box(k[0], k[1], 0, 0.3, 0.3, 4.2, KOL); });
+      h += box(-4.8, -3.8, 4.2, 9.6, 0.3, 0.3, KOL) + box(-4.8, -3.8, 4.2, 0.3, 7.6, 0.3, KOL);
+      for (var t = -2.8; t < 4.6; t += 1.9) h += lin([P(t, -3.6, 4.5), P(t, 3.8, 4.5)], 'rgba(27,25,21,.28)', 1.5);
+      // Traversen som åker längs balken.
+      h += g('v-travers', box(-4.6, -3.5, 3.95, 0.6, 7.2, 0.25, { t: '#f0b56e', x: '#8f5424', y: '#c9975a' }) +
+        lin([P(-4.3, 0.2, 3.95), P(-4.3, 0.2, 2.9)], '#1b1915', 1.4));
+      // Ett färdigt element står lutat.
+      h += skugga(-2.9, -1.4, 1.6, 0.8);
+      h += box(-3.8, -2.6, 0, 0.18, 2.6, 2.5, VIRKE);
+      for (var s = -2.6; s <= 0.05; s += 0.65) h += lin([P(-3.62, s, 0), P(-3.62, s, 2.5)], '#c9975a', 1.4);
+      h += poly([P(-3.62, -2.6, 1.3), P(-3.62, 0, 1.3), P(-3.62, 0, 2.5), P(-3.62, -2.6, 2.5)], 'rgba(233,226,212,.85)');
+      // Arbetsbänken med elementet som byggs.
+      h += skugga(1.4, 1.2, 3.0, 1.4);
+      [[-0.9, -0.6], [3.4, -0.6], [3.4, 2.4], [-0.9, 2.4]].forEach(function (k) { h += box(k[0], k[1], 0, 0.2, 0.2, 0.9, KOL); });
+      h += box(-1.1, -0.8, 0.9, 4.8, 3.4, 0.14, { t: '#6f6a62', x: '#3a352d', y: '#4f4a42' });
+      h += box(-0.8, -0.5, 1.04, 4.2, 0.24, 0.16, VIRKE) + box(-0.8, 2.0, 1.04, 4.2, 0.24, 0.16, VIRKE);
+      for (var k = 0; k < 6; k++) {
+        h += g('v-regel', box(-0.8 + k * 0.8, -0.26, 1.04, 0.2, 2.26, 0.16, VIRKE), '--i:' + k);
+      }
+      // Termometern: jämn temperatur.
+      var tm = P(4.2, -3.8, 2.4);
+      h += '<g class="v-termo" transform="translate(' + tm[0].toFixed(1) + ',' + tm[1].toFixed(1) + ')">' +
+        '<rect x="-7" y="-34" width="14" height="44" rx="7" fill="#fffdf8" stroke="#1b1915" stroke-width="1.5"/>' +
+        '<rect class="v-termofyll" x="-3" y="-26" width="6" height="30" rx="3" fill="#f0b56e"/>' +
+        '<circle cx="0" cy="8" r="6" fill="#f0b56e" stroke="#1b1915" stroke-width="1.5"/></g>';
+      return h;
+    }
+
+    /* 5 Grund och anslutningar: plattan gjuts, ledningarna fram. */
+    function ror(pnts, farg, klass) {
+      var q = pnts.map(function (k) { return P(k[0], k[1], k[2]); });
+      return lin(q, '#1b1915', 5.5) + lin(q, farg, 3.5) + lin(q, 'rgba(255,255,255,.85)', 1.6, ' class="v-flode ' + klass + '"');
+    }
+    function stigare(x, y, farg) {
+      var a = P(x, y, 0.4), b = P(x, y, 0.75);
+      var l = ' x1="' + a[0].toFixed(1) + '" y1="' + a[1].toFixed(1) + '" x2="' + b[0].toFixed(1) + '" y2="' + b[1].toFixed(1) + '"';
+      return '<line' + l + ' stroke="#1b1915" stroke-width="7" stroke-linecap="round"/><line' + l + ' stroke="' + farg + '" stroke-width="4.5" stroke-linecap="round"/>';
+    }
+    function grund() {
+      var h = DEFS + platta(GRAS);
+      h += gran(-4.2, -3.2, 2.8) + gran(-3.2, -3.6, 2.2) + gran(4.1, -3.4, 2.6);
+      // Utsättningen: pinnar och snöre.
+      var sn = [[-2.8, -2.2], [2.8, -2.2], [2.8, 2.2], [-2.8, 2.2]];
+      sn.forEach(function (k) { h += box(k[0] - 0.08, k[1] - 0.08, 0, 0.16, 0.16, 0.7, VIRKE); });
+      h += lin(sn.concat([sn[0]]).map(function (k) { return P(k[0], k[1], 0.62); }), '#f0b56e', 1.4, ' stroke-dasharray="5 4"');
+      // Schaktet och plattan som gjuts.
+      h += poly([P(-2.4, -1.9, 0.01), P(2.4, -1.9, 0.01), P(2.4, 1.9, 0.01), P(-2.4, 1.9, 0.01)], '#8c6c4d');
+      h += ror([[5, 0.6, 0.02], [1.2, 0.6, 0.02]], '#5b8fbf', '') +
+        ror([[5, -0.6, 0.02], [0.4, -0.6, 0.02]], '#8a847a', 'v-flode--2') +
+        ror([[-0.6, 4, 0.02], [-0.6, 1.0, 0.02]], '#f0b56e', 'v-flode--3');
+      h += g('v-platta', box(-2.3, -1.8, 0, 4.6, 3.6, 0.4, BETONG) +
+        poly([P(-2.3, -1.8, 0.4), P(2.3, -1.8, 0.4), P(2.3, 1.8, 0.4), P(-2.3, 1.8, 0.4)], 'url(#v-glans)', ' class="v-blank"'));
+      // Stigarna upp genom plattan.
+      h += stigare(1.2, 0.6, '#5b8fbf') + stigare(0.4, -0.6, '#8a847a') + stigare(-0.6, 1.0, '#f0b56e');
+      // Laser på stativ som sveper.
+      var st = P(3.6, 3.0, 0);
+      h += '<g transform="translate(' + st[0].toFixed(1) + ',' + st[1].toFixed(1) + ')">' +
+        '<path d="M0-38L-12 0M0-38L12 0M0-38L0 2" stroke="#1b1915" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+        '<rect x="-7" y="-50" width="14" height="12" rx="3" fill="#f0b56e" stroke="#1b1915" stroke-width="1.5"/>' +
+        '<path class="v-laser" d="M0-44L-120-80" stroke="#e0764a" stroke-width="1.6" stroke-linecap="round" style="transform-origin:0 -44px"/></g>';
+      return h.replace('</defs>', '<linearGradient id="v-glans" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>');
+    }
+
+    /* 6 Leverans och montage: lastbilen, kranen och väggarna. */
+    function montage() {
+      var h = DEFS + platta(GRAS);
+      h += gran(-4.3, 3.2, 2.6) + gran(-4.4, -3.4, 3.0);
+      // Plattan med två väggar som redan står.
+      h += skugga(-0.8, -0.6, 2.8, 1.4);
+      h += box(-3.2, -3.0, 0, 4.6, 3.6, 0.35, BETONG);
+      h += box(-3.1, -2.9, 0.35, 4.4, 0.22, 2.4, FASAD);
+      h += box(-3.1, -2.9, 0.35, 0.22, 3.4, 2.4, FASAD);
+      h += fonsterY(-2.68, -1.6, -0.2, 1.1, 2.2, 'url(#v-glas)');
+      // Kranen: torn, bom, lina och elementet som sänks.
+      h += skugga(3.4, -2.8, 0.9, 0.45);
+      h += box(3.0, -3.2, 0, 0.5, 0.5, 5.2, { t: '#f0b56e', x: '#8f5424', y: '#c9975a' });
+      for (var z = 0.4; z < 5.2; z += 0.6) h += lin([P(3.5, -3.2, z), P(3.5, -2.7, z + 0.4)], 'rgba(27,25,21,.4)', 1);
+      h += box(-1.8, -3.1, 5.2, 5.6, 0.3, 0.3, { t: '#f0b56e', x: '#8f5424', y: '#c9975a' });
+      h += box(3.6, -3.2, 4.6, 1.0, 0.5, 0.6, KOL);
+      var krok = P(0.2, -1.3, 5.2);
+      h += '<line class="v-lina" x1="' + krok[0].toFixed(1) + '" y1="' + krok[1].toFixed(1) + '" x2="' + krok[0].toFixed(1) + '" y2="' + (krok[1] + 40).toFixed(1) + '" stroke="#1b1915" stroke-width="1.6" style="transform-origin:' + krok[0].toFixed(1) + 'px ' + krok[1].toFixed(1) + 'px"/>';
+      h += g('v-last', box(-0.9, -0.95, 2.9, 2.2, 0.22, 1.6, VIRKE) +
+        lin([P(0.2, -0.95, 4.5), P(-0.9, -0.95, 4.5 - 0.02)], '#1b1915', 1.2) + lin([P(0.2, -0.95, 4.5), P(1.3, -0.95, 4.5)], '#1b1915', 1.2));
+      // Lastbilen med fler element på flaket.
+      h += skugga(2.6, 2.6, 2.6, 1.1);
+      h += box(0.6, 2.0, 0.2, 3.4, 1.3, 0.5, KOL);
+      h += box(0.8, 2.1, 0.7, 2.6, 1.1, 0.25, VIRKE) + box(0.9, 2.15, 0.95, 2.4, 1.0, 0.25, VIRKE);
+      h += box(4.0, 2.0, 0.2, 1.1, 1.3, 1.5, { t: '#f7f2ea', x: '#cfc6b5', y: '#e2d9ca' });
+      h += fonsterX(5.1, 2.15, 3.15, 0.95, 1.5, 'url(#v-glas)');
+      [[1.2, 3.3], [3.4, 3.3], [4.6, 3.3]].forEach(function (k) { h += cyl(k[0], k[1], 0.02, 0.32, 0.18, { x: '#1b1915', t: '#35302a' }); });
+      return h;
+    }
+
+    /* 7 Slutbesiktning: det färdiga huset, lampor tända, punktlistan. */
+    function besiktning() {
+      var h = DEFS + platta(GRAS);
+      h += gran(-4.3, -3.3, 3.0) + gran(-3.4, -3.7, 2.2) + gran(4.2, -3.3, 2.7);
+      h += skugga(0.4, 0.2, 4.0, 2.0);
+      h += box(-3.0, -2.2, 0, 5.6, 3.4, 0.25, BETONG);
+      h += hus(-2.8, -2.0, 2.4, 1.0, 2.5, 3.7, FASAD, TAK, 0.3);
+      // Varma fönster med sken.
+      var sk = P(0.2, 1.0, 1.4);
+      h += '<ellipse class="v-sken" cx="' + sk[0].toFixed(1) + '" cy="' + (sk[1] + 30).toFixed(1) + '" rx="120" ry="44" fill="url(#v-sken)"/>';
+      h += fonsterY(1.0, -2.1, -0.9, 0.9, 2.1, 'url(#v-varm)') + fonsterY(1.0, 0.1, 1.9, 0.5, 2.1, 'url(#v-varm)');
+      h += lin([P(1.0, 1.0, 0.5), P(1.0, 1.0, 2.1)], '#1b1915', 1.6);
+      h += fonsterX(2.4, -1.4, -0.3, 1.1, 2.0, 'url(#v-varm)');
+      h += poly([P(-0.6, 1.0, 0.25), P(-0.1, 1.0, 0.25), P(-0.1, 1.0, 2.0), P(-0.6, 1.0, 2.0)], '#1b1915');
+      // Altanen och trappan.
+      h += box(-1.6, 1.0, 0, 3.6, 1.3, 0.25, VIRKE);
+      for (var d = -1.3; d < 2.0; d += 0.45) h += lin([P(d, 1.0, 0.26), P(d, 2.3, 0.26)], '#c9975a', 1);
+      h += box(-0.8, 2.3, 0, 1.0, 0.4, 0.12, VIRKE);
+      // Gången.
+      [[-0.3, 2.9], [0.1, 3.5]].forEach(function (k) { h += box(k[0], k[1], 0, 0.6, 0.4, 0.05, BETONG); });
+      // Punktlistan som bockas av, och nyckeln.
+      h += '<g class="v-lista"><rect x="438" y="58" width="118" height="134" rx="14" fill="#fffdf8" stroke="#1b1915" stroke-width="1.6"/>' +
+        '<rect x="480" y="50" width="34" height="14" rx="4" fill="#1b1915"/>' +
+        [0, 1, 2].map(function (i) {
+          var y = 92 + i * 32;
+          return '<rect x="452" y="' + (y - 9) + '" width="18" height="18" rx="5" fill="none" stroke="#1b1915" stroke-width="1.5"/>' +
+            '<path class="v-bock v-bock--' + (i + 1) + '" d="M455 ' + y + 'l4 4 8-9" fill="none" stroke="#22a35a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>' +
+            '<rect x="478" y="' + (y - 3) + '" width="' + (62 - i * 12) + '" height="6" rx="3" fill="#d8d1c4"/>';
+        }).join('') + '</g>';
+      h += '<g class="v-nyckel" style="transform-origin:96px 92px"><circle cx="96" cy="92" r="14" fill="none" stroke="#1b1915" stroke-width="3"/>' +
+        '<path d="M96 106v34M96 124h10M96 134h7" fill="none" stroke="#1b1915" stroke-width="3" stroke-linecap="round"/>' +
+        '<rect x="70" y="62" width="30" height="18" rx="4" fill="#f0b56e" stroke="#1b1915" stroke-width="1.5" transform="rotate(-12 85 71)"/></g>';
+      return h;
+    }
+
+    return [samtal, modell, lov, tillverkning, grund, montage, besiktning];
+  })();
+
+  /* --- Så fungerar det --------------------------------------------
+     Scrollberättelsen (femte versionen, 2026-09-30). Till vänster en
+     klistrande scen med sju isometriska miljöer (SCENER nedan), som byter
+     mjukt när man rullar: den gamla lyfts undan, den nya glider fram och
+     sakerna i den börjar röra sig (bara den aktiva rör sig). Ovanpå:
+     skedet, en ring med stegnumret och stegets namn. Till höger stegen
+     längs en räls som fylls. I mobilen ligger varje miljö i sitt steg.
+     Vem gör vad och hustypen som förut. Stil i design.css 19. */
+  (function () {
+    $$('.vemkort').forEach(function (v) {
+      if (lugn) v.classList.add('syns');
+      else narSynligt(v, function (e) { e.classList.add('syns'); }, 0.4);
+    });
+    var rot = $('[data-berattelse]');
+    if (!rot) return;
+    var sek = rot.closest('.flode') || document;
+    var steg = $$('.berattelse__steg', rot);
+    var holder = $('[data-vyer]', rot);
+    var ram = $('.berattelse__ram', rot);
+    var lista = $('.berattelse__lista', rot);
+    var railFyll = $('.berattelse__railfyll', rot);
+    var prickar = $$('[data-fard]', sek);
+    var nu = $('[data-flode-nu]', sek);
+    var hud = {
+      skede: $('[data-scen-skede]', rot), nr: $('[data-scen-nr]', rot),
+      namn: $('[data-scen-namn]', rot), ring: $('.berattelse__ringfyll', rot)
+    };
+    var bred = window.matchMedia('(min-width: 1041px)');
+    $$('.vemfilter, .hustypval', sek).forEach(glidandeMarkering);
+    if (ram) lutaI3D(ram, 3);
+
+    // Scenerna. Varje svg får egna id:n för sina toningar.
+    var vyer = SCENER.map(function (f, i) {
+      var d = document.createElement('div');
+      d.className = 'berattelse__vy';
+      d.innerHTML = '<svg viewBox="0 0 600 440" focusable="false">' +
+        f().replace(/id="v-/g, 'id="v' + i + '-').replace(/url\(#v-/g, 'url(#v' + i + '-') + '</svg>';
+      return d;
+    });
+    var ioVy = null;
+    function placera() {
+      if (ioVy) { ioVy.disconnect(); ioVy = null; }
+      if (bred.matches) {
+        vyer.forEach(function (v) { holder.appendChild(v); v.classList.remove('i-vy'); });
+      } else {
+        vyer.forEach(function (v, i) { $('.berattelse__plats', steg[i]).appendChild(v); });
+        // I mobilen rör sig en miljö när den syns.
+        if (window.IntersectionObserver && !lugn) {
+          ioVy = new IntersectionObserver(function (poster) {
+            poster.forEach(function (p) { p.target.classList.toggle('i-vy', p.isIntersecting); });
+          }, { threshold: 0.35 });
+          vyer.forEach(function (v) { ioVy.observe(v); });
+        } else {
+          vyer.forEach(function (v) { v.classList.add('i-vy'); });
+        }
+      }
+      aktiv = -1;
+      matt = null;
+      boka();
+    }
+
+    var aktiv = -1;
+    function visa(i) {
+      if (i === aktiv) return;
+      aktiv = i;
+      steg.forEach(function (s, j) {
+        s.classList.toggle('aktiv', j === i);
+        s.classList.toggle('passerad', j <= i);
+      });
+      vyer.forEach(function (v, j) {
+        v.classList.toggle('aktiv', j === i);
+        v.classList.toggle('forbi', j < i);
+      });
+      prickar.forEach(function (d, j) {
+        d.classList.toggle('aktiv', j === i);
+        d.classList.toggle('klar', j < i);
+      });
+      var namn = $('h3', steg[i]).textContent;
+      if (nu) nu.textContent = '0' + (i + 1) + ' · ' + steg[i].getAttribute('data-namn');
+      if (hud.skede) hud.skede.textContent = steg[i].getAttribute('data-skede');
+      if (hud.nr) hud.nr.textContent = '0' + (i + 1);
+      if (hud.namn) {
+        hud.namn.textContent = namn;
+        hud.namn.classList.remove('byt');
+        void hud.namn.offsetWidth;
+        hud.namn.classList.add('byt');
+      }
+      if (hud.ring) hud.ring.style.strokeDasharray = ((i + 1) / steg.length * 100).toFixed(2) + ' 100';
+    }
+
+    // Vilket steg läser man? Det vars ruta korsar mitten av skärmen.
+    var matt = null, bokad = false;
+    function mat() {
+      var y0 = window.scrollY;
+      matt = {
+        lista: { topp: lista.getBoundingClientRect().top + y0, h: lista.offsetHeight },
+        steg: steg.map(function (s) {
+          var r = s.getBoundingClientRect();
+          return { topp: r.top + y0, botten: r.bottom + y0 };
+        })
+      };
+    }
+    function rita() {
+      bokad = false;
+      if (!matt) mat();
+      var y = window.scrollY + window.innerHeight * 0.5;
+      var i = 0;
+      matt.steg.forEach(function (r, j) { if (y >= r.topp) i = j; });
+      visa(i);
+      var p = Math.min(1, Math.max(0, (y - matt.lista.topp) / matt.lista.h));
+      if (railFyll) railFyll.style.transform = 'scaleY(' + p.toFixed(4) + ')';
+    }
+    function boka() {
+      if (bokad) return;
+      bokad = true;
+      requestAnimationFrame(rita);
+    }
+    window.addEventListener('scroll', boka, { passive: true });
+    window.addEventListener('resize', function () { matt = null; boka(); });
+    if (window.ResizeObserver) new ResizeObserver(function () { matt = null; boka(); }).observe(lista);
+    if (bred.addEventListener) bred.addEventListener('change', placera);
+    placera();
+
+    // Vem gör vad: det som inte gäller tonas ner.
     var vemKnappar = $$('.vemfilter button', sek);
     vemKnappar.forEach(function (b) {
       b.addEventListener('click', function () {
         vemKnappar.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
         var vem = b.getAttribute('data-vem');
-        kortS.forEach(function (k, i) {
-          var med = vem === 'alla' || k.getAttribute('data-vem') === vem;
-          k.classList.toggle('dampad', !med);
-          k.classList.toggle('markerad', med && vem !== 'alla');
-          if (med && vem !== 'alla' && !lugn && k.animate) {
-            k.animate([
-              { transform: 'perspective(900px) rotateX(18deg) translateY(10px)', opacity: 0.6 },
-              { transform: 'none', opacity: 1 }
-            ], { duration: 600, delay: i * 40, easing: 'cubic-bezier(.34,1.4,.64,1)' });
-          }
-        });
-        $$('[data-fard]', sek).forEach(function (a) {
-          var k = $('#steg-' + a.getAttribute('data-fard'));
-          a.classList.toggle('dampad', k.classList.contains('dampad'));
+        steg.forEach(function (s, i) {
+          var med = vem === 'alla' || s.getAttribute('data-vem') === vem;
+          s.classList.toggle('dampad', !med);
+          s.classList.toggle('markerad', med && vem !== 'alla');
+          if (prickar[i]) prickar[i].classList.toggle('dampad', !med);
         });
       });
     });
 
-    // Hustyp: steg 03 säger vad som faktiskt gäller för det huset, och
-    // steg 06 får modellernas leveranstid.
+    // Hustyp: steg 03 säger vad som gäller, steg 06 får leveranstiden.
     var steg3 = $('#steg-3'), steg6 = $('#steg-6');
     var leverans = {};
     try { leverans = JSON.parse(sek.getAttribute('data-leverans')); } catch (e) { leverans = {}; }
     var orig = steg3 ? { h: $('h3', steg3).textContent, p: $('p', steg3).textContent } : null;
     var chip = document.createElement('span');
-    chip.className = 'fassteg__leverans';
+    chip.className = 'flode__leverans';
     chip.hidden = true;
-    if (steg6) $('.fassteg__topp', steg6).appendChild(chip);
+    if (steg6) $('.berattelse__stegtopp', steg6).appendChild(chip);
     var TEXT = {
       attefallshus: ['Anmälan för installationerna',
         'Ett attefallshus inom måtten behöver sedan december 2025 varken bygglov eller anmälan för själva byggnaden. Ska det ha vatten, avlopp, ventilation eller eldstad anmäls installationerna. Vi tar fram underlaget, du lämnar in till kommunen.'],
       annat: ['Bygglov',
         'Fritidshus kräver bygglov. Vi tar fram ritningar och underlag, men det är du som är byggherre och söker lovet hos din kommun.']
     };
+    function blinka(el) {
+      if (lugn || !el) return;
+      el.classList.remove('berattelse__kort--ny');
+      void el.offsetWidth;
+      el.classList.add('berattelse__kort--ny');
+    }
     var typKnappar = $$('.hustypval button', sek);
     typKnappar.forEach(function (b) {
       b.addEventListener('click', function () {
@@ -855,49 +1294,51 @@
           var t = typ === 'alla' ? [orig.h, orig.p] : (TEXT[typ] || TEXT.annat);
           $('h3', steg3).textContent = t[0];
           $('p', steg3).textContent = t[1];
-          if (!lugn && steg3.animate) {
-            steg3.animate([
-              { transform: 'perspective(900px) rotateY(-12deg)', opacity: 0.4 },
-              { transform: 'none', opacity: 1 }
-            ], { duration: 650, easing: 'cubic-bezier(.34,1.4,.64,1)' });
-          }
+          blinka($('.berattelse__kort', steg3));
+          if (aktiv === 2 && hud.namn) hud.namn.textContent = t[0];
         }
         chip.hidden = typ === 'alla' || !leverans[typ];
         if (!chip.hidden) {
           chip.textContent = 'Leverans ' + leverans[typ] + ' v';
-          chip.classList.remove('fassteg__leverans--ny');
-          void chip.offsetWidth;
-          chip.classList.add('fassteg__leverans--ny');
+          blinka($('.berattelse__kort', steg6));
         }
       });
     });
+  })();
 
-    // Färdplanen: markerar steget man läser och fyller spåret dit.
-    var fard = $$('[data-fard]', sek);
-    var spar = $('.fardplan__spar span', sek);
-    function markera(nr) {
-      fard.forEach(function (a) {
-        var n = Number(a.getAttribute('data-fard'));
-        a.classList.toggle('aktiv', n === nr);
-        a.classList.toggle('klar', n < nr);
-      });
-      if (spar) spar.style.transform = 'scaleX(' + ((nr - 1) / (fard.length - 1)).toFixed(3) + ')';
-      kortS.forEach(function (k) {
-        if (Number(k.getAttribute('data-steg')) <= nr) k.classList.add('tand');
-      });
+  /* --- Så fungerar det: din checklista ---------------------------
+     Det du själv gör, att bocka av. Bockarna sparas i webbläsaren
+     (localStorage) - bara för den som tittar, inget skickas någonstans. */
+  (function () {
+    var lista = $('.checklista');
+    if (!lista) return;
+    var NYCKEL = 'idealhus-checklista';
+    var rutor = $$('[data-check]', lista);
+    var antal = $('[data-check-antal]', lista);
+    var ring = $('.checklista__ringfyll', lista);
+    var sparat = {};
+    try { sparat = JSON.parse(lagra.hamta(NYCKEL) || '{}') || {}; } catch (e) { sparat = {}; }
+    function rita() {
+      var klara = rutor.filter(function (r) { return r.checked; }).length;
+      antal.textContent = klara + ' av ' + rutor.length;
+      if (ring) ring.style.strokeDasharray = (klara / rutor.length * 100).toFixed(2) + ' 100';
+      lista.classList.toggle('checklista--klar', klara === rutor.length);
     }
-    markera(1);
-    if (window.IntersectionObserver) {
-      // Läsbandet är mitten av skärmen. Står flera kort där (de ligger
-      // bredvid varandra) räknas det sista, så spåret hinner fram.
-      var synliga = new Map();
-      var obs = new IntersectionObserver(function (poster) {
-        poster.forEach(function (p) { synliga.set(p.target, p.isIntersecting); });
-        var inne = kortS.filter(function (k) { return synliga.get(k); });
-        if (inne.length) markera(Number(inne[inne.length - 1].getAttribute('data-steg')));
-      }, { rootMargin: '-35% 0px -45% 0px' });
-      kortS.forEach(function (k) { obs.observe(k); });
-    }
+    rutor.forEach(function (r) {
+      r.checked = !!sparat[r.getAttribute('data-check')];
+      r.addEventListener('change', function () {
+        sparat[r.getAttribute('data-check')] = r.checked;
+        lagra.spara(NYCKEL, JSON.stringify(sparat));
+        rita();
+      });
+    });
+    $('[data-check-rensa]', lista).addEventListener('click', function () {
+      rutor.forEach(function (r) { r.checked = false; });
+      sparat = {};
+      lagra.spara(NYCKEL, '{}');
+      rita();
+    });
+    rita();
   })();
 
   /* --- Huset i 3D och AR ------------------------------------------
@@ -1063,6 +1504,302 @@
     narSynligt(sek, bygg, 0, '0px 0px 300px 0px');
   })();
 
+  /* --- 3D-studion på kategorisidorna ---------------------------------
+     De riktiga modellerna (modeller/hus-r*.glb) i model-viewer, i samma
+     skala: kameran står på ett avstånd som passar kategorins största
+     hus, så att ett mindre hus ser mindre ut. Måttlinjer och en människa
+     på 1,8 m ritas ovanpå och följer modellen när man vrider - deras
+     ändpunkter är hotspots i modellen som model-viewer räknar om till
+     skärmen vid varje kamerarörelse. Tre vyer, zoom med knappar (inte
+     med hjulet - då fastnar sidan) och talen räknas fram vid byte.
+     Märkning och mått i _sidor.py (studio3d), stil i design.css 17. */
+  (function () {
+    var sek = $('[data-studio3d]');
+    if (!sek) return;
+    var scen = $('[data-3d-scen]', sek);
+    var knappar = $$('[data-3d-val]', sek);
+    var vyKnappar = $$('[data-vy]', sek);
+    var progress = $('[data-3d-progress]', sek);
+    var person = $('[data-3d-person]', sek);
+    var tips = $('.studio3d__tips', sek);
+    var mattKnapp = $('[data-3d-matt]', sek);
+    var talEl = $$('[data-3d-tal]', sek);
+    var linjer = {}, etiketter = {};
+    ['l', 'b', 'h'].forEach(function (k) {
+      linjer[k] = $$('[data-linje="' + k + '"] line', sek);
+      etiketter[k] = $('[data-etikett="' + k + '"]', sek);
+    });
+    var komma = function (v, dec) { return v.toFixed(dec).replace('.', ','); };
+    var alla = knappar.map(function (b) {
+      var a = function (n) { return b.getAttribute('data-' + n); };
+      return { knapp: b, id: a('id'), namn: a('namn'), yta: +a('yta'), rum: +a('rum'),
+        l: +a('l'), b: +a('b'), h: +a('h') };
+    });
+    if (!alla.length) return;
+    var aktiv = alla[0];
+
+    // Samma kameraavstånd för alla hus i kategorin.
+    var storst = Math.max.apply(null, alla.map(function (d) { return Math.sqrt(d.l * d.l + d.b * d.b); }));
+    var R = storst * 1.2 + 5;
+    var VYER = { horn: [-34, 70, 1], fasad: [0, 84, 0.95], ovan: [0, 0, 1.5] };
+    var vy = 'horn', zoom = 1;
+    // En smal ruta (mobilen) ser mindre på bredden - kameran backar.
+    var rad = function () {
+      var r = scen.getBoundingClientRect();
+      return R * Math.max(1, 1.5 / ((r.width / r.height) || 1.5));
+    };
+    var orbit = function () {
+      var v = VYER[vy];
+      return v[0] + 'deg ' + v[1] + 'deg ' + (rad() * v[2] * zoom).toFixed(2) + 'm';
+    };
+
+    // Måttlinjerna ligger 0,7 m utanför väggarna, på de sidor kameran
+    // ser (sx: vilken gavel, sz: fram- eller baksida): längden längs den
+    // synliga långsidan, bredden längs den synliga gaveln, nockhöjden i
+    // det bortre hörnet och människan framför huset.
+    var PUNKTER = ['l0', 'l1', 'b0', 'b1', 'h0', 'h1', 'p0', 'p1'];
+    function positioner(d, sx, sz) {
+      var L = d.l / 2, B = d.b / 2, u = 0.7, pz = sz * (B + u + 1.3);
+      return {
+        l0: [-L, 0, sz * (B + u)], l1: [L, 0, sz * (B + u)],
+        b0: [sx * (L + u), 0, -B], b1: [sx * (L + u), 0, B],
+        h0: [-sx * (L + u), 0, sz * (B + u)], h1: [-sx * (L + u), d.h, sz * (B + u)],
+        p0: [sx * (L - 1.4), 0, pz], p1: [sx * (L - 1.4), 1.8, pz]
+      };
+    }
+    var sida = '', lager = $('.studio3d__lager', sek);
+
+    // Talen räknas fram från förra huset till nästa.
+    var nu = { yta: aktiv.yta, l: aktiv.l, b: aktiv.b, h: aktiv.h, rum: aktiv.rum };
+    var talRaf = null;
+    function raknaTal(d) {
+      var fran = {}, till = { yta: d.yta, l: d.l, b: d.b, h: d.h, rum: d.rum };
+      Object.keys(nu).forEach(function (k) { fran[k] = nu[k]; });
+      var start = performance.now(), T = lugn ? 0 : 750;
+      cancelAnimationFrame(talRaf);
+      function steg(t) {
+        var x = T ? Math.min(1, Math.max(0, (t - start) / T)) : 1;
+        var e = 1 - Math.pow(1 - x, 3);
+        talEl.forEach(function (el) {
+          var k = el.getAttribute('data-3d-tal');
+          nu[k] = x === 1 ? till[k] : fran[k] + (till[k] - fran[k]) * e;
+          el.textContent = komma(nu[k], Number(el.getAttribute('data-dec')));
+        });
+        if (x < 1) talRaf = requestAnimationFrame(steg);
+      }
+      talRaf = requestAnimationFrame(steg);
+    }
+
+    var mv = null, laddad = false, bokad = false;
+    function satt(el, x1, y1, x2, y2) {
+      el.setAttribute('x1', x1.toFixed(1));
+      el.setAttribute('y1', y1.toFixed(1));
+      el.setAttribute('x2', x2.toFixed(1));
+      el.setAttribute('y2', y2.toFixed(1));
+    }
+    function rita() {
+      bokad = false;
+      if (!mv || !laddad) return;
+      var q = function (n) {
+        var h = mv.queryHotspot('hotspot-' + n);
+        return h && h.canvasPosition;
+      };
+      var orb = mv.getCameraOrbit(), phi = orb.phi;
+      var ny = (Math.sin(orb.theta) < -0.001 ? '-' : '+') + (Math.cos(orb.theta) < 0 ? '-' : '+');
+      if (ny !== sida) {
+        // Kameran har gått runt ett hörn: måtten byter sida med en toning.
+        sida = ny;
+        flyttaPunkter();
+        lager.classList.add('studio3d__lager--byt');
+        setTimeout(function () { lager.classList.remove('studio3d__lager--byt'); boka(); }, 90);
+        return;
+      }
+      // Golvrutnätet är ritat snett; rakt uppifrån tonar det bort.
+      scen.classList.toggle('studio3d--uppifran', phi < 0.6);
+      [['l', 'l0', 'l1'], ['b', 'b0', 'b1'], ['h', 'h0', 'h1']].forEach(function (x) {
+        var a = q(x[1]), b = q(x[2]);
+        var g = linjer[x[0]], et = etiketter[x[0]];
+        var dx = a && b ? b.x - a.x : 0, dy = a && b ? b.y - a.y : 0;
+        var len = Math.sqrt(dx * dx + dy * dy);
+        // Rakt uppifrån syns ingen höjd, och en linje som ses från änden
+        // blir en prick - då döljs den.
+        var dold = !a || !b || len < 36 || (x[0] === 'h' && phi < 0.5);
+        g[0].parentNode.style.opacity = dold ? '0' : '';
+        et.style.opacity = dold ? '0' : '';
+        if (dold) return;
+        satt(g[0], a.x, a.y, b.x, b.y);
+        var nx = -dy / len * 6, ny = dx / len * 6;
+        satt(g[1], a.x - nx, a.y - ny, a.x + nx, a.y + ny);
+        satt(g[2], b.x - nx, b.y - ny, b.x + nx, b.y + ny);
+        et.style.transform = 'translate(' + ((a.x + b.x) / 2).toFixed(1) + 'px,' +
+          ((a.y + b.y) / 2).toFixed(1) + 'px) translate(-50%,-50%)';
+      });
+      var fot = q('p0'), huvud = q('p1');
+      if (fot && huvud && phi > 0.7) {
+        var hojd = Math.sqrt(Math.pow(huvud.x - fot.x, 2) + Math.pow(huvud.y - fot.y, 2));
+        person.style.opacity = '';
+        person.style.transform = 'translate(' + (fot.x - 17.35).toFixed(1) + 'px,' + (fot.y - 100).toFixed(1) +
+          'px) scale(' + (hojd / 100).toFixed(3) + ')';
+      } else {
+        person.style.opacity = '0';
+      }
+    }
+    function boka() {
+      if (bokad) return;
+      bokad = true;
+      requestAnimationFrame(rita);
+    }
+    function flyttaPunkter() {
+      var p = positioner(aktiv, sida.charAt(0) === '-' ? -1 : 1, sida.charAt(1) === '-' ? -1 : 1);
+      PUNKTER.forEach(function (n) {
+        mv.updateHotspot({
+          name: 'hotspot-' + n,
+          position: p[n].map(function (v) { return v.toFixed(3) + 'm'; }).join(' ')
+        });
+      });
+    }
+
+    function byt(d) {
+      if (d === aktiv && laddad) return;
+      aktiv = d;
+      knappar.forEach(function (b) { b.setAttribute('aria-pressed', String(b === d.knapp)); });
+      $('[data-3d-namn]', sek).textContent = d.namn;
+      etiketter.l.textContent = komma(d.l, 2) + ' m';
+      etiketter.b.textContent = komma(d.b, 2) + ' m';
+      etiketter.h.textContent = 'Nock ' + komma(d.h, 2) + ' m';
+      raknaTal(d);
+      if (!mv) return;
+      scen.classList.add('studio3d--byter');
+      setTimeout(function () {
+        if (aktiv === d) mv.src = 'modeller/hus-' + d.id + '.glb';
+      }, lugn ? 0 : 260);
+    }
+    alla.forEach(function (d) {
+      d.knapp.addEventListener('click', function () { byt(d); });
+    });
+    glidandeMarkering($('.studio3d__val', sek));
+    glidandeMarkering($('.studio3d__vyer', sek));
+
+    // Kameran går sakta runt huset tills man själv tar i det. (model-
+    // viewers egen auto-rotate vrider modellen i stället för kameran, och
+    // då hamnar vyerna och måttens sidor fel.)
+    var snurrar = !lugn, synlig = false, snurrRaf = null, senast = 0;
+    function snurra(t) {
+      snurrRaf = null;
+      if (!snurrar || !mv || !laddad || !synlig || document.hidden) { senast = 0; return; }
+      if (senast) {
+        var o = mv.getCameraOrbit();
+        var d = Math.min(64, t - senast) / 1000 * 7 * Math.PI / 180;
+        mv.cameraOrbit = (o.theta + d) + 'rad ' + o.phi + 'rad ' + o.radius + 'm';
+      }
+      senast = t;
+      snurrRaf = requestAnimationFrame(snurra);
+    }
+    function startaSnurr() {
+      if (!snurrRaf && snurrar) snurrRaf = requestAnimationFrame(snurra);
+    }
+    function stoppaSnurr() {
+      snurrar = false;
+      if (tips) tips.classList.add('studio3d__tips--borta');
+    }
+    vyKnappar.forEach(function (b) {
+      b.addEventListener('click', function () {
+        vy = b.getAttribute('data-vy');
+        vyKnappar.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        stoppaSnurr();
+        if (mv) mv.cameraOrbit = orbit();
+      });
+    });
+    $$('[data-zoom]', sek).forEach(function (b) {
+      b.addEventListener('click', function () {
+        zoom = Math.max(0.6, Math.min(1.45, zoom * (b.getAttribute('data-zoom') === '1' ? 1.18 : 0.85)));
+        stoppaSnurr();
+        if (!mv) return;
+        var o = mv.getCameraOrbit();
+        mv.cameraOrbit = o.theta + 'rad ' + o.phi + 'rad ' + (rad() * VYER[vy][2] * zoom).toFixed(2) + 'm';
+      });
+    });
+    $('[data-3d-aterstall]', sek).addEventListener('click', function () {
+      vy = 'horn';
+      zoom = 1;
+      vyKnappar.forEach(function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-vy') === 'horn')); });
+      if (mv) mv.cameraOrbit = orbit();
+    });
+    mattKnapp.addEventListener('click', function () {
+      var pa = mattKnapp.getAttribute('aria-pressed') !== 'true';
+      mattKnapp.setAttribute('aria-pressed', String(pa));
+      sek.classList.toggle('studio3d--utan-matt', !pa);
+    });
+
+    function bygg() {
+      laddaModelViewer().then(function () {
+        mv = document.createElement('model-viewer');
+        var attr = {
+          src: 'modeller/hus-' + aktiv.id + '.glb',
+          alt: '3D-modell av ' + aktiv.namn + ' i skala 1:1',
+          'camera-controls': '',
+          'disable-zoom': '',
+          'touch-action': 'pan-y',
+          'camera-orbit': orbit(),
+          'camera-target': '0m 1.1m 0m',
+          'field-of-view': '30deg',
+          'min-camera-orbit': 'auto 0deg ' + (rad() * 0.5).toFixed(1) + 'm',
+          'max-camera-orbit': 'auto 88deg ' + (rad() * 1.6).toFixed(1) + 'm',
+          'min-field-of-view': '30deg',
+          'max-field-of-view': '30deg',
+          'interpolation-decay': '160',
+          'shadow-intensity': '1.15',
+          'shadow-softness': '0.55',
+          'environment-image': 'neutral',
+          'tone-mapping': 'neutral',
+          exposure: '1.05',
+          'interaction-prompt': 'none'
+        };
+        Object.keys(attr).forEach(function (k) { mv.setAttribute(k, attr[k]); });
+        PUNKTER.forEach(function (n) {
+          var h = document.createElement('div');
+          h.slot = 'hotspot-' + n;
+          h.className = 'studio3d__punkt';
+          h.setAttribute('data-position', '0m 0m 0m');
+          h.setAttribute('data-normal', '0 1 0');
+          mv.appendChild(h);
+        });
+        mv.addEventListener('progress', function (e) {
+          if (progress) progress.style.transform = 'scaleX(' + (e.detail.totalProgress || 0).toFixed(3) + ')';
+        });
+        mv.addEventListener('load', function () {
+          laddad = true;
+          flyttaPunkter();
+          mv.setAttribute('alt', '3D-modell av ' + aktiv.namn + ' i skala 1:1');
+          sek.classList.add('studio3d--laddad');
+          scen.classList.remove('studio3d--byter');
+          requestAnimationFrame(function () { requestAnimationFrame(rita); });
+          startaSnurr();
+        });
+        mv.addEventListener('camera-change', function (e) {
+          if (e.detail && e.detail.source === 'user-interaction') stoppaSnurr();
+          boka();
+        });
+        window.addEventListener('resize', boka);
+        scen.insertBefore(mv, scen.firstChild);
+        if (window.IntersectionObserver) {
+          new IntersectionObserver(function (poster) {
+            synlig = poster[0].isIntersecting;
+            startaSnurr();
+          }).observe(scen);
+        } else {
+          synlig = true;
+        }
+        document.addEventListener('visibilitychange', startaSnurr);
+      }).catch(function () {
+        sek.classList.add('studio3d--fel');
+        var t = $('[data-3d-laddar] span', sek);
+        if (t) t.textContent = '3D-modellen kunde inte laddas.';
+      });
+    }
+    narSynligt(sek, bygg, 0, '0px 0px 400px 0px');
+  })();
+
   // Korten för husen som finns i 3D får en liten märkning.
   $$('.model-card[data-bild^="hus-r"] .model-card__media').forEach(function (a) {
     var m = document.createElement('span');
@@ -1103,7 +1840,7 @@
       knapp.setAttribute('aria-label', mork ? 'Byt till ljust läge' : 'Byt till mörkt läge');
       if (rad) rad.setAttribute('aria-pressed', String(mork));
       var tc = $('meta[name="theme-color"]');
-      if (tc) tc.setAttribute('content', mork ? '#15110d' : '#2c2820');
+      if (tc) tc.setAttribute('content', mork ? '#141310' : '#1b1915');
     }
     function vaxla() {
       var mork = html.getAttribute('data-tema') !== 'mork';
@@ -1197,7 +1934,7 @@
      Som Kasters lanseringsnotis: visas en gång efter halva sidan,
      aldrig där det redan finns ett formulär eller verktyget självt,
      och inte igen på fjorton dagar efter att man stängt det. */
-  var utan = ['vad-far-jag-bygga.html', 'kontakt.html', '404.html', 'integritetspolicy.html'];
+  var utan = ['vad-far-jag-bygga.html', 'kontakt.html', '404.html', 'integritetspolicy.html', 'attefallshus-regler.html'];
   if (utan.indexOf(sida) < 0) {
     var senast = Number(lagra.hamta('idealhus-tips') || 0);
     if (Date.now() - senast > 14 * 864e5) {
@@ -1372,5 +2109,1295 @@
     window.addEventListener('pageshow', function (e) {
       if (e.persisted && oppen()) knapp.click();
     });
+  })();
+
+  /* ============================================================
+     Andra upplagan (2026-09-30): Kaster/Uperformance-formen.
+     Allt rör bara transform och opacity, pausas utanför vyn och
+     stängs av vid prefers-reduced-motion.
+     ============================================================ */
+
+  /* --- Toppen: filmen i rubriken ---------------------------------
+     Rullningen genom toppen driver ett tal p från 0 till 1:
+       0 - 0,45  ytan med rubriken zoomar in genom "l":et, filmen tar över
+       0,40 - 0,6  en mörk toning läggs över filmen
+       0,48 - 0,7  budskapet tonar fram
+     Ytan med de urklippta bokstäverna ritas på en canvas och bara bilden
+     skalas (att skala en HTML-yta med mix-blend-mode ritade om texten i
+     varje bildruta och hackade kraftigt). När sidan öppnas ritas
+     rubriken fram: konturerna dras som med en penna och bokstäverna
+     fylls en i taget med filmen medan de glider på plats. Därefter
+     sveper en färgvåg i virke och bärnsten genom bokstäverna
+     (.film__farg, ren CSS-förflyttning), och filmen i bokstäverna
+     följer pekaren en aning. HTML-rubriken står kvar för skärmläsare.
+     Vid lugn rörelse står toppen kvar som en vanlig film med rubriken. */
+  (function () {
+    var topp = $('[data-film]');
+    if (!topp || lugn || !window.requestAnimationFrame) return;
+    var spar = $('.film__spar', topp);
+    var fast = $('.film__fast', topp);
+    var mask = $('.film__mask', topp);
+    var rubrik = $('.film__rubrik', topp);
+    var video = $('.film__video', topp);
+    var ui = $('.film__ui', topp);
+    var efter = $('.film__efter', topp);
+    var slojor = $('.film__slojor', topp);
+    var ton = $('.film__ton', topp);
+    var farg = $('.film__farg', topp);
+    if (!spar || !mask || !rubrik) return;
+    topp.classList.add('film--zoom');
+
+    var vagg = document.createElement('div');
+    vagg.className = 'film__dukvagg';
+    vagg.setAttribute('aria-hidden', 'true');
+    var duk = document.createElement('canvas');
+    duk.className = 'film__duk';
+    vagg.appendChild(duk);
+    mask.parentNode.insertBefore(vagg, mask.nextSibling);
+    var bak = document.createElement('canvas');
+    var overlager = [], introAnim = [];
+
+    var RADER = ['Från virke', 'till verklighet.'];
+    // "l":et i "verklighet" - rad 2, efter "till verk".
+    var ZOOM_RAD = 1, ZOOM_FORE = 'till verk';
+    var maxS = 40, bokad = false, klar = false, forraP = -1;
+    var skrivet = new Map();
+    var L = null;          // uppmätt layout: bredd, höjd, tecken och deras lägen
+    function klamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+    function mjuk(t) { return 1 - Math.pow(1 - t, 3); }
+
+    // Skriver bara när värdet ändrats - varje skrivning kostar.
+    function satt(el, egenskap, varde) {
+      var nyckel = skrivet.get(el);
+      if (!nyckel) { nyckel = {}; skrivet.set(el, nyckel); }
+      if (nyckel[egenskap] === varde) return;
+      nyckel[egenskap] = varde;
+      el.style[egenskap] = varde;
+    }
+
+    function glod(c, x, y, r, f) {
+      var g = c.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, f);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = g;
+      c.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+
+    // Mäter upp allt en gång och ritar bakgrunden (yta, glöd, rutnät)
+    // på en egen canvas som sedan bara kopieras in.
+    function mat() {
+      var w = fast.clientWidth, h = fast.clientHeight;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      [duk, bak].forEach(function (d) {
+        d.width = Math.round(w * dpr);
+        d.height = Math.round(h * dpr);
+      });
+      duk.style.width = w + 'px';
+      duk.style.height = h + 'px';
+      var mork = document.documentElement.getAttribute('data-tema') === 'mork';
+
+      var b = bak.getContext('2d');
+      b.setTransform(dpr, 0, 0, dpr, 0, 0);
+      b.fillStyle = mork ? '#141310' : '#f7f5f0';
+      b.fillRect(0, 0, w, h);
+      var st = Math.max(w, h);
+      glod(b, w * 0.06, h * 0.04, st * 0.55, mork ? 'rgba(184,205,224,0.10)' : 'rgba(184,205,224,0.55)');
+      glod(b, w * 0.98, h * 0.18, st * 0.5, mork ? 'rgba(240,181,110,0.12)' : 'rgba(240,181,110,0.32)');
+      b.strokeStyle = mork ? 'rgba(247,245,240,0.05)' : 'rgba(27,25,21,0.06)';
+      b.lineWidth = 1;
+      b.beginPath();
+      for (var x = (w / 2) % 44; x < w; x += 44) { b.moveTo(Math.round(x) + 0.5, 0); b.lineTo(Math.round(x) + 0.5, h); }
+      for (var y = (h / 2) % 44; y < h; y += 44) { b.moveTo(0, Math.round(y) + 0.5); b.lineTo(w, Math.round(y) + 0.5); }
+      b.stroke();
+
+      var c = duk.getContext('2d');
+      var fs = parseFloat(getComputedStyle(rubrik).fontSize);
+      var sparr = -0.055 * fs;
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      c.font = '700 ' + fs + 'px Poppins';
+      if ('letterSpacing' in c) c.letterSpacing = '0px';
+      c.textBaseline = 'alphabetic';
+      var m = c.measureText('Hg');
+      var upp = m.actualBoundingBoxAscent || fs * 0.72;
+      var ner = m.actualBoundingBoxDescent || fs * 0.2;
+      var lh = fs * 0.9;
+      var blockTopp = h / 2 - (lh * RADER.length) / 2;
+      var tecken = [];
+      var ox = w / 2, oy = h / 2, stam = 8;
+      RADER.forEach(function (rad, i) {
+        var x = 0, pos = [];
+        for (var j = 0; j < rad.length; j++) {
+          var bb = c.measureText(rad[j]).width;
+          pos.push([x, x + bb]);
+          x += bb + sparr;
+        }
+        var x0 = w / 2 - pos[pos.length - 1][1] / 2;
+        var bas = blockTopp + lh * i + lh / 2 + (upp - ner) / 2;
+        pos.forEach(function (t, j) {
+          if (rad[j] !== ' ') tecken.push({ t: rad[j], x: x0 + t[0], y: bas, rad: i, b: t[1] - t[0] });
+        });
+        if (i === ZOOM_RAD) {
+          var l = pos[ZOOM_FORE.length];
+          ox = x0 + (l[0] + l[1]) / 2;
+          oy = bas - upp * 0.5;
+          stam = Math.max(3, (l[1] - l[0]) * 0.42);
+        }
+      });
+      L = { w: w, h: h, dpr: dpr, fs: fs, tecken: tecken, mork: mork };
+      maxS = Math.min(90, Math.hypot(w, h) * 2.2 / stam);
+      vagg.style.transformOrigin = ox.toFixed(1) + 'px ' + oy.toFixed(1) + 'px';
+      skrivet.delete(vagg);
+    }
+
+    // Ritar ytan EN gång: bakgrunden med bokstäverna urklippta, och
+    // konturen i vilotillståndet (kontur = dess opacitet, 0 = ingen).
+    function konturFarg() { return L.mork ? 'rgba(247,245,240,0.85)' : 'rgba(27,25,21,0.85)'; }
+    function rita_duk(kontur) {
+      if (!L) return;
+      var c = duk.getContext('2d');
+      c.setTransform(1, 0, 0, 1, 0, 0);
+      c.globalCompositeOperation = 'copy';
+      c.globalAlpha = 1;
+      c.drawImage(bak, 0, 0);
+      c.setTransform(L.dpr, 0, 0, L.dpr, 0, 0);
+      c.font = '700 ' + L.fs + 'px Poppins';
+      c.textBaseline = 'alphabetic';
+      c.globalCompositeOperation = 'destination-out';
+      c.fillStyle = '#000';
+      L.tecken.forEach(function (tk) { c.fillText(tk.t, tk.x, tk.y); });
+      if (kontur) {
+        c.globalCompositeOperation = 'source-over';
+        c.globalAlpha = kontur;
+        c.strokeStyle = konturFarg();
+        c.lineWidth = Math.max(1, L.fs * 0.012);
+        L.tecken.forEach(function (tk) { c.strokeText(tk.t, tk.x, tk.y); });
+      }
+      c.globalCompositeOperation = 'source-over';
+      c.globalAlpha = 1;
+    }
+
+    /* Introt - helt på grafikkortet. Förra versionen ritade om hela ytan
+       (full skärm, dubbel upplösning, streckade konturer) i varje
+       bildruta i 2,2 s medan filmen och typsnitten laddade, och hackade.
+       Nu ritas allt en gång innan det börjar: ytan med hålen, en liten
+       täckbit per bokstav (bokstaven fylld med bakgrunden precis där) och
+       konturerna per rad. Sedan rör sig bara lagren med transform och
+       opacitet (Web Animations), som går på kompositorn även när
+       huvudtråden är upptagen: konturen sveps fram rad för rad bakom en
+       mjuk kant, täckbitarna krymper uppåt en i taget så att filmen fyller
+       bokstaven nerifrån, och konturen tonar ner. Till sist bakas den
+       tunna konturen in i ytan och lagren tas bort. */
+    function rensaIntro() {
+      introAnim.forEach(function (a) { a.cancel(); });
+      introAnim = [];
+      overlager.forEach(function (el) { el.remove(); });
+      overlager = [];
+    }
+    function avslutaIntro() {
+      rensaIntro();
+      rita_duk(0.22);
+    }
+    function spelaIntro() {
+      if (!L || !vagg.animate) { avslutaIntro(); return; }
+      rensaIntro();
+      rita_duk(0);
+      var dpr = L.dpr, fs = L.fs, lw = Math.max(1, fs * 0.012), pad = Math.ceil(lw + 3);
+      var font = '700 ' + fs + 'px Poppins';
+      var matare = duk.getContext('2d');
+      matare.setTransform(dpr, 0, 0, dpr, 0, 0);
+      matare.font = font;
+      var frag = document.createDocumentFragment();
+
+      function lager(klass, x0, y0, x1, y1) {
+        var cv = document.createElement('canvas');
+        cv.className = klass;
+        cv.width = Math.round((x1 - x0) * dpr);
+        cv.height = Math.round((y1 - y0) * dpr);
+        var g = cv.getContext('2d');
+        g.setTransform(dpr, 0, 0, dpr, -x0 * dpr, -y0 * dpr);
+        g.font = font;
+        g.textBaseline = 'alphabetic';
+        return { cv: cv, g: g };
+      }
+      function placera(el, x0, y0, x1, y1) {
+        el.style.left = x0 + 'px';
+        el.style.top = y0 + 'px';
+        el.style.width = (x1 - x0) + 'px';
+        el.style.height = (y1 - y0) + 'px';
+      }
+
+      // Täckbitarna: bokstaven fylld med bakgrunden där den sitter.
+      L.tecken.forEach(function (tk) {
+        var m = matare.measureText(tk.t);
+        var x0 = Math.floor(tk.x - (m.actualBoundingBoxLeft || 0) - pad);
+        var x1 = Math.ceil(tk.x + (m.actualBoundingBoxRight || tk.b) + pad);
+        var y0 = Math.floor(tk.y - (m.actualBoundingBoxAscent || fs * 0.8) - pad);
+        var y1 = Math.ceil(tk.y + (m.actualBoundingBoxDescent || fs * 0.2) + pad);
+        var l = lager('film__tacke', x0, y0, x1, y1);
+        // Bokstaven plus en tunn kant, så att täckbiten också täcker
+        // hålets mjuka kant - annars syns filmen som en skugga runt den.
+        l.g.fillText(tk.t, tk.x, tk.y);
+        l.g.lineWidth = 2;
+        l.g.lineJoin = 'round';
+        l.g.strokeText(tk.t, tk.x, tk.y);
+        l.g.setTransform(1, 0, 0, 1, 0, 0);
+        l.g.globalCompositeOperation = 'source-in';
+        l.g.drawImage(bak, Math.round(x0 * dpr), Math.round(y0 * dpr), l.cv.width, l.cv.height, 0, 0, l.cv.width, l.cv.height);
+        placera(l.cv, x0, y0, x1, y1);
+        frag.appendChild(l.cv);
+        overlager.push(l.cv);
+        tk.tacke = l.cv;
+      });
+
+      // Konturerna: en duk per rad i ett fönster med mjuk högerkant.
+      var rader = [];
+      L.tecken.forEach(function (tk) { (rader[tk.rad] = rader[tk.rad] || []).push(tk); });
+      rader = rader.filter(Boolean).map(function (lista) {
+        var sist = lista[lista.length - 1];
+        var x0 = Math.floor(lista[0].x - fs * 0.08), x1 = Math.ceil(sist.x + sist.b + fs * 0.08 + 90);
+        var y0 = Math.floor(lista[0].y - fs * 1.02), y1 = Math.ceil(lista[0].y + fs * 0.32);
+        var fonster = document.createElement('div');
+        fonster.className = 'film__konturfonster';
+        placera(fonster, x0, y0, x1, y1);
+        var l = lager('film__kontur', x0, y0, x1, y1);
+        l.g.strokeStyle = konturFarg();
+        l.g.lineWidth = lw;
+        l.g.lineJoin = 'round';
+        lista.forEach(function (tk) { l.g.strokeText(tk.t, tk.x, tk.y); });
+        // Dolda från start - rörelsen börjar två bildrutor senare.
+        fonster.style.transform = 'translateX(-100%)';
+        l.cv.style.transform = 'translateX(100%)';
+        fonster.appendChild(l.cv);
+        frag.appendChild(fonster);
+        overlager.push(fonster);
+        return { fonster: fonster, duk: l.cv };
+      });
+      vagg.appendChild(frag);
+
+      // Två bildrutor senare, när lagren finns på skärmen, börjar rörelsen.
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          if (!overlager.length) return;
+          var n = L.tecken.length;
+          rader.forEach(function (r, i) {
+            var d = 60 + i * 280;
+            introAnim.push(r.fonster.animate([{ transform: 'translateX(-100%)' }, { transform: 'none' }],
+              { duration: 1200, delay: d, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', fill: 'both' }));
+            introAnim.push(r.duk.animate([{ transform: 'translateX(100%)' }, { transform: 'none' }],
+              { duration: 1200, delay: d, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', fill: 'both' }));
+            introAnim.push(r.fonster.animate([{ opacity: 1 }, { opacity: 0.22 }],
+              { duration: 900, delay: 1650 + i * 140, easing: 'ease-out', fill: 'both' }));
+          });
+          L.tecken.forEach(function (tk, k) {
+            introAnim.push(tk.tacke.animate([
+              { transform: 'scaleY(1)', opacity: 1 },
+              { transform: 'scaleY(0)', opacity: 0.35 }
+            ], { duration: 1000, delay: 380 + (k / n) * 950, easing: 'cubic-bezier(0.7, 0, 0.25, 1)', fill: 'both' }));
+          });
+          Promise.all(introAnim.map(function (a) { return a.finished; }))
+            .then(avslutaIntro, function () {});
+        });
+      });
+    }
+
+    function rita() {
+      bokad = false;
+      var r = spar.getBoundingClientRect();
+      var langd = spar.offsetHeight - fast.offsetHeight;
+      var p = langd > 0 ? klamp(-r.top / langd) : 0;
+      if (p === forraP) return;
+      forraP = p;
+
+      var z = klamp(p / 0.45);
+      var e = z * z * z;
+      if (klar) {
+        satt(vagg, 'transform', 'scale(' + (1 + e * (maxS - 1)).toFixed(3) + ')');
+        satt(vagg, 'opacity', z > 0.82 ? (1 - (z - 0.82) / 0.18).toFixed(3) : '1');
+        satt(vagg, 'visibility', z >= 1 ? 'hidden' : 'visible');
+      }
+
+      var u = klamp(p / 0.12);
+      satt(ui, 'opacity', (1 - u).toFixed(3));
+      satt(ui, 'transform', 'translate3d(0,' + (-u * 40).toFixed(1) + 'px,0)');
+      satt(ui, 'visibility', u >= 1 ? 'hidden' : 'visible');
+
+      var tona = (1 - klamp((z - 0.55) / 0.4)).toFixed(3);
+      satt(ton, 'opacity', tona);
+      if (farg) {
+        satt(farg, 'opacity', tona);
+        satt(farg, 'visibility', tona === '0.000' ? 'hidden' : 'visible');
+      }
+      satt(slojor, 'opacity', klamp((p - 0.4) / 0.2).toFixed(3));
+
+      var ef = klamp((p - 0.48) / 0.22);
+      satt(efter, 'opacity', ef.toFixed(3));
+      satt(efter, 'transform', 'translate3d(0,' + ((1 - ef) * 40).toFixed(1) + 'px,0)');
+      satt(efter, 'visibility', ef <= 0 ? 'hidden' : 'visible');
+    }
+
+    function boka() {
+      if (bokad) return;
+      bokad = true;
+      requestAnimationFrame(rita);
+    }
+
+    rita();
+    // Canvasen ritas när rubrikens typsnitt finns, annars blir
+    // bokstäverna i reservtypsnittet.
+    var typsnitt = document.fonts && document.fonts.load
+      ? document.fonts.load('700 100px Poppins').catch(function () {}) : Promise.resolve();
+    typsnitt.then(function () {
+      mat();
+      klar = true;
+      // Introt spelas bara om man står i toppen - kommer man tillbaka
+      // till sidan halvvägs ner är rubriken redan klar.
+      if (window.scrollY < window.innerHeight * 0.3) spelaIntro();
+      else avslutaIntro();
+      topp.classList.add('film--duk');
+      forraP = -1;
+      rita();
+    });
+
+    var storlek = window.innerWidth + 'x' + window.innerHeight;
+    window.addEventListener('resize', function () {
+      // Mobilens adressfält ändrar höjden lite när man rullar - rita
+      // bara om när bredden ändras eller höjden ändras mycket.
+      var gammal = storlek.split('x');
+      if (+gammal[0] === window.innerWidth && Math.abs(+gammal[1] - window.innerHeight) < 140) return;
+      storlek = window.innerWidth + 'x' + window.innerHeight;
+      if (klar) { mat(); avslutaIntro(); }
+      forraP = -1;
+      rita();
+    });
+    window.addEventListener('scroll', boka, { passive: true });
+    // Byter man tema ritas ytan om i rätt färg.
+    new MutationObserver(function () { if (klar) { mat(); avslutaIntro(); } })
+      .observe(document.documentElement, { attributes: true, attributeFilter: ['data-tema'] });
+
+    // Filmen i bokstäverna följer pekaren en aning - som fönster.
+    if (finPekare && video) {
+      var mx = 0, my = 0, vx = 0, vy = 0, gar = false;
+      topp.addEventListener('pointermove', function (ev) {
+        mx = ev.clientX / window.innerWidth - 0.5;
+        my = ev.clientY / window.innerHeight - 0.5;
+        if (!gar) { gar = true; requestAnimationFrame(glid); }
+      });
+      function glid() {
+        vx += (mx - vx) * 0.08;
+        vy += (my - vy) * 0.08;
+        video.style.transform = 'translate3d(' + (-vx * 28).toFixed(2) + 'px,' + (-vy * 18).toFixed(2) + 'px,0) scale(1.06)';
+        if (Math.abs(mx - vx) > 0.001 || Math.abs(my - vy) > 0.001) requestAnimationFrame(glid);
+        else gar = false;
+      }
+    }
+  })();
+
+  // De mörka elitkorten och kantstrimman pausas när de inte syns.
+  $$('.siffror, .film__fast').forEach(pausaUtanforVy);
+
+  /* --- Bildkorten lutar i 3D och ljuset följer pekaren ----------- */
+  $$('.vag').forEach(function (k) { lutaI3D(k, 7); });
+  $$('.skal').forEach(function (k) { lutaI3D(k, 9); });
+
+  /* --- Banorna: husen och bakom kulisserna -----------------------
+     Korten vrider sig efter var de står i banan - det i mitten står
+     rakt, de vid kanterna vänder sig inåt som i en karusell. Pilarna
+     bläddrar ett kort i taget, och med mus kan man dra banan. */
+  $$('[data-bana]').forEach(function (bana) {
+    var sektion = bana.closest('section');
+    var kort = $$(':scope > li', bana);
+    if (!kort.length) return;
+
+    function steg() {
+      var a = kort[0].getBoundingClientRect();
+      var b = kort[1] ? kort[1].getBoundingClientRect() : a;
+      return Math.max(200, b.left - a.left);
+    }
+    var bak = $('[data-bana-bak]', sektion);
+    var fram = $('[data-bana-fram]', sektion);
+    if (bak) bak.addEventListener('click', function () { bana.scrollBy({ left: -steg(), behavior: lugn ? 'auto' : 'smooth' }); });
+    if (fram) fram.addEventListener('click', function () { bana.scrollBy({ left: steg(), behavior: lugn ? 'auto' : 'smooth' }); });
+
+    function uppdateraPilar() {
+      if (bak) bak.disabled = bana.scrollLeft < 4;
+      if (fram) fram.disabled = bana.scrollLeft > bana.scrollWidth - bana.clientWidth - 4;
+    }
+
+    var bokad = false;
+    function vrid() {
+      bokad = false;
+      uppdateraPilar();
+      if (lugn) return;
+      var mitt = window.innerWidth / 2;
+      kort.forEach(function (k) {
+        var r = k.getBoundingClientRect();
+        var d = (r.left + r.width / 2 - mitt) / window.innerWidth;
+        d = Math.max(-1, Math.min(1, d));
+        k.style.setProperty('--vinkel', (-d * 16).toFixed(2) + 'deg');
+        k.style.setProperty('--djup', (-Math.abs(d) * 80).toFixed(1) + 'px');
+      });
+    }
+    function boka() {
+      if (bokad) return;
+      bokad = true;
+      requestAnimationFrame(vrid);
+    }
+    bana.addEventListener('scroll', boka, { passive: true });
+    window.addEventListener('resize', boka);
+    vrid();
+
+    // Dra med musen (pekskärmar sveper själva).
+    if (bana.hasAttribute('data-dra') && finPekare) {
+      var drar = false, startX = 0, startL = 0, flyttat = 0;
+      bana.addEventListener('pointerdown', function (e) {
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        drar = true;
+        flyttat = 0;
+        startX = e.clientX;
+        startL = bana.scrollLeft;
+        bana.classList.add('drar');
+      });
+      window.addEventListener('pointermove', function (e) {
+        if (!drar) return;
+        flyttat = Math.abs(e.clientX - startX);
+        bana.scrollLeft = startL - (e.clientX - startX);
+      });
+      window.addEventListener('pointerup', function () {
+        if (!drar) return;
+        drar = false;
+        bana.classList.remove('drar');
+      });
+      bana.addEventListener('click', function (e) {
+        if (flyttat > 6) { e.preventDefault(); e.stopPropagation(); }
+      }, true);
+      bana.addEventListener('dragstart', function (e) { e.preventDefault(); });
+    }
+  });
+
+  /* --- Bygget: bildberättelsen -----------------------------------
+     Rullningen genom sektionen driver ett tal från 0 till 4. Nästa bild
+     avslöjas nerifrån som en ridå: fönstret (kortet) glider upp och
+     bilden inuti glider tillbaka lika mycket, så bilden står still
+     medan kanten sveper över - med en guldlinje i kanten. Bilden som
+     täcks glider lite uppåt och mörknar, och den som visas zoomar
+     långsamt ut. Till vänster rullar siffran fram som ett räkneverk,
+     stegets ord reser sig ur en mask (uppifrån när man rullar tillbaka)
+     och staplarna fylls - de går att klicka på. Bara transform och
+     opacitet per bildruta. Smalt eller lugnt: lista och bildkarusell. */
+  (function () {
+    var bygget = $('[data-bygget]');
+    if (!bygget) return;
+    var spar = $('.bygget__spar', bygget);
+    var kort = $$('.bygget__kort', bygget);
+    var steg = $$('.bygget__steg', bygget);
+    var rulle = $('.bygget__rulle', bygget);
+    var staplar = $$('[data-bygget-hopp]', bygget);
+    var fyllning = staplar.map(function (b) { return $('b', b); });
+    var n = kort.length;
+    var bred = window.matchMedia('(min-width: 901px)');
+    var aktivt = -1, bokad = false, pa = false, forraAndel = -1;
+
+    var bilder = [], skuggor = [], svep = [];
+    function lager(k, klass) {
+      var el = document.createElement('i');
+      el.className = klass;
+      el.setAttribute('aria-hidden', 'true');
+      k.appendChild(el);
+      return el;
+    }
+    kort.forEach(function (k) {
+      bilder.push($('img', k));
+      skuggor.push(lager(k, 'bygget__skugga'));
+      svep.push(lager(k, 'bygget__svep'));
+    });
+
+    // Varje ord i en egen mask.
+    steg.forEach(function (s) {
+      $$('.bygget__titel, .bygget__text', s).forEach(function (el) {
+        var ord = el.textContent.trim().split(/\s+/);
+        el.textContent = '';
+        ord.forEach(function (o, k) {
+          var mask = document.createElement('span');
+          mask.className = 'bw';
+          var inne = document.createElement('span');
+          inne.style.setProperty('--w', k);
+          inne.textContent = o;
+          mask.appendChild(inne);
+          if (k) el.appendChild(document.createTextNode(' '));
+          el.appendChild(mask);
+        });
+      });
+    });
+
+    function klamp(v) {
+      return Math.min(1, Math.max(0, v));
+    }
+
+    function rita() {
+      bokad = false;
+      if (!pa) return;
+      var r = spar.getBoundingClientRect();
+      var langd = r.height - window.innerHeight;
+      var andel = langd > 0 ? Math.min(1, Math.max(0, -r.top / langd)) : 0;
+      if (andel === forraAndel) return;
+      forraAndel = andel;
+      // Varje steg står still en stor del av sträckan och byter i mitten.
+      var q = andel * (n - 1);
+      var hel = Math.floor(q);
+      var t0 = klamp((q - hel - 0.25) / 0.5);
+      var p = Math.min(n - 1, hel + t0 * t0 * (3 - 2 * t0));
+
+      kort.forEach(function (k, i) {
+        var d = i - p;
+        var zoom = 1.1 - 0.1 * klamp((q - i + 1) / 2);
+        var yk = 0, yb = 0, sk = 0, sv = 0, syns = true;
+        if (d >= 1) {
+          syns = false;
+        } else if (d > 0) {
+          yk = d * 100;
+          yb = -d * 100;
+          sv = Math.min(1, d * 6, (1 - d) * 6);
+        } else if (d > -1) {
+          yb = d * 14;
+          sk = -d * 0.7;
+        } else {
+          syns = false;
+        }
+        k.style.visibility = syns ? '' : 'hidden';
+        if (!syns) return;
+        k.style.transform = 'translate3d(0,' + yk.toFixed(2) + '%,0)';
+        bilder[i].style.transform = 'translate3d(0,' + yb.toFixed(2) + '%,0) scale(' + zoom.toFixed(4) + ')';
+        skuggor[i].style.opacity = sk.toFixed(3);
+        svep[i].style.opacity = sv.toFixed(3);
+      });
+
+      var akt = Math.min(n - 1, Math.round(p));
+      if (akt !== aktivt) {
+        aktivt = akt;
+        steg.forEach(function (s, j) {
+          s.classList.toggle('aktiv', j === akt);
+          s.classList.toggle('klar', j < akt);
+        });
+        staplar.forEach(function (b, j) {
+          b.classList.toggle('aktiv', j === akt);
+          if (j === akt) b.setAttribute('aria-current', 'step');
+          else b.removeAttribute('aria-current');
+        });
+        if (rulle) rulle.style.transform = 'translate3d(0,' + (-akt * 100 / n).toFixed(3) + '%,0)';
+      }
+      // Varje stapel fylls medan dess steg är det aktiva.
+      fyllning.forEach(function (b, j) {
+        if (!b) return;
+        var fran = Math.max(0, j - 0.5), till = Math.min(n - 1, j + 0.5);
+        b.style.transform = 'scaleX(' + klamp((q - fran) / (till - fran)).toFixed(3) + ')';
+      });
+    }
+    function boka() {
+      if (bokad) return;
+      bokad = true;
+      requestAnimationFrame(rita);
+    }
+
+    // Staplarna hoppar till sitt steg.
+    staplar.forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!pa) return;
+        var i = Number(b.getAttribute('data-bygget-hopp'));
+        var r = spar.getBoundingClientRect();
+        var langd = r.height - window.innerHeight;
+        window.scrollTo({ top: window.scrollY + r.top + langd * (i / (n - 1)), behavior: 'smooth' });
+      });
+    });
+
+    function lage() {
+      pa = bred.matches && !lugn;
+      bygget.classList.toggle('bygget--3d', pa);
+      aktivt = -1;
+      forraAndel = -1;
+      kort.forEach(function (k, i) {
+        k.style.zIndex = String(i + 1);
+        if (!pa) {
+          k.style.transform = '';
+          k.style.visibility = '';
+          bilder[i].style.transform = '';
+          skuggor[i].style.opacity = '';
+          svep[i].style.opacity = '';
+        }
+      });
+      if (pa) rita();
+      else steg.forEach(function (s) { s.classList.add('aktiv'); s.classList.remove('klar'); });
+    }
+    window.addEventListener('scroll', boka, { passive: true });
+    window.addEventListener('resize', boka);
+    if (bred.addEventListener) bred.addEventListener('change', lage);
+    lage();
+  })();
+
+  /* --- Elitlagret -------------------------------------------------
+     Bilder som avslöjas, etikettstreck som ritas, kort som glider in,
+     magnetiska knappar och en glidande markör i menyn (design.css 15). */
+  document.documentElement.classList.add('ih-js');
+
+  // Etikettstrecken ritas när de syns.
+  $$('.ih-etikett, .section-label').forEach(function (el) {
+    if (lugn) { el.classList.add('syns'); return; }
+    narSynligt(el, function (e) { e.classList.add('syns'); }, 0.4);
+  });
+
+  if (!lugn && window.IntersectionObserver) {
+    // Stora bilder i innehållet avslöjas ur en ram.
+    var UNDANTAG = '.ihtopp, .subpage-hero, .guidehero, .heroscen, .ordband, .val, .bildval, ' +
+      '.main-nav__sub, .kuliss, .hus, .bygget, .vag, .virke, .helbild__bak, .kollen-hus, ' +
+      '.jamforruta, .storlek3d, .hus3dvy, .site-footer, .model-plan';
+    var bilder = $$('main img').filter(function (img) {
+      if (img.closest(UNDANTAG)) return false;
+      var b = img.getBoundingClientRect().width || img.width;
+      return b >= 220;
+    });
+    var bildObs = new IntersectionObserver(function (poster) {
+      poster.forEach(function (p) {
+        if (!p.isIntersecting) return;
+        p.target.classList.add('ih-avslojd');
+        bildObs.unobserve(p.target);
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 });
+    bilder.forEach(function (img) {
+      img.classList.add('ih-avslojas');
+      bildObs.observe(img);
+    });
+
+    // Kort och rubrikblock glider in, syskon efter varandra.
+    var KORT = '.ih-huvud, .skal, .siffra, .kontakt-direkt__rad, .proffs-hopp a, .styrkort, ' +
+      '.priskort, .team-kort, .vidarekort, .fassteg__kort, .ih-fakta__kort, .ih-varde, .ih-fraga';
+    var kortObs = new IntersectionObserver(function (poster) {
+      poster.forEach(function (p) {
+        if (!p.isIntersecting) return;
+        p.target.classList.add('ih-inne');
+        kortObs.unobserve(p.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    var syskon = new Map();
+    $$(KORT).forEach(function (k) {
+      if (k.classList.contains('reveal') || k.closest('.ihtopp')) return;
+      var f = k.parentElement;
+      var i = syskon.get(f) || 0;
+      syskon.set(f, i + 1);
+      k.style.setProperty('--ih-droj', Math.min(i * 0.08, 0.4).toFixed(2) + 's');
+      k.classList.add('ih-in');
+      kortObs.observe(k);
+    });
+  }
+
+  // Magnetiska knappar: följer pekaren några pixlar.
+  if (finPekare && !lugn) {
+    $$('.ih-knapp--virke, .header-button, .hero__link--solid, .knapp-fylld, .kontaktkort__knapp, ' +
+       '.model-price__button, .site-footer__button').forEach(function (k) {
+      k.addEventListener('pointermove', function (e) {
+        var r = k.getBoundingClientRect();
+        var x = (e.clientX - r.left - r.width / 2) / r.width;
+        var y = (e.clientY - r.top - r.height / 2) / r.height;
+        k.style.translate = (x * 10).toFixed(1) + 'px ' + (y * 8).toFixed(1) + 'px';
+      });
+      k.addEventListener('pointerleave', function () { k.style.translate = ''; });
+    });
+  }
+
+  // Glidande markör bakom menylänkarna.
+  (function () {
+    var nav = $('.main-nav');
+    if (!nav || !finPekare) return;
+    var markor = document.createElement('span');
+    markor.className = 'nav-markor';
+    markor.setAttribute('aria-hidden', 'true');
+    nav.insertBefore(markor, nav.firstChild);
+    nav.classList.add('har-navmarkor');
+    var lankar = $$('.main-nav__link', nav);
+    function aktiv() {
+      return lankar.filter(function (a) {
+        return a.getAttribute('aria-current') === 'page' || a.classList.contains('main-nav__link--active');
+      })[0];
+    }
+    function flytta(a, direkt) {
+      if (!a) { markor.style.opacity = '0'; return; }
+      var nr = nav.getBoundingClientRect();
+      var r = a.getBoundingClientRect();
+      if (direkt) markor.style.transition = 'none';
+      markor.style.width = r.width + 'px';
+      markor.style.transform = 'translateX(' + (r.left - nr.left) + 'px)';
+      markor.style.opacity = '1';
+      if (direkt) { void markor.offsetWidth; markor.style.transition = ''; }
+    }
+    lankar.forEach(function (a) {
+      a.addEventListener('pointerenter', function () { flytta(a); });
+      a.addEventListener('focus', function () { flytta(a); });
+    });
+    nav.addEventListener('pointerleave', function () { flytta(aktiv()); });
+    function start() { flytta(aktiv(), true); }
+    start();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(start);
+    window.addEventListener('resize', start);
+  })();
+
+  /* --- Sidfotens stora ord ----------------------------------------
+     Som på Uperformance: en span per bokstav (--k) för framtoningen,
+     och en kopia i ljusfönstret (.ord-ljus) med exakt samma uppdelning,
+     så att ljuset hamnar precis på bokstäverna. Stil i design.css 09. */
+  (function () {
+    var ord = $('.site-footer__ord');
+    if (!ord) return;
+    var text = ord.textContent.trim();
+    function bokstaver(klass) {
+      return Array.prototype.map.call(text, function (t, k) {
+        return '<span class="' + klass + '" style="--k:' + k + '">' + t + '</span>';
+      }).join('');
+    }
+    ord.innerHTML = bokstaver('ord-bokstav') +
+      '<span class="ord-ljus"><span>' + bokstaver('ord-bokstav-ljus') + '</span></span>';
+    ord.classList.add('ord-delat');
+    if (lugn) { ord.classList.add('ord-synlig'); return; }
+    narSynligt(ord, function () { ord.classList.add('ord-synlig'); }, 0.25);
+    pausaUtanforVy(ord);
+  })();
+
+  /* --- Vägen dit: bygget i isometri --------------------------------
+     En byggscen ritad som vektorgrafik i isometrisk projektion: tomten,
+     verkstaden, grunden, lastbilen, kranen och huset. Scenen byggs upp
+     genom de sju stegen (samma steg och vem-gör-vad som på processidan).
+     Varje del av scenen är en grupp med data-fran/data-till - den syns i
+     de stegen och tonar/glider in när den kommer. Hustypen ändrar husets
+     mått, lovet och leveranstiden. Tidslinjen spelar själv när sektionen
+     syns, pausar när man pekar på den och slutar när man väljer själv. */
+  (function () {
+    var rot = $('[data-resan]');
+    if (!rot) return;
+    var svg = $('.resan__svg', rot);
+    var knappar = $$('.resan__tidslinje button', rot);
+    var typKnappar = $$('.resan__hustyp button', rot);
+    var vemKnappar = $$('.resan__vem button', rot);
+    var infoRuta = $('.resan__info', rot);
+    var I = {
+      skede: $('[data-resan-skede]', rot), nr: $('[data-resan-nr]', rot),
+      titel: $('[data-resan-titel]', rot), vem: $('[data-resan-vem]', rot),
+      text: $('[data-resan-text]', rot), meta: $('[data-resan-meta]', rot),
+      lank: $('[data-resan-lank]', rot)
+    };
+
+    var TYP = {
+      attefallshus: { L: 7.14, B: 4.2, nock: 4.0, lev: '10–12', sida: 'attefallshus.html',
+        matt: ['7,14 m', '4,20 m'], lov: 'Anmälan · installationer' },
+      fritidshus: { L: 10.83, B: 3.9, nock: 4.35, lev: '12–14', sida: 'fritidshus.html',
+        matt: ['10,83 m', '3,90 m'], lov: 'Bygglov' }
+    };
+    var SKEDE = ['Skede 1 · Innan bygget', 'Skede 2 · Medan huset byggs', 'Skede 3 · På plats'];
+    var VEMTEXT = { vi: 'Vi gör det', du: 'Du gör det', bada: 'Tillsammans' };
+    var STEG = [
+      { titel: 'Första samtalet', skede: 0, vem: 'bada', vemText: 'Tillsammans',
+        text: 'Du berättar om tomten, hur huset ska användas och ungefär när du vill vara i gång. Vi säger vad som är möjligt och vad som inte är det. Kostar ingenting och förpliktigar inte till något.',
+        meta: function () { return 'Kostar ingenting · förpliktigar inte till något'; },
+        lank: function () { return ['kontakt.html', 'Boka första samtalet']; } },
+      { titel: 'Modell och anpassning', skede: 0, vem: 'bada', vemText: 'Tillsammans',
+        text: 'Vi går igenom modellerna och gör de anpassningar som betyder något för just din plats. Du får en offert där det står vad som ingår och vad som tillkommer.',
+        meta: function (t) { return 'Offert post för post · planritning ' + t.matt[0] + ' × ' + t.matt[1]; },
+        lank: function (t) { return [t.sida, 'Se modellerna']; } },
+      { titel: 'Bygglov eller anmälan', skede: 0, vem: 'du', vemText: 'Du lämnar in',
+        text: 'Mindre komplementhus behöver sedan december 2025 varken bygglov eller anmälan för själva byggnaden, men installationerna anmäls ändå. Övriga hus kräver bygglov. Vi tar fram ritningar och underlag, men det är du som är byggherre och lämnar in till din kommun.',
+        meta: function (t) {
+          return t === TYP.attefallshus
+            ? 'Attefallshus: inget bygglov för byggnaden inom måtten'
+            : 'Fritidshus: bygglov krävs - vi tar fram underlaget';
+        },
+        lank: function (t) {
+          return t === TYP.attefallshus ? ['attefallshus-regler.html', 'Reglerna för attefallshus']
+            : ['sa-fungerar-det.html', 'Så går lovet till'];
+        } },
+      { titel: 'Tillverkning', skede: 1, vem: 'vi', vemText: 'Vi gör det',
+        text: 'Huset byggs i Sverige, under tak. Väggar, golv och tak monteras i jämn temperatur och fuktnivå i stället för ute i väder och vind. Du får veta var i processen huset befinner sig.',
+        meta: function (t) { return 'Leverans ' + t.lev + ' veckor · byggt under tak i Sverige'; },
+        lank: function () { return ['proffs.html', 'Se produktionen']; } },
+      { titel: 'Grund och anslutningar', skede: 1, vem: 'du', vemText: 'Du ordnar',
+        text: 'Grunden ska vara gjuten och el, vatten och avlopp framdragna innan huset kommer. Vi säger vad som krävs och när det ska vara klart, så att inget står och väntar på varandra.',
+        meta: function () { return 'Grund, el, vatten och avlopp klart innan huset kommer'; },
+        lank: function () { return ['vad-far-jag-bygga.html', 'Kolla din tomt och mark']; } },
+      { titel: 'Leverans och montage', skede: 2, vem: 'vi', vemText: 'Vi gör det',
+        text: 'Huset transporteras till tomten och monteras. Framkomlighet för lastbil och kranbil är det vanligaste som behöver lösas i förväg.',
+        meta: function () { return 'Montaget tar dagar i stället för månader'; },
+        lank: function () { return ['sa-fungerar-det.html', 'Se hela processen']; } },
+      { titel: 'Slutbesiktning', skede: 2, vem: 'bada', vemText: 'Tillsammans',
+        text: 'Genomgång av huset, punktlista på det som ska rättas, och överlämning. Du har haft samma kontakt hela vägen och vet vem du pratar med.',
+        meta: function () { return 'Samma kontakt hela vägen'; },
+        lank: function () { return ['kontakt.html', 'Börja med ett samtal']; } }
+    ];
+
+    /* Isometrisk projektion: x åt höger-ner, y åt vänster-ner, z uppåt. */
+    var S = 30, OX = 500, OY = 445, C = 0.8660254;
+    function P(x, y, z) { return [OX + (x - y) * S * C, OY + (x + y) * S * 0.5 - (z || 0) * S]; }
+    function pts(a) { return a.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' '); }
+    function poly(a, fill, extra) { return '<polygon points="' + pts(a) + '" fill="' + fill + '"' + (extra || '') + '/>'; }
+    function lin(a, farg, b, extra) {
+      return '<polyline points="' + pts(a) + '" fill="none" stroke="' + farg + '" stroke-width="' + b +
+        '" stroke-linecap="round" stroke-linejoin="round"' + (extra || '') + '/>';
+    }
+    function rita(a, farg, b, extra) { return lin(a, farg, b, ' pathLength="1" class="rs-rita"' + (extra || '')); }
+    function box(x, y, z, dx, dy, dz, f) {
+      var x1 = x + dx, y1 = y + dy, z1 = z + dz;
+      return poly([P(x1, y, z), P(x1, y1, z), P(x1, y1, z1), P(x1, y, z1)], f.x) +
+        poly([P(x, y1, z), P(x1, y1, z), P(x1, y1, z1), P(x, y1, z1)], f.y) +
+        poly([P(x, y, z1), P(x1, y, z1), P(x1, y1, z1), P(x, y1, z1)], f.t);
+    }
+    function del(fran, till, inne, stil, klass) {
+      return '<g class="rs-del ' + (klass || '') + '" data-fran="' + fran + '" data-till="' + till + '"' +
+        (stil ? ' style="' + stil + '"' : '') + '>' + inne + '</g>';
+    }
+    function etikett(p, text, klass) {
+      var b = Math.round(text.length * 7.1 + 26);
+      return '<g class="rs-etikett ' + (klass || '') + '" transform="translate(' + p[0].toFixed(1) + ',' + p[1].toFixed(1) + ')">' +
+        '<rect x="' + (-b / 2) + '" y="-15" width="' + b + '" height="30" rx="15"/>' +
+        '<text x="0" y="5" text-anchor="middle">' + text + '</text></g>';
+    }
+    function gran(x, y, h) {
+      var bas = P(x, y, 0), topp = P(x, y, h), mitt = P(x, y, h * 0.25), b = S * 0.62 * (h / 3);
+      return '<ellipse cx="' + bas[0].toFixed(1) + '" cy="' + (bas[1] + 2).toFixed(1) + '" rx="' + (b * 1.1).toFixed(1) +
+        '" ry="' + (b * 0.45).toFixed(1) + '" fill="rgba(0,0,0,.28)"/>' +
+        poly([[bas[0] - 2.2, bas[1]], [bas[0] + 2.2, bas[1]], [mitt[0] + 2.2, mitt[1]], [mitt[0] - 2.2, mitt[1]]], '#5b4632') +
+        poly([topp, [mitt[0] - b, mitt[1]], [mitt[0], mitt[1] + b * 0.32]], '#4d7d5c') +
+        poly([topp, [mitt[0], mitt[1] + b * 0.32], [mitt[0] + b, mitt[1]]], '#2e5541');
+    }
+    // Rektangel i ett väggplan: planet y=yv (framsidan) eller x=xv (gaveln).
+    function iY(yv, x0, x1, z0, z1) { return [P(x0, yv, z0), P(x1, yv, z0), P(x1, yv, z1), P(x0, yv, z1)]; }
+    function iX(xv, y0, y1, z0, z1) { return [P(xv, y0, z0), P(xv, y1, z0), P(xv, y1, z1), P(xv, y0, z1)]; }
+
+    var FASAD = { t: '#57504a', x: '#2d2823', y: '#3b352e' };
+    var BETONG = { t: '#c9c3b8', x: '#8d877d', y: '#a39d92' };
+    var VIRKE = { t: '#f1d3a2', x: '#c79a5f', y: '#dcb57c' };
+
+    function bygg(t) {
+      var L = t.L, B = t.B, x0 = -L / 2, x1 = L / 2, y0 = -B / 2, y1 = B / 2;
+      var zs = 0.35, H = 2.5, ze = zs + H, zr = t.nock + 0.2, o = 0.35;
+      var h = '';
+      h += '<defs>' +
+        '<linearGradient id="rs-gras" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5f8062"/><stop offset="1" stop-color="#344f3c"/></linearGradient>' +
+        '<linearGradient id="rs-glas" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0d6"/><stop offset="1" stop-color="#f0b56e"/></linearGradient>' +
+        '<radialGradient id="rs-sken"><stop offset="0" stop-color="#ffcf8a" stop-opacity=".55"/><stop offset="1" stop-color="#ffcf8a" stop-opacity="0"/></radialGradient>' +
+        '<radialGradient id="rs-skugga"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>' +
+        '</defs>';
+
+      // Tomten och verkstaden (verkstaden flyger in i steg 4).
+      h += box(-9, -6.5, -0.7, 18, 13, 0.7, { t: 'url(#rs-gras)', x: '#2a231c', y: '#382e24' });
+      var hall = box(-15, -6.3, -0.5, 4.6, 4.6, 0.5, { t: '#4c4740', x: '#2a2622', y: '#353029' }) +
+        poly([P(-14.6, -5.9, 0), P(-10.8, -5.9, 0), P(-10.8, -5.9, 2.6), P(-14.6, -5.9, 2.6)], 'rgba(247,245,240,.05)', ' stroke="rgba(247,245,240,.22)" stroke-width="1"') +
+        poly([P(-14.6, -5.9, 0), P(-14.6, -2.1, 0), P(-14.6, -2.1, 2.6), P(-14.6, -5.9, 2.6)], 'rgba(247,245,240,.04)', ' stroke="rgba(247,245,240,.18)" stroke-width="1"');
+      var hallTak = poly([P(-14.6, -5.9, 2.6), P(-10.8, -5.9, 2.6), P(-10.8, -2.1, 2.6), P(-14.6, -2.1, 2.6)], 'rgba(247,245,240,.07)', ' stroke="rgba(247,245,240,.3)" stroke-width="1"');
+      var paneler = '';
+      for (var i = 0; i < 4; i++) {
+        var px = -14.1 + i * 0.9, pa = [];
+        pa.push(poly(iX(px, -5.5, -2.6, 0.05, 2.1), 'rgba(241,211,162,.14)', ' stroke="#e2bf8a" stroke-width="1.6"'));
+        for (var s = -5.5 + 0.58; s < -2.6; s += 0.58) pa.push(lin([P(px, s, 0.05), P(px, s, 2.1)], '#e2bf8a', 1.1));
+        pa.push(lin([P(px, -5.5, 1.1), P(px, -2.6, 1.1)], '#e2bf8a', 1.1));
+        paneler += del(4, 6, pa.join(''), '--in-y:-28px;--d:' + (0.35 + i * 0.22) + 's');
+      }
+      h += del(4, 99, hall + paneler + hallTak + etikett(P(-12.7, -4, 3.9), 'Verkstaden · under tak'), '--in-y:-50px');
+
+      // Steg 1: tomtgränsen ritas och nålen landar.
+      var gr = [P(-8.3, -5.8, 0.02), P(8.3, -5.8, 0.02), P(8.3, 5.8, 0.02), P(-8.3, 5.8, 0.02), P(-8.3, -5.8, 0.02)];
+      var pinnar = [[-8.3, -5.8], [8.3, -5.8], [8.3, 5.8], [-8.3, 5.8]].map(function (k) {
+        return lin([P(k[0], k[1], 0), P(k[0], k[1], 0.9)], '#f0b56e', 2.4) +
+          '<circle cx="' + P(k[0], k[1], 0.9)[0].toFixed(1) + '" cy="' + P(k[0], k[1], 0.9)[1].toFixed(1) + '" r="3" fill="#f0b56e"/>';
+      }).join('');
+      h += del(1, 99, rita(gr, 'rgba(240,181,110,.75)', 1.6) + pinnar, '--in-y:0px');
+      h += del(1, 2, etikett(P(-6.2, 5.8, 0.2), 'Din tomt', 'rs-etikett--ljus'), '--in-y:10px;--d:.7s');
+
+      // Steg 2: planritningen på marken, med mått.
+      var ritn = rita([P(x0, y0, 0.03), P(x1, y0, 0.03), P(x1, y1, 0.03), P(x0, y1, 0.03), P(x0, y0, 0.03)], '#f0b56e', 2.2) +
+        rita([P(x0 + L * 0.4, y0, 0.03), P(x0 + L * 0.4, y1, 0.03)], '#f0b56e', 1.4, ' style="--d:.5s"') +
+        poly([P(x0, y0, 0.03), P(x1, y0, 0.03), P(x1, y1, 0.03), P(x0, y1, 0.03)], 'rgba(240,181,110,.1)') +
+        rita([P(x0, y1 + 1, 0.03), P(x1, y1 + 1, 0.03)], 'rgba(247,245,240,.7)', 1.2, ' style="--d:.8s"') +
+        rita([P(x1 + 1, y0, 0.03), P(x1 + 1, y1, 0.03)], 'rgba(247,245,240,.7)', 1.2, ' style="--d:.9s"') +
+        etikett(P(0, y1 + 1.9, 0.03), t.matt[0], 'rs-etikett--matt') +
+        etikett(P(x1 + 2.2, 0, 0.03), t.matt[1], 'rs-etikett--matt');
+      h += del(2, 5, ritn, '--in-y:0px');
+
+      // Steg 5: ledningar fram till grunden.
+      var led = rita([P(9, -1.2, 0.02), P(x1 + 0.3, -1.2, 0.02)], '#f2b33d', 2.6) +
+        rita([P(9, -0.5, 0.02), P(x1 + 0.3, -0.5, 0.02)], '#6aa7d8', 2.6, ' style="--d:.2s"') +
+        rita([P(9, 0.2, 0.02), P(x1 + 0.3, 0.2, 0.02)], '#a8a196', 2.6, ' style="--d:.4s"');
+      h += del(5, 99, led, '--in-y:0px');
+
+      // Träd bakom huset.
+      var baktrad = [[-7.8, -4.6, 3.4], [7.6, -5.3, 3.8], [8.2, -2.4, 2.9], [-8.1, 1.4, 2.6]];
+      var framtrad = [[-6.8, 5.3, 2.3], [2.8, 5.6, 2.0]];
+      h += baktrad.map(function (g) { return gran(g[0], g[1], g[2]); }).join('');
+
+      // Steg 1-4: nålen.
+      var c = P(0, 0, 0);
+      var nal = '<ellipse class="rs-puls" cx="' + c[0].toFixed(1) + '" cy="' + c[1].toFixed(1) + '" rx="22" ry="11" fill="none" stroke="#f0b56e" stroke-width="2"/>' +
+        '<g class="rs-nal"><path d="M' + c[0] + ' ' + c[1] + 'c-13-20-19-28-19-38a19 19 0 1 1 38 0c0 10-6 18-19 38z" fill="#f0b56e"/>' +
+        '<circle cx="' + c[0] + '" cy="' + (c[1] - 38) + '" r="7" fill="#1b1915"/></g>';
+      h += del(1, 5, nal, '--in-y:-60px;--d:.35s');
+
+      // Steg 3: handlingarna, stämplade.
+      var d = P(4.8, -3.6, 3.4);
+      var dok = '<g class="rs-dok" transform="translate(' + d[0].toFixed(1) + ',' + d[1].toFixed(1) + ') rotate(-6)">' +
+        '<rect x="-38" y="-48" width="76" height="96" rx="8" fill="#f7f5f0"/>' +
+        '<path d="M-24 -30h48M-24 -18h48M-24 -6h32M-24 6h40" stroke="#b9b1a4" stroke-width="3" stroke-linecap="round"/>' +
+        '<circle class="rs-stampel" cx="14" cy="28" r="17" fill="none" stroke="#8f5424" stroke-width="3"/>' +
+        '<path class="rs-stampel" d="M6 28l6 6 11-12" fill="none" stroke="#8f5424" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></g>';
+      h += del(3, 5, dok + etikett([d[0], d[1] + 70], t.lov), '--in-y:-40px');
+
+      // Steg 5: grunden reser sig, med en mjuk skugga.
+      var sk = P(0.3, 0.3, 0);
+      h += del(5, 99, '<ellipse cx="' + sk[0].toFixed(1) + '" cy="' + (sk[1] + 6).toFixed(1) + '" rx="' + (L * S * 0.95).toFixed(1) +
+        '" ry="' + (L * S * 0.42).toFixed(1) + '" fill="url(#rs-skugga)"/>' +
+        box(x0 - 0.3, y0 - 0.3, 0, L + 0.6, B + 0.6, zs, BETONG), '--in-y:22px');
+      h += del(5, 6, etikett(P(8.2, -2.6, 0.4), 'El · vatten · avlopp', 'rs-etikett--liten'), '--in-y:10px;--d:.6s');
+
+      // Steg 6: kranen.
+      var kb = P(5.8, -4.4, 0), kt = P(5.8, -4.4, 8.2), km = P(-0.5, 0.2, 8.2), kk = P(-0.5, 0.2, 5.2);
+      var kran = box(5.3, -4.9, 0, 1, 1, 0.5, { t: '#f2c14e', x: '#b8891f', y: '#d6a534' }) +
+        lin([kb, kt], '#f2c14e', 4) + lin([P(5.8, -4.4, 7.2), km], '#f2c14e', 3) +
+        lin([kt, km], '#f2c14e', 2) + lin([km, kk], 'rgba(247,245,240,.7)', 1.2) +
+        '<rect x="' + (kk[0] - 4) + '" y="' + kk[1] + '" width="8" height="7" rx="2" fill="#f2c14e"/>';
+      h += del(6, 7, kran, '--in-y:-80px');
+
+      // Steg 6-7: väggarna reses (bakifrån) och taket läggs på.
+      var vagg = '';
+      vagg += del(6, 99, box(x0, y0, zs, L, 0.2, H, FASAD), '--in-y:-70px;--d:.2s');
+      vagg += del(6, 99, box(x0, y0, zs, 0.2, B, H, FASAD), '--in-y:-70px;--d:.45s');
+      var gavel = box(x1 - 0.2, y0, zs, 0.2, B, H, FASAD) +
+        poly(iX(x1 + 0.01, -0.45, 0.45, zs + 0.9, zs + 2.0), '#1c2a33', ' stroke="#8a8074" stroke-width="1"');
+      vagg += del(6, 99, gavel, '--in-y:-70px;--d:.7s');
+      var fram = box(x0, y1 - 0.2, zs, L, 0.2, H, FASAD);
+      for (var bx = x0 + 0.45; bx < x1; bx += 0.45) fram += lin([P(bx, y1 + 0.005, zs), P(bx, y1 + 0.005, ze)], 'rgba(255,255,255,.07)', 1);
+      var f1 = [x0 + L * 0.12, x0 + L * 0.12 + 1.3], f2 = [x1 - L * 0.12 - 2.0, x1 - L * 0.12];
+      var dorr = [x0 + L * 0.46, x0 + L * 0.46 + 0.95];
+      fram += poly(iY(y1 + 0.01, f1[0], f1[1], zs + 0.8, zs + 2.0), '#1c2a33', ' stroke="#8a8074" stroke-width="1"');
+      fram += poly(iY(y1 + 0.01, f2[0], f2[1], zs + 0.25, zs + 2.15), '#1c2a33', ' stroke="#8a8074" stroke-width="1"');
+      fram += poly(iY(y1 + 0.01, dorr[0], dorr[1], zs, zs + 2.1), '#2a1f17', ' stroke="#8a8074" stroke-width="1"');
+      vagg += del(6, 99, fram, '--in-y:-70px;--d:.95s');
+      var tak = poly([P(x1, y0, ze), P(x1, y1, ze), P(x1, 0, zr - 0.2)], '#25211d') +
+        poly([P(x0 - o, 0, zr), P(x1 + o, 0, zr), P(x1 + o, y0 - o, ze - 0.2), P(x0 - o, y0 - o, ze - 0.2)], '#4a4f55') +
+        poly([P(x0 - o, 0, zr), P(x1 + o, 0, zr), P(x1 + o, y1 + o, ze - 0.2), P(x0 - o, y1 + o, ze - 0.2)], '#2c3034') +
+        lin([P(x0 - o, 0, zr), P(x1 + o, 0, zr)], 'rgba(255,255,255,.35)', 1.4);
+      for (var tx = x0; tx <= x1 + 0.01; tx += 0.55) tak += lin([P(tx, 0.05, zr - 0.02), P(tx, y1 + o - 0.05, ze - 0.18)], 'rgba(255,255,255,.06)', 1);
+      vagg += del(6, 99, tak, '--in-y:-110px;--d:1.3s');
+      h += vagg;
+
+      // Steg 7: ljuset tänds, trall, skylt och bock.
+      var glod = poly(iY(y1 + 0.02, f1[0], f1[1], zs + 0.8, zs + 2.0), 'url(#rs-glas)') +
+        poly(iY(y1 + 0.02, f2[0], f2[1], zs + 0.25, zs + 2.15), 'url(#rs-glas)') +
+        poly(iX(x1 + 0.02, -0.45, 0.45, zs + 0.9, zs + 2.0), 'url(#rs-glas)');
+      var sp = P((f2[0] + f2[1]) / 2, y1 + 2, 0);
+      glod = '<ellipse cx="' + sp[0].toFixed(1) + '" cy="' + sp[1].toFixed(1) + '" rx="120" ry="44" fill="url(#rs-sken)"/>' + glod;
+      h += del(7, 99, glod, '--in-y:0px;--d:.2s', 'rs-ljus');
+      var trall = box(dorr[0] - 0.9, y1, 0, dorr[1] - dorr[0] + 1.8, 1.3, 0.2, VIRKE);
+      var skylt = lin([P(x0 - 0.8, y1 + 1.6, 0), P(x0 - 0.8, y1 + 1.6, 1.1)], '#2b241d', 2.4) +
+        lin([P(x0 + 0.9, y1 + 1.6, 0), P(x0 + 0.9, y1 + 1.6, 1.1)], '#2b241d', 2.4) +
+        poly(iY(y1 + 1.6, x0 - 1.0, x0 + 1.1, 0.8, 1.55), '#c9a06a');
+      var sm = P(x0 + 0.05, y1 + 1.6, 1.12);
+      skylt += '<text class="rs-skylttext" x="' + sm[0].toFixed(1) + '" y="' + (sm[1] + 3).toFixed(1) + '" text-anchor="middle" transform="rotate(-30 ' + sm[0].toFixed(1) + ' ' + sm[1].toFixed(1) + ')">Idealhus</text>';
+      h += del(7, 99, trall + skylt, '--in-y:14px;--d:.5s');
+      var bm = P(0, 0, zr + 2.6);
+      var bock = '<g class="rs-bock" transform="translate(' + bm[0].toFixed(1) + ',' + bm[1].toFixed(1) + ')">' +
+        '<circle r="24" fill="#22a35a"/><path d="M-10 0l7 7 13-14" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></g>' +
+        etikett([bm[0], bm[1] + 46], 'Slutbesiktning klar', 'rs-etikett--ljus');
+      h += del(7, 99, bock, '--in-y:-30px;--d:.9s');
+
+      // Steg 6: lastbilen med väggelement.
+      var bil = box(3.4, 3.9, 0.45, 3.6, 1.5, 0.22, { t: '#3a3632', x: '#211e1b', y: '#2c2925' }) +
+        box(3.6, 4.1, 0.67, 3.1, 1.1, 0.55, VIRKE) +
+        box(7.1, 3.9, 0.3, 1.3, 1.5, 1.45, { t: '#f5c690', x: '#b27a3e', y: '#e0a45f' }) +
+        poly(iX(8.41, 4.1, 5.2, 1.05, 1.6), '#1c2a33');
+      [[4.2, 5.4], [6.2, 5.4], [7.7, 5.4]].forEach(function (w) {
+        var p = P(w[0], w[1] + 0.01, 0.3);
+        bil += '<ellipse cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" rx="8" ry="9" fill="#141210" stroke="#57504a" stroke-width="2"/>';
+      });
+      h += del(6, 7, bil, '--in-x:140px;--in-y:80px');
+
+      // Träd framför huset, sist.
+      h += framtrad.map(function (g) { return gran(g[0], g[1], g[2]); }).join('');
+      return h;
+    }
+
+    var steg = 0, typ = 'attefallshus', spelar = !lugn, synlig = false, pekar = false, timer, vald = false;
+    var TID = 5200;
+    rot.style.setProperty('--resatid', TID + 'ms');
+
+    function visaSteg(n) {
+      steg = n;
+      rot.setAttribute('data-steg', String(n));
+      $$('.rs-del', svg).forEach(function (g) {
+        var pa = +g.getAttribute('data-fran') <= n && n < +g.getAttribute('data-till');
+        g.classList.toggle('pa', pa);
+      });
+      knappar.forEach(function (b, i) {
+        if (i + 1 === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+        b.classList.toggle('klar', i + 1 < n);
+      });
+      var t = TYP[typ], s = STEG[n - 1];
+      I.skede.textContent = SKEDE[s.skede];
+      I.nr.textContent = '0' + n;
+      I.titel.textContent = s.titel;
+      I.vem.setAttribute('data-vem', s.vem);
+      I.vem.innerHTML = '<i class="prick prick--' + s.vem + '"></i><span>' + s.vemText + '</span>';
+      I.text.textContent = s.text;
+      I.meta.textContent = s.meta(t);
+      var l = s.lank(t);
+      I.lank.setAttribute('href', l[0]);
+      I.lank.firstChild.nodeValue = l[1];
+      if (!lugn) {
+        infoRuta.classList.remove('resan__info--byt');
+        void infoRuta.offsetWidth;
+        infoRuta.classList.add('resan__info--byt');
+      }
+      starta();
+    }
+
+    function starta() {
+      clearTimeout(timer);
+      rot.classList.remove('resan--spelar');
+      if (!spelar || !synlig || pekar) return;
+      void rot.offsetWidth;
+      rot.classList.add('resan--spelar');
+      timer = setTimeout(function () { visaSteg(steg % 7 + 1); }, TID);
+    }
+
+    function valjSjalv() {
+      spelar = false;
+      if (!vald) { vald = true; infoRuta.setAttribute('aria-live', 'polite'); }
+    }
+
+    function rendera() {
+      svg.innerHTML = bygg(TYP[typ]);
+      if (steg) {
+        // Nya grupper ska tona in - ge webbläsaren en bildruta först. Steget
+        // läses när bildrutan kommer, inte nu: hinner man klicka på ett
+        // steg under tiden är det det steget som gäller.
+        requestAnimationFrame(function () { requestAnimationFrame(function () { visaSteg(steg); }); });
+      }
+    }
+
+    knappar.forEach(function (b, i) {
+      b.addEventListener('click', function () { valjSjalv(); visaSteg(i + 1); });
+      b.addEventListener('keydown', function (e) {
+        var n = null;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = Math.min(7, i + 2);
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = Math.max(1, i);
+        if (n === null) return;
+        e.preventDefault();
+        valjSjalv();
+        visaSteg(n);
+        knappar[n - 1].focus();
+      });
+    });
+
+    typKnappar.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var ny = b.getAttribute('data-typ');
+        if (ny === typ) return;
+        typ = ny;
+        typKnappar.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        valjSjalv();
+        rendera();
+      });
+    });
+
+    vemKnappar.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var pa = b.getAttribute('aria-pressed') !== 'true';
+        vemKnappar.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b && pa)); });
+        if (pa) rot.setAttribute('data-vem', b.getAttribute('data-vem'));
+        else rot.removeAttribute('data-vem');
+      });
+    });
+
+    rot.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') { pekar = true; starta(); } });
+    rot.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') { pekar = false; starta(); } });
+    rot.addEventListener('focusin', function () { valjSjalv(); starta(); });
+
+    rendera();
+    if (!window.IntersectionObserver || lugn) {
+      synlig = true;
+      visaSteg(1);
+    } else {
+      new IntersectionObserver(function (poster) {
+        synlig = poster[0].isIntersecting;
+        if (synlig && !steg) {
+          requestAnimationFrame(function () { visaSteg(1); });
+        } else {
+          starta();
+        }
+      }, { threshold: 0.3 }).observe(rot);
+    }
+    pausaUtanforVy(rot);
+    glidandeMarkering($('.resan__hustyp', rot));
+  })();
+
+  /* --- Regelsidan: guiden om attefallshus --------------------------
+     Innehållsförteckningen med läsmätare och en markör som glider till
+     avsnittet man läser, måtten som växlar mellan inom och utanför
+     detaljplan, talen i kortsvaret och korten som ritas upp när de
+     syns (design.css 21). Utan skriptet står allt stilla men syns. */
+  (function () {
+    var rot = $('.rg');
+    if (!rot) return;
+
+    function somTal(s) { return parseFloat(String(s).replace(',', '.')) || 0; }
+    function somText(v, dec) { return dec ? v.toFixed(dec).replace('.', ',') : String(Math.round(v)); }
+
+    // Räknar om ett tal mjukt. Ett nytt anrop tar över ett pågående.
+    function tweena(el, fran, till, ms, enhet) {
+      var dec = String(till).indexOf(',') >= 0 ? 1 : 0;
+      var a = somTal(fran), b = somTal(till);
+      var id = (el.rgTween || 0) + 1;
+      el.rgTween = id;
+      if (lugn || a === b) { el.textContent = somText(b, dec) + (enhet || ''); return; }
+      var start = performance.now();
+      (function steg(nu) {
+        if (el.rgTween !== id) return;
+        var t = Math.min(1, (nu - start) / ms);
+        var e = 1 - Math.pow(1 - t, 3);
+        el.textContent = somText(a + (b - a) * e, dec) + (enhet || '');
+        if (t < 1) requestAnimationFrame(steg);
+      })(start);
+    }
+
+    // Korten tonar in syskon efter syskon; ikoner, bockar och streck ritas.
+    if (!lugn && window.IntersectionObserver) {
+      var syskon = new Map();
+      $$('[data-rg-in]').forEach(function (el) {
+        var f = el.parentElement;
+        var i = syskon.get(f) || 0;
+        syskon.set(f, i + 1);
+        el.style.setProperty('--rg-d', Math.min(i * 0.09, 0.36).toFixed(2) + 's');
+        el.classList.add('rg-vanta');
+        narSynligt(el, function (e) {
+          e.classList.remove('rg-vanta');
+          setTimeout(function () { e.style.removeProperty('--rg-d'); }, 2000);
+        }, 0.16, '0px 0px -6% 0px');
+      });
+    }
+
+    // Talen i kortsvaret räknas upp en gång.
+    $$('[data-rg-rakna]').forEach(function (el) {
+      if (lugn) return;
+      var mal = el.getAttribute('data-rg-rakna');
+      el.textContent = mal.indexOf(',') >= 0 ? '0,0' : '0';
+      narSynligt(el, function () {
+        setTimeout(function () { tweena(el, 0, mal, 1500); }, 500);
+      }, 0.4);
+    });
+
+    $$('.rg-topp, .rg-vatten').forEach(pausaUtanforVy);
+
+    /* Innehållsförteckningen. Linjen på 35 % av skärmhöjden avgör vilket
+       avsnitt man läser; mätaren fylls i takt med texten. */
+    var lankar = $$('.rg-toc a');
+    var delar = lankar.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+    var markor = $('.rg-toc__markor');
+    var fyll = $('.rg-toc__fyll');
+    var text = $('.rg__text');
+    var aktiv = -1;
+
+    function flyttaMarkor() {
+      var a = lankar[aktiv];
+      if (!a || !markor) return;
+      markor.style.height = a.offsetHeight + 'px';
+      markor.style.transform = 'translateY(' + a.offsetTop + 'px)';
+    }
+
+    function markera(i) {
+      if (i === aktiv) return;
+      aktiv = i;
+      lankar.forEach(function (a, j) {
+        a.classList.toggle('ar-har', j === i);
+        if (j === i) a.setAttribute('aria-current', 'location');
+        else a.removeAttribute('aria-current');
+      });
+      flyttaMarkor();
+      if (markor) markor.classList.add('syns');
+    }
+
+    var bokad = false;
+    function las() {
+      bokad = false;
+      var linje = window.innerHeight * 0.35;
+      var i = 0;
+      for (var j = 0; j < delar.length; j++) {
+        if (delar[j] && delar[j].getBoundingClientRect().top <= linje) i = j;
+      }
+      markera(i);
+      if (fyll && text) {
+        var r = text.getBoundingClientRect();
+        var p = (linje - r.top) / Math.max(1, r.height - window.innerHeight * 0.4);
+        fyll.style.transform = 'scaleY(' + Math.min(1, Math.max(0, p)).toFixed(4) + ')';
+      }
+    }
+    function bokaLas() {
+      if (bokad) return;
+      bokad = true;
+      requestAnimationFrame(las);
+    }
+
+    if (lankar.length) {
+      window.addEventListener('scroll', bokaLas, { passive: true });
+      window.addEventListener('resize', function () { flyttaMarkor(); bokaLas(); });
+      if (document.fonts) document.fonts.ready.then(flyttaMarkor);
+      las();
+    }
+
+    /* Måtten: växeln flyttar pillret, huset växer i ritningen (CSS) och
+       talen räknas om. Piltangenterna byter också. */
+    var matt = $('[data-rg-matt]');
+    if (!matt) return;
+    var vaxel = $('.rg-vaxel', matt);
+    var pill = $('.rg-vaxel__pill', matt);
+    var knappar = $$('button', vaxel);
+    var varden = $$('[data-inom]', matt);
+
+    function pillTill(direkt) {
+      var b = $('[aria-pressed="true"]', vaxel);
+      if (!b || !pill) return;
+      if (direkt) pill.style.transition = 'none';
+      pill.style.width = b.offsetWidth + 'px';
+      pill.style.transform = 'translateX(' + b.offsetLeft + 'px)';
+      if (direkt) { void pill.offsetWidth; pill.style.transition = ''; }
+    }
+
+    function satt(plan) {
+      vaxel.classList.remove('lockar');
+      if (matt.getAttribute('data-plan') === plan) return;
+      matt.setAttribute('data-plan', plan);
+      knappar.forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.getAttribute('data-plan') === plan));
+      });
+      pillTill(false);
+      varden.forEach(function (el) {
+        tweena(el, el.textContent, el.getAttribute('data-' + plan), 850, el.getAttribute('data-enhet') || '');
+      });
+    }
+
+    knappar.forEach(function (b) {
+      b.addEventListener('click', function () { satt(b.getAttribute('data-plan')); });
+    });
+    vaxel.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      var ny = e.key === 'ArrowRight' ? 'utanfor' : 'inom';
+      satt(ny);
+      $('[data-plan="' + ny + '"]', vaxel).focus();
+    });
+
+    vaxel.classList.add('klar');
+    pillTill(true);
+    if (window.ResizeObserver) new ResizeObserver(function () { pillTill(true); }).observe(vaxel);
+    if (document.fonts) document.fonts.ready.then(function () { pillTill(true); });
+
+    // En diskret inbjudan att prova växeln, en gång, när panelen syns.
+    if (!lugn) {
+      narSynligt(matt, function () {
+        setTimeout(function () {
+          if (matt.getAttribute('data-plan') === 'inom') vaxel.classList.add('lockar');
+        }, 2200);
+      }, 0.5);
+    }
   })();
 })();

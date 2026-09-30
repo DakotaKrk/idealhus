@@ -102,11 +102,11 @@ import os
 import re
 
 SIDFILER = sorted(f for f in os.listdir(".") if f.endswith(".html") and not f.startswith("_")) + [
-    "styles.css", "premium.js", "sitemap.xml", "robots.txt",
+    "styles.css", "design.css", "premium.js", "sitemap.xml", "robots.txt",
     "favicon.ico", "apple-touch-icon.png", ".htaccess"]
 text = "".join(io.open(f, encoding="utf-8", errors="ignore").read()
                for f in SIDFILER if f.endswith((".html", ".css", ".js")))
-media = set(m.rstrip(".") for m in re.findall(r"(?:images|modeller|vendor)/[\w./-]+", text))
+media = set(m.rstrip(".") for m in re.findall(r"(?:images|modeller|vendor|fonts)/[\w./-]+", text))
 for namn in re.findall(r"['\"]([\w-]+\.(?:webp|png|jpg|svg|mp4|glb))['\"]", text):
     for mapp in ("images/", "modeller/"):
         media.add(mapp + namn)

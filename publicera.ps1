@@ -69,9 +69,11 @@ $losen = $null
 # FTP-kontot har "Hela hemkatalogen", så domänens mapp ligger under roten.
 $rot = "$Doman/public_html"
 # TLS 1.2: med TLS 1.3 begärde Loopias server omförhandling mitt i
-# överföringen, och flera filer blev tomma på servern.
+# överföringen, och flera filer blev tomma på servern. Anslutningar
+# misslyckas ibland helt, så kort väntan och nya försök (inte
+# --retry-all-errors: fel lösenord ska inte provas om och om igen).
 $grund = @('--ssl-reqd', '--ssl-no-revoke', '--tls-max', '1.2', '--ftp-create-dirs', '--ftp-pasv',
-           '--fail', '--show-error', '--silent', '--retry', '2')
+           '--fail', '--show-error', '--silent', '--connect-timeout', '10', '--retry', '3')
 
 function LaddaUpp([string[]]$lista, [string]$cfg) {
     $arg = $grund + @('--config', $cfg)
@@ -87,7 +89,14 @@ function Felaktiga([string[]]$lista) {
     foreach ($fil in $lista) {
         if ($fil -eq '.htaccess') { continue }
         $lokal = (Get-Item -LiteralPath $fil -Force).Length
-        $webb = & $curl --silent --ssl-no-revoke --output NUL --write-out '%{size_download}' "https://$Doman/$fil`?kontroll=$([guid]::NewGuid().ToString('N'))"
+        # Samma TLS-gräns som vid uppladdningen (annars blev även hämtningar
+        # ibland avkortade och filen såg fel ut), och en tidsgräns så att
+        # en hängande hämtning inte stoppar skriptet.
+        # Ibland går det inte att ansluta alls (Windows väntar då 21 s), så
+        # kort väntan och nya försök.
+        $webb = & $curl --silent --ssl-no-revoke --tls-max 1.2 --max-time 120 --connect-timeout 8 `
+            --retry 4 --retry-all-errors --retry-delay 1 --output NUL --write-out '%{size_download}' `
+            "https://$Doman/$fil`?kontroll=$([guid]::NewGuid().ToString('N'))"
         if ([int64]$webb -ne $lokal) { $fel += $fil }
     }
     return ,$fel

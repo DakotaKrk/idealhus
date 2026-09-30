@@ -3,7 +3,7 @@
 import re, io, os
 
 BAS = "https://idealhus.se/"
-CSS_V = "20260929c"
+CSS_V = "20260930zi"
 
 # Husen for den som ska bo i dem, och det vi levererar till andra som
 # bygger. De sag likadana ut i menyn tidigare, som fem jamnstallda val.
@@ -29,7 +29,7 @@ KATEGORI_INFO = {
                      "Utan bygglov, 30–50 m²"),
     "Fritidshus": ("hus-r3.webp",
                    "För helger och långa somrar"),
-    "Proffs": ("generated-craft-cladding-01.webp",
+    "Proffs": ("foto/lyft-stommar.webp",
                "Väggar, block och moduler"),
 }
 
@@ -121,6 +121,14 @@ TEMASKRIPT = ("<script>try{var t=new URLSearchParams(location.search).get('tema'
               "document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>")
 
 
+# Typsnitten ligger i fonts/ sedan 2026-09-30 (Poppins och Manrope, som
+# Uperformance) - inga anrop till Google. De två som syns direkt
+# förladdas, så rubriken inte hinner ritas i reservtypsnittet.
+TYPSNITT = (
+    '    <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>\n'
+    '    <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>')
+
+
 def head(titel, beskrivning, forladdad=None, fil=None):
     pre = f'\n    <link rel="preload" as="image" href="images/{forladdad}" fetchpriority="high">' if forladdad else ""
     return f'''<!doctype html>
@@ -130,7 +138,7 @@ def head(titel, beskrivning, forladdad=None, fil=None):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{titel}</title>
     <meta name="description" content="{beskrivning}">
-    <meta name="theme-color" content="#2c2820">
+    <meta name="theme-color" content="#1b1915">
     <link rel="icon" href="images/idealhus.svg" type="image/svg+xml">
     <link rel="icon" href="favicon.ico" sizes="32x32">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -145,10 +153,9 @@ def head(titel, beskrivning, forladdad=None, fil=None):
     <meta property="og:url" content="{BAS}{fil or ''}">
     <meta name="twitter:card" content="summary_large_image">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&amp;family=Source+Sans+3:ital,wght@0,300..700;1,400&amp;display=swap">{pre}
+{TYPSNITT}{pre}
     <link rel="stylesheet" href="styles.css?v={CSS_V}">
+    <link rel="stylesheet" href="design.css?v={CSS_V}">
     <script src="premium.js?v={CSS_V}" defer></script>
     {TEMASKRIPT}
     <script type="application/ld+json">
@@ -207,7 +214,7 @@ SIDFOT = '''    <footer class="site-footer">
         <div>
           <img class="site-footer__logo" src="images/idealhus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Idealhus">
           <p class="site-footer__text">
-            Attefallshus &amp; komplementhus med skandinavisk design och hög kvalitet.
+            Attefallshus, fritidshus och byggelement, byggda under tak i Sverige och monterade på några dagar.
           </p>
         </div>
 
@@ -250,6 +257,8 @@ SIDFOT = '''    <footer class="site-footer">
         <span>© 2026 Idealhus AB. Alla rättigheter förbehållna.</span>
         <a class="site-footer__policy" href="integritetspolicy.html">Integritetspolicy</a>
       </div>
+
+      <p class="site-footer__ord" aria-hidden="true">Idealhus</p>
     </footer>
 '''
 

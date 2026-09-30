@@ -6,6 +6,7 @@ for hand: den ar samma data som kategorisidornas kort bygger pa. Skriptet
 byter ut allt mellan markorerna, resten av sidan ror det inte.
 """
 import io
+import json
 import os
 
 import _modeller as M
@@ -23,8 +24,9 @@ def tabell():
         rader.append("            namn: '%s'," % namn)
         rader.append("            modeller: [")
         for mnamn, bild, yta, rum, lev in modeller:
-            rader.append("              { namn: '%s', bild: '%s', yta: %d, rum: %d, lev: %d },"
-                         % (mnamn, bild, yta, rum, lev))
+            text = json.dumps([M.BESKRIVNING[mnamn], M.GEMENSAMT], ensure_ascii=False)
+            rader.append("              { namn: '%s', bild: '%s', yta: %d, rum: %d, lev: %d, text: %s },"
+                         % (mnamn, bild, yta, rum, lev, text))
         rader.append("            ]")
         rader.append("          },")
     rader.append("        };")
@@ -36,11 +38,15 @@ BLOCK = '''      /* MODELLER:START - skrivs av _huskort.py, andra inte for hand 
 %s
 
         // Korten pa kategorisidorna lankar hit med kategori och nummer.
-        // Utan parametrar star sidan kvar som den exempelsida den ar.
+        // Utan (giltiga) parametrar visas forsta attefallshuset - sidan
+        // ar ingen exempelsida langre (2026-09-30).
         var p = new URLSearchParams(window.location.search);
         var typ = MODELLER[p.get('typ')];
         var nr = parseInt(p.get('modell'), 10);
-        if (!typ || !(nr >= 1 && nr <= typ.modeller.length)) return;
+        if (!typ || !(nr >= 1 && nr <= typ.modeller.length)) {
+          typ = MODELLER.attefallshus;
+          nr = 1;
+        }
 
         var m = typ.modeller[nr - 1];
 
@@ -84,6 +90,11 @@ BLOCK = '''      /* MODELLER:START - skrivs av _huskort.py, andra inte for hand 
         document.querySelectorAll('.model-specs dt').forEach(function (dt) {
           var varde = varden[dt.textContent.trim()];
           if (varde && dt.nextElementSibling) dt.nextElementSibling.textContent = varde;
+        });
+
+        var stycken = document.querySelectorAll('.model-intro__text');
+        (m.text || []).forEach(function (t, i) {
+          if (stycken[i]) stycken[i].textContent = t;
         });
 
         document.querySelectorAll('.model-price__card').forEach(function (kort) {

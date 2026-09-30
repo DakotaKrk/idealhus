@@ -1,18 +1,22 @@
     <main id="innehall">
       <section class="subpage-hero">
-        <img class="subpage-hero__image" src="images/hus-r4.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Ljusgrått fritidshus med takkupa på en äng bland björkar">
+        <img class="subpage-hero__image" src="images/foto/dronare-platta.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Två personer i arbete på betongplattan mellan de resta väggarna">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
-            <h1 class="subpage-hero__title">Kontakt</h1>
-            <p class="subpage-hero__meta">Du når oss direkt · ingen växel · ingen säljorganisation</p>
+            <h1 class="subpage-hero__title">Låt oss prata om din plats</h1>
+            <p class="subpage-hero__meta">Du når oss direkt, utan växel och utan säljorganisation. Berätta kort om ditt projekt, så återkommer vi med nästa steg.</p>
+            <div class="subpage-hero__actions">
+              <a class="hero__link hero__link--solid" href="#kontaktformular">Till formuläret</a>
+              <a class="hero__link" href="mailto:info@idealhus.se">info@idealhus.se</a>
+            </div>
           </div>
         </div>
       </section>
 
       <section class="kontakt-topp">
         <div>
-          <h2>Prata med oss om <em>din plats</em>.</h2>
+          <h2>Hör av dig. <em>Vi svarar själva.</em></h2>
           <p class="kontakt-topp__lead">
             Har du frågor om våra hus, vill jämföra modeller eller komma vidare
             med en offert? Skriv några rader så återkommer vi med nästa tydliga
@@ -54,7 +58,7 @@
               spelar det ingen roll — gå vidare ändå.
             </p>
 
-            <ul class="kontakt-tips">
+            <ol class="kontakt-tips">
               <li>
                 <strong>Du får svar direkt av oss</strong>
                 <span>Vi som bygger husen läser förfrågan själva. Ingen växel emellan.</span>
@@ -67,7 +71,7 @@
                 <strong>Sedan vet du var du står</strong>
                 <span>Vi säger vad som gäller för din tomt och vilka modeller som passar den.</span>
               </li>
-            </ul>
+            </ol>
           </div>
 
 __FORMULAR__        </div>

@@ -49,7 +49,11 @@ KROPP = f'''    <main id="innehall">
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
             <h1 class="subpage-hero__title">Äga och hyra ut</h1>
-            <p class="subpage-hero__meta">Samäga stugan · räkna på uthyrningen</p>
+            <p class="subpage-hero__meta">Två verktyg för dig som delar stugan med andra: en kalender som fördelar årets veckor rättvist, och en kalkyl som visar vad uthyrningen kan täcka.</p>
+            <div class="subpage-hero__actions">
+              <a class="hero__link hero__link--solid" href="#samagare">Samägarkalendern</a>
+              <a class="hero__link" href="#kalkyl">Uthyrningskalkylen</a>
+            </div>
           </div>
         </div>
       </section>

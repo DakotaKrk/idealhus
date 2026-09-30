@@ -29,7 +29,19 @@ def patcha(fil):
     nl = "\r\n" if "\r\n" in s else "\n"
     s = s.replace("\r\n", "\n")
 
-    s = re.sub(r'(styles\.css|premium\.js)\?v=\w+', r'\1?v=' + B.CSS_V, s)
+    s = re.sub(r'(styles\.css|premium\.js|design\.css)\?v=\w+', r'\1?v=' + B.CSS_V, s)
+
+    # Nya typsnitt och design.css (2026-09-30), som i mallen.
+    s = re.sub(r'    <link rel="preconnect" href="https://fonts\.g[^\n]*\n', '', s)
+    s = re.sub(r'    <link rel="stylesheet" href="https://fonts\.googleapis[^\n]*\n', '', s)
+    if 'fonts/poppins-600.woff2' not in s:
+        s = s.replace('    <link rel="stylesheet" href="styles.css',
+                      B.TYPSNITT + '\n    <link rel="stylesheet" href="styles.css', 1)
+    if 'design.css' not in s:
+        s = re.sub(r'(    <link rel="stylesheet" href="styles\.css\?v=\w+">\n)',
+                   lambda m: m.group(1) + '    <link rel="stylesheet" href="design.css?v=' + B.CSS_V + '">\n',
+                   s, count=1)
+    s = s.replace('<meta name="theme-color" content="#2c2820">', '<meta name="theme-color" content="#1b1915">')
 
     # Menyn och sidfoten tas hela ur mallen (2026-09-24). Att lappa dem
     # rad för rad lämnade en dubbel länk i sidfoten och glömde

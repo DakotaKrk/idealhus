@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proffs | Idealhus</title>
+    <title>Byggelement för proffs | Idealhus</title>
     <meta name="description" content="Utfackningsväggar, husblock och moduler från Idealhus för byggföretag och entreprenörer.">
-    <meta name="theme-color" content="#2c2820">
+    <meta name="theme-color" content="#1b1915">
     <link rel="icon" href="images/idealhus.svg" type="image/svg+xml">
     <link rel="icon" href="favicon.ico" sizes="32x32">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -16,16 +16,16 @@
     <meta property="og:site_name" content="Idealhus">
     <meta property="og:title" content="Proffs | Idealhus">
     <meta property="og:description" content="Utfackningsväggar, husblock och moduler från Idealhus för byggföretag och entreprenörer.">
-    <meta property="og:image" content="https://idealhus.se/images/generated-craft-sanding-01.webp">
+    <meta property="og:image" content="https://idealhus.se/images/foto/dronare-vaggblock.webp">
     <meta property="og:url" content="https://idealhus.se/proffs.html">
     <meta name="twitter:card" content="summary_large_image">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&amp;family=Source+Sans+3:ital,wght@0,300..700;1,400&amp;display=swap">
-    <link rel="preload" as="image" href="images/generated-craft-sanding-01.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20260929c">
-    <script src="premium.js?v=20260929c" defer></script>
+    <link rel="preload" as="image" href="images/foto/dronare-vaggblock.webp" fetchpriority="high">
+    <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="styles.css?v=20260930zi">
+    <link rel="stylesheet" href="design.css?v=20260930zi">
+    <script src="premium.js?v=20260930zi" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
@@ -73,7 +73,7 @@
               </a>
               <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
               <a href="proffs.html">
-                <img src="images/generated-craft-cladding-01.webp" alt="" loading="lazy" decoding="async">
+                <img src="images/foto/lyft-stommar.webp" alt="" loading="lazy" decoding="async">
                 <span>
                   <strong>Proffs</strong>
                   <em>Väggar, block och moduler</em>
@@ -123,12 +123,28 @@
 
     <main id="innehall">
       <section class="subpage-hero">
-        <img class="subpage-hero__image" src="images/generated-craft-sanding-01.webp" width="1536" height="1024" fetchpriority="high" decoding="async" alt="Händer som slipar en fönsterkarm i verkstaden">
+        <span class="ih-kant" aria-hidden="true"></span>
+        <img class="subpage-hero__image" src="images/foto/dronare-vaggblock.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Drönarbild av väggblock i trä bredvid en lastbil med takstolar">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
-            <h1 class="subpage-hero__title">Proffs</h1>
-            <p class="subpage-hero__meta">Utfackningsväggar · husblock · moduler</p>
+            <p class="ih-etikett ih-etikett--ljus sidtopp__etikett">Våra hus · För dig som bygger</p>
+            <h1 class="subpage-hero__title">Byggelement för proffs</h1>
+            <p class="subpage-hero__meta">Utfackningsväggar, husblock och moduler, tillverkade under tak i Sverige och levererade till er byggarbetsplats. Utförandet följer er ritning.</p>
+            <div class="subpage-hero__actions">
+              <a class="hero__link hero__link--solid" href="#kontakt">Berätta om projektet</a>
+              <a class="hero__link" href="#utfackningsvaggar">Se vad vi levererar</a>
+            </div>
+            <div class="heroscen heroscen--kategori heroscen--inne" aria-hidden="true">
+              <div class="heroscen__chip heroscen__chip--a">
+                <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M4 20h16M6 20V9l6-3 6 3v11M9 12h6M9 15.5h6"/></svg></span>
+                <p><strong>Efter er ritning</strong><span>mått och utförande</span></p>
+              </div>
+              <div class="heroscen__chip heroscen__chip--b">
+                <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"/></svg></span>
+                <p><strong>Levererat till bygget</strong><span>isolerat och klart under tak</span></p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -164,7 +180,7 @@
             <a class="model-price__button" href="kontakt.html">Fråga om utfackningsväggar</a>
           </div>
           <div class="segment__media">
-            <img src="images/idealhus_vaggar_001.jpg" loading="lazy" decoding="async" alt="Närbild av träreglar i en väggstomme hos Idealhus">
+            <img src="images/foto/reglar.webp" loading="lazy" decoding="async" alt="Närbild av träreglar i en väggstomme hos Idealhus">
           </div>
         </article>
 
@@ -181,7 +197,7 @@
             <a class="model-price__button" href="kontakt.html">Fråga om husblock</a>
           </div>
           <div class="segment__media">
-            <img src="images/idealhus_trastommar_002.jpg" loading="lazy" decoding="async" alt="Trästommar som lyfts med kran vid montage av husblock">
+            <img src="images/foto/lyft-stommar.webp" loading="lazy" decoding="async" alt="Trästommar som lyfts med kran vid montage av husblock">
           </div>
         </article>
 
@@ -198,9 +214,67 @@
             <a class="model-price__button" href="kontakt.html">Fråga om moduler</a>
           </div>
           <div class="segment__media">
-            <img src="images/generated-craft-saw-01.webp" loading="lazy" decoding="async" alt="Moduler i Idealhus produktion">
+            <img src="images/foto/dronare-leverans.webp" loading="lazy" decoding="async" alt="Drönarbild av en lastbil med takstolar och väggstommar vid bygget">
           </div>
         </article>
+      </section>
+
+      <section class="virke">
+        <img class="virke__bild" src="images/foto/lyft-stommar.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="En kran lyfter väggstommar i trä förbi en rest vägg">
+        <div class="virke__inre">
+          <p class="ih-etikett ih-etikett--ljus">Varför element</p>
+          <h2 class="virke__rubrik">Mindre tid på bygget. <em>Mer under tak.</em></h2>
+          <p class="virke__text">
+            Isolering, ångspärr och beklädnad görs inomhus, i jämn temperatur
+            och fuktnivå. Kvar på byggarbetsplatsen är att lyfta, koppla samman
+            och täta - och det går fort.
+          </p>
+          <p class="virke__chips">
+            <span class="ih-chip ih-chip--glas">Oberoende av väder</span>
+            <span class="ih-chip ih-chip--glas">Jämnare kvalitet</span>
+            <span class="ih-chip ih-chip--glas">Planeras in i er tidplan</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="ih-sektion">
+        <div class="ih-inre">
+          <div class="ih-huvud ih-huvud--mitt">
+            <p class="ih-etikett">Från ritning till leverans</p>
+            <h2 class="ih-rubrik">Fyra steg. <em>En kontakt.</em></h2>
+            <p class="ih-ingress">
+              Samma person följer projektet från första frågan till att
+              elementen står på plats.
+            </p>
+          </div>
+
+          <div class="varfor__grid">
+            <article class="skal">
+              <span class="skal__nr">01</span>
+              <span class="skal__ikon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3.5h9l3.5 3.5v13.5H6zM9 11h6M9 14.5h6M9 18h3.5"/></svg></span>
+              <h3>Ritning och förfrågan</h3>
+              <p>Ni skickar ritning och mängder. Vi går igenom vad som passar som väggar, block eller moduler.</p>
+            </article>
+            <article class="skal">
+              <span class="skal__nr">02</span>
+              <span class="skal__ikon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v15H4zM4 9.5h16M9 3v4M15 3v4"/></svg></span>
+              <h3>Offert och tidplan</h3>
+              <p>Ni får en offert post för post, och leveranserna planeras in i er tidplan.</p>
+            </article>
+            <article class="skal">
+              <span class="skal__nr">03</span>
+              <span class="skal__ikon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5"/></svg></span>
+              <h3>Tillverkning under tak</h3>
+              <p>Elementen byggs inomhus i Sverige, i jämn temperatur och fuktnivå.</p>
+            </article>
+            <article class="skal">
+              <span class="skal__nr">04</span>
+              <span class="skal__ikon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"/></svg></span>
+              <h3>Leverans till bygget</h3>
+              <p>Elementen kommer på lastbil och lyfts på plats. Färre moment återstår på byggarbetsplatsen.</p>
+            </article>
+          </div>
+        </div>
       </section>
 
       <section class="contact-section" id="kontakt">
@@ -245,7 +319,7 @@
         <div>
           <img class="site-footer__logo" src="images/idealhus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Idealhus">
           <p class="site-footer__text">
-            Attefallshus &amp; komplementhus med skandinavisk design och hög kvalitet.
+            Attefallshus, fritidshus och byggelement, byggda under tak i Sverige och monterade på några dagar.
           </p>
         </div>
 
@@ -288,6 +362,8 @@
         <span>© 2026 Idealhus AB. Alla rättigheter förbehållna.</span>
         <a class="site-footer__policy" href="integritetspolicy.html">Integritetspolicy</a>
       </div>
+
+      <p class="site-footer__ord" aria-hidden="true">Idealhus</p>
     </footer>
 
     <script>

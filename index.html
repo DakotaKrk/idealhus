@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Idealhus | Attefallshus och fritidshus</title>
     <meta name="description" content="Idealhus formger och bygger attefallshus och fritidshus med skandinavisk design, naturliga material och svensk tillverkning.">
-    <meta name="theme-color" content="#2c2820">
+    <meta name="theme-color" content="#1b1915">
     <link rel="icon" href="images/idealhus.svg" type="image/svg+xml">
     <link rel="icon" href="favicon.ico" sizes="32x32">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -16,16 +16,17 @@
     <meta property="og:site_name" content="Idealhus">
     <meta property="og:title" content="Idealhus | Attefallshus och fritidshus">
     <meta property="og:description" content="Skandinavisk design, naturliga material och svensk tillverkning. Hus formade för platsen, ljuset och livet som ska rymmas.">
-    <meta property="og:image" content="https://idealhus.se/images/hus-r2.webp">
+    <meta property="og:image" content="https://idealhus.se/images/foto/arbetare-vattenpass.webp">
     <meta property="og:url" content="https://idealhus.se/">
     <meta name="twitter:card" content="summary_large_image">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&amp;family=Source+Sans+3:ital,wght@0,300..700;1,400&amp;display=swap">
     <link rel="preload" as="image" href="images/hero-video-poster.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20260929c">
-    <script src="premium.js?v=20260929c" defer></script>
+    <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="styles.css?v=20260930zi">
+    <link rel="stylesheet" href="design.css?v=20260930zi">
+    <script src="premium.js?v=20260930zi" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
@@ -73,7 +74,7 @@
               </a>
               <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
               <a href="proffs.html">
-                <img src="images/generated-craft-cladding-01.webp" alt="" loading="lazy" decoding="async">
+                <img src="images/foto/lyft-stommar.webp" alt="" loading="lazy" decoding="async">
                 <span>
                   <strong>Proffs</strong>
                   <em>Väggar, block och moduler</em>
@@ -170,351 +171,336 @@
     </script>
 
     <main id="innehall">
-      <section class="hero" data-malgrupp="privat">
-        <video class="hero__media" autoplay muted loop playsinline preload="metadata"
-               poster="images/hero-video-poster.webp" width="1600" height="950" aria-hidden="true">
-          <source src="images/video/hero-video-light.mp4" type="video/mp4">
-        </video>
+      <section class="ihtopp film" data-malgrupp="privat" data-film>
+        <div class="film__spar">
+          <div class="film__fast">
+            <video class="film__video ihtopp__film" autoplay muted loop playsinline preload="auto"
+                   poster="images/hero-video-poster.webp" width="1600" height="950" aria-hidden="true">
+              <source src="images/video/hero-video-light.mp4" type="video/mp4">
+            </video>
+            <div class="film__ton" aria-hidden="true"></div>
+            <div class="film__farg" aria-hidden="true"></div>
+            <div class="film__slojor" aria-hidden="true"></div>
 
-        <div class="hero__content-wrap">
-          <div class="hero__content">
-            <div class="malgrupp" role="group" aria-label="Visa startsidan för">
-              <button type="button" aria-pressed="true" data-malgrupp="privat"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5M10 20v-5h4v5"/></svg><span>Jag ska bo</span></button>
-              <button type="button" aria-pressed="false" data-malgrupp="proffs"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h16M6 20V9l6-3 6 3v11M9 12h6M9 15.5h6"/></svg><span>Jag bygger åt andra</span></button>
+            <div class="film__mask">
+              <h1 class="film__rubrik"><span class="rad">Från virke</span> <span class="rad">till verk<span class="film__zoom">l</span>ighet.</span></h1>
             </div>
-            <p class="hero__eyebrow"><span data-for="privat">Svensktillverkade hus</span><span data-for="proffs">Väggar, block och moduler</span></p>
-            <h1 class="hero__title"><span class="rad"><span>Vi skapar plats</span></span> <span class="rad"><span>för livet du vill leva.</span></span></h1>
-            <p class="hero__text" data-for="privat">
-          Moderna fritidshus och permanentbostäder med genomtänkta planlösningar, möjlighet till anpassning och en tydligare väg från idé till färdigt hus.
-            </p>
-            <p class="hero__text" data-for="proffs">
-          Utfackningsväggar, husblock och moduler, tillverkade under tak i Sverige och levererade till er byggarbetsplats. Utförandet följer er ritning.
-            </p>
-            <div class="hero__actions" data-for="privat">
-              <a class="hero__link hero__link--solid" href="#kontakt">Begär offert</a>
-              <a class="hero__link" href="attefallshus.html">Se våra husmodeller</a>
+
+            <div class="film__ui">
+              <div class="film__topp">
+                <div class="malgrupp" role="group" aria-label="Visa startsidan för"><span class="ih-kant" aria-hidden="true"></span>
+                  <button type="button" aria-pressed="true" data-malgrupp="privat"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path pathLength="1" d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5M10 20v-5h4v5"/></svg><span>Jag ska bo</span></button>
+                  <button type="button" aria-pressed="false" data-malgrupp="proffs"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path pathLength="1" d="M4 20h16M6 20V9l6-3 6 3v11M9 12h6M9 15.5h6"/></svg><span>Jag bygger åt andra</span></button>
+                </div>
+              </div>
+
+              <div class="film__fot">
+                <p class="film__ingress" data-for="privat">Attefallshus och fritidshus med genomtänkta planlösningar, byggda <strong>under tak i Sverige</strong> och monterade på din tomt <strong>på några dagar</strong>.</p>
+                <p class="film__ingress" data-for="proffs">Utfackningsväggar, husblock och moduler, tillverkade <strong>under tak i Sverige</strong> och levererade till er byggarbetsplats. Utförandet följer <strong>er ritning</strong>.</p>
+              </div>
+
+              <p class="film__rulla" aria-hidden="true"><span class="film__rulla-linje"></span>Rulla</p>
             </div>
-            <div class="hero__actions" data-for="proffs">
-              <a class="hero__link hero__link--solid" href="#kontakt">Berätta om projektet</a>
-              <a class="hero__link" href="proffs.html">Se vad vi levererar</a>
+
+            <div class="film__efter">
+              <div class="film__efter-ord">
+                <p class="ih-etikett ih-etikett--ljus">Produktion i Sverige</p>
+                <p class="film__efter-rubrik" role="heading" aria-level="2">Byggt under tak. <em>Monterat på dagar.</em></p>
+                <p class="film__efter-text" data-for="privat">Huset växer fram inomhus, i jämn temperatur, och kommer som färdiga delar. Montaget på tomten tar dagar i stället för månader.</p>
+                <p class="film__efter-text" data-for="proffs">Väggar och block byggs inomhus, i jämn temperatur, och levereras isolerade och klara till er byggarbetsplats.</p>
+                <div class="ih-knappar">
+                  <a class="ih-knapp ih-knapp--virke" href="#kontakt">Begär offert<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                  <a class="ih-knapp ih-knapp--ljus" href="sa-fungerar-det.html">Så går det till</a>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div class="heroscen" aria-hidden="true">
-          <div class="heroscen__chip heroscen__chip--a" data-for="privat">
-            <svg class="matare" viewBox="0 0 120 70"><path class="matare__spar" d="M10 64a50 50 0 0 1 100 0" pathLength="100"/><path class="matare__varde" d="M10 64a50 50 0 0 1 100 0" pathLength="100" style="--varde: 60"/></svg>
-            <p><strong>30 m²</strong><span>utan bygglov inom detaljplan</span></p>
-          </div>
-          <div class="heroscen__chip heroscen__chip--b" data-for="privat">
-            <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5"/></svg></span>
-            <p><strong>Byggt under tak</strong><span>i Sverige, klart för montage</span></p>
-          </div>
-          <div class="heroscen__chip heroscen__chip--a" data-for="proffs">
-            <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M4 20h16M6 20V9l6-3 6 3v11M9 12h6M9 15.5h6"/></svg></span>
-            <p><strong>Väggar · block · moduler</strong><span>efter er ritning</span></p>
-          </div>
-          <div class="heroscen__chip heroscen__chip--b" data-for="proffs">
-            <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"/></svg></span>
-            <p><strong>Levererat till bygget</strong><span>isolerat och klart under tak</span></p>
-          </div>
-        </div>
-
-        <p class="hero__foot" aria-hidden="true">
-          <span>Attefallshus</span><span>Fritidshus</span><span>Byggt under tak i Sverige</span>
-        </p>
-      </section>
-
-      <section class="house-types">
-        <div class="house-types__header">
-          <div>
-            <h2 class="house-types__title">Våra hus</h2>
-          </div>
-
-          <a class="house-types__all" href="priser.html#prisnivaer">Jämför storlekar och priser</a>
-        </div>
-
-        <div class="house-types__grid">
-          <article class="house-card">
-            <img class="house-card__image" src="images/hus-r2.webp" loading="lazy" decoding="async" alt="Attefallshus med lärkpanel på en äng vid vattnet">
-            <div class="house-card__content">
-              <h3 class="house-card__title">Attefallshus</h3>
-              <p class="house-card__text">Smarta småhus för boende, gästhus eller uthyrning.</p>
-              <a class="house-card__link" href="attefallshus.html">Se alla attefallshus</a>
-            </div>
-          </article>
-
-          <article class="house-card">
-            <img class="house-card__image" src="images/hus-r3.webp" loading="lazy" decoding="async" alt="Svart fritidshus med takkupa i en tallskog">
-            <div class="house-card__content">
-              <h3 class="house-card__title">Fritidshus</h3>
-              <p class="house-card__text">Mer plats på tomten, byggt för livet som ska rymmas.</p>
-              <a class="house-card__link" href="fritidshus.html">Se alla fritidshus</a>
-            </div>
-          </article>
-
-          <article class="house-card house-card--list">
-            <img class="house-card__image" src="images/generated-materials-01.webp" loading="lazy" decoding="async" alt="Materialprover med träpanel och fönsterdetalj">
-            <div class="house-card__content">
-              <h3 class="house-card__title">Proffs</h3>
-              <p class="house-card__text">För dig som bygger åt andra.</p>
-              <ul class="house-card__list">
-                <li><a href="proffs.html#utfackningsvaggar">Utfackningsväggar</a></li>
-                <li><a href="proffs.html#husblock">Husblock</a></li>
-                <li><a href="proffs.html#moduler">Moduler</a></li>
-              </ul>
-              <a class="house-card__link" href="proffs.html">För företag</a>
-            </div>
-          </article>
         </div>
       </section>
 
-      <section class="tomtkoll glod">
-        <div class="tomtkoll__inner">
-          <div class="tomtkoll__ord">
-            <p class="section-label section-label--accent">Prova</p>
-            <h2 class="tomtkoll__titel">Vad får du bygga på <em>din tomt</em>?</h2>
-            <p class="tomtkoll__text">
+      <section class="vagar ih-sektion">
+        <div class="ih-inre">
+          <div class="ih-huvud ih-huvud--mitt">
+            <p class="ih-etikett">Två vägar · ett hantverk</p>
+            <h2 class="ih-rubrik">Samma virke. <em>Två sätt</em> att bygga.</h2>
+            <p class="ih-ingress">
+              Bygger du för dig själv får du ett färdigt hus. Bygger du åt andra
+              får du väggarna, blocken eller modulerna till ditt projekt.
+            </p>
+          </div>
+
+          <div class="vagar__grid">
+            <a class="vag" href="attefallshus.html">
+              <img class="vag__bild" src="images/foto/attefall-panel.webp" width="1400" height="1400" loading="lazy" decoding="async" alt="Ett litet hus under bygget, med vit panel på gaveln och läkt på långsidan">
+              <span class="vag__topp">
+                <span class="ih-chip ih-chip--glas">För dig som ska bo</span>
+                <span class="vag__pil" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+              </span>
+              <h3 class="vag__titel">Attefallshus och fritidshus</h3>
+              <p class="vag__text">Smarta småhus för boende, gästhus eller uthyrning, anpassade efter din tomt.</p>
+              <span class="vag__chips">
+                <span class="ih-chip ih-chip--glas">Utan bygglov, 30–50 m²</span>
+                <span class="ih-chip ih-chip--glas">Fem husmodeller</span>
+                <span class="ih-chip ih-chip--glas">En kontakt hela vägen</span>
+              </span>
+            </a>
+
+            <a class="vag" href="proffs.html">
+              <img class="vag__bild" src="images/foto/lyft-stommar.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="En kran lyfter väggstommar i trä förbi en rest vägg">
+              <span class="vag__topp">
+                <span class="ih-chip ih-chip--glas">För dig som bygger åt andra</span>
+                <span class="vag__pil" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+              </span>
+              <h3 class="vag__titel">Väggar, block och moduler</h3>
+              <p class="vag__text">Tillverkade under tak i Sverige och levererade till er byggarbetsplats. Utförandet följer er ritning.</p>
+              <span class="vag__chips">
+                <span class="ih-chip ih-chip--glas">Utfackningsväggar</span>
+                <span class="ih-chip ih-chip--glas">Husblock</span>
+                <span class="ih-chip ih-chip--glas">Moduler</span>
+              </span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="siffror ih-sektion">
+        <div class="ih-inre">
+          <div class="ih-huvud ih-huvud--rad">
+            <div>
+              <p class="ih-etikett">Prova</p>
+              <h2 class="ih-rubrik">Vad får du bygga på <em>din tomt?</em></h2>
+            </div>
+            <p class="ih-ingress">
               Sedan december 2025 behövs varken bygglov eller anmälan för ett
-              attefallshus inom måtten. Svara på fem frågor, så ser du hur
-              stort hus som ryms hos dig och vilka av våra modeller som passar.
+              attefallshus inom måtten. Svara på fem frågor, så ser du hur stort
+              hus som ryms hos dig och vilka av våra modeller som passar.
             </p>
-            <a class="knapp-fylld" href="vad-far-jag-bygga.html">Räkna på din tomt</a>
           </div>
 
-          <div class="tomtkoll__matare">
-            <div class="matarblock">
-              <svg class="matare" viewBox="0 0 120 70" aria-hidden="true" focusable="false">
-                <path class="matare__spar" d="M10 64a50 50 0 0 1 100 0" pathLength="100"/>
-                <path class="matare__varde" d="M10 64a50 50 0 0 1 100 0" pathLength="100" style="--varde: 60"/>
-              </svg>
-              <p class="matarblock__tal"><strong data-rakna="30">30</strong><small> m²</small></p>
-              <p class="matarblock__text">per hus inom detaljplan</p>
+          <div class="siffror__grid">
+            <div class="siffra ih-mork">
+              <span class="ih-kant" aria-hidden="true"></span>
+              <svg class="matare" viewBox="0 0 120 70" aria-hidden="true" focusable="false"><path class="matare__spar" d="M10 64a50 50 0 0 1 100 0" pathLength="100"/><path class="matare__varde" d="M10 64a50 50 0 0 1 100 0" pathLength="100" style="--varde: 60"/></svg>
+              <p class="siffra__tal"><strong data-rakna="30">30</strong><small> m²</small></p>
+              <p class="siffra__text">per hus inom detaljplan.</p>
+              <p class="siffra__fot"><span class="ih-chip ih-chip--glas">Attefallshus</span></p>
             </div>
 
-            <div class="matarblock">
-              <svg class="matare" viewBox="0 0 120 70" aria-hidden="true" focusable="false">
-                <path class="matare__spar" d="M10 64a50 50 0 0 1 100 0" pathLength="100"/>
-                <path class="matare__varde" d="M10 64a50 50 0 0 1 100 0" pathLength="100" style="--varde: 100"/>
-              </svg>
-              <p class="matarblock__tal"><strong data-rakna="50">50</strong><small> m²</small></p>
-              <p class="matarblock__text">per hus utanför detaljplan</p>
+            <div class="siffra siffra--ljus">
+              <svg class="matare" viewBox="0 0 120 70" aria-hidden="true" focusable="false"><path class="matare__spar" d="M10 64a50 50 0 0 1 100 0" pathLength="100"/><path class="matare__varde" d="M10 64a50 50 0 0 1 100 0" pathLength="100" style="--varde: 100"/></svg>
+              <p class="siffra__tal"><strong data-rakna="50">50</strong><small> m²</small></p>
+              <p class="siffra__text">per hus utanför detaljplan.</p>
+              <p class="siffra__fot"><span class="ih-chip">Attefallshus</span></p>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <section class="quiet-break">
-        <div class="quiet-break__inner">
-          <figure class="quiet-break__bild">
-            <img src="images/hus-r4.webp" width="1600" height="1062" loading="lazy" decoding="async" alt="Ljusgrått fritidshus med takkupa på en äng bland björkar">
-          </figure>
-
-          <div class="quiet-break__ord">
-            <p class="quiet-break__etikett">Vår utgångspunkt</p>
-            <h2 class="quiet-break__title">Mindre yta.<em>Mer att leva i.</em></h2>
-            <p class="quiet-break__text">
-              Vi tror att ett litet hus ska kännas generöst i vardagen. Därför
-              utgår vi från platsen, människorna och livet som ska rymmas där,
-              och låter varje detalj ha en tydlig funktion.
-            </p>
-            <a class="quiet-break__link" href="om-oss.html">Så tänker vi</a>
+            <div class="siffra siffra--verktyg">
+              <h3 class="siffra__rubrik">Fem frågor. Sedan vet du.</h3>
+              <p class="siffra__text">Räkna ut vad som ryms på din tomt och vilka av våra hus som passar.</p>
+              <p class="siffra__fot"><a class="ih-knapp ih-knapp--mork" href="vad-far-jag-bygga.html">Räkna på din tomt<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="feature-cards">
-        <div class="feature-cards__header">
-          <div>
-            <p class="section-label">Varför Idealhus</p>
-            <h2 class="feature-cards__title">Det som gör skillnad.</h2>
-          </div>
-
-          <p class="feature-cards__intro">
-            Fyra saker avgör hur projektet går: var huset byggs, hur det möter
-            din tomt, vem du pratar med och vad du får veta innan du bestämmer
-            dig.
-          </p>
-        </div>
-
-        <div class="feature-cards__grid">
-          <article class="feature-card">
-            <span class="feature-card__nr" aria-hidden="true">01</span>
-            <img class="feature-card__image" src="images/generated-craft-sanding-01.webp" loading="lazy" decoding="async" alt="Händer som slipar en fönsterkarm inne i verkstaden">
-            <div class="feature-card__content">
-              <h3 class="feature-card__title">Byggt under tak</h3>
-              <p class="feature-card__text">Husen växer fram inomhus, i jämn temperatur, och kommer färdiga till tomten. Montaget tar dagar i stället för månader.</p>
-            </div>
-          </article>
-
-          <article class="feature-card">
-            <span class="feature-card__nr" aria-hidden="true">02</span>
-            <img class="feature-card__image" src="images/hus-r1.webp" loading="lazy" decoding="async" alt="Svart attefallshus på klippor vid havet">
-            <div class="feature-card__content">
-              <h3 class="feature-card__title">Anpassat efter tomten</h3>
-              <p class="feature-card__text">Modellen är utgångspunkten. Berget, ljuset och infarten avgör resten.</p>
-            </div>
-          </article>
-
-          <article class="feature-card">
-            <span class="feature-card__nr" aria-hidden="true">03</span>
-            <img class="feature-card__image" src="images/hus-r5.webp" loading="lazy" decoding="async" alt="Svart attefallshus med stora glaspartier i vinterskogen">
-            <div class="feature-card__content">
-              <h3 class="feature-card__title">En kontakt hela vägen</h3>
-              <p class="feature-card__text">Samma person från första samtalet till slutbesiktningen. Du vet vem du pratar med.</p>
-            </div>
-          </article>
-
-          <article class="feature-card">
-            <span class="feature-card__nr" aria-hidden="true">04</span>
-            <img class="feature-card__image" src="images/generated-craft-cladding-01.webp" loading="lazy" decoding="async" alt="Händer som arbetar med träpanel i verkstaden">
-            <div class="feature-card__content">
-              <h3 class="feature-card__title">Offert post för post</h3>
-              <p class="feature-card__text">Det står vad som ingår och vad som tillkommer, innan du bestämmer dig.</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="production">
-        <div class="production__content">
-          <p class="section-label">Tillverkning</p>
-          <h2 class="production__title">Produktion i Sverige.<br>Nära dig.</h2>
-          <p class="production__text">
+      <section class="virke">
+        <img class="virke__bild" src="images/foto/arbetare-vattenpass.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="En snickare i varselkläder håller vattenpass mot en väggstomme">
+        <div class="virke__inre">
+          <p class="ih-etikett ih-etikett--ljus">Hantverket</p>
+          <h2 class="virke__rubrik">Byggt för hand. <em>Kontrollerat under tak.</em></h2>
+          <p class="virke__text">
             När huset byggs i Sverige kan vi följa varje moment på nära håll.
             Det ger kortare beslutsvägar, jämnare kvalitet och bättre kontroll
             över material, detaljer och arbetsmiljö.
           </p>
-
-          <a class="production__link" href="proffs.html">Se produktionen</a>
+          <p class="virke__chips">
+            <span class="ih-chip ih-chip--glas">Jämn temperatur</span>
+            <span class="ih-chip ih-chip--glas">Kontroll i varje moment</span>
+            <span class="ih-chip ih-chip--glas">Kortare beslutsvägar</span>
+          </p>
+          <div class="ih-knappar">
+            <a class="ih-knapp ih-knapp--virke" href="proffs.html">Se produktionen</a>
+            <a class="ih-knapp ih-knapp--ljus" href="sa-fungerar-det.html">Så fungerar det</a>
+          </div>
         </div>
-
-        <a class="production__media" href="proffs.html" aria-label="Se produktionen">
-          <img class="production__image" src="images/idealhus_hantverk.jpg" loading="lazy" decoding="async" alt="Hantverk i Idealhus verkstad">
-          <span class="production__play" aria-hidden="true"></span>
-          <span class="production__caption">
-            <span>Film · Produktion i Sverige</span>
-            <span>Sågning, träarbete och vardagen i verkstaden</span>
-          </span>
-        </a>
       </section>
 
-      <section class="about-text vagen">
-        <div class="about-text__inner vagen__inner">
-          <div class="vagen__topp">
-            <div>
-              <p class="section-label">Vägen dit</p>
-              <h2 class="about-text__title">Ett hus för dina planer.</h2>
-            </div>
+      <section class="bygget ih-sektion" data-bygget aria-labelledby="bygget-rubrik">
+        <div class="bygget__spar">
+          <div class="bygget__fast">
+            <div class="bygget__ord">
+              <p class="ih-etikett">Så blir virket ett hus</p>
+              <h2 class="ih-rubrik bygget__rubrik" id="bygget-rubrik">Från verkstad <em>till tomt.</em></h2>
 
-            <div class="vagen__ord">
-              <p class="about-text__lead">
-                Att bygga är många beslut i rad. Vi delar upp dem i tre skeden,
-                och säger i förväg vem som gör vad i varje.
+              <p class="bygget__nu" aria-hidden="true">
+                <span class="bygget__siffra"><span class="bygget__rulle"><b>01</b><b>02</b><b>03</b><b>04</b><b>05</b></span></span>
+                <span class="bygget__av">/ 05</span>
               </p>
-              <a class="about-text__link" href="sa-fungerar-det.html">Se hela processen</a>
-            </div>
-          </div>
 
-          <div class="resa" data-resa>
-            <div class="resa__scen">
-              <div class="resa3d" data-skede="1" aria-hidden="true">
-                <div class="resa3d__vrid">
-                  <div class="resa3d__mark"></div>
-                  <div class="resa3d__stolpe resa3d__stolpe--a"></div>
-                  <div class="resa3d__stolpe resa3d__stolpe--b"></div>
-                  <div class="resa3d__stolpe resa3d__stolpe--c"></div>
-                  <div class="resa3d__stolpe resa3d__stolpe--d"></div>
-                  <div class="resa3d__balk resa3d__balk--fram"></div>
-                  <div class="resa3d__balk resa3d__balk--bak"></div>
-                  <div class="resa3d__golv"></div>
-                  <div class="resa3d__innervagg"></div>
-                  <div class="resa3d__vagg resa3d__vagg--bak"><i class="resa3d__fonster resa3d__fonster--b1"></i></div>
-                  <div class="resa3d__gavel resa3d__gavel--vanster"><i class="resa3d__fonster resa3d__fonster--g1"></i></div>
-                  <div class="resa3d__gavel resa3d__gavel--hoger"><i class="resa3d__fonster resa3d__fonster--g2"></i></div>
-                  <div class="resa3d__vagg resa3d__vagg--fram"><i class="resa3d__fonster resa3d__fonster--f1"></i><i class="resa3d__fonster resa3d__fonster--f2"></i><i class="resa3d__dorr"></i></div>
-                  <div class="resa3d__tak resa3d__tak--bak"></div>
-                  <div class="resa3d__tak resa3d__tak--fram"></div>
-                  <div class="resa3d__skorsten"><i></i><i></i><b></b><b></b><b></b></div>
-                  <div class="resa3d__skylt"><span>Idealhus</span></div>
-                  <div class="resa3d__trad resa3d__trad--a"><i></i><i></i></div>
-                  <div class="resa3d__trad resa3d__trad--b"><i></i><i></i></div>
-                  <div class="resa3d__trad resa3d__trad--c"><i></i><i></i></div>
-                  <div class="resa3d__trad resa3d__trad--d"><i></i><i></i></div>
-                </div>
-              </div>
-              <p class="resa__etikett" aria-live="polite"><span class="resa__etikett-nr">01</span><span data-resa-etikett>Ritning och underlag</span></p>
-            </div>
-
-            <div class="resa__sida">
-              <ol class="resa__lista">
-              <li class="resa__skede" data-skede="1">
-                <button class="resa__knapp" type="button" aria-expanded="true" aria-controls="resa-1">
-                  <span class="resa__nr" aria-hidden="true">01</span>
-                  <span class="resa__titel">Innan bygget</span>
-                  <span class="resa__antal" aria-hidden="true" hidden></span>
-                  <span class="resa__pil" aria-hidden="true"></span>
-                  <span class="resa__tid" aria-hidden="true"><span></span></span>
-                </button>
-                <div class="resa__panel" id="resa-1">
-                  <div class="resa__inre">
-                    <p class="resa__text">Vi ritar, räknar och tar fram underlaget. Reglerna ändrades i december 2025 - vi säger vad som gäller för just din tomt.</p>
-                    <ul class="resa__moment">
-                        <li data-vem="bada"><i class="prick prick--bada"></i>Första samtalet</li>
-                        <li data-vem="bada"><i class="prick prick--bada"></i>Modell och anpassning</li>
-                        <li data-vem="du"><i class="prick prick--du"></i>Bygglov eller anmälan</li>
-                    </ul>
-                    <a class="resa__lank" href="vad-far-jag-bygga.html">Räkna på din tomt</a>
-                  </div>
-                </div>
-              </li>
-              <li class="resa__skede" data-skede="2">
-                <button class="resa__knapp" type="button" aria-expanded="true" aria-controls="resa-2">
-                  <span class="resa__nr" aria-hidden="true">02</span>
-                  <span class="resa__titel">Medan huset byggs</span>
-                  <span class="resa__antal" aria-hidden="true" hidden></span>
-                  <span class="resa__pil" aria-hidden="true"></span>
-                  <span class="resa__tid" aria-hidden="true"><span></span></span>
-                </button>
-                <div class="resa__panel" id="resa-2">
-                  <div class="resa__inre">
-                    <p class="resa__text">Huset växer fram inomhus, i jämn temperatur, och kommer som färdiga delar. Under tiden görs marken redo.</p>
-                    <ul class="resa__moment">
-                        <li data-vem="vi"><i class="prick prick--vi"></i>Tillverkning under tak</li>
-                        <li data-vem="du"><i class="prick prick--du"></i>Grund och anslutningar</li>
-                    </ul>
-                    <a class="resa__lank" href="sa-fungerar-det.html">Se hela processen</a>
-                  </div>
-                </div>
-              </li>
-              <li class="resa__skede" data-skede="3">
-                <button class="resa__knapp" type="button" aria-expanded="true" aria-controls="resa-3">
-                  <span class="resa__nr" aria-hidden="true">03</span>
-                  <span class="resa__titel">På plats</span>
-                  <span class="resa__antal" aria-hidden="true" hidden></span>
-                  <span class="resa__pil" aria-hidden="true"></span>
-                  <span class="resa__tid" aria-hidden="true"><span></span></span>
-                </button>
-                <div class="resa__panel" id="resa-3">
-                  <div class="resa__inre">
-                    <p class="resa__text">Huset kommer på lastbil och monteras på några dagar. Sedan går vi igenom det tillsammans, rum för rum.</p>
-                    <ul class="resa__moment">
-                        <li data-vem="vi"><i class="prick prick--vi"></i>Leverans och montage</li>
-                        <li data-vem="bada"><i class="prick prick--bada"></i>Slutbesiktning</li>
-                    </ul>
-                    <a class="resa__lank" href="kontakt.html">Börja med ett samtal</a>
-                  </div>
-                </div>
-              </li>
+              <ol class="bygget__lista">
+                <li class="bygget__steg aktiv">
+                  <span class="bygget__nr" aria-hidden="true">01</span>
+                  <h3 class="bygget__titel">Stommarna byggs under tak</h3>
+                  <p class="bygget__text">Väggar och bjälklag växer fram inomhus, i jämn temperatur, och kommer färdiga till tomten.</p>
+                </li>
+                <li class="bygget__steg">
+                  <span class="bygget__nr" aria-hidden="true">02</span>
+                  <h3 class="bygget__titel">Lastas och körs ut</h3>
+                  <p class="bygget__text">Väggblock och takstolar lastas på lastbil och körs direkt till tomten.</p>
+                </li>
+                <li class="bygget__steg">
+                  <span class="bygget__nr" aria-hidden="true">03</span>
+                  <h3 class="bygget__titel">Lyfts på plats</h3>
+                  <p class="bygget__text">Kranen lyfter väggarna från flaket och ställer dem på grunden.</p>
+                </li>
+                <li class="bygget__steg">
+                  <span class="bygget__nr" aria-hidden="true">04</span>
+                  <h3 class="bygget__titel">Tätt på några dagar</h3>
+                  <p class="bygget__text">Väggarna reses och täcks in. Montaget tar dagar i stället för månader.</p>
+                </li>
+                <li class="bygget__steg">
+                  <span class="bygget__nr" aria-hidden="true">05</span>
+                  <h3 class="bygget__titel">Klart för fasaden</h3>
+                  <p class="bygget__text">Läkt, panel och fönster kommer på plats. Sedan går vi igenom huset tillsammans, rum för rum.</p>
+                </li>
               </ol>
 
-              <div class="resa__vem" role="group" aria-label="Markera vem som gör vad">
-                <button type="button" data-vem="vi" aria-pressed="false"><i class="prick prick--vi"></i>Vi gör det</button>
-                <button type="button" data-vem="du" aria-pressed="false"><i class="prick prick--du"></i>Du gör det</button>
+              <div class="bygget__staplar" role="group" aria-label="Hoppa till ett steg">
+                <button type="button" data-bygget-hopp="0"><i><b></b></i><span>Verkstaden</span></button>
+                <button type="button" data-bygget-hopp="1"><i><b></b></i><span>Leverans</span></button>
+                <button type="button" data-bygget-hopp="2"><i><b></b></i><span>Lyft</span></button>
+                <button type="button" data-bygget-hopp="3"><i><b></b></i><span>Montage</span></button>
+                <button type="button" data-bygget-hopp="4"><i><b></b></i><span>Fasad</span></button>
+              </div>
+            </div>
+
+            <div class="bygget__scen">
+              <figure class="bygget__kort">
+                <img src="images/foto/stommar-stapel.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra">
+                <figcaption><span class="ih-chip ih-chip--glas">01 · Verkstaden</span></figcaption>
+              </figure>
+              <figure class="bygget__kort">
+                <img src="images/foto/dronare-vaggblock.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Drönarbild av väggblock i trä som ligger på marken bredvid en lastbil med takstolar">
+                <figcaption><span class="ih-chip ih-chip--glas">02 · Leverans</span></figcaption>
+              </figure>
+              <figure class="bygget__kort">
+                <img src="images/foto/lyft-stommar.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="En kran lyfter väggstommar i trä">
+                <figcaption><span class="ih-chip ih-chip--glas">03 · Lyft</span></figcaption>
+              </figure>
+              <figure class="bygget__kort">
+                <img src="images/foto/dronare-montage.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Drönarbild av ett hus under montage, med inplastade väggar runt en betongplatta och en kran">
+                <figcaption><span class="ih-chip ih-chip--glas">04 · Montage</span></figcaption>
+              </figure>
+              <figure class="bygget__kort">
+                <img src="images/foto/attefall-lakt.webp" width="1200" height="1200" loading="lazy" decoding="async" alt="Ett litet hus med svart vindskydd och läkt i trä, klart för panel">
+                <figcaption><span class="ih-chip ih-chip--glas">05 · Fasad</span></figcaption>
+              </figure>
+              <span class="ih-kant" aria-hidden="true"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="resan ih-sektion" data-resan aria-labelledby="resan-rubrik">
+        <div class="resan__panel">
+          <span class="ih-kant" aria-hidden="true"></span>
+
+          <div class="resan__topp">
+            <div class="resan__ord">
+              <p class="ih-etikett ih-etikett--ljus">Vägen dit</p>
+              <h2 class="resan__rubrik" id="resan-rubrik">Från första samtal <em>till färdigt hus.</em></h2>
+              <p class="resan__ingress">Sju steg i tre skeden. Välj hus så ser du din väg, och i varje steg står det vem som gör vad.</p>
+            </div>
+
+            <div class="resan__styr">
+              <div class="resan__hustyp" role="group" aria-label="Välj hus">
+                <button type="button" data-typ="attefallshus" aria-pressed="true">Attefallshus</button>
+                <button type="button" data-typ="fritidshus" aria-pressed="false">Fritidshus</button>
+              </div>
+              <div class="resan__vem" role="group" aria-label="Markera vem som gör vad">
+                <button type="button" data-vem="vi" aria-pressed="false"><i class="prick prick--vi"></i>Vi</button>
+                <button type="button" data-vem="du" aria-pressed="false"><i class="prick prick--du"></i>Du</button>
                 <button type="button" data-vem="bada" aria-pressed="false"><i class="prick prick--bada"></i>Tillsammans</button>
               </div>
             </div>
           </div>
+
+          <div class="resan__mitt">
+            <div class="resan__scen" aria-hidden="true">
+              <svg class="resan__svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet" focusable="false"></svg>
+            </div>
+
+            <div class="resan__info" id="resan-info">
+              <p class="resan__skede" data-resan-skede>Skede 1 · Innan bygget</p>
+              <p class="resan__nr" data-resan-nr>01</p>
+              <h3 class="resan__titel" data-resan-titel>Första samtalet</h3>
+              <p class="resan__vemtag" data-resan-vem data-vem="bada"><i class="prick prick--bada"></i><span>Tillsammans</span></p>
+              <p class="resan__text" data-resan-text>Du berättar om tomten, hur huset ska användas och ungefär när du vill vara i gång. Vi säger vad som är möjligt och vad som inte är det. Kostar ingenting och förpliktigar inte till något.</p>
+              <p class="resan__meta" data-resan-meta>Kostar ingenting · förpliktigar inte till något</p>
+              <a class="ih-textlank resan__lank" data-resan-lank href="kontakt.html">Boka första samtalet<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </div>
+          </div>
+
+          <ol class="resan__tidslinje" aria-label="Stegen">
+            <li><button type="button" data-steg="1" data-vem="bada" aria-current="step" aria-controls="resan-info"><span class="resan__stegnr">01</span><span class="resan__stegnamn">Samtalet</span><span class="resan__fyll" aria-hidden="true"></span></button></li>
+            <li><button type="button" data-steg="2" data-vem="bada" aria-controls="resan-info"><span class="resan__stegnr">02</span><span class="resan__stegnamn">Modell</span><span class="resan__fyll" aria-hidden="true"></span></button></li>
+            <li><button type="button" data-steg="3" data-vem="du" aria-controls="resan-info"><span class="resan__stegnr">03</span><span class="resan__stegnamn">Lov</span><span class="resan__fyll" aria-hidden="true"></span></button></li>
+            <li><button type="button" data-steg="4" data-vem="vi" aria-controls="resan-info"><span class="resan__stegnr">04</span><span class="resan__stegnamn">Tillverkning</span><span class="resan__fyll" aria-hidden="true"></span></button></li>
+            <li><button type="button" data-steg="5" data-vem="du" aria-controls="resan-info"><span class="resan__stegnr">05</span><span class="resan__stegnamn">Grund</span><span class="resan__fyll" aria-hidden="true"></span></button></li>
+            <li><button type="button" data-steg="6" data-vem="vi" aria-controls="resan-info"><span class="resan__stegnr">06</span><span class="resan__stegnamn">Montage</span><span class="resan__fyll" aria-hidden="true"></span></button></li>
+            <li><button type="button" data-steg="7" data-vem="bada" aria-controls="resan-info"><span class="resan__stegnr">07</span><span class="resan__stegnamn">Besiktning</span><span class="resan__fyll" aria-hidden="true"></span></button></li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="kulisser ih-sektion" aria-labelledby="kulisser-rubrik">
+        <div class="ih-inre">
+          <div class="ih-huvud ih-huvud--rad">
+            <div>
+              <p class="ih-etikett ih-etikett--ljus">Bakom kulisserna</p>
+              <h2 class="ih-rubrik" id="kulisser-rubrik">Följ med <em>bakom kulisserna.</em></h2>
+              <p class="ih-ingress">
+                Bilder från ett riktigt bygge: grunden, väggblocken, kranen och
+                huset som reser sig.
+              </p>
+            </div>
+            <div class="husen__styr">
+              <button class="husen__knapp" type="button" data-bana-bak aria-label="Föregående bild"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+              <button class="husen__knapp" type="button" data-bana-fram aria-label="Nästa bild"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <ul class="kulisser__bana" data-bana data-dra>
+          <li class="kuliss kuliss--telefon">
+            <img src="images/foto/affisch-virke.webp" width="900" height="1600" loading="lazy" decoding="async" alt="Idealhus: Från virke till verklighet. En snickare håller vattenpass mot en väggstomme.">
+          </li>
+          <li class="kuliss kuliss--bild">
+            <img src="images/foto/dronare-bygget.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Drönarbild av en betongplatta med inplastade väggar runt om, en kran och folk som arbetar">
+            <p class="kuliss__text"><span class="ih-chip ih-chip--glas">Grunden och väggarna</span></p>
+          </li>
+          <li class="kuliss kuliss--bild">
+            <img src="images/foto/dronare-leverans.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Drönarbild av en lastbil med takstolar och väggstommar vid bygget">
+            <p class="kuliss__text"><span class="ih-chip ih-chip--glas">Takstolar på väg in</span></p>
+          </li>
+          <li class="kuliss kuliss--telefon">
+            <img src="images/foto/affisch-kulisser.webp" width="900" height="1600" loading="lazy" decoding="async" alt="Idealhus: Följ med bakom kulisserna. En snickare vid en inplastad väggstomme.">
+          </li>
+          <li class="kuliss kuliss--bild">
+            <img src="images/foto/dronare-kran.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Drönarbild av kranen som sträcker sig över bygget">
+            <p class="kuliss__text"><span class="ih-chip ih-chip--glas">Kranen på plats</span></p>
+          </li>
+          <li class="kuliss kuliss--bild">
+            <img src="images/foto/reglar.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="Närbild av reglar i en väggstomme">
+            <p class="kuliss__text"><span class="ih-chip ih-chip--glas">Reglarna</span></p>
+          </li>
+          <li class="kuliss kuliss--bild">
+            <img src="images/foto/dronare-platta.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Två personer i arbete på betongplattan mellan de resta väggarna">
+            <p class="kuliss__text"><span class="ih-chip ih-chip--glas">På plattan</span></p>
+          </li>
+        </ul>
+
+        <div class="ih-inre kulisser__fot">
+          <p>Dra eller svep för att se fler bilder.</p>
         </div>
       </section>
 
@@ -527,14 +513,24 @@
               Berätta vad du funderar på, så återkommer vi med nästa tydliga
               steg. Utan krav och utan säljsnack.
             </p>
-            <ul class="tillit" aria-label="Det du kan räkna med">
-              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg>Byggt under tak i Sverige</li>
-              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.9 3.9-6 7.5-6s6.6 2.1 7.5 6"/></svg>En kontakt hela vägen</li>
-              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h9l3.5 3.5v13.5H6zM9 11h6M9 14.5h6M9 18h3.5"/></svg>Offert post för post</li>
-              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20h18M6 20V10l6-5 6 5v10M10 20v-5h4v5"/></svg>Anpassat efter din tomt</li>
-            </ul>
+
+            <ol class="kontakt-tips">
+              <li>
+                <strong>Du berättar</strong>
+                <span>Svara på det du vet. Modell och budget behöver inte vara bestämda.</span>
+              </li>
+              <li>
+                <strong>Vi läser själva</strong>
+                <span>Vi som bygger husen läser förfrågan. Ingen växel emellan.</span>
+              </li>
+              <li>
+                <strong>Du vet var du står</strong>
+                <span>Vad som gäller för din tomt och vilka modeller som passar den.</span>
+              </li>
+            </ol>
 
             <div class="kontaktkort">
+              <span class="ih-kant" aria-hidden="true"></span>
               <p class="kontaktkort__rubrik">Hör av dig direkt</p>
               <div class="contact-section__meta">
                 <div>
@@ -546,11 +542,24 @@
                   <span class="contact-section__meta-value contact-section__meta-value--tyst">Stockholm, Sverige</span>
                 </div>
               </div>
+              <ul class="tillit" aria-label="Det du kan räkna med">
+                <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg>Byggt under tak i Sverige</li>
+                <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.9 3.9-6 7.5-6s6.6 2.1 7.5 6"/></svg>En kontakt hela vägen</li>
+                <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h9l3.5 3.5v13.5H6zM9 11h6M9 14.5h6M9 18h3.5"/></svg>Offert post för post</li>
+                <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20h18M6 20V10l6-5 6 5v10M10 20v-5h4v5"/></svg>Anpassat efter din tomt</li>
+              </ul>
             </div>
           </div>
 
           <form class="contact-form" id="kontaktformular" method="post" novalidate>
-            <p class="contact-form__steg" data-raknare hidden>Steg <span>1</span> av 2</p>
+            <div class="contact-form__topp">
+              <p class="contact-form__rubrik">Din förfrågan</p>
+              <p class="contact-form__steg" data-raknare hidden>Steg <span>1</span> av 2</p>
+              <ol class="contact-form__faser" aria-hidden="true">
+                <li><i></i>Om huset</li>
+                <li><i></i>Om dig</li>
+              </ol>
+            </div>
 
             <div class="contact-form__del" data-del="1">
               <fieldset class="valgrupp valgrupp--bild">
@@ -574,7 +583,7 @@
 
               <fieldset class="valgrupp">
                 <legend>Vad ska huset användas till?</legend>
-                <div class="valgrupp__rad">
+                <div class="valgrupp__rad valgrupp__rad--piller">
                 <label class="val"><input type="radio" name="anvandning" value="Bo året runt"><span>Bo året runt</span></label>
                 <label class="val"><input type="radio" name="anvandning" value="Gästhus"><span>Gästhus</span></label>
                 <label class="val"><input type="radio" name="anvandning" value="Uthyrning"><span>Uthyrning</span></label>
@@ -587,7 +596,7 @@
                 <legend>I vilken kommun?</legend>
                 <p class="field">
                   <label class="field__dold" for="field-city">Kommun eller ort</label>
-                  <input id="field-city" type="text" name="city" autocomplete="address-level2" placeholder="Kommun eller ort räcker">
+                  <input id="field-city" type="text" name="city" autocomplete="address-level2" placeholder="Kommun eller ort">
                 </p>
               </fieldset>
 
@@ -600,10 +609,6 @@
             </div>
 
             <div class="contact-form__del" data-del="2">
-              <p class="contact-form__tillbaka">
-                <button type="button" data-tillbaka>Tillbaka</button>
-              </p>
-
               <div class="contact-form__row">
                 <p class="field">
                   <label for="field-name">Namn</label>
@@ -628,13 +633,14 @@
               <!-- Lockbete for spambottar: doljs for besokare, ska alltid vara tom. -->
               <input class="contact-form__honey" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-              <div class="contact-form__bottom">
-                <button type="submit">Skicka förfrågan</button>
+              <label class="contact-form__check">
+                <input type="checkbox" name="consent" required>
+                <span>Genom att skicka godkänner du att Idealhus kontaktar dig om din förfrågan. Se vår <a href="integritetspolicy.html">integritetspolicy</a>.</span>
+              </label>
 
-                <label class="contact-form__check">
-                  <input type="checkbox" name="consent" required>
-                  <span>Genom att skicka godkänner du att Idealhus kontaktar dig om din förfrågan. Se vår <a href="integritetspolicy.html">integritetspolicy</a>.</span>
-                </label>
+              <div class="contact-form__bottom">
+                <button class="contact-form__bak" type="button" data-tillbaka><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 6 8.5 12l6 6"/></svg>Tillbaka</button>
+                <button type="submit">Skicka förfrågan</button>
               </div>
             </div>
 
@@ -649,7 +655,7 @@
         <div>
           <img class="site-footer__logo" src="images/idealhus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Idealhus">
           <p class="site-footer__text">
-            Attefallshus &amp; komplementhus med skandinavisk design och hög kvalitet.
+            Attefallshus, fritidshus och byggelement, byggda under tak i Sverige och monterade på några dagar.
           </p>
         </div>
 
@@ -692,6 +698,8 @@
         <span>© 2026 Idealhus AB. Alla rättigheter förbehållna.</span>
         <a class="site-footer__policy" href="integritetspolicy.html">Integritetspolicy</a>
       </div>
+
+      <p class="site-footer__ord" aria-hidden="true">Idealhus</p>
     </footer>
 
     <div class="cta-bar" id="cta-bar" aria-hidden="true">
@@ -705,7 +713,7 @@
       // skarmen och raden vore bara i vagen.
       (function () {
         var bar = document.getElementById('cta-bar');
-        var hero = document.querySelector('.hero');
+        var hero = document.querySelector('.hero, .ihtopp');
         var kontakt = document.getElementById('kontakt');
         if (!bar || !hero || !kontakt || !window.IntersectionObserver) return;
 
@@ -761,11 +769,33 @@
         function visaSteg(nr) {
           delar[0].hidden = nr !== 1;
           delar[1].hidden = nr !== 2;
+          form.setAttribute('data-steg', nr);
           if (raknare) {
             raknare.hidden = false;
             raknare.querySelector('span').textContent = nr;
           }
         }
+
+        // Framstegslinjen i toppen: första delen fylls fråga för fråga,
+        // andra delen fält för fält (namn, e-post, samtycke).
+        var faser = form.querySelectorAll('.contact-form__faser i');
+        function framsteg() {
+          if (faser.length !== 2 || delar.length !== 2) return;
+          var fragor = delar[0].querySelectorAll('fieldset');
+          var svar = 0;
+          Array.prototype.forEach.call(fragor, function (f) {
+            var text = f.querySelector('input[type="text"]');
+            if (text) f.classList.toggle('valgrupp--besvarad', !!text.value.trim());
+            if (f.querySelector('input:checked') || (text && text.value.trim())) svar++;
+          });
+          var e = form.elements;
+          var fyllda = [e.name.value.trim(), e.email.value.trim(), e.consent.checked].filter(Boolean).length;
+          faser[0].style.setProperty('--klar', fragor.length ? svar / fragor.length : 0);
+          faser[1].style.setProperty('--klar', fyllda / 3);
+        }
+        form.addEventListener('input', framsteg);
+        form.addEventListener('change', framsteg);
+        framsteg();
 
         if (delar.length === 2 && knappNasta) {
           visaSteg(1);
@@ -1007,6 +1037,7 @@
         if (!window.IntersectionObserver) return;
 
         var valjare = [
+          '.ih-huvud', '.vag', '.siffra', '.skal', '.virke__inre',
           '.house-types__header', '.house-card',
           '.quiet-break__inner',
           '.feature-cards__header', '.feature-card',
@@ -1091,7 +1122,7 @@
       // Respektera prefers-reduced-motion: da stoppas filmen och
       // affischen, som ar filmens forsta bildruta, star kvar.
       (function () {
-        var film = document.querySelector('.hero__media');
+        var film = document.querySelector('.hero__media, .ihtopp__film');
         if (!film) return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
           film.removeAttribute('autoplay');

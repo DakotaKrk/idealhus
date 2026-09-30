@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kontakt | Idealhus</title>
     <meta name="description" content="Kontakta Idealhus om husmodeller, offert och nästa steg. Du når oss direkt.">
-    <meta name="theme-color" content="#2c2820">
+    <meta name="theme-color" content="#1b1915">
     <link rel="icon" href="images/idealhus.svg" type="image/svg+xml">
     <link rel="icon" href="favicon.ico" sizes="32x32">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -16,16 +16,16 @@
     <meta property="og:site_name" content="Idealhus">
     <meta property="og:title" content="Kontakt | Idealhus">
     <meta property="og:description" content="Kontakta Idealhus om husmodeller, offert och nästa steg. Du når oss direkt.">
-    <meta property="og:image" content="https://idealhus.se/images/hus-r4.webp">
+    <meta property="og:image" content="https://idealhus.se/images/foto/dronare-platta.webp">
     <meta property="og:url" content="https://idealhus.se/kontakt.html">
     <meta name="twitter:card" content="summary_large_image">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&amp;family=Source+Sans+3:ital,wght@0,300..700;1,400&amp;display=swap">
-    <link rel="preload" as="image" href="images/hus-r4.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20260929c">
-    <script src="premium.js?v=20260929c" defer></script>
+    <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" as="image" href="images/foto/dronare-platta.webp" fetchpriority="high">
+    <link rel="stylesheet" href="styles.css?v=20260930zi">
+    <link rel="stylesheet" href="design.css?v=20260930zi">
+    <script src="premium.js?v=20260930zi" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
@@ -73,7 +73,7 @@
               </a>
               <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
               <a href="proffs.html">
-                <img src="images/generated-craft-cladding-01.webp" alt="" loading="lazy" decoding="async">
+                <img src="images/foto/lyft-stommar.webp" alt="" loading="lazy" decoding="async">
                 <span>
                   <strong>Proffs</strong>
                   <em>Väggar, block och moduler</em>
@@ -123,19 +123,25 @@
 
     <main id="innehall">
       <section class="subpage-hero">
-        <img class="subpage-hero__image" src="images/hus-r4.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Ljusgrått fritidshus med takkupa på en äng bland björkar">
+        <span class="ih-kant" aria-hidden="true"></span>
+        <img class="subpage-hero__image" src="images/foto/dronare-platta.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Två personer i arbete på betongplattan mellan de resta väggarna">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
-            <h1 class="subpage-hero__title">Kontakt</h1>
-            <p class="subpage-hero__meta">Du når oss direkt · ingen växel · ingen säljorganisation</p>
+            <p class="ih-etikett ih-etikett--ljus sidtopp__etikett">Kontakt</p>
+            <h1 class="subpage-hero__title">Låt oss prata om din plats</h1>
+            <p class="subpage-hero__meta">Du når oss direkt, utan växel och utan säljorganisation. Berätta kort om ditt projekt, så återkommer vi med nästa steg.</p>
+            <div class="subpage-hero__actions">
+              <a class="hero__link hero__link--solid" href="#kontaktformular">Till formuläret</a>
+              <a class="hero__link" href="mailto:info@idealhus.se">info@idealhus.se</a>
+            </div>
           </div>
         </div>
       </section>
 
       <section class="kontakt-topp">
         <div>
-          <h2>Prata med oss om <em>din plats</em>.</h2>
+          <h2>Hör av dig. <em>Vi svarar själva.</em></h2>
           <p class="kontakt-topp__lead">
             Har du frågor om våra hus, vill jämföra modeller eller komma vidare
             med en offert? Skriv några rader så återkommer vi med nästa tydliga
@@ -177,7 +183,7 @@
               spelar det ingen roll — gå vidare ändå.
             </p>
 
-            <ul class="kontakt-tips">
+            <ol class="kontakt-tips">
               <li>
                 <strong>Du får svar direkt av oss</strong>
                 <span>Vi som bygger husen läser förfrågan själva. Ingen växel emellan.</span>
@@ -190,11 +196,18 @@
                 <strong>Sedan vet du var du står</strong>
                 <span>Vi säger vad som gäller för din tomt och vilka modeller som passar den.</span>
               </li>
-            </ul>
+            </ol>
           </div>
 
           <form class="contact-form" id="kontaktformular" method="post" novalidate>
-            <p class="contact-form__steg" data-raknare hidden>Steg <span>1</span> av 2</p>
+            <div class="contact-form__topp">
+              <p class="contact-form__rubrik">Din förfrågan</p>
+              <p class="contact-form__steg" data-raknare hidden>Steg <span>1</span> av 2</p>
+              <ol class="contact-form__faser" aria-hidden="true">
+                <li><i></i>Om huset</li>
+                <li><i></i>Om dig</li>
+              </ol>
+            </div>
 
             <div class="contact-form__del" data-del="1">
               <fieldset class="valgrupp valgrupp--bild">
@@ -218,7 +231,7 @@
 
               <fieldset class="valgrupp">
                 <legend>Vad ska huset användas till?</legend>
-                <div class="valgrupp__rad">
+                <div class="valgrupp__rad valgrupp__rad--piller">
                 <label class="val"><input type="radio" name="anvandning" value="Bo året runt"><span>Bo året runt</span></label>
                 <label class="val"><input type="radio" name="anvandning" value="Gästhus"><span>Gästhus</span></label>
                 <label class="val"><input type="radio" name="anvandning" value="Uthyrning"><span>Uthyrning</span></label>
@@ -231,7 +244,7 @@
                 <legend>I vilken kommun?</legend>
                 <p class="field">
                   <label class="field__dold" for="field-city">Kommun eller ort</label>
-                  <input id="field-city" type="text" name="city" autocomplete="address-level2" placeholder="Kommun eller ort räcker">
+                  <input id="field-city" type="text" name="city" autocomplete="address-level2" placeholder="Kommun eller ort">
                 </p>
               </fieldset>
 
@@ -244,10 +257,6 @@
             </div>
 
             <div class="contact-form__del" data-del="2">
-              <p class="contact-form__tillbaka">
-                <button type="button" data-tillbaka>Tillbaka</button>
-              </p>
-
               <div class="contact-form__row">
                 <p class="field">
                   <label for="field-name">Namn</label>
@@ -272,13 +281,14 @@
               <!-- Lockbete for spambottar: doljs for besokare, ska alltid vara tom. -->
               <input class="contact-form__honey" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-              <div class="contact-form__bottom">
-                <button type="submit">Skicka förfrågan</button>
+              <label class="contact-form__check">
+                <input type="checkbox" name="consent" required>
+                <span>Genom att skicka godkänner du att Idealhus kontaktar dig om din förfrågan. Se vår <a href="integritetspolicy.html">integritetspolicy</a>.</span>
+              </label>
 
-                <label class="contact-form__check">
-                  <input type="checkbox" name="consent" required>
-                  <span>Genom att skicka godkänner du att Idealhus kontaktar dig om din förfrågan. Se vår <a href="integritetspolicy.html">integritetspolicy</a>.</span>
-                </label>
+              <div class="contact-form__bottom">
+                <button class="contact-form__bak" type="button" data-tillbaka><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 6 8.5 12l6 6"/></svg>Tillbaka</button>
+                <button type="submit">Skicka förfrågan</button>
               </div>
             </div>
 
@@ -293,7 +303,7 @@
         <div>
           <img class="site-footer__logo" src="images/idealhus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Idealhus">
           <p class="site-footer__text">
-            Attefallshus &amp; komplementhus med skandinavisk design och hög kvalitet.
+            Attefallshus, fritidshus och byggelement, byggda under tak i Sverige och monterade på några dagar.
           </p>
         </div>
 
@@ -336,6 +346,8 @@
         <span>© 2026 Idealhus AB. Alla rättigheter förbehållna.</span>
         <a class="site-footer__policy" href="integritetspolicy.html">Integritetspolicy</a>
       </div>
+
+      <p class="site-footer__ord" aria-hidden="true">Idealhus</p>
     </footer>
 
     <script>
@@ -699,11 +711,33 @@
         function visaSteg(nr) {
           delar[0].hidden = nr !== 1;
           delar[1].hidden = nr !== 2;
+          form.setAttribute('data-steg', nr);
           if (raknare) {
             raknare.hidden = false;
             raknare.querySelector('span').textContent = nr;
           }
         }
+
+        // Framstegslinjen i toppen: första delen fylls fråga för fråga,
+        // andra delen fält för fält (namn, e-post, samtycke).
+        var faser = form.querySelectorAll('.contact-form__faser i');
+        function framsteg() {
+          if (faser.length !== 2 || delar.length !== 2) return;
+          var fragor = delar[0].querySelectorAll('fieldset');
+          var svar = 0;
+          Array.prototype.forEach.call(fragor, function (f) {
+            var text = f.querySelector('input[type="text"]');
+            if (text) f.classList.toggle('valgrupp--besvarad', !!text.value.trim());
+            if (f.querySelector('input:checked') || (text && text.value.trim())) svar++;
+          });
+          var e = form.elements;
+          var fyllda = [e.name.value.trim(), e.email.value.trim(), e.consent.checked].filter(Boolean).length;
+          faser[0].style.setProperty('--klar', fragor.length ? svar / fragor.length : 0);
+          faser[1].style.setProperty('--klar', fyllda / 3);
+        }
+        form.addEventListener('input', framsteg);
+        form.addEventListener('change', framsteg);
+        framsteg();
 
         if (delar.length === 2 && knappNasta) {
           visaSteg(1);

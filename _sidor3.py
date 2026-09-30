@@ -151,8 +151,8 @@ import _modeller as M  # noqa: E402
 # Priset per kategori. Storleken räknas ur modellerna, så den kan inte
 # glida isär från korten. Skriv hela prissträngen, t.ex. "Från 450 000 kr".
 PRISER = [
-    ("Attefallshus", "attefallshus.html", "Från X kr"),
-    ("Fritidshus", "fritidshus.html", "Från X kr"),
+    ("Attefallshus", "attefallshus.html", "Pris i offert"),
+    ("Fritidshus", "fritidshus.html", "Pris i offert"),
 ]
 
 # Vad som krävs, sagt utan belopp. Attefallshus inom måtten är lovfria;
@@ -205,76 +205,164 @@ def _kategori(namn, lank, pris):
 KATEGORIER_PRIS = [_kategori(*p) for p in PRISER]
 
 
+# --- Prissidan, tredje versionen (2026-09-30) -------------------------------
+# Kunden: "super elit och super premium och smart och snygga animeringar".
+# Tre delar: en storleksskala med zoner för lov och husen utmärkta, en levande
+# offert som fylls i när man svarar om tomten, och fem faktorer med egna
+# animerade bilder. Stil i design.css 18, skript i premium.js (Prissidan).
+
+YMIN, YMAX = 20, 60
+
+
+def _p(yta):
+    return f"{(yta - YMIN) / (YMAX - YMIN):.4f}"
+
+
+def _alla_hus():
+    """(namn, yta, länk, bild, kategori) för alla modeller, i kortens ordning."""
+    ut = []
+    for kat, lank, *_ in PRISER:
+        for i, m in enumerate(M.modeller(lank), 1):
+            typ = lank.replace(".html", "")
+            ut.append((m[0], m[2], f"huskort.html?typ={typ}&amp;modell={i}", m[1], kat))
+    return ut
+
+
+def skalans_hak():
+    """Ett litet märke på spåret per storlek där vi har ett hus."""
+    return "".join(f'<span class="prisskala__hak" data-yta="{yta}" style="--p:{_p(yta)}"></span>'
+                   for yta in sorted({h[1] for h in _alla_hus()}))
+
+
+def skalans_modeller():
+    return "\n".join(
+        f'                <button class="prisskala__modell" type="button" data-yta="{yta}">'
+        f'<img src="images/tumme/{bild}" width="192" height="144" alt="" loading="lazy" decoding="async">'
+        f'<span><b>{namn}</b><small>{yta} m² · {kat}</small></span></button>'
+        for namn, yta, lank, bild, kat in _alla_hus())
+
+
+def skalans_chips():
+    return "\n".join(
+        f'                  <a class="prisskala__chip" data-yta="{yta}" href="{lank}" hidden>{namn}<span>{yta} m²</span></a>'
+        for namn, yta, lank, bild, kat in _alla_hus())
+
+
 def priskort():
-    return "\n".join(f"""          <article class="priskort" data-min="{lo}" data-max="{hi}" data-namn="{namn}">
-            <span class="priskort__passar" aria-hidden="true">Passar dig</span>
-            <a class="priskort__bild" href="{lank}"><img src="images/{bild}" alt="" loading="lazy" decoding="async"></a>
-            <div class="priskort__kropp">
-              <h3 class="priskort__namn"><a href="{lank}">{namn}</a></h3>
-              <p class="priskort__spann">{spann} · {antal} modeller</p>
-              <p class="priskort__pris">{pris}</p>
-              <p class="priskort__lov">{LOV[namn]}</p>
-              <a class="priskort__lank" href="{lank}">Se modellerna</a>
+    ut = []
+    for namn, lank, pris, bild, lo, hi, spann, antal in KATEGORIER_PRIS:
+        modeller = " ".join(f'<span>{m[0]}</span>' for m in M.modeller(lank))
+        ut.append(f"""          <article class="pkort" data-min="{lo}" data-max="{hi}" data-namn="{namn}">
+            <a class="pkort__bild" href="{lank}" tabindex="-1" aria-hidden="true"><img src="images/{bild}" alt="" loading="lazy" decoding="async"></a>
+            <span class="pkort__passar">Passar storleken</span>
+            <div class="pkort__kropp">
+              <p class="pkort__spann">{spann} · {antal} modeller</p>
+              <h3 class="pkort__namn"><a href="{lank}">{namn}</a></h3>
+              <p class="pkort__modeller">{modeller}</p>
+              <dl class="pkort__rader">
+                <div><dt>Lov</dt><dd>{LOV[namn]}</dd></div>
+                <div><dt>Pris</dt><dd><strong>{pris}</strong></dd></div>
+              </dl>
+              <a class="pkort__lank" href="{lank}">Se modellerna<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
             </div>
-          </article>""" for namn, lank, pris, bild, lo, hi, spann, antal in KATEGORIER_PRIS)
+          </article>""")
+    return "\n".join(ut)
 
 
 def ingar_html():
-    return "\n".join(f"""            <li>
-              <span class="ingar__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="{d}"/></svg></span>
-              <span><strong>{a}</strong>{b}</span>
-            </li>""" for a, b, d in INGAR)
+    return "\n".join(f"""                <li class="orad orad--ingar">
+                  <span class="orad__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="{d}"/></svg></span>
+                  <span class="orad__text"><strong>{a}</strong><span>{b}</span></span>
+                  <span class="orad__status orad__status--ingar">Ingår</span>
+                </li>""" for a, b, d in INGAR)
 
 
 def tillkommer_html():
-    return "\n".join(f"""            <li class="post" data-post="{k}">
-              <span class="post__status" data-status>Räkna med</span>
-              <strong>{a}</strong>
-              <span class="post__text">{b}</span>
-              <span class="post__svar" data-svar></span>
-            </li>""" for k, a, b in TILLKOMMER)
+    return "\n".join(f"""                <li class="orad orad--andra" data-post="{k}">
+                  <span class="orad__prick" aria-hidden="true"></span>
+                  <span class="orad__text"><strong>{a}</strong><span>{b}</span><em class="orad__svar" data-svar></em></span>
+                  <span class="orad__status" data-status>Räkna med</span>
+                </li>""" for k, a, b in TILLKOMMER)
 
 
-def styr_html():
-    return "\n".join(f"""          <article class="styrkort">
-            <span class="styrkort__nr">0{i}</span>
-            <h3>{a}</h3>
-            <p>{b}</p>
-          </article>""" for i, (a, b) in enumerate(STYR, 1))
-
-
-def kartfraga(namn, fraga, val):
+def kartfraga(nr, namn, fraga, val):
     knappar = "\n".join(
-        f'                <label class="kartval"><input type="radio" name="{namn}" value="{v}"{" checked" if i == 0 else ""}><span>{t}</span></label>'
+        f'                  <label class="tval"><input type="radio" name="{namn}" value="{v}"{" checked" if i == 0 else ""}><span>{t}</span></label>'
         for i, (v, t) in enumerate(val))
-    return f"""            <fieldset class="kartfraga">
-              <legend>{fraga}</legend>
-              <div class="kartfraga__rad">
+    return f"""              <fieldset class="tfraga">
+                <legend><span class="tfraga__nr" aria-hidden="true">0{nr}</span>{fraga}</legend>
+                <div class="tfraga__rad">
 {knappar}
-              </div>
-            </fieldset>"""
+                </div>
+              </fieldset>"""
 
 
 KARTFRAGOR = "\n".join([
-    kartfraga("va", "Finns vatten och avlopp framdraget till tomten?",
+    kartfraga(1, "va", "Finns vatten och avlopp framdraget till tomten?",
               [("ja", "Ja"), ("nej", "Nej"), ("vetej", "Vet inte")]),
-    kartfraga("lutning", "Hur ser marken ut där huset ska stå?",
+    kartfraga(2, "lutning", "Hur ser marken ut där huset ska stå?",
               [("plan", "Plan"), ("sluttar", "Sluttande eller berg")]),
-    kartfraga("infart", "Kommer en lastbil ända fram?",
+    kartfraga(3, "infart", "Kommer en lastbil ända fram?",
               [("ja", "Ja"), ("nej", "Nej, eller osäkert")]),
-    kartfraga("vatten", "Ligger tomten nära vatten?",
+    kartfraga(4, "vatten", "Ligger tomten nära vatten?",
               [("nej", "Nej"), ("ja", "Ja")]),
 ])
+
+# Bilderna till de fem faktorerna: små ritningar som rör sig (design.css 18).
+FAKTORBILD = [
+    '<line class="f-mark" x1="18" y1="112" x2="222" y2="112"/>'
+    '<path class="f-spok" d="M40 112V82L82 62L124 82V112Z"/>'
+    '<g class="f-vaxer"><path class="f-hus" d="M40 112V62L110 30L180 62V112Z"/><path class="f-dorr" d="M101 112V86h18v26"/>'
+    '<path class="f-matt" d="M40 126H180M40 121v10M180 121v10"/></g>',
+
+    '<rect class="f-hus" x="32" y="22" width="176" height="96" rx="3"/>'
+    '<path class="f-vagg f-vagg--1" pathLength="1" d="M96 22V78"/>'
+    '<path class="f-vagg f-vagg--2" pathLength="1" d="M96 78H208"/>'
+    '<path class="f-vagg f-vagg--3" pathLength="1" d="M150 78V118"/>'
+    '<path class="f-vagg f-vagg--4" pathLength="1" d="M96 96a18 18 0 0 1 18-18"/>'
+    '<path class="f-vagg f-vagg--5" pathLength="1" d="M58 118a20 20 0 0 1 20-20"/>',
+
+    '<g class="f-lager f-lager--1"><path class="f-sida f-sida--sand" d="M52 96v9l68 30 68-30v-9l-68 30z"/><path class="f-yta f-yta--sand" d="M52 96l68-30 68 30-68 30z"/></g>'
+    '<g class="f-lager f-lager--2"><path class="f-sida f-sida--kol" d="M52 76v9l68 30 68-30v-9l-68 30z"/><path class="f-yta f-yta--kol" d="M52 76l68-30 68 30-68 30z"/></g>'
+    '<g class="f-lager f-lager--3"><path class="f-sida f-sida--virke" d="M52 56v9l68 30 68-30v-9l-68 30z"/><path class="f-yta f-yta--virke" d="M52 56l68-30 68 30-68 30z"/></g>',
+
+    '<g class="f-mark-grupp"><line class="f-mark" x1="10" y1="96" x2="232" y2="96"/></g>'
+    '<path class="f-hus" d="M70 84V52L120 28L170 52V84Z"/>'
+    '<line class="f-plint f-plint--1" x1="85" y1="84" x2="85" y2="96"/>'
+    '<line class="f-plint f-plint--2" x1="120" y1="84" x2="120" y2="96"/>'
+    '<line class="f-plint f-plint--3" x1="155" y1="84" x2="155" y2="96"/>',
+
+    '<path class="f-vag" d="M24 104L216 46"/>'
+    '<circle class="f-start" cx="24" cy="104" r="6"/>'
+    '<path class="f-nal" d="M216 46c-8-9-12-15-12-21a12 12 0 0 1 24 0c0 6-4 12-12 21z"/>'
+    '<g class="f-bil"><path class="f-lastbil" d="M-20-20h24v14h-24zM4-15h9l5 5v4H4z"/>'
+    '<circle class="f-hjul" cx="-13" cy="-4" r="3.2"/><circle class="f-hjul" cx="11" cy="-4" r="3.2"/></g>',
+]
+
+
+def faktorer_html():
+    return "\n".join(f"""            <article class="faktor faktor--{i}">
+              <div class="faktor__bild" aria-hidden="true"><svg viewBox="0 0 240 140" focusable="false">{FAKTORBILD[i - 1]}</svg></div>
+              <div class="faktor__ord">
+                <span class="faktor__nr">0{i}</span>
+                <h3>{a}</h3>
+                <p>{b}</p>
+              </div>
+            </article>""" for i, (a, b) in enumerate(STYR, 1))
 
 
 PRISSIDA = f'''    <main id="innehall">
       <section class="subpage-hero">
-        <img class="subpage-hero__image" src="images/generated-materials-01.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Materialprover med träpanel och fönsterdetalj">
+        <img class="subpage-hero__image" src="images/foto/stommar-stapel.webp" width="1800" height="1200" fetchpriority="high" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
             <h1 class="subpage-hero__title">Vad ett hus kostar</h1>
-            <p class="subpage-hero__meta">Vad som ingår, vad som tillkommer och vad som styr summan</p>
+            <p class="subpage-hero__meta">Inget listpris, men inga gissningar heller. Här ser du vad som ingår, vad som tillkommer och vad som flyttar summan - innan du ber om en offert.</p>
+            <div class="subpage-hero__actions">
+              <a class="hero__link hero__link--solid" href="#ingar">Se vad som ingår</a>
+              <a class="hero__link" href="#kontakt">Begär offert</a>
+            </div>
           </div>
         </div>
 
@@ -290,90 +378,134 @@ PRISSIDA = f'''    <main id="innehall">
         </div>
       </section>
 
-      <section class="prisintro">
-        <div class="prisintro__inner">
-          <p class="section-label section-label--accent">Priser</p>
-          <h2 class="prisintro__titel">Inget listpris, men <em>inga gissningar</em>.</h2>
-          <p class="prisintro__text">
-            Ett hus har inget listpris på samma sätt som en bil. Men det går
-            att säga vad som ingår, vad som tillkommer och vad som får summan
-            att röra sig, så att du vet vad du jämför när du får offerten.
-          </p>
-        </div>
-      </section>
-
-      <section class="prisvaljare" id="prisnivaer">
-        <div class="prisvaljare__inner">
-          <div class="prisvaljare__topp">
+      <section class="prisskala" id="prisnivaer" aria-labelledby="prisskala-rubrik">
+        <div class="prisskala__inner">
+          <div class="prisskala__topp">
             <div>
-              <h2 class="prisvaljare__titel">Prisnivåer</h2>
-              <p class="prisvaljare__text">
-                Startpriser per kategori. Vad just ditt hus kostar står i
-                offerten, och den skriver vi när vi vet hur tomten ser ut.
-              </p>
+              <p class="section-label section-label--accent">Prisnivåer</p>
+              <h2 class="prisskala__titel" id="prisskala-rubrik">Välj storlek. <em>Se vad som gäller.</em></h2>
             </div>
-            <div class="prisvaljare__reglage">
-              <label for="onskad-yta">Hur stort hus vill du ha?</label>
-              <div class="prisvaljare__rad">
-                <input type="range" id="onskad-yta" min="20" max="60" step="1" value="30">
-                <output for="onskad-yta" data-yta-ut>30 m²</output>
+            <p class="prisskala__text">
+              Ett hus har inget listpris som en bil. Dra i reglaget så ser du
+              vilka hus som ligger närmast, vad som gäller för lov och var
+              priset står.
+            </p>
+          </div>
+
+          <div class="prisskala__panel">
+            <span class="ih-kant" aria-hidden="true"></span>
+
+            <div class="prisskala__matare">
+              <div class="prisskala__huvud">
+                <label class="prisskala__fraga" for="onskad-yta">Hur stort hus vill du ha?</label>
+                <p class="prisskala__tips" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 12h10M7 12l3-3M7 12l3 3M17 12l-3-3M17 12l-3 3"/></svg>Dra i reglaget eller välj ett hus</p>
               </div>
-              <p class="prisvaljare__svar" data-yta-svar aria-live="polite"></p>
+              <div class="prisskala__linjal">
+                <div class="prisskala__zoner" aria-hidden="true">
+                  <span class="zon zon--a" style="--fran:0;--till:0.25"><b><span class="lang">Attefallshus</span><span class="kort">Attefall</span></b></span>
+                  <span class="zon zon--b" style="--fran:0.25;--till:0.75"><b><span class="lang">Utanför detaljplan, upp till 50 m²</span><span class="kort">Utanför detaljplan</span></b></span>
+                  <span class="zon zon--c" style="--fran:0.75;--till:1"><b>Bygglov</b></span>
+                </div>
+                <div class="prisskala__bubbla" aria-hidden="true"><span data-yta-bubbla>30 m²</span></div>
+                <div class="prisskala__spar" aria-hidden="true"><i></i>{skalans_hak()}</div>
+                <input type="range" id="onskad-yta" min="{YMIN}" max="{YMAX}" step="1" value="30" aria-describedby="yta-svar">
+                <div class="prisskala__siffror" aria-hidden="true">
+                  <span style="--p:0">20</span><span style="--p:0.25">30</span><span style="--p:0.5">40</span><span style="--p:0.75">50</span><span style="--p:1">60 m²</span>
+                </div>
+              </div>
+              <div class="prisskala__modeller" role="group" aria-label="Våra hus på skalan">
+{skalans_modeller()}
+              </div>
+            </div>
+
+            <div class="prisskala__yta">
+              <div class="prisskala__ytahuvud">
+                <p class="prisskala__ytarubrik">Golvytan i skala</p>
+                <p class="prisskala__ytatal"><strong data-yta-golv>30 m²</strong> ≈ <strong data-yta-bilar>2,4</strong> bilplatser</p>
+              </div>
+              <svg class="prisskala__iso" data-yta-iso viewBox="-190 -100 430 225" aria-hidden="true" focusable="false"></svg>
+              <p class="prisskala__ytanot">Varje ruta är en kvadratmeter. Bredvid står en bil på en bilplats, 2,5 × 5 m, och en person på 1,8 m.</p>
+            </div>
+
+            <div class="prisskala__svar">
+              <p class="prisskala__varde"><output for="onskad-yta" data-yta-ut>30</output><span>m²</span></p>
+              <p class="prisskala__regel" id="yta-svar" data-yta-svar aria-live="polite">Vid 30 m² passar ett attefallshus. Inom detaljplan får det vara 30 m² utan bygglov.</p>
+              <dl class="prisskala__fakta">
+                <div>
+                  <dt>Närmast i storlek</dt>
+                  <dd class="prisskala__chips">
+{skalans_chips()}
+                  </dd>
+                </div>
+                <div><dt>Lov</dt><dd class="prisskala__lov" data-yta-lov data-zon="a">Inget bygglov inom måtten</dd></div>
+                <div><dt>Pris</dt><dd>I offerten, post för post</dd></div>
+              </dl>
             </div>
           </div>
 
-          <div class="priskort-rad">
+          <div class="pkort-rad">
 {priskort()}
           </div>
         </div>
       </section>
 
-      <section class="kostnadskarta" id="ingar">
-        <div class="kostnadskarta__inner">
-          <div class="kostnadskarta__topp">
-            <p class="section-label section-label--accent">Din kostnadskarta</p>
-            <h2 class="kostnadskarta__titel">Vad ingår, och vad ska du <em>räkna med</em>?</h2>
-            <p class="kostnadskarta__text">
-              Svara på fyra frågor om tomten, så markerar vi vilka poster som
-              troligen blir stora och vilka som kan bli små. Inga belopp - de
-              står i offerten.
+      <section class="prisoffert" id="ingar" aria-labelledby="prisoffert-rubrik">
+        <div class="prisoffert__inner">
+          <span class="ih-kant" aria-hidden="true"></span>
+          <div class="prisoffert__ord">
+            <p class="ih-etikett ih-etikett--ljus">Din kostnadskarta</p>
+            <h2 class="prisoffert__titel" id="prisoffert-rubrik">Offerten, <em>post för post.</em></h2>
+            <p class="prisoffert__text">
+              Svara på fyra frågor om tomten, så fylls utkastet i: vad som
+              ingår hos oss, och vilka poster hos andra som troligen blir
+              stora eller små. Inga belopp - de står i offerten.
             </p>
-            <p class="kostnadskarta__lank">
+            <form class="tfragor" id="kostnadskarta" aria-label="Frågor om tomten">
+{KARTFRAGOR}
+            </form>
+            <p class="prisoffert__lank">
               <a href="vad-far-jag-bygga.html#kolla-marken">Kolla din mark: tomtgräns, jordarter, djup till berg och ledningar</a>
             </p>
           </div>
 
-          <form class="kartfragor" id="kostnadskarta" aria-label="Frågor om tomten">
-{KARTFRAGOR}
-          </form>
+          <div class="offert">
+            <div class="offert__papper">
+              <div class="offert__huvud">
+                <div class="offert__avsandare">
+                  <img class="offert__logo" src="images/idealhus_logo.svg" width="1024" height="279" alt="Idealhus">
+                  <span class="offert__typ">Offert · utkast</span>
+                </div>
+                <span class="offert__stampel" aria-hidden="true">Post för post</span>
+              </div>
 
-          <div class="kostnadskarta__kolumner">
-            <div class="ingar">
-              <h3 class="kolumnrubrik"><span class="kolumnrubrik__prick kolumnrubrik__prick--ingar"></span>Det här ingår i vår offert</h3>
-              <ul>
+              <h3 class="offert__rubrik"><span class="offert__prick offert__prick--ingar"></span>Det här ingår hos oss</h3>
+              <ul class="offert__lista">
 {ingar_html()}
               </ul>
-            </div>
 
-            <div class="tillkommer" id="tillkommer">
-              <h3 class="kolumnrubrik"><span class="kolumnrubrik__prick"></span>Det här betalas till andra</h3>
-              <p class="tillkommer__summa" data-karta-summa aria-live="polite"></p>
-              <ul>
+              <h3 class="offert__rubrik"><span class="offert__prick"></span>Det här betalas till andra</h3>
+              <p class="offert__summa" data-karta-summa aria-live="polite"></p>
+              <ul class="offert__lista">
 {tillkommer_html()}
               </ul>
+
+              <div class="offert__fot">
+                <span>Summa</span>
+                <strong>Sätts i offerten</strong>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="styr" id="styr">
-        <div class="styr__inner">
-          <div class="styr__topp">
-            <p class="section-label">Vad som styr priset</p>
-            <h2 class="styr__titel">Fem saker flyttar summan.</h2>
+      <section class="prisfaktorer" id="styr" aria-labelledby="prisfaktorer-rubrik">
+        <div class="prisfaktorer__inner">
+          <div class="prisfaktorer__topp">
+            <p class="section-label section-label--accent">Vad som styr priset</p>
+            <h2 class="prisfaktorer__titel" id="prisfaktorer-rubrik">Fem saker <em>flyttar summan.</em></h2>
           </div>
-          <div class="styr__rad">
-{styr_html()}
+          <div class="prisfaktorer__grid">
+{faktorer_html()}
           </div>
         </div>
       </section>
@@ -424,7 +556,7 @@ def bygg():
     sida = (B.head("Priser | Idealhus",
                    "Vad ett hus fr\u00e5n Idealhus kostar: vad som ing\u00e5r, vad som "
                    "tillkommer och vad som styr priset.",
-                   "generated-materials-01.webp", fil="priser.html")
+                   "foto/stommar-stapel.webp", fil="priser.html")
             + "\n" + B.header("Priser") + "\n" + PRISSIDA + B.SIDFOT + "\n"
             + B.skript())
     io.open("priser.html", "w", encoding="utf-8",

@@ -1,4 +1,10 @@
 # Bygger sa-fungerar-det.html. Kor: python _process.py
+#
+# Femte versionen (2026-09-30, kunden: "ser billigt och tomt ut"). En
+# scrollberattelse: en stor klistrande scen till vanster med sju
+# isometriska miljoer (en per steg, ritade i premium.js "SCENER") som byter
+# nar man rullar, och stegen till hoger langs en rals. Munken visar vem som
+# gor vad, checklistan det du sjalv gor. Stil i design.css 19.
 import _bygg as B
 import json
 import _modeller as M
@@ -34,80 +40,24 @@ STEG = [
      "Du har haft samma kontakt hela vägen och vet vem du pratar med."),
 ]
 
-# De tre teckningarna (ritningen, verkstaden, huset på plats). De låg
-# förut på startsidan och hämtades därifrån; sedan startsidan fick
-# resan i 3D (2026-09-24) bor de här.
-TECKNINGAR = [
-    '''<svg viewBox="0 0 320 150" aria-hidden="true" focusable="false">
-          <!-- Ritningen pa bordet -->
-          <rect class="linje" x="54" y="26" width="176" height="106" rx="5"/>
-          <path class="linje" d="M78 52h128v56H78z"/>
-          <path class="linje" d="M142 52v56M142 82h64"/>
-          <path class="hartunn" d="M78 68h26M170 52v12M78 118h60"/>
-          <!-- Pennan -->
-          <g class="skede__penna">
-            <path class="accentfyll" d="M232 108l44-44 13 13-44 44-19 6z"/>
-            <path class="linje" d="M226 127l19-6"/>
-          </g>
-        </svg>''',
-    '''<svg viewBox="0 0 320 150" aria-hidden="true" focusable="false">
-          <!-- Taket over verkstaden -->
-          <path class="linje" d="M20 56L160 14l140 42"/>
-          <path class="hartunn" d="M26 56v76M294 56v76M20 132h280"/>
-          <!-- Huset som byggs, tydligt innanfor -->
-          <path class="linje" d="M102 128V90l58-24 58 24v38"/>
-          <path class="hartunn" d="M130 128v-30M160 128V88M190 128v-30"/>
-          <!-- Grunden -->
-          <path class="accentlinje" d="M88 128h144"/>
-        </svg>''',
-    '''<svg viewBox="0 0 320 150" aria-hidden="true" focusable="false">
-          <!-- Huset -->
-          <path class="linje" d="M96 132V80l64-30 64 30v52"/>
-          <path class="linje" d="M142 132v-32h36v32"/>
-          <path class="hartunn" d="M196 68V48h13v26"/>
-          <!-- Roken kommer nar man pekar pa kortet -->
-          <path class="rok accentlinje" d="M202 40c7-7 0-14 7-21"/>
-          <!-- Mark -->
-          <path class="linje" d="M22 132h276"/>
-          <!-- Granar: slutna trianglar laser som trad, tva
-               vinklar over varandra laste som pilar -->
-          <path class="hartunn trad trad--ett" d="M52 132v-11M34 121h36L52 91zM40 99h24L52 77z"/>
-          <path class="hartunn trad trad--tva" d="M270 132v-9M255 123h30L270 99zM261 105h18L270 85z"/>
-        </svg>''',
+KORTNAMN = ["Samtalet", "Modell", "Lov", "Tillverkning", "Grund", "Montage", "Besiktning"]
+
+FASER = [
+    ('Innan bygget', (1, 3), 'Vi ritar, räknar och tar fram underlaget. Du är byggherre och lämnar in till kommunen. Vi säger vad som ska med.'),
+    ('Medan huset byggs', (4, 5), 'Huset växer fram inomhus, i jämn temperatur. Under tiden ska marken vara redo när det kommer.'),
+    ('På plats', (6, 7), 'Huset kommer på lastbil och monteras. Sedan går vi igenom det tillsammans, rum för rum.'),
 ]
 
-FASER = [('Innan bygget', (1, 3), 'Vi ritar, räknar och tar fram underlaget. Du är byggherre och lämnar in till kommunen. Vi säger vad som ska med.'), ('Medan huset byggs', (4, 5), 'Huset växer fram inomhus, i jämn temperatur. Under tiden ska marken vara redo när det kommer.'), ('På plats', (6, 7), 'Huset kommer på lastbil och monteras. Sedan går vi igenom det tillsammans, rum för rum.')]
-
-
-def fas(namn, spann, ingress, teckning, steg):
-    kort = "\n".join(f'''            <li class="fassteg__kort" id="steg-{i}" data-vem="{klass}" data-steg="{i}">
-              <span class="fassteg__nr">{i:02d}</span>
-              <div class="fassteg__kropp">
-                <div class="fassteg__topp">
-                  <h3>{rubrik}</h3>
-                  <span class="process__vem process__vem--{klass}">{vem}</span>
-                </div>
-                <p>{text}</p>
-              </div>
-            </li>''' for i, (rubrik, vem, klass, text) in steg)
-
-    return f'''        <section class="fas">
-          <div class="fas__huvud">
-            <span class="fas__bild">
-{teckning}
-            </span>
-
-            <div>
-              <p class="fas__spann">Steg {spann[0]:02d}–{spann[1]:02d}</p>
-              <h2 class="fas__titel">{namn}</h2>
-              <p class="fas__text">{ingress}</p>
-            </div>
-          </div>
-
-          <ol class="fassteg">
-{kort}
-          </ol>
-        </section>'''
+# Det du själv gör, ur stegens texter. (nyckel, steg, text)
+CHECKLISTA = [
+    ("samtal", 1, "Berätta om tomten och hur huset ska användas"),
+    ("modell", 2, "Välj modell och de anpassningar som betyder något"),
+    ("lov", 3, "Lämna in bygglov eller anmälan till din kommun"),
+    ("grund", 5, "Se till att grunden är gjuten innan huset kommer"),
+    ("anslutning", 5, "Dra fram el, vatten och avlopp"),
+    ("framkomlighet", 6, "Ordna framkomlighet för lastbil och kranbil"),
+    ("besiktning", 7, "Gå igenom huset vid slutbesiktningen"),
+]
 
 
 def _lev(typ):
@@ -116,30 +66,90 @@ def _lev(typ):
 
 
 # Leveranstiden per hustyp, ur modellerna. Visas på steg 06 när man
-# väljer hustyp i verktygsraden.
+# väljer hustyp.
 LEVERANS_JSON = json.dumps({typ: _lev(typ) for typ in M.KATEGORIER})
 
-KORTNAMN = ["Samtalet", "Modell", "Lov", "Tillverkning", "Grund", "Montage", "Besiktning"]
-
-FARDPLAN = "\n".join(
-    f'            <a href="#steg-{i}" data-fard="{i}"><span>{i:02d}</span><em>{n}</em></a>'
-    for i, n in enumerate(KORTNAMN, 1))
-
 ANTAL = {k: sum(1 for s in STEG if s[2] == k) for k in ("vi", "du", "bada")}
+VEMNAMN = {"vi": "Vi", "du": "Du", "bada": "Tillsammans"}
 
-faser = "\n\n".join(
-    fas(namn, spann, ingress, TECKNINGAR[n],
-        [(i, STEG[i - 1]) for i in range(spann[0], spann[1] + 1)])
-    for n, (namn, spann, ingress) in enumerate(FASER))
+
+def munk():
+    """Munken: en båge per 'vem', lika lång som andelen steg."""
+    delar, start, glapp = [], 0.0, 1.6
+    for k in ("vi", "du", "bada"):
+        langd = ANTAL[k] / len(STEG) * 100
+        delar.append(f'<circle class="vemkort__del vemkort__del--{k}" cx="21" cy="21" r="15.9155" '
+                     f'stroke-dasharray="{langd - glapp:.3f} {100 - langd + glapp:.3f}" '
+                     f'stroke-dashoffset="{-start:.3f}" style="--langd:{langd - glapp:.3f}"/>')
+        start += langd
+    return "".join(delar)
+
+
+def steg_html(i, rubrik, vem, klass, text, fas):
+    n, namn, spann, ingress = fas
+    huvud = ""
+    if i == spann[0]:
+        huvud = (f'''
+              <div class="berattelse__fas" id="skede-{n}">
+                <span>Skede {n} · Steg {spann[0]:02d}–{spann[1]:02d}</span>
+                <b>{namn}</b>
+                <p>{ingress}</p>
+              </div>''')
+    return f'''            <li class="berattelse__steg" id="steg-{i}" data-steg="{i}" data-vem="{klass}" data-namn="{KORTNAMN[i - 1]}" data-skede="Skede {n} · {namn}">{huvud}
+              <div class="berattelse__kort">
+                <div class="berattelse__stegtopp">
+                  <span class="berattelse__nr" aria-hidden="true">{i:02d}</span>
+                  <span class="flode__vem flode__vem--{klass}"><i></i>{vem}</span>
+                </div>
+                <h3>{rubrik}</h3>
+                <p>{text}</p>
+              </div>
+              <div class="berattelse__plats" aria-hidden="true"></div>
+            </li>'''
+
+
+def _fas_for(i):
+    for n, (namn, spann, ingress) in enumerate(FASER, 1):
+        if spann[0] <= i <= spann[1]:
+            return (n, namn, spann, ingress)
+
+
+STEG_HTML = "\n".join(steg_html(i, *STEG[i - 1], _fas_for(i)) for i in range(1, len(STEG) + 1))
+
+SKEDEN = "\n".join(
+    f'              <a href="#skede-{n}" style="--n:{spann[1] - spann[0] + 1}"><span>{spann[0]:02d}–{spann[1]:02d}</span><b>{namn}</b><i></i></a>'
+    for n, (namn, spann, _) in enumerate(FASER, 1))
+
+PRICKAR = "\n".join(
+    f'              <a href="#steg-{i}" data-fard="{i}" aria-label="Steg {i}: {STEG[i - 1][0]}"><i></i></a>'
+    for i in range(1, len(STEG) + 1))
+
+VEMLISTA = "\n".join(
+    f'              <li><i class="vemprick vemprick--{k}"></i>{VEMNAMN[k]}<b>{ANTAL[k]} steg</b></li>'
+    for k in ("vi", "du", "bada"))
+
+CHECK_HTML = "\n".join(
+    f'''            <li>
+              <label class="checklista__rad">
+                <input type="checkbox" data-check="{nyckel}">
+                <span class="checklista__ruta" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+                <span class="checklista__punkt">{text}</span>
+              </label>
+              <a class="checklista__steg" href="#steg-{s}">Steg {s:02d}</a>
+            </li>''' for nyckel, s, text in CHECKLISTA)
 
 KROPP = f'''    <main id="innehall">
       <section class="subpage-hero">
-        <img class="subpage-hero__image" src="images/generated-craft-cladding-01.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Händer som arbetar med träpanel i verkstad">
+        <img class="subpage-hero__image" src="images/foto/dronare-montage.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Drönarbild av ett hus under montage, med inplastade väggar runt en betongplatta och en kran">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
-            <h1 class="subpage-hero__title">Så fungerar det</h1>
-            <p class="subpage-hero__meta">Från första samtalet till inflyttning</p>
+            <h1 class="subpage-hero__title">Så går det till</h1>
+            <p class="subpage-hero__meta">Från första samtalet till slutbesiktningen: sju steg i tre skeden, och i varje steg står det vem som gör vad.</p>
+            <div class="subpage-hero__actions">
+              <a class="hero__link hero__link--solid" href="#steg-1">Följ stegen</a>
+              <a class="hero__link" href="#kontakt">Begär offert</a>
+            </div>
           </div>
         </div>
 
@@ -150,81 +160,103 @@ KROPP = f'''    <main id="innehall">
           </div>
           <div class="heroscen__chip heroscen__chip--b">
             <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20c.9-3.9 3.9-6 7.5-6s6.6 2.1 7.5 6"/></svg></span>
-            <p><strong>En kontakt</strong><span>hela vägen till nyckeln</span></p>
+            <p><strong>En kontakt</strong><span>hela vägen till besiktningen</span></p>
           </div>
         </div>
       </section>
 
-      <section class="kontakt-topp">
-        <div>
-          <h2>Sju steg, <em>i ordning</em>.</h2>
-          <p class="kontakt-topp__lead">
-            Ordningen spelar roll. Du kan inte bygga innan bygglovet är klart,
-            och vi kan inte tillverka innan modellen är bestämd.
-          </p>
-          <p class="kontakt-topp__brod">
-            Vi har markerat vem som gör vad i varje steg, för det är den fråga
-            de flesta faktiskt har. En del ligger på oss, en del på dig, och en
-            del gör vi tillsammans. Ingenting av det ska komma som en
-            överraskning halvvägs in.
-          </p>
-        </div>
-
-        <div class="kontakt-direkt">
-          <div class="kontakt-direkt__rad">
-            <span class="kontakt-direkt__namn">Lovfritt</span>
-            <span class="kontakt-direkt__roll">Attefallshus</span>
-            <span class="kontakt-direkt__lankar">
-              <a href="vad-far-jag-bygga.html">30 m² inom detaljplan, 50 m² utanför</a>
-            </span>
+      <section class="flode-intro" aria-labelledby="flode-rubrik">
+        <div class="flode-intro__inre">
+          <div class="flode-intro__ord">
+            <p class="section-label section-label--accent">Processen</p>
+            <h2 class="flode-intro__titel" id="flode-rubrik">Sju steg, <em>i ordning.</em></h2>
+            <p class="flode-intro__text">
+              Ordningen spelar roll. Du kan inte bygga innan bygglovet är klart,
+              och vi kan inte tillverka innan modellen är bestämd. I varje steg
+              står det vem som gör vad - ingenting ska komma som en
+              överraskning halvvägs in.
+            </p>
+            <nav class="flode-intro__skeden" aria-label="De tre skedena">
+{SKEDEN}
+            </nav>
           </div>
 
-          <div class="kontakt-direkt__rad">
-            <span class="kontakt-direkt__namn">Bygglov</span>
-            <span class="kontakt-direkt__roll">Övriga hus</span>
-            <span class="kontakt-direkt__lankar">
-              <a href="fritidshus.html">Fritidshus</a>
-            </span>
-          </div>
-
-          <div class="kontakt-direkt__rad">
-            <span class="kontakt-direkt__namn">En kontakt</span>
-            <span class="kontakt-direkt__roll">Hela vägen</span>
-            <span class="kontakt-direkt__lankar">
-              <a href="kontakt.html">Kontakta oss</a>
-            </span>
-          </div>
+          <figure class="vemkort">
+            <div class="vemkort__munk">
+              <svg viewBox="0 0 42 42" aria-hidden="true" focusable="false"><circle class="vemkort__spar" cx="21" cy="21" r="15.9155"/>{munk()}</svg>
+              <p class="vemkort__mitt"><strong>7</strong><span>steg</span></p>
+            </div>
+            <figcaption>
+              <p class="vemkort__rubrik">Vem gör vad</p>
+              <ul class="vemkort__lista">
+{VEMLISTA}
+              </ul>
+            </figcaption>
+          </figure>
         </div>
       </section>
 
-      <section class="process process--faser" data-leverans='{LEVERANS_JSON}'>
-        <div class="process__inre">
-          <div class="processverktyg">
-            <div class="processverktyg__grupp">
-              <p class="processverktyg__etikett">Vem gör vad</p>
-              <div class="vemfilter" role="group" aria-label="Visa steg efter vem som gör dem">
-                <button type="button" data-vem="alla" aria-pressed="true">Alla <small>7</small></button>
-                <button type="button" data-vem="vi" aria-pressed="false"><i class="prick prick--vi"></i>Vi <small>{ANTAL["vi"]}</small></button>
-                <button type="button" data-vem="du" aria-pressed="false"><i class="prick prick--du"></i>Du <small>{ANTAL["du"]}</small></button>
-                <button type="button" data-vem="bada" aria-pressed="false"><i class="prick prick--bada"></i>Tillsammans <small>{ANTAL["bada"]}</small></button>
-              </div>
-            </div>
-            <div class="processverktyg__grupp">
-              <p class="processverktyg__etikett">Visa för</p>
-              <div class="hustypval" role="group" aria-label="Anpassa stegen efter hustyp">
-                <button type="button" data-typ="alla" aria-pressed="true">Alla hus</button>
-                <button type="button" data-typ="attefallshus" aria-pressed="false">Attefallshus</button>
-                <button type="button" data-typ="fritidshus" aria-pressed="false">Fritidshus</button>
-              </div>
-            </div>
+      <section class="flode" data-leverans='{LEVERANS_JSON}' aria-label="Stegen">
+        <div class="flode__styr">
+          <div class="vemfilter" role="group" aria-label="Visa steg efter vem som gör dem">
+            <button type="button" data-vem="alla" aria-pressed="true">Alla <small>7</small></button>
+            <button type="button" data-vem="vi" aria-pressed="false"><i class="vemprick vemprick--vi"></i>Vi <small>{ANTAL["vi"]}</small></button>
+            <button type="button" data-vem="du" aria-pressed="false"><i class="vemprick vemprick--du"></i>Du <small>{ANTAL["du"]}</small></button>
+            <button type="button" data-vem="bada" aria-pressed="false"><i class="vemprick vemprick--bada"></i>Tillsammans <small>{ANTAL["bada"]}</small></button>
           </div>
-
-          <nav class="fardplan" aria-label="Stegen">
-            <span class="fardplan__spar" aria-hidden="true"><span></span></span>
-{FARDPLAN}
+          <div class="hustypval" role="group" aria-label="Anpassa stegen efter hustyp">
+            <button type="button" data-typ="alla" aria-pressed="true">Alla hus</button>
+            <button type="button" data-typ="attefallshus" aria-pressed="false">Attefallshus</button>
+            <button type="button" data-typ="fritidshus" aria-pressed="false">Fritidshus</button>
+          </div>
+          <nav class="flode__prickar" aria-label="Hoppa till ett steg">
+{PRICKAR}
+            <span class="flode__nu" data-flode-nu aria-hidden="true">Start</span>
           </nav>
+        </div>
 
-{faser}
+        <div class="berattelse" data-berattelse>
+          <div class="berattelse__scen" aria-hidden="true">
+            <div class="berattelse__ram">
+              <span class="ih-kant"></span>
+              <div class="berattelse__vyer" data-vyer></div>
+              <p class="berattelse__skede" data-scen-skede>Skede 1 · Innan bygget</p>
+              <div class="berattelse__matare">
+                <svg viewBox="0 0 42 42" focusable="false"><circle class="berattelse__ringspar" cx="21" cy="21" r="15.9155"/><circle class="berattelse__ringfyll" cx="21" cy="21" r="15.9155"/></svg>
+                <span><b data-scen-nr>01</b>/07</span>
+              </div>
+              <p class="berattelse__namn" data-scen-namn>Första samtalet</p>
+            </div>
+          </div>
+
+          <div class="berattelse__spar">
+            <div class="berattelse__rail" aria-hidden="true"><i class="berattelse__railfyll"></i></div>
+            <ol class="berattelse__lista">
+{STEG_HTML}
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="checklista" aria-labelledby="checklista-rubrik">
+        <div class="checklista__inre">
+          <span class="ih-kant" aria-hidden="true"></span>
+          <div class="checklista__ord">
+            <p class="ih-etikett ih-etikett--ljus">Din del</p>
+            <h2 class="checklista__titel" id="checklista-rubrik">Det här <em>gör du.</em></h2>
+            <p class="checklista__text">
+              Stegen där du själv gör något, som en lista att bocka av. Bockarna
+              sparas i den här webbläsaren, så listan finns kvar nästa gång.
+            </p>
+            <div class="checklista__matare">
+              <svg viewBox="0 0 42 42" aria-hidden="true" focusable="false"><circle class="checklista__ringspar" cx="21" cy="21" r="15.9155"/><circle class="checklista__ringfyll" cx="21" cy="21" r="15.9155"/></svg>
+              <p><strong data-check-antal>0 av {len(CHECKLISTA)}</strong><span>klara</span></p>
+            </div>
+            <button class="checklista__rensa" type="button" data-check-rensa>Börja om</button>
+          </div>
+          <ol class="checklista__lista">
+{CHECK_HTML}
+          </ol>
         </div>
       </section>
 
@@ -245,7 +277,7 @@ KROPP = f'''    <main id="innehall">
             <a class="model-price__button" href="proffs.html">Se produktionen</a>
           </div>
           <div class="segment__media">
-            <img src="images/generated-craft-saw-01.webp" loading="lazy" decoding="async" alt="Händer som kapar ett trästycke i verkstaden">
+            <img src="images/foto/stommar-stapel.webp" loading="lazy" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra">
           </div>
         </article>
       </section>
@@ -257,7 +289,7 @@ KROPP = f'''    <main id="innehall">
 ut = (B.head("Så fungerar det | Idealhus",
              "Från första samtalet till inflyttning. Sju steg, och vem som gör "
              "vad i varje steg.",
-             "generated-craft-cladding-01.webp", fil="sa-fungerar-det.html")
+             "foto/dronare-montage.webp", fil="sa-fungerar-det.html")
       + "\n" + B.header("Så fungerar det") + "\n" + KROPP + B.SIDFOT + "\n" + B.skript())
 
 open("sa-fungerar-det.html", "w", encoding="utf-8", newline="").write(ut.replace("\n", "\r\n"))

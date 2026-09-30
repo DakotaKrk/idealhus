@@ -35,8 +35,87 @@ def hero(bild, rubrik, meta, alt, extra=""):
           <div class="subpage-hero__content">
             <h1 class="subpage-hero__title">{rubrik}</h1>
             <p class="subpage-hero__meta">{meta}</p>
+            <div class="subpage-hero__actions">
+              <a class="hero__link hero__link--solid" href="#modeller">Se modellerna</a>
+              <a class="hero__link" href="#kontakt">Begär offert</a>
+            </div>
           </div>
         </div>{extra}
+      </section>
+'''
+
+
+def komma(v, dec=2):
+    return f"{v:.{dec}f}".replace(".", ",")
+
+
+def studio3d(modeller):
+    """3D-studion (2026-09-30): de riktiga modellerna (modeller/hus-r*.glb)
+    i samma skala, med mått, en människa för skalan och tre vyer.
+    premium.js laddar visaren när sektionen närmar sig."""
+    forsta = modeller[0]
+    l0, b0, h0 = M.MATT[forsta[1]]
+    val = "".join(
+        f'              <button type="button" data-3d-val data-id="{bild[4:6]}" data-namn="{namn}" '
+        f'data-yta="{yta}" data-rum="{rum}" data-l="{M.MATT[bild][0]}" data-b="{M.MATT[bild][1]}" '
+        f'data-h="{M.MATT[bild][2]}" aria-pressed="{str(i == 0).lower()}">'
+        f'<b>{namn}</b><span>{yta} m²</span></button>\n'
+        for i, (namn, bild, yta, rum, lev) in enumerate(modeller))
+    return f'''      <section class="studio3d" data-studio3d aria-labelledby="studio3d-rubrik">
+        <div class="studio3d__inner">
+          <div class="studio3d__topp">
+            <div class="studio3d__ord">
+              <p class="section-label section-label--accent">Storleken i 3D</p>
+              <h2 class="studio3d__titel" id="studio3d-rubrik">Så stort är <em data-3d-namn>{forsta[0]}</em>.</h2>
+              <p class="studio3d__text">
+                Husen är byggda ur ritningarna i skala 1:1 och visas i samma
+                skala, så att skillnaden syns. Dra för att vrida.
+              </p>
+            </div>
+            <div class="studio3d__val" role="group" aria-label="Välj hus att visa i 3D">
+{val}            </div>
+          </div>
+
+          <div class="studio3d__scen" data-3d-scen>
+            <span class="ih-kant" aria-hidden="true"></span>
+            <div class="studio3d__laddar" data-3d-laddar>
+              <span>Laddar 3D-modellen</span>
+              <i><b data-3d-progress></b></i>
+            </div>
+            <div class="studio3d__lager" aria-hidden="true">
+              <svg class="studio3d__linjer" data-3d-linjer>
+                <g data-linje="l"><line/><line class="studio3d__tick"/><line class="studio3d__tick"/></g>
+                <g data-linje="b"><line/><line class="studio3d__tick"/><line class="studio3d__tick"/></g>
+                <g data-linje="h"><line/><line class="studio3d__tick"/><line class="studio3d__tick"/></g>
+              </svg>
+              <span class="studio3d__etikett" data-etikett="l">{komma(l0)} m</span>
+              <span class="studio3d__etikett" data-etikett="b">{komma(b0)} m</span>
+              <span class="studio3d__etikett studio3d__etikett--h" data-etikett="h">Nock {komma(h0)} m</span>
+              <svg class="studio3d__person" data-3d-person viewBox="0 3 40 115.25"><circle cx="20" cy="11" r="8"/><path d="M12 22H28A6 6 0 0 1 34 28V62A3 3 0 0 1 28 62V36H27V115A3.25 3.25 0 0 1 20.5 115V70H19.5V115A3.25 3.25 0 0 1 13 115V36H12V62A3 3 0 0 1 6 62V28A6 6 0 0 1 12 22Z"/></svg>
+            </div>
+
+            <div class="studio3d__vyer" role="group" aria-label="Välj vy">
+              <button type="button" data-vy="horn" aria-pressed="true">Hörn</button>
+              <button type="button" data-vy="fasad" aria-pressed="false">Fasad</button>
+              <button type="button" data-vy="ovan" aria-pressed="false">Ovanifrån</button>
+            </div>
+            <div class="studio3d__kontroller">
+              <button class="studio3d__matt" type="button" data-3d-matt aria-pressed="true">Mått</button>
+              <button class="studio3d__ikon" type="button" data-zoom="1" aria-label="Zooma ut"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12h12"/></svg></button>
+              <button class="studio3d__ikon" type="button" data-zoom="-1" aria-label="Zooma in"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12h12M12 6v12"/></svg></button>
+              <button class="studio3d__ikon" type="button" data-3d-aterstall aria-label="Återställ vyn"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4h4"/></svg></button>
+            </div>
+            <p class="studio3d__tips" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 12h10M7 12l3-3M7 12l3 3M17 12l-3-3M17 12l-3 3"/></svg>Dra för att vrida</p>
+          </div>
+
+          <dl class="studio3d__fakta">
+            <div><dt>Boyta</dt><dd><strong data-3d-tal="yta" data-dec="0">{forsta[2]}</strong><span>m²</span></dd></div>
+            <div><dt>Yttermått</dt><dd><strong data-3d-tal="l" data-dec="2">{komma(l0)}</strong><span>×</span><strong data-3d-tal="b" data-dec="2">{komma(b0)}</strong><span>m</span></dd></div>
+            <div><dt>Nockhöjd</dt><dd><strong data-3d-tal="h" data-dec="2">{komma(h0)}</strong><span>m</span></dd></div>
+            <div><dt>Rum</dt><dd><strong data-3d-tal="rum" data-dec="0">{forsta[3]}</strong></dd></div>
+          </dl>
+          <p class="studio3d__not">Yttermåtten och nockhöjden står i ritningarna. Människan bredvid huset är 1,8 m lång.</p>
+        </div>
       </section>
 '''
 
@@ -92,14 +171,14 @@ def kategorisida(fil, namn, herobild, meta, rubrik, ingress, spann):
             </div>
             <p class="model-card__facts"><span>{rum} rum</span><span>Leverans {lev} v</span></p>
             <div class="model-card__fot">
-              <p class="model-card__price">Från X kr</p>
+              <p class="model-card__price">Pris i offert</p>
               <button class="jamfor-knapp" type="button" aria-pressed="false">Jämför</button>
             </div>
           </article>''' for i, (titel, bild, yta, rum, lev) in enumerate(modeller, 1))
 
     kropp = f'''    <main id="innehall">
 {hero(herobild, namn, meta, namn + " i svensk natur", fakta_bubblor(modeller))}
-      <section class="category">
+      <section class="category" id="modeller">
         <div class="category__inner">
           <nav class="category-filter" aria-label="Huskategorier">
 {piller}
@@ -132,59 +211,7 @@ def kategorisida(fil, namn, herobild, meta, rubrik, ingress, spann):
         </div>
       </section>
 
-      <section class="storlek3d" data-skala="{max(m[2] for m in modeller)}">
-        <div class="storlek3d__inner">
-          <div class="storlek3d__ord">
-            <p class="section-label section-label--accent">Storleken i 3D</p>
-            <h2 class="storlek3d__titel">Så stort är <em data-3d-namn>{modeller[0][0].lower()}</em>.</h2>
-            <p class="storlek3d__text">
-              Peka på en modell ovanför, eller välj här, så växer huset till
-              rätt yta. Lyft taket för att se golvet i kvadratmeter.
-            </p>
-            <div class="storlek3d__val" role="group" aria-label="Välj modell att visa i 3D">
-{"".join(f'              <button type="button" data-3d="{i}" aria-pressed="{str(i == 1).lower()}">{yta} m²</button>' + chr(10) for i, (t, b, yta, r, l) in enumerate(modeller, 1))}            </div>
-            <dl class="storlek3d__fakta">
-              <div><dt>Boyta</dt><dd><strong data-3d-yta>{modeller[0][2]}</strong> m²</dd></div>
-              <div><dt>Rum</dt><dd><strong data-3d-rum>{modeller[0][3]}</strong></dd></div>
-              <div><dt>Bilplatser</dt><dd>≈ <strong data-3d-p>{round(modeller[0][2] / 12.5, 1)}</strong></dd></div>
-            </dl>
-            <p class="storlek3d__not">En bilplats är 2,5 × 5 m. Måtten och proportionerna i modellen är ungefärliga.</p>
-          </div>
-
-          <div class="storlek3d__scen" tabindex="0" role="img" aria-label="3D-modell av huset. Dra eller använd piltangenterna för att vrida.">
-            <div class="hus3d">
-              <div class="hus3d__mark"></div>
-              <div class="hus3d__skugga"></div>
-              <div class="hus3d__dack"></div>
-              <div class="hus3d__golv"><span data-3d-golvtext></span></div>
-              <div class="hus3d__vagg hus3d__vagg--fram">
-                <span class="hus3d__glas"></span>
-                <span class="hus3d__dorr"></span>
-              </div>
-              <div class="hus3d__vagg hus3d__vagg--bak"><span class="hus3d__fonster"></span></div>
-              <div class="hus3d__vagg hus3d__vagg--vanster"><span class="hus3d__fonster"></span></div>
-              <div class="hus3d__vagg hus3d__vagg--hoger"><span class="hus3d__fonster"></span></div>
-              <div class="hus3d__tak">
-                <div class="hus3d__takyta"></div>
-                <div class="hus3d__takkant hus3d__takkant--fram"></div>
-                <div class="hus3d__takkant hus3d__takkant--bak"></div>
-                <div class="hus3d__takkant hus3d__takkant--vanster"></div>
-                <div class="hus3d__takkant hus3d__takkant--hoger"></div>
-              </div>
-              <span class="hus3d__matt hus3d__matt--bredd" data-3d-bredd></span>
-              <span class="hus3d__matt hus3d__matt--djup" data-3d-djup></span>
-            </div>
-            <p class="storlek3d__tips" aria-hidden="true">Dra för att vrida</p>
-            <div class="storlek3d__kontroller">
-              <button class="storlek3d__lyft" type="button" aria-pressed="false">Lyft taket</button>
-              <button class="storlek3d__ikon" type="button" data-zoom="-1" aria-label="Zooma ut">−</button>
-              <button class="storlek3d__ikon" type="button" data-zoom="1" aria-label="Zooma in">+</button>
-              <button class="storlek3d__ikon" type="button" data-aterstall aria-label="Återställ vyn">↺</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
+{studio3d(modeller)}
       <div class="jamforbar" hidden>
         <p><strong data-jamfor-antal>0</strong> hus valda</p>
         <button class="jamforbar__oppna" type="button">Jämför sida vid sida</button>
@@ -199,6 +226,7 @@ def kategorisida(fil, namn, herobild, meta, rubrik, ingress, spann):
         <div class="jamforruta__kolumner"></div>
       </dialog>
 
+{fragor(fil)}
 {KONTAKT_SEKTION}    </main>
 
 '''
@@ -211,6 +239,61 @@ def kategorisida(fil, namn, herobild, meta, rubrik, ingress, spann):
           + B.skript())
     open(fil, "w", encoding="utf-8", newline="").write(ut.replace("\n", "\r\n"))
     return fil
+
+
+FRAGOR = {
+    "attefallshus.html": [
+        ("Behöver jag bygglov?",
+         "Nej, inte för själva byggnaden om huset håller sig inom måtten. Sedan "
+         "december 2025 behövs varken bygglov eller anmälan för den. Ska huset ha "
+         "vatten, avlopp, ventilation eller eldstad anmäls installationerna till kommunen."),
+        ("Hur stort får huset vara?",
+         "30 m² inom detaljplan och 50 m² utanför. Nockhöjden får vara 4,0 m inom "
+         "detaljplan och 4,5 m utanför."),
+        ("Hur nära tomtgränsen får det stå?",
+         "4,5 m från tomtgränsen, eller närmare om grannen ger sitt skriftliga "
+         "medgivande."),
+        ("Kan jag bo i huset året runt?",
+         "Ja, om det byggs som komplementbostadshus. Då ska det uppfylla kraven på "
+         "en fullvärdig bostad, med kök och badrum."),
+    ],
+    "fritidshus.html": [
+        ("Behöver ett fritidshus bygglov?",
+         "Ja. Våra fritidshus är större än ett attefallshus och kräver bygglov. "
+         "Vi tar fram ritningar och underlag, och du som byggherre lämnar in "
+         "ansökan till kommunen."),
+        ("Kan vi äga stugan tillsammans?",
+         "Ja. Samägarkalendern fördelar årets veckor rättvist mellan delägarna, "
+         "storhelgerna först."),
+        ("Går det att hyra ut stugan när vi inte är där?",
+         "Uthyrningskalkylen visar vad uthyrningen kan täcka av kostnaderna, "
+         "vecka för vecka."),
+    ],
+}
+
+
+def fragor(fil):
+    rader = FRAGOR.get(fil)
+    if not rader:
+        return ""
+    poster = "\n".join(
+        f'''            <details class="ih-fraga"{" open" if i == 0 else ""}>
+              <summary>{f}</summary>
+              <p>{s}</p>
+            </details>''' for i, (f, s) in enumerate(rader))
+    return f'''
+      <section class="ih-sektion ih-sektion--sand">
+        <div class="ih-inre">
+          <div class="ih-huvud ih-huvud--mitt">
+            <p class="ih-etikett">Vanliga frågor</p>
+            <h2 class="ih-rubrik">Det du undrar <em>först.</em></h2>
+          </div>
+          <div class="ih-fragor">
+{poster}
+          </div>
+        </div>
+      </section>
+'''
 
 
 KORTA_BESKRIVNINGAR = {
@@ -226,14 +309,14 @@ sidor = []
 
 sidor.append(kategorisida(
     "fritidshus.html", "Fritidshus", "hus-r3.webp",
-    "För helger och långa somrar · från X m²",
+    "Mer plats än ett attefallshus, för helger, lov och långa somrar - från X m², byggda under tak i Sverige och monterade på några dagar.",
     "Modeller för fritidsboende",
     "Fritidshus ger mer plats på tomten än ett attefallshus och kräver bygglov. Här samlar vi modellerna som är gjorda för att bo i över helger, lov och långa somrar.",
     SPANN))
 
 sidor.append(kategorisida(
     "attefallshus.html", "Attefallshus", "hus-r2.webp",
-    "Bygglovsbefriat · 30 m² inom detaljplan, 50 m² utanför",
+    "Smarta småhus för boende, gästhus eller uthyrning. Inom måtten behövs varken bygglov eller anmälan för själva byggnaden: 30 m² inom detaljplan, 50 m² utanför.",
     "Modeller i attefallsstorlek",
     "Sedan december 2025 krävs varken bygglov eller anmälan för själva byggnaden inom måtten, men installationer som vatten och avlopp anmäls fortfarande. Det gör dem till den snabbaste vägen till ett extra hus på tomten.",
     SPANN))

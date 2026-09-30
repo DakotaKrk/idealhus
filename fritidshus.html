@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fritidshus | Idealhus</title>
     <meta name="description" content="Fritidshus från Idealhus. Mer plats på tomten än ett attefallshus, byggda för att bo i över helger, lov och långa somrar. Kräver bygglov.">
-    <meta name="theme-color" content="#2c2820">
+    <meta name="theme-color" content="#1b1915">
     <link rel="icon" href="images/idealhus.svg" type="image/svg+xml">
     <link rel="icon" href="favicon.ico" sizes="32x32">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -20,12 +20,12 @@
     <meta property="og:url" content="https://idealhus.se/fritidshus.html">
     <meta name="twitter:card" content="summary_large_image">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&amp;family=Source+Sans+3:ital,wght@0,300..700;1,400&amp;display=swap">
+    <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" as="image" href="images/hus-r3.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20260929c">
-    <script src="premium.js?v=20260929c" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20260930zi">
+    <link rel="stylesheet" href="design.css?v=20260930zi">
+    <script src="premium.js?v=20260930zi" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
@@ -73,7 +73,7 @@
               </a>
               <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
               <a href="proffs.html">
-                <img src="images/generated-craft-cladding-01.webp" alt="" loading="lazy" decoding="async">
+                <img src="images/foto/lyft-stommar.webp" alt="" loading="lazy" decoding="async">
                 <span>
                   <strong>Proffs</strong>
                   <em>Väggar, block och moduler</em>
@@ -123,27 +123,33 @@
 
     <main id="innehall">
       <section class="subpage-hero">
+        <span class="ih-kant" aria-hidden="true"></span>
         <img class="subpage-hero__image" src="images/hus-r3.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Fritidshus i svensk natur">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
+            <p class="ih-etikett ih-etikett--ljus sidtopp__etikett">Våra hus · För dig som ska bo</p>
             <h1 class="subpage-hero__title">Fritidshus</h1>
-            <p class="subpage-hero__meta">För helger och långa somrar · från 38 m²</p>
-          </div>
-        </div>
-        <div class="heroscen heroscen--kategori" aria-hidden="true">
-          <div class="heroscen__chip heroscen__chip--a">
-            <svg class="matare" viewBox="0 0 120 70"><path class="matare__spar" d="M10 64a50 50 0 0 1 100 0" pathLength="100"/><path class="matare__varde" d="M10 64a50 50 0 0 1 100 0" pathLength="100" style="--varde: 100"/></svg>
-            <p><strong>38–45 m²</strong><span>boyta · 2 rum</span></p>
-          </div>
-          <div class="heroscen__chip heroscen__chip--b">
-            <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"/></svg></span>
-            <p><strong>Leverans 12–14 v</strong><span>tillverkat under tak i Sverige</span></p>
+            <p class="subpage-hero__meta">Mer plats än ett attefallshus, för helger, lov och långa somrar - från 38 m², byggda under tak i Sverige och monterade på några dagar.</p>
+            <div class="subpage-hero__actions">
+              <a class="hero__link hero__link--solid" href="#modeller">Se modellerna</a>
+              <a class="hero__link" href="#kontakt">Begär offert</a>
+            </div>
+            <div class="heroscen heroscen--kategori heroscen--inne" aria-hidden="true">
+              <div class="heroscen__chip heroscen__chip--a">
+                <svg class="matare" viewBox="0 0 120 70"><path class="matare__spar" d="M10 64a50 50 0 0 1 100 0" pathLength="100"/><path class="matare__varde" d="M10 64a50 50 0 0 1 100 0" pathLength="100" style="--varde: 100"/></svg>
+                <p><strong>38–45 m²</strong><span>boyta · 2 rum</span></p>
+              </div>
+              <div class="heroscen__chip heroscen__chip--b">
+                <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"/></svg></span>
+                <p><strong>Leverans 12–14 v</strong><span>tillverkat under tak i Sverige</span></p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="category">
+      <section class="category" id="modeller">
         <div class="category__inner">
           <nav class="category-filter" aria-label="Huskategorier">
           <a href="attefallshus.html">Attefallshus</a>
@@ -170,33 +176,33 @@
           </div>
 
           <div class="model-grid">
-          <article class="model-card" data-yta="38" data-rum="2" data-lev="12" data-nr="1" data-namn="Huskort 1" data-bild="hus-r3.webp">
+          <article class="model-card" data-yta="38" data-rum="2" data-lev="12" data-nr="1" data-namn="Kupa 38" data-bild="hus-r3.webp">
             <a class="model-card__media" href="huskort.html?typ=fritidshus&amp;modell=1">
-              <img src="images/hus-r3.webp" loading="lazy" decoding="async" alt="Huskort 1, fritidshus i svensk natur">
+              <img src="images/hus-r3.webp" loading="lazy" decoding="async" alt="Kupa 38, fritidshus i svensk natur">
               <span class="model-card__pill" aria-hidden="true">Se huskortet</span>
             </a>
             <div class="model-card__rad">
-              <h3 class="model-card__title"><a href="huskort.html?typ=fritidshus&amp;modell=1">Huskort 1</a></h3>
+              <h3 class="model-card__title"><a href="huskort.html?typ=fritidshus&amp;modell=1">Kupa 38</a></h3>
               <p class="model-card__yta">38<span>m²</span></p>
             </div>
             <p class="model-card__facts"><span>2 rum</span><span>Leverans 12 v</span></p>
             <div class="model-card__fot">
-              <p class="model-card__price">Från X kr</p>
+              <p class="model-card__price">Pris i offert</p>
               <button class="jamfor-knapp" type="button" aria-pressed="false">Jämför</button>
             </div>
           </article>
-          <article class="model-card" data-yta="45" data-rum="2" data-lev="14" data-nr="2" data-namn="Huskort 2" data-bild="hus-r4.webp">
+          <article class="model-card" data-yta="45" data-rum="2" data-lev="14" data-nr="2" data-namn="Kupa 45" data-bild="hus-r4.webp">
             <a class="model-card__media" href="huskort.html?typ=fritidshus&amp;modell=2">
-              <img src="images/hus-r4.webp" loading="lazy" decoding="async" alt="Huskort 2, fritidshus i svensk natur">
+              <img src="images/hus-r4.webp" loading="lazy" decoding="async" alt="Kupa 45, fritidshus i svensk natur">
               <span class="model-card__pill" aria-hidden="true">Se huskortet</span>
             </a>
             <div class="model-card__rad">
-              <h3 class="model-card__title"><a href="huskort.html?typ=fritidshus&amp;modell=2">Huskort 2</a></h3>
+              <h3 class="model-card__title"><a href="huskort.html?typ=fritidshus&amp;modell=2">Kupa 45</a></h3>
               <p class="model-card__yta">45<span>m²</span></p>
             </div>
             <p class="model-card__facts"><span>2 rum</span><span>Leverans 14 v</span></p>
             <div class="model-card__fot">
-              <p class="model-card__price">Från X kr</p>
+              <p class="model-card__price">Pris i offert</p>
               <button class="jamfor-knapp" type="button" aria-pressed="false">Jämför</button>
             </div>
           </article>
@@ -209,58 +215,62 @@
         </div>
       </section>
 
-      <section class="storlek3d" data-skala="45">
-        <div class="storlek3d__inner">
-          <div class="storlek3d__ord">
-            <p class="section-label section-label--accent">Storleken i 3D</p>
-            <h2 class="storlek3d__titel">Så stort är <em data-3d-namn>huskort 1</em>.</h2>
-            <p class="storlek3d__text">
-              Peka på en modell ovanför, eller välj här, så växer huset till
-              rätt yta. Lyft taket för att se golvet i kvadratmeter.
-            </p>
-            <div class="storlek3d__val" role="group" aria-label="Välj modell att visa i 3D">
-              <button type="button" data-3d="1" aria-pressed="true">38 m²</button>
-              <button type="button" data-3d="2" aria-pressed="false">45 m²</button>
+      <section class="studio3d" data-studio3d aria-labelledby="studio3d-rubrik">
+        <div class="studio3d__inner">
+          <div class="studio3d__topp">
+            <div class="studio3d__ord">
+              <p class="section-label section-label--accent">Storleken i 3D</p>
+              <h2 class="studio3d__titel" id="studio3d-rubrik">Så stort är <em data-3d-namn>Kupa 38</em>.</h2>
+              <p class="studio3d__text">
+                Husen är byggda ur ritningarna i skala 1:1 och visas i samma
+                skala, så att skillnaden syns. Dra för att vrida.
+              </p>
             </div>
-            <dl class="storlek3d__fakta">
-              <div><dt>Boyta</dt><dd><strong data-3d-yta>38</strong> m²</dd></div>
-              <div><dt>Rum</dt><dd><strong data-3d-rum>2</strong></dd></div>
-              <div><dt>Bilplatser</dt><dd>≈ <strong data-3d-p>3.0</strong></dd></div>
-            </dl>
-            <p class="storlek3d__not">En bilplats är 2,5 × 5 m. Måtten och proportionerna i modellen är ungefärliga.</p>
+            <div class="studio3d__val" role="group" aria-label="Välj hus att visa i 3D">
+              <button type="button" data-3d-val data-id="r3" data-namn="Kupa 38" data-yta="38" data-rum="2" data-l="10.83" data-b="3.9" data-h="4.35" aria-pressed="true"><b>Kupa 38</b><span>38 m²</span></button>
+              <button type="button" data-3d-val data-id="r4" data-namn="Kupa 45" data-yta="45" data-rum="2" data-l="12.5" data-b="3.9" data-h="4.05" aria-pressed="false"><b>Kupa 45</b><span>45 m²</span></button>
+            </div>
           </div>
 
-          <div class="storlek3d__scen" tabindex="0" role="img" aria-label="3D-modell av huset. Dra eller använd piltangenterna för att vrida.">
-            <div class="hus3d">
-              <div class="hus3d__mark"></div>
-              <div class="hus3d__skugga"></div>
-              <div class="hus3d__dack"></div>
-              <div class="hus3d__golv"><span data-3d-golvtext></span></div>
-              <div class="hus3d__vagg hus3d__vagg--fram">
-                <span class="hus3d__glas"></span>
-                <span class="hus3d__dorr"></span>
-              </div>
-              <div class="hus3d__vagg hus3d__vagg--bak"><span class="hus3d__fonster"></span></div>
-              <div class="hus3d__vagg hus3d__vagg--vanster"><span class="hus3d__fonster"></span></div>
-              <div class="hus3d__vagg hus3d__vagg--hoger"><span class="hus3d__fonster"></span></div>
-              <div class="hus3d__tak">
-                <div class="hus3d__takyta"></div>
-                <div class="hus3d__takkant hus3d__takkant--fram"></div>
-                <div class="hus3d__takkant hus3d__takkant--bak"></div>
-                <div class="hus3d__takkant hus3d__takkant--vanster"></div>
-                <div class="hus3d__takkant hus3d__takkant--hoger"></div>
-              </div>
-              <span class="hus3d__matt hus3d__matt--bredd" data-3d-bredd></span>
-              <span class="hus3d__matt hus3d__matt--djup" data-3d-djup></span>
+          <div class="studio3d__scen" data-3d-scen>
+            <span class="ih-kant" aria-hidden="true"></span>
+            <div class="studio3d__laddar" data-3d-laddar>
+              <span>Laddar 3D-modellen</span>
+              <i><b data-3d-progress></b></i>
             </div>
-            <p class="storlek3d__tips" aria-hidden="true">Dra för att vrida</p>
-            <div class="storlek3d__kontroller">
-              <button class="storlek3d__lyft" type="button" aria-pressed="false">Lyft taket</button>
-              <button class="storlek3d__ikon" type="button" data-zoom="-1" aria-label="Zooma ut">−</button>
-              <button class="storlek3d__ikon" type="button" data-zoom="1" aria-label="Zooma in">+</button>
-              <button class="storlek3d__ikon" type="button" data-aterstall aria-label="Återställ vyn">↺</button>
+            <div class="studio3d__lager" aria-hidden="true">
+              <svg class="studio3d__linjer" data-3d-linjer>
+                <g data-linje="l"><line/><line class="studio3d__tick"/><line class="studio3d__tick"/></g>
+                <g data-linje="b"><line/><line class="studio3d__tick"/><line class="studio3d__tick"/></g>
+                <g data-linje="h"><line/><line class="studio3d__tick"/><line class="studio3d__tick"/></g>
+              </svg>
+              <span class="studio3d__etikett" data-etikett="l">10,83 m</span>
+              <span class="studio3d__etikett" data-etikett="b">3,90 m</span>
+              <span class="studio3d__etikett studio3d__etikett--h" data-etikett="h">Nock 4,35 m</span>
+              <svg class="studio3d__person" data-3d-person viewBox="0 3 40 115.25"><circle cx="20" cy="11" r="8"/><path d="M12 22H28A6 6 0 0 1 34 28V62A3 3 0 0 1 28 62V36H27V115A3.25 3.25 0 0 1 20.5 115V70H19.5V115A3.25 3.25 0 0 1 13 115V36H12V62A3 3 0 0 1 6 62V28A6 6 0 0 1 12 22Z"/></svg>
             </div>
+
+            <div class="studio3d__vyer" role="group" aria-label="Välj vy">
+              <button type="button" data-vy="horn" aria-pressed="true">Hörn</button>
+              <button type="button" data-vy="fasad" aria-pressed="false">Fasad</button>
+              <button type="button" data-vy="ovan" aria-pressed="false">Ovanifrån</button>
+            </div>
+            <div class="studio3d__kontroller">
+              <button class="studio3d__matt" type="button" data-3d-matt aria-pressed="true">Mått</button>
+              <button class="studio3d__ikon" type="button" data-zoom="1" aria-label="Zooma ut"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12h12"/></svg></button>
+              <button class="studio3d__ikon" type="button" data-zoom="-1" aria-label="Zooma in"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12h12M12 6v12"/></svg></button>
+              <button class="studio3d__ikon" type="button" data-3d-aterstall aria-label="Återställ vyn"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4h4"/></svg></button>
+            </div>
+            <p class="studio3d__tips" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 12h10M7 12l3-3M7 12l3 3M17 12l-3-3M17 12l-3 3"/></svg>Dra för att vrida</p>
           </div>
+
+          <dl class="studio3d__fakta">
+            <div><dt>Boyta</dt><dd><strong data-3d-tal="yta" data-dec="0">38</strong><span>m²</span></dd></div>
+            <div><dt>Yttermått</dt><dd><strong data-3d-tal="l" data-dec="2">10,83</strong><span>×</span><strong data-3d-tal="b" data-dec="2">3,90</strong><span>m</span></dd></div>
+            <div><dt>Nockhöjd</dt><dd><strong data-3d-tal="h" data-dec="2">4,35</strong><span>m</span></dd></div>
+            <div><dt>Rum</dt><dd><strong data-3d-tal="rum" data-dec="0">2</strong></dd></div>
+          </dl>
+          <p class="studio3d__not">Yttermåtten och nockhöjden står i ritningarna. Människan bredvid huset är 1,8 m lång.</p>
         </div>
       </section>
 
@@ -277,6 +287,30 @@
         </div>
         <div class="jamforruta__kolumner"></div>
       </dialog>
+
+
+      <section class="ih-sektion ih-sektion--sand">
+        <div class="ih-inre">
+          <div class="ih-huvud ih-huvud--mitt">
+            <p class="ih-etikett">Vanliga frågor</p>
+            <h2 class="ih-rubrik">Det du undrar <em>först.</em></h2>
+          </div>
+          <div class="ih-fragor">
+            <details class="ih-fraga" open>
+              <summary>Behöver ett fritidshus bygglov?</summary>
+              <p>Ja. Våra fritidshus är större än ett attefallshus och kräver bygglov. Vi tar fram ritningar och underlag, och du som byggherre lämnar in ansökan till kommunen.</p>
+            </details>
+            <details class="ih-fraga">
+              <summary>Kan vi äga stugan tillsammans?</summary>
+              <p>Ja. Samägarkalendern fördelar årets veckor rättvist mellan delägarna, storhelgerna först.</p>
+            </details>
+            <details class="ih-fraga">
+              <summary>Går det att hyra ut stugan när vi inte är där?</summary>
+              <p>Uthyrningskalkylen visar vad uthyrningen kan täcka av kostnaderna, vecka för vecka.</p>
+            </details>
+          </div>
+        </div>
+      </section>
 
       <section class="contact-section" id="kontakt">
         <div class="contact-section__inner">
@@ -320,7 +354,7 @@
         <div>
           <img class="site-footer__logo" src="images/idealhus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Idealhus">
           <p class="site-footer__text">
-            Attefallshus &amp; komplementhus med skandinavisk design och hög kvalitet.
+            Attefallshus, fritidshus och byggelement, byggda under tak i Sverige och monterade på några dagar.
           </p>
         </div>
 
@@ -363,6 +397,8 @@
         <span>© 2026 Idealhus AB. Alla rättigheter förbehållna.</span>
         <a class="site-footer__policy" href="integritetspolicy.html">Integritetspolicy</a>
       </div>
+
+      <p class="site-footer__ord" aria-hidden="true">Idealhus</p>
     </footer>
 
     <script>
