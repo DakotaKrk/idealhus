@@ -9,11 +9,11 @@ PRINCIPER = [
      "väderstreck, utsikt, hur marken lutar och var solen står när ni faktiskt "
      "är där. Samma modell blir olika hus beroende på var den hamnar.",
      "Svart attefallshus på klippor vid havet"),
-    ("Varje kvadrat räknas", "foto/attefall-panel.webp",
+    ("Varje kvadrat räknas", "hus-r5.webp",
      "Ett litet hus ska kännas generöst i vardagen. Det handlar mindre om antal "
      "kvadratmeter och mer om var väggarna står, var ljuset kommer in och vad "
      "man ser när man kommer in genom dörren.",
-     "Ett litet hus under bygget, med vit panel på gaveln och läkt på långsidan"),
+     "Svart hus med upplysta fönster bland snötäckta granar"),
     ("Material som får leva", "foto/reglar.webp",
      "Vi väljer naturliga material som åldras vackert i stället för ytskikt som "
      "ska bytas. Trä som gråar jämnt, beslag som håller, detaljer som ser bättre "

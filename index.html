@@ -24,9 +24,9 @@
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20260930zl">
-    <link rel="stylesheet" href="design.css?v=20260930zl">
-    <script src="premium.js?v=20260930zl" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20260930zp">
+    <link rel="stylesheet" href="design.css?v=20260930zp">
+    <script src="premium.js?v=20260930zp" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
@@ -236,8 +236,9 @@
           </div>
 
           <div class="vagar__grid">
-            <a class="vag" href="attefallshus.html">
-              <img class="vag__bild" src="images/foto/attefall-panel.webp" width="1400" height="1400" loading="lazy" decoding="async" alt="Ett litet hus under bygget, med vit panel på gaveln och läkt på långsidan">
+            <a class="vag vag--hel" href="attefallshus.html">
+              <span class="vag__bak" aria-hidden="true" style="--bak: url(images/hus-r2.webp)"></span>
+              <img class="vag__bild" src="images/hus-r2.webp" width="1600" height="1062" loading="lazy" decoding="async" alt="Attefallshus i ljust trä med svart plåttak på en äng vid vatten">
               <span class="vag__topp">
                 <span class="ih-chip ih-chip--glas">För dig som ska bo</span>
                 <span class="vag__pil" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
@@ -396,8 +397,8 @@
                 <img src="images/foto/dronare-montage.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Drönarbild av ett hus under montage, med inplastade väggar runt en betongplatta och en kran">
                 <figcaption><span class="ih-chip ih-chip--glas">04 · Montage</span></figcaption>
               </figure>
-              <figure class="bygget__kort">
-                <img src="images/foto/attefall-lakt.webp" width="1200" height="1200" loading="lazy" decoding="async" alt="Ett litet hus med svart vindskydd och läkt i trä, klart för panel">
+              <figure class="bygget__kort bygget__kort--hel" style="--bak: url(images/hus-r4.webp)">
+                <img src="images/hus-r4.webp" width="1600" height="1062" loading="lazy" decoding="async" alt="Ljust fritidshus med mörkt tak i en trädgård">
                 <figcaption><span class="ih-chip ih-chip--glas">05 · Fasad</span></figcaption>
               </figure>
               <span class="ih-kant" aria-hidden="true"></span>
