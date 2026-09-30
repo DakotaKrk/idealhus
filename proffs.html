@@ -23,9 +23,9 @@
     <link rel="preload" as="image" href="images/foto/dronare-vaggblock.webp" fetchpriority="high">
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20260930zi">
-    <link rel="stylesheet" href="design.css?v=20260930zi">
-    <script src="premium.js?v=20260930zi" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20260930zj">
+    <link rel="stylesheet" href="design.css?v=20260930zj">
+    <script src="premium.js?v=20260930zj" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
@@ -122,158 +122,253 @@
     </header>
 
     <main id="innehall">
-      <section class="subpage-hero">
+      <section class="guidehero pf-topp">
         <span class="ih-kant" aria-hidden="true"></span>
-        <img class="subpage-hero__image" src="images/foto/dronare-vaggblock.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Drönarbild av väggblock i trä bredvid en lastbil med takstolar">
-
-        <div class="subpage-hero__content-wrap">
-          <div class="subpage-hero__content">
+        <div class="pf-topp__inre">
+          <div class="pf-topp__ord">
             <p class="ih-etikett ih-etikett--ljus sidtopp__etikett">Våra hus · För dig som bygger</p>
-            <h1 class="subpage-hero__title">Byggelement för proffs</h1>
-            <p class="subpage-hero__meta">Utfackningsväggar, husblock och moduler, tillverkade under tak i Sverige och levererade till er byggarbetsplats. Utförandet följer er ritning.</p>
-            <div class="subpage-hero__actions">
-              <a class="hero__link hero__link--solid" href="#kontakt">Berätta om projektet</a>
-              <a class="hero__link" href="#utfackningsvaggar">Se vad vi levererar</a>
+            <h1 class="guidehero__titel pf-topp__titel">Byggelement för proffs</h1>
+            <p class="pf-topp__lead">Utfackningsväggar, husblock och moduler, tillverkade under tak i Sverige och levererade till er byggarbetsplats. Utförandet följer er ritning.</p>
+            <div class="pf-topp__knappar">
+              <a class="ih-knapp ih-knapp--virke" href="#kontakt">Berätta om projektet<svg class="pf-pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14" pathLength="1"/><path d="M13 6l6 6-6 6" pathLength="1"/></svg></a>
+              <a class="ih-knapp ih-knapp--ljus" href="#leverans">Se vad vi levererar</a>
             </div>
-            <div class="heroscen heroscen--kategori heroscen--inne" aria-hidden="true">
-              <div class="heroscen__chip heroscen__chip--a">
-                <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M4 20h16M6 20V9l6-3 6 3v11M9 12h6M9 15.5h6"/></svg></span>
-                <p><strong>Efter er ritning</strong><span>mått och utförande</span></p>
+            <ol class="pf-topp__tre">
+              <li><a href="#utfackningsvaggar" data-hopp="vagg"><span>01</span>Utfackningsväggar</a></li>
+              <li><a href="#husblock" data-hopp="block"><span>02</span>Husblock</a></li>
+              <li><a href="#moduler" data-hopp="modul"><span>03</span>Moduler</a></li>
+            </ol>
+          </div>
+
+          <figure class="pf-topp__bild">
+            <span class="pf-topp__ram"><img src="images/foto/dronare-vaggblock.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Drönarbild av väggblock i trä bredvid en lastbil med takstolar"></span>
+            <div class="pf-chip pf-chip--a" aria-hidden="true"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h16" pathLength="1"/><path d="M6 20V9l6-3 6 3v11" pathLength="1"/><path d="M9 12h6" pathLength="1"/><path d="M9 15.5h6" pathLength="1"/></svg><p><strong>Efter er ritning</strong><span>mått och utförande</span></p></div>
+            <div class="pf-chip pf-chip--b" aria-hidden="true"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17h13l3-4h2v4" pathLength="1"/><path d="M5 17v2" pathLength="1"/><path d="M17 17v2" pathLength="1"/><path d="M3 13h11V7H3z" pathLength="1"/></svg><p><strong>Levererat till bygget</strong><span>isolerat och klart under tak</span></p></div>
+          </figure>
+        </div>
+      </section>
+
+      <section class="pf-lev" id="leverans" data-pf-lev>
+        <div class="pf-lev__inre">
+          <header class="pf-lev__huvud">
+            <p class="ih-etikett">För dig som bygger åt andra</p>
+            <h2 class="pf-lev__titel">Väggar, block <em>och moduler.</em></h2>
+            <p class="pf-lev__ingress">
+              Vi tillverkar väggar, block och moduler i Sverige och levererar
+              till er byggarbetsplats. Utförandet följer er ritning, och det
+              mesta av arbetet är gjort under tak innan leverans.
+            </p>
+          </header>
+
+          <div class="pf-lev__panel">
+            <div class="pf-lev__vanster">
+              <div class="pf-lev__val" role="tablist" aria-label="Det vi levererar">
+                <button type="button" role="tab" id="pf-flik-vagg" aria-controls="utfackningsvaggar" aria-selected="true" tabindex="0" data-val="vagg">
+                  <span class="pf-lev__nr">01</span><svg class="pf-lev__ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20V5h16v15" pathLength="1"/><path d="M8 5v15" pathLength="1"/><path d="M12 5v15" pathLength="1"/><path d="M16 5v15" pathLength="1"/><path d="M4 12.5h16" pathLength="1"/></svg>
+                  <span class="pf-lev__namn">Utfacknings&shy;väggar<small>Färdiga väggblock</small></span>
+                  <i class="pf-lev__tid" aria-hidden="true"></i>
+                </button>
+                <button type="button" role="tab" id="pf-flik-block" aria-controls="husblock" aria-selected="false" tabindex="-1" data-val="block">
+                  <span class="pf-lev__nr">02</span><svg class="pf-lev__ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 9l9-4.5L21 9v9l-9 4.5L3 18z" pathLength="1"/><path d="M3 9l9 4.5L21 9" pathLength="1"/><path d="M12 13.5v9" pathLength="1"/></svg>
+                  <span class="pf-lev__namn">Husblock<small>Större volymelement</small></span>
+                  <i class="pf-lev__tid" aria-hidden="true"></i>
+                </button>
+                <button type="button" role="tab" id="pf-flik-modul" aria-controls="moduler" aria-selected="false" tabindex="-1" data-val="modul">
+                  <span class="pf-lev__nr">03</span><svg class="pf-lev__ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.5 10h6v8h-6z" pathLength="1"/><path d="M9 10h6v8H9z" pathLength="1"/><path d="M15.5 10h6v8h-6z" pathLength="1"/><path d="M2.5 13h19" pathLength="1"/></svg>
+                  <span class="pf-lev__namn">Moduler<small>Kompletta enheter i serie</small></span>
+                  <i class="pf-lev__tid" aria-hidden="true"></i>
+                </button>
               </div>
-              <div class="heroscen__chip heroscen__chip--b">
-                <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"/></svg></span>
-                <p><strong>Levererat till bygget</strong><span>isolerat och klart under tak</span></p>
+              <div class="pf-lev__delar">
+              <article class="pf-lev__del vald" id="utfackningsvaggar" role="tabpanel" aria-labelledby="pf-flik-vagg" data-del="vagg">
+                <h3>Utfackningsväggar</h3>
+                <p>Färdiga väggblock som levereras till byggarbetsplatsen och monteras på plats. Isolering, ångspärr och beklädnad är gjorda under tak, i jämn temperatur och fuktnivå.</p>
+                <ul class="pf-lev__fakta">
+                    <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Tillverkas inomhus, oberoende av väder</li>
+                    <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Kortare tid på byggarbetsplatsen</li>
+                    <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Jämnare kvalitet mellan leveranser</li>
+                    <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Mått och utförande enligt er ritning</li>
+                </ul>
+                <a class="pf-lev__knapp" href="kontakt.html">Fråga om utfackningsväggar<svg class="pf-pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14" pathLength="1"/><path d="M13 6l6 6-6 6" pathLength="1"/></svg></a>
+              </article>
+              <article class="pf-lev__del" id="husblock" role="tabpanel" aria-labelledby="pf-flik-block" data-del="block">
+                <h3>Husblock</h3>
+                <p>Större volymelement där stomme, ytskikt och delar av installationerna sitter på plats redan vid leverans. Blocken lyfts på plats och kopplas samman.</p>
+                <ul class="pf-lev__fakta">
+                    <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Stomme och ytskikt monterade i fabrik</li>
+                    <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Färre moment kvar på plats</li>
+                    <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Planeras in i er tidplan</li>
+                    <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Anpassas efter projektets mått</li>
+                </ul>
+                <a class="pf-lev__knapp" href="kontakt.html">Fråga om husblock<svg class="pf-pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14" pathLength="1"/><path d="M13 6l6 6-6 6" pathLength="1"/></svg></a>
+              </article>
+              <article class="pf-lev__del" id="moduler" role="tabpanel" aria-labelledby="pf-flik-modul" data-del="modul">
+                <h3>Moduler</h3>
+                <p>Kompletta enheter för projekt där samma utförande upprepas: personalbostäder, uthyrning eller etappvis utbyggnad. Modulerna kan flyttas och byggas om.</p>
+                <ul class="pf-lev__fakta">
+                    <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Samma utförande i serie</li>
+                    <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Kan flyttas eller byggas om</li>
+                    <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Lämpar sig för etapper</li>
+                    <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Levereras klara att koppla in</li>
+                </ul>
+                <a class="pf-lev__knapp" href="kontakt.html">Fråga om moduler<svg class="pf-pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14" pathLength="1"/><path d="M13 6l6 6-6 6" pathLength="1"/></svg></a>
+              </article>
               </div>
+            </div>
+
+            <div class="pf-lev__scen" aria-hidden="true">
+              <span class="ih-kant"></span>
+              <svg class="pf-rit" viewBox="0 0 600 430" focusable="false">
+                <defs>
+                  <linearGradient id="pf-glas-ton" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1d8"/><stop offset="1" stop-color="#f0b56e"/></linearGradient>
+                </defs>
+                <g class="pf-scen pf-scen--vagg vald" data-scen="vagg"><g transform="translate(309.1 185.5)"><g class="pf-lager" style="--i:0;--ux:0.0px;--uy:0.0px"><polygon class="pf-tra v" points="-10.6,6.1 188.9,121.3 188.9,115.6 -10.6,0.4"/><polygon class="pf-tra h" points="199.5,115.2 188.9,121.3 188.9,115.6 199.5,109.4"/><polygon class="pf-tra t" points="0.0,-5.8 199.5,109.4 188.9,115.6 -10.6,0.4"/><polygon class="pf-tra v" points="-10.6,0.4 -5.9,3.1 -5.9,-100.6 -10.6,-103.3"/><polygon class="pf-tra h" points="4.7,-3.1 -5.9,3.1 -5.9,-100.6 4.7,-106.7"/><polygon class="pf-tra t" points="0.0,-109.4 4.7,-106.7 -5.9,-100.6 -10.6,-103.3"/><polygon class="pf-tra v" points="28.4,22.9 33.0,25.6 33.0,-78.1 28.4,-80.8"/><polygon class="pf-tra h" points="43.6,19.4 33.0,25.6 33.0,-78.1 43.6,-84.2"/><polygon class="pf-tra t" points="39.0,-86.9 43.6,-84.2 33.0,-78.1 28.4,-80.8"/><polygon class="pf-tra v" points="67.3,45.4 72.0,48.1 72.0,-55.6 67.3,-58.3"/><polygon class="pf-tra h" points="82.6,41.9 72.0,48.1 72.0,-55.6 82.6,-61.7"/><polygon class="pf-tra t" points="77.9,-64.4 82.6,-61.7 72.0,-55.6 67.3,-58.3"/><polygon class="pf-tra v" points="106.3,67.9 111.0,70.6 111.0,-33.1 106.3,-35.8"/><polygon class="pf-tra h" points="121.6,64.4 111.0,70.6 111.0,-33.1 121.6,-39.2"/><polygon class="pf-tra t" points="116.9,-41.9 121.6,-39.2 111.0,-33.1 106.3,-35.8"/><polygon class="pf-tra v" points="145.3,90.4 150.0,93.1 150.0,-10.6 145.3,-13.3"/><polygon class="pf-tra h" points="160.6,86.9 150.0,93.1 150.0,-10.6 160.6,-16.7"/><polygon class="pf-tra t" points="155.9,-19.4 160.6,-16.7 150.0,-10.6 145.3,-13.3"/><polygon class="pf-tra v" points="184.3,112.9 188.9,115.6 188.9,11.9 184.3,9.2"/><polygon class="pf-tra h" points="199.5,109.4 188.9,115.6 188.9,11.9 199.5,5.8"/><polygon class="pf-tra t" points="194.9,3.1 199.5,5.8 188.9,11.9 184.3,9.2"/><polygon class="pf-tra v" points="-10.6,-103.3 188.9,11.9 188.9,6.1 -10.6,-109.1"/><polygon class="pf-tra h" points="199.5,5.8 188.9,11.9 188.9,6.1 199.5,0.0"/><polygon class="pf-tra t" points="0.0,-115.2 199.5,0.0 188.9,6.1 -10.6,-109.1"/><g class="pf-skylt " transform="translate(17.5 -114.9)"><g class="pf-skylt__inre"><rect x="-31.8" y="-13" width="63.6" height="26" rx="13"/><text y="4.5" text-anchor="middle">Stomme</text></g></g></g><g class="pf-lager" style="--i:1;--ux:57.4px;--uy:-33.1px"><polygon class="pf-ull v" points="-74.5,42.7 115.7,152.5 115.7,48.8 -74.5,-61.0"/><polygon class="pf-ull h" points="126.3,146.3 115.7,152.5 115.7,48.8 126.3,42.7"/><polygon class="pf-ull t" points="-63.9,-67.1 126.3,42.7 115.7,48.8 -74.5,-61.0"/><path class="pf-ull__vag" d="M-69.8 34.6L-62.9 32.1L-55.9 42.6L-49.0 40.1L-42.0 50.6L-35.1 48.2L-28.1 58.7L-21.2 56.2L-14.2 66.7L-7.2 64.2L-0.3 74.7L6.7 72.2L13.6 82.7L20.6 80.3L27.5 90.8L34.5 88.3L41.4 98.8L48.4 96.3L55.4 106.8L62.3 104.4L69.3 114.9L76.2 112.4L83.2 122.9L90.1 120.4L97.1 130.9L104.0 128.5L111.0 139.0"/><path class="pf-ull__vag" d="M-69.8 16.6L-62.9 14.1L-55.9 24.6L-49.0 22.1L-42.0 32.6L-35.1 30.2L-28.1 40.7L-21.2 38.2L-14.2 48.7L-7.2 46.2L-0.3 56.7L6.7 54.2L13.6 64.7L20.6 62.3L27.5 72.8L34.5 70.3L41.4 80.8L48.4 78.3L55.4 88.8L62.3 86.4L69.3 96.9L76.2 94.4L83.2 104.9L90.1 102.4L97.1 112.9L104.0 110.5L111.0 121.0"/><path class="pf-ull__vag" d="M-69.8 -1.4L-62.9 -3.9L-55.9 6.6L-49.0 4.1L-42.0 14.6L-35.1 12.2L-28.1 22.7L-21.2 20.2L-14.2 30.7L-7.2 28.2L-0.3 38.7L6.7 36.2L13.6 46.7L20.6 44.3L27.5 54.8L34.5 52.3L41.4 62.8L48.4 60.3L55.4 70.8L62.3 68.4L69.3 78.9L76.2 76.4L83.2 86.9L90.1 84.4L97.1 94.9L104.0 92.5L111.0 103.0"/><path class="pf-ull__vag" d="M-69.8 -19.4L-62.9 -21.9L-55.9 -11.4L-49.0 -13.9L-42.0 -3.4L-35.1 -5.8L-28.1 4.7L-21.2 2.2L-14.2 12.7L-7.2 10.2L-0.3 20.7L6.7 18.2L13.6 28.7L20.6 26.3L27.5 36.8L34.5 34.3L41.4 44.8L48.4 42.3L55.4 52.8L62.3 50.4L69.3 60.9L76.2 58.4L83.2 68.9L90.1 66.4L97.1 76.9L104.0 74.5L111.0 85.0"/><path class="pf-ull__vag" d="M-69.8 -37.4L-62.9 -39.9L-55.9 -29.4L-49.0 -31.9L-42.0 -21.4L-35.1 -23.8L-28.1 -13.3L-21.2 -15.8L-14.2 -5.3L-7.2 -7.8L-0.3 2.7L6.7 0.2L13.6 10.7L20.6 8.3L27.5 18.8L34.5 16.3L41.4 26.8L48.4 24.3L55.4 34.8L62.3 32.4L69.3 42.9L76.2 40.4L83.2 50.9L90.1 48.4L97.1 58.9L104.0 56.5L111.0 67.0"/><g class="pf-skylt " transform="translate(-51.1 -75.3)"><g class="pf-skylt__inre"><rect x="-41.7" y="-13" width="83.4" height="26" rx="13"/><text y="4.5" text-anchor="middle">Isolering</text></g></g></g><g class="pf-lager" style="--i:2;--ux:111.6px;--uy:-64.4px"><polygon class="pf-folie v" points="-135.6,78.3 63.9,193.5 63.9,78.3 -135.6,-36.9"/><polygon class="pf-folie h" points="65.5,192.6 63.9,193.5 63.9,78.3 65.5,77.4"/><polygon class="pf-folie t" points="-134.1,-37.8 65.5,77.4 63.9,78.3 -135.6,-36.9"/><path class="pf-folie__veck" d="M-101.3 87.3L-76.4 8.1"/><path class="pf-folie__veck" d="M-29.6 128.7L-7.8 47.7"/><path class="pf-folie__veck" d="M26.5 161.1L48.3 80.1"/><g class="pf-skylt " transform="translate(-107.6 -42.7)"><g class="pf-skylt__inre"><rect x="-38.4" y="-13" width="76.8" height="26" rx="13"/><text y="4.5" text-anchor="middle">Ångspärr</text></g></g></g><g class="pf-lager" style="--i:3;--ux:159.6px;--uy:-92.2px"><polygon class="pf-skiva v" points="-197.7,114.1 1.9,229.3 1.9,114.1 -197.7,-1.1"/><polygon class="pf-skiva h" points="6.2,226.8 1.9,229.3 1.9,114.1 6.2,111.6"/><polygon class="pf-skiva t" points="-193.3,-3.6 6.2,111.6 1.9,114.1 -197.7,-1.1"/><path class="pf-skiva__fog" d="M-147.8 142.9L-147.8 27.7"/><path class="pf-skiva__fog" d="M-97.9 171.7L-97.9 56.5"/><path class="pf-skiva__fog" d="M-48.0 200.5L-48.0 85.3"/><g class="pf-skylt " transform="translate(-169.6 -6.9)"><g class="pf-skylt__inre"><rect x="-41.7" y="-13" width="83.4" height="26" rx="13"/><text y="4.5" text-anchor="middle">Beklädnad</text></g></g></g></g></g>
+                <g class="pf-scen pf-scen--block" data-scen="block"><g transform="translate(202.8 152.8)"><polygon class="pf-mark v" points="-154.3,59.4 194.3,260.7 194.3,250.8 -154.3,49.5"/><polygon class="pf-mark h" points="348.7,171.6 194.3,260.7 194.3,250.8 348.7,161.7"/><polygon class="pf-mark t" points="0.0,-39.6 348.7,161.7 194.3,250.8 -154.3,49.5"/><path class="pf-mark__rut" d="M28.6 -23.1L-125.7 66.0"/><path class="pf-mark__rut" d="M57.2 -6.6L-97.2 82.5"/><path class="pf-mark__rut" d="M85.7 9.9L-68.6 99.0"/><path class="pf-mark__rut" d="M114.3 26.4L-40.0 115.5"/><path class="pf-mark__rut" d="M142.9 42.9L-11.4 132.0"/><path class="pf-mark__rut" d="M171.5 59.4L17.1 148.5"/><path class="pf-mark__rut" d="M200.1 75.9L45.7 165.0"/><path class="pf-mark__rut" d="M228.6 92.4L74.3 181.5"/><path class="pf-mark__rut" d="M257.2 108.9L102.9 198.0"/><path class="pf-mark__rut" d="M285.8 125.4L131.5 214.5"/><path class="pf-mark__rut" d="M314.4 141.9L160.0 231.0"/><path class="pf-mark__rut" d="M-28.6 -23.1L320.1 178.2"/><path class="pf-mark__rut" d="M-57.2 -6.6L291.5 194.7"/><path class="pf-mark__rut" d="M-85.7 9.9L262.9 211.2"/><path class="pf-mark__rut" d="M-114.3 26.4L234.3 227.7"/><path class="pf-mark__rut" d="M-142.9 42.9L205.8 244.2"/><g class="pf-block__a"><polygon class="pf-fasad v" points="-80.0,46.2 57.2,125.4 57.2,36.3 -80.0,-42.9"/><polygon class="pf-fasad h" points="137.2,79.2 57.2,125.4 57.2,36.3 137.2,-9.9"/><polygon class="pf-fasad t" points="0.0,-89.1 137.2,-9.9 57.2,36.3 -80.0,-42.9"/><path class="pf-fasad__bradd" d="M-68.6 51.1L-68.6 -34.7"/><path class="pf-fasad__bradd" d="M-57.2 57.7L-57.2 -28.1"/><path class="pf-fasad__bradd" d="M-45.7 64.3L-45.7 -21.5"/><path class="pf-fasad__bradd" d="M-34.3 71.0L-34.3 -14.9"/><path class="pf-fasad__bradd" d="M-22.9 77.5L-22.9 -8.3"/><path class="pf-fasad__bradd" d="M-11.4 84.1L-11.4 -1.7"/><path class="pf-fasad__bradd" d="M0.0 90.7L0.0 4.9"/><path class="pf-fasad__bradd" d="M11.4 97.3L11.4 11.5"/><path class="pf-fasad__bradd" d="M22.9 103.9L22.9 18.1"/><path class="pf-fasad__bradd" d="M34.3 110.5L34.3 24.7"/><path class="pf-fasad__bradd" d="M45.7 117.1L45.7 31.3"/><path class="pf-fasad__bradd" d="M125.7 84.1L125.7 -1.7"/><path class="pf-fasad__bradd" d="M114.3 90.7L114.3 4.9"/><path class="pf-fasad__bradd" d="M102.9 97.3L102.9 11.5"/><path class="pf-fasad__bradd" d="M91.5 104.0L91.5 18.1"/><path class="pf-fasad__bradd" d="M80.0 110.5L80.0 24.7"/><path class="pf-fasad__bradd" d="M68.6 117.1L68.6 31.3"/><polygon class="pf-glas" points="-60.0,26.4 -25.7,46.2 -25.7,8.2 -60.0,-11.5"/><polygon class="pf-glas" points="0.0,61.0 34.3,80.9 34.3,42.9 0.0,23.1"/><polygon class="pf-kant v" points="-80.0,-42.9 57.2,36.3 57.2,33.0 -80.0,-46.2"/><polygon class="pf-kant h" points="137.2,-9.9 57.2,36.3 57.2,33.0 137.2,-13.2"/><polygon class="pf-kant t" points="0.0,-92.4 137.2,-13.2 57.2,33.0 -80.0,-46.2"/><path class="pf-ledare" d="M38.6 -106.1L17.1 -49.5"/><g class="pf-skylt " transform="translate(38.6 -119.1)"><g class="pf-skylt__inre"><rect x="-111.0" y="-13" width="222.0" height="26" rx="13"/><text y="4.5" text-anchor="middle">Stomme och ytskikt från fabrik</text></g></g></g><g class="pf-block__spar"><path class="pf-spar" d="M58.6 126.2L195.8 205.4L275.8 159.2"/><path class="pf-spar" d="M58.6 37.1L195.8 116.3L275.8 70.1L138.6 -9.1L58.6 37.1"/><path class="pf-spar" d="M195.8 205.4L195.8 116.3"/><path class="pf-spar" d="M58.6 126.2L58.6 37.1"/><path class="pf-spar" d="M275.8 159.2L275.8 70.1"/></g><g class="pf-block__b" style="--ly:-79.2px"><path class="pf-lina pf-lina--wire" d="M167.2 -19.0V-243.4"/><path class="pf-lina" d="M167.2 -19.0L144.3 0.8"/><path class="pf-lina" d="M167.2 -19.0L252.9 63.5"/><path class="pf-lina" d="M167.2 -19.0L81.4 37.1"/><path class="pf-lina" d="M167.2 -19.0L190.0 99.8"/><circle class="pf-krok" cx="167.2" cy="-19.0" r="5"/><polygon class="pf-fasad v" points="58.6,126.2 195.8,205.4 195.8,116.3 58.6,37.1"/><polygon class="pf-fasad h" points="275.8,159.2 195.8,205.4 195.8,116.3 275.8,70.1"/><polygon class="pf-fasad t" points="138.6,-9.1 275.8,70.1 195.8,116.3 58.6,37.1"/><path class="pf-fasad__bradd" d="M70.0 131.2L70.0 45.4"/><path class="pf-fasad__bradd" d="M81.4 137.8L81.4 52.0"/><path class="pf-fasad__bradd" d="M92.9 144.4L92.9 58.6"/><path class="pf-fasad__bradd" d="M104.3 151.0L104.3 65.2"/><path class="pf-fasad__bradd" d="M115.7 157.6L115.7 71.8"/><path class="pf-fasad__bradd" d="M127.2 164.2L127.2 78.4"/><path class="pf-fasad__bradd" d="M138.6 170.8L138.6 85.0"/><path class="pf-fasad__bradd" d="M150.0 177.4L150.0 91.6"/><path class="pf-fasad__bradd" d="M161.5 184.0L161.5 98.2"/><path class="pf-fasad__bradd" d="M172.9 190.6L172.9 104.8"/><path class="pf-fasad__bradd" d="M184.3 197.2L184.3 111.4"/><path class="pf-fasad__bradd" d="M264.4 164.2L264.4 78.4"/><path class="pf-fasad__bradd" d="M252.9 170.8L252.9 85.0"/><path class="pf-fasad__bradd" d="M241.5 177.4L241.5 91.6"/><path class="pf-fasad__bradd" d="M230.1 184.0L230.1 98.2"/><path class="pf-fasad__bradd" d="M218.6 190.6L218.6 104.8"/><path class="pf-fasad__bradd" d="M207.2 197.2L207.2 111.4"/><polygon class="pf-glas" points="141.5,142.7 175.8,162.5 175.8,124.6 141.5,104.8"/><polygon class="pf-dorr" points="81.4,139.4 110.0,155.9 110.0,88.3 81.4,71.8"/><polygon class="pf-kant v" points="58.6,37.1 195.8,116.3 195.8,113.0 58.6,33.8"/><polygon class="pf-kant h" points="275.8,70.1 195.8,116.3 195.8,113.0 275.8,66.8"/><polygon class="pf-kant t" points="138.6,-12.4 275.8,66.8 195.8,113.0 58.6,33.8"/></g><g class="pf-block__skarv"><path class="pf-skarv" d="M58.0 125.9L58.0 36.8"/><g class="pf-skylt pf-skylt--virke" transform="translate(50.0 159.9)"><g class="pf-skylt__inre"><rect x="-58.2" y="-13" width="116.4" height="26" rx="13"/><text y="4.5" text-anchor="middle">Kopplas samman</text></g></g></g><g class="pf-block__lyfts"><g class="pf-skylt " transform="translate(237.2 -37.0)"><g class="pf-skylt__inre"><rect x="-58.2" y="-13" width="116.4" height="26" rx="13"/><text y="4.5" text-anchor="middle">Lyfts på plats</text></g></g></g></g></g>
+                <g class="pf-scen pf-scen--modul" data-scen="modul"><g transform="translate(194.7 144.7)"><polygon class="pf-mark v" points="-150.2,56.1 210.5,264.3 210.5,254.1 -150.2,45.9"/><polygon class="pf-mark h" points="360.7,177.7 210.5,264.3 210.5,254.1 360.7,167.5"/><polygon class="pf-mark t" points="0.0,-40.8 360.7,167.5 210.5,254.1 -150.2,45.9"/><path class="pf-mark__rut" d="M29.4 -23.8L-120.7 62.9"/><path class="pf-mark__rut" d="M58.9 -6.8L-91.3 79.9"/><path class="pf-mark__rut" d="M88.3 10.2L-61.8 96.9"/><path class="pf-mark__rut" d="M117.8 27.2L-32.4 113.9"/><path class="pf-mark__rut" d="M147.2 44.2L-2.9 130.9"/><path class="pf-mark__rut" d="M176.7 61.2L26.5 147.9"/><path class="pf-mark__rut" d="M206.1 78.2L55.9 164.9"/><path class="pf-mark__rut" d="M235.6 95.2L85.4 181.9"/><path class="pf-mark__rut" d="M265.0 112.2L114.8 198.9"/><path class="pf-mark__rut" d="M294.4 129.2L144.3 215.9"/><path class="pf-mark__rut" d="M323.9 146.2L173.7 232.9"/><path class="pf-mark__rut" d="M353.3 163.2L203.2 249.9"/><path class="pf-mark__rut" d="M-29.4 -23.8L331.3 184.5"/><path class="pf-mark__rut" d="M-58.9 -6.8L301.8 201.5"/><path class="pf-mark__rut" d="M-88.3 10.2L272.4 218.5"/><path class="pf-mark__rut" d="M-117.8 27.2L242.9 235.5"/><g class="pf-modul" style="--i:0"><polygon class="pf-fasad v" points="-73.6,42.5 14.7,93.5 14.7,5.1 -73.6,-45.9"/><polygon class="pf-fasad h" points="88.3,51.0 14.7,93.5 14.7,5.1 88.3,-37.4"/><polygon class="pf-fasad t" points="0.0,-88.4 88.3,-37.4 14.7,5.1 -73.6,-45.9"/><path class="pf-fasad__bradd" d="M-61.8 47.6L-61.8 -37.4"/><path class="pf-fasad__bradd" d="M-50.1 54.4L-50.1 -30.6"/><path class="pf-fasad__bradd" d="M-38.3 61.2L-38.3 -23.8"/><path class="pf-fasad__bradd" d="M-26.5 68.0L-26.5 -17.0"/><path class="pf-fasad__bradd" d="M-14.7 74.8L-14.7 -10.2"/><path class="pf-fasad__bradd" d="M-2.9 81.6L-2.9 -3.4"/><path class="pf-fasad__bradd" d="M8.8 88.4L8.8 3.4"/><path class="pf-fasad__bradd" d="M76.6 56.1L76.6 -28.9"/><path class="pf-fasad__bradd" d="M64.8 62.9L64.8 -22.1"/><path class="pf-fasad__bradd" d="M53.0 69.7L53.0 -15.3"/><path class="pf-fasad__bradd" d="M41.2 76.5L41.2 -8.5"/><path class="pf-fasad__bradd" d="M29.4 83.3L29.4 -1.7"/><polygon class="pf-glas" points="-26.5,37.4 2.9,54.4 2.9,15.3 -26.5,-1.7"/><polygon class="pf-dorr" points="-61.8,49.3 -38.3,62.9 -38.3,-6.8 -61.8,-20.4"/><polygon class="pf-kant v" points="-73.6,-45.9 14.7,5.1 14.7,1.7 -73.6,-49.3"/><polygon class="pf-kant h" points="88.3,-37.4 14.7,5.1 14.7,1.7 88.3,-40.8"/><polygon class="pf-kant t" points="0.0,-91.8 88.3,-40.8 14.7,1.7 -73.6,-49.3"/><g class="pf-nr" transform="translate(7.4 -45.1)"><circle r="12"/><text y="4.5" text-anchor="middle">1</text></g></g><g class="pf-modul" style="--i:1"><polygon class="pf-fasad v" points="25.0,99.4 113.4,150.4 113.4,62.0 25.0,11.0"/><polygon class="pf-fasad h" points="187.0,107.9 113.4,150.4 113.4,62.0 187.0,19.5"/><polygon class="pf-fasad t" points="98.6,-31.5 187.0,19.5 113.4,62.0 25.0,11.0"/><path class="pf-fasad__bradd" d="M36.8 104.5L36.8 19.5"/><path class="pf-fasad__bradd" d="M48.6 111.4L48.6 26.4"/><path class="pf-fasad__bradd" d="M60.4 118.2L60.4 33.2"/><path class="pf-fasad__bradd" d="M72.1 125.0L72.1 40.0"/><path class="pf-fasad__bradd" d="M83.9 131.8L83.9 46.8"/><path class="pf-fasad__bradd" d="M95.7 138.6L95.7 53.6"/><path class="pf-fasad__bradd" d="M107.5 145.4L107.5 60.4"/><path class="pf-fasad__bradd" d="M175.2 113.0L175.2 28.0"/><path class="pf-fasad__bradd" d="M163.4 119.8L163.4 34.8"/><path class="pf-fasad__bradd" d="M151.6 126.6L151.6 41.6"/><path class="pf-fasad__bradd" d="M139.9 133.4L139.9 48.4"/><path class="pf-fasad__bradd" d="M128.1 140.2L128.1 55.2"/><polygon class="pf-glas" points="72.1,94.4 101.6,111.3 101.6,72.2 72.1,55.2"/><polygon class="pf-dorr" points="36.8,106.2 60.4,119.8 60.4,50.2 36.8,36.6"/><polygon class="pf-kant v" points="25.0,11.0 113.4,62.0 113.4,58.6 25.0,7.6"/><polygon class="pf-kant h" points="187.0,19.5 113.4,62.0 113.4,58.6 187.0,16.1"/><polygon class="pf-kant t" points="98.6,-34.9 187.0,16.1 113.4,58.6 25.0,7.6"/><g class="pf-nr" transform="translate(106.0 11.9)"><circle r="12"/><text y="4.5" text-anchor="middle">2</text></g></g><g class="pf-modul__spar"><path class="pf-spar" d="M123.7 156.4L212.0 207.4L285.6 164.9"/><path class="pf-spar" d="M123.7 68.0L212.0 119.0L285.6 76.5L197.3 25.5L123.7 68.0"/><path class="pf-spar" d="M212.0 207.4L212.0 119.0"/><path class="pf-spar" d="M123.7 156.4L123.7 68.0"/><path class="pf-spar" d="M285.6 164.9L285.6 76.5"/></g><g class="pf-modul pf-modul--ny" style="--i:2;--ux:132.5px;--uy:76.5px"><polygon class="pf-fasad v" points="123.7,156.4 212.0,207.4 212.0,119.0 123.7,68.0"/><polygon class="pf-fasad h" points="285.6,164.9 212.0,207.4 212.0,119.0 285.6,76.5"/><polygon class="pf-fasad t" points="197.3,25.5 285.6,76.5 212.0,119.0 123.7,68.0"/><path class="pf-fasad__bradd" d="M135.4 161.5L135.4 76.5"/><path class="pf-fasad__bradd" d="M147.2 168.3L147.2 83.3"/><path class="pf-fasad__bradd" d="M159.0 175.1L159.0 90.1"/><path class="pf-fasad__bradd" d="M170.8 181.9L170.8 96.9"/><path class="pf-fasad__bradd" d="M182.6 188.7L182.6 103.7"/><path class="pf-fasad__bradd" d="M194.3 195.5L194.3 110.5"/><path class="pf-fasad__bradd" d="M206.1 202.3L206.1 117.3"/><path class="pf-fasad__bradd" d="M273.8 170.0L273.8 85.0"/><path class="pf-fasad__bradd" d="M262.1 176.8L262.1 91.8"/><path class="pf-fasad__bradd" d="M250.3 183.6L250.3 98.6"/><path class="pf-fasad__bradd" d="M238.5 190.4L238.5 105.4"/><path class="pf-fasad__bradd" d="M226.7 197.2L226.7 112.2"/><polygon class="pf-glas" points="170.8,151.3 200.2,168.3 200.2,129.2 170.8,112.2"/><polygon class="pf-dorr" points="135.4,163.2 159.0,176.8 159.0,107.1 135.4,93.5"/><polygon class="pf-kant v" points="123.7,68.0 212.0,119.0 212.0,115.6 123.7,64.6"/><polygon class="pf-kant h" points="285.6,76.5 212.0,119.0 212.0,115.6 285.6,73.1"/><polygon class="pf-kant t" points="197.3,22.1 285.6,73.1 212.0,115.6 123.7,64.6"/><g class="pf-nr" transform="translate(204.6 68.8)"><circle r="12"/><text y="4.5" text-anchor="middle">3</text></g></g><g class="pf-etapp"><g class="pf-skylt " transform="translate(93.7 -67.5)"><g class="pf-skylt__inre"><rect x="-35.1" y="-13" width="70.2" height="26" rx="13"/><text y="4.5" text-anchor="middle">Etapp 1</text></g></g></g><g class="pf-etapp pf-etapp--2"><g class="pf-skylt pf-skylt--virke" transform="translate(241.4 17.8)"><g class="pf-skylt__inre"><rect x="-35.1" y="-13" width="70.2" height="26" rx="13"/><text y="4.5" text-anchor="middle">Etapp 2</text></g></g></g></g></g>
+              </svg>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="process">
-        <div class="process__head">
-          <h2>För dig som bygger åt andra</h2>
-          <p>
-            Vi tillverkar väggar, block och moduler i Sverige och levererar
-            till er byggarbetsplats. Utförandet följer er ritning, och det
-            mesta av arbetet är gjort under tak innan leverans.
-          </p>
+      <section class="pf-band" aria-labelledby="pf-band-titel">
+        <div class="pf-band__huvud">
+          <div>
+            <p class="ih-etikett">Från fabrik till bygge</p>
+            <h2 class="pf-band__titel" id="pf-band-titel">Så ser det ut på bygget.</h2>
+          </div>
+          <div class="pf-band__pilar">
+            <button type="button" data-pf-band="-1" aria-label="Föregående bild"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+            <button type="button" data-pf-band="1" aria-label="Nästa bild"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </div>
         </div>
-
-        <nav class="proffs-hopp" aria-label="Det vi levererar">
-          <a href="#utfackningsvaggar"><span>01</span><strong>Utfackningsväggar</strong><em>Färdiga väggblock</em></a>
-          <a href="#husblock"><span>02</span><strong>Husblock</strong><em>Större volymelement</em></a>
-          <a href="#moduler"><span>03</span><strong>Moduler</strong><em>Kompletta enheter i serie</em></a>
-        </nav>
+        <ol class="pf-band__rad" tabindex="0" aria-label="Bilder från bygget">
+            <li class="pf-band__bild" style="--ar:1.500">
+              <figure>
+                <span class="pf-band__ram"><img src="images/foto/stommar-stapel.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra" draggable="false"></span>
+                <figcaption><span>01</span>Färdiga väggstommar i trä</figcaption>
+              </figure>
+            </li>
+            <li class="pf-band__bild" style="--ar:1.500">
+              <figure>
+                <span class="pf-band__ram"><img src="images/foto/reglar.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="Närbild av träreglar i en väggstomme hos Idealhus" draggable="false"></span>
+                <figcaption><span>02</span>Reglarna i en väggstomme</figcaption>
+              </figure>
+            </li>
+            <li class="pf-band__bild" style="--ar:1.500">
+              <figure>
+                <span class="pf-band__ram"><img src="images/foto/arbetare-vattenpass.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="En snickare i varselkläder håller vattenpass mot en väggstomme" draggable="false"></span>
+                <figcaption><span>03</span>Vattenpass mot en väggstomme</figcaption>
+              </figure>
+            </li>
+            <li class="pf-band__bild" style="--ar:1.778">
+              <figure>
+                <span class="pf-band__ram"><img src="images/foto/dronare-leverans.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Drönarbild av en lastbil med takstolar och väggstommar vid bygget" draggable="false"></span>
+                <figcaption><span>04</span>Leveransen: takstolar och väggstommar</figcaption>
+              </figure>
+            </li>
+            <li class="pf-band__bild" style="--ar:1.500">
+              <figure>
+                <span class="pf-band__ram"><img src="images/foto/lyft-stommar.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="En kran lyfter väggstommar i trä förbi en rest vägg" draggable="false"></span>
+                <figcaption><span>05</span>Kranen lyfter stommarna på plats</figcaption>
+              </figure>
+            </li>
+            <li class="pf-band__bild" style="--ar:1.778">
+              <figure>
+                <span class="pf-band__ram"><img src="images/foto/dronare-montage.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Drönarbild av ett hus under montage, med inplastade väggar runt en betongplatta och en kran" draggable="false"></span>
+                <figcaption><span>06</span>Montaget runt betongplattan</figcaption>
+              </figure>
+            </li>
+            <li class="pf-band__bild" style="--ar:1.778">
+              <figure>
+                <span class="pf-band__ram"><img src="images/foto/dronare-platta.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Två personer i arbete på betongplattan mellan de resta väggarna" draggable="false"></span>
+                <figcaption><span>07</span>Arbete mellan de resta väggarna</figcaption>
+              </figure>
+            </li>
+        </ol>
+        <span class="pf-band__matare" aria-hidden="true"><i></i></span>
       </section>
 
-      <section class="segment">
-        <article class="segment__block" id="utfackningsvaggar">
-          <div>
-            <h2>Utfackningsväggar</h2>
-            <p>Färdiga väggblock som levereras till byggarbetsplatsen och monteras på plats. Isolering, ångspärr och beklädnad är gjorda under tak, i jämn temperatur och fuktnivå.</p>
-            <ul class="segment__fakta">
-              <li>Tillverkas inomhus, oberoende av väder</li>
-              <li>Kortare tid på byggarbetsplatsen</li>
-              <li>Jämnare kvalitet mellan leveranser</li>
-              <li>Mått och utförande enligt er ritning</li>
-            </ul>
-            <a class="model-price__button" href="kontakt.html">Fråga om utfackningsväggar</a>
-          </div>
-          <div class="segment__media">
-            <img src="images/foto/reglar.webp" loading="lazy" decoding="async" alt="Närbild av träreglar i en väggstomme hos Idealhus">
-          </div>
-        </article>
-
-        <article class="segment__block" id="husblock">
-          <div>
-            <h2>Husblock</h2>
-            <p>Större volymelement där stomme, ytskikt och delar av installationerna sitter på plats redan vid leverans. Blocken lyfts på plats och kopplas samman.</p>
-            <ul class="segment__fakta">
-              <li>Stomme och ytskikt monterade i fabrik</li>
-              <li>Färre moment kvar på plats</li>
-              <li>Planeras in i er tidplan</li>
-              <li>Anpassas efter projektets mått</li>
-            </ul>
-            <a class="model-price__button" href="kontakt.html">Fråga om husblock</a>
-          </div>
-          <div class="segment__media">
-            <img src="images/foto/lyft-stommar.webp" loading="lazy" decoding="async" alt="Trästommar som lyfts med kran vid montage av husblock">
-          </div>
-        </article>
-
-        <article class="segment__block" id="moduler">
-          <div>
-            <h2>Moduler</h2>
-            <p>Kompletta enheter för projekt där samma utförande upprepas: personalbostäder, uthyrning eller etappvis utbyggnad. Modulerna kan flyttas och byggas om.</p>
-            <ul class="segment__fakta">
-              <li>Samma utförande i serie</li>
-              <li>Kan flyttas eller byggas om</li>
-              <li>Lämpar sig för etapper</li>
-              <li>Levereras klara att koppla in</li>
-            </ul>
-            <a class="model-price__button" href="kontakt.html">Fråga om moduler</a>
-          </div>
-          <div class="segment__media">
-            <img src="images/foto/dronare-leverans.webp" loading="lazy" decoding="async" alt="Drönarbild av en lastbil med takstolar och väggstommar vid bygget">
-          </div>
-        </article>
-      </section>
-
-      <section class="virke">
-        <img class="virke__bild" src="images/foto/lyft-stommar.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="En kran lyfter väggstommar i trä förbi en rest vägg">
-        <div class="virke__inre">
-          <p class="ih-etikett ih-etikett--ljus">Varför element</p>
-          <h2 class="virke__rubrik">Mindre tid på bygget. <em>Mer under tak.</em></h2>
-          <p class="virke__text">
-            Isolering, ångspärr och beklädnad görs inomhus, i jämn temperatur
-            och fuktnivå. Kvar på byggarbetsplatsen är att lyfta, koppla samman
-            och täta - och det går fort.
-          </p>
-          <p class="virke__chips">
-            <span class="ih-chip ih-chip--glas">Oberoende av väder</span>
-            <span class="ih-chip ih-chip--glas">Jämnare kvalitet</span>
-            <span class="ih-chip ih-chip--glas">Planeras in i er tidplan</span>
-          </p>
-        </div>
-      </section>
-
-      <section class="ih-sektion">
-        <div class="ih-inre">
-          <div class="ih-huvud ih-huvud--mitt">
-            <p class="ih-etikett">Från ritning till leverans</p>
-            <h2 class="ih-rubrik">Fyra steg. <em>En kontakt.</em></h2>
-            <p class="ih-ingress">
-              Samma person följer projektet från första frågan till att
-              elementen står på plats.
+      <section class="pf-tak">
+        <img class="pf-tak__bild" src="images/foto/lyft-stommar.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="">
+        <div class="pf-tak__inre">
+          <div class="pf-tak__ord">
+            <p class="ih-etikett ih-etikett--ljus">Varför element</p>
+            <h2 class="pf-tak__titel">Mindre tid på bygget. <em>Mer under tak.</em></h2>
+            <p class="pf-tak__text">
+              Isolering, ångspärr och beklädnad görs inomhus, i jämn temperatur
+              och fuktnivå. Kvar på byggarbetsplatsen är att lyfta, koppla samman
+              och täta - och det går fort.
+            </p>
+            <p class="pf-tak__chips">
+              <span>Oberoende av väder</span>
+              <span>Jämnare kvalitet</span>
+              <span>Planeras in i er tidplan</span>
             </p>
           </div>
 
-          <div class="varfor__grid">
-            <article class="skal">
-              <span class="skal__nr">01</span>
-              <span class="skal__ikon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3.5h9l3.5 3.5v13.5H6zM9 11h6M9 14.5h6M9 18h3.5"/></svg></span>
+          <div class="pf-flytt" data-pf-in>
+            <div class="pf-flytt__kol pf-flytt__kol--tak">
+              <p class="pf-flytt__rubrik"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11 12 4l8.5 7" pathLength="1"/><path d="M6 9.5V20h12V9.5" pathLength="1"/></svg>Under tak</p>
+              <ul>
+                <li>Stomme</li>
+                <li>Isolering</li>
+                <li>Ångspärr</li>
+                <li>Beklädnad</li>
+              </ul>
+            </div>
+            <div class="pf-flytt__vag" aria-hidden="true">
+              <span class="pf-flytt__bil"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17h13l3-4h2v4" pathLength="1"/><path d="M5 17v2" pathLength="1"/><path d="M17 17v2" pathLength="1"/><path d="M3 13h11V7H3z" pathLength="1"/></svg></span>
+            </div>
+            <div class="pf-flytt__kol pf-flytt__kol--bygge">
+              <p class="pf-flytt__rubrik"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 21V5" pathLength="1"/><path d="M5 5h15" pathLength="1"/><path d="M8 5 5 9" pathLength="1"/><path d="M17 5v6" pathLength="1"/><path d="M15.5 11h3v2.5h-3z" pathLength="1"/><path d="M3 21h5" pathLength="1"/></svg>På bygget</p>
+              <ul>
+                <li>Lyfta</li>
+                <li>Koppla samman</li>
+                <li>Täta</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="pf-steg">
+        <div class="pf-steg__inre">
+          <header class="pf-steg__huvud">
+            <p class="ih-etikett">Från ritning till leverans</p>
+            <h2 class="pf-steg__titel">Fyra steg. <em>En kontakt.</em></h2>
+            <p class="pf-steg__ingress">
+              Samma person följer projektet från första frågan till att
+              elementen står på plats.
+            </p>
+          </header>
+          <ol class="pf-steg__lista" data-pf-steg>
+            <li class="pf-steg__linje" aria-hidden="true"><i></i></li>
+            <li class="pf-steg__steg" style="--i:0">
+              <span class="pf-steg__nod"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h9l3.5 3.5v13.5H6z" pathLength="1"/><path d="M9 11h6" pathLength="1"/><path d="M9 14.5h6" pathLength="1"/><path d="M9 18h3.5" pathLength="1"/></svg></span>
+              <span class="pf-steg__nr">01</span>
               <h3>Ritning och förfrågan</h3>
               <p>Ni skickar ritning och mängder. Vi går igenom vad som passar som väggar, block eller moduler.</p>
-            </article>
-            <article class="skal">
-              <span class="skal__nr">02</span>
-              <span class="skal__ikon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v15H4zM4 9.5h16M9 3v4M15 3v4"/></svg></span>
+            </li>
+            <li class="pf-steg__steg" style="--i:1">
+              <span class="pf-steg__nod"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h16v15H4z" pathLength="1"/><path d="M4 9.5h16" pathLength="1"/><path d="M9 3v4" pathLength="1"/><path d="M15 3v4" pathLength="1"/></svg></span>
+              <span class="pf-steg__nr">02</span>
               <h3>Offert och tidplan</h3>
               <p>Ni får en offert post för post, och leveranserna planeras in i er tidplan.</p>
-            </article>
-            <article class="skal">
-              <span class="skal__nr">03</span>
-              <span class="skal__ikon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5"/></svg></span>
+            </li>
+            <li class="pf-steg__steg" style="--i:2">
+              <span class="pf-steg__nod"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11 12 4l8.5 7" pathLength="1"/><path d="M6 9.5V20h12V9.5" pathLength="1"/></svg></span>
+              <span class="pf-steg__nr">03</span>
               <h3>Tillverkning under tak</h3>
               <p>Elementen byggs inomhus i Sverige, i jämn temperatur och fuktnivå.</p>
-            </article>
-            <article class="skal">
-              <span class="skal__nr">04</span>
-              <span class="skal__ikon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"/></svg></span>
+            </li>
+            <li class="pf-steg__steg" style="--i:3">
+              <span class="pf-steg__nod"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17h13l3-4h2v4" pathLength="1"/><path d="M5 17v2" pathLength="1"/><path d="M17 17v2" pathLength="1"/><path d="M3 13h11V7H3z" pathLength="1"/></svg></span>
+              <span class="pf-steg__nr">04</span>
               <h3>Leverans till bygget</h3>
               <p>Elementen kommer på lastbil och lyfts på plats. Färre moment återstår på byggarbetsplatsen.</p>
-            </article>
-          </div>
+            </li>
+          </ol>
         </div>
       </section>
 
@@ -281,7 +376,7 @@
         <div class="contact-section__inner">
           <div class="contact-section__intro">
             <p class="section-label section-label--accent">Första steget</p>
-            <h2 class="contact-section__title">Låt oss börja med <em>din plats</em>.</h2>
+            <h2 class="contact-section__title">Låt oss börja med <em>ert projekt</em>.</h2>
             <p class="contact-section__text">
               Berätta vad du funderar på, så återkommer vi med nästa tydliga
               steg. Utan krav och utan säljsnack.
@@ -290,7 +385,7 @@
               <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg>Byggt under tak i Sverige</li>
               <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.9 3.9-6 7.5-6s6.6 2.1 7.5 6"/></svg>En kontakt hela vägen</li>
               <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h9l3.5 3.5v13.5H6zM9 11h6M9 14.5h6M9 18h3.5"/></svg>Offert post för post</li>
-              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20h18M6 20V10l6-5 6 5v10M10 20v-5h4v5"/></svg>Anpassat efter din tomt</li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h16M6 20V9l6-3 6 3v11M9 12h6M9 15.5h6"/></svg>Utförande efter er ritning</li>
             </ul>
           </div>
 

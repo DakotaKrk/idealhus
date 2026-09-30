@@ -187,7 +187,7 @@
      lite inne i sin ram när man för pekaren över kortet den sitter
      i. Ramen klipper, så bilden aldrig går utanför sina hörn. */
   $$('main img').forEach(function (img) {
-    if (img.closest('.hero, .ihtopp, .subpage-hero, .heroscen, .ordband, .val, .vag, .hus, .kuliss, .bygget, .virke')) return;
+    if (img.closest('.hero, .ihtopp, .subpage-hero, .heroscen, .ordband, .val, .vag, .hus, .kuliss, .bygget, .virke, .pf-tak')) return;
     var ram = img.parentElement;
     if (!ram || img.getBoundingClientRect().width < 120) return;
     var kort = img.closest('a, article, figure, .segment__block, .quiet-break__bild, .guidehero__bild') || ram;
@@ -1934,7 +1934,7 @@
      Som Kasters lanseringsnotis: visas en gång efter halva sidan,
      aldrig där det redan finns ett formulär eller verktyget självt,
      och inte igen på fjorton dagar efter att man stängt det. */
-  var utan = ['vad-far-jag-bygga.html', 'kontakt.html', '404.html', 'integritetspolicy.html', 'attefallshus-regler.html'];
+  var utan = ['vad-far-jag-bygga.html', 'kontakt.html', '404.html', 'integritetspolicy.html', 'attefallshus-regler.html', 'proffs.html'];
   if (utan.indexOf(sida) < 0) {
     var senast = Number(lagra.hamta('idealhus-tips') || 0);
     if (Date.now() - senast > 14 * 864e5) {
@@ -2748,7 +2748,7 @@
     // Stora bilder i innehållet avslöjas ur en ram.
     var UNDANTAG = '.ihtopp, .subpage-hero, .guidehero, .heroscen, .ordband, .val, .bildval, ' +
       '.main-nav__sub, .kuliss, .hus, .bygget, .vag, .virke, .helbild__bak, .kollen-hus, ' +
-      '.jamforruta, .storlek3d, .hus3dvy, .site-footer, .model-plan';
+      '.jamforruta, .storlek3d, .hus3dvy, .site-footer, .model-plan, .pf-tak';
     var bilder = $$('main img').filter(function (img) {
       if (img.closest(UNDANTAG)) return false;
       var b = img.getBoundingClientRect().width || img.width;
@@ -3398,6 +3398,167 @@
           if (matt.getAttribute('data-plan') === 'inom') vaxel.classList.add('lockar');
         }, 2200);
       }, 0.5);
+    }
+  })();
+
+  /* --- Proffssidan ------------------------------------------------
+     Utforskaren (tre flikar som bläddrar själva medan de syns, tills
+     man väljer själv), bildbandet (pilar, dra med musen, mätare), linjen
+     genom de fyra stegen och det som tonar in (design.css 22). */
+  (function () {
+    var lev = $('[data-pf-lev]');
+    if (!lev) return;
+
+    $$('[data-pf-in]').forEach(function (el) {
+      if (lugn || !window.IntersectionObserver) return;
+      el.classList.add('pf-vanta');
+      narSynligt(el, function (e) { e.classList.remove('pf-vanta'); }, 0.3, '0px 0px -8% 0px');
+    });
+    $$('.pf-topp, .pf-tak, [data-pf-lev]').forEach(pausaUtanforVy);
+
+    /* Utforskaren. */
+    var flikar = $$('[role="tab"]', lev);
+    var delar = $$('.pf-lev__del', lev);
+    var scener = $$('.pf-scen', lev);
+
+    function valj(kod, fokus) {
+      flikar.forEach(function (f) {
+        var ja = f.getAttribute('data-val') === kod;
+        f.setAttribute('aria-selected', String(ja));
+        f.tabIndex = ja ? 0 : -1;
+        if (ja && fokus) f.focus();
+      });
+      delar.forEach(function (d) { d.classList.toggle('vald', d.getAttribute('data-del') === kod); });
+      scener.forEach(function (s) { s.classList.toggle('vald', s.getAttribute('data-scen') === kod); });
+    }
+    function stoppa() { lev.classList.remove('kor'); }
+
+    lev.classList.add('klar');
+    flikar.forEach(function (f, i) {
+      f.addEventListener('click', function () { stoppa(); valj(f.getAttribute('data-val')); });
+      f.addEventListener('keydown', function (e) {
+        var n = flikar.length, j = -1;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = (i + 1) % n;
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = (i - 1 + n) % n;
+        else if (e.key === 'Home') j = 0;
+        else if (e.key === 'End') j = n - 1;
+        if (j < 0) return;
+        e.preventDefault();
+        stoppa();
+        valj(flikar[j].getAttribute('data-val'), true);
+      });
+      // Mätaren i fliken är klockan: när den är full går turen vidare.
+      $('.pf-lev__tid', f).addEventListener('animationend', function () {
+        if (!lev.classList.contains('kor')) return;
+        valj(flikar[(i + 1) % flikar.length].getAttribute('data-val'));
+      });
+    });
+    if (!lugn) narSynligt(lev, function () { lev.classList.add('kor'); }, 0.35);
+
+    // Länkarna i toppen (och adresser som #husblock) väljer rätt flik.
+    function tillLeverans(kod) {
+      stoppa();
+      valj(kod);
+      lev.scrollIntoView({ behavior: lugn ? 'auto' : 'smooth', block: 'start' });
+    }
+    $$('[data-hopp]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        tillLeverans(a.getAttribute('data-hopp'));
+        if (history.replaceState) history.replaceState(null, '', a.getAttribute('href'));
+      });
+    });
+    function franAdress() {
+      var d = delar.filter(function (x) { return '#' + x.id === location.hash; })[0];
+      if (d) tillLeverans(d.getAttribute('data-del'));
+    }
+    window.addEventListener('hashchange', franAdress);
+    franAdress();
+
+    /* Bildbandet. */
+    var rad = $('.pf-band__rad');
+    if (rad) {
+      var matare = $('.pf-band__matare i');
+      var bak = $('[data-pf-band="-1"]'), fram = $('[data-pf-band="1"]');
+      var bokadBand = false;
+      var matBand = function () {
+        bokadBand = false;
+        var max = rad.scrollWidth - rad.clientWidth;
+        var andel = rad.clientWidth / rad.scrollWidth;
+        var p = max > 0 ? rad.scrollLeft / max : 0;
+        if (matare) {
+          matare.style.width = (andel * 100).toFixed(2) + '%';
+          matare.style.transform = 'translateX(' + (p * (1 / andel - 1) * 100).toFixed(2) + '%)';
+        }
+        if (bak) bak.disabled = rad.scrollLeft < 4;
+        if (fram) fram.disabled = rad.scrollLeft > max - 4;
+      };
+      var bokaBand = function () {
+        if (bokadBand) return;
+        bokadBand = true;
+        requestAnimationFrame(matBand);
+      };
+      rad.addEventListener('scroll', bokaBand, { passive: true });
+      window.addEventListener('resize', bokaBand);
+      matBand();
+      $$('[data-pf-band]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var forsta = $('.pf-band__bild', rad);
+          var steg = forsta ? forsta.offsetWidth + 14 : rad.clientWidth * 0.8;
+          rad.scrollBy({ left: Number(b.getAttribute('data-pf-band')) * steg, behavior: lugn ? 'auto' : 'smooth' });
+        });
+      });
+
+      // Dra med musen. Ett drag är inget klick.
+      var drar = false, startX = 0, startL = 0, flyttat = 0;
+      rad.addEventListener('pointerdown', function (e) {
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        drar = true;
+        flyttat = 0;
+        startX = e.clientX;
+        startL = rad.scrollLeft;
+        rad.classList.add('drar');
+        rad.setPointerCapture(e.pointerId);
+      });
+      rad.addEventListener('pointermove', function (e) {
+        if (!drar) return;
+        flyttat = e.clientX - startX;
+        rad.scrollLeft = startL - flyttat;
+      });
+      var slapp = function () {
+        if (!drar) return;
+        drar = false;
+        rad.classList.remove('drar');
+      };
+      rad.addEventListener('pointerup', slapp);
+      rad.addEventListener('pointercancel', slapp);
+      rad.addEventListener('click', function (e) {
+        if (Math.abs(flyttat) > 6) { e.preventDefault(); e.stopPropagation(); }
+      }, true);
+    }
+
+    /* De fyra stegen: linjen fylls och noderna tänds i takt med sidan. */
+    var steglista = $('[data-pf-steg]');
+    if (steglista) {
+      var fyll = $('.pf-steg__linje i', steglista);
+      var stegen = $$('.pf-steg__steg', steglista);
+      var bokadSteg = false;
+      var matSteg = function () {
+        bokadSteg = false;
+        var r = steglista.getBoundingClientRect();
+        var vh = window.innerHeight;
+        var p = lugn ? 1 : Math.min(1, Math.max(0, (vh * 0.8 - r.top) / (r.height * 0.5 + vh * 0.35)));
+        fyll.style.setProperty('--p', p.toFixed(4));
+        stegen.forEach(function (s, i) {
+          s.classList.toggle('klar', p > 0 && p >= i / (stegen.length - 1) - 0.001);
+        });
+      };
+      window.addEventListener('scroll', function () {
+        if (bokadSteg) return;
+        bokadSteg = true;
+        requestAnimationFrame(matSteg);
+      }, { passive: true });
+      matSteg();
     }
   })();
 })();

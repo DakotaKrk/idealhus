@@ -2734,7 +2734,6 @@ html[data-tema="mork"] .film--duk .film__farg {
   pointer-events: none;
 }
 
-.film__topp,
 .film__fot,
 .film__rulla {
   position: absolute;
@@ -2743,16 +2742,10 @@ html[data-tema="mork"] .film--duk .film__farg {
   pointer-events: auto;
 }
 
-.film__topp {
-  top: calc(76px + clamp(12px, 3vh, 36px));
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-}
-
-.film__topp .malgrupp {
-  margin: 0;
+/* Målgruppsväxeln står under ingressen: rubrik, text och sedan valet
+   (2026-09-30, förut låg den direkt under menyraden). */
+.ihtopp .film__fot .malgrupp {
+  margin: clamp(20px, 3.2vh, 30px) 0 0;
 }
 
 .film__bricka {
@@ -2820,15 +2813,15 @@ html[data-tema="mork"] .film--duk .film__farg {
   to { opacity: 1; transform: none; filter: none; }
 }
 
+/* "Rulla" står i högra hörnet - mitten under texten är växelns plats. */
 .film__rulla {
-  left: 50%;
-  right: auto;
+  left: auto;
+  right: clamp(24px, 3.2vw, 52px);
   bottom: clamp(18px, 3.4vh, 36px);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  translate: -50% 0;
   margin: 0;
   font-family: var(--knappfont);
   font-size: 0.75rem;
@@ -3130,13 +3123,13 @@ html[data-tema="mork"] .film__rulla-linje {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .film__topp .malgrupp {
-    animation: ih-vaxel-in 1.1s var(--mjuk) 0.35s both;
+  .film__fot .malgrupp {
+    animation: ih-vaxel-in 1.1s var(--mjuk) 1.75s both;
   }
 }
 
 @keyframes ih-vaxel-in {
-  from { opacity: 0; transform: translateY(-14px) scale(0.96); }
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
   to { opacity: 1; transform: none; }
 }
 
@@ -12291,6 +12284,1511 @@ html[data-tema="mork"] .rg-slut {
   .rg-kort__etikett i::after,
   .rg-vatten__vag,
   .rg-vaxel.lockar button[data-plan="utanfor"]::after {
+    animation: none;
+  }
+}
+
+/* 22 Proffssidan (2026-09-30) ---------------------------------------
+   Kunden: "fixa denna sida med". Innehållet skrivs av _proffs.py, rörelsen
+   av "Proffssidan" i premium.js. Mörk topp med drönarbilden och två
+   svävande kort, sedan det vi levererar som en utforskare: tre flikar
+   som bläddrar själva, och en ritning i isometri där väggens lager
+   vecklas ut, husblocket lyfts på plats och modulerna ställs i rad.
+   Därefter ett bildband från bygget, under tak mot på bygget, och fyra
+   steg på en linje som fylls. Klasserna heter pf-*. */
+
+/* --- Toppen ------------------------------------------------------ */
+.pf-topp__inre {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  gap: clamp(40px, 5vw, 88px);
+  align-items: center;
+  width: var(--inre);
+  margin: 0 auto;
+  padding: clamp(56px, 9vh, 104px) 0 clamp(64px, 10vh, 112px);
+}
+
+.pf-topp .sidtopp__etikett {
+  margin: 0 0 20px;
+}
+
+.pf-topp__titel {
+  margin: 0 0 24px;
+  font-size: clamp(2.6rem, 1.1rem + 4vw, 4.8rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.pf-topp__lead {
+  max-width: 46ch;
+  margin: 0;
+  font-size: clamp(1rem, 0.94rem + 0.3vw, 1.15rem);
+  line-height: 1.65;
+  color: rgba(247, 245, 240, 0.72);
+}
+
+.pf-topp__knappar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 30px 0 0;
+}
+
+.pf-topp__tre {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pf-topp__tre a {
+  display: inline-flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(247, 245, 240, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+  font: 500 0.8125rem/1 var(--knappfont);
+  color: rgba(247, 245, 240, 0.82);
+  text-decoration: none;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+.pf-topp__tre a:hover {
+  background: rgba(247, 245, 240, 0.14);
+  color: var(--krita);
+}
+
+.pf-topp__tre span {
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--virke);
+}
+
+.pf-topp__bild {
+  position: relative;
+  margin: 0;
+  animation: rg-bild-in 1.3s var(--mjuk) 0.15s both;
+}
+
+.pf-topp__ram {
+  display: block;
+  border-radius: 26px;
+}
+
+.pf-topp__ram img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 26px;
+  box-shadow: 0 50px 100px -30px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.pf-chip {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 18px 11px 11px;
+  border-radius: 18px;
+  background:
+    radial-gradient(120% 80% at 100% 0%, rgba(240, 181, 110, 0.18), transparent 60%),
+    #26221c;
+  box-shadow: 0 24px 48px -18px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+  color: var(--krita);
+  animation: pf-chip-in 0.9s var(--mjuk) 1s both, pf-svav 6s ease-in-out 2s infinite;
+}
+
+.pf-chip--a {
+  top: -24px;
+  left: -28px;
+}
+
+.pf-chip--b {
+  right: -20px;
+  bottom: -24px;
+  animation-delay: 1.2s, 5s;
+}
+
+.pf-chip p {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+}
+
+.pf-chip strong {
+  font: 600 0.875rem/1.2 var(--knappfont);
+}
+
+.pf-chip span {
+  font-size: 0.75rem;
+  color: rgba(247, 245, 240, 0.6);
+}
+
+.pf-ikon {
+  display: block;
+  box-sizing: border-box;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pf-chip .pf-ikon {
+  width: 40px;
+  height: 40px;
+  padding: 9px;
+  border-radius: 12px;
+  background: rgba(240, 181, 110, 0.14);
+  stroke: var(--virke);
+}
+
+.pf-topp.pausad .pf-chip {
+  animation-play-state: paused;
+}
+
+@keyframes pf-chip-in {
+  from { opacity: 0; transform: scale(0.85) translateY(10px); }
+}
+
+@keyframes pf-svav {
+  50% { translate: 0 -8px; }
+}
+
+.pf-pil {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.4s var(--mjuk);
+}
+
+a:hover > .pf-pil {
+  transform: translateX(4px);
+}
+
+/* --- Det vi levererar: utforskaren -------------------------------- */
+.pf-lev {
+  padding: var(--sekt) 0 clamp(40px, 5vw, 72px);
+}
+
+.pf-lev__inre {
+  width: var(--inre);
+  margin: 0 auto;
+}
+
+.pf-lev__huvud {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: 16px clamp(24px, 5vw, 72px);
+  align-items: end;
+  margin: 0 0 clamp(28px, 4vw, 48px);
+}
+
+.pf-lev__huvud .ih-etikett {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.pf-lev__titel {
+  margin: 0;
+  font-size: clamp(2.2rem, 1.2rem + 3.4vw, 4.2rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.pf-lev__ingress {
+  max-width: 52ch;
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+
+.pf-lev__panel {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.pf-lev__vanster {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.pf-lev__val {
+  display: grid;
+  gap: 8px;
+}
+
+.pf-lev__val button {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  overflow: hidden;
+  padding: 14px 18px 14px 16px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--vit);
+  box-shadow: 0 1px 2px rgba(27, 25, 21, 0.05), 0 18px 36px -30px rgba(27, 25, 21, 0.45),
+    inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.45s ease, color 0.45s ease, box-shadow 0.45s ease, transform 0.45s var(--mjuk);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pf-lev__val button:hover {
+  transform: translateX(3px);
+}
+
+.pf-lev__val button[aria-selected="true"] {
+  background:
+    radial-gradient(90% 120% at 100% 0%, rgba(240, 181, 110, 0.18), transparent 60%),
+    var(--kol);
+  color: var(--krita);
+  box-shadow: 0 26px 50px -30px rgba(27, 25, 21, 0.75), inset 0 0 0 1px rgba(247, 245, 240, 0.06);
+  transform: none;
+}
+
+.pf-lev__val button:focus-visible {
+  outline: 2px solid var(--virke);
+  outline-offset: 3px;
+}
+
+.pf-lev__nr {
+  font: 600 0.75rem/1 var(--knappfont);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+}
+
+.pf-lev__val button[aria-selected="true"] .pf-lev__nr {
+  color: var(--virke);
+}
+
+.pf-lev__ikon {
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  padding: 9px;
+  border-radius: 13px;
+  background: var(--virke-ljus);
+  fill: none;
+  stroke: var(--virke-djup);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: background-color 0.45s ease, stroke 0.45s ease;
+}
+
+.pf-lev__val button[aria-selected="true"] .pf-lev__ikon {
+  background: rgba(240, 181, 110, 0.16);
+  stroke: var(--virke);
+}
+
+.pf-lev__namn {
+  display: grid;
+  gap: 3px;
+  font: 600 1rem/1.2 var(--knappfont);
+  letter-spacing: -0.015em;
+}
+
+.pf-lev__namn small {
+  font: 500 0.8125rem/1.3 var(--sans);
+  letter-spacing: 0;
+  color: var(--text-3);
+}
+
+.pf-lev__val button[aria-selected="true"] small {
+  color: rgba(247, 245, 240, 0.6);
+}
+
+.pf-lev__tid {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--virke-djup), var(--virke));
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.pf-lev.kor .pf-lev__val button[aria-selected="true"] .pf-lev__tid {
+  animation: pf-tid 9s linear forwards;
+}
+
+.pf-lev.kor .pf-lev__panel:hover .pf-lev__tid,
+.pf-lev.pausad .pf-lev__tid {
+  animation-play-state: paused !important;
+}
+
+@keyframes pf-tid {
+  to { transform: scaleX(1); }
+}
+
+.pf-lev__delar {
+  display: grid;
+  gap: 14px;
+}
+
+.pf-lev__del {
+  padding: 24px;
+  border-radius: 24px;
+  background: var(--vit);
+  box-shadow: 0 1px 2px rgba(27, 25, 21, 0.05), 0 22px 44px -34px rgba(27, 25, 21, 0.45),
+    inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+.pf-lev.klar .pf-lev__del:not(.vald) {
+  display: none;
+}
+
+.pf-lev.klar .pf-lev__del.vald {
+  animation: pf-del-in 0.6s var(--mjuk) both;
+}
+
+@keyframes pf-del-in {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+.pf-lev__del h3 {
+  margin: 0 0 8px;
+  font: 600 1.35rem/1.2 var(--knappfont);
+  letter-spacing: -0.025em;
+}
+
+.pf-lev__del p {
+  margin: 0 0 18px;
+  font-size: 0.96875rem;
+  line-height: 1.65;
+  color: var(--text-2);
+}
+
+.pf-lev__fakta {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.pf-lev__fakta li {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  font: 500 0.9375rem/1.35 var(--knappfont);
+}
+
+.pf-bock {
+  flex: none;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  padding: 4.5px;
+  border-radius: 50%;
+  background: var(--kol);
+  fill: none;
+  stroke: var(--virke);
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pf-lev__knapp {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 13px 20px;
+  border-radius: 999px;
+  background: var(--virke);
+  color: var(--kol);
+  font: 600 0.875rem/1 var(--knappfont);
+  text-decoration: none;
+  box-shadow: 0 14px 28px -16px rgba(143, 84, 36, 0.8);
+  transition: transform 0.4s var(--mjuk);
+}
+
+.pf-lev__knapp:hover {
+  transform: translateY(-2px);
+}
+
+/* Scenen: ljus ritbordsyta med rutnät. */
+.pf-lev__scen {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  min-height: 480px;
+  overflow: hidden;
+  border-radius: 30px;
+  background:
+    radial-gradient(60% 55% at 50% 45%, rgba(255, 255, 255, 0.9), transparent 70%),
+    linear-gradient(160deg, #f5f0e7 0%, #e9e2d5 100%);
+  box-shadow: 0 40px 90px -50px rgba(27, 25, 21, 0.5), inset 0 0 0 1px rgba(27, 25, 21, 0.07);
+}
+
+.pf-lev__scen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(27, 25, 21, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(27, 25, 21, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 20%, transparent 80%);
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 20%, transparent 80%);
+}
+
+.pf-rit {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 580px;
+}
+
+.pf-rit polygon {
+  stroke: rgba(27, 25, 21, 0.2);
+  stroke-width: 0.8;
+  stroke-linejoin: round;
+}
+
+.pf-tra.t { fill: #f5dbb0; }
+.pf-tra.v { fill: #e8c08a; }
+.pf-tra.h { fill: #cf9f64; }
+
+.pf-ull.t { fill: #fcecbc; }
+.pf-ull.v { fill: #f5db95; }
+.pf-ull.h { fill: #e2c47c; }
+
+.pf-ull__vag {
+  fill: none;
+  stroke: rgba(160, 115, 35, 0.34);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.pf-rit .pf-folie {
+  fill: rgba(166, 204, 230, 0.52);
+  stroke: rgba(70, 120, 160, 0.45);
+}
+
+.pf-folie__veck {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.75);
+  stroke-width: 1.4;
+}
+
+.pf-skiva.t { fill: #ffffff; }
+.pf-skiva.v { fill: #f4efe7; }
+.pf-skiva.h { fill: #dcd3c5; }
+
+.pf-skiva__fog {
+  stroke: rgba(27, 25, 21, 0.16);
+  stroke-width: 1;
+}
+
+.pf-fasad.t { fill: #4a443b; }
+.pf-fasad.v { fill: #302c26; }
+.pf-fasad.h { fill: #22201b; }
+
+.pf-rit .pf-fasad {
+  stroke: rgba(0, 0, 0, 0.35);
+}
+
+.pf-fasad__bradd {
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 1;
+}
+
+.pf-kant.t { fill: #ecc893; }
+.pf-kant.v { fill: #d9ad72; }
+.pf-kant.h { fill: #bf925a; }
+
+.pf-rit .pf-glas {
+  fill: url(#pf-glas-ton);
+  stroke: rgba(0, 0, 0, 0.3);
+}
+
+.pf-rit .pf-dorr {
+  fill: #16140f;
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.pf-mark.t { fill: #efe9df; }
+.pf-mark.v { fill: #ddd5c7; }
+.pf-mark.h { fill: #cdc4b4; }
+
+.pf-rit .pf-mark {
+  stroke: rgba(27, 25, 21, 0.1);
+}
+
+.pf-mark__rut {
+  fill: none;
+  stroke: rgba(27, 25, 21, 0.07);
+  stroke-width: 1;
+}
+
+.pf-spar {
+  fill: none;
+  stroke: var(--virke-djup);
+  stroke-width: 1.4;
+  stroke-dasharray: 5 5;
+  opacity: 0.75;
+}
+
+.pf-lina {
+  fill: none;
+  stroke: #3a352d;
+  stroke-width: 1.2;
+}
+
+.pf-lina--wire {
+  stroke-width: 1.8;
+}
+
+.pf-ledare {
+  fill: none;
+  stroke: rgba(27, 25, 21, 0.35);
+  stroke-width: 1;
+}
+
+html[data-tema="mork"] .pf-ledare {
+  stroke: rgba(247, 245, 240, 0.35);
+}
+
+.pf-krok {
+  fill: var(--virke);
+  stroke: #3a352d;
+  stroke-width: 1.5;
+}
+
+.pf-skarv {
+  fill: none;
+  stroke: var(--virke);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+
+.pf-skylt rect {
+  fill: #ffffff;
+  stroke: rgba(27, 25, 21, 0.1);
+}
+
+.pf-skylt text {
+  font: 600 11.5px/1 var(--knappfont);
+  fill: var(--kol);
+}
+
+.pf-skylt--virke rect {
+  fill: var(--virke);
+  stroke: none;
+}
+
+.pf-nr circle {
+  fill: var(--virke);
+}
+
+.pf-nr text {
+  font: 700 12px/1 var(--knappfont);
+  fill: var(--kol);
+}
+
+/* Scenerna tonar mellan varandra; var och en spelar sin rörelse
+   när den väljs - varje gång. */
+.pf-scen {
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.pf-scen.vald {
+  opacity: 1;
+  transition: opacity 0.6s ease 0.1s;
+}
+
+.pf-lager {
+  transform: translate(var(--ux), var(--uy));
+  transition: transform 1.2s var(--mjuk);
+}
+
+.pf-scen--vagg.vald .pf-lager {
+  transform: none;
+  transition-delay: calc(0.25s + var(--i) * 0.12s);
+}
+
+.pf-lager .pf-skylt {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.pf-scen--vagg.vald .pf-lager .pf-skylt {
+  opacity: 1;
+  transition: opacity 0.6s ease calc(1.1s + var(--i) * 0.14s);
+}
+
+.pf-block__b {
+  transform: translateY(var(--ly));
+  transition: transform 0.6s ease;
+}
+
+.pf-scen--block.vald .pf-block__b {
+  transform: none;
+  transition: transform 1.8s cubic-bezier(0.45, 0, 0.2, 1) 0.7s;
+}
+
+.pf-block__spar,
+.pf-block__lyfts {
+  transition: opacity 0.4s ease;
+}
+
+.pf-scen--block.vald .pf-block__spar {
+  opacity: 0;
+  transition-delay: 2.3s;
+}
+
+.pf-scen--block.vald .pf-block__lyfts {
+  opacity: 0;
+  transition-delay: 2.1s;
+}
+
+.pf-block__skarv {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.pf-scen--block.vald .pf-block__skarv {
+  opacity: 1;
+  transition: opacity 0.6s ease 2.5s;
+}
+
+.pf-modul {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.4s ease, transform 0.6s ease;
+}
+
+.pf-scen--modul.vald .pf-modul {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.6s ease calc(0.2s + var(--i) * 0.25s), transform 0.9s var(--mjuk) calc(0.2s + var(--i) * 0.25s);
+}
+
+.pf-modul--ny {
+  transform: translate(var(--ux), var(--uy));
+}
+
+.pf-scen--modul.vald .pf-modul--ny {
+  transition: opacity 0.5s ease 1.1s, transform 1.5s var(--mjuk) 1.1s;
+}
+
+.pf-modul__spar {
+  transition: opacity 0.4s ease;
+}
+
+.pf-scen--modul.vald .pf-modul__spar {
+  opacity: 0;
+  transition-delay: 2.3s;
+}
+
+.pf-etapp {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.pf-scen--modul.vald .pf-etapp {
+  opacity: 1;
+  transition: opacity 0.6s ease 0.9s;
+}
+
+.pf-scen--modul.vald .pf-etapp--2 {
+  transition-delay: 2.5s;
+}
+
+/* --- Bildbandet --------------------------------------------------- */
+.pf-band {
+  padding: clamp(40px, 5vw, 72px) 0 var(--sekt);
+  overflow: clip;
+}
+
+.pf-band__huvud {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: var(--inre);
+  margin: 0 auto 28px;
+}
+
+.pf-band__huvud .ih-etikett {
+  margin: 0 0 14px;
+}
+
+.pf-band__titel {
+  margin: 0;
+  font-size: clamp(2rem, 1.1rem + 2.8vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.pf-band__pilar {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+
+.pf-band__pilar button {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--vit);
+  box-shadow: 0 1px 2px rgba(27, 25, 21, 0.05), 0 14px 28px -20px rgba(27, 25, 21, 0.5),
+    inset 0 0 0 1px rgba(27, 25, 21, 0.08);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 0.35s ease, color 0.35s ease, opacity 0.35s ease, transform 0.35s var(--mjuk);
+}
+
+.pf-band__pilar button:hover:not(:disabled) {
+  background: var(--kol);
+  color: var(--krita);
+  transform: scale(1.05);
+}
+
+.pf-band__pilar button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pf-band__pilar svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pf-band__rad {
+  --kant-in: max(calc((100% - 1240px) / 2), clamp(16px, 4vw, 48px));
+  display: flex;
+  gap: 14px;
+  margin: 0;
+  padding: 0 var(--kant-in) 4px;
+  overflow-x: auto;
+  list-style: none;
+  scroll-padding-inline: var(--kant-in);
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  cursor: grab;
+}
+
+.pf-band__rad::-webkit-scrollbar {
+  display: none;
+}
+
+.pf-band__rad:focus-visible {
+  outline: 2px solid var(--virke);
+  outline-offset: 4px;
+}
+
+.pf-band__rad.drar {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+}
+
+.pf-band__bild {
+  flex: none;
+  width: calc(clamp(240px, 32vw, 420px) * var(--ar));
+  max-width: 82vw;
+  scroll-snap-align: start;
+}
+
+.pf-band__bild figure {
+  margin: 0;
+}
+
+.pf-band__ram {
+  display: block;
+  aspect-ratio: var(--ar);
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: 0 30px 60px -40px rgba(27, 25, 21, 0.55);
+}
+
+.pf-band__ram img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  -webkit-user-drag: none;
+}
+
+.pf-band__bild figcaption {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  margin-top: 12px;
+  font: 500 0.875rem/1.4 var(--knappfont);
+  color: var(--text-2);
+}
+
+.pf-band__bild figcaption span {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--virke-djup);
+}
+
+.pf-band__matare {
+  display: block;
+  width: var(--inre);
+  height: 2px;
+  margin: 26px auto 0;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--kant);
+}
+
+.pf-band__matare i {
+  display: block;
+  width: 30%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--virke-djup), var(--virke));
+}
+
+/* --- Under tak mot på bygget ---------------------------------------- */
+.pf-tak {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: calc(100% - 24px);
+  margin: 0 12px;
+  border-radius: 32px;
+  background: #1b1915;
+  color: var(--krita);
+}
+
+.pf-tak__bild {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.32;
+}
+
+.pf-tak::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(50% 70% at 90% 10%, rgba(240, 181, 110, 0.16), transparent 60%),
+    linear-gradient(100deg, rgba(20, 18, 15, 0.97) 0%, rgba(20, 18, 15, 0.86) 45%, rgba(20, 18, 15, 0.62) 100%);
+}
+
+.pf-tak__inre {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 80px);
+  align-items: center;
+  width: var(--inre);
+  margin: 0 auto;
+  padding: clamp(64px, 9vw, 120px) 0;
+}
+
+.pf-tak .ih-etikett {
+  margin: 0 0 18px;
+}
+
+.pf-tak .pf-tak__titel {
+  margin: 0 0 20px;
+  font-size: clamp(2.2rem, 1.2rem + 3.4vw, 4.2rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--krita);
+}
+
+.pf-tak__titel em {
+  background-image: linear-gradient(-45deg,
+    #d9974f 0%, #f0b56e 30%, #f6c68d 40%, #ffe2b8 47%, #fff4e2 50%, #ffe2b8 53%, #f0b56e 68%, #d9974f 100%);
+}
+
+.pf-tak__text {
+  max-width: 50ch;
+  margin: 0 0 24px;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: rgba(247, 245, 240, 0.74);
+}
+
+.pf-tak__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+
+.pf-tak__chips span {
+  padding: 9px 15px;
+  border-radius: 999px;
+  background: rgba(247, 245, 240, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  font: 500 0.8125rem/1 var(--knappfont);
+  color: rgba(247, 245, 240, 0.85);
+}
+
+.pf-flytt {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) 96px minmax(0, 1fr);
+  align-items: center;
+}
+
+.pf-flytt__kol {
+  padding: 22px;
+  border-radius: 24px;
+  background: rgba(247, 245, 240, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+}
+
+.pf-flytt__kol--tak {
+  background: linear-gradient(160deg, rgba(240, 181, 110, 0.2), rgba(240, 181, 110, 0.05));
+  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.32), 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+}
+
+.pf-flytt__rubrik {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 16px;
+  font: 600 0.75rem/1 var(--knappfont);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--virke);
+}
+
+.pf-flytt__kol--bygge .pf-flytt__rubrik {
+  color: rgba(247, 245, 240, 0.72);
+}
+
+.pf-flytt__rubrik .pf-ikon {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  border-radius: 10px;
+  background: rgba(240, 181, 110, 0.16);
+  stroke: var(--virke);
+}
+
+.pf-flytt ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pf-flytt li {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(247, 245, 240, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+  font: 600 0.9375rem/1.2 var(--knappfont);
+  color: var(--krita);
+  transition: opacity 0.6s ease, transform 0.8s var(--mjuk);
+}
+
+.pf-flytt__kol--tak li {
+  background: rgba(20, 18, 15, 0.45);
+}
+
+.pf-flytt__kol--tak li:nth-child(2) { transition-delay: 0.08s; }
+.pf-flytt__kol--tak li:nth-child(3) { transition-delay: 0.16s; }
+.pf-flytt__kol--tak li:nth-child(4) { transition-delay: 0.24s; }
+.pf-flytt__kol--bygge li { transition-delay: 0.9s; }
+.pf-flytt__kol--bygge li:nth-child(2) { transition-delay: 1s; }
+.pf-flytt__kol--bygge li:nth-child(3) { transition-delay: 1.1s; }
+
+.pf-flytt.pf-vanta li {
+  opacity: 0;
+  transform: translateX(-14px);
+}
+
+.pf-flytt__vag {
+  position: relative;
+  align-self: stretch;
+}
+
+.pf-flytt__vag::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  left: 10px;
+  border-top: 2px dashed rgba(240, 181, 110, 0.45);
+}
+
+.pf-flytt__bil {
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-top: -20px;
+  border-radius: 50%;
+  background: var(--virke);
+  box-shadow: 0 10px 22px -8px rgba(240, 181, 110, 0.7);
+  color: var(--kol);
+  animation: pf-bil 3.8s var(--mjuk) infinite;
+}
+
+.pf-flytt__bil .pf-ikon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.8;
+}
+
+.pf-tak.pausad .pf-flytt__bil,
+.pf-flytt.pf-vanta .pf-flytt__bil {
+  animation-play-state: paused;
+}
+
+@keyframes pf-bil {
+  0% { opacity: 0; transform: translateX(-4px); }
+  12% { opacity: 1; }
+  70% { opacity: 1; transform: translateX(48px); }
+  86%, 100% { opacity: 0; transform: translateX(52px); }
+}
+
+/* --- Fyra steg på en linje ----------------------------------------- */
+.pf-steg {
+  padding: var(--sekt) 0;
+}
+
+.pf-steg__inre {
+  width: var(--inre);
+  margin: 0 auto;
+}
+
+.pf-steg__huvud {
+  max-width: 720px;
+  margin: 0 auto clamp(40px, 5vw, 64px);
+  text-align: center;
+}
+
+.pf-steg__huvud .ih-etikett {
+  justify-content: center;
+  margin: 0 0 16px;
+}
+
+.pf-steg__titel {
+  margin: 0 0 16px;
+  font-size: clamp(2.2rem, 1.2rem + 3.4vw, 4.2rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.pf-steg__ingress {
+  margin: 0 auto;
+  max-width: 46ch;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+
+.pf-steg__lista {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pf-steg__linje {
+  position: absolute;
+  top: 34px;
+  right: 12.5%;
+  left: 12.5%;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--kant);
+}
+
+.pf-steg__linje i {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--virke-djup), var(--virke));
+  transform: scaleX(var(--p, 0));
+  transform-origin: left;
+}
+
+.pf-steg__steg {
+  position: relative;
+  padding: 0 10px;
+  text-align: center;
+}
+
+.pf-steg__nod {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--vit);
+  box-shadow: 0 0 0 8px var(--ben), 0 14px 30px -16px rgba(27, 25, 21, 0.5),
+    inset 0 0 0 1px rgba(27, 25, 21, 0.08);
+  transition: background-color 0.5s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pf-steg__nod .pf-ikon {
+  width: 26px;
+  height: 26px;
+  stroke: var(--text-3);
+  transition: stroke 0.5s ease;
+}
+
+.pf-steg__steg.klar .pf-steg__nod {
+  background: var(--kol);
+  transform: scale(1.06);
+}
+
+.pf-steg__steg.klar .pf-steg__nod .pf-ikon {
+  stroke: var(--virke);
+}
+
+.pf-steg__nr {
+  display: block;
+  margin-bottom: 6px;
+  font: 600 0.75rem/1 var(--knappfont);
+  letter-spacing: 0.08em;
+  color: var(--virke-djup);
+}
+
+.pf-steg__steg h3 {
+  margin: 0 0 8px;
+  font: 600 1.125rem/1.25 var(--knappfont);
+  letter-spacing: -0.015em;
+}
+
+.pf-steg__steg p {
+  max-width: 30ch;
+  margin: 0 auto;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+/* --- Smalare skärmar ------------------------------------------------ */
+@media (max-width: 1000px) {
+  .pf-topp__inre,
+  .pf-tak__inre {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pf-topp__bild {
+    max-width: 640px;
+  }
+
+  .pf-lev__panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pf-lev__vanster {
+    display: contents;
+  }
+
+  .pf-lev__val {
+    order: 1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pf-lev__scen {
+    order: 2;
+    min-height: 0;
+  }
+
+  .pf-lev__delar {
+    order: 3;
+  }
+
+  .pf-lev__huvud {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .pf-topp__inre {
+    padding-top: 40px;
+  }
+
+  .pf-chip--a {
+    top: -18px;
+    left: -6px;
+  }
+
+  .pf-chip--b {
+    right: -6px;
+    bottom: -18px;
+  }
+
+  .pf-chip {
+    padding: 8px 14px 8px 8px;
+  }
+
+  .pf-chip .pf-ikon {
+    width: 32px;
+    height: 32px;
+    padding: 7px;
+  }
+
+  .pf-lev__val {
+    gap: 6px;
+  }
+
+  .pf-lev__val button {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    justify-items: start;
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .pf-lev__val button:hover {
+    transform: none;
+  }
+
+  .pf-lev__nr,
+  .pf-lev__namn small {
+    display: none;
+  }
+
+  .pf-lev__ikon {
+    width: 34px;
+    height: 34px;
+    padding: 7px;
+  }
+
+  .pf-lev__namn {
+    font-size: 0.8125rem;
+    hyphens: manual;
+  }
+
+  /* Ritningen skalas ned i mobilen - skyltarna får växa tillbaka. */
+  .pf-skylt__inre {
+    transform: scale(1.5);
+  }
+
+  .pf-lev__scen {
+    border-radius: 24px;
+  }
+
+  .pf-lev__del {
+    padding: 20px;
+  }
+
+  .pf-band__huvud {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pf-band__pilar {
+    display: none;
+  }
+
+  .pf-band__bild {
+    width: calc(240px * var(--ar));
+  }
+
+  .pf-tak {
+    border-radius: 26px;
+  }
+
+  .pf-flytt {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 72px auto;
+  }
+
+  .pf-flytt__vag::before {
+    top: 10px;
+    bottom: 10px;
+    left: 50%;
+    right: auto;
+    border-top: 0;
+    border-left: 2px dashed rgba(240, 181, 110, 0.45);
+  }
+
+  .pf-flytt__bil {
+    top: 4px;
+    left: 50%;
+    margin: 0 0 0 -20px;
+    animation-name: pf-bil-ned;
+  }
+
+  .pf-steg__lista {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .pf-steg__linje {
+    top: 34px;
+    bottom: 34px;
+    left: 33px;
+    right: auto;
+    width: 2px;
+    height: auto;
+  }
+
+  .pf-steg__linje i {
+    transform: scaleY(var(--p, 0));
+    transform-origin: top;
+  }
+
+  .pf-steg__steg {
+    display: grid;
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 0 18px;
+    padding: 0;
+    text-align: left;
+  }
+
+  .pf-steg__nod {
+    grid-row: span 3;
+    margin: 0;
+  }
+
+  .pf-steg__nr {
+    margin-top: 8px;
+  }
+
+  .pf-steg__steg p {
+    margin: 0;
+  }
+}
+
+@keyframes pf-bil-ned {
+  0% { opacity: 0; transform: translateY(-4px); }
+  12% { opacity: 1; }
+  70% { opacity: 1; transform: translateY(28px); }
+  86%, 100% { opacity: 0; transform: translateY(30px); }
+}
+
+/* --- Mörkt läge ----------------------------------------------------- */
+html[data-tema="mork"] .pf-lev__val button[aria-selected="true"] {
+  background:
+    radial-gradient(90% 120% at 100% 0%, rgba(240, 181, 110, 0.16), transparent 60%),
+    #2b2721;
+  box-shadow: 0 26px 50px -30px rgba(0, 0, 0, 0.9), inset 0 0 0 1px rgba(240, 181, 110, 0.28);
+}
+
+html[data-tema="mork"] .pf-lev__ikon {
+  background: rgba(240, 181, 110, 0.12);
+  stroke: var(--virke);
+}
+
+html[data-tema="mork"] .pf-lev__val button,
+html[data-tema="mork"] .pf-lev__del,
+html[data-tema="mork"] .pf-band__pilar button {
+  box-shadow: 0 22px 44px -34px rgba(0, 0, 0, 0.9), inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] .pf-lev__knapp {
+  box-shadow: none;
+}
+
+html[data-tema="mork"] .pf-bock {
+  background: rgba(240, 181, 110, 0.14);
+}
+
+html[data-tema="mork"] .pf-lev__scen {
+  background:
+    radial-gradient(60% 55% at 50% 45%, rgba(240, 181, 110, 0.08), transparent 70%),
+    linear-gradient(160deg, #221f1a 0%, #171511 100%);
+  box-shadow: 0 40px 90px -50px rgba(0, 0, 0, 0.9), inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] .pf-lev__scen::before {
+  background-image:
+    linear-gradient(rgba(247, 245, 240, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(247, 245, 240, 0.05) 1px, transparent 1px);
+}
+
+html[data-tema="mork"] .pf-mark.t { fill: #2e2a24; }
+html[data-tema="mork"] .pf-mark.v { fill: #25221d; }
+html[data-tema="mork"] .pf-mark.h { fill: #1e1b17; }
+
+html[data-tema="mork"] .pf-mark__rut {
+  stroke: rgba(247, 245, 240, 0.06);
+}
+
+html[data-tema="mork"] .pf-rit .pf-mark,
+html[data-tema="mork"] .pf-rit .pf-fasad {
+  stroke: rgba(247, 245, 240, 0.14);
+}
+
+html[data-tema="mork"] .pf-lina {
+  stroke: #cfc8bc;
+}
+
+html[data-tema="mork"] .pf-skylt rect {
+  fill: #2b2721;
+  stroke: rgba(247, 245, 240, 0.14);
+}
+
+html[data-tema="mork"] .pf-skylt text {
+  fill: var(--krita);
+}
+
+html[data-tema="mork"] .pf-skylt--virke rect {
+  fill: var(--virke);
+}
+
+html[data-tema="mork"] .pf-skylt--virke text {
+  fill: var(--kol);
+}
+
+html[data-tema="mork"] .pf-steg__steg.klar .pf-steg__nod {
+  background: #2b2721;
+  box-shadow: 0 0 0 8px var(--ben), inset 0 0 0 1px rgba(240, 181, 110, 0.35);
+}
+
+html[data-tema="mork"] .pf-tak {
+  box-shadow: 0 0 0 1px rgba(247, 245, 240, 0.06);
+}
+
+/* --- Lugn rörelse --------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .pf-topp__bild,
+  .pf-chip,
+  .pf-flytt__bil {
     animation: none;
   }
 }
