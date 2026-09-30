@@ -168,12 +168,16 @@
   }
 
   // Filmen i heron spelas bara när den syns - avkodningen kostar
-  // annars bildrutor hela vägen ner genom sidan.
+  // annars bildrutor hela vägen ner genom sidan. Den startas härifrån
+  // (inte autoplay), så i telefonens sparläge och vid lugn rörelse
+  // laddas den aldrig - då står stillbilden kvar. Mobilen får en
+  // mindre fil (720p, ca 2 MB) via <source media> i index.html.
   var film = $('.hero__media, .ihtopp__film');
+  var sparaData = !!(navigator.connection && navigator.connection.saveData);
   if (film && film.tagName === 'VIDEO' && window.IntersectionObserver) {
     new IntersectionObserver(function (poster) {
       if (poster[0].isIntersecting) {
-        if (!lugn && film.paused) { var p = film.play(); if (p && p.catch) p.catch(function () {}); }
+        if (!lugn && !sparaData && film.paused) { var p = film.play(); if (p && p.catch) p.catch(function () {}); }
       } else if (!film.paused) {
         film.pause();
       }

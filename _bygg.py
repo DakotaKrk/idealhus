@@ -3,7 +3,7 @@
 import re, io, os
 
 BAS = "https://idealhus.se/"
-CSS_V = "20260930zp"
+CSS_V = "20261001b"
 
 # Husen for den som ska bo i dem, och det vi levererar till andra som
 # bygger. De sag likadana ut i menyn tidigare, som fem jamnstallda val.
@@ -167,6 +167,34 @@ TYPSNITT = (
     '    <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>')
 
 
+def delningsbild(kalla):
+    """JPG i 1200 x 630 för länkförhandsvisningar (2026-10-01).
+
+    iMessage, WhatsApp och flera andra visar inte WebP som delningsbild,
+    så varje sida får en JPG gjord ur sin bild. Husbilderna beskärs
+    nerifrån (skylten sitter i nedre vänstra hörnet), övriga på mitten.
+    Filen skapas bara om den saknas.
+    """
+    import os
+    namn = os.path.splitext(os.path.basename(kalla))[0]
+    ut = f"delning/{namn}.jpg"
+    if not os.path.exists("images/" + ut):
+        from PIL import Image
+        os.makedirs("images/delning", exist_ok=True)
+        im = Image.open("images/" + kalla).convert("RGB")
+        b, h = im.size
+        nh = round(b * 630 / 1200)
+        if nh <= h:
+            top = h - nh if namn.startswith("hus-r") else (h - nh) // 2
+            im = im.crop((0, top, b, top + nh))
+        else:
+            nb = round(h * 1200 / 630)
+            im = im.crop(((b - nb) // 2, 0, (b - nb) // 2 + nb, h))
+        im.resize((1200, 630), Image.LANCZOS).save("images/" + ut, "JPEG", quality=82,
+                                                   optimize=True, progressive=True)
+    return ut
+
+
 def head(titel, beskrivning, forladdad=None, fil=None):
     pre = f'\n    <link rel="preload" as="image" href="images/{forladdad}" fetchpriority="high">' if forladdad else ""
     return f'''<!doctype html>
@@ -187,7 +215,9 @@ def head(titel, beskrivning, forladdad=None, fil=None):
     <meta property="og:site_name" content="Idealhus">
     <meta property="og:title" content="{titel}">
     <meta property="og:description" content="{beskrivning}">
-    <meta property="og:image" content="{BAS}images/{forladdad or 'hus-r2.webp'}">
+    <meta property="og:image" content="{BAS}images/{delningsbild(forladdad or 'hus-r2.webp')}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:url" content="{BAS}{fil or ''}">
     <meta name="twitter:card" content="summary_large_image">
 

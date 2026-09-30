@@ -58,6 +58,23 @@ def patcha(fil):
         slut = s.index('            </div>\n          </div>', start)
         s = s[:slut] + B.TIPSKORT + '\n' + s[slut:]
 
+    # Delningsbilden som JPG (2026-10-01), som i mallen. Startsidan delas
+    # med ett av husen i stället för snickarbilden.
+    m = re.search(r'    <meta property="og:image" content="https://idealhus\.se/images/([^"]+)">\n', s)
+    if m:
+        kalla = m.group(1)
+        if kalla.startswith("delning/"):
+            ny = kalla
+        else:
+            ny = B.delningsbild("hus-r2.webp" if fil == "index.html" else kalla)
+        rad = (f'    <meta property="og:image" content="https://idealhus.se/images/{ny}">\n'
+               '    <meta property="og:image:width" content="1200">\n'
+               '    <meta property="og:image:height" content="630">\n')
+        slut = m.end()
+        while s.startswith('    <meta property="og:image:', slut):
+            slut = s.index('\n', slut) + 1
+        s = s[:m.start()] + rad + s[slut:]
+
     # Temat sätts innan sidan ritas, annars blinkar den vit för den som
     # valt mörkt läge.
     # Raden byts alltid mot mallens, så en ändring där når hit också.

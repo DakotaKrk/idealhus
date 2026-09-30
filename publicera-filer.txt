@@ -25,6 +25,13 @@ fonts/manrope.woff2
 fonts/poppins-500.woff2
 fonts/poppins-600.woff2
 fonts/poppins-700.woff2
+images/delning/arbetare-vattenpass.jpg
+images/delning/dronare-montage.jpg
+images/delning/dronare-platta.jpg
+images/delning/dronare-vaggblock.jpg
+images/delning/hus-r2.jpg
+images/delning/hus-r3.jpg
+images/delning/stommar-stapel.jpg
 images/foto/affisch-kulisser.webp
 images/foto/affisch-virke.webp
 images/foto/arbetare-vattenpass.webp
@@ -56,7 +63,8 @@ images/tumme/meny-proffs.webp
 images/tumme/vidare-hus.webp
 images/tumme/vidare-pris.webp
 images/tumme/vidare-steg.webp
-images/video/hero-video-light.mp4
+images/video/hero-video-1080.mp4
+images/video/hero-video-720.mp4
 modeller/hus-r1.glb
 modeller/hus-r2.glb
 modeller/hus-r3.glb
