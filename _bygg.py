@@ -3,7 +3,7 @@
 import re, io, os
 
 BAS = "https://idealhus.se/"
-CSS_V = "20260930zj"
+CSS_V = "20260930zk"
 
 # Husen for den som ska bo i dem, och det vi levererar till andra som
 # bygger. De sag likadana ut i menyn tidigare, som fem jamnstallda val.
@@ -59,9 +59,16 @@ def kategorirad(namn, fil):
 # forst hur stort hus som far sta pa tomten.
 TIPSKORT = (
     '              <a class="main-nav__tips" href="vad-far-jag-bygga.html">\n'
-    '                <span class="main-nav__tips-etikett">Prova</span>\n'
-    '                <strong>Vad får jag bygga?</strong>\n'
-    '                <em>Räkna ut vad som ryms på din tomt</em>\n'
+    '                <span class="main-nav__tips-bild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false">'
+    '<path d="M12 11.6l8.5 4.3L12 20.2l-8.5-4.3z"/><path d="M9.2 16.4v-3.9l2.8-2.1 2.8 2.1v3.9"/>'
+    '<path d="M4 7h6M4 5.6v2.8M10 5.6v2.8"/></svg></span>\n'
+    '                <span class="main-nav__tips-text">\n'
+    '                  <span class="main-nav__tips-etikett">Prova</span>\n'
+    '                  <strong>Vad får jag bygga?</strong>\n'
+    '                  <em>Räkna ut vad som ryms på din tomt</em>\n'
+    '                </span>\n'
+    '                <svg class="main-nav__tips-pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+    '<path d="M5 12h14M13 6l6 6-6 6"/></svg>\n'
     '              </a>')
 
 
