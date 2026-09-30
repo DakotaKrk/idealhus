@@ -52,6 +52,9 @@ images/tumme/hus-r2.webp
 images/tumme/hus-r3.webp
 images/tumme/hus-r4.webp
 images/tumme/hus-r5.webp
+images/tumme/meny-attefallshus.webp
+images/tumme/meny-fritidshus.webp
+images/tumme/meny-proffs.webp
 images/tumme/vidare-hus.webp
 images/tumme/vidare-pris.webp
 images/tumme/vidare-steg.webp

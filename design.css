@@ -13881,6 +13881,411 @@ html[data-tema="mork"] .pf-tak {
   }
 }
 
+/* 23 Mobilmenyn (2026-09-30) -----------------------------------------
+   Kunden: "fixa den med på mobil versionen, mjuk när den kommer fram och
+   stänger, och skön känsla när man är på menyn". Ett mörkt kort som
+   växer fram ur hamburgaren medan sidan bakom mörknar; raderna glider
+   upp en i taget (--i). Husen som bildkort överst, sidorna som stora
+   länkar med en pil som vaknar, verktyget, temat, offerten och mejlen.
+   Stängs det glider allt tillbaka innan menyn göms (premium.js,
+   "Menyerna"). Bara transform och opacitet rör sig. */
+.mmeny {
+  display: none;
+}
+
+@media (max-width: 1040px) {
+  .mmeny {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    display: block;
+    padding: 86px max(8px, calc((100% - min(1296px, 100% - 2 * clamp(8px, 2vw, 32px))) / 2)) 12px;
+    background: rgba(12, 11, 9, 0.5);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mmeny[hidden] {
+    display: none;
+  }
+
+  .mmeny.mmeny--oppen {
+    opacity: 1;
+  }
+
+  .mmeny__panel {
+    position: relative;
+    width: min(540px, 100%);
+    max-height: 100%;
+    margin-left: auto;
+    padding: 10px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 28px;
+    background:
+      radial-gradient(90% 40% at 100% 0%, rgba(240, 181, 110, 0.16), transparent 65%),
+      radial-gradient(70% 30% at 0% 100%, rgba(63, 107, 80, 0.2), transparent 65%),
+      var(--kol);
+    box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.65), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    color: var(--krita);
+    opacity: 0;
+    transform: translateY(-14px) scale(0.96);
+    transform-origin: 100% 0;
+    transition: transform 0.55s var(--mjuk), opacity 0.35s ease;
+    scrollbar-width: none;
+  }
+
+  .mmeny__panel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mmeny--oppen .mmeny__panel {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Raderna glider upp i tur och ordning - och går tillbaka direkt. */
+  .mmeny__panel > * {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.25s ease, transform 0.4s var(--mjuk);
+  }
+
+  .mmeny--oppen .mmeny__panel > * {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.5s ease calc(0.08s + var(--i, 0) * 0.045s),
+      transform 0.7s var(--mjuk) calc(0.08s + var(--i, 0) * 0.045s);
+  }
+
+  /* --- Husen ----------------------------------------------------- */
+  .mmeny__grupp {
+    margin-bottom: 6px;
+    padding: 14px 10px 10px;
+    border-radius: 22px;
+    background: rgba(247, 245, 240, 0.04);
+    box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.06);
+  }
+
+  .mmeny__etikett {
+    margin: 0 6px 10px;
+    font: 600 0.6875rem/1 var(--knappfont);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 240, 0.5);
+  }
+
+  .mmeny__hus + .mmeny__etikett {
+    margin-top: 16px;
+  }
+
+  .mmeny__hus {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .mmeny__kort {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 6px 6px 12px;
+    border-radius: 18px;
+    background: rgba(247, 245, 240, 0.05);
+    color: var(--krita);
+    text-decoration: none;
+    transition: transform 0.35s var(--mjuk), background-color 0.35s ease, box-shadow 0.35s ease;
+  }
+
+  .mmeny__kort:hover {
+    background: rgba(247, 245, 240, 0.09);
+  }
+
+  .mmeny__kort:active {
+    transform: scale(0.97);
+  }
+
+  .mmeny__bild {
+    display: block;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border-radius: 13px;
+    background: #2b2721;
+  }
+
+  .mmeny__bild img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s var(--mjuk);
+  }
+
+  .mmeny__kort:hover .mmeny__bild img {
+    transform: scale(1.05);
+  }
+
+  .mmeny__korttext {
+    display: grid;
+    gap: 3px;
+    padding: 0 6px;
+  }
+
+  .mmeny__korttext strong {
+    font: 600 1rem/1.2 var(--knappfont);
+    letter-spacing: -0.015em;
+  }
+
+  .mmeny__korttext em {
+    font-style: normal;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: rgba(247, 245, 240, 0.6);
+  }
+
+  .mmeny__kort--bred {
+    grid-template-columns: 104px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+    padding: 6px;
+  }
+
+  .mmeny__kort--bred .mmeny__korttext {
+    padding: 0;
+  }
+
+  .mmeny__kort[aria-current="page"] {
+    box-shadow: inset 0 0 0 1.5px rgba(240, 181, 110, 0.7);
+  }
+
+  .mmeny__kort[aria-current="page"] strong {
+    color: var(--virke);
+  }
+
+  /* --- Sidorna ---------------------------------------------------- */
+  .mmeny__lank {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 14px 14px 12px;
+    border-radius: 16px;
+    color: var(--krita);
+    font: 600 1.375rem/1.15 var(--knappfont);
+    letter-spacing: -0.025em;
+    text-decoration: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .mmeny__lank + .mmeny__lank {
+    box-shadow: inset 0 1px 0 rgba(247, 245, 240, 0.07);
+  }
+
+  .mmeny__lank:hover,
+  .mmeny__lank:active {
+    background: rgba(247, 245, 240, 0.06);
+    box-shadow: none;
+  }
+
+  .mmeny__lank:hover + .mmeny__lank,
+  .mmeny__lank:active + .mmeny__lank {
+    box-shadow: none;
+  }
+
+  .mmeny__pil {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.3;
+    transform: translateX(-6px);
+    transition: transform 0.45s var(--mjuk), opacity 0.3s ease;
+  }
+
+  .mmeny__lank:hover .mmeny__pil,
+  .mmeny__lank:active .mmeny__pil,
+  .mmeny__lank[aria-current="page"] .mmeny__pil {
+    opacity: 1;
+    transform: none;
+  }
+
+  .mmeny__lank[aria-current="page"] {
+    color: var(--virke);
+  }
+
+  .mmeny__lank[aria-current="page"] span::after {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin: 0 0 0.2em 10px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 4px rgba(240, 181, 110, 0.18);
+    vertical-align: middle;
+  }
+
+  /* --- Verktyget, temat, offerten --------------------------------- */
+  .mmeny__tips {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+    margin-top: 8px;
+    padding: 10px 16px 10px 10px;
+    border-radius: 20px;
+    background: linear-gradient(120deg, rgba(240, 181, 110, 0.2), rgba(240, 181, 110, 0.05));
+    box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.26);
+    color: var(--krita);
+    text-decoration: none;
+    transition: transform 0.35s var(--mjuk);
+  }
+
+  .mmeny__tips:active {
+    transform: scale(0.98);
+  }
+
+  .mmeny__tipsbild {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--virke);
+  }
+
+  .mmeny__tipsbild svg {
+    width: 28px;
+    height: 28px;
+    fill: none;
+    stroke: var(--kol);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mmeny__tipstext {
+    display: grid;
+    gap: 3px;
+  }
+
+  .mmeny__prova {
+    font: 600 0.625rem/1 var(--knappfont);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--virke);
+  }
+
+  .mmeny__tipstext strong {
+    font: 600 1rem/1.2 var(--knappfont);
+    letter-spacing: -0.015em;
+  }
+
+  .mmeny__tips .mmeny__pil {
+    opacity: 0.8;
+    transform: none;
+  }
+
+  .mmeny .mmeny__tema {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 8px;
+    padding: 14px 16px;
+    border: 0;
+    border-radius: 18px;
+    background: rgba(247, 245, 240, 0.05);
+    box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.06);
+    color: var(--krita);
+    font: 600 0.9375rem/1.2 var(--knappfont);
+  }
+
+  .mmeny .mmeny__tema .temavaxel {
+    background: rgba(247, 245, 240, 0.2);
+  }
+
+  .mmeny .mmeny__tema[aria-pressed="true"] .temavaxel {
+    background: var(--virke);
+  }
+
+  .mmeny__cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 56px;
+    margin-top: 10px;
+    border-radius: 999px;
+    background: var(--virke);
+    color: var(--kol);
+    font: 600 1rem/1 var(--knappfont);
+    text-decoration: none;
+    box-shadow: 0 16px 32px -16px rgba(240, 181, 110, 0.7);
+    transition: transform 0.35s var(--mjuk);
+  }
+
+  .mmeny__cta:active {
+    transform: scale(0.98);
+  }
+
+  .mmeny__kontakt {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    justify-content: center;
+    margin: 14px 0 6px;
+    font-size: 0.8125rem;
+    color: rgba(247, 245, 240, 0.45);
+  }
+
+  .mmeny__kontakt a {
+    color: rgba(247, 245, 240, 0.8);
+    text-decoration: none;
+  }
+
+  .mmeny a:focus-visible,
+  .mmeny button:focus-visible {
+    outline: 2px solid var(--virke);
+    outline-offset: 2px;
+  }
+
+  html[data-tema="mork"] .mmeny__panel {
+    background:
+      radial-gradient(90% 40% at 100% 0%, rgba(240, 181, 110, 0.12), transparent 65%),
+      radial-gradient(70% 30% at 0% 100%, rgba(63, 107, 80, 0.16), transparent 65%),
+      #1f1c17;
+    box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+  }
+
+  html[data-tema="mork"] .mmeny {
+    background: rgba(0, 0, 0, 0.55);
+  }
+}
+
+@media (max-width: 760px) {
+  .mmeny {
+    padding-top: 76px;
+  }
+
+  .mmeny__lank {
+    font-size: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mmeny,
+  .mmeny__panel,
+  .mmeny__panel > * {
+    transition: none !important;
+  }
+}
+
 /* 16 Prestanda ------------------------------------------------
    backdrop-filter suddar det som ligger bakom i varje bildruta när
    sidan rullar eller filmen spelar - menyraden låg över filmen och

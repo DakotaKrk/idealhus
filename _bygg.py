@@ -3,7 +3,7 @@
 import re, io, os
 
 BAS = "https://idealhus.se/"
-CSS_V = "20260930zk"
+CSS_V = "20260930zl"
 
 # Husen for den som ska bo i dem, och det vi levererar till andra som
 # bygger. De sag likadana ut i menyn tidigare, som fem jamnstallda val.
@@ -25,11 +25,11 @@ PROFFS_ETIKETT = "För dig som bygger"
 # Bild och en rad om varje kategori. En rullgardin med bara namn
 # tvingar besokaren att gissa vad skillnaden ar.
 KATEGORI_INFO = {
-    "Attefallshus": ("hus-r2.webp",
+    "Attefallshus": ("tumme/meny-attefallshus.webp",
                      "Utan bygglov, 30–50 m²"),
-    "Fritidshus": ("hus-r3.webp",
+    "Fritidshus": ("tumme/meny-fritidshus.webp",
                    "För helger och långa somrar"),
-    "Proffs": ("foto/lyft-stommar.webp",
+    "Proffs": ("tumme/meny-proffs.webp",
                "Väggar, block och moduler"),
 }
 
@@ -104,18 +104,49 @@ def huvudmeny(aktiv):
     return "\n".join(rader)
 
 
+MMENY_PIL = ('<svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+             '<path d="M5 12h14M13 6l6 6-6 6"/></svg>')
+
+
+def mmeny_kort(namn, fil, bred=False):
+    bild, text = KATEGORI_INFO[namn]
+    klass = "mmeny__kort mmeny__kort--bred" if bred else "mmeny__kort"
+    return (f'            <a class="{klass}" href="{fil}">'
+            f'<span class="mmeny__bild"><img src="images/{bild}" width="480" height="320" alt="" '
+            f'loading="lazy" decoding="async"></span>'
+            f'<span class="mmeny__korttext"><strong>{namn}</strong><em>{text}</em></span></a>')
+
+
 def mobilmeny():
-    val = "\n".join(
-        [f'          <a href="{fil}">{namn}</a>' for namn, fil in KATEGORIER_PRIVAT]
-        + [f'          <span class="mobile-nav__under">{PROFFS_ETIKETT}</span>']
-        + [f'          <a href="{fil}">{namn}</a>' for namn, fil in KATEGORIER_PROFFS])
-    rader = []
+    """Mobilmenyn (2026-09-30): husen som kort överst, sedan sidorna som
+    stora länkar, verktyget, temat (läggs in av premium.js), offerten
+    och mejlen. --i styr i vilken ordning raderna glider fram."""
+    hus = "\n".join(mmeny_kort(n, f) for n, f in KATEGORIER_PRIVAT)
+    proffs = "\n".join(mmeny_kort(n, f, True) for n, f in KATEGORIER_PROFFS)
+    rader = [f'''          <div class="mmeny__grupp" style="--i:0">
+            <p class="mmeny__etikett">{PRIVAT_ETIKETT}</p>
+            <div class="mmeny__hus">
+{hus}
+            </div>
+            <p class="mmeny__etikett">{PROFFS_ETIKETT}</p>
+{proffs}
+          </div>''']
+    i = 1
     for namn, fil in MENY:
         if namn == "__DROPDOWN__":
-            rader.append('        <div class="mobile-nav__grupp">\n'
-                         '          <span>Våra hus</span>\n' + val + '\n        </div>')
             continue
-        rader.append(f'        <a href="{fil}">{namn}</a>')
+        rader.append(f'          <a class="mmeny__lank" href="{fil}" style="--i:{i}"><span>{namn}</span>{MMENY_PIL}</a>')
+        i += 1
+    rader.append(
+        f'          <a class="mmeny__tips" href="vad-far-jag-bygga.html" style="--i:{i}">'
+        '<span class="mmeny__tipsbild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false">'
+        '<path d="M12 11.6l8.5 4.3L12 20.2l-8.5-4.3z"/><path d="M9.2 16.4v-3.9l2.8-2.1 2.8 2.1v3.9"/>'
+        '<path d="M4 7h6M4 5.6v2.8M10 5.6v2.8"/></svg></span>'
+        '<span class="mmeny__tipstext"><span class="mmeny__prova">Prova</span>'
+        '<strong>Vad får jag bygga?</strong></span>' + MMENY_PIL + '</a>')
+    rader.append(f'          <a class="mmeny__cta" href="kontakt.html" style="--i:{i + 2}">Begär offert</a>')
+    rader.append(f'          <p class="mmeny__kontakt" style="--i:{i + 3}">'
+                 '<a href="mailto:info@idealhus.se">info@idealhus.se</a><span>Stockholm, Sverige</span></p>')
     return "\n".join(rader)
 
 
@@ -207,10 +238,10 @@ def header(aktiv):
         </div>
       </div>
 
-      <nav class="mobile-nav" id="mobile-nav" aria-label="Meny" hidden>
+      <nav class="mmeny" id="mobile-nav" aria-label="Meny" hidden>
+        <div class="mmeny__panel">
 {mobilmeny()}
-        <a class="mobile-nav__tips" href="vad-far-jag-bygga.html"><span>Prova</span> Vad får jag bygga?</a>
-        <a class="mobile-nav__cta" href="kontakt.html">Begär offert</a>
+        </div>
       </nav>
     </header>
 '''

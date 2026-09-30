@@ -58,10 +58,6 @@ def patcha(fil):
         slut = s.index('            </div>\n          </div>', start)
         s = s[:slut] + B.TIPSKORT + '\n' + s[slut:]
 
-    if 'class="mobile-nav__tips"' not in s:
-        assert s.count(MOBIL_A) == 1, fil
-        s = s.replace(MOBIL_A, MOBIL_B)
-
     # Temat sätts innan sidan ritas, annars blinkar den vit för den som
     # valt mörkt läge.
     # Raden byts alltid mot mallens, så en ändring där når hit också.

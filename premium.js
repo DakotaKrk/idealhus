@@ -1828,11 +1828,13 @@
     if (meny) {
       rad = document.createElement('button');
       rad.type = 'button';
-      rad.className = 'mobile-nav__tema';
+      rad.className = 'mobile-nav__tema mmeny__tema';
       rad.innerHTML = '<span class="mobile-nav__tema-ikon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
         '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Mörkt läge</span>' +
         '<span class="temavaxel" aria-hidden="true"></span>';
-      meny.insertBefore(rad, $('.mobile-nav__cta', meny));
+      var cta = $('.mmeny__cta, .mobile-nav__cta', meny);
+      rad.style.setProperty('--i', (parseInt(cta.style.getPropertyValue('--i'), 10) || 8) - 1);
+      cta.parentNode.insertBefore(rad, cta);
     }
     function uppdatera() {
       var mork = html.getAttribute('data-tema') === 'mork';
@@ -2093,22 +2095,58 @@
      menyn öppen och sidan låst - så då stängs den. */
   (function () {
     var sidan = location.pathname.split('/').pop() || 'index.html';
-    $$('.main-nav a, .mobile-nav a').forEach(function (a) {
+    $$('.main-nav a, .mmeny a').forEach(function (a) {
       if (a.getAttribute('href') === sidan) a.setAttribute('aria-current', 'page');
     });
-    var knapp = $('.menu-button');
+    // Sidornas egna skript slår av och på menyn direkt (hidden). Knappen
+    // byts mot en kopia utan deras lyssnare, så att menyn kan glida fram
+    // och tillbaka i stället (2026-09-30, design.css 23).
+    var gammal = $('.menu-button');
     var panel = $('#mobile-nav');
-    if (!knapp || !panel) return;
+    if (!gammal || !panel) return;
+    var knapp = gammal.cloneNode(true);
+    gammal.parentNode.replaceChild(knapp, gammal);
+    var html = document.documentElement;
+    var timer = 0;
     function oppen() { return knapp.getAttribute('aria-expanded') === 'true'; }
+    function satt(oppna, direkt) {
+      knapp.setAttribute('aria-expanded', String(oppna));
+      knapp.setAttribute('aria-label', oppna ? 'Stäng meny' : 'Öppna meny');
+      knapp.classList.toggle('menu-button--open', oppna);
+      html.classList.toggle('meny-oppen', oppna);
+      // Sidans rullelement är <html>; utan lås rullar sidan bakom menyn.
+      html.style.overflow = oppna ? 'hidden' : '';
+      clearTimeout(timer);
+      if (oppna) {
+        panel.hidden = false;
+        void panel.offsetWidth;
+        panel.classList.add('mmeny--oppen');
+        var p = $('.mmeny__panel', panel);
+        if (p) p.scrollTop = 0;
+      } else {
+        panel.classList.remove('mmeny--oppen');
+        if (direkt || lugn) panel.hidden = true;
+        else timer = setTimeout(function () { panel.hidden = true; }, 460);
+      }
+    }
+    knapp.addEventListener('click', function () { satt(!oppen()); });
+    // Ett tryck utanför kortet stänger; en länk stänger också.
+    panel.addEventListener('click', function (e) {
+      if (e.target === panel || e.target.closest('a')) satt(false);
+    });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && oppen()) {
-        knapp.click();
+        satt(false);
         knapp.focus();
       }
     });
+    // Bakåt visar sidan ur minnet - med menyn öppen och sidan låst.
     window.addEventListener('pageshow', function (e) {
-      if (e.persisted && oppen()) knapp.click();
+      if (e.persisted && oppen()) satt(false, true);
     });
+    var bred = window.matchMedia('(min-width: 1041px)');
+    var nyBredd = function (m) { if (m.matches && oppen()) satt(false, true); };
+    if (bred.addEventListener) bred.addEventListener('change', nyBredd);
   })();
 
   /* ============================================================

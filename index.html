@@ -24,9 +24,9 @@
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20260930zk">
-    <link rel="stylesheet" href="design.css?v=20260930zk">
-    <script src="premium.js?v=20260930zk" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20260930zl">
+    <link rel="stylesheet" href="design.css?v=20260930zl">
+    <script src="premium.js?v=20260930zl" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
@@ -59,14 +59,14 @@
             <div class="main-nav__sub" id="undermeny-hus">
               <p class="main-nav__sub-etikett">För dig som ska bo</p>
               <a href="attefallshus.html">
-                <img src="images/hus-r2.webp" alt="" loading="lazy" decoding="async">
+                <img src="images/tumme/meny-attefallshus.webp" alt="" loading="lazy" decoding="async">
                 <span>
                   <strong>Attefallshus</strong>
                   <em>Utan bygglov, 30–50 m²</em>
                 </span>
               </a>
               <a href="fritidshus.html">
-                <img src="images/hus-r3.webp" alt="" loading="lazy" decoding="async">
+                <img src="images/tumme/meny-fritidshus.webp" alt="" loading="lazy" decoding="async">
                 <span>
                   <strong>Fritidshus</strong>
                   <em>För helger och långa somrar</em>
@@ -74,7 +74,7 @@
               </a>
               <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
               <a href="proffs.html">
-                <img src="images/foto/lyft-stommar.webp" alt="" loading="lazy" decoding="async">
+                <img src="images/tumme/meny-proffs.webp" alt="" loading="lazy" decoding="async">
                 <span>
                   <strong>Proffs</strong>
                   <em>Väggar, block och moduler</em>
@@ -108,21 +108,26 @@
         </div>
       </div>
 
-      <nav class="mobile-nav" id="mobile-nav" aria-label="Meny" hidden>
-        <a href="index.html">Hem</a>
-        <div class="mobile-nav__grupp">
-          <span>Våra hus</span>
-          <a href="attefallshus.html">Attefallshus</a>
-          <a href="fritidshus.html">Fritidshus</a>
-          <span class="mobile-nav__under">För dig som bygger</span>
-          <a href="proffs.html">Proffs</a>
+      <nav class="mmeny" id="mobile-nav" aria-label="Meny" hidden>
+        <div class="mmeny__panel">
+          <div class="mmeny__grupp" style="--i:0">
+            <p class="mmeny__etikett">För dig som ska bo</p>
+            <div class="mmeny__hus">
+            <a class="mmeny__kort" href="attefallshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-attefallshus.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Attefallshus</strong><em>Utan bygglov, 30–50 m²</em></span></a>
+            <a class="mmeny__kort" href="fritidshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-fritidshus.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Fritidshus</strong><em>För helger och långa somrar</em></span></a>
+            </div>
+            <p class="mmeny__etikett">För dig som bygger</p>
+            <a class="mmeny__kort mmeny__kort--bred" href="proffs.html"><span class="mmeny__bild"><img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Proffs</strong><em>Väggar, block och moduler</em></span></a>
+          </div>
+          <a class="mmeny__lank" href="index.html" style="--i:1"><span>Hem</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="mmeny__lank" href="priser.html" style="--i:2"><span>Priser</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="mmeny__lank" href="sa-fungerar-det.html" style="--i:3"><span>Så fungerar det</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="mmeny__lank" href="om-oss.html" style="--i:4"><span>Om oss</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="mmeny__lank" href="kontakt.html" style="--i:5"><span>Kontakt</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="mmeny__tips" href="vad-far-jag-bygga.html" style="--i:6"><span class="mmeny__tipsbild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 11.6l8.5 4.3L12 20.2l-8.5-4.3z"/><path d="M9.2 16.4v-3.9l2.8-2.1 2.8 2.1v3.9"/><path d="M4 7h6M4 5.6v2.8M10 5.6v2.8"/></svg></span><span class="mmeny__tipstext"><span class="mmeny__prova">Prova</span><strong>Vad får jag bygga?</strong></span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="mmeny__cta" href="kontakt.html" style="--i:8">Begär offert</a>
+          <p class="mmeny__kontakt" style="--i:9"><a href="mailto:info@idealhus.se">info@idealhus.se</a><span>Stockholm, Sverige</span></p>
         </div>
-        <a href="priser.html">Priser</a>
-        <a href="sa-fungerar-det.html">Så fungerar det</a>
-        <a href="om-oss.html">Om oss</a>
-        <a href="kontakt.html">Kontakt</a>
-        <a class="mobile-nav__tips" href="vad-far-jag-bygga.html"><span>Prova</span> Vad får jag bygga?</a>
-        <a class="mobile-nav__cta" href="kontakt.html">Begär offert</a>
       </nav>
     </header>
 
