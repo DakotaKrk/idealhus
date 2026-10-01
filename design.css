@@ -18916,3 +18916,206 @@ html[data-tema="mork"] .husval__ruta .husval__val button {
   font-weight: 500;
 }
 
+/* =====================================================================
+   Rubrikerna som "Samma virke. Två sätt att bygga." (2026-10-05)
+   1. Alla avsnittsrubriker får samma storlek och radavstånd som
+      .ih-rubrik (60 px på datorn).
+   2. Rubrikblock som står ovanför sitt innehåll centreras: etiketten
+      med strecket, rubriken och ingressen under, i en kolumn.
+      Rubriker i en textspalt bredvid en bild eller ett formulär står
+      kvar till vänster - centrerat i en halv spalt ser trasigt ut.
+   ===================================================================== */
+body main .prisskala__titel,
+body main .prisoffert__titel,
+body main .prisfaktorer__titel,
+body main .prisvag__titel,
+body main .pf-lev__titel,
+body main .pf-band__titel,
+body main .pf-tak__titel,
+body main .flode-intro__titel,
+body main .checklista__titel,
+body main .virke__rubrik,
+body main .contact-section__title,
+body main .kollen-hus__titel,
+body main .markkoll__titel,
+body main .samagare__titel,
+body main .kalkyl__titel,
+body main .studio3d__titel,
+body main .hus3dvy__titel,
+body main .segment__block h2,
+body main .kontakt-topp h2,
+body main .pf-steg__huvud h2,
+body main .rg-slut h2,
+body main .againtro h2,
+body main .category__head h2 {
+  font-size: clamp(2.1rem, 1.2rem + 3.4vw, 3.75rem);
+  line-height: 1.04;
+}
+
+/* --- Centrerade rubrikblock ------------------------------------------ */
+.ih-huvud.ih-huvud--rad,
+.husval .ih-huvud.ih-huvud--rad,
+.prisskala__topp,
+.prisfaktorer__topp,
+.prisvag__topp,
+.pf-lev__huvud,
+.pf-band__huvud,
+.kollen-hus__topp,
+.markkoll__topp,
+.samagare__topp,
+.kalkyl__topp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  max-width: 52rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.ih-huvud.ih-huvud--rad > div,
+.husval .ih-huvud--rad > div,
+.prisskala__topp > div,
+.pf-band__huvud > div:first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ih-huvud--rad .ih-etikett,
+.husval .ih-huvud--rad .ih-etikett,
+.prisskala__topp .section-label,
+.prisfaktorer__topp .section-label,
+.prisvag__topp .section-label,
+.pf-lev__huvud .ih-etikett,
+.pf-band__huvud .ih-etikett,
+.kollen-hus__topp .section-label,
+.markkoll__topp .section-label,
+.samagare__topp .section-label,
+.kalkyl__topp .section-label {
+  justify-content: center;
+}
+
+.ih-huvud--rad .ih-etikett::after,
+.husval .ih-huvud--rad .ih-etikett::after {
+  content: none;
+}
+
+.ih-huvud--rad .ih-rubrik,
+.husval .ih-huvud--rad .ih-rubrik,
+.prisskala__titel,
+.prisfaktorer__titel,
+.prisvag__titel,
+.pf-lev__titel,
+.pf-band__titel,
+.kollen-hus__titel,
+.markkoll__titel,
+.samagare__titel,
+.kalkyl__titel {
+  margin-inline: auto;
+  max-width: 18ch;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.ih-huvud--rad .ih-ingress,
+.husval .ih-huvud--rad .ih-ingress,
+.prisskala__text,
+.pf-lev__ingress,
+.markkoll__text,
+.samagare__text,
+.kalkyl__text {
+  max-width: 40rem;
+  margin: 0.9rem auto 0;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.pf-lev__huvud {
+  grid-template-columns: none;
+}
+
+.pf-band__huvud {
+  position: relative;
+}
+
+.pf-band__pilar {
+  margin-top: 18px;
+}
+
+.prisvag__titel.delad {
+  justify-content: center;
+}
+
+/* --- Kontakten: centrerad på alla sidor -------------------------------- */
+@media (min-width: 1041px) {
+  .contact-section__inner {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 40px;
+  }
+
+  .contact-section__intro {
+    position: static;
+    top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 50rem;
+    text-align: center;
+  }
+
+  .contact-section .contact-form {
+    width: min(760px, 100%);
+  }
+
+  .contact-section .kontaktkort {
+    width: min(620px, 100%);
+  }
+
+  .contact-section__intro .contact-section__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 40px;
+  }
+
+  .contact-section__intro .contact-section__meta > div {
+    display: grid;
+    justify-items: center;
+  }
+
+  .contact-section__intro .tillit {
+    grid-template-columns: repeat(4, minmax(0, max-content));
+    justify-content: center;
+  }
+}
+
+.contact-section__intro .section-label {
+  justify-content: center;
+}
+
+.contact-section__title,
+.contact-section__text {
+  margin-inline: auto;
+}
+
+.contact-section__intro {
+  text-align: center;
+}
+
+html body main .pf-tak .pf-tak__titel,
+html body main .virke .virke__rubrik,
+html body main.katsida .kat-huvud h2 {
+  font-size: clamp(2.1rem, 1.2rem + 3.4vw, 3.75rem);
+  line-height: 1.04;
+}
+
+/* Stegen i kontaktdelen: ett vänsterställt block mitt under rubriken. */
+.contact-section__intro .kontakt-tips {
+  width: min(440px, 100%);
+  margin-inline: auto;
+  text-align: left;
+}
+
