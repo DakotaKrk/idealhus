@@ -8020,3 +8020,309 @@ button.kal__rad:hover {
 .dagtopp__ring--noll .dagtopp__fyll {
   opacity: 0;
 }
+
+/* =====================================================================
+   Inställningar premium (2026-10-08)
+   Toppen sammanfattar prislistan, raderna är glas med priser i stora
+   siffror, ändrade rader lyser med skillnaden och knappen räknar
+   ändringarna. Återställ kräver ett andra klick.
+   ===================================================================== */
+.instopp {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 26px;
+  border-radius: 30px;
+  background:
+    radial-gradient(60% 70% at 100% 0%, rgba(255, 214, 160, 0.45), transparent 65%),
+    radial-gradient(55% 70% at 0% 100%, rgba(205, 228, 196, 0.42), transparent 65%),
+    linear-gradient(165deg, #fffdf9, #fcf6ed 55%, #f7f2e9);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 40px 80px -56px rgba(90, 60, 25, 0.6);
+}
+
+.instopp__ord h2 {
+  margin: 8px 0 8px;
+  font: 600 clamp(1.6rem, 1.2rem + 1.2vw, 2.2rem)/1.1 var(--rubrik);
+  letter-spacing: -0.035em;
+  color: var(--text);
+}
+
+.instopp__ord p:last-child {
+  max-width: 52ch;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+.instopp__tal {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.instopp__tal > div {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.7));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 18px 34px -26px rgba(90, 60, 25, 0.55);
+  animation: in-rad 0.6s var(--mjuk) backwards;
+}
+
+.instopp__tal > div:nth-child(2) { animation-delay: 0.08s; }
+.instopp__tal > div:nth-child(3) { animation-delay: 0.16s; }
+
+.instopp__tal span {
+  font-size: 1.25rem;
+}
+
+.instopp__tal small {
+  font: 600 0.6875rem/1.2 var(--rubrik);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.instopp__tal b {
+  font: 600 1.0625rem/1.2 var(--rubrik);
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.instopp__tal em {
+  font-style: normal;
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+/* --- Prisraderna ------------------------------------------------------------ */
+.prisrutnat {
+  align-items: stretch;
+}
+
+.prisform {
+  display: flex;
+  flex-direction: column;
+}
+
+.prisform > .kort__kropp {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.prisform .formular__knappar {
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+.prislista {
+  gap: 8px;
+}
+
+.prisrad {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "bild namn falt" "bild namn diff";
+  align-items: center;
+  column-gap: 14px;
+  padding: 9px 12px 9px 9px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #fff, rgba(255, 255, 255, 0.78));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 12px 24px -22px rgba(90, 60, 25, 0.5);
+  cursor: text;
+  transition: box-shadow 0.35s ease, background 0.35s ease;
+}
+
+.prisrad > .tumme,
+.prisrad > .prisrad__emoji {
+  grid-area: bild;
+}
+
+.prisrad .tumme {
+  width: 64px;
+  height: auto;
+  aspect-ratio: 1600 / 1062;
+  border-radius: 11px;
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.06), 0 8px 14px -10px rgba(27, 25, 21, 0.5);
+}
+
+.prisrad__emoji {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #fff6e8, #ffe2bd);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(201, 138, 69, 0.28);
+  font-size: 1.25rem;
+}
+
+.prisrad__namn {
+  grid-area: namn;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.prisrad__namn b {
+  font: 600 0.9375rem/1.3 var(--rubrik);
+  color: var(--text);
+}
+
+.prisrad__namn small {
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.prisrad__namn [data-perkvm] {
+  font-weight: 600;
+  color: #a07650;
+}
+
+.prisrad__falt {
+  grid-area: falt;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.prisrad__falt input {
+  width: 128px;
+  height: 42px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(160deg, #fff, #fffaf3);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.25), inset 0 1px 2px rgba(27, 25, 21, 0.04);
+  font: 600 1rem/1 var(--rubrik);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text);
+  outline: none;
+  transition: box-shadow 0.3s ease;
+}
+
+.prisrad__falt input:focus {
+  box-shadow: inset 0 0 0 1.5px #e8a456, 0 0 0 4px rgba(240, 181, 110, 0.18);
+}
+
+.prisrad__falt em {
+  font: 600 0.8125rem/1 var(--rubrik);
+  font-style: normal;
+  color: var(--text-3);
+}
+
+.prisrad__diff {
+  grid-area: diff;
+  justify-self: end;
+  font: 600 0.75rem/1 var(--rubrik);
+  color: #1f7a45;
+}
+
+.prisrad__diff:empty {
+  display: none;
+}
+
+.prisrad__diff.upp {
+  color: #a4482a;
+}
+
+.prisrad.andrad {
+  background: linear-gradient(160deg, #fffaf2, #ffefd8);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1.5px rgba(232, 164, 86, 0.6), 0 14px 26px -20px rgba(143, 84, 36, 0.55);
+}
+
+.prisrad.andrad .prisrad__diff {
+  margin-top: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.3);
+}
+
+.prisform--andrad .prisform__spara {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 0 0 4px rgba(240, 181, 110, 0.25), 0 16px 30px -14px rgba(201, 128, 52, 0.85);
+  animation: spara-puls 1.8s ease-in-out infinite;
+}
+
+@keyframes spara-puls {
+  50% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 0 0 8px rgba(240, 181, 110, 0.12), 0 16px 30px -14px rgba(201, 128, 52, 0.85); }
+}
+
+/* --- Prototypen ------------------------------------------------------------- */
+.installning__proto {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  border-radius: 30px;
+  background:
+    radial-gradient(60% 90% at 100% 0%, rgba(184, 205, 224, 0.4), transparent 65%),
+    linear-gradient(165deg, #fffdf9, #f8f4ec);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 30px 60px -46px rgba(90, 60, 25, 0.55);
+}
+
+.installning__emoji {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #eef4fa, #d8e6f3);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(111, 147, 181, 0.3);
+  font-size: 1.625rem;
+}
+
+.installning__proto p:last-child {
+  color: var(--text-2);
+}
+
+.installning__proto .knapp--glas {
+  background: linear-gradient(160deg, #fff, #fff6ea);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.3), 0 10px 20px -14px rgba(90, 60, 25, 0.5);
+  color: #7a4a1c;
+}
+
+.installning__proto .knapp--glas.bekrafta {
+  background: linear-gradient(160deg, #fff1ea, #ffd9c7);
+  box-shadow: inset 0 0 0 1.5px rgba(224, 118, 74, 0.55), 0 0 0 4px rgba(224, 118, 74, 0.12);
+  color: #a4482a;
+  animation: bekrafta-skak 0.4s ease;
+}
+
+@keyframes bekrafta-skak {
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+@media (max-width: 1100px) {
+  .instopp {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .instopp__tal {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .prisrad {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "bild namn" "falt falt" "diff diff";
+    row-gap: 8px;
+  }
+
+  .prisrad__falt {
+    justify-self: end;
+  }
+
+  .installning__proto {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

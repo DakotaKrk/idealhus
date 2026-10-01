@@ -2903,34 +2903,110 @@
   /* ================================================================
      Inställningar
      ================================================================ */
+  // Inställningar (omgjord 2026-10-08): priserna med mellanslag, pris per
+  // kvadratmeter, ändringar som lyser med skillnaden och en knapp som
+  // räknar dem. Tillvalen får emoji efter vad de är. Återställningen
+  // kräver ett andra klick.
+  var POST_EMOJI = [[/frakt|leverans/i, '🚚'], [/montage/i, '🔧'], [/kran/i, '🏗️'], [/ritning|bygglov/i, '📐'], [/altan|trä/i, '🪵'],
+    [/kök|badrum/i, '🛁'], [/kamin|skorsten|eldstad/i, '🔥']];
+  function postEmoji(t) { for (var n = 0; n < POST_EMOJI.length; n++) if (POST_EMOJI[n][0].test(t)) return POST_EMOJI[n][1]; return '➕'; }
+  function prisText(n) { return String(Math.round(n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+  function prisTal(v) { return Number(String(v || '').replace(/[^0-9]/g, '')) || 0; }
+
   IH.vyer.installningar = function () {
     var pl = IH.db.prislista;
+    var hus = IH.MODELLER.filter(function (m) { return m.id !== 'element'; });
+    var priser = hus.map(function (m) { return pl.modeller[m.id] || 0; }).filter(function (p) { return p > 0; });
+    var minP = priser.length ? Math.min.apply(null, priser) : 0, maxP = priser.length ? Math.max.apply(null, priser) : 0;
+    var sparad = pl.sparad ? (dagarTill(pl.sparad) === 0 ? 'i dag ' + new Date(pl.sparad).toTimeString().slice(0, 5) : IH.datum(pl.sparad)) : 'inte ändrade än';
+    var rad = function (namn, inne, emojiEllerBild, typ, org, extra) {
+      return '<label class="prisrad" data-prisrad>' + emojiEllerBild +
+        '<span class="prisrad__namn"><b>' + e(namn) + '</b>' + (inne ? '<small>' + inne + '</small>' : '') + '</span>' +
+        '<span class="prisrad__falt"><input type="text" inputmode="numeric" autocomplete="off" name="' + typ + '" value="' + prisText(org) + '" data-org="' + org + '"' + (extra || '') + ' aria-label="Pris för ' + e(namn) + '"><em>kr</em></span>' +
+        '<span class="prisrad__diff" data-diff aria-live="polite"></span></label>';
+    };
     var html = '<header class="vyhuvud"><div><p class="etikett">Mitt</p><h1>Inställningar</h1><p>Prislistan som offerterna och kalkylen i kundmötet räknar med.</p></div></header>' +
-      '<div class="rutnat rutnat--2">' +
-      '<form class="kort" data-form="prislista" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('hus') + '</span>Husen</h2><span class="chip">Exempelpriser</span></header><div class="kort__kropp prislista">' +
-        IH.MODELLER.filter(function (m) { return m.id !== 'element'; }).map(function (m) {
-          return '<label class="prislista__rad">' + tumme(m.tumme) + '<span><b>' + e(m.namn) + '</b><small>' + e(m.kategori) + ' · ' + m.yta + ' m²</small></span><input type="number" name="m-' + m.id + '" value="' + (pl.modeller[m.id] || 0) + '" step="1000" min="0"><em>kr</em></label>';
-        }).join('') + '<div class="formular__knappar"><button class="knapp knapp--mork" type="submit">Spara priserna</button></div></div></form>' +
-      '<form class="kort" data-form="prislista" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('lista') + '</span>Tillval och poster</h2></header><div class="kort__kropp prislista">' +
+      '<section class="instopp kort kort--mork" data-in>' +
+        '<div class="instopp__ord"><p class="etikett etikett--ljus">Prislistan</p><h2>Priserna bakom varje offert <span aria-hidden="true">💰</span></h2>' +
+          '<p>Ändra ett pris och spara. Nya offerter och kalkylen i kundmötet räknar med det direkt – offerter som redan är skickade behåller sina priser.</p></div>' +
+        '<div class="instopp__tal">' +
+          '<div><span aria-hidden="true">🏠</span><small>Husen</small><b>' + (priser.length ? IH.kort(minP) + ' – ' + IH.kort(maxP) : '–') + '</b><em>' + hus.length + ' modeller</em></div>' +
+          '<div><span aria-hidden="true">🧩</span><small>Tillval och poster</small><b>' + pl.poster.length + ' st</b><em>' + (pl.poster.length ? 'från ' + IH.kort(Math.min.apply(null, pl.poster.map(function (p) { return p.pris || 0; }))) : 'inga än') + '</em></div>' +
+          '<div><span aria-hidden="true">💾</span><small>Senast sparad</small><b>' + sparad + '</b><em>Exempelpriser</em></div>' +
+        '</div></section>' +
+      '<div class="rutnat rutnat--2 prisrutnat">' +
+      '<form class="kort prisform" data-form="prislista" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('hus') + '</span>Husen</h2><span class="chip">Pris per hus</span></header><div class="kort__kropp prislista">' +
+        hus.map(function (m) {
+          var p = pl.modeller[m.id] || 0;
+          return rad(m.namn, e(m.kategori) + ' · ' + m.yta + ' m² · <span data-perkvm>' + (m.yta ? prisText(p / m.yta) + ' kr/m²' : '') + '</span>', tumme(m.tumme), 'm-' + m.id, p, ' data-yta="' + (m.yta || 0) + '"');
+        }).join('') + '<div class="formular__knappar"><button class="knapp knapp--mork prisform__spara" type="submit" data-spara>Spara priserna</button></div></div></form>' +
+      '<form class="kort prisform" data-form="prislista" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('lista') + '</span>Tillval och poster</h2><span class="chip">Läggs till i offerten</span></header><div class="kort__kropp prislista">' +
         pl.poster.map(function (p) {
-          return '<label class="prislista__rad"><span><b>' + e(p.text) + '</b></span><input type="number" name="p-' + p.id + '" value="' + p.pris + '" step="500" min="0"><em>kr</em></label>';
-        }).join('') + '<div class="formular__knappar"><button class="knapp knapp--mork" type="submit">Spara priserna</button></div></div></form>' +
+          return rad(p.text, '', '<span class="prisrad__emoji" aria-hidden="true">' + postEmoji(p.text) + '</span>', 'p-' + p.id, p.pris || 0);
+        }).join('') + '<div class="formular__knappar"><button class="knapp knapp--mork prisform__spara" type="submit" data-spara>Spara priserna</button></div></div></form>' +
       '</div>' +
-      '<section class="kort kort--mork installning__proto" data-in><div><p class="etikett etikett--ljus">Prototyp</p><h2>Allt sparas i den här webbläsaren</h2>' +
+      '<section class="kort kort--mork installning__proto" data-in><span class="installning__emoji" aria-hidden="true">🧪</span><div><p class="etikett etikett--ljus">Prototyp</p><h2>Allt sparas i den här webbläsaren</h2>' +
         '<p>Kunderna, förfrågningarna och priserna är påhittade exempel. Den skarpa versionen tar emot riktiga förfrågningar från formuläret på idealhus.se och kräver inloggning med lösenord.</p></div>' +
-        '<button class="knapp knapp--glas" type="button" data-g="aterstall">' + i('aterstall') + 'Återställ exempeldata</button></section>';
-    return { titel: 'Inställningar', html: html };
+        '<button class="knapp knapp--glas" type="button" data-g="aterstall">' + i('aterstall') + '<span>Återställ exempeldata</span></button></section>';
+    return {
+      titel: 'Inställningar', html: html,
+      efter: function (rot) {
+        // Live: mellanslag i talen, kr/m², skillnaden och antal ändringar.
+        $$('.prisform', rot).forEach(function (form) {
+          var knapp = $('[data-spara]', form);
+          var rakna = function () {
+            var n = $$('[data-prisrad].andrad', form).length;
+            knapp.textContent = n ? 'Spara ' + n + (n === 1 ? ' ändring' : ' ändringar') : 'Spara priserna';
+            form.classList.toggle('prisform--andrad', n > 0);
+          };
+          $$('input[data-org]', form).forEach(function (inp) {
+            var radEl = inp.closest('[data-prisrad]');
+            var diffEl = $('[data-diff]', radEl);
+            var kvm = $('[data-perkvm]', radEl);
+            var uppdatera = function () {
+              var v = prisTal(inp.value), org = Number(inp.getAttribute('data-org')) || 0, d = v - org;
+              radEl.classList.toggle('andrad', d !== 0);
+              diffEl.textContent = d ? (d > 0 ? '+' : '−') + prisText(Math.abs(d)) + ' kr' : '';
+              diffEl.classList.toggle('upp', d > 0);
+              if (kvm) { var y = Number(inp.getAttribute('data-yta')) || 0; kvm.textContent = y ? prisText(v / y) + ' kr/m²' : ''; }
+              rakna();
+            };
+            inp.addEventListener('input', uppdatera);
+            inp.addEventListener('blur', function () { inp.value = prisText(prisTal(inp.value)); });
+            inp.addEventListener('focus', function () { setTimeout(function () { inp.select(); }, 0); });
+          });
+        });
+      }
+    };
   };
   FORM.prislista = function (f, d) {
     var pl = IH.db.prislista;
+    var andrade = 0;
     d.forEach(function (v, k) {
-      if (k.indexOf('m-') === 0) pl.modeller[k.slice(2)] = Number(v) || 0;
-      if (k.indexOf('p-') === 0) pl.poster.forEach(function (p) { if (p.id === k.slice(2)) p.pris = Number(v) || 0; });
+      var tal = prisTal(v);
+      if (k.indexOf('m-') === 0) { if (pl.modeller[k.slice(2)] !== tal) andrade += 1; pl.modeller[k.slice(2)] = tal; }
+      if (k.indexOf('p-') === 0) pl.poster.forEach(function (p) { if (p.id === k.slice(2)) { if (p.pris !== tal) andrade += 1; p.pris = tal; } });
     });
+    pl.sparad = new Date().toISOString();
     IH.spara();
-    IH.toast('Priserna är sparade', 'Nya offerter och kalkyler räknar med dem.', 'bock');
+    IH.ritaOm();
+    IH.toast(andrade ? 'Priserna är sparade' : 'Inget att spara', andrade ? andrade + (andrade === 1 ? ' pris ändrat.' : ' priser ändrade.') + ' Nya offerter och kalkyler räknar med dem.' : 'Priserna var redan sparade.', 'bock');
   };
-  G.aterstall = function () {
+  // Återställ kräver ett andra klick inom fyra sekunder.
+  var aterstallTimer = null;
+  G.aterstall = function (el) {
+    if (!el.classList.contains('bekrafta')) {
+      el.classList.add('bekrafta');
+      var t = el.querySelector('span');
+      if (t) t.textContent = 'Säker? Klicka igen';
+      clearTimeout(aterstallTimer);
+      aterstallTimer = setTimeout(function () {
+        el.classList.remove('bekrafta');
+        if (t) t.textContent = 'Återställ exempeldata';
+      }, 4000);
+      return;
+    }
+    clearTimeout(aterstallTimer);
     IH.db = IH.skapaExempeldata();
     IH.spara();
     IH.ritaOm();
