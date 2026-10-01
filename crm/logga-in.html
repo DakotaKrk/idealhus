@@ -4,85 +4,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#1b1915">
+    <meta name="theme-color" content="#f7f1e8">
     <title>Logga in · Idealhus CRM</title>
     <link rel="icon" href="../images/idealhus.svg" type="image/svg+xml">
     <link rel="preload" href="../fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="crm.css?v=20261002g">
-    <link rel="stylesheet" href="logga-in.css?v=20261002g">
+    <link rel="preload" href="../fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="crm.css?v=20261002j">
+    <link rel="stylesheet" href="logga-in.css?v=20261002j">
     <script type="module" src="../vendor/model-viewer.min.js"></script>
   </head>
   <body class="li">
+    <div class="li__bakgrund" aria-hidden="true">
+      <i class="ljusklot ljusklot--1"></i><i class="ljusklot ljusklot--2"></i><i class="ljusklot ljusklot--3"></i>
+    </div>
+
     <main class="li__vanster">
       <header class="li__topp">
-        <img src="../images/idealhus_logo.svg" alt="Idealhus">
+        <img src="../images/idealhus_logo.svg" alt="Idealhus" width="120" height="24">
         <a class="li__tillbaka" href="../index.html" data-lamna>
           <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>Till idealhus.se
         </a>
       </header>
 
       <div class="li__innehall">
-        <p class="li__etikett"><i></i>Demo med exempeldata</p>
-        <h1 class="li__titel">Logga in på <em>Idealhus.</em></h1>
-        <p class="li__text">Välj en roll och prova CRM:et direkt – inget lösenord behövs. Allt du gör sparas bara i din egen webbläsare.</p>
+        <p class="li__halsning"><span class="li__sol" aria-hidden="true"></span><b data-halsning>Hej</b><span class="li__datum" data-datum></span></p>
+        <h1 class="li__titel" aria-label="Välkommen in.">
+          <span class="li__rad" aria-hidden="true"><span>Välkommen</span></span>
+          <span class="li__rad" aria-hidden="true"><span><em>in.</em></span></span>
+        </h1>
+        <p class="li__text">Här samlas hela kundresan – från första förfrågan till nyckeln i handen. Välj vem du är och kliv in. I den här demon behövs inget lösenord.</p>
 
-        <div class="li__roller">
-          <button class="roll" type="button" data-roll="ml" style="--n:0">
-            <span class="avatar" style="--av:linear-gradient(135deg,#f0b56e,#8f5424)">ML</span>
-            <span class="roll__text"><b>Sälj</b><small>Maja Lind · förfrågningar, säljtavla, offerter och kundmöten</small></span>
-            <span class="roll__pil"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+        <button class="li__igen" type="button" data-igen hidden>
+          <span class="avatar" data-igen-avatar></span>
+          <span class="li__igen-text"><small>Välkommen tillbaka</small><b data-igen-namn>Fortsätt</b></span>
+          <span class="li__igen-pil"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+        </button>
+
+        <div class="li__roller" role="group" aria-label="Välj roll">
+          <button class="roll" type="button" data-roll="ml" style="--n:0;--rf:#f0b56e">
+            <span class="roll__topp">
+              <span class="avatar" style="--av:linear-gradient(135deg,#f6c68d,#c98a45)">ML</span>
+              <span class="roll__namn"><b>Sälj</b><small>Maja Lind</small></span>
+              <span class="roll__pil"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+            </span>
+            <span class="roll__text">Svara på förfrågningar, flytta affärer och håll kundmöten med husen i 3D.</span>
+            <span class="roll__chips"><i>Förfrågningar</i><i>Säljtavla</i><i>Kundmöte</i></span>
+            <span class="roll__glans" aria-hidden="true"></span>
           </button>
-          <button class="roll" type="button" data-roll="je" style="--n:1">
-            <span class="avatar" style="--av:linear-gradient(135deg,#7fe0a6,#3f6b50)">JE</span>
-            <span class="roll__text"><b>Produktion</b><small>Jonas Ek · projekt, montage och checklistor före leverans</small></span>
-            <span class="roll__pil"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+          <button class="roll" type="button" data-roll="je" style="--n:1;--rf:#7fe0a6">
+            <span class="roll__topp">
+              <span class="avatar" style="--av:linear-gradient(135deg,#a8ebc3,#3f9a63)">JE</span>
+              <span class="roll__namn"><b>Produktion</b><small>Jonas Ek</small></span>
+              <span class="roll__pil"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+            </span>
+            <span class="roll__text">Följ husen från ritning till slutbesiktning, med montagevecka och checklistor.</span>
+            <span class="roll__chips"><i>Projekt</i><i>Montage</i><i>Checklistor</i></span>
+            <span class="roll__glans" aria-hidden="true"></span>
           </button>
         </div>
 
-        <div class="li__skiljare"><span>Det här kan du göra</span></div>
-        <ul class="li__funktioner">
-          <li style="--n:0"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/></svg><b>Förfrågningar</b><small>Från formuläret</small></li>
-          <li style="--n:1"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h5v16H4z"/><path d="M11 4h5v10h-5z"/><path d="M18 4h2v7h-2z"/></svg><b>Säljtavla</b><small>Dra och släpp</small></li>
-          <li style="--n:2"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4.5h18v11H3z"/><path d="M8 20h8"/><path d="M12 15.5V20"/></svg><b>Kundmöte</b><small>Husen i 3D</small></li>
-        </ul>
-
         <p class="li__not"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11V8a6 6 0 0 1 12 0v3"/><path d="M5 11h14v10H5z"/></svg>
-          Det här är en prototyp med påhittade kunder och exempelpriser. Den skarpa inloggningen byggs när CRM:et tar emot riktiga förfrågningar.</p>
+          En prototyp med påhittade kunder och exempelpriser. Allt du gör sparas bara i din egen webbläsare.</p>
       </div>
 
-      <footer class="li__fot"><span>© 2026 Idealhus</span></footer>
+      <footer class="li__fot"><span>© 2026 Idealhus</span><span>Byggt under tak · monterat på dagar</span></footer>
     </main>
 
     <aside class="li__hoger" aria-hidden="true">
       <div class="scen" data-scen>
-        <div class="scen__golv"></div>
-        <model-viewer class="scen__hus" src="../modeller/hus-r1.glb" alt="" camera-orbit="30deg 70deg 135%" field-of-view="28deg" auto-rotate auto-rotate-delay="0"
-          rotation-per-second="10deg" interaction-prompt="none" shadow-intensity="1.1" shadow-softness="1" exposure="1.45" environment-image="neutral" tone-mapping="neutral" disable-zoom disable-pan></model-viewer>
+        <div class="scen__himmel">
+          <i class="scen__sol"></i><i class="scen__moln scen__moln--1"></i><i class="scen__moln scen__moln--2"></i><i class="scen__moln scen__moln--3"></i>
+        </div>
+        <svg class="scen__kullar" viewBox="0 0 600 220" preserveAspectRatio="none">
+          <path class="kulle kulle--1" d="M0 120 C 90 70, 170 90, 250 110 S 420 60, 600 95 V220 H0Z"/>
+          <path class="kulle kulle--2" d="M0 150 C 120 115, 220 135, 330 140 S 500 110, 600 128 V220 H0Z"/>
+          <path class="kulle kulle--3" d="M0 182 C 140 160, 260 178, 380 172 S 540 160, 600 168 V220 H0Z"/>
+        </svg>
+        <div class="scen__tomt"><i class="scen__altan"></i></div>
+        <model-viewer class="scen__hus" src="../modeller/hus-r1.glb" alt="" camera-orbit="38deg 74deg 118%" field-of-view="26deg" auto-rotate auto-rotate-delay="0"
+          rotation-per-second="8deg" interaction-prompt="none" shadow-intensity="0.9" shadow-softness="1" exposure="1.15" environment-image="neutral" tone-mapping="neutral" disable-zoom disable-pan></model-viewer>
 
-        <div class="glas glas--a" style="--z:60px">
-          <span class="glas__bild"><img src="../images/hus-r1.webp" alt=""></span>
+        <div class="glas glas--a" data-djup="1.2">
+          <span class="glas__bild"><img src="../images/hus-r1.webp" alt="" width="64" height="42"></span>
           <span><b>Ny förfrågan</b><small>Vid havet · Attefallshus</small></span><i class="glas__prick"></i>
         </div>
-        <div class="glas glas--b" style="--z:110px">
+        <div class="glas glas--b" data-djup="1.8">
           <small class="glas__etikett">Öppen pipeline</small>
           <b class="glas__tal">8,4 <em>Mkr</em></b>
-          <span class="glas__staplar"><i style="--h:.35"></i><i style="--h:.5"></i><i style="--h:.42"></i><i style="--h:.7"></i><i style="--h:.6"></i><i style="--h:.85"></i><i style="--h:1"></i></span>
+          <span class="glas__staplar"><i style="--h:.35;--n:0"></i><i style="--h:.5;--n:1"></i><i style="--h:.42;--n:2"></i><i style="--h:.7;--n:3"></i><i style="--h:.6;--n:4"></i><i style="--h:.85;--n:5"></i><i style="--h:1;--n:6"></i></span>
         </div>
-        <div class="glas glas--c" style="--z:80px">
+        <div class="glas glas--c" data-djup="1.4">
           <span class="glas__ikon glas__ikon--gron"><svg class="i" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
           <span><b>Order signerad</b><small>Sadel 27 · Vallentuna</small></span>
         </div>
-        <div class="glas glas--d" style="--z:40px">
+        <div class="glas glas--d" data-djup="0.9">
           <span class="glas__ikon"><svg class="i" viewBox="0 0 24 24"><path d="M4 5h16v15H4z"/><path d="M4 9.5h16"/><path d="M9 3v4"/><path d="M15 3v4"/></svg></span>
           <span><b>Montage bokat</b><small>Kupa 38 · vecka 45</small></span>
         </div>
-      </div>
-      <div class="li__slogan">
-        <h2>Från förfrågan<br>till nyckel.</h2>
-        <p>Hela kundresan i ett system · bilden visar exempeldata</p>
+
+        <div class="resa">
+          <p class="resa__rubrik">Från förfrågan till nyckel</p>
+          <ol class="resa__steg">
+            <li style="--n:0"><i></i>Förfrågan</li>
+            <li style="--n:1"><i></i>Möte</li>
+            <li style="--n:2"><i></i>Offert</li>
+            <li style="--n:3"><i></i>Order</li>
+            <li style="--n:4"><i></i>Montage</li>
+            <li style="--n:5"><i></i>Nyckel</li>
+          </ol>
+          <span class="resa__spar"><i></i><b></b></span>
+        </div>
+        <p class="scen__not">Bilden visar exempeldata</p>
       </div>
     </aside>
 
-    <script src="logga-in.js?v=20261002g"></script>
+    <div class="li__valkommen" aria-live="polite">
+      <div class="li__valkommen-inre">
+        <span class="avatar" data-va></span>
+        <p data-vtext>Välkommen.</p>
+        <small>Öppnar ditt CRM</small>
+        <i class="li__laddning"><i></i></i>
+      </div>
+    </div>
+
+    <script src="logga-in.js?v=20261002j"></script>
   </body>
 </html>
