@@ -191,7 +191,7 @@
      lite inne i sin ram när man för pekaren över kortet den sitter
      i. Ramen klipper, så bilden aldrig går utanför sina hörn. */
   $$('main img').forEach(function (img) {
-    if (img.closest('.hero, .ihtopp, .subpage-hero, .heroscen, .ordband, .val, .vag, .hus, .kuliss, .bygget, .virke, .pf-tak')) return;
+    if (img.closest('.hero, .ihtopp, .subpage-hero, .kat-topp, .at-foto, .heroscen, .ordband, .val, .vag, .hus, .kuliss, .bygget, .virke, .pf-tak, .husval, .sprang')) return;
     var ram = img.parentElement;
     if (!ram || img.getBoundingClientRect().width < 120) return;
     var kort = img.closest('a, article, figure, .segment__block, .quiet-break__bild, .guidehero__bild') || ram;
@@ -490,7 +490,7 @@
           '<div><dt>Boyta</dt><dd>' + stapel(tal(k, 'yta'), storstYta, 'm²') + '</dd></div>' +
           '<div><dt>Rum</dt><dd>' + stapel(tal(k, 'rum'), storstRum, 'rum') + '</dd></div>' +
           '<div><dt>Leverans</dt><dd>' + stapel(tal(k, 'lev'), storstLev, 'v', true) + '</dd></div>' +
-          '<div><dt>Pris</dt><dd><strong>Från X kr</strong></dd></div>' +
+          '<div><dt>Pris</dt><dd><strong>I offert</strong></dd></div>' +
           '</dl>' +
           '<a class="jamforruta__lank" href="' + lank + '">Se huskortet</a>' +
           '</article>';
@@ -2789,7 +2789,7 @@
 
   if (!lugn && window.IntersectionObserver) {
     // Stora bilder i innehållet avslöjas ur en ram.
-    var UNDANTAG = '.ihtopp, .subpage-hero, .guidehero, .heroscen, .ordband, .val, .bildval, ' +
+    var UNDANTAG = '.ihtopp, .subpage-hero, .kat-topp, .guidehero, .heroscen, .ordband, .val, .bildval, .husval, .sprang, ' +
       '.main-nav__sub, .kuliss, .hus, .bygget, .vag, .virke, .helbild__bak, .kollen-hus, ' +
       '.jamforruta, .storlek3d, .hus3dvy, .site-footer, .model-plan, .pf-tak';
     var bilder = $$('main img').filter(function (img) {
@@ -3640,5 +3640,168 @@
   media.addEventListener('pointerleave', function () {
     media.style.setProperty('--rx', '0deg');
     media.style.setProperty('--ry', '0deg');
+  });
+})();
+
+/* --- Husväljaren och sprängskissen (2026-10-03) -------------------- */
+(function () {
+  var lugn = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Husväljaren: fem foton som byts, spelar själv tills man klickar. */
+  var hv = document.querySelector('[data-husval]');
+  if (hv) {
+    var knappar = Array.prototype.slice.call(hv.querySelectorAll('.husval__val button'));
+    var bilder = Array.prototype.slice.call(hv.querySelectorAll('.husval__bild'));
+    var paneler = Array.prototype.slice.call(hv.querySelectorAll('.husval__panel'));
+    var aktiv = 0, timer = 0, manuell = false, synlig = false;
+    function visa(i, fokus) {
+      aktiv = (i + knappar.length) % knappar.length;
+      knappar.forEach(function (k, n) {
+        var ja = n === aktiv;
+        k.setAttribute('aria-selected', String(ja));
+        k.tabIndex = ja ? 0 : -1;
+        if (ja && fokus) k.focus();
+      });
+      bilder.forEach(function (b, n) { b.classList.toggle('aktiv', n === aktiv); if (n === aktiv) b.loading = 'eager'; });
+      paneler.forEach(function (pn, n) { pn.hidden = n !== aktiv; pn.classList.toggle('aktiv', n === aktiv); });
+      // Nästa bild får ladda i förväg.
+      var nasta = bilder[(aktiv + 1) % bilder.length];
+      if (nasta) nasta.loading = 'eager';
+    }
+    function stopp() {
+      clearInterval(timer);
+      hv.classList.remove('husval--spelar');
+    }
+    function spela() {
+      stopp();
+      if (lugn || manuell || !synlig) return;
+      hv.classList.add('husval--spelar');
+      timer = setInterval(function () { visa(aktiv + 1, false); }, 5200);
+    }
+    knappar.forEach(function (k, n) {
+      k.addEventListener('click', function () { manuell = true; stopp(); visa(n, false); });
+      k.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); manuell = true; stopp(); visa(aktiv + (e.key === 'ArrowRight' ? 1 : -1), true); }
+      });
+    });
+    if (window.IntersectionObserver) {
+      new IntersectionObserver(function (poster) {
+        synlig = poster.some(function (x) { return x.isIntersecting; });
+        if (synlig) { bilder.forEach(function (b) { b.loading = 'eager'; }); spela(); } else stopp();
+      }, { rootMargin: '200px 0px' }).observe(hv);
+    } else spela();
+  }
+
+  /* Sprängskissen: model-viewer laddas när sektionen närmar sig, och
+     rullningen spolar animationen "sprang" (tak upp, grund ner). */
+  var sp = document.querySelector('[data-sprang]');
+  if (!sp) return;
+  var scen = sp.querySelector('[data-sprang-scen]');
+  var delar = Array.prototype.slice.call(sp.querySelectorAll('.sprang__del'));
+  var matare = sp.querySelector('.sprang__matare i');
+  var spar = sp.querySelector('.sprang__spar');
+  var mv = null, klar = false, p = -1, bokad = false, inne = false;
+  var smal = window.matchMedia('(max-width: 900px)');
+
+  function laddaMV() {
+    if (window.customElements && customElements.get('model-viewer')) return Promise.resolve();
+    return new Promise(function (ok, fel) {
+      var s = document.createElement('script');
+      s.type = 'module';
+      s.src = 'vendor/model-viewer.min.js';
+      s.onload = ok;
+      s.onerror = fel;
+      document.head.appendChild(s);
+    });
+  }
+
+  function bygg() {
+    if (mv) return;
+    mv = document.createElement('model-viewer');
+    var attr = {
+      src: 'modeller/hus-r1-sprang.glb?v=20261004q',
+      alt: 'Sadel 27 i sprängskiss: grund, väggar och tak',
+      'animation-name': 'sprang',
+      'camera-orbit': '34deg 72deg 16m',
+      'camera-target': '0m 1.7m 0m',
+      'field-of-view': '30deg',
+      'shadow-intensity': '1.2',
+      'shadow-softness': '0.7',
+      'environment-image': 'legacy',
+      'tone-mapping': 'neutral',
+      exposure: '1.1',
+      'interaction-prompt': 'none',
+      'disable-zoom': '',
+      'disable-pan': '',
+      'disable-tap': ''
+    };
+    Object.keys(attr).forEach(function (k) { mv.setAttribute(k, attr[k]); });
+    mv.addEventListener('load', function () {
+      mv.play();
+      mv.pause();
+      klar = true;
+      mv.classList.add('syns');
+      p = -1;
+      rita();
+    });
+    mv.addEventListener('error', function () { sp.classList.add('sprang--utan3d'); });
+    scen.appendChild(mv);
+  }
+
+  function progress() {
+    var vh = window.innerHeight;
+    if (smal.matches) {
+      var r = scen.getBoundingClientRect();
+      return Math.max(0, Math.min(1, (vh * 0.95 - r.top) / (vh * 0.9)));
+    }
+    var sr = spar.getBoundingClientRect();
+    var langd = sr.height - vh;
+    return langd > 0 ? Math.max(0, Math.min(1, -sr.top / langd)) : 1;
+  }
+
+  function rita() {
+    bokad = false;
+    var ny = lugn ? 1 : progress();
+    if (Math.abs(ny - p) < 0.002) return;
+    p = ny;
+    // Mjuk start och slut.
+    var e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    if (klar && mv) {
+      mv.currentTime = Math.min(0.999, Math.max(0, e));
+      mv.cameraOrbit = (34 + e * 24).toFixed(2) + 'deg ' + (72 - e * 8).toFixed(2) + 'deg ' + (16 + e * 7).toFixed(2) + 'm';
+      mv.cameraTarget = '0m ' + (1.7 + e * 1.4).toFixed(2) + 'm 0m';
+    }
+    var steg = p < 0.34 ? 0 : p < 0.67 ? 1 : 2;
+    delar.forEach(function (d, n) { d.classList.toggle('aktiv', n === steg); });
+    if (matare) matare.style.setProperty('--p', e.toFixed(3));
+  }
+
+  function boka() {
+    if (!inne || bokad) return;
+    bokad = true;
+    requestAnimationFrame(rita);
+  }
+
+  if (window.IntersectionObserver) {
+    new IntersectionObserver(function (poster) {
+      inne = poster.some(function (x) { return x.isIntersecting; });
+      if (inne) { laddaMV().then(bygg, function () { sp.classList.add('sprang--utan3d'); }); boka(); }
+    }, { rootMargin: '120% 0px' }).observe(sp);
+  } else { laddaMV().then(bygg); inne = true; }
+  window.addEventListener('scroll', boka, { passive: true });
+  window.addEventListener('resize', function () { p = -1; boka(); }, { passive: true });
+})();
+
+
+/* --- Rullningsmarkören i toppen (2026-10-04) ----------------------- */
+(function () {
+  var pil = document.querySelector('.topp3__rulla');
+  if (!pil) return;
+  pil.addEventListener('click', function (e) {
+    var mal = document.querySelector(pil.getAttribute('href'));
+    if (!mal || !mal.scrollIntoView) return;
+    e.preventDefault();
+    var lugn = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    mal.scrollIntoView({ behavior: lugn ? 'auto' : 'smooth', block: 'start' });
   });
 })();

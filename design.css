@@ -14846,7 +14846,7 @@ html[data-rullat] .site-header__inner {
   gap: clamp(28px, 4vw, 56px);
   align-items: center;
   width: min(1340px, 100% - 2 * clamp(12px, 2vw, 32px));
-  min-height: min(calc(100svh - 150px), 760px);
+  min-height: min(calc(100svh - 360px), 560px);
   margin: 0 auto;
 }
 
@@ -15710,3 +15710,2517 @@ html:not([data-tema="mork"]) .site-footer .logo__svg {
 html:not([data-tema="mork"]) .pf-topp__tre span {
   color: var(--virke-djup);
 }
+
+
+/* =====================================================================
+   Bevisremsan under heron, husväljaren och sprängskissen (2026-10-03,
+   efter genomgången av Modulo-mallen). Bara transform och opacitet rör
+   sig; model-viewer i sprängskissen spolas av rullningen.
+   ===================================================================== */
+.topp2__bevis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  width: min(1340px, 100% - 2 * clamp(12px, 2vw, 32px));
+  margin: clamp(26px, 4vh, 44px) auto 0;
+  padding: 6px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07), 0 20px 44px -30px rgba(90, 60, 25, 0.5);
+  list-style: none;
+  animation: topp2-in 0.9s var(--mjuk) 0.75s both;
+}
+
+.topp2__bevis li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 16px;
+}
+
+.topp2__bevis li + li::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: -2px;
+  width: 1px;
+  background: rgba(27, 25, 21, 0.08);
+}
+
+.topp2__bevis svg {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  padding: 8px;
+  border-radius: 11px;
+  background: var(--virke-ljus);
+  color: var(--virke-djup);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.topp2__bevis b {
+  display: block;
+  font-family: var(--knappfont);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.topp2__bevis small {
+  display: block;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: var(--text-3);
+}
+
+.topp2__fakta {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .topp2__bevis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-radius: 18px;
+  }
+
+  .topp2__bevis li:nth-child(odd)::before {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .topp2__bevis li {
+    padding: 8px 10px;
+    gap: 9px;
+  }
+
+  .topp2__bevis svg {
+    width: 30px;
+    height: 30px;
+    padding: 7px;
+  }
+
+  .topp2__bevis b {
+    font-size: 0.8125rem;
+  }
+
+  .topp2__bevis small {
+    font-size: 0.6875rem;
+  }
+}
+
+/* Husväljaren: ett stort foto som byts, väljaren uppe till vänster och
+   infokortet nere till höger (skylten i fotots nedre vänstra hörn ska
+   synas). */
+.husval__scen {
+  position: relative;
+}
+
+.husval__ruta {
+  position: relative;
+  height: min(72vh, 680px);
+  min-height: 520px;
+  overflow: hidden;
+  border-radius: 32px;
+  background: var(--ben-2);
+  box-shadow: var(--skugga-stor);
+  isolation: isolate;
+}
+
+/* Bytet: den nya bilden tonar in ovanpå och glider långsamt till ro,
+   den gamla ligger kvar under tills den nya täcker och tonar först sen.
+   Hög specificitet så premium.js bildavslöjning inte tänder alla fem. */
+.husval__ruta .husval__bild {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.07);
+  transition: opacity 1s ease 1s, transform 1s var(--mjuk) 1s;
+}
+
+.husval__ruta .husval__bild.aktiv {
+  z-index: 2;
+  opacity: 1;
+  transform: scale(1.0001);
+  transition: opacity 1.1s ease, transform 8s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+.husval__ton {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(27, 25, 21, 0.22), transparent 30%),
+    linear-gradient(0deg, rgba(27, 25, 21, 0.28), transparent 45%);
+  pointer-events: none;
+}
+
+.husval__val {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  display: flex;
+  gap: 4px;
+  max-width: calc(100% - 36px);
+  padding: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07), 0 18px 40px -26px rgba(27, 25, 21, 0.55);
+}
+
+.husval__val::-webkit-scrollbar {
+  display: none;
+}
+
+.husval__val button {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 12px 5px 5px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--knappfont);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.35s var(--mjuk);
+}
+
+.husval__val button:hover {
+  background: rgba(27, 25, 21, 0.05);
+  color: var(--text);
+}
+
+.husval__val button[aria-selected="true"] {
+  background: var(--kol);
+  color: var(--krita);
+}
+
+.husval__val img {
+  width: 48px;
+  height: 32px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.husval__val b {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.husval__val small {
+  display: block;
+  font-size: 0.6875rem;
+  opacity: 0.7;
+}
+
+.husval__info {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  width: min(420px, calc(100% - 36px));
+}
+
+.husval__panel {
+  padding: 22px 24px 24px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07), 0 30px 60px -36px rgba(27, 25, 21, 0.6);
+  animation: husval-in 0.6s var(--mjuk) both;
+}
+
+.husval__panel[hidden] {
+  display: none;
+}
+
+@keyframes husval-in {
+  from { opacity: 0; transform: translateY(12px); }
+}
+
+.husval__kat {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 6px;
+  font-family: var(--knappfont);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--virke-djup);
+}
+
+.husval__nr {
+  color: var(--text-3);
+}
+
+.husval__namn {
+  margin: 0;
+  font-family: var(--knappfont);
+  font-size: clamp(1.6rem, 1.3rem + 1vw, 2.2rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--text);
+}
+
+.husval__text {
+  margin: 10px 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+.husval__fakta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, auto));
+  justify-content: start;
+  gap: 16px;
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(27, 25, 21, 0.08);
+}
+
+.husval__fakta dt {
+  font-size: 0.6875rem;
+  color: var(--text-3);
+}
+
+.husval__fakta dd {
+  margin: 2px 0 0;
+  font-family: var(--knappfont);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.husval__knappar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.husval__knappar .ih-knapp {
+  min-height: 46px;
+  padding: 10px 20px;
+  font-size: 0.9375rem;
+}
+
+@media (max-width: 900px) {
+  .husval__ruta {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+    border-radius: 24px;
+  }
+
+  .husval__info {
+    position: static;
+    width: auto;
+    margin-top: 12px;
+  }
+
+  .husval__panel {
+    padding: 18px 18px 20px;
+    box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07);
+  }
+
+  .husval__fakta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .husval__val {
+    top: 12px;
+    left: 12px;
+  }
+
+  .husval__val span {
+    display: none;
+  }
+
+  .husval__val button {
+    padding: 4px;
+  }
+}
+
+/* Sprängskissen: texten klistrar till vänster, huset i 3D till höger och
+   rullningen drar isär tak, väggar och grund. */
+.sprang {
+  position: relative;
+}
+
+.sprang__spar {
+  position: relative;
+  height: 260vh;
+}
+
+.sprang__fast {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(32px, 5vw, 80px);
+  align-items: center;
+  width: var(--inre);
+  height: 100vh;
+  height: 100svh;
+  margin: 0 auto;
+  padding: 92px 0 28px;
+  overflow: hidden;
+}
+
+.sprang__ord .ih-ingress {
+  margin-top: 1rem;
+}
+
+.sprang__delar {
+  display: grid;
+  gap: 6px;
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sprang__del {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px transparent;
+  opacity: 0.55;
+  transition: opacity 0.35s ease, background-color 0.35s ease, box-shadow 0.35s ease, transform 0.45s var(--mjuk);
+}
+
+.sprang__del.aktiv {
+  opacity: 1;
+  background: var(--vit);
+  box-shadow: inset 0 0 0 1px var(--kant), var(--skugga);
+  transform: translateX(4px);
+}
+
+.sprang__nr {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: var(--ben-2);
+  font-family: var(--knappfont);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-2);
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+.sprang__del.aktiv .sprang__nr {
+  background: var(--virke);
+  color: var(--kol);
+}
+
+.sprang__del b {
+  display: block;
+  font-family: var(--knappfont);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sprang__del p {
+  margin: 3px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.sprang__matare {
+  position: relative;
+  height: 3px;
+  margin: 22px 0 0;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--ben-2);
+}
+
+.sprang__matare i {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--virke-djup), var(--virke));
+  transform-origin: 0 50%;
+  transform: scaleX(var(--p, 0));
+}
+
+.sprang__scen {
+  position: relative;
+  height: min(calc(100svh - 136px), 720px);
+  overflow: hidden;
+  border-radius: 32px;
+  background:
+    radial-gradient(55% 70% at 100% 0%, rgba(255, 210, 150, 0.4), transparent 65%),
+    radial-gradient(50% 60% at 0% 100%, rgba(190, 220, 180, 0.3), transparent 65%),
+    linear-gradient(165deg, #fffdf9 0%, #fdf6ec 55%, #f6f2e8 100%);
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.9), var(--skugga-stor);
+  isolation: isolate;
+}
+
+.sprang__scen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(143, 84, 36, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143, 84, 36, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(70% 70% at 50% 50%, #000, transparent);
+  mask-image: radial-gradient(70% 70% at 50% 50%, #000, transparent);
+  pointer-events: none;
+}
+
+.sprang--utan3d .sprang__scen {
+  background: url("images/hus-r1.webp") center / cover no-repeat;
+}
+
+.sprang__scen model-viewer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  --poster-color: transparent;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.sprang__scen model-viewer.syns {
+  opacity: 1;
+}
+
+.sprang__skylt {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  display: grid;
+  gap: 2px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07);
+}
+
+.sprang__skylt b {
+  font-family: var(--knappfont);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sprang__skylt small {
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+@media (max-width: 900px) {
+  .sprang__spar {
+    height: auto;
+  }
+
+  .sprang__fast {
+    position: static;
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    padding: var(--sektion) 0;
+  }
+
+  .sprang__scen {
+    order: -1;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    border-radius: 24px;
+  }
+
+  .sprang__matare {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .husval__bild,
+  .husval__panel,
+  .sprang__del {
+    transition: none;
+    animation: none;
+  }
+}
+
+
+/* =====================================================================
+   Toppen, tredje versionen (2026-10-03, efter Modulo): en enda film i
+   en stor rundad ram, ord och knappar till vänster över filmen och en
+   smal bevisrad längst ner. Inget mer.
+   ===================================================================== */
+.topp3 {
+  position: relative;
+  margin-top: 0;
+  padding: 18px 0 clamp(28px, 4vh, 44px);
+  text-align: left;
+  overflow: visible;
+}
+
+.topp3::before,
+.topp3::after {
+  content: none;
+}
+
+.topp3__ram {
+  position: relative;
+  width: calc(100% - 24px);
+  height: min(calc(100svh - 124px), 800px);
+  min-height: 560px;
+  margin: 0 12px;
+  overflow: hidden;
+  border-radius: 32px;
+  background: var(--kol);
+  box-shadow: var(--skugga-stor);
+  isolation: isolate;
+}
+
+.topp3__film {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  animation: topp3-film 1.6s ease 0.15s forwards;
+}
+
+.topp3__ton {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(27, 25, 21, 0.8) 0%, rgba(27, 25, 21, 0.5) 40%, rgba(27, 25, 21, 0.12) 72%),
+    linear-gradient(0deg, rgba(27, 25, 21, 0.72) 0%, rgba(27, 25, 21, 0) 48%),
+    linear-gradient(180deg, rgba(27, 25, 21, 0.3) 0%, rgba(27, 25, 21, 0) 22%);
+  pointer-events: none;
+}
+
+.topp3__inre {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(32px, 6vw, 84px);
+}
+
+.topp3__ord {
+  max-width: 44rem;
+}
+
+.topp3__etikett {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 30px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  background: rgba(247, 245, 240, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.22);
+  font-family: var(--knappfont);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(247, 245, 240, 0.9);
+  animation: topp3-in 0.9s var(--mjuk) 0.4s both;
+}
+
+.topp3__rubrik {
+  margin: 0 0 30px;
+  font-family: var(--knappfont);
+  font-size: clamp(2.6rem, 1.3rem + 4vw, 4.8rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em !important;
+  color: var(--krita);
+  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.topp3__rubrik .rad {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.topp3__rubrik .rad > span {
+  display: inline-block;
+  transform: translateY(110%);
+  animation: topp3-rad 1s var(--mjuk) 0.25s forwards;
+}
+
+.topp3__rubrik .rad:nth-child(2) > span {
+  animation-delay: 0.37s;
+}
+
+.topp3__ingress {
+  max-width: 31rem;
+  margin: 0 0 36px;
+  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
+  line-height: 1.7;
+  color: rgba(247, 245, 240, 0.84);
+  animation: topp3-in 0.9s var(--mjuk) 0.6s both;
+}
+
+.topp3__knappar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  animation: topp3-in 0.9s var(--mjuk) 0.75s both;
+}
+
+.topp3__bevis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 5px;
+  border-radius: 16px;
+  background: rgba(27, 25, 21, 0.46);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  list-style: none;
+  animation: topp3-in 0.9s var(--mjuk) 0.95s both;
+}
+
+.topp3__bevis li {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px 10px 12px;
+  border-radius: 12px;
+  font-family: var(--knappfont);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(247, 245, 240, 0.88);
+}
+
+.topp3__bevis li + li {
+  box-shadow: inset 1px 0 0 rgba(247, 245, 240, 0.12);
+}
+
+.topp3__bevis svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--virke);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes topp3-film {
+  to { opacity: 1; }
+}
+
+@keyframes topp3-rad {
+  to { transform: none; }
+}
+
+@keyframes topp3-in {
+  from { opacity: 0; transform: translateY(14px); }
+}
+
+@media (max-width: 900px) {
+  .topp3 {
+    padding-top: 12px;
+  }
+
+  .topp3__ram {
+    height: min(calc(100svh - 100px), 720px);
+    min-height: 560px;
+    border-radius: 24px;
+  }
+
+  .topp3__inre {
+    justify-content: flex-end;
+    padding: 24px 22px 30px;
+  }
+
+  .topp3__bevis {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: auto;
+  }
+
+  .topp3__bevis li {
+    padding: 9px 10px;
+    font-size: 0.625rem;
+    letter-spacing: 0.06em;
+    white-space: normal;
+  }
+
+  .topp3__bevis li + li {
+    box-shadow: none;
+  }
+
+  .topp3__ton {
+    background:
+      linear-gradient(0deg, rgba(27, 25, 21, 0.85) 0%, rgba(27, 25, 21, 0.45) 55%, rgba(27, 25, 21, 0.2) 100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topp3__film,
+  .topp3__etikett,
+  .topp3__rubrik .rad > span,
+  .topp3__ingress,
+  .topp3__knappar,
+  .topp3__bevis {
+    animation: none;
+  }
+
+  .topp3__film {
+    opacity: 1;
+  }
+
+  .topp3__rubrik .rad > span {
+    transform: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .sprang__skylt {
+    top: 12px;
+    left: 12px;
+    padding: 7px 10px;
+  }
+
+  .sprang__skylt small {
+    display: none;
+  }
+}
+
+/* Sprängskissen på låga fönster: texten måste rymmas i den klistrade ytan,
+   annars glider nästa sektion in över den. */
+@media (min-width: 901px) and (max-height: 840px) {
+  .sprang__fast { padding-top: 84px; }
+  .sprang__ord .ih-rubrik { font-size: clamp(1.9rem, 1rem + 2.4vw, 2.8rem); }
+  .sprang__ord .ih-ingress { margin-top: 0.6rem; font-size: 0.95rem; }
+  .sprang__delar { margin-top: 14px; gap: 4px; }
+  .sprang__del { padding: 8px 12px; }
+  .sprang__del b { font-size: 0.95rem; }
+  .sprang__del p { font-size: 0.8125rem; }
+  .sprang__matare { margin-top: 12px; }
+  .sprang__scen { height: min(calc(100svh - 120px), 720px); }
+}
+
+
+/* =====================================================================
+   Ljust även här (2026-10-03): hantverksbandet på Om oss blir ett
+   tvåspaltigt solkort med fotot i en ram, och "Mindre tid på bygget"
+   på Proffs blir ett ljust solkort med vita kort.
+   ===================================================================== */
+html:not([data-tema="mork"]) .virke {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(28px, 4vw, 64px);
+  align-items: center;
+  width: min(1240px, 100% - 24px);
+  min-height: 0;
+  margin: var(--sektion) auto;
+  padding: clamp(32px, 5vw, 64px);
+  border-radius: 32px;
+  color: var(--text);
+  background: radial-gradient(55% 70% at 100% 0%, rgba(255, 210, 150, 0.4), transparent 65%), radial-gradient(50% 60% at 0% 100%, rgba(190, 220, 180, 0.3), transparent 65%), linear-gradient(165deg, #fffdf9 0%, #fdf6ec 55%, #f6f2e8 100%);
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 40px 80px -52px rgba(90, 60, 25, 0.45);
+}
+
+html:not([data-tema="mork"]) .virke::before {
+  content: none;
+}
+
+html:not([data-tema="mork"]) .virke__bild {
+  position: static;
+  inset: auto;
+  z-index: auto;
+  order: 2;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  border-radius: 24px;
+  object-position: 62% 40%;
+  box-shadow: var(--skugga-stor);
+}
+
+html:not([data-tema="mork"]) .virke__inre {
+  width: auto;
+  margin: 0;
+  padding: 0;
+}
+
+html:not([data-tema="mork"]) .virke__rubrik {
+  max-width: 12ch;
+  font-size: clamp(2.2rem, 1.2rem + 3.2vw, 3.8rem);
+}
+
+html:not([data-tema="mork"]) .pf-tak {
+  color: var(--text);
+  background: radial-gradient(55% 70% at 100% 0%, rgba(255, 210, 150, 0.4), transparent 65%), radial-gradient(50% 60% at 0% 100%, rgba(190, 220, 180, 0.3), transparent 65%), linear-gradient(165deg, #fffdf9 0%, #fdf6ec 55%, #f6f2e8 100%);
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 40px 80px -52px rgba(90, 60, 25, 0.45);
+}
+
+html:not([data-tema="mork"]) .pf-tak__bild,
+html:not([data-tema="mork"]) .pf-tak::before {
+  display: none;
+  content: none;
+}
+
+html:not([data-tema="mork"]) .pf-tak .ih-etikett {
+  color: var(--virke-djup);
+}
+
+html:not([data-tema="mork"]) .pf-tak .ih-etikett::before {
+  background: var(--virke-djup);
+}
+
+html:not([data-tema="mork"]) .pf-flytt__kol {
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07), 0 30px 60px -40px rgba(27, 25, 21, 0.35);
+}
+
+html:not([data-tema="mork"]) .pf-flytt__kol--tak {
+  background: linear-gradient(160deg, rgba(240, 181, 110, 0.24), rgba(240, 181, 110, 0.06)), #fff;
+  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.45), 0 30px 60px -40px rgba(90, 60, 25, 0.4);
+}
+
+html:not([data-tema="mork"]) .pf-flytt li {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08);
+  color: var(--text);
+}
+
+@media (max-width: 900px) {
+  html:not([data-tema="mork"]) .virke {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 22px;
+  }
+
+  html:not([data-tema="mork"]) .virke__bild {
+    order: 0;
+  }
+}
+
+html:not([data-tema="mork"]) .pf-tak {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .pf-tak .pf-tak__titel {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .pf-tak__text {
+  color: rgba(27, 25, 21, 0.74);
+}
+
+html:not([data-tema="mork"]) .pf-tak__chips span {
+  background: rgba(27, 25, 21, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.12);
+  color: rgba(27, 25, 21, 0.85);
+}
+
+html:not([data-tema="mork"]) .pf-flytt__kol {
+  background: rgba(27, 25, 21, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.12);
+}
+
+html:not([data-tema="mork"]) .pf-flytt__rubrik {
+  color: var(--virke-djup);
+}
+
+html:not([data-tema="mork"]) .pf-flytt__kol--bygge .pf-flytt__rubrik {
+  color: rgba(27, 25, 21, 0.72);
+}
+
+html:not([data-tema="mork"]) .pf-flytt li {
+  background: rgba(27, 25, 21, 0.035);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08);
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .pf-flytt__kol--tak li {
+  background: rgba(27, 25, 21, 0.08);
+}
+
+
+/* =====================================================================
+   Toppen 3.1 (2026-10-04): allt i mitten av filmramen – etikett, rubrik,
+   ingress och knappar centrerade, en lugn zoom på filmen och en liten
+   rullningsmarkör. Husväljarens band får ligga ovanpå fotona igen.
+   ===================================================================== */
+.topp3__ram {
+  box-shadow: var(--skugga-stor), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.topp3__film {
+  transform-origin: 50% 50%;
+  animation:
+    topp3-film 1.6s ease 0.15s forwards,
+    topp3-zoom 26s ease-in-out 0.15s infinite alternate;
+}
+
+@keyframes topp3-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+
+.topp3__ton {
+  background:
+    radial-gradient(68% 72% at 50% 54%, rgba(27, 25, 21, 0.6) 0%, rgba(27, 25, 21, 0.4) 55%, rgba(27, 25, 21, 0.1) 100%),
+    linear-gradient(0deg, rgba(27, 25, 21, 0.72) 0%, rgba(27, 25, 21, 0) 42%),
+    linear-gradient(180deg, rgba(27, 25, 21, 0.44) 0%, rgba(27, 25, 21, 0) 30%);
+}
+
+.topp3__inre {
+  align-items: center;
+  justify-content: center;
+  padding: clamp(40px, 7vh, 84px) clamp(20px, 5vw, 64px) clamp(72px, 10vh, 110px);
+  text-align: center;
+}
+
+.topp3__ord {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 58rem;
+  margin: 0 auto;
+}
+
+.topp3__etikett {
+  gap: 9px;
+  margin: 0 0 clamp(22px, 3.5vh, 34px);
+  padding: 8px 15px 8px 11px;
+  background: rgba(27, 25, 21, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.2);
+  color: rgba(247, 245, 240, 0.92);
+}
+
+.topp3__etikett::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--virke);
+  animation: topp3-puls 2.6s ease-out 1.2s infinite;
+}
+
+@keyframes topp3-puls {
+  0% { box-shadow: 0 0 0 0 rgba(240, 181, 110, 0.55); }
+  70% { box-shadow: 0 0 0 8px rgba(240, 181, 110, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(240, 181, 110, 0); }
+}
+
+.topp3__rubrik {
+  margin: 0 0 clamp(20px, 3vh, 28px);
+  font-size: clamp(2.75rem, 1.1rem + 5.2vw, 5.6rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em !important;
+  text-shadow: 0 16px 56px rgba(0, 0, 0, 0.32);
+}
+
+.topp3__rubrik .rad {
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+
+.topp3__punkt {
+  font-style: normal;
+  color: var(--virke);
+}
+
+.topp3__ingress {
+  max-width: 36rem;
+  margin: 0 auto clamp(28px, 4.5vh, 40px);
+  font-size: clamp(1.05rem, 1rem + 0.35vw, 1.25rem);
+  line-height: 1.65;
+  color: rgba(247, 245, 240, 0.86);
+  text-wrap: balance;
+}
+
+.topp3__knappar {
+  justify-content: center;
+  gap: 12px;
+}
+
+.topp3__knappar .ih-knapp {
+  min-height: 56px;
+  padding: 12px 28px;
+}
+
+.topp3__knappar .ih-knapp--virke {
+  box-shadow: 0 18px 40px -18px rgba(240, 181, 110, 0.75);
+}
+
+.topp3 .ih-knapp--ljus {
+  background: rgba(247, 245, 240, 0.1);
+  border-color: rgba(247, 245, 240, 0.42);
+}
+
+.topp3 .ih-knapp--ljus:hover {
+  background: var(--krita);
+  border-color: var(--krita);
+}
+
+/* Rullningsmarkören: en liten "mus" med en prick som faller. */
+.topp3__rulla {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  z-index: 2;
+  width: 26px;
+  height: 42px;
+  margin-left: -13px;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1.5px rgba(247, 245, 240, 0.42);
+  opacity: 0.9;
+  transition: box-shadow 0.3s ease, opacity 0.3s ease;
+  animation: topp3-in 0.9s var(--mjuk) 1.15s both;
+}
+
+.topp3__rulla:hover,
+.topp3__rulla:focus-visible {
+  box-shadow: inset 0 0 0 1.5px rgba(247, 245, 240, 0.9);
+  opacity: 1;
+  outline: none;
+}
+
+.topp3__rulla span {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 4px;
+  height: 8px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--krita);
+  animation: topp3-rulla 1.9s ease-in-out 1.6s infinite;
+}
+
+@keyframes topp3-rulla {
+  0% { transform: translateY(0); opacity: 1; }
+  55% { transform: translateY(14px); opacity: 0; }
+  56% { transform: translateY(0); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 900px) {
+  .topp3__inre {
+    justify-content: center;
+    padding: 36px 20px 48px;
+  }
+
+  .topp3__rubrik {
+    font-size: clamp(2.5rem, 1rem + 7.5vw, 4rem);
+  }
+
+  .topp3__ingress {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+
+  .topp3__rulla {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .topp3__mer {
+    display: none;
+  }
+
+  .topp3__knappar {
+    width: 100%;
+    max-width: 22rem;
+    gap: 10px;
+  }
+
+  .topp3__knappar .ih-knapp {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-height: 640px) {
+  .topp3__rulla {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topp3__film,
+  .topp3__etikett::before,
+  .topp3__rulla,
+  .topp3__rulla span {
+    animation: none;
+  }
+
+  .topp3__film {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Husväljarens band: fotona fick z-index för det mjuka bytet, så bandet
+   och tonen måste ligga ovanför dem. Bandet får en takt-linje som visar
+   när nästa hus kommer, så länge väljaren spelar själv. */
+.husval__ruta .husval__ton {
+  z-index: 3;
+}
+
+.husval__ruta .husval__val {
+  z-index: 4;
+  top: 16px;
+  left: 16px;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 24px 50px -28px rgba(27, 25, 21, 0.6);
+}
+
+.husval__val button {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.husval__val button:hover {
+  transform: translateY(-1px);
+}
+
+.husval__val button[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  bottom: 3px;
+  left: 10px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--virke);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+.husval--spelar .husval__val button[aria-selected="true"]::after {
+  animation: husval-takt 5.2s linear forwards;
+}
+
+@keyframes husval-takt {
+  to { transform: scaleX(1); }
+}
+
+@media (max-width: 900px) {
+  .husval__ruta .husval__val {
+    top: 12px;
+    left: 12px;
+    border-radius: 16px;
+  }
+
+  .husval__val button {
+    border-radius: 12px;
+  }
+
+  .husval__val button[aria-selected="true"]::after {
+    right: 6px;
+    bottom: 2px;
+    left: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .husval__val button[aria-selected="true"]::after {
+    animation: none;
+    transform: none;
+  }
+}
+
+
+/* Ramen växer med innehållet i stället för att klippa det på låga
+   skärmar: höjden sitter på det inre blocket, filmen fyller bakom. */
+.topp3__ram {
+  height: auto;
+  min-height: 0;
+}
+
+.topp3__inre {
+  position: relative;
+  inset: auto;
+  min-height: max(560px, min(calc(100svh - 124px), 800px));
+}
+
+.vagar {
+  scroll-margin-top: 20px;
+}
+
+@media (max-width: 900px) {
+  .topp3__ram {
+    height: auto;
+    min-height: 0;
+  }
+
+  .topp3__inre {
+    min-height: max(560px, min(calc(100svh - 100px), 720px));
+  }
+}
+
+@media (min-width: 901px) and (max-height: 760px) {
+  .topp3__inre {
+    padding-top: 32px;
+    padding-bottom: 68px;
+  }
+
+  .topp3__etikett {
+    margin-bottom: 18px;
+  }
+
+  .topp3__rubrik {
+    margin-bottom: 18px;
+    font-size: clamp(2.5rem, 1rem + 4.4vw, 4.6rem);
+  }
+
+  .topp3__ingress {
+    margin-bottom: 26px;
+  }
+}
+
+
+/* Filmens hörn: Android-Chrome klipper inte en film mot förälderns
+   rundning när filmen själv ligger i ett eget lager, så filmen får
+   samma rundning som ramen och ingen zoom. Ramen klipper dessutom med
+   clip-path som dubbel säkerhet. */
+.topp3__ram {
+  clip-path: inset(0 round 32px);
+}
+
+.topp3__film {
+  border-radius: inherit;
+  transform: none;
+  animation: topp3-film 1.6s ease 0.15s forwards;
+}
+
+@media (max-width: 900px) {
+  .topp3__ram {
+    clip-path: inset(0 round 24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topp3__film {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* =====================================================================
+   Mobilmenyn ljus (2026-10-04): samma mjuka solkort som resten av
+   sajten i stället för det mörka kortet. Mörkt läge behåller sitt.
+   ===================================================================== */
+@media (max-width: 1040px) {
+  html:not([data-tema="mork"]) .mmeny {
+    background: rgba(27, 25, 21, 0.3);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__panel {
+    background:
+      radial-gradient(90% 40% at 100% 0%, rgba(240, 181, 110, 0.26), transparent 65%),
+      linear-gradient(165deg, #fffdf9, #fdf6ec 55%, #f6f2e8);
+    box-shadow: 0 40px 80px -30px rgba(27, 25, 21, 0.4), inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+    color: var(--text);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__grupp {
+    background: rgba(27, 25, 21, 0.035);
+    box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__etikett {
+    color: var(--text-3);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__kort {
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 10px 24px -18px rgba(27, 25, 21, 0.4);
+    color: var(--text);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__kort:hover {
+    background: #fff;
+  }
+
+  html:not([data-tema="mork"]) .mmeny__bild {
+    background: var(--ben-2);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__korttext em {
+    color: var(--text-2);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__kort[aria-current="page"] {
+    box-shadow: inset 0 0 0 1.5px rgba(143, 84, 36, 0.6);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__kort[aria-current="page"] strong {
+    color: var(--virke-djup);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__lank {
+    color: var(--text);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__lank + .mmeny__lank {
+    box-shadow: inset 0 1px 0 rgba(27, 25, 21, 0.07);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__lank:hover,
+  html:not([data-tema="mork"]) .mmeny__lank:active {
+    background: rgba(27, 25, 21, 0.04);
+    box-shadow: none;
+  }
+
+  html:not([data-tema="mork"]) .mmeny__lank[aria-current="page"] {
+    color: var(--virke-djup);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__lank[aria-current="page"] span::after {
+    box-shadow: 0 0 0 4px rgba(143, 84, 36, 0.16);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__tips {
+    background: linear-gradient(120deg, rgba(240, 181, 110, 0.3), rgba(240, 181, 110, 0.1));
+    box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.55);
+    color: var(--text);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__prova {
+    color: var(--virke-djup);
+  }
+
+  html:not([data-tema="mork"]) .mmeny .mmeny__tema {
+    background: rgba(27, 25, 21, 0.04);
+    box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+    color: var(--text);
+  }
+
+  html:not([data-tema="mork"]) .mmeny .mmeny__tema .temavaxel {
+    background: rgba(27, 25, 21, 0.18);
+  }
+
+  html:not([data-tema="mork"]) .mmeny .mmeny__tema[aria-pressed="true"] .temavaxel {
+    background: var(--virke-djup);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__kontakt {
+    color: var(--text-3);
+  }
+
+  html:not([data-tema="mork"]) .mmeny__kontakt a {
+    color: var(--text-2);
+  }
+
+  html:not([data-tema="mork"]) .mmeny a:focus-visible,
+  html:not([data-tema="mork"]) .mmeny button:focus-visible {
+    outline-color: var(--virke-djup);
+  }
+}
+
+
+/* =====================================================================
+   Attefallshus-sidan (2026-10-04): varmare topp, modellhuvud i två
+   spalter, rikare modellkort och tre nya avsnitt – vad huset kan bli,
+   hur det byggs och tre steg till ett hus.
+   ===================================================================== */
+.subpage-hero__title em,
+.category__head.at-huvud h2 em {
+  font-style: normal;
+  color: var(--virke-djup);
+}
+
+.category__head.at-huvud {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 24px 56px;
+  max-width: none;
+  margin: 0 0 32px;
+  text-align: left;
+}
+
+.category__head.at-huvud h2 {
+  margin: 1.1rem 0 0;
+  max-width: 12ch;
+  font-size: clamp(2.3rem, 1.2rem + 3.4vw, 4.2rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+.category__head.at-huvud .category__ingress {
+  margin: 0;
+  max-width: 34rem;
+  font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.2rem);
+  line-height: 1.65;
+  color: var(--text-2);
+}
+
+.at-huvud__lankar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 0;
+}
+
+.at-huvud__lankar a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--vit);
+  box-shadow: inset 0 0 0 1px var(--kant);
+  color: var(--text);
+  font: 600 0.875rem/1 var(--knappfont);
+  text-decoration: none;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.35s var(--mjuk);
+}
+
+.at-huvud__lankar a:hover {
+  background: var(--kol);
+  color: var(--krita);
+  transform: translateY(-1px);
+}
+
+.category__head.at-huvud .category__count {
+  margin: 16px 0 0;
+  font: 600 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* Modellkorten: en rad om vem huset passar, och fakta som brickor. */
+.model-card__tag {
+  margin: 12px 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.model-card .model-card__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.model-card .model-card__facts span {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: var(--ben-2);
+  font: 600 0.75rem/1 var(--knappfont);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text);
+}
+
+.model-card .model-card__facts span + span::before {
+  content: none;
+}
+
+.model-card .model-card__facts .model-card__tak {
+  background: rgba(240, 181, 110, 0.24);
+  color: var(--virke-djup);
+}
+
+/* Vad huset kan bli: fyra vita kort med ritade ikoner. */
+.at-anv__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.at-anv__kort {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 26px 24px;
+  border-radius: 26px;
+  background: var(--vit);
+  box-shadow: inset 0 0 0 1px var(--kant), var(--skugga);
+  transition: transform 0.5s var(--mjuk), box-shadow 0.5s var(--mjuk);
+}
+
+.at-anv__kort:hover {
+  transform: translateY(-4px);
+  box-shadow: inset 0 0 0 1px var(--kant), 0 30px 60px -36px rgba(27, 25, 21, 0.5);
+}
+
+.at-anv__ikon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: rgba(240, 181, 110, 0.22);
+  color: var(--virke-djup);
+}
+
+.at-anv__ikon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.at-anv__kort h3 {
+  margin: 4px 0 0;
+  font: 600 1.25rem/1.2 var(--knappfont);
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.at-anv__kort p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.at-anv__kort a {
+  margin-top: auto;
+  padding-top: 6px;
+  font: 600 0.875rem/1.2 var(--knappfont);
+  color: var(--virke-djup);
+  text-decoration: none;
+}
+
+.at-anv__kort a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Så byggs huset: tre foton med korta rader. */
+.at-foto__rad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.at-foto__bild {
+  margin: 0;
+}
+
+.at-foto__ram {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--ben-2);
+  box-shadow: var(--skugga);
+}
+
+.at-foto__ram img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.at-foto__bild figcaption {
+  display: grid;
+  gap: 4px;
+  padding: 16px 6px 0;
+}
+
+.at-foto__bild b {
+  font: 600 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--virke-djup);
+}
+
+.at-foto__bild span {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+/* Tre steg: ett varmt kort med tre rutor. */
+.at-steg {
+  padding-top: 0;
+}
+
+.at-steg__kort {
+  position: relative;
+  padding: clamp(28px, 4vw, 48px);
+  border-radius: 32px;
+  background:
+    radial-gradient(80% 60% at 100% 0%, rgba(255, 210, 150, 0.4), transparent 60%),
+    linear-gradient(165deg, #fffdf9, #fdf6ec 55%, #f6f2e8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), var(--skugga-stor);
+}
+
+.at-steg__kort .ih-huvud {
+  margin-bottom: clamp(24px, 3vw, 36px);
+}
+
+.at-steg__lista {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.at-steg__lista li {
+  position: relative;
+  padding: 24px 22px 26px;
+  overflow: hidden;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+.at-steg__lista li::before {
+  content: attr(data-nr);
+  position: absolute;
+  top: 6px;
+  right: 16px;
+  font: 600 4rem/1 var(--knappfont);
+  letter-spacing: -0.06em;
+  color: rgba(240, 181, 110, 0.32);
+  pointer-events: none;
+}
+
+.at-steg__nr {
+  display: block;
+  font: 600 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--virke-djup);
+}
+
+.at-steg__lista h3 {
+  margin: 14px 0 8px;
+  font: 600 1.25rem/1.2 var(--knappfont);
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.at-steg__lista p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+@media (max-width: 1100px) {
+  .at-anv__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .category__head.at-huvud {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .category__head.at-huvud h2 {
+    max-width: none;
+  }
+
+  .at-foto__rad,
+  .at-steg__lista {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .at-steg__kort {
+    padding: 22px 18px;
+    border-radius: 26px;
+  }
+}
+
+@media (max-width: 600px) {
+  .at-anv__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Formuläret på smal skärm: inga spår som växer av sitt innehåll
+   (huskortets formulär sköt ut 50 px åt höger på mobilen). */
+@media (max-width: 700px) {
+  .contact-form,
+  .contact-form__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contact-form > *,
+  .contact-form__row > * {
+    min-width: 0;
+  }
+
+  .contact-form__bottom {
+    flex-wrap: wrap;
+  }
+}
+
+
+/* Korten lika höga: priset och Jämför står alltid längst ner. */
+.model-grid .model-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.model-grid .model-card__fot {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+
+/* =====================================================================
+   Kategorisidorna, version 2 (2026-10-04): attefallshus.html och
+   fritidshus.html har <main class="katsida">. Allt står rakt och lika
+   brett: toppen i två lika spalter med en faktarad under, alla rubriker
+   centrerade med streck på båda sidor om etiketten, korten lika höga
+   och utan lutning.
+   ===================================================================== */
+
+/* --- Centrerade huvuden --------------------------------------------- */
+.katsida .kat-mitt .ih-etikett,
+.katsida .kat-mitt .section-label {
+  justify-content: center;
+}
+
+.katsida .kat-mitt .ih-etikett::after,
+.katsida .kat-mitt .section-label::after {
+  content: "";
+  display: block;
+  width: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(270deg, var(--virke-djup), var(--virke));
+  position: static;
+}
+
+.ih-js .katsida .kat-mitt .ih-etikett::after,
+.ih-js .katsida .kat-mitt .section-label::after {
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.9s var(--mjuk) 0.15s;
+}
+
+.ih-js .katsida .kat-mitt .ih-etikett.syns::after,
+.ih-js .katsida .kat-mitt .section-label.syns::after {
+  transform: scaleX(1);
+}
+
+.katsida .ih-huvud--mitt .ih-rubrik {
+  max-width: 22ch;
+  text-wrap: balance;
+}
+
+.katsida .ih-huvud--mitt .ih-ingress {
+  max-width: 38rem;
+  text-wrap: balance;
+}
+
+.kat-sr {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- Toppen ----------------------------------------------------------- */
+.kat-topp {
+  position: relative;
+  width: calc(100% - 24px);
+  margin: 0 12px;
+  padding: clamp(32px, 5vw, 72px) clamp(20px, 5vw, 72px) clamp(20px, 3vw, 40px);
+  border-radius: 32px;
+  isolation: isolate;
+  background:
+    radial-gradient(60% 80% at 100% 0%, rgba(255, 210, 150, 0.4), transparent 62%),
+    radial-gradient(55% 70% at 0% 100%, rgba(184, 205, 224, 0.24), transparent 62%),
+    linear-gradient(165deg, #fffdf9, #fdf6ec 55%, #f6f2e8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 40px 80px -56px rgba(27, 25, 21, 0.4);
+}
+
+html[data-tema="mork"] .kat-topp {
+  background:
+    radial-gradient(60% 80% at 100% 0%, rgba(240, 181, 110, 0.14), transparent 62%),
+    var(--vit);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+.kat-topp__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(32px, 5vw, 80px);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.kat-topp__ord {
+  animation: kat-in 0.9s var(--mjuk) 0.1s both;
+}
+
+.kat-topp__rubrik {
+  margin: 22px 0 20px;
+  font-family: var(--knappfont);
+  font-size: clamp(2.6rem, 1.2rem + 3.6vw, 4.6rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.kat-topp__ingress {
+  max-width: 32rem;
+  margin: 0 0 32px;
+  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
+  line-height: 1.65;
+  color: var(--text-2);
+}
+
+.kat-topp__knappar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.kat-topp__bild {
+  margin: 0;
+  aspect-ratio: 1600 / 1062;
+  overflow: hidden;
+  border-radius: 26px;
+  background: var(--ben-2);
+  box-shadow: 0 40px 80px -44px rgba(27, 25, 21, 0.5), 0 0 0 1px rgba(27, 25, 21, 0.05);
+  animation: kat-in 1s var(--mjuk) 0.2s both;
+}
+
+.kat-topp__bild img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kat-topp__fakta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 1200px;
+  margin: clamp(28px, 4vw, 52px) auto 0;
+  padding: 0;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07);
+  animation: kat-in 0.9s var(--mjuk) 0.35s both;
+}
+
+html[data-tema="mork"] .kat-topp__fakta {
+  background: rgba(247, 245, 240, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+.kat-topp__fakta div {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 22px 12px;
+  text-align: center;
+}
+
+.kat-topp__fakta div + div {
+  box-shadow: inset 1px 0 0 rgba(27, 25, 21, 0.08);
+}
+
+html[data-tema="mork"] .kat-topp__fakta div + div {
+  box-shadow: inset 1px 0 0 rgba(247, 245, 240, 0.08);
+}
+
+.kat-topp__fakta dt {
+  font: 600 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.kat-topp__fakta dd {
+  margin: 0;
+  font: 600 clamp(1.15rem, 1rem + 0.6vw, 1.5rem)/1.1 var(--knappfont);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+@keyframes kat-in {
+  from { opacity: 0; transform: translateY(16px); }
+}
+
+/* --- Modellerna --------------------------------------------------------- */
+.katsida .category {
+  width: var(--inre);
+}
+
+.katsida .category__head.kat-huvud {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 46rem;
+  margin: 0 auto clamp(28px, 3vw, 40px);
+  text-align: center;
+}
+
+.katsida .kat-huvud h2 {
+  margin: 1.1rem 0 0;
+  font-size: clamp(2.2rem, 1.2rem + 3.2vw, 3.9rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.katsida .kat-huvud .category__ingress {
+  max-width: 38rem;
+  margin: 1.25rem auto 0;
+  font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.2rem);
+  line-height: 1.65;
+  color: var(--text-2);
+  text-wrap: balance;
+}
+
+.kat-huvud__lankar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 24px 0 0;
+}
+
+.kat-huvud__lankar a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--vit);
+  box-shadow: inset 0 0 0 1px var(--kant), 0 8px 20px -16px rgba(27, 25, 21, 0.4);
+  color: var(--text);
+  font: 600 0.875rem/1 var(--knappfont);
+  text-decoration: none;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.35s var(--mjuk);
+}
+
+.kat-huvud__lankar a:hover {
+  background: var(--kol);
+  color: var(--krita);
+  transform: translateY(-1px);
+}
+
+.katsida .modellrad {
+  justify-content: center;
+  margin-bottom: clamp(28px, 3vw, 40px);
+}
+
+.katsida .model-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.katsida .model-grid--tva {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 880px;
+  margin-inline: auto;
+}
+
+.katsida .model-card {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 10px 20px;
+}
+
+/* Ingen lutning: korten lyfter rakt upp vid hovring. */
+.katsida .model-card__media,
+.katsida .model-card:hover .model-card__media {
+  transform: none;
+}
+
+.katsida .model-card__media img {
+  aspect-ratio: 1600 / 1062;
+}
+
+.katsida .model-card__rad {
+  margin-top: 20px;
+}
+
+.katsida .model-card__tag {
+  margin: 12px 0 20px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+.katsida .model-card .model-card__data {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: auto 10px 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--kant);
+  box-shadow: inset 0 0 0 1px var(--kant);
+}
+
+.katsida .model-card__data div {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--ben);
+}
+
+.katsida .model-card__data dt {
+  font: 600 0.625rem/1 var(--knappfont);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.katsida .model-card__data dd {
+  margin: 0;
+  font: 600 0.9375rem/1.2 var(--knappfont);
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.katsida .model-card__fot {
+  margin-top: 18px;
+  padding-top: 0;
+}
+
+.katsida .category__prisrad {
+  margin-top: 28px;
+  text-align: center;
+}
+
+/* --- Vad huset kan bli ---------------------------------------------------- */
+.katsida .at-anv__kort {
+  align-items: center;
+  padding: 32px 24px 34px;
+  text-align: center;
+}
+
+.katsida .at-anv__ikon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+}
+
+.katsida .at-anv__ikon svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* --- 3D ------------------------------------------------------------------- */
+.katsida .studio3d__topp {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.katsida .studio3d__ord {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 44rem;
+}
+
+.katsida .studio3d__titel {
+  margin-top: 1.1rem;
+}
+
+.katsida .studio3d__text {
+  margin-inline: auto;
+  text-wrap: balance;
+}
+
+.katsida .studio3d__not {
+  text-align: center;
+}
+
+/* --- Byggfotona ----------------------------------------------------------- */
+.katsida .at-foto__bild figcaption {
+  justify-items: center;
+  text-align: center;
+}
+
+/* --- Tre steg ------------------------------------------------------------- */
+.katsida .at-steg__kort .ih-huvud {
+  margin-bottom: clamp(28px, 3vw, 40px);
+}
+
+.katsida .at-steg__lista li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 24px 32px;
+  text-align: center;
+}
+
+.katsida .at-steg__lista li::before {
+  content: none;
+}
+
+.katsida .at-steg__nr {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--virke);
+  box-shadow: 0 0 0 6px rgba(240, 181, 110, 0.2);
+  font: 600 1rem/1 var(--knappfont);
+  letter-spacing: 0;
+  color: var(--kol);
+}
+
+.katsida .at-steg__lista h3 {
+  margin: 20px 0 8px;
+}
+
+.at-steg__mer {
+  display: flex;
+  justify-content: center;
+  margin: clamp(24px, 3vw, 36px) 0 0;
+}
+
+html[data-tema="mork"] .at-steg__kort {
+  background:
+    radial-gradient(80% 60% at 100% 0%, rgba(240, 181, 110, 0.12), transparent 60%),
+    var(--vit);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] .at-steg__lista li {
+  background: rgba(247, 245, 240, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+/* --- Kontakten: centrerad som resten -------------------------------------- */
+.katsida .contact-section__intro {
+  text-align: center;
+}
+
+.katsida .contact-section__title,
+.katsida .contact-section__text {
+  margin-inline: auto;
+}
+
+.katsida .tillit {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.katsida .tillit li {
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  text-align: center;
+}
+
+html[data-tema="mork"] .katsida .tillit li {
+  background: rgba(247, 245, 240, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+@media (min-width: 1041px) {
+  .katsida .contact-section__inner {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 40px;
+  }
+
+  .katsida .contact-section__intro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 50rem;
+  }
+
+  .katsida .contact-section .kontaktkort {
+    width: min(620px, 100%);
+  }
+}
+
+/* --- Mellanstora skärmar --------------------------------------------------- */
+@media (max-width: 1100px) {
+  .katsida .model-grid {
+    gap: 14px;
+  }
+
+  .katsida .model-card__data div {
+    padding: 11px 12px;
+  }
+}
+
+@media (max-width: 900px) {
+  .kat-topp {
+    padding: 12px 12px 12px;
+    border-radius: 26px;
+  }
+
+  .kat-topp__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .kat-topp__bild {
+    order: -1;
+    border-radius: 18px;
+  }
+
+  .kat-topp__ord {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 8px;
+    text-align: center;
+  }
+
+  .kat-topp__ord .ih-etikett::after {
+    content: "";
+    display: block;
+    width: 22px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(270deg, var(--virke-djup), var(--virke));
+  }
+
+  .kat-topp__rubrik {
+    margin: 16px 0 14px;
+    font-size: clamp(2.3rem, 1.2rem + 5.6vw, 3.4rem);
+  }
+
+  .kat-topp__ingress {
+    margin-bottom: 24px;
+  }
+
+  .kat-topp__knappar {
+    justify-content: center;
+  }
+
+  .kat-topp__fakta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 24px;
+  }
+
+  .kat-topp__fakta div + div {
+    box-shadow: none;
+  }
+
+  .kat-topp__fakta div:nth-child(2) {
+    box-shadow: inset 1px 0 0 rgba(27, 25, 21, 0.08);
+  }
+
+  .kat-topp__fakta div:nth-child(3) {
+    box-shadow: inset 0 1px 0 rgba(27, 25, 21, 0.08);
+  }
+
+  .kat-topp__fakta div:nth-child(4) {
+    box-shadow: inset 1px 0 0 rgba(27, 25, 21, 0.08), inset 0 1px 0 rgba(27, 25, 21, 0.08);
+  }
+
+  .kat-topp__fakta div {
+    padding: 18px 8px;
+  }
+
+  .katsida .model-grid,
+  .katsida .model-grid--tva {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 520px;
+    margin-inline: auto;
+  }
+
+  .katsida .tillit {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .katsida .contact-section__intro .tillit {
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .kat-topp__knappar {
+    width: 100%;
+  }
+
+  .kat-topp__knappar .ih-knapp {
+    flex: 1 1 100%;
+  }
+
+  .kat-topp__fakta dd {
+    font-size: 1.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kat-topp__ord,
+  .kat-topp__bild,
+  .kat-topp__fakta {
+    animation: none;
+  }
+}
+
+/* Rättelser efter första kontrollen. */
+.katsida .model-card__media img {
+  height: auto;
+}
+
+.katsida .category__head.kat-huvud {
+  gap: 0;
+}
+
+.katsida .contact-section__intro .section-label {
+  margin-bottom: 20px;
+}
+
+.katsida .contact-section .kontaktkort {
+  text-align: center;
+}
+
+.katsida .contact-section .kontaktkort__rubrik {
+  justify-content: center;
+}
+
+.katsida .contact-section .kontaktkort__rubrik::after {
+  content: "";
+  display: block;
+  width: 22px;
+  height: 1px;
+  background: var(--virke);
+}
+
+.katsida .contact-section .kontaktkort .contact-section__meta > div {
+  justify-items: center;
+}
+
+.katsida .contact-section .kontaktkort .contact-section__meta > div > * {
+  justify-content: center;
+}
+
+/* De färgade orden i rubrikerna hålls ihop på en rad. */
+.katsida h1 em,
+.katsida h2 em {
+  display: inline-block;
+}
+
+/* Smal skärm: flikarna och sorteringen på en centrerad rad var. */
+@media (max-width: 620px) {
+  .katsida .category-filter {
+    justify-content: center;
+    gap: 6px;
+    overflow: visible;
+  }
+
+  .katsida .category-filter a {
+    height: 40px;
+    padding: 0 14px;
+    font-size: 0.875rem;
+  }
+
+  .katsida .category-filter__delare {
+    margin: 0 2px;
+  }
+
+  .katsida .modellrad .sortering {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+    max-width: 400px;
+    padding: 5px;
+    gap: 2px;
+  }
+
+  .katsida .sortering .filter__etikett {
+    display: none;
+  }
+
+  .katsida .modellrad .sortering button {
+    width: 100%;
+    padding: 0 6px;
+  }
+}
+
+/* Herorubriken: den stora mjuka skuggan klipptes av radernas mask
+   (overflow: hidden för inglidningen) och syntes som en hinna bakom
+   varje rad. Ingen skugga på texten - tonen bakom ger kontrasten. */
+.topp3__rubrik,
+.topp3__rubrik .rad,
+.topp3__rubrik .rad > span {
+  text-shadow: none;
+}
+
+.topp3__ton {
+  background:
+    radial-gradient(70% 74% at 50% 52%, rgba(27, 25, 21, 0.64) 0%, rgba(27, 25, 21, 0.42) 55%, rgba(27, 25, 21, 0.12) 100%),
+    linear-gradient(0deg, rgba(27, 25, 21, 0.72) 0%, rgba(27, 25, 21, 0) 42%),
+    linear-gradient(180deg, rgba(27, 25, 21, 0.44) 0%, rgba(27, 25, 21, 0) 30%);
+}
+

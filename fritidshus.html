@@ -25,9 +25,9 @@
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" as="image" href="images/hus-r3.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20261004f">
-    <link rel="stylesheet" href="design.css?v=20261004f">
-    <script src="premium.js?v=20261004f" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261005b">
+    <link rel="stylesheet" href="design.css?v=20261005b">
+    <script src="premium.js?v=20261005b" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
@@ -132,32 +132,21 @@
       </nav>
     </header>
 
-    <main id="innehall">
-      <section class="subpage-hero">
-        <span class="ih-kant" aria-hidden="true"></span>
-        <img class="subpage-hero__image" src="images/hus-r3.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Fritidshus i svensk natur">
-
-        <div class="subpage-hero__content-wrap">
-          <div class="subpage-hero__content">
-            <p class="ih-etikett ih-etikett--ljus sidtopp__etikett">Våra hus · För dig som ska bo</p>
-            <h1 class="subpage-hero__title">Fritidshus</h1>
-            <p class="subpage-hero__meta">Mer plats än ett attefallshus, för helger, lov och långa somrar - från 38 m², byggda under tak i Sverige och monterade på några dagar.</p>
-            <div class="subpage-hero__actions">
-              <a class="hero__link hero__link--solid" href="#modeller">Se modellerna</a>
-              <a class="hero__link" href="#kontakt">Begär offert</a>
-            </div>
-            <div class="heroscen heroscen--kategori heroscen--inne" aria-hidden="true">
-              <div class="heroscen__chip heroscen__chip--a">
-                <svg class="matare" viewBox="0 0 120 70"><path class="matare__spar" d="M10 64a50 50 0 0 1 100 0" pathLength="100"/><path class="matare__varde" d="M10 64a50 50 0 0 1 100 0" pathLength="100" style="--varde: 100"/></svg>
-                <p><strong>38–45 m²</strong><span>boyta · 2 rum</span></p>
-              </div>
-              <div class="heroscen__chip heroscen__chip--b">
-                <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"/></svg></span>
-                <p><strong>Leverans 12–14 v</strong><span>tillverkat under tak i Sverige</span></p>
-              </div>
+    <main id="innehall" class="katsida">
+      <section class="kat-topp" aria-labelledby="kat-rubrik">
+        <div class="kat-topp__grid">
+          <div class="kat-topp__ord">
+            <p class="ih-etikett">Fritidshus</p>
+            <h1 class="kat-topp__rubrik" id="kat-rubrik">Mer plats för <em>långa somrar.</em></h1>
+            <p class="kat-topp__ingress">Två fritidshus med takkupa, på 38 och 45 kvadratmeter. Byggda under tak i Sverige och monterade på din tomt på några dagar. Fritidshusen kräver bygglov, och underlaget tar vi fram.</p>
+            <div class="kat-topp__knappar">
+              <a class="ih-knapp ih-knapp--virke" href="#modeller">Se husen<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+              <a class="ih-knapp ih-knapp--kontur" href="#kontakt">Prata med oss</a>
             </div>
           </div>
+          <figure class="kat-topp__bild"><img src="images/hus-r3.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Kupa 38, ett fritidshus med svart fasad och takkupa i en tallskog"></figure>
         </div>
+        <dl class="kat-topp__fakta"><div><dt>Boyta</dt><dd>38–45 m²</dd></div><div><dt>Planlösning</dt><dd>2 rum</dd></div><div><dt>Leveranstid</dt><dd>12–14 veckor</dd></div><div><dt>Extra takhöjd</dt><dd>Takkupa</dd></div></dl>
       </section>
 
       <section class="category" id="modeller">
@@ -169,11 +158,12 @@
           <a href="proffs.html">Proffs</a>
           </nav>
 
-          <div class="category__head">
-            <h2>Modeller för fritidsboende</h2>
-            <p class="category__ingress">Fritidshus ger mer plats på tomten än ett attefallshus och kräver bygglov. Här samlar vi modellerna som är gjorda för att bo i över helger, lov och långa somrar.</p>
-          <p class="category__guide"><a href="aga-och-hyra-ut.html">Samäga eller hyra ut stugan: kalender och uthyrningskalkyl</a></p>
-            <p class="category__count" aria-live="polite">2 modeller</p>
+          <div class="category__head kat-huvud kat-mitt">
+            <p class="ih-etikett">Modellerna</p>
+            <h2>Två hus. <em>Samma hantverk.</em></h2>
+            <p class="category__ingress">Kupa 38 och Kupa 45 har samma form och byggs på samma sätt. Det som skiljer är storleken. Planlösning, fasad och kulörer bestämmer vi tillsammans i offerten.</p>
+            <p class="kat-huvud__lankar"><a href="aga-och-hyra-ut.html">Äga och hyra ut</a><a href="vad-far-jag-bygga.html">Vad får jag bygga?</a></p>
+            <p class="category__count kat-sr" aria-live="polite">2 modeller</p>
           </div>
 
           <div class="modellrad">
@@ -186,17 +176,18 @@
             </div>
           </div>
 
-          <div class="model-grid">
+          <div class="model-grid model-grid--tva">
           <article class="model-card" data-yta="38" data-rum="2" data-lev="12" data-nr="1" data-namn="Kupa 38" data-bild="hus-r3.webp">
             <a class="model-card__media" href="huskort.html?typ=fritidshus&amp;modell=1">
-              <img src="images/hus-r3.webp" loading="lazy" decoding="async" alt="Kupa 38, fritidshus i svensk natur">
+              <img src="images/hus-r3.webp" width="1600" height="1062" loading="lazy" decoding="async" alt="Kupa 38, fritidshus med takkupa i skogen">
               <span class="model-card__pill" aria-hidden="true">Se huskortet</span>
             </a>
             <div class="model-card__rad">
               <h3 class="model-card__title"><a href="huskort.html?typ=fritidshus&amp;modell=1">Kupa 38</a></h3>
               <p class="model-card__yta">38<span>m²</span></p>
             </div>
-            <p class="model-card__facts"><span>2 rum</span><span>Leverans 12 v</span></p>
+            <p class="model-card__tag">Två rum och extra takhöjd under kupan. För helger, lov och långa somrar.</p>
+            <dl class="model-card__data"><div><dt>Tak</dt><dd>Med takkupa</dd></div><div><dt>Rum</dt><dd>2 rum</dd></div><div><dt>Yttermått</dt><dd>10,83 × 3,90 m</dd></div><div><dt>Leverans</dt><dd>12 veckor</dd></div></dl>
             <div class="model-card__fot">
               <p class="model-card__price">Pris i offert</p>
               <button class="jamfor-knapp" type="button" aria-pressed="false">Jämför</button>
@@ -204,14 +195,15 @@
           </article>
           <article class="model-card" data-yta="45" data-rum="2" data-lev="14" data-nr="2" data-namn="Kupa 45" data-bild="hus-r4.webp">
             <a class="model-card__media" href="huskort.html?typ=fritidshus&amp;modell=2">
-              <img src="images/hus-r4.webp" loading="lazy" decoding="async" alt="Kupa 45, fritidshus i svensk natur">
+              <img src="images/hus-r4.webp" width="1600" height="1062" loading="lazy" decoding="async" alt="Kupa 45, fritidshus med takkupa och altan">
               <span class="model-card__pill" aria-hidden="true">Se huskortet</span>
             </a>
             <div class="model-card__rad">
               <h3 class="model-card__title"><a href="huskort.html?typ=fritidshus&amp;modell=2">Kupa 45</a></h3>
               <p class="model-card__yta">45<span>m²</span></p>
             </div>
-            <p class="model-card__facts"><span>2 rum</span><span>Leverans 14 v</span></p>
+            <p class="model-card__tag">Vårt största hus. Två rum och plats för både vardag och gäster.</p>
+            <dl class="model-card__data"><div><dt>Tak</dt><dd>Med takkupa</dd></div><div><dt>Rum</dt><dd>2 rum</dd></div><div><dt>Yttermått</dt><dd>12,50 × 3,90 m</dd></div><div><dt>Leverans</dt><dd>14 veckor</dd></div></dl>
             <div class="model-card__fot">
               <p class="model-card__price">Pris i offert</p>
               <button class="jamfor-knapp" type="button" aria-pressed="false">Jämför</button>
@@ -219,22 +211,52 @@
           </article>
           </div>
 
-          <p class="category__prisrad">
-            Priserna sätts i offert efter din tomt.
-            <a href="priser.html">Så sätts priset</a>
-          </p>
+          <p class="category__prisrad">Priset sätts i offerten, efter din tomt. <a href="priser.html">Så räknar vi</a></p>
+        </div>
+      </section>
+
+      <section class="at-anv ih-sektion" aria-labelledby="anv-rubrik">
+        <div class="ih-inre">
+          <div class="ih-huvud ih-huvud--mitt kat-mitt">
+            <p class="ih-etikett">Användning</p>
+            <h2 class="ih-rubrik" id="anv-rubrik">Vad ska <em>stugan</em> bli?</h2>
+            <p class="ih-ingress">Ett ställe för helgerna, ett sommarhem för hela familjen eller något att dela med fler.</p>
+          </div>
+          <div class="at-anv__grid">
+            <article class="at-anv__kort">
+              <span class="at-anv__ikon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></span>
+              <h3>Helger och lov</h3>
+              <p>Ett eget ställe att åka till på fredagen. Två rum och plats att stanna hela sommaren.</p>
+            </article>
+            <article class="at-anv__kort">
+              <span class="at-anv__ikon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3"/><path d="M3 20c.6-3.4 3-5 6-5s5.4 1.6 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.2c2.6.1 4.4 1.6 5 4.8"/></svg></span>
+              <h3>Plats för fler</h3>
+              <p>Barnbarn, vänner eller släkten en vecka i juli. Kupa 45 är vårt största hus.</p>
+            </article>
+            <article class="at-anv__kort">
+              <span class="at-anv__ikon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span>
+              <h3>Äga tillsammans</h3>
+              <p>Dela stugan med syskon eller vänner. Samägarkalendern fördelar veckorna mellan er.</p>
+            </article>
+            <article class="at-anv__kort">
+              <span class="at-anv__ikon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="8" cy="12" r="4"/><path d="M12 12h9"/><path d="M18 12v3"/><path d="M15 12v2"/></svg></span>
+              <h3>Hyra ut</h3>
+              <p>Hyr ut veckorna ni inte är där. Uthyrningskalkylen visar vad det kan täcka.</p>
+            </article>
+          </div>
         </div>
       </section>
 
       <section class="studio3d" data-studio3d aria-labelledby="studio3d-rubrik">
         <div class="studio3d__inner">
-          <div class="studio3d__topp">
+          <div class="studio3d__topp kat-mitt">
             <div class="studio3d__ord">
               <p class="section-label section-label--accent">Storleken i 3D</p>
               <h2 class="studio3d__titel" id="studio3d-rubrik">Så stort är <em data-3d-namn>Kupa 38</em>.</h2>
               <p class="studio3d__text">
-                Husen är byggda ur ritningarna i skala 1:1 och visas i samma
-                skala, så att skillnaden syns. Dra för att vrida.
+                Svårt att föreställa sig hur stort 38 kvadratmeter är? Här står husen i rätt
+                skala bredvid en människa på 1,80. Dra för att vrida och byt hus
+                för att jämföra.
               </p>
             </div>
             <div class="studio3d__val" role="group" aria-label="Välj hus att visa i 3D">
@@ -285,6 +307,59 @@
         </div>
       </section>
 
+      <section class="at-foto ih-sektion" aria-labelledby="foto-rubrik">
+        <div class="ih-inre">
+          <div class="ih-huvud ih-huvud--mitt kat-mitt">
+            <p class="ih-etikett">Så bygger vi</p>
+            <h2 class="ih-rubrik" id="foto-rubrik">Byggt under tak. <em>Monterat på dagar.</em></h2>
+            <p class="ih-ingress">Väggarna byggs färdiga inomhus, i torr och jämn temperatur. Sedan kommer de på lastbil till tomten och lyfts på plats med kran.</p>
+          </div>
+          <div class="at-foto__rad">
+            <figure class="at-foto__bild">
+              <span class="at-foto__ram"><img src="images/foto/stommar-stapel.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra"></span>
+              <figcaption><b>01 · Verkstaden</b><span>Stommarna byggs regel för regel, under tak.</span></figcaption>
+            </figure>
+            <figure class="at-foto__bild">
+              <span class="at-foto__ram"><img src="images/foto/dronare-leverans.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Lastbil med kran levererar väggelement och takstolar till ett bygge i skogen"></span>
+              <figcaption><b>02 · Leveransen</b><span>Väggarna kommer färdiga till tomten på lastbil.</span></figcaption>
+            </figure>
+            <figure class="at-foto__bild">
+              <span class="at-foto__ram"><img src="images/foto/dronare-montage.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Kran lyfter väggelement på plats på en gjuten platta"></span>
+              <figcaption><b>03 · Montaget</b><span>Kranen lyfter dem på plats, en vägg i taget.</span></figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="at-steg ih-sektion" aria-labelledby="steg-rubrik">
+        <div class="ih-inre">
+          <div class="at-steg__kort">
+            <div class="ih-huvud ih-huvud--mitt kat-mitt">
+              <p class="ih-etikett">Så går det till</p>
+              <h2 class="ih-rubrik" id="steg-rubrik">Tre steg <em>till ditt hus.</em></h2>
+            </div>
+            <ol class="at-steg__lista">
+              <li>
+                <span class="at-steg__nr">01</span>
+                <h3>Du berättar om tomten</h3>
+                <p>Var den ligger, vad huset ska bli och ungefär när. Mer än så behöver vi inte för att börja.</p>
+              </li>
+              <li>
+                <span class="at-steg__nr">02</span>
+                <h3>Vi ritar och räknar</h3>
+                <p>Du får förslag på modell, underlag till bygglovet och en offert post för post.</p>
+              </li>
+              <li>
+                <span class="at-steg__nr">03</span>
+                <h3>Huset kommer</h3>
+                <p>Byggt under tak i Sverige, levererat på lastbil och monterat på din tomt på några dagar.</p>
+              </li>
+            </ol>
+            <p class="at-steg__mer"><a class="ih-knapp ih-knapp--kontur" href="sa-fungerar-det.html">Läs hela processen</a></p>
+          </div>
+        </div>
+      </section>
+
       <div class="jamforbar" hidden>
         <p><strong data-jamfor-antal>0</strong> hus valda</p>
         <button class="jamforbar__oppna" type="button">Jämför sida vid sida</button>
@@ -299,12 +374,11 @@
         <div class="jamforruta__kolumner"></div>
       </dialog>
 
-
       <section class="ih-sektion ih-sektion--sand">
         <div class="ih-inre">
-          <div class="ih-huvud ih-huvud--mitt">
-            <p class="ih-etikett">Vanliga frågor</p>
-            <h2 class="ih-rubrik">Det du undrar <em>först.</em></h2>
+          <div class="ih-huvud ih-huvud--mitt kat-mitt">
+            <p class="ih-etikett">Frågor och svar</p>
+            <h2 class="ih-rubrik">Bra att <em>veta.</em></h2>
           </div>
           <div class="ih-fragor">
             <details class="ih-fraga" open>
@@ -312,12 +386,16 @@
               <p>Ja. Våra fritidshus är större än ett attefallshus och kräver bygglov. Vi tar fram ritningar och underlag, och du som byggherre lämnar in ansökan till kommunen.</p>
             </details>
             <details class="ih-fraga">
+              <summary>Hur lång tid tar det?</summary>
+              <p>Leveranstiden är 12–14 veckor beroende på modell, och bygglovet behöver vara klart innan huset byggs. Själva montaget på tomten tar några dagar.</p>
+            </details>
+            <details class="ih-fraga">
               <summary>Kan vi äga stugan tillsammans?</summary>
               <p>Ja. Samägarkalendern fördelar årets veckor rättvist mellan delägarna, storhelgerna först.</p>
             </details>
             <details class="ih-fraga">
               <summary>Går det att hyra ut stugan när vi inte är där?</summary>
-              <p>Uthyrningskalkylen visar vad uthyrningen kan täcka av kostnaderna, vecka för vecka.</p>
+              <p>Ja. Uthyrningskalkylen visar vad uthyrningen kan täcka av kostnaderna, vecka för vecka.</p>
             </details>
           </div>
         </div>
@@ -325,12 +403,12 @@
 
       <section class="contact-section" id="kontakt">
         <div class="contact-section__inner">
-          <div class="contact-section__intro">
+          <div class="contact-section__intro kat-mitt">
             <p class="section-label section-label--accent">Första steget</p>
-            <h2 class="contact-section__title">Låt oss börja med <em>din plats</em>.</h2>
+            <h2 class="contact-section__title">Berätta om <em>din tomt</em>.</h2>
             <p class="contact-section__text">
-              Berätta vad du funderar på, så återkommer vi med nästa tydliga
-              steg. Utan krav och utan säljsnack.
+              Var den ligger, vad huset ska bli och ungefär när. Då får du ett
+              rakt besked om vad som går att bygga och vad det kostar.
             </p>
             <ul class="tillit" aria-label="Det du kan räkna med">
               <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg>Byggt under tak i Sverige</li>

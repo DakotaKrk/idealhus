@@ -408,8 +408,6 @@ MAIN = f'''    <main id="innehall">
 
           <figure class="pf-topp__bild">
             <span class="pf-topp__ram"><img src="images/foto/dronare-vaggblock.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Drönarbild av väggblock i trä bredvid en lastbil med takstolar"></span>
-            <div class="pf-chip pf-chip--a" aria-hidden="true">{ikon("bygge")}<p><strong>Efter er ritning</strong><span>mått och utförande</span></p></div>
-            <div class="pf-chip pf-chip--b" aria-hidden="true">{ikon("bil")}<p><strong>Levererat till bygget</strong><span>isolerat och klart under tak</span></p></div>
           </figure>
         </div>
       </section>
