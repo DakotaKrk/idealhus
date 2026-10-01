@@ -15,19 +15,19 @@
 
   /* --- Husen (samma som _modeller.py) ------------------------------ */
   IH.MODELLER = [
-    { id: 'r2', namn: 'Sadel 26', kategori: 'Attefallshus', yta: 30, rum: 1, bild: '../images/hus-r2.webp',
+    { id: 'r2', namn: 'Sadel 30', kategori: 'Attefallshus', yta: 30, rum: 1, bild: '../images/hus-r2.webp',
       tumme: '../images/tumme/meny-attefallshus.webp', glb: '../modeller/hus-r2.glb', matt: '8,33 × 3,49 m', tak: 'Sadeltak 30°',
       text: 'Ett rum under ett brant sadeltak. Smal form som får plats längs en häck eller tomtgräns.' },
-    { id: 'r1', namn: 'Sadel 27', kategori: 'Attefallshus', yta: 30, rum: 2, bild: '../images/hus-r1.webp',
+    { id: 'r1', namn: 'Sadel 30 Bred', kategori: 'Attefallshus', yta: 30, rum: 2, bild: '../images/hus-r1.webp',
       tumme: '../images/tumme/hus-r1.webp', glb: '../modeller/hus-r1.glb', matt: '7,14 × 4,20 m', tak: 'Sadeltak 24°',
       text: 'Två rum, sovrum och allrum. Ett litet hus som går att bo i på riktigt.' },
-    { id: 'r5', namn: 'Pulpet 27', kategori: 'Attefallshus', yta: 30, rum: 2, bild: '../images/hus-r5.webp',
+    { id: 'r5', namn: 'Pulpet 30', kategori: 'Attefallshus', yta: 30, rum: 2, bild: '../images/hus-r5.webp',
       tumme: '../images/tumme/hus-r5.webp', glb: '../modeller/hus-r5.glb', matt: '7,50 × 4,00 m', tak: 'Pulpettak 2°',
       text: 'Två rum under ett nästan platt tak, stora glaspartier och mycket ljus.' },
-    { id: 'r3', namn: 'Kupa 38', kategori: 'Fritidshus', yta: 40, rum: 2, bild: '../images/hus-r3.webp',
+    { id: 'r3', namn: 'Kupa 40', kategori: 'Fritidshus', yta: 40, rum: 2, bild: '../images/hus-r3.webp',
       tumme: '../images/tumme/meny-fritidshus.webp', glb: '../modeller/hus-r3.glb', matt: '10,83 × 3,90 m', tak: 'Takkupa',
       text: 'Fritidshus med takkupa och extra takhöjd. Kräver bygglov.', lov: true },
-    { id: 'r4', namn: 'Kupa 45', kategori: 'Fritidshus', yta: 50, rum: 2, bild: '../images/hus-r4.webp',
+    { id: 'r4', namn: 'Kupa 50', kategori: 'Fritidshus', yta: 50, rum: 2, bild: '../images/hus-r4.webp',
       tumme: '../images/tumme/hus-r4.webp', glb: '../modeller/hus-r4.glb', matt: '12,50 × 3,90 m', tak: 'Takkupa',
       text: 'Det största huset, plats för både vardag och gäster. Kräver bygglov.', lov: true },
     { id: 'element', namn: 'Byggelement', kategori: 'Proffs', yta: 0, rum: 0, bild: '../images/foto/lyft-stommar.webp',
@@ -167,17 +167,17 @@
 
     // Affärerna på säljtavlan.
     var A = [
-      [3, 'r3', 'kontakt', 695000, -2, 'Kupa 38 vid havet'],
-      [4, 'r2', 'besok', 423000, -3, 'Sadel 26 som kontor'],
-      [6, 'r4', 'offert', 868000, -5, 'Kupa 45, året runt'],
-      [7, 'r1', 'forhandling', 612000, -7, 'Sadel 27 med kök och bad'],
+      [3, 'r3', 'kontakt', 695000, -2, 'Kupa 40 vid havet'],
+      [4, 'r2', 'besok', 423000, -3, 'Sadel 30 som kontor'],
+      [6, 'r4', 'offert', 868000, -5, 'Kupa 50, året runt'],
+      [7, 'r1', 'forhandling', 612000, -7, 'Sadel 30 Bred med kök och bad'],
       [8, 'element', 'offert', 2640000, -8, 'Husblock, 12 tomter'],
-      [10, 'r5', 'kontakt', 470000, -10, 'Pulpet 27 i Falun'],
-      [11, 'r2', 'besok', 1580000, -14, 'Fyra Sadel 26 för uthyrning'],
+      [10, 'r5', 'kontakt', 470000, -10, 'Pulpet 30 i Falun'],
+      [11, 'r2', 'besok', 1580000, -14, 'Fyra Sadel 30 för uthyrning'],
       [5, 'r5', 'ny', 445000, -4, 'Hus utanför detaljplan'],
-      [13, 'r1', 'vunnen', 498000, -26, 'Sadel 27 i Vallentuna'],
-      [2, 'r3', 'vunnen', 765000, -40, 'Kupa 38 i Åre'],
-      [0, 'r2', 'vunnen', 441000, -58, 'Sadel 26 vid sjön'],
+      [13, 'r1', 'vunnen', 498000, -26, 'Sadel 30 Bred i Vallentuna'],
+      [2, 'r3', 'vunnen', 765000, -40, 'Kupa 40 i Åre'],
+      [0, 'r2', 'vunnen', 441000, -58, 'Sadel 30 vid sjön'],
       [9, 'r1', 'forlorad', 452000, -30, 'Sommarhus på Orust']
     ];
     A.forEach(function (a, i) {
@@ -221,7 +221,7 @@
     }
     akt(-2, 'samtal', 'Ringde och gick igenom strandskyddet. Skickar karta över tomten.', 'k4', 'a1');
     akt(-3, 'mote', 'Platsbesök bokat till nästa vecka.', 'k5', 'a2');
-    akt(-5, 'mejl', 'Offert skickad för Kupa 45.', 'k7', 'a3');
+    akt(-5, 'mejl', 'Offert skickad för Kupa 50.', 'k7', 'a3');
     akt(-7, 'samtal', 'Vill förhandla om altanen. Återkommer med nytt förslag.', 'k8', 'a4');
     akt(-8, 'mote', 'Digitalt möte om husblock för tolv tomter.', 'k9', 'a5');
     akt(-26, 'system', 'Order signerad.', 'k14', 'a9');

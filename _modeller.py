@@ -21,13 +21,13 @@ Ordningen ar samma som pa sidan: modell 1 ar forst.
 # en platshållare. Byt här om kunden ger modellerna egna namn.
 KATEGORIER = {
     "attefallshus": ("Attefallshus", [
-        ("Sadel 26", "hus-r2.webp", 30, 1, 10),       # R2: 8,33 x 3,49 m, sadeltak 30°
-        ("Sadel 27", "hus-r1.webp", 30, 2, 10),       # R1: 7,14 x 4,20 m, sadeltak 24°
-        ("Pulpet 27", "hus-r5.webp", 30, 2, 12),       # R5: 7,50 x 4,00 m, pulpettak 2°
+        ("Sadel 30", "hus-r2.webp", 30, 1, 10),       # R2: 8,33 x 3,49 m, sadeltak 30°
+        ("Sadel 30 Bred", "hus-r1.webp", 30, 2, 10),       # R1: 7,14 x 4,20 m, sadeltak 24°
+        ("Pulpet 30", "hus-r5.webp", 30, 2, 12),       # R5: 7,50 x 4,00 m, pulpettak 2°
     ]),
     "fritidshus": ("Fritidshus", [
-        ("Kupa 38", "hus-r3.webp", 40, 2, 12),       # R3: 10,83 x 3,90 m, takkupa
-        ("Kupa 45", "hus-r4.webp", 50, 2, 14),       # R4: 12,50 x 3,90 m, takkupa
+        ("Kupa 40", "hus-r3.webp", 40, 2, 12),       # R3: 10,83 x 3,90 m, takkupa
+        ("Kupa 50", "hus-r4.webp", 50, 2, 14),       # R4: 12,50 x 3,90 m, takkupa
     ]),
 }
 
@@ -44,11 +44,11 @@ MATT = {
 
 # Taket per modell, som det står i ritningarna (huskortets faktarad).
 TAK = {
-    "Sadel 26": "Sadeltak",
-    "Sadel 27": "Sadeltak",
-    "Pulpet 27": "Pulpettak",
-    "Kupa 38": "Med takkupa",
-    "Kupa 45": "Med takkupa",
+    "Sadel 30": "Sadeltak",
+    "Sadel 30 Bred": "Sadeltak",
+    "Pulpet 30": "Pulpettak",
+    "Kupa 40": "Med takkupa",
+    "Kupa 50": "Med takkupa",
 }
 
 
@@ -58,19 +58,19 @@ GEMENSAMT = ("Huset byggs under tak i Sverige och kommer i färdiga delar till "
              "tomten, där montaget tar dagar i stället för månader. Planlösning, "
              "fasad och kulörer bestäms tillsammans i offerten.")
 BESKRIVNING = {
-    "Sadel 26": ("Ett rum på 30 m² under ett brant sadeltak. Den smala formen, "
+    "Sadel 30": ("Ett rum på 30 m² under ett brant sadeltak. Den smala formen, "
                  "8,33 × 3,49 meter, gör att huset får plats längs en häck eller "
                  "en tomtgräns - som gästhus, ateljé eller för uthyrning."),
-    "Sadel 27": ("Två rum på 30 m² under ett sadeltak. Den bredare formen, "
+    "Sadel 30 Bred": ("Två rum på 30 m² under ett sadeltak. Den bredare formen, "
                  "7,14 × 4,20 meter, ger plats för ett sovrum och ett allrum - "
                  "ett litet hus som går att bo i på riktigt."),
-    "Pulpet 27": ("Två rum på 30 m² under ett nästan platt pulpettak. Formen, "
+    "Pulpet 30": ("Två rum på 30 m² under ett nästan platt pulpettak. Formen, "
                   "7,50 × 4,00 meter, och de stora glaspartierna ger ett modernt "
                   "hus med mycket ljus."),
-    "Kupa 38": ("Ett fritidshus på 40 m² med takkupa, 10,83 × 3,90 meter. Två rum "
+    "Kupa 40": ("Ett fritidshus på 40 m² med takkupa, 10,83 × 3,90 meter. Två rum "
                 "och extra takhöjd under kupan, för helger, lov och långa somrar. "
                 "Huset kräver bygglov."),
-    "Kupa 45": ("Vårt största hus: 50 m² med takkupa, 12,50 × 3,90 meter. Två rum "
+    "Kupa 50": ("Vårt största hus: 50 m² med takkupa, 12,50 × 3,90 meter. Två rum "
                 "och plats för både vardag och gäster. Huset kräver bygglov."),
 }
 

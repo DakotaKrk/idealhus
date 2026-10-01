@@ -4307,7 +4307,7 @@
     mv = document.createElement('model-viewer');
     var attr = {
       src: 'modeller/hus-r1-sprang.glb?v=20261004q',
-      alt: 'Sadel 27 i sprängskiss: grund, väggar och tak',
+      alt: 'Sadel 30 Bred i sprängskiss: grund, väggar och tak',
       'animation-name': 'sprang',
       'camera-orbit': '34deg 72deg 16m',
       'camera-target': '0m 1.7m 0m',
