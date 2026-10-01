@@ -1925,7 +1925,7 @@
                 '<span><b>' + e(x.m ? x.m.namn : '') + '</b><small>' + x.antal + (x.antal === 1 ? ' offert' : ' offerter') + (x.ja ? ' · ' + x.ja + ' ja' : '') + '</small><i class="permodell__stapel"></i></span><em class="tal">' + IH.kort(x.summa) + '</em></a>';
             }).join('') + '</div>' : '') + '</div>' +
             '<div class="poster"><p class="etikett etikett--ljus">Vanligaste posterna</p><div class="poster__lista">' + topPoster.map(function (t) {
-              return '<span><b>' + poster[t] + '</b>' + e(t) + '<small>' + Math.round(poster[t] / alla.length * 100) + ' %</small></span>';
+              return '<span style="--a:' + (poster[t] / alla.length).toFixed(3) + '"><b>' + poster[t] + '</b>' + e(t) + '<small>' + Math.round(poster[t] / alla.length * 100) + ' %</small><i></i></span>';
             }).join('') + '</div></div>' +
           '</div>' +
         '</div>' +

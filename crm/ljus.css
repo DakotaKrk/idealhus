@@ -5671,3 +5671,166 @@ body {
   padding-top: 10px;
   border-top: 1px solid rgba(27, 25, 21, 0.06);
 }
+
+/* =====================================================================
+   Offerter premium, ljus och mjuk (2026-10-08)
+   Samma ljusa glas som säljtavlan och kunderna: toppen som solkort,
+   veckostaplarna fyllda med den här veckan lysande, panelerna i glas,
+   "Per hus" med tjockare mjuka staplar, posterna som glaspiller och
+   tabellen som ett glaskort där raderna lyser varmt vid hovring.
+   ===================================================================== */
+.offtopp {
+  background:
+    radial-gradient(60% 70% at 100% 0%, rgba(255, 214, 160, 0.45), transparent 65%),
+    radial-gradient(55% 70% at 0% 100%, rgba(205, 228, 196, 0.4), transparent 65%),
+    linear-gradient(165deg, #fffdf9, #fcf6ed 55%, #f7f2e9);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 40px 80px -56px rgba(90, 60, 25, 0.6);
+}
+
+.offtopp__staplar {
+  height: 76px;
+}
+
+.offtopp__staplar i {
+  height: calc(var(--a) * 54px + 4px);
+  border-radius: 7px 7px 3px 3px;
+  background: linear-gradient(180deg, #f6c88f, #e3a35a);
+  box-shadow: 0 6px 12px -8px rgba(201, 128, 52, 0.6);
+}
+
+.offtopp__staplar span:last-child i {
+  background: linear-gradient(180deg, #ffd8a4, #e8a456);
+  box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.22), 0 0 16px rgba(240, 181, 110, 0.55);
+}
+
+.offtopp__staplar span:last-child small {
+  font-weight: 700;
+  color: #8f5424;
+}
+
+/* Panelerna till höger. */
+.snartut,
+.permodell,
+.poster {
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.62));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 18px 36px -28px rgba(90, 60, 25, 0.5);
+}
+
+.permodell__rad {
+  padding: 4px 6px 4px 4px;
+  border-radius: 14px;
+  transition: background 0.3s ease;
+}
+
+.permodell__rad:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.permodell__rad img,
+.permodell__rad > i {
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.06), 0 6px 12px -8px rgba(27, 25, 21, 0.45);
+}
+
+.permodell__stapel {
+  height: 6px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e3a35a, #f6c88f calc(var(--a) * 100%), rgba(27, 25, 21, 0.07) 0);
+}
+
+.poster__lista {
+  gap: 8px;
+}
+
+.poster__lista span {
+  padding: 6px 12px 6px 6px;
+  background: linear-gradient(160deg, #fff, #fff6ea);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.2), 0 8px 16px -12px rgba(90, 60, 25, 0.45);
+}
+
+.poster__lista b {
+  background: linear-gradient(160deg, #f6c88f, #e3a35a);
+  color: #1b1915;
+}
+
+/* --- Tabellen som glaskort --------------------------------------------- */
+.kort:has(> .tabell) {
+  overflow: hidden;
+  border-radius: 26px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.74));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 30px 60px -44px rgba(90, 60, 25, 0.55);
+}
+
+.kort > .tabell thead th {
+  padding-top: 15px;
+  padding-bottom: 13px;
+  background: linear-gradient(180deg, rgba(255, 246, 232, 0.8), rgba(255, 246, 232, 0.35));
+  color: #a07650;
+}
+
+.kort > .tabell td {
+  border-top-color: rgba(27, 25, 21, 0.06);
+}
+
+.kort > .tabell tr[data-g]:hover {
+  background: linear-gradient(90deg, rgba(255, 236, 210, 0.55), rgba(255, 246, 232, 0.3));
+}
+
+.kort > .tabell .tabell__hus img {
+  width: 57px;
+  height: auto;
+  aspect-ratio: 1600 / 1062;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.06), 0 8px 16px -10px rgba(27, 25, 21, 0.5);
+}
+
+.kort > .tabell .tabell__hus b {
+  font-family: var(--rubrik);
+  font-weight: 600;
+}
+
+/* Vanligaste posterna som rader med en mjuk stapel, grafen per vecka högre. */
+.poster {
+  display: flex;
+  flex-direction: column;
+}
+
+.poster__lista {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.poster__lista span {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 10px 12px 12px 10px;
+  border-radius: 16px;
+  font-size: 0.8125rem;
+  color: var(--text);
+}
+
+.poster__lista small {
+  font: 600 0.75rem/1 var(--rubrik);
+  color: #8f5424;
+}
+
+.poster__lista i {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e3a35a, #f6c88f calc(var(--a) * 100%), rgba(27, 25, 21, 0.07) 0);
+}
+
+.offtopp__staplar {
+  height: 132px;
+  margin-top: 6px;
+}
+
+.offtopp__staplar i {
+  max-width: 34px;
+  height: calc(var(--a) * 104px + 5px);
+}
