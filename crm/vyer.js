@@ -2243,7 +2243,7 @@
       var v = (arr.length === 1 ? 90 : 22 + n * (136 / (arr.length - 1))) * Math.PI / 180;
       var left = 50 + Math.cos(v) * 46, top = 70 + Math.sin(v) * 24;
       return '<button type="button" class="bord__plats' + (x.id === moteAffar ? ' vald' : '') + '" style="left:' + left.toFixed(1) + '%;top:' + top.toFixed(1) + '%;--n:' + n + '" data-g="mote-valj" data-id="' + x.id + '" title="' + e(kk ? kk.namn : '') + ' · ' + e(x.titel) + '">' +
-        kundAvatar(kk, true) + '<span>' + e(kk ? forsta(kk.namn) : '') + '</span></button>';
+        kundAvatar(kk, true) + '<span>' + e(kk ? forsta(kk.namn) : '') + '<em aria-hidden="true">' + (SALJ_EMOJI[x.steg] || '') + '</em></span></button>';
     }).join('');
     var rubrik = a && k ? 'Nästa möte med<br><em>' + e(forsta(k.namn)) + '.</em>' : 'Redo att<br><em>presentera.</em>';
     var text = a && k ? e(a.titel) + (m ? ' · ' + e(m.kategori) + ' ' + e(m.namn) : '') + ' · ' + (f ? e(f.miljo) + ' · ' : '') + e(k.ort) : 'Välj en kund runt bordet, eller kör presentationen generellt.';
@@ -2253,9 +2253,9 @@
         '<h2 class="motescen__rubrik">' + rubrik + '</h2>' +
         '<p class="motescen__text">' + text + '</p>' +
         '<div class="motescen__chips">' +
-          '<span>' + i('mote') + N + (N === 1 ? ' bild' : ' bilder') + ' · ≈ ' + total + ' min</span>' +
-          '<span>' + i('klocka') + moten.length + (moten.length === 1 ? ' möte hållet' : ' möten hållna') + (snitt !== null ? ' · snitt ' + snitt + ' min' : '') + '</span>' +
-          (besok ? '<span>' + i('kalender') + 'Platsbesök ' + e(IH.sedan(besok.forfaller)) + (besokKund ? ' · ' + e(forsta(besokKund.namn)) : '') + '</span>' : '') +
+          '<span><i aria-hidden="true">🖼️</i>' + N + (N === 1 ? ' bild' : ' bilder') + ' · ≈ ' + total + ' min</span>' +
+          '<span><i aria-hidden="true">🤝</i>' + moten.length + (moten.length === 1 ? ' möte hållet' : ' möten hållna') + (snitt !== null ? ' · snitt ' + snitt + ' min' : '') + '</span>' +
+          (besok ? '<span><i aria-hidden="true">📍</i>Platsbesök ' + e(IH.sedan(besok.forfaller)) + (besokKund ? ' · ' + e(forsta(besokKund.namn)) : '') + '</span>' : '') +
         '</div>' +
         '<div class="motescen__knappar">' +
           '<button class="knapp knapp--virke knapp--stor" type="button" data-g="starta-mote"' + (a ? ' data-affar="' + a.id + '"' : '') + ' data-bilder="' + valda.join(',') + '">' + i('mote') + 'Starta presentation</button>' +
@@ -2268,6 +2268,17 @@
         platser +
       '</div>' +
     '</section>';
+  }
+
+  // Tidsbandet: de valda bilderna i presentationens ordning, bredd efter
+  // minuterna, så man ser var tiden går.
+  function tidsband(valda) {
+    var med = IH.MOTE_BILDER.map(function (bb, n) { return [bb, n]; }).filter(function (x) { return valda.indexOf(x[0].id) >= 0; });
+    if (!med.length) return '<div class="tidsband tidsband--tom" data-tidsband>Inga bilder valda</div>';
+    return '<div class="tidsband" data-tidsband aria-label="Tiden per bild">' + med.map(function (x, k) {
+      var min = MOTE_MIN[x[0].id] || 1;
+      return '<span style="flex:' + min + ';--k:' + k + '" title="' + e(x[0].namn) + ' · ' + min + ' min"><b>' + (x[1] + 1) + '</b>' + (min >= 4 ? '<small>' + min + ' min</small>' : '') + '</span>';
+    }).join('') + '</div>';
   }
 
   IH.vyer.mote = function () {
@@ -2325,18 +2336,18 @@
             '<div><small>Mötet öppnar med</small><b>' + (k && k.typ !== 'foretag' ? 'Välkommen, ' + e(forsta(k.namn)) + '.' : 'Hus formade för platsen.') + '</b>' +
             '<span>' + (m ? e(m.kategori) + ' ' + e(m.namn) : '') + (f ? ' · ' + e(f.miljo) : '') + (k ? ' · ' + e(k.ort) : '') + '</span>' +
             (f ? '<em>“' + e(f.beskrivning) + '”</em>' : '<em>Ingen förfrågan kopplad – bilden "Er förfrågan" hoppas över.</em>') + '</div></div>'
-            : '<p class="forhand__tom">' + i('kunder') + 'Utan vald affär visas presentationen generellt, utan kundens namn och förfrågan.</p>') +
+            : '<p class="forhand__tom"><span aria-hidden="true">👥</span>Utan vald affär visas presentationen generellt, utan kundens namn och förfrågan.</p>') +
 
           '<div class="falt"><span>Upplägg' + (lage ? '' : ' · eget val') + '</span><div class="upplagg" role="toolbar">' + Object.keys(MOTE_LAGEN).map(function (l) {
             var ids = MOTE_LAGEN[l][1].filter(function (id) { return id !== 'er' || f; });
-            return '<button type="button" class="upplagg__val' + (lage === l ? ' vald' : '') + '" data-g="mote-lage" data-l="' + l + '" aria-pressed="' + (lage === l) + '"><b>' + MOTE_LAGEN[l][0] + '</b><small>' + ids.length + ' bilder · ' + ids.reduce(function (t, id) { return t + MOTE_MIN[id]; }, 0) + ' min</small></button>';
+            return '<button type="button" class="upplagg__val' + (lage === l ? ' vald' : '') + '" data-g="mote-lage" data-l="' + l + '" aria-pressed="' + (lage === l) + '"><i class="upplagg__emoji" aria-hidden="true">' + ({ fullt: '🎬', kort: '⚡', kalkyl: '🧮' }[l] || '') + '</i><b>' + MOTE_LAGEN[l][0] + '</b><small>' + ids.length + ' bilder · ' + ids.reduce(function (t, id) { return t + MOTE_MIN[id]; }, 0) + ' min</small></button>';
           }).join('') + '</div></div>' +
 
           '<fieldset class="falt"><span>Bilder i presentationen – klicka för att ta bort eller lägga till</span><div class="agenda" data-agenda>' + IH.MOTE_BILDER.map(function (bb, n) {
             var med = valda.indexOf(bb.id) >= 0, kan = bb.id !== 'er' || !!f;
             return '<label class="agenda__kort' + (med ? ' med' : '') + (kan ? '' : ' agenda__kort--saknas') + '" style="--n:' + n + '"><input type="checkbox" name="bild" value="' + bb.id + '"' + (med ? ' checked' : '') + (kan ? '' : ' disabled') + '>' +
               '<img src="' + bb.bild + '" alt="" loading="lazy" decoding="async"><span class="agenda__nr">' + (n + 1) + '</span><span class="agenda__text"><b>' + e(bb.namn) + '</b><small>' + (kan ? MOTE_MIN[bb.id] + ' min' : 'kräver förfrågan') + '</small></span><i class="agenda__bock">' + i('bock') + '</i></label>';
-          }).join('') + '</div><p class="agenda__summa">Beräknad tid <b data-motetid>≈ ' + total + ' min</b> · <span data-moteantal>' + valda.length + ' bilder</span></p></fieldset>' +
+          }).join('') + '</div>' + tidsband(valda) + '<p class="agenda__summa">⏱️ Beräknad tid <b data-motetid>≈ ' + total + ' min</b> · <span data-moteantal>' + valda.length + ' bilder</span></p></fieldset>' +
 
           (a ? '<div class="motecheck"><p class="etikett">Inför mötet</p><ul>' + check.map(function (c) {
             return '<li class="' + (c[0] ? 'klar' : '') + '"><i>' + i(c[0] ? 'bock' : 'klocka') + '</i><span><b>' + c[1] + '</b><small>' + c[2] + '</small></span>' + c[3] + '</li>';
@@ -2349,12 +2360,12 @@
           '<section class="kort" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('klocka') + '</span>Tidigare möten</h2>' + (moten.length ? '<span class="chip">' + moten.length + '</span>' : '') + '</header>' +
             '<div class="kort__kropp">' + (moten.length ? '<div class="tidigare" data-stagger>' + moten.slice(0, 6).map(function (h) {
               var kk = IH.kund(h.kund), mins = moteMinuter(h.text), text = String(h.text).replace(/^Kundmöte \(\d+ min\):\s*/, '').replace(/^Platsbesök bokat i kundmötet.*$/, 'Platsbesök bokat i kundmötet');
-              return '<a class="tidigare__rad" href="#/kunder/' + (kk ? kk.id : '') + '">' + kundAvatar(kk, true) + '<span><b>' + e(kk ? kk.namn : 'Okänd kund') + '</b><small>' + IH.datum(h.tid) + (mins ? ' · ' + mins + ' min' : '') + '</small><em>' + e(text) + '</em></span></a>';
+              return '<a class="tidigare__rad" href="#/kunder/' + (kk ? kk.id : '') + '">' + kundAvatar(kk, true) + '<span><b>' + e(kk ? kk.namn : 'Okänd kund') + '</b><small>🤝 ' + IH.datum(h.tid) + '</small><em>' + e(text) + '</em></span>' + (mins ? '<i class="tidigare__min">' + mins + ' min</i>' : '') + '</a>';
             }).join('') + '</div>' : '<p class="forhand__tom">' + i('anteckning') + 'Anteckningar från mötena hamnar här. Tryck N under presentationen för att anteckna.</p>') + '</div></section>' +
           '<section class="kort motekort" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('blixt') + '</span>Så funkar det</h2></header>' +
-            '<div class="kort__kropp"><ul class="motetips"><li>' + i('pil') + '<span><b>Pil höger/vänster</b> eller svep för att byta bild – <b>K</b> hoppar till kalkylen, <b>N</b> öppnar anteckningarna.</span></li>' +
-            '<li>' + i('kub') + '<span>Husen visas i <b>3D</b> – dra för att vrida, som på huskortet.</span></li>' +
-            '<li>' + i('offert') + '<span>Spara kalkylen som offert och boka platsbesök direkt i mötet.</span></li></ul>' +
+            '<div class="kort__kropp"><ul class="motetips"><li><i class="motetips__emoji" aria-hidden="true">👆</i><span><b>Pil höger/vänster</b> eller svep för att byta bild – <b>K</b> hoppar till kalkylen, <b>N</b> öppnar anteckningarna.</span></li>' +
+            '<li><i class="motetips__emoji" aria-hidden="true">🏠</i><span>Husen visas i <b>3D</b> – dra för att vrida, som på huskortet.</span></li>' +
+            '<li><i class="motetips__emoji" aria-hidden="true">🧾</i><span>Spara kalkylen som offert och boka platsbesök direkt i mötet.</span></li></ul>' +
             '<div class="tangenter"><p class="etikett etikett--ljus">Kortkommandon i presentationen</p><div class="tangenter__lista">' +
             [['→', 'Nästa bild'], ['←', 'Förra bilden'], ['K', 'Till kalkylen'], ['N', 'Anteckningar'], ['Home', 'Första bilden'], ['End', 'Sista bilden'], ['Esc', 'Stäng']].map(function (t) {
               return '<span><kbd>' + t[0] + '</kbd>' + t[1] + '</span>';
@@ -2389,6 +2400,8 @@
           var tot = ids.reduce(function (t, id) { return t + (MOTE_MIN[id] || 0); }, 0);
           $('[data-motetid]', rot).textContent = '≈ ' + tot + ' min';
           $('[data-moteantal]', rot).textContent = ids.length + ' bilder';
+          var tb = $('[data-tidsband]', rot);
+          if (tb) tb.outerHTML = tidsband(ids);
           $$('.upplagg__val', rot).forEach(function (b) { b.classList.remove('vald'); b.setAttribute('aria-pressed', 'false'); });
         });
       }
