@@ -913,9 +913,9 @@ body {
 }
 
 .kundresa__steg li.klar span {
-  background: var(--kol);
-  box-shadow: none;
-  color: var(--virke);
+  background: linear-gradient(160deg, #f6c88f, #e3a35a);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 8px 16px -10px rgba(201, 128, 52, 0.75);
+  color: #4a2a0e;
 }
 
 .kundresa__steg li.nu span {
@@ -939,7 +939,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--kol), var(--virke));
+  background: linear-gradient(90deg, #e3a35a, #f6c88f);
   transform: scaleX(calc(var(--nu) / 5));
   transform-origin: left;
   animation: stapel-x 1.2s var(--mjuk) 0.35s backwards;
@@ -2446,8 +2446,8 @@ body {
   color: var(--text-3);
 }
 
-/* Redo för möte */
-.redo {
+/* Redo för möte (inte html.redo – den klassen sätts när appen startat). */
+div.redo {
   padding: 14px 16px 16px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.6);
@@ -9201,5 +9201,283 @@ button.kal__rad:hover {
 @media (prefers-reduced-motion: reduce) {
   .aff__tid--still::before {
     animation: none;
+  }
+}
+
+/* =====================================================================
+   Ramen runt appen (2026-10-09)
+   Tidigare kom ramen av en slump (stilen för "Redo för möte" träffade
+   html.redo) och följde med när man rullade, så sidomenyn tappade sitt
+   tak. Nu är ramen fast: en ljus kant runt hela fönstret med rundade
+   hörn, som alltid fyller ut skärmen. Sidomenyn och toppraden står
+   under taket när man rullar. Bara på dator – mobilen använder hela ytan.
+   ===================================================================== */
+@media (min-width: 901px) {
+  body {
+    --ram: 12px;
+    padding: var(--ram);
+  }
+
+  .app {
+    min-height: calc(100vh - var(--ram) * 2);
+  }
+
+  /* Själva ramen: en genomskinlig ruta där skuggan målar kanten utanför. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: var(--ram);
+    z-index: 35;
+    border-radius: 26px;
+    box-shadow:
+      0 0 0 1px rgba(201, 138, 69, 0.16),
+      0 0 0 100vmax #fbf8f3;
+    pointer-events: none;
+  }
+
+  .sido {
+    top: var(--ram);
+    height: calc(100vh - var(--ram) * 2);
+  }
+
+  .topp {
+    top: var(--ram);
+  }
+
+  .stegband {
+    top: calc(70px + var(--ram));
+  }
+
+  .inkorg__lista {
+    top: calc(86px + var(--ram));
+    max-height: calc(100vh - 110px - var(--ram) * 2);
+  }
+
+  .kal__sida {
+    top: calc(84px + var(--ram));
+  }
+
+  .dokyta {
+    top: calc(90px + var(--ram));
+  }
+}
+
+/* =====================================================================
+   Kunder, andra varvet (2026-10-09)
+   Emoji för resans steg, filtren och talen. "Behöver uppmärksamhet"
+   säger vem och varför. Korten har lättare talrutor där noll visas som
+   streck, vunnet lyser grönt, och kortet sjunker mjukt när man trycker.
+   ===================================================================== */
+.kundtopp__tal {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.kundtopp__tal > div {
+  padding: 12px 13px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.62));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 14px 28px -22px rgba(90, 60, 25, 0.5);
+}
+
+.kundtopp__tal small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font: 600 0.6875rem/1.2 var(--rubrik);
+}
+
+.kundtopp__tal small i {
+  font-size: 0.875rem;
+  font-style: normal;
+}
+
+/* Behöver uppmärksamhet: rader med namn och skäl. */
+.kundtopp__varma > small {
+  font: 600 0.75rem/1 var(--rubrik);
+  color: #a4482a;
+}
+
+.varmlista {
+  display: grid;
+  gap: 6px;
+}
+
+.kundtopp__varma .varmrad {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 8px 10px 8px 8px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.66));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 12px 24px -20px rgba(90, 60, 25, 0.5);
+  color: var(--text);
+  text-align: left;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, background 0.3s ease;
+}
+
+.kundtopp__varma .varmrad:hover {
+  transform: translateX(3px);
+  background: #fff;
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.28), 0 16px 28px -20px rgba(143, 84, 36, 0.55);
+}
+
+.kundtopp__varma .varmrad:active {
+  transform: scale(0.98);
+  transition-duration: 0.12s;
+}
+
+.varmrad > span {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.varmrad b {
+  overflow: hidden;
+  font: 600 0.8125rem/1.25 var(--rubrik);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.varmrad em {
+  font-size: 0.75rem;
+  font-style: normal;
+  color: var(--text-3);
+}
+
+.varmrad > .i {
+  width: 14px;
+  height: 14px;
+  color: #c47a32;
+  transition: transform 0.4s var(--mjuk);
+}
+
+.varmrad:hover > .i {
+  transform: translateX(2px);
+}
+
+.kundtopp__varma .varmrad--fler {
+  display: block;
+  padding: 7px 10px;
+  background: none;
+  box-shadow: none;
+  font: 600 0.75rem/1 var(--rubrik);
+  color: #8f5424;
+}
+
+.kundtopp__varma .varmrad--fler:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* Resans steg med emoji. */
+.resakol__ikon--emoji {
+  font-size: 0.9375rem;
+  line-height: 1;
+}
+
+.resakol__steg {
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.resakol__steg:active {
+  transform: scale(0.96);
+  transition-duration: 0.12s;
+}
+
+.resakol__steg:hover .resakol__ikon {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.resakol__ikon {
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* --- Korten ----------------------------------------------------------------- */
+.kundkort {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.45s var(--mjuk);
+}
+
+.kundkort:active {
+  transform: scale(0.985);
+  transition-duration: 0.12s;
+}
+
+.kundkort__tal > span {
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.98), rgba(255, 250, 243, 0.8));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.16), 0 8px 16px -14px rgba(90, 60, 25, 0.5);
+}
+
+.kundkort__tal small {
+  font: 600 0.6875rem/1.2 var(--rubrik);
+}
+
+.kundkort__tal > span.vunnet {
+  background: linear-gradient(160deg, #fbfffc, #eaf8ef);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(47, 138, 82, 0.2), 0 8px 16px -14px rgba(47, 138, 82, 0.5);
+}
+
+.kundkort__tal > span.vunnet b {
+  color: #1f6b3f;
+}
+
+.kundkort__tal > span.noll b {
+  color: var(--text-3);
+  opacity: 0.6;
+}
+
+.kundkort__resa small {
+  font-weight: 600;
+}
+
+/* Kundsidan: nu-steget i kundresan blir den ljusa rutan, och valt slag
+   i anteckningen är varmt i stället för svart. */
+.kundresa__steg li.nu span {
+  background: linear-gradient(160deg, #fff, #ffe9cb);
+  box-shadow: inset 0 0 0 1.5px #e8a456, 0 0 0 5px rgba(240, 181, 110, 0.2);
+  color: #b06a26;
+}
+
+.anteckna__typ span {
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.anteckna__typ span:active {
+  transform: scale(0.95);
+}
+
+.anteckna__typ input:checked + span {
+  background: linear-gradient(160deg, #fffaf2, #ffe9cb);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.35), 0 6px 14px -10px rgba(143, 84, 36, 0.6);
+  color: #7a4a1c;
+}
+
+.anteckna__typ input:checked + span .i {
+  color: #c47a32;
+}
+
+/* Snabbknapparna på uppgiftsraden tar ingen plats förrän man hovrar –
+   annars klämdes texten ihop i smala kort (t.ex. Historik på kundsidan). */
+@media (hover: hover) {
+  .uppg__snabb {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    padding-left: 28px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), #fff 26px);
+    transform: translate(6px, -50%);
+    pointer-events: none;
+  }
+
+  .uppg:hover .uppg__snabb,
+  .uppg:focus-within .uppg__snabb {
+    transform: translate(0, -50%);
+    pointer-events: auto;
   }
 }

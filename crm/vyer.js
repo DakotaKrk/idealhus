@@ -1620,8 +1620,9 @@
         x.sena ? '<span class="kundkort__flagga kundkort__flagga--sen">' + i('varning') + (x.sena === 1 ? 'Försenad uppföljning' : x.sena + ' försenade uppföljningar') + '</span>' : '') +
       '<span class="kundkort__resa" title="' + (x.steg < 0 ? 'Ingen kontakt än' : RESA_STEG[x.steg][1]) + '">' + RESA_STEG.map(function (st, n) {
         return '<i class="' + (n < x.steg ? 'klar' : n === x.steg ? 'nu' : '') + '"></i>';
-      }).join('') + '<small>' + (x.steg < 0 ? 'Ingen kontakt' : RESA_STEG[x.steg][1]) + '</small></span>' +
-      '<span class="kundkort__tal"><span><small>Öppet</small><b class="tal">' + IH.kort(x.oppet) + '</b></span><span><small>Vunnet</small><b class="tal">' + IH.kort(x.vunnet) + '</b></span></span>' +
+      }).join('') + '<small>' + (x.steg < 0 ? 'Ingen kontakt' : RESA_EMOJI[x.steg] + ' ' + RESA_STEG[x.steg][1]) + '</small></span>' +
+      '<span class="kundkort__tal"><span' + (x.oppet ? '' : ' class="noll"') + '><small>💼 Öppet</small><b class="tal">' + (x.oppet ? IH.kort(x.oppet) : '–') + '</b></span>' +
+        '<span' + (x.vunnet ? ' class="vunnet"' : ' class="noll"') + '><small>🏆 Vunnet</small><b class="tal">' + (x.vunnet ? IH.kort(x.vunnet) : '–') + '</b></span></span>' +
       '<span class="kundkort__fot"><span>' + (x.senast ? i('klocka') + IH.sedan(x.senast.tid) : 'Ingen aktivitet') + '</span>' +
         (x.vunnen.length ? '<span class="status" style="--s:#7fe0a6">Kund</span>' : x.oppen.length ? '<span class="status" style="--s:#f0b56e">Affär pågår</span>' : '') + '</span>' +
       '<span class="kundkort__snabb">' +
@@ -1675,26 +1676,30 @@
           '<p class="etikett etikett--ljus">Kundbasen</p>' +
           '<p class="kundtopp__stort"><b class="tal" data-rakna="' + alla.length + '">' + alla.length + '</b><span>kunder<small>' + (senasteKund ? 'senast ' + e(forsta(senasteKund.k.namn)) + ' · ' + IH.datum(senasteKund.k.skapad) : 'inga kunder än') + '</small></span></p>' +
           '<div class="kundtopp__tal">' +
-            '<div><small>Affär pågår</small><b class="tal" data-rakna="' + antal.pagar + '">' + antal.pagar + '</b></div>' +
-            '<div><small>Har köpt hus</small><b class="tal" data-rakna="' + antal.kund + '">' + antal.kund + '</b></div>' +
-            '<div><small>Företag</small><b class="tal" data-rakna="' + foretag + '">' + foretag + '</b></div>' +
+            '<div><small><i aria-hidden="true">💼</i>Affär pågår</small><b class="tal" data-rakna="' + antal.pagar + '">' + antal.pagar + '</b></div>' +
+            '<div><small><i aria-hidden="true">🏡</i>Har köpt hus</small><b class="tal" data-rakna="' + antal.kund + '">' + antal.kund + '</b></div>' +
+            '<div><small><i aria-hidden="true">🏢</i>Företag</small><b class="tal" data-rakna="' + foretag + '">' + foretag + '</b></div>' +
           '</div>' +
           '<div class="kundtopp__typ"><span class="kallbar"><i style="flex:' + (alla.length - foretag) + ';--k:#f0b56e;--n:0"></i><i style="flex:' + Math.max(foretag, 0.001) + ';--k:#9fc2c9;--n:1"></i></span>' +
             '<span class="kallbar__lista"><span style="--k:#f0b56e"><i></i>Privatpersoner<b>' + (alla.length - foretag) + '</b></span><span style="--k:#9fc2c9"><i></i>Företag<b>' + foretag + '</b></span></span></div>' +
-          (varma.length ? '<div class="kundtopp__varma"><small>' + i('blixt') + 'Behöver uppmärksamhet</small><span>' + varma.slice(0, 6).map(function (x) {
-              return '<button type="button" data-g="kund-oppna" data-id="' + x.k.id + '" title="' + e(x.k.namn) + (x.nyaF ? ' · ny förfrågan' : x.sena ? ' · försenad uppföljning' : ' · följ upp offerten') + '">' + kundAvatar(x.k, true) + '</button>';
-            }).join('') + (varma.length > 6 ? '<em>+' + (varma.length - 6) + '</em>' : '') + '</span></div>' : '') +
+          // Behöver uppmärksamhet: vem och varför, de tre första.
+          (varma.length ? '<div class="kundtopp__varma"><small>🔔 Behöver uppmärksamhet</small><div class="varmlista">' + varma.slice(0, 3).map(function (x) {
+              var skal = x.nyaF ? ['✨', x.nyaF === 1 ? 'Ny förfrågan' : x.nyaF + ' nya förfrågningar']
+                : x.sena ? ['⏰', x.sena === 1 ? 'Försenad uppföljning' : x.sena + ' försenade uppföljningar'] : ['📨', 'Följ upp offerten'];
+              return '<button type="button" class="varmrad" data-g="kund-oppna" data-id="' + x.k.id + '">' + kundAvatar(x.k, true) +
+                '<span><b>' + e(x.k.namn) + '</b><em>' + skal[0] + ' ' + skal[1] + '</em></span>' + i('pil') + '</button>';
+            }).join('') + (varma.length > 3 ? '<button type="button" class="varmrad varmrad--fler" data-g="kund-filter" data-f="varm">+' + (varma.length - 3) + ' till · visa alla</button>' : '') + '</div></div>' : '') +
         '</div>' +
         '<div class="kundtopp__resa"><div class="kundtopp__resahuvud"><p class="etikett etikett--ljus">Var på resan?</p><small>' + (kundSteg === null ? 'Klicka på ett steg för att filtrera' : 'Visar ' + RESA_STEG[kundSteg][1].toLowerCase()) + '</small></div>' +
           '<div class="resakol">' + RESA_STEG.map(function (st, n) {
             return '<button type="button" class="resakol__steg' + (kundSteg === n ? ' vald' : '') + '" data-g="kund-steg" data-n="' + n + '" style="--n:' + n + ';--a:' + (perSteg[n] / maxSteg).toFixed(2) + '" aria-pressed="' + (kundSteg === n) + '">' +
-              '<b>' + perSteg[n] + '</b><i class="resakol__stapel"></i><span class="resakol__ikon">' + i(st[0]) + '</span><small>' + st[1] + '</small></button>';
+              '<b>' + perSteg[n] + '</b><i class="resakol__stapel"></i><span class="resakol__ikon resakol__ikon--emoji" aria-hidden="true">' + RESA_EMOJI[n] + '</span><small>' + st[1] + '</small></button>';
           }).join('') + '</div></div>' +
       '</section>' +
 
       '<div class="kundverktyg">' +
         '<div class="flikar flikar--filter" data-flikar role="toolbar" aria-label="Filter">' + FILTER.map(function (f) {
-          return '<button type="button" data-g="kund-filter" data-f="' + f[0] + '" aria-pressed="' + (kundFilter === f[0]) + '">' + f[1] + '<b>' + antal[f[0]] + '</b></button>';
+          return '<button type="button" data-g="kund-filter" data-f="' + f[0] + '" aria-pressed="' + (kundFilter === f[0]) + '"><i class="flik__emoji" aria-hidden="true">' + KUND_FILTER_EMOJI[f[0]] + '</i>' + f[1] + '<b>' + antal[f[0]] + '</b></button>';
         }).join('') + '</div>' +
         (kundSteg !== null ? '<button class="chip chip--rensa" type="button" data-g="kund-steg" data-n="' + kundSteg + '">' + RESA_STEG[kundSteg][1] + i('stang') + '</button>' : '') +
         '<div class="kundverktyg__hoger"><label class="kundsort">' + i('lista') + '<select data-kundsort aria-label="Sortera">' +
@@ -1744,6 +1749,8 @@
 
   // Var kunden är på resan: Förfrågan → Affär → Offert → Order → Montage → Nyckel.
   var RESA_STEG = [['inkorg', 'Förfrågan'], ['tavla', 'Affär'], ['offert', 'Offert'], ['trofe', 'Order'], ['produktion', 'Montage'], ['hus', 'Nyckel']];
+  var RESA_EMOJI = ['📥', '💼', '🧾', '✍️', '🏗️', '🔑'];
+  var KUND_FILTER_EMOJI = { alla: '👥', pagar: '💼', kund: '🏡', foretag: '🏢', varm: '🔔' };
   function resaSteg(ff, aff, off, proj) {
     var nu = -1;
     if (ff.length) nu = 0;
