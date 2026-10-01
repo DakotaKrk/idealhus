@@ -163,19 +163,49 @@
   };
 
   /* --- Meddelanden och konfetti ------------------------------------- */
-  IH.toast = function (rubrik, text, ikon) {
+  // val: { lank, knapp, tid } ger en åtgärdsknapp och egen visningstid.
+  IH.toast = function (rubrik, text, ikon, val) {
+    val = val || {};
     var yta = $('.toaster');
     if (!yta) return;
+    var tid = val.tid || (val.lank ? 6500 : 3800);
     var t = document.createElement('div');
     t.className = 'toast';
     t.setAttribute('role', 'status');
-    t.innerHTML = '<span class="toast__ikon">' + IH.i(ikon || 'bock') + '</span><span><b>' + IH.e(rubrik) + '</b>' +
-      (text ? '<small>' + IH.e(text) + '</small>' : '') + '</span>';
+    t.style.setProperty('--tid', tid + 'ms');
+    t.innerHTML = '<span class="toast__ikon">' + IH.i(ikon || 'bock') + '</span><span class="toast__text"><b>' + IH.e(rubrik) + '</b>' +
+      (text ? '<small>' + IH.e(text) + '</small>' : '') + '</span>' +
+      (val.lank ? '<a class="toast__knapp" href="' + IH.e(val.lank) + '">' + IH.e(val.knapp || 'Öppna') + '</a>' : '') +
+      '<i class="toast__tid"></i>';
     yta.appendChild(t);
-    setTimeout(function () {
+    var borta = false;
+    var bort = function () {
+      if (borta) return;
+      borta = true;
       t.classList.add('ut');
       setTimeout(function () { t.remove(); }, 400);
-    }, 3800);
+    };
+    var timer = setTimeout(bort, tid);
+    t.addEventListener('click', function () { clearTimeout(timer); bort(); });
+    t.addEventListener('mouseenter', function () { clearTimeout(timer); t.classList.add('vilar'); });
+    t.addEventListener('mouseleave', function () { t.classList.remove('vilar'); timer = setTimeout(bort, 1800); });
+    return t;
+  };
+
+  // Lyfter fram det som just ändrades: väntar in nästa ritning och
+  // sätter klassen en stund – CSS gör resten.
+  IH.lysUpp = function (sel, klass) {
+    klass = klass || 'bytt';
+    var t0 = performance.now();
+    (function leta() {
+      var el = $(sel);
+      if (el) {
+        el.classList.remove(klass);
+        void el.offsetWidth;
+        el.classList.add(klass);
+        setTimeout(function () { el.classList.remove(klass); }, 1500);
+      } else if (performance.now() - t0 < 1500) requestAnimationFrame(leta);
+    })();
   };
 
   IH.konfetti = function (x, y) {
@@ -308,8 +338,7 @@
     var app = $('#app');
     app.innerHTML = '<aside class="sido">' + sidomeny() + '</aside>' +
       '<div class="huvud"><header class="topp">' +
-      '<label class="sok">' + IH.i('sok') + '<span class="dold">Sök</span><input type="search" placeholder="Sök kund, förfrågan eller affär…" autocomplete="off" data-sok><kbd>/</kbd>' +
-      '<div class="sokresultat" hidden></div></label>' +
+      '<button class="sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök eller skriv ett kommando…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
       '<span class="proto">Prototyp · exempeldata</span>' +
       '<button class="knapp knapp--virke" type="button" data-g="ny">' + IH.i('plus') + 'Ny</button>' +
       '</header><main class="vy" id="vy" tabindex="-1"></main></div>' +
@@ -357,6 +386,7 @@
     var vyfn = IH.vyer[adr.vy] || IH.vyer.oversikt;
     if (!IH.vyer[adr.vy]) adr.vy = 'oversikt';
     IH.nuvarande = adr;
+    if (adr.del[0] && /^(kunder|salj|forfragningar|offerter)$/.test(adr.vy)) minnsSenaste('#/' + adr.vy + '/' + adr.del[0]);
     var yta = $('#vy');
     if (!yta) return;
     // Vyerna kan läsa om det här är ett byte eller en omritning på plats
@@ -417,7 +447,7 @@
       var skriv = function (v) {
         el.textContent = format === 'kort' ? IH.kort(v) : format === 'kr' ? IH.kr(v) : Math.round(v).toString();
       };
-      if (lugn || !mal) { skriv(mal); return; }
+      if (lugn || !mal || IH.vyByte === false) { skriv(mal); return; }
       var start = performance.now();
       (function steg(nu) {
         var t = Math.min(1, (nu - start) / 1300);
@@ -458,29 +488,158 @@
     }).slice(0, 4);
     return ut;
   }
-  function visaSok(inp) {
-    var ruta = inp.parentNode.querySelector('.sokresultat');
-    var r = sok(inp.value);
-    var html = '';
-    if (r.kunder.length) html += '<p>Kunder</p>' + r.kunder.map(function (k) {
-      return '<a href="#/kunder/' + k.id + '"><span class="avatar avatar--liten">' + IH.initialer(k.namn) + '</span>' + IH.e(k.namn) + '<small>' + IH.e(k.ort) + '</small></a>';
-    }).join('');
-    if (r.forfragningar.length) html += '<p>Förfrågningar</p>' + r.forfragningar.map(function (f) {
-      return '<a href="#/forfragningar/' + f.id + '">' + IH.i('inkorg') + IH.e(f.namn) + '<small>' + IH.e(f.hustyp) + '</small></a>';
-    }).join('');
-    if (r.affarer.length) html += '<p>Affärer</p>' + r.affarer.map(function (a) {
-      return '<a href="#/salj/' + a.id + '">' + IH.i('tavla') + IH.e(a.titel) + '<small>' + IH.kort(a.varde) + '</small></a>';
-    }).join('');
-    if (!html && inp.value.trim().length >= 2) html = '<p>Inga träffar</p>';
-    ruta.innerHTML = html;
-    ruta.hidden = !html;
+  /* --- Kommandopaletten (Ctrl/⌘ K) ------------------------------------ */
+  var MAC = /Mac|iPhone|iPad/.test(navigator.platform || '');
+  var SIDOR = [['oversikt', 'Översikt', 'hem'], ['forfragningar', 'Förfrågningar', 'inkorg'], ['salj', 'Säljtavla', 'tavla'],
+    ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote'],
+    ['produktion', 'Projekt', 'produktion'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']];
+  var ATGARDER = [['ny-kund', 'Ny kund', 'kunder', 'Privatperson eller företag'], ['ny-affar', 'Ny affär', 'tavla', 'Direkt på säljtavlan'],
+    ['ny-forfragan', 'Ny förfrågan', 'inkorg', 'Någon ringde eller mejlade'], ['ny-uppgift', 'Ny uppgift', 'uppgift', 'Något att göra'],
+    ['starta-mote', 'Starta kundmöte', 'mote', 'Presentationen i helskärm']];
+  var palett = null;
+
+  // De senast öppnade kunderna, affärerna, förfrågningarna och offerterna.
+  function senaste() {
+    try { return JSON.parse(localStorage.getItem('ih-crm-senaste') || '[]'); } catch (e) { return []; }
   }
+  function minnsSenaste(adr) {
+    var l = senaste().filter(function (x) { return x !== adr; });
+    l.unshift(adr);
+    try { localStorage.setItem('ih-crm-senaste', JSON.stringify(l.slice(0, 8))); } catch (e) { /* privat läge */ }
+  }
+  // En rad i paletten för en adress som #/kunder/k1.
+  function senasteRad(adr) {
+    var d = adr.replace(/^#\//, '').split('/');
+    var id = d[1];
+    if (d[0] === 'kunder') { var k = IH.kund(id); return k && rad('ga:' + adr, '<span class="avatar avatar--liten">' + IH.initialer(k.namn) + '</span>', k.namn, k.ort, 'Kund'); }
+    if (d[0] === 'salj') { var a = IH.affar(id); var ak = a && IH.kund(a.kund); return a && rad('ga:' + adr, IH.i('tavla'), a.titel, (ak ? ak.namn + ' · ' : '') + IH.kort(a.varde), 'Affär'); }
+    if (d[0] === 'forfragningar') { var f = IH.forfragan(id); return f && rad('ga:' + adr, IH.i('inkorg'), f.namn, f.hustyp + ' · ' + f.ort, 'Förfrågan'); }
+    if (d[0] === 'offerter') { var o = IH.offert(id); var oa = o && IH.affar(o.affar); var ok = oa && IH.kund(oa.kund); return o && rad('ga:' + adr, IH.i('offert'), o.nummer, ok ? ok.namn : '', 'Offert'); }
+    return '';
+  }
+  function rad(mal, ikon, rubrik, under, typ) {
+    return '<button type="button" class="palett__rad" role="option" data-g="palett-val" data-mal="' + IH.e(mal) + '">' +
+      '<span class="palett__ikon">' + ikon + '</span><span class="palett__text"><b>' + IH.e(rubrik) + '</b>' + (under ? '<small>' + IH.e(under) + '</small>' : '') + '</span>' +
+      (typ ? '<span class="palett__typ">' + typ + '</span>' : '') + '</button>';
+  }
+  function grupp(namn, rader) {
+    return rader.length ? '<p class="palett__grupp">' + namn + '</p>' + rader.join('') : '';
+  }
+  // Träff: texten innehåller söksträngen, eller (från tre tecken) alla
+  // dess tecken i rätt ordning – "sgb" hittar Skärgårdsbyn.
+  function traff(text, q, namn) {
+    text = (text || '').toLowerCase();
+    if (text.indexOf(q) >= 0) return true;
+    namn = (namn || '').toLowerCase();
+    if (q.length < 3 || !namn) return false;
+    var p = 0;
+    for (var n = 0; n < namn.length && p < q.length; n++) if (namn[n] === q[p]) p++;
+    return p === q.length;
+  }
+
+  function palettInnehall(q) {
+    q = q.trim().toLowerCase();
+    var html = '';
+    if (!q) {
+      html += grupp('Senaste', senaste().map(senasteRad).filter(Boolean).slice(0, 5));
+      html += grupp('Snabbåtgärder', ATGARDER.map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
+      html += grupp('Gå till', SIDOR.filter(function (x) { return x[0] !== IH.nuvarande.vy; }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
+    } else {
+      var db = IH.db;
+      var kunder = db.kunder.filter(function (k) { return traff(k.namn + ' ' + k.ort + ' ' + k.epost + ' ' + k.telefon, q, k.namn); }).slice(0, 5);
+      var affarer = db.affarer.filter(function (a) { var k = IH.kund(a.kund); return traff(a.titel + ' ' + (k ? k.namn : ''), q, a.titel + ' ' + (k ? k.namn : '')); }).slice(0, 4);
+      var forfragningar = db.forfragningar.filter(function (f) { return traff(f.namn + ' ' + f.ort + ' ' + f.hustyp, q, f.namn); }).slice(0, 4);
+      var offerter = db.offerter.filter(function (o) {
+        if (o.status === 'ersatt') return false;
+        var a = IH.affar(o.affar), k = a && IH.kund(a.kund);
+        return traff(o.nummer + ' ' + (k ? k.namn : ''), q, k ? k.namn : '');
+      }).slice(0, 4);
+      html += grupp('Kunder', kunder.map(function (k) { return rad('ga:#/kunder/' + k.id, '<span class="avatar avatar--liten">' + IH.initialer(k.namn) + '</span>', k.namn, k.ort, 'Kund'); }));
+      html += grupp('Affärer', affarer.map(function (a) { var k = IH.kund(a.kund); return rad('ga:#/salj/' + a.id, IH.i('tavla'), a.titel, (k ? k.namn + ' · ' : '') + IH.kort(a.varde), 'Affär'); }));
+      html += grupp('Förfrågningar', forfragningar.map(function (f) { return rad('ga:#/forfragningar/' + f.id, IH.i('inkorg'), f.namn, f.hustyp + ' · ' + f.ort, 'Förfrågan'); }));
+      html += grupp('Offerter', offerter.map(function (o) { var a = IH.affar(o.affar), k = a && IH.kund(a.kund); return rad('ga:#/offerter/' + o.id, IH.i('offert'), o.nummer, k ? k.namn : '', 'Offert'); }));
+      html += grupp('Åtgärder', ATGARDER.filter(function (x) { return traff(x[1] + ' ' + x[3], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
+      html += grupp('Gå till', SIDOR.filter(function (x) { return traff(x[1], q, x[1]); }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
+      if (!html) html = '<p class="palett__tom">Inga träffar för ”' + IH.e(q) + '”</p>';
+    }
+    return html;
+  }
+
+  function palettRita(q) {
+    var lista = palett.rot.querySelector('[data-palett-lista]');
+    lista.innerHTML = palettInnehall(q);
+    var rader = lista.querySelectorAll('.palett__rad');
+    Array.prototype.forEach.call(rader, function (r, k) { r.style.setProperty('--k', Math.min(k, 16)); });
+    if (rader[0]) rader[0].classList.add('vald');
+  }
+  function palettVald() { return palett && palett.rot.querySelector('.palett__rad.vald'); }
+  function palettFlytta(steg) {
+    var rader = Array.prototype.slice.call(palett.rot.querySelectorAll('.palett__rad'));
+    if (!rader.length) return;
+    var n = rader.indexOf(palettVald());
+    rader.forEach(function (r) { r.classList.remove('vald'); });
+    var ny = rader[(n + steg + rader.length) % rader.length];
+    ny.classList.add('vald');
+    ny.scrollIntoView({ block: 'nearest' });
+  }
+  function palettKor(el) {
+    var mal = el.getAttribute('data-mal') || '';
+    IH.stangPalett(true);
+    if (mal.indexOf('ga:') === 0) IH.ga(mal.slice(3));
+    else if (mal.indexOf('g:') === 0 && IH.G[mal.slice(2)]) IH.G[mal.slice(2)](el);
+  }
+
+  IH.oppnaPalett = function () {
+    if (palett) { palett.rot.querySelector('input').focus(); return; }
+    IH.stangArk(true);
+    var slojan = document.createElement('div');
+    slojan.className = 'slojan slojan--palett';
+    var rot = document.createElement('div');
+    rot.className = 'palett ny';
+    rot.setAttribute('role', 'dialog');
+    rot.setAttribute('aria-modal', 'true');
+    rot.setAttribute('aria-label', 'Sök och kommandon');
+    rot.innerHTML = '<label class="palett__sok">' + IH.i('sok') + '<input type="text" placeholder="Sök eller skriv ett kommando…" autocomplete="off" spellcheck="false" aria-label="Sök eller skriv ett kommando"><kbd>esc</kbd></label>' +
+      '<div class="palett__lista" role="listbox" data-palett-lista></div>' +
+      '<footer class="palett__fot"><span><kbd>↑</kbd><kbd>↓</kbd>välj</span><span><kbd>↵</kbd>öppna</span><span><kbd>esc</kbd>stäng</span><span class="palett__fot--hoger"><kbd>N</kbd>ny</span><span><kbd>/</kbd>sök</span></footer>';
+    document.body.appendChild(slojan);
+    document.body.appendChild(rot);
+    palett = { rot: rot, slojan: slojan, fokus: document.activeElement };
+    palettRita('');
+    var inp = rot.querySelector('input');
+    inp.addEventListener('input', function () { rot.classList.remove('ny'); palettRita(inp.value); });
+    inp.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); palettFlytta(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); palettFlytta(-1); }
+      else if (e.key === 'Enter') { e.preventDefault(); var v = palettVald(); if (v) palettKor(v); }
+    });
+    rot.addEventListener('mouseover', function (e) {
+      var r = e.target.closest('.palett__rad');
+      if (!r || r.classList.contains('vald')) return;
+      $$('.palett__rad.vald', rot).forEach(function (x) { x.classList.remove('vald'); });
+      r.classList.add('vald');
+    });
+    slojan.addEventListener('click', function () { IH.stangPalett(); });
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { slojan.classList.add('syns'); rot.classList.add('syns'); inp.focus(); });
+    });
+  };
+  IH.stangPalett = function (direkt) {
+    if (!palett) return;
+    var p = palett;
+    palett = null;
+    p.rot.classList.remove('syns');
+    p.slojan.classList.remove('syns');
+    var bort = function () { p.rot.remove(); p.slojan.remove(); };
+    if (direkt || lugn) bort(); else setTimeout(bort, 260);
+    if (p.fokus && p.fokus.focus && !direkt) p.fokus.focus();
+  };
+  IH.G.palett = function () { IH.oppnaPalett(); };
+  IH.G['palett-val'] = function (el) { palettKor(el); };
 
   /* --- Händelser ------------------------------------------------------ */
   function kopplaHandelser() {
     document.addEventListener('click', function (e) {
-      var r = $('.sokresultat');
-      if (r && !e.target.closest('.sok')) r.hidden = true;
       var el = e.target.closest('[data-g]');
       if (!el) return;
       var namn = el.getAttribute('data-g');
@@ -489,18 +648,19 @@
         IH.G[namn](el, e);
       }
     });
-    document.addEventListener('input', function (e) {
-      if (e.target.matches('[data-sok]')) visaSok(e.target);
-    });
     document.addEventListener('keydown', function (e) {
       var inmatning = /INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable;
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        if (palett) IH.stangPalett(); else IH.oppnaPalett();
+        return;
+      }
       if (e.key === 'Escape') {
+        if (palett) { IH.stangPalett(); return; }
         if (aktivtArk) { IH.stangArk(); return; }
-        var r = $('.sokresultat');
-        if (r && !r.hidden) { r.hidden = true; e.target.blur(); }
       }
       if (inmatning || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === '/') { e.preventDefault(); var s = $('[data-sok]'); if (s) s.focus(); }
+      if (e.key === '/') { e.preventDefault(); IH.oppnaPalett(); }
       if (e.key === 'n' || e.key === 'N') { e.preventDefault(); IH.G.ny(); }
     });
     document.addEventListener('submit', function (e) {
@@ -512,10 +672,7 @@
     });
     window.addEventListener('hashchange', function () {
       IH.stangArk(true);
-      var r = $('.sokresultat');
-      if (r) r.hidden = true;
-      var s = $('[data-sok]');
-      if (s) { s.value = ''; s.blur(); }
+      IH.stangPalett(true);
       rita();
     });
     window.addEventListener('resize', function () { flyttaMarkor(true); });

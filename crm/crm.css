@@ -1369,3 +1369,425 @@ button.lista__rad {
     background: #fff;
   }
 }
+
+
+/* =====================================================================
+   Kommandopaletten (Ctrl/⌘ K): sökfältet i toppen är en knapp som
+   öppnar den; här finns senaste, snabbåtgärder, sidor och sökträffar.
+   ===================================================================== */
+.sok {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  padding: 0 12px 0 15px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--vit);
+  box-shadow: inset 0 0 0 1px var(--kant), 0 8px 20px -18px rgba(27, 25, 21, 0.5);
+  color: var(--text-3);
+  font: 400 0.9375rem/1 var(--sans);
+  text-align: left;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease, color 0.3s ease;
+}
+
+.sok:hover,
+.sok:focus-visible {
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.16), 0 12px 28px -18px rgba(27, 25, 21, 0.5);
+  color: var(--text-2);
+  outline: none;
+}
+
+.sok > .i {
+  position: static;
+  flex: none;
+}
+
+.sok > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sok kbd {
+  position: static;
+  flex: none;
+}
+
+.palett {
+  position: fixed;
+  top: max(12px, 10vh);
+  left: 50%;
+  z-index: 62;
+  display: flex;
+  flex-direction: column;
+  width: min(640px, 100% - 24px);
+  max-height: min(70vh, 640px);
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--vit);
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px var(--kant);
+  opacity: 0;
+  transform: translate(-50%, -8px) scale(0.975);
+  transition: transform 0.32s var(--mjuk), opacity 0.2s ease;
+}
+
+.palett.syns {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.palett__sok {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px 6px 18px;
+  border-bottom: 1px solid var(--kant);
+  color: var(--text-3);
+}
+
+.palett__sok input {
+  flex: 1;
+  min-width: 0;
+  height: 52px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: 400 1.0625rem/1 var(--sans);
+  outline: none;
+}
+
+.palett__sok input::placeholder {
+  color: var(--text-3);
+}
+
+.palett kbd {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--ben-2);
+  font: 600 0.6875rem/1.4 var(--rubrik);
+  color: var(--text-3);
+}
+
+.palett__lista {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  overflow-y: auto;
+  padding: 8px;
+  overscroll-behavior: contain;
+}
+
+.palett__grupp {
+  margin: 10px 10px 4px;
+  font: 700 0.625rem/1 var(--rubrik);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.palett__rad {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.palett__rad.vald {
+  background: var(--ben);
+}
+
+.palett__rad.vald::after {
+  content: "↵";
+  flex: none;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--ben-2);
+  font: 600 0.6875rem/1.4 var(--rubrik);
+  color: var(--text-3);
+}
+
+.palett.ny .palett__rad {
+  animation: ark-rad 0.4s var(--mjuk) backwards;
+  animation-delay: calc(var(--k, 0) * 22ms);
+}
+
+.palett__ikon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--ben);
+  color: var(--text-2);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.palett__rad.vald .palett__ikon {
+  background: var(--virke-ljus);
+  color: var(--virke-djup);
+}
+
+.palett__ikon .i {
+  width: 16px;
+  height: 16px;
+}
+
+.palett__ikon .avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-size: 0.6875rem;
+}
+
+.palett__text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.palett__text b {
+  overflow: hidden;
+  font: 600 0.9rem/1.25 var(--rubrik);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palett__text small {
+  overflow: hidden;
+  font-size: 0.75rem;
+  color: var(--text-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palett__typ {
+  flex: none;
+  font: 600 0.6875rem/1 var(--rubrik);
+  color: var(--text-3);
+}
+
+.palett__rad.vald .palett__typ {
+  color: var(--virke-djup);
+}
+
+.palett__tom {
+  margin: 28px 10px;
+  font-size: 0.875rem;
+  color: var(--text-3);
+  text-align: center;
+}
+
+.palett__fot {
+  display: flex;
+  gap: 16px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--kant);
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.palett__fot kbd {
+  margin-right: 5px;
+}
+
+.palett__fot--hoger {
+  margin-left: auto;
+}
+
+/* Glas bara här: paletten ligger överst och är liten. */
+.slojan--palett {
+  background: rgba(20, 18, 15, 0.28);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+
+@media (max-width: 700px) {
+  .palett {
+    top: 8px;
+    width: calc(100% - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+
+  .palett__fot {
+    display: none;
+  }
+
+  .sok > span,
+  .sok kbd {
+    display: none;
+  }
+
+  .sok {
+    flex: none;
+    width: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+
+/* =====================================================================
+   Återkoppling: kort som går att klicka lyfter lite, det som just
+   ändrades lyfts fram med ett litet hopp och en ring som tonar bort,
+   en vunnen affär får sitt ögonblick och toasten visar sin tid, går
+   att klicka bort och kan bära en åtgärd. Bara transform och opacitet
+   i rörelse (raderna i tabeller glimmar med bakgrund, en gång).
+   ===================================================================== */
+a.kort:not([data-tilt]),
+button.kort:not([data-tilt]),
+.kort[data-g]:not([data-tilt]) {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+a.kort:not([data-tilt]):hover,
+button.kort:not([data-tilt]):hover,
+.kort[data-g]:not([data-tilt]):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 1px 2px rgba(27, 25, 21, 0.05), 0 22px 44px -26px rgba(27, 25, 21, 0.5), inset 0 0 0 1px rgba(27, 25, 21, 0.14);
+}
+
+/* Det som just ändrades. */
+.bytt:not(tr) {
+  position: relative;
+  animation: bytt-hopp 0.6s var(--studs);
+}
+
+.bytt:not(tr)::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px var(--virke);
+  opacity: 0;
+  pointer-events: none;
+  animation: ring-ut 1.3s ease-out;
+}
+
+tr.bytt > td {
+  animation: rad-glim 1.3s ease-out;
+}
+
+.bytt .status,
+.uppg__bock.bytt {
+  animation: chip-pop 0.55s var(--studs);
+}
+
+@keyframes bytt-hopp {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.025); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ring-ut {
+  0% { opacity: 0.9; transform: scale(0.99); }
+  100% { opacity: 0; transform: scale(1.02); }
+}
+
+@keyframes rad-glim {
+  0% { background-color: var(--virke-ljus); }
+  100% { background-color: transparent; }
+}
+
+@keyframes chip-pop {
+  0% { transform: scale(0.7); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* Vunnen affär: kortet poppar, pokalen landar, en varm ring tonar bort. */
+.aff--vann {
+  animation: vann-pop 0.9s var(--studs);
+}
+
+.aff--vann .aff__vunnen {
+  animation: chip-pop 0.7s var(--studs) 0.15s backwards;
+}
+
+.aff--vann::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 3px var(--virke), 0 0 40px rgba(240, 181, 110, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  animation: ring-ut 1.4s ease-out 0.1s;
+}
+
+@keyframes vann-pop {
+  0% { transform: scale(0.92); }
+  45% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+/* Toasten: tidslinje, klick stänger, musen över pausar, åtgärdsknapp. */
+.toast {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.toast__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast__knapp {
+  flex: none;
+  padding: 8px 13px;
+  border-radius: 999px;
+  background: var(--virke);
+  color: var(--kol);
+  font: 600 0.75rem/1 var(--rubrik);
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.toast__knapp:hover {
+  transform: translateY(-1px);
+  background: #f6c68d;
+}
+
+.toast__tid {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: rgba(240, 181, 110, 0.55);
+  transform-origin: 0 50%;
+  animation: toast-tid var(--tid, 3800ms) linear forwards;
+}
+
+.toast.vilar .toast__tid {
+  animation-play-state: paused;
+}
+
+@keyframes toast-tid {
+  to { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bytt:not(tr),
+  .bytt:not(tr)::after,
+  .aff--vann,
+  .aff--vann::after,
+  .toast__tid {
+    animation: none;
+  }
+}

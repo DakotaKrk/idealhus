@@ -414,9 +414,9 @@
         '</section>' +
         '<section class="kort" data-in>' +
           '<header class="kort__huvud"><h2><span class="kort__ikon">' + i('graf') + '</span>Intäkter</h2><span class="chip">Vunnet per månad</span></header>' +
-          '<div class="kort__kropp"><div class="graf__tal"><div><small>Vunnet i år</small><b class="tal">' + IH.kr(summa(vunnet)) + '</b></div>' +
-          '<div><small>Viktad pipeline</small><b class="tal">' + IH.kr(viktat(oppna)) + '</b></div>' +
-          '<div><small>Snittorder</small><b class="tal">' + IH.kr(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '</b></div></div>' + intaktsgraf() + '</div>' +
+          '<div class="kort__kropp"><div class="graf__tal"><div><small>Vunnet i år</small><b class="tal" data-rakna="' + Math.round(summa(vunnet)) + '" data-format="kr">' + IH.kr(summa(vunnet)) + '</b></div>' +
+          '<div><small>Viktad pipeline</small><b class="tal" data-rakna="' + Math.round(viktat(oppna)) + '" data-format="kr">' + IH.kr(viktat(oppna)) + '</b></div>' +
+          '<div><small>Snittorder</small><b class="tal" data-rakna="' + Math.round(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '" data-format="kr">' + IH.kr(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '</b></div></div>' + intaktsgraf() + '</div>' +
         '</section>' +
       '</div><div class="oversikt__kol">' +
         (fokus.length ? '<section class="kort" data-in>' +
@@ -807,7 +807,7 @@
           (nya.length ? 'väntar på svar · äldsta ' + text : 'allt är besvarat') + '</small></span></p>' +
         '<div class="ipuls__vecka"><div class="ipuls__staplar">' + dagar.map(function (x, n) {
           return '<span class="' + (n === 6 ? 'idag' : '') + '" style="--a:' + (x.antal / maxDag).toFixed(3) + ';--n:' + n + '"><b>' + (x.antal || '') + '</b><i></i><small>' + DAG[x.d.getDay()] + '</small></span>';
-        }).join('') + '</div><p><b class="tal">' + vecka + '</b> in de senaste 7 dagarna</p></div>' +
+        }).join('') + '</div><p><b class="tal" data-rakna="' + vecka + '">' + vecka + '</b> in de senaste 7 dagarna</p></div>' +
         '<div class="ipuls__tal">' +
           '<div><small>Varma just nu</small><b class="tal">' + nya.filter(function (f) { return leadpoang(f).p >= 70; }).length + '<em> av ' + nya.length + '</em></b>' +
             '<span class="ipuls__prickar">' + nya.slice(0, 12).map(function (f) { var p = leadpoang(f).p; return '<i class="' + (p >= 70 ? 'varm' : p >= 50 ? 'ljum' : '') + '"></i>'; }).join('') + '</span></div>' +
@@ -1139,7 +1139,7 @@
   IH.vyer.salj = function (del) {
     var oppna = oppnaAffarer();
     var vunna90 = db().affarer.filter(function (a) { return a.steg === 'vunnen' && IH.dagarSedan(a.vunnen || a.andrad) <= 90; });
-    var html = '<header class="vyhuvud"><div><p class="etikett">Sälj</p><h1>Säljtavla</h1><p>Öppen pipeline <b class="tal">' + IH.kr(summa(oppna)) + '</b> · ' +
+    var html = '<header class="vyhuvud"><div><p class="etikett">Sälj</p><h1>Säljtavla</h1><p>Öppen pipeline <b class="tal" data-rakna="' + Math.round(summa(oppna)) + '" data-format="kr">' + IH.kr(summa(oppna)) + '</b> · ' +
       oppna.length + ' affärer · viktad prognos ' + IH.kort(viktat(oppna)) + '</p></div>' +
       '<div class="vyhuvud__knappar"><div class="flikar" data-flikar><button type="button" data-g="tavla-lage" data-l="tavla" aria-pressed="' + (tavlaLage === 'tavla') + '">' + i('tavla') + 'Tavla</button>' +
       '<button type="button" data-g="tavla-lage" data-l="lista" aria-pressed="' + (tavlaLage === 'lista') + '">' + i('lista') + 'Lista</button></div>' +
@@ -1333,8 +1333,7 @@
     IH.logga('system', 'Flyttad från ' + fran + ' till ' + IH.steg(steg).namn + '.', a.kund, a.id);
     IH.spara();
     IH.ritaOm();
-    var nytt = $('[data-aff="' + id + '"]');
-    if (nytt) nytt.classList.add('aff--ny');
+    IH.lysUpp('[data-aff="' + id + '"]', 'aff--ny');
     IH.toast('Flyttad till ' + IH.steg(steg).namn, a.titel, 'tavla');
   }
 
@@ -1354,10 +1353,29 @@
     }
     IH.spara();
     IH.ritaOm();
+    IH.lysUpp('[data-aff="' + a.id + '"]', 'aff--vann');
     var x = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
     var y = rect ? rect.top + 30 : window.innerHeight / 3;
     IH.konfetti(x, y);
-    IH.toast('Affären är vunnen!', a.titel + ' · ' + IH.kr(a.varde) + ' – projektet ligger nu hos produktionen.', 'trofe');
+    IH.toast('Affären är vunnen!', a.titel + ' · ' + IH.kr(a.varde), 'trofe');
+    var p = db().projekt.filter(function (q) { return q.affar === a.id; })[0];
+    var m = IH.modell(a.modell);
+    if (!p) return;
+    // Sedan projektet som skapades – och projektvyn öppnas av sig själv
+    // om användaren inte hunnit göra något annat under tiden.
+    var vantar = true;
+    var avbryt = function () { vantar = false; };
+    document.addEventListener('pointerdown', avbryt, { once: true });
+    setTimeout(function () {
+      IH.toast('Projekt skapat', (m ? m.namn + ' · ' : '') + 'montage planerat vecka ' + IH.vecka(new Date(p.montage)) + ' · ligger hos produktionen', 'produktion', { lank: '#/produktion/' + p.id, knapp: 'Öppna' });
+    }, IH.lugn ? 0 : 900);
+    setTimeout(function () {
+      document.removeEventListener('pointerdown', avbryt);
+      if (vantar && /^#\/salj/.test(location.hash)) {
+        IH.ga('#/produktion/' + p.id);
+        IH.lysUpp('.aff--proj[data-id="' + p.id + '"]', 'bytt');
+      }
+    }, IH.lugn ? 1200 : 2800);
   }
 
   function affArk(id) {
@@ -1595,9 +1613,9 @@
           '<p class="etikett etikett--ljus">Kundbasen</p>' +
           '<p class="kundtopp__stort"><b class="tal" data-rakna="' + alla.length + '">' + alla.length + '</b><span>kunder<small>' + (senasteKund ? 'senast ' + e(forsta(senasteKund.k.namn)) + ' · ' + IH.datum(senasteKund.k.skapad) : 'inga kunder än') + '</small></span></p>' +
           '<div class="kundtopp__tal">' +
-            '<div><small>Affär pågår</small><b class="tal">' + antal.pagar + '</b></div>' +
-            '<div><small>Har köpt hus</small><b class="tal">' + antal.kund + '</b></div>' +
-            '<div><small>Företag</small><b class="tal">' + foretag + '</b></div>' +
+            '<div><small>Affär pågår</small><b class="tal" data-rakna="' + antal.pagar + '">' + antal.pagar + '</b></div>' +
+            '<div><small>Har köpt hus</small><b class="tal" data-rakna="' + antal.kund + '">' + antal.kund + '</b></div>' +
+            '<div><small>Företag</small><b class="tal" data-rakna="' + foretag + '">' + foretag + '</b></div>' +
           '</div>' +
           '<div class="kundtopp__typ"><span class="kallbar"><i style="flex:' + (alla.length - foretag) + ';--k:#f0b56e;--n:0"></i><i style="flex:' + Math.max(foretag, 0.001) + ';--k:#9fc2c9;--n:1"></i></span>' +
             '<span class="kallbar__lista"><span style="--k:#f0b56e"><i></i>Privatpersoner<b>' + (alla.length - foretag) + '</b></span><span style="--k:#9fc2c9"><i></i>Företag<b>' + foretag + '</b></span></span></div>' +
@@ -1842,11 +1860,11 @@
       '<section class="offtopp kort kort--mork" data-in>' +
         '<div class="offtopp__ord">' +
           '<p class="etikett etikett--ljus">Offertläget</p>' +
-          '<p class="offtopp__stort"><b class="tal">' + IH.kort(sum(skickade)) + '</b><span>väntar på svar<small>' + skickade.length + (skickade.length === 1 ? ' offert' : ' offerter') + (snart.length ? ' · ' + snart.length + ' går ut inom tio dagar' : '') + '</small></span></p>' +
+          '<p class="offtopp__stort"><b class="tal" data-rakna="' + Math.round(sum(skickade)) + '" data-format="kort">' + IH.kort(sum(skickade)) + '</b><span>väntar på svar<small>' + skickade.length + (skickade.length === 1 ? ' offert' : ' offerter') + (snart.length ? ' · ' + snart.length + ' går ut inom tio dagar' : '') + '</small></span></p>' +
           '<div class="offtopp__tal">' +
-            '<div><small>Träffsäkerhet</small><b class="tal">' + (traff === null ? '–' : traff + '<em> %</em>') + '</b><span>' + (avgjorda ? godkanda.length + ' av ' + avgjorda + ' avgjorda' : 'inga avgjorda än') + '</span></div>' +
-            '<div><small>Tid till ja</small><b class="tal">' + (snittTid === null ? '–' : snittTid + '<em> d</em>') + '</b><span>' + (tider.length ? 'snitt för ' + tider.length + ' godkända' : 'inga godkända än') + '</span></div>' +
-            '<div><small>Godkänt värde</small><b class="tal">' + IH.kort(sum(godkanda)) + '</b><span>' + godkanda.length + ' blev order</span></div>' +
+            '<div><small>Träffsäkerhet</small><b class="tal">' + (traff === null ? '–' : '<span data-rakna="' + traff + '">' + traff + '</span><em> %</em>') + '</b><span>' + (avgjorda ? godkanda.length + ' av ' + avgjorda + ' avgjorda' : 'inga avgjorda än') + '</span></div>' +
+            '<div><small>Tid till ja</small><b class="tal">' + (snittTid === null ? '–' : '<span data-rakna="' + snittTid + '">' + snittTid + '</span><em> d</em>') + '</b><span>' + (tider.length ? 'snitt för ' + tider.length + ' godkända' : 'inga godkända än') + '</span></div>' +
+            '<div><small>Godkänt värde</small><b class="tal" data-rakna="' + Math.round(sum(godkanda)) + '" data-format="kort">' + IH.kort(sum(godkanda)) + '</b><span>' + godkanda.length + ' blev order</span></div>' +
           '</div>' +
           '<div class="offtopp__vecka"><small>Offererat per vecka</small><div class="offtopp__staplar">' + veckor.map(function (y, n) {
             return '<span style="--a:' + (y.summa / maxV).toFixed(2) + ';--n:' + n + '" title="v. ' + y.v + ' · ' + y.antal + ' st · ' + IH.kort(y.summa) + '"><i></i><small>' + y.v + '</small></span>';
@@ -1915,6 +1933,7 @@
     IH.spara();
     IH.toast('Offerten är förlängd', o.nummer + ' gäller nu i ' + o.giltig + ' dagar', 'klocka');
     IH.rita();
+    IH.lysUpp('tr[data-id="' + o.id + '"]', 'bytt');
   };
   G['offert-ny-version'] = function (el) {
     var o = IH.offert(el.getAttribute('data-id'));
@@ -2077,6 +2096,7 @@
     IH.logga('mejl', 'Offert ' + o.nummer + ' skickad (' + IH.kr(IH.summaOffert(o)) + ').', o.kund, o.affar);
     IH.spara();
     IH.ritaOm();
+    IH.lysUpp('tr[data-id="' + o.id + '"], .ostatus', 'bytt');
     IH.toast('Offerten är markerad som skickad', 'Affären ligger nu i Offert skickad.', 'post');
   };
   G['skriv-ut'] = function () { window.print(); };
@@ -2500,6 +2520,7 @@
     var rad = el.closest('.uppg');
     rad.classList.toggle('uppg--klar', u.klar);
     el.setAttribute('aria-pressed', String(u.klar));
+    el.classList.remove('bytt'); void el.offsetWidth; el.classList.add('bytt');
     if (u.klar) {
       var r = el.getBoundingClientRect();
       rad.classList.add('uppg--pang');
