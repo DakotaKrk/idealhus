@@ -7123,3 +7123,425 @@ button.kal__rad:hover {
 .prodtopp__hoger .fabrik {
   align-content: center;
 }
+
+/* =====================================================================
+   Projekt, tydligare (2026-10-08): "gör så man förstår lättare".
+   Toppen i ordning uppifrån: läget i en mening, fyra nyckeltal på rad,
+   två block (nästa montage, att åtgärda) och var husen är. Varje block
+   har rubrik och en kort förklaring. Kalendern förklarar sina tecken.
+   ===================================================================== */
+.prodtopp {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.prodtopp__intro {
+  display: grid;
+  gap: 2px;
+}
+
+.prodtopp__intro .prodtopp__text {
+  max-width: 70ch;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.vy .prodtopp .nyckel.kort {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.prodtopp__rad {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* Blocken med rubrik och förklaring. */
+.prodblock {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.64));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 22px 44px -32px rgba(90, 60, 25, 0.55);
+}
+
+.prodblock__huvud {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.prodblock__emoji {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: linear-gradient(160deg, #fff6e8, #ffe2bd);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(201, 138, 69, 0.28), 0 8px 16px -10px rgba(143, 84, 36, 0.5);
+  font-size: 1.25rem;
+}
+
+.prodblock__huvud h3 {
+  margin: 0;
+  font: 600 1.0625rem/1.2 var(--rubrik);
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.prodblock__huvud p {
+  margin: 3px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+.prodblock__tom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #fffaf3, #fff3e3);
+  font-size: 0.875rem;
+  color: var(--text-2);
+}
+
+.prodblock__tom span {
+  font-size: 1.25rem;
+}
+
+/* --- Nästa montage, tydligare ------------------------------------------- */
+.prodblock--montage .nedrakning {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "ring info"
+    "lista lista"
+    "vag vag";
+  gap: 14px 18px;
+  margin: 0;
+  padding: 16px;
+  flex: 1;
+  align-content: start;
+}
+
+.prodblock--montage .nedrakning__ring {
+  grid-area: ring;
+  width: 104px;
+  height: 104px;
+}
+
+.prodblock--montage .nedrakning__ring b {
+  font-size: 2.125rem;
+}
+
+.prodblock--montage .nedrakning__ring small {
+  bottom: 22px;
+}
+
+.prodblock--montage .nedrakning__info {
+  grid-area: info;
+  align-self: center;
+}
+
+.nedrakning__info > b {
+  font: 600 1.1875rem/1.2 var(--rubrik);
+}
+
+.nedrakning__lista {
+  grid-area: lista;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.nedrakning__lista > small {
+  grid-column: 1 / -1;
+  font: 600 0.6875rem/1.2 var(--rubrik);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a07650;
+}
+
+.nedrakning__lista > span {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px 7px 7px;
+  border-radius: 12px;
+  font: 600 0.75rem/1.25 var(--rubrik);
+}
+
+.nedrakning__lista > span.klar {
+  background: rgba(76, 194, 127, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(47, 138, 82, 0.2);
+  color: #1f5c38;
+}
+
+.nedrakning__lista > span.saknas {
+  background: rgba(224, 118, 74, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(224, 118, 74, 0.3);
+  color: #8f3f1f;
+}
+
+.nedrakning__lista i {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-style: normal;
+  font-size: 0.6875rem;
+  color: #fff;
+}
+
+.nedrakning__lista .klar i {
+  background: #3aaa68;
+}
+
+.nedrakning__lista .saknas i {
+  background: #e0764a;
+}
+
+.nedrakning__lista em {
+  font: 500 0.625rem/1 var(--sans);
+  font-style: normal;
+  opacity: 0.75;
+}
+
+.prodblock--montage .nedrakning__vag {
+  grid-area: vag;
+  position: relative;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  height: 44px;
+}
+
+.nedrakning__ande {
+  position: absolute;
+  top: 0;
+  font: 600 0.6875rem/1 var(--rubrik);
+  color: var(--text-3);
+}
+
+.nedrakning__ande--start {
+  left: 0;
+}
+
+.nedrakning__ande--slut {
+  right: 0;
+  color: #8f5424;
+}
+
+.prodblock--montage .nedrakning__spar {
+  right: 0;
+  bottom: 8px;
+}
+
+.prodblock--montage .nedrakning__bil {
+  bottom: 8px;
+  left: calc(var(--a) * 100%);
+}
+
+/* --- Att åtgärda -------------------------------------------------------- */
+.prodblock--varn .prodvarn__lista {
+  margin: 0;
+}
+
+.prodvarn__rad {
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+}
+
+.prodvarn__rad b {
+  white-space: normal;
+}
+
+.prodvarn__meta {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.prodvarn__del {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(224, 118, 74, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(224, 118, 74, 0.28);
+  font: 600 0.6875rem/1 var(--rubrik);
+  font-style: normal;
+  white-space: nowrap;
+  color: #8f3f1f;
+}
+
+.prodvarn__del--var {
+  background: rgba(240, 181, 110, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.35);
+  color: #7a4a1c;
+}
+
+.prodvarn__meta small {
+  font: 600 0.6875rem/1 var(--rubrik);
+  white-space: nowrap;
+  color: var(--text-3);
+}
+
+/* --- Var husen är ---------------------------------------------------------- */
+.prodblock--fabrik .fabrik {
+  padding: 8px 4px 2px;
+  background: none;
+  box-shadow: none;
+}
+
+.prodblock--fabrik .fabrik__band {
+  top: 32px;
+}
+
+.fabrik__emoji i {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(201, 138, 69, 0.35), 0 4px 8px -4px rgba(90, 60, 25, 0.5);
+  font: 700 0.625rem/1 var(--rubrik);
+  font-style: normal;
+  color: #8f5424;
+}
+
+.fabrik__station b {
+  font-size: 0.8125rem;
+}
+
+.fabrik__station:not(.fabrik__station--har) .fabrik__emoji {
+  filter: grayscale(0.4);
+  opacity: 0.75;
+}
+
+.fabrik__station--har small {
+  font-weight: 700;
+  color: #8f5424;
+}
+
+.fabrik__hus button {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+}
+
+.fabrik__hus button span {
+  font: 600 0.625rem/1 var(--rubrik);
+  color: var(--text-2);
+}
+
+.fabrik__hus img {
+  width: 54px;
+}
+
+/* --- Kalenderns rubrik och förklaring ------------------------------------- */
+.kal__rubrik {
+  margin-bottom: 16px;
+}
+
+.kal__hjalp {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: -6px 0 14px;
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.kal__hjalp span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kal__hjalpvnr {
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: rgba(240, 181, 110, 0.2);
+  font: 600 0.625rem/1 var(--rubrik);
+  color: #8f5424;
+}
+
+.kal__hjalpvarn {
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #e0764a;
+  font: 700 0.625rem/1 var(--rubrik);
+  color: #fff;
+}
+
+.prodrubrik p {
+  max-width: 70ch;
+  margin: 6px 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+@media (max-width: 1100px) {
+  .prodtopp__rad {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vy .prodtopp .nyckel.kort {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .nedrakning__lista {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .prodvarn__rad {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .prodvarn__meta {
+    grid-column: 2;
+    justify-items: start;
+    grid-auto-flow: column;
+  }
+}
+
+/* Mobil: vägen med lastbilen tar hela bredden. */
+.prodblock--montage .nedrakning__vag {
+  justify-self: stretch;
+  width: 100%;
+}
+
+@media (max-width: 760px) {
+  .prodblock--montage .nedrakning {
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-items: stretch;
+  }
+}
+
+@media (max-width: 560px) {
+  .prodvarn__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+  }
+}

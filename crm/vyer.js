@@ -2448,26 +2448,34 @@
     return ut;
   }
 
-  // Smarta varningar: kundens punkter som saknas inför montaget, egna
-  // punkter som saknas och två montage samma vecka.
+  // Det som saknas, i klartext och med vems del det är (2026-10-08:
+  // "gör så man förstår lättare").
+  var SAKNAS = {
+    ritning: ['Ritningarna är inte klara', 'Vår del', '📐'],
+    lov: ['Bygglov eller anmälan är inte inlämnad', 'Kundens del', '📝'],
+    grund: ['Grund, el, vatten och avlopp är inte klart', 'Kundens del', '🧱'],
+    framkomlighet: ['Vägen för lastbil och kran är inte klar', 'Kundens del', '🚛']
+  };
+  var CHECK_KORT = { ritning: 'Ritningar', lov: 'Bygglov/anmälan', grund: 'Grund och anslutningar', framkomlighet: 'Väg för lastbil och kran' };
+
+  // Smarta påminnelser: det som saknas inför montaget (viktigast först)
+  // och två montage samma vecka.
   function prodVarningar(aktiva) {
     var ut = [], veckor = {};
     aktiva.forEach(function (p) {
       var k = IH.kund(p.kund), m = IH.modell(p.modell), t = p.montage ? dagarTill(p.montage) : null;
-      var namn = (k ? forsta(k.namn) : 'kunden'), hus = m ? m.namn : 'huset';
       CHECK.forEach(function (c) {
         if (p.check[c[0]]) return;
-        var kundens = c[0] !== 'ritning';
+        var s = SAKNAS[c[0]];
         var bradskar = t !== null && t <= 21;
-        ut.push({ vikt: (bradskar ? 0 : 2) + (kundens ? 0 : 1), emoji: bradskar ? '⚠️' : (kundens ? '⏳' : '📐'),
-          text: (kundens ? c[1] + ' hos ' + namn : c[1] + ' för ' + hus),
-          under: t === null ? '' : (t >= 0 ? 'Montage om ' + t + (t === 1 ? ' dag' : ' dagar') : 'Montaget har passerat') + ' · ' + hus,
-          id: p.id, varm: bradskar });
+        ut.push({ vikt: (bradskar ? 0 : 2) + (s[1] === 'Vår del' ? 1 : 0), emoji: bradskar ? '⚠️' : s[2], text: s[0], del: s[1],
+          under: (k ? k.namn : 'Kunden') + ' · ' + (m ? m.namn : 'huset'),
+          nar: t === null ? '' : (t > 0 ? 'om ' + t + ' d' : t === 0 ? 'i dag' : 'passerat'), id: p.id, varm: bradskar });
       });
       if (p.montage) { var v = IH.vecka(new Date(p.montage)); (veckor[v] = veckor[v] || []).push(p); }
     });
     Object.keys(veckor).forEach(function (v) {
-      if (veckor[v].length > 1) ut.push({ vikt: 0, emoji: '📅', text: veckor[v].length + ' montage samma vecka', under: 'Vecka ' + v, id: veckor[v][0].id, varm: true });
+      if (veckor[v].length > 1) ut.push({ vikt: 0, emoji: '📅', text: veckor[v].length + ' montage samma vecka', del: 'Planering', under: 'Vecka ' + v, nar: 'v. ' + v, id: veckor[v][0].id, varm: true });
     });
     return ut.sort(function (a, b) { return a.vikt - b.vikt; });
   }
@@ -2476,52 +2484,66 @@
     var nasta = aktiva.filter(function (p) { return p.montage && dagarTill(p.montage) >= 0; })
       .sort(function (a, b) { return a.montage < b.montage ? -1 : 1; })[0];
     var varn = prodVarningar(aktiva);
-    var mening;
-    var nedrakning = '';
+    var mening, nedrakning;
     if (nasta) {
       var k = IH.kund(nasta.kund), m = IH.modell(nasta.modell), t = dagarTill(nasta.montage);
       var saknas = CHECK.filter(function (c) { return !nasta.check[c[0]]; });
-      var start = nasta.start ? new Date(nasta.start).getTime() : Date.now() - 30 * 864e5;
-      var slut = new Date(nasta.montage).getTime();
-      var andel = Math.max(0.04, Math.min(1, (Date.now() - start) / Math.max(1, slut - start)));
-      mening = 'Nästa montage är <b>' + e(m ? m.namn : 'huset') + '</b> hos ' + e(k ? k.namn : 'kunden') + (k && k.ort ? ' i ' + e(k.ort) : '') +
-        ' – om <b>' + t + (t === 1 ? ' dag' : ' dagar') + '</b>.' + (saknas.length ? ' ' + saknas.length + (saknas.length === 1 ? ' punkt' : ' punkter') + ' kvar innan lastbilen kommer.' : ' Allt är klart inför montaget. ✨');
+      var start = nasta.start ? new Date(nasta.start) : new Date(Date.now() - 30 * 864e5);
+      var slut = new Date(nasta.montage);
+      var andel = Math.max(0.04, Math.min(1, (Date.now() - start.getTime()) / Math.max(1, slut - start)));
+      mening = 'Nästa hus som monteras är <b>' + e(m ? m.namn : 'huset') + '</b> hos ' + e(k ? k.namn : 'kunden') + (k && k.ort ? ' i ' + e(k.ort) : '') +
+        ', om <b>' + t + (t === 1 ? ' dag' : ' dagar') + '</b>. ' + (saknas.length ? saknas.length + (saknas.length === 1 ? ' sak' : ' saker') + ' måste bli klara innan dess.' : 'Allt är klart inför montaget. ✨');
       nedrakning = '<button class="nedrakning" type="button" data-g="proj-oppna" data-id="' + nasta.id + '" style="--a:' + andel.toFixed(3) + ';--p:' + Math.round((1 - Math.min(t, 70) / 70) * 100) + '">' +
         '<span class="nedrakning__ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52"/><circle class="nedrakning__fyll" cx="60" cy="60" r="52" pathLength="100"/></svg>' +
           '<b class="tal" data-rakna="' + t + '">' + t + '</b><small>' + (t === 1 ? 'dag kvar' : 'dagar kvar') + '</small></span>' +
-        '<span class="nedrakning__info"><small>Nästa montage · v. ' + IH.vecka(new Date(nasta.montage)) + '</small>' +
-          '<b>' + e(m ? m.namn : '') + '</b><em>' + e(k ? k.namn : '') + (k && k.ort ? ' · ' + e(k.ort) : '') + '</em>' +
-          '<span class="nedrakning__datum">' + i('kalender') + dagNamn(new Date(nasta.montage)) + '</span>' +
-          '<span class="nedrakning__check">' + CHECK.map(function (c) {
-            var kort = { ritning: 'Ritning', lov: 'Lov', grund: 'Grund', framkomlighet: 'Väg' }[c[0]];
-            return '<i class="' + (nasta.check[c[0]] ? 'klar' : '') + '" title="' + e(c[1]) + '">' + (nasta.check[c[0]] ? '✓' : '·') + ' ' + kort + '</i>';
-          }).join('') + '</span></span>' +
-        '<span class="nedrakning__vag" aria-hidden="true"><i class="nedrakning__spar"></i><span class="nedrakning__bil">🚚</span>' +
-          (m ? '<img class="nedrakning__hus" src="' + m.tumme + '" alt="">' : '<span class="nedrakning__hus">🏠</span>') + '</span>' +
+        '<span class="nedrakning__info">' +
+          '<b>' + e(m ? m.kategori + ' ' + m.namn : '') + '</b><em>' + e(k ? k.namn : '') + (k && k.ort ? ' · ' + e(k.ort) : '') + '</em>' +
+          '<span class="nedrakning__datum">' + i('kalender') + dagNamn(slut) + ' · v. ' + IH.vecka(slut) + '</span></span>' +
+        '<span class="nedrakning__lista"><small>Klart innan lastbilen kommer?</small>' + CHECK.map(function (c) {
+            var klar = !!nasta.check[c[0]];
+            return '<span class="' + (klar ? 'klar' : 'saknas') + '"><i aria-hidden="true">' + (klar ? '✓' : '✕') + '</i>' + CHECK_KORT[c[0]] +
+              '<em>' + (c[0] === 'ritning' ? 'Vi' : 'Kunden') + '</em></span>';
+          }).join('') + '</span>' +
+        '<span class="nedrakning__vag" aria-hidden="true"><span class="nedrakning__ande nedrakning__ande--start">🏁 Start ' + IH.datum(start.toISOString()) + '</span>' +
+          '<span class="nedrakning__ande nedrakning__ande--slut">Montage ' + IH.datum(slut.toISOString()) + ' 🏠</span>' +
+          '<i class="nedrakning__spar"></i><span class="nedrakning__bil">🚚</span></span>' +
       '</button>';
     } else {
-      mening = aktiva.length ? 'Inga montage inplanerade framåt ännu. Sätt montagedag i projekten.' : 'Inga hus i produktion just nu. När en affär vinns hamnar den här. 🌱';
+      mening = aktiva.length ? 'Inga montage är inplanerade framåt ännu. Sätt montagedag i projekten.' : 'Inga hus i produktion just nu. När en affär vinns hamnar den här. 🌱';
+      nedrakning = '<p class="prodblock__tom"><span aria-hidden="true">🗓️</span>Inget montage inplanerat.</p>';
     }
-    var fabrik = '<div class="fabrik" aria-label="Husen per steg"><i class="fabrik__band" aria-hidden="true"></i>' + IH.PROJSTEG.map(function (s, n) {
+    var steg = IH.PROJSTEG;
+    var fabrik = '<div class="fabrik" aria-label="Husen per steg"><i class="fabrik__band" aria-hidden="true"></i>' + steg.map(function (s, n) {
       var l = proj.filter(function (p) { return p.steg === s.id; });
-      return '<div class="fabrik__station" style="--f:' + s.farg + ';--n:' + n + '"><span class="fabrik__emoji" aria-hidden="true">' + (STEG_EMOJI[s.id] || '🏠') + '</span>' +
-        '<b>' + e(s.kort) + '</b><small>' + l.length + (l.length === 1 ? ' hus' : ' hus') + '</small>' +
+      return '<div class="fabrik__station' + (l.length ? ' fabrik__station--har' : '') + '" style="--f:' + s.farg + ';--n:' + n + '" title="' + e(s.text) + '">' +
+        '<span class="fabrik__emoji" aria-hidden="true">' + (STEG_EMOJI[s.id] || '🏠') + '<i>' + (n + 1) + '</i></span>' +
+        '<b>' + e(s.namn) + '</b><small>' + (l.length ? l.length + ' hus' : 'inga hus') + '</small>' +
         '<span class="fabrik__hus">' + l.map(function (p, j) {
           var m = IH.modell(p.modell), k = IH.kund(p.kund);
-          return '<button type="button" data-g="proj-oppna" data-id="' + p.id + '" style="--j:' + j + '" title="' + e(k ? k.namn : '') + ' · ' + e(m ? m.namn : '') + '"><img src="' + (m ? m.tumme : '') + '" alt="' + e(m ? m.namn : '') + '"></button>';
+          return '<button type="button" data-g="proj-oppna" data-id="' + p.id + '" style="--j:' + j + '" title="' + e(k ? k.namn : '') + ' · ' + e(m ? m.namn : '') + '"><img src="' + (m ? m.tumme : '') + '" alt="' + e(m ? m.namn : '') + '"><span>' + e(k ? forsta(k.namn) : '') + '</span></button>';
         }).join('') + '</span></div>';
     }).join('') + '</div>';
+    var block = function (emoji, rubrik, hjalp, inne, klass) {
+      return '<div class="prodblock' + (klass ? ' ' + klass : '') + '"><div class="prodblock__huvud"><span class="prodblock__emoji" aria-hidden="true">' + emoji + '</span>' +
+        '<span><h3>' + rubrik + '</h3><p>' + hjalp + '</p></span></div>' + inne + '</div>';
+    };
+    var lista = varn.length ? '<ul class="prodvarn__lista" data-stagger>' + varn.slice(0, 4).map(function (v) {
+        return '<li><button type="button" class="prodvarn__rad' + (v.varm ? ' prodvarn__rad--varm' : '') + '" data-g="proj-oppna" data-id="' + v.id + '"><span class="prodvarn__emoji" aria-hidden="true">' + v.emoji + '</span>' +
+          '<span><b>' + e(v.text) + '</b><small>' + e(v.under) + '</small></span>' +
+          '<span class="prodvarn__meta"><em class="prodvarn__del' + (v.del === 'Vår del' ? ' prodvarn__del--var' : '') + '">' + e(v.del) + '</em>' + (v.nar ? '<small>Montage ' + e(v.nar) + '</small>' : '') + '</span></button></li>';
+      }).join('') + '</ul>' + (varn.length > 4 ? '<p class="prodvarn__fler">+' + (varn.length - 4) + ' till – öppna projekten för att se allt</p>' : '')
+      : '<p class="prodblock__tom"><span aria-hidden="true">✨</span>Inget saknas inför montagen.</p>';
     return '<section class="prodtopp kort kort--mork" data-in>' +
-      '<div class="prodtopp__ord"><p class="etikett etikett--ljus">Produktionen just nu</p>' +
-        '<h2 class="prodtopp__titel"><b class="tal" data-rakna="' + aktiva.length + '">' + aktiva.length + '</b> ' + (aktiva.length === 1 ? 'hus på väg' : 'hus på väg') + ' <span class="prodtopp__emoji" aria-hidden="true">🏗️</span></h2>' +
-        '<p class="prodtopp__text">' + mening + '</p>' + (nyckel || '') + nedrakning + '</div>' +
-      '<div class="prodtopp__hoger"><div class="prodvarn"><p class="etikett etikett--ljus">Smarta påminnelser</p>' +
-        (varn.length ? '<ul class="prodvarn__lista" data-stagger>' + varn.slice(0, 4).map(function (v) {
-          return '<li><button type="button" class="prodvarn__rad' + (v.varm ? ' prodvarn__rad--varm' : '') + '" data-g="proj-oppna" data-id="' + v.id + '"><span class="prodvarn__emoji" aria-hidden="true">' + v.emoji + '</span>' +
-            '<span><b>' + e(v.text) + '</b><small>' + e(v.under) + '</small></span>' + i('pil') + '</button></li>';
-        }).join('') + '</ul>' + (varn.length > 4 ? '<p class="prodvarn__fler">+' + (varn.length - 4) + ' till i projekten</p>' : '')
-          : '<p class="prodvarn__tom"><span aria-hidden="true">✨</span>Allt ser bra ut – inga punkter saknas inför montagen.</p>') +
-      '</div>' + fabrik + '</div></section>';
+      '<div class="prodtopp__intro"><p class="etikett etikett--ljus">Läget just nu</p>' +
+        '<h2 class="prodtopp__titel"><b class="tal" data-rakna="' + aktiva.length + '">' + aktiva.length + '</b> hus på väg <span class="prodtopp__emoji" aria-hidden="true">🏗️</span></h2>' +
+        '<p class="prodtopp__text">' + mening + '</p></div>' +
+      (nyckel || '') +
+      '<div class="prodtopp__rad">' +
+        block('🚚', 'Nästa montage', 'Dagar kvar, och vad som ska vara klart innan lastbilen kommer.', nedrakning, 'prodblock--montage') +
+        block('⚠️', 'Att åtgärda', 'Det som saknas inför montagen. Viktigast först – klicka för att öppna projektet.', lista, 'prodblock--varn') +
+      '</div>' +
+      block('🏭', 'Var husen är just nu', 'Varje hus står på sitt steg, från ritning till nyckel. Klicka på ett hus för att öppna det.', fabrik, 'prodblock--fabrik') +
+    '</section>';
   }
 
   function kalender() {
@@ -2591,7 +2613,10 @@
       (snart.length ? '<div class="kal__lista kal__lista--snart">' + snart.slice(0, 6).map(function (h) { return rad(h, true); }).join('') + '</div>'
         : '<p class="kal__tom"><span aria-hidden="true">🌱</span>Lugnt framåt.</p>') +
     '</div></aside>';
-    return '<section class="kal kort" data-in><div class="kal__ram">' + huvud + '<div class="kal__kropp"><div class="kal__rutnat">' + rutor + '</div>' + sida + '</div></div></section>';
+    var hjalp = '<p class="kal__hjalp"><span>👆 Klicka på en dag för att se allt som händer då.</span><span><b class="kal__hjalpvnr">1 🚚</b> = montage den veckan</span>' +
+      '<span><b class="kal__hjalpvarn">!</b> = saker kvar inför montaget</span><span>Knapparna ovanför tänder och släcker.</span></p>';
+    return '<section class="kal kort" data-in><div class="kal__ram"><div class="prodblock__huvud kal__rubrik"><span class="prodblock__emoji" aria-hidden="true">📅</span>' +
+      '<span><h3>Kalender</h3><p>Montage, projektstarter, uppgifter, möten och offerter som går ut.</p></span></div>' + huvud + hjalp + '<div class="kal__kropp"><div class="kal__rutnat">' + rutor + '</div>' + sida + '</div></div></section>';
   }
 
   IH.vyer.produktion = function (del) {
@@ -2609,7 +2634,7 @@
         ['kub', 'Värde i produktion', aktiva.reduce(function (s, p) { var a = p.affar ? IH.affar(p.affar) : null; return s + (a ? a.varde : 0); }, 0), 'kort', 'signerade ordrar']
       ])) +
       kalender() +
-      '<div class="prodrubrik"><p class="etikett">Alla projekt</p><h2>Från ritning till nyckel</h2></div>' +
+      '<div class="prodrubrik"><p class="etikett">Alla projekt</p><h2>Från ritning till nyckel</h2><p>Varje kolumn är ett steg. När ett steg är klart flyttar du huset vidare med pilen på kortet, eller öppnar projektet och väljer steg.</p></div>' +
       '<div class="tavla tavla--prod">' + IH.PROJSTEG.map(function (s) {
         var l = proj.filter(function (p) { return p.steg === s.id; });
         return '<section class="spalt" style="--f:' + s.farg + '"><header class="spalt__huvud"><div><b><span class="spalt__emoji" aria-hidden="true">' + (STEG_EMOJI[s.id] || '') + '</span>' + e(s.namn) + '</b><span>' + l.length + '</span></div><small>' + e(s.text) + '</small></header>' +
