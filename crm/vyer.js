@@ -1093,20 +1093,36 @@
     }
   }
 
+  // Emoji för säljstegen och nästa steg – i stegbandet, spalterna och korten.
+  var SALJ_EMOJI = { ny: '📥', kontakt: '📞', besok: '📍', offert: '🧾', forhandling: '🤝', vunnen: '🏆' };
+  function nastaEmoji(a) {
+    switch (a.steg) {
+      case 'ny': return '📞';
+      case 'kontakt': return '📍';
+      case 'besok': return IH.offertFor(a.id) ? '📨' : '🧾';
+      case 'offert': return IH.dagarSedan(a.andrad) > 4 ? '📨' : '⏳';
+      case 'forhandling': return '✍️';
+      default: return '👉';
+    }
+  }
+
   function affKort(a) {
     var k = IH.kund(a.kund);
     var m = IH.modell(a.modell);
     var s = IH.steg(a.steg);
     var p = sannolikhet(a);
     var d = IH.dagarSedan(a.andrad);
-    return '<article class="aff" data-aff="' + a.id + '" tabindex="0" style="--f:' + s.farg + '" aria-label="' + e(a.titel) + ', ' + IH.kort(a.varde) + '">' +
+    // Hur länge affären legat i steget: färsk, lugn eller står still.
+    var tid = d <= 3 ? 'farsk' : d <= 10 ? 'lugn' : 'still';
+    return '<article class="aff aff--' + tid + '" data-aff="' + a.id + '" tabindex="0" style="--f:' + s.farg + '" aria-label="' + e(a.titel) + ', ' + IH.kort(a.varde) + '">' +
       '<div class="aff__topp">' + (m ? '<span class="aff__bild"><img src="' + m.tumme + '" alt="" loading="lazy" decoding="async"></span>' : '') +
       '<span class="aff__modell">' + (m ? e(m.namn) : '') + '</span>' + (a.steg === 'vunnen' ? '<span class="aff__vunnen">' + i('trofe') + '</span>' : ring(p, s.farg)) + '</div>' +
       '<b class="aff__titel">' + e(a.titel) + '</b>' +
       '<span class="aff__kund">' + kundAvatar(k, true) + e(k ? k.namn : '') + '</span>' +
-      '<div class="aff__fot"><span class="tal">' + IH.kort(a.varde) + '</span><span class="tid">' + (a.steg === 'vunnen' ? 'vann ' + IH.sedan(a.vunnen) : d + ' d i steget') + '</span></div>' +
-      (a.steg !== 'vunnen' ? '<p class="aff__nasta' + (d > 10 ? ' aff__nasta--varm' : '') + '">' + i('pil') + e(nastaSteg(a)) + '</p>' +
-        '<i class="aff__dagar' + (d > 10 ? ' aff__dagar--varm' : '') + '" style="--a:' + Math.min(1, d / 14).toFixed(2) + '" title="' + d + ' dagar i steget"></i>' : '') +
+      '<div class="aff__fot"><span class="tal">' + IH.kort(a.varde) + '</span>' +
+        (a.steg === 'vunnen' ? '<span class="tid">vann ' + IH.sedan(a.vunnen) + '</span>'
+          : '<span class="aff__tid aff__tid--' + tid + '" title="' + d + (d === 1 ? ' dag' : ' dagar') + ' i steget">' + (d === 0 ? 'I dag' : d + ' d') + (tid === 'still' ? ' · står still' : '') + '</span>') + '</div>' +
+      (a.steg !== 'vunnen' ? '<p class="aff__nasta' + (d > 10 ? ' aff__nasta--varm' : '') + '"><span class="aff__nastaemoji" aria-hidden="true">' + nastaEmoji(a) + '</span>' + e(nastaSteg(a)) + '</p>' : '') +
       '</article>';
   }
 
@@ -1212,15 +1228,17 @@
       html += '<div class="stegband" data-in>' + IH.SALJSTEG.map(function (s) {
         var l = s.id === 'vunnen' ? vunna90 : oppna.filter(function (a) { return a.steg === s.id; });
         var andel = summa(oppna.concat(vunna90)) ? summa(l) / summa(oppna.concat(vunna90)) : 0;
-        return '<button type="button" data-g="till-spalt" data-steg="' + s.id + '" style="--f:' + s.farg + ';--a:' + andel.toFixed(3) + '"><b>' + e(s.namn) + '</b><small>' + l.length + ' · ' + IH.kort(summa(l)) + '</small><i></i></button>';
+        return '<button type="button" data-g="till-spalt" data-steg="' + s.id + '" style="--f:' + s.farg + ';--a:' + andel.toFixed(3) + '">' +
+          '<span class="stegband__emoji" aria-hidden="true">' + SALJ_EMOJI[s.id] + '</span><span class="stegband__text"><b>' + e(s.namn) + '</b><small>' + l.length + ' st · ' + IH.kort(summa(l)) + '</small></span><i></i></button>';
       }).join('') + '</div>' +
+      '<p class="tavla__tips">💡 Dra korten mellan stegen – på mobilen håller du in kortet först. Släpp längst ned för att markera som förlorad.</p>' +
       '<div class="tavla" data-tavla>' + IH.SALJSTEG.map(function (s) {
         var l = (s.id === 'vunnen' ? vunna90 : oppna.filter(function (a) { return a.steg === s.id; }))
           .sort(function (a, b) { return b.andrad < a.andrad ? -1 : 1; });
         return '<section class="spalt" data-steg="' + s.id + '" style="--f:' + s.farg + '" id="spalt-' + s.id + '">' +
-          '<header class="spalt__huvud"><div><b>' + e(s.namn) + '</b><span>' + l.length + '</span></div><p class="tal">' + IH.kort(summa(l)) + '</p>' +
-          '<small>' + (s.id === 'vunnen' ? 'senaste 90 dagarna' : s.sannolikhet + ' % grund · viktat ' + IH.kort(viktat(l))) + '</small></header>' +
-          '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(affKort).join('') : '<p class="spalt__tom">' + i('hus') + 'Dra hit en affär</p>') + '</div></section>';
+          '<header class="spalt__huvud"><div><b><span class="spalt__emoji" aria-hidden="true">' + SALJ_EMOJI[s.id] + '</span>' + e(s.namn) + '</b><span>' + l.length + '</span></div><p class="tal">' + IH.kort(summa(l)) + '</p>' +
+          '<small>' + (s.id === 'vunnen' ? 'senaste 90 dagarna' : s.sannolikhet + ' % chans · viktat ' + IH.kort(viktat(l))) + '</small></header>' +
+          '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(affKort).join('') : '<p class="spalt__tom"><span aria-hidden="true">✨</span>Dra hit en affär</p>') + '</div></section>';
       }).join('') + '</div>' +
       '<div class="forlustdocka" aria-hidden="true">' + i('stang') + 'Släpp här för att markera som förlorad</div>';
     }
