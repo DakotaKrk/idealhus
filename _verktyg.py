@@ -175,6 +175,22 @@ KROPP = f'''    <main id="innehall">
         <div class="tv__inre">
           <form class="tv__form" id="kollen" aria-label="Frågor om tomten">
 {FORMULAR}
+
+          <aside class="tv__regler" id="tv-regler" data-vald="inom" aria-label="Reglerna som verktyget räknar med">
+            <p class="tv__regler-rubrik"><span class="tv__regler-ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 19.5h16M6.5 19.5V9.8L12 5l5.5 4.8v9.7M10 19.5v-5h4v5"/></svg></span>Så räknar vi</p>
+            <table class="tv__regeltabell">
+              <thead>
+                <tr><td></td><th scope="col" data-plan="inom">Inom detaljplan</th><th scope="col" data-plan="utanfor">Utanför</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Största nya hus</th><td data-plan="inom">30 m²</td><td data-plan="utanfor">50 m²</td></tr>
+                <tr><th scope="row">Utan lov sammanlagt</th><td data-plan="inom">45 m²</td><td data-plan="utanfor">65 m²</td></tr>
+                <tr><th scope="row">Högsta nockhöjd</th><td data-plan="inom">4,0 m</td><td data-plan="utanfor">4,5 m</td></tr>
+                <tr><th scope="row">Till tomtgränsen</th><td data-plan="inom">4,5 m</td><td data-plan="utanfor">4,5 m</td></tr>
+              </tbody>
+            </table>
+            <p class="tv__regler-not">Närmare gränsen går med grannens medgivande. <a href="attefallshus-regler.html">Läs hela guiden</a></p>
+          </aside>
           </form>
 
           <div class="tv__hoger">
@@ -943,6 +959,7 @@ SKRIPT = '''
             '<em>av ' + totalt + ' m² utan lov</em>';
           // Huset i höjdrutan växer till nocken (4,5 m är fullt).
           document.getElementById('svar-nock').style.setProperty('--nock', (parseFloat(hojd.replace(',', '.')) / 4.5).toFixed(3));
+          document.getElementById('tv-regler').setAttribute('data-vald', plan === 'utanfor' ? 'utanfor' : 'inom');
           document.getElementById('svar-hojdinfo').textContent = plan === 'utanfor' ? 'Utanför detaljplan'
             : (plan === 'vetej' ? 'Räknat som inom detaljplan' : 'Inom detaljplan');
 
@@ -2034,7 +2051,7 @@ ut = (B.head("Vad får jag bygga? | Idealhus",
              "Svara på fem frågor om tomten och se hur stort attefallshus som "
              "ryms, hur högt det får bli och vad kommunen behöver veta.",
              None, fil="vad-far-jag-bygga.html")
-      + "\n" + B.header("") + "\n" + KROPP + B.SIDFOT + "\n" + B.skript(SKRIPT))
+      + "\n" + B.header(B.VERKTYG_NAMN) + "\n" + KROPP + B.SIDFOT + "\n" + B.skript(SKRIPT))
 
 io.open("vad-far-jag-bygga.html", "w", encoding="utf-8",
         newline="").write(ut.replace("\n", "\r\n"))

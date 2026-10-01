@@ -60,8 +60,8 @@ def kategorirad(namn, fil):
 TIPSKORT = (
     '              <a class="main-nav__tips" href="vad-far-jag-bygga.html">\n'
     '                <span class="main-nav__tips-bild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false">'
-    '<path d="M12 11.6l8.5 4.3L12 20.2l-8.5-4.3z"/><path d="M9.2 16.4v-3.9l2.8-2.1 2.8 2.1v3.9"/>'
-    '<path d="M4 7h6M4 5.6v2.8M10 5.6v2.8"/></svg></span>\n'
+    '<path d="M8 15.3 3.5 17.4 12 21.4l8.5-4L16 15.3"/><path d="M8 17.5v-6.3l4-3.6 4 3.6v6.3M11 17.5v-3h2v3"/>'
+    '<path d="M18.6 3v3.4M16.9 4.7h3.4"/></svg></span>\n'
     '                <span class="main-nav__tips-text">\n'
     '                  <span class="main-nav__tips-etikett">Prova</span>\n'
     '                  <strong>Vad får jag bygga?</strong>\n'
@@ -93,11 +93,24 @@ def dropdown(aktiv):
             f'            </div>\n          </div>')
 
 
+# Verktyget står som en egen, utmärkt länk i menyn (2026-10-08).
+VERKTYG_NAMN = "Vad får jag bygga?"
+VERKTYG_IKON = ('<span class="main-nav__verktyg-ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path class="mv-mark" pathLength="1" d="M8 15.3 3.5 17.4 12 21.4l8.5-4L16 15.3"/><path class="mv-hus" pathLength="1" d="M8 17.5v-6.3l4-3.6 4 3.6v6.3M11 17.5v-3h2v3"/><path class="mv-matt" pathLength="1" d="M18.6 3v3.4M16.9 4.7h3.4"/></svg></span>')
+
+
+def verktygslank(aktiv):
+    k = "main-nav__link main-nav__verktyg" + (" main-nav__link--active" if aktiv else "")
+    cur = ' aria-current="page"' if aktiv else ""
+    return (f'          <a class="{k}" href="vad-far-jag-bygga.html"{cur}>{VERKTYG_IKON}'
+            '<span class="main-nav__verktyg-text">Vad får jag bygga?</span></a>')
+
+
 def huvudmeny(aktiv):
     rader = []
     for namn, fil in MENY:
         if namn == "__DROPDOWN__":
             rader.append(dropdown(aktiv))
+            rader.append(verktygslank(aktiv == VERKTYG_NAMN))
             continue
         k = "main-nav__link main-nav__link--active" if namn == aktiv else "main-nav__link"
         rader.append(f'          <a class="{k}" href="{fil}">{namn}</a>')
@@ -140,8 +153,8 @@ def mobilmeny():
     rader.append(
         f'          <a class="mmeny__tips" href="vad-far-jag-bygga.html" style="--i:{i}">'
         '<span class="mmeny__tipsbild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false">'
-        '<path d="M12 11.6l8.5 4.3L12 20.2l-8.5-4.3z"/><path d="M9.2 16.4v-3.9l2.8-2.1 2.8 2.1v3.9"/>'
-        '<path d="M4 7h6M4 5.6v2.8M10 5.6v2.8"/></svg></span>'
+        '<path d="M8 15.3 3.5 17.4 12 21.4l8.5-4L16 15.3"/><path d="M8 17.5v-6.3l4-3.6 4 3.6v6.3M11 17.5v-3h2v3"/>'
+        '<path d="M18.6 3v3.4M16.9 4.7h3.4"/></svg></span>'
         '<span class="mmeny__tipstext"><span class="mmeny__prova">Prova</span>'
         '<strong>Vad får jag bygga?</strong></span>' + MMENY_PIL + '</a>')
     rader.append(f'          <a class="mmeny__cta" href="kontakt.html" style="--i:{i + 2}">Börja här</a>')

@@ -23343,3 +23343,343 @@ html[data-tema="mork"] .tvhus__pil::after {
     font-size: 0.875rem;
   }
 }
+/* === "Vad får jag bygga?" i menyn (2026-10-08) ============================
+   Verktyget är en särskild länk: varm glaspill med en ring som sakta
+   roterar, ett mörkt märke där tomten och huset ritas fram, och ett
+   skimmer i texten. Ritningen spelas vid första besöket och när man
+   pekar på länken. */
+@property --mv-vinkel {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+html body .logo {
+  flex-shrink: 0;
+}
+
+html body .main-nav .main-nav__verktyg {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 6px;
+  padding: 4px 15px 4px 4px;
+  border-radius: 999px;
+  background: linear-gradient(160deg, rgba(255, 251, 243, 0.98), rgba(255, 233, 200, 0.82));
+  box-shadow: inset 0 1px 0 #fff, 0 10px 22px -12px rgba(201, 128, 52, 0.75);
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+  transition: transform 0.4s var(--mjuk), box-shadow 0.4s var(--mjuk);
+}
+
+html body .main-nav .main-nav__verktyg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 1.6px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--mv-vinkel), #e8a456, #fff4de 22%, #c47a32 48%, #ffe1b0 72%, #e8a456);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+html body .main-nav .main-nav__verktyg::after {
+  content: "";
+  position: absolute;
+  inset: -7px -9px;
+  z-index: -1;
+  display: block;
+  border-radius: inherit;
+  background: radial-gradient(closest-side, rgba(240, 181, 110, 0.55), rgba(240, 181, 110, 0));
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+html body .main-nav .main-nav__verktyg:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(160deg, #fffbf3, rgba(255, 228, 188, 0.95));
+  box-shadow: inset 0 1px 0 #fff, 0 14px 26px -12px rgba(201, 128, 52, 0.85);
+}
+
+html body .main-nav__verktyg-ikon {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #3a342d, #141210);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 5px 12px -5px rgba(27, 25, 21, 0.7);
+}
+
+html body .main-nav__verktyg-ikon svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: #f6c88f;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html body .main-nav__verktyg-text {
+  position: relative;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .main-nav .main-nav__verktyg::before {
+    animation: mv-snurr 5s linear infinite;
+  }
+  html body .main-nav .main-nav__verktyg::after {
+    animation: mv-glod 3.4s ease-in-out infinite;
+  }
+  html body .main-nav__verktyg-text {
+    background: linear-gradient(100deg, var(--text) 0 42%, #c47a32 50%, var(--text) 58% 100%);
+    background-size: 260% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: mv-skimmer 6s ease-in-out infinite 1.6s;
+  }
+  html:not(.meny-stilla) .main-nav__verktyg-ikon path,
+  html body .main-nav__verktyg:hover .main-nav__verktyg-ikon path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: mv-rita 0.9s cubic-bezier(0.6, 0, 0.2, 1) forwards;
+  }
+  html:not(.meny-stilla) .main-nav__verktyg-ikon .mv-mark { animation-delay: 0.5s; }
+  html:not(.meny-stilla) .main-nav__verktyg-ikon .mv-hus { animation-delay: 0.85s; }
+  html:not(.meny-stilla) .main-nav__verktyg-ikon .mv-matt { animation-delay: 1.15s; }
+  html body .main-nav__verktyg:hover .main-nav__verktyg-ikon .mv-hus { animation-delay: 0.2s; }
+  html body .main-nav__verktyg:hover .main-nav__verktyg-ikon .mv-matt { animation-delay: 0.4s; }
+}
+
+@keyframes mv-snurr {
+  to { --mv-vinkel: 360deg; }
+}
+
+@keyframes mv-glod {
+  0%, 100% { opacity: 0.35; transform: scale(0.96); }
+  50% { opacity: 0.85; transform: scale(1.04); }
+}
+
+@keyframes mv-skimmer {
+  0%, 55% { background-position: 100% 0; }
+  85%, 100% { background-position: 0 0; }
+}
+
+@keyframes mv-rita {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Mörkt läge. */
+html[data-tema="mork"] .main-nav .main-nav__verktyg {
+  background: linear-gradient(160deg, rgba(58, 50, 40, 0.95), rgba(28, 25, 21, 0.9));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 22px -12px rgba(240, 181, 110, 0.45);
+  color: #f7f5f0;
+}
+html[data-tema="mork"] .main-nav__verktyg-text {
+  --text: #f7f5f0;
+}
+
+/* Mellanbredder: menyn tätare så att loggan och knapparna får plats. */
+@media (min-width: 1041px) and (max-width: 1320px) {
+  html body .main-nav {
+    gap: 0;
+  }
+  html body .main-nav .main-nav__link {
+    padding-inline: 10px;
+    font-size: 14px;
+  }
+  html body .main-nav .main-nav__verktyg {
+    margin: 0 4px;
+    padding: 4px 12px 4px 4px;
+  }
+}
+
+@media (min-width: 1041px) and (max-width: 1160px) {
+  html body .main-nav .main-nav__link {
+    padding-inline: 8px;
+    font-size: 13.5px;
+  }
+  html body .main-nav__verktyg-ikon {
+    width: 26px;
+    height: 26px;
+  }
+  html body .main-nav__verktyg-ikon svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Mobilmenyns verktygskort får samma ring. */
+@media (prefers-reduced-motion: no-preference) {
+  html body .mmeny__tips {
+    position: relative;
+    isolation: isolate;
+  }
+  html body .mmeny__tips::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1.5px;
+    border-radius: inherit;
+    background: conic-gradient(from var(--mv-vinkel), rgba(232, 164, 86, 0.9), rgba(255, 244, 222, 0.4) 22%, rgba(196, 122, 50, 0.9) 48%, rgba(255, 225, 176, 0.5) 72%, rgba(232, 164, 86, 0.9));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+    animation: mv-snurr 5s linear infinite;
+    pointer-events: none;
+  }
+}
+
+/* === Regelkortet under frågorna ===========================================
+   Fyller ut spalten bredvid svaret och visar vilka siffror verktyget
+   räknar med; den valda planens kolumn lyser. */
+@media (min-width: 1041px) {
+  html body .tv__form {
+    align-self: stretch;
+    grid-template-rows: repeat(5, auto) 1fr;
+  }
+}
+
+html body .tv__regler {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  padding: 22px 22px 20px;
+  border-radius: 22px;
+  background:
+    radial-gradient(80% 60% at 100% 0%, rgba(255, 214, 160, 0.38), transparent 65%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.58));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 30px 60px -44px rgba(90, 60, 25, 0.6);
+}
+
+html body .tv__regler-rubrik {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font: 600 1.0625rem/1.2 var(--knappfont);
+  color: var(--text);
+}
+
+html body .tv__regler-ikon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: linear-gradient(160deg, #e2a865, #a96a2f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 16px -9px rgba(143, 84, 36, 0.7);
+}
+
+html body .tv__regler-ikon svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: #fffaf2;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html body .tv__regeltabell {
+  width: 100%;
+  margin-block: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+}
+
+html body .tv__regeltabell th,
+html body .tv__regeltabell td {
+  padding: 11px 12px;
+  transition: background-color 0.5s var(--mjuk), color 0.5s var(--mjuk);
+}
+
+html body .tv__regeltabell thead th {
+  padding-block: 9px;
+  font: 600 0.6875rem/1.2 var(--knappfont);
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+html body .tv__regeltabell tbody th {
+  font-weight: 500;
+  text-align: left;
+  color: var(--text-2);
+}
+
+html body .tv__regeltabell tbody td {
+  font: 600 0.9375rem/1.2 var(--knappfont);
+  text-align: center;
+  color: var(--text);
+}
+
+html body .tv__regeltabell tbody th,
+html body .tv__regeltabell tbody td {
+  border-top: 1px solid rgba(27, 25, 21, 0.07);
+}
+
+html body .tv__regler[data-vald="inom"] [data-plan="inom"],
+html body .tv__regler[data-vald="utanfor"] [data-plan="utanfor"] {
+  background: linear-gradient(180deg, rgba(240, 181, 110, 0.2), rgba(240, 181, 110, 0.13));
+  color: #7a4a1c;
+}
+
+html body .tv__regler[data-vald="inom"] thead [data-plan="inom"],
+html body .tv__regler[data-vald="utanfor"] thead [data-plan="utanfor"] {
+  border-radius: 12px 12px 0 0;
+  color: #8f5424;
+}
+
+html body .tv__regler[data-vald="inom"] tbody tr:last-child [data-plan="inom"],
+html body .tv__regler[data-vald="utanfor"] tbody tr:last-child [data-plan="utanfor"] {
+  border-radius: 0 0 12px 12px;
+}
+
+html body .tv__regler-not {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+html body .tv__regler-not a {
+  color: var(--virke-djup);
+  font-weight: 600;
+}
+
+html[data-tema="mork"] .tv__regler {
+  background: linear-gradient(160deg, rgba(247, 245, 240, 0.07), rgba(247, 245, 240, 0.03));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08), 0 26px 50px -36px rgba(0, 0, 0, 0.8);
+}
+html[data-tema="mork"] .tv__regeltabell tbody th,
+html[data-tema="mork"] .tv__regeltabell tbody td {
+  border-top-color: rgba(247, 245, 240, 0.08);
+}
+html[data-tema="mork"] .tv__regler[data-vald="inom"] [data-plan="inom"],
+html[data-tema="mork"] .tv__regler[data-vald="utanfor"] [data-plan="utanfor"] {
+  color: #f6c88f;
+}
