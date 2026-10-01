@@ -18837,3 +18837,82 @@ html[data-tema="mork"] .husval__ruta .husval__val button {
   text-wrap: balance;
 }
 
+/* Husväljarens huvud, igen (2026-10-05): rubriken överst och texten
+   under, allt vänsterställt i linje med bildens vänsterkant. */
+.husval .ih-huvud.ih-huvud--rad {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(1rem, 2vw, 1.4rem);
+  max-width: none;
+  margin-inline: 0;
+  text-align: left;
+}
+
+.husval .ih-huvud--rad > div {
+  align-items: flex-start;
+}
+
+.husval .ih-huvud--rad .ih-etikett {
+  justify-content: flex-start;
+}
+
+.husval .ih-huvud--rad .ih-etikett::after {
+  content: none;
+}
+
+.husval .ih-huvud--rad .ih-rubrik {
+  margin-inline: 0;
+}
+
+.husval .ih-huvud--rad .ih-ingress {
+  max-width: 44rem;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* Brödtexter och ingresser ett snäpp tjockare (400 -> 500). Manrope är
+   variabel 200-800, så inget nytt typsnitt laddas. */
+.ih-ingress,
+.category__ingress,
+.kat-topp__ingress,
+.contact-section__text,
+.againtro__text,
+.checklista__text,
+.flode-intro__text,
+.guide-topp__lead,
+.hus3dvy__text,
+.kalkyl__text,
+.kollen-hus__tomt,
+.kollen-topp__text,
+.kontakt-topp__brod,
+.kontakt-topp__lead,
+.manifest__text,
+.markkoll__text,
+.model-grid__tomt,
+.pf-lev__ingress,
+.pf-steg__ingress,
+.pf-tak__text,
+.pf-topp__lead,
+.prisoffert__text,
+.prisskala__text,
+.rg-slut__text,
+.rg-topp__lead,
+.samagare__text,
+.studio3d__text,
+.subpage-hero__meta,
+.topp3__ingress,
+.vag__text,
+.virke__text,
+.guide__text p,
+.guide__lista li,
+.ih-fraga p,
+.rg-del p,
+.rg-fraga__svar p,
+.berattelse__fas p,
+.berattelse__kort p,
+.pf-lev__del p,
+.at-foto__bild figcaption span,
+.segment__block p {
+  font-weight: 500;
+}
+
