@@ -2320,7 +2320,11 @@
           '<section class="kort motekort" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('blixt') + '</span>Så funkar det</h2></header>' +
             '<div class="kort__kropp"><ul class="motetips"><li>' + i('pil') + '<span><b>Pil höger/vänster</b> eller svep för att byta bild – <b>K</b> hoppar till kalkylen, <b>N</b> öppnar anteckningarna.</span></li>' +
             '<li>' + i('kub') + '<span>Husen visas i <b>3D</b> – dra för att vrida, som på huskortet.</span></li>' +
-            '<li>' + i('offert') + '<span>Spara kalkylen som offert och boka platsbesök direkt i mötet.</span></li></ul></div></section>' +
+            '<li>' + i('offert') + '<span>Spara kalkylen som offert och boka platsbesök direkt i mötet.</span></li></ul>' +
+            '<div class="tangenter"><p class="etikett etikett--ljus">Kortkommandon i presentationen</p><div class="tangenter__lista">' +
+            [['→', 'Nästa bild'], ['←', 'Förra bilden'], ['K', 'Till kalkylen'], ['N', 'Anteckningar'], ['Home', 'Första bilden'], ['End', 'Sista bilden'], ['Esc', 'Stäng']].map(function (t) {
+              return '<span><kbd>' + t[0] + '</kbd>' + t[1] + '</span>';
+            }).join('') + '</div></div></div></section>' +
         '</div>' +
       '</div>';
 
