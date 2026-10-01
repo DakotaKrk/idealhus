@@ -6034,3 +6034,1092 @@ body {
   font: 600 0.75rem/1 var(--rubrik);
   color: #6b3f16;
 }
+
+/* =====================================================================
+   Projekt omgjord (2026-10-08): dashboard och stor kalender
+   Ljust glas som resten av CRM:et. Toppen: nedräkning till nästa
+   montage med en lastbil som kör mot huset, smarta påminnelser och
+   byggfabriken. Kalendern: månad, veckonummer, emoji per slag, filter,
+   vald dag och de närmaste två veckorna. Allt rör sig mjukt och bara
+   med transform och opacitet.
+   ===================================================================== */
+
+/* --- Toppen ----------------------------------------------------------- */
+.prodtopp {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 26px;
+  margin-bottom: 16px;
+  padding: 26px;
+  border-radius: 30px;
+  background:
+    radial-gradient(60% 70% at 100% 0%, rgba(255, 214, 160, 0.45), transparent 65%),
+    radial-gradient(55% 70% at 0% 100%, rgba(205, 228, 196, 0.42), transparent 65%),
+    linear-gradient(165deg, #fffdf9, #fcf6ed 55%, #f7f2e9);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 40px 80px -56px rgba(90, 60, 25, 0.6);
+}
+
+.prodtopp__ord {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.prodtopp__titel {
+  margin: 8px 0 10px;
+  font: 600 clamp(2rem, 1.4rem + 1.6vw, 2.9rem)/1.05 var(--rubrik);
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+
+.prodtopp__titel .tal {
+  background: linear-gradient(120deg, #c98a45, #f0b56e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.prodtopp__emoji {
+  display: inline-block;
+  transform-origin: 50% 90%;
+  animation: emoji-gung 3.2s ease-in-out infinite;
+}
+
+@keyframes emoji-gung {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg) translateY(-2px); }
+}
+
+.prodtopp__text {
+  max-width: 46ch;
+  margin: 0 0 18px;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.prodtopp__text b {
+  color: var(--text);
+}
+
+/* Nedräkningen till nästa montage. */
+.nedrakning {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  margin-top: auto;
+  padding: 18px 18px 60px;
+  border: 0;
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.7));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 26px 50px -34px rgba(90, 60, 25, 0.6);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.45s var(--mjuk), box-shadow 0.45s var(--mjuk);
+}
+
+.nedrakning:hover {
+  transform: translateY(-3px);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.32), 0 32px 56px -34px rgba(143, 84, 36, 0.65);
+}
+
+.nedrakning__ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 118px;
+  height: 118px;
+}
+
+.nedrakning__ring svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.nedrakning__ring circle {
+  fill: none;
+  stroke: rgba(27, 25, 21, 0.07);
+  stroke-width: 9;
+}
+
+.nedrakning__ring .nedrakning__fyll {
+  stroke: #e8a456;
+  stroke-linecap: round;
+  stroke-dasharray: var(--p) 100;
+  filter: drop-shadow(0 4px 8px rgba(232, 164, 86, 0.45));
+  animation: ring-fyll 1.6s var(--mjuk) 0.3s backwards;
+}
+
+@keyframes ring-fyll {
+  from { stroke-dasharray: 0 100; }
+}
+
+.nedrakning__ring b {
+  position: relative;
+  margin-top: 6px;
+  font: 600 2.5rem/1 var(--rubrik);
+  letter-spacing: -0.04em;
+}
+
+.nedrakning__ring small {
+  position: absolute;
+  bottom: 26px;
+  font: 600 0.625rem/1 var(--rubrik);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.nedrakning__info {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.nedrakning__info small {
+  font: 600 0.6875rem/1.2 var(--rubrik);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a07650;
+}
+
+.nedrakning__info b {
+  font: 600 1.25rem/1.2 var(--rubrik);
+  letter-spacing: -0.02em;
+}
+
+.nedrakning__info em {
+  font-style: normal;
+  font-size: 0.875rem;
+  color: var(--text-2);
+}
+
+.nedrakning__datum {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font: 600 0.8125rem/1 var(--rubrik);
+  color: #7a4a1c;
+}
+
+.nedrakning__datum .i {
+  width: 15px;
+  height: 15px;
+  color: #c47a32;
+}
+
+.nedrakning__check {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.nedrakning__check i {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(224, 118, 74, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(224, 118, 74, 0.25);
+  font: 600 0.6875rem/1 var(--rubrik);
+  font-style: normal;
+  color: #a4482a;
+}
+
+.nedrakning__check i.klar {
+  background: rgba(76, 194, 127, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(47, 138, 82, 0.25);
+  color: #1f7a45;
+}
+
+/* Vägen: lastbilen står där projektet är mellan start och montage. */
+.nedrakning__vag {
+  position: absolute;
+  right: 22px;
+  bottom: 16px;
+  left: 22px;
+  height: 30px;
+}
+
+.nedrakning__spar {
+  position: absolute;
+  right: 40px;
+  bottom: 6px;
+  left: 0;
+  height: 4px;
+  border-radius: 4px;
+  background: repeating-linear-gradient(90deg, rgba(27, 25, 21, 0.14) 0 10px, transparent 10px 18px);
+}
+
+.nedrakning__spar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  right: calc((1 - var(--a)) * 100%);
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(240, 181, 110, 0.4), #e8a456);
+}
+
+.nedrakning__bil {
+  position: absolute;
+  bottom: 6px;
+  left: calc(var(--a) * (100% - 40px));
+  font-size: 1.375rem;
+  line-height: 1;
+  transform: translateX(-60%) scaleX(-1);
+  animation: bil-in 1.8s var(--mjuk) 0.4s backwards, bil-skak 0.6s ease-in-out 2.2s infinite alternate;
+}
+
+@keyframes bil-in {
+  from { left: 0; opacity: 0; }
+}
+
+@keyframes bil-skak {
+  to { translate: 0 -1.5px; }
+}
+
+.nedrakning__hus {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 40px;
+  height: auto;
+  aspect-ratio: 1600 / 1062;
+  border-radius: 7px;
+  box-shadow: 0 0 0 2px #fff, 0 6px 12px -6px rgba(27, 25, 21, 0.5);
+  font-size: 1.4rem;
+  object-fit: cover;
+}
+
+/* Påminnelserna. */
+.prodtopp__hoger {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+}
+
+.prodvarn {
+  padding: 16px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.62));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 18px 36px -28px rgba(90, 60, 25, 0.5);
+}
+
+.prodvarn__lista {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prodvarn__rad {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 9px 12px 9px 9px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #fff, #fffaf3);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.05);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.35s var(--mjuk), box-shadow 0.35s ease;
+}
+
+.prodvarn__rad:hover {
+  transform: translateX(3px);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.32), 0 12px 24px -18px rgba(143, 84, 36, 0.55);
+}
+
+.prodvarn__rad--varm {
+  background: linear-gradient(160deg, #fff8f3, #ffeadf);
+  box-shadow: inset 0 0 0 1px rgba(224, 118, 74, 0.25);
+}
+
+.prodvarn__emoji {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #fff6e8, #ffe2bd);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.25);
+  font-size: 1.125rem;
+}
+
+.prodvarn__rad--varm .prodvarn__emoji {
+  background: linear-gradient(160deg, #fff1ea, #ffd9c7);
+  animation: varn-puls 2.4s ease-in-out infinite;
+}
+
+@keyframes varn-puls {
+  50% { box-shadow: inset 0 0 0 1px rgba(224, 118, 74, 0.35), 0 0 0 5px rgba(224, 118, 74, 0.1); }
+}
+
+.prodvarn__rad b {
+  display: block;
+  overflow: hidden;
+  font: 600 0.875rem/1.25 var(--rubrik);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prodvarn__rad small {
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.prodvarn__rad .i {
+  width: 16px;
+  height: 16px;
+  color: #c47a32;
+}
+
+.prodvarn__fler,
+.prodvarn__tom {
+  margin: 10px 2px 0;
+  font-size: 0.8125rem;
+  color: var(--text-3);
+}
+
+.prodvarn__tom span {
+  margin-right: 8px;
+}
+
+/* Byggfabriken: stationerna med husen på ett rullande band. */
+.fabrik {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  padding: 16px 12px 14px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.62));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 18px 36px -28px rgba(90, 60, 25, 0.5);
+}
+
+.fabrik__band {
+  position: absolute;
+  top: 40px;
+  right: 8%;
+  left: 8%;
+  height: 4px;
+  border-radius: 4px;
+  background: repeating-linear-gradient(90deg, rgba(201, 138, 69, 0.45) 0 10px, transparent 10px 18px);
+  background-size: 36px 4px;
+  animation: band-rull 1.6s linear infinite;
+}
+
+@keyframes band-rull {
+  to { background-position: 36px 0; }
+}
+
+.fabrik__station {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 4px;
+  text-align: center;
+  animation: in-rad 0.6s var(--mjuk) backwards;
+  animation-delay: calc(0.2s + var(--n) * 0.07s);
+}
+
+.fabrik__emoji {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, color-mix(in srgb, var(--f) 30%, #fff));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--f) 55%, transparent), 0 8px 16px -10px rgba(90, 60, 25, 0.55);
+  font-size: 1.375rem;
+  transition: transform 0.4s var(--studs);
+}
+
+.fabrik__station:hover .fabrik__emoji {
+  transform: scale(1.12) rotate(-6deg);
+}
+
+.fabrik__station b {
+  font: 600 0.75rem/1.2 var(--rubrik);
+  color: var(--text);
+}
+
+.fabrik__station small {
+  font-size: 0.6875rem;
+  color: var(--text-3);
+}
+
+.fabrik__hus {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  min-height: 30px;
+  margin-top: 6px;
+}
+
+.fabrik__hus button {
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  animation: hus-gung 3s ease-in-out infinite;
+  animation-delay: calc(var(--j) * -0.7s);
+  transition: transform 0.35s var(--studs);
+}
+
+.fabrik__hus button:hover {
+  transform: translateY(-3px) scale(1.08);
+}
+
+.fabrik__hus img {
+  display: block;
+  width: 42px;
+  height: auto;
+  aspect-ratio: 1600 / 1062;
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px #fff, 0 8px 14px -8px rgba(27, 25, 21, 0.55);
+  object-fit: cover;
+}
+
+@keyframes hus-gung {
+  50% { translate: 0 -2px; }
+}
+
+/* --- Kalendern -------------------------------------------------------- */
+.kal {
+  margin: 16px 0 26px;
+  padding: 22px;
+}
+
+.kal__huvud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  margin-bottom: 16px;
+}
+
+.kal__nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kal__nav h2 {
+  min-width: 9.5em;
+  margin: 0;
+  font: 600 1.625rem/1 var(--rubrik);
+  letter-spacing: -0.03em;
+  text-align: center;
+}
+
+.kal__nav h2 span {
+  color: var(--text-3);
+}
+
+.kal__nav button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #fff, #fff6ea);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.25), 0 8px 16px -12px rgba(90, 60, 25, 0.5);
+  color: #8f5424;
+  cursor: pointer;
+  transition: transform 0.35s var(--mjuk);
+}
+
+.kal__nav button:first-child .i {
+  transform: scaleX(-1);
+}
+
+.kal__nav button:hover {
+  transform: translateY(-1px);
+}
+
+.kal__nav .kal__idag {
+  width: auto;
+  padding: 0 14px;
+  border-radius: 999px;
+  font: 600 0.8125rem/1 var(--rubrik);
+}
+
+.kal__filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kal__filter button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px 7px 9px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #fff, color-mix(in srgb, var(--f) 16%, #fff));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--f) 50%, transparent);
+  font: 600 0.75rem/1 var(--rubrik);
+  color: var(--text);
+  cursor: pointer;
+  transition: opacity 0.3s ease, transform 0.3s var(--mjuk), filter 0.3s ease;
+}
+
+.kal__filter button:hover {
+  transform: translateY(-1px);
+}
+
+.kal__filter button[aria-pressed="false"] {
+  opacity: 0.45;
+  filter: grayscale(0.7);
+}
+
+.kal__filter b {
+  min-width: 18px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 0.6875rem;
+  text-align: center;
+}
+
+.kal__kropp {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 18px;
+  align-items: start;
+}
+
+.kal__rutnat {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.kal__dagnamn,
+.kal__vecka {
+  display: grid;
+  grid-template-columns: 40px repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.kal__dagnamn span {
+  padding: 0 0 2px;
+  font: 600 0.6875rem/1 var(--rubrik);
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.kal__vnr {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 4px;
+  padding-top: 10px;
+  font: 600 0.6875rem/1 var(--rubrik);
+  color: #a07650;
+}
+
+.kal__vnr em {
+  padding: 3px 4px;
+  border-radius: 999px;
+  background: rgba(240, 181, 110, 0.2);
+  font-size: 0.625rem;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.kal__vecka--full .kal__vnr em {
+  background: rgba(224, 118, 74, 0.2);
+  color: #a4482a;
+}
+
+.kal__dag {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  min-height: 104px;
+  padding: 8px 7px 8px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.6));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  animation: kal-in 0.5s var(--mjuk) backwards;
+  animation-delay: calc(var(--n) * 12ms);
+  transition: transform 0.3s var(--mjuk), box-shadow 0.3s ease, background 0.3s ease;
+}
+
+@keyframes kal-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+}
+
+.kal__dag:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.3), 0 14px 26px -18px rgba(143, 84, 36, 0.55);
+}
+
+.kal__dag--helg {
+  background: linear-gradient(160deg, rgba(250, 246, 239, 0.9), rgba(246, 240, 230, 0.55));
+}
+
+.kal__dag--utanfor {
+  opacity: 0.45;
+}
+
+.kal__dag--forbi .kal__nr {
+  color: var(--text-3);
+}
+
+.kal__dag--montage {
+  background:
+    radial-gradient(90% 70% at 100% 0%, rgba(240, 181, 110, 0.28), transparent 70%),
+    linear-gradient(160deg, #fff, rgba(255, 248, 236, 0.85));
+}
+
+.kal__dag.vald {
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 2px rgba(232, 164, 86, 0.75), 0 16px 30px -18px rgba(143, 84, 36, 0.6);
+}
+
+.kal__nr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  font: 600 0.875rem/1 var(--rubrik);
+}
+
+.kal__nr em {
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #f6c88f, #e3a35a);
+  font: 600 0.5625rem/1 var(--rubrik);
+  font-style: normal;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #1b1915;
+}
+
+.kal__dag--idag {
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1.5px rgba(232, 164, 86, 0.6), 0 0 0 6px rgba(240, 181, 110, 0.12);
+  animation: kal-in 0.5s var(--mjuk) backwards, idag-puls 3s ease-in-out 1s infinite;
+}
+
+@keyframes idag-puls {
+  50% { box-shadow: inset 0 1px 0 #fff, 0 0 0 1.5px rgba(232, 164, 86, 0.75), 0 0 0 9px rgba(240, 181, 110, 0.08); }
+}
+
+.kal__h {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 4px 6px 4px 4px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--f) 20%, #fff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--f) 40%, transparent);
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  animation: h-pop 0.45s var(--studs) backwards;
+  animation-delay: calc(0.25s + var(--n) * 12ms);
+}
+
+@keyframes h-pop {
+  from { opacity: 0; transform: scale(0.8); }
+}
+
+.kal__h i {
+  flex: none;
+  font-style: normal;
+  font-size: 0.75rem;
+}
+
+.kal__h b {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kal__h img {
+  flex: none;
+  width: 24px;
+  height: auto;
+  aspect-ratio: 1600 / 1062;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.kal__h--montage {
+  padding: 5px 7px 5px 5px;
+  background: linear-gradient(160deg, #ffe9c9, #f8cd92);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.45), 0 6px 12px -8px rgba(143, 84, 36, 0.6);
+}
+
+.kal__h--klar {
+  opacity: 0.55;
+}
+
+.kal__h--klar b {
+  text-decoration: line-through;
+}
+
+.kal__varn {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: #e0764a;
+  font: 700 0.625rem/1 var(--rubrik);
+  font-style: normal;
+  color: #fff;
+  animation: varn-blink 1.8s ease-in-out infinite;
+}
+
+@keyframes varn-blink {
+  50% { box-shadow: 0 0 0 4px rgba(224, 118, 74, 0.2); }
+}
+
+.kal__fler {
+  padding-left: 4px;
+  font: 600 0.6875rem/1 var(--rubrik);
+  color: #a07650;
+}
+
+/* Sidan bredvid kalendern. */
+.kal__sida {
+  position: sticky;
+  top: 84px;
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 22px;
+  background:
+    radial-gradient(90% 40% at 100% 0%, rgba(255, 214, 160, 0.3), transparent 70%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.7));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 24px 44px -30px rgba(90, 60, 25, 0.55);
+}
+
+.kal__valdag {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kal__valdatum {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 60px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #fff6e8, #ffe2bd);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(201, 138, 69, 0.3), 0 8px 16px -10px rgba(143, 84, 36, 0.55);
+}
+
+.kal__valdatum b {
+  font: 600 1.5rem/1 var(--rubrik);
+  color: #6b3f16;
+}
+
+.kal__valdatum small {
+  font: 600 0.625rem/1 var(--rubrik);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a07650;
+}
+
+.kal__valdag > span:last-child small {
+  display: block;
+  font: 600 0.6875rem/1.2 var(--rubrik);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a07650;
+}
+
+.kal__valdag > span:last-child b {
+  font: 600 1.0625rem/1.2 var(--rubrik);
+}
+
+.kal__lista {
+  display: grid;
+  gap: 6px;
+}
+
+.kal__rad {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 7px 10px 7px 7px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #fff, #fffaf3);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.05);
+  color: var(--text);
+  text-align: left;
+}
+
+button.kal__rad {
+  cursor: pointer;
+  transition: transform 0.3s var(--mjuk), box-shadow 0.3s ease;
+}
+
+button.kal__rad:hover {
+  transform: translateX(3px);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.3), 0 10px 20px -16px rgba(143, 84, 36, 0.55);
+}
+
+.kal__rad > .i {
+  width: 15px;
+  height: 15px;
+  color: #c47a32;
+}
+
+.kal__radikon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--f) 22%, #fff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--f) 45%, transparent);
+  font-size: 1rem;
+}
+
+.kal__radikon img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1600 / 1062;
+  object-fit: cover;
+}
+
+.kal__radtext {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kal__radtext b {
+  overflow: hidden;
+  font: 600 0.8125rem/1.25 var(--rubrik);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kal__radtext small {
+  overflow: hidden;
+  font-size: 0.6875rem;
+  color: var(--text-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kal__radtext em {
+  font: 600 0.6875rem/1.2 var(--rubrik);
+  font-style: normal;
+  color: #a4482a;
+}
+
+.kal__radtext em.klar {
+  color: #1f7a45;
+}
+
+.kal__tom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #fffaf3, #fff3e3);
+  font-size: 0.8125rem;
+  color: var(--text-2);
+}
+
+.kal__tom span {
+  font-size: 1.25rem;
+}
+
+.kal__snartrubrik {
+  margin: 8px 0 0;
+}
+
+/* --- Projekttavlan längst ned ------------------------------------------- */
+.prodrubrik {
+  margin: 8px 0 14px;
+}
+
+.prodrubrik h2 {
+  margin: 4px 0 0;
+  font: 600 1.5rem/1.1 var(--rubrik);
+  letter-spacing: -0.03em;
+}
+
+.spalt__emoji {
+  margin-right: 2px;
+  font-size: 0.9375rem;
+}
+
+.spalt__huvud b:has(.spalt__emoji)::before {
+  display: none;
+}
+
+/* --- Smalare skärmar ------------------------------------------------------ */
+@media (max-width: 1260px) {
+  .prodtopp {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kal__kropp {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kal__sida {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .kal {
+    padding: 14px;
+  }
+
+  .kal__rutnat {
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .kal__dagnamn,
+  .kal__vecka {
+    min-width: 640px;
+  }
+
+  .fabrik {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 16px;
+  }
+
+  .fabrik__band {
+    display: none;
+  }
+
+  .nedrakning {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prodtopp__emoji,
+  .fabrik__band,
+  .fabrik__hus button,
+  .nedrakning__bil,
+  .kal__dag--idag,
+  .kal__varn,
+  .prodvarn__rad--varm .prodvarn__emoji {
+    animation: none;
+  }
+}
+
+/* Projekt, andra varvet: nyckeltalen i toppens vänsterspalt, kalendern
+   över hela bredden och sidan under den i två delar. */
+.vy .prodtopp .nyckel.kort {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.prodtopp .nyckel__cell {
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.7));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 16px 30px -24px rgba(90, 60, 25, 0.55);
+}
+
+.prodtopp .nyckel__cell::before,
+.prodtopp .nyckel__cell + .nyckel__cell::before {
+  display: none;
+}
+
+.kal__kropp {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.kal__sida {
+  position: static;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 18px;
+  margin-top: 6px;
+}
+
+.kal__sidadel {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.kal__sidadel .kal__snartrubrik {
+  margin: 4px 0 2px;
+}
+
+.kal__dag {
+  min-height: 112px;
+}
+
+.kal__h {
+  font-size: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  .kal__sida {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.prodtopp__hoger {
+  grid-template-rows: auto 1fr;
+}
+
+.prodtopp__hoger .fabrik {
+  align-content: center;
+}

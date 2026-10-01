@@ -2395,38 +2395,224 @@
   /* ================================================================
      Produktion
      ================================================================ */
+  /* --- Projekt (omgjord 2026-10-08) ------------------------------------
+     Kunden: "gör om den mycket och ge den en cool unik dashboard och en
+     cool stor kalender med all info och ikoner, emoji, animeringar och
+     smarta saker". Toppen: nedräkning till nästa montage (lastbilen kör
+     mot huset i takt med projektet), smarta varningar ur checklistorna
+     och byggfabriken där varje hus står på sitt steg. Sedan en stor
+     månadskalender med montage, starter, uppgifter, möten och offerter
+     som går ut, filter per slag, vald dag och de närmaste två veckorna.
+     Projekttavlan ligger kvar längst ned. */
+  var kalForskjut = 0, kalVald = null, kalAv = {};
+  var KAL_SLAG = [
+    ['montage', 'Montage', '🚚', '#f0b56e'],
+    ['start', 'Projektstart', '🏁', '#9fc2c9'],
+    ['uppgift', 'Att göra', '✅', '#a9c8a4'],
+    ['mote', 'Möten', '🤝', '#b8cde0'],
+    ['offert', 'Offert går ut', '🧾', '#e8c98f']
+  ];
+  var STEG_EMOJI = { underlag: '📐', tillverkning: '🏭', grund: '🧱', montage: '🚚', besiktning: '🔍', klart: '🔑' };
+  var VECKODAG = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
+  var MANAD = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
+  function slag(id) { for (var n = 0; n < KAL_SLAG.length; n++) if (KAL_SLAG[n][0] === id) return KAL_SLAG[n]; return KAL_SLAG[0]; }
+  function dagNamn(d) { var t = VECKODAG[d.getDay()]; return t.charAt(0).toUpperCase() + t.slice(1) + ' ' + d.getDate() + ' ' + MANAD[d.getMonth()]; }
+  function dagarTill(iso) { var a = new Date(); a.setHours(0, 0, 0, 0); var b = new Date(iso); b.setHours(0, 0, 0, 0); return Math.round((b - a) / 864e5); }
+
+  // Allt som hör hemma i kalendern, ur datan.
+  function kalHandelser() {
+    var ut = [], d = db();
+    d.projekt.forEach(function (p) {
+      var k = IH.kund(p.kund), m = IH.modell(p.modell);
+      var saknas = CHECK.filter(function (c) { return !p.check[c[0]]; });
+      if (p.montage) ut.push({ slag: 'montage', dag: IH.dagStr(p.montage), titel: 'Montage · ' + (m ? m.namn : 'hus'), under: k ? k.namn + ' · ' + k.ort : '',
+        g: 'proj-oppna', id: p.id, bild: m ? m.tumme : '', klar: p.steg === 'klart', kort: m ? m.namn : 'Montage',
+        varning: p.steg !== 'klart' && saknas.length ? saknas.length + (saknas.length === 1 ? ' punkt kvar' : ' punkter kvar') : '' });
+      if (p.start) ut.push({ slag: 'start', dag: IH.dagStr(p.start), titel: 'Start · ' + (m ? m.namn : 'hus'), kort: m ? m.namn : 'Start', under: k ? k.namn : '', g: 'proj-oppna', id: p.id });
+    });
+    d.uppgifter.forEach(function (u) {
+      var k = u.kund ? IH.kund(u.kund) : null;
+      ut.push({ slag: 'uppgift', dag: IH.dagStr(u.forfaller), titel: u.text, under: k ? k.namn : '', g: k ? 'kund-oppna' : '', id: k ? k.id : '', klar: u.klar });
+    });
+    d.aktiviteter.forEach(function (a) {
+      if (a.typ !== 'mote') return;
+      var k = IH.kund(a.kund);
+      ut.push({ slag: 'mote', dag: IH.dagStr(a.tid), titel: a.text, under: k ? k.namn : '', g: k ? 'kund-oppna' : '', id: k ? k.id : '' });
+    });
+    d.offerter.forEach(function (o) {
+      if (o.status !== 'skickad') return;
+      var slut = new Date(o.skapad); slut.setDate(slut.getDate() + (o.giltig || 30));
+      var k = IH.kund(o.kund);
+      ut.push({ slag: 'offert', dag: IH.dagStr(slut), titel: 'Offert ' + o.nummer + ' går ut', kort: k ? forsta(k.namn) : o.nummer, under: k ? k.namn : '', g: k ? 'kund-oppna' : '', id: k ? k.id : '' });
+    });
+    return ut;
+  }
+
+  // Smarta varningar: kundens punkter som saknas inför montaget, egna
+  // punkter som saknas och två montage samma vecka.
+  function prodVarningar(aktiva) {
+    var ut = [], veckor = {};
+    aktiva.forEach(function (p) {
+      var k = IH.kund(p.kund), m = IH.modell(p.modell), t = p.montage ? dagarTill(p.montage) : null;
+      var namn = (k ? forsta(k.namn) : 'kunden'), hus = m ? m.namn : 'huset';
+      CHECK.forEach(function (c) {
+        if (p.check[c[0]]) return;
+        var kundens = c[0] !== 'ritning';
+        var bradskar = t !== null && t <= 21;
+        ut.push({ vikt: (bradskar ? 0 : 2) + (kundens ? 0 : 1), emoji: bradskar ? '⚠️' : (kundens ? '⏳' : '📐'),
+          text: (kundens ? c[1] + ' hos ' + namn : c[1] + ' för ' + hus),
+          under: t === null ? '' : (t >= 0 ? 'Montage om ' + t + (t === 1 ? ' dag' : ' dagar') : 'Montaget har passerat') + ' · ' + hus,
+          id: p.id, varm: bradskar });
+      });
+      if (p.montage) { var v = IH.vecka(new Date(p.montage)); (veckor[v] = veckor[v] || []).push(p); }
+    });
+    Object.keys(veckor).forEach(function (v) {
+      if (veckor[v].length > 1) ut.push({ vikt: 0, emoji: '📅', text: veckor[v].length + ' montage samma vecka', under: 'Vecka ' + v, id: veckor[v][0].id, varm: true });
+    });
+    return ut.sort(function (a, b) { return a.vikt - b.vikt; });
+  }
+
+  function prodTopp(proj, aktiva, nyckel) {
+    var nasta = aktiva.filter(function (p) { return p.montage && dagarTill(p.montage) >= 0; })
+      .sort(function (a, b) { return a.montage < b.montage ? -1 : 1; })[0];
+    var varn = prodVarningar(aktiva);
+    var mening;
+    var nedrakning = '';
+    if (nasta) {
+      var k = IH.kund(nasta.kund), m = IH.modell(nasta.modell), t = dagarTill(nasta.montage);
+      var saknas = CHECK.filter(function (c) { return !nasta.check[c[0]]; });
+      var start = nasta.start ? new Date(nasta.start).getTime() : Date.now() - 30 * 864e5;
+      var slut = new Date(nasta.montage).getTime();
+      var andel = Math.max(0.04, Math.min(1, (Date.now() - start) / Math.max(1, slut - start)));
+      mening = 'Nästa montage är <b>' + e(m ? m.namn : 'huset') + '</b> hos ' + e(k ? k.namn : 'kunden') + (k && k.ort ? ' i ' + e(k.ort) : '') +
+        ' – om <b>' + t + (t === 1 ? ' dag' : ' dagar') + '</b>.' + (saknas.length ? ' ' + saknas.length + (saknas.length === 1 ? ' punkt' : ' punkter') + ' kvar innan lastbilen kommer.' : ' Allt är klart inför montaget. ✨');
+      nedrakning = '<button class="nedrakning" type="button" data-g="proj-oppna" data-id="' + nasta.id + '" style="--a:' + andel.toFixed(3) + ';--p:' + Math.round((1 - Math.min(t, 70) / 70) * 100) + '">' +
+        '<span class="nedrakning__ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52"/><circle class="nedrakning__fyll" cx="60" cy="60" r="52" pathLength="100"/></svg>' +
+          '<b class="tal" data-rakna="' + t + '">' + t + '</b><small>' + (t === 1 ? 'dag kvar' : 'dagar kvar') + '</small></span>' +
+        '<span class="nedrakning__info"><small>Nästa montage · v. ' + IH.vecka(new Date(nasta.montage)) + '</small>' +
+          '<b>' + e(m ? m.namn : '') + '</b><em>' + e(k ? k.namn : '') + (k && k.ort ? ' · ' + e(k.ort) : '') + '</em>' +
+          '<span class="nedrakning__datum">' + i('kalender') + dagNamn(new Date(nasta.montage)) + '</span>' +
+          '<span class="nedrakning__check">' + CHECK.map(function (c) {
+            var kort = { ritning: 'Ritning', lov: 'Lov', grund: 'Grund', framkomlighet: 'Väg' }[c[0]];
+            return '<i class="' + (nasta.check[c[0]] ? 'klar' : '') + '" title="' + e(c[1]) + '">' + (nasta.check[c[0]] ? '✓' : '·') + ' ' + kort + '</i>';
+          }).join('') + '</span></span>' +
+        '<span class="nedrakning__vag" aria-hidden="true"><i class="nedrakning__spar"></i><span class="nedrakning__bil">🚚</span>' +
+          (m ? '<img class="nedrakning__hus" src="' + m.tumme + '" alt="">' : '<span class="nedrakning__hus">🏠</span>') + '</span>' +
+      '</button>';
+    } else {
+      mening = aktiva.length ? 'Inga montage inplanerade framåt ännu. Sätt montagedag i projekten.' : 'Inga hus i produktion just nu. När en affär vinns hamnar den här. 🌱';
+    }
+    var fabrik = '<div class="fabrik" aria-label="Husen per steg"><i class="fabrik__band" aria-hidden="true"></i>' + IH.PROJSTEG.map(function (s, n) {
+      var l = proj.filter(function (p) { return p.steg === s.id; });
+      return '<div class="fabrik__station" style="--f:' + s.farg + ';--n:' + n + '"><span class="fabrik__emoji" aria-hidden="true">' + (STEG_EMOJI[s.id] || '🏠') + '</span>' +
+        '<b>' + e(s.kort) + '</b><small>' + l.length + (l.length === 1 ? ' hus' : ' hus') + '</small>' +
+        '<span class="fabrik__hus">' + l.map(function (p, j) {
+          var m = IH.modell(p.modell), k = IH.kund(p.kund);
+          return '<button type="button" data-g="proj-oppna" data-id="' + p.id + '" style="--j:' + j + '" title="' + e(k ? k.namn : '') + ' · ' + e(m ? m.namn : '') + '"><img src="' + (m ? m.tumme : '') + '" alt="' + e(m ? m.namn : '') + '"></button>';
+        }).join('') + '</span></div>';
+    }).join('') + '</div>';
+    return '<section class="prodtopp kort kort--mork" data-in>' +
+      '<div class="prodtopp__ord"><p class="etikett etikett--ljus">Produktionen just nu</p>' +
+        '<h2 class="prodtopp__titel"><b class="tal" data-rakna="' + aktiva.length + '">' + aktiva.length + '</b> ' + (aktiva.length === 1 ? 'hus på väg' : 'hus på väg') + ' <span class="prodtopp__emoji" aria-hidden="true">🏗️</span></h2>' +
+        '<p class="prodtopp__text">' + mening + '</p>' + (nyckel || '') + nedrakning + '</div>' +
+      '<div class="prodtopp__hoger"><div class="prodvarn"><p class="etikett etikett--ljus">Smarta påminnelser</p>' +
+        (varn.length ? '<ul class="prodvarn__lista" data-stagger>' + varn.slice(0, 4).map(function (v) {
+          return '<li><button type="button" class="prodvarn__rad' + (v.varm ? ' prodvarn__rad--varm' : '') + '" data-g="proj-oppna" data-id="' + v.id + '"><span class="prodvarn__emoji" aria-hidden="true">' + v.emoji + '</span>' +
+            '<span><b>' + e(v.text) + '</b><small>' + e(v.under) + '</small></span>' + i('pil') + '</button></li>';
+        }).join('') + '</ul>' + (varn.length > 4 ? '<p class="prodvarn__fler">+' + (varn.length - 4) + ' till i projekten</p>' : '')
+          : '<p class="prodvarn__tom"><span aria-hidden="true">✨</span>Allt ser bra ut – inga punkter saknas inför montagen.</p>') +
+      '</div>' + fabrik + '</div></section>';
+  }
+
+  function kalender() {
+    var idag = new Date(); idag.setHours(0, 0, 0, 0);
+    var forsta = new Date(idag.getFullYear(), idag.getMonth() + kalForskjut, 1);
+    var start = new Date(forsta); start.setDate(1 - ((forsta.getDay() + 6) % 7));
+    var allaH = kalHandelser();
+    var synliga = allaH.filter(function (h) { return !kalAv[h.slag]; });
+    var perDag = {};
+    synliga.forEach(function (h) { (perDag[h.dag] = perDag[h.dag] || []).push(h); });
+    var ordning = { montage: 0, start: 1, offert: 2, uppgift: 3, mote: 4 };
+    Object.keys(perDag).forEach(function (k) { perDag[k].sort(function (a, b) { return ordning[a.slag] - ordning[b.slag]; }); });
+    var idagStr = IH.dagStr(idag);
+    var vald = kalVald || idagStr;
+    var iManad = function (h) { var d = new Date(h.dag); return d.getMonth() === forsta.getMonth() && d.getFullYear() === forsta.getFullYear(); };
+    var filter = '<div class="kal__filter" role="group" aria-label="Visa i kalendern">' + KAL_SLAG.map(function (s) {
+      var antal = allaH.filter(function (h) { return h.slag === s[0] && iManad(h); }).length;
+      return '<button type="button" data-g="kal-slag" data-s="' + s[0] + '" aria-pressed="' + !kalAv[s[0]] + '" style="--f:' + s[3] + '"><span aria-hidden="true">' + s[2] + '</span>' + s[1] + '<b>' + antal + '</b></button>';
+    }).join('') + '</div>';
+    var huvud = '<div class="kal__huvud"><div class="kal__nav"><button type="button" data-g="kal-man" data-d="-1" aria-label="Förra månaden">' + i('pil') + '</button>' +
+      '<h2>' + MANAD[forsta.getMonth()].charAt(0).toUpperCase() + MANAD[forsta.getMonth()].slice(1) + ' <span>' + forsta.getFullYear() + '</span></h2>' +
+      '<button type="button" data-g="kal-man" data-d="1" aria-label="Nästa månad">' + i('pil') + '</button>' +
+      (kalForskjut ? '<button type="button" class="kal__idag" data-g="kal-man" data-d="0">I dag</button>' : '') + '</div>' + filter + '</div>';
+    var rutor = '<div class="kal__dagnamn"><span></span>' + ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>';
+    for (var w = 0; w < 6; w++) {
+      var mand = new Date(start); mand.setDate(start.getDate() + w * 7);
+      if (w > 3 && mand.getMonth() !== forsta.getMonth()) break;
+      var veckansMontage = 0;
+      var dagar = '';
+      for (var dd = 0; dd < 7; dd++) {
+        var dag = new Date(mand); dag.setDate(mand.getDate() + dd);
+        var ds = IH.dagStr(dag), l = perDag[ds] || [];
+        veckansMontage += l.filter(function (h) { return h.slag === 'montage'; }).length;
+        var cls = 'kal__dag' + (dag.getMonth() !== forsta.getMonth() ? ' kal__dag--utanfor' : '') + (ds === idagStr ? ' kal__dag--idag' : '') +
+          (dd >= 5 ? ' kal__dag--helg' : '') + (dag < idag ? ' kal__dag--forbi' : '') + (ds === vald ? ' vald' : '') + (l.some(function (h) { return h.slag === 'montage'; }) ? ' kal__dag--montage' : '');
+        dagar += '<button type="button" class="' + cls + '" data-g="kal-dag" data-dag="' + ds + '" style="--n:' + (w * 7 + dd) + '" aria-label="' + dagNamn(dag) + (l.length ? ', ' + l.length + ' händelser' : '') + '">' +
+          '<span class="kal__nr">' + dag.getDate() + (ds === idagStr ? '<em>i dag</em>' : '') + '</span>' +
+          l.slice(0, 3).map(function (h) {
+            var s = slag(h.slag);
+            return '<span class="kal__h kal__h--' + h.slag + (h.klar ? ' kal__h--klar' : '') + '" style="--f:' + s[3] + '" title="' + e(s[1] + ': ' + h.titel + (h.under ? ' · ' + h.under : '') + (h.varning ? ' · ' + h.varning : '')) + '">' +
+              (h.slag === 'montage' && h.bild ? '<img src="' + h.bild + '" alt="">' : '<i aria-hidden="true">' + s[2] + '</i>') +
+              '<b>' + e(h.kort || h.titel) + '</b>' + (h.varning ? '<em class="kal__varn" title="' + e(h.varning) + '">!</em>' : '') + '</span>';
+          }).join('') + (l.length > 3 ? '<span class="kal__fler">+' + (l.length - 3) + ' till</span>' : '') + '</button>';
+      }
+      rutor += '<div class="kal__vecka' + (veckansMontage > 1 ? ' kal__vecka--full' : '') + '"><span class="kal__vnr" title="Vecka ' + IH.vecka(mand) + '">v.' + IH.vecka(mand) +
+        (veckansMontage ? '<em>' + veckansMontage + ' 🚚</em>' : '') + '</span>' + dagar + '</div>';
+    }
+    // Sidan: vald dag och de närmaste två veckorna.
+    var valdDag = new Date(vald + 'T12:00:00');
+    var valdaH = (perDag[vald] || []);
+    var rad = function (h, visaDag) {
+      var s = slag(h.slag), d = new Date(h.dag + 'T12:00:00');
+      var inne = '<span class="kal__radikon" style="--f:' + s[3] + '">' + (h.slag === 'montage' && h.bild ? '<img src="' + h.bild + '" alt="">' : s[2]) + '</span>' +
+        '<span class="kal__radtext"><b>' + e(h.titel) + '</b><small>' + (visaDag ? dagNamn(d) + (h.under ? ' · ' : '') : '') + e(h.under) + '</small>' +
+        (h.varning ? '<em>⚠️ ' + e(h.varning) + '</em>' : '') + (h.klar ? '<em class="klar">✓ Klart</em>' : '') + '</span>';
+      return h.g ? '<button type="button" class="kal__rad" data-g="' + h.g + '" data-id="' + e(h.id) + '">' + inne + i('pil') + '</button>' : '<div class="kal__rad">' + inne + '</div>';
+    };
+    var snart = synliga.filter(function (h) { var t = dagarTill(h.dag + 'T12:00:00'); return t >= 0 && t <= 14 && h.dag !== vald && !h.klar; })
+      .sort(function (a, b) { return a.dag < b.dag ? -1 : a.dag > b.dag ? 1 : ordning[a.slag] - ordning[b.slag]; });
+    var t = dagarTill(vald + 'T12:00:00');
+    var sida = '<aside class="kal__sida"><div class="kal__sidadel">' +
+      '<div class="kal__valdag"><span class="kal__valdatum"><b>' + valdDag.getDate() + '</b><small>' + MANAD[valdDag.getMonth()].slice(0, 3) + '</small></span>' +
+        '<span><small>' + (t === 0 ? 'I dag' : t === 1 ? 'I morgon' : t === -1 ? 'I går' : (t > 0 ? 'Om ' + t + ' dagar' : t * -1 + ' dagar sedan')) + ' · v. ' + IH.vecka(valdDag) + '</small><b>' + dagNamn(valdDag) + '</b></span></div>' +
+      (valdaH.length ? '<div class="kal__lista" data-stagger>' + valdaH.map(function (h) { return rad(h, false); }).join('') + '</div>'
+        : '<p class="kal__tom"><span aria-hidden="true">' + (valdDag.getDay() % 6 === 0 ? '🌿' : '🌤️') + '</span>Inget inplanerat den här dagen.</p>') +
+      '</div><div class="kal__sidadel"><p class="etikett etikett--ljus kal__snartrubrik">Närmaste två veckorna</p>' +
+      (snart.length ? '<div class="kal__lista kal__lista--snart">' + snart.slice(0, 6).map(function (h) { return rad(h, true); }).join('') + '</div>'
+        : '<p class="kal__tom"><span aria-hidden="true">🌱</span>Lugnt framåt.</p>') +
+    '</div></aside>';
+    return '<section class="kal kort" data-in><div class="kal__ram">' + huvud + '<div class="kal__kropp"><div class="kal__rutnat">' + rutor + '</div>' + sida + '</div></div></section>';
+  }
+
   IH.vyer.produktion = function (del) {
     var proj = db().projekt;
     var aktiva = proj.filter(function (p) { return p.steg !== 'klart'; });
-    var nu = new Date();
-    var veckor = [];
-    for (var n = 0; n < 12; n++) { var d = new Date(nu); d.setDate(d.getDate() + n * 7); veckor.push(d); }
-    var nasta = aktiva.filter(function (p) { return p.montage && new Date(p.montage) > nu; }).sort(function (a, b) { return a.montage < b.montage ? -1 : 1; })[0];
-    var nk = nasta ? IH.kund(nasta.kund) : null;
     var punkter = aktiva.length * CHECK.length;
     var klaraP = aktiva.reduce(function (s, p) { return s + CHECK.filter(function (c) { return p.check[c[0]]; }).length; }, 0);
+    var nasta = aktiva.filter(function (p) { return p.montage && dagarTill(p.montage) >= 0; }).sort(function (a, b) { return a.montage < b.montage ? -1 : 1; })[0];
+    var nk = nasta ? IH.kund(nasta.kund) : null;
     var html = '<header class="vyhuvud"><div><p class="etikett">Produktion</p><h1>Projekt</h1><p>' + aktiva.length + ' hus på väg – från ritning till slutbesiktning.</p></div></header>' +
-      nyckelband([
+      prodTopp(proj, aktiva, nyckelband([
         ['produktion', 'Aktiva projekt', aktiva.length, 'tal', proj.length - aktiva.length + ' klara'],
-        ['kalender', 'Nästa montage', nasta ? 'v. ' + IH.vecka(new Date(nasta.montage)) : '–', 'text', nasta ? e(nk ? nk.namn : '') + ' · ' + IH.sedan(nasta.montage) : 'inget planerat'],
+        ['kalender', 'Nästa montage', nasta ? 'v. ' + IH.vecka(new Date(nasta.montage)) : '–', 'text', nasta ? e(nk ? nk.namn : '') + ' · om ' + dagarTill(nasta.montage) + ' d' : 'inget planerat'],
         ['bock', 'Checklistor klara', punkter ? klaraP / punkter * 100 : 0, 'pct', klaraP + ' av ' + punkter + ' punkter', punkter ? klaraP / punkter : 0],
         ['kub', 'Värde i produktion', aktiva.reduce(function (s, p) { var a = p.affar ? IH.affar(p.affar) : null; return s + (a ? a.varde : 0); }, 0), 'kort', 'signerade ordrar']
-      ]) +
-      '<section class="bana kort kort--mork" data-in><div class="bana__ord"><p class="etikett etikett--ljus">Kommande montage</p><h2>Tolv veckor framåt</h2>' +
-        '<p>Varje hus på sin montagevecka. Grund och framkomlighet är kundens del och ska vara klara innan lastbilen kommer.</p></div>' +
-        '<div class="bana__spar" aria-label="Tidslinje">' + veckor.map(function (v, n) {
-          var denna = aktiva.filter(function (p) { return p.montage && IH.vecka(new Date(p.montage)) === IH.vecka(v) && Math.abs(new Date(p.montage) - v) < 7 * 864e5; });
-          return '<div class="bana__vecka' + (n === 0 ? ' nu' : '') + '" style="--n:' + n + '"><small>v. ' + IH.vecka(v) + '</small><i></i>' + denna.map(function (p) {
-            var m = IH.modell(p.modell), k = IH.kund(p.kund);
-            var klaraH = CHECK.filter(function (c) { return p.check[c[0]]; }).length;
-            return '<button class="bana__hus" type="button" data-g="proj-oppna" data-id="' + p.id + '" title="' + e(k ? k.namn : '') + ' · ' + klaraH + ' av ' + CHECK.length + ' klart"><img src="' + (m ? m.tumme : '') + '" alt="">' +
-              '<i class="bana__ring" style="--p:' + Math.round(klaraH / CHECK.length * 100) + '"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17"/><circle class="bana__ring-fyll" cx="20" cy="20" r="17" pathLength="100"/></svg></i>' +
-              '<span>' + e(k ? forsta(k.namn) : '') + '</span></button>';
-          }).join('') + '</div>';
-        }).join('') + '</div></section>' +
+      ])) +
+      kalender() +
+      '<div class="prodrubrik"><p class="etikett">Alla projekt</p><h2>Från ritning till nyckel</h2></div>' +
       '<div class="tavla tavla--prod">' + IH.PROJSTEG.map(function (s) {
         var l = proj.filter(function (p) { return p.steg === s.id; });
-        return '<section class="spalt" style="--f:' + s.farg + '"><header class="spalt__huvud"><div><b>' + e(s.namn) + '</b><span>' + l.length + '</span></div><small>' + e(s.text) + '</small></header>' +
+        return '<section class="spalt" style="--f:' + s.farg + '"><header class="spalt__huvud"><div><b><span class="spalt__emoji" aria-hidden="true">' + (STEG_EMOJI[s.id] || '') + '</span>' + e(s.namn) + '</b><span>' + l.length + '</span></div><small>' + e(s.text) + '</small></header>' +
           '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(projKort).join('') : '<p class="spalt__tom">' + i('hus') + 'Inget här just nu</p>') + '</div></section>';
       }).join('') + '</div>';
     return {
@@ -2438,6 +2624,23 @@
         if (del[0]) setTimeout(function () { projArk(del[0]); }, 60);
       }
     };
+  };
+
+  // Kalenderns knappar: månad, slag och dag ritar om vyn på plats.
+  G['kal-man'] = function (el) {
+    var d = parseInt(el.getAttribute('data-d'), 10);
+    kalForskjut = d === 0 ? 0 : kalForskjut + d;
+    if (d === 0) kalVald = null;
+    IH.ritaOm();
+  };
+  G['kal-slag'] = function (el) {
+    var s = el.getAttribute('data-s');
+    kalAv[s] = !kalAv[s];
+    IH.ritaOm();
+  };
+  G['kal-dag'] = function (el) {
+    kalVald = el.getAttribute('data-dag');
+    IH.ritaOm();
   };
 
   var CHECK = [['ritning', 'Ritningar klara'], ['lov', 'Bygglov eller anmälan inlämnad'], ['grund', 'Grund, el, vatten och avlopp klart'], ['framkomlighet', 'Framkomlighet för lastbil och kran']];
