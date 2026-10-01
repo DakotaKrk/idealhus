@@ -1,0 +1,476 @@
+/* =====================================================================
+   Idealhus CRM – ljust tema (2026-10-02)
+   Samma morgonljus som inloggningen, men stramare: krämvit botten med
+   sol uppe till höger och grönska nere till vänster, en ljus sidomeny
+   i glas och ljusa "solkort" i stället för de mörka korten. Mörkt finns
+   kvar som accent – knappar, flikmarkören, små etiketter, aviseringar
+   och kundmötet i helskärm.
+   Laddas sist och skriver bara över färger, aldrig layout.
+   ===================================================================== */
+:root {
+  --sand: #f8f4ed;
+  --sol-kant: rgba(27, 25, 21, 0.07);
+  --glas: rgba(255, 255, 255, 0.74);
+  --glas-skugga: 0 1px 2px rgba(27, 25, 21, 0.04), 0 16px 34px -26px rgba(90, 60, 25, 0.45);
+  --ljus-fast: #f7f5f0;
+}
+
+body {
+  background:
+    radial-gradient(60% 50% at 100% 0%, rgba(255, 214, 160, 0.36), transparent 65%),
+    radial-gradient(45% 45% at 0% 100%, rgba(200, 225, 190, 0.32), transparent 65%),
+    radial-gradient(35% 35% at 25% 0%, rgba(232, 240, 245, 0.55), transparent 70%),
+    var(--sand);
+  background-attachment: fixed;
+}
+
+/* --- Sidomenyn: ljust glas ------------------------------------------- */
+.sido {
+  color: var(--text);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.64));
+  box-shadow: inset -1px 0 0 var(--sol-kant), 18px 0 40px -36px rgba(90, 60, 25, 0.4);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+
+.sido::after {
+  display: none;
+}
+
+.sido__logo img {
+  filter: none;
+}
+
+.sido__logo small,
+.sido__rubrik {
+  color: var(--text-3);
+}
+
+.sido__markor {
+  background: linear-gradient(90deg, rgba(240, 181, 110, 0.26), rgba(240, 181, 110, 0.08));
+  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.38), 0 10px 22px -18px rgba(143, 84, 36, 0.7);
+}
+
+.sido__markor::before {
+  background: var(--virke-djup);
+  box-shadow: 0 0 10px rgba(201, 138, 69, 0.6);
+}
+
+.sido__lank {
+  color: var(--text-2);
+}
+
+.sido__lank:hover {
+  color: var(--text);
+  background: rgba(27, 25, 21, 0.035);
+}
+
+.sido__lank.aktiv {
+  color: var(--text);
+}
+
+.sido__lank.aktiv .i {
+  color: var(--virke-djup);
+}
+
+.sido__bricka {
+  background: rgba(27, 25, 21, 0.06);
+  color: var(--text-2);
+}
+
+.sido__bricka--varm {
+  background: var(--virke);
+  color: var(--kol);
+}
+
+.sido__fot {
+  border-top-color: var(--sol-kant);
+}
+
+.anv {
+  background: var(--glas);
+  box-shadow: inset 0 0 0 1px var(--sol-kant), 0 10px 24px -20px rgba(90, 60, 25, 0.5);
+  color: var(--text);
+}
+
+.anv:hover {
+  background: #fff;
+}
+
+.anv small,
+.anv .i,
+.sido__smalt a,
+.sido__smalt button {
+  color: var(--text-3);
+}
+
+.sido__smalt a:hover,
+.sido__smalt button:hover {
+  color: var(--text);
+  background: rgba(27, 25, 21, 0.04);
+}
+
+/* --- Toppen ------------------------------------------------------------ */
+.topp {
+  background: rgba(250, 247, 241, 0.78);
+  border-bottom-color: var(--sol-kant);
+}
+
+/* --- Solkorten (de tidigare mörka korten) --------------------------------
+   Tokens skrivs om inuti korten, så text som var ljus på mörkt blir mörk. */
+.kort--mork {
+  --krita: var(--text);
+  --ljus-2: rgba(27, 25, 21, 0.66);
+  --ljus-3: rgba(27, 25, 21, 0.48);
+  background:
+    radial-gradient(55% 70% at 100% 0%, rgba(255, 210, 150, 0.4), transparent 65%),
+    radial-gradient(50% 60% at 0% 100%, rgba(190, 220, 180, 0.3), transparent 65%),
+    linear-gradient(165deg, #fffdf9 0%, #fdf6ec 55%, #f6f2e8 100%);
+  box-shadow: 0 0 0 1px var(--sol-kant), inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 40px 80px -52px rgba(90, 60, 25, 0.55);
+  color: var(--text);
+}
+
+.kort--mork::before {
+  background-image:
+    linear-gradient(rgba(143, 84, 36, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143, 84, 36, 0.05) 1px, transparent 1px);
+}
+
+.etikett--ljus {
+  color: var(--virke-djup);
+}
+
+.knapp--glas {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.1), 0 8px 18px -14px rgba(90, 60, 25, 0.5);
+  color: var(--text);
+}
+
+.knapp--glas:hover {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.16), 0 12px 24px -14px rgba(90, 60, 25, 0.55);
+}
+
+/* Mörka accenter behåller ljus text även inuti solkorten. */
+.kort--mork .knapp--mork,
+.kort--mork .flikar button[aria-pressed="true"] {
+  color: var(--ljus-fast);
+}
+
+.chip--mork {
+  background: var(--glas);
+  box-shadow: inset 0 0 0 1px var(--sol-kant);
+  color: var(--text-2);
+}
+
+/* Glaskort inuti solkorten. */
+.kort--mork .kpi,
+.kort--mork .forslag__rad,
+.kort--mork .bygge__rad,
+.kort--mork .kundhero__tal div,
+.kort--mork .bana__hus {
+  background: var(--glas);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), var(--glas-skugga);
+  color: var(--text);
+}
+
+.kort--mork .forslag__rad:hover,
+.kort--mork .bana__hus:hover {
+  background: #fff;
+}
+
+.kort--mork .kpi__etikett {
+  color: var(--text-2);
+}
+
+.kort--mork .kpi__ikon,
+.kort--mork .forslag__ikon {
+  background: var(--virke-ljus);
+  color: var(--virke-djup);
+}
+
+.kort--mork .forslag__rad em {
+  background: var(--kol);
+  color: var(--ljus-fast);
+}
+
+.kort--mork .bana__vecka > i {
+  background: rgba(27, 25, 21, 0.16);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.8);
+}
+
+/* Rubriker med träton: mörkare så de syns på ljus botten. */
+.hero__titel em,
+.kundhero h1 em {
+  background: linear-gradient(100deg, #8f5424 0%, #c98a45 30%, #e8a95e 50%, #c98a45 70%, #8f5424 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.ipuls__stort b {
+  background: linear-gradient(180deg, #e8a95e, #c98a45 55%, #8f5424);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* --- Översiktens topp: ljus himmel efter tid på dygnet ------------------ */
+.hero--morgon {
+  background:
+    radial-gradient(55% 60% at 90% 4%, rgba(255, 205, 140, 0.55), transparent 68%),
+    radial-gradient(60% 70% at 0% 100%, rgba(190, 220, 180, 0.38), transparent 65%),
+    linear-gradient(170deg, #fff7eb 0%, #fdf3e6 50%, #f4f1e8 100%);
+}
+
+.hero--dag {
+  background:
+    radial-gradient(60% 65% at 88% 0%, rgba(255, 225, 170, 0.55), transparent 68%),
+    radial-gradient(60% 70% at 0% 100%, rgba(190, 220, 180, 0.38), transparent 65%),
+    linear-gradient(170deg, #fffbf4 0%, #fbf5ea 50%, #f2f2e9 100%);
+}
+
+.hero--kvall {
+  background:
+    radial-gradient(55% 60% at 88% 6%, rgba(240, 165, 115, 0.45), transparent 68%),
+    radial-gradient(60% 70% at 0% 100%, rgba(200, 210, 190, 0.35), transparent 65%),
+    linear-gradient(170deg, #fff2e8 0%, #fbefe5 50%, #f2ede6 100%);
+}
+
+.hero--natt {
+  background:
+    radial-gradient(55% 60% at 86% 8%, rgba(170, 190, 235, 0.45), transparent 68%),
+    radial-gradient(60% 70% at 0% 100%, rgba(190, 210, 200, 0.32), transparent 65%),
+    linear-gradient(170deg, #f0f2f8 0%, #f2f1f4 50%, #eceee9 100%);
+}
+
+.hero--natt .hero__himmel,
+.hero--kvall .hero__himmel {
+  background: none;
+}
+
+.hero--natt .hero__himmel::after {
+  box-shadow: 0 0 0 6px rgba(170, 190, 235, 0.25), 0 0 40px rgba(150, 170, 220, 0.55);
+}
+
+.hero--natt .stad__plan {
+  background:
+    radial-gradient(circle at 60% 40%, rgba(170, 190, 235, 0.16), transparent 60%),
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient(135deg, #4c6a44, #3c5838 50%, #2e4429);
+}
+
+.ljusfall__stralar {
+  opacity: 1;
+}
+
+/* Lapparna i byn: vitt glas med mörk text. */
+.stad__torn .stad__lapp {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 10px 24px -12px rgba(60, 40, 15, 0.45);
+}
+
+.stad__lapp b {
+  color: var(--text);
+}
+
+.stad__lapp small {
+  color: var(--text-3);
+}
+
+.stad__torn.lyser .stad__lapp {
+  background: color-mix(in srgb, var(--f) 26%, #fff);
+  box-shadow: inset 0 0 0 1.5px var(--f), 0 12px 26px -12px rgba(60, 40, 15, 0.5);
+}
+
+/* Pipelinen under byn. */
+.hero .pipe__rad,
+.pipe__rad:hover {
+  background: var(--glas);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), var(--glas-skugga);
+  color: var(--text);
+}
+
+.hero .pipe__rad.lyser {
+  background: color-mix(in srgb, var(--f) 18%, #fff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--f) 75%, transparent), var(--glas-skugga);
+}
+
+.pipe__nr {
+  background: color-mix(in srgb, var(--f) 26%, #fff);
+  color: color-mix(in srgb, var(--f) 45%, #3a2a18);
+}
+
+.pipe__info small {
+  color: var(--text-3);
+}
+
+/* --- Inkorgens topp ------------------------------------------------------ */
+.ipuls {
+  background:
+    radial-gradient(55% 70% at 100% 0%, rgba(255, 210, 150, 0.4), transparent 65%),
+    radial-gradient(50% 60% at 0% 100%, rgba(190, 220, 180, 0.32), transparent 65%),
+    linear-gradient(165deg, #fffdf9 0%, #fdf6ec 55%, #f6f2e8 100%);
+}
+
+.ipuls__live {
+  background: rgba(63, 154, 99, 0.12);
+  color: #2f7a4d;
+}
+
+.ipuls__tal {
+  border-top-color: rgba(27, 25, 21, 0.08);
+}
+
+.ipuls__prickar i,
+.ipuls__mini {
+  background: rgba(27, 25, 21, 0.09);
+}
+
+.kallbar__lista b {
+  color: var(--text);
+}
+
+.dio {
+  background:
+    radial-gradient(90% 60% at 50% 38%, color-mix(in srgb, var(--f) 16%, transparent), transparent 70%),
+    rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), var(--glas-skugga);
+}
+
+.dio:hover {
+  background:
+    radial-gradient(90% 60% at 50% 38%, color-mix(in srgb, var(--f) 22%, transparent), transparent 70%),
+    rgba(255, 255, 255, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.1), 0 26px 50px -30px rgba(90, 60, 25, 0.55);
+}
+
+.dio__fakta {
+  border-top-color: rgba(27, 25, 21, 0.08);
+}
+
+.dio__fakta i {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--f) 70%, #8f5424) calc(var(--a) * 100%), rgba(27, 25, 21, 0.08) 0);
+}
+
+.dio__folk .avatar {
+  box-shadow: 0 0 0 2px #fff;
+}
+
+/* --- Säljtavlans topp: huset i sprängskiss på ljus botten --------------- */
+.bygge__mark {
+  background:
+    linear-gradient(rgba(143, 84, 36, 0.08) 1px, transparent 1px) 0 0 / 20px 20px,
+    linear-gradient(90deg, rgba(143, 84, 36, 0.08) 1px, transparent 1px) 0 0 / 20px 20px,
+    radial-gradient(closest-side, rgba(240, 181, 110, 0.22), transparent);
+}
+
+.bygge__rad small,
+.bygge__rad em {
+  color: var(--text-3);
+}
+
+/* --- Inkorgens läsruta och lista ----------------------------------------- */
+.nbs {
+  --krita: var(--text);
+  --ljus-2: rgba(27, 25, 21, 0.66);
+  --ljus-3: rgba(27, 25, 21, 0.5);
+  background:
+    radial-gradient(120% 160% at 100% 0%, rgba(255, 210, 150, 0.4), transparent 55%),
+    linear-gradient(160deg, #fffaf2, #fff3e2);
+  box-shadow: inset 0 0 0 1.5px rgba(240, 181, 110, 0.5), 0 24px 50px -34px rgba(143, 84, 36, 0.6);
+  color: var(--text);
+}
+
+.nbs small {
+  color: var(--virke-djup);
+}
+
+.nbs__ikon {
+  background: var(--virke);
+  color: var(--kol);
+}
+
+.nbs__spar {
+  background: rgba(27, 25, 21, 0.08);
+}
+
+.nbs__ej {
+  color: var(--text-3);
+}
+
+.nbs__ej:hover {
+  color: var(--text);
+}
+
+.fd__forslag {
+  --krita: var(--text);
+  --ljus-2: rgba(27, 25, 21, 0.66);
+  background:
+    radial-gradient(100% 140% at 100% 0%, rgba(255, 210, 150, 0.35), transparent 60%),
+    linear-gradient(160deg, #fffaf2, #fdf3e6);
+  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.4), var(--glas-skugga);
+  color: var(--text);
+}
+
+.fd__forslag p {
+  color: var(--text-2);
+}
+
+/* Vald förfrågan: varm markering i stället för ett mörkt block. */
+.fl.vald {
+  background: linear-gradient(90deg, #fff1dc, #fff9f0);
+  box-shadow: inset 0 0 0 1.5px rgba(240, 181, 110, 0.6), 0 14px 30px -24px rgba(143, 84, 36, 0.6);
+  color: var(--text);
+}
+
+.fl.vald .tid {
+  color: var(--text-3);
+}
+
+.fl.vald .fl__text small,
+.fl.vald .fl__text em {
+  color: var(--text-2);
+}
+
+.fl.vald .fl__sla {
+  background: rgba(27, 25, 21, 0.08);
+}
+
+.fl.vald .fl__bild .poang {
+  background: #fff;
+  color: var(--text);
+}
+
+.fl.vald .poang circle {
+  stroke: rgba(27, 25, 21, 0.1);
+}
+
+.fl.vald .poang .poang__fyll {
+  stroke: var(--pf);
+}
+
+/* --- Mobilmenyn: ljust glas ---------------------------------------------- */
+@media (max-width: 900px) {
+  .app .mobilmeny {
+    background: rgba(255, 255, 255, 0.86);
+    box-shadow: inset 0 0 0 1px var(--sol-kant), 0 24px 50px -24px rgba(90, 60, 25, 0.55);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  .app .mobilmeny a,
+  .app .mobilmeny button {
+    color: var(--text-3);
+  }
+
+  .app .mobilmeny .aktiv {
+    background: var(--virke-ljus);
+    color: var(--virke-djup);
+  }
+}
+
+.fl.vald .status {
+  background: color-mix(in srgb, var(--s, #a39b8e) 22%, #fff);
+  color: color-mix(in srgb, var(--s, #a39b8e) 60%, #1b1915);
+}

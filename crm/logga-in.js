@@ -79,6 +79,34 @@
     setTimeout(visa, 4000);
   }
 
+  // Resan från förfrågan till nyckel i en gemensam takt: ljuspunkten
+  // går steg för steg, varje steg tänds när punkten når det, Nyckel
+  // hålls tänd en stund och sedan börjar resan om.
+  var resa = document.querySelector('.resa');
+  if (resa) {
+    var steg = resa.querySelectorAll('.resa__steg li');
+    var spar = resa.querySelector('.resa__spar');
+    var sista = steg.length - 1;
+    var visaSteg = function (n) {
+      resa.classList.toggle('nollst', n < 0);
+      spar.style.setProperty('--resa', (Math.max(0, n) / sista).toFixed(3));
+      steg.forEach(function (li, k) {
+        li.classList.toggle('klar', n >= 0 && k <= n);
+        li.classList.toggle('nu', k === n);
+      });
+    };
+    if (lugn) visaSteg(sista);
+    else {
+      var n = -1;
+      var takt = function () {
+        n = n >= sista ? -1 : n + 1;
+        visaSteg(n);
+        setTimeout(takt, n === sista ? 2400 : n < 0 ? 800 : 950);
+      };
+      setTimeout(takt, 1900);
+    }
+  }
+
   // Korten i scenen följer pekaren, olika mycket efter sitt djup.
   var scen = document.querySelector('[data-scen]');
   if (scen) {

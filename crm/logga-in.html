@@ -10,8 +10,8 @@
     <link rel="preload" href="../fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="../fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="../fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="crm.css?v=20261002j">
-    <link rel="stylesheet" href="logga-in.css?v=20261002j">
+    <link rel="stylesheet" href="crm.css?v=20261002l">
+    <link rel="stylesheet" href="logga-in.css?v=20261002l">
     <script type="module" src="../vendor/model-viewer.min.js"></script>
   </head>
   <body class="li">
@@ -81,9 +81,11 @@
           <path class="kulle kulle--2" d="M0 150 C 120 115, 220 135, 330 140 S 500 110, 600 128 V220 H0Z"/>
           <path class="kulle kulle--3" d="M0 182 C 140 160, 260 178, 380 172 S 540 160, 600 168 V220 H0Z"/>
         </svg>
-        <div class="scen__tomt"><i class="scen__altan"></i></div>
-        <model-viewer class="scen__hus" src="../modeller/hus-r1.glb" alt="" camera-orbit="38deg 74deg 118%" field-of-view="26deg" auto-rotate auto-rotate-delay="0"
-          rotation-per-second="8deg" interaction-prompt="none" shadow-intensity="0.9" shadow-softness="1" exposure="1.15" environment-image="neutral" tone-mapping="neutral" disable-zoom disable-pan></model-viewer>
+        <div class="scen__husram">
+          <div class="scen__tomt"><i class="scen__ljuspol"></i></div>
+          <model-viewer class="scen__hus" src="../modeller/hus-r1.glb" alt="" camera-orbit="38deg 72deg 120%" field-of-view="26deg" auto-rotate auto-rotate-delay="0"
+            rotation-per-second="8deg" interaction-prompt="none" shadow-intensity="1.2" shadow-softness="0.85" exposure="1.32" environment-image="neutral" tone-mapping="neutral" disable-zoom disable-pan></model-viewer>
+        </div>
 
         <div class="glas glas--a" data-djup="1.2">
           <span class="glas__bild"><img src="../images/hus-r1.webp" alt="" width="64" height="42"></span>
@@ -113,7 +115,7 @@
             <li style="--n:4"><i></i>Montage</li>
             <li style="--n:5"><i></i>Nyckel</li>
           </ol>
-          <span class="resa__spar"><i></i><b></b></span>
+          <span class="resa__spar"><i></i><span class="resa__punkt"><b></b></span></span>
         </div>
         <p class="scen__not">Bilden visar exempeldata</p>
       </div>
@@ -128,6 +130,6 @@
       </div>
     </div>
 
-    <script src="logga-in.js?v=20261002j"></script>
+    <script src="logga-in.js?v=20261002l"></script>
   </body>
 </html>
