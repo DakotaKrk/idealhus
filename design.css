@@ -18651,3 +18651,140 @@ html[data-tema="mork"] .hus-pris__kort .model-price__card span {
     rgba(27, 25, 21, 0.62) 42%, rgba(27, 25, 21, 0.9) 100%);
 }
 
+/* Husväljaren i glas (2026-10-05): bandet och infokortet är nästan
+   genomskinliga med en stark oskärpa bakom, så fotot syns igenom.
+   Ytorna är små, så backdrop-filter kostar inget märkbart. Ljusheten
+   bakom höjs lite så att den mörka texten håller kontrast även mot
+   mörk skog och svarta fasader. */
+.husval__ruta .husval__val {
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.42), 0 24px 50px -30px rgba(27, 25, 21, 0.55);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6) brightness(1.18);
+  backdrop-filter: blur(18px) saturate(1.6) brightness(1.18);
+}
+
+.husval__ruta .husval__val button {
+  color: rgba(27, 25, 21, 0.86);
+}
+
+.husval__ruta .husval__val button:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.husval__ruta .husval__val button[aria-selected="true"] {
+  background: rgba(27, 25, 21, 0.86);
+  color: var(--krita);
+}
+
+.husval__ruta .husval__val small {
+  opacity: 0.78;
+}
+
+@media (min-width: 901px) {
+  .husval__info .husval__panel {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 30px 60px -36px rgba(27, 25, 21, 0.6);
+    -webkit-backdrop-filter: blur(22px) saturate(1.6) brightness(1.22);
+    backdrop-filter: blur(22px) saturate(1.6) brightness(1.22);
+  }
+
+  .husval__info .husval__fakta {
+    border-top-color: rgba(27, 25, 21, 0.12);
+  }
+
+  .husval__info .husval__text,
+  .husval__info .husval__fakta dt {
+    color: rgba(27, 25, 21, 0.78);
+  }
+
+  .husval__info .husval__nr {
+    color: rgba(27, 25, 21, 0.6);
+  }
+
+  .husval__info .ih-knapp--kontur {
+    background: rgba(255, 255, 255, 0.18);
+  }
+}
+
+html[data-tema="mork"] .husval__ruta .husval__val,
+html[data-tema="mork"] .husval__info .husval__panel {
+  background: rgba(20, 19, 16, 0.32);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.16), 0 24px 50px -30px rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4) brightness(0.8);
+  backdrop-filter: blur(20px) saturate(1.4) brightness(0.8);
+}
+
+html[data-tema="mork"] .husval__ruta .husval__val button {
+  color: rgba(247, 245, 240, 0.9);
+}
+
+@media (min-width: 901px) {
+  html[data-tema="mork"] .husval__info .husval__text,
+  html[data-tema="mork"] .husval__info .husval__fakta dt {
+    color: rgba(247, 245, 240, 0.8);
+  }
+
+  html[data-tema="mork"] .husval__info .husval__nr {
+    color: rgba(247, 245, 240, 0.6);
+  }
+}
+
+@media (min-width: 901px) {
+  html:not([data-tema="mork"]) .husval__info .husval__panel {
+    background: rgba(255, 255, 255, 0.24);
+    -webkit-backdrop-filter: blur(22px) saturate(1.5) brightness(1.38);
+    backdrop-filter: blur(22px) saturate(1.5) brightness(1.38);
+  }
+
+  html:not([data-tema="mork"]) .husval__info .husval__text {
+    color: rgba(27, 25, 21, 0.88);
+  }
+
+  html:not([data-tema="mork"]) .husval__info .husval__fakta dt {
+    color: rgba(27, 25, 21, 0.72);
+  }
+}
+
+/* "Samma virke. Två sätt att bygga." närmare toppen och tätare:
+   mindre luft ovanför, mellan rubrikens delar och ned till korten.
+   "Två sätt" hålls ihop på en rad. */
+.vagar.ih-sektion {
+  padding-top: clamp(2.25rem, 4.5vw, 4rem);
+}
+
+.vagar .ih-huvud {
+  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.vagar .ih-rubrik {
+  margin-top: 0.85rem;
+}
+
+.vagar .ih-ingress {
+  margin-top: 0.9rem;
+}
+
+.vagar .ih-rubrik em {
+  display: inline-block;
+}
+
+/* Startsidan tätare (2026-10-05): ungefär hälften så mycket luft mellan
+   avsnitten som förut (256 px blev ca 140 px på datorn). */
+.vagar.ih-sektion {
+  padding-bottom: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.husval.ih-sektion,
+.siffror.ih-sektion {
+  padding-block: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.husval .ih-huvud,
+.siffror .ih-huvud {
+  margin-bottom: clamp(1.75rem, 3vw, 2.75rem);
+}
+
+.siffror + .contact-section {
+  padding-top: clamp(3rem, 6vw, 5rem);
+}
+

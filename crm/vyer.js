@@ -72,7 +72,7 @@
         : { m: IH.modell('r3'), varfor: 'Fritidshus för helger och lov – Kupa 38 med takkupa och extra takhöjd.' };
     }
     if (f.anvandning === 'Bo året runt') return { m: IH.modell('r1'), varfor: 'Två rum, sovrum och allrum – går att bo i på riktigt, utan bygglov.' };
-    if (f.anvandning === 'Uthyrning' || f.anvandning === 'Kontor') return { m: IH.modell('r2'), varfor: 'Ett rum på 26 m² med smal form – enkel att placera, bra för ' + f.anvandning.toLowerCase() + '.' };
+    if (f.anvandning === 'Uthyrning' || f.anvandning === 'Kontor') return { m: IH.modell('r2'), varfor: 'Ett rum på 30 m² med smal form – enkel att placera, bra för ' + f.anvandning.toLowerCase() + '.' };
     if (f.miljo === 'På fjället' || f.miljo === 'Vid havet') return { m: IH.modell('r5'), varfor: 'Stora glaspartier och mycket ljus – tar vara på utsikten.' };
     return { m: IH.modell('r1'), varfor: 'Två rum under sadeltak – det mest mångsidiga huset.' };
   }
