@@ -282,7 +282,7 @@ SIDFOT = '''    <footer class="site-footer">
         <div>
           <img class="site-footer__logo" src="images/idealhus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Idealhus">
           <p class="site-footer__text">
-            Attefallshus, fritidshus och byggelement, byggda under tak i Sverige och monterade på några dagar.
+            Attefallshus, fritidshus och byggelement, byggda under tak i Sverige.
           </p>
         </div>
 
