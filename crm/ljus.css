@@ -10127,6 +10127,24 @@ button.kal__rad:hover {
   transform: scale(0.92);
 }
 
+/* Sidrubrikerna borttagna (2026-10-09, kunden: "tar onödig plats").
+   Rubriken finns kvar dold för skärmläsare; där det fanns knappar ligger
+   de kvar på en smal rad till höger. */
+.vyhuvud--smal {
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 900px) {
+  .vyhuvud--smal {
+    justify-content: stretch;
+  }
+
+  .vyhuvud--smal .vyhuvud__knappar {
+    width: 100%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tidsband span {
     animation: none;

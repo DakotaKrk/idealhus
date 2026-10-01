@@ -906,8 +906,7 @@
     var vald = del[0] ? IH.forfragan(del[0]) : lista[0];
     if (vald && vald.status === 'ny' && del[0] && !vald.last) { vald.last = true; IH.spara(); }
     var flikar = [['alla', 'Alla', alla.length]].concat(IH.FSTATUS.map(function (s) { return [s.id, s.namn, antal[s.id]]; }));
-    var html = '<header class="vyhuvud"><div><p class="etikett">Inkorg</p><h1>Förfrågningar</h1><p>' +
-      (antal.ny ? '<b>' + antal.ny + ' nya</b> · ' : '') + alla.length + ' totalt · från formuläret på idealhus.se, verktyget, telefon och mejl.</p></div>' +
+    var html = '<header class="vyhuvud vyhuvud--smal"><h1 class="dold">Förfrågningar</h1>' +
       '<div class="vyhuvud__knappar"><button class="knapp" type="button" data-g="simulera">' + i('blixt') + 'Simulera ny förfrågan</button>' +
       '<button class="knapp knapp--mork" type="button" data-g="ny-forfragan">' + i('plus') + 'Lägg in förfrågan</button></div></header>' +
       inkorgPuls(alla) +
@@ -1200,8 +1199,7 @@
   IH.vyer.salj = function (del) {
     var oppna = oppnaAffarer();
     var vunna90 = db().affarer.filter(function (a) { return a.steg === 'vunnen' && IH.dagarSedan(a.vunnen || a.andrad) <= 90; });
-    var html = '<header class="vyhuvud"><div><p class="etikett">Sälj</p><h1>Säljtavla</h1><p>Öppen pipeline <b class="tal" data-rakna="' + Math.round(summa(oppna)) + '" data-format="kr">' + IH.kr(summa(oppna)) + '</b> · ' +
-      oppna.length + ' affärer · viktad prognos ' + IH.kort(viktat(oppna)) + '</p></div>' +
+    var html = '<header class="vyhuvud vyhuvud--smal"><h1 class="dold">Säljtavla</h1>' +
       '<div class="vyhuvud__knappar"><div class="flikar" data-flikar><button type="button" data-g="tavla-lage" data-l="tavla" aria-pressed="' + (tavlaLage === 'tavla') + '">' + i('tavla') + 'Tavla</button>' +
       '<button type="button" data-g="tavla-lage" data-l="lista" aria-pressed="' + (tavlaLage === 'lista') + '">' + i('lista') + 'Lista</button></div>' +
       '<button class="knapp knapp--mork" type="button" data-g="ny-affar">' + i('plus') + 'Ny affär</button></div></header>' +
@@ -1668,7 +1666,7 @@
       return ty < tx ? -1 : ty > tx ? 1 : x.k.namn.localeCompare(y.k.namn, 'sv');
     });
 
-    var html = '<header class="vyhuvud"><div><p class="etikett">Sälj</p><h1>Kunder</h1><p>' + alla.length + ' kunder · privatpersoner och företag.</p></div>' +
+    var html = '<header class="vyhuvud vyhuvud--smal"><h1 class="dold">Kunder</h1>' +
       '<div class="vyhuvud__knappar"><label class="sok sok--liten">' + i('sok') + '<input type="search" placeholder="Sök namn eller ort…" value="' + e(kundSok) + '" data-kundsok></label>' +
       '<button class="knapp knapp--mork" type="button" data-g="ny-kund">' + i('plus') + 'Ny kund</button></div></header>' +
 
@@ -1929,7 +1927,7 @@
       return y.o.skapad < x.o.skapad ? -1 : 1;
     });
 
-    var html = '<header class="vyhuvud"><div><p class="etikett">Sälj</p><h1>Offerter</h1><p>' + alla.length + ' offerter · totalt ' + IH.kort(sum(alla)) + '</p></div>' +
+    var html = '<header class="vyhuvud vyhuvud--smal"><h1 class="dold">Offerter</h1>' +
       '<div class="vyhuvud__knappar"><label class="sok sok--liten">' + i('sok') + '<input type="search" placeholder="Sök kund eller nummer…" value="' + e(offSok) + '" data-offsok></label></div></header>' +
 
       '<section class="offtopp kort kort--mork" data-in>' +
@@ -2322,7 +2320,7 @@
       ];
     }
 
-    var html = '<header class="vyhuvud"><div><p class="etikett">Sälj</p><h1>Kundmöte</h1><p>Presentera Idealhus i helskärm – husen i 3D, reglerna och en kalkyl som räknar live. Priserna syns bara här, inte på sajten.</p></div></header>' +
+    var html = '<h1 class="dold">Kundmöte</h1>' +
 
       motescen(a, k, m, f, valda, total, moten, snitt, redo, besok, besokKund) +
 
@@ -2674,7 +2672,7 @@
     var klaraP = aktiva.reduce(function (s, p) { return s + CHECK.filter(function (c) { return p.check[c[0]]; }).length; }, 0);
     var nasta = aktiva.filter(function (p) { return p.montage && dagarTill(p.montage) >= 0; }).sort(function (a, b) { return a.montage < b.montage ? -1 : 1; })[0];
     var nk = nasta ? IH.kund(nasta.kund) : null;
-    var html = '<header class="vyhuvud"><div><p class="etikett">Produktion</p><h1>Projekt</h1><p>' + aktiva.length + ' hus på väg – från ritning till slutbesiktning.</p></div></header>' +
+    var html = '<h1 class="dold">Projekt</h1>' +
       prodTopp(proj, aktiva, nyckelband([
         ['🏗️', 'Aktiva projekt', aktiva.length, 'tal', proj.length - aktiva.length + ' klara'],
         ['🚚', 'Nästa montage', nasta ? 'v. ' + IH.vecka(new Date(nasta.montage)) : '–', 'text', nasta ? e(nk ? nk.namn : '') + ' · om ' + dagarTill(nasta.montage) + ' d' : 'inget planerat'],
@@ -2923,7 +2921,7 @@
           '<em>' + (x.l.length ? x.l.length + (x.l.length === 1 ? ' uppgift' : ' uppgifter') : 'fritt') + '</em></span>';
       }).join('') + '</div>' +
     '</section>';
-    var html = '<header class="vyhuvud"><div><p class="etikett">Mitt</p><h1>Att göra</h1><p>' + u.filter(function (x) { return !x.klar; }).length + ' uppgifter kvar.</p></div></header>' +
+    var html = '<h1 class="dold">Att göra</h1>' +
       topp + '<form class="nyuppg kort" data-form="uppgift" data-in><span class="nyuppg__plus" aria-hidden="true">' + i('plus') + '</span><input name="text" placeholder="Ny uppgift – t.ex. Ring Karin om tomten" required autocomplete="off">' +
       '<select name="kund" aria-label="Kund"><option value="">Ingen kund</option>' + db().kunder.map(function (k) { return '<option value="' + k.id + '">' + e(k.namn) + '</option>'; }).join('') + '</select>' +
       '<input type="date" name="datum" value="' + IH.dagStr() + '" aria-label="Datum"><button class="knapp knapp--mork knapp--liten" type="submit">Lägg till</button></form>' +
@@ -2986,7 +2984,7 @@
         '<span class="prisrad__falt"><input type="text" inputmode="numeric" autocomplete="off" name="' + typ + '" value="' + prisText(org) + '" data-org="' + org + '"' + (extra || '') + ' aria-label="Pris för ' + e(namn) + '"><em>kr</em></span>' +
         '<span class="prisrad__diff" data-diff aria-live="polite"></span></label>';
     };
-    var html = '<header class="vyhuvud"><div><p class="etikett">Mitt</p><h1>Inställningar</h1><p>Prislistan som offerterna och kalkylen i kundmötet räknar med.</p></div></header>' +
+    var html = '<h1 class="dold">Inställningar</h1>' +
       '<section class="instopp kort kort--mork" data-in>' +
         '<div class="instopp__ord"><p class="etikett etikett--ljus">Prislistan</p><h2>Priserna bakom varje offert <span aria-hidden="true">💰</span></h2>' +
           '<p>Ändra ett pris och spara. Nya offerter och kalkylen i kundmötet räknar med det direkt – offerter som redan är skickade behåller sina priser.</p></div>' +
