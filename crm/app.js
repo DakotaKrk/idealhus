@@ -315,7 +315,7 @@
         return '<a class="sido__lank" href="#/' + p[0] + '" data-vy="' + p[0] + '">' + IH.i(p[2]) + '<span>' + p[1] + '</span>' + bricka + '</a>';
       }).join('');
     }).join('');
-    return '<a class="sido__logo" href="#/"><img src="../images/idealhus_logo.svg" alt="Idealhus"><small>CRM · prototyp</small></a>' +
+    return '<a class="sido__logo" href="#/"><img src="../images/idealhus_logo.svg" alt="Idealhus"><span class="sido__crm">CRM <small>· Prototyp</small></span></a>' +
       '<nav class="sido__nav" aria-label="CRM"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
       '<div class="sido__fot">' +
       '<button class="anv" type="button" data-g="byt-anvandare"><span class="avatar" style="--av:' + jag.farg + '">' + IH.initialer(jag.namn) + '</span>' +

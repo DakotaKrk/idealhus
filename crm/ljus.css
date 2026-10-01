@@ -4654,3 +4654,229 @@ body {
   font: inherit;
   color: inherit;
 }
+
+/* =====================================================================
+   Sidomenyn i hemsidans stil (2026-10-08)
+   Kunden: "fixa så den ser bra ut och synkar med hemsidans design, fixa
+   så loggan syns bra och passar in och är symmetrisk". Loggan centrerad
+   i en glasruta med CRM-brickan under, rubriker med sajtens streck,
+   ikonerna i små rutor, den valda raden som sajtens glaspill med en mörk
+   ikonruta, och foten i glas.
+   ===================================================================== */
+.sido {
+  padding: 14px 12px 12px;
+  background:
+    radial-gradient(90% 26% at 50% 0%, rgba(255, 214, 160, 0.42), transparent 70%),
+    radial-gradient(80% 22% at 0% 100%, rgba(200, 225, 190, 0.32), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 252, 246, 0.7));
+  box-shadow: inset -1px 0 0 var(--sol-kant), 20px 0 44px -38px rgba(90, 60, 25, 0.45);
+}
+
+/* --- Loggan: centrerad, med CRM-brickan under ------------------------- */
+.sido__logo {
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  padding: 18px 10px 16px;
+  border-radius: 22px;
+  background:
+    radial-gradient(80% 90% at 50% 0%, rgba(255, 214, 160, 0.4), transparent 70%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.62));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 18px 34px -26px rgba(90, 60, 25, 0.55);
+  transition: transform 0.45s var(--mjuk), box-shadow 0.45s var(--mjuk);
+}
+
+.sido__logo:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(201, 138, 69, 0.3),
+    0 22px 40px -26px rgba(143, 84, 36, 0.6);
+}
+
+.sido__logo img {
+  display: block;
+  height: 34px;
+  width: auto;
+  filter: brightness(0.6) contrast(1.08);
+}
+
+.sido__crm {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 11px 6px 9px;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #38332c, #141210);
+  box-shadow: 0 8px 16px -10px rgba(27, 25, 21, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  font: 600 0.625rem/1 var(--rubrik);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #f7f5f0;
+}
+
+.sido__crm::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f0b56e;
+  box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.25);
+}
+
+.sido__crm small {
+  margin: 0;
+  font: inherit;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: rgba(247, 245, 240, 0.6);
+}
+
+/* --- Rubrikerna med sajtens streck ------------------------------------- */
+.sido__rubrik {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 12px 6px;
+  font-size: 0.625rem;
+  color: var(--text-3);
+}
+
+.sido__rubrik::before {
+  content: "";
+  width: 14px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #e8a456, #c47a32);
+}
+
+/* --- Raderna: ikonerna i små rutor ------------------------------------- */
+.sido__lank {
+  gap: 11px;
+  min-height: 46px;
+  padding: 0 10px 0 7px;
+  font-weight: 500;
+}
+
+.sido__lank > .i {
+  box-sizing: border-box;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: 10px;
+  background: rgba(27, 25, 21, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.05);
+  color: var(--text-2);
+  transition: background 0.35s ease, color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.sido__lank:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.sido__lank:hover > .i {
+  background: #fff;
+  color: var(--text);
+}
+
+.sido__lank.aktiv {
+  font-weight: 600;
+}
+
+.sido__lank.aktiv > .i {
+  background: linear-gradient(160deg, #38332c, #141210);
+  box-shadow: 0 8px 16px -9px rgba(27, 25, 21, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: #f6c88f;
+}
+
+/* Markören som glider: sajtens glaspill med varm kant. */
+.sido__markor {
+  border-radius: 16px;
+  background: linear-gradient(160deg, #fff, rgba(255, 255, 255, 0.78));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(201, 138, 69, 0.32),
+    0 14px 26px -18px rgba(143, 84, 36, 0.6);
+}
+
+.sido__markor::before {
+  display: none;
+}
+
+.sido__bricka {
+  min-width: 24px;
+  padding: 4px 8px;
+  background: rgba(27, 25, 21, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.05);
+}
+
+.sido__bricka--varm {
+  background: linear-gradient(160deg, #f6c88f, #e3a35a);
+  box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.2);
+  color: #1b1915;
+}
+
+/* --- Foten i glas -------------------------------------------------------- */
+.sido__fot {
+  gap: 8px;
+  padding-top: 12px;
+}
+
+.anv {
+  padding: 10px 12px 10px 10px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.65));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 16px 30px -24px rgba(90, 60, 25, 0.55);
+}
+
+.anv .i {
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #38332c, #141210);
+  color: #f6c88f;
+}
+
+.sido__smalt {
+  gap: 6px;
+}
+
+.sido__smalt a,
+.sido__smalt button {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+.sido__smalt a:hover,
+.sido__smalt button:hover {
+  background: #fff;
+}
+
+@media (max-height: 760px) {
+  .sido__logo {
+    gap: 8px;
+    padding: 12px 10px 12px;
+  }
+
+  .sido__logo img {
+    height: 28px;
+  }
+
+  .sido__lank {
+    min-height: 40px;
+  }
+
+  .sido__lank > .i {
+    width: 28px;
+    height: 28px;
+    padding: 6px;
+  }
+}

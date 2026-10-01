@@ -1,9 +1,9 @@
 /* ============================================================
    Idealhus CRM – inloggningen (prototyp, 2026-10-02)
    Ljus och välkomnande: morgonljus över hela sidan. Vänster en
-   hälsning efter tid på dygnet och rollerna, höger en ljus scen
-   med himmel, kullar och ett av husen i riktig 3D, vita kort som
-   svävar runt det och resan från förfrågan till nyckel.
+   hälsning efter tid på dygnet och rollerna, höger CRM:et i
+   miniatyr (2026-10-08, huset i 3D är borta), händelser som kommer
+   in och resan från förfrågan till nyckel.
    Bara transform och opacitet rör sig.
    ============================================================ */
 .li {
@@ -475,15 +475,25 @@
   animation: li-in 1s var(--mjuk) 0.8s backwards;
 }
 
-/* --- Höger: den ljusa scenen ------------------------------------- */
+/* --- Höger: CRM:et i miniatyr (2026-10-08) ----------------------------
+   Kunden tyckte att huset i 3D såg billigt ut. Nu visar scenen själva
+   verktyget: ett lutat glasfönster med översikten (talen räknas upp,
+   staplarna växer, affärerna glider in), händelser som kommer in en i
+   taget och resan från förfrågan till nyckel. Allt i em, och fönstrets
+   storlek följer rutan (container-enheter). */
 .li__hoger {
   position: relative;
   z-index: 1;
   min-height: 560px;
   overflow: hidden;
   border-radius: 34px;
-  background: linear-gradient(180deg, #fbe7cf 0%, #f8efe2 34%, #eaf1ee 70%, #dfe9dc 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 50px 100px -60px rgba(90, 60, 25, 0.55);
+  background:
+    radial-gradient(70% 55% at 85% 8%, #ffd9a8 0%, rgba(255, 217, 168, 0) 60%),
+    radial-gradient(60% 50% at 8% 92%, #d7e8d2 0%, rgba(215, 232, 210, 0) 62%),
+    radial-gradient(50% 40% at 15% 15%, #e9f0f5 0%, rgba(233, 240, 245, 0) 70%),
+    linear-gradient(170deg, #fbf3e7, #f4ece0 60%, #eef0e8);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.75), 0 50px 100px -60px rgba(90, 60, 25, 0.55);
+  container-type: size;
   animation: scen-in 1.3s var(--mjuk) 0.1s backwards;
 }
 
@@ -492,293 +502,510 @@
 }
 
 .scen {
+  --px: 0;
+  --py: 0;
   position: absolute;
   inset: 0;
-  perspective: 1200px;
+  font-size: clamp(8.5px, 1.62cqw, 15px);
+  perspective: 1400px;
 }
 
-.scen__himmel {
+/* Mjukt ljus som driver och ett rutnät som tonar ut. */
+.scen__ljus {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  pointer-events: none;
 }
 
-.scen__sol {
-  position: absolute;
-  top: 9%;
-  right: 13%;
-  width: 92px;
-  height: 92px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #fffaf0 0 35%, #ffe2ab 62%, rgba(255, 210, 140, 0));
-  box-shadow: 0 0 80px 30px rgba(255, 214, 150, 0.55);
-  animation: sol-andas 6s ease-in-out infinite alternate;
-}
-
-.scen__sol::after {
-  content: "";
-  position: absolute;
-  inset: -140px;
-  border-radius: 50%;
-  background: repeating-conic-gradient(from 0deg, rgba(255, 226, 170, 0.22) 0deg 4deg, transparent 4deg 18deg);
-  -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent 75%);
-  mask-image: radial-gradient(closest-side, #000 30%, transparent 75%);
-  animation: solstralar 60s linear infinite;
-}
-
-@keyframes solstralar {
-  to { transform: rotate(360deg); }
-}
-
-.scen__moln {
-  position: absolute;
-  width: 118px;
-  height: 32px;
-  border-radius: 32px;
-  background: #fff;
-  box-shadow: 0 14px 20px -14px rgba(150, 110, 60, 0.35);
-  opacity: 0.9;
-  animation: moln 90s linear infinite;
-}
-
-.scen__moln::before,
-.scen__moln::after {
-  content: "";
+.scen__klot {
   position: absolute;
   border-radius: 50%;
-  background: #fff;
+  filter: blur(40px);
+  opacity: 0.75;
 }
 
-.scen__moln::before {
-  top: -22px;
-  left: 18px;
-  width: 50px;
-  height: 50px;
+.scen__klot--1 {
+  top: -8%;
+  right: -6%;
+  width: 46%;
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, #ffcf91, rgba(255, 207, 145, 0));
+  animation: klot-a 18s ease-in-out infinite alternate;
 }
 
-.scen__moln::after {
-  top: -14px;
-  left: 56px;
-  width: 38px;
-  height: 38px;
+.scen__klot--2 {
+  bottom: 4%;
+  left: -10%;
+  width: 52%;
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, #cfe5c8, rgba(207, 229, 200, 0));
+  animation: klot-b 22s ease-in-out infinite alternate;
 }
 
-.scen__moln--1 { top: 15%; left: 6%; }
-.scen__moln--2 { top: 30%; left: 30%; scale: 0.72; animation-duration: 120s; animation-delay: -40s; opacity: 0.8; }
-.scen__moln--3 { top: 9%; left: 62%; scale: 0.55; animation-duration: 140s; animation-delay: -80s; opacity: 0.7; }
-
-@keyframes moln {
-  from { translate: 0 0; }
-  to { translate: 40vw 0; }
+.scen__klot--3 {
+  top: 30%;
+  left: 30%;
+  width: 40%;
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+  animation: klot-a 26s ease-in-out infinite alternate-reverse;
 }
 
-.scen__kullar {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 46%;
+@keyframes klot-a {
+  to { transform: translate(-8%, 10%) scale(1.12); }
 }
 
-.kulle--1 { fill: #d9e6cf; }
-.kulle--2 { fill: #c6dabb; }
-.kulle--3 { fill: #b3cda5; }
-
-/* Huset och tomten delar en ram, så gräsplätten alltid ligger mitt
-   under huset (modellens fot hamnar på 84 % av ramens höjd). */
-.scen__husram {
-  position: absolute;
-  left: 50%;
-  bottom: 20%;
-  width: min(74%, 560px);
-  height: 55%;
-  transform: translateX(-50%);
+@keyframes klot-b {
+  to { transform: translate(10%, -8%) scale(1.1); }
 }
 
-.scen__tomt {
-  position: absolute;
-  left: 50%;
-  top: 84%;
-  width: 76%;
-  aspect-ratio: 2.9;
-  border-radius: 50%;
-  background:
-    radial-gradient(60% 55% at 50% 42%, rgba(255, 255, 255, 0.4), transparent 70%),
-    radial-gradient(closest-side, #a7c98f, #8ab873 62%, #76a560 86%, #6c9858);
-  box-shadow:
-    0 0 0 5px rgba(255, 255, 255, 0.55),
-    0 0 0 6px rgba(120, 150, 90, 0.25),
-    0 26px 40px -16px rgba(70, 95, 50, 0.45);
-  transform: translate(-50%, -50%);
-  animation: tomt-in 1.2s var(--mjuk) 0.4s backwards;
-}
-
-@keyframes tomt-in {
-  from { opacity: 0; transform: translate(-50%, -40%) scale(0.85); }
-}
-
-/* Varmt ljus från fönstren på gräset. */
-.scen__ljuspol {
-  position: absolute;
-  inset: 12% 18%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(255, 226, 170, 0.55), transparent);
-}
-
-.scen__hus {
+.scen__rutnat {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  --poster-color: transparent;
-  --progress-bar-height: 0px;
-  opacity: 0;
-  transform: translateY(26px);
-  transition: opacity 1s ease, transform 1.4s var(--mjuk);
+  background-image:
+    linear-gradient(rgba(90, 60, 25, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(90, 60, 25, 0.06) 1px, transparent 1px);
+  background-size: 34px 34px;
+  -webkit-mask-image: radial-gradient(60% 55% at 50% 42%, #000, transparent 75%);
+  mask-image: radial-gradient(60% 55% at 50% 42%, #000, transparent 75%);
+  pointer-events: none;
 }
 
-/* Huset tonar fram först när modellen är laddad (ingen laddstapel). */
-.scen__hus.laddad {
-  opacity: 1;
-  transform: none;
-}
-
-.scen__hus::part(default-progress-bar) {
-  display: none;
-}
-
-/* Vita kort som svävar runt huset och följer pekaren lite. */
-.glas {
+.scen__not {
   position: absolute;
+  top: 18px;
+  right: 22px;
+  z-index: 4;
+  margin: 0;
+  font-size: 0.6875rem;
+  color: rgba(80, 60, 30, 0.55);
+}
+
+/* --- Fönstret ---------------------------------------------------------- */
+.forhand {
+  --d: 1;
+  position: absolute;
+  top: 9%;
+  left: 50%;
+  width: 54em;
+  margin-left: -27em;
+  transform:
+    translate3d(calc(var(--px) * var(--d) * 1px), calc(var(--py) * var(--d) * 1px), 0)
+    rotateX(9deg) rotateY(-14deg) rotateZ(1.5deg);
+  animation: fonster-in 1.5s var(--mjuk) 0.35s backwards;
+  transition: transform 0.6s var(--mjuk);
+}
+
+@keyframes fonster-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 60px, -120px) rotateX(24deg) rotateY(-22deg) rotateZ(3deg);
+  }
+}
+
+.forhand__ram {
+  overflow: hidden;
+  border-radius: 1.6em;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.96), rgba(255, 253, 249, 0.84));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 2.4em 5em -2em rgba(90, 60, 25, 0.45),
+    0 6em 9em -4em rgba(90, 60, 25, 0.35);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  animation: fonster-flyt 9s ease-in-out 2s infinite;
+}
+
+@keyframes fonster-flyt {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-0.8em); }
+}
+
+.forhand__list {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 11px 15px 11px 11px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 24px 44px -26px rgba(90, 60, 25, 0.5);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  font-size: 0.8125rem;
-  color: var(--text);
-  translate: calc(var(--px, 0) * var(--d, 1) * 1px) calc(var(--py, 0) * var(--d, 1) * 1px);
-  transition: translate 1.2s var(--mjuk);
-  animation: glas-in 1s var(--mjuk) backwards, glas-flyt 6s ease-in-out infinite alternate;
+  gap: 1em;
+  height: 3.2em;
+  padding: 0 1.2em;
+  border-bottom: 1px solid rgba(27, 25, 21, 0.06);
+  background: rgba(250, 246, 239, 0.8);
 }
 
-@keyframes glas-in {
-  from { opacity: 0; transform: translateY(20px) scale(0.94); }
+.forhand__prickar {
+  display: flex;
+  gap: 0.5em;
 }
 
-@keyframes glas-flyt {
-  to { transform: translateY(-8px); }
+.forhand__prickar i {
+  width: 0.75em;
+  height: 0.75em;
+  border-radius: 50%;
+  background: #e8ddd0;
 }
 
-.glas b {
-  display: block;
-  font: 600 0.875rem/1.2 var(--rubrik);
-}
+.forhand__prickar i:first-child { background: #f0b56e; }
 
-.glas small {
-  font-size: 0.75rem;
+.forhand__adress {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  margin: 0 auto;
+  padding: 0.45em 1.1em;
+  border-radius: 999px;
+  background: rgba(27, 25, 21, 0.04);
+  font: 500 0.85em/1 var(--sans);
   color: var(--text-3);
 }
 
-.glas--a { top: 12%; left: 7%; animation-delay: 0.9s, 1.9s; }
-.glas--b { top: 28%; right: 6%; display: grid; gap: 4px; padding: 14px 16px; animation-delay: 1.05s, 2.6s; }
-.glas--c { bottom: 30%; right: 9%; animation-delay: 1.2s, 3.1s; }
-.glas--d { bottom: 38%; left: 5%; animation-delay: 1.35s, 2.7s; }
-
-.glas__bild {
-  width: 64px;
-  aspect-ratio: 1600 / 1062;
-  overflow: hidden;
-  border-radius: 10px;
+.forhand__adress svg {
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.glas__bild img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.forhand__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  font: 600 0.8em/1 var(--rubrik);
+  color: #2f8a52;
 }
 
-.glas__prick {
-  width: 8px;
-  height: 8px;
-  margin-left: 4px;
+.forhand__live i {
+  width: 0.6em;
+  height: 0.6em;
   border-radius: 50%;
-  background: var(--virke);
-  animation: prick 1.8s ease-out infinite;
+  background: #3aaa68;
+  box-shadow: 0 0 0 0.25em rgba(58, 170, 104, 0.2);
+  animation: live 2s ease-in-out infinite;
 }
 
-@keyframes prick {
-  0% { box-shadow: 0 0 0 0 rgba(240, 181, 110, 0.7); }
-  100% { box-shadow: 0 0 0 9px rgba(240, 181, 110, 0); }
+@keyframes live {
+  50% { box-shadow: 0 0 0 0.5em rgba(58, 170, 104, 0.06); }
 }
 
-.glas__etikett {
-  font: 700 0.625rem/1 var(--rubrik);
-  letter-spacing: 0.14em;
+.forhand__kropp {
+  display: grid;
+  grid-template-columns: 4.6em minmax(0, 1fr);
+}
+
+.forhand__sido {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 0.9em;
+  padding: 1.3em 0;
+  border-right: 1px solid rgba(27, 25, 21, 0.05);
+  background: rgba(250, 246, 239, 0.55);
+}
+
+.forhand__marke {
+  width: 2em;
+  height: 2em;
+  margin-bottom: 0.6em;
+}
+
+.forhand__sido i {
+  width: 2.4em;
+  height: 2.4em;
+  border-radius: 0.8em;
+  background: rgba(27, 25, 21, 0.05);
+}
+
+.forhand__sido i.aktiv {
+  background: linear-gradient(160deg, #38332c, #141210);
+  box-shadow: 0 0.6em 1.2em -0.6em rgba(27, 25, 21, 0.7), inset 0 0 0 0.35em rgba(240, 181, 110, 0) ;
+  position: relative;
+}
+
+.forhand__sido i.aktiv::after {
+  content: "";
+  position: absolute;
+  inset: 0.75em;
+  border-radius: 0.3em;
+  background: #f0b56e;
+}
+
+.forhand__huvud {
+  display: grid;
+  gap: 1.1em;
+  padding: 1.5em 1.6em 1.6em;
+}
+
+.forhand__halsa {
+  margin: 0;
+  font: 600 1.9em/1.1 var(--rubrik);
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.forhand__halsa span {
+  background: linear-gradient(100deg, #c98a45, #f0b56e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.forhand__under {
+  margin: -0.6em 0 0;
+  font-size: 0.95em;
+  color: var(--text-3);
+}
+
+.forhand__tal {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8em;
+}
+
+.forhand__tal > div {
+  display: grid;
+  gap: 0.5em;
+  padding: 0.9em 1em;
+  border-radius: 1em;
+  background: linear-gradient(160deg, #fff, rgba(255, 255, 255, 0.7));
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 1em 2em -1.6em rgba(90, 60, 25, 0.5);
+  animation: rad-in 0.9s var(--mjuk) backwards;
+  animation-delay: calc(0.9s + var(--n) * 0.12s);
+}
+
+.forhand__tal small {
+  font: 600 0.72em/1.2 var(--rubrik);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--virke-djup);
+  color: var(--text-3);
 }
 
-.glas .glas__tal {
-  font: 600 1.75rem/1 var(--rubrik);
-  letter-spacing: -0.04em;
+.forhand__tal b {
+  font: 600 2em/1 var(--rubrik);
+  letter-spacing: -0.03em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 
-.glas__tal em {
-  font-size: 0.6em;
+.forhand__tal em {
+  margin-left: 0.25em;
+  font: 600 0.5em/1 var(--rubrik);
   font-style: normal;
   color: var(--text-3);
 }
 
-.glas__staplar {
+.forhand__graf {
+  padding: 1em 1.1em 1.1em;
+  border-radius: 1em;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  animation: rad-in 0.9s var(--mjuk) 1.25s backwards;
+}
+
+.forhand__graf p {
   display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 30px;
-  margin-top: 4px;
+  justify-content: space-between;
+  margin: 0 0 0.8em;
 }
 
-.glas__staplar i {
-  width: 9px;
+.forhand__graf small {
+  font: 600 0.72em/1 var(--rubrik);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.forhand__graf em {
+  font-size: 0.72em;
+  font-style: normal;
+  color: var(--text-3);
+}
+
+.forhand__staplar {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  align-items: end;
+  gap: 0.6em;
+  height: 6.4em;
+  border-bottom: 1px solid rgba(27, 25, 21, 0.08);
+}
+
+.forhand__staplar i {
   height: calc(var(--h) * 100%);
-  border-radius: 3px 3px 1px 1px;
-  background: linear-gradient(180deg, #f6c68d, #e0a05a);
-  transform-origin: bottom;
-  animation: stapel-upp 0.9s var(--mjuk) backwards;
-  animation-delay: calc(1.3s + var(--n) * 0.06s);
+  border-radius: 0.45em 0.45em 0.15em 0.15em;
+  background: linear-gradient(180deg, #f6c88f, #e3a35a);
+  transform-origin: 50% 100%;
+  animation: stapel-ny 1s var(--mjuk) backwards;
+  animation-delay: calc(1.45s + var(--n) * 0.06s);
 }
 
-.glas__staplar i:last-child {
-  background: linear-gradient(180deg, #8f5424, #c98a45);
+.forhand__staplar i:last-child {
+  background: linear-gradient(180deg, #4a443c, #1b1915);
+  box-shadow: 0 0 0 0.25em rgba(240, 181, 110, 0.25);
 }
 
-@keyframes stapel-upp {
-  from { transform: scaleY(0); }
+@keyframes stapel-ny {
+  from { transform: scaleY(0.04); }
 }
 
-.glas__ikon {
+.forhand__affarer {
+  display: grid;
+  gap: 0.15em;
+}
+
+.forhand__affarer p {
+  display: grid;
+  grid-template-columns: 2.6em minmax(0, 1fr) auto 4.6em;
+  align-items: center;
+  gap: 0.9em;
+  margin: 0;
+  padding: 0.6em 0.4em;
+  border-top: 1px solid rgba(27, 25, 21, 0.06);
+  animation: rad-in 0.8s var(--mjuk) backwards;
+  animation-delay: calc(1.7s + var(--n) * 0.14s);
+}
+
+.forhand__affarer p:first-child {
+  border-top: 0;
+}
+
+.forhand__av {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  background: var(--virke-ljus);
-  color: var(--virke-djup);
+  width: 2.6em;
+  height: 2.6em;
+  border-radius: 0.85em;
+  background: var(--av);
+  font: 700 0.8em/1 var(--rubrik);
+  color: #1b1915;
 }
 
-.glas__ikon .i {
-  width: 18px;
-  height: 18px;
+.forhand__affarer b {
+  display: block;
+  font: 600 1em/1.2 var(--rubrik);
+  color: var(--text);
 }
 
-.glas__ikon--gron {
-  background: #e1f5e8;
-  color: #2f7a4d;
+.forhand__affarer small {
+  display: block;
+  overflow: hidden;
+  font-size: 0.85em;
+  color: var(--text-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.forhand__steg {
+  padding: 0.4em 0.8em;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--f) 26%, #fff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--f) 50%, transparent);
+  font: 600 0.75em/1 var(--rubrik);
+  font-style: normal;
+  color: #5c3a17;
+}
+
+.forhand__affarer .forhand__varde {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+@keyframes rad-in {
+  from { opacity: 0; transform: translateY(0.8em); }
+}
+
+/* --- Händelser som kommer in --------------------------------------------- */
+.flode {
+  --d: 1.7;
+  position: absolute;
+  bottom: 23%;
+  left: 5%;
+  z-index: 3;
+  display: grid;
+  gap: 0.7em;
+  width: 25em;
+  transform: translate3d(calc(var(--px) * var(--d) * 1px), calc(var(--py) * var(--d) * 1px), 0);
+  transition: transform 0.6s var(--mjuk);
+}
+
+.handelse {
+  display: grid;
+  grid-template-columns: 3em minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9em;
+  padding: 0.85em 1.1em 0.85em 0.85em;
+  border-radius: 1.3em;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 255, 255, 0.8));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 1.8em 3.4em -1.8em rgba(90, 60, 25, 0.55);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transform-origin: 50% 0;
+  animation: handelse-in 0.8s cubic-bezier(0.2, 0.9, 0.25, 1.2) backwards;
+  transition: opacity 0.6s ease, transform 0.7s var(--mjuk), scale 0.7s var(--mjuk);
+}
+
+.handelse:nth-child(2) { opacity: 0.86; scale: 0.96; }
+.handelse:nth-child(3) { opacity: 0.6; scale: 0.92; }
+.handelse.ut { opacity: 0; transform: translateY(1em); }
+
+@keyframes handelse-in {
+  from { opacity: 0; transform: translateY(-1.4em) scale(0.92); }
+}
+
+.handelse__ikon {
+  display: grid;
+  place-items: center;
+  width: 3em;
+  height: 3em;
+  border-radius: 1em;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--f) 30%, #fff), color-mix(in srgb, var(--f) 12%, #fff));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--f) 40%, transparent);
+  color: color-mix(in srgb, var(--f) 60%, #1b1915);
+}
+
+.handelse__ikon svg {
+  width: 1.5em;
+  height: 1.5em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.handelse b {
+  display: block;
+  font: 600 1.05em/1.2 var(--rubrik);
+  color: var(--text);
+}
+
+.handelse small {
+  display: block;
+  overflow: hidden;
+  font-size: 0.88em;
+  color: var(--text-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.handelse time {
+  align-self: start;
+  font: 600 0.75em/1 var(--rubrik);
+  color: var(--text-3);
+}
+
+/* Resan längst ned (samma som förut, i glas). */
+.li__hoger .resa {
+  z-index: 3;
+  font-size: 1rem;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 24px 44px -30px rgba(90, 60, 25, 0.45);
+}
+
+@keyframes glas-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
 }
 
 /* Resan från förfrågan till nyckel, med en ljuspunkt som vandrar. */
@@ -1009,9 +1236,9 @@
 
   .li__hoger {
     order: -1;
-    min-height: 0;
-    height: 46vh;
-    min-height: 320px;
+    height: 56vh;
+    min-height: 380px;
+    max-height: 560px;
     border-radius: 28px;
   }
 
@@ -1026,49 +1253,37 @@
     top: 20px;
     right: 20px;
     left: 20px;
-    z-index: 3;
+    z-index: 5;
   }
 
   .li__innehall {
     padding: 26px 4px 20px;
   }
 
-  .glas--b,
-  .glas--d,
-  .resa {
+  .scen {
+    font-size: 1.55cqw;
+  }
+
+  .forhand {
+    top: 21%;
+  }
+
+  .flode {
+    right: 6%;
+    bottom: 6%;
+    left: 6%;
+    width: auto;
+    font-size: clamp(9.5px, 2.6cqw, 13px);
+  }
+
+  .li__hoger .resa {
     display: none;
-  }
-
-  .glas--a {
-    top: auto;
-    bottom: 10%;
-    left: 5%;
-  }
-
-  .glas--c {
-    top: 20%;
-    bottom: auto;
-    right: 5%;
-  }
-
-  .scen__husram {
-    bottom: 4%;
-    width: min(92%, 520px);
-    height: 72%;
   }
 
   .scen__not {
     top: auto;
-    bottom: 10px;
-  }
-
-  .scen__moln--1,
-  .scen__moln--2 {
-    display: none;
-  }
-
-  .scen__moln--3 {
-    top: 24%;
+    bottom: 8px;
+    right: 16px;
   }
 }
 
@@ -1082,7 +1297,7 @@
     gap: 2px;
   }
 
-  .glas--a {
+  .flode .handelse:nth-child(3) {
     display: none;
   }
 }
@@ -1094,5 +1309,144 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* --- Vänster, putsad (2026-10-08) --------------------------------------
+   Toppen som sajtens glasrad med loggan och en CRM-bricka, rollerna som
+   glaskort med en ring som tänds, och en tydligare hierarki. */
+.li__topp {
+  padding: 10px 10px 10px 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.55));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 18px 40px -30px rgba(120, 80, 30, 0.55);
+}
+
+.li__marke {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.li__topp .li__marke img {
+  display: block;
+  height: 30px;
+  width: auto;
+  filter: brightness(0.6) contrast(1.08);
+}
+
+.li__crm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 8px;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #38332c, #141210);
+  font: 600 0.6875rem/1 var(--rubrik);
+  letter-spacing: 0.12em;
+  color: #f7f5f0;
+}
+
+.li__crm::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f0b56e;
+  box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.25);
+}
+
+.li__tillbaka {
+  background: rgba(27, 25, 21, 0.04);
+}
+
+.li__titel {
+  margin-bottom: 18px;
+}
+
+.roll {
+  padding: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.72));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 30px 60px -40px rgba(90, 60, 25, 0.6);
+}
+
+.roll::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--ring, 0deg), transparent 0 55%, color-mix(in srgb, var(--rf) 90%, #fff) 75%, transparent 92%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+@property --ring {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.roll:hover::after,
+.roll:focus-visible::after {
+  opacity: 1;
+  animation: roll-ring 2.4s linear infinite;
+}
+
+@keyframes roll-ring {
+  to { --ring: 360deg; }
+}
+
+.roll__pil {
+  background: linear-gradient(160deg, #38332c, #141210);
+  color: #f6c88f;
+  box-shadow: 0 8px 16px -8px rgba(27, 25, 21, 0.7);
+}
+
+.roll:hover .roll__pil {
+  background: linear-gradient(160deg, #f6c88f, #c98a45);
+  color: #1b1915;
+}
+
+.roll .avatar {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 10px 18px -10px rgba(90, 60, 25, 0.7);
+}
+
+.li__igen {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.72));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.35), 0 24px 44px -30px rgba(90, 60, 25, 0.6);
+}
+
+.li__not {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.05);
+}
+
+@media (max-width: 560px) {
+  .li__topp {
+    padding: 8px 8px 8px 14px;
+  }
+
+  .li__topp .li__marke img {
+    height: 24px;
+  }
+
+  .li__marke {
+    gap: 8px;
+  }
+
+  .li__tillbaka {
+    padding: 9px 11px;
+    white-space: nowrap;
   }
 }

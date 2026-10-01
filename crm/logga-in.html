@@ -10,9 +10,8 @@
     <link rel="preload" href="../fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="../fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="../fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="crm.css?v=20261002l">
-    <link rel="stylesheet" href="logga-in.css?v=20261002l">
-    <script type="module" src="../vendor/model-viewer.min.js"></script>
+    <link rel="stylesheet" href="crm.css?v=20261008b">
+    <link rel="stylesheet" href="logga-in.css?v=20261008b">
   </head>
   <body class="li">
     <div class="li__bakgrund" aria-hidden="true">
@@ -21,7 +20,7 @@
 
     <main class="li__vanster">
       <header class="li__topp">
-        <img src="../images/idealhus_logo.svg" alt="Idealhus" width="120" height="24">
+        <span class="li__marke"><img src="../images/idealhus_logo.svg" alt="Idealhus" width="132" height="36"><span class="li__crm">CRM</span></span>
         <a class="li__tillbaka" href="../index.html" data-lamna>
           <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>Till idealhus.se
         </a>
@@ -73,37 +72,52 @@
 
     <aside class="li__hoger" aria-hidden="true">
       <div class="scen" data-scen>
-        <div class="scen__himmel">
-          <i class="scen__sol"></i><i class="scen__moln scen__moln--1"></i><i class="scen__moln scen__moln--2"></i><i class="scen__moln scen__moln--3"></i>
-        </div>
-        <svg class="scen__kullar" viewBox="0 0 600 220" preserveAspectRatio="none">
-          <path class="kulle kulle--1" d="M0 120 C 90 70, 170 90, 250 110 S 420 60, 600 95 V220 H0Z"/>
-          <path class="kulle kulle--2" d="M0 150 C 120 115, 220 135, 330 140 S 500 110, 600 128 V220 H0Z"/>
-          <path class="kulle kulle--3" d="M0 182 C 140 160, 260 178, 380 172 S 540 160, 600 168 V220 H0Z"/>
-        </svg>
-        <div class="scen__husram">
-          <div class="scen__tomt"><i class="scen__ljuspol"></i></div>
-          <model-viewer class="scen__hus" src="../modeller/hus-r1.glb" alt="" camera-orbit="38deg 72deg 120%" field-of-view="26deg" auto-rotate auto-rotate-delay="0"
-            rotation-per-second="8deg" interaction-prompt="none" shadow-intensity="1.2" shadow-softness="0.85" exposure="1.32" environment-image="neutral" tone-mapping="neutral" disable-zoom disable-pan></model-viewer>
+        <div class="scen__ljus"><i class="scen__klot scen__klot--1"></i><i class="scen__klot scen__klot--2"></i><i class="scen__klot scen__klot--3"></i></div>
+        <div class="scen__rutnat"></div>
+        <p class="scen__not">Bilden visar exempeldata</p>
+
+        <!-- CRM:et i miniatyr, lutat i rummet. Talen räknas upp, staplarna
+             växer och affärerna glider in när sidan öppnas. -->
+        <div class="forhand" data-djup="1">
+          <div class="forhand__ram">
+            <div class="forhand__list">
+              <span class="forhand__prickar"><i></i><i></i><i></i></span>
+              <span class="forhand__adress"><svg viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><path d="M5.5 11h13v9h-13z"/></svg>idealhus.se/crm</span>
+              <span class="forhand__live"><i></i>Live</span>
+            </div>
+            <div class="forhand__kropp">
+              <div class="forhand__sido">
+                <img class="forhand__marke" src="../images/idealhus.svg" alt="" width="24" height="24">
+                <i class="aktiv"></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <div class="forhand__huvud">
+                <p class="forhand__halsa"><span data-mini-halsning>Hej</span>, Maja.</p>
+                <p class="forhand__under">3 nya förfrågningar väntar på svar</p>
+                <div class="forhand__tal">
+                  <div style="--n:0"><small>Nya förfrågningar</small><b data-rakna="3" data-dec="0">0</b></div>
+                  <div style="--n:1"><small>Öppen pipeline</small><b><span data-rakna="7.7" data-dec="1">0</span><em>Mkr</em></b></div>
+                  <div style="--n:2"><small>I produktion</small><b data-rakna="2" data-dec="0">0</b></div>
+                </div>
+                <div class="forhand__graf">
+                  <p><small>Vunnet per månad</small><em>exempel</em></p>
+                  <div class="forhand__staplar">
+                    <i style="--h:.34;--n:0"></i><i style="--h:.52;--n:1"></i><i style="--h:.4;--n:2"></i><i style="--h:.66;--n:3"></i>
+                    <i style="--h:.48;--n:4"></i><i style="--h:.74;--n:5"></i><i style="--h:.58;--n:6"></i><i style="--h:.86;--n:7"></i>
+                    <i style="--h:.7;--n:8"></i><i style="--h:1;--n:9"></i>
+                  </div>
+                </div>
+                <div class="forhand__affarer">
+                  <p style="--n:0"><span class="forhand__av" style="--av:linear-gradient(135deg,#f6c68d,#c98a45)">AF</span><span><b>Anna Forsberg</b><small>Sadel 30 Bred med kök och bad</small></span><i class="forhand__steg" style="--f:#f0b56e">Förhandling</i><b class="forhand__varde">612 tkr</b></p>
+                  <p style="--n:1"><span class="forhand__av" style="--av:linear-gradient(135deg,#bcd3e6,#6f93b5)">PS</span><span><b>Patrik Sandberg</b><small>Kupa 50, året runt</small></span><i class="forhand__steg" style="--f:#e8c98f">Offert</i><b class="forhand__varde">868 tkr</b></p>
+                  <p style="--n:2"><span class="forhand__av" style="--av:linear-gradient(135deg,#a8ebc3,#3f9a63)">SL</span><span><b>Sara Lindqvist</b><small>Kupa 40 vid havet</small></span><i class="forhand__steg" style="--f:#9fc2c9">Kontakt</i><b class="forhand__varde">695 tkr</b></p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="glas glas--a" data-djup="1.2">
-          <span class="glas__bild"><img src="../images/hus-r1.webp" alt="" width="64" height="42"></span>
-          <span><b>Ny förfrågan</b><small>Vid havet · Attefallshus</small></span><i class="glas__prick"></i>
-        </div>
-        <div class="glas glas--b" data-djup="1.8">
-          <small class="glas__etikett">Öppen pipeline</small>
-          <b class="glas__tal">8,4 <em>Mkr</em></b>
-          <span class="glas__staplar"><i style="--h:.35;--n:0"></i><i style="--h:.5;--n:1"></i><i style="--h:.42;--n:2"></i><i style="--h:.7;--n:3"></i><i style="--h:.6;--n:4"></i><i style="--h:.85;--n:5"></i><i style="--h:1;--n:6"></i></span>
-        </div>
-        <div class="glas glas--c" data-djup="1.4">
-          <span class="glas__ikon glas__ikon--gron"><svg class="i" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
-          <span><b>Order signerad</b><small>Sadel 30 Bred · Vallentuna</small></span>
-        </div>
-        <div class="glas glas--d" data-djup="0.9">
-          <span class="glas__ikon"><svg class="i" viewBox="0 0 24 24"><path d="M4 5h16v15H4z"/><path d="M4 9.5h16"/><path d="M9 3v4"/><path d="M15 3v4"/></svg></span>
-          <span><b>Montage bokat</b><small>Kupa 40 · vecka 45</small></span>
-        </div>
+        <!-- Händelser som kommer in, en i taget (fylls av logga-in.js). -->
+        <div class="flode" data-flode data-djup="1.7"></div>
 
         <div class="resa">
           <p class="resa__rubrik">Från förfrågan till nyckel</p>
@@ -117,7 +131,6 @@
           </ol>
           <span class="resa__spar"><i></i><span class="resa__punkt"><b></b></span></span>
         </div>
-        <p class="scen__not">Bilden visar exempeldata</p>
       </div>
     </aside>
 
@@ -130,6 +143,6 @@
       </div>
     </div>
 
-    <script src="logga-in.js?v=20261002l"></script>
+    <script src="logga-in.js?v=20261008b"></script>
   </body>
 </html>

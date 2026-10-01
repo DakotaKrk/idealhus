@@ -71,12 +71,75 @@
     });
   });
 
-  // Huset tonar fram när modellen är laddad (senast efter fyra sekunder).
-  var hus = document.querySelector('.scen__hus');
-  if (hus) {
-    var visa = function () { hus.classList.add('laddad'); };
-    hus.addEventListener('load', function () { setTimeout(visa, 150); });
-    setTimeout(visa, 4000);
+  // Miniatyren av CRM:et: samma hälsning, talen räknas upp och
+  // händelserna kommer in en i taget (högst tre syns).
+  document.querySelectorAll('[data-mini-halsning]').forEach(function (el) { el.textContent = halsning; });
+
+  document.querySelectorAll('[data-rakna]').forEach(function (el) {
+    var mal = parseFloat(el.getAttribute('data-rakna')), dec = parseInt(el.getAttribute('data-dec'), 10) || 0;
+    var skriv = function (v) { el.textContent = v.toFixed(dec).replace('.', ','); };
+    if (lugn) { skriv(mal); return; }
+    skriv(0);
+    setTimeout(function () {
+      var t0 = performance.now();
+      var steg = function (t) {
+        var k = Math.min(1, (t - t0) / 1400);
+        skriv(mal * (1 - Math.pow(1 - k, 3)));
+        if (k < 1) requestAnimationFrame(steg);
+      };
+      requestAnimationFrame(steg);
+    }, 1100);
+  });
+
+  var flode = document.querySelector('[data-flode]');
+  if (flode) {
+    var IKON = {
+      inkorg: '<path d="M4 13.5h4l1.5 2.5h5l1.5-2.5h4"/><path d="M4 13.5 6.5 6h11l2.5 7.5V19H4z"/>',
+      plats: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11Z"/><path d="M12 12.3a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6Z"/>',
+      offert: '<path d="M6.5 3.5h8l4 4v13h-12z"/><path d="M9.5 12h6M9.5 15.5h4"/>',
+      klar: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+      kalender: '<path d="M4 5h16v15H4z"/><path d="M4 9.5h16M9 3v4M15 3v4"/>'
+    };
+    var HANDELSER = [
+      ['inkorg', '#f0b56e', 'Ny förfrågan', 'Maria Ek · Hus utanför detaljplan'],
+      ['plats', '#a9c8a4', 'Platsbesök bokat', 'Johan Berg · Sadel 30 som kontor'],
+      ['offert', '#e8c98f', 'Offert skickad', 'Patrik Sandberg · Kupa 50'],
+      ['klar', '#7fe0a6', 'Order signerad', 'Fredrik Sjögren · Sadel 30 Bred'],
+      ['kalender', '#9fc2c9', 'Montage bokat', 'Erik Nyström · Kupa 40 i Åre']
+    ];
+    var TIDER = ['nu', '1 min', '4 min'];
+    var nasta = 0;
+    var kort = function (h) {
+      var el = document.createElement('div');
+      el.className = 'handelse';
+      el.style.setProperty('--f', h[1]);
+      el.innerHTML = '<span class="handelse__ikon"><svg viewBox="0 0 24 24">' + IKON[h[0]] + '</svg></span>' +
+        '<span><b>' + h[2] + '</b><small>' + h[3] + '</small></span><time>nu</time>';
+      return el;
+    };
+    var tider = function () {
+      Array.prototype.forEach.call(flode.children, function (c, k) {
+        var t = c.querySelector('time');
+        if (t) t.textContent = TIDER[k] || '';
+      });
+    };
+    var ny = function () {
+      flode.insertBefore(kort(HANDELSER[nasta]), flode.firstChild);
+      nasta = (nasta + 1) % HANDELSER.length;
+      var kvar = flode.children;
+      if (kvar.length > 3) {
+        var sist = kvar[kvar.length - 1];
+        sist.classList.add('ut');
+        setTimeout(function () { if (sist.parentNode) sist.parentNode.removeChild(sist); tider(); }, 600);
+      }
+      tider();
+    };
+    if (lugn) { ny(); ny(); ny(); }
+    else {
+      setTimeout(ny, 1700);
+      setTimeout(ny, 2500);
+      setTimeout(function () { ny(); setInterval(function () { if (!document.hidden) ny(); }, 3400); }, 3300);
+    }
   }
 
   // Resan från förfrågan till nyckel i en gemensam takt: ljuspunkten
