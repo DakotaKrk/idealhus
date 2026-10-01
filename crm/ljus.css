@@ -9503,17 +9503,40 @@ button.kal__rad:hover {
   box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 14px 28px -22px rgba(90, 60, 25, 0.5);
 }
 
+/* Emojin står ovanför rubriken, så långa ord som "Träffsäkerhet" får
+   plats i smala rutor (kundens skärmbild 2026-10-09). */
+.offtopp__tal > div {
+  min-width: 0;
+}
+
 .offtopp__tal small {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: grid;
+  justify-items: start;
+  gap: 5px;
   margin-bottom: 6px;
   font: 600 0.6875rem/1.2 var(--rubrik);
+  overflow-wrap: anywhere;
 }
 
 .offtopp__tal small i {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-style: normal;
+  line-height: 1;
+}
+
+/* Smal spalt (t.ex. 1280 px-fönster): två rutor per rad, den tredje under. */
+.offtopp__ord {
+  container-type: inline-size;
+}
+
+@container (max-width: 340px) {
+  .offtopp__tal {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .offtopp__tal > div:last-child {
+    grid-column: 1 / -1;
+  }
 }
 
 .offtopp__vecka {
@@ -9676,6 +9699,53 @@ button.kal__rad:hover {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Byn i översikten på mobilen (2026-10-09, kundens skärmbild): lapparna
+   med belopp krockade med varandra. På smal skärm blir de små runda
+   nummerbrickor i stegets färg – samma nummer som listan under byn, där
+   beloppen står. */
+.stad__nr {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .stad .stad__torn .stad__lapp,
+  .stad .stad__torn.lyser .stad__lapp {
+    padding: 0;
+    border-radius: 50%;
+    background: none;
+    box-shadow: none;
+  }
+
+  .stad__lapp b,
+  .stad__lapp small,
+  .stad .stad__pin {
+    display: none;
+  }
+
+  .stad__nr {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(160deg, #fff, color-mix(in srgb, var(--f) 30%, #fff));
+    box-shadow: inset 0 0 0 2px var(--f), 0 8px 14px -6px rgba(60, 40, 15, 0.55);
+    font: 700 0.75rem/1 var(--rubrik);
+    font-style: normal;
+    color: #1b1915;
+  }
+
+  /* Det färdiga huset har vimpel: brickan lyfts över stången. */
+  .stad__torn[data-steg="5"] .stad__lapp {
+    transform: translate3d(-50%, -50%, calc(var(--s) * var(--v) * (var(--Hw) + var(--R)) + 52px)) rotateZ(38deg) rotateX(-58deg);
+  }
+
+  .stad__torn.lyser .stad__nr {
+    transform: scale(1.18);
+    box-shadow: inset 0 0 0 2px var(--f), 0 0 0 4px color-mix(in srgb, var(--f) 35%, transparent), 0 8px 14px -6px rgba(60, 40, 15, 0.55);
+  }
 }
 
 @media (max-width: 900px) {

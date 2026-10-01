@@ -138,7 +138,7 @@
         (n === 0 && s.antal ? '<span class="dio__pin stad__pin"><b>' + s.antal + '</b></span>' : '') +
         (n === 5 ? '<i class="vimpel"><i></i><i></i><b></b></i><span class="bil">' + box3('bil-kaross', 20, 10, 5, 0, 0, 1.5) + box3('bil-kupe', 11, 9, 4, 4, 0.5, 6.5) +
           '<i class="bil-hjul" style="left:3px"></i><i class="bil-hjul" style="left:14px"></i></span>' : '') +
-        '<span class="stad__lapp"><b>' + IH.kort(s.summa) + '</b><small><i style="background:' + s.farg + '"></i>' + e(s.kort) + ' · ' + s.antal + ' st</small></span></a>';
+        '<span class="stad__lapp"><em class="stad__nr" aria-hidden="true">' + (n + 1) + '</em><b>' + IH.kort(s.summa) + '</b><small><i style="background:' + s.farg + '"></i>' + e(s.kort) + ' · ' + s.antal + ' st</small></span></a>';
     }).join('');
     var lyktor = [[18, 'bak'], [52, 'bak'], [86, 'bak'], [34, 'fram'], [70, 'fram']].map(function (l, n) {
       return '<i class="lykta lykta--' + l[1] + '" style="left:' + l[0] + '%;--n:' + n + '"><i></i><i></i><b></b></i>';
