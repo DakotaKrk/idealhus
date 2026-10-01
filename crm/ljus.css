@@ -4880,3 +4880,288 @@ body {
     padding: 6px;
   }
 }
+
+/* =====================================================================
+   Översikten premium (2026-10-08)
+   Kunden: "gör översikten i crm mer premium också". Korten i sajtens
+   glas, rubrikernas ikoner i mörka rutor, nyckeltalen som glaskort som
+   lyfter, starkare staplar med den här månaden mörk, och spalterna slutar
+   i jämnhöjd: sista kortet i varje spalt sträcks och intäktskortet har
+   fått "Per hus" längst ned.
+   ===================================================================== */
+.oversikt {
+  align-items: stretch;
+}
+
+.oversikt__kol {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.oversikt__kol > .kort:last-child {
+  flex: 1;
+}
+
+.oversikt .kort {
+  display: flex;
+  flex-direction: column;
+  border-radius: 28px;
+  background:
+    radial-gradient(90% 50% at 100% 0%, rgba(255, 214, 160, 0.24), transparent 70%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.68));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 34px 64px -46px rgba(90, 60, 25, 0.6);
+}
+
+.oversikt .kort > .kort__kropp {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.oversikt .kort__huvud {
+  padding: 22px 22px 2px;
+}
+
+.oversikt .kort__huvud h2 {
+  font-size: 1.125rem;
+  letter-spacing: -0.02em;
+}
+
+.oversikt .kort__ikon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #38332c, #141210);
+  box-shadow: 0 8px 16px -9px rgba(27, 25, 21, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: #f6c88f;
+}
+
+.oversikt .kort__huvud .chip {
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07);
+}
+
+/* Listorna: raderna lyfts fram i glas vid hovring. */
+.oversikt .lista__rad,
+.oversikt .fokus__rad {
+  transition: background 0.35s ease, box-shadow 0.35s ease, transform 0.35s var(--mjuk);
+}
+
+.oversikt .lista__rad:hover {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.22), 0 12px 24px -20px rgba(90, 60, 25, 0.6);
+}
+
+.oversikt .fokus__rad {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05);
+}
+
+.oversikt .fokus__rad:hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.3), 0 14px 26px -20px rgba(90, 60, 25, 0.6);
+}
+
+.oversikt .tumme {
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.06), 0 6px 12px -8px rgba(27, 25, 21, 0.5);
+}
+
+/* --- Nyckeltalen i toppen ------------------------------------------------ */
+.hero .kpi,
+.kort--mork.hero .kpi {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.7));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 22px 44px -32px rgba(90, 60, 25, 0.6);
+  transition: transform 0.45s var(--mjuk), box-shadow 0.45s var(--mjuk);
+}
+
+.hero .kpi:hover,
+.kort--mork.hero .kpi:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(201, 138, 69, 0.32),
+    0 28px 50px -32px rgba(143, 84, 36, 0.65);
+}
+
+.hero .kpi__ikon,
+.kort--mork.hero .kpi__ikon {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #38332c, #141210);
+  box-shadow: 0 6px 12px -7px rgba(27, 25, 21, 0.7);
+  color: #f6c88f;
+}
+
+.hero .kpi__tal {
+  font-weight: 600;
+}
+
+/* --- Intäkterna ------------------------------------------------------------ */
+.oversikt .graf__tal {
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.oversikt .graf__tal > div {
+  flex: 1 1 140px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+.oversikt .graf__tal b {
+  font-size: 1.1875rem;
+  letter-spacing: -0.02em;
+}
+
+.oversikt .graf__rut {
+  stroke: rgba(27, 25, 21, 0.08);
+}
+
+.oversikt path.graf__stapel {
+  filter: drop-shadow(0 6px 10px rgba(201, 128, 52, 0.25));
+}
+
+.oversikt path.graf__stapel--nu {
+  fill: #2a2622;
+  filter: drop-shadow(0 6px 10px rgba(27, 25, 21, 0.35));
+}
+
+.oversikt text.graf__stapel--nu {
+  fill: var(--virke-djup);
+  font-weight: 700;
+}
+
+/* Per hus. */
+.perhus {
+  display: grid;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.perhus__rubrik {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 4px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(27, 25, 21, 0.07);
+}
+
+.perhus__rubrik small {
+  font: 600 0.6875rem/1 var(--rubrik);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.perhus__rubrik span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.perhus__prick {
+  width: 8px;
+  height: 8px;
+  margin-left: 6px;
+  border-radius: 50%;
+}
+
+.perhus__prick--vunnet,
+.perhus__del--vunnet {
+  background: linear-gradient(90deg, #2a2622, #4a443c);
+}
+
+.perhus__prick--oppet,
+.perhus__del--oppet {
+  background: linear-gradient(90deg, #f6c88f, #e3a35a);
+}
+
+.perhus__rad {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 8.5em) minmax(0, 1fr) 4.6em;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 8px;
+  border-radius: 14px;
+  color: var(--text);
+  text-decoration: none;
+  transition: background 0.3s ease;
+  animation: perhus-in 0.7s var(--mjuk) backwards;
+  animation-delay: calc(0.4s + var(--i, 0) * 0.07s);
+}
+
+.perhus__rad:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.perhus__rad .tumme {
+  width: 54px;
+}
+
+.perhus__namn b {
+  display: block;
+  overflow: hidden;
+  font: 600 0.875rem/1.2 var(--rubrik);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perhus__namn small {
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.perhus__stapel {
+  display: flex;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(27, 25, 21, 0.06);
+}
+
+.perhus__del {
+  display: block;
+  height: 100%;
+  transform-origin: left;
+  animation: perhus-del 1.1s var(--mjuk) backwards;
+  animation-delay: calc(0.6s + var(--i, 0) * 0.07s);
+}
+
+.perhus__del + .perhus__del {
+  box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.9);
+}
+
+.perhus__summa {
+  font: 600 0.875rem/1 var(--rubrik);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes perhus-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+@keyframes perhus-del {
+  from { transform: scaleX(0); }
+}
+
+@media (max-width: 1100px) {
+  .oversikt__kol > .kort:last-child {
+    flex: none;
+  }
+}

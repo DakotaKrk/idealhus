@@ -173,6 +173,33 @@
 
   // Vunnet per månad, sex månader bakåt: en stapel per månad, värdet
   // ovanför och den pågående månaden i full färg. Ett mått, en axel.
+  // Affärerna per hus: vunnet mörkt och öppet ljust i samma stapel,
+  // skalat mot huset med störst summa. Förlorade räknas inte.
+  function perHus() {
+    var per = {};
+    db().affarer.forEach(function (a) {
+      if (a.forlorad) return;
+      var p = per[a.modell] || (per[a.modell] = { vunnet: 0, oppet: 0, antal: 0 });
+      if (a.steg === 'vunnen') p.vunnet += a.varde; else p.oppet += a.varde;
+      p.antal += 1;
+    });
+    var rader = IH.MODELLER.filter(function (m) { return per[m.id]; }).map(function (m) {
+      var p = per[m.id];
+      return { m: m, vunnet: p.vunnet, oppet: p.oppet, summa: p.vunnet + p.oppet, antal: p.antal };
+    }).sort(function (a, b) { return b.summa - a.summa; }).slice(0, 5);
+    if (!rader.length) return '';
+    var max = rader[0].summa || 1;
+    return '<div class="perhus"><p class="perhus__rubrik"><small>Per hus</small>' +
+      '<span><i class="perhus__prick perhus__prick--vunnet"></i>Vunnet<i class="perhus__prick perhus__prick--oppet"></i>Öppet</span></p>' +
+      rader.map(function (r, n) {
+        return '<a class="perhus__rad" href="#/salj" style="--i:' + n + '">' + tumme(r.m.bild) +
+          '<span class="perhus__namn"><b>' + e(r.m.namn) + '</b><small>' + r.antal + (r.antal === 1 ? ' affär' : ' affärer') + '</small></span>' +
+          '<span class="perhus__stapel"><i class="perhus__del perhus__del--vunnet" style="width:' + (r.vunnet / max * 100).toFixed(1) + '%"></i>' +
+          '<i class="perhus__del perhus__del--oppet" style="width:' + (r.oppet / max * 100).toFixed(1) + '%"></i></span>' +
+          '<b class="perhus__summa">' + IH.kort(r.summa) + '</b></a>';
+      }).join('') + '</div>';
+  }
+
   function intaktsgraf() {
     var nu = new Date();
     var mnamn = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
@@ -205,7 +232,7 @@
     }).join('');
     return '<div class="graf__ram"><svg class="graf" viewBox="0 0 ' + B + ' ' + H + '" role="img" aria-label="Vunnet per månad, sex månader: ' +
       man.map(function (x) { return mnamn[x.m] + ' ' + IH.kort(x.summa); }).join(', ') + '">' +
-      '<defs><linearGradient id="graf-stapel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0b56e" stop-opacity=".55"/><stop offset="1" stop-color="#f0b56e" stop-opacity=".22"/></linearGradient></defs>' +
+      '<defs><linearGradient id="graf-stapel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6c88f"/><stop offset="1" stop-color="#e3a35a"/></linearGradient></defs>' +
       [1 / 3, 2 / 3].map(function (t) { return '<path class="graf__rut" d="M0 ' + (top + t * (bas - top)).toFixed(1) + 'H' + B + '"/>'; }).join('') +
       '<path class="graf__bas" d="M0 ' + bas + 'H' + B + '"/>' + staplar +
       '</svg><div class="graf__tips" role="status" hidden></div></div>';
@@ -385,7 +412,7 @@
     var idag = new Date(); idag.setHours(23, 59, 59, 999);
     var uppg = db().uppgifter.filter(function (u) { return !u.klar && new Date(u.forfaller) <= idag; });
     var senaste = db().forfragningar.slice().sort(function (a, b) { return b.skapad < a.skapad ? -1 : 1; }).slice(0, 5);
-    var akt = db().aktiviteter.slice().sort(function (a, b) { return b.tid < a.tid ? -1 : 1; }).slice(0, 4);
+    var akt = db().aktiviteter.slice().sort(function (a, b) { return b.tid < a.tid ? -1 : 1; }).slice(0, 6);
     var fokus = smartaForslag();
 
     var text = (nya.length ? '<b>' + nya.length + ' ' + (nya.length === 1 ? 'ny förfrågan' : 'nya förfrågningar') + '</b> väntar på svar. ' : 'Inga obesvarade förfrågningar. ') +
@@ -426,7 +453,7 @@
           '<header class="kort__huvud"><h2><span class="kort__ikon">' + i('graf') + '</span>Intäkter</h2><span class="chip">Vunnet per månad</span></header>' +
           '<div class="kort__kropp"><div class="graf__tal"><div><small>Vunnet i år</small><b class="tal" data-rakna="' + Math.round(summa(vunnet)) + '" data-format="kr">' + IH.kr(summa(vunnet)) + '</b></div>' +
           '<div><small>Viktad pipeline</small><b class="tal" data-rakna="' + Math.round(viktat(oppna)) + '" data-format="kr">' + IH.kr(viktat(oppna)) + '</b></div>' +
-          '<div><small>Snittorder</small><b class="tal" data-rakna="' + Math.round(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '" data-format="kr">' + IH.kr(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '</b></div></div>' + intaktsgraf() + '</div>' +
+          '<div><small>Snittorder</small><b class="tal" data-rakna="' + Math.round(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '" data-format="kr">' + IH.kr(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '</b></div></div>' + intaktsgraf() + perHus() + '</div>' +
         '</section>' +
       '</div><div class="oversikt__kol">' +
         (fokus.length ? '<section class="kort" data-in>' +

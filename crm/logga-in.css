@@ -2,8 +2,8 @@
    Idealhus CRM – inloggningen (prototyp, 2026-10-02)
    Ljus och välkomnande: morgonljus över hela sidan. Vänster en
    hälsning efter tid på dygnet och rollerna, höger CRM:et i
-   miniatyr (2026-10-08, huset i 3D är borta), händelser som kommer
-   in och resan från förfrågan till nyckel.
+   miniatyr (2026-10-08, huset i 3D är borta) och händelser som
+   kommer in en i taget.
    Bara transform och opacitet rör sig.
    ============================================================ */
 .li {
@@ -479,7 +479,7 @@
    Kunden tyckte att huset i 3D såg billigt ut. Nu visar scenen själva
    verktyget: ett lutat glasfönster med översikten (talen räknas upp,
    staplarna växer, affärerna glider in), händelser som kommer in en i
-   taget och resan från förfrågan till nyckel. Allt i em, och fönstrets
+   taget. Allt i em, och fönstrets
    storlek följer rutan (container-enheter). */
 .li__hoger {
   position: relative;
@@ -920,7 +920,7 @@
 .flode {
   --d: 1.7;
   position: absolute;
-  bottom: 23%;
+  bottom: 9%;
   left: 5%;
   z-index: 3;
   display: grid;
@@ -996,129 +996,8 @@
   color: var(--text-3);
 }
 
-/* Resan längst ned (samma som förut, i glas). */
-.li__hoger .resa {
-  z-index: 3;
-  font-size: 1rem;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
-  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 24px 44px -30px rgba(90, 60, 25, 0.45);
-}
-
 @keyframes glas-in {
   from { opacity: 0; transform: translateY(20px) scale(0.96); }
-}
-
-/* Resan från förfrågan till nyckel, med en ljuspunkt som vandrar. */
-.resa {
-  position: absolute;
-  right: 6%;
-  bottom: 5%;
-  left: 6%;
-  padding: 14px 18px 16px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 24px 44px -30px rgba(90, 60, 25, 0.45);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  animation: glas-in 1s var(--mjuk) 1.5s backwards;
-}
-
-.resa__rubrik {
-  margin: 0 0 10px;
-  font: 700 0.625rem/1 var(--rubrik);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--virke-djup);
-}
-
-.resa__steg {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.resa__steg li {
-  display: grid;
-  justify-items: center;
-  gap: 7px;
-  font: 600 0.6875rem/1 var(--rubrik);
-  color: var(--text-2);
-}
-
-.resa__steg i {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: inset 0 0 0 2px #e3cfae;
-  transition: background-color 0.4s ease, box-shadow 0.5s ease, transform 0.6s var(--studs);
-}
-
-.resa__steg li {
-  transition: color 0.4s ease;
-}
-
-.resa__steg li.klar {
-  color: var(--text);
-}
-
-.resa__steg li.klar i {
-  background: #f0b56e;
-  box-shadow: inset 0 0 0 2px #c98a45, 0 0 0 5px rgba(240, 181, 110, 0.22);
-  transform: scale(1.18);
-}
-
-.resa__steg li.nu i {
-  box-shadow: inset 0 0 0 2px #c98a45, 0 0 0 7px rgba(240, 181, 110, 0.28), 0 0 16px rgba(240, 181, 110, 0.6);
-}
-
-.resa__spar {
-  --resa: 0;
-  position: absolute;
-  top: 44px;
-  right: calc(18px + 100% / 12 - 3px);
-  left: calc(18px + 100% / 12 - 3px);
-  height: 2px;
-  border-radius: 2px;
-  background: #ecdcc2;
-}
-
-.resa__spar i {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #f0b56e, #c98a45);
-  transform: scaleX(var(--resa));
-  transform-origin: left;
-  transition: transform 0.85s var(--mjuk), opacity 0.4s ease;
-}
-
-.resa__punkt {
-  position: absolute;
-  inset: 0;
-  transform: translateX(calc(var(--resa) * 100%));
-  transition: transform 0.85s var(--mjuk), opacity 0.4s ease;
-}
-
-.resa__punkt b {
-  position: absolute;
-  top: -5px;
-  left: -6px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 3px #f0b56e, 0 0 16px 4px rgba(240, 181, 110, 0.7);
-}
-
-.resa.nollst .resa__spar i,
-.resa.nollst .resa__punkt {
-  opacity: 0;
-  transition: opacity 0.4s ease;
 }
 
 .scen__not {
@@ -1274,10 +1153,6 @@
     left: 6%;
     width: auto;
     font-size: clamp(9.5px, 2.6cqw, 13px);
-  }
-
-  .li__hoger .resa {
-    display: none;
   }
 
   .scen__not {
@@ -1449,4 +1324,81 @@
     padding: 9px 11px;
     white-space: nowrap;
   }
+}
+
+/* --- Hälsningen och rubriken, finare (2026-10-08) -------------------------
+   Rubriken står på en rad där den får plats, utan stor lucka under, och
+   hälsningen har en ikon efter tid på dygnet i stället för en vit pärla. */
+.li__innehall {
+  max-width: 560px;
+}
+
+.li__halsning {
+  gap: 10px;
+  margin-bottom: 22px;
+  padding: 6px 15px 6px 6px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.6));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.25), 0 12px 26px -20px rgba(143, 84, 36, 0.6);
+}
+
+.li__sol,
+.li--kvall .li__sol,
+.li--natt .li__sol {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(160deg, #f6c88f, #e3a35a);
+  box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.18), 0 8px 16px -8px rgba(201, 128, 52, 0.8);
+  animation: none;
+}
+
+.li__sol::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: #3a2410;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.li--kvall .li__sol {
+  background: linear-gradient(160deg, #f7c08a, #c9706a);
+  box-shadow: 0 0 0 3px rgba(201, 112, 106, 0.16), 0 8px 16px -8px rgba(160, 80, 70, 0.7);
+}
+
+.li--kvall .li__sol::before {
+  background: #3b1d18;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M3 17.5h18M7 17.5a5 5 0 0 1 10 0M12 6.5v2.4M5.2 10.4l1.6 1.4M18.8 10.4l-1.6 1.4M8.5 21h7'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M3 17.5h18M7 17.5a5 5 0 0 1 10 0M12 6.5v2.4M5.2 10.4l1.6 1.4M18.8 10.4l-1.6 1.4M8.5 21h7'/%3E%3C/svg%3E");
+}
+
+.li--natt .li__sol {
+  background: linear-gradient(160deg, #4a5679, #1f2538);
+  box-shadow: 0 0 0 3px rgba(74, 86, 121, 0.18), 0 8px 16px -8px rgba(31, 37, 56, 0.8);
+}
+
+.li--natt .li__sol::before {
+  width: 14px;
+  height: 14px;
+  background: #f6d9a8;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M20 14.6A8.2 8.2 0 1 1 9.4 4a6.6 6.6 0 0 0 10.6 10.6z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M20 14.6A8.2 8.2 0 1 1 9.4 4a6.6 6.6 0 0 0 10.6 10.6z'/%3E%3C/svg%3E");
+}
+
+.li__titel {
+  margin: 0;
+  font-size: clamp(2.8rem, 1.5rem + 3.1vw, 4.7rem);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+}
+
+.li__rad {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.li__text {
+  max-width: 46ch;
+  margin: 16px 0 28px;
 }
