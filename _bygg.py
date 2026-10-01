@@ -158,6 +158,13 @@ TEMASKRIPT = ("<script>try{var t=new URLSearchParams(location.search).get('tema'
               "matchMedia('(prefers-color-scheme: dark)').matches))"
               "document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>")
 
+# Menyradens intro spelas bara första gången under besöket och på
+# startsidan (2026-10-05) - inte vid varje sidbyte.
+MENYSKRIPT = (r"<script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);"
+              "if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');"
+              "s.setItem('idealhus-meny','1')}catch(e){}</script>")
+TEMASKRIPT = TEMASKRIPT + MENYSKRIPT
+
 
 # Typsnitten ligger i fonts/ sedan 2026-09-30 (Poppins och Manrope, som
 # Uperformance) - inga anrop till Google. De två som syns direkt

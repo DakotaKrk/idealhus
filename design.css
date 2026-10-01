@@ -19373,3 +19373,145 @@ html:not([data-tema="mork"]) .ord-bokstav-ljus {
   }
 }
 
+/* Menyradens intro (logo, länkar, knappar) spelas bara första gången
+   under besöket och på startsidan. Skriptet i head sätter .meny-stilla
+   innan sidan ritas. */
+html.meny-stilla .site-header__inner::after,
+html.meny-stilla .logo__svg,
+html.meny-stilla .main-nav > *,
+html.meny-stilla .site-header__actions > *,
+html.meny-stilla .header-button::after {
+  animation: none !important;
+}
+
+/* =====================================================================
+   Modellkorten i glas (2026-10-05): genomskinliga kort med ljus kant
+   och mjuk skugga, och ett varmt och ett kallt ljus bakom rutnätet som
+   syns igenom. Ingen backdrop-filter - ljuset bakom är redan mjukt, och
+   tre stora kort med oskärpa gör rullningen tung på svagare enheter.
+   ===================================================================== */
+.katsida .model-grid {
+  position: relative;
+  isolation: isolate;
+}
+
+.katsida .model-grid::before {
+  content: "";
+  position: absolute;
+  inset: -6% -4% -8%;
+  z-index: -1;
+  background:
+    radial-gradient(38% 46% at 18% 32%, rgba(240, 181, 110, 0.42), transparent 70%),
+    radial-gradient(36% 44% at 82% 58%, rgba(184, 205, 224, 0.5), transparent 70%),
+    radial-gradient(34% 40% at 50% 96%, rgba(240, 181, 110, 0.3), transparent 72%),
+    radial-gradient(30% 36% at 55% 8%, rgba(255, 236, 205, 0.6), transparent 72%);
+  pointer-events: none;
+}
+
+.katsida .model-grid .model-card {
+  border: 0;
+  border-radius: 30px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.36));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 30px 60px -40px rgba(90, 60, 25, 0.5);
+  transition: transform 0.6s var(--mjuk), box-shadow 0.6s var(--mjuk), background-color 0.6s ease;
+}
+
+.katsida .model-grid .model-card:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 44px 80px -44px rgba(90, 60, 25, 0.6);
+}
+
+.katsida .model-grid .model-card__media {
+  border-radius: 22px;
+  box-shadow: 0 18px 36px -28px rgba(27, 25, 21, 0.55);
+}
+
+.katsida .model-grid .model-card__media img {
+  transition: transform 1.1s var(--mjuk);
+}
+
+.katsida .model-grid .model-card:hover .model-card__media img {
+  transform: scale(1.04);
+}
+
+.katsida .model-grid .model-card__rad {
+  border-bottom-color: rgba(27, 25, 21, 0.08);
+}
+
+.katsida .model-grid .model-card .model-card__data {
+  background: rgba(27, 25, 21, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+}
+
+.katsida .model-grid .model-card__data div {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.katsida .model-grid .jamfor-knapp {
+  border-color: rgba(27, 25, 21, 0.1);
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Mörkt läge: samma glas i grafit. */
+html[data-tema="mork"] .katsida .model-grid::before {
+  opacity: 0.35;
+}
+
+html[data-tema="mork"] .katsida .model-grid .model-card {
+  background: linear-gradient(160deg, rgba(247, 245, 240, 0.08), rgba(247, 245, 240, 0.03));
+  box-shadow:
+    inset 0 1px 0 rgba(247, 245, 240, 0.1),
+    inset 0 0 0 1px rgba(247, 245, 240, 0.08),
+    0 30px 60px -40px rgba(0, 0, 0, 0.7);
+}
+
+html[data-tema="mork"] .katsida .model-grid .model-card__data div,
+html[data-tema="mork"] .katsida .model-grid .jamfor-knapp {
+  background: rgba(247, 245, 240, 0.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .katsida .model-grid .model-card:hover .model-card__media img {
+    transform: none;
+  }
+}
+
+/* Glaskorten mer genomskinliga: mindre vitt i korten, starkare ljus bakom. */
+html:not([data-tema="mork"]) .katsida .model-grid::before {
+  background:
+    radial-gradient(40% 48% at 16% 30%, rgba(240, 181, 110, 0.62), transparent 70%),
+    radial-gradient(38% 46% at 84% 56%, rgba(167, 196, 222, 0.7), transparent 70%),
+    radial-gradient(36% 42% at 50% 98%, rgba(240, 181, 110, 0.45), transparent 72%),
+    radial-gradient(32% 38% at 52% 6%, rgba(255, 226, 184, 0.75), transparent 72%);
+}
+
+html:not([data-tema="mork"]) .katsida .model-grid .model-card {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.16));
+}
+
+html:not([data-tema="mork"]) .katsida .model-grid .model-card__data div {
+  background: rgba(255, 255, 255, 0.34);
+}
+
+html:not([data-tema="mork"]) .katsida .model-grid .jamfor-knapp {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Ljuset bakom korten slutade i en rak kant där nästa avsnitts tätare
+   bakgrund tog vid. Nu stannar det inom rutnätet och tonar ut mjukt
+   åt alla håll. */
+.katsida .model-grid::before {
+  inset: -4% -5% 0;
+  -webkit-mask-image: radial-gradient(75% 70% at 50% 50%, #000 55%, transparent 100%);
+  mask-image: radial-gradient(75% 70% at 50% 50%, #000 55%, transparent 100%);
+}
+
