@@ -474,3 +474,1463 @@ body {
   background: color-mix(in srgb, var(--s, #a39b8e) 22%, #fff);
   color: color-mix(in srgb, var(--s, #a39b8e) 60%, #1b1915);
 }
+
+/* =====================================================================
+   Kundmötet i ljust: samma morgonljus som resten, vitt glas på kort och
+   knappar, mörk text. Filmen på hantverksbilden får en ljus slöja i
+   stället för en mörk. Mörkt finns kvar där det är en accent: summan på
+   kvittot, valda flikar, pilen framåt.
+   ===================================================================== */
+.mote {
+  --krita: var(--text);
+  --ljus-2: rgba(27, 25, 21, 0.66);
+  --ljus-3: rgba(27, 25, 21, 0.48);
+  background:
+    radial-gradient(55% 60% at 100% 0%, rgba(255, 210, 150, 0.5), transparent 65%),
+    radial-gradient(50% 60% at 0% 100%, rgba(195, 222, 185, 0.45), transparent 65%),
+    radial-gradient(40% 40% at 20% 0%, rgba(232, 240, 245, 0.6), transparent 70%),
+    #f8f4ed;
+  color: var(--text);
+}
+
+/* Bildbytet: ingen mörk toning av bilden som är på väg in eller ut. */
+.mote__bild.in-h,
+.mote__bild.in-v,
+.mote__bild.ut-v,
+.mote__bild.ut-h {
+  filter: blur(10px);
+}
+
+/* Toppen och botten: vitt glas. */
+.mote__kund,
+.mote__tid,
+.mote__ikon,
+.mote__pil {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08), 0 10px 24px -20px rgba(90, 60, 25, 0.5);
+  color: var(--text);
+}
+
+.mote__kund,
+.mote__tid {
+  color: var(--text-2);
+}
+
+.mote__ikon:hover,
+.mote__pil:hover:not(:disabled) {
+  background: #fff;
+}
+
+.mote__ikon[aria-pressed="true"],
+.mote__pil--fram {
+  background: var(--kol);
+  box-shadow: 0 12px 26px -14px rgba(27, 25, 21, 0.8);
+  color: #f7f5f0;
+}
+
+.mote__botten {
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07), 0 24px 50px -28px rgba(90, 60, 25, 0.55);
+}
+
+.mote__prick i {
+  background: rgba(27, 25, 21, 0.18);
+}
+
+.mote__prick.nu i {
+  background: var(--virke-djup);
+}
+
+.mote__framsteg {
+  background: rgba(27, 25, 21, 0.08);
+}
+
+.mote__raknare {
+  color: var(--text-3);
+}
+
+@media (max-width: 900px) {
+  .mote .mote__topp {
+    background: linear-gradient(#f8f4ed 62%, rgba(248, 244, 237, 0));
+  }
+}
+
+/* Anteckningarna: ett vitt block till höger. */
+.mote__anteckning {
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07), 0 40px 80px -40px rgba(90, 60, 25, 0.6);
+}
+
+.mote__anteckning textarea {
+  background: #fbf9f5;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.09);
+  color: var(--text);
+}
+
+.mote__anteckning textarea:focus {
+  box-shadow: inset 0 0 0 1.5px var(--virke-djup);
+}
+
+.mote--anteckning .mote__scen {
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.08), 0 50px 100px -50px rgba(90, 60, 25, 0.6);
+}
+
+/* Text och små kort på bilderna. */
+.mote .mb__titel em {
+  background: linear-gradient(100deg, #8f5424 0%, #c98a45 30%, #e8a95e 50%, #c98a45 70%, #8f5424 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.mote .mb__etikett {
+  color: var(--virke-djup);
+}
+
+.mote .mb__etikett::before {
+  background: var(--virke-djup);
+}
+
+.mb__chips span,
+.husval__kort,
+.kalkyl__modell,
+.regeltal__ruta,
+.er__svar div,
+.nasta3 li,
+.husvisning__fakta,
+.er__forslag {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07), 0 16px 34px -28px rgba(90, 60, 25, 0.5);
+  color: var(--text);
+}
+
+.husval__kort:hover,
+.kalkyl__modell:hover {
+  background: #fff;
+}
+
+.husval__kort.vald,
+.kalkyl__modell.vald {
+  background: #fff;
+  box-shadow: inset 0 0 0 2px var(--virke), 0 20px 40px -28px rgba(143, 84, 36, 0.6);
+}
+
+.mb__foto {
+  box-shadow: 0 50px 90px -46px rgba(90, 60, 25, 0.6), 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+/* Hantverket: filmen bakom en ljus slöja, så texten är mörk. */
+.mb__slojan,
+.mb__slojan--vanster {
+  background: linear-gradient(90deg, rgba(248, 244, 237, 0.96) 0%, rgba(248, 244, 237, 0.86) 48%, rgba(248, 244, 237, 0.4) 100%);
+}
+
+/* Husen i 3D: en gräsplätt i dagsljus, som på inloggningen. */
+.husvisning {
+  background:
+    radial-gradient(60% 50% at 50% 70%, rgba(255, 255, 255, 0.5), transparent 70%),
+    linear-gradient(180deg, #fbeedd 0%, #f6efe3 45%, #e6efe0 100%);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 30px 60px -40px rgba(90, 60, 25, 0.5);
+}
+
+.husvisning__golv {
+  background:
+    radial-gradient(closest-side, rgba(255, 255, 255, 0.4), transparent 70%),
+    radial-gradient(closest-side, #a7c98f, #8ab873 62%, #76a560 86%, #6c9858);
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.6), 0 26px 40px -16px rgba(70, 95, 50, 0.4);
+  opacity: 1;
+}
+
+.husvisning__tal em {
+  color: var(--text);
+}
+
+/* Reglerna: växeln och husets siluett på ljus botten. */
+.regelvaxel {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08);
+}
+
+.regelvaxel button {
+  color: var(--text-2);
+}
+
+.regelvaxel button[aria-pressed="true"] {
+  color: var(--kol);
+}
+
+.regeltal__ruta i {
+  background: rgba(27, 25, 21, 0.08);
+}
+
+.hussil {
+  background:
+    radial-gradient(60% 70% at 50% 100%, rgba(240, 181, 110, 0.18), transparent 70%),
+    linear-gradient(rgba(143, 84, 36, 0.06) 1px, transparent 1px) 0 0 / 26px 26px,
+    linear-gradient(90deg, rgba(143, 84, 36, 0.06) 1px, transparent 1px) 0 0 / 26px 26px,
+    rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+.hussil__mark {
+  stroke: rgba(27, 25, 21, 0.35);
+}
+
+.hussil__spok {
+  stroke: rgba(27, 25, 21, 0.28);
+}
+
+.hussil__hus {
+  stroke: var(--virke-djup);
+}
+
+.hussil__fonster {
+  fill: rgba(240, 181, 110, 0.4);
+  stroke: rgba(27, 25, 21, 0.4);
+}
+
+.hussil__dorr {
+  fill: rgba(27, 25, 21, 0.7);
+  stroke: rgba(27, 25, 21, 0.4);
+}
+
+.hussil__niva,
+.hussil__matt {
+  stroke: var(--virke-djup);
+}
+
+.hussil__bredd {
+  fill: var(--text-2);
+}
+
+/* Resan: vita steg med träfärgad ring. */
+.resa7__nr {
+  background: #fff;
+  box-shadow: 0 0 0 6px #f8f4ed, inset 0 0 0 1.5px var(--virke-djup);
+  color: var(--virke-djup);
+}
+
+.mote__bild.nu .resa7__nr {
+  animation: none;
+}
+
+.vem--vi {
+  background: rgba(240, 181, 110, 0.22);
+  color: #8f5424;
+}
+
+.vem--ni {
+  background: rgba(159, 194, 201, 0.3);
+  color: #2f5f6a;
+}
+
+.vem--tillsammans {
+  background: rgba(127, 224, 166, 0.26);
+  color: #2f7a4d;
+}
+
+/* Kalkylen och kvittot. */
+.kalkyl__chip {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.09);
+  color: var(--text-2);
+}
+
+.kalkyl__chip.vald {
+  background: var(--kol);
+  color: #f7f5f0;
+}
+
+.kvitto {
+  box-shadow: 0 50px 100px -50px rgba(90, 60, 25, 0.6), 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+.kvitto__summa {
+  color: #f7f5f0;
+}
+
+/* Er förfrågan och nästa steg. */
+.er__citat {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.5), 0 16px 34px -28px rgba(90, 60, 25, 0.5);
+}
+
+.er__citat::before {
+  color: var(--virke);
+}
+
+.mb--nasta::before {
+  background:
+    radial-gradient(50% 60% at 85% 20%, rgba(240, 181, 110, 0.22), transparent 70%),
+    linear-gradient(rgba(143, 84, 36, 0.05) 1px, transparent 1px) 0 0 / 44px 44px,
+    linear-gradient(90deg, rgba(143, 84, 36, 0.05) 1px, transparent 1px) 0 0 / 44px 44px;
+}
+
+.mote .knapp--glas {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.1), 0 10px 24px -18px rgba(90, 60, 25, 0.5);
+  color: var(--text);
+}
+
+/* Kvittot förblir ett vitt papper, logotypen är mörk, välkomstbilden
+   staplas på mobilen. */
+.mote .kvitto {
+  background: #fff;
+  color: var(--text);
+}
+
+.mote .kvitto__summa {
+  background: var(--kol);
+  color: #f7f5f0;
+}
+
+.mote .mote__topp img {
+  filter: none;
+}
+
+@media (max-width: 900px) {
+  .mote .mb--titel .mb__in--delad {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --- Affärspanelen: priset i ett vitt kort uppe till höger, så husets
+   skylt nere till vänster alltid syns. ------------------------------- */
+.affark__glas {
+  top: 14px;
+  right: 14px;
+  bottom: auto;
+  left: auto;
+  width: max-content;
+  max-width: 60%;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 14px 30px -18px rgba(90, 60, 25, 0.5);
+  color: var(--text);
+}
+
+.affark__glas small {
+  color: var(--virke-djup);
+}
+
+.affark__glas b {
+  font-size: 1.375rem;
+}
+
+.affark__glas span {
+  color: var(--text-3);
+}
+
+/* Projektpanelens 3D: ljus himmel och gräs i stället för en mörk låda. */
+.projark__3d {
+  background:
+    radial-gradient(60% 40% at 50% 82%, rgba(140, 185, 115, 0.55), transparent 70%),
+    linear-gradient(180deg, #fbeedd 0%, #f6efe3 50%, #e8efe2 100%);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+.projark__glas {
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 14px 30px -18px rgba(90, 60, 25, 0.5);
+  color: var(--text);
+}
+
+.projark__glas small {
+  color: var(--virke-djup);
+}
+
+.projark__glas span {
+  color: var(--text-3);
+}
+
+/* --- Kundresan på kundsidan -------------------------------------------- */
+.kundresa {
+  --nu: 0;
+  padding: 18px 22px 20px;
+  margin-bottom: 16px;
+}
+
+.kundresa__huvud {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.kundresa__huvud .etikett {
+  margin: 0;
+}
+
+.kundresa__huvud small {
+  font-size: 0.8125rem;
+  color: var(--text-3);
+}
+
+.kundresa__rad {
+  position: relative;
+}
+
+.kundresa__steg {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kundresa__steg li {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  font: 600 0.75rem/1 var(--rubrik);
+  color: var(--text-3);
+  animation: in-rad 0.7s var(--mjuk) backwards;
+  animation-delay: calc(0.2s + var(--n) * 0.07s);
+}
+
+.kundresa__steg span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--kant);
+  color: var(--text-3);
+}
+
+.kundresa__steg span .i {
+  width: 16px;
+  height: 16px;
+}
+
+.kundresa__steg li.klar,
+.kundresa__steg li.nu {
+  color: var(--text);
+}
+
+.kundresa__steg li.klar span {
+  background: var(--kol);
+  box-shadow: none;
+  color: var(--virke);
+}
+
+.kundresa__steg li.nu span {
+  background: var(--virke);
+  box-shadow: 0 0 0 5px rgba(240, 181, 110, 0.22);
+  color: var(--kol);
+  animation: nu-puls 2.4s ease-in-out infinite;
+}
+
+.kundresa__spar {
+  position: absolute;
+  top: 17px;
+  right: calc(100% / 12);
+  left: calc(100% / 12);
+  height: 2px;
+  border-radius: 2px;
+  background: var(--kant);
+}
+
+.kundresa__spar i {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--kol), var(--virke));
+  transform: scaleX(calc(var(--nu) / 5));
+  transform-origin: left;
+  animation: stapel-x 1.2s var(--mjuk) 0.35s backwards;
+}
+
+/* --- Veckan på Att göra -------------------------------------------------- */
+.veckoband {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.9fr);
+  gap: 24px;
+  align-items: center;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+}
+
+.veckoband__ord .etikett {
+  margin: 0 0 6px;
+}
+
+.veckoband__ord b {
+  display: block;
+  font: 600 1.125rem/1.25 var(--rubrik);
+  letter-spacing: -0.02em;
+}
+
+.veckoband__ord small {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  color: #2f7a4d;
+}
+
+.veckoband__ord small .i {
+  width: 14px;
+  height: 14px;
+}
+
+.veckoband__ord .veckoband__sen {
+  color: #b5541f;
+}
+
+.veckoband__dagar {
+  display: flex;
+  gap: 6px;
+  height: 74px;
+}
+
+.veckoband__dagar span {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.veckoband__dagar b {
+  font: 600 0.6875rem/1 var(--rubrik);
+  color: var(--text-2);
+}
+
+.veckoband__dagar i {
+  width: 100%;
+  max-width: 34px;
+  height: calc(var(--a) * 40px + 3px);
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, rgba(240, 181, 110, 0.55), rgba(240, 181, 110, 0.2));
+  transform-origin: bottom;
+  animation: stapel 0.9s var(--mjuk) backwards;
+  animation-delay: calc(0.3s + var(--n) * 0.06s);
+}
+
+.veckoband__dagar .idag i {
+  background: linear-gradient(180deg, #ffd49a, var(--virke));
+  box-shadow: 0 0 14px rgba(240, 181, 110, 0.5);
+}
+
+.veckoband__dagar small {
+  font-size: 0.6875rem;
+  color: var(--text-3);
+}
+
+.veckoband__dagar .idag small {
+  color: var(--virke-djup);
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .veckoband {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kundresa__steg li b {
+    font-size: 0.625rem;
+  }
+}
+
+/* --- Kundkorten: huset kunden tittar på och resan som prickar ---------- */
+.kundkort {
+  position: relative;
+}
+
+.kundkort__hus {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 64px;
+  aspect-ratio: 1600 / 1062;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px -14px rgba(27, 25, 21, 0.5);
+  transition: transform 0.5s var(--mjuk);
+}
+
+.kundkort:hover .kundkort__hus {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.kundkort__hus img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kundkort__resa {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.kundkort__resa i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(27, 25, 21, 0.1);
+}
+
+.kundkort__resa i.klar {
+  background: var(--kol);
+}
+
+.kundkort__resa i.nu {
+  background: var(--virke);
+  box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.25);
+}
+
+.kundkort__resa small {
+  margin-left: 6px;
+  font: 600 0.6875rem/1 var(--rubrik);
+  color: var(--text-3);
+}
+
+/* --- Offertens läge och giltighet --------------------------------------- */
+.ostatus {
+  --nu: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 16px 22px;
+}
+
+.ostatus__steg {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 520px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ostatus__steg::before,
+.ostatus__steg::after {
+  content: "";
+  position: absolute;
+  top: 17px;
+  right: calc(100% / 6);
+  left: calc(100% / 6);
+  height: 2px;
+  border-radius: 2px;
+  background: var(--kant);
+}
+
+.ostatus__steg::after {
+  background: linear-gradient(90deg, var(--kol), var(--virke));
+  transform: scaleX(calc(var(--nu) / 2));
+  transform-origin: left;
+  animation: stapel-x 1.1s var(--mjuk) 0.3s backwards;
+}
+
+.ostatus__steg li {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  font: 600 0.75rem/1 var(--rubrik);
+  color: var(--text-3);
+}
+
+.ostatus__steg span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--kant);
+  color: var(--text-3);
+}
+
+.ostatus__steg span .i {
+  width: 16px;
+  height: 16px;
+}
+
+.ostatus__steg li.klar,
+.ostatus__steg li.nu {
+  color: var(--text);
+}
+
+.ostatus__steg li.klar span {
+  background: var(--kol);
+  box-shadow: none;
+  color: var(--virke);
+}
+
+.ostatus__steg li.nu span {
+  background: var(--virke);
+  box-shadow: 0 0 0 5px rgba(240, 181, 110, 0.22);
+  color: var(--kol);
+}
+
+.ostatus__giltig {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px 8px 8px;
+  border-radius: 999px;
+  background: var(--ben);
+}
+
+.ostatus__giltig .poang {
+  width: 40px;
+  height: 40px;
+}
+
+.ostatus__giltig .poang b {
+  font-size: 0.75rem;
+}
+
+.ostatus__giltig .poang .i {
+  width: 16px;
+  height: 16px;
+  color: #2f7a4d;
+}
+
+.ostatus__giltig small {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--text-3);
+}
+
+.ostatus__giltig > span:last-child b {
+  font: 600 0.875rem/1.2 var(--rubrik);
+}
+
+.ostatus__giltig--varm {
+  background: #fbeee4;
+}
+
+.ostatus__giltig--varm > span:last-child b {
+  color: #b5541f;
+}
+
+/* --- Kundmötets förhandsvisning ---------------------------------------- */
+.forhand,
+.forhand__tom {
+  margin: 4px 0 14px;
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--ben);
+}
+
+.forhand {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  animation: in-rad 0.5s var(--mjuk);
+}
+
+.forhand__hus {
+  width: 96px;
+  flex: none;
+  aspect-ratio: 1600 / 1062;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 12px 24px -16px rgba(27, 25, 21, 0.6);
+}
+
+.forhand small {
+  display: block;
+  font: 700 0.625rem/1 var(--rubrik);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--virke-djup);
+}
+
+.forhand b {
+  display: block;
+  margin-top: 5px;
+  font: 600 1.0625rem/1.2 var(--rubrik);
+  letter-spacing: -0.02em;
+}
+
+.forhand span {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.8125rem;
+  color: var(--text-3);
+}
+
+.forhand em {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.forhand__tom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8125rem;
+  color: var(--text-3);
+}
+
+.forhand__tom .i {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--virke-djup);
+}
+
+/* --- Produktionens tidslinje: ring med checklistan runt husen ------------- */
+.bana__hus {
+  position: relative;
+}
+
+.bana__ring {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 10px -4px rgba(27, 25, 21, 0.45);
+}
+
+.bana__ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.bana__ring circle {
+  fill: none;
+  stroke: rgba(27, 25, 21, 0.1);
+  stroke-width: 4;
+}
+
+.bana__ring .bana__ring-fyll {
+  stroke: var(--virke-djup);
+  stroke-linecap: round;
+  stroke-dasharray: var(--p) 100;
+  animation: poang-in 1.2s var(--mjuk) 0.5s backwards;
+}
+
+.bana__vecka.nu small {
+  color: var(--virke-djup);
+  font-weight: 700;
+}
+
+.bana__vecka.nu > i {
+  background: var(--virke);
+  box-shadow: 0 0 0 4px rgba(240, 181, 110, 0.25);
+  animation: nu-puls 2.4s ease-in-out infinite;
+}
+
+/* --- Säljtavlans kort: dagarna i steget --------------------------------- */
+.aff {
+  position: relative;
+  overflow: hidden;
+}
+
+.aff__dagar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--a) * 100%);
+  height: 3px;
+  background: linear-gradient(90deg, rgba(240, 181, 110, 0.5), var(--virke));
+  transform-origin: left;
+  animation: stapel-x 1s var(--mjuk) 0.4s backwards;
+}
+
+.aff__dagar--varm {
+  background: linear-gradient(90deg, var(--virke), #d9733a);
+}
+
+/* --- Tomma tillstånd ------------------------------------------------------ */
+.spalt__tom {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 26px 10px;
+  border-color: rgba(27, 25, 21, 0.12);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.spalt__tom .i {
+  width: 22px;
+  height: 22px;
+  color: rgba(27, 25, 21, 0.25);
+}
+
+@media (max-width: 700px) {
+  .ostatus {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ostatus__giltig {
+    justify-self: start;
+  }
+}
+
+/* =====================================================================
+   Kunder: kundbasen överst, var kunderna är på resan, verktygsrad med
+   sortering och kort/lista, kundkort med snabbval vid hovring.
+   ===================================================================== */
+.kundtopp {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.9fr) minmax(0, 1.4fr);
+  gap: 28px;
+  margin-bottom: 16px;
+  padding: 24px 26px 22px;
+}
+
+.kundtopp__ord {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
+.kundtopp__ord .etikett {
+  margin: 0;
+}
+
+.kundtopp__stort {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+}
+
+.kundtopp__stort b {
+  font: 600 clamp(3rem, 2.2rem + 2vw, 4.4rem)/0.9 var(--rubrik);
+  letter-spacing: -0.05em;
+  background: linear-gradient(180deg, #e8a95e, #c98a45 55%, #8f5424);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.kundtopp__stort span {
+  font: 600 1.0625rem/1.25 var(--rubrik);
+}
+
+.kundtopp__stort small {
+  display: block;
+  margin-top: 4px;
+  font: 400 0.75rem/1.4 var(--sans);
+  color: var(--text-3);
+}
+
+.kundtopp__tal {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: start;
+  gap: 24px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(27, 25, 21, 0.08);
+}
+
+.kundtopp__tal small {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.6875rem;
+  color: var(--text-3);
+}
+
+.kundtopp__tal b {
+  font: 600 1.5rem/1 var(--rubrik);
+  letter-spacing: -0.03em;
+}
+
+.kundtopp__typ .kallbar {
+  margin-bottom: 8px;
+}
+
+.kundtopp__varma small {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.kundtopp__varma small .i {
+  width: 13px;
+  height: 13px;
+  color: #b5541f;
+}
+
+.kundtopp__varma > span {
+  display: flex;
+  align-items: center;
+}
+
+.kundtopp__varma button {
+  padding: 0;
+  margin-right: 4px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.4s var(--studs);
+}
+
+.kundtopp__varma button:hover {
+  transform: translateY(-3px) scale(1.08);
+}
+
+.kundtopp__varma .avatar {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px rgba(232, 137, 74, 0.55);
+}
+
+.kundtopp__varma em {
+  margin-left: 10px;
+  font: 600 0.75rem/1 var(--rubrik);
+  font-style: normal;
+  color: var(--text-3);
+}
+
+/* Var på resan: sex kolumner med staplar, klickbara filter. */
+.kundtopp__resa {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+}
+
+.kundtopp__resahuvud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 14px;
+}
+
+.kundtopp__resahuvud .etikett {
+  margin: 0;
+}
+
+.kundtopp__resahuvud small {
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.resakol {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  align-items: end;
+  min-height: 190px;
+}
+
+.resakol__steg {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  gap: 8px;
+  height: 100%;
+  padding: 12px 6px 12px;
+  border: 0;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  color: var(--text);
+  cursor: pointer;
+  animation: in-rad 0.7s var(--mjuk) backwards;
+  animation-delay: calc(0.25s + var(--n) * 0.06s);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.45s var(--mjuk);
+}
+
+.resakol__steg:hover {
+  background: #fff;
+  transform: translateY(-3px);
+}
+
+.resakol__steg.vald {
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--virke), 0 18px 36px -26px rgba(143, 84, 36, 0.6);
+}
+
+.resakol__steg > b {
+  font: 600 1.125rem/1 var(--rubrik);
+  letter-spacing: -0.03em;
+}
+
+.resakol__stapel {
+  display: block;
+  width: min(100%, 38px);
+  height: calc(var(--a) * 70px + 4px);
+  border-radius: 8px 8px 3px 3px;
+  background: linear-gradient(180deg, #f6c68d, rgba(240, 181, 110, 0.35));
+  transform-origin: bottom;
+  animation: stapel 1s var(--mjuk) backwards;
+  animation-delay: calc(0.45s + var(--n) * 0.07s);
+}
+
+.resakol__steg.vald .resakol__stapel {
+  background: linear-gradient(180deg, #ffd49a, var(--virke));
+  box-shadow: 0 0 16px rgba(240, 181, 110, 0.5);
+}
+
+.resakol__ikon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: var(--virke-ljus);
+  color: var(--virke-djup);
+}
+
+.resakol__ikon .i {
+  width: 15px;
+  height: 15px;
+}
+
+.resakol__steg small {
+  font: 600 0.6875rem/1 var(--rubrik);
+  color: var(--text-2);
+}
+
+/* Verktygsraden */
+.kundverktyg {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.kundverktyg .flikar--filter {
+  margin-bottom: 0;
+}
+
+.kundverktyg__hoger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.kundsort {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.09);
+  color: var(--text-3);
+}
+
+.kundsort .i {
+  width: 15px;
+  height: 15px;
+}
+
+.kundsort select {
+  padding: 10px 26px 10px 2px;
+  border: 0;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231b1915' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 6px center / 14px;
+  font: 600 0.8125rem/1 var(--rubrik);
+  color: var(--text);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.flikar--vy button {
+  min-width: 40px;
+  padding: 0 10px;
+}
+
+.flikar--vy .i {
+  width: 16px;
+  height: 16px;
+}
+
+/* Kundkorten */
+.kundkort {
+  cursor: pointer;
+  isolation: isolate;
+}
+
+.kundkort:focus-visible {
+  outline: none;
+  box-shadow: var(--skugga), inset 0 0 0 2px var(--virke);
+}
+
+.kundkort__topp {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kundkort__topp .kundkort__namn {
+  flex: 1;
+  min-width: 0;
+}
+
+.kundkort__topp .kundkort__namn b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kundkort .kundkort__hus {
+  position: static;
+  flex: none;
+  width: 68px;
+}
+
+.kundkort--varm::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(80% 60% at 100% 0%, rgba(240, 181, 110, 0.18), transparent 70%);
+}
+
+.kundkort__flagga {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: max-content;
+  padding: 5px 10px 5px 8px;
+  border-radius: 999px;
+  background: var(--virke-ljus);
+  font: 600 0.6875rem/1 var(--rubrik);
+  color: var(--virke-djup);
+}
+
+.kundkort__flagga i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--virke);
+  animation: ny-prick 1.8s ease-out infinite;
+}
+
+.kundkort__flagga .i {
+  width: 12px;
+  height: 12px;
+}
+
+.kundkort__flagga--sen {
+  background: #fbeee4;
+  color: #b5541f;
+}
+
+/* Snabbvalen glider upp när man pekar på kortet. */
+.kundkort__snabb {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08), 0 14px 30px -18px rgba(90, 60, 25, 0.6);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.45s var(--mjuk);
+  pointer-events: none;
+}
+
+.kundkort:hover .kundkort__snabb,
+.kundkort:focus-within .kundkort__snabb {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.kundkort__snabb button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.35s var(--studs);
+}
+
+.kundkort__snabb button:hover {
+  background: var(--kol);
+  color: var(--krita);
+  transform: scale(1.08);
+}
+
+.kundkort__snabb .i {
+  width: 15px;
+  height: 15px;
+}
+
+@media (hover: none) {
+  .kundkort__snabb {
+    position: static;
+    justify-content: flex-start;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    background: var(--ben);
+    box-shadow: none;
+  }
+}
+
+/* Listan */
+.tabell__kund {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tabell__kund b {
+  display: block;
+}
+
+.tabell__kund small {
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.tabell--kunder .tabell__hus img {
+  width: 48px;
+  height: 32px;
+}
+
+@media (max-width: 1100px) {
+  .kundtopp {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .resakol {
+    min-height: 160px;
+  }
+}
+
+@media (max-width: 700px) {
+  .kundverktyg__hoger {
+    margin-left: 0;
+  }
+
+  .resakol {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    min-height: 0;
+  }
+
+  .resakol__steg {
+    height: auto;
+  }
+
+  .tabell--kunder th:nth-child(2),
+  .tabell--kunder td:nth-child(2),
+  .tabell--kunder th:nth-child(n+4),
+  .tabell--kunder td:nth-child(n+4) {
+    display: none;
+  }
+}
+
+/* Snabbvalen tar fotens plats när man pekar på kortet – inget ligger
+   över texten. På pekskärm står de alltid under foten. */
+.kundkort__fot {
+  transition: opacity 0.25s ease;
+}
+
+@media (hover: hover) {
+  .kundkort:hover .kundkort__fot,
+  .kundkort:focus-within .kundkort__fot {
+    opacity: 0;
+  }
+
+  .kundkort__snabb {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    justify-content: space-between;
+    padding: 4px;
+  }
+
+  .kundkort__snabb button {
+    flex: 1;
+    width: auto;
+    height: 34px;
+    border-radius: 999px;
+  }
+}
+
+/* Kundkortet: toppraden får inte växa ut ur kortet när namnet är långt
+   (huset till höger kapades). Resan i toppkortet hugger sitt innehåll
+   och står centrerad i stället för att dra ut tomma kolumner. */
+.kundkort__topp {
+  min-width: 0;
+}
+
+.kundkort__topp .kundkort__namn small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kundtopp__resa {
+  grid-template-rows: auto auto;
+  align-content: center;
+}
+
+.resakol {
+  min-height: 0;
+  align-items: end;
+}
+
+.resakol__steg {
+  height: auto;
+  padding: 14px 6px 14px;
+}
+
+.resakol__stapel {
+  height: calc(var(--a) * 96px + 6px);
+}
+
+@media (max-width: 1100px) {
+  .resakol {
+    min-height: 0;
+  }
+}
+
+/* Resans kolumner lika höga (staplarna ligger i botten), och namnen på
+   korten bryts på två rader i stället för att kapas. */
+.resakol {
+  align-items: stretch;
+}
+
+.kundkort__topp .kundkort__namn b {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+/* Bredare kundkort – hellre två generösa kolumner än tre trånga. */
+.kundnat {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}

@@ -214,7 +214,7 @@
     mv.classList.remove('in');
     setTimeout(function () {
       mv.innerHTML = '<model-viewer src="' + m.glb + '" alt="' + e(m.namn) + ' i 3D" camera-controls auto-rotate auto-rotate-delay="0" rotation-per-second="14deg" ' +
-        'camera-orbit="32deg 74deg auto" interaction-prompt="none" shadow-intensity="1" shadow-softness="0.9" exposure="1.1" environment-image="neutral" disable-zoom></model-viewer>';
+        'camera-orbit="32deg 74deg auto" interaction-prompt="none" shadow-intensity="1.1" shadow-softness="0.9" exposure="1.38" environment-image="neutral" tone-mapping="neutral" disable-zoom></model-viewer>';
       mv.classList.add('in');
     }, IH.lugn ? 0 : 220);
     fakta.innerHTML = '<small>' + e(m.kategori) + '</small><b>' + e(m.namn) + '</b><div class="husvisning__tal"><span><em>' + m.yta + '</em> m²</span><span><em>' + m.rum + '</em> rum</span><span><em>' + e(m.matt) + '</em></span></div>' +
