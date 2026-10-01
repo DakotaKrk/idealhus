@@ -317,11 +317,11 @@
     }).join('');
     return '<a class="sido__logo" href="#/"><img src="../images/idealhus_logo.svg" alt="Idealhus"><span class="sido__crm">CRM <small>· Prototyp</small></span></a>' +
       '<nav class="sido__nav" aria-label="CRM"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
-      '<div class="sido__fot">' +
+      '<div class="sido__fot"><button class="sido__mer" type="button" tabindex="-1" aria-hidden="true" data-g="sido-mer">Mer ' + IH.i('pil') + '</button>' +
       '<button class="anv" type="button" data-g="byt-anvandare"><span class="avatar" style="--av:' + jag.farg + '">' + IH.initialer(jag.namn) + '</span>' +
       '<span><b>' + IH.e(jag.namn) + '</b><small>' + jag.titel + ' · byt användare</small></span>' + IH.i('pil') + '</button>' +
-      '<div class="sido__smalt"><a href="../index.html" data-g="lamna">' + IH.i('hem') + 'Hemsidan</a>' +
-      '<button type="button" data-g="logga-ut">' + IH.i('utloggning') + 'Logga ut</button></div></div>';
+      '<div class="sido__smalt"><a href="../index.html" data-g="lamna" title="Till hemsidan">' + IH.i('hem') + 'Hemsidan</a>' +
+      '<button type="button" data-g="logga-ut" title="Logga ut">' + IH.i('utloggning') + 'Logga ut</button></div></div>';
   }
 
   function mobilmeny() {
@@ -358,7 +358,35 @@
     m.style.height = a.offsetHeight + 'px';
     m.style.transform = 'translateY(' + a.offsetTop + 'px)';
     if (direkt) { void m.offsetWidth; m.style.transition = ''; }
+    // I låga fönster rullar menyn: den valda raden ska alltid synas.
+    if (a.offsetTop < nav.scrollTop || a.offsetTop + a.offsetHeight > nav.scrollTop + nav.clientHeight) {
+      nav.scrollTo({ top: Math.max(0, a.offsetTop - nav.clientHeight / 2 + a.offsetHeight / 2), behavior: direkt ? 'auto' : 'smooth' });
+    }
+    sidoMer();
   }
+
+  // Visar "Mer" när det finns rader under kanten och skuggan överst när
+  // menyn är rullad.
+  function sidoMer() {
+    var nav = $('.sido__nav'), sido = $('.sido');
+    if (!nav || !sido) return;
+    sido.classList.toggle('sido--mer', nav.scrollTop + nav.clientHeight < nav.scrollHeight - 6);
+    sido.classList.toggle('sido--rullad', nav.scrollTop > 4);
+  }
+  document.addEventListener('scroll', function (ev) { if (ev.target.classList && ev.target.classList.contains('sido__nav')) sidoMer(); }, true);
+  window.addEventListener('resize', function () { flyttaMarkor(true); });
+
+  // Mjuk krusning där man trycker, i menyn och på mobilmenyn.
+  document.addEventListener('pointerdown', function (ev) {
+    var el = ev.target.closest && ev.target.closest('.sido__lank, .anv, .sido__smalt a, .sido__smalt button, .sido__logo, .mobilmeny a, .mobilmeny button');
+    if (!el || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var r = el.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2.2;
+    var k = document.createElement('span');
+    k.className = 'krusning';
+    k.style.cssText = 'width:' + d + 'px;height:' + d + 'px;left:' + (ev.clientX - r.left - d / 2) + 'px;top:' + (ev.clientY - r.top - d / 2) + 'px';
+    el.appendChild(k);
+    setTimeout(function () { k.remove(); }, 750);
+  });
 
   IH.uppdateraMeny = function () {
     var sido = $('.sido');
@@ -374,6 +402,11 @@
     var vy = IH.nuvarande.vy;
     $$('[data-vy]').forEach(function (a) {
       var ja = a.getAttribute('data-vy') === vy;
+      // Ett litet hopp i ikonen när raden blir vald (inte vid omritning).
+      if (ja && !direkt && !a.classList.contains('aktiv')) {
+        a.classList.remove('hopp'); void a.offsetWidth; a.classList.add('hopp');
+        a.addEventListener('animationend', function slut(ev) { if (ev.target === a.firstElementChild) { a.classList.remove('hopp'); a.removeEventListener('animationend', slut); } });
+      }
       a.classList.toggle('aktiv', ja);
       if (ja) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
@@ -717,6 +750,10 @@
     IH.uppdateraMeny();
     IH.ga(u.roll === 'prod' ? '#/produktion' : '#/');
     IH.toast('Inloggad som ' + u.namn, u.titel, 'kunder');
+  };
+  IH.G['sido-mer'] = function () {
+    var nav = $('.sido__nav');
+    if (nav) nav.scrollBy({ top: nav.clientHeight * 0.7, behavior: 'smooth' });
   };
   IH.G.mer = function () {
     var poster = [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote'],

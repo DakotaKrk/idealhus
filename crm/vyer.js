@@ -482,13 +482,23 @@
      ================================================================ */
   var fFilter = 'alla';
 
+  // Emoji för miljön, källan och statusen – samma i listan, toppen och läsrutan.
+  var MILJO_EMOJI = { 'Vid havet': '🌊', 'I skogen': '🌲', 'På fjället': '🏔️', 'I trädgården': '🌷' };
+  var KALLA_EMOJI = { 'Webbformulär': '🌐', 'Verktyget': '🧭', 'Mejl': '✉️', 'Telefon': '📞' };
+  var FSTATUS_EMOJI = { alla: '📬', ny: '✨', kontaktad: '📞', kvalificerad: '🤝', ej: '💤' };
+  function vantatText(h) { return h < 1 ? 'under 1 h' : h < 48 ? Math.floor(h) + ' h' : Math.floor(h / 24) + ' dagar'; }
+
   function fRad(f, vald) {
     var s = fstatus(f.status);
+    var h = vantat(f), over = h > SVARSMAL;
     return '<a class="fl' + (f.status === 'ny' ? ' fl--ny' : '') + (vald ? ' vald' : '') + '" href="#/forfragningar/' + f.id + '" data-fid="' + f.id + '">' +
-      '<span class="fl__bild"><img src="' + (IH.MILJO[f.miljo] || '../images/hus-r2.webp') + '" alt="" loading="lazy" decoding="async">' + (f.status === 'ej' ? '' : poangRing(leadpoang(f))) + '</span>' +
+      '<span class="fl__bild"><img src="' + (IH.MILJO[f.miljo] || '../images/hus-r2.webp') + '" alt="" loading="lazy" decoding="async">' +
+        (MILJO_EMOJI[f.miljo] ? '<i class="fl__miljo" title="' + e(f.miljo) + '" aria-hidden="true">' + MILJO_EMOJI[f.miljo] + '</i>' : '') +
+        (f.status === 'ej' ? '' : poangRing(leadpoang(f))) + '</span>' +
       '<span class="fl__text"><b>' + e(f.namn) + '</b><small>' + e(f.hustyp) + ' · ' + e(f.ort) + '</small><em>' + e(f.beskrivning) + '</em></span>' +
-      '<span class="fl__meta"><span class="tid">' + IH.sedan(f.skapad) + '</span>' + statusChip(s.farg, s.namn) + '</span>' +
-      (f.status === 'ny' ? '<i class="fl__sla' + (vantat(f) > SVARSMAL ? ' fl__sla--over' : '') + '" style="--a:' + Math.min(1, vantat(f) / SVARSMAL).toFixed(3) + '"></i>' : '') + '</a>';
+      '<span class="fl__meta"><span class="tid">' + IH.sedan(f.skapad) + '</span>' + statusChip(s.farg, s.namn) +
+        (f.status === 'ny' ? '<span class="fl__vantar' + (over ? ' fl__vantar--over' : '') + '" title="Väntat ' + vantatText(h) + ' · mål ' + SVARSMAL + ' h">' + (over ? '⏰ ' : '⏳ ') + vantatText(h) + '</span>' : '') +
+      '</span></a>';
   }
   function vantat(f) { return Math.max(0, (Date.now() - new Date(f.skapad)) / 36e5); }
 
@@ -715,10 +725,10 @@
       '</header>' + forlopp(f) + nastaBasta(f, aff) +
       '<div class="fd__mitt"><div class="fd__bild" data-tilt><img src="' + (IH.MILJO[f.miljo] || '../images/hus-r2.webp') + '" alt="" decoding="async"><span class="fd__skylt"><small>Var ska huset stå?</small>' + e(f.miljo) + '</span></div>' +
       '<div class="fd__svar">' +
-        '<div><small>Vad funderar du på?</small><b>' + e(f.hustyp) + '</b></div>' +
-        '<div><small>Användning</small><b>' + e(f.anvandning) + '</b></div>' +
-        '<div><small>Ort</small><b>' + e(f.ort) + '</b></div>' +
-        '<div><small>Kom via</small><b>' + e(f.kalla) + '</b></div>' +
+        '<div><i aria-hidden="true">🏠</i><small>Vad funderar du på?</small><b>' + e(f.hustyp) + '</b></div>' +
+        '<div><i aria-hidden="true">🎯</i><small>Användning</small><b>' + e(f.anvandning) + '</b></div>' +
+        '<div><i aria-hidden="true">📍</i><small>Ort</small><b>' + e(f.ort) + '</b></div>' +
+        '<div><i aria-hidden="true">' + (KALLA_EMOJI[f.kalla] || '📨') + '</i><small>Kom via</small><b>' + e(f.kalla) + '</b></div>' +
       '</div></div>' +
       '<blockquote class="fd__citat">' + markera(String(f.beskrivning || '')) + '</blockquote>' + smartKort(f) +
       '<div class="fd__kontakt">' +
@@ -729,7 +739,7 @@
       '<div class="fd__forslag" data-tilt><img src="' + forslag.m.tumme + '" alt="" loading="lazy">' +
         '<div><small class="etikett">Förslag</small><b>' + e(forslag.m.kategori) + ' ' + e(forslag.m.namn) + (forslag.m.yta ? ' · ' + forslag.m.yta + ' m²' : '') + '</b><p>' + e(forslag.varfor) + '</p></div></div>' +
       '<div class="fd__logg"><h3>Historik</h3>' + (kund ? anteckningsForm(kund.id, aff ? aff.id : '') : '') +
-        (kund ? tidslinje(logg, 'Ingen aktivitet än.') : '<p class="fd__logg-tom">' + i('klocka') + 'Historiken börjar när förfrågan har blivit en kund.</p>') + '</div>' +
+        (kund ? tidslinje(logg, 'Ingen aktivitet än.') : '<p class="fd__logg-tom"><span aria-hidden="true">🕰️</span><span><b>Ingen historik än</b>Den börjar när förfrågan har blivit en kund – markera den som kontaktad så skapas kundkortet.</span></p>') + '</div>' +
       '</section>';
   }
 
@@ -807,6 +817,8 @@
   function inkorgPuls(alla) {
     var nya = alla.filter(function (f) { return f.status === 'ny'; });
     var aldst = nya.reduce(function (m, f) { return Math.max(m, vantat(f)); }, 0);
+    // Först i kön: den som väntat längst.
+    var forst = nya.slice().sort(function (a, b) { return vantat(b) - vantat(a); })[0] || null;
     var besvarade = alla.filter(function (f) { return f.status !== 'ny'; });
     var affar = alla.filter(function (f) { return f.status === 'kvalificerad'; }).length;
     var konv = besvarade.length ? Math.round(affar / besvarade.length * 100) : 0;
@@ -832,19 +844,23 @@
       '<div class="ipuls__ord">' +
         '<div class="ipuls__topp"><p class="etikett etikett--ljus">Inkorgen just nu</p><span class="ipuls__live"><i></i>' + String(nu.getHours()).padStart(2, '0') + ':' + String(nu.getMinutes()).padStart(2, '0') + '</span></div>' +
         '<p class="ipuls__stort"><b class="tal" data-rakna="' + nya.length + '">' + nya.length + '</b><span>' + (nya.length === 1 ? 'ny förfrågan' : 'nya förfrågningar') + '<small>' +
-          (nya.length ? 'väntar på svar · äldsta ' + text : 'allt är besvarat') + '</small></span></p>' +
+          (nya.length ? 'väntar på svar · äldsta ' + text : 'allt är besvarat ✨') + '</small></span></p>' +
+        (forst ? '<a class="ipuls__forst' + (vantat(forst) > SVARSMAL ? ' ipuls__forst--over' : '') + '" href="#/forfragningar/' + forst.id + '">' +
+          avatar(forst.namn, false, kundfarg(forst.kund || forst.id)) +
+          '<span><small>Börja med</small><b>' + e(forst.namn) + '</b><em>' + (MILJO_EMOJI[forst.miljo] || '🏠') + ' ' + e(forst.ort) + ' · väntat ' + vantatText(vantat(forst)) + '</em></span>' +
+          '<i class="ipuls__pil">' + i('pil') + '</i></a>' : '') +
         '<div class="ipuls__vecka"><div class="ipuls__staplar">' + dagar.map(function (x, n) {
           return '<span class="' + (n === 6 ? 'idag' : '') + '" style="--a:' + (x.antal / maxDag).toFixed(3) + ';--n:' + n + '" data-tip="' + (n === 6 ? 'I dag' : DAG[x.d.getDay()] + ' ' + IH.datum(x.d.toISOString())) + ' · ' + (x.antal === 1 ? '1 förfrågan' : x.antal ? x.antal + ' förfrågningar' : 'inga förfrågningar') + '"><b>' + (x.antal || '') + '</b><i></i><small>' + DAG[x.d.getDay()] + '</small></span>';
         }).join('') + '</div><p><b class="tal" data-rakna="' + vecka + '">' + vecka + '</b> in de senaste 7 dagarna</p></div>' +
         '<div class="ipuls__tal">' +
-          '<div><small>Varma just nu</small><b class="tal">' + nya.filter(function (f) { return leadpoang(f).p >= 70; }).length + '<em> av ' + nya.length + '</em></b>' +
+          '<div><small><i aria-hidden="true">🔥</i>Varma just nu</small><b class="tal">' + nya.filter(function (f) { return leadpoang(f).p >= 70; }).length + '<em> av ' + nya.length + '</em></b>' +
             '<span class="ipuls__prickar">' + nya.slice(0, 12).map(function (f) { var p = leadpoang(f).p; return '<i class="' + (p >= 70 ? 'varm' : p >= 50 ? 'ljum' : '') + '"></i>'; }).join('') + '</span></div>' +
-          '<div><small>Blev affär</small><b class="tal">' + konv + '<em> %</em></b><span class="ipuls__mini" style="--a:' + (konv / 100).toFixed(2) + '"><i></i></span></div>' +
+          '<div><small><i aria-hidden="true">🤝</i>Blev affär</small><b class="tal">' + konv + '<em> %</em></b><span class="ipuls__mini" style="--a:' + (konv / 100).toFixed(2) + '"><i></i></span></div>' +
         '</div>' +
         '<div class="ipuls__kalla"><small>Kom via</small><span class="kallbar">' + kallLista.map(function (k, n) {
             return '<i style="flex:' + kallor[k] + ';--k:' + KFARG[n % KFARG.length] + ';--n:' + n + '"></i>';
           }).join('') + '</span><span class="kallbar__lista">' + kallLista.map(function (k, n) {
-            return '<span style="--k:' + KFARG[n % KFARG.length] + '"><i></i>' + e(k) + '<b>' + kallor[k] + '</b></span>';
+            return '<span style="--k:' + KFARG[n % KFARG.length] + '"><i></i>' + (KALLA_EMOJI[k] ? KALLA_EMOJI[k] + ' ' : '') + e(k) + '<b>' + kallor[k] + '</b></span>';
           }).join('') + '</span></div>' +
       '</div>' +
       '<div class="ipuls__miljo"><div class="ipuls__miljohuvud"><p class="etikett etikett--ljus">Var ska huset stå?</p><small>Samma fråga som i formuläret · klicka för att filtrera</small></div>' +
@@ -895,7 +911,7 @@
       '<button class="knapp knapp--mork" type="button" data-g="ny-forfragan">' + i('plus') + 'Lägg in förfrågan</button></div></header>' +
       inkorgPuls(alla) +
       '<div class="inkorg__filter"><div class="flikar" data-flikar>' + flikar.map(function (f) {
-        return '<button type="button" data-g="f-filter" data-f="' + f[0] + '" aria-pressed="' + (fFilter === f[0]) + '">' + f[1] + ' <b>' + f[2] + '</b></button>';
+        return '<button type="button" data-g="f-filter" data-f="' + f[0] + '" aria-pressed="' + (fFilter === f[0]) + '"><i class="flik__emoji" aria-hidden="true">' + (FSTATUS_EMOJI[f[0]] || '') + '</i>' + f[1] + ' <b>' + f[2] + '</b></button>';
       }).join('') + '</div>' +
       (fMiljo ? '<button class="chip chip--rensa" type="button" data-g="f-miljo" data-m="' + e(fMiljo) + '">' + e(fMiljo) + i('stang') + '</button>' : '') + '</div>' +
       '<div class="inkorg">' +
