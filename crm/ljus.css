@@ -2005,6 +2005,7 @@ body {
 
 .offtopp__tal b {
   display: block;
+  white-space: nowrap;
   font: 600 1.5rem/1 var(--rubrik);
   letter-spacing: -0.03em;
 }
@@ -4563,4 +4564,93 @@ body {
 
 @keyframes fanna {
   from { transform: translate(0, 0) rotateZ(0deg) translateZ(calc(var(--n) * 1.2px)); }
+}
+
+
+/* =====================================================================
+   Projektkortens snabbval: ring, kundkort, nästa steg och öppna –
+   dyker upp över foten vid hovring, alltid synliga på pekskärm.
+   ===================================================================== */
+.aff--proj {
+  position: relative;
+}
+
+.aff__snabb {
+  position: absolute;
+  right: 10px;
+  bottom: 9px;
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08), 0 14px 30px -18px rgba(90, 60, 25, 0.6);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.4s var(--mjuk);
+  pointer-events: none;
+}
+
+.aff--proj:hover .aff__snabb,
+.aff--proj:focus-within .aff__snabb {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.aff--proj:hover .aff__fot,
+.aff--proj:focus-within .aff__fot {
+  opacity: 0.3;
+}
+
+.aff--proj .aff__fot {
+  transition: opacity 0.25s ease;
+}
+
+.aff__snabb button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.35s var(--studs);
+}
+
+.aff__snabb button:hover {
+  background: var(--kol);
+  color: #f7f5f0;
+  transform: scale(1.08);
+}
+
+.aff__snabb .i {
+  width: 14px;
+  height: 14px;
+}
+
+@media (hover: none) {
+  .aff__snabb {
+    position: static;
+    justify-content: flex-start;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    background: var(--ben);
+    box-shadow: none;
+  }
+
+  .aff--proj .aff__fot {
+    opacity: 1 !important;
+  }
+}
+
+/* Räkneverkets span inuti talet är inline – inte en egen rad. */
+.offtopp__tal b span {
+  display: inline;
+  margin: 0;
+  font: inherit;
+  color: inherit;
 }

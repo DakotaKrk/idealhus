@@ -1791,3 +1791,68 @@ tr.bytt > td {
     animation: none;
   }
 }
+
+
+/* =====================================================================
+   Tomma lägen med nästa steg, och små tooltips på staplar och ikoner
+   (data-tip). Tooltipen är alltid mörk på ljus botten.
+   ===================================================================== */
+.tom p {
+  max-width: 36ch;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.tom .knapp {
+  margin-top: 4px;
+}
+
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  z-index: 5;
+  padding: 6px 9px;
+  border-radius: 8px;
+  background: #1b1915;
+  color: #f7f5f0;
+  font: 600 0.6875rem/1.2 var(--rubrik);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.2s var(--mjuk);
+}
+
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (hover: none) {
+  [data-tip]::after {
+    display: none;
+  }
+}
+
+/* De små sökfälten (Kunder, Offerter) är vanliga fält, inte palettknappen. */
+.sok--liten,
+.sok--liten:hover {
+  display: block;
+  height: auto;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  cursor: auto;
+}
+
+.sok--liten > .i {
+  position: absolute;
+}
