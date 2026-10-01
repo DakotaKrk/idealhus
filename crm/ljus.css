@@ -10011,6 +10011,122 @@ button.kal__rad:hover {
   }
 }
 
+/* Översikten: kolumnerna får olika höjd i stället för att sista kortet
+   sträcks ut. Förut hamnade "Per hus" längst ned i Intäkter med ett stort
+   tomrum ovanför när högra kolumnen var längre (kundens skärmbild). */
+.oversikt {
+  align-items: start;
+}
+
+.oversikt__kol > .kort:last-child {
+  flex: none;
+}
+
+.oversikt .perhus {
+  margin-top: 0;
+}
+
+/* Inget svart kvar i översikten: vunnet är grönt, månadens stapel
+   djupare varm och systemhändelser i aktiviteten får en varm ruta. */
+.perhus__prick--vunnet,
+.perhus__del--vunnet {
+  background: linear-gradient(90deg, #3aaa68, #7fd6a2);
+}
+
+.oversikt path.graf__stapel--nu {
+  fill: #c98a45;
+  filter: drop-shadow(0 6px 10px rgba(201, 128, 52, 0.35));
+}
+
+.logg__rad--system .logg__ikon {
+  background: linear-gradient(160deg, #fff6e8, #ffe2bd);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(201, 138, 69, 0.3);
+  color: #b06a26;
+}
+
+/* =====================================================================
+   Projekt, tredje varvet (2026-10-09)
+   Nyckeltalen med emoji. Projektkorten: montaget som bricka med
+   nedräkning (varm när det är inom tre veckor), checklistan som en liten
+   stapel och "Allt klart" i grönt. Snabbknapparna lyser varmt i stället
+   för svart, tomma spalter har en gnista.
+   ===================================================================== */
+.kort__ikon--emoji {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.aff--proj .proj__fot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: stretch;
+  justify-items: start;
+  gap: 8px;
+}
+
+.proj__montage {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(27, 25, 21, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  font: 600 0.6875rem/1.2 var(--rubrik);
+  white-space: nowrap;
+  color: var(--text-2);
+}
+
+.proj__montage--snart {
+  background: rgba(240, 181, 110, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.35);
+  color: #8f5424;
+}
+
+.proj__montage--klar {
+  background: rgba(76, 194, 127, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(47, 138, 82, 0.25);
+  color: #1f6b3f;
+}
+
+.proj__check {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  justify-self: stretch;
+}
+
+.proj__check i {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e3a35a, #f6c88f calc(var(--a) * 100%), rgba(27, 25, 21, 0.08) 0);
+}
+
+.proj__check--klar i {
+  background: linear-gradient(90deg, #3aaa68, #7fd6a2);
+}
+
+.proj__check small {
+  font: 600 0.625rem/1 var(--rubrik);
+  white-space: nowrap;
+  color: var(--text-3);
+}
+
+.proj__check--klar small {
+  color: #1f6b3f;
+}
+
+.aff__snabb button:hover {
+  background: linear-gradient(160deg, #f6c88f, #e3a35a);
+  color: #1b1915;
+}
+
+.aff__snabb button:active {
+  transform: scale(0.92);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tidsband span {
     animation: none;

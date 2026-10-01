@@ -109,7 +109,8 @@
       var tal = c[3] === 'text' ? '<b class="nyckel__tal">' + e(c[2]) + '</b>'
         : c[3] === 'pct' ? '<b class="nyckel__tal tal"><span data-rakna="' + Math.round(c[2]) + '" data-format="tal">' + Math.round(c[2]) + '</span><em>%</em></b>'
         : '<b class="nyckel__tal tal" data-rakna="' + Math.round(c[2]) + '" data-format="' + c[3] + '">' + (c[3] === 'kort' ? IH.kort(c[2]) : Math.round(c[2])) + '</b>';
-      return '<div class="nyckel__cell"><span class="nyckel__etikett"><span class="kort__ikon">' + i(c[0]) + '</span>' + c[1] + '</span>' + tal +
+      var emoji = !/^[a-z]+$/.test(c[0]);
+      return '<div class="nyckel__cell"><span class="nyckel__etikett"><span class="kort__ikon' + (emoji ? ' kort__ikon--emoji' : '') + '">' + (emoji ? c[0] : i(c[0])) + '</span>' + c[1] + '</span>' + tal +
         '<small>' + c[4] + '</small>' + (c[5] !== undefined ? '<i class="nyckel__stapel" style="--a:' + Math.max(0, Math.min(1, c[5])).toFixed(3) + '"></i>' : '') + '</div>';
     }).join('') + '</section>';
   }
@@ -2675,17 +2676,17 @@
     var nk = nasta ? IH.kund(nasta.kund) : null;
     var html = '<header class="vyhuvud"><div><p class="etikett">Produktion</p><h1>Projekt</h1><p>' + aktiva.length + ' hus på väg – från ritning till slutbesiktning.</p></div></header>' +
       prodTopp(proj, aktiva, nyckelband([
-        ['produktion', 'Aktiva projekt', aktiva.length, 'tal', proj.length - aktiva.length + ' klara'],
-        ['kalender', 'Nästa montage', nasta ? 'v. ' + IH.vecka(new Date(nasta.montage)) : '–', 'text', nasta ? e(nk ? nk.namn : '') + ' · om ' + dagarTill(nasta.montage) + ' d' : 'inget planerat'],
-        ['bock', 'Checklistor klara', punkter ? klaraP / punkter * 100 : 0, 'pct', klaraP + ' av ' + punkter + ' punkter', punkter ? klaraP / punkter : 0],
-        ['kub', 'Värde i produktion', aktiva.reduce(function (s, p) { var a = p.affar ? IH.affar(p.affar) : null; return s + (a ? a.varde : 0); }, 0), 'kort', 'signerade ordrar']
+        ['🏗️', 'Aktiva projekt', aktiva.length, 'tal', proj.length - aktiva.length + ' klara'],
+        ['🚚', 'Nästa montage', nasta ? 'v. ' + IH.vecka(new Date(nasta.montage)) : '–', 'text', nasta ? e(nk ? nk.namn : '') + ' · om ' + dagarTill(nasta.montage) + ' d' : 'inget planerat'],
+        ['✅', 'Checklistor klara', punkter ? klaraP / punkter * 100 : 0, 'pct', klaraP + ' av ' + punkter + ' punkter', punkter ? klaraP / punkter : 0],
+        ['💰', 'Värde i produktion', aktiva.reduce(function (s, p) { var a = p.affar ? IH.affar(p.affar) : null; return s + (a ? a.varde : 0); }, 0), 'kort', 'signerade ordrar']
       ])) +
       kalender() +
       '<div class="prodrubrik"><p class="etikett">Alla projekt</p><h2>Från ritning till nyckel</h2><p>Varje kolumn är ett steg. När ett steg är klart flyttar du huset vidare med pilen på kortet, eller öppnar projektet och väljer steg.</p></div>' +
       '<div class="tavla tavla--prod">' + IH.PROJSTEG.map(function (s) {
         var l = proj.filter(function (p) { return p.steg === s.id; });
         return '<section class="spalt" style="--f:' + s.farg + '"><header class="spalt__huvud"><div><b><span class="spalt__emoji" aria-hidden="true">' + (STEG_EMOJI[s.id] || '') + '</span>' + e(s.namn) + '</b><span>' + l.length + '</span></div><small>' + e(s.text) + '</small></header>' +
-          '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(projKort).join('') : '<p class="spalt__tom">' + i('hus') + 'Inget här just nu</p>') + '</div></section>';
+          '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(projKort).join('') : '<p class="spalt__tom"><span aria-hidden="true">✨</span>Inget här just nu</p>') + '</div></section>';
       }).join('') + '</div>';
     return {
       titel: 'Projekt', html: html,
@@ -2721,10 +2722,14 @@
     var klara = CHECK.filter(function (c) { return p.check[c[0]]; }).length;
     var ids = IH.PROJSTEG.map(function (x) { return x.id; });
     var nasta = ids[ids.indexOf(p.steg) + 1];
+    var dagar = dagarTill(p.montage);
     return '<article class="aff aff--proj" data-g="proj-oppna" data-id="' + p.id + '" tabindex="0" role="button" style="--f:' + s.farg + '" aria-label="' + e(k ? k.namn : '') + ', ' + e(m ? m.namn : '') + ', ' + e(s.namn) + '">' +
       '<div class="aff__topp">' + (m ? '<span class="aff__bild"><img src="' + m.tumme + '" alt="" loading="lazy"></span>' : '') + '<span class="aff__modell">' + e(m ? m.namn : '') + '</span>' + ring(klara / CHECK.length * 100, s.farg) + '</div>' +
-      '<b class="aff__titel">' + e(k ? k.namn : '') + '</b><span class="aff__kund">' + i('plats') + e(k ? k.ort : '') + '</span>' +
-      '<div class="aff__fot"><span>' + i('kalender') + 'Montage v. ' + IH.vecka(new Date(p.montage)) + '</span><span class="tid">' + klara + '/' + CHECK.length + ' klart</span></div>' +
+      '<b class="aff__titel">' + e(k ? k.namn : '') + '</b><span class="aff__kund">📍 ' + e(k ? k.ort : '') + '</span>' +
+      '<div class="aff__fot proj__fot">' + (p.steg === 'klart'
+        ? '<span class="proj__montage proj__montage--klar">🔑 Överlämnat</span>'
+        : '<span class="proj__montage' + (dagar >= 0 && dagar <= 21 ? ' proj__montage--snart' : '') + '">🚚 v. ' + IH.vecka(new Date(p.montage)) + (dagar >= 0 ? ' · om ' + dagar + ' d' : '') + '</span>') +
+        '<span class="proj__check' + (klara === CHECK.length ? ' proj__check--klar' : '') + '" title="' + klara + ' av ' + CHECK.length + ' punkter klara"><i style="--a:' + (klara / CHECK.length).toFixed(2) + '"></i><small>' + (klara === CHECK.length ? '✅ Allt klart' : klara + '/' + CHECK.length + ' klart') + '</small></span></div>' +
       '<div class="aff__snabb">' +
         (k && k.telefon ? '<button type="button" data-g="kund-ring" data-tel="' + e(k.telefon) + '" title="Ring ' + e(forsta(k.namn)) + '" aria-label="Ring ' + e(forsta(k.namn)) + '">' + i('tel') + '</button>' : '') +
         (k ? '<button type="button" data-g="kund-oppna" data-id="' + k.id + '" title="Kundkortet" aria-label="Kundkortet">' + i('kunder') + '</button>' : '') +
