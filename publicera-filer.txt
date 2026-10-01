@@ -32,16 +32,14 @@ images/delning/dronare-vaggblock.jpg
 images/delning/hus-r2.jpg
 images/delning/hus-r3.jpg
 images/delning/stommar-stapel.jpg
-images/foto/affisch-kulisser.webp
-images/foto/affisch-virke.webp
 images/foto/arbetare-vattenpass.webp
 images/foto/dronare-bygget.webp
-images/foto/dronare-kran.webp
 images/foto/dronare-leverans.webp
 images/foto/dronare-montage.webp
 images/foto/dronare-platta.webp
 images/foto/dronare-vaggblock.webp
 images/foto/lyft-stommar.webp
+images/foto/montor-vaggelement.webp
 images/foto/reglar.webp
 images/foto/stommar-stapel.webp
 images/hero-video-poster.webp
@@ -65,6 +63,7 @@ images/tumme/vidare-pris.webp
 images/tumme/vidare-steg.webp
 images/video/hero-video-1080.mp4
 images/video/hero-video-720.mp4
+modeller/hus-r1-sprang.glb
 modeller/hus-r1.glb
 modeller/hus-r2.glb
 modeller/hus-r3.glb
