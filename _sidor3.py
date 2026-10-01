@@ -430,6 +430,13 @@ PRISSIDA = f'''    <main id="innehall">
             <div class="prisskala__svar">
               <p class="prisskala__varde"><output for="onskad-yta" data-yta-ut>30</output><span>m²</span></p>
               <p class="prisskala__regel" id="yta-svar" data-yta-svar aria-live="polite">Vid 30 m² passar ett attefallshus. Inom detaljplan får det vara 30 m² utan bygglov.</p>
+              <div class="prisskala__granser" aria-hidden="true">
+                <p class="granser__rubrik">Lovgränserna</p>
+                <div class="granser__spar"><i data-yta-gransfyll></i>
+                  <span class="granser__mark" style="--p:0.5"><b>30 m²</b><small>inom detaljplan</small></span>
+                  <span class="granser__mark" style="--p:0.8333"><b>50 m²</b><small>utanför detaljplan</small></span>
+                </div>
+              </div>
               <dl class="prisskala__fakta">
                 <div>
                   <dt>Närmast i storlek</dt>

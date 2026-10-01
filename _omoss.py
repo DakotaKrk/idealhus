@@ -68,7 +68,7 @@ KROPP = f'''    <main id="innehall">
               <p class="siffra__text">husmodeller, tre attefallshus och två fritidshus.</p>
             </div>
             <div class="siffra siffra--ljus">
-              <p class="siffra__tal">26–45<small> m²</small></p>
+              <p class="siffra__tal">30–50<small> m²</small></p>
               <p class="siffra__text">boyta i våra fem modeller, med ett eller två rum.</p>
             </div>
             <div class="siffra siffra--ljus">

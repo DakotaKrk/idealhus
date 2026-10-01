@@ -578,30 +578,134 @@
         poly([[x, y + d, z], [x + w, y + d, z], [x + w, y + d, z + h], [x, y + d, z + h]], klass + ' iso-sida-y') +
         poly([[x, y, z + h], [x + w, y, z + h], [x + w, y + d, z + h], [x, y + d, z + h]], klass + ' iso-topp');
     }
+    // Golvytan som ett litet rum i genomskärning: golv med en ruta per
+    // kvadratmeter, två glasväggar bakom, en säng, en köksbänk och en
+    // soffa i verklig storlek, bilen på sin bilplats och en person.
+    // viewBox räknas en gång så att största ytan får plats - skalan är
+    // densamma för alla storlekar, bara huset växer.
+    // En bil i isometri, längs y med fronten mot +y: kaross, kupé med
+    // vindruta och sidorutor, hjul, lampor och backspegel.
+    function bil(cx, cy) {
+      var Lb = 4.4, Bb = 1.8, z0 = 0.28, zk = 0.86, zt = 1.46;
+      function hjul(y) {
+        var punkter = [], navet = [];
+        for (var t = 0; t < 24; t++) {
+          var a = t / 24 * Math.PI * 2;
+          punkter.push([cx + Bb + 0.01, y + Math.cos(a) * 0.36, 0.36 + Math.sin(a) * 0.36]);
+          navet.push([cx + Bb + 0.02, y + Math.cos(a) * 0.18, 0.36 + Math.sin(a) * 0.18]);
+        }
+        return poly(punkter, 'iso-hjul') + poly(navet, 'iso-nav');
+      }
+      var s = poly([[cx - 0.15, cy - 0.1, 0], [cx + Bb + 0.35, cy - 0.1, 0], [cx + Bb + 0.35, cy + Lb + 0.2, 0], [cx - 0.15, cy + Lb + 0.2, 0]], 'iso-bilskugga');
+      // Karossen.
+      s += lada(cx, cy, z0, Bb, Lb, zk - z0, 'iso-kaross');
+      // Motorhuv och baklucka sluttar lite.
+      s += poly([[cx, cy + 3.35, zk], [cx + Bb, cy + 3.35, zk], [cx + Bb, cy + Lb, zk - 0.08], [cx, cy + Lb, zk - 0.08]], 'iso-kaross iso-huv');
+      // Kupén: tak, vindruta, sidoruta.
+      var k0 = cx + 0.14, k1 = cx + Bb - 0.14;
+      s += poly([[k1, cy + 0.55, zk], [k1, cy + 3.35, zk], [k1 - 0.04, cy + 2.8, zt], [k1 - 0.04, cy + 1.05, zt]], 'iso-kupe-sida');
+      s += poly([[k1 + 0.005, cy + 0.85, zk + 0.08], [k1 + 0.005, cy + 3.05, zk + 0.08], [k1 - 0.03, cy + 2.7, zt - 0.08], [k1 - 0.03, cy + 1.15, zt - 0.08]], 'iso-ruta');
+      s += lin([k1 + 0.006, cy + 2.0, zk + 0.06], [k1 - 0.02, cy + 2.0, zt - 0.06], 'iso-stolpe');
+      s += poly([[k0, cy + 3.35, zk], [k1, cy + 3.35, zk], [k1 - 0.04, cy + 2.8, zt], [k0 + 0.04, cy + 2.8, zt]], 'iso-vindruta');
+      s += poly([[k0 + 0.04, cy + 1.05, zt], [k1 - 0.04, cy + 1.05, zt], [k1 - 0.04, cy + 2.8, zt], [k0 + 0.04, cy + 2.8, zt]], 'iso-biltak');
+      // Hjulen på den synliga sidan.
+      s += hjul(cy + 0.95) + hjul(cy + 3.5);
+      // Dörrlinjen och handtaget.
+      s += lin([cx + Bb + 0.005, cy + 2.0, z0 + 0.08], [cx + Bb + 0.005, cy + 2.0, zk - 0.02], 'iso-dorrlinje');
+      s += lin([cx + Bb + 0.005, cy + 2.3, zk - 0.16], [cx + Bb + 0.005, cy + 2.55, zk - 0.16], 'iso-handtag');
+      // Fronten: strålkastare och grill.
+      s += poly([[cx + 0.15, cy + Lb + 0.005, zk - 0.3], [cx + 0.55, cy + Lb + 0.005, zk - 0.3], [cx + 0.55, cy + Lb + 0.005, zk - 0.17], [cx + 0.15, cy + Lb + 0.005, zk - 0.17]], 'iso-lampa');
+      s += poly([[cx + 1.25, cy + Lb + 0.005, zk - 0.3], [cx + 1.65, cy + Lb + 0.005, zk - 0.3], [cx + 1.65, cy + Lb + 0.005, zk - 0.17], [cx + 1.25, cy + Lb + 0.005, zk - 0.17]], 'iso-lampa');
+      s += poly([[cx + 0.65, cy + Lb + 0.005, z0 + 0.1], [cx + 1.15, cy + Lb + 0.005, z0 + 0.1], [cx + 1.15, cy + Lb + 0.005, zk - 0.32], [cx + 0.65, cy + Lb + 0.005, zk - 0.32]], 'iso-grill');
+      // Backspegeln.
+      s += lada(cx + Bb, cy + 3.05, zk + 0.02, 0.16, 0.1, 0.12, 'iso-spegel');
+      return s;
+    }
     function rita3d(A, etikett) {
       if (!iso) return;
-      var W = Math.sqrt(A * 1.6), D = A / W, h = 0.25;
+      var W = Math.sqrt(A * 1.6), D = A / W, h = 0.22, vh = 2.4;
       var x0 = -W / 2, y0 = -D / 2, x1 = W / 2, y1 = D / 2;
-      var s = poly([[x0 + 0.4, y0 + 0.4, 0], [x1 + 0.7, y0 + 0.4, 0], [x1 + 0.7, y1 + 0.7, 0], [x0 + 0.4, y1 + 0.7, 0]], 'iso-skugga');
+      var s = poly([[x0 + 0.5, y0 + 0.5, 0], [x1 + 0.9, y0 + 0.5, 0], [x1 + 0.9, y1 + 0.9, 0], [x0 + 0.5, y1 + 0.9, 0]], 'iso-skugga');
       s += lada(x0, y0, 0, W, D, h, 'iso-golv');
       for (var i = 1; i < W; i++) s += lin([x0 + i, y0, h], [x0 + i, y1, h], 'iso-rut');
       for (var j = 1; j < D; j++) s += lin([x0, y0 + j, h], [x1, y0 + j, h], 'iso-rut');
+      // Glasväggarna bakom, med ett fönster.
+      var t = h + vh;
+      s += poly([[x0, y0, h], [x1, y0, h], [x1, y0, t], [x0, y0, t]], 'iso-vagg iso-vagg--bak');
+      s += poly([[x0, y0, h], [x0, y1, h], [x0, y1, t], [x0, y0, t]], 'iso-vagg iso-vagg--sida');
+      var fx = x0 + W * 0.42;
+      s += poly([[fx, y0, h + 0.9], [fx + 1.4, y0, h + 0.9], [fx + 1.4, y0, h + 2.0], [fx, y0, h + 2.0]], 'iso-fonster');
+      s += lin([fx + 0.7, y0, h + 0.9], [fx + 0.7, y0, h + 2.0], 'iso-fonsterpost');
+      s += lin([x0, y1, t], [x0, y0, t], 'iso-vaggkant') + lin([x0, y0, t], [x1, y0, t], 'iso-vaggkant') +
+        lin([x0, y0, h], [x0, y0, t], 'iso-vaggkant') + lin([x1, y0, h], [x1, y0, t], 'iso-vaggkant') +
+        lin([x0, y1, h], [x0, y1, t], 'iso-vaggkant');
+      // Möblerna i verklig storlek.
+      // Sängen (1,6 x 2,0 m) längs bakväggen, huvudänden mot vänsterväggen.
+      var bx0 = x0 + 0.3, by0 = y0 + 0.3;
+      s += lada(bx0, by0, h, 2.0, 1.6, 0.28, 'iso-sangram');
+      s += lada(bx0 + 0.05, by0 + 0.05, h + 0.28, 1.9, 1.5, 0.18, 'iso-sang');
+      s += lada(bx0 + 0.1, by0 + 0.15, h + 0.46, 0.38, 0.55, 0.1, 'iso-kudde') +
+        lada(bx0 + 0.1, by0 + 0.85, h + 0.46, 0.38, 0.55, 0.1, 'iso-kudde');
+      s += lada(bx0 + 0.95, by0 + 0.05, h + 0.46, 1.0, 1.5, 0.04, 'iso-filt');
+      // Köksbänken längs bakväggen till höger.
+      var kx = x1 - 2.6;
+      s += lada(kx, y0 + 0.05, h, 2.3, 0.6, 0.9, 'iso-bank');
+      s += lada(kx - 0.02, y0 + 0.03, h + 0.9, 2.34, 0.64, 0.05, 'iso-bankskiva');
+      // Soffan (1,8 m) mot vänsterväggen framför sängen, när den får plats.
+      var sy0 = by0 + 1.6 + 0.25;
+      if (y1 - 0.3 - sy0 >= 1.8) {
+        var sx = x0 + 0.25, sy = y1 - 0.3 - 1.8;
+        s += lada(sx, sy, h, 0.9, 1.8, 0.42, 'iso-soffa');
+        s += lada(sx, sy, h + 0.42, 0.28, 1.8, 0.4, 'iso-soffa');
+        s += lada(sx + 0.32, sy + 0.1, h + 0.42, 0.5, 0.75, 0.08, 'iso-dyna') +
+          lada(sx + 0.32, sy + 0.95, h + 0.42, 0.5, 0.75, 0.08, 'iso-dyna');
+      }
+      // Mattan och bordet mitt i rummet, växten i hörnet vid fönstret.
+      s += poly([[-0.35, -0.1, h + 0.01], [1.95, -0.1, h + 0.01], [1.95, 1.6, h + 0.01], [-0.35, 1.6, h + 0.01]], 'iso-matta');
+      s += poly([[-0.2, 0.05, h + 0.012], [1.8, 0.05, h + 0.012], [1.8, 1.45, h + 0.012], [-0.2, 1.45, h + 0.012]], 'iso-mattkant');
+      s += lada(0.84, 0.54, h, 0.12, 0.12, 0.7, 'iso-bordben');
+      s += lada(0.4, 0.1, h + 0.7, 1.0, 1.0, 0.06, 'iso-bord');
+      s += lada(0.0, 0.35, h, 0.45, 0.45, 0.42, 'iso-stol') + lada(0.0, 0.35, h + 0.42, 0.08, 0.45, 0.45, 'iso-stol');
+      s += lada(1.5, 0.35, h, 0.45, 0.45, 0.42, 'iso-stol') + lada(1.87, 0.35, h + 0.42, 0.08, 0.45, 0.45, 'iso-stol');
+      var vx = Math.min(fx + 1.75, x1 - 3.0), vy = y0 + 0.2;
+      if (vx > bx0 + 2.2) {
+        s += lada(vx, vy, h, 0.36, 0.36, 0.38, 'iso-kruka');
+        var v = P(vx + 0.18, vy + 0.18, h + 0.38);
+        s += '<path class="iso-blad" d="M' + v[0].toFixed(1) + ' ' + v[1].toFixed(1) +
+          'c-10-6-14-16-9-26c6 8 8 16 9 26zm0 0c4-10 12-16 22-16c-4 9-11 14-22 16zm0 0c-2-12 2-22 10-28c2 11-2 20-10 28z"/>';
+      }
       // Bilplatsen till höger om golvet, bilen i mitten av den.
-      var bx = x1 + 1.6, by = -2.5;
-      s += poly([[bx, by, 0], [bx + 2.5, by, 0], [bx + 2.5, by + 5, 0], [bx, by + 5, 0]], 'iso-plats');
-      s += lada(bx + 0.4, by + 0.55, 0, 1.7, 3.9, 0.72, 'iso-bil');
-      s += lada(bx + 0.52, by + 1.55, 0.72, 1.46, 1.9, 0.5, 'iso-kupe');
+      var px = x1 + 1.2, py = y0 - 5.2;
+      s += poly([[px, py, 0], [px + 2.5, py, 0], [px + 2.5, py + 5, 0], [px, py + 5, 0]], 'iso-plats');
+      s += bil(px + 0.35, py + 0.3);
       // Personen (1,8 m) framför golvets främre långsida.
-      var fot = P(x0 + W * 0.34, y1 + 1.7, 0), k = 1.8 * S / 115.25;
+      var fot = P(x0 + W * 0.3, y1 + 1.7, 0), k = 1.8 * S / 115.25;
+      s += '<ellipse class="iso-fotskugga" cx="' + fot[0].toFixed(1) + '" cy="' + fot[1].toFixed(1) + '" rx="9" ry="3.5"/>';
       s += '<path class="iso-person" transform="translate(' + (fot[0] - 20 * k).toFixed(1) + ',' +
         (fot[1] - 118.25 * k).toFixed(1) + ') scale(' + k.toFixed(4) + ')" d="' + PERSON + '"/>';
-      // Ytan mitt på golvet.
-      var c = P(0, 0, h), bredd = etikett.length * 7.4 + 22;
+      // Ytan som en bricka över golvets främre del.
+      var c = P(x1, y1, 0), bredd = etikett.length * 7.6 + 26;
+      c = [c[0], c[1] + 30];
       s += '<g class="iso-etikett" transform="translate(' + c[0].toFixed(1) + ',' + c[1].toFixed(1) + ')">' +
-        '<rect x="' + (-bredd / 2).toFixed(1) + '" y="-13" width="' + bredd.toFixed(1) + '" height="26" rx="13"/>' +
+        '<rect x="' + (-bredd / 2).toFixed(1) + '" y="-14" width="' + bredd.toFixed(1) + '" height="28" rx="14"/>' +
         '<text y="4.5" text-anchor="middle">' + etikett + '</text></g>';
       iso.innerHTML = s;
     }
+    // Ramen runt största och minsta ytan, en gång.
+    (function () {
+      if (!iso) return;
+      var mx = Infinity, Mx = -Infinity, my = Infinity, My = -Infinity;
+      [min, max].forEach(function (A) {
+        var W = Math.sqrt(A * 1.6), D = A / W, x0 = -W / 2, y0 = -D / 2, x1 = W / 2, y1 = D / 2;
+        [[x0, y0, 2.62], [x0, y1, 0], [x1, y1, 0], [x1, y0, 2.62], [x1 + 3.7, y0 - 5.2, 0], [x1 + 3.7, y0 - 0.2, 0], [x1 + 1.2, y0 - 0.2, 0], [x1 + 1.2, y0 - 5.2, 1.3],
+          [x0 + W * 0.3, y1 + 1.7, 1.9], [x0 + W * 0.3, y1 + 1.7, 0], [x1 + 1.6, y1 + 1.6, 0]].forEach(function (q) {
+          var p = P(q[0], q[1], q[2]);
+          mx = Math.min(mx, p[0]); Mx = Math.max(Mx, p[0]); my = Math.min(my, p[1]); My = Math.max(My, p[1]);
+        });
+      });
+      iso.setAttribute('viewBox', (mx - 16).toFixed(0) + ' ' + (my - 16).toFixed(0) + ' ' +
+        (Mx - mx + 32).toFixed(0) + ' ' + (My - my + 32).toFixed(0));
+    })();
     var visad = Number(reglage.value), mal = visad, isoRaf = null;
     function tweena() {
       isoRaf = null;
@@ -646,6 +750,18 @@
         : zon === 'b'
           ? 'Som komplementbostadshus kan huset vara lovfritt upp till 50 m², men bara utanför detaljplan.'
           : 'Vid ' + y + ' m² krävs bygglov.';
+
+      // Gränsmätaren och zonen på svarskortet.
+      var gransfyll = $('[data-yta-gransfyll]', skala);
+      if (gransfyll) gransfyll.style.transform = 'scaleX(' + (y / max).toFixed(4) + ')';
+      var svarKort = $('.prisskala__svar', skala);
+      if (svarKort) svarKort.setAttribute('data-zon', zon);
+      var bubblaRuta = bubbla.parentNode;
+      if (!lugn && bubblaRuta) {
+        bubblaRuta.classList.remove('puls');
+        void bubblaRuta.offsetWidth;
+        bubblaRuta.classList.add('puls');
+      }
 
       var passar = kortP.filter(function (k) {
         return y >= Number(k.getAttribute('data-min')) && y <= Number(k.getAttribute('data-max'));
@@ -846,6 +962,9 @@
       '<linearGradient id="v-varm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2d9"/><stop offset="1" stop-color="#f0b56e"/></linearGradient>' +
       '<radialGradient id="v-skugga"><stop offset="0" stop-color="#1b1915" stop-opacity=".32"/><stop offset="1" stop-color="#1b1915" stop-opacity="0"/></radialGradient>' +
       '<radialGradient id="v-sken"><stop offset="0" stop-color="#ffcf8a" stop-opacity=".65"/><stop offset="1" stop-color="#ffcf8a" stop-opacity="0"/></radialGradient>' +
+      '<linearGradient id="v-sol" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3d6" stop-opacity=".9"/><stop offset="1" stop-color="#ffd9a0" stop-opacity=".15"/></linearGradient>' +
+      '<linearGradient id="v-kon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe2b0" stop-opacity=".75"/><stop offset="1" stop-color="#ffe2b0" stop-opacity="0"/></linearGradient>' +
+      '<radialGradient id="v-lampa"><stop offset="0" stop-color="#fff1d2" stop-opacity=".95"/><stop offset=".45" stop-color="#ffcf8a" stop-opacity=".45"/><stop offset="1" stop-color="#ffcf8a" stop-opacity="0"/></radialGradient>' +
       '</defs>';
 
     // Rummets två bakväggar med tjocklek och golvlist.
@@ -861,16 +980,224 @@
     function platta(f, tjock) {
       return skugga(0.6, 0.6, 6.4, 3.4, 0.9) + box(-5, -4, -(tjock || 0.45), 10, 8, tjock || 0.45, f);
     }
-    // Pratbubbla (platt, framför scenen).
-    function bubbla(cx, cy, b, h, fyll, text, klass, svans) {
-      var x0 = cx - b / 2, y0 = cy - h / 2, s = svans === 'h' ? 1 : -1;
-      var sx = cx + s * b * 0.22;
-      return g('v-bubbla ' + klass,
-        '<rect x="' + x0 + '" y="' + y0 + '" width="' + b + '" height="' + h + '" rx="' + (h / 2) + '" fill="' + fyll + '" stroke="#1b1915" stroke-width="1.6"/>' +
-        '<path d="M' + (sx - 7) + ' ' + (y0 + h - 1) + 'l' + (s * 4) + ' 12 ' + (s * 8) + '-12z" fill="' + fyll + '" stroke="#1b1915" stroke-width="1.6" stroke-linejoin="round"/>' +
-        '<rect x="' + (sx - 8) + '" y="' + (y0 + h - 3) + '" width="16" height="4" fill="' + fyll + '"/>' + text,
-        'transform-origin:' + sx + 'px ' + (y0 + h + 10) + 'px');
+    // Pratbubbla: en enda kontur med pilen inbyggd (förut en lös pil med
+    // en lapp över konturen, som sprack). svans: 'nh'/'nv' = nedåt höger/
+    // vänster, 'h'/'v' = åt höger/vänster från mitten av kanten.
+    function bubbla(cx, cy, b, h, fyll, text, klass, svans, tagg, taggprick) {
+      var x0 = cx - b / 2, y0 = cy - h / 2, x1 = cx + b / 2, y1 = cy + h / 2, r = Math.min(16, h / 2);
+      var d = 'M' + (x0 + r) + ' ' + y0 + 'H' + (x1 - r) + 'A' + r + ' ' + r + ' 0 0 1 ' + x1 + ' ' + (y0 + r);
+      var spets;
+      if (svans === 'h') { spets = [x1 + 13, cy + 3]; d += 'V' + (cy - 6) + 'L' + spets[0] + ' ' + spets[1] + 'L' + x1 + ' ' + (cy + 7); }
+      d += 'V' + (y1 - r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x1 - r) + ' ' + y1;
+      if (svans === 'nh' || svans === 'nv') {
+        var tx = svans === 'nh' ? x1 - r - 14 : x0 + r + 14;
+        spets = [tx + (svans === 'nh' ? 5 : -5), y1 + 13];
+        d += 'H' + (tx + 7) + 'L' + spets[0] + ' ' + spets[1] + 'L' + (tx - 7) + ' ' + y1;
+      }
+      d += 'H' + (x0 + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + x0 + ' ' + (y1 - r);
+      if (svans === 'v') { spets = [x0 - 13, cy + 3]; d += 'V' + (cy + 7) + 'L' + spets[0] + ' ' + spets[1] + 'L' + x0 + ' ' + (cy - 6); }
+      d += 'V' + (y0 + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x0 + r) + ' ' + y0 + 'Z';
+      var inne = '<path class="v-bubbelform" d="' + d + '" fill="' + fyll + '" stroke="#1b1915" stroke-width="1.6" stroke-linejoin="round"/>' + text;
+      if (tagg) {
+        var tb = tagg.length * 7 + 26;
+        inne += '<g class="v-bubbeltagg"><rect x="' + (x0 + 10) + '" y="' + (y0 - 11) + '" width="' + tb + '" height="20" rx="10" fill="#fffdf8" stroke="#1b1915" stroke-width="1.2"/>' +
+          '<circle cx="' + (x0 + 21) + '" cy="' + (y0 - 1) + '" r="3.6" fill="' + (taggprick || '#f0b56e') + '"/>' +
+          '<text x="' + (x0 + 29) + '" y="' + (y0 + 3) + '" font-family="Poppins, sans-serif" font-size="11" font-weight="600" fill="#1b1915">' + tagg + '</text></g>';
+      }
+      return g('v-bubbla ' + klass, inne, 'transform-origin:' + spets[0] + 'px ' + spets[1] + 'px');
     }
+    // Etikett som förklarar vad som händer: en prick på saken och ett rakt,
+    // kort stift (upp, ner, vänster eller höger) till en liten bricka.
+    // Aldrig diagonala linjer genom andra saker. dx flyttar brickan i
+    // sidled längs stiftets ände (bara för upp/ner). Göms på mobil (CSS).
+    function etikett(tx, ty, text, rikt, d, i, prick, dx) {
+      var w = text.length * 6.5 + 32, hh = 22, ex = tx, ey = ty, cx, cy;
+      prick = prick || '#f0b56e';
+      dx = dx || 0;
+      if (rikt === 'upp') { ey = ty - d; cx = tx + dx; cy = ey - hh / 2; }
+      else if (rikt === 'ner') { ey = ty + d; cx = tx + dx; cy = ey + hh / 2; }
+      else if (rikt === 'vanster') { ex = tx - d; cx = ex - w / 2; cy = ty; }
+      else { ex = tx + d; cx = ex + w / 2; cy = ty; }
+      var ax = rikt === 'vanster' ? ex : (rikt === 'hoger' ? ex : cx);
+      return '<g class="v-etikett" data-rikt="' + rikt + '" data-ax="' + ax.toFixed(1) + '" style="--i:' + i + '">' +
+        '<line x1="' + tx.toFixed(1) + '" y1="' + ty.toFixed(1) + '" x2="' + ex.toFixed(1) + '" y2="' + ey.toFixed(1) + '" stroke="#1b1915" stroke-width="1.2" stroke-linecap="round" opacity=".45"/>' +
+        '<circle cx="' + tx.toFixed(1) + '" cy="' + ty.toFixed(1) + '" r="4.4" fill="' + prick + '" stroke="#fffdf8" stroke-width="2.2"/>' +
+        '<rect class="v-etikettruta" x="' + (cx - w / 2).toFixed(1) + '" y="' + (cy - hh / 2).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + hh + '" rx="11" fill="#fffdf8" stroke="rgba(27,25,21,.14)" stroke-width="1"/>' +
+        '<circle cx="' + (cx - w / 2 + 12).toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="3.6" fill="' + prick + '"/>' +
+        '<text x="' + (cx - w / 2 + 21).toFixed(1) + '" y="' + (cy + 3.8).toFixed(1) + '" font-family="Poppins, sans-serif" font-size="11" font-weight="600" fill="#1b1915">' + text + '</text></g>';
+    }
+    // Krukväxt med breda blad som vajar.
+    function vaxt(x, y, hojd) {
+      hojd = hojd || 1;
+      var h = skugga(x, y, 0.55, 0.28, 0.8) + cyl(x, y, 0, 0.42, 0.62, { x: '#c9975a', t: '#6b4f36' });
+      var t = P(x, y, 0.62), blad = '';
+      [[-58, 34, '#5f8a5c'], [-28, 44, '#6f9a6a'], [0, 50, '#436b4f'], [26, 42, '#6f9a6a'], [54, 32, '#5a8660'], [-8, 30, '#86ad78']].forEach(function (b) {
+        var v = b[0] * Math.PI / 180, l = b[1] * hojd, sx = t[0] + Math.sin(v) * l, sy = t[1] - Math.cos(v) * l;
+        var nx = Math.cos(v) * 9, ny = Math.sin(v) * 9;
+        blad += '<path d="M' + t[0].toFixed(1) + ' ' + t[1].toFixed(1) + 'Q' + ((t[0] + sx) / 2 + nx).toFixed(1) + ' ' + ((t[1] + sy) / 2 + ny).toFixed(1) + ' ' + sx.toFixed(1) + ' ' + sy.toFixed(1) +
+          'Q' + ((t[0] + sx) / 2 - nx).toFixed(1) + ' ' + ((t[1] + sy) / 2 - ny).toFixed(1) + ' ' + t[0].toFixed(1) + ' ' + t[1].toFixed(1) + 'z" fill="' + b[2] + '"/>';
+      });
+      return h + '<g class="v-vaxt" style="transform-origin:' + t[0].toFixed(1) + 'px ' + t[1].toFixed(1) + 'px">' + blad + '</g>';
+    }
+    function pk(x, y, z) { return P(x, y, z || 0); }
+    function hull(pts) {
+      var s = pts.slice().sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+      function kors(o, a, b) { return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); }
+      var ned = [], upp = [];
+      s.forEach(function (q) { while (ned.length > 1 && kors(ned[ned.length - 2], ned[ned.length - 1], q) <= 0) ned.pop(); ned.push(q); });
+      s.slice().reverse().forEach(function (q) { while (upp.length > 1 && kors(upp[upp.length - 2], upp[upp.length - 1], q) <= 0) upp.pop(); upp.push(q); });
+      return ned.slice(0, -1).concat(upp.slice(0, -1));
+    }
+
+    var TRASTOL = { t: '#e2b47a', x: '#a8743f', y: '#c08a50' };
+    var DYNA = { t: '#4a443d', x: '#27231f', y: '#35302a' };
+    // Stol: fyra ben, sits och ryggstöd. Ryggen åt 'x' (mot -x) eller 'y' (mot +y).
+    function stol(x, y, rygg, mellan) {
+      var h = '';
+      [[0.05, 0.05], [0.72, 0.05], [0.05, 0.72], [0.72, 0.72]].forEach(function (b) { h += box(x + b[0], y + b[1], 0, 0.1, 0.1, 0.48, TRASTOL); });
+      if (rygg === 'x') h += box(x, y, 0.48, 0.12, 0.85, 0.9, TRASTOL);
+      h += box(x, y, 0.48, 0.85, 0.85, 0.1, TRASTOL) + box(x + 0.08, y + 0.08, 0.58, 0.7, 0.7, 0.08, DYNA);
+      h += mellan || '';
+      if (rygg === 'y') h += box(x, y + 0.73, 0.48, 0.85, 0.12, 0.9, TRASTOL);
+      return h;
+    }
+    // En sittande person på en stol vid (x, y). 'x': ryggen mot -x, ser mot +x.
+    // 'y': ryggen mot +y, ser mot -y.
+    var BYXA = { t: '#4a443d', x: '#27231f', y: '#35302a' };
+    function sitter(x, y, rygg, troja, har) {
+      var h = '', k;
+      if (rygg === 'x') {
+        h += box(x + 0.92, y + 0.24, 0, 0.16, 0.36, 0.64, BYXA) + box(x + 0.46, y + 0.22, 0.62, 0.6, 0.4, 0.14, BYXA);
+        h += box(x + 0.14, y + 0.2, 0.66, 0.36, 0.46, 0.72, troja);
+        k = P(x + 0.32, y + 0.43, 1.66);
+      } else {
+        h += box(x + 0.24, y - 0.28, 0, 0.36, 0.16, 0.64, BYXA) + box(x + 0.22, y - 0.12, 0.62, 0.4, 0.6, 0.14, BYXA);
+        h += box(x + 0.2, y + 0.36, 0.66, 0.46, 0.36, 0.72, troja);
+        k = P(x + 0.43, y + 0.54, 1.66);
+      }
+      h += '<circle cx="' + k[0].toFixed(1) + '" cy="' + k[1].toFixed(1) + '" r="7.4" fill="#e8c19a" stroke="#1b1915" stroke-width="1"/>';
+      h += '<path d="M' + (k[0] - 7.4).toFixed(1) + ' ' + (k[1] - 1).toFixed(1) + 'a7.4 7.4 0 0 1 14.8 0c-3-2.4-11.6-2.4-14.8 0z" fill="' + (har || '#4a3424') + '"/>';
+      return '<g class="v-sitter">' + h + '</g>';
+    }
+    // En person: skor, ben, kropp, armar, hals och huvud, med hjälm om
+    // färg ges. handV/handH är punkter [x, y, z] som vänster/höger hand
+    // når mot (annars hänger armen längs kroppen).
+    function arm(fran, till, farg) {
+      var a = P(fran[0], fran[1], fran[2]), b = P(till[0], till[1], till[2]);
+      var l = ' x1="' + a[0].toFixed(1) + '" y1="' + a[1].toFixed(1) + '" x2="' + b[0].toFixed(1) + '" y2="' + b[1].toFixed(1) + '"';
+      return '<line' + l + ' stroke="#1b1915" stroke-width="6.2" stroke-linecap="round"/><line' + l + ' stroke="' + farg + '" stroke-width="4" stroke-linecap="round"/>' +
+        '<circle cx="' + b[0].toFixed(1) + '" cy="' + b[1].toFixed(1) + '" r="2.6" fill="#e8c19a" stroke="#1b1915" stroke-width=".9"/>';
+    }
+    function person(x, y, troja, hjalm, klass, handV, handH) {
+      var BYX = { t: '#3b3631', x: '#1b1915', y: '#2a2622' }, SKO = { t: '#4a443d', x: '#141210', y: '#1b1915' };
+      var h = skugga(x + 0.25, y + 0.2, 0.45, 0.22, 0.9);
+      var vS = [x + 0.02, y + 0.09, 1.5], hS = [x + 0.42, y + 0.09, 1.5];
+      h += arm(vS, handV || [x - 0.04, y + 0.12, 0.95], troja.x);
+      h += box(x, y, 0, 0.17, 0.3, 0.08, SKO) + box(x + 0.25, y, 0, 0.17, 0.3, 0.08, SKO);
+      h += box(x, y, 0.08, 0.17, 0.17, 0.74, BYX) + box(x + 0.25, y, 0.08, 0.17, 0.17, 0.74, BYX);
+      h += box(x - 0.05, y - 0.06, 0.82, 0.52, 0.3, 0.74, troja);
+      h += box(x + 0.15, y + 0.04, 1.56, 0.12, 0.12, 0.1, { t: '#e8c19a', x: '#c99a70', y: '#d8ab82' });
+      if (!handH) h += arm(hS, [x + 0.48, y + 0.12, 0.95], troja.x);
+      var k = P(x + 0.21, y + 0.1, 1.9);
+      h += '<circle cx="' + k[0].toFixed(1) + '" cy="' + k[1].toFixed(1) + '" r="7.4" fill="#e8c19a" stroke="#1b1915" stroke-width="1"/>';
+      if (hjalm) h += '<path d="M' + (k[0] - 8.2).toFixed(1) + ' ' + (k[1] - 0.5).toFixed(1) + 'a8.2 8.2 0 0 1 16.4 0z" fill="' + hjalm + '" stroke="#1b1915" stroke-width="1"/><path d="M' + (k[0] - 9.6).toFixed(1) + ' ' + (k[1] - 0.5).toFixed(1) + 'h19.2" stroke="#1b1915" stroke-width="1.6" stroke-linecap="round"/>';
+      else h += '<path d="M' + (k[0] - 7.4).toFixed(1) + ' ' + (k[1] - 1).toFixed(1) + 'a7.4 7.4 0 0 1 14.8 0c-3-2.4-11.6-2.4-14.8 0z" fill="#4a3424"/>';
+      if (handH) h += arm(hS, handH, troja.x);
+      return '<g class="v-person ' + (klass || '') + '">' + h + '</g>';
+    }
+    // Lastbilshytt med fronten mot +x: kaross, vindruta, sidoruta, dörr,
+    // grill, lampor, stötfångare, backspegel och takljus.
+    function hytt(x, y, l, b, hz, z0, farg) {
+      farg = farg || { t: '#f7f2ea', x: '#cfc6b5', y: '#e9e2d6' };
+      var x1 = x + l, y1 = y + b, h = box(x, y, z0, l, b, hz, farg);
+      h += box(x + 0.05, y + 0.05, z0 + hz, l - 0.1, b - 0.1, 0.05, { t: '#e9e2d6', x: '#bfb6a5', y: '#d6cdbd' });
+      h += poly([P(x1, y + 0.1, z0 + hz * 0.55), P(x1, y1 - 0.1, z0 + hz * 0.55), P(x1, y1 - 0.1, z0 + hz * 0.92), P(x1, y + 0.1, z0 + hz * 0.92)], 'url(#v-glas)', ' stroke="#1b1915" stroke-width="1.2"');
+      h += poly([P(x + 0.12, y1, z0 + hz * 0.52), P(x1 - 0.18, y1, z0 + hz * 0.52), P(x1 - 0.18, y1, z0 + hz * 0.9), P(x + 0.12, y1, z0 + hz * 0.9)], 'url(#v-glas)', ' stroke="#1b1915" stroke-width="1.1"');
+      h += lin([P(x + 0.08, y1 + 0.002, z0 + 0.08), P(x + 0.08, y1 + 0.002, z0 + hz * 0.9)], 'rgba(27,25,21,.35)', 1);
+      h += lin([P(x1 - 0.32, y1 + 0.002, z0 + hz * 0.42), P(x1 - 0.2, y1 + 0.002, z0 + hz * 0.42)], '#1b1915', 1.6);
+      h += poly([P(x1 + 0.002, y + 0.28, z0 + 0.12), P(x1 + 0.002, y1 - 0.28, z0 + 0.12), P(x1 + 0.002, y1 - 0.28, z0 + hz * 0.42), P(x1 + 0.002, y + 0.28, z0 + hz * 0.42)], '#3a352d');
+      for (var gz = z0 + 0.18; gz < z0 + hz * 0.4; gz += 0.07) h += lin([P(x1 + 0.003, y + 0.3, gz), P(x1 + 0.003, y1 - 0.3, gz)], 'rgba(255,255,255,.18)', 1);
+      [[y + 0.06, y + 0.22], [y1 - 0.22, y1 - 0.06]].forEach(function (q) {
+        h += poly([P(x1 + 0.003, q[0], z0 + hz * 0.22), P(x1 + 0.003, q[1], z0 + hz * 0.22), P(x1 + 0.003, q[1], z0 + hz * 0.36), P(x1 + 0.003, q[0], z0 + hz * 0.36)], '#fff1d2', ' stroke="#1b1915" stroke-width=".8"');
+      });
+      h += box(x1, y - 0.03, z0 - 0.1, 0.1, b + 0.06, 0.16, { t: '#4a443d', x: '#1b1915', y: '#2a2622' });
+      h += lin([P(x1 - 0.06, y1, z0 + hz * 0.82), P(x1 - 0.06, y1 + 0.2, z0 + hz * 0.82)], '#1b1915', 1.6);
+      h += box(x1 - 0.1, y1 + 0.18, z0 + hz * 0.62, 0.06, 0.08, 0.28, { t: '#3a352d', x: '#1b1915', y: '#2a2622' });
+      h += box(x + l * 0.3, y + b * 0.3, z0 + hz + 0.05, l * 0.35, b * 0.4, 0.07, { t: '#f6a04d', x: '#c5662a', y: '#dc7834' });
+      return h;
+    }
+
+    function golvlampa(x, y) {
+      var a = P(x, y, 0), b = P(x, y, 2.5), sk = P(x, y, 2.55);
+      return skugga(x, y, 0.5, 0.25, 0.8) +
+        cyl(x, y, 0, 0.32, 0.06, { x: '#27231f', t: '#4a443d' }) +
+        '<line x1="' + a[0].toFixed(1) + '" y1="' + a[1].toFixed(1) + '" x2="' + b[0].toFixed(1) + '" y2="' + b[1].toFixed(1) + '" stroke="#27231f" stroke-width="2.4"/>' +
+        '<ellipse class="v-lampsken" cx="' + sk[0].toFixed(1) + '" cy="' + (sk[1] + 6).toFixed(1) + '" rx="46" ry="34" fill="url(#v-lampa)"/>' +
+        '<path d="M' + (sk[0] - 12).toFixed(1) + ' ' + (sk[1] + 6).toFixed(1) + 'L' + (sk[0] - 7).toFixed(1) + ' ' + (sk[1] - 10).toFixed(1) + 'H' + (sk[0] + 7).toFixed(1) + 'L' + (sk[0] + 12).toFixed(1) + ' ' + (sk[1] + 6).toFixed(1) + 'z" fill="#f3d6a6" stroke="#1b1915" stroke-width="1.4" stroke-linejoin="round"/>';
+    }
+    function lovtrad(x, y, h) {
+      var bas = P(x, y, 0), topp = P(x, y, h);
+      return skugga(x + 0.3, y + 0.3, 1.0, 0.5, 0.8) +
+        '<line x1="' + bas[0].toFixed(1) + '" y1="' + bas[1].toFixed(1) + '" x2="' + topp[0].toFixed(1) + '" y2="' + (topp[1] + 12).toFixed(1) + '" stroke="#6b4f36" stroke-width="4" stroke-linecap="round"/>' +
+        '<g class="v-krona" style="transform-origin:' + topp[0].toFixed(1) + 'px ' + (topp[1] + 14).toFixed(1) + 'px">' +
+        '<circle cx="' + (topp[0] - 9).toFixed(1) + '" cy="' + (topp[1] + 4).toFixed(1) + '" r="15" fill="#6f9a6a"/>' +
+        '<circle cx="' + (topp[0] + 9).toFixed(1) + '" cy="' + (topp[1] + 2).toFixed(1) + '" r="14" fill="#5a8660"/>' +
+        '<circle cx="' + topp[0].toFixed(1) + '" cy="' + (topp[1] - 8).toFixed(1) + '" r="15" fill="#86ad78"/></g>';
+    }
+    function buske(x, y) {
+      var c = P(x, y, 0.35);
+      return skugga(x, y, 0.6, 0.3, 0.7) +
+        '<circle cx="' + (c[0] - 6).toFixed(1) + '" cy="' + c[1].toFixed(1) + '" r="9" fill="#5a8660"/>' +
+        '<circle cx="' + (c[0] + 6).toFixed(1) + '" cy="' + (c[1] + 1).toFixed(1) + '" r="8" fill="#436b4f"/>' +
+        '<circle cx="' + c[0].toFixed(1) + '" cy="' + (c[1] - 6).toFixed(1) + '" r="8" fill="#6f9a6a"/>';
+    }
+    function kon(x, y) {
+      var b = P(x, y, 0), t = P(x, y, 0.75);
+      return '<path d="M' + (b[0] - 10).toFixed(1) + ' ' + b[1].toFixed(1) + 'L' + t[0].toFixed(1) + ' ' + t[1].toFixed(1) + 'L' + (b[0] + 10).toFixed(1) + ' ' + b[1].toFixed(1) + 'z" fill="#f08a3c" stroke="#1b1915" stroke-width="1.2" stroke-linejoin="round"/>' +
+        '<path d="M' + (b[0] - 6.5).toFixed(1) + ' ' + (b[1] - 7).toFixed(1) + 'H' + (b[0] + 6.5).toFixed(1) + '" stroke="#fffdf8" stroke-width="3"/>' +
+        '<rect x="' + (b[0] - 13).toFixed(1) + '" y="' + (b[1] - 2).toFixed(1) + '" width="26" height="4" rx="2" fill="#1b1915"/>';
+    }
+    function glitter(cx, cy, r, i) {
+      return '<path class="v-glitter" style="--i:' + i + ';transform-origin:' + cx + 'px ' + cy + 'px" d="M' + cx + ' ' + (cy - r) +
+        'Q' + cx + ' ' + cy + ' ' + (cx + r) + ' ' + cy + 'Q' + cx + ' ' + cy + ' ' + cx + ' ' + (cy + r) +
+        'Q' + cx + ' ' + cy + ' ' + (cx - r) + ' ' + cy + 'Q' + cx + ' ' + cy + ' ' + cx + ' ' + (cy - r) + 'z" fill="#f0b56e"/>';
+    }
+
+    // Hjul i planet y = yv (syns från +y) eller x = xv (syns från +x).
+    function hjulY(xc, yv, zc, r) {
+      var a = [], b = [];
+      for (var t = 0; t < 20; t++) {
+        var v = t / 20 * Math.PI * 2;
+        a.push(P(xc + Math.cos(v) * r, yv, zc + Math.sin(v) * r));
+        b.push(P(xc + Math.cos(v) * r * 0.5, yv + 0.01, zc + Math.sin(v) * r * 0.5));
+      }
+      return poly(a, '#151311') + poly(b, '#c4c8cc', ' stroke="#5f646a" stroke-width=".8"');
+    }
+    function hjulX(xv, yc, zc, r) {
+      var a = [], b = [];
+      for (var t = 0; t < 20; t++) {
+        var v = t / 20 * Math.PI * 2;
+        a.push(P(xv, yc + Math.cos(v) * r, zc + Math.sin(v) * r));
+        b.push(P(xv + 0.01, yc + Math.cos(v) * r * 0.5, zc + Math.sin(v) * r * 0.5));
+      }
+      return poly(a, '#151311') + poly(b, '#c4c8cc', ' stroke="#5f646a" stroke-width=".8"');
+    }
+    // Fackverk på en yta: sicksack mellan två kanter.
+    function fackY(x0, x1, yv, z0, z1, steg, farg) {
+      var pts = [], upp = true;
+      for (var x = x0; x <= x1 + 0.001; x += steg) { pts.push(P(x, yv, upp ? z1 : z0)); upp = !upp; }
+      return lin(pts, farg, 1.2);
+    }
+    function fackZ(xv, yv, z0, z1, steg, farg, axel) {
+      var pts = [], sida = true;
+      for (var z = z0; z <= z1 + 0.001; z += steg) {
+        pts.push(axel === 'x' ? P(xv + (sida ? 0.5 : 0), yv, z) : P(xv, yv + (sida ? 0.5 : 0), z));
+        sida = !sida;
+      }
+      return lin(pts, farg, 1.1);
+    }
+    var ORANGE = { t: '#f6a04d', x: '#c5662a', y: '#dc7834' };
+    var GRA = { t: '#e8e3da', x: '#bdb5a8', y: '#d2cabd' };
 
     /* 1 Första samtalet: ett ljust rum, bord med ritning och kaffe. */
     function samtal() {
@@ -879,39 +1206,49 @@
       h += rum();
       h += fonsterY(-4, 0.4, 3.8, 1.2, 2.9, 'url(#v-glas)');
       h += lin([P(2.1, -4, 1.2), P(2.1, -4, 2.9)], '#1b1915', 1.6);
+      // Solljuset från fönstret på golvet.
+      h += poly([P(0.4, -3.95, 0.02), P(3.8, -3.95, 0.02), P(4.8, -1.1, 0.02), P(1.4, -1.1, 0.02)], 'url(#v-sol)', ' class="v-solljus"');
       // Tavla med en husritning på vänstra väggen.
       h += poly([P(-5, -2.8, 1.5), P(-5, -0.4, 1.5), P(-5, -0.4, 2.9), P(-5, -2.8, 2.9)], '#fffdf8', ' stroke="#1b1915" stroke-width="1.6"');
       h += lin([P(-5, -2.3, 1.8), P(-5, -2.3, 2.3), P(-5, -1.6, 2.7), P(-5, -0.9, 2.3), P(-5, -0.9, 1.8), P(-5, -2.3, 1.8)], '#8f5424', 1.6);
-      // Växt i hörnet.
-      h += cyl(-4.1, -3.1, 0, 0.45, 0.8, { x: '#c9975a', t: '#8a6a4b' });
-      h += '<g class="v-blad">' + poly([P(-4.1, -3.1, 0.8), P(-4.8, -3.3, 2.1), P(-4.2, -3.1, 1.2)], '#6f9a6a') +
-        poly([P(-4.1, -3.1, 0.8), P(-3.3, -3.5, 2.3), P(-3.9, -3.2, 1.3)], '#436b4f') +
-        poly([P(-4.1, -3.1, 0.8), P(-4.1, -2.2, 1.9), P(-4.0, -2.9, 1.1)], '#5a8660') + '</g>';
+      // Hylla med böcker under tavlan.
+      h += box(-5, -2.9, 0.9, 0.35, 2.6, 0.08, VIRKE);
+      ['#8f5424', '#1b1915', '#6f9a6a', '#f0b56e', '#8fb0cf'].forEach(function (f, k) {
+        h += box(-4.95, -2.7 + k * 0.42, 0.98, 0.26, 0.3, 0.42 - (k % 2) * 0.08, { t: f, x: f, y: f }, ' opacity=".95"');
+      });
+      // Mattan under bordet.
+      var m = P(0.35, 0.55, 0.01);
+      h += '<ellipse cx="' + m[0].toFixed(1) + '" cy="' + m[1].toFixed(1) + '" rx="' + (3.3 * S).toFixed(1) + '" ry="' + (1.75 * S).toFixed(1) + '" fill="#efe2cb" stroke="#d6c2a0" stroke-width="1.4"/>';
+      h += '<ellipse cx="' + m[0].toFixed(1) + '" cy="' + m[1].toFixed(1) + '" rx="' + (2.8 * S).toFixed(1) + '" ry="' + (1.45 * S).toFixed(1) + '" fill="none" stroke="#d6c2a0" stroke-width="1" stroke-dasharray="4 5"/>';
+      // Stolen bakom bordet (ryggen mot väggen).
+      h += stol(-2.6, 0.0, 'x', sitter(-2.6, 0.0, 'x', { t: '#8fb0cf', x: '#6f90af', y: '#7fa0bf' }, '#6b4f36'));
       // Bordet.
       h += skugga(0.9, 0.9, 2.2, 1.1);
-      h += box(0.1, 0.2, 0, 0.3, 0.3, 1.4, KOL);
+      h += cyl(0.25, 0.35, 0, 0.75, 0.08, { x: '#27231f', t: '#3a352d' });
+      h += box(0.1, 0.2, 0.08, 0.3, 0.3, 1.32, KOL);
       h += cyl(0.25, 0.35, 1.4, 1.9, 0.14, { x: '#c9975a', t: '#f3d6a6' });
-      // Stolarna.
-      h += box(-2.6, 0.6, 0, 1, 1, 0.9, KOL) + box(-2.6, 0.6, 0.9, 0.22, 1, 1.1, KOL);
-      h += box(2.2, 2.2, 0, 1, 1, 0.9, KOL) + box(2.2, 3.0, 0.9, 1, 0.22, 1.1, KOL);
       // På bordet: ritning, laptop, två koppar.
       h += poly([P(-0.9, -0.4, 1.56), P(0.9, -0.6, 1.56), P(1.2, 0.8, 1.56), P(-0.6, 1.0, 1.56)], '#fffdf8', ' stroke="#c9b391" stroke-width="1"');
-      h += lin([P(-0.4, -0.1, 1.57), P(0.6, -0.2, 1.57), P(0.8, 0.5, 1.57), P(-0.2, 0.6, 1.57), P(-0.4, -0.1, 1.57)], '#8f5424', 1.3);
+      h += lin([P(-0.4, -0.1, 1.57), P(0.6, -0.2, 1.57), P(0.8, 0.5, 1.57), P(-0.2, 0.6, 1.57), P(-0.4, -0.1, 1.57)], '#8f5424', 1.3, ' pathLength="1" class="v-rita"');
       h += box(0.6, 0.8, 1.54, 1.0, 0.7, 0.06, { t: '#b9b3a8', x: '#6f6a62', y: '#8a847a' });
       h += poly([P(0.6, 0.8, 1.6), P(1.6, 0.8, 1.6), P(1.6, 0.8, 2.3), P(0.6, 0.8, 2.3)], '#2a2622');
-      h += poly([P(0.7, 0.8, 1.68), P(1.5, 0.8, 1.68), P(1.5, 0.8, 2.22), P(0.7, 0.8, 2.22)], 'url(#v-glas)');
+      h += poly([P(0.7, 0.8, 1.68), P(1.5, 0.8, 1.68), P(1.5, 0.8, 2.22), P(0.7, 0.8, 2.22)], 'url(#v-glas)', ' class="v-skarm"');
       h += cyl(-0.9, 1.0, 1.54, 0.16, 0.26, { x: '#f7f2ea', t: '#6b4f36' });
       h += cyl(0.2, -0.9, 1.54, 0.16, 0.26, { x: '#f0b56e', t: '#6b4f36' });
       var a = P(-0.9, 1.0, 1.95), b = P(0.2, -0.9, 1.95);
       h += '<path class="v-anga" d="M' + a[0].toFixed(1) + ' ' + a[1].toFixed(1) + 'c-4-6 4-10 0-16s4-10 0-14" pathLength="1"/>';
       h += '<path class="v-anga v-anga--2" d="M' + b[0].toFixed(1) + ' ' + b[1].toFixed(1) + 'c-4-6 4-10 0-16s4-10 0-14" pathLength="1"/>';
-      // Pratbubblorna.
-      h += bubbla(232, 150, 104, 42, '#fffdf8',
-        '<circle class="v-prick" cx="208" cy="150" r="4" fill="#1b1915"/><circle class="v-prick v-prick--2" cx="232" cy="150" r="4" fill="#1b1915"/><circle class="v-prick v-prick--3" cx="256" cy="150" r="4" fill="#1b1915"/>',
-        'v-bubbla--1', 'h');
-      h += bubbla(400, 112, 150, 46, '#f3d6a6',
-        '<rect x="345" y="102" width="96" height="6" rx="3" fill="#8f5424"/><rect x="345" y="116" width="62" height="6" rx="3" fill="#8f5424" opacity=".55"/>',
-        'v-bubbla--2', 'v');
+      // Stolen framför bordet (ryggen mot oss).
+      h += stol(2.0, 2.2, 'y', sitter(2.0, 2.2, 'y', { t: '#3a352d', x: '#1b1915', y: '#2a2622' }, '#c9975a'));
+      // Golvlampan i främre hörnet.
+      h += golvlampa(-4.3, 3.3);
+      // Pratbubblorna vid personerna: du (blå tröja) berättar, vi svarar.
+      h += bubbla(312, 128, 100, 40, '#fffdf8',
+        '<circle class="v-prick" cx="290" cy="128" r="4" fill="#1b1915"/><circle class="v-prick v-prick--2" cx="312" cy="128" r="4" fill="#1b1915"/><circle class="v-prick v-prick--3" cx="334" cy="128" r="4" fill="#1b1915"/>',
+        'v-bubbla--1', 'nv', 'Du', '#8fb0cf');
+      h += bubbla(432, 252, 140, 44, '#f3d6a6',
+        '<rect class="v-skriv" x="380" y="242" width="96" height="6" rx="3" fill="#8f5424"/><rect class="v-skriv v-skriv--2" x="380" y="256" width="62" height="6" rx="3" fill="#8f5424" opacity=".55"/>',
+        'v-bubbla--2', 'v', 'Vi', '#1b1915');
       return h;
     }
 
@@ -947,36 +1284,74 @@
       h += box(-2.95, 1.75, 1.5, 0.5, 0.5, 0.35, { t: '#f0b56e', x: '#8f5424', y: '#c9975a' });
       // Kulörproverna som fläktas ut.
       var kulor = ['#24211d', '#c9975a', '#e9e2d4', '#6f8f58'];
-      var mitt = [500, 175];
+      var fot = P(4.6, 1.6, 0), mp = P(4.6, 1.6, 0.9), mitt = [Math.round(mp[0]), Math.round(mp[1])];
+      h += skugga(4.6, 1.6, 0.4, 0.2, 0.8) + '<path d="M' + fot[0].toFixed(1) + ' ' + fot[1].toFixed(1) + 'V' + mp[1].toFixed(1) + 'M' + (fot[0] - 9).toFixed(1) + ' ' + (fot[1] + 2).toFixed(1) + 'L' + fot[0].toFixed(1) + ' ' + (fot[1] - 4).toFixed(1) + 'L' + (fot[0] + 9).toFixed(1) + ' ' + (fot[1] + 2).toFixed(1) + '" fill="none" stroke="#1b1915" stroke-width="2.2" stroke-linecap="round"/>';
       h += g('v-flakt', kulor.map(function (f, i) {
         return '<g class="v-prov" style="--i:' + i + ';--v:' + ((i - 1.5) * 16) + 'deg;transform-origin:' + mitt[0] + 'px ' + mitt[1] + 'px;transform:rotate(var(--v))">' +
-          '<rect x="' + (mitt[0] - 11) + '" y="' + (mitt[1] - 78) + '" width="22" height="80" rx="4" fill="' + f + '" stroke="#1b1915" stroke-width="1.4"/></g>';
+          '<rect x="' + (mitt[0] - 9) + '" y="' + (mitt[1] - 64) + '" width="18" height="66" rx="4" fill="' + f + '" stroke="#1b1915" stroke-width="1.4"/></g>';
       }).join('') + '<circle cx="' + mitt[0] + '" cy="' + (mitt[1] - 4) + '" r="3.5" fill="#1b1915"/>');
+      // Skrivbordslampa på ritbordet, en stol och en växt.
+      var lb = P(-2.4, -1.5, 1.66), lt = P(-2.4, -1.5, 2.9);
+      h += '<ellipse class="v-lampsken" cx="' + (lt[0] + 18).toFixed(1) + '" cy="' + (lt[1] + 30).toFixed(1) + '" rx="54" ry="30" fill="url(#v-lampa)"/>';
+      h += '<path d="M' + lb[0].toFixed(1) + ' ' + lb[1].toFixed(1) + 'L' + (lb[0] - 6).toFixed(1) + ' ' + (lt[1] + 6).toFixed(1) + 'L' + (lt[0] + 14).toFixed(1) + ' ' + (lt[1] - 2).toFixed(1) + '" fill="none" stroke="#1b1915" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>';
+      h += '<path d="M' + (lt[0] + 8).toFixed(1) + ' ' + (lt[1] - 8).toFixed(1) + 'l16 4-4 12-16-4z" fill="#f0b56e" stroke="#1b1915" stroke-width="1.4" stroke-linejoin="round"/>';
+      h += '<ellipse cx="' + lb[0].toFixed(1) + '" cy="' + lb[1].toFixed(1) + '" rx="8" ry="4" fill="#1b1915"/>';
+      h += stol(0.0, 2.55, 'y', sitter(0.0, 2.55, 'y', { t: '#f0b56e', x: '#c9975a', y: '#dfb57a' }, '#1b1915'));
+      h += vaxt(-4.2, 3.0, 1.1);
+      var pl = P(-1.9, 0.9, 1.68);
+      h += etikett(pl[0], pl[1], 'Planlösning', 'upp', 38, 0, null, -30) + etikett(372, 262, 'Kulörer', 'hoger', 40, 1);
       return h;
     }
 
     /* 3 Bygglov eller anmälan: underlaget stämplas och skickas in. */
     function lov() {
       var h = DEFS + platta(BETONG, 0.4);
-      for (var i = -5; i < 5; i += 2) h += lin([P(i, -4, 0.01), P(i, 4, 0.01)], 'rgba(27,25,21,.07)', 1);
-      // Kommunhuset i bakgrunden.
-      h += skugga(-2.2, -2.2, 2.6, 1.3);
-      h += box(-4.4, -3.8, 0, 3.6, 2.6, 0.3, BETONG);
+      // Torgets plattor.
+      for (var i = -5; i <= 5; i += 1) h += lin([P(i, -4, 0.01), P(i, 4, 0.01)], 'rgba(27,25,21,.06)', 1);
+      for (var j = -4; j <= 4; j += 1) h += lin([P(-5, j, 0.01), P(5, j, 0.01)], 'rgba(27,25,21,.06)', 1);
+      // Gräsremsa bakom kommunhuset.
+      h += poly([P(-5, -4, 0.01), P(0.6, -4, 0.01), P(0.6, -3.95, 0.01), P(-5, -3.95, 0.01)], '#7ea267');
+      // Kommunhuset: sockel, trappa, kropp, kolonner, gavelfält och tak.
+      h += skugga(-2.2, -2.0, 2.8, 1.4);
+      h += box(-4.4, -3.8, 0, 3.6, 2.7, 0.3, GRA);
+      h += box(-3.4, -1.1, 0, 1.6, 0.5, 0.2, GRA) + box(-3.3, -1.1, 0.2, 1.4, 0.25, 0.1, GRA);
       h += box(-4.2, -3.6, 0.3, 3.2, 2.2, 2.4, { t: '#efe8dc', x: '#cfc6b5', y: '#e2d9ca' });
+      // Fönster på framsidan och gaveln, dörren i mitten.
+      h += fonsterY(-1.4, -3.95, -3.45, 1.0, 1.9, 'url(#v-glas)') + fonsterY(-1.4, -1.75, -1.25, 1.0, 1.9, 'url(#v-glas)');
+      h += poly([P(-2.85, -1.4, 0.3), P(-2.35, -1.4, 0.3), P(-2.35, -1.4, 1.7), P(-2.85, -1.4, 1.7)], '#6b4f36', ' stroke="#1b1915" stroke-width="1.4"');
+      h += fonsterX(-1.0, -3.3, -2.7, 1.1, 2.0, 'url(#v-glas)') + fonsterX(-1.0, -2.4, -1.8, 1.1, 2.0, 'url(#v-glas)');
       for (var c = 0; c < 4; c++) h += box(-4.0 + c * 0.9, -1.35, 0.3, 0.22, 0.22, 2.4, { t: '#fffdf8', x: '#d8d1c4', y: '#ece6da' });
-      h += poly([P(-4.4, -1.1, 2.7), P(-0.8, -1.1, 2.7), P(-2.6, -1.1, 3.6)], '#e9e2d4', ' stroke="#b3a994" stroke-width="1.2"');
       h += box(-4.4, -3.8, 2.7, 3.6, 2.7, 0.18, { t: '#cfc6b5', x: '#a9a297', y: '#bfb8ad' });
-      h += fonsterY(-1.4, -3.5, -3.0, 1.0, 1.9, 'url(#v-glas)') + fonsterY(-1.4, -2.1, -1.6, 1.0, 1.9, 'url(#v-glas)');
-      var fl = P(-2.6, -2.5, 3.3);
-      h += '<line x1="' + fl[0].toFixed(1) + '" y1="' + fl[1].toFixed(1) + '" x2="' + fl[0].toFixed(1) + '" y2="' + (fl[1] - 38).toFixed(1) + '" stroke="#1b1915" stroke-width="1.5"/>';
-      h += '<path class="v-flagga" d="M' + fl[0].toFixed(1) + ' ' + (fl[1] - 38).toFixed(1) + 'h20l-4 6 4 6h-20z" fill="#f0b56e" style="transform-origin:' + fl[0].toFixed(1) + 'px ' + (fl[1] - 32).toFixed(1) + 'px"/>';
-      // Skrivbordet med dokumentbunten.
+      h += poly([P(-4.4, -1.1, 2.88), P(-0.8, -1.1, 2.88), P(-2.6, -1.1, 3.7)], '#efe8dc', ' stroke="#b3a994" stroke-width="1.2"');
+      var ur = P(-2.6, -1.1, 3.22);
+      h += '<circle cx="' + ur[0].toFixed(1) + '" cy="' + ur[1].toFixed(1) + '" r="7" fill="#fffdf8" stroke="#8f5424" stroke-width="1.4"/>' +
+        '<path d="M' + ur[0].toFixed(1) + ' ' + ur[1].toFixed(1) + 'v-4.5M' + ur[0].toFixed(1) + ' ' + ur[1].toFixed(1) + 'h3.5" stroke="#1b1915" stroke-width="1.2" stroke-linecap="round"/>';
+      var fl = P(-2.6, -2.5, 2.9);
+      h += '<line x1="' + fl[0].toFixed(1) + '" y1="' + fl[1].toFixed(1) + '" x2="' + fl[0].toFixed(1) + '" y2="' + (fl[1] - 46).toFixed(1) + '" stroke="#1b1915" stroke-width="1.5"/>';
+      h += '<path class="v-flagga" d="M' + fl[0].toFixed(1) + ' ' + (fl[1] - 46).toFixed(1) + 'h22l-4 6 4 6h-22z" fill="#f0b56e" style="transform-origin:' + fl[0].toFixed(1) + 'px ' + (fl[1] - 40).toFixed(1) + 'px"/>';
+      // Träd, gatlykta och en bänk på torget.
+      h += lovtrad(1.4, -3.6, 2.6) + lovtrad(-4.7, 0.9, 2.2);
+      h += box(-2.1, 2.6, 0, 0.1, 0.35, 0.32, KOL) + box(-0.75, 2.6, 0, 0.1, 0.35, 0.32, KOL) +
+        box(-2.2, 2.55, 0.32, 1.6, 0.45, 0.1, VIRKE) + box(-2.2, 2.9, 0.42, 1.6, 0.1, 0.4, VIRKE);
+      var gb = P(4.4, -0.7, 0), gt = P(4.4, -0.7, 3.0);
+      h += skugga(4.4, -0.7, 0.4, 0.2, 0.8);
+      h += '<line x1="' + gb[0].toFixed(1) + '" y1="' + gb[1].toFixed(1) + '" x2="' + gt[0].toFixed(1) + '" y2="' + gt[1].toFixed(1) + '" stroke="#27231f" stroke-width="2.6"/>';
+      h += '<ellipse class="v-lampsken" cx="' + gt[0].toFixed(1) + '" cy="' + (gt[1] + 4).toFixed(1) + '" rx="30" ry="22" fill="url(#v-lampa)"/>';
+      h += '<rect x="' + (gt[0] - 6).toFixed(1) + '" y="' + (gt[1] - 6).toFixed(1) + '" width="12" height="10" rx="3" fill="#fff1d2" stroke="#1b1915" stroke-width="1.4"/>';
+      // Skrivbordet: ben, skiva, lådhurts, lampa och kaffe.
       h += skugga(1.8, 1.9, 2.4, 1.2);
-      h += box(0.2, 0.6, 0, 3.4, 2.4, 1.2, VIRKE);
+      [[0.25, 0.65], [3.4, 0.65], [0.25, 2.8], [3.4, 2.8]].forEach(function (k) { h += box(k[0], k[1], 0, 0.14, 0.14, 1.08, KOL); });
+      h += box(2.3, 0.75, 0.15, 1.15, 2.0, 0.93, { t: '#efe8dc', x: '#cfc6b5', y: '#e2d9ca' });
+      [0.42, 0.75].forEach(function (z) { h += lin([P(3.451, 0.95, z), P(3.451, 2.55, z)], '#a9a297', 1.2); });
+      h += box(0.2, 0.6, 1.08, 3.4, 2.4, 0.12, VIRKE);
       [0, 1, 2].forEach(function (k) {
         h += box(0.8 + k * 0.08, 0.9 - k * 0.06, 1.2 + k * 0.06, 1.7, 1.25, 0.05, PAPPER);
       });
       for (var r = 0; r < 4; r++) h += lin([P(1.1, 1.15 + r * 0.24, 1.39), P(2.2 - (r === 3 ? 0.5 : 0), 1.15 + r * 0.24, 1.39)], '#c9b391', 1.4);
+      h += cyl(3.0, 2.3, 1.2, 0.17, 0.28, { x: '#fffdf8', t: '#6b4f36' });
+      var lb = P(0.6, 2.4, 1.2), lt = P(0.6, 2.4, 2.2);
+      h += '<path d="M' + lb[0].toFixed(1) + ' ' + lb[1].toFixed(1) + 'L' + (lb[0] + 5).toFixed(1) + ' ' + (lt[1] + 4).toFixed(1) + 'L' + (lt[0] + 18).toFixed(1) + ' ' + (lt[1] + 2).toFixed(1) + '" fill="none" stroke="#1b1915" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+      h += '<path d="M' + (lt[0] + 12).toFixed(1) + ' ' + (lt[1] - 4).toFixed(1) + 'l14 4-3 10-14-4z" fill="#f0b56e" stroke="#1b1915" stroke-width="1.3" stroke-linejoin="round"/>';
       // Stämpeln: slår ner, lämnar sitt märke.
       var mark = P(2.05, 1.5, 1.4);
       h += '<g class="v-stampelmark" style="transform-origin:' + mark[0].toFixed(1) + 'px ' + mark[1].toFixed(1) + 'px">' +
@@ -987,43 +1362,87 @@
         cyl(2.05, 1.5, 2.12, 0.14, 0.7, { x: '#27231f', t: '#4a443d' }) +
         cyl(2.05, 1.5, 2.82, 0.3, 0.28, { x: '#27231f', t: '#4a443d' }));
       // Kuvertet som flyger till kommunen.
-      h += '<path class="v-bana" d="M300 236C214 206 196 112 262 150" fill="none" stroke="#8f5424" stroke-width="1.6" stroke-dasharray="4 6"/>';
       h += '<g class="v-kuvert" style="transform:translate(262px,150px) scale(.8)"><rect x="-16" y="-11" width="32" height="22" rx="3" fill="#fffdf8" stroke="#1b1915" stroke-width="1.6"/>' +
         '<path d="M-16 -9l16 11 16-11" fill="none" stroke="#1b1915" stroke-width="1.6" stroke-linejoin="round"/></g>';
+      var up = P(1.9, 3.0, 1.2), ko = P(-4.3, -1.1, 2.95);
+      h += etikett(up[0], up[1], 'Underlaget', 'ner', 20, 0, null, 30) + etikett(ko[0], ko[1], 'Kommunen', 'vanster', 22, 1);
       return h;
     }
 
     /* 4 Tillverkning: hallen under tak, väggelement på bänken. */
     function tillverkning() {
-      var h = DEFS + platta(BETONG, 0.4);
-      h += lin([P(-4.6, 2.8, 0.01), P(4.6, 2.8, 0.01)], '#f0b56e', 3);
+      var h = DEFS + platta({ t: '#d9d4ca', x: '#a9a297', y: '#bfb8ad' }, 0.4);
+      // Hallens väggar: paneler, fönsterband och en industriport.
+      h += poly([P(-5, -4, 0), P(5, -4, 0), P(5, -4, 4.2), P(-5, -4, 4.2)], '#e7e1d6');
+      h += poly([P(-5, -4, 0), P(-5, 4, 0), P(-5, 4, 4.2), P(-5, -4, 4.2)], '#d9d1c3');
+      for (var v = -3.75; v < 5; v += 1.25) h += lin([P(v, -4, 0), P(v, -4, 4.2)], 'rgba(27,25,21,.08)', 1);
+      h += poly([P(-4.6, -4, 3.0), P(4.6, -4, 3.0), P(4.6, -4, 3.7), P(-4.6, -4, 3.7)], 'url(#v-glas)', ' stroke="#1b1915" stroke-width="1.2"');
+      for (var f = -3.4; f < 4.6; f += 1.2) h += lin([P(f, -4, 3.0), P(f, -4, 3.7)], '#1b1915', 1.2);
+      h += poly([P(-5, 0.4, 0), P(-5, 3.4, 0), P(-5, 3.4, 3.0), P(-5, 0.4, 3.0)], '#c3baab', ' stroke="#1b1915" stroke-width="1.2"');
+      for (var r = 0.3; r < 3; r += 0.3) h += lin([P(-5, 0.4, r), P(-5, 3.4, r)], 'rgba(27,25,21,.18)', 1);
+      // Golvmarkeringar.
+      h += lin([P(-4.6, 2.9, 0.01), P(4.6, 2.9, 0.01)], '#f0b56e', 3);
       h += lin([P(-4.6, -3.2, 0.01), P(4.6, -3.2, 0.01)], '#f0b56e', 3);
-      // Pelare och takbalkar (taket syns som konstruktion).
+      // Pelare och takbalkar.
       [[-4.8, -3.8], [4.5, -3.8], [-4.8, 3.5]].forEach(function (k) { h += box(k[0], k[1], 0, 0.3, 0.3, 4.2, KOL); });
       h += box(-4.8, -3.8, 4.2, 9.6, 0.3, 0.3, KOL) + box(-4.8, -3.8, 4.2, 0.3, 7.6, 0.3, KOL);
       for (var t = -2.8; t < 4.6; t += 1.9) h += lin([P(t, -3.6, 4.5), P(t, 3.8, 4.5)], 'rgba(27,25,21,.28)', 1.5);
       // Traversen som åker längs balken.
       h += g('v-travers', box(-4.6, -3.5, 3.95, 0.6, 7.2, 0.25, { t: '#f0b56e', x: '#8f5424', y: '#c9975a' }) +
-        lin([P(-4.3, 0.2, 3.95), P(-4.3, 0.2, 2.9)], '#1b1915', 1.4));
-      // Ett färdigt element står lutat.
-      h += skugga(-2.9, -1.4, 1.6, 0.8);
-      h += box(-3.8, -2.6, 0, 0.18, 2.6, 2.5, VIRKE);
-      for (var s = -2.6; s <= 0.05; s += 0.65) h += lin([P(-3.62, s, 0), P(-3.62, s, 2.5)], '#c9975a', 1.4);
-      h += poly([P(-3.62, -2.6, 1.3), P(-3.62, 0, 1.3), P(-3.62, 0, 2.5), P(-3.62, -2.6, 2.5)], 'rgba(233,226,212,.85)');
-      // Arbetsbänken med elementet som byggs.
+        lin([P(-4.3, 0.2, 3.95), P(-4.3, 0.2, 2.9)], '#1b1915', 1.4) +
+        box(-4.45, 0.05, 2.75, 0.3, 0.3, 0.15, KOL));
+      // Stället med färdiga väggelement, fasad och fönster.
+      h += skugga(2.6, -2.8, 1.8, 0.8);
+      [0, 1, 2].forEach(function (k) { h += box(1.2, -3.7 + k * 0.32, 0, 2.9, 0.14, 2.3, k === 2 ? FASAD : VIRKE); });
+      h += fonsterY(-2.92, 1.7, 2.5, 0.9, 1.9, 'url(#v-glas)') + fonsterY(-2.92, 2.9, 3.7, 0.9, 1.9, 'url(#v-glas)');
+      // Arbetsbänken med elementet som byggs: reglar och sedan isolering.
       h += skugga(1.4, 1.2, 3.0, 1.4);
       [[-0.9, -0.6], [3.4, -0.6], [3.4, 2.4], [-0.9, 2.4]].forEach(function (k) { h += box(k[0], k[1], 0, 0.2, 0.2, 0.9, KOL); });
       h += box(-1.1, -0.8, 0.9, 4.8, 3.4, 0.14, { t: '#6f6a62', x: '#3a352d', y: '#4f4a42' });
       h += box(-0.8, -0.5, 1.04, 4.2, 0.24, 0.16, VIRKE) + box(-0.8, 2.0, 1.04, 4.2, 0.24, 0.16, VIRKE);
-      for (var k = 0; k < 6; k++) {
-        h += g('v-regel', box(-0.8 + k * 0.8, -0.26, 1.04, 0.2, 2.26, 0.16, VIRKE), '--i:' + k);
-      }
+      for (var k = 0; k < 6; k++) h += g('v-regel', box(-0.8 + k * 0.8, -0.26, 1.04, 0.2, 2.26, 0.16, VIRKE), '--i:' + k);
+      for (var q = 0; q < 5; q++) h += g('v-isolering', box(-0.58 + q * 0.8, -0.24, 1.05, 0.56, 2.22, 0.13, { t: '#f6dd8f', x: '#d9b95c', y: '#e8c96e' }), '--i:' + q);
+      // Snickaren vid bänken.
+      h += person(1.2, 2.95, { t: '#f0b56e', x: '#c9975a', y: '#dfb57a' }, '#fffdf8', 'v-arbetare', null, [1.75, 2.05, 1.24]);
+      // Trucken som kör fram och tillbaka med en pall reglar.
+      // Trucken: motvikt och chassi, förarskydd med tak, säte och ratt,
+      // mast med gaffelvagn och gafflar under en pall virke, hjul och
+      // en varningslampa som blinkar.
+      var MORK = { t: '#3a352d', x: '#1b1915', y: '#2a2622' };
+      var tr = box(-4.45, 1.55, 0.18, 0.14, 0.85, 0.55, { t: '#c5662a', x: '#9d4f1f', y: '#b35a24' });
+      tr += box(-4.31, 1.55, 0.18, 1.12, 0.85, 0.45, ORANGE);
+      tr += box(-4.2, 1.7, 0.63, 0.42, 0.5, 0.1, MORK) + box(-4.2, 1.7, 0.73, 0.09, 0.5, 0.42, MORK);
+      var rb = P(-3.62, 1.95, 0.63), rt = P(-3.68, 1.95, 1.02);
+      tr += '<line x1="' + rb[0].toFixed(1) + '" y1="' + rb[1].toFixed(1) + '" x2="' + rt[0].toFixed(1) + '" y2="' + rt[1].toFixed(1) + '" stroke="#1b1915" stroke-width="2"/>' +
+        '<ellipse cx="' + rt[0].toFixed(1) + '" cy="' + rt[1].toFixed(1) + '" rx="5" ry="2.6" fill="none" stroke="#1b1915" stroke-width="1.6"/>';
+      [[-4.28, 1.58], [-4.28, 2.33], [-3.42, 1.58], [-3.42, 2.33]].forEach(function (k) { tr += box(k[0], k[1], 0.63, 0.05, 0.05, 0.95, MORK); });
+      tr += box(-4.32, 1.55, 1.58, 0.95, 0.86, 0.05, MORK);
+      for (var gx = -4.15; gx < -3.42; gx += 0.18) tr += lin([P(gx, 1.57, 1.635), P(gx, 2.39, 1.635)], 'rgba(255,255,255,.18)', 1);
+      tr += cyl(-3.85, 1.95, 1.63, 0.08, 0.1, { x: '#f6a04d', t: '#ffd29a' });
+      var bk = P(-3.85, 1.95, 1.75);
+      tr += '<ellipse class="v-blink" cx="' + bk[0].toFixed(1) + '" cy="' + bk[1].toFixed(1) + '" rx="14" ry="10" fill="url(#v-lampa)"/>';
+      tr += box(-3.19, 1.6, 0.12, 0.07, 0.07, 1.85, MORK) + box(-3.19, 2.27, 0.12, 0.07, 0.07, 1.85, MORK);
+      tr += box(-3.19, 1.6, 1.9, 0.07, 0.74, 0.06, MORK) + box(-3.19, 1.6, 0.95, 0.07, 0.74, 0.05, MORK);
+      tr += box(-3.12, 1.64, 0.2, 0.04, 0.66, 0.4, MORK);
+      tr += box(-3.08, 1.7, 0.2, 1.0, 0.1, 0.04, { t: '#6f6a62', x: '#3a352d', y: '#4f4a42' }) + box(-3.08, 2.12, 0.2, 1.0, 0.1, 0.04, { t: '#6f6a62', x: '#3a352d', y: '#4f4a42' });
+      tr += box(-3.02, 1.62, 0.24, 0.92, 0.74, 0.04, { t: '#c9975a', x: '#8f5424', y: '#a96c33' });
+      [1.62, 1.95, 2.28].forEach(function (yy) { tr += box(-3.02, yy, 0.28, 0.92, 0.08, 0.07, { t: '#c9975a', x: '#8f5424', y: '#a96c33' }); });
+      tr += box(-3.02, 1.62, 0.35, 0.92, 0.74, 0.04, { t: '#c9975a', x: '#8f5424', y: '#a96c33' });
+      for (var lv = 0; lv < 3; lv++) tr += box(-2.98, 1.65 + lv * 0.235, 0.39, 0.84, 0.21, 0.28, { t: '#f3d6a6', x: '#c9975a', y: '#dfb57a' });
+      tr += hjulY(-4.05, 2.41, 0.2, 0.2) + hjulY(-3.4, 2.41, 0.24, 0.24);
+      h += g('v-truck', skugga(-3.6, 2.0, 1.0, 0.45, 0.8) + tr);
       // Termometern: jämn temperatur.
       var tm = P(4.2, -3.8, 2.4);
       h += '<g class="v-termo" transform="translate(' + tm[0].toFixed(1) + ',' + tm[1].toFixed(1) + ')">' +
         '<rect x="-7" y="-34" width="14" height="44" rx="7" fill="#fffdf8" stroke="#1b1915" stroke-width="1.5"/>' +
         '<rect class="v-termofyll" x="-3" y="-26" width="6" height="30" rx="3" fill="#f0b56e"/>' +
         '<circle cx="0" cy="8" r="6" fill="#f0b56e" stroke="#1b1915" stroke-width="1.5"/></g>';
+      // Dagsljuset från fönsterbandet faller in över golvet.
+      [[-3.4, -1.6], [0.2, 2.0]].forEach(function (k, i) {
+        h += '<polygon class="v-ljuskon" style="--i:' + i + '" points="' + [P(k[0], -4, 3.0), P(k[1], -4, 3.0), P(k[1] + 1.2, -1.0, 0.02), P(k[0] + 1.2, -1.0, 0.02)].map(function (q) { return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ') + '" fill="url(#v-kon)"/>';
+      });
+      var be = P(3.4, 1.3, 1.2);
+      h += etikett(be[0], be[1], 'Väggarna', 'hoger', 22, 0);
       return h;
     }
 
@@ -1039,91 +1458,239 @@
     }
     function grund() {
       var h = DEFS + platta(GRAS);
-      h += gran(-4.2, -3.2, 2.8) + gran(-3.2, -3.6, 2.2) + gran(4.1, -3.4, 2.6);
+      h += gran(-4.2, -3.2, 2.8) + gran(-3.2, -3.6, 2.2);
+      // Betongbilen bakom till höger: chassi, hytt, en avsmalnande trumma
+      // som lutar uppåt bakåt med spiralband, tratt och stativ.
+      h += skugga(3.7, -3.3, 1.9, 0.7, 0.9);
+      h += box(2.25, -3.85, 0.3, 2.1, 1.0, 0.22, KOL);
+      h += box(2.6, -2.86, 0.28, 0.6, 0.06, 0.14, { t: '#5f5a52', x: '#3a352d', y: '#4f4a42' });
+      // Stativet under trumman.
+      [[3.75, 0.95], [2.7, 1.25]].forEach(function (s) {
+        h += lin([P(s[0], -3.75, 0.52), P(s[0], -3.35, s[1]), P(s[0], -2.95, 0.52)], '#3a352d', 2.6);
+      });
+      var dr = [], fram = [3.95, -3.35, 1.32, 0.62], bak = [2.35, -3.35, 1.72, 0.4];
+      for (var t = 0; t < 28; t++) {
+        var v = t / 28 * Math.PI * 2;
+        dr.push(P(fram[0], fram[1] + Math.cos(v) * fram[3], fram[2] + Math.sin(v) * fram[3]));
+        dr.push(P(bak[0], bak[1] + Math.cos(v) * bak[3], bak[2] + Math.sin(v) * bak[3]));
+      }
+      var holje = hull(dr);
+      h += '<defs><clipPath id="v-trumklipp"><polygon points="' + holje.map(function (q) { return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ') + '"/></clipPath>' +
+        '<linearGradient id="v-trumljus" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf8f2"/><stop offset=".55" stop-color="#e3dccd"/><stop offset="1" stop-color="#b9b1a2"/></linearGradient></defs>';
+      h += poly(holje, 'url(#v-trumljus)', ' stroke="#1b1915" stroke-width="1.4" stroke-linejoin="round"');
+      var band = '';
+      for (var k = -2; k < 9; k++) {
+        var bx = 2.2 + k * 0.32;
+        band += lin([P(bx, -3.35 - 0.9, 2.4), P(bx + 0.55, -3.35 + 0.9, 0.5)], '#f0b56e', 6);
+      }
+      h += '<g clip-path="url(#v-trumklipp)"><g class="v-trumband">' + band + '</g></g>';
+      var opp = [];
+      for (var t2 = 0; t2 < 24; t2++) { var w = t2 / 24 * Math.PI * 2; opp.push(P(bak[0] - 0.01, bak[1] + Math.cos(w) * bak[3], bak[2] + Math.sin(w) * bak[3])); }
+      h += poly(opp, '#cfc6b5', ' stroke="#1b1915" stroke-width="1.2"');
+      var inner = [];
+      for (var t3 = 0; t3 < 24; t3++) { var w2 = t3 / 24 * Math.PI * 2; inner.push(P(bak[0] - 0.02, bak[1] + Math.cos(w2) * bak[3] * 0.55, bak[2] + Math.sin(w2) * bak[3] * 0.55)); }
+      h += poly(inner, '#3a352d');
+      // Tratten ovanför öppningen.
+      h += poly([P(2.2, -3.6, 2.35), P(2.2, -3.1, 2.35), P(2.35, -3.22, 2.0), P(2.35, -3.48, 2.0)], '#dfb57a', ' stroke="#1b1915" stroke-width="1"');
+      h += hytt(4.3, -3.9, 0.8, 1.1, 1.15, 0.3);
+      h += hjulY(2.75, -2.79, 0.3, 0.3) + hjulY(3.4, -2.79, 0.3, 0.3) + hjulY(4.65, -2.79, 0.3, 0.3);
+      // Rännan som häller betongen i formen.
+      var r0 = P(2.25, -3.1, 1.15), r1 = P(1.7, -1.5, 0.55);
+      h += '<path d="M' + r0[0].toFixed(1) + ' ' + r0[1].toFixed(1) + 'L' + r1[0].toFixed(1) + ' ' + r1[1].toFixed(1) + '" stroke="#1b1915" stroke-width="9" stroke-linecap="round"/>' +
+        '<path d="M' + r0[0].toFixed(1) + ' ' + r0[1].toFixed(1) + 'L' + r1[0].toFixed(1) + ' ' + r1[1].toFixed(1) + '" stroke="#a9a297" stroke-width="6" stroke-linecap="round"/>' +
+        '<path class="v-hall" d="M' + r0[0].toFixed(1) + ' ' + r0[1].toFixed(1) + 'L' + r1[0].toFixed(1) + ' ' + r1[1].toFixed(1) + 'L' + r1[0].toFixed(1) + ' ' + (r1[1] + 12).toFixed(1) + '" fill="none" stroke="#d6d0c4" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="6 6"/>';
       // Utsättningen: pinnar och snöre.
       var sn = [[-2.8, -2.2], [2.8, -2.2], [2.8, 2.2], [-2.8, 2.2]];
       sn.forEach(function (k) { h += box(k[0] - 0.08, k[1] - 0.08, 0, 0.16, 0.16, 0.7, VIRKE); });
       h += lin(sn.concat([sn[0]]).map(function (k) { return P(k[0], k[1], 0.62); }), '#f0b56e', 1.4, ' stroke-dasharray="5 4"');
-      // Schaktet och plattan som gjuts.
+      // Material till plattan: en pall cellplast och en bunt armeringsnät.
+      h += skugga(-3.9, -1.0, 1.0, 0.55, 0.9);
+      h += box(-4.6, -1.6, 0, 1.3, 1.1, 0.14, { t: '#c9975a', x: '#8f5424', y: '#a96c33' });
+      for (var ck = 0; ck < 5; ck++) {
+        var cz = 0.14 + ck * 0.17;
+        h += box(-4.55 + (ck % 2) * 0.03, -1.55, cz, 1.2, 1.0, 0.16, { t: '#fbfaf6', x: '#d9d4ca', y: '#e9e5dc' });
+        h += lin([P(-3.35 + (ck % 2) * 0.03, -1.55, cz + 0.08), P(-3.35 + (ck % 2) * 0.03, -0.55, cz + 0.08)], 'rgba(27,25,21,.12)', 1);
+      }
+      h += lin([P(-3.95, -1.55, 0.98), P(-3.95, -0.55, 0.98), P(-3.95, -0.55, 0.15)], '#5b8fbf', 2.4);
+      h += box(-3.3, 0.0, 0, 1.6, 1.1, 0.06, { t: '#8a847a', x: '#5f5a52', y: '#6f6a62' });
+      for (var ak = 0; ak < 2; ak++) {
+        var az = 0.07 + ak * 0.05;
+        for (var ax = -3.25; ax <= -1.75; ax += 0.2) h += lin([P(ax, 0.05, az), P(ax, 1.05, az)], '#6f6a62', 1.2);
+        for (var ay = 0.05; ay <= 1.06; ay += 0.2) h += lin([P(-3.25, ay, az), P(-1.75, ay, az)], '#6f6a62', 1.2);
+      }
+      // Schaktet, formbrädorna bak och rören.
       h += poly([P(-2.4, -1.9, 0.01), P(2.4, -1.9, 0.01), P(2.4, 1.9, 0.01), P(-2.4, 1.9, 0.01)], '#8c6c4d');
+      h += box(-2.45, -1.95, 0, 4.9, 0.08, 0.5, VIRKE) + box(-2.45, -1.95, 0, 0.08, 3.9, 0.5, VIRKE);
       h += ror([[5, 0.6, 0.02], [1.2, 0.6, 0.02]], '#5b8fbf', '') +
         ror([[5, -0.6, 0.02], [0.4, -0.6, 0.02]], '#8a847a', 'v-flode--2') +
         ror([[-0.6, 4, 0.02], [-0.6, 1.0, 0.02]], '#f0b56e', 'v-flode--3');
       h += g('v-platta', box(-2.3, -1.8, 0, 4.6, 3.6, 0.4, BETONG) +
         poly([P(-2.3, -1.8, 0.4), P(2.3, -1.8, 0.4), P(2.3, 1.8, 0.4), P(-2.3, 1.8, 0.4)], 'url(#v-glans)', ' class="v-blank"'));
-      // Stigarna upp genom plattan.
       h += stigare(1.2, 0.6, '#5b8fbf') + stigare(0.4, -0.6, '#8a847a') + stigare(-0.6, 1.0, '#f0b56e');
-      // Laser på stativ som sveper.
-      var st = P(3.6, 3.0, 0);
-      h += '<g transform="translate(' + st[0].toFixed(1) + ',' + st[1].toFixed(1) + ')">' +
-        '<path d="M0-38L-12 0M0-38L12 0M0-38L0 2" stroke="#1b1915" stroke-width="2" fill="none" stroke-linecap="round"/>' +
-        '<rect x="-7" y="-50" width="14" height="12" rx="3" fill="#f0b56e" stroke="#1b1915" stroke-width="1.5"/>' +
-        '<path class="v-laser" d="M0-44L-120-80" stroke="#e0764a" stroke-width="1.6" stroke-linecap="round" style="transform-origin:0 -44px"/></g>';
+      // Formbrädorna fram.
+      h += box(-2.45, 1.87, 0, 4.9, 0.08, 0.5, VIRKE) + box(2.37, -1.95, 0, 0.08, 3.9, 0.5, VIRKE);
+      // Grushögen.
+      var gh = P(-3.6, 2.8, 0), gt = P(-3.6, 2.8, 1.1);
+      h += skugga(-3.5, 2.9, 1.1, 0.55, 0.9);
+      h += '<path d="M' + (gh[0] - 32).toFixed(1) + ' ' + gh[1].toFixed(1) + 'Q' + (gt[0] - 6).toFixed(1) + ' ' + (gt[1] - 6).toFixed(1) + ' ' + gt[0].toFixed(1) + ' ' + gt[1].toFixed(1) + 'L' + gh[0].toFixed(1) + ' ' + (gh[1] + 10).toFixed(1) + 'Q' + (gh[0] - 20).toFixed(1) + ' ' + (gh[1] + 8).toFixed(1) + ' ' + (gh[0] - 32).toFixed(1) + ' ' + gh[1].toFixed(1) + 'z" fill="#c9bfae"/>';
+      h += '<path d="M' + gt[0].toFixed(1) + ' ' + gt[1].toFixed(1) + 'Q' + (gt[0] + 8).toFixed(1) + ' ' + (gt[1] - 4).toFixed(1) + ' ' + (gh[0] + 32).toFixed(1) + ' ' + gh[1].toFixed(1) + 'Q' + (gh[0] + 18).toFixed(1) + ' ' + (gh[1] + 8).toFixed(1) + ' ' + gh[0].toFixed(1) + ' ' + (gh[1] + 10).toFixed(1) + 'z" fill="#a39886"/>';
+      for (var s = 0; s < 6; s++) h += '<circle cx="' + (gh[0] - 18 + s * 7).toFixed(1) + '" cy="' + (gh[1] - 4 + (s % 2) * 6).toFixed(1) + '" r="1.6" fill="#8a7f6e"/>';
+      // Skottkärran med grus.
+      h += skugga(-1.7, 3.5, 0.8, 0.4, 0.85);
+      h += lin([P(-2.0, 3.3, 0.36), P(-2.0, 3.3, 0)], '#3a352d', 2) + lin([P(-2.0, 3.8, 0.36), P(-2.0, 3.8, 0)], '#3a352d', 2);
+      h += box(-2.15, 3.2, 0.32, 0.95, 0.75, 0.34, { t: '#6f9a6a', x: '#3f5a33', y: '#4f7042' });
+      h += poly([P(-2.1, 3.25, 0.67), P(-1.25, 3.25, 0.67), P(-1.25, 3.9, 0.67), P(-2.1, 3.9, 0.67)], '#a39886');
+      h += hjulY(-0.98, 3.56, 0.2, 0.2);
+      h += lin([P(-2.15, 3.28, 0.6), P(-2.95, 3.28, 0.55)], '#6b4f36', 2.4) + lin([P(-2.15, 3.87, 0.6), P(-2.95, 3.87, 0.55)], '#6b4f36', 2.4);
+      var va = P(5, 0.6, 0), av = P(5, -0.6, 0), el = P(-0.6, 4, 0), pt = P(0, 0, 0.4);
+      h += etikett(va[0], va[1], 'Vatten', 'ner', 47, 0, '#5b8fbf', -10) + etikett(av[0], av[1], 'Avlopp', 'ner', 18, 1, '#8a847a', 20) +
+        etikett(el[0], el[1], 'El', 'ner', 40, 2, '#f0b56e') + etikett(pt[0], pt[1], 'Plattan gjuts', 'upp', 14, 3);
       return h.replace('</defs>', '<linearGradient id="v-glans" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>');
     }
 
     /* 6 Leverans och montage: lastbilen, kranen och väggarna. */
     function montage() {
       var h = DEFS + platta(GRAS);
-      h += gran(-4.3, 3.2, 2.6) + gran(-4.4, -3.4, 3.0);
-      // Plattan med två väggar som redan står.
+      h += gran(-4.4, -3.4, 3.0) + gran(4.5, -3.6, 2.4);
+      // Plattan med två väggar som redan står, med fönster.
       h += skugga(-0.8, -0.6, 2.8, 1.4);
       h += box(-3.2, -3.0, 0, 4.6, 3.6, 0.35, BETONG);
       h += box(-3.1, -2.9, 0.35, 4.4, 0.22, 2.4, FASAD);
       h += box(-3.1, -2.9, 0.35, 0.22, 3.4, 2.4, FASAD);
       h += fonsterY(-2.68, -1.6, -0.2, 1.1, 2.2, 'url(#v-glas)');
-      // Kranen: torn, bom, lina och elementet som sänks.
-      h += skugga(3.4, -2.8, 0.9, 0.45);
-      h += box(3.0, -3.2, 0, 0.5, 0.5, 5.2, { t: '#f0b56e', x: '#8f5424', y: '#c9975a' });
-      for (var z = 0.4; z < 5.2; z += 0.6) h += lin([P(3.5, -3.2, z), P(3.5, -2.7, z + 0.4)], 'rgba(27,25,21,.4)', 1);
-      h += box(-1.8, -3.1, 5.2, 5.6, 0.3, 0.3, { t: '#f0b56e', x: '#8f5424', y: '#c9975a' });
-      h += box(3.6, -3.2, 4.6, 1.0, 0.5, 0.6, KOL);
-      var krok = P(0.2, -1.3, 5.2);
-      h += '<line class="v-lina" x1="' + krok[0].toFixed(1) + '" y1="' + krok[1].toFixed(1) + '" x2="' + krok[0].toFixed(1) + '" y2="' + (krok[1] + 40).toFixed(1) + '" stroke="#1b1915" stroke-width="1.6" style="transform-origin:' + krok[0].toFixed(1) + 'px ' + krok[1].toFixed(1) + 'px"/>';
-      h += g('v-last', box(-0.9, -0.95, 2.9, 2.2, 0.22, 1.6, VIRKE) +
-        lin([P(0.2, -0.95, 4.5), P(-0.9, -0.95, 4.5 - 0.02)], '#1b1915', 1.2) + lin([P(0.2, -0.95, 4.5), P(1.3, -0.95, 4.5)], '#1b1915', 1.2));
-      // Lastbilen med fler element på flaket.
-      h += skugga(2.6, 2.6, 2.6, 1.1);
-      h += box(0.6, 2.0, 0.2, 3.4, 1.3, 0.5, KOL);
-      h += box(0.8, 2.1, 0.7, 2.6, 1.1, 0.25, VIRKE) + box(0.9, 2.15, 0.95, 2.4, 1.0, 0.25, VIRKE);
-      h += box(4.0, 2.0, 0.2, 1.1, 1.3, 1.5, { t: '#f7f2ea', x: '#cfc6b5', y: '#e2d9ca' });
-      h += fonsterX(5.1, 2.15, 3.15, 0.95, 1.5, 'url(#v-glas)');
-      [[1.2, 3.3], [3.4, 3.3], [4.6, 3.3]].forEach(function (k) { h += cyl(k[0], k[1], 0.02, 0.32, 0.18, { x: '#1b1915', t: '#35302a' }); });
+      h += fonsterX(-2.88, -2.2, -1.0, 1.1, 2.2, 'url(#v-glas)');
+      for (var s = -3.0; s < 1.3; s += 0.45) h += lin([P(s, -2.68, 0.4), P(s, -2.68, 2.7)], 'rgba(255,255,255,.06)', 1);
+      // Tornkranen: fackverkstorn, bom rakt över framkanten, motvikt och löpkatt.
+      h += skugga(3.6, 0.5, 0.9, 0.45);
+      h += box(3.1, 0.05, 0, 0.9, 0.9, 0.2, BETONG);
+      h += box(3.3, 0.25, 0.2, 0.5, 0.5, 5.0, { t: '#f0b56e', x: '#c9975a', y: '#dfb57a' });
+      h += fackZ(3.8, 0.25, 0.3, 5.1, 0.45, '#8f5424', 'y') + fackZ(3.3, 0.75, 0.3, 5.1, 0.45, '#8f5424', 'x');
+      h += box(3.2, 0.15, 5.2, 0.7, 0.7, 0.55, { t: '#fffdf8', x: '#cfc6b5', y: '#e2d9ca' });
+      h += poly([P(3.9, 0.25, 5.3), P(3.9, 0.75, 5.3), P(3.9, 0.75, 5.65), P(3.9, 0.25, 5.65)], 'url(#v-glas)');
+      h += box(4.0, 0.25, 5.3, 0.9, 0.5, 0.45, KOL);
+      h += box(3.0, -0.05, 0.2, 0.35, 0.35, 0.35, BETONG) + box(3.95, 0.65, 0.2, 0.35, 0.35, 0.35, BETONG);
+      var spets = P(3.55, 0.5, 6.85);
+      h += lin([P(3.55, 0.5, 5.75), P(3.55, 0.5, 6.85)], '#8f5424', 2.4);
+      h += lin([spets, P(-1.4, 0.5, 6.03)], '#1b1915', 1) + lin([spets, P(4.9, 0.5, 5.75)], '#1b1915', 1);
+      h += box(-1.6, 0.35, 5.75, 6.6, 0.3, 0.28, { t: '#f0b56e', x: '#c9975a', y: '#dfb57a' });
+      h += fackY(-1.5, 4.9, 0.65, 5.76, 6.02, 0.5, '#8f5424');
+      h += box(0.0, 0.3, 5.6, 0.4, 0.4, 0.15, KOL);
+      var krok = P(0.2, 0.5, 5.6);
+      h += '<line class="v-lina" x1="' + krok[0].toFixed(1) + '" y1="' + krok[1].toFixed(1) + '" x2="' + krok[0].toFixed(1) + '" y2="' + (krok[1] + 58.5).toFixed(1) + '" stroke="#1b1915" stroke-width="1.6" style="transform-origin:' + krok[0].toFixed(1) + 'px ' + krok[1].toFixed(1) + 'px"/>';
+      // Elementet (en framvägg med fönster) som sänks ned på plattans framkant.
+      var kt = P(0.2, 0.5, 3.35);
+      h += g('v-last', box(-0.9, 0.38, 0.35, 2.2, 0.22, 2.4, FASAD) +
+        poly([P(-0.4, 0.601, 1.1), P(0.8, 0.601, 1.1), P(0.8, 0.601, 2.2), P(-0.4, 0.601, 2.2)], 'url(#v-glas)', ' stroke="#1b1915" stroke-width="1"') +
+        lin([P(0.2, 0.5, 3.35), P(-0.9, 0.49, 2.75)], '#1b1915', 1.2) + lin([P(0.2, 0.5, 3.35), P(1.3, 0.49, 2.75)], '#1b1915', 1.2) +
+        '<rect x="' + (kt[0] - 5).toFixed(1) + '" y="' + (kt[1] - 9).toFixed(1) + '" width="10" height="9" rx="2" fill="#f0b56e" stroke="#1b1915" stroke-width="1.2"/>');
+      // Montören som dirigerar, och koner.
+      h += person(-1.7, 1.35, { t: '#f08a3c', x: '#c5662a', y: '#dc7834' }, '#f0b56e', 'v-arbetare', null, [-1.05, 1.3, 2.35]);
+      h += kon(-3.4, 2.4) + kon(-0.6, 3.75);
+      // Lastbilen: chassi, flak med element i spännband, hytt, hjul och blinkljus.
+      var x0 = 0.4, y0 = 2.05;
+      h += skugga(x0 + 2.4, y0 + 0.75, 2.8, 1.0, 0.9);
+      h += box(x0, y0 + 0.1, 0.3, 4.6, 1.1, 0.22, KOL);
+      h += box(x0, y0, 0.52, 3.3, 1.3, 0.12, { t: '#8a6a4b', x: '#5a4330', y: '#6f5440' });
+      h += box(x0 + 0.1, y0 + 0.1, 0.64, 3.1, 1.1, 0.22, VIRKE) + box(x0 + 0.15, y0 + 0.15, 0.86, 3.0, 1.0, 0.22, { t: '#f3d6a6', x: '#c9975a', y: '#dfb57a' });
+      [0.9, 2.5].forEach(function (u) {
+        h += lin([P(x0 + u, y0 + 0.1, 1.09), P(x0 + u, y0 + 1.2, 1.09), P(x0 + u, y0 + 1.3, 0.6)], '#f08a3c', 2.2);
+      });
+      h += hytt(x0 + 3.35, y0, 1.25, 1.3, 1.5, 0.3);
+      h += box(x0 + 3.2, y0 + 1.3, 0.38, 0.6, 0.06, 0.22, { t: '#5f5a52', x: '#3a352d', y: '#4f4a42' });
+      var bl = P(x0 + 3.95, y0 + 0.65, 1.86);
+      h += '<ellipse class="v-blink" cx="' + bl[0].toFixed(1) + '" cy="' + (bl[1] - 3).toFixed(1) + '" rx="18" ry="11" fill="url(#v-lampa)"/>';
+      h += '<rect x="' + (bl[0] - 5).toFixed(1) + '" y="' + (bl[1] - 6).toFixed(1) + '" width="10" height="6" rx="2" fill="#f6a04d" stroke="#1b1915" stroke-width="1"/>';
+      h += hjulY(x0 + 0.7, y0 + 1.31, 0.32, 0.32) + hjulY(x0 + 1.5, y0 + 1.31, 0.32, 0.32) + hjulY(x0 + 3.95, y0 + 1.31, 0.32, 0.32);
+      var lv = P(5.0, 2.7, 0.3), mo = P(-1.75, 1.45, 1.15);
+      h += etikett(lv[0], lv[1], 'Leveransen', 'ner', 40, 0) + etikett(mo[0], mo[1], 'Montaget', 'vanster', 18, 1);
       return h;
     }
 
     /* 7 Slutbesiktning: det färdiga huset, lampor tända, punktlistan. */
     function besiktning() {
       var h = DEFS + platta(GRAS);
-      h += gran(-4.3, -3.3, 3.0) + gran(-3.4, -3.7, 2.2) + gran(4.2, -3.3, 2.7);
+      h += gran(-4.4, -3.4, 3.0) + gran(-3.5, -3.8, 2.2) + gran(4.5, -2.4, 2.4);
+      // Grusgången från trappan till kanten.
+      h += poly([P(-0.75, 2.72, 0.01), P(0.15, 2.72, 0.01), P(0.15, 4.0, 0.01), P(-0.75, 4.0, 0.01)], '#e6dfcf');
+      for (var gk = 0; gk < 14; gk++) {
+        var gp = P(-0.65 + (gk * 0.37) % 0.75, 2.85 + gk * 0.085, 0.02);
+        h += '<circle cx="' + gp[0].toFixed(1) + '" cy="' + gp[1].toFixed(1) + '" r="1.1" fill="#c9bfae"/>';
+      }
+      // Huset: sockel, väggar med panel, gavel, tak med falsar, skorsten.
+      var x0 = -2.8, y0 = -2.0, x1 = 2.4, y1 = 1.0, ze = 2.5, zr = 3.7, ym = -0.5, o = 0.3;
       h += skugga(0.4, 0.2, 4.0, 2.0);
       h += box(-3.0, -2.2, 0, 5.6, 3.4, 0.25, BETONG);
-      h += hus(-2.8, -2.0, 2.4, 1.0, 2.5, 3.7, FASAD, TAK, 0.3);
-      // Varma fönster med sken.
+      h += box(x0, y0, 0.25, x1 - x0, y1 - y0, ze - 0.25, FASAD);
+      h += poly([P(x1, y0, ze), P(x1, y1, ze), P(x1, ym, zr)], FASAD.x);
+      for (var px = x0 + 0.26; px < x1 - 0.05; px += 0.26) h += lin([P(px, y1, 0.27), P(px, y1, ze - 0.02)], 'rgba(255,255,255,.08)', 1);
+      for (var py = y0 + 0.26; py < y1 - 0.05; py += 0.26) {
+        var zt = ze + (zr - ze) * (1 - Math.abs(py - ym) / ((y1 - y0) / 2));
+        h += lin([P(x1, py, 0.27), P(x1, py, zt - 0.04)], 'rgba(255,255,255,.07)', 1);
+      }
+      // Taket.
+      h += poly([P(x0 - o, y0 - o, ze - 0.05), P(x1 + o, y0 - o, ze - 0.05), P(x1 + o, ym, zr), P(x0 - o, ym, zr)], TAK.x);
+      h += poly([P(x0 - o, ym, zr), P(x1 + o, ym, zr), P(x1 + o, y1 + o, ze - 0.05), P(x0 - o, y1 + o, ze - 0.05)], TAK.t);
+      for (var sx = x0 - o + 0.32; sx < x1 + o; sx += 0.32) h += lin([P(sx, ym, zr), P(sx, y1 + o, ze - 0.05)], 'rgba(255,255,255,.07)', 1);
+      h += poly([P(x1 + o, ym, zr), P(x1 + o, y1 + o, ze - 0.05), P(x1 + o, y1 + o, ze - 0.2), P(x1 + o, ym, zr - 0.15)], TAK.kant);
+      h += poly([P(x1 + o, y0 - o, ze - 0.05), P(x1 + o, ym, zr), P(x1 + o, ym, zr - 0.15), P(x1 + o, y0 - o, ze - 0.2)], TAK.kant);
+      h += lin([P(x0 - o, ym, zr + 0.02), P(x1 + o, ym, zr + 0.02)], '#5a554e', 2.6);
+      h += lin([P(x0 - o, y1 + o, ze - 0.06), P(x1 + o, y1 + o, ze - 0.06)], '#1b1915', 2);
+      // Skorstenen på takets framsida, med rök.
+      function rz(y) { return zr - (y - ym) / ((y1 + o) - ym) * (zr - (ze - 0.05)); }
+      h += poly([P(1.4, 0, rz(0)), P(1.4, 0.4, rz(0.4)), P(1.4, 0.4, 4.35), P(1.4, 0, 4.35)], '#8a847a');
+      h += poly([P(1.0, 0.4, rz(0.4)), P(1.4, 0.4, rz(0.4)), P(1.4, 0.4, 4.35), P(1.0, 0.4, 4.35)], '#a39b8e');
+      h += box(0.95, -0.05, 4.35, 0.5, 0.5, 0.1, { t: '#5a554e', x: '#3a352d', y: '#4a443d' });
+      var rk = P(1.2, 0.2, 4.5);
+      [0, 1, 2].forEach(function (i) {
+        h += '<circle class="v-rok" style="--i:' + i + '" cx="' + rk[0].toFixed(1) + '" cy="' + rk[1].toFixed(1) + '" r="' + (6 + i * 2) + '" fill="#e9e2d6"/>';
+      });
+      // Varmt sken framför husets fönster.
       var sk = P(0.2, 1.0, 1.4);
       h += '<ellipse class="v-sken" cx="' + sk[0].toFixed(1) + '" cy="' + (sk[1] + 30).toFixed(1) + '" rx="120" ry="44" fill="url(#v-sken)"/>';
-      h += fonsterY(1.0, -2.1, -0.9, 0.9, 2.1, 'url(#v-varm)') + fonsterY(1.0, 0.1, 1.9, 0.5, 2.1, 'url(#v-varm)');
-      h += lin([P(1.0, 1.0, 0.5), P(1.0, 1.0, 2.1)], '#1b1915', 1.6);
-      h += fonsterX(2.4, -1.4, -0.3, 1.1, 2.0, 'url(#v-varm)');
-      h += poly([P(-0.6, 1.0, 0.25), P(-0.1, 1.0, 0.25), P(-0.1, 1.0, 2.0), P(-0.6, 1.0, 2.0)], '#1b1915');
+      // Fönster med karm, spröjs och fönsterbänk; dörr med handtag.
+      h += fonsterY(y1, -2.3, -1.1, 0.95, 2.1, 'url(#v-varm)');
+      h += lin([P(-1.7, y1, 0.95), P(-1.7, y1, 2.1)], '#1b1915', 1.4);
+      h += fonsterY(y1, 0.1, 1.9, 0.5, 2.1, 'url(#v-varm)');
+      h += lin([P(1.0, y1, 0.5), P(1.0, y1, 2.1)], '#1b1915', 1.6);
+      [[-2.35, -1.05, 0.93], [0.05, 1.95, 0.48]].forEach(function (f) { h += lin([P(f[0], y1 + 0.02, f[2]), P(f[1], y1 + 0.02, f[2])], '#e9e2d6', 2.6); });
+      h += fonsterX(x1, -1.3, -0.3, 1.1, 2.0, 'url(#v-varm)');
+      h += lin([P(x1, -0.8, 1.1), P(x1, -0.8, 2.0)], '#1b1915', 1.2);
+      h += poly([P(-0.75, y1, 0.27), P(-0.2, y1, 0.27), P(-0.2, y1, 2.05), P(-0.75, y1, 2.05)], '#6b4f36', ' stroke="#1b1915" stroke-width="1.4"');
+      h += lin([P(-0.62, y1, 1.95), P(-0.62, y1, 0.4)], 'rgba(255,255,255,.12)', 1) + lin([P(-0.33, y1, 1.95), P(-0.33, y1, 0.4)], 'rgba(255,255,255,.12)', 1);
+      var dh = P(-0.28, y1, 1.15);
+      h += '<circle cx="' + dh[0].toFixed(1) + '" cy="' + dh[1].toFixed(1) + '" r="1.8" fill="#f0b56e"/>';
+      var vl = P(-0.05, y1, 1.75);
+      h += '<ellipse class="v-lampsken" cx="' + vl[0].toFixed(1) + '" cy="' + (vl[1] + 4).toFixed(1) + '" rx="22" ry="16" fill="url(#v-lampa)"/>';
+      h += '<rect x="' + (vl[0] - 3).toFixed(1) + '" y="' + (vl[1] - 6).toFixed(1) + '" width="6" height="9" rx="2" fill="#fff1d2" stroke="#1b1915" stroke-width="1"/>';
       // Altanen och trappan.
-      h += box(-1.6, 1.0, 0, 3.6, 1.3, 0.25, VIRKE);
-      for (var d = -1.3; d < 2.0; d += 0.45) h += lin([P(d, 1.0, 0.26), P(d, 2.3, 0.26)], '#c9975a', 1);
-      h += box(-0.8, 2.3, 0, 1.0, 0.4, 0.12, VIRKE);
-      // Gången.
-      [[-0.3, 2.9], [0.1, 3.5]].forEach(function (k) { h += box(k[0], k[1], 0, 0.6, 0.4, 0.05, BETONG); });
-      // Punktlistan som bockas av, och nyckeln.
-      h += '<g class="v-lista"><rect x="438" y="58" width="118" height="134" rx="14" fill="#fffdf8" stroke="#1b1915" stroke-width="1.6"/>' +
-        '<rect x="480" y="50" width="34" height="14" rx="4" fill="#1b1915"/>' +
+      h += box(-1.6, y1, 0, 3.6, 1.3, 0.25, VIRKE);
+      for (var d = -1.3; d < 2.0; d += 0.4) h += lin([P(d, y1, 0.26), P(d, 2.3, 0.26)], '#c9975a', 1);
+      h += box(-0.8, 2.3, 0, 1.0, 0.42, 0.13, VIRKE);
+      // Buskar, brevlåda.
+      h += buske(2.45, 1.7) + buske(2.95, 0.6);
+      h += box(3.35, 3.15, 0, 0.1, 0.1, 0.95, KOL);
+      h += box(3.2, 3.0, 0.95, 0.4, 0.45, 0.32, { t: '#4a443d', x: '#27231f', y: '#35302a' });
+      var bf = P(3.6, 3.1, 1.2);
+      h += '<rect x="' + (bf[0] - 1).toFixed(1) + '" y="' + (bf[1] - 12).toFixed(1) + '" width="2" height="12" fill="#1b1915"/><rect x="' + (bf[0] + 1).toFixed(1) + '" y="' + (bf[1] - 12).toFixed(1) + '" width="8" height="5" rx="1" fill="#f0b56e"/>';
+      // Nyckelöverlämningen: kunden och Idealhus, nyckeln mellan dem.
+      h += person(-2.7, 2.3, { t: '#8fb0cf', x: '#6f90af', y: '#7fa0bf' }, null, 'v-arbetare', null, [-1.62, 2.66, 1.18]);
+      h += person(-0.35, 3.0, { t: '#3a352d', x: '#1b1915', y: '#2a2622' }, '#f0b56e', '', [-1.28, 2.84, 1.18]);
+      var ny = P(-1.45, 2.75, 1.16);
+      h += '<g class="v-nyckel2" style="transform-origin:' + ny[0].toFixed(1) + 'px ' + ny[1].toFixed(1) + 'px">' +
+        '<circle cx="' + (ny[0] - 4).toFixed(1) + '" cy="' + ny[1].toFixed(1) + '" r="3.6" fill="none" stroke="#c98a45" stroke-width="2"/>' +
+        '<path d="M' + (ny[0] - 0.5).toFixed(1) + ' ' + ny[1].toFixed(1) + 'h8m-2.5 0v3m-2.5-3v2" fill="none" stroke="#c98a45" stroke-width="1.8" stroke-linecap="round"/></g>';
+      h += glitter(ny[0] + 4, ny[1] - 12, 5, 0);
+      // Punktlistan som bockas av.
+      h += '<g class="v-lista"><rect x="436" y="56" width="124" height="142" rx="16" fill="#fffdf8" stroke="#1b1915" stroke-width="1.6"/>' +
+        '<rect x="481" y="48" width="34" height="14" rx="4" fill="#1b1915"/>' +
+        '<text x="452" y="82" font-family="Poppins, sans-serif" font-size="10.5" font-weight="600" fill="#8f5424" letter-spacing="1">PUNKTLISTA</text>' +
         [0, 1, 2].map(function (i) {
-          var y = 92 + i * 32;
+          var y = 106 + i * 30;
           return '<rect x="452" y="' + (y - 9) + '" width="18" height="18" rx="5" fill="none" stroke="#1b1915" stroke-width="1.5"/>' +
             '<path class="v-bock v-bock--' + (i + 1) + '" d="M455 ' + y + 'l4 4 8-9" fill="none" stroke="#22a35a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>' +
-            '<rect x="478" y="' + (y - 3) + '" width="' + (62 - i * 12) + '" height="6" rx="3" fill="#d8d1c4"/>';
+            '<rect x="478" y="' + (y - 3) + '" width="' + (64 - i * 12) + '" height="6" rx="3" fill="#d8d1c4"/>';
         }).join('') + '</g>';
-      h += '<g class="v-nyckel" style="transform-origin:96px 92px"><circle cx="96" cy="92" r="14" fill="none" stroke="#1b1915" stroke-width="3"/>' +
-        '<path d="M96 106v34M96 124h10M96 134h7" fill="none" stroke="#1b1915" stroke-width="3" stroke-linecap="round"/>' +
-        '<rect x="70" y="62" width="30" height="18" rx="4" fill="#f0b56e" stroke="#1b1915" stroke-width="1.5" transform="rotate(-12 85 71)"/></g>';
+      h += glitter(222, 128, 7, 1) + glitter(396, 116, 6, 2) + glitter(418, 214, 7, 3);
       return h;
     }
 
@@ -1159,7 +1726,7 @@
     };
     var bred = window.matchMedia('(min-width: 1041px)');
     $$('.vemfilter, .hustypval', sek).forEach(glidandeMarkering);
-    if (ram) lutaI3D(ram, 3);
+    // Scenramen lutar inte längre efter musen (ritade om hela SVG:n).
 
     // Scenerna. Varje svg får egna id:n för sina toningar.
     var vyer = SCENER.map(function (f, i) {
@@ -1169,6 +1736,24 @@
         f().replace(/id="v-/g, 'id="v' + i + '-').replace(/url\(#v-/g, 'url(#v' + i + '-') + '</svg>';
       return d;
     });
+    // Brickornas bredd mäts mot den riktiga texten (uppskattningen per
+    // tecken räckte inte för t.ex. "Kommunen").
+    function passaEtiketter() {
+      vyer.forEach(function (v) {
+        Array.prototype.forEach.call(v.querySelectorAll('.v-etikett'), function (e) {
+          var t = e.querySelector('text'), r = e.querySelector('.v-etikettruta'), pr = r && r.nextElementSibling;
+          if (!t || !r || !t.getComputedTextLength) return;
+          var tl = t.getComputedTextLength();
+          if (!tl) return;
+          var w = tl + 35, rikt = e.getAttribute('data-rikt'), ax = parseFloat(e.getAttribute('data-ax'));
+          var x0 = rikt === 'vanster' ? ax - w : (rikt === 'hoger' ? ax : ax - w / 2);
+          r.setAttribute('x', x0.toFixed(1));
+          r.setAttribute('width', w.toFixed(1));
+          if (pr) pr.setAttribute('cx', (x0 + 12).toFixed(1));
+          t.setAttribute('x', (x0 + 21).toFixed(1));
+        });
+      });
+    }
     var ioVy = null;
     function placera() {
       if (ioVy) { ioVy.disconnect(); ioVy = null; }
@@ -1252,6 +1837,8 @@
     if (window.ResizeObserver) new ResizeObserver(function () { matt = null; boka(); }).observe(lista);
     if (bred.addEventListener) bred.addEventListener('change', placera);
     placera();
+    passaEtiketter();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(passaEtiketter);
 
     // Vem gör vad: det som inte gäller tonas ner.
     var vemKnappar = $$('.vemfilter button', sek);
@@ -3804,4 +4391,29 @@
     var lugn = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     mal.scrollIntoView({ behavior: lugn ? 'auto' : 'smooth', block: 'start' });
   });
+})();
+
+/* --- Inträdet för löftesrutorna och skedeskorten (2026-10-06) -------
+   Grupperna tonas fram en ruta i taget när de syns, och hela inträdet
+   spelas klart på en gång (stil i design.css, .glid). */
+(function () {
+  var grupper = document.querySelectorAll('.contact-section .kontaktkort .tillit, .katsida .tillit, .flode-intro__skeden, .contact-section .kontaktkort');
+  if (!grupper.length) return;
+  var lugn = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  Array.prototype.forEach.call(grupper, function (g) {
+    Array.prototype.forEach.call(g.children, function (el, i) {
+      el.classList.add('glid');
+      el.style.setProperty('--i', i);
+    });
+  });
+  function visa(g) {
+    Array.prototype.forEach.call(g.children, function (el) { el.classList.add('glid--in'); });
+  }
+  if (lugn || !window.IntersectionObserver) { Array.prototype.forEach.call(grupper, visa); return; }
+  var io = new IntersectionObserver(function (poster) {
+    poster.forEach(function (p) {
+      if (p.isIntersecting) { visa(p.target); io.unobserve(p.target); }
+    });
+  }, { threshold: 0.2 });
+  Array.prototype.forEach.call(grupper, function (g) { io.observe(g); });
 })();

@@ -19703,3 +19703,3643 @@ html:not([data-tema="mork"]) .prisoffert__lank a:hover {
   color: var(--text);
 }
 
+/* =====================================================================
+   Om oss-siffrorna (2026-10-06): fyra lika glaskort med centrerat
+   innehåll, samma storlek på alla värden, ett kort virkesstreck under
+   och ett mjukt ljus bakom. Fyra i rad först från 1200 px.
+   ===================================================================== */
+.siffror__grid--fyra {
+  position: relative;
+  isolation: isolate;
+}
+
+.siffror__grid--fyra::before {
+  content: "";
+  position: absolute;
+  inset: -8% -4%;
+  z-index: -1;
+  background:
+    radial-gradient(34% 70% at 14% 50%, rgba(240, 181, 110, 0.5), transparent 70%),
+    radial-gradient(34% 70% at 86% 50%, rgba(167, 196, 222, 0.55), transparent 70%),
+    radial-gradient(30% 60% at 50% 50%, rgba(255, 226, 184, 0.55), transparent 72%);
+  -webkit-mask-image: radial-gradient(70% 80% at 50% 50%, #000 50%, transparent 100%);
+  mask-image: radial-gradient(70% 80% at 50% 50%, #000 50%, transparent 100%);
+  pointer-events: none;
+}
+
+html body .siffror__grid--fyra .siffra,
+html body .siffror__grid--fyra .siffra.ih-mork,
+html body .siffror__grid--fyra .siffra.siffra--ljus {
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  padding: clamp(28px, 3vw, 40px) clamp(18px, 2vw, 28px);
+  border: 0;
+  border-radius: 28px;
+  text-align: center;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.26));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 26px 54px -36px rgba(90, 60, 25, 0.5);
+}
+
+.siffror__grid--fyra .siffra > .ih-kant {
+  display: none;
+}
+
+html body .siffror__grid--fyra .siffra__tal,
+html body .siffror__grid--fyra .siffra__tal--ord {
+  font-size: clamp(2rem, 0.8rem + 2.2vw, 3.2rem);
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.siffror__grid--fyra .siffra__tal::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 2px;
+  margin: 18px auto 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--virke-djup), var(--virke));
+}
+
+html body .siffror__grid--fyra .siffra__text {
+  max-width: 22ch;
+  margin: 14px auto 0;
+  color: var(--text-2);
+  text-wrap: balance;
+}
+
+@media (max-width: 1199px) {
+  .siffror__grid--fyra {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .siffror__grid--fyra {
+    grid-template-columns: 1fr;
+  }
+
+  html body .siffror__grid--fyra .siffra {
+    min-height: 0;
+  }
+}
+
+html[data-tema="mork"] body .siffror__grid--fyra .siffra {
+  background: linear-gradient(160deg, rgba(247, 245, 240, 0.08), rgba(247, 245, 240, 0.03));
+  box-shadow: inset 0 1px 0 rgba(247, 245, 240, 0.1), inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] .siffror__grid--fyra::before {
+  opacity: 0.35;
+}
+
+/* =====================================================================
+   Rullgardinen under "Våra hus" i glas (2026-10-06): frostat glas med
+   ljus kant och mjuk skugga, länkarna som glaspill vid hovring och
+   provakortet som ett varmt glaskort. Oskärpan kostar bara när menyn
+   är öppen.
+   ===================================================================== */
+html body .main-nav__sub {
+  padding: 10px;
+  border: 0;
+  border-radius: 26px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.5));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 40px 90px -40px rgba(60, 40, 15, 0.5),
+    0 18px 40px -28px rgba(60, 40, 15, 0.35);
+  -webkit-backdrop-filter: blur(24px) saturate(1.7);
+  backdrop-filter: blur(24px) saturate(1.7);
+}
+
+html body .main-nav__sub > a:not(.main-nav__tips) {
+  border-radius: 18px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.35s var(--mjuk);
+}
+
+html body .main-nav__sub > a:not(.main-nav__tips):hover {
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 10px 24px -18px rgba(60, 40, 15, 0.5);
+}
+
+html body .main-nav__sub img {
+  border-radius: 14px;
+  box-shadow: 0 8px 18px -12px rgba(27, 25, 21, 0.55), 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+html body .main-nav__sub-etikett {
+  color: var(--text-3);
+  letter-spacing: 0.16em;
+}
+
+html body .main-nav__sub-etikett--delad {
+  border-top-color: rgba(27, 25, 21, 0.08);
+}
+
+html body .main-nav__sub .main-nav__tips {
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(240, 181, 110, 0.38), transparent 60%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.3));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    0 0 0 1px rgba(27, 25, 21, 0.05);
+}
+
+html body .main-nav__sub .main-nav__tips:hover {
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(240, 181, 110, 0.5), transparent 60%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.45));
+}
+
+html[data-tema="mork"] body .main-nav__sub {
+  background: linear-gradient(160deg, rgba(33, 30, 25, 0.78), rgba(20, 19, 16, 0.66));
+  box-shadow:
+    inset 0 1px 0 rgba(247, 245, 240, 0.08),
+    inset 0 0 0 1px rgba(247, 245, 240, 0.08),
+    0 40px 90px -40px rgba(0, 0, 0, 0.8);
+}
+
+html[data-tema="mork"] body .main-nav__sub > a:not(.main-nav__tips):hover {
+  background: rgba(247, 245, 240, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+}
+
+html[data-tema="mork"] body .main-nav__sub .main-nav__tips {
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(240, 181, 110, 0.2), transparent 60%),
+    rgba(247, 245, 240, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+}
+
+/* Menyradens glas ligger i ett eget lager (::before). Med backdrop-filter
+   på själva raden blev raden en "backdrop root" och rullgardinen inuti
+   kunde inte göra oskärpa av sidan bakom - den blev bara genomskinlig. */
+html body .site-header__inner,
+html[data-rullat] body .site-header__inner {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+html body .site-header__inner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.36));
+  -webkit-backdrop-filter: blur(18px) saturate(1.7);
+  backdrop-filter: blur(18px) saturate(1.7);
+  pointer-events: none;
+  transition: background-color 0.45s ease;
+}
+
+html[data-rullat] body .site-header__inner::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.54));
+}
+
+html[data-tema="mork"] body .site-header__inner::before {
+  background: linear-gradient(180deg, rgba(33, 30, 25, 0.62), rgba(20, 19, 16, 0.5));
+}
+
+/* =====================================================================
+   Tillitsrutorna i kontaktdelen (2026-10-06): glaskort, ikonen i en
+   varm bricka, lyft vid hovring, och de tonas in en i taget ur oskärpa
+   när de rullas fram (scroll-driven; utan stöd står de bara där).
+   ===================================================================== */
+html body .katsida .tillit li {
+  position: relative;
+  gap: 12px;
+  padding: 24px 14px 22px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.42));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 18px 36px -26px rgba(90, 60, 25, 0.45);
+  font: 600 0.9375rem/1.3 var(--knappfont);
+  letter-spacing: -0.01em;
+  color: var(--text);
+  transition: transform 0.5s var(--mjuk), box-shadow 0.5s var(--mjuk);
+}
+
+html body .katsida .tillit li:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 28px 50px -28px rgba(90, 60, 25, 0.55);
+}
+
+html body .katsida .tillit svg {
+  box-sizing: content-box;
+  width: 22px;
+  height: 22px;
+  padding: 12px;
+  border-radius: 16px;
+  background: radial-gradient(circle at 30% 25%, rgba(255, 233, 200, 1), rgba(240, 181, 110, 0.55));
+  stroke: var(--virke-djup);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 10px 20px -12px rgba(240, 181, 110, 0.9);
+  transition: transform 0.6s var(--mjuk);
+}
+
+html body .katsida .tillit li:hover svg {
+  transform: rotate(-6deg) scale(1.07);
+}
+
+@keyframes tillit-in {
+  from {
+    opacity: 0;
+    translate: 0 26px;
+    scale: 0.95;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    filter: blur(0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html body .katsida .tillit li {
+      animation: tillit-in linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 30%;
+    }
+
+    html body .katsida .tillit li:nth-child(2) {
+      animation-range: entry 12% cover 36%;
+    }
+
+    html body .katsida .tillit li:nth-child(3) {
+      animation-range: entry 19% cover 42%;
+    }
+
+    html body .katsida .tillit li:nth-child(4) {
+      animation-range: entry 26% cover 48%;
+    }
+  }
+}
+
+html[data-tema="mork"] body .katsida .tillit li {
+  background: linear-gradient(160deg, rgba(247, 245, 240, 0.07), rgba(247, 245, 240, 0.03));
+  box-shadow: inset 0 1px 0 rgba(247, 245, 240, 0.08), inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+/* Övergångsnamnet sätts av skriptet i head bara under sidbytet. */
+html body .site-header {
+  view-transition-name: none;
+}
+
+/* Rullgardinens små texter tydligare. */
+html:not([data-tema="mork"]) body .main-nav__sub {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.66));
+}
+
+html:not([data-tema="mork"]) body .main-nav__sub em,
+html:not([data-tema="mork"]) body .main-nav__sub .main-nav__tips em {
+  color: rgba(27, 25, 21, 0.72);
+  font-weight: 500;
+}
+
+html:not([data-tema="mork"]) body .main-nav__sub-etikett {
+  color: rgba(27, 25, 21, 0.6);
+}
+
+html:not([data-tema="mork"]) body .main-nav__sub strong {
+  color: var(--text);
+}
+/* =====================================================================
+   Kontaktkortet "Hör av dig direkt" (2026-10-06): centrerat och
+   symmetriskt glaskort - rubrik med streck på båda sidor, e-post och
+   plats i mitten, de fyra löftena som lika glasrutor med ikon i varm
+   bricka. Rutorna tonas fram en i taget när kortet rullas fram.
+   ===================================================================== */
+html:not([data-tema="mork"]) body .contact-section .kontaktkort {
+  justify-items: center;
+  text-align: center;
+  border: 0;
+  background:
+    radial-gradient(80% 60% at 100% 0%, rgba(255, 214, 160, 0.42), transparent 62%),
+    radial-gradient(70% 60% at 0% 100%, rgba(184, 205, 224, 0.3), transparent 62%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.5));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 34px 70px -44px rgba(90, 60, 25, 0.55);
+}
+
+html body .contact-section .kontaktkort__rubrik {
+  justify-content: center;
+  gap: 14px;
+}
+
+html body .contact-section .kontaktkort__rubrik::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 1px;
+  background: var(--virke);
+}
+
+html body .contact-section .kontaktkort__rubrik::before {
+  width: 28px;
+}
+
+html body .contact-section .kontaktkort .contact-section__meta {
+  width: 100%;
+}
+
+html body .contact-section .kontaktkort .contact-section__meta > div {
+  justify-items: center;
+}
+
+html body .contact-section .kontaktkort .kopiera-rad {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+html body .contact-section .kontaktkort .tillit {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  margin-top: 22px;
+}
+
+html body .contact-section .kontaktkort .tillit li {
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  min-height: 116px;
+  padding: 18px 12px 16px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.45));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 14px 30px -24px rgba(90, 60, 25, 0.5);
+  font: 600 0.875rem/1.3 var(--knappfont);
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: var(--text);
+  text-wrap: balance;
+  transition: transform 0.5s var(--mjuk), box-shadow 0.5s var(--mjuk);
+}
+
+html body .contact-section .kontaktkort .tillit li:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 22px 40px -24px rgba(90, 60, 25, 0.55);
+}
+
+html body .contact-section .kontaktkort .tillit svg {
+  box-sizing: content-box;
+  width: 20px;
+  height: 20px;
+  padding: 10px;
+  border-radius: 14px;
+  background: radial-gradient(circle at 30% 25%, rgba(255, 236, 205, 1), rgba(240, 181, 110, 0.55));
+  stroke: var(--virke-djup);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 18px -10px rgba(240, 181, 110, 0.9);
+  transition: transform 0.6s var(--mjuk);
+}
+
+html body .contact-section .kontaktkort .tillit li:hover svg {
+  transform: rotate(-6deg) scale(1.08);
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html body .contact-section .kontaktkort .tillit li {
+      animation: tillit-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 25%;
+    }
+
+    html body .contact-section .kontaktkort .tillit li:nth-child(2) { animation-range: entry 6% cover 30%; }
+    html body .contact-section .kontaktkort .tillit li:nth-child(3) { animation-range: entry 12% cover 35%; }
+    html body .contact-section .kontaktkort .tillit li:nth-child(4) { animation-range: entry 18% cover 40%; }
+  }
+}
+
+html[data-tema="mork"] body .contact-section .kontaktkort .tillit li {
+  background: rgba(247, 245, 240, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+  color: var(--text);
+}
+
+/* =====================================================================
+   "Sju steg, i ordning" (2026-10-06): skedena som tre lika glaskort
+   med en mätare, munken i ett glaskort med ljus bakom och styrraden i
+   glas. Skedeskorten tonas fram en i taget.
+   ===================================================================== */
+.flode-intro__inre {
+  align-items: stretch;
+}
+
+.flode-intro__ord {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+html body .flode-intro__skeden {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+html body .flode-intro__skeden a {
+  gap: 8px;
+  padding: 18px 18px 26px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.5));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 16px 32px -24px rgba(90, 60, 25, 0.5);
+}
+
+html body .flode-intro__skeden span {
+  justify-self: start;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(240, 181, 110, 0.18);
+}
+
+html body .flode-intro__skeden b {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+  font-size: 1rem;
+}
+
+html body .flode-intro__skeden i {
+  left: 18px;
+  right: 18px;
+  bottom: 12px;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(27, 25, 21, 0.07);
+  transform: none;
+  overflow: hidden;
+}
+
+html body .flode-intro__skeden i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--virke-djup), var(--virke));
+  transform: scaleX(0.22);
+  transform-origin: left center;
+  transition: transform 0.7s var(--mjuk);
+}
+
+html body .flode-intro__skeden a:hover i::after {
+  transform: none;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html body .flode-intro__skeden a {
+      animation: tillit-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 28%;
+    }
+
+    html body .flode-intro__skeden a:nth-child(2) { animation-range: entry 8% cover 34%; }
+    html body .flode-intro__skeden a:nth-child(3) { animation-range: entry 16% cover 40%; }
+  }
+}
+
+/* Munkkortet. */
+html:not([data-tema="mork"]) body .vemkort {
+  position: relative;
+  isolation: isolate;
+  border-radius: 32px;
+  background:
+    radial-gradient(70% 70% at 0% 0%, rgba(255, 214, 160, 0.45), transparent 60%),
+    radial-gradient(70% 70% at 100% 100%, rgba(184, 205, 224, 0.4), transparent 60%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.55));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 44px 90px -54px rgba(90, 60, 25, 0.6);
+}
+
+html body .vemkort__munk {
+  isolation: isolate;
+}
+
+html body .vemkort__munk::before {
+  content: "";
+  position: absolute;
+  inset: 16%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.7) 58%, rgba(255, 255, 255, 0) 74%);
+}
+
+html body .vemkort__munk svg {
+  filter: drop-shadow(0 10px 18px rgba(90, 60, 25, 0.22));
+}
+
+html body .vemkort__spar {
+  stroke: rgba(27, 25, 21, 0.06);
+}
+
+html body .vemkort__mitt strong {
+  font-size: 3rem;
+  background: linear-gradient(180deg, #2a2620, #7a522a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+html body .vemkort__lista {
+  gap: 6px;
+}
+
+html body .vemkort__lista li {
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.05);
+  transition: transform 0.45s var(--mjuk), background-color 0.3s ease;
+}
+
+html body .vemkort__lista li:last-child {
+  padding-bottom: 12px;
+}
+
+html body .vemkort__lista li:hover {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+html body .vemkort__lista .vemprick {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9), 0 0 0 5px rgba(27, 25, 21, 0.06);
+}
+
+/* Styrraden i glas. */
+html:not([data-tema="mork"]) body .flode__styr {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.48));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 22px 46px -26px rgba(90, 60, 25, 0.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+}
+
+html body .flode__styr .vemfilter,
+html body .flode__styr .hustypval {
+  background: rgba(27, 25, 21, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.05);
+}
+
+html body .flode__prickar a.aktiv i {
+  box-shadow: 0 0 0 4px rgba(240, 181, 110, 0.28), 0 0 14px rgba(240, 181, 110, 0.8);
+}
+
+html body .flode__nu {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  html body .flode-intro__skeden {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+html[data-tema="mork"] body .flode-intro__skeden a,
+html[data-tema="mork"] body .vemkort__lista li,
+html[data-tema="mork"] body .flode__nu {
+  background: rgba(247, 245, 240, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] body .vemkort__mitt strong {
+  background: linear-gradient(180deg, #fff4e2, var(--virke));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+html[data-tema="mork"] body .vemkort__munk::before {
+  background: radial-gradient(circle, rgba(247, 245, 240, 0.08), transparent 70%);
+}
+/* Introt och styrraden på "Så fungerar det" hör ihop - mindre luft. */
+html body main > .flode-intro + .flode.flode {
+  margin-top: clamp(2.5rem, 4vw, 3.5rem);
+}
+/* Kontaktkortet: jämn luft mellan plats och löftena. */
+html body .contact-section .kontaktkort .tillit {
+  margin-top: 0;
+  padding-top: 18px;
+}
+/* Inträdet för löftesrutorna och skedeskorten (2026-10-06): inte längre
+   kopplat till rullningen (då blev de kvar suddiga om man stannade mitt
+   i). premium.js sätter .glid och sedan .glid--in när de syns - då
+   spelas hela inträdet på en gång, en ruta i taget. */
+html body .contact-section .kontaktkort .tillit li,
+html body .katsida .tillit li,
+html body .flode-intro__skeden a {
+  animation: none;
+}
+
+html.ih-js body .contact-section .kontaktkort .tillit li.glid,
+html.ih-js body .katsida .tillit li.glid,
+html.ih-js body .flode-intro__skeden a.glid {
+  opacity: 0;
+  translate: 0 20px;
+  filter: blur(6px);
+  transition:
+    opacity 0.8s ease calc(var(--i, 0) * 110ms),
+    translate 1s var(--mjuk) calc(var(--i, 0) * 110ms),
+    filter 0.8s ease calc(var(--i, 0) * 110ms),
+    transform 0.5s var(--mjuk),
+    box-shadow 0.5s var(--mjuk);
+}
+
+html.ih-js body .contact-section .kontaktkort .tillit li.glid.glid--in,
+html.ih-js body .katsida .tillit li.glid.glid--in,
+html.ih-js body .flode-intro__skeden a.glid.glid--in {
+  opacity: 1;
+  translate: 0 0;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.ih-js body .contact-section .kontaktkort .tillit li.glid,
+  html.ih-js body .katsida .tillit li.glid,
+  html.ih-js body .flode-intro__skeden a.glid {
+    opacity: 1;
+    translate: none;
+    filter: none;
+    transition: none;
+  }
+}
+/* =====================================================================
+   Storleksskalan på prissidan, version 2 (2026-10-06): glaspanel med
+   mjukt ljus, ett tjockare spår med glödande knopp och en bubbla som
+   pulsar vid varje byte, husen som glaskort, golvytan som ett litet rum
+   i genomskärning (glasväggar, säng, köksbänk, soffa, bil och person i
+   verklig storlek) och ett ljust svarskort med en mätare mot
+   lovgränserna. Svarskortet hade vit text kvar från den mörka panelen.
+   ===================================================================== */
+html:not([data-tema="mork"]) body .prisskala__panel {
+  border-radius: 36px;
+  background:
+    radial-gradient(50% 60% at 0% 0%, rgba(255, 214, 160, 0.4), transparent 62%),
+    radial-gradient(50% 60% at 100% 100%, rgba(184, 205, 224, 0.32), transparent 62%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.58));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 60px 120px -64px rgba(90, 60, 25, 0.6);
+}
+
+html body .prisskala__panel > .ih-kant {
+  display: none;
+}
+
+/* --- Reglaget ---------------------------------------------------------- */
+html body .prisskala__linjal {
+  --t: 34px;
+}
+
+html body .prisskala__spar {
+  height: 12px;
+  background: linear-gradient(90deg,
+    rgba(240, 181, 110, 0.16) 0 25%, rgba(184, 205, 224, 0.28) 25% 75%, rgba(27, 25, 21, 0.08) 75% 100%);
+  box-shadow: inset 0 1px 2px rgba(27, 25, 21, 0.12), 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+html body .prisskala__spar i {
+  background: linear-gradient(90deg, #8f5424, #c98a45 45%, #f0b56e);
+  box-shadow: 0 0 22px rgba(240, 181, 110, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transition: transform 0.18s ease-out;
+}
+
+html body .prisskala__linjal input[type="range"]::-webkit-slider-thumb {
+  background:
+    radial-gradient(circle at 50% 50%, #1b1915 0 5px, transparent 5.5px),
+    radial-gradient(circle at 50% 28%, #ffffff, #fff1dc 45%, #f0b56e 100%);
+  box-shadow:
+    0 0 0 7px rgba(240, 181, 110, 0.24),
+    0 0 26px rgba(240, 181, 110, 0.7),
+    0 14px 24px -8px rgba(143, 84, 36, 0.8),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+}
+
+html body .prisskala__linjal input[type="range"]:hover::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 11px rgba(240, 181, 110, 0.22),
+    0 0 30px rgba(240, 181, 110, 0.8),
+    0 14px 24px -8px rgba(143, 84, 36, 0.8),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+}
+
+html body .prisskala__bubbla span {
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #38332c, #1b1915);
+  box-shadow: 0 12px 24px -10px rgba(27, 25, 21, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  font-size: 0.875rem;
+}
+
+html body .prisskala__bubbla span::after {
+  border-top-color: #1b1915;
+}
+
+@keyframes skala-puls {
+  0% { scale: 1; }
+  40% { scale: 1.1; }
+  100% { scale: 1; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .prisskala__bubbla.puls span {
+    animation: skala-puls 0.35s var(--mjuk);
+  }
+}
+
+html body .zon b {
+  font-size: 0.8125rem;
+}
+
+/* --- Husen ------------------------------------------------------------- */
+html body .prisskala__modeller {
+  gap: 12px;
+}
+
+html body .prisskala__modell {
+  position: relative;
+  padding: 8px 14px 8px 8px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.45));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 12px 26px -22px rgba(90, 60, 25, 0.5);
+}
+
+html body .prisskala__modell img {
+  width: 68px;
+  height: 52px;
+  border-radius: 13px;
+  box-shadow: 0 8px 16px -10px rgba(27, 25, 21, 0.6);
+}
+
+html body .prisskala__modell:hover {
+  transform: translateY(-3px);
+}
+
+html body .prisskala__modell.aktiv {
+  background: linear-gradient(160deg, #ffffff, rgba(255, 246, 232, 0.9));
+  box-shadow:
+    inset 0 0 0 2px #f0b56e,
+    0 0 0 5px rgba(240, 181, 110, 0.16),
+    0 20px 36px -22px rgba(143, 84, 36, 0.7);
+  transform: translateY(-3px);
+}
+
+html body .prisskala__modell.aktiv::after {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%231b1915' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat,
+    linear-gradient(180deg, #f6c993, #f0b56e);
+  box-shadow: 0 0 0 3px #fff, 0 6px 12px -4px rgba(143, 84, 36, 0.7);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .prisskala__modell.aktiv::after {
+    animation: tval-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+html body .prisskala__modell:not(.aktiv) {
+  opacity: 0.72;
+}
+
+html body .prisskala__modell:not(.aktiv):hover {
+  opacity: 1;
+}
+
+/* --- Golvytan ---------------------------------------------------------- */
+html:not([data-tema="mork"]) body .prisskala__yta {
+  border-top: 1px solid rgba(27, 25, 21, 0.06);
+  background:
+    radial-gradient(55% 60% at 45% 62%, rgba(255, 214, 160, 0.35), transparent 70%),
+    linear-gradient(rgba(27, 25, 21, 0.035) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgba(27, 25, 21, 0.035) 1px, transparent 1px) 0 0 / 24px 24px;
+}
+
+html body .prisskala__iso {
+  min-height: 300px;
+  margin: 14px 0 10px;
+  filter: drop-shadow(0 24px 30px rgba(90, 60, 25, 0.18));
+}
+
+.prisskala__iso .iso-golv.iso-topp { fill: #fbe9d0; stroke: #8f5424; stroke-width: 1.4; stroke-linejoin: round; }
+.prisskala__iso .iso-rut { stroke: rgba(143, 84, 36, 0.22); stroke-width: 0.8; }
+.prisskala__iso .iso-vagg { stroke: none; }
+.prisskala__iso .iso-vagg--bak { fill: rgba(255, 255, 255, 0.55); }
+.prisskala__iso .iso-vagg--sida { fill: rgba(240, 232, 220, 0.6); }
+.prisskala__iso .iso-vaggkant { stroke: rgba(143, 84, 36, 0.55); stroke-width: 1.2; stroke-linecap: round; }
+.prisskala__iso .iso-fonster { fill: rgba(184, 205, 224, 0.75); stroke: rgba(27, 25, 21, 0.55); stroke-width: 1; }
+.prisskala__iso .iso-fonsterpost { stroke: rgba(27, 25, 21, 0.55); stroke-width: 1; }
+.prisskala__iso .iso-sangram.iso-topp { fill: #c98a45; }
+.prisskala__iso .iso-sangram.iso-sida-x { fill: #8f5424; }
+.prisskala__iso .iso-sangram.iso-sida-y { fill: #a96c33; }
+.prisskala__iso .iso-sang.iso-topp { fill: #ffffff; }
+.prisskala__iso .iso-sang.iso-sida-x { fill: #ddd6ca; }
+.prisskala__iso .iso-sang.iso-sida-y { fill: #ece6dc; }
+.prisskala__iso .iso-kudde.iso-topp { fill: #f4efe6; }
+.prisskala__iso .iso-kudde.iso-sida-x { fill: #d4ccbe; }
+.prisskala__iso .iso-kudde.iso-sida-y { fill: #e2dbcf; }
+.prisskala__iso .iso-filt.iso-topp { fill: #8fb0cf; }
+.prisskala__iso .iso-filt.iso-sida-x,
+.prisskala__iso .iso-filt.iso-sida-y { fill: #6f90af; }
+.prisskala__iso .iso-bank.iso-topp { fill: #efe8dc; }
+.prisskala__iso .iso-bank.iso-sida-x { fill: #cbbfac; }
+.prisskala__iso .iso-bank.iso-sida-y { fill: #ddd3c3; }
+.prisskala__iso .iso-bankskiva.iso-topp { fill: #3a352d; }
+.prisskala__iso .iso-bankskiva.iso-sida-x,
+.prisskala__iso .iso-bankskiva.iso-sida-y { fill: #1b1915; }
+.prisskala__iso .iso-soffa.iso-topp { fill: #6f8f58; }
+.prisskala__iso .iso-soffa.iso-sida-x { fill: #4a6838; }
+.prisskala__iso .iso-soffa.iso-sida-y { fill: #5c7a48; }
+.prisskala__iso .iso-dyna.iso-topp { fill: #86a46e; }
+.prisskala__iso .iso-dyna.iso-sida-x,
+.prisskala__iso .iso-dyna.iso-sida-y { fill: #5c7a48; }
+.prisskala__iso .iso-fotskugga { fill: rgba(27, 25, 21, 0.14); }
+.prisskala__iso .iso-etikett rect { fill: #1b1915; filter: drop-shadow(0 6px 10px rgba(27, 25, 21, 0.35)); }
+.prisskala__iso .iso-etikett text { font-size: 13px; }
+
+/* --- Svarskortet ------------------------------------------------------- */
+html:not([data-tema="mork"]) body .prisskala__svar {
+  border-top: 1px solid rgba(27, 25, 21, 0.06);
+  border-left: 1px solid rgba(27, 25, 21, 0.06);
+  background:
+    radial-gradient(70% 60% at 100% 0%, rgba(255, 214, 160, 0.45), transparent 62%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.4));
+  color: var(--text);
+}
+
+html body .prisskala__varde output {
+  background: linear-gradient(180deg, #f6c88f, #c98a45 70%, #8f5424);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+html:not([data-tema="mork"]) body .prisskala__varde span {
+  color: var(--text-2);
+}
+
+html:not([data-tema="mork"]) body .prisskala__regel {
+  color: var(--text);
+  font-weight: 500;
+}
+
+html:not([data-tema="mork"]) body .prisskala__fakta > div {
+  border-color: rgba(27, 25, 21, 0.08);
+}
+
+html:not([data-tema="mork"]) body .prisskala__fakta dt {
+  color: var(--text-3);
+}
+
+html:not([data-tema="mork"]) body .prisskala__fakta dd {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) body .prisskala__chip {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08), 0 8px 18px -14px rgba(90, 60, 25, 0.6);
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) body .prisskala__chip span {
+  color: var(--virke-djup);
+}
+
+html:not([data-tema="mork"]) body .prisskala__chip:hover {
+  background: var(--kol);
+  color: var(--krita);
+}
+
+/* Mätaren mot lovgränserna. */
+.prisskala__granser {
+  margin: 22px 0 6px;
+}
+
+.granser__rubrik {
+  margin: 0 0 12px;
+  font: 600 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.granser__spar {
+  position: relative;
+  height: 10px;
+  margin-bottom: 44px;
+  border-radius: 99px;
+  background: rgba(27, 25, 21, 0.07);
+  box-shadow: inset 0 1px 2px rgba(27, 25, 21, 0.1);
+}
+
+.granser__spar i {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6f9a6a, #a9c98e);
+  transform-origin: left center;
+  transform: scaleX(0.5);
+  transition: transform 0.6s var(--mjuk), background 0.4s ease;
+}
+
+.prisskala__svar[data-zon="b"] .granser__spar i {
+  background: linear-gradient(90deg, #6f90af, #b8cde0);
+}
+
+.prisskala__svar[data-zon="c"] .granser__spar i {
+  background: linear-gradient(90deg, #8f5424, #f0b56e);
+}
+
+.granser__mark {
+  position: absolute;
+  top: -5px;
+  left: calc(100% * var(--p));
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding-top: 26px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.granser__mark::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 20px;
+  border-radius: 2px;
+  background: #1b1915;
+  transform: translateX(-50%);
+}
+
+.granser__mark b {
+  font: 600 0.8125rem/1 var(--knappfont);
+  color: var(--text);
+}
+
+.granser__mark small {
+  font-size: 0.6875rem;
+  color: var(--text-3);
+}
+
+/* --- Mobil ------------------------------------------------------------- */
+@media (max-width: 900px) {
+  html body .prisskala__iso {
+    min-height: 240px;
+  }
+
+  html:not([data-tema="mork"]) body .prisskala__svar {
+    border-left: 0;
+  }
+}
+
+/* --- Mörkt läge -------------------------------------------------------- */
+html[data-tema="mork"] body .prisskala__modell,
+html[data-tema="mork"] body .prisskala__modell.aktiv {
+  background: rgba(247, 245, 240, 0.05);
+}
+
+html[data-tema="mork"] body .prisskala__iso .iso-vagg--bak,
+html[data-tema="mork"] body .prisskala__iso .iso-vagg--sida {
+  fill: rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] .granser__spar {
+  background: rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] .granser__mark::before {
+  background: var(--krita);
+}
+/* --- Bilen och rummets detaljer (2026-10-06) ---------------------------- */
+.prisskala__iso .iso-bilskugga { fill: rgba(27, 25, 21, 0.16); }
+.prisskala__iso .iso-kaross.iso-topp { fill: #4d6b86; }
+.prisskala__iso .iso-kaross.iso-sida-x { fill: #2f4559; }
+.prisskala__iso .iso-kaross.iso-sida-y { fill: #3b546b; }
+.prisskala__iso .iso-kaross.iso-huv { fill: #577794; }
+.prisskala__iso .iso-kupe-sida { fill: #2f4559; }
+.prisskala__iso .iso-ruta { fill: #b8d2e6; stroke: #1b1915; stroke-width: 0.8; stroke-linejoin: round; }
+.prisskala__iso .iso-vindruta { fill: #cfe2f0; stroke: #1b1915; stroke-width: 0.8; stroke-linejoin: round; }
+.prisskala__iso .iso-biltak { fill: #3f5a73; }
+.prisskala__iso .iso-stolpe { stroke: #22313f; stroke-width: 2.2; stroke-linecap: round; }
+.prisskala__iso .iso-hjul { fill: #141210; }
+.prisskala__iso .iso-nav { fill: #c9cdd2; stroke: #6f757c; stroke-width: 0.8; }
+.prisskala__iso .iso-dorrlinje { stroke: rgba(15, 25, 35, 0.6); stroke-width: 1; }
+.prisskala__iso .iso-handtag { stroke: #d6dde4; stroke-width: 1.8; stroke-linecap: round; }
+.prisskala__iso .iso-lampa { fill: #fff6e0; stroke: #1b1915; stroke-width: 0.6; }
+.prisskala__iso .iso-grill { fill: #1b1915; }
+.prisskala__iso .iso-spegel.iso-topp { fill: #4d6b86; }
+.prisskala__iso .iso-spegel.iso-sida-x,
+.prisskala__iso .iso-spegel.iso-sida-y { fill: #2f4559; }
+
+.prisskala__iso .iso-matta { fill: rgba(143, 176, 207, 0.32); }
+.prisskala__iso .iso-mattkant { fill: none; stroke: rgba(111, 144, 175, 0.55); stroke-width: 1; stroke-dasharray: 3 3; }
+.prisskala__iso .iso-bord.iso-topp { fill: #f3d6a6; }
+.prisskala__iso .iso-bord.iso-sida-x,
+.prisskala__iso .iso-bord.iso-sida-y { fill: #c9975a; }
+.prisskala__iso .iso-bordben.iso-topp,
+.prisskala__iso .iso-bordben.iso-sida-x,
+.prisskala__iso .iso-bordben.iso-sida-y { fill: #3a352d; }
+.prisskala__iso .iso-stol.iso-topp { fill: #4a443d; }
+.prisskala__iso .iso-stol.iso-sida-x { fill: #27231f; }
+.prisskala__iso .iso-stol.iso-sida-y { fill: #35302a; }
+.prisskala__iso .iso-kruka.iso-topp { fill: #8a6a4b; }
+.prisskala__iso .iso-kruka.iso-sida-x { fill: #b3713a; }
+.prisskala__iso .iso-kruka.iso-sida-y { fill: #c98a45; }
+.prisskala__iso .iso-blad { fill: #5f8a5c; }
+
+/* --- Reglaget, mer påkostat ------------------------------------------- */
+html body .prisskala__huvud {
+  margin-bottom: 26px;
+}
+
+html body .prisskala__fraga {
+  font-size: clamp(1.25rem, 1rem + 0.6vw, 1.6rem);
+}
+
+html body .prisskala__tips {
+  padding: 9px 16px 9px 12px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.5));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(27, 25, 21, 0.07), 0 10px 22px -16px rgba(90, 60, 25, 0.5);
+  color: var(--text);
+}
+
+html body .prisskala__tips--borta {
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+}
+
+/* Zonerna som tre mjuka fält ovanför spåret i stället för parenteser. */
+html body .zon {
+  padding: 0 4px 10px;
+}
+
+html body .zon::after {
+  left: 4px;
+  right: 4px;
+  height: 4px;
+  border: 0;
+  border-radius: 4px;
+  background: rgba(27, 25, 21, 0.08);
+  transition: background 0.45s var(--mjuk), box-shadow 0.45s var(--mjuk);
+}
+
+html body .zon b {
+  font-size: 0.8125rem;
+  color: var(--text-3);
+}
+
+html body .zon.aktiv::after {
+  background: linear-gradient(90deg, #c98a45, #f0b56e);
+  box-shadow: 0 0 14px rgba(240, 181, 110, 0.6);
+}
+
+html body .zon.aktiv b {
+  color: var(--virke-djup);
+}
+
+/* Spåret med ett ljus som glider i fyllningen. */
+html body .prisskala__spar i {
+  overflow: hidden;
+}
+
+html body .prisskala__spar i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.55) 50%, transparent 100%);
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  background-position: -60% 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .prisskala__spar i::after {
+    animation: skala-glans 3.6s ease-in-out 1s infinite;
+  }
+}
+
+@keyframes skala-glans {
+  0% { background-position: -60% 0; }
+  60%, 100% { background-position: 160% 0; }
+}
+
+/* Knoppen: vit glasknapp med ett litet hus i virke. */
+html body .prisskala__linjal {
+  --t: 40px;
+}
+
+html body .prisskala__linjal input[type="range"]::-webkit-slider-thumb {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 11l8-6.5 8 6.5M6.5 9.5V19h11V9.5M10.5 19v-4.5h3V19' fill='none' stroke='%238f5424' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 20px no-repeat,
+    radial-gradient(circle at 50% 30%, #ffffff, #fff4e4 60%, #f6d9b0 100%);
+  box-shadow:
+    0 0 0 3px #f0b56e,
+    0 0 0 9px rgba(240, 181, 110, 0.2),
+    0 0 28px rgba(240, 181, 110, 0.7),
+    0 16px 26px -10px rgba(143, 84, 36, 0.75);
+}
+
+html body .prisskala__linjal input[type="range"]:hover::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 3px #f0b56e,
+    0 0 0 13px rgba(240, 181, 110, 0.2),
+    0 0 34px rgba(240, 181, 110, 0.85),
+    0 16px 26px -10px rgba(143, 84, 36, 0.75);
+}
+
+html body .prisskala__linjal input[type="range"]::-moz-range-thumb {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 11l8-6.5 8 6.5M6.5 9.5V19h11V9.5M10.5 19v-4.5h3V19' fill='none' stroke='%238f5424' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 20px no-repeat,
+    radial-gradient(circle at 50% 30%, #ffffff, #fff4e4 60%, #f6d9b0 100%);
+  box-shadow: 0 0 0 3px #f0b56e, 0 0 0 9px rgba(240, 181, 110, 0.2), 0 16px 26px -10px rgba(143, 84, 36, 0.75);
+}
+
+@keyframes knopp-andas {
+  0%, 100% { box-shadow: 0 0 0 3px #f0b56e, 0 0 0 9px rgba(240, 181, 110, 0.2), 0 0 22px rgba(240, 181, 110, 0.55), 0 16px 26px -10px rgba(143, 84, 36, 0.75); }
+  50% { box-shadow: 0 0 0 3px #f0b56e, 0 0 0 14px rgba(240, 181, 110, 0.12), 0 0 34px rgba(240, 181, 110, 0.85), 0 16px 26px -10px rgba(143, 84, 36, 0.75); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .prisskala:not(:has(.prisskala__tips--borta)) .prisskala__linjal input[type="range"]::-webkit-slider-thumb {
+    animation: knopp-andas 2.4s ease-in-out infinite;
+  }
+}
+
+html body .prisskala__siffror span {
+  font-size: 0.8125rem;
+  color: var(--text-2);
+}
+
+html body .prisskala__hak {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  box-shadow: inset 0 0 0 2px rgba(143, 84, 36, 0.5), 0 2px 6px rgba(27, 25, 21, 0.2);
+}
+
+html body .prisskala__hak.aktiv {
+  background: linear-gradient(180deg, #f6c993, #f0b56e);
+  box-shadow: 0 0 0 3px #fff, 0 0 12px rgba(240, 181, 110, 0.9);
+}
+/* =====================================================================
+   Kontaktkorten "Hör av dig direkt" på alla sidor (2026-10-06): en
+   glödande kant som sakta går runt kortet, ikoner vid e-post och plats,
+   en knapp med glanssvep och pil, och raderna tonas fram en i taget
+   när kortet syns (premium.js lägger .glid).
+   ===================================================================== */
+@property --kk-vinkel {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+html body .contact-section .kontaktkort {
+  position: relative;
+  isolation: isolate;
+}
+
+html body .contact-section .kontaktkort > .ih-kant {
+  display: none;
+}
+
+html body .contact-section .kontaktkort::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--kk-vinkel),
+    transparent 0deg, transparent 200deg,
+    rgba(240, 181, 110, 0.85) 250deg, #fff4e2 268deg, rgba(240, 181, 110, 0.85) 286deg,
+    transparent 330deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@keyframes kk-varv {
+  to { --kk-vinkel: 360deg; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .contact-section .kontaktkort::after {
+    animation: kk-varv 9s linear infinite;
+  }
+}
+
+/* Ikoner vid etiketterna. */
+html body .contact-section .kontaktkort .contact-section__meta-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+html body .contact-section .kontaktkort .contact-section__meta-label::before {
+  content: "";
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  background:
+    var(--kk-ikon) center / 14px no-repeat,
+    radial-gradient(circle at 30% 25%, #fff0d9, rgba(240, 181, 110, 0.55));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 6px 12px -8px rgba(240, 181, 110, 0.9);
+}
+
+html body .contact-section .kontaktkort .contact-section__meta > div:first-child {
+  --kk-ikon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 6.5h16v11H4z' fill='none' stroke='%238f5424' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M4.5 7l7.5 6 7.5-6' fill='none' stroke='%238f5424' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+html body .contact-section .kontaktkort .contact-section__meta > div:nth-child(2) {
+  --kk-ikon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z' fill='none' stroke='%238f5424' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='10' r='2.3' fill='none' stroke='%238f5424' stroke-width='2'/%3E%3C/svg%3E");
+}
+
+/* Kopiera-knappen i glas. */
+html:not([data-tema="mork"]) body .contact-section .kontaktkort .kopiera {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(27, 25, 21, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 14px -10px rgba(90, 60, 25, 0.5);
+  color: var(--text);
+}
+
+/* Knappen till formuläret. */
+@keyframes kk-glans {
+  0% { background-position: -160% 0, 0 0; }
+  45%, 100% { background-position: 260% 0, 0 0; }
+}
+
+html body .contact-section .kontaktkort__knapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 26px 0 30px;
+  border: 0;
+  border-radius: 999px;
+  background:
+    linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.6) 45%, transparent 60%) -160% 0 / 250% 100% no-repeat,
+    linear-gradient(180deg, #f8cf9c, #f0b56e 55%, #e3a25a);
+  color: var(--kol);
+  font: 600 1rem/1 var(--knappfont);
+  text-decoration: none;
+  box-shadow: 0 18px 32px -16px rgba(227, 162, 90, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition: transform 0.45s var(--mjuk), box-shadow 0.45s var(--mjuk);
+}
+
+html body .contact-section .kontaktkort__knapp::after {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6' fill='none' stroke='%231b1915' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform 0.45s var(--mjuk);
+}
+
+html body .contact-section .kontaktkort__knapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 40px -16px rgba(227, 162, 90, 1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+html body .contact-section .kontaktkort__knapp:hover::after {
+  transform: translateX(4px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .contact-section .kontaktkort__knapp {
+    animation: kk-glans 5s ease-in-out 1.6s infinite;
+  }
+}
+
+/* Raderna tonas fram en i taget. */
+html.ih-js body .contact-section .kontaktkort > .glid {
+  opacity: 0;
+  translate: 0 16px;
+  filter: blur(5px);
+  transition:
+    opacity 0.8s ease calc(var(--i, 0) * 120ms),
+    translate 1s var(--mjuk) calc(var(--i, 0) * 120ms),
+    filter 0.8s ease calc(var(--i, 0) * 120ms),
+    transform 0.45s var(--mjuk),
+    box-shadow 0.45s var(--mjuk);
+}
+
+html.ih-js body .contact-section .kontaktkort > .glid.glid--in {
+  opacity: 1;
+  translate: 0 0;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.ih-js body .contact-section .kontaktkort > .glid {
+    opacity: 1;
+    translate: none;
+    filter: none;
+    transition: none;
+  }
+}
+/* Inget i innehållet får skjuta ut sidan i sidled (ljusen bakom
+   korten sträcker sig utanför sina rutnät). clip skapar ingen
+   rullningsruta, så klistrade element fungerar som förut. */
+html body main {
+  overflow-x: clip;
+}
+/* =====================================================================
+   Stegberättelsen, premium (2026-10-06)
+   - Ramen i ljust glas med studioljus, ingen 3D-lutning (den ritade om
+     hela SVG:n vid varje musrörelse och gjorde rullningen ryckig).
+   - Pratbubblorna poppar fram en gång och svävar sedan - inga fler
+     halvgenomskinliga "spöken" när de tonade ut i en slinga.
+   - Nya rörelser: solljus, lampsken, ljuskäglor, arbetare, glitter.
+   - Bara den aktiva scenen rör sig (som förut).
+   ===================================================================== */
+html body .berattelse__ram {
+  transform: none;
+  border-radius: 36px;
+  background:
+    radial-gradient(60% 55% at 50% 58%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 72%),
+    radial-gradient(70% 60% at 100% 0%, rgba(255, 214, 160, 0.38), transparent 70%),
+    radial-gradient(60% 60% at 0% 100%, rgba(184, 205, 224, 0.42), transparent 70%),
+    linear-gradient(180deg, #fbf7f0, #efe7da);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 60px 110px -60px rgba(90, 60, 25, 0.55);
+}
+
+html body .berattelse__vy svg {
+  will-change: transform;
+}
+
+/* HUD: skede, ring och namn i glas. */
+html body .berattelse__skede {
+  padding: 10px 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.62));
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 12px 24px -16px rgba(90, 60, 25, 0.5);
+}
+
+html body .berattelse__namn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px 13px 16px;
+  background: linear-gradient(180deg, #38332c, #1b1915);
+  box-shadow: 0 16px 30px -16px rgba(27, 25, 21, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+html body .berattelse__namn::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--virke);
+  box-shadow: 0 0 0 4px rgba(240, 181, 110, 0.25), 0 0 12px rgba(240, 181, 110, 0.8);
+}
+
+html body .berattelse__matare {
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 55%, rgba(255, 255, 255, 0) 72%);
+}
+
+html body .berattelse__ringfyll {
+  stroke: #c98a45;
+  filter: drop-shadow(0 0 3px rgba(240, 181, 110, 0.7));
+}
+
+/* Stegkorten: tydligare även när de inte är aktiva, och glas. */
+html body .berattelse__kort {
+  border-radius: 28px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 24px 50px -40px rgba(90, 60, 25, 0.5);
+  opacity: 0.5;
+}
+
+html body .berattelse__steg.aktiv .berattelse__kort {
+  opacity: 1;
+  background:
+    radial-gradient(80% 70% at 100% 0%, rgba(255, 214, 160, 0.35), transparent 62%),
+    linear-gradient(160deg, #ffffff, rgba(255, 255, 255, 0.82));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 2px #f0b56e,
+    0 0 0 7px rgba(240, 181, 110, 0.14),
+    0 44px 80px -44px rgba(143, 84, 36, 0.6);
+}
+
+html body .berattelse__steg.aktiv::before {
+  box-shadow: 0 0 0 6px rgba(240, 181, 110, 0.25), 0 0 16px rgba(240, 181, 110, 0.9);
+}
+
+/* --- Rörelserna ---------------------------------------------------------- */
+.berattelse__vy .v-skriv {
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-bubbla--1 {
+    animation: v-bubbla-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.35s both, v-flyt 4.2s ease-in-out 1.05s infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-bubbla--2 {
+    animation: v-bubbla-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 1.1s both, v-flyt 4.6s ease-in-out 1.8s infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-skriv {
+    animation: v-skriv 3.2s var(--mjuk) 1.5s infinite both;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-skriv--2 {
+    animation-delay: 1.8s;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-solljus {
+    animation: v-andas 6s ease-in-out infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-lampsken {
+    animation: v-andas 4s ease-in-out infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-ljuskon {
+    animation: v-andas 5s ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * -2.5s);
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-skarm {
+    animation: v-andas 3s ease-in-out infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-arbetare {
+    animation: v-gunga 2.6s ease-in-out infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-krona {
+    animation: v-vaja 5s ease-in-out infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-blad--2 {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: v-vaja 4.4s ease-in-out infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-glitter {
+    animation: v-glitter 2.4s ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * 0.6s);
+  }
+}
+
+@keyframes v-bubbla-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.6); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes v-flyt {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes v-skriv {
+  0% { transform: scaleX(0.08); }
+  35%, 85% { transform: scaleX(1); }
+  100% { transform: scaleX(0.08); }
+}
+
+@keyframes v-andas {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}
+
+@keyframes v-gunga {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes v-glitter {
+  0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  40%, 60% { opacity: 1; transform: scale(1) rotate(45deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .berattelse__vy .v-glitter {
+    opacity: 0.8;
+  }
+}
+/* =====================================================================
+   "Fler hus" på huskortet i glas (2026-10-06): genomskinliga kort med
+   ett varmt och ett kallt ljus bakom, bilden zoomar sakta vid hovring
+   och en pil glider fram.
+   ===================================================================== */
+.hus-fler__grid {
+  position: relative;
+  isolation: isolate;
+}
+
+.hus-fler__grid::before {
+  content: "";
+  position: absolute;
+  inset: 4% -3% -6%;
+  z-index: -1;
+  background:
+    radial-gradient(34% 70% at 14% 50%, rgba(240, 181, 110, 0.55), transparent 70%),
+    radial-gradient(34% 70% at 86% 50%, rgba(167, 196, 222, 0.6), transparent 70%),
+    radial-gradient(30% 60% at 50% 60%, rgba(255, 226, 184, 0.6), transparent 72%);
+  -webkit-mask-image: radial-gradient(70% 80% at 50% 50%, #000 50%, transparent 100%);
+  mask-image: radial-gradient(70% 80% at 50% 50%, #000 50%, transparent 100%);
+  pointer-events: none;
+}
+
+html:not([data-tema="mork"]) body .hus-fler__kort {
+  position: relative;
+  padding: 8px 8px 20px;
+  border-radius: 26px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.2));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 26px 54px -38px rgba(90, 60, 25, 0.55);
+}
+
+html body .hus-fler__kort:hover {
+  transform: translateY(-6px);
+}
+
+html body .hus-fler__bild {
+  border-radius: 20px;
+  box-shadow: 0 16px 30px -22px rgba(27, 25, 21, 0.6);
+}
+
+html body .hus-fler__bild img {
+  transition: transform 1.1s var(--mjuk);
+}
+
+html body .hus-fler__kort:hover .hus-fler__bild img {
+  transform: scale(1.05);
+}
+
+html body .hus-fler__text {
+  gap: 6px;
+  padding: 0 6px;
+}
+
+html body .hus-fler__text b {
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+html body .hus-fler__text small {
+  justify-self: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  font: 600 0.75rem/1 var(--knappfont);
+  color: var(--text-2);
+}
+
+html body .hus-fler__kort::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6' fill='none' stroke='%231b1915' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 16px no-repeat,
+    rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 18px -10px rgba(27, 25, 21, 0.6);
+  opacity: 0;
+  transform: translateX(-6px) scale(0.9);
+  transition: opacity 0.35s ease, transform 0.45s var(--mjuk);
+}
+
+html body .hus-fler__kort:hover::after,
+html body .hus-fler__kort:focus-visible::after {
+  opacity: 1;
+  transform: none;
+}
+
+html[data-tema="mork"] body .hus-fler__kort {
+  background: linear-gradient(160deg, rgba(247, 245, 240, 0.08), rgba(247, 245, 240, 0.03));
+  box-shadow: inset 0 1px 0 rgba(247, 245, 240, 0.1), inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] .hus-fler__grid::before {
+  opacity: 0.35;
+}
+
+/* =====================================================================
+   E-post och plats i de centrerade kontaktintrona (huskortet och där
+   introt står ensamt): två glaskort med ikon, etikett och värde - inte
+   lösa småtexter.
+   ===================================================================== */
+html body .contact-section__intro > .contact-section__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+html body .contact-section__intro > .contact-section__meta > div {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 4px;
+  min-width: 240px;
+  padding: 14px 20px 14px 14px;
+  border: 0;
+  border-radius: 22px;
+  text-align: left;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.5));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 16px 34px -26px rgba(90, 60, 25, 0.55);
+  transition: transform 0.45s var(--mjuk), box-shadow 0.45s var(--mjuk);
+}
+
+html body .contact-section__intro > .contact-section__meta > div:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(27, 25, 21, 0.08),
+    0 24px 44px -26px rgba(90, 60, 25, 0.6);
+}
+
+html body .contact-section__intro > .contact-section__meta > div::before {
+  content: "";
+  grid-row: 1 / 3;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background:
+    var(--kk-ikon) center / 20px no-repeat,
+    radial-gradient(circle at 30% 25%, #fff0d9, rgba(240, 181, 110, 0.6));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 16px -10px rgba(240, 181, 110, 0.9);
+}
+
+html body .contact-section__intro > .contact-section__meta > div:first-child {
+  --kk-ikon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 6.5h16v11H4z' fill='none' stroke='%238f5424' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M4.5 7l7.5 6 7.5-6' fill='none' stroke='%238f5424' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+html body .contact-section__intro > .contact-section__meta > div:nth-child(2) {
+  --kk-ikon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z' fill='none' stroke='%238f5424' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='10' r='2.3' fill='none' stroke='%238f5424' stroke-width='2'/%3E%3C/svg%3E");
+}
+
+html body .contact-section__intro > .contact-section__meta .contact-section__meta-label {
+  align-self: end;
+  font: 600 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--virke-djup);
+}
+
+html body .contact-section__intro > .contact-section__meta .contact-section__meta-value,
+html body .contact-section__intro > .contact-section__meta .kopiera-rad {
+  align-self: start;
+  font: 600 1.0625rem/1.25 var(--knappfont);
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+html body .contact-section__intro > .contact-section__meta .kopiera-rad {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+html body .contact-section__intro > .contact-section__meta .kopiera {
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(27, 25, 21, 0.06);
+  font: 600 0.75rem/1.4 var(--knappfont);
+  color: var(--text-2);
+}
+
+html body .contact-section__intro > .contact-section__meta .kopiera:hover {
+  background: var(--kol);
+  color: var(--krita);
+}
+
+html[data-tema="mork"] body .contact-section__intro > .contact-section__meta > div {
+  background: rgba(247, 245, 240, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+html body .contact-section__intro > .contact-section__meta.contact-section__meta {
+  flex-direction: row;
+  align-self: stretch;
+  width: 100%;
+}
+
+@media (max-width: 560px) {
+  html body .contact-section__intro > .contact-section__meta > div {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+}
+html body .contact-section__intro > .contact-section__meta.contact-section__meta {
+  max-width: none;
+  width: min(680px, 100%);
+}
+/* Nya rörelser i scenerna (2026-10-06): trucken i hallen, isoleringen
+   som läggs efter reglarna, grävarmen och lastbilens blinkljus. */
+@media (prefers-reduced-motion: no-preference) {
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-truck {
+    animation: v-truck 7s ease-in-out infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-isolering {
+    animation: v-isolering 6s var(--mjuk) infinite both;
+    animation-delay: calc(1.9s + var(--i) * 0.22s);
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-grav {
+    animation: v-grav 4.2s ease-in-out infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-blink {
+    animation: v-blink 1.2s ease-in-out infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-sitter {
+    animation: v-gunga 3.4s ease-in-out infinite;
+  }
+}
+
+@keyframes v-truck {
+  0%, 12% { transform: translate(0, 0); }
+  45%, 62% { transform: translate(27px, 15.6px); }
+  92%, 100% { transform: translate(0, 0); }
+}
+
+@keyframes v-isolering {
+  0%, 6% { opacity: 0; transform: translateY(-18px); }
+  20%, 82% { opacity: 1; transform: none; }
+  94%, 100% { opacity: 0; transform: none; }
+}
+
+@keyframes v-grav {
+  0%, 100% { transform: rotate(0deg); }
+  45% { transform: rotate(-9deg); }
+  65% { transform: rotate(-9deg); }
+}
+
+@keyframes v-blink {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+@media (max-width: 600px) {
+  html body .zon b {
+    font-size: 0.6875rem;
+    letter-spacing: 0;
+  }
+}
+/* =====================================================================
+   Scenerna, noggrann genomgång (2026-10-06)
+   - Bubblorna: en kontur, mjuk skugga, namnbricka "Du"/"Vi".
+   - Etiketter som förklarar vad som händer, tonas in efter varandra.
+   - Montaget: elementet sänks från linan och landar på plattans framkant;
+     linan blir lika lång som avståndet (scaleY 0,11 -> 1).
+   - Grunden: betongen rinner i rännan medan plattan gjuts, trumman snurrar.
+   - Hallen: trucken kör kortare så den inte går in i bänken.
+   ===================================================================== */
+.berattelse__vy .v-bubbelform {
+  filter: drop-shadow(0 6px 10px rgba(27, 25, 21, 0.16));
+}
+
+.berattelse__vy .v-etikettruta {
+  filter: drop-shadow(0 6px 10px rgba(27, 25, 21, 0.14));
+}
+
+@media (max-width: 700px) {
+  .berattelse__vy .v-etikett {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .berattelse__vy .v-etikett {
+    opacity: 0;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-etikett {
+    animation: v-etikett-in 0.7s var(--mjuk) both;
+    animation-delay: calc(0.9s + var(--i, 0) * 0.35s);
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-last {
+    animation: v-sank2 6s cubic-bezier(0.45, 0, 0.25, 1) infinite both;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-lina {
+    animation: v-lina2 6s cubic-bezier(0.45, 0, 0.25, 1) infinite both;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-hall {
+    animation: v-hall 5.4s var(--mjuk) infinite both, v-hallflode 0.6s linear infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-trumma {
+    animation: v-trumma 1.6s linear infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-truck {
+    animation: v-truck2 7s ease-in-out infinite;
+  }
+}
+
+@keyframes v-etikett-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes v-sank2 {
+  0% { opacity: 0; transform: translateY(-52px); }
+  10% { opacity: 1; transform: translateY(-52px); }
+  58%, 86% { opacity: 1; transform: translateY(0); }
+  96%, 100% { opacity: 0; transform: translateY(0); }
+}
+
+@keyframes v-lina2 {
+  0%, 10% { transform: scaleY(0.11); }
+  58%, 100% { transform: scaleY(1); }
+}
+
+@keyframes v-hall {
+  0%, 4% { opacity: 0; }
+  8%, 52% { opacity: 1; }
+  60%, 100% { opacity: 0; }
+}
+
+@keyframes v-hallflode {
+  to { stroke-dashoffset: -12; }
+}
+
+@keyframes v-trumma {
+  to { stroke-dashoffset: -40; }
+}
+
+@keyframes v-truck2 {
+  0%, 12% { transform: translate(0, 0); }
+  45%, 62% { transform: translate(18px, 10.4px); }
+  92%, 100% { transform: translate(0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .berattelse__vy .v-etikett {
+    opacity: 1;
+  }
+}
+/* Traversen åker bara över vänstra delen av hallen (förut genom hela
+   hallen och ovanpå elementstället), och betongtrummans band snurrar. */
+@media (prefers-reduced-motion: no-preference) {
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-travers {
+    animation: v-travers2 8s ease-in-out infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-trumband {
+    animation: v-trumband 0.9s linear infinite;
+  }
+}
+
+@keyframes v-travers2 {
+  0%, 10%, 100% { transform: translate(0, 0); }
+  45%, 60% { transform: translate(81px, 46.8px); }
+}
+
+@keyframes v-trumband {
+  to { transform: translate(11.26px, 6.5px); }
+}
+/* Stämpeln lyfts bara lite (förut svävade den framför kommunhuset) och
+   kuvertet flyger till kommunhusets dörr, inte in i taket. */
+@media (prefers-reduced-motion: no-preference) {
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-stampel {
+    animation: v-stampel2 4.4s cubic-bezier(0.5, 0, 0.3, 1) infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-kuvert {
+    animation: v-kuvert2 4.4s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+  }
+}
+
+@keyframes v-stampel2 {
+  0%, 18% { transform: translateY(-16px); }
+  32% { transform: translateY(0); }
+  40% { transform: translateY(-3px); }
+  56%, 100% { transform: translateY(-16px); }
+}
+
+@keyframes v-kuvert2 {
+  0%, 42% { opacity: 0; transform: translate(302px, 246px) scale(0.6); }
+  50% { opacity: 1; transform: translate(296px, 238px) scale(1); }
+  68% { opacity: 1; transform: translate(254px, 220px) scale(0.95); }
+  84% { opacity: 1; transform: translate(262px, 188px) scale(0.85); }
+  96%, 100% { opacity: 0; transform: translate(272px, 176px) scale(0.45); }
+}
+/* Scen 3, städad: stämpeln står på skrivbordet bredvid papperen, lyfts,
+   stämplar och ställs tillbaka. Kuvertet flyger till dörren efteråt. */
+@media (prefers-reduced-motion: no-preference) {
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-stampel {
+    animation: v-stampel3 4.8s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-stampelmark {
+    animation: v-mark3 4.8s var(--mjuk) infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-slag {
+    animation: v-slag3 4.8s var(--mjuk) infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-kuvert {
+    animation: v-kuvert3 4.8s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+  }
+}
+
+html body .berattelse__vy .v-stampel {
+  transform: translate(30.4px, 5.85px);
+}
+
+@keyframes v-stampel3 {
+  0%, 10% { transform: translate(30.4px, 5.85px); }
+  18% { transform: translate(30.4px, -10px); }
+  28% { transform: translate(0, -16px); }
+  35% { transform: translate(0, 0); }
+  41% { transform: translate(0, -16px); }
+  51% { transform: translate(30.4px, -10px); }
+  59%, 100% { transform: translate(30.4px, 5.85px); }
+}
+
+@keyframes v-mark3 {
+  0%, 34% { opacity: 0; transform: scale(1.3); }
+  38%, 88% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: none; }
+}
+
+@keyframes v-slag3 {
+  0%, 34% { opacity: 0; transform: scale(0.6); }
+  37% { opacity: 1; transform: scale(0.9); }
+  54%, 100% { opacity: 0; transform: scale(1.9); }
+}
+
+@keyframes v-kuvert3 {
+  0%, 50% { opacity: 0; transform: translate(300px, 246px) scale(0.6); }
+  58% { opacity: 1; transform: translate(294px, 236px) scale(1); }
+  74% { opacity: 1; transform: translate(256px, 216px) scale(0.92); }
+  88% { opacity: 1; transform: translate(264px, 188px) scale(0.8); }
+  97%, 100% { opacity: 0; transform: translate(272px, 176px) scale(0.4); }
+}
+/* Samma luft mellan menyn och toppen på alla sidor som på startsidan
+   (18 px under menyraden). */
+html body main > :first-child:not(.ihtopp) {
+  margin-top: 18px;
+}
+/* Röken ur skorstenen, växten som vajar, nyckeln som blänker. */
+@media (prefers-reduced-motion: no-preference) {
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-rok {
+    animation: v-rok 4.2s ease-out infinite;
+    animation-delay: calc(var(--i, 0) * 1.4s);
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-vaxt {
+    animation: v-vaja 5s ease-in-out infinite;
+  }
+
+  html body .berattelse__vy:is(.aktiv, .i-vy) .v-nyckel2 {
+    animation: v-nyckel2 3.2s ease-in-out infinite;
+  }
+}
+
+html body .berattelse__vy .v-rok {
+  opacity: 0;
+}
+
+@keyframes v-rok {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  20% { opacity: 0.75; }
+  100% { opacity: 0; transform: translate(10px, -46px) scale(1.5); }
+}
+
+@keyframes v-nyckel2 {
+  0%, 100% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
+}
+/* =====================================================================
+   "Vad får jag bygga?" – verktyget, premium (2026-10-07)
+   ===================================================================== */
+
+/* --- Tomtens brickor: glas med färgprick ------------------------------- */
+.tv-etikett rect {
+  fill: rgba(255, 253, 248, 0.96);
+  stroke: rgba(27, 25, 21, 0.14);
+  stroke-width: 1;
+  filter: drop-shadow(0 6px 10px rgba(27, 25, 21, 0.18));
+}
+
+.tv-etikett text {
+  fill: #1b1915;
+  font: 600 11.5px/1 var(--knappfont);
+}
+
+.tv-etikett .tv-etikett__prick { fill: #8f5424; }
+.tv-etikett--hus rect { fill: #1b1915; stroke: none; }
+.tv-etikett--hus text { fill: #fffdf8; font-size: 12.5px; }
+.tv-etikett--hus .tv-etikett__prick { fill: #f0b56e; }
+.tv-etikett--ljus .tv-etikett__prick { fill: #dfb57a; }
+.tv-etikett--matt text { fill: #8f5424; }
+.tv-etikett--ja .tv-etikett__prick { fill: #2f8a52; }
+.tv-etikett--ja text { fill: #1f6b3d; }
+.tv-etikett--villkor .tv-etikett__prick { fill: #d9974f; }
+.tv-etikett--nej .tv-etikett__prick { fill: #e0764a; }
+.tv-etikett--nej text { fill: #b4532c; }
+.tv-etikett--vatten .tv-etikett__prick { fill: #5b8fbf; }
+.tv-etikett--vatten text { fill: #2f5f8a; }
+
+/* --- Tomtens rörelser ------------------------------------------------- */
+.tv-rok {
+  stroke: none;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .tv-rok {
+    stroke-dasharray: none;
+    animation: tv-rok 4s ease-out infinite;
+    animation-delay: calc(var(--i, 0) * 1.3s);
+  }
+
+  html body .tv-krona {
+    animation: v-vaja 5s ease-in-out infinite;
+  }
+
+  html body .tv-lampa {
+    animation: v-andas 4s ease-in-out infinite;
+  }
+
+  html body .tv-vag--2 {
+    animation-delay: -1.5s;
+  }
+}
+
+@keyframes tv-rok {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  20% { opacity: 0.7; }
+  100% { opacity: 0; transform: translate(8px, -36px) scale(1.5); }
+}
+
+/* --- Scenen ------------------------------------------------------------ */
+html:not([data-tema="mork"]) body .tv__scen {
+  border-radius: 32px;
+  background:
+    radial-gradient(60% 55% at 50% 55%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 72%),
+    radial-gradient(70% 60% at 100% 0%, rgba(255, 214, 160, 0.38), transparent 70%),
+    radial-gradient(60% 60% at 0% 100%, rgba(184, 205, 224, 0.42), transparent 70%),
+    linear-gradient(180deg, #fbf7f0, #efe7da);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 60px 110px -60px rgba(90, 60, 25, 0.55);
+}
+
+html body .tv__scen > .ih-kant {
+  display: none;
+}
+
+html body .tv__skylt {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 18px 11px 14px;
+  background: linear-gradient(180deg, #38332c, #1b1915);
+  box-shadow: 0 14px 28px -14px rgba(27, 25, 21, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+html body .tv__skylt::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--virke);
+  box-shadow: 0 0 0 4px rgba(240, 181, 110, 0.25), 0 0 12px rgba(240, 181, 110, 0.8);
+}
+
+html body .tv__forklaring {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 10px 20px -14px rgba(90, 60, 25, 0.5);
+  width: max-content;
+  max-width: calc(100% - 40px);
+}
+
+.tv__prick--bostad {
+  background: #f6efe3;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.25);
+}
+
+/* --- Frågorna ---------------------------------------------------------- */
+html:not([data-tema="mork"]) body .tv__fraga {
+  padding: 22px 24px 24px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.62));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 22px 44px -34px rgba(90, 60, 25, 0.5);
+  transition: box-shadow 0.4s var(--mjuk), transform 0.4s var(--mjuk);
+}
+
+html:not([data-tema="mork"]) body .tv__fraga:hover {
+  transform: translateY(-2px);
+}
+
+html:not([data-tema="mork"]) body .tv__fraga:focus-within {
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 2px #f0b56e,
+    0 0 0 7px rgba(240, 181, 110, 0.14),
+    0 26px 50px -30px rgba(143, 84, 36, 0.55);
+}
+
+html body .tv__nr {
+  width: 34px;
+  height: 34px;
+  background: radial-gradient(circle at 30% 25%, #fff0d9, rgba(240, 181, 110, 0.6));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 16px -10px rgba(240, 181, 110, 0.9);
+  font-size: 0.75rem;
+}
+
+html body .tv__hjalp {
+  margin-left: 46px;
+  font-size: 0.875rem;
+  color: var(--text-2);
+}
+
+html:not([data-tema="mork"]) body .tv__alt span {
+  min-height: 44px;
+  padding: 0 18px;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.1), inset 0 1px 0 #fff;
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) body .tv__alt span:hover {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.18), 0 8px 16px -12px rgba(90, 60, 25, 0.5);
+}
+
+html body .tv__alt input:checked + span {
+  background: linear-gradient(180deg, #38332c 0%, #1d1b17 55%, #141210 100%);
+  color: var(--krita);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(240, 181, 110, 0.24),
+    0 10px 22px -10px rgba(27, 25, 21, 0.65);
+}
+
+/* Reglaget: tjockare spår och samma glasknopp som prisreglaget. */
+html body .tv__reglage input[type="range"] {
+  height: 40px;
+}
+
+html body .tv__reglage input[type="range"]::-webkit-slider-runnable-track {
+  height: 10px;
+  background:
+    linear-gradient(90deg, #8f5424, #c98a45 45%, #f0b56e) 0 0 / calc(var(--a) * 100%) 100% no-repeat,
+    rgba(27, 25, 21, 0.08);
+  box-shadow: inset 0 1px 2px rgba(27, 25, 21, 0.12), 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+html body .tv__reglage input[type="range"]::-moz-range-track {
+  height: 10px;
+}
+
+html body .tv__reglage input[type="range"]::-webkit-slider-thumb {
+  width: 34px;
+  height: 34px;
+  margin-top: -12px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 11l8-6.5 8 6.5M6.5 9.5V19h11V9.5M10.5 19v-4.5h3V19' fill='none' stroke='%238f5424' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 17px no-repeat,
+    radial-gradient(circle at 50% 30%, #ffffff, #fff4e4 60%, #f6d9b0 100%);
+  box-shadow:
+    0 0 0 3px #f0b56e,
+    0 0 0 8px rgba(240, 181, 110, 0.2),
+    0 0 22px rgba(240, 181, 110, 0.6),
+    0 12px 22px -10px rgba(143, 84, 36, 0.75);
+}
+
+html body .tv__reglage input[type="range"]::-moz-range-thumb {
+  width: 34px;
+  height: 34px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 11l8-6.5 8 6.5M6.5 9.5V19h11V9.5M10.5 19v-4.5h3V19' fill='none' stroke='%238f5424' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 17px no-repeat,
+    radial-gradient(circle at 50% 30%, #ffffff, #fff4e4 60%, #f6d9b0 100%);
+  box-shadow: 0 0 0 3px #f0b56e, 0 0 0 8px rgba(240, 181, 110, 0.2);
+}
+
+html body .tv__reglage output {
+  min-width: 86px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07);
+  font-size: 1.375rem;
+  text-align: center;
+}
+
+/* --- Svarskortet: ljust glas (hade vit text kvar från den mörka) ------- */
+html:not([data-tema="mork"]) body .tv__svar {
+  border-radius: 30px;
+  background:
+    radial-gradient(80% 60% at 100% 0%, rgba(255, 214, 160, 0.42), transparent 62%),
+    radial-gradient(70% 60% at 0% 100%, rgba(184, 205, 224, 0.3), transparent 62%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.6));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 40px 80px -48px rgba(90, 60, 25, 0.55);
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) body .tv__summa {
+  color: #1f5c38;
+  background: linear-gradient(160deg, rgba(76, 194, 127, 0.16), rgba(76, 194, 127, 0.08));
+  box-shadow: inset 0 0 0 1px rgba(47, 138, 82, 0.28);
+}
+
+html:not([data-tema="mork"]) body .tv__svar[data-status="villkor"] .tv__summa {
+  color: #7a4a1c;
+  background: linear-gradient(160deg, rgba(240, 181, 110, 0.22), rgba(240, 181, 110, 0.1));
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.4);
+}
+
+html:not([data-tema="mork"]) body .tv__svar[data-status="lov"] .tv__summa {
+  color: #8f3f1f;
+  background: linear-gradient(160deg, rgba(224, 118, 74, 0.18), rgba(224, 118, 74, 0.08));
+  box-shadow: inset 0 0 0 1px rgba(224, 118, 74, 0.4);
+}
+
+html:not([data-tema="mork"]) body .tv__tal > div {
+  padding: 18px 18px 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 12px 26px -20px rgba(90, 60, 25, 0.45);
+}
+
+html body .tv__tal strong {
+  background: linear-gradient(180deg, #f6c88f, #c98a45 70%, #8f5424);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+html:not([data-tema="mork"]) body .tv__tal small {
+  color: var(--text-2);
+}
+
+html:not([data-tema="mork"]) body .tv__tal span {
+  font: 600 0.75rem/1.2 var(--knappfont);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+html:not([data-tema="mork"]) body .tv__stapel {
+  height: 6px;
+  background: rgba(27, 25, 21, 0.08);
+}
+
+html body .tv__stapel b {
+  background: linear-gradient(90deg, #8f5424, #c98a45 45%, #f0b56e);
+  box-shadow: 0 0 10px rgba(240, 181, 110, 0.6);
+}
+
+html:not([data-tema="mork"]) body .tv__svar .kollen__valt {
+  background: rgba(27, 25, 21, 0.04);
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) body .tv__lista .kollen__punkt {
+  border-top-color: rgba(27, 25, 21, 0.07);
+  color: var(--text);
+  font-size: 0.9375rem;
+}
+
+html:not([data-tema="mork"]) body .tv__svar .kollen__dela {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.1), inset 0 1px 0 #fff;
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) body .tv__svar .kollen__dela:hover {
+  background: var(--kol);
+  color: var(--krita);
+}
+
+html:not([data-tema="mork"]) body .tv__friskrivning {
+  color: var(--text-3);
+}
+
+html:not([data-tema="mork"]) body .tv__friskrivning a {
+  color: var(--virke-djup);
+}
+/* === Livet på tomten (verktyget "Vad får jag bygga?") ====================
+   Bilen kör förbi, någon går med hunden, fåglar flyger, molnskuggor
+   driver, vimpeln vajar, röken stiger och någon vinkar från altanen.
+   Utan rörelse står allt stilla där det är ritat. */
+.tv-rok--ljus { fill: #f4efe6; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Färder längs gatan: in från ena kanten, ut i den andra, paus. */
+  html body .tv-fard {
+    transform: translate(var(--fx), var(--fy));
+    animation: tv-fard var(--tid, 15s) linear infinite;
+    animation-delay: var(--start, 0s);
+  }
+  html body .tv-fard--bil { --tid: 13s; --start: -3s; }
+  html body .tv-fard--gang { --tid: 46s; --start: -14s; }
+
+  html body .tv-gung {
+    animation: tv-gung 0.5s ease-in-out infinite alternate;
+  }
+
+  /* Benen går, armen svänger, kroppen studsar lite i varje steg. */
+  html body .tv-ben { animation: tv-steg 0.9s ease-in-out infinite; }
+  html body .tv-ben--b { animation-delay: -0.45s; }
+  html body .tv-armsving { animation: tv-steg 0.9s ease-in-out infinite; animation-delay: -0.45s; }
+  html body .tv-studs { animation: tv-studs 0.45s ease-in-out infinite alternate; }
+  html body .tv-tass { animation: tv-tass 0.45s ease-in-out infinite; }
+  html body .tv-tass--b { animation-delay: -0.225s; }
+  html body .tv-svans { animation: tv-svans 0.35s ease-in-out infinite alternate; }
+  html body .tv-hund { animation: tv-studs 0.225s ease-in-out infinite alternate; }
+
+  html body .tv-vinka { animation: tv-vinka 2.8s ease-in-out infinite; }
+
+  html body .tv-krona--gran { animation: tv-gran 6s ease-in-out infinite; }
+  html body .tv-vass { animation: tv-vass 3.2s ease-in-out infinite; animation-delay: calc(var(--i, 0) * -0.55s); }
+
+  html body .tv-moln { animation: tv-moln 38s linear infinite; animation-delay: -9s; }
+  html body .tv-moln--2 { animation-duration: 52s; animation-delay: -36s; }
+
+  html body .tv-flyg { animation: tv-flyg 24s linear infinite; animation-delay: calc(var(--i, 0) * -0.9s - 4s); }
+  html body .tv-flaxa {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: tv-flaxa 0.42s ease-in-out infinite alternate;
+    animation-delay: calc(var(--i, 0) * -0.13s);
+  }
+
+  html body .tv-damm { opacity: 0; animation: tv-damm 1.6s ease-out infinite; animation-delay: calc(var(--i, 0) * -0.4s); }
+
+  html body .tv-radjur__huvud { animation: tv-beta 7s ease-in-out infinite; }
+
+  html body .tv-fjaril { animation: tv-fjaril 9s ease-in-out infinite; animation-delay: calc(var(--i, 0) * -4.2s); }
+  html body .tv-fjaril__vingar { transform-box: fill-box; transform-origin: 50% 50%; animation: tv-vinge 0.22s ease-in-out infinite alternate; }
+
+  html body .tv-bat { animation: tv-bat 3.6s ease-in-out infinite; }
+  html body .tv-ring { animation: tv-ring 3.6s ease-out infinite; }
+  html body .tv-glitter {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    opacity: 0;
+    animation: tv-glitter 3.4s ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * -0.61s);
+  }
+
+  /* Ytans bricka andas lätt ovanför huset. */
+  html body .tv-etikett--hus { animation: tv-svava 4.5s ease-in-out infinite; }
+}
+
+@keyframes tv-fard {
+  0% { transform: translate(var(--fx), var(--fy)); }
+  82%, 100% { transform: translate(var(--tx), var(--ty)); }
+}
+@keyframes tv-gung { to { translate: 0 -0.6px; } }
+@keyframes tv-steg {
+  0%, 100% { transform: rotate(24deg); }
+  50% { transform: rotate(-24deg); }
+}
+@keyframes tv-studs { to { translate: 0 -0.7px; } }
+@keyframes tv-tass {
+  0%, 100% { transform: rotate(30deg); }
+  50% { transform: rotate(-30deg); }
+}
+@keyframes tv-svans { from { transform: rotate(-16deg); } to { transform: rotate(18deg); } }
+@keyframes tv-vinka {
+  0%, 40%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-26deg); }
+  60% { transform: rotate(8deg); }
+  70% { transform: rotate(-26deg); }
+  80% { transform: rotate(8deg); }
+}
+@keyframes tv-gran {
+  0%, 100% { transform: rotate(-1.2deg); }
+  50% { transform: rotate(1.4deg); }
+}
+@keyframes tv-vass {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(6deg); }
+}
+@keyframes tv-moln {
+  from { transform: translate(-330px, -120px); }
+  to { transform: translate(330px, 120px); }
+}
+@keyframes tv-flyg {
+  0% { transform: translate(-90px, 18px); }
+  50% { transform: translate(260px, -6px); }
+  100% { transform: translate(640px, 14px); }
+}
+@keyframes tv-flaxa {
+  from { transform: scaleY(1); }
+  to { transform: scaleY(-0.55); }
+}
+@keyframes tv-damm {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  25% { opacity: 0.75; }
+  100% { opacity: 0; transform: translate(-26px, -16px) scale(1.9); }
+}
+@keyframes tv-beta {
+  0%, 30% { transform: rotate(0deg); }
+  38%, 70% { transform: rotate(-58deg); }
+  78%, 100% { transform: rotate(0deg); }
+}
+@keyframes tv-fjaril {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(14px, -9px); }
+  45% { transform: translate(26px, 2px); }
+  65% { transform: translate(12px, -14px); }
+  85% { transform: translate(-6px, -5px); }
+}
+@keyframes tv-vinge { from { transform: scaleX(1); } to { transform: scaleX(0.25); } }
+@keyframes tv-bat {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50% { transform: translateY(1.2px) rotate(1.8deg); }
+}
+@keyframes tv-ring {
+  0% { opacity: 0.9; transform: scale(0.55); }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+@keyframes tv-glitter {
+  0%, 60%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  75% { opacity: 0.95; transform: scale(1) rotate(45deg); }
+}
+@keyframes tv-svava {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -2.5px; }
+}
+/* Livet på tomten, finslipat: bilen och den som går tonar in och ut vid
+   plattans kanter i stället för att klippas, röken är små puffar. */
+@media (prefers-reduced-motion: no-preference) {
+  html body .tv-fard {
+    opacity: 0;
+    animation-name: tv-fard2;
+  }
+  html body .tv-fard--bil { --tid: 12s; --start: -2s; }
+  html body .tv-fard--gang { --tid: 40s; --start: -12s; }
+  html body .tv-rok {
+    animation: tv-rok2 4.2s ease-out infinite;
+    animation-delay: calc(var(--i, 0) * 1.4s);
+  }
+}
+
+@keyframes tv-fard2 {
+  0% { transform: translate(var(--fx), var(--fy)); opacity: 0; }
+  6% { opacity: 1; }
+  76% { opacity: 1; }
+  82% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+  100% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+}
+
+@keyframes tv-rok2 {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.5); }
+  18% { opacity: 0.95; }
+  100% { opacity: 0; transform: translate(10px, -30px) scale(1.8); }
+}
+/* Röken skalas kring sin egen mitt. */
+.tv-rok {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+/* === Svarskortet, smartare (verktyget) ===================================
+   Ytan visas som tomtens lovfria yta: det som finns, det nya huset och
+   det som blir kvar. Nockhöjden som ett litet hus som växer. Fyra rutor
+   med det som gäller och en rad med husen som ryms. Talen rullar fram. */
+html body .tv__tal {
+  gap: 12px;
+}
+
+html body .tv__talkort {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+html body .tv__ytbar {
+  display: flex;
+  height: 10px;
+  margin-top: 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(27, 25, 21, 0.07);
+}
+
+html body .tv__ytdel {
+  display: block;
+  flex: none;
+  width: 0;
+  height: 100%;
+  transition: width 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+html body .tv__ytdel + .tv__ytdel {
+  box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.9);
+}
+
+html body .tv__ytdel--fanns,
+html body .tv__ytprick--fanns {
+  background: repeating-linear-gradient(135deg, #d7b582 0 3px, #e9d3ad 3px 6px);
+}
+
+html body .tv__ytdel--nytt,
+html body .tv__ytprick--nytt {
+  background: linear-gradient(90deg, #8f5424, #c98a45 50%, #f0b56e);
+}
+
+html body .tv__ytdel--kvar,
+html body .tv__ytprick--kvar {
+  background: linear-gradient(90deg, rgba(76, 194, 127, 0.45), rgba(76, 194, 127, 0.25));
+}
+
+html body .tv__talinfo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin: 10px 0 0;
+  font: 600 0.75rem/1.3 var(--knappfont);
+  color: var(--text-2);
+}
+
+html body .tv__talinfo span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+html body .tv__talinfo em {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+html body .tv__ytprick {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Huset som visar nockhöjden. */
+html body .tv__nock {
+  display: block;
+  width: 100%;
+  max-width: 190px;
+  height: auto;
+  margin-top: 8px;
+  overflow: visible;
+}
+
+html body .tv__nock * {
+  vector-effect: non-scaling-stroke;
+}
+
+html body .tv__nock-hus {
+  transform-box: view-box;
+  transform-origin: 0 50.5px;
+  transform: scaleY(var(--nock, 0.89));
+  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+html body .tv__nock-mark { stroke: rgba(27, 25, 21, 0.18); stroke-width: 1.2; stroke-linecap: round; }
+html body .tv__nock-kropp { fill: #2a2622; }
+html body .tv__nock-tak { fill: none; stroke: #45403a; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+html body .tv__nock-fonster { fill: #f6c88f; }
+html body .tv__nock-dorr { fill: #8a6a4b; }
+html body .tv__nock-streck { stroke: #c98a45; stroke-width: 1.2; stroke-dasharray: 2 3; }
+html body .tv__nock-matt { stroke: #8f5424; stroke-width: 1.5; stroke-linecap: round; }
+
+/* Fyra rutor: bygglov, anmälan, grannen, strandskydd. */
+html body .tv__status {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+html body .tv__stat {
+  --ton: 47, 138, 82;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 2px;
+  padding: 12px 14px 12px 12px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.6));
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 12px 24px -20px rgba(90, 60, 25, 0.5);
+}
+
+html body .tv__stat--villkor { --ton: 201, 128, 52; }
+html body .tv__stat--nej { --ton: 214, 98, 58; }
+
+html body .tv__stat::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgb(var(--ton));
+  box-shadow: 0 0 0 3px rgba(var(--ton), 0.16), 0 0 10px rgba(var(--ton), 0.5);
+}
+
+html body .tv__stat-ikon {
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, rgba(var(--ton), 0.18), rgba(var(--ton), 0.08));
+  box-shadow: inset 0 0 0 1px rgba(var(--ton), 0.22);
+  color: rgb(var(--ton));
+}
+
+html body .tv__stat-ikon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html body .tv__stat-namn {
+  font: 600 0.6875rem/1.2 var(--knappfont);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+html body .tv__stat strong {
+  min-width: 0;
+  padding-right: 12px;
+  font: 600 0.875rem/1.25 var(--knappfont);
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .tv__stat {
+    animation: tv-stat-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 60ms);
+  }
+  html body .tv__stat--nej::after {
+    animation: tv-stat-puls 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes tv-stat-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+}
+
+@keyframes tv-stat-puls {
+  50% { box-shadow: 0 0 0 6px rgba(var(--ton), 0.1), 0 0 14px rgba(var(--ton), 0.6); }
+}
+
+/* Husen som ryms, med en länk ned till korten. */
+html body .tv__ryms {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+  padding: 10px 12px 10px 10px;
+  border-radius: 20px;
+  background:
+    radial-gradient(70% 120% at 0% 0%, rgba(255, 214, 160, 0.35), transparent 70%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.62));
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(27, 25, 21, 0.07), 0 14px 28px -22px rgba(90, 60, 25, 0.55);
+  color: var(--text);
+  text-decoration: none;
+  transition: transform 0.4s var(--mjuk), box-shadow 0.4s var(--mjuk);
+}
+
+html body .tv__ryms:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(201, 138, 69, 0.4), 0 20px 34px -22px rgba(143, 84, 36, 0.6);
+}
+
+html body .tv__ryms-bilder {
+  display: flex;
+  flex: none;
+  gap: 4px;
+}
+
+/* Husbilderna visas hela: rutan har bildens eget format. */
+html body .tv__ryms-bilder img {
+  display: block;
+  width: 48px;
+  height: auto;
+  aspect-ratio: 1600 / 1062;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.08), 0 6px 12px -8px rgba(27, 25, 21, 0.5);
+}
+
+html body .tv__ryms--inga .tv__ryms-bilder img {
+  filter: grayscale(0.85);
+  opacity: 0.6;
+}
+
+html body .tv__ryms-text {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+html body .tv__ryms-text strong {
+  font: 600 0.9375rem/1.25 var(--knappfont);
+}
+
+html body .tv__ryms-text em {
+  overflow: hidden;
+  font-style: normal;
+  font-size: 0.8125rem;
+  color: var(--text-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html body .tv__ryms-pil {
+  position: relative;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #38332c, #141210);
+  box-shadow: 0 8px 16px -8px rgba(27, 25, 21, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 0.4s var(--mjuk);
+}
+
+html body .tv__ryms-pil::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #f6c88f;
+  border-bottom: 2px solid #f6c88f;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+html body .tv__ryms:hover .tv__ryms-pil {
+  transform: translateY(3px);
+}
+
+@media (max-width: 520px) {
+  html body .tv__status {
+    gap: 8px;
+  }
+  html body .tv__stat {
+    padding: 10px 10px 10px 10px;
+    column-gap: 9px;
+  }
+  html body .tv__stat-ikon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+  html body .tv__stat strong {
+    font-size: 0.8125rem;
+  }
+  html body .tv__ryms-bilder img {
+    width: 40px;
+  }
+  html body .tv__ryms-bilder img:nth-child(3) {
+    display: none;
+  }
+}
+
+/* Mörkt läge. */
+html[data-tema="mork"] .tv__ytbar { background: rgba(247, 245, 240, 0.08); }
+html[data-tema="mork"] .tv__ytdel + .tv__ytdel { box-shadow: inset 2px 0 0 #15130f; }
+html[data-tema="mork"] .tv__nock-mark { stroke: rgba(247, 245, 240, 0.2); }
+html[data-tema="mork"] .tv__nock-kropp { fill: #e9e2d6; }
+html[data-tema="mork"] .tv__nock-tak { stroke: #cfc6b5; }
+html[data-tema="mork"] .tv__nock-dorr { fill: #8a6a4b; }
+html[data-tema="mork"] .tv__nock-matt { stroke: #f0b56e; }
+html[data-tema="mork"] .tv__stat,
+html[data-tema="mork"] .tv__ryms {
+  background: linear-gradient(160deg, rgba(247, 245, 240, 0.07), rgba(247, 245, 240, 0.03));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08), 0 16px 30px -22px rgba(0, 0, 0, 0.8);
+}
+
+/* === Husen som ryms: glaskort, hela bilder ================================ */
+html body .tvhus-rad {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+  gap: 16px;
+}
+
+html body .tvhus {
+  position: relative;
+  padding: 8px;
+  border-radius: 26px;
+  background:
+    radial-gradient(90% 60% at 100% 0%, rgba(255, 214, 160, 0.3), transparent 70%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.55));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 30px 60px -40px rgba(90, 60, 25, 0.6);
+}
+
+html body .tvhus:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(201, 138, 69, 0.45),
+    0 40px 70px -40px rgba(143, 84, 36, 0.65);
+}
+
+html body .tvhus__bild {
+  aspect-ratio: 1600 / 1062;
+  border-radius: 19px;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+html body .tvhus__bild img,
+html body .tvhus:hover .tvhus__bild img {
+  transform: none;
+}
+
+html body .tvhus__ryms,
+html body .tvhus__3d {
+  top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 8px;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 14px -8px rgba(27, 25, 21, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+html body .tvhus__ryms {
+  left: 10px;
+  background: linear-gradient(160deg, rgba(58, 170, 104, 0.95), rgba(31, 122, 69, 0.95));
+}
+
+html body .tvhus__ryms::before {
+  content: "";
+  width: 7px;
+  height: 4px;
+  margin: -2px 1px 0 2px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg);
+}
+
+html body .tvhus--lov .tvhus__ryms {
+  background: linear-gradient(160deg, rgba(56, 51, 44, 0.9), rgba(20, 18, 16, 0.9));
+  color: #f6c88f;
+}
+
+html body .tvhus--lov .tvhus__ryms::before {
+  width: 6px;
+  height: 6px;
+  margin: 0 1px 0 2px;
+  border: 0;
+  border-radius: 50%;
+  background: #f0b56e;
+  box-shadow: 0 0 8px rgba(240, 181, 110, 0.8);
+  transform: none;
+}
+
+html body .tvhus__3d {
+  right: 10px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--kol);
+}
+
+html body .tvhus__3d::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border: 1.6px solid currentColor;
+  border-radius: 2px;
+  transform: rotate(45deg) skew(-8deg, -8deg);
+}
+
+html body .tvhus__kropp {
+  position: relative;
+  padding: 14px 54px 10px 10px;
+}
+
+html body .tvhus__fakta b {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(240, 181, 110, 0.18);
+  color: #7a4a1c;
+}
+
+html body .tvhus__pil {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  margin-top: -16px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #38332c, #141210);
+  box-shadow: 0 10px 18px -10px rgba(27, 25, 21, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 0.45s var(--mjuk), background 0.45s var(--mjuk);
+}
+
+html body .tvhus__pil::after {
+  content: "";
+  position: absolute;
+  left: 44%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid #f6c88f;
+  border-right: 2px solid #f6c88f;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+html body .tvhus:hover .tvhus__pil {
+  transform: translateX(4px);
+  background: linear-gradient(160deg, #f6c88f, #c98a45);
+}
+
+html body .tvhus:hover .tvhus__pil::after {
+  border-color: #1b1915;
+}
+
+html body .tvhus--lov .tvhus__bild img {
+  filter: grayscale(0.55) contrast(0.95);
+  opacity: 0.82;
+}
+
+html body .tvhus--lov .tvhus__fakta b {
+  background: rgba(27, 25, 21, 0.06);
+  color: var(--text-2);
+}
+
+html[data-tema="mork"] .tvhus {
+  background: linear-gradient(160deg, rgba(247, 245, 240, 0.07), rgba(247, 245, 240, 0.03));
+}
+
+html[data-tema="mork"] .tvhus__fakta b {
+  color: #f6c88f;
+}
+/* Raden under ytstapeln i vanlig stil, inte som etikett. */
+html body .tv__tal .tv__talinfo span,
+html:not([data-tema="mork"]) body .tv__tal .tv__talinfo span {
+  font: 600 0.75rem/1.3 var(--knappfont);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-2);
+}
+/* === "Vad får jag bygga?" omgjord (2026-10-07) ============================
+   Toppen: text till vänster, ett hus i riktig 3D till höger som byggs upp,
+   vaggar och går att vrida. Markkollen: sökrutan bredvid en genomskärning
+   av marken i 3D. Brickorna i scenerna är HTML (läsbara på mobil) och
+   följer punkter i scenen. Skriptet heter "Två scener i riktig 3D". */
+
+/* --- Toppen ----------------------------------------------------------- */
+html body .vf-topp__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: clamp(20px, 3.5vw, 56px);
+  padding-top: clamp(44px, 6vw, 76px);
+  padding-bottom: clamp(40px, 5.5vw, 70px);
+}
+
+html body .vf-topp .kollen-topp__titel {
+  font-size: clamp(2.8rem, 1.1rem + 3.7vw, 5.4rem);
+  line-height: 1.02;
+}
+
+html body .vf-topp .kollen-topp__text {
+  max-width: 31rem;
+}
+
+html body .vf-topp__knappar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+html body .vf-topp .kollen-topp__fakta {
+  margin-top: 26px;
+  gap: 8px;
+}
+
+html body .vf-topp .kollen-topp__fakta li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px 8px 11px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.5));
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(27, 25, 21, 0.07), 0 10px 20px -16px rgba(90, 60, 25, 0.5);
+  color: var(--text-2);
+}
+
+html body .vf-topp .kollen-topp__fakta li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-right: 3px;
+  border-radius: 50%;
+  background: #e8a456;
+  box-shadow: 0 0 0 3px rgba(232, 164, 86, 0.18);
+}
+
+html body .vf-topp .kollen-topp__fakta b {
+  color: var(--text);
+}
+
+/* --- Scenerna --------------------------------------------------------- */
+html body .vf3d {
+  position: relative;
+  min-width: 0;
+  touch-action: pan-y;
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html body .vf3d--drar {
+  cursor: grabbing;
+}
+
+html body .vf3d::before {
+  content: "";
+  position: absolute;
+  inset: 4% 2% 0;
+  border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 222, 176, 0.55), rgba(255, 222, 176, 0) 70%);
+  pointer-events: none;
+}
+
+html body .vf3d__svg {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+html body .vf3d--rorlig {
+  opacity: 0;
+  transform: translateY(18px) scale(0.985);
+  transition: opacity 0.9s var(--mjuk), transform 1.1s var(--mjuk);
+}
+
+html body .vf3d--rorlig.vf3d--klar {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .vf3d__grans {
+    animation: tv-marsch 1.4s linear infinite;
+  }
+}
+
+/* Brickorna: en prick på punkten, en linje och en glasbricka. */
+html body .vf3d__chip {
+  --prick: #e8a456;
+  --stam: 18px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+html body .vf3d__chip::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--prick);
+  box-shadow: 0 0 0 2px #fffdf8, 0 2px 6px rgba(27, 25, 21, 0.3);
+  opacity: 0;
+  transition: opacity 0.4s var(--mjuk);
+}
+
+html body .vf3d__chip-in {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px 8px 10px;
+  border-radius: 999px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.78));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.07), 0 14px 26px -16px rgba(90, 60, 25, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  font: 500 0.8125rem/1 var(--knappfont);
+  color: var(--text-2);
+  white-space: nowrap;
+  opacity: 0;
+  scale: 0.86;
+  transition: opacity 0.5s var(--mjuk), scale 0.6s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+html body .vf3d__chip-in::after {
+  content: "";
+  position: absolute;
+  background: linear-gradient(var(--prick), var(--prick));
+  opacity: 0.75;
+}
+
+html body .vf3d__chip-in i {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--prick);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--prick) 22%, transparent);
+}
+
+html body .vf3d__chip-in b {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+html body .vf3d__chip--in::before,
+html body .vf3d__chip--in .vf3d__chip-in {
+  opacity: 1;
+  scale: 1;
+}
+
+html body .vf3d__chip--upp .vf3d__chip-in {
+  left: 0;
+  bottom: var(--stam);
+  transform: translateX(-50%);
+  transform-origin: 50% 100%;
+}
+html body .vf3d__chip--upp .vf3d__chip-in::after { left: calc(50% - 0.75px); top: 100%; width: 1.5px; height: var(--stam); }
+
+html body .vf3d__chip--ner .vf3d__chip-in {
+  left: 0;
+  top: var(--stam);
+  transform: translateX(-50%);
+  transform-origin: 50% 0;
+}
+html body .vf3d__chip--ner .vf3d__chip-in::after { left: calc(50% - 0.75px); bottom: 100%; width: 1.5px; height: var(--stam); }
+
+html body .vf3d__chip--vanster .vf3d__chip-in {
+  right: var(--stam);
+  top: 0;
+  transform: translateY(-50%);
+  transform-origin: 100% 50%;
+}
+html body .vf3d__chip--vanster .vf3d__chip-in::after { left: 100%; top: calc(50% - 0.75px); width: var(--stam); height: 1.5px; }
+
+html body .vf3d__chip--hoger .vf3d__chip-in {
+  left: var(--stam);
+  top: 0;
+  transform: translateY(-50%);
+  transform-origin: 0 50%;
+}
+html body .vf3d__chip--hoger .vf3d__chip-in::after { right: 100%; top: calc(50% - 0.75px); width: var(--stam); height: 1.5px; }
+
+html body .vf3d__chip--mork { --prick: #f0b56e; }
+html body .vf3d__chip--mork .vf3d__chip-in {
+  background: linear-gradient(160deg, rgba(56, 51, 44, 0.94), rgba(20, 18, 16, 0.94));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 16px 30px -14px rgba(27, 25, 21, 0.7);
+  color: rgba(247, 245, 240, 0.72);
+}
+html body .vf3d__chip--mork .vf3d__chip-in b { color: #fffaf2; font-size: 0.9375rem; }
+html body .vf3d__chip--brun { --prick: #8f5424; }
+html body .vf3d__chip--gron { --prick: #2f8a52; }
+html body .vf3d__chip--matjord { --prick: #70503a; }
+html body .vf3d__chip--lera { --prick: #b28e6a; }
+html body .vf3d__chip--moran { --prick: #9e9584; }
+html body .vf3d__chip--berg { --prick: #74777e; }
+html body .vf3d__chip--ledning { --prick: #4b8fd1; }
+html body .vf3d__chip--ledning .vf3d__chip-in i {
+  background: conic-gradient(#e59a3c 0 33%, #3fa36b 0 66%, #4b8fd1 0);
+}
+
+html body .vf3d__chip--lager .vf3d__chip-in {
+  padding: 7px 12px 7px 9px;
+}
+
+/* "Dra för att vrida" försvinner när man provat. */
+html body .vf3d__tips {
+  position: absolute;
+  right: 6%;
+  bottom: 2%;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 7px 12px 7px 9px;
+  border-radius: 999px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 10px 20px -14px rgba(90, 60, 25, 0.5);
+  font: 600 0.75rem/1 var(--knappfont);
+  color: var(--text-2);
+  pointer-events: none;
+  transition: opacity 0.5s var(--mjuk), transform 0.5s var(--mjuk);
+}
+
+html body .vf3d__tips svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #c98a45;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html body .vf3d--provat .vf3d__tips {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .vf3d__tips svg {
+    animation: vf-vrid 3.2s ease-in-out infinite;
+  }
+}
+
+@keyframes vf-vrid {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-35deg); }
+  40% { transform: rotate(25deg); }
+}
+
+/* --- Markkollen: sökrutan och genomskärningen ------------------------- */
+html body .markkoll__topp {
+  margin-bottom: clamp(36px, 5vw, 60px);
+}
+
+html body .markkoll__scen {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  align-items: center;
+  gap: clamp(20px, 3vw, 44px);
+  margin-bottom: clamp(44px, 6vw, 76px);
+}
+
+html body .markkoll__scen > .tomtrapport {
+  margin: 0;
+}
+
+html body .markkoll__scen:has(.tomtrapport__vy:not([hidden])) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+html body .markkoll__scen:has(.tomtrapport__vy:not([hidden])) .vf3d--mark,
+html body .markkoll__scen:has(.tomtrapport__vy:not([hidden])) .marksok__far {
+  display: none;
+}
+
+html body .vf3d--mark::before {
+  inset: 0 6% 6%;
+}
+
+html body .marksok__far {
+  display: grid;
+  gap: 10px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+html body .marksok__far li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 14px 11px 11px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: var(--text-2);
+}
+
+html body .marksok__far strong {
+  display: block;
+  margin-bottom: 2px;
+  font: 600 0.9375rem/1.25 var(--knappfont);
+  color: var(--text);
+}
+
+html body .marksok__ikon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: linear-gradient(160deg, #e2a865, #a96a2f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 18px -10px rgba(143, 84, 36, 0.7);
+}
+
+html body .marksok__ikon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #fffaf2;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+
+/* Kartkorten i glas. */
+html body .markkort {
+  background:
+    radial-gradient(90% 60% at 100% 0%, rgba(255, 214, 160, 0.3), transparent 70%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.55));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 30px 60px -42px rgba(90, 60, 25, 0.6);
+  transition: transform 0.45s var(--mjuk), box-shadow 0.45s var(--mjuk);
+}
+
+html body .markkort:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(201, 138, 69, 0.45),
+    0 40px 70px -42px rgba(143, 84, 36, 0.65);
+}
+
+/* --- Mörkt läge ------------------------------------------------------- */
+html[data-tema="mork"] .vf3d::before {
+  background: radial-gradient(50% 50% at 50% 50%, rgba(240, 181, 110, 0.14), rgba(240, 181, 110, 0) 70%);
+}
+html[data-tema="mork"] .vf3d__chip-in,
+html[data-tema="mork"] .vf3d__tips,
+html[data-tema="mork"] .marksok__far li,
+html[data-tema="mork"] .vf-topp .kollen-topp__fakta li {
+  background: linear-gradient(160deg, rgba(40, 36, 31, 0.92), rgba(24, 22, 19, 0.88));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08), 0 14px 26px -16px rgba(0, 0, 0, 0.8);
+}
+html[data-tema="mork"] .markkort {
+  background: linear-gradient(160deg, rgba(247, 245, 240, 0.07), rgba(247, 245, 240, 0.03));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08), 0 26px 50px -36px rgba(0, 0, 0, 0.8);
+}
+
+/* --- Mobil ------------------------------------------------------------- */
+@media (max-width: 900px) {
+  html body .vf-topp__inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    padding-top: 36px;
+    padding-bottom: 20px;
+  }
+  html body .vf3d--hus {
+    margin: 0 -8px;
+  }
+  html body .markkoll__scen {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  html body .vf3d--mark {
+    margin: 0 -6px;
+  }
+}
+
+@media (max-width: 560px) {
+  html body .vf3d__chip-in {
+    gap: 5px;
+    padding: 6px 10px 6px 8px;
+    font-size: 0.6875rem;
+  }
+  html body .vf3d__chip-in b {
+    font-size: 0.75rem;
+  }
+  html body .vf3d__chip--mork .vf3d__chip-in b {
+    font-size: 0.8125rem;
+  }
+  html body .vf3d__chip-in i {
+    width: 6px;
+    height: 6px;
+  }
+  html body .vf3d__tips {
+    font-size: 0.6875rem;
+  }
+  html body .vf-topp__knappar .ih-knapp {
+    flex: 1 1 100%;
+  }
+}
+/* Markscenen på smal skärm: lagrens brickor ligger på lagren, djupet
+   visas bara som linjen. */
+@media (max-width: 560px) {
+  html body .vf3d__chip--lager::before {
+    display: none;
+  }
+  html body .vf3d__chip--lager .vf3d__chip-in {
+    right: auto;
+    left: 0;
+    transform: translate(-50%, -50%);
+    transform-origin: 50% 50%;
+    padding: 5px 9px 5px 7px;
+  }
+  html body .vf3d__chip--lager .vf3d__chip-in::after {
+    display: none;
+  }
+  html body .vf3d--mark [data-chip="djup"] {
+    display: none;
+  }
+}
+html body .vf3d__chip-in em {
+  font-style: normal;
+}
+
+@media (max-width: 560px) {
+  html body .vf3d__chip[data-chip="hojd"] .vf3d__chip-in em {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  html body .vf3d__tips {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    display: flex;
+    width: max-content;
+    margin: 2px auto 0;
+  }
+}
+html[data-tema="mork"] .tv__ryms-pil,
+html[data-tema="mork"] .tvhus__pil {
+  background: linear-gradient(160deg, #f6c88f, #c98a45);
+}
+html[data-tema="mork"] .tv__ryms-pil::after,
+html[data-tema="mork"] .tvhus__pil::after {
+  border-color: #1b1915;
+}
+/* Mobil: husen i en rad att svepa, statusrutorna med plats för texten. */
+@media (max-width: 640px) {
+  html body .tvhus-rad {
+    display: flex;
+    gap: 12px;
+    margin: 0 -16px;
+    padding: 6px 16px 22px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 16px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  html body .tvhus-rad::-webkit-scrollbar {
+    display: none;
+  }
+  html body .tvhus {
+    flex: 0 0 80%;
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 520px) {
+  html body .tv__stat {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    row-gap: 4px;
+    padding: 12px;
+  }
+  html body .tv__stat-ikon {
+    grid-row: auto;
+    width: 30px;
+    height: 30px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+  }
+  html body .tv__stat-ikon svg {
+    width: 17px;
+    height: 17px;
+  }
+  html body .tv__stat strong {
+    padding-right: 0;
+  }
+  html body .tv__ryms-text strong {
+    font-size: 0.875rem;
+  }
+}

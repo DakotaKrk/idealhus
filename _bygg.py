@@ -144,7 +144,7 @@ def mobilmeny():
         '<path d="M4 7h6M4 5.6v2.8M10 5.6v2.8"/></svg></span>'
         '<span class="mmeny__tipstext"><span class="mmeny__prova">Prova</span>'
         '<strong>Vad får jag bygga?</strong></span>' + MMENY_PIL + '</a>')
-    rader.append(f'          <a class="mmeny__cta" href="kontakt.html" style="--i:{i + 2}">Begär offert</a>')
+    rader.append(f'          <a class="mmeny__cta" href="kontakt.html" style="--i:{i + 2}">Börja här</a>')
     rader.append(f'          <p class="mmeny__kontakt" style="--i:{i + 3}">'
                  '<a href="mailto:info@idealhus.se">info@idealhus.se</a><span>Stockholm, Sverige</span></p>')
     return "\n".join(rader)
@@ -163,7 +163,14 @@ TEMASKRIPT = ("<script>try{var t=new URLSearchParams(location.search).get('tema'
 MENYSKRIPT = (r"<script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);"
               "if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');"
               "s.setItem('idealhus-meny','1')}catch(e){}</script>")
-TEMASKRIPT = TEMASKRIPT + MENYSKRIPT
+# Menyraden får sitt övergångsnamn bara under sidbytet - ett namn hela
+# tiden gör raden till en backdrop root och stänger av glaset (2026-10-06).
+VTSKRIPT = ("<script>(function(){function n(){var h=document.querySelector('.site-header');"
+            "if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',"
+            "function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){"
+            "if(!e.viewTransition)return;var h=n(),t=function(){if(h)h.style.viewTransitionName=''};"
+            "e.viewTransition.finished.then(t,t)})})()</script>")
+TEMASKRIPT = TEMASKRIPT + MENYSKRIPT + VTSKRIPT
 
 
 # Typsnitten ligger i fonts/ sedan 2026-09-30 (Poppins och Manrope, som
@@ -265,7 +272,7 @@ def header(aktiv):
         </nav>
 
         <div class="site-header__actions">
-          <a class="header-button" href="kontakt.html">Begär offert</a>
+          <a class="header-button" href="kontakt.html">Börja här</a>
 
           <button class="menu-button" type="button" aria-label="Öppna meny" aria-expanded="false" aria-controls="mobile-nav">
             <span class="menu-button__line"></span>
