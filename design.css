@@ -19048,63 +19048,6 @@ body main .category__head h2 {
   justify-content: center;
 }
 
-/* --- Kontakten: centrerad på alla sidor -------------------------------- */
-@media (min-width: 1041px) {
-  .contact-section__inner {
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-    gap: 40px;
-  }
-
-  .contact-section__intro {
-    position: static;
-    top: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 50rem;
-    text-align: center;
-  }
-
-  .contact-section .contact-form {
-    width: min(760px, 100%);
-  }
-
-  .contact-section .kontaktkort {
-    width: min(620px, 100%);
-  }
-
-  .contact-section__intro .contact-section__meta {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px 40px;
-  }
-
-  .contact-section__intro .contact-section__meta > div {
-    display: grid;
-    justify-items: center;
-  }
-
-  .contact-section__intro .tillit {
-    grid-template-columns: repeat(4, minmax(0, max-content));
-    justify-content: center;
-  }
-}
-
-.contact-section__intro .section-label {
-  justify-content: center;
-}
-
-.contact-section__title,
-.contact-section__text {
-  margin-inline: auto;
-}
-
-.contact-section__intro {
-  text-align: center;
-}
-
 html body main .pf-tak .pf-tak__titel,
 html body main .virke .virke__rubrik,
 html body main.katsida .kat-huvud h2 {
@@ -19112,10 +19055,321 @@ html body main.katsida .kat-huvud h2 {
   line-height: 1.04;
 }
 
-/* Stegen i kontaktdelen: ett vänsterställt block mitt under rubriken. */
-.contact-section__intro .kontakt-tips {
-  width: min(440px, 100%);
-  margin-inline: auto;
-  text-align: left;
+/* =====================================================================
+   Samma luft överallt (2026-10-05)
+   --luft:  mellan två avsnitt, från innehåll eller panelkant till nästa
+            innehåll eller panelkant.
+   --panel: inre luft överst och nederst i en panel med bakgrund.
+   --huvud: från ett rubrikblock ned till dess innehåll.
+   Toppen, "Samma virke"-arket som ligger över toppen och regelsidans
+   kort som ligger över toppen behåller sina egna mått.
+   ===================================================================== */
+:root {
+  --luft: clamp(4rem, 8vw, 7rem);
+  --panel: clamp(2.75rem, 5.5vw, 5rem);
+  --huvud: clamp(2rem, 3.5vw, 3rem);
+}
+
+html body main > [class] {
+  margin-bottom: 0;
+}
+
+html body main > * + *:not(.vagar):not(.rg-kort) {
+  margin-top: var(--luft);
+}
+
+/* Öppna avsnitt och paneler vars luft sitter på ett inre block: ingen
+   egen luft på själva avsnittet. */
+html body main > .ih-sektion:not(.ih-sektion--sand):not(.vagar),
+html body main > .category,
+html body main > .prisskala,
+html body main > .prisfaktorer,
+html body main > .prisvag,
+html body main > .pf-lev,
+html body main > .pf-band,
+html body main > .pf-steg,
+html body main > .flode-intro,
+html body main > .flode,
+html body main > .segment,
+html body main > .manifest,
+html body main > .kontakt-topp,
+html body main > .tv,
+html body main > .kollen-hus,
+html body main > .markkoll,
+html body main > .againtro,
+html body main > .kalkyl,
+html body main > .rg,
+html body main > .guide,
+html body main > .siffror,
+html body main > .husval,
+html body main > .at-anv,
+html body main > .at-foto,
+html body main > .at-steg,
+html body main > .hus-plan,
+html body main > .hus-fler,
+html body main > .hus-pris,
+html body main > .pf-tak,
+html body main > .studio3d,
+html body main > .hus3dvy,
+html body main > .prisoffert,
+html body main > .checklista,
+html body main > .samagare,
+html body main > .rg-slut {
+  padding-block: 0;
+}
+
+/* Paneler: samma inre luft. */
+html body main > .contact-section.contact-section,
+html body main > .ih-sektion--sand.ih-sektion--sand,
+html body main > .virke.virke,
+html body .studio3d__inner.studio3d__inner,
+html body .hus3dvy__inner.hus3dvy__inner,
+html body .prisoffert__inner.prisoffert__inner,
+html body .checklista__inre.checklista__inre,
+html body .samagare__inner.samagare__inner,
+html body .rg-slut__inre.rg-slut__inre,
+html body .at-steg__kort.at-steg__kort,
+html body .hus-pris__panel.hus-pris__panel,
+html body .pf-tak__inre.pf-tak__inre {
+  padding-top: var(--panel);
+  padding-bottom: var(--panel);
+}
+
+/* "Samma virke" ligger som ett ark över toppens nederkant. */
+html body main > .vagar.vagar {
+  padding-top: clamp(2.25rem, 4.5vw, 4rem);
+  padding-bottom: 0;
+}
+
+/* Introt och flödet på "Så fungerar det" hör ihop. */
+html body main > .flode-intro + .flode {
+  margin-top: var(--huvud);
+}
+
+/* Rubrikblocken: samma luft ned till innehållet. */
+html body main .ih-huvud,
+html body main .category__head.kat-huvud,
+html body main .prisskala__topp,
+html body main .prisfaktorer__topp,
+html body main .prisvag__topp,
+html body main .pf-lev__huvud,
+html body main .pf-band__huvud,
+html body main .pf-steg__huvud,
+html body main .kollen-hus__topp,
+html body main .markkoll__topp,
+html body main .samagare__topp,
+html body main .kalkyl__topp,
+html body main .studio3d__topp {
+  margin-bottom: var(--huvud);
+}
+
+main :is(.ih-etikett, .section-label) + h2 {
+  margin-top: 1rem;
+}
+
+html:not([data-tema]) body main > .virke.virke,
+html body main > .virke.virke.virke {
+  margin-bottom: 0;
+}
+
+/* Mer luft runt rubrikblocken (2026-10-05): ovanför (mellan avsnitten)
+   och under (ned till innehållet). */
+:root {
+  --luft: clamp(5rem, 10vw, 9rem);
+  --huvud: clamp(5rem, 10vw, 9rem);
+  --panel: clamp(3rem, 6.5vw, 6rem);
+}
+
+/* Rubrikblockens luft ned till innehållet vinner över äldre regler
+   (t.ex. .husval .ih-huvud) - klassen tredubblad för specificiteten. */
+html body main .ih-huvud.ih-huvud.ih-huvud,
+html body main .kat-huvud.kat-huvud.kat-huvud,
+html body main .prisskala__topp.prisskala__topp.prisskala__topp,
+html body main .prisfaktorer__topp.prisfaktorer__topp.prisfaktorer__topp,
+html body main .prisvag__topp.prisvag__topp.prisvag__topp,
+html body main .pf-lev__huvud.pf-lev__huvud.pf-lev__huvud,
+html body main .pf-band__huvud.pf-band__huvud.pf-band__huvud,
+html body main .pf-steg__huvud.pf-steg__huvud.pf-steg__huvud,
+html body main .kollen-hus__topp.kollen-hus__topp.kollen-hus__topp,
+html body main .markkoll__topp.markkoll__topp.markkoll__topp,
+html body main .samagare__topp.samagare__topp.samagare__topp,
+html body main .kalkyl__topp.kalkyl__topp.kalkyl__topp,
+html body main .studio3d__topp.studio3d__topp.studio3d__topp {
+  margin-bottom: var(--huvud);
+}
+
+/* =====================================================================
+   Menyraden i glas (2026-10-05): genomskinlig med stark oskärpa bakom,
+   en ljus kant överst och mjuk skugga. Användaren ville ha den
+   transparent - oskärpan kostar lite när sidan rullar men raden är
+   smal. Aktiv sida är en vit pill.
+   ===================================================================== */
+.site-header__inner {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.36));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45),
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 18px 40px -26px rgba(90, 60, 25, 0.45);
+  -webkit-backdrop-filter: blur(18px) saturate(1.7);
+  backdrop-filter: blur(18px) saturate(1.7);
+}
+
+html[data-rullat] .site-header__inner {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.54));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 22px 48px -26px rgba(90, 60, 25, 0.5);
+}
+
+.main-nav__link {
+  border-radius: 999px;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.main-nav__link:hover,
+.main-nav__item--open .main-nav__toggle {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+.main-nav__link--active,
+.main-nav__link[aria-current="page"] {
+  color: var(--text);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), 0 6px 16px -10px rgba(90, 60, 25, 0.45);
+}
+
+.site-header__actions > button:not(.menu-button) {
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07);
+}
+
+.header-button {
+  box-shadow: 0 10px 24px -12px rgba(240, 181, 110, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+html[data-tema="mork"] .site-header__inner {
+  background: linear-gradient(180deg, rgba(33, 30, 25, 0.62), rgba(20, 19, 16, 0.5));
+  box-shadow:
+    inset 0 1px 0 rgba(247, 245, 240, 0.1),
+    inset 0 0 0 1px rgba(247, 245, 240, 0.08),
+    0 18px 40px -26px rgba(0, 0, 0, 0.7);
+}
+
+html[data-tema="mork"] .main-nav__link--active,
+html[data-tema="mork"] .main-nav__link[aria-current="page"],
+html[data-tema="mork"] .main-nav__link:hover {
+  background: rgba(247, 245, 240, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+}
+
+/* =====================================================================
+   Sidfotsordet (2026-10-05): i det ljusa läget var bokstäverna nästan
+   vita på ljus botten och syntes inte förrän ljussvepet kom. Nu en varm
+   virkeston som syns direkt, och bokstäverna står redan svagt kvar
+   innan de renderas fram.
+   ===================================================================== */
+html:not([data-tema="mork"]) .site-footer__ord:not(.ord-delat) {
+  background: linear-gradient(180deg, rgba(143, 84, 36, 0.32), rgba(143, 84, 36, 0.06) 88%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+html:not([data-tema="mork"]) .ord-bokstav {
+  background-image: linear-gradient(180deg, rgba(143, 84, 36, 0.32), rgba(143, 84, 36, 0.06) 88%);
+}
+
+html:not([data-tema="mork"]) .ord-bokstav-ljus {
+  background-image: linear-gradient(180deg, rgba(255, 214, 160, 1), rgba(220, 150, 80, 0.75) 55%, rgba(201, 138, 69, 0.2));
+}
+
+.ih-js .site-footer__ord.ord-delat .ord-bokstav {
+  opacity: 0.35;
+  transform: translateY(0.1em);
+  filter: blur(0.04em);
+}
+
+.ih-js .site-footer__ord.ord-synlig .ord-bokstav {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* =====================================================================
+   Herorubriken, ny rendering (2026-10-05): raderna renderas fram ur
+   oskärpa (opacity + blur + en kort glidning) i stället för att glida
+   upp ur en mask - då behövs ingen overflow: hidden och skenet runt
+   "verklighet." klipps inte. Ordet har en champagnefärgad gradient och
+   ett ljus som glider fram och tillbaka (alternate, inga hopp).
+   ===================================================================== */
+.topp3__rubrik {
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+.topp3__rubrik .rad {
+  overflow: visible;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.topp3__rubrik .rad > span {
+  transform: none;
+  opacity: 0;
+  filter: blur(16px);
+  translate: 0 0.3em;
+  animation: topp3-render 1.5s cubic-bezier(0.2, 0.7, 0.2, 1) 0.3s forwards;
+}
+
+.topp3__rubrik .rad:nth-child(2) > span {
+  animation-delay: 0.55s;
+}
+
+@keyframes topp3-render {
+  to {
+    opacity: 1;
+    filter: blur(0);
+    translate: 0 0;
+  }
+}
+
+.topp3__rubrik em.topp3__skimmer {
+  display: inline-block;
+  padding: 0 0.05em 0.12em;
+  margin: 0 -0.05em -0.12em;
+  background-image: linear-gradient(100deg,
+    #d68a44 0%, #eaa65c 16%, #f4c587 30%, #fde6c4 42%, #fff6ea 48%, #fde6c4 54%, #f4c587 66%, #eaa65c 82%, #d68a44 100%);
+  background-size: 260% 100%;
+  background-position: 100% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 26px rgba(240, 181, 110, 0.32));
+  animation: topp3-skimmer 8s cubic-bezier(0.45, 0, 0.55, 1) 2s infinite alternate;
+}
+
+@keyframes topp3-skimmer {
+  from { background-position: 100% 50%; }
+  to { background-position: 0% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topp3__rubrik .rad > span {
+    animation: none;
+    opacity: 1;
+    filter: none;
+    translate: none;
+  }
+
+  .topp3__rubrik em.topp3__skimmer {
+    animation: none;
+    background-position: 50% 50%;
+  }
 }
 
