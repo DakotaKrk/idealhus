@@ -269,15 +269,6 @@
     });
   }
 
-  function uppgiftRad(u) {
-    var k = u.kund ? IH.kund(u.kund) : null;
-    var sen = !u.klar && new Date(u.forfaller) < new Date(new Date().setHours(0, 0, 0, 0));
-    return '<li class="uppg' + (u.klar ? ' uppg--klar' : '') + (sen ? ' uppg--sen' : '') + '">' +
-      '<button class="uppg__bock" type="button" data-g="uppgift-klar" data-id="' + u.id + '" aria-pressed="' + u.klar + '" aria-label="Markera klar">' + i('bock') + '</button>' +
-      '<span class="uppg__text"><b>' + e(u.text) + '</b><small>' + (k ? '<a href="#/kunder/' + k.id + '">' + e(k.namn) + '</a> · ' : '') +
-      (sen ? 'försenad · ' : '') + IH.sedan(u.forfaller) + '</small></span></li>';
-  }
-
   // Tid på dygnet styr ljuset i toppen: stjärnor på natten, gryning,
   // dagsljus och kvällsljus.
   function dygn() {
@@ -2780,42 +2771,105 @@
   /* ================================================================
      Att göra
      ================================================================ */
+  // Att göra (omgjord 2026-10-08): typen läses ur texten och visas som
+  // emoji, tiden står i klartext ("I dag", "I morgon", "Försenad 2 dagar")
+  // och raden har snabbknappar för att ringa eller öppna kunden.
+  var UPPG_TYP = [
+    [/offert/i, '🧾', 'Offert'],
+    [/platsbesök|besök|tomtkoll/i, '📍', 'Platsbesök'],
+    [/^ring|samtal|telefon/i, '📞', 'Samtal'],
+    [/mejl|mail|skicka/i, '✉️', 'Mejl'],
+    [/möte|träff/i, '🤝', 'Möte'],
+    [/boka|montage|kran|leverans/i, '📅', 'Bokning']
+  ];
+  function uppgTyp(text) {
+    for (var n = 0; n < UPPG_TYP.length; n++) if (UPPG_TYP[n][0].test(text || '')) return UPPG_TYP[n];
+    return [null, '✅', 'Uppgift'];
+  }
+  function uppgNar(u) {
+    var t = dagarTill(u.forfaller);
+    if (u.klar) return ['klar', 'Klar'];
+    if (t < 0) return ['sen', 'Försenad ' + (-t) + (t === -1 ? ' dag' : ' dagar')];
+    if (t === 0) return ['idag', 'I dag'];
+    if (t === 1) return ['morgon', 'I morgon'];
+    return ['', 'Om ' + t + ' dagar'];
+  }
+  function uppgiftRad(u) {
+    var k = u.kund ? IH.kund(u.kund) : null;
+    var typ = uppgTyp(u.text), nar = uppgNar(u);
+    var sen = nar[0] === 'sen';
+    return '<li class="uppg' + (u.klar ? ' uppg--klar' : '') + (sen ? ' uppg--sen' : '') + '">' +
+      '<button class="uppg__bock" type="button" data-g="uppgift-klar" data-id="' + u.id + '" aria-pressed="' + u.klar + '" aria-label="Markera klar">' + i('bock') + '</button>' +
+      '<span class="uppg__typ" title="' + typ[2] + '" aria-hidden="true">' + typ[1] + '</span>' +
+      '<span class="uppg__text"><b>' + e(u.text) + '</b><small>' + (k ? '<a href="#/kunder/' + k.id + '">' + e(k.namn) + '</a> · ' : '') + typ[2] + '</small></span>' +
+      '<span class="uppg__nar' + (nar[0] ? ' uppg__nar--' + nar[0] : '') + '">' + nar[1] + '</span>' +
+      (k && !u.klar ? '<span class="uppg__snabb">' +
+        (k.telefon ? '<button type="button" data-g="kund-ring" data-tel="' + e(k.telefon) + '" title="Ring ' + e(forsta(k.namn)) + '" aria-label="Ring ' + e(forsta(k.namn)) + '">' + i('tel') + '</button>' : '') +
+        '<button type="button" data-g="kund-oppna" data-id="' + k.id + '" title="Kundkortet" aria-label="Kundkortet">' + i('kunder') + '</button></span>' : '') +
+      '</li>';
+  }
+
   IH.vyer['att-gora'] = function () {
     var idag0 = new Date(); idag0.setHours(0, 0, 0, 0);
     var idag1 = new Date(); idag1.setHours(23, 59, 59, 999);
     var u = db().uppgifter.slice().sort(function (a, b) { return a.forfaller < b.forfaller ? -1 : 1; });
     var grupper = [
-      ['Försenade', u.filter(function (x) { return !x.klar && new Date(x.forfaller) < idag0; }), 'varning'],
-      ['I dag', u.filter(function (x) { return !x.klar && new Date(x.forfaller) >= idag0 && new Date(x.forfaller) <= idag1; }), 'blixt'],
-      ['Kommande', u.filter(function (x) { return !x.klar && new Date(x.forfaller) > idag1; }), 'kalender'],
-      ['Klara', u.filter(function (x) { return x.klar; }), 'bock']
+      ['Försenade', u.filter(function (x) { return !x.klar && new Date(x.forfaller) < idag0; }), '⏰', 'Det här skulle ha gjorts tidigare.'],
+      ['I dag', u.filter(function (x) { return !x.klar && new Date(x.forfaller) >= idag0 && new Date(x.forfaller) <= idag1; }), '☀️', 'Bocka av när det är gjort.'],
+      ['Kommande', u.filter(function (x) { return !x.klar && new Date(x.forfaller) > idag1; }), '🗓️', 'Det som väntar de närmaste dagarna.'],
+      ['Klara', u.filter(function (x) { return x.klar; }), '✅', 'Bra jobbat. Klicka på bocken för att ångra.']
     ];
     var dagens = u.filter(function (x) { return new Date(x.forfaller) <= idag1 && (!x.klar || (x.klarTid && new Date(x.klarTid) >= idag0)); });
     var dagKlara = dagens.filter(function (x) { return x.klar; }).length;
     var andel = dagens.length ? dagKlara / dagens.length : 1;
-    var DAGN = ['sö', 'må', 'ti', 'on', 'to', 'fr', 'lö'];
+    var kvarIdag = dagens.filter(function (x) { return !x.klar; });
+    var sena = grupper[0][1].length;
+    // Dagens uppgifter per typ, till meningen och brickorna.
+    var perTyp = {};
+    kvarIdag.forEach(function (x) { var t = uppgTyp(x.text); (perTyp[t[2]] = perTyp[t[2]] || [t[1], t[2], 0])[2] += 1; });
+    var typLista = Object.keys(perTyp).map(function (k) { return perTyp[k]; }).sort(function (a, b) { return b[2] - a[2]; });
+    var imorgon = u.filter(function (x) { return !x.klar && dagarTill(x.forfaller) === 1; });
+    var jag = IH.jag();
+    var mening = kvarIdag.length
+      ? 'Du har <b>' + kvarIdag.length + (kvarIdag.length === 1 ? ' uppgift' : ' uppgifter') + ' kvar i dag</b>' + (sena ? ', varav ' + sena + ' försenad' + (sena === 1 ? '' : 'e') : '') + '.' +
+        (imorgon.length ? ' I morgon väntar ' + imorgon.length + (imorgon.length === 1 ? ' till.' : ' till.') : '')
+      : (dagens.length ? 'Allt för i dag är klart. ✨' : 'Inget inplanerat i dag.') + (imorgon.length ? ' I morgon väntar ' + imorgon.length + (imorgon.length === 1 ? ' uppgift.' : ' uppgifter.') : '');
+    var DAGK = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
     var vecka = [];
     for (var v = 0; v < 7; v++) {
       var d = new Date(idag0); d.setDate(d.getDate() + v);
       var d1 = new Date(d); d1.setHours(23, 59, 59, 999);
-      vecka.push({ d: d, antal: u.filter(function (x) { return !x.klar && new Date(x.forfaller) >= d && new Date(x.forfaller) <= d1; }).length });
+      vecka.push({ d: d, l: u.filter(function (x) { return !x.klar && new Date(x.forfaller) >= d && new Date(x.forfaller) <= d1; }) });
     }
-    var sena = u.filter(function (x) { return !x.klar && new Date(x.forfaller) < idag0; }).length;
-    var maxV = Math.max.apply(null, vecka.map(function (x) { return x.antal; }).concat([1]));
-    var veckoband = '<section class="veckoband kort" data-in>' +
-      '<div class="veckoband__ord"><p class="etikett">Veckan</p><b>' + vecka.reduce(function (s, x) { return s + x.antal; }, 0) + ' uppgifter de närmaste sju dagarna</b>' +
-      (sena ? '<small class="veckoband__sen">' + i('varning') + sena + (sena === 1 ? ' försenad' : ' försenade') + '</small>' : '<small>' + i('bock') + 'Inget försenat</small>') + '</div>' +
-      '<div class="veckoband__dagar">' + vecka.map(function (x, n) {
-        return '<span class="' + (n === 0 ? 'idag' : '') + '" style="--a:' + (x.antal / maxV).toFixed(2) + ';--n:' + n + '"><b>' + (x.antal || '') + '</b><i></i><small>' + (n === 0 ? 'i dag' : DAGN[x.d.getDay()]) + '</small></span>';
-      }).join('') + '</div></section>';
-    var html = '<header class="vyhuvud"><div><p class="etikett">Mitt</p><h1>Att göra</h1><p>' + u.filter(function (x) { return !x.klar; }).length + ' uppgifter kvar.</p></div>' +
-      '<div class="dagring' + (dagKlara ? '' : ' dagring--noll') + '" style="--p:' + (andel * 100).toFixed(1) + '"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="20"/><circle class="dagring__fyll" cx="24" cy="24" r="20" pathLength="100"/></svg>' +
-      '<span><b>' + dagKlara + ' av ' + dagens.length + '</b><small>' + (dagens.length && dagKlara === dagens.length ? 'Dagen är klar' : 'klara i dag') + '</small></span></div></header>' +
-      veckoband + '<form class="nyuppg kort" data-form="uppgift" data-in>' + i('plus') + '<input name="text" placeholder="Ny uppgift – t.ex. Ring Karin om tomten" required autocomplete="off">' +
+    var h = new Date().getHours();
+    var dygnEmoji = h < 5 || h >= 22 ? '🌙' : h < 10 ? '🌅' : h < 17 ? '☀️' : '🌆';
+    var topp = '<section class="dagtopp kort kort--mork" data-in>' +
+      '<div class="dagtopp__ord"><p class="etikett etikett--ljus">Din dag · ' + dagNamn(idag0) + '</p>' +
+        '<h2>' + IH.hej() + ', ' + e(forsta(jag.namn)) + '. <span class="dagtopp__emoji" aria-hidden="true">' + dygnEmoji + '</span></h2>' +
+        '<p class="dagtopp__text">' + mening + '</p>' +
+        (typLista.length ? '<div class="dagtopp__typer">' + typLista.map(function (t) {
+          var fler = { Offert: 'offerter', 'Möte': 'möten', Bokning: 'bokningar', Uppgift: 'uppgifter' };
+          return '<span><i aria-hidden="true">' + t[0] + '</i><b>' + t[2] + '</b> ' + (t[2] > 1 && fler[t[1]] ? fler[t[1]] : t[1].toLowerCase()) + '</span>';
+        }).join('') + '</div>' : '') + '</div>' +
+      '<div class="dagtopp__ring' + (dagens.length && dagKlara === dagens.length ? ' dagtopp__ring--klar' : '') + (dagKlara ? '' : ' dagtopp__ring--noll') + '" style="--p:' + (andel * 100).toFixed(1) + '">' +
+        '<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50"/><circle class="dagtopp__fyll" cx="60" cy="60" r="50" pathLength="100"/></svg>' +
+        '<span><b>' + dagKlara + '<em>/' + dagens.length + '</em></b><small>' + (dagens.length && dagKlara === dagens.length ? 'Dagen är klar 🎉' : 'klara i dag') + '</small></span></div>' +
+      '<div class="dagtopp__vecka" aria-label="De närmaste sju dagarna">' + vecka.map(function (x, n) {
+        var helg = x.d.getDay() % 6 === 0;
+        return '<span class="dagkort' + (n === 0 ? ' dagkort--idag' : '') + (helg ? ' dagkort--helg' : '') + (x.l.length ? ' dagkort--har' : '') + '" style="--n:' + n + '">' +
+          '<small>' + (n === 0 ? 'I dag' : n === 1 ? 'I morgon' : DAGK[x.d.getDay()]) + '</small><b>' + x.d.getDate() + '</b>' +
+          '<span class="dagkort__emoji">' + (x.l.length ? x.l.slice(0, 3).map(function (y) { return uppgTyp(y.text)[1]; }).join('') : '<i>·</i>') + '</span>' +
+          '<em>' + (x.l.length ? x.l.length + (x.l.length === 1 ? ' uppgift' : ' uppgifter') : 'fritt') + '</em></span>';
+      }).join('') + '</div>' +
+    '</section>';
+    var html = '<header class="vyhuvud"><div><p class="etikett">Mitt</p><h1>Att göra</h1><p>' + u.filter(function (x) { return !x.klar; }).length + ' uppgifter kvar.</p></div></header>' +
+      topp + '<form class="nyuppg kort" data-form="uppgift" data-in><span class="nyuppg__plus" aria-hidden="true">' + i('plus') + '</span><input name="text" placeholder="Ny uppgift – t.ex. Ring Karin om tomten" required autocomplete="off">' +
       '<select name="kund" aria-label="Kund"><option value="">Ingen kund</option>' + db().kunder.map(function (k) { return '<option value="' + k.id + '">' + e(k.namn) + '</option>'; }).join('') + '</select>' +
       '<input type="date" name="datum" value="' + IH.dagStr() + '" aria-label="Datum"><button class="knapp knapp--mork knapp--liten" type="submit">Lägg till</button></form>' +
+      '<p class="nyuppg__tips">💡 Skriv som du pratar – "Ring …", "Skicka offert …" eller "Platsbesök …" får rätt ikon av sig själv.</p>' +
       grupper.filter(function (g) { return g[1].length; }).map(function (g) {
-        return '<section class="kort uppgrupp" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i(g[2]) + '</span>' + g[0] + '<b class="chip">' + g[1].length + '</b></h2></header>' +
+        return '<section class="kort uppgrupp' + (g[0] === 'Försenade' ? ' uppgrupp--sen' : '') + (g[0] === 'Klara' ? ' uppgrupp--klara' : '') + '" data-in><header class="kort__huvud"><h2><span class="uppgrupp__emoji" aria-hidden="true">' + g[2] + '</span>' +
+          '<span class="uppgrupp__namn">' + g[0] + '<small>' + g[3] + '</small></span><b class="chip">' + g[1].length + '</b></h2></header>' +
           '<div class="kort__kropp"><ul class="uppglista" data-stagger>' + g[1].map(uppgiftRad).join('') + '</ul></div></section>';
       }).join('');
     return { titel: 'Att göra', html: html };
