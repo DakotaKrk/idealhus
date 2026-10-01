@@ -26,9 +26,9 @@
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20261001c">
-    <link rel="stylesheet" href="design.css?v=20261001c">
-    <script src="premium.js?v=20261001c" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261004f">
+    <link rel="stylesheet" href="design.css?v=20261004f">
+    <script src="premium.js?v=20261004f" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
@@ -100,7 +100,7 @@
         </nav>
 
         <div class="site-header__actions">
-          <a class="header-button" href="kontakt.html">Begär offert</a>
+          <a class="header-button" href="kontakt.html">Börja här</a>
 
           <button class="menu-button" type="button" aria-label="Öppna meny" aria-expanded="false" aria-controls="mobile-nav">
             <span class="menu-button__line"></span>
@@ -127,7 +127,7 @@
           <a class="mmeny__lank" href="om-oss.html" style="--i:4"><span>Om oss</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="mmeny__lank" href="kontakt.html" style="--i:5"><span>Kontakt</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="mmeny__tips" href="vad-far-jag-bygga.html" style="--i:6"><span class="mmeny__tipsbild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 11.6l8.5 4.3L12 20.2l-8.5-4.3z"/><path d="M9.2 16.4v-3.9l2.8-2.1 2.8 2.1v3.9"/><path d="M4 7h6M4 5.6v2.8M10 5.6v2.8"/></svg></span><span class="mmeny__tipstext"><span class="mmeny__prova">Prova</span><strong>Vad får jag bygga?</strong></span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          <a class="mmeny__cta" href="kontakt.html" style="--i:8">Begär offert</a>
+          <a class="mmeny__cta" href="kontakt.html" style="--i:8">Börja här</a>
           <p class="mmeny__kontakt" style="--i:9"><a href="mailto:info@idealhus.se">info@idealhus.se</a><span>Stockholm, Sverige</span></p>
         </div>
       </nav>
@@ -182,46 +182,38 @@
     </script>
 
     <main id="innehall">
-      <section class="ihtopp film" data-malgrupp="privat" data-film>
-        <div class="film__spar">
-          <div class="film__fast">
-            <video class="film__video ihtopp__film" muted loop playsinline preload="metadata"
-                   poster="images/hero-video-poster.webp" width="1600" height="950" aria-hidden="true">
-              <source src="images/video/hero-video-720.mp4" type="video/mp4" media="(max-width: 900px)">
-              <source src="images/video/hero-video-1080.mp4" type="video/mp4">
-            </video>
-            <div class="film__ton" aria-hidden="true"></div>
-            <div class="film__farg" aria-hidden="true"></div>
-            <div class="film__slojor" aria-hidden="true"></div>
 
-            <div class="film__mask">
-              <h1 class="film__rubrik"><span class="rad">Från virke</span> <span class="rad">till verk<span class="film__zoom">l</span>ighet.</span></h1>
+      <section class="ihtopp topp2" data-malgrupp="privat" aria-labelledby="topp-rubrik">
+        <div class="topp2__inre">
+          <div class="topp2__ord">
+            <p class="ih-etikett topp2__etikett"><span data-for="privat">Attefallshus och fritidshus · byggda i Sverige</span><span data-for="proffs">Väggar, block och moduler · byggda i Sverige</span></p>
+            <h1 class="topp2__rubrik" id="topp-rubrik"><span class="rad"><span>Från virke</span></span> <span class="rad"><span>till <em>verklighet.</em></span></span></h1>
+            <p class="topp2__ingress" data-for="privat">Attefallshus och fritidshus med genomtänkta planlösningar, byggda <strong>under tak i Sverige</strong> och monterade på din tomt <strong>på några dagar</strong>.</p>
+            <p class="topp2__ingress" data-for="proffs">Utfackningsväggar, husblock och moduler, tillverkade <strong>under tak i Sverige</strong> och levererade till er byggarbetsplats. Utförandet följer <strong>er ritning</strong>.</p>
+            <div class="ih-knappar topp2__knappar">
+              <a class="ih-knapp ih-knapp--virke" href="kontakt.html">Börja här<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+              <a class="ih-knapp ih-knapp--kontur" href="sa-fungerar-det.html">Så går det till</a>
             </div>
-
-            <div class="film__ui">
-              <div class="film__fot">
-                <p class="film__ingress" data-for="privat">Attefallshus och fritidshus med genomtänkta planlösningar, byggda <strong>under tak i Sverige</strong> och monterade på din tomt <strong>på några dagar</strong>.</p>
-                <p class="film__ingress" data-for="proffs">Utfackningsväggar, husblock och moduler, tillverkade <strong>under tak i Sverige</strong> och levererade till er byggarbetsplats. Utförandet följer <strong>er ritning</strong>.</p>
-                <div class="malgrupp" role="group" aria-label="Visa startsidan för"><span class="ih-kant" aria-hidden="true"></span>
-                  <button type="button" aria-pressed="true" data-malgrupp="privat"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path pathLength="1" d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5M10 20v-5h4v5"/></svg><span>Jag ska bo</span></button>
-                  <button type="button" aria-pressed="false" data-malgrupp="proffs"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path pathLength="1" d="M4 20h16M6 20V9l6-3 6 3v11M9 12h6M9 15.5h6"/></svg><span>Jag bygger åt andra</span></button>
-                </div>
-              </div>
-
-              <p class="film__rulla" aria-hidden="true"><span class="film__rulla-linje"></span>Rulla</p>
+            <div class="malgrupp" role="group" aria-label="Visa startsidan för"><span class="ih-kant" aria-hidden="true"></span>
+              <button type="button" aria-pressed="true" data-malgrupp="privat"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path pathLength="1" d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5M10 20v-5h4v5"/></svg><span>Jag ska bo</span></button>
+              <button type="button" aria-pressed="false" data-malgrupp="proffs"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path pathLength="1" d="M4 20h16M6 20V9l6-3 6 3v11M9 12h6M9 15.5h6"/></svg><span>Jag bygger åt andra</span></button>
             </div>
+            <ul class="topp2__fakta" aria-label="Det här är Idealhus">
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>Monterat på några dagar</li>
+              <li data-for="privat"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Utan bygglov, 30–50 m²</li>
+              <li data-for="proffs"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 4h14v11l-5 5H5zM14 20v-5h5M8 9h8M8 13h4"/></svg>Utförandet följer er ritning</li>
+            </ul>
+          </div>
 
-            <div class="film__efter">
-              <div class="film__efter-ord">
-                <p class="ih-etikett ih-etikett--ljus">Produktion i Sverige</p>
-                <p class="film__efter-rubrik" role="heading" aria-level="2">Byggt under tak. <em>Monterat på dagar.</em></p>
-                <p class="film__efter-text" data-for="privat">Huset växer fram inomhus, i jämn temperatur, och kommer som färdiga delar. Montaget på tomten tar dagar i stället för månader.</p>
-                <p class="film__efter-text" data-for="proffs">Väggar och block byggs inomhus, i jämn temperatur, och levereras isolerade och klara till er byggarbetsplats.</p>
-                <div class="ih-knappar">
-                  <a class="ih-knapp ih-knapp--virke" href="#kontakt">Begär offert<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-                  <a class="ih-knapp ih-knapp--ljus" href="sa-fungerar-det.html">Så går det till</a>
-                </div>
-              </div>
+          <div class="topp2__media">
+            <div class="topp2__ram">
+              <video class="topp2__film ihtopp__film" muted loop playsinline preload="metadata"
+                     poster="images/hero-video-poster.webp" width="1600" height="950" aria-hidden="true">
+                <source src="images/video/hero-video-720.mp4" type="video/mp4" media="(max-width: 900px)">
+                <source src="images/video/hero-video-1080.mp4" type="video/mp4">
+              </video>
+              <span class="topp2__ton" aria-hidden="true"></span>
+              <div class="topp2__chip topp2__chip--a" aria-hidden="true"><span class="topp2__chipikon"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 20V10l7-5 7 5v10M9 20v-6h6v6"/></svg></span><span><b>Byggt under tak i Sverige</b></span></div>
             </div>
           </div>
         </div>
@@ -312,27 +304,6 @@
         </div>
       </section>
 
-      <section class="virke">
-        <img class="virke__bild" src="images/foto/arbetare-vattenpass.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="En snickare i varselkläder håller vattenpass mot en väggstomme">
-        <div class="virke__inre">
-          <p class="ih-etikett ih-etikett--ljus">Hantverket</p>
-          <h2 class="virke__rubrik">Byggt för hand. <em>Kontrollerat under tak.</em></h2>
-          <p class="virke__text">
-            När huset byggs i Sverige kan vi följa varje moment på nära håll.
-            Det ger kortare beslutsvägar, jämnare kvalitet och bättre kontroll
-            över material, detaljer och arbetsmiljö.
-          </p>
-          <p class="virke__chips">
-            <span class="ih-chip ih-chip--glas">Jämn temperatur</span>
-            <span class="ih-chip ih-chip--glas">Kontroll i varje moment</span>
-            <span class="ih-chip ih-chip--glas">Kortare beslutsvägar</span>
-          </p>
-          <div class="ih-knappar">
-            <a class="ih-knapp ih-knapp--virke" href="proffs.html">Se produktionen</a>
-            <a class="ih-knapp ih-knapp--ljus" href="sa-fungerar-det.html">Så fungerar det</a>
-          </div>
-        </div>
-      </section>
 
       <section class="bygget ih-sektion" data-bygget aria-labelledby="bygget-rubrik">
         <div class="bygget__spar">
@@ -462,57 +433,6 @@
         </div>
       </section>
 
-      <section class="kulisser ih-sektion" aria-labelledby="kulisser-rubrik">
-        <div class="ih-inre">
-          <div class="ih-huvud ih-huvud--rad">
-            <div>
-              <p class="ih-etikett ih-etikett--ljus">Bakom kulisserna</p>
-              <h2 class="ih-rubrik" id="kulisser-rubrik">Följ med <em>bakom kulisserna.</em></h2>
-              <p class="ih-ingress">
-                Bilder från ett riktigt bygge: grunden, väggblocken, kranen och
-                huset som reser sig.
-              </p>
-            </div>
-            <div class="husen__styr">
-              <button class="husen__knapp" type="button" data-bana-bak aria-label="Föregående bild"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
-              <button class="husen__knapp" type="button" data-bana-fram aria-label="Nästa bild"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-            </div>
-          </div>
-        </div>
-
-        <ul class="kulisser__bana" data-bana data-dra>
-          <li class="kuliss kuliss--telefon">
-            <img src="images/foto/affisch-virke.webp" width="900" height="1600" loading="lazy" decoding="async" alt="Idealhus: Från virke till verklighet. En snickare håller vattenpass mot en väggstomme.">
-          </li>
-          <li class="kuliss kuliss--bild">
-            <img src="images/foto/dronare-bygget.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Drönarbild av en betongplatta med inplastade väggar runt om, en kran och folk som arbetar">
-            <p class="kuliss__text"><span class="ih-chip ih-chip--glas">Grunden och väggarna</span></p>
-          </li>
-          <li class="kuliss kuliss--bild">
-            <img src="images/foto/dronare-leverans.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Drönarbild av en lastbil med takstolar och väggstommar vid bygget">
-            <p class="kuliss__text"><span class="ih-chip ih-chip--glas">Takstolar på väg in</span></p>
-          </li>
-          <li class="kuliss kuliss--telefon">
-            <img src="images/foto/affisch-kulisser.webp" width="900" height="1600" loading="lazy" decoding="async" alt="Idealhus: Följ med bakom kulisserna. En snickare vid en inplastad väggstomme.">
-          </li>
-          <li class="kuliss kuliss--bild">
-            <img src="images/foto/dronare-kran.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Drönarbild av kranen som sträcker sig över bygget">
-            <p class="kuliss__text"><span class="ih-chip ih-chip--glas">Kranen på plats</span></p>
-          </li>
-          <li class="kuliss kuliss--bild">
-            <img src="images/foto/reglar.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="Närbild av reglar i en väggstomme">
-            <p class="kuliss__text"><span class="ih-chip ih-chip--glas">Reglarna</span></p>
-          </li>
-          <li class="kuliss kuliss--bild">
-            <img src="images/foto/dronare-platta.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Två personer i arbete på betongplattan mellan de resta väggarna">
-            <p class="kuliss__text"><span class="ih-chip ih-chip--glas">På plattan</span></p>
-          </li>
-        </ul>
-
-        <div class="ih-inre kulisser__fot">
-          <p>Dra eller svep för att se fler bilder.</p>
-        </div>
-      </section>
 
       <section class="contact-section" id="kontakt">
         <div class="contact-section__inner">

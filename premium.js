@@ -3605,3 +3605,40 @@
     }
   })();
 })();
+
+/* --- Menyraden och toppen (2026-10-03) ---------------------------
+   Menyraden blir fastare när sidan rullats en bit, och filmramen i
+   toppen lutar lite mot pekaren (bara med pekare, inte vid lugn
+   rörelse). */
+(function () {
+  var html = document.documentElement;
+  function rullat() {
+    if ((window.scrollY || window.pageYOffset || 0) > 24) html.setAttribute('data-rullat', '');
+    else html.removeAttribute('data-rullat');
+  }
+  window.addEventListener('scroll', rullat, { passive: true });
+  rullat();
+
+  var media = document.querySelector('.topp2__media');
+  if (!media) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  var tick = null, rx = 0, ry = 0;
+  media.addEventListener('pointermove', function (e) {
+    var r = media.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width - 0.5;
+    var y = (e.clientY - r.top) / r.height - 0.5;
+    rx = -y * 5;
+    ry = x * 7;
+    if (tick) return;
+    tick = requestAnimationFrame(function () {
+      tick = null;
+      media.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+      media.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+    });
+  });
+  media.addEventListener('pointerleave', function () {
+    media.style.setProperty('--rx', '0deg');
+    media.style.setProperty('--ry', '0deg');
+  });
+})();

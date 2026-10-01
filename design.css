@@ -77,6 +77,7 @@
    Nya namn för det nya, och de gamla variablerna pekas om så att
    allt som redan finns följer med. */
 :root {
+  /* Samma färger som CRM:et (2026-10-03): ben, kol och virke. */
   --ben: #f7f5f0;
   --ben-2: #efebe3;
   --vit: #ffffff;
@@ -99,6 +100,9 @@
   --himmel: #b8cde0;
   --himmel-ljus: #e8f0f7;
   --lysgul: #d9f24e;
+  --salvia: #c9d8cc;
+  --dis: #e4eae5;
+  --lera: #e5d3c5;
 
   --gron: #22a35a;
   --gron-ljus: #e0f5e8;
@@ -14740,4 +14744,969 @@ html[data-tema="mork"] .siffra--ljus .matare__spar {
   .kuliss {
     transform: none !important;
   }
+}
+
+/* =====================================================================
+   Samma ljusa, mjuka form som CRM:et (2026-10-03). Menyraden är ett
+   vitt glas med mörk text och virkesknapp (som CRM:ets topprad), och
+   toppen är en lugn SaaS-topp: ord till vänster, filmen i en rundad
+   ram till höger med två svävande brickor. Ingen rullningseffekt.
+   ===================================================================== */
+.site-header__inner {
+  background: rgba(255, 255, 255, 0.74);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(27, 25, 21, 0.04), 0 16px 34px -26px rgba(90, 60, 25, 0.45), inset 0 0 0 1px rgba(27, 25, 21, 0.07);
+  transition: background-color 0.45s ease, box-shadow 0.45s ease;
+}
+
+html[data-rullat] .site-header__inner {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 2px rgba(27, 25, 21, 0.05), 0 20px 44px -26px rgba(90, 60, 25, 0.55), inset 0 0 0 1px rgba(27, 25, 21, 0.08);
+}
+
+.logo__svg {
+  filter: none;
+}
+
+.main-nav__link {
+  color: var(--text-2);
+}
+
+.main-nav__link:hover,
+.main-nav__link--active,
+.main-nav__link[aria-current="page"],
+.main-nav__item--open .main-nav__toggle {
+  color: var(--text);
+  background: var(--virke-ljus);
+}
+
+.header-button {
+  background: var(--virke);
+  color: var(--kol);
+  box-shadow: 0 12px 30px -14px rgba(240, 181, 110, 0.8);
+}
+
+.header-button:hover {
+  background: var(--virke-hover);
+  color: var(--kol);
+}
+
+.temaknapp {
+  background: rgba(27, 25, 21, 0.06);
+  color: var(--text);
+}
+
+.temaknapp:hover {
+  background: rgba(27, 25, 21, 0.12);
+}
+
+.menu-button__line {
+  background: currentColor;
+}
+
+/* Toppen. .ihtopp drar annars upp sig 76 px under menyraden och centrerar texten. */
+.topp2 {
+  position: relative;
+  margin-top: 0;
+  padding: clamp(32px, 6vh, 64px) 0 clamp(40px, 7vh, 80px);
+  text-align: left;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.topp2::before,
+.topp2::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.topp2::before {
+  background:
+    radial-gradient(55% 60% at 100% 0%, rgba(255, 210, 150, 0.4), transparent 65%),
+    radial-gradient(45% 55% at 0% 100%, rgba(190, 220, 180, 0.3), transparent 65%),
+    radial-gradient(35% 35% at 25% 0%, rgba(232, 240, 245, 0.55), transparent 70%),
+    linear-gradient(165deg, #fffdf9 0%, #fdf6ec 55%, #f6f2e8 100%);
+}
+
+.topp2::after {
+  background-image:
+    linear-gradient(rgba(143, 84, 36, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143, 84, 36, 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(70% 70% at 50% 40%, #000, transparent);
+  mask-image: radial-gradient(70% 70% at 50% 40%, #000, transparent);
+}
+
+.topp2__inre {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(28px, 4vw, 56px);
+  align-items: center;
+  width: min(1340px, 100% - 2 * clamp(12px, 2vw, 32px));
+  min-height: min(calc(100svh - 150px), 760px);
+  margin: 0 auto;
+}
+
+.topp2__ord {
+  container-type: inline-size;
+  padding-left: clamp(4px, calc((100vw - 1240px) / 2), 64px);
+}
+
+.topp2__etikett {
+  margin: 0 0 18px;
+}
+
+.topp2__rubrik {
+  margin: 0 0 22px;
+  font-family: var(--knappfont);
+  font-size: clamp(2.9rem, 12.4cqw, 5rem);
+  font-weight: 700;
+  line-height: 0.96;
+  letter-spacing: -0.045em !important;
+  color: var(--text);
+}
+
+.topp2__rubrik .rad {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.topp2__rubrik .rad > span {
+  display: inline-block;
+  transform: translateY(110%);
+  animation: topp2-rad 1s var(--mjuk) forwards;
+}
+
+.topp2__rubrik .rad:nth-child(2) > span {
+  animation-delay: 0.12s;
+}
+
+.topp2__rubrik em {
+  font-style: normal;
+  background: linear-gradient(100deg, #8f5424 0%, #c98a45 30%, #e8a95e 50%, #c98a45 70%, #8f5424 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: topp2-skimmer 8s ease-in-out infinite;
+}
+
+.topp2__ingress {
+  max-width: 36rem;
+  margin: 0 0 26px;
+  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
+  line-height: 1.6;
+  color: var(--text-2);
+  animation: topp2-in 0.9s var(--mjuk) 0.35s both;
+}
+
+.topp2__ingress strong {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.topp2__knappar {
+  margin: 0 0 20px;
+  animation: topp2-in 0.9s var(--mjuk) 0.5s both;
+}
+
+.topp2 .malgrupp {
+  position: relative;
+  inset: auto;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 0 26px;
+  transform: none;
+  animation: topp2-in 0.9s var(--mjuk) 0.6s both;
+}
+
+.topp2__fakta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  animation: topp2-in 0.9s var(--mjuk) 0.7s both;
+}
+
+.topp2__fakta li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 13px 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07);
+  font-family: var(--knappfont);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-2);
+}
+
+.topp2__fakta svg,
+.topp2__chipikon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.topp2__fakta svg {
+  color: var(--virke-djup);
+}
+
+/* Filmen i en ram, som en produktbild. */
+.topp2__media {
+  perspective: 1400px;
+}
+
+.topp2__ram {
+  position: relative;
+  aspect-ratio: 16 / 10.5;
+  overflow: hidden;
+  border-radius: 30px;
+  background: var(--kol);
+  box-shadow: 0 1px 2px rgba(27, 25, 21, 0.06), 0 60px 120px -50px rgba(90, 60, 25, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.5s var(--mjuk);
+  animation: topp2-media 1.2s var(--mjuk) 0.2s both;
+}
+
+.topp2__film {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.topp2__ton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(27, 25, 21, 0) 55%, rgba(27, 25, 21, 0.35));
+  pointer-events: none;
+}
+
+.topp2__chip {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 10px 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 40px -22px rgba(27, 25, 21, 0.55), inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  color: var(--text);
+  animation: topp2-chip 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.topp2__chip--a {
+  bottom: 18px;
+  left: 18px;
+  padding-right: 16px;
+  animation-delay: 1s;
+}
+
+.topp2__chip b {
+  display: block;
+  font-family: var(--knappfont);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.topp2__chip small {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.topp2__chipikon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--virke-ljus);
+  color: var(--virke-djup);
+}
+
+.topp2__chipikon svg {
+  width: 18px;
+  height: 18px;
+}
+
+@keyframes topp2-rad {
+  to { transform: none; }
+}
+
+@keyframes topp2-in {
+  from { opacity: 0; transform: translateY(14px); }
+}
+
+@keyframes topp2-media {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+}
+
+@keyframes topp2-chip {
+  from { opacity: 0; transform: translateY(12px) scale(0.9); }
+}
+
+@keyframes topp2-skimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@media (max-width: 900px) {
+  .topp2__inre {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .topp2__ram {
+    aspect-ratio: 4 / 3;
+    border-radius: 22px;
+  }
+
+  .topp2__chip {
+    padding: 8px 12px 8px 8px;
+  }
+
+  .topp2__chip--a {
+    bottom: 12px;
+    left: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topp2__rubrik .rad > span,
+  .topp2__ingress,
+  .topp2__knappar,
+  .topp2 .malgrupp,
+  .topp2__fakta,
+  .topp2__ram,
+  .topp2__chip,
+  .topp2__rubrik em {
+    animation: none;
+  }
+
+  .topp2__rubrik .rad > span {
+    transform: none;
+  }
+}
+
+html[data-tema="mork"] .topp2::before {
+  background:
+    radial-gradient(55% 60% at 100% 0%, rgba(240, 181, 110, 0.12), transparent 65%),
+    linear-gradient(165deg, #1b1915 0%, #141310 100%);
+}
+
+html[data-tema="mork"] .topp2__fakta li,
+html[data-tema="mork"] .topp2__chip {
+  background: rgba(33, 30, 25, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+  color: var(--text);
+}
+
+html[data-tema="mork"] .topp2__fakta svg {
+  color: var(--virke);
+}
+
+
+/* =====================================================================
+   Ljust som CRM:et på alla sidor (2026-10-03). De mörka panelerna –
+   undersidornas toppar, kontaktkortet, prisläsaren, offertutkastet,
+   checklistan, hantverksbandet, svarskortet, regelsidans mörka kort
+   och sidfoten – är solkort med mörk text. Reglerna nedan är
+   genererade ur de ursprungliga blocken (ljus text → mörk, ljust glas
+   → svag mörk ton, mörk botten → solkort) och sedan handjusterade.
+   Panelerna med 3D-/SVG-scener (vägen dit, bygget, måttpanelen) och
+   brickorna över foton är kvar som de var.
+   ===================================================================== */
+
+/* Panelerna som helhet: solkortet, mörk text, varmt rutnät. */
+html:not([data-tema="mork"]) .subpage-hero,
+html:not([data-tema="mork"]) .kollen-topp,
+html:not([data-tema="mork"]) .kollen-topp.glod,
+html:not([data-tema="mork"]) .guidehero,
+html:not([data-tema="mork"]) .guide-topp,
+html:not([data-tema="mork"]) .fyrafyra,
+html:not([data-tema="mork"]) .pf-topp,
+html:not([data-tema="mork"]) .kontaktkort,
+html:not([data-tema="mork"]) .prisskala__svar,
+html:not([data-tema="mork"]) .prisoffert,
+html:not([data-tema="mork"]) .checklista,
+html:not([data-tema="mork"]) .virke,
+html:not([data-tema="mork"]) .tv__svar,
+html:not([data-tema="mork"]) .rg-kort__tal,
+html:not([data-tema="mork"]) .rg-fore__kol--efter,
+html:not([data-tema="mork"]) .rg-citat,
+html:not([data-tema="mork"]) .rg-vs__kort--bo,
+html:not([data-tema="mork"]) .rg-slut,
+html:not([data-tema="mork"]) .siffra.ih-mork,
+html:not([data-tema="mork"]) .ih-mork,
+html:not([data-tema="mork"]) .site-footer {
+  --krita: var(--text);
+  --text-ljus: var(--text-2);
+  --kant-ljus: var(--kant);
+  color: var(--text);
+  background: radial-gradient(55% 70% at 100% 0%, rgba(255, 210, 150, 0.4), transparent 65%), radial-gradient(50% 60% at 0% 100%, rgba(190, 220, 180, 0.3), transparent 65%), linear-gradient(165deg, #fffdf9 0%, #fdf6ec 55%, #f6f2e8 100%);
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 40px 80px -52px rgba(90, 60, 25, 0.45);
+}
+
+html:not([data-tema="mork"]) .subpage-hero::before,
+html:not([data-tema="mork"]) .kollen-topp::before,
+html:not([data-tema="mork"]) .guidehero::before,
+html:not([data-tema="mork"]) .guide-topp::before,
+html:not([data-tema="mork"]) .fyrafyra::before {
+  background-image:
+    linear-gradient(rgba(143, 84, 36, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143, 84, 36, 0.06) 1px, transparent 1px);
+}
+
+/* Det ljusa kantljuset hör till mörka paneler. */
+html:not([data-tema="mork"]) .subpage-hero > .ih-kant,
+html:not([data-tema="mork"]) .kollen-topp > .ih-kant,
+html:not([data-tema="mork"]) .kollen-topp.glod > .ih-kant,
+html:not([data-tema="mork"]) .guidehero > .ih-kant,
+html:not([data-tema="mork"]) .guide-topp > .ih-kant,
+html:not([data-tema="mork"]) .fyrafyra > .ih-kant,
+html:not([data-tema="mork"]) .pf-topp > .ih-kant,
+html:not([data-tema="mork"]) .kontaktkort > .ih-kant,
+html:not([data-tema="mork"]) .prisskala__svar > .ih-kant,
+html:not([data-tema="mork"]) .prisoffert > .ih-kant,
+html:not([data-tema="mork"]) .checklista > .ih-kant,
+html:not([data-tema="mork"]) .virke > .ih-kant,
+html:not([data-tema="mork"]) .tv__svar > .ih-kant,
+html:not([data-tema="mork"]) .rg-kort__tal > .ih-kant,
+html:not([data-tema="mork"]) .rg-fore__kol--efter > .ih-kant,
+html:not([data-tema="mork"]) .rg-citat > .ih-kant,
+html:not([data-tema="mork"]) .rg-vs__kort--bo > .ih-kant,
+html:not([data-tema="mork"]) .rg-slut > .ih-kant,
+html:not([data-tema="mork"]) .siffra.ih-mork > .ih-kant,
+html:not([data-tema="mork"]) .ih-mork > .ih-kant,
+html:not([data-tema="mork"]) .site-footer > .ih-kant {
+  display: none;
+}
+
+/* Ljusa etiketter, glaschips och ljusa konturknappar inuti panelerna. */
+html:not([data-tema="mork"]) .subpage-hero .ih-etikett--ljus,
+html:not([data-tema="mork"]) .kollen-topp .ih-etikett--ljus,
+html:not([data-tema="mork"]) .kollen-topp.glod .ih-etikett--ljus,
+html:not([data-tema="mork"]) .guidehero .ih-etikett--ljus,
+html:not([data-tema="mork"]) .guide-topp .ih-etikett--ljus,
+html:not([data-tema="mork"]) .fyrafyra .ih-etikett--ljus,
+html:not([data-tema="mork"]) .pf-topp .ih-etikett--ljus,
+html:not([data-tema="mork"]) .kontaktkort .ih-etikett--ljus,
+html:not([data-tema="mork"]) .prisskala__svar .ih-etikett--ljus,
+html:not([data-tema="mork"]) .prisoffert .ih-etikett--ljus,
+html:not([data-tema="mork"]) .checklista .ih-etikett--ljus,
+html:not([data-tema="mork"]) .virke .ih-etikett--ljus,
+html:not([data-tema="mork"]) .tv__svar .ih-etikett--ljus,
+html:not([data-tema="mork"]) .rg-kort__tal .ih-etikett--ljus,
+html:not([data-tema="mork"]) .rg-fore__kol--efter .ih-etikett--ljus,
+html:not([data-tema="mork"]) .rg-citat .ih-etikett--ljus,
+html:not([data-tema="mork"]) .rg-vs__kort--bo .ih-etikett--ljus,
+html:not([data-tema="mork"]) .rg-slut .ih-etikett--ljus,
+html:not([data-tema="mork"]) .siffra.ih-mork .ih-etikett--ljus,
+html:not([data-tema="mork"]) .ih-mork .ih-etikett--ljus,
+html:not([data-tema="mork"]) .site-footer .ih-etikett--ljus {
+  color: var(--virke-djup);
+}
+
+html:not([data-tema="mork"]) .subpage-hero .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .kollen-topp .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .kollen-topp.glod .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .guidehero .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .guide-topp .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .fyrafyra .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .pf-topp .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .kontaktkort .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .prisskala__svar .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .prisoffert .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .checklista .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .virke .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .tv__svar .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .rg-kort__tal .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .rg-fore__kol--efter .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .rg-citat .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .rg-vs__kort--bo .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .rg-slut .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .siffra.ih-mork .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .ih-mork .ih-etikett--ljus::before,
+html:not([data-tema="mork"]) .site-footer .ih-etikett--ljus::before {
+  background: var(--virke-djup);
+}
+
+html:not([data-tema="mork"]) .subpage-hero .ih-chip--glas,
+html:not([data-tema="mork"]) .kollen-topp .ih-chip--glas,
+html:not([data-tema="mork"]) .kollen-topp.glod .ih-chip--glas,
+html:not([data-tema="mork"]) .guidehero .ih-chip--glas,
+html:not([data-tema="mork"]) .guide-topp .ih-chip--glas,
+html:not([data-tema="mork"]) .fyrafyra .ih-chip--glas,
+html:not([data-tema="mork"]) .pf-topp .ih-chip--glas,
+html:not([data-tema="mork"]) .kontaktkort .ih-chip--glas,
+html:not([data-tema="mork"]) .prisskala__svar .ih-chip--glas,
+html:not([data-tema="mork"]) .prisoffert .ih-chip--glas,
+html:not([data-tema="mork"]) .checklista .ih-chip--glas,
+html:not([data-tema="mork"]) .virke .ih-chip--glas,
+html:not([data-tema="mork"]) .tv__svar .ih-chip--glas,
+html:not([data-tema="mork"]) .rg-kort__tal .ih-chip--glas,
+html:not([data-tema="mork"]) .rg-fore__kol--efter .ih-chip--glas,
+html:not([data-tema="mork"]) .rg-citat .ih-chip--glas,
+html:not([data-tema="mork"]) .rg-vs__kort--bo .ih-chip--glas,
+html:not([data-tema="mork"]) .rg-slut .ih-chip--glas,
+html:not([data-tema="mork"]) .siffra.ih-mork .ih-chip--glas,
+html:not([data-tema="mork"]) .ih-mork .ih-chip--glas,
+html:not([data-tema="mork"]) .site-footer .ih-chip--glas {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08);
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .subpage-hero .ih-knapp--ljus,
+html:not([data-tema="mork"]) .kollen-topp .ih-knapp--ljus,
+html:not([data-tema="mork"]) .kollen-topp.glod .ih-knapp--ljus,
+html:not([data-tema="mork"]) .guidehero .ih-knapp--ljus,
+html:not([data-tema="mork"]) .guide-topp .ih-knapp--ljus,
+html:not([data-tema="mork"]) .fyrafyra .ih-knapp--ljus,
+html:not([data-tema="mork"]) .pf-topp .ih-knapp--ljus,
+html:not([data-tema="mork"]) .kontaktkort .ih-knapp--ljus,
+html:not([data-tema="mork"]) .prisskala__svar .ih-knapp--ljus,
+html:not([data-tema="mork"]) .prisoffert .ih-knapp--ljus,
+html:not([data-tema="mork"]) .checklista .ih-knapp--ljus,
+html:not([data-tema="mork"]) .virke .ih-knapp--ljus,
+html:not([data-tema="mork"]) .tv__svar .ih-knapp--ljus,
+html:not([data-tema="mork"]) .rg-kort__tal .ih-knapp--ljus,
+html:not([data-tema="mork"]) .rg-fore__kol--efter .ih-knapp--ljus,
+html:not([data-tema="mork"]) .rg-citat .ih-knapp--ljus,
+html:not([data-tema="mork"]) .rg-vs__kort--bo .ih-knapp--ljus,
+html:not([data-tema="mork"]) .rg-slut .ih-knapp--ljus,
+html:not([data-tema="mork"]) .siffra.ih-mork .ih-knapp--ljus,
+html:not([data-tema="mork"]) .ih-mork .ih-knapp--ljus,
+html:not([data-tema="mork"]) .site-footer .ih-knapp--ljus {
+  background: transparent;
+  border-color: rgba(27, 25, 21, 0.82);
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .subpage-hero .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .kollen-topp .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .kollen-topp.glod .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .guidehero .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .guide-topp .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .fyrafyra .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .pf-topp .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .kontaktkort .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .prisskala__svar .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .prisoffert .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .checklista .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .virke .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .tv__svar .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .rg-kort__tal .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .rg-fore__kol--efter .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .rg-citat .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .rg-vs__kort--bo .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .rg-slut .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .siffra.ih-mork .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .ih-mork .ih-knapp--ljus:hover,
+html:not([data-tema="mork"]) .site-footer .ih-knapp--ljus:hover {
+  background: var(--kol);
+  border-color: var(--kol);
+  color: var(--krita-fast, #f7f5f0);
+}
+
+/* Sidfoten: sand, mörk text, ordet i ljus ton. */
+html:not([data-tema="mork"]) .site-footer {
+  border-top: 1px solid var(--kant);
+}
+
+html:not([data-tema="mork"]) .site-footer a,
+html:not([data-tema="mork"]) .site-footer p,
+html:not([data-tema="mork"]) .site-footer li,
+html:not([data-tema="mork"]) .site-footer h2,
+html:not([data-tema="mork"]) .site-footer h3,
+html:not([data-tema="mork"]) .site-footer small {
+  color: var(--text-2);
+}
+
+html:not([data-tema="mork"]) .site-footer a:hover {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .site-footer .logo__svg,
+html:not([data-tema="mork"]) .site-footer img.logo__svg {
+  filter: none;
+}
+
+html:not([data-tema="mork"]) .kontaktkort__knapp {
+  border-color: var(--virke);
+}
+
+html:not([data-tema="mork"]) .kontaktkort__knapp:hover {
+  border-color: var(--virke-hover);
+}
+
+/* Mörkt elitkort med en ljusstrimma som vandrar runt kanten    (Uperformances hjältescen). Strimman ligger i .ih-kant. */ .ih-mork {
+  color: var(--text);
+}
+
+/* --- Det mörka kontaktkortet --------------------------------- */ .contact-section .kontaktkort {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .contact-section .kontaktkort__rubrik {
+  color: rgba(27, 25, 21, 0.62);
+}
+
+html:not([data-tema="mork"]) .contact-section .kontaktkort .contact-section__meta > div {
+  border-top: 1px solid rgba(27, 25, 21, 0.1);
+}
+
+html:not([data-tema="mork"]) .contact-section .kontaktkort .contact-section__meta-label {
+  color: rgba(27, 25, 21, 0.62);
+}
+
+html:not([data-tema="mork"]) .contact-section .kontaktkort .contact-section__meta-value {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .contact-section .kontaktkort .contact-section__meta-value--tyst {
+  color: rgba(27, 25, 21, 0.8);
+}
+
+html:not([data-tema="mork"]) .contact-section .kontaktkort .kopiera {
+  border-color: rgba(27, 25, 21, 0.14);
+  background: rgba(27, 25, 21, 0.03);
+  color: rgba(27, 25, 21, 0.8);
+}
+
+html:not([data-tema="mork"]) .contact-section .kontaktkort .kopiera:hover {
+  border-color: var(--virke);
+}
+
+html:not([data-tema="mork"]) .contact-section .kontaktkort .kopiera.kopiera--klar {
+  border-color: rgba(127, 224, 166, 0.45);
+}
+
+html:not([data-tema="mork"]) .contact-section .kontaktkort .tillit {
+  border-top: 1px solid rgba(27, 25, 21, 0.1);
+}
+
+html:not([data-tema="mork"]) .contact-section .kontaktkort .tillit li {
+  color: rgba(27, 25, 21, 0.8);
+}
+
+/* --- Mörkt läge ---------------------------------------------- */ html[data-tema="mork"] .contact-section .kontaktkort {
+  box-shadow: 0 34px 70px -40px rgba(0, 0, 0, 0.9), inset 0 0 0 1px rgba(27, 25, 21, 0.07);
+}
+
+html:not([data-tema="mork"]) med företagsnamnet stort i    botten - som Uperformances sidfotsord. */ .site-footer {
+  color: var(--text-2);
+}
+
+html:not([data-tema="mork"]) .site-footer__heading {
+  color: rgba(27, 25, 21, 0.62);
+}
+
+html:not([data-tema="mork"]) .site-footer__text,
+html:not([data-tema="mork"]) .site-footer__nav a,
+html:not([data-tema="mork"]) .site-footer__etikett,
+html:not([data-tema="mork"]) .site-footer__bottom,
+html:not([data-tema="mork"]) .site-footer__bottom a {
+  color: var(--text-2);
+}
+
+html:not([data-tema="mork"]) .site-footer__nav a:hover,
+html:not([data-tema="mork"]) .site-footer__text a:hover,
+html:not([data-tema="mork"]) .site-footer__bottom a:hover {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .site-footer__text a {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .site-footer__button {
+  border-color: var(--virke);
+}
+
+html:not([data-tema="mork"]) .site-footer__button:hover {
+  border-color: var(--virke-hover);
+}
+
+html:not([data-tema="mork"]) integritetssidans och 404-sidans toppar. */ .subpage-hero,
+html:not([data-tema="mork"]) .kollen-topp,
+html:not([data-tema="mork"]) .kollen-topp.glod,
+html:not([data-tema="mork"]) .guidehero,
+html:not([data-tema="mork"]) .guide-topp,
+html:not([data-tema="mork"]) .fyrafyra {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .subpage-hero__title,
+html:not([data-tema="mork"]) .kollen-topp__titel,
+html:not([data-tema="mork"]) .guidehero__titel,
+html:not([data-tema="mork"]) .guide-topp__titel,
+html:not([data-tema="mork"]) .fyrafyra__titel {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .subpage-hero__meta,
+html:not([data-tema="mork"]) .kollen-topp__text,
+html:not([data-tema="mork"]) .guidehero__lead,
+html:not([data-tema="mork"]) .guide-topp__lead,
+html:not([data-tema="mork"]) .fyrafyra__text {
+  color: rgba(27, 25, 21, 0.76);
+}
+
+html:not([data-tema="mork"]) .subpage-hero .section-label,
+html:not([data-tema="mork"]) .kollen-topp .section-label,
+html:not([data-tema="mork"]) .guidehero .section-label,
+html:not([data-tema="mork"]) .guide-topp .section-label,
+html:not([data-tema="mork"]) .fyrafyra .section-label {
+  color: rgba(27, 25, 21, 0.62);
+}
+
+html:not([data-tema="mork"]) .subpage-hero__actions .hero__link:not(.hero__link--solid),
+html:not([data-tema="mork"]) .subpage-hero__actions .hero__link--solid:not(:first-child),
+html:not([data-tema="mork"]) .fyrafyra .knapp-linje {
+  background: rgba(27, 25, 21, 0.03);
+  border-color: rgba(27, 25, 21, 0.14);
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .subpage-hero__actions .hero__link:not(.hero__link--solid):hover,
+html:not([data-tema="mork"]) .subpage-hero__actions .hero__link--solid:not(:first-child):hover,
+html:not([data-tema="mork"]) .fyrafyra .knapp-linje:hover {
+  border-color: var(--krita);
+}
+
+html:not([data-tema="mork"]) html .subpage-hero.helbild .subpage-hero__image {
+  box-shadow: 0 50px 100px -30px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(27, 25, 21, 0.1);
+}
+
+html:not([data-tema="mork"]) .guidehero__meta,
+html:not([data-tema="mork"]) .guidehero__meta span {
+  color: rgba(27, 25, 21, 0.62);
+}
+
+html:not([data-tema="mork"]) .guidehero__bild img {
+  box-shadow: 0 50px 100px -30px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(27, 25, 21, 0.1);
+}
+
+html:not([data-tema="mork"]) .fyrafyra__hus a {
+  border-color: rgba(27, 25, 21, 0.14);
+  color: var(--text);
+}
+
+/* Mörkt läge: panelen är redan mörk - bara lite djupare. */ html[data-tema="mork"] .subpage-hero {
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+html:not([data-tema="mork"]) .siffra.ih-mork .siffra__text {
+  color: var(--text-2);
+}
+
+/* --- Virke: mörkt fotoband ------------------------------------- */ .virke {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+html:not([data-tema="mork"]) .virke__rubrik {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .virke__text {
+  color: rgba(27, 25, 21, 0.8);
+}
+
+html:not([data-tema="mork"]) med talet stort. */ .prisskala__svar {
+  color: var(--text);
+}
+
+/* --- Den levande offerten ------------------------------------ */ .prisoffert {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .prisoffert__titel {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .prisoffert__text {
+  color: rgba(27, 25, 21, 0.74);
+}
+
+/* --- Checklistan ------------------------------------------------ */ .checklista {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .checklista__titel {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .checklista__text {
+  color: rgba(27, 25, 21, 0.74);
+}
+
+html:not([data-tema="mork"]) .checklista__ringspar {
+  stroke: rgba(27, 25, 21, 0.62);
+}
+
+html:not([data-tema="mork"]) .checklista__matare span {
+  color: rgba(27, 25, 21, 0.62);
+}
+
+html:not([data-tema="mork"]) .checklista__rensa {
+  color: rgba(27, 25, 21, 0.62);
+}
+
+html:not([data-tema="mork"]) .checklista__lista li {
+  background: rgba(27, 25, 21, 0.025);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08);
+}
+
+html:not([data-tema="mork"]) .checklista__lista li:hover {
+  background: rgba(27, 25, 21, 0.04);
+}
+
+html:not([data-tema="mork"]) .checklista__ruta {
+  box-shadow: inset 0 0 0 2px rgba(27, 25, 21, 0.14);
+}
+
+html:not([data-tema="mork"]) .checklista__punkt {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .checklista__rad input:checked ~ .checklista__punkt {
+  color: rgba(27, 25, 21, 0.62);
+}
+
+html:not([data-tema="mork"]) .kollen-topp__fakta li {
+  background: rgba(27, 25, 21, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.14);
+  color: rgba(27, 25, 21, 0.78);
+}
+
+/* --- Svaret ----------------------------------------------------- */ .tv__svar {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .tv__svar .kollen__valt {
+  background: rgba(27, 25, 21, 0.03);
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .tv__svar .kollen__dela {
+  background: rgba(27, 25, 21, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.14);
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .rg-fore__kol--efter {
+  color: var(--text);
+  box-shadow: 0 30px 60px -36px rgba(27, 25, 21, 0.7), inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+html:not([data-tema="mork"]) .rg-citat {
+  color: var(--text);
+  box-shadow: 0 50px 100px -50px rgba(27, 25, 21, 0.8), inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+html:not([data-tema="mork"]) .rg-citat blockquote p {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .rg-citat__rad {
+  background: rgba(27, 25, 21, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.1);
+}
+
+html:not([data-tema="mork"]) .rg-citat__rad span {
+  color: rgba(27, 25, 21, 0.62);
+}
+
+html:not([data-tema="mork"]) .rg-vs__kort--bo {
+  color: var(--text);
+  box-shadow: 0 40px 80px -44px rgba(27, 25, 21, 0.8), inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+html:not([data-tema="mork"]) .rg-vs__kort--bo .rg-vs__typ {
+  color: rgba(27, 25, 21, 0.62);
+}
+
+/* --- Slutet: samma panel som toppen ------------------------------- */ .rg-slut {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .rg-slut .rg-slut__titel {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .rg-slut__text {
+  color: rgba(27, 25, 21, 0.72);
+}
+
+html:not([data-tema="mork"]) .rg-slut__linje {
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.14);
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .pf-topp__lead {
+  color: rgba(27, 25, 21, 0.72);
+}
+
+html:not([data-tema="mork"]) .pf-topp__tre a {
+  background: rgba(27, 25, 21, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.12);
+  color: rgba(27, 25, 21, 0.82);
+}
+
+html:not([data-tema="mork"]) .pf-topp__tre a:hover {
+  background: rgba(27, 25, 21, 0.07);
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .pf-topp__ram img {
+  box-shadow: 0 50px 100px -30px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(27, 25, 21, 0.1);
+}
+
+/* Handjusteringar efter genomgången. */
+html:not([data-tema="mork"]) .heroscen__chip {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08), 0 16px 34px -22px rgba(27, 25, 21, 0.45);
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .heroscen__chip strong {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .heroscen__chip span {
+  color: var(--text-3);
+}
+
+html:not([data-tema="mork"]) .heroscen__ikon {
+  background: var(--virke-ljus);
+  color: var(--virke-djup);
+}
+
+html:not([data-tema="mork"]) .site-footer img,
+html:not([data-tema="mork"]) .site-footer .logo__svg {
+  filter: none;
+}
+
+html:not([data-tema="mork"]) .pf-topp__tre span {
+  color: var(--virke-djup);
 }
