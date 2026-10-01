@@ -18224,3 +18224,430 @@ html[data-tema="mork"] .katsida .tillit li {
     linear-gradient(180deg, rgba(27, 25, 21, 0.44) 0%, rgba(27, 25, 21, 0) 30%);
 }
 
+/* "verklighet." i toppen: samma skimmer som rubrikernas färgade ord,
+   men den ljusa varianten så det lyser mot filmen. Svepet startar när
+   raden glidit upp och går sedan lugnt i en slinga. */
+.topp3__rubrik em.topp3__skimmer {
+  font-style: normal;
+  background-image: linear-gradient(-45deg,
+    #e0a35e 0%, #f0b56e 28%, #f7cb92 40%, #ffe6c2 47%, #fff6e8 50%, #ffe6c2 53%, #f0b56e 66%, #e0a35e 100%);
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  padding-bottom: 0.08em;
+  animation: ih-svep 7s var(--mjuk) 1.1s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topp3__rubrik em.topp3__skimmer {
+    animation: none;
+    background-position: 50% 0;
+  }
+}
+
+
+/* =====================================================================
+   Huskortet (2026-10-05): <main class="katsida husida">. Samma topp och
+   centrerade huvuden som kategorisidorna, sedan 3D, planlösning,
+   byggfoton, pris, de andra husen och formuläret.
+   ===================================================================== */
+.kat-tillbaka {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 22px;
+  padding: 8px 15px 8px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08);
+  color: var(--text-2);
+  font: 600 0.8125rem/1 var(--knappfont);
+  text-decoration: none;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.35s var(--mjuk);
+}
+
+.kat-tillbaka svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.35s var(--mjuk);
+}
+
+.kat-tillbaka:hover {
+  background: var(--kol);
+  color: var(--krita);
+}
+
+.kat-tillbaka:hover svg {
+  transform: translateX(-3px);
+}
+
+html[data-tema="mork"] .kat-tillbaka {
+  background: rgba(247, 245, 240, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+}
+
+.kat-tillbaka + .ih-etikett {
+  display: flex;
+}
+
+.kat-topp__ryms {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  color: var(--virke-djup);
+  font: 600 0.9375rem/1.2 var(--knappfont);
+  text-decoration: none;
+}
+
+.kat-topp__ryms svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.35s var(--mjuk);
+}
+
+.kat-topp__ryms:hover svg {
+  transform: translateX(3px);
+}
+
+html[data-tema="mork"] .kat-topp__ryms {
+  color: var(--virke);
+}
+
+.husida .kat-topp__ingress {
+  max-width: 32rem;
+  margin: 0 0 32px;
+  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
+  line-height: 1.65;
+  color: var(--text-2);
+}
+
+/* --- 3D: samma panel som kategorisidornas 3D-studio ---------------------- */
+.husida .hus3dvy {
+  margin-top: var(--sekt);
+}
+
+/* --- Planlösningen -------------------------------------------------------- */
+.hus-plan__ritning {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.hus-plan__notis {
+  max-width: 36rem;
+  margin: 20px auto 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--text-3);
+}
+
+/* --- Pris ------------------------------------------------------------------ */
+.hus-pris__panel {
+  padding: clamp(32px, 5vw, 64px) clamp(18px, 4vw, 56px);
+  border-radius: 32px;
+  background:
+    radial-gradient(70% 60% at 100% 0%, rgba(255, 210, 150, 0.38), transparent 60%),
+    radial-gradient(60% 60% at 0% 100%, rgba(184, 205, 224, 0.22), transparent 60%),
+    linear-gradient(165deg, #fffdf9, #fdf6ec 55%, #f6f2e8);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), var(--skugga-stor);
+}
+
+html[data-tema="mork"] .hus-pris__panel {
+  background:
+    radial-gradient(70% 60% at 100% 0%, rgba(240, 181, 110, 0.12), transparent 60%),
+    var(--vit);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+.hus-pris__kort {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.hus-pris__kort .model-price__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 28px 24px 30px;
+  border: 0;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  text-align: center;
+}
+
+html[data-tema="mork"] .hus-pris__kort .model-price__card {
+  background: rgba(247, 245, 240, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+.hus-pris__kort .model-price__card span {
+  font: 600 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--virke-djup);
+}
+
+html[data-tema="mork"] .hus-pris__kort .model-price__card span {
+  color: var(--virke);
+}
+
+.hus-pris__kort .model-price__card h3 {
+  margin: 0;
+  font: 600 clamp(1.35rem, 1.1rem + 0.8vw, 1.75rem)/1.15 var(--knappfont);
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.hus-pris__kort .model-price__card p {
+  margin: 0;
+  max-width: 24rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.hus-pris__knappar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin: clamp(24px, 3vw, 36px) 0 0;
+}
+
+/* --- Fler hus ---------------------------------------------------------------- */
+.hus-fler {
+  padding-top: 0;
+}
+
+.hus-fler__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.hus-fler__kort[hidden] {
+  display: none !important;
+}
+
+.hus-fler__kort {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 8px 8px 18px;
+  border-radius: 24px;
+  background: var(--vit);
+  box-shadow: inset 0 0 0 1px var(--kant), var(--skugga);
+  color: var(--text);
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.5s var(--mjuk), box-shadow 0.5s var(--mjuk);
+}
+
+.hus-fler__kort:hover {
+  transform: translateY(-4px);
+  box-shadow: inset 0 0 0 1px var(--kant), 0 30px 60px -36px rgba(27, 25, 21, 0.5);
+}
+
+.hus-fler__bild {
+  display: block;
+  aspect-ratio: 1600 / 1062;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--ben-2);
+}
+
+.hus-fler__bild img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hus-fler__text {
+  display: grid;
+  gap: 4px;
+}
+
+.hus-fler__text b {
+  font: 600 1.125rem/1.2 var(--knappfont);
+  letter-spacing: -0.015em;
+}
+
+.hus-fler__text small {
+  font-size: 0.8125rem;
+  color: var(--text-3);
+}
+
+/* --- Formuläret: centrerat under rubriken --------------------------------- */
+@media (min-width: 1041px) {
+  .husida .contact-section .contact-form {
+    width: min(760px, 100%);
+  }
+
+  .husida .contact-section__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 40px;
+    margin-top: 28px;
+  }
+
+  .husida .contact-section__meta > div {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+  }
+}
+
+/* --- Mindre skärmar ----------------------------------------------------------- */
+@media (max-width: 1100px) {
+  .hus-fler__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 760px;
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .kat-tillbaka {
+    margin-bottom: 18px;
+  }
+
+  .husida .kat-topp__ingress {
+    margin-bottom: 24px;
+  }
+
+  .hus-pris__kort {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hus-pris__panel {
+    border-radius: 26px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hus-fler__grid {
+    gap: 10px;
+  }
+
+  .hus-fler__kort {
+    padding: 6px 6px 14px;
+    border-radius: 20px;
+  }
+
+  .hus-fler__bild {
+    border-radius: 15px;
+  }
+
+  .hus-fler__text b {
+    font-size: 1rem;
+  }
+
+  .hus-fler__text small {
+    font-size: 0.75rem;
+  }
+}
+
+/* Kontaktintrot var klistrat (sticky) från tvåspaltsläget och gled in
+   över formuläret när det står under. Huskortets formulär får luft
+   mellan raderna. */
+.katsida .contact-section__intro {
+  position: static;
+  top: auto;
+}
+
+.husida .contact-section .contact-form {
+  row-gap: 18px;
+}
+
+.husida .contact-section .contact-form__row {
+  gap: 18px 20px;
+}
+
+/* 3D-avsnittet: två spalter på datorn, centrerat på mobilen som resten. */
+@media (min-width: 901px) {
+  .husida .hus3dvy__ord .section-label {
+    justify-content: flex-start;
+  }
+
+  .husida .hus3dvy__ord .section-label::after {
+    content: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .husida .hus3dvy__ord {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .husida .hus3dvy__matt {
+    width: 100%;
+  }
+
+  .husida .konfig {
+    width: 100%;
+    text-align: left;
+  }
+}
+
+@media (max-width: 900px) {
+  .husida .hus3dvy__matt div {
+    min-width: 0;
+    padding-inline: 8px;
+  }
+
+  .husida .hus3dvy__matt dt {
+    font-size: 0.625rem;
+    letter-spacing: 0.1em;
+  }
+
+  .husida .hus3dvy__matt dd {
+    font-size: 1.2rem;
+    white-space: nowrap;
+  }
+}
+
+/* Proffskortets långa rubrik: avstavas bara vid "Utfacknings-" (mjukt
+   bindestreck), aldrig mitt i ett ord. */
+.vag__titel--lang {
+  font-size: clamp(1.75rem, 1.1rem + 1.7vw, 2.5rem);
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
+  -webkit-hyphens: manual;
+}
+
+/* Proffskortet: plats för märket och pilen överst, så att den längre
+   texten skjuter kortet nedåt i stället för upp i märket, och en högre
+   ton bakom texten så de översta raderna syns mot det ljusa virket. */
+.vag:not(.vag--hel) {
+  padding-top: calc(clamp(20px, 2.4vw, 32px) + 78px);
+}
+
+.vag:not(.vag--hel)::before {
+  background: linear-gradient(180deg, rgba(27, 25, 21, 0.34) 0%, rgba(27, 25, 21, 0.2) 18%,
+    rgba(27, 25, 21, 0.62) 42%, rgba(27, 25, 21, 0.9) 100%);
+}
+

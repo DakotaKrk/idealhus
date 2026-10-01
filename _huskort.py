@@ -17,16 +17,22 @@ START = "      /* MODELLER:START"
 SLUT = "      /* MODELLER:SLUT */"
 
 
+def komma(v):
+    return ("%.2f" % v).replace(".", ",")
+
+
 def tabell():
     rader = ["        var MODELLER = {"]
     for slug, (namn, modeller) in M.KATEGORIER.items():
         rader.append("          %s: {" % slug)
         rader.append("            namn: '%s'," % namn)
+        rader.append("            sida: '%s.html'," % slug)
         rader.append("            modeller: [")
         for mnamn, bild, yta, rum, lev in modeller:
             text = json.dumps([M.BESKRIVNING[mnamn], M.GEMENSAMT], ensure_ascii=False)
-            rader.append("              { namn: '%s', bild: '%s', yta: %d, rum: %d, lev: %d, text: %s },"
-                         % (mnamn, bild, yta, rum, lev, text))
+            l, b, nock = M.MATT[bild]
+            rader.append("              { namn: '%s', bild: '%s', yta: %d, rum: %d, lev: %d, matt: '%s \u00d7 %s', nock: '%s', tak: '%s', text: %s },"
+                         % (mnamn, bild, yta, rum, lev, komma(l), komma(b), komma(nock), M.TAK[mnamn], text))
         rader.append("            ]")
         rader.append("          },")
     rader.append("        };")
@@ -41,9 +47,11 @@ BLOCK = '''      /* MODELLER:START - skrivs av _huskort.py, andra inte for hand 
         // Utan (giltiga) parametrar visas forsta attefallshuset - sidan
         // ar ingen exempelsida langre (2026-09-30).
         var p = new URLSearchParams(window.location.search);
-        var typ = MODELLER[p.get('typ')];
+        var slug = p.get('typ');
+        var typ = MODELLER[slug];
         var nr = parseInt(p.get('modell'), 10);
         if (!typ || !(nr >= 1 && nr <= typ.modeller.length)) {
+          slug = 'attefallshus';
           typ = MODELLER.attefallshus;
           nr = 1;
         }
@@ -103,6 +111,39 @@ BLOCK = '''      /* MODELLER:START - skrivs av _huskort.py, andra inte for hand 
           if (etikett && rubrik && etikett.textContent.trim() === 'Leverans') {
             rubrik.textContent = m.lev + ' veckor';
           }
+        });
+
+        // Huskortets nya topp och faktarad (2026-10-05): varje ruta med
+        // data-hus fylls med sitt värde, bilden och länken tillbaka följer
+        // modellen, och huset man tittar på göms bland "Fler hus".
+        function satt(namn, varde) {
+          document.querySelectorAll('[data-hus="' + namn + '"]').forEach(function (e) { e.textContent = varde; });
+        }
+        satt('typ', typ.namn);
+        satt('yta', m.yta + ' m\u00b2');
+        satt('rum', m.rum + ' rum');
+        satt('lev', m.lev + ' veckor');
+        satt('matt', m.matt + ' m');
+        satt('nock', m.nock + ' m');
+        satt('tak', m.tak);
+        var husBild = document.querySelector('[data-hus-bild]');
+        if (husBild) {
+          husBild.src = 'images/' + m.bild;
+          husBild.alt = m.namn + ', ' + typ.namn.toLowerCase() + ' i svensk natur';
+        }
+        var tillbaka = document.querySelector('[data-hus-tillbaka]');
+        if (tillbaka) {
+          tillbaka.href = typ.sida;
+          var tt = tillbaka.querySelector('span');
+          if (tt) tt.textContent = 'Alla ' + typ.namn.toLowerCase();
+        }
+        var rymsLank = document.querySelector('[data-ryms]');
+        if (rymsLank) {
+          rymsLank.href = 'vad-far-jag-bygga.html?yta=' + m.yta + '&namn='
+            + encodeURIComponent(typ.namn + ', ' + m.namn.toLowerCase());
+        }
+        document.querySelectorAll('[data-hus-kort]').forEach(function (k) {
+          k.hidden = k.getAttribute('data-hus-kort') === slug + '-' + nr;
         });
       })();
       /* MODELLER:SLUT */'''

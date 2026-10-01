@@ -25,9 +25,9 @@
     <link rel="preload" as="image" href="images/hus-r2.webp" fetchpriority="high">
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20261005b">
-    <link rel="stylesheet" href="design.css?v=20261005b">
-    <script src="premium.js?v=20261005b" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261005i">
+    <link rel="stylesheet" href="design.css?v=20261005i">
+    <script src="premium.js?v=20261005i" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
     <script type="application/ld+json">
     {
@@ -132,58 +132,28 @@
       </nav>
     </header>
 
-    <main id="innehall">
-      <section class="subpage-hero model-hero">
-        <span class="ih-kant" aria-hidden="true"></span>
-        <img class="subpage-hero__image" src="images/hus-r2.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Attefallshus med lärkpanel på en äng vid vattnet">
-
-        <div class="subpage-hero__content-wrap">
-          <div class="subpage-hero__content">
-            <p class="ih-etikett ih-etikett--ljus sidtopp__etikett">Husmodell</p>
-            <h1 class="subpage-hero__title" data-model-title>Sadel 26</h1>
-            <p class="subpage-hero__meta">Attefallshus · 26 m² · 1 rum · leverans 10 veckor</p>
-            <div class="subpage-hero__actions">
-              <a class="hero__link hero__link--solid" href="#planlosning">Planlösningar</a>
-              <a class="hero__link hero__link--solid" href="#pris">Pris</a>
-              <a class="hero__link hero__link--solid" href="#kontakt">Intresseanmälan</a>
+    <main id="innehall" class="katsida husida">
+      <section class="kat-topp" aria-labelledby="kat-rubrik">
+        <div class="kat-topp__grid">
+          <div class="kat-topp__ord">
+            <a class="kat-tillbaka" data-hus-tillbaka href="attefallshus.html"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span>Alla attefallshus</span></a>
+            <p class="ih-etikett" data-hus="typ">Attefallshus</p>
+            <h1 class="kat-topp__rubrik" id="kat-rubrik" data-model-title>Sadel 26</h1>
+            <p class="kat-topp__ingress model-intro__text">Ett rum på 26 m² under ett brant sadeltak. Den smala formen, 8,33 × 3,49 meter, gör att huset får plats längs en häck eller en tomtgräns - som gästhus, ateljé eller för uthyrning.</p>
+            <div class="kat-topp__knappar">
+              <a class="ih-knapp ih-knapp--virke" href="#kontakt">Intresseanmälan<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+              <a class="ih-knapp ih-knapp--kontur" href="#i-3d">Se huset i 3D</a>
             </div>
+            <a class="kat-topp__ryms" data-ryms href="vad-far-jag-bygga.html">Ryms huset på din tomt?<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           </div>
+          <figure class="kat-topp__bild"><img data-hus-bild src="images/hus-r2.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Sadel 26, attefallshus i svensk natur"></figure>
         </div>
-      </section>
-
-      <section class="model-intro">
-        <div class="model-intro__inner">
-          <div>
-            <h2 class="model-intro__title" data-model-title>Sadel 26</h2>
-            <p class="model-intro__text">Ett rum på 26 m² under ett brant sadeltak. Den smala formen, 8,33 × 3,49 meter, gör att huset får plats längs en häck eller en tomtgräns - som gästhus, ateljé eller för uthyrning.</p>
-            <p class="model-intro__text">Huset byggs under tak i Sverige och kommer i färdiga delar till tomten, där montaget tar dagar i stället för månader. Planlösning, fasad och kulörer bestäms tillsammans i offerten.</p>
-            <a class="ryms-lank" data-ryms href="vad-far-jag-bygga.html">Ryms huset på din tomt?</a>
-          </div>
-
-          <dl class="model-specs">
-            <div>
-              <dt>Boyta</dt>
-              <dd>26 m²</dd>
-            </div>
-            <div>
-              <dt>Yttermått</dt>
-              <dd>8,33 × 3,49 m</dd>
-            </div>
-            <div>
-              <dt>Nockhöjd</dt>
-              <dd>4,00 m</dd>
-            </div>
-            <div>
-              <dt>Rum</dt>
-              <dd>1 rum</dd>
-            </div>
-          </dl>
-        </div>
+        <dl class="kat-topp__fakta"><div><dt>Boyta</dt><dd data-hus="yta">26 m²</dd></div><div><dt>Rum</dt><dd data-hus="rum">1 rum</dd></div><div><dt>Yttermått</dt><dd data-hus="matt">8,33 × 3,49 m</dd></div><div><dt>Leverans</dt><dd data-hus="lev">10 veckor</dd></div></dl>
       </section>
 
       <section class="hus3dvy" id="i-3d" hidden>
         <div class="hus3dvy__inner">
-          <div class="hus3dvy__ord">
+          <div class="hus3dvy__ord kat-mitt">
             <p class="section-label section-label--accent">3D och AR</p>
             <h2 class="hus3dvy__titel">Ställ huset på <em>din tomt</em>.</h2>
             <p class="hus3dvy__text">
@@ -237,41 +207,14 @@
         </div>
       </section>
 
-      <section class="model-price" id="pris">
-        <div class="model-price__inner">
-          <div class="model-price__intro">
-            <h2>Pris och upplägg</h2>
-            <p>
-              Ett hus har inget listpris på samma sätt som en bil. Priset sätts
-              i offert efter din tomt, och du ser vad som ingår och vad som
-              tillkommer innan du bestämmer dig.
-            </p>
-            <a class="model-price__button" href="#kontakt">Fråga om pris</a>
-            <a class="model-price__lank" href="priser.html">Så sätts priset</a>
+      <section class="hus-plan ih-sektion" id="planlosning" aria-labelledby="plan-rubrik">
+        <div class="ih-inre">
+          <div class="ih-huvud ih-huvud--mitt kat-mitt">
+            <p class="ih-etikett">Planlösning</p>
+            <h2 class="ih-rubrik" id="plan-rubrik">Så kan <em>ytan</em> användas.</h2>
+            <p class="ih-ingress">Ett exempel: kök och vardagsrum i öppen förbindelse mot gaveln, badrum och entré i mitten och sovrummet för sig mot andra kortsidan. Planen för <span data-model-title>sadel 26</span> ritar vi tillsammans med dig.</p>
           </div>
-
-          <article class="model-price__card">
-            <span>Pris</span>
-            <h3>I offert</h3>
-            <p>Storleken, planlösningen, materialen, tomten och avståndet styr summan. Offerten visar det post för post.</p>
-          </article>
-          <article class="model-price__card">
-            <span>Leverans</span>
-            <h3>10 veckor</h3>
-            <p>Huset tillverkas under tak medan grunden och anslutningarna görs klara på tomten.</p>
-          </article>
-          <article class="model-price__card">
-            <span>Ingår</span>
-            <h3>Hus, leverans, montage</h3>
-            <p>Ritningar och underlag, själva huset, leverans till tomten, montage och slutbesiktning.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="model-plan" id="planlosning">
-        <div class="model-plan__inner">
-          <div class="model-plan__image-wrap">
-          <figure class="planritning">
+          <figure class="planritning hus-plan__ritning">
             <svg class="planritning__svg" viewBox="0 0 900 700" role="img" aria-labelledby="plan-titel plan-desc">
               <title id="plan-titel">Exempelplan, 30 kvadratmeter</title>
               <desc id="plan-desc">Öppet vardagsrum med kök mot ena gaveln, badrum och entré i mitten och ett sovrum mot den andra gaveln. Terrass längs långsidan.</desc>
@@ -410,33 +353,103 @@
               Exempelplan · 30 m² · mått och planlösning fastställs i projekteringen
             </figcaption>
           </figure>
-          </div>
+          <p class="hus-plan__notis">Ritningen är ett exempel på 30 m². Mått, planlösning och tillval bestäms i projekteringen.</p>
+        </div>
+      </section>
 
-          <div class="model-plan__content">
-            <h2 class="model-plan__title">Planlösning för <span data-model-title>sadel 26</span>.</h2>
-            <p class="model-plan__text">
-              Planen visar hur ytan kan disponeras: kök och vardagsrum i öppen
-              förbindelse mot gaveln, badrum och entré samlade i mitten och
-              sovrummet avskilt mot andra kortsidan. Terrassen ligger i söderläge
-              längs långsidan.
-            </p>
-            <p class="model-plan__notis">
-              Ritningen är ett exempel. Mått, planlösning och tillval bestäms
-              tillsammans med dig i projekteringen.
-            </p>
-            <a class="production__link" href="#kontakt">Prata med oss</a>
+      <section class="at-foto ih-sektion" aria-labelledby="foto-rubrik">
+        <div class="ih-inre">
+          <div class="ih-huvud ih-huvud--mitt kat-mitt">
+            <p class="ih-etikett">Så bygger vi</p>
+            <h2 class="ih-rubrik" id="foto-rubrik">Byggt under tak. <em>Monterat på dagar.</em></h2>
+            <p class="ih-ingress model-intro__text">Huset byggs under tak i Sverige och kommer i färdiga delar till tomten, där montaget tar dagar i stället för månader. Planlösning, fasad och kulörer bestäms tillsammans i offerten.</p>
+          </div>
+          <div class="at-foto__rad">
+            <figure class="at-foto__bild">
+              <span class="at-foto__ram"><img src="images/foto/stommar-stapel.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra"></span>
+              <figcaption><b>01 · Verkstaden</b><span>Stommarna byggs regel för regel, under tak.</span></figcaption>
+            </figure>
+            <figure class="at-foto__bild">
+              <span class="at-foto__ram"><img src="images/foto/dronare-leverans.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Lastbil med kran levererar väggelement och takstolar till ett bygge i skogen"></span>
+              <figcaption><b>02 · Leveransen</b><span>Väggarna kommer färdiga till tomten på lastbil.</span></figcaption>
+            </figure>
+            <figure class="at-foto__bild">
+              <span class="at-foto__ram"><img src="images/foto/dronare-montage.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Kran lyfter väggelement på plats på en gjuten platta"></span>
+              <figcaption><b>03 · Montaget</b><span>Kranen lyfter dem på plats, en vägg i taget.</span></figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="hus-pris ih-sektion" id="pris" aria-labelledby="pris-rubrik">
+        <div class="ih-inre">
+          <div class="hus-pris__panel">
+            <div class="ih-huvud ih-huvud--mitt kat-mitt">
+              <p class="ih-etikett">Pris och upplägg</p>
+              <h2 class="ih-rubrik" id="pris-rubrik">Priset sätts <em>efter din tomt.</em></h2>
+              <p class="ih-ingress">Ett hus har inget listpris som en bil. Du får en offert där varje post står för sig, så du ser vad som ingår och vad som tillkommer innan du bestämmer dig.</p>
+            </div>
+            <div class="hus-pris__kort">
+              <article class="model-price__card">
+                <span>Pris</span>
+                <h3>I offert</h3>
+                <p>Storleken, planlösningen, materialen, tomten och avståndet styr summan.</p>
+              </article>
+              <article class="model-price__card">
+                <span>Leverans</span>
+                <h3>10 veckor</h3>
+                <p>Huset tillverkas under tak medan grunden och anslutningarna görs klara på tomten.</p>
+              </article>
+              <article class="model-price__card">
+                <span>Ingår</span>
+                <h3>Hus, leverans, montage</h3>
+                <p>Ritningar och underlag, själva huset, leverans till tomten, montage och slutbesiktning.</p>
+              </article>
+            </div>
+            <p class="hus-pris__knappar"><a class="ih-knapp ih-knapp--virke" href="#kontakt">Fråga om pris<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="ih-knapp ih-knapp--kontur" href="priser.html">Så sätts priset</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="hus-fler ih-sektion" aria-labelledby="fler-rubrik">
+        <div class="ih-inre">
+          <div class="ih-huvud ih-huvud--mitt kat-mitt">
+            <p class="ih-etikett">Fler hus</p>
+            <h2 class="ih-rubrik" id="fler-rubrik">Jämför med <em>de andra.</em></h2>
+          </div>
+          <div class="hus-fler__grid">
+            <a class="hus-fler__kort" href="huskort.html?typ=attefallshus&amp;modell=1" data-hus-kort="attefallshus-1">
+              <span class="hus-fler__bild"><img src="images/hus-r2.webp" width="1600" height="1062" loading="lazy" decoding="async" alt="Sadel 26, attefallshus"></span>
+              <span class="hus-fler__text"><b>Sadel 26</b><small>Attefallshus · 26 m² · 1 rum</small></span>
+            </a>
+            <a class="hus-fler__kort" href="huskort.html?typ=attefallshus&amp;modell=2" data-hus-kort="attefallshus-2">
+              <span class="hus-fler__bild"><img src="images/hus-r1.webp" width="1600" height="1062" loading="lazy" decoding="async" alt="Sadel 27, attefallshus"></span>
+              <span class="hus-fler__text"><b>Sadel 27</b><small>Attefallshus · 27 m² · 2 rum</small></span>
+            </a>
+            <a class="hus-fler__kort" href="huskort.html?typ=attefallshus&amp;modell=3" data-hus-kort="attefallshus-3">
+              <span class="hus-fler__bild"><img src="images/hus-r5.webp" width="1600" height="1062" loading="lazy" decoding="async" alt="Pulpet 27, attefallshus"></span>
+              <span class="hus-fler__text"><b>Pulpet 27</b><small>Attefallshus · 27 m² · 2 rum</small></span>
+            </a>
+            <a class="hus-fler__kort" href="huskort.html?typ=fritidshus&amp;modell=1" data-hus-kort="fritidshus-1">
+              <span class="hus-fler__bild"><img src="images/hus-r3.webp" width="1600" height="1062" loading="lazy" decoding="async" alt="Kupa 38, fritidshus"></span>
+              <span class="hus-fler__text"><b>Kupa 38</b><small>Fritidshus · 38 m² · 2 rum</small></span>
+            </a>
+            <a class="hus-fler__kort" href="huskort.html?typ=fritidshus&amp;modell=2" data-hus-kort="fritidshus-2">
+              <span class="hus-fler__bild"><img src="images/hus-r4.webp" width="1600" height="1062" loading="lazy" decoding="async" alt="Kupa 45, fritidshus"></span>
+              <span class="hus-fler__text"><b>Kupa 45</b><small>Fritidshus · 45 m² · 2 rum</small></span>
+            </a>
           </div>
         </div>
       </section>
 
       <section class="contact-section" id="kontakt">
         <div class="contact-section__inner">
-          <div class="contact-section__intro">
+          <div class="contact-section__intro kat-mitt">
             <p class="section-label section-label--accent">Intresseanmälan</p>
             <h2 class="contact-section__title">Vill du veta mer om <em data-model-title>sadel 26</em>?</h2>
             <p class="contact-section__text">
-              Berätta kort om tomten och vad huset ska användas till, så hjälper
-              vi dig vidare med nästa steg.
+              Berätta kort om tomten och vad huset ska bli. Då får du ett rakt
+              besked om vad som går att bygga och vad det kostar.
             </p>
 
             <div class="contact-section__meta">
@@ -610,17 +623,19 @@
         var MODELLER = {
           attefallshus: {
             namn: 'Attefallshus',
+            sida: 'attefallshus.html',
             modeller: [
-              { namn: 'Sadel 26', bild: 'hus-r2.webp', yta: 26, rum: 1, lev: 10, text: ["Ett rum på 26 m² under ett brant sadeltak. Den smala formen, 8,33 × 3,49 meter, gör att huset får plats längs en häck eller en tomtgräns - som gästhus, ateljé eller för uthyrning.", "Huset byggs under tak i Sverige och kommer i färdiga delar till tomten, där montaget tar dagar i stället för månader. Planlösning, fasad och kulörer bestäms tillsammans i offerten."] },
-              { namn: 'Sadel 27', bild: 'hus-r1.webp', yta: 27, rum: 2, lev: 10, text: ["Två rum på 27 m² under ett sadeltak. Den bredare formen, 7,14 × 4,20 meter, ger plats för ett sovrum och ett allrum - ett litet hus som går att bo i på riktigt.", "Huset byggs under tak i Sverige och kommer i färdiga delar till tomten, där montaget tar dagar i stället för månader. Planlösning, fasad och kulörer bestäms tillsammans i offerten."] },
-              { namn: 'Pulpet 27', bild: 'hus-r5.webp', yta: 27, rum: 2, lev: 12, text: ["Två rum på 27 m² under ett nästan platt pulpettak. Formen, 7,50 × 4,00 meter, och de stora glaspartierna ger ett modernt hus med mycket ljus.", "Huset byggs under tak i Sverige och kommer i färdiga delar till tomten, där montaget tar dagar i stället för månader. Planlösning, fasad och kulörer bestäms tillsammans i offerten."] },
+              { namn: 'Sadel 26', bild: 'hus-r2.webp', yta: 26, rum: 1, lev: 10, matt: '8,33 × 3,49', nock: '4,00', tak: 'Sadeltak', text: ["Ett rum på 26 m² under ett brant sadeltak. Den smala formen, 8,33 × 3,49 meter, gör att huset får plats längs en häck eller en tomtgräns - som gästhus, ateljé eller för uthyrning.", "Huset byggs under tak i Sverige och kommer i färdiga delar till tomten, där montaget tar dagar i stället för månader. Planlösning, fasad och kulörer bestäms tillsammans i offerten."] },
+              { namn: 'Sadel 27', bild: 'hus-r1.webp', yta: 27, rum: 2, lev: 10, matt: '7,14 × 4,20', nock: '4,00', tak: 'Sadeltak', text: ["Två rum på 27 m² under ett sadeltak. Den bredare formen, 7,14 × 4,20 meter, ger plats för ett sovrum och ett allrum - ett litet hus som går att bo i på riktigt.", "Huset byggs under tak i Sverige och kommer i färdiga delar till tomten, där montaget tar dagar i stället för månader. Planlösning, fasad och kulörer bestäms tillsammans i offerten."] },
+              { namn: 'Pulpet 27', bild: 'hus-r5.webp', yta: 27, rum: 2, lev: 12, matt: '7,50 × 4,00', nock: '4,00', tak: 'Pulpettak', text: ["Två rum på 27 m² under ett nästan platt pulpettak. Formen, 7,50 × 4,00 meter, och de stora glaspartierna ger ett modernt hus med mycket ljus.", "Huset byggs under tak i Sverige och kommer i färdiga delar till tomten, där montaget tar dagar i stället för månader. Planlösning, fasad och kulörer bestäms tillsammans i offerten."] },
             ]
           },
           fritidshus: {
             namn: 'Fritidshus',
+            sida: 'fritidshus.html',
             modeller: [
-              { namn: 'Kupa 38', bild: 'hus-r3.webp', yta: 38, rum: 2, lev: 12, text: ["Ett fritidshus på 38 m² med takkupa, 10,83 × 3,90 meter. Två rum och extra takhöjd under kupan, för helger, lov och långa somrar. Huset kräver bygglov.", "Huset byggs under tak i Sverige och kommer i färdiga delar till tomten, där montaget tar dagar i stället för månader. Planlösning, fasad och kulörer bestäms tillsammans i offerten."] },
-              { namn: 'Kupa 45', bild: 'hus-r4.webp', yta: 45, rum: 2, lev: 14, text: ["Vårt största hus: 45 m² med takkupa, 12,50 × 3,90 meter. Två rum och plats för både vardag och gäster. Huset kräver bygglov.", "Huset byggs under tak i Sverige och kommer i färdiga delar till tomten, där montaget tar dagar i stället för månader. Planlösning, fasad och kulörer bestäms tillsammans i offerten."] },
+              { namn: 'Kupa 38', bild: 'hus-r3.webp', yta: 38, rum: 2, lev: 12, matt: '10,83 × 3,90', nock: '4,35', tak: 'Med takkupa', text: ["Ett fritidshus på 38 m² med takkupa, 10,83 × 3,90 meter. Två rum och extra takhöjd under kupan, för helger, lov och långa somrar. Huset kräver bygglov.", "Huset byggs under tak i Sverige och kommer i färdiga delar till tomten, där montaget tar dagar i stället för månader. Planlösning, fasad och kulörer bestäms tillsammans i offerten."] },
+              { namn: 'Kupa 45', bild: 'hus-r4.webp', yta: 45, rum: 2, lev: 14, matt: '12,50 × 3,90', nock: '4,05', tak: 'Med takkupa', text: ["Vårt största hus: 45 m² med takkupa, 12,50 × 3,90 meter. Två rum och plats för både vardag och gäster. Huset kräver bygglov.", "Huset byggs under tak i Sverige och kommer i färdiga delar till tomten, där montaget tar dagar i stället för månader. Planlösning, fasad och kulörer bestäms tillsammans i offerten."] },
             ]
           },
         };
@@ -629,9 +644,11 @@
         // Utan (giltiga) parametrar visas forsta attefallshuset - sidan
         // ar ingen exempelsida langre (2026-09-30).
         var p = new URLSearchParams(window.location.search);
-        var typ = MODELLER[p.get('typ')];
+        var slug = p.get('typ');
+        var typ = MODELLER[slug];
         var nr = parseInt(p.get('modell'), 10);
         if (!typ || !(nr >= 1 && nr <= typ.modeller.length)) {
+          slug = 'attefallshus';
           typ = MODELLER.attefallshus;
           nr = 1;
         }
@@ -692,12 +709,45 @@
             rubrik.textContent = m.lev + ' veckor';
           }
         });
+
+        // Huskortets nya topp och faktarad (2026-10-05): varje ruta med
+        // data-hus fylls med sitt värde, bilden och länken tillbaka följer
+        // modellen, och huset man tittar på göms bland "Fler hus".
+        function satt(namn, varde) {
+          document.querySelectorAll('[data-hus="' + namn + '"]').forEach(function (e) { e.textContent = varde; });
+        }
+        satt('typ', typ.namn);
+        satt('yta', m.yta + ' m²');
+        satt('rum', m.rum + ' rum');
+        satt('lev', m.lev + ' veckor');
+        satt('matt', m.matt + ' m');
+        satt('nock', m.nock + ' m');
+        satt('tak', m.tak);
+        var husBild = document.querySelector('[data-hus-bild]');
+        if (husBild) {
+          husBild.src = 'images/' + m.bild;
+          husBild.alt = m.namn + ', ' + typ.namn.toLowerCase() + ' i svensk natur';
+        }
+        var tillbaka = document.querySelector('[data-hus-tillbaka]');
+        if (tillbaka) {
+          tillbaka.href = typ.sida;
+          var tt = tillbaka.querySelector('span');
+          if (tt) tt.textContent = 'Alla ' + typ.namn.toLowerCase();
+        }
+        var rymsLank = document.querySelector('[data-ryms]');
+        if (rymsLank) {
+          rymsLank.href = 'vad-far-jag-bygga.html?yta=' + m.yta + '&namn='
+            + encodeURIComponent(typ.namn + ', ' + m.namn.toLowerCase());
+        }
+        document.querySelectorAll('[data-hus-kort]').forEach(function (k) {
+          k.hidden = k.getAttribute('data-hus-kort') === slug + '-' + nr;
+        });
       })();
       /* MODELLER:SLUT */
 
       (function () {
         var bar = document.getElementById('cta-bar');
-        var hero = document.querySelector('.subpage-hero');
+        var hero = document.querySelector('.kat-topp');
         var kontakt = document.getElementById('kontakt');
         if (!bar || !hero || !kontakt || !window.IntersectionObserver) return;
 

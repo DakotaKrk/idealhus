@@ -41,6 +41,16 @@ MATT = {
 }
 
 
+# Taket per modell, som det står i ritningarna (huskortets faktarad).
+TAK = {
+    "Sadel 26": "Sadeltak",
+    "Sadel 27": "Sadeltak",
+    "Pulpet 27": "Pulpettak",
+    "Kupa 38": "Med takkupa",
+    "Kupa 45": "Med takkupa",
+}
+
+
 # Två stycken per modell till huskortssidan (2026-09-30). Bara det
 # ritningarna säger: yta, rum, tak och yttermått.
 GEMENSAMT = ("Huset byggs under tak i Sverige och kommer i färdiga delar till "

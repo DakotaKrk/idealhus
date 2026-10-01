@@ -1372,7 +1372,7 @@
 
   (function () {
     var sek = $('#i-3d');
-    var hero = $('.subpage-hero__image');
+    var hero = $('[data-hus-bild]') || $('.subpage-hero__image');
     if (!sek || !hero) return;
     var m = (hero.getAttribute('src') || '').match(/hus-(r\d)\.webp/);
     if (!m || !MATT3D[m[1]]) return;
