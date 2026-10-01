@@ -23683,3 +23683,394 @@ html[data-tema="mork"] .tv__regler[data-vald="inom"] [data-plan="inom"],
 html[data-tema="mork"] .tv__regler[data-vald="utanfor"] [data-plan="utanfor"] {
   color: #f6c88f;
 }
+/* === Mobilmenyn premium (2026-10-08) =====================================
+   Kunden: "gör menyn på mobilen också mer premium". Glaspanel med varmt
+   och kallt ljus, verktyget som ett mörkt utvalt kort direkt under husen
+   (ring som roterar, ikonen ritas fram när menyn öppnas), numrerade
+   sidlänkar med pilen i en cirkel, temaraden som glaspill, "Börja här"
+   med ett glansdrag och kontakten som två piller. */
+@media (max-width: 1040px) {
+  html body .mmeny {
+    -webkit-backdrop-filter: blur(6px) saturate(1.1);
+    backdrop-filter: blur(6px) saturate(1.1);
+  }
+
+  html body .mmeny .mmeny__panel {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    border-radius: 30px;
+    counter-reset: mlank;
+  }
+
+  html:not([data-tema="mork"]) body .mmeny__panel {
+    background:
+      radial-gradient(90% 32% at 100% 0%, rgba(255, 210, 150, 0.5), transparent 65%),
+      radial-gradient(80% 28% at 0% 100%, rgba(184, 205, 224, 0.42), transparent 65%),
+      linear-gradient(165deg, #fffdf9, #fbf5eb 55%, #f6f1e7);
+    box-shadow:
+      0 50px 90px -30px rgba(27, 25, 21, 0.5),
+      inset 0 1px 0 #fff,
+      inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  }
+
+  html body .mmeny .mmeny__panel > * {
+    order: 3;
+  }
+
+  html body .mmeny .mmeny__grupp {
+    order: 1;
+  }
+
+  /* --- Husen ---------------------------------------------------------- */
+  html:not([data-tema="mork"]) body .mmeny__grupp {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.35));
+    box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(27, 25, 21, 0.05);
+  }
+
+  html body .mmeny .mmeny__grupp {
+    padding: 14px 10px 10px;
+    border-radius: 24px;
+  }
+
+  html body .mmeny .mmeny__etikett {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  html body .mmeny .mmeny__etikett::before {
+    content: "";
+    width: 16px;
+    height: 1.5px;
+    border-radius: 1px;
+    background: linear-gradient(90deg, #e8a456, #c47a32);
+  }
+
+  html:not([data-tema="mork"]) body .mmeny__kort {
+    background: linear-gradient(160deg, #fff, rgba(255, 255, 255, 0.8));
+    box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 14px 26px -20px rgba(90, 60, 25, 0.55);
+  }
+
+  html body .mmeny .mmeny__kort {
+    position: relative;
+    border-radius: 19px;
+  }
+
+  html body .mmeny .mmeny__bild {
+    border-radius: 14px;
+    box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  }
+
+  html body .mmeny .mmeny__bild img,
+  html body .mmeny .mmeny__kort:hover .mmeny__bild img {
+    transform: none;
+  }
+
+  html body .mmeny .mmeny__korttext strong {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  html body .mmeny .mmeny__korttext strong::after {
+    content: "";
+    flex: none;
+    width: 7px;
+    height: 7px;
+    margin-right: 3px;
+    border-top: 1.8px solid currentColor;
+    border-right: 1.8px solid currentColor;
+    opacity: 0.35;
+    transform: rotate(45deg);
+    transition: opacity 0.3s ease, transform 0.4s var(--mjuk);
+  }
+
+  html body .mmeny .mmeny__kort:active .mmeny__korttext strong::after,
+  html body .mmeny .mmeny__kort:hover .mmeny__korttext strong::after {
+    opacity: 0.9;
+    transform: translateX(3px) rotate(45deg);
+  }
+
+  /* --- Verktyget: mörkt utvalt kort direkt under husen ---------------- */
+  html body .mmeny .mmeny__tips {
+    --i: 1 !important;
+    order: 2;
+    grid-template-columns: 54px minmax(0, 1fr) 38px;
+    gap: 14px;
+    margin: 10px 0 8px;
+    padding: 12px;
+    border-radius: 24px;
+    background:
+      radial-gradient(70% 120% at 100% 0%, rgba(240, 181, 110, 0.36), transparent 62%),
+      radial-gradient(60% 90% at 0% 100%, rgba(63, 107, 80, 0.32), transparent 65%),
+      linear-gradient(160deg, #3a342d, #151310);
+    box-shadow: 0 22px 40px -20px rgba(27, 25, 21, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    color: #f7f5f0;
+  }
+
+  html body .mmeny .mmeny__tipsbild {
+    width: 54px;
+    height: 54px;
+    border-radius: 17px;
+    background: linear-gradient(160deg, #f6c88f, #c98a45);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 10px 20px -10px rgba(240, 181, 110, 0.8);
+  }
+
+  html body .mmeny .mmeny__tipsbild svg {
+    width: 30px;
+    height: 30px;
+    stroke: #1b1915;
+    stroke-width: 1.7;
+  }
+
+  html body .mmeny .mmeny__prova {
+    color: #f0b56e;
+  }
+
+  html body .mmeny .mmeny__tipstext strong {
+    font-size: 1.0625rem;
+    color: #fffaf2;
+  }
+
+  html body .mmeny .mmeny__tipsrad {
+    font-style: normal;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: rgba(247, 245, 240, 0.6);
+  }
+
+  html body .mmeny .mmeny__tips .mmeny__pil {
+    box-sizing: border-box;
+    width: 38px;
+    height: 38px;
+    padding: 10px;
+    border-radius: 50%;
+    background: linear-gradient(160deg, #f6c88f, #c98a45);
+    stroke: #1b1915;
+    stroke-width: 2;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html body .mmeny--oppen .mmeny__tipsbild path {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: mv-rita 0.9s cubic-bezier(0.6, 0, 0.2, 1) forwards;
+    }
+    html body .mmeny--oppen .mmeny__tipsbild path:nth-child(1) { animation-delay: 0.3s; }
+    html body .mmeny--oppen .mmeny__tipsbild path:nth-child(2) { animation-delay: 0.6s; }
+    html body .mmeny--oppen .mmeny__tipsbild path:nth-child(3) { animation-delay: 0.9s; }
+    html body .mmeny--oppen .mmeny__tips .mmeny__pil {
+      animation: mm-puff 2.6s ease-in-out 1.2s infinite;
+    }
+  }
+
+  /* --- Sidorna: numrerade, pilen i en cirkel --------------------------- */
+  html body .mmeny .mmeny__lank {
+    counter-increment: mlank;
+    padding: 13px 10px 13px 12px;
+    border-radius: 18px;
+  }
+
+  html body .mmeny .mmeny__lank > span {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+
+  html body .mmeny .mmeny__lank > span::before {
+    content: counter(mlank, decimal-leading-zero);
+    min-width: 20px;
+    font: 600 0.6875rem/1 var(--knappfont);
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    transform: translateY(-0.35em);
+  }
+
+  html body .mmeny .mmeny__lank .mmeny__pil {
+    box-sizing: border-box;
+    width: 34px;
+    height: 34px;
+    padding: 9px;
+    border-radius: 50%;
+    background: rgba(27, 25, 21, 0.04);
+    box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08);
+    opacity: 0.75;
+    transform: none;
+    transition: background 0.35s ease, transform 0.45s var(--mjuk), opacity 0.3s ease;
+  }
+
+  html body .mmeny .mmeny__lank:hover .mmeny__pil,
+  html body .mmeny .mmeny__lank:active .mmeny__pil,
+  html body .mmeny .mmeny__lank[aria-current="page"] .mmeny__pil {
+    background: linear-gradient(160deg, #38332c, #141210);
+    box-shadow: none;
+    stroke: #f6c88f;
+    opacity: 1;
+    transform: translateX(-2px);
+  }
+
+  html:not([data-tema="mork"]) body .mmeny__lank[aria-current="page"] {
+    background: linear-gradient(100deg, rgba(240, 181, 110, 0.22), rgba(240, 181, 110, 0.06));
+    box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.28);
+  }
+
+  html:not([data-tema="mork"]) body .mmeny__lank[aria-current="page"] + .mmeny__lank {
+    box-shadow: none;
+  }
+
+  html body .mmeny .mmeny__lank[aria-current="page"] > span::before {
+    color: #c47a32;
+  }
+
+  /* --- Temat, offerten, kontakten -------------------------------------- */
+  html body .mmeny .mmeny__tema {
+    margin-top: 10px;
+    padding: 10px 12px 10px 10px;
+    border-radius: 20px;
+  }
+
+  html:not([data-tema="mork"]) body .mmeny .mmeny__tema {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.45));
+    box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+  }
+
+  html body .mmeny .mmeny__tema .mobile-nav__tema-ikon {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  html body .mmeny .mmeny__tema .mobile-nav__tema-ikon svg {
+    box-sizing: border-box;
+    width: 34px;
+    height: 34px;
+    padding: 8px;
+    border-radius: 50%;
+    background: linear-gradient(160deg, #38332c, #141210);
+    fill: none;
+    stroke: #f6c88f;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  html body .mmeny .mmeny__cta {
+    position: relative;
+    gap: 10px;
+    overflow: hidden;
+    min-height: 58px;
+    margin-top: 10px;
+    background: linear-gradient(160deg, #f6c88f, #e8a456 55%, #c98a45);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 18px 34px -16px rgba(201, 128, 52, 0.8);
+    color: #1b1915;
+    font-size: 1.0625rem;
+  }
+
+  html body .mmeny .mmeny__cta::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    transform: rotate(45deg);
+  }
+
+  html body .mmeny .mmeny__cta::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 -40%;
+    width: 30%;
+    background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+    transform: skewX(-18deg);
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html body .mmeny--oppen .mmeny__cta::before {
+      animation: mm-glans 3.8s ease-in-out 1s infinite;
+    }
+  }
+
+  html body .mmeny .mmeny__kontakt {
+    gap: 8px;
+    margin: 12px 0 4px;
+  }
+
+  html body .mmeny .mmeny__kontakt > * {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 13px 8px 10px;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+  }
+
+  html:not([data-tema="mork"]) body .mmeny__kontakt > * {
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07);
+  }
+
+  html body .mmeny .mmeny__kontakt > *::before {
+    content: "";
+    width: 15px;
+    height: 15px;
+    background: #c47a32;
+    -webkit-mask: var(--ikon) center / contain no-repeat;
+    mask: var(--ikon) center / contain no-repeat;
+  }
+
+  html body .mmeny .mmeny__kontakt a {
+    --ikon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6.5h16v11H4z'/%3E%3Cpath d='m4.5 7 7.5 6 7.5-6'/%3E%3C/svg%3E");
+  }
+
+  html body .mmeny .mmeny__kontakt span {
+    --ikon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11Z'/%3E%3Ccircle cx='12' cy='10' r='2.3'/%3E%3C/svg%3E");
+  }
+
+  /* --- Mörkt läge -------------------------------------------------------- */
+  html[data-tema="mork"] body .mmeny__panel {
+    background:
+      radial-gradient(90% 32% at 100% 0%, rgba(240, 181, 110, 0.16), transparent 65%),
+      radial-gradient(80% 28% at 0% 100%, rgba(63, 107, 80, 0.2), transparent 65%),
+      linear-gradient(165deg, #24201b, #171511);
+  }
+  html[data-tema="mork"] body .mmeny .mmeny__lank > span::before {
+    color: rgba(247, 245, 240, 0.4);
+  }
+  html[data-tema="mork"] body .mmeny .mmeny__lank .mmeny__pil {
+    background: rgba(247, 245, 240, 0.06);
+    box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+  }
+  html[data-tema="mork"] body .mmeny .mmeny__lank:hover .mmeny__pil,
+  html[data-tema="mork"] body .mmeny .mmeny__lank[aria-current="page"] .mmeny__pil {
+    background: linear-gradient(160deg, #f6c88f, #c98a45);
+    stroke: #1b1915;
+  }
+  html[data-tema="mork"] body .mmeny .mmeny__lank[aria-current="page"] {
+    background: linear-gradient(100deg, rgba(240, 181, 110, 0.16), rgba(240, 181, 110, 0.04));
+  }
+  html[data-tema="mork"] body .mmeny .mmeny__tips {
+    box-shadow: 0 22px 40px -20px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+  }
+  html[data-tema="mork"] body .mmeny .mmeny__kontakt > * {
+    background: rgba(247, 245, 240, 0.06);
+    box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+  }
+  html[data-tema="mork"] body .mmeny .mmeny__kontakt > *::before {
+    background: #f0b56e;
+  }
+}
+
+@keyframes mm-glans {
+  0%, 55% { left: -40%; }
+  85%, 100% { left: 120%; }
+}
+
+@keyframes mm-puff {
+  0%, 70%, 100% { transform: translateX(0); }
+  80% { transform: translateX(4px); }
+  90% { transform: translateX(0); }
+}

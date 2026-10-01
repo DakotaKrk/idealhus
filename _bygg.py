@@ -153,10 +153,10 @@ def mobilmeny():
     rader.append(
         f'          <a class="mmeny__tips" href="vad-far-jag-bygga.html" style="--i:{i}">'
         '<span class="mmeny__tipsbild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false">'
-        '<path d="M8 15.3 3.5 17.4 12 21.4l8.5-4L16 15.3"/><path d="M8 17.5v-6.3l4-3.6 4 3.6v6.3M11 17.5v-3h2v3"/>'
-        '<path d="M18.6 3v3.4M16.9 4.7h3.4"/></svg></span>'
+        '<path pathLength="1" d="M8 15.3 3.5 17.4 12 21.4l8.5-4L16 15.3"/><path pathLength="1" d="M8 17.5v-6.3l4-3.6 4 3.6v6.3M11 17.5v-3h2v3"/>'
+        '<path pathLength="1" d="M18.6 3v3.4M16.9 4.7h3.4"/></svg></span>'
         '<span class="mmeny__tipstext"><span class="mmeny__prova">Prova</span>'
-        '<strong>Vad får jag bygga?</strong></span>' + MMENY_PIL + '</a>')
+        '<strong>Vad får jag bygga?</strong><em class="mmeny__tipsrad">Fem frågor · svar direkt</em></span>' + MMENY_PIL + '</a>')
     rader.append(f'          <a class="mmeny__cta" href="kontakt.html" style="--i:{i + 2}">Börja här</a>')
     rader.append(f'          <p class="mmeny__kontakt" style="--i:{i + 3}">'
                  '<a href="mailto:info@idealhus.se">info@idealhus.se</a><span>Stockholm, Sverige</span></p>')
