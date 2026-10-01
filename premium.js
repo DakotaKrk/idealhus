@@ -2295,7 +2295,8 @@
     // konturen i vilotillståndet (kontur = dess opacitet, 0 = ingen).
     function konturFarg() { return L.mork ? 'rgba(247,245,240,0.85)' : 'rgba(27,25,21,0.85)'; }
     function rita_duk(kontur) {
-      if (!L) return;
+      // En dold flik kan ge ytan storleken 0 – då finns inget att rita.
+      if (!L || !bak.width || !bak.height || !duk.width || !duk.height) return;
       var c = duk.getContext('2d');
       c.setTransform(1, 0, 0, 1, 0, 0);
       c.globalCompositeOperation = 'copy';

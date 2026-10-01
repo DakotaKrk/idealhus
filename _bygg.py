@@ -3,7 +3,7 @@
 import re, io, os
 
 BAS = "https://idealhus.se/"
-CSS_V = "20261001b"
+CSS_V = "20261001c"
 
 # Husen for den som ska bo i dem, och det vi levererar till andra som
 # bygger. De sag likadana ut i menyn tidigare, som fem jamnstallda val.

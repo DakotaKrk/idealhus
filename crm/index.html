@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#1b1915">
+    <title>Idealhus CRM</title>
+    <link rel="icon" href="../images/idealhus.svg" type="image/svg+xml">
+    <!-- Ej inloggad: till inloggningen, med adressen man ville till. -->
+    <script>try{if(!localStorage.getItem('ih-crm-inloggad'))location.replace('logga-in.html'+(location.hash.indexOf('#/')===0?'?nasta='+encodeURIComponent(location.hash):''))}catch(e){}</script>
+    <link rel="preload" href="../fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../fonts/poppins-500.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="crm.css?v=20261002g">
+    <link rel="stylesheet" href="vyer.css?v=20261002g">
+    <link rel="stylesheet" href="mote.css?v=20261002g">
+  </head>
+  <body>
+    <div class="app" id="app"></div>
+    <script src="data.js?v=20261002g"></script>
+    <script src="app.js?v=20261002g"></script>
+    <script src="mote.js?v=20261002g"></script>
+    <script src="vyer.js?v=20261002g"></script>
+    <script>
+      (function () {
+        var klar = false;
+        var go = function () { if (!klar) { klar = true; if (performance.mark) performance.mark('ih-start'); IH.starta(); if (performance.mark) performance.mark('ih-ritad'); } };
+        if (document.fonts && document.fonts.load) {
+          Promise.race([
+            Promise.all(['500 1em Poppins', '600 1em Poppins', '700 1em Poppins', '400 1em Manrope'].map(function (f) { return document.fonts.load(f); })),
+            new Promise(function (r) { setTimeout(r, 350); })
+          ]).then(go, go);
+        } else go();
+      })();
+    </script>
+  </body>
+</html>

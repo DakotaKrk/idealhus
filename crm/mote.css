@@ -1,0 +1,1579 @@
+/* ============================================================
+   Idealhus CRM – kundmötet i helskärm (prototyp, 2026-10-01)
+   Bilderna vrids in i 3D, innehållet lutar in i tur och ordning
+   (data-m-in). Mörk botten som sajtens toppar: kol med virke och
+   skog i hörnen.
+   ============================================================ */
+.mote {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  overflow: hidden;
+  background:
+    radial-gradient(50% 60% at 0% 0%, rgba(240, 181, 110, 0.14), transparent 70%),
+    radial-gradient(50% 60% at 100% 100%, rgba(63, 107, 80, 0.3), transparent 70%),
+    #12100d;
+  color: var(--krita);
+  opacity: 0;
+  transform: scale(1.03);
+  transition: opacity 0.5s ease, transform 0.7s var(--mjuk);
+}
+
+.mote.oppen {
+  opacity: 1;
+  transform: none;
+}
+
+.mote.stanger {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+.mote__scen {
+  position: absolute;
+  inset: 0;
+  perspective: 1800px;
+}
+
+.mote__bild {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  opacity: 0;
+  transform-origin: 50% 50%;
+  transition: transform 0.9s var(--mjuk), opacity 0.6s ease, visibility 0s linear 0.9s;
+}
+
+.mote__bild.nu {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition: transform 0.9s var(--mjuk), opacity 0.6s ease 0.1s, visibility 0s;
+}
+
+.mote__bild.in-h { transform: translate3d(26%, 0, -260px) rotateY(-32deg); filter: blur(10px) brightness(0.6); transition: none; }
+.mote__bild.in-v { transform: translate3d(-26%, 0, -260px) rotateY(32deg); filter: blur(10px) brightness(0.6); transition: none; }
+.mote__bild.ut-v { visibility: visible; opacity: 0; transform: translate3d(-30%, 0, -320px) rotateY(34deg); filter: blur(12px) brightness(0.5); }
+.mote__bild.ut-h { visibility: visible; opacity: 0; transform: translate3d(30%, 0, -320px) rotateY(-34deg); filter: blur(12px) brightness(0.5); }
+
+.mote__bild,
+.mote__bild.nu {
+  transition-property: transform, opacity, filter, visibility;
+  transition-duration: 1.05s, 0.7s, 0.9s, 0s;
+  transition-timing-function: var(--mjuk), ease, ease, linear;
+}
+
+.mote__bild.nu {
+  filter: none;
+}
+
+.mote__bild [data-m-in] {
+  opacity: 0;
+  transform: perspective(900px) translateY(34px) rotateX(16deg);
+  filter: blur(6px);
+  transition: opacity 0.8s ease, transform 1.1s var(--mjuk), filter 0.8s ease;
+}
+
+.mote__bild.nu [data-m-in] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition-delay: calc(0.3s + var(--mi, 0) * 0.11s);
+}
+
+/* Rubrikerna: raderna stiger ur en mask. */
+.mrad {
+  display: block;
+  overflow: clip;
+  overflow-clip-margin: 0.1em;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.mrad > span {
+  display: inline-block;
+  transform: translateY(112%) rotate(3deg);
+  transform-origin: 0 100%;
+  transition: transform 1.2s var(--mjuk);
+}
+
+.mote__bild.nu .mrad > span {
+  transform: none;
+  transition-delay: calc(0.28s + var(--r, 0) * 0.13s);
+}
+
+/* --- Toppen och botten ---------------------------------------------- */
+.mote__topp {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  left: 26px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mote__topp img {
+  height: 26px;
+  width: auto;
+  filter: brightness(0) invert(0.96);
+}
+
+.mote__kund {
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: rgba(247, 245, 240, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  font: 600 0.75rem/1 var(--rubrik);
+  color: var(--ljus-2);
+}
+
+.mote__ikon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(247, 245, 240, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  color: var(--krita);
+  transition: background-color 0.3s ease;
+}
+
+.mote__tid {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  padding: 0 14px;
+  height: 42px;
+  border-radius: 999px;
+  background: rgba(247, 245, 240, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+  font: 600 0.8125rem/1 var(--rubrik);
+  font-variant-numeric: tabular-nums;
+  color: var(--ljus-2);
+}
+
+.mote__tid .i {
+  width: 15px;
+  height: 15px;
+  color: var(--virke);
+}
+
+.mote__ikon[aria-pressed="true"] {
+  background: var(--virke);
+  color: var(--kol);
+}
+
+/* Med anteckningarna öppna krymper bilden till ett kort till vänster. */
+.mote__scen {
+  transform-origin: 0 50%;
+  transition: transform 0.9s var(--mjuk), border-radius 0.9s var(--mjuk), box-shadow 0.9s ease;
+}
+
+.mote--anteckning .mote__scen {
+  overflow: hidden;
+  border-radius: 34px;
+  box-shadow: 0 0 0 1px rgba(247, 245, 240, 0.12), 0 50px 100px -40px rgba(0, 0, 0, 0.9);
+  transform: translateX(20px) scale(0.72);
+}
+
+@media (max-width: 1200px) {
+  .mote--anteckning .mote__scen {
+    transform: translateX(14px) scale(0.6);
+  }
+}
+
+.mote__anteckning {
+  position: absolute;
+  top: 76px;
+  right: 20px;
+  bottom: 92px;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  width: min(360px, 100% - 40px);
+  padding: 18px;
+  border-radius: 26px;
+  background: rgba(30, 27, 22, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12), 0 40px 80px -30px rgba(0, 0, 0, 0.8);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(40px) scale(0.97);
+  transition: opacity 0.4s ease, transform 0.7s var(--mjuk), visibility 0s linear 0.7s;
+}
+
+.mote__anteckning.oppen {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.4s ease, transform 0.7s var(--mjuk), visibility 0s;
+}
+
+.mote__anteckning header b {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 1rem/1.2 var(--rubrik);
+}
+
+.mote__anteckning header .i {
+  width: 17px;
+  height: 17px;
+  color: var(--virke);
+}
+
+.mote__anteckning header small {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ljus-3);
+}
+
+.mote__anteckning textarea {
+  flex: 1;
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px;
+  border: 0;
+  border-radius: 16px;
+  background: rgba(247, 245, 240, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+  color: var(--krita);
+  font: 400 0.9375rem/1.6 var(--sans);
+  resize: none;
+  outline: none;
+  transition: box-shadow 0.3s ease;
+}
+
+.mote__anteckning textarea:focus {
+  box-shadow: inset 0 0 0 1.5px var(--virke);
+}
+
+.mote__anteckning textarea::placeholder {
+  color: var(--ljus-3);
+}
+
+.mote__anteckning-tips {
+  margin: 10px 0 0;
+  font-size: 0.6875rem;
+  color: var(--ljus-3);
+  text-align: center;
+}
+
+.mote__ikon:hover {
+  background: rgba(247, 245, 240, 0.16);
+}
+
+.mote__botten {
+  position: absolute;
+  right: 20px;
+  bottom: 18px;
+  left: 20px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 10px 10px 22px;
+  border-radius: 999px;
+  background: rgba(18, 16, 13, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1), 0 20px 40px -20px rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.mote__namn {
+  min-width: 150px;
+  font: 600 0.875rem/1 var(--rubrik);
+}
+
+.mote__prickar {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  gap: 4px;
+}
+
+.mote__prick {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.mote__prick i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(247, 245, 240, 0.3);
+  transition: width 0.4s var(--mjuk), background-color 0.3s ease;
+}
+
+.mote__prick.nu i {
+  width: 22px;
+  border-radius: 8px;
+  background: var(--virke);
+}
+
+.mote__raknare {
+  font: 600 0.8125rem/1 var(--rubrik);
+  color: var(--ljus-3);
+}
+
+.mote__pil {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(247, 245, 240, 0.1);
+  color: var(--krita);
+  transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.3s var(--mjuk);
+}
+
+.mote__pil--fram {
+  background: var(--virke);
+  color: var(--kol);
+}
+
+.mote__pil:hover:not(:disabled) {
+  transform: scale(1.06);
+}
+
+.mote__pil:disabled {
+  opacity: 0.3;
+}
+
+.mote__framsteg {
+  position: absolute;
+  right: 26px;
+  bottom: -1px;
+  left: 26px;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.mote__framsteg i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--virke-djup), var(--virke));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.8s var(--mjuk);
+}
+
+/* --- Bilderna ------------------------------------------------------- */
+.mb {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-items: center;
+  overflow: hidden;
+}
+
+.mb__bak {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mb__bak--zoom {
+  animation: mote-zoom 24s ease-in-out infinite alternate;
+}
+
+@keyframes mote-zoom {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.14) translate(-1.5%, -1%); }
+}
+
+.mb__slojan {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(18, 16, 13, 0.88) 0%, rgba(18, 16, 13, 0.55) 45%, rgba(18, 16, 13, 0.1) 100%);
+}
+
+.mb__slojan--vanster {
+  background: linear-gradient(90deg, rgba(18, 16, 13, 0.92) 0%, rgba(18, 16, 13, 0.6) 55%, rgba(18, 16, 13, 0.3) 100%);
+}
+
+.mb__in {
+  position: relative;
+  z-index: 1;
+  width: min(1240px, 100% - 80px);
+  margin: 0 auto;
+  padding: 90px 0 110px;
+}
+
+.mb__in--delad {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 48px;
+  align-items: center;
+}
+
+.mb__etikett {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  font: 700 0.75rem/1 var(--rubrik);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--virke);
+}
+
+.mb__etikett::before {
+  content: "";
+  width: 26px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--virke);
+}
+
+.mb__titel {
+  font-size: clamp(3rem, 1.6rem + 5vw, 6.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+}
+
+.mb__titel--mindre {
+  font-size: clamp(2.4rem, 1.4rem + 3.4vw, 4.6rem);
+}
+
+.mb__titel em {
+  font-style: normal;
+  background: linear-gradient(100deg, #d9974f 0%, #f0b56e 30%, #ffe2b8 50%, #f0b56e 70%, #d9974f 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: skimmer 7s ease-in-out infinite;
+}
+
+.mb__text {
+  max-width: 46ch;
+  margin: 22px 0 0;
+  font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.3rem);
+  line-height: 1.6;
+  color: var(--ljus-2);
+}
+
+.mb__text--liten {
+  max-width: 64ch;
+  font-size: 1rem;
+}
+
+.mb__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 26px;
+}
+
+.mb__chips span {
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(247, 245, 240, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.16);
+  font: 600 0.875rem/1 var(--rubrik);
+}
+
+/* Huset hel i en ram (titel): bilden beskärs aldrig. */
+.mb__foto {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 30px;
+  box-shadow: 0 60px 100px -40px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+.mote__bild.nu .mb__foto {
+  transform: perspective(1600px) rotateY(-7deg) rotateX(2deg);
+  transition: transform 1.4s var(--mjuk) 0.35s, opacity 0.8s ease 0.35s;
+}
+
+.mb__foto img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1600 / 1062;
+  animation: mote-flyt 7s ease-in-out infinite alternate;
+}
+
+@keyframes mote-flyt {
+  to { transform: scale(1.03); }
+}
+
+.mb--titel .mb__in--delad {
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+}
+
+.mb--nasta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(50% 60% at 85% 20%, rgba(240, 181, 110, 0.16), transparent 70%),
+    linear-gradient(rgba(247, 245, 240, 0.035) 1px, transparent 1px) 0 0 / 44px 44px,
+    linear-gradient(90deg, rgba(247, 245, 240, 0.035) 1px, transparent 1px) 0 0 / 44px 44px;
+}
+
+/* Husen i 3D */
+.husval__lista {
+  display: grid;
+  gap: 8px;
+  margin-top: 26px;
+}
+
+.husval__kort {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 14px 8px 8px;
+  border: 0;
+  border-radius: 18px;
+  background: rgba(247, 245, 240, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+  color: var(--krita);
+  text-align: left;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.4s var(--mjuk);
+}
+
+.husval__kort:hover {
+  transform: translateX(4px);
+}
+
+.husval__kort.vald {
+  background: rgba(240, 181, 110, 0.14);
+  box-shadow: inset 0 0 0 1.5px var(--virke);
+}
+
+.husval__kort img {
+  width: 74px;
+  height: 50px;
+  border-radius: 11px;
+  object-fit: cover;
+}
+
+.husval__kort b {
+  display: block;
+  font: 600 1rem/1.2 var(--rubrik);
+}
+
+.husval__kort small {
+  font-size: 0.8125rem;
+  color: var(--ljus-3);
+}
+
+.husvisning {
+  position: relative;
+  height: min(62vh, 600px);
+  border-radius: 34px;
+  background:
+    radial-gradient(60% 55% at 50% 50%, rgba(247, 245, 240, 0.18), transparent 70%),
+    linear-gradient(180deg, rgba(247, 245, 240, 0.06), rgba(247, 245, 240, 0.02));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+  perspective: 900px;
+}
+
+.husvisning__golv {
+  position: absolute;
+  right: 10%;
+  bottom: 14%;
+  left: 10%;
+  height: 40%;
+  border-radius: 50%;
+  background:
+    linear-gradient(rgba(240, 181, 110, 0.14) 1px, transparent 1px) 0 0 / 26px 26px,
+    linear-gradient(90deg, rgba(240, 181, 110, 0.14) 1px, transparent 1px) 0 0 / 26px 26px;
+  -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent);
+  mask-image: radial-gradient(closest-side, #000 30%, transparent);
+  transform: rotateX(72deg);
+}
+
+.husvisning__mv {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(0.9) translateY(20px);
+  transition: opacity 0.5s ease, transform 0.9s var(--mjuk);
+}
+
+.husvisning__mv.in {
+  opacity: 1;
+  transform: none;
+}
+
+.husvisning model-viewer {
+  width: 100%;
+  height: 100%;
+  --poster-color: transparent;
+}
+
+.husvisning__fakta {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: grid;
+  gap: 4px;
+  max-width: 340px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(18, 16, 13, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+}
+
+.husvisning__fakta.in {
+  animation: in-upp 0.7s var(--mjuk) 0.2s both;
+}
+
+.husvisning__fakta small {
+  font: 700 0.625rem/1 var(--rubrik);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--virke);
+}
+
+.husvisning__fakta b {
+  font: 600 1.5rem/1.1 var(--rubrik);
+  letter-spacing: -0.03em;
+}
+
+.husvisning__tal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 0.8125rem;
+  color: var(--ljus-2);
+}
+
+.husvisning__tal em {
+  font: 600 1rem var(--rubrik);
+  font-style: normal;
+  color: var(--krita);
+}
+
+.husvisning__fakta p {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ljus-2);
+}
+
+.husvisning__tips {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ljus-3);
+}
+
+/* Reglerna */
+.regelvaxel {
+  position: relative;
+  display: inline-flex;
+  margin-top: 26px;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgba(247, 245, 240, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+}
+
+.regelvaxel button {
+  position: relative;
+  z-index: 1;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: 600 1rem/1 var(--rubrik);
+  color: var(--ljus-2);
+  transition: color 0.4s ease;
+}
+
+.regelvaxel button[aria-pressed="true"] {
+  color: var(--kol);
+}
+
+.regelvaxel__pill {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  height: calc(100% - 10px);
+  border-radius: 999px;
+  background: var(--virke);
+  box-shadow: 0 10px 24px -10px rgba(240, 181, 110, 0.8);
+  transition: transform 0.6s var(--mjuk), width 0.6s var(--mjuk);
+}
+
+.regeltal {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.regeltal__ruta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 4px 8px;
+  padding: 22px;
+  border-radius: 26px;
+  background: rgba(247, 245, 240, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+}
+
+.regeltal__ruta small {
+  grid-column: 1 / -1;
+  font-size: 0.875rem;
+  color: var(--ljus-2);
+}
+
+.regeltal__ruta b {
+  font: 600 clamp(3rem, 2rem + 3vw, 5rem)/1 var(--rubrik);
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.regeltal__ruta span {
+  font: 600 1.25rem/1 var(--rubrik);
+  color: var(--ljus-3);
+}
+
+.regeltal__ruta i {
+  grid-column: 1 / -1;
+  height: 6px;
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: rgba(247, 245, 240, 0.1);
+}
+
+.regeltal__ruta em {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #c98a45, #f6c68d);
+  transform: scaleX(var(--a));
+  transform-origin: left;
+  transition: transform 0.9s var(--mjuk);
+}
+
+.regeltal[data-plan="utanfor"] em {
+  transform: scaleX(var(--b));
+}
+
+/* Resan */
+.resa7 {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+  perspective: 1200px;
+}
+
+.resa7::before {
+  content: "";
+  position: absolute;
+  top: 26px;
+  right: 7%;
+  left: 7%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--virke), rgba(127, 224, 166, 0.8));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.mote__bild.nu .resa7::before {
+  transform: none;
+  transition: transform 2.2s var(--mjuk) 0.5s;
+}
+
+.mote__bild.nu .resa7__nr {
+  animation: nr-tand 0.9s var(--mjuk) backwards;
+  animation-delay: calc(0.6s + var(--n) * 0.22s);
+}
+
+@keyframes nr-tand {
+  0% { box-shadow: 0 0 0 6px #12100d, inset 0 0 0 1.5px rgba(247, 245, 240, 0.2); color: var(--ljus-3); transform: scale(0.8); }
+  60% { box-shadow: 0 0 0 6px #12100d, inset 0 0 0 1.5px var(--virke), 0 0 0 14px rgba(240, 181, 110, 0.18); transform: scale(1.08); }
+}
+
+.resa7__steg {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.mote__bild.nu .resa7__steg[data-m-in] {
+  transition-delay: calc(0.35s + var(--n) * 0.1s);
+}
+
+.resa7__nr {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #1f1c17;
+  box-shadow: 0 0 0 6px #12100d, inset 0 0 0 1.5px var(--virke);
+  font: 600 1.25rem/1 var(--rubrik);
+  color: var(--virke);
+}
+
+.resa7__steg b {
+  font: 600 1rem/1.25 var(--rubrik);
+}
+
+.resa7__steg p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ljus-3);
+}
+
+/* Kalkylen */
+.kalkyl__modeller {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 26px;
+}
+
+.kalkyl__modell {
+  display: grid;
+  gap: 4px;
+  padding: 6px 6px 10px;
+  border: 0;
+  border-radius: 16px;
+  background: rgba(247, 245, 240, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+  color: var(--krita);
+  transition: box-shadow 0.3s ease, transform 0.4s var(--mjuk), background-color 0.3s ease;
+}
+
+.kalkyl__modell img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  margin-bottom: 4px;
+  border-radius: 11px;
+  object-fit: cover;
+}
+
+.kalkyl__modell b {
+  font: 600 0.875rem/1.1 var(--rubrik);
+}
+
+.kalkyl__modell small {
+  font-size: 0.75rem;
+  color: var(--ljus-3);
+}
+
+.kalkyl__modell.vald {
+  background: rgba(240, 181, 110, 0.14);
+  box-shadow: inset 0 0 0 2px var(--virke);
+  transform: translateY(-3px);
+}
+
+.kalkyl__tillval {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.kalkyl__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(247, 245, 240, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  color: var(--ljus-2);
+  font: 600 0.8125rem/1 var(--rubrik);
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.kalkyl__chip .i {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.4;
+  opacity: 0.3;
+}
+
+.kalkyl__chip.vald {
+  background: var(--virke);
+  box-shadow: none;
+  color: var(--kol);
+}
+
+.kalkyl__chip.vald .i {
+  opacity: 1;
+}
+
+.kvitto {
+  position: relative;
+  overflow: hidden;
+  padding: 18px;
+  border-radius: 28px;
+  background: var(--krita);
+  box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 0.8);
+  color: var(--kol);
+  transform: perspective(1400px) rotateY(-6deg) rotateX(3deg);
+  transition: transform 0.8s var(--mjuk);
+}
+
+.kvitto:hover {
+  transform: none;
+}
+
+.kvitto__huvud {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.kvitto__bild {
+  flex: none;
+  width: 168px;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 14px 28px -18px rgba(27, 25, 21, 0.7);
+}
+
+.kvitto__bild img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1600 / 1062;
+  animation: in-fade 0.6s ease both;
+}
+
+.kvitto__huvud small {
+  display: block;
+  font: 700 0.625rem/1 var(--rubrik);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--virke-djup);
+}
+
+.kvitto__huvud b {
+  display: block;
+  margin: 4px 0 2px;
+  font: 600 1.625rem/1.1 var(--rubrik);
+  letter-spacing: -0.03em;
+}
+
+.kvitto__huvud em {
+  font-size: 0.8125rem;
+  font-style: normal;
+  color: var(--text-3);
+}
+
+.kvitto__rader {
+  display: grid;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kvitto__rader li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 4px;
+  border-bottom: 1px dashed rgba(27, 25, 21, 0.14);
+  font-size: 0.9375rem;
+  animation: in-upp 0.5s var(--mjuk) both;
+  animation-delay: calc(var(--n) * 0.04s);
+}
+
+.kvitto__summa {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: var(--kol);
+  color: var(--krita);
+}
+
+.kvitto__summa span {
+  font: 600 1rem/1 var(--rubrik);
+}
+
+.kvitto__summa b {
+  font-size: clamp(1.8rem, 1.2rem + 1.6vw, 2.6rem);
+  color: var(--virke);
+}
+
+.kvitto__summa b.blink {
+  animation: blink 0.7s ease;
+}
+
+@keyframes blink {
+  30% { text-shadow: 0 0 24px rgba(240, 181, 110, 0.9); }
+}
+
+.kvitto__not {
+  margin: 10px 4px 0;
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.kvitto__knappar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.kvitto__tips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--text-3);
+}
+
+/* Nästa steg */
+.nasta3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 900px;
+  margin: 34px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nasta3 li {
+  display: grid;
+  gap: 6px;
+  padding: 20px;
+  border-radius: 24px;
+  background: rgba(18, 16, 13, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+}
+
+.nasta3 span {
+  font: 600 0.8125rem/1 var(--rubrik);
+  color: var(--virke);
+}
+
+.nasta3 b {
+  font: 600 1.25rem/1.2 var(--rubrik);
+}
+
+.nasta3 p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ljus-2);
+}
+
+.nasta__knappar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.knapp--stor {
+  min-height: 54px;
+  padding: 0 24px;
+  font-size: 1rem;
+}
+
+.knapp--stor .i {
+  width: 18px;
+  height: 18px;
+}
+
+/* Er förfrågan */
+.er__citat {
+  position: relative;
+  max-width: 34ch;
+  margin: 26px 0 0;
+  padding: 22px 24px 20px 58px;
+  border-radius: 24px;
+  background: rgba(240, 181, 110, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.22);
+}
+
+.er__citat::before {
+  content: "\201C";
+  position: absolute;
+  top: 6px;
+  left: 18px;
+  font: 700 3.6rem/1 var(--rubrik);
+  color: var(--virke);
+}
+
+.er__citat p {
+  margin: 0;
+  font: 500 clamp(1.05rem, 0.95rem + 0.4vw, 1.3rem)/1.5 var(--sans);
+  color: var(--krita);
+}
+
+.er__citat cite {
+  display: block;
+  margin-top: 10px;
+  font: 600 0.8125rem/1 var(--rubrik);
+  font-style: normal;
+  color: var(--ljus-3);
+}
+
+.er__svar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 0;
+}
+
+.er__svar div {
+  padding: 10px 16px;
+  border-radius: 16px;
+  background: rgba(247, 245, 240, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+}
+
+.er__svar dt {
+  font-size: 0.6875rem;
+  color: var(--ljus-3);
+}
+
+.er__svar dd {
+  margin: 2px 0 0;
+  font: 600 0.9375rem/1.2 var(--rubrik);
+}
+
+.er__bild {
+  position: relative;
+  padding-bottom: 44px;
+}
+
+/* Förslaget ligger i nedre högra hörnet – husets skylt nere till
+   vänster syns alltid. */
+.er__forslag {
+  position: absolute;
+  right: -14px;
+  bottom: 0;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  width: min(390px, 86%);
+  padding: 12px 18px 12px 12px;
+  border-radius: 22px;
+  background: rgba(30, 27, 22, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14), 0 30px 60px -24px rgba(0, 0, 0, 0.85);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.mote__bild.nu .er__forslag {
+  animation: forslag-in 1.2s var(--mjuk) 1.1s backwards;
+}
+
+@keyframes forslag-in {
+  from { opacity: 0; transform: translate(30px, 20px) scale(0.94); }
+}
+
+.er__forslag img {
+  width: 92px;
+  flex: none;
+  aspect-ratio: 1600 / 1062;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.er__forslag small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 0.6875rem/1 var(--rubrik);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--virke);
+}
+
+.er__forslag small .i {
+  width: 13px;
+  height: 13px;
+}
+
+.er__forslag b {
+  display: block;
+  margin-top: 5px;
+  font: 600 1.125rem/1.2 var(--rubrik);
+}
+
+.er__forslag em {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8125rem;
+  font-style: normal;
+  line-height: 1.45;
+  color: var(--ljus-2);
+}
+
+/* Reglerna: fasaden i skala växer när man byter plan. */
+.regelbild {
+  display: grid;
+  gap: 8px;
+}
+
+.hussil {
+  margin: 0;
+  padding: 18px 10px 4px;
+  border-radius: 30px;
+  background:
+    radial-gradient(60% 70% at 50% 100%, rgba(240, 181, 110, 0.12), transparent 70%),
+    linear-gradient(rgba(247, 245, 240, 0.035) 1px, transparent 1px) 0 0 / 26px 26px,
+    linear-gradient(90deg, rgba(247, 245, 240, 0.035) 1px, transparent 1px) 0 0 / 26px 26px;
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+}
+
+.hussil svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.hussil__mark {
+  stroke: rgba(247, 245, 240, 0.35);
+  stroke-width: 2;
+}
+
+.hussil__hus,
+.hussil__panel,
+.hussil__spok {
+  transition: d 1.1s var(--mjuk);
+}
+
+.hussil__hus {
+  fill: url(#sil-fasad);
+  stroke: var(--virke);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.mote__bild.nu .hussil__hus {
+  animation: sil-rita 2s var(--mjuk) 0.5s backwards;
+}
+
+@keyframes sil-rita {
+  from { stroke-dashoffset: 1; fill-opacity: 0; }
+  60% { fill-opacity: 0; }
+}
+
+.hussil__panel {
+  fill: url(#sil-panel);
+  pointer-events: none;
+}
+
+.hussil__spok {
+  fill: none;
+  stroke: rgba(247, 245, 240, 0.3);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 6;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.hussil[data-plan="utanfor"] .hussil__spok {
+  opacity: 1;
+}
+
+.hussil[data-plan="utanfor"] .hussil__hus,
+.hussil[data-plan="utanfor"] .hussil__panel {
+  d: path("M72 300 V170 L260 62 L448 170 V300 Z");
+}
+
+.hussil[data-plan="inom"] .hussil__hus,
+.hussil[data-plan="inom"] .hussil__panel {
+  d: path("M110 300 V170 L260 88 L410 170 V300 Z");
+}
+
+.hussil__fonster {
+  fill: rgba(159, 194, 201, 0.22);
+  stroke: rgba(247, 245, 240, 0.35);
+  stroke-width: 1.5;
+}
+
+.hussil__dorr {
+  fill: rgba(18, 16, 13, 0.7);
+  stroke: rgba(247, 245, 240, 0.35);
+  stroke-width: 1.5;
+}
+
+.hussil__niva {
+  stroke: var(--virke);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 5;
+  transition: d 1.1s var(--mjuk);
+}
+
+.hussil__matt {
+  stroke: var(--virke);
+  stroke-width: 2;
+  transition: d 1.1s var(--mjuk);
+}
+
+.hussil[data-plan="inom"] .hussil__niva { d: path("M260 88 H492"); }
+.hussil[data-plan="utanfor"] .hussil__niva { d: path("M260 62 H492"); }
+.hussil[data-plan="inom"] .hussil__matt { d: path("M492 300 V88"); }
+.hussil[data-plan="utanfor"] .hussil__matt { d: path("M492 300 V62"); }
+
+.hussil__lapp {
+  transform: translateY(88px);
+  transition: transform 1.1s var(--mjuk);
+}
+
+.hussil[data-plan="utanfor"] .hussil__lapp {
+  transform: translateY(62px);
+}
+
+.hussil__lapp rect {
+  fill: var(--virke);
+}
+
+.hussil__lapp text {
+  font: 700 13px var(--rubrik);
+  fill: var(--kol);
+}
+
+.hussil__bredd {
+  font: 600 13px var(--rubrik);
+  fill: var(--ljus-2);
+}
+
+.mb--regler .regeltal {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.mb--regler .regeltal__ruta {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  padding: 14px 20px 16px;
+  border-radius: 20px;
+}
+
+.mb--regler .regeltal__ruta small {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+}
+
+.mb--regler .regeltal__ruta b {
+  font-size: clamp(2rem, 1.4rem + 1.6vw, 3rem);
+}
+
+.mb--regler .regeltal__ruta i {
+  margin-top: 6px;
+}
+
+.mb--regler .mb__text--liten {
+  margin-top: 8px;
+  font-size: 0.9375rem;
+}
+
+/* Resan: vem gör vad. */
+.resa__topp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.resa__vem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vem {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: max-content;
+  padding: 7px 12px 7px 9px;
+  border-radius: 999px;
+  font: 600 0.75rem/1 var(--rubrik);
+}
+
+.vem .i {
+  width: 14px;
+  height: 14px;
+}
+
+.vem--vi {
+  background: rgba(240, 181, 110, 0.16);
+  color: #f6c68d;
+}
+
+.vem--ni {
+  background: rgba(159, 194, 201, 0.16);
+  color: #b9d6dc;
+}
+
+.vem--tillsammans {
+  background: rgba(127, 224, 166, 0.14);
+  color: #a8ebc3;
+}
+
+.resa__vem .vem {
+  padding: 10px 16px 10px 12px;
+  font-size: 0.875rem;
+}
+
+.resa7__steg .vem {
+  margin-top: 4px;
+}
+
+.mb__kontakt {
+  margin: 26px 0 0;
+  font: 600 1rem/1 var(--rubrik);
+  color: var(--ljus-2);
+}
+
+@media (max-width: 900px) {
+  .mb__in {
+    width: calc(100% - 36px);
+    padding: 80px 0 100px;
+  }
+
+  .mb__in--delad {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .husvisning {
+    height: 44vh;
+  }
+
+  .husval__lista {
+    grid-auto-flow: column;
+    grid-auto-columns: 70%;
+    overflow-x: auto;
+  }
+
+  .regeltal,
+  .nasta3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mote__tid {
+    display: none;
+  }
+
+  .mote--anteckning .mote__scen {
+    transform: none;
+  }
+
+  .mote__anteckning {
+    top: auto;
+    right: 10px;
+    bottom: 84px;
+    left: 10px;
+    width: auto;
+    height: 46vh;
+  }
+
+  .er__forslag {
+    position: relative;
+    right: auto;
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  /* Toppen får en egen botten så att rullat innehåll inte syns igenom. */
+  .mote__topp {
+    top: 0;
+    right: 0;
+    left: 0;
+    padding: 12px 12px 22px 16px;
+    background: linear-gradient(#12100d 62%, rgba(18, 16, 13, 0));
+  }
+
+  .er__bild {
+    padding-bottom: 0;
+  }
+
+  .resa7__steg .vem {
+    grid-column: 2;
+  }
+
+  .resa7 {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .resa7::before {
+    display: none;
+  }
+
+  .resa7__steg {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .resa7__nr {
+    grid-row: span 2;
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+  }
+
+  .kalkyl__modeller {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mb {
+    overflow-y: auto;
+    align-items: start;
+  }
+
+  .mote__namn,
+  .mote__raknare {
+    display: none;
+  }
+
+  .mote__botten {
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    padding-left: 10px;
+  }
+
+  .kvitto {
+    transform: none;
+  }
+}
