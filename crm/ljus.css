@@ -5165,3 +5165,326 @@ body {
     flex: none;
   }
 }
+
+/* CRM-brickan ljus och mjuk (2026-10-08, kunden: den mörka såg billig ut). */
+.sido .sido__crm {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 9px;
+  border-radius: 999px;
+  background: linear-gradient(160deg, rgba(255, 249, 238, 0.98), rgba(255, 236, 210, 0.78));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(201, 138, 69, 0.26),
+    0 8px 18px -12px rgba(143, 84, 36, 0.45);
+  font: 600 0.6875rem/1 var(--rubrik);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8f5424;
+}
+
+.sido .sido__crm::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffe2b8, #e8a456 70%);
+  box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.18), 0 0 8px rgba(240, 181, 110, 0.55);
+}
+
+.sido .sido__crm small {
+  font: 500 0.6875rem/1 var(--rubrik);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: #a98763;
+}
+
+/* =====================================================================
+   Säljtavlan premium, ljus och mjuk (2026-10-08)
+   Kunden: "gör säljtavlan mer premium" och "ska se ljus mjuk ut och inte
+   så billigt". Allt i ljust glas med varma toner: nyckeltalen och
+   förslagen som glaskort med ljusa ikonrutor, stegbandet som en mjuk
+   glasrad, spalterna som glaspaneler där stegets färg lyser svagt i
+   toppen, och affärskorten i vitt glas som lyfter mjukt.
+   ===================================================================== */
+
+/* --- Sidhuvudet: mjuk flik och varm knapp ------------------------------ */
+.vyhuvud .flikar {
+  padding: 4px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.6));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 12px 24px -20px rgba(90, 60, 25, 0.5);
+}
+
+.vyhuvud .flikar__markor {
+  background: linear-gradient(160deg, #fffaf2, #ffe9cb);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.32), 0 8px 18px -12px rgba(143, 84, 36, 0.55);
+}
+
+.vyhuvud .flikar button[aria-pressed="true"] {
+  color: #7a4a1c;
+}
+
+.vyhuvud .flikar button[aria-pressed="true"] .i {
+  color: #c47a32;
+}
+
+.vyhuvud__knappar .knapp--mork {
+  background: linear-gradient(160deg, #f6c88f, #e8a456 55%, #d38f45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 14px 28px -14px rgba(201, 128, 52, 0.75);
+  color: #1b1915;
+}
+
+.vyhuvud__knappar .knapp--mork:hover {
+  background: linear-gradient(160deg, #f8d29f, #eaab5f 55%, #d8964c);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 18px 32px -14px rgba(201, 128, 52, 0.85);
+}
+
+.vyhuvud__knappar .knapp--mork::after {
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
+}
+
+/* --- Toppen: nyckeltal och förslag ------------------------------------- */
+.puls {
+  background:
+    radial-gradient(60% 70% at 100% 0%, rgba(255, 214, 160, 0.45), transparent 65%),
+    radial-gradient(55% 70% at 0% 100%, rgba(205, 228, 196, 0.4), transparent 65%),
+    linear-gradient(165deg, #fffdf9, #fcf6ed 55%, #f7f2e9);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 40px 80px -56px rgba(90, 60, 25, 0.6);
+}
+
+.puls .kpi,
+.kort--mork.puls .kpi {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.7));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 22px 44px -32px rgba(90, 60, 25, 0.55);
+  transition: transform 0.45s var(--mjuk), box-shadow 0.45s var(--mjuk);
+}
+
+.puls .kpi:hover,
+.kort--mork.puls .kpi:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(201, 138, 69, 0.3),
+    0 28px 50px -32px rgba(143, 84, 36, 0.6);
+}
+
+.puls .kpi__ikon,
+.puls .forslag__ikon,
+.kort--mork.puls .kpi__ikon,
+.kort--mork.puls .forslag__ikon {
+  background: linear-gradient(160deg, #fff6e8, #ffe2bd);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(201, 138, 69, 0.28), 0 6px 12px -8px rgba(143, 84, 36, 0.5);
+  color: #b06a26;
+}
+
+.puls .kpi__tal {
+  font-weight: 600;
+}
+
+.puls .forslag__rad,
+.kort--mork.puls .forslag__rad {
+  padding: 11px 12px 11px 11px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.66));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 14px 28px -24px rgba(90, 60, 25, 0.55);
+}
+
+.puls .forslag__rad:hover,
+.kort--mork.puls .forslag__rad:hover {
+  background: #fff;
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.3), 0 18px 32px -24px rgba(143, 84, 36, 0.6);
+}
+
+.puls .forslag__rad em,
+.kort--mork.puls .forslag__rad em {
+  background: linear-gradient(160deg, #fffaf2, #ffe9cb);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.35);
+  color: #7a4a1c;
+}
+
+.puls .forslag__rad:hover em {
+  background: linear-gradient(160deg, #f6c88f, #e8a456);
+  color: #1b1915;
+}
+
+/* --- Stegbandet ---------------------------------------------------------- */
+.stegband {
+  padding: 6px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.62));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 18px 36px -28px rgba(90, 60, 25, 0.55);
+}
+
+.stegband button {
+  border-radius: 16px;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stegband button:hover {
+  background: linear-gradient(160deg, #fff, color-mix(in srgb, var(--f) 14%, #fff));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--f) 40%, transparent);
+}
+
+.stegband b::before {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--f) 25%, transparent);
+}
+
+.stegband i {
+  height: 3px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--f) 55%, #fff), var(--f));
+}
+
+/* --- Spalterna ----------------------------------------------------------- */
+.tavla {
+  gap: 14px;
+  scrollbar-color: rgba(201, 138, 69, 0.35) transparent;
+}
+
+.spalt {
+  border-radius: 26px;
+  background:
+    radial-gradient(90% 40% at 50% 0%, color-mix(in srgb, var(--f) 18%, transparent), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.3));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 0 0 1px rgba(27, 25, 21, 0.045);
+}
+
+.spalt__huvud {
+  position: relative;
+  margin: 6px 6px 0;
+  padding: 14px 14px 12px;
+  border-top: 0;
+  border-radius: 20px;
+  background:
+    radial-gradient(100% 120% at 0% 0%, color-mix(in srgb, var(--f) 26%, transparent), transparent 65%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.78));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 14px 26px -22px rgba(90, 60, 25, 0.5);
+}
+
+.spalt__huvud b {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spalt__huvud b::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--f);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--f) 25%, transparent);
+}
+
+.spalt__huvud span {
+  background: color-mix(in srgb, var(--f) 22%, #fff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--f) 45%, transparent);
+  color: #5c3a17;
+}
+
+.spalt__huvud .tal {
+  font-size: 1.4375rem;
+  letter-spacing: -0.03em;
+}
+
+.spalt__kort {
+  gap: 10px;
+  padding: 10px 8px 12px;
+}
+
+.spalt--mal {
+  background:
+    radial-gradient(90% 50% at 50% 0%, color-mix(in srgb, var(--f) 32%, transparent), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.5));
+}
+
+/* --- Affärskorten -------------------------------------------------------- */
+.aff {
+  gap: 9px;
+  padding: 13px 13px 14px 14px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, #fff, rgba(255, 255, 255, 0.82));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(27, 25, 21, 0.05),
+    0 16px 30px -24px rgba(90, 60, 25, 0.55);
+}
+
+.aff::before {
+  top: 16px;
+  bottom: 16px;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--f) 70%, #fff), var(--f));
+  opacity: 0.85;
+}
+
+.aff:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(201, 138, 69, 0.3),
+    0 24px 40px -26px rgba(143, 84, 36, 0.6);
+}
+
+/* Husbilden i sitt eget format, så skylten nere till vänster syns. */
+.aff__bild {
+  width: 51px;
+  height: 34px;
+  border-radius: 9px;
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.06), 0 6px 12px -8px rgba(27, 25, 21, 0.45);
+}
+
+.aff__modell {
+  color: #a07650;
+}
+
+.aff__nasta {
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #fffaf2, #fff0dc);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.2);
+  color: #6b4a2b;
+}
+
+.aff__nasta--varm {
+  background: linear-gradient(160deg, #fff4ee, #ffe3d6);
+  box-shadow: inset 0 0 0 1px rgba(217, 115, 58, 0.25);
+  color: #8a3a22;
+}
+
+.aff__dagar {
+  height: 3px;
+  border-radius: 0 3px 0 0;
+  background: linear-gradient(90deg, rgba(240, 181, 110, 0.35), #f0b56e);
+}
+
+.spalt__tom {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.vyhuvud .flikar button[aria-pressed="true"] b {
+  background: rgba(201, 138, 69, 0.18);
+}
+
+/* Ljusa, mjuka ikonrutor i stället för mörka (2026-10-08, kunden: "ska se
+   ljus mjuk ut"). Samma varma ruta som på säljtavlan. */
+.sido__lank.aktiv > .i,
+.anv .i,
+.oversikt .kort__ikon,
+.hero .kpi__ikon,
+.kort--mork.hero .kpi__ikon {
+  background: linear-gradient(160deg, #fff6e8, #ffe2bd);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(201, 138, 69, 0.3), 0 6px 12px -8px rgba(143, 84, 36, 0.5);
+  color: #b06a26;
+}
+
+.oversikt .fokus__ikon {
+  background: linear-gradient(160deg, #fff6e8, #ffe2bd);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(201, 138, 69, 0.3), 0 6px 12px -8px rgba(143, 84, 36, 0.5);
+  color: #b06a26;
+}

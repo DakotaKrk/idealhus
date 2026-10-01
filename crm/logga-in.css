@@ -1402,3 +1402,30 @@
   max-width: 46ch;
   margin: 16px 0 28px;
 }
+
+/* CRM-brickan ljus och mjuk (2026-10-08, kunden: den mörka såg billig ut). */
+.li__topp .li__crm {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 9px;
+  border-radius: 999px;
+  background: linear-gradient(160deg, rgba(255, 249, 238, 0.98), rgba(255, 236, 210, 0.78));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(201, 138, 69, 0.26),
+    0 8px 18px -12px rgba(143, 84, 36, 0.45);
+  font: 600 0.6875rem/1 var(--rubrik);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8f5424;
+}
+
+.li__topp .li__crm::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffe2b8, #e8a456 70%);
+  box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.18), 0 0 8px rgba(240, 181, 110, 0.55);
+}
