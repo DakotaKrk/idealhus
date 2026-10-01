@@ -19515,3 +19515,191 @@ html:not([data-tema="mork"]) .katsida .model-grid .jamfor-knapp {
   mask-image: radial-gradient(75% 70% at 50% 50%, #000 55%, transparent 100%);
 }
 
+/* =====================================================================
+   Knappgrupperna med glidande markör (2026-10-06): sorteringen,
+   3D-väljarna, stegfiltren och samägandet ser likadana ut - ljust glas
+   med tunn kant, och en mörk markör med varm gradient, ljus innerkant
+   och mjuk skugga bakom den valda knappen. Flikarna Attefallshus /
+   Fritidshus / Proffs samlas i samma sorts pill.
+   ===================================================================== */
+html body :is(.filter.sortering, .studio3d__val, .studio3d__vyer, .vemfilter, .hustypval) {
+  border: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.52));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(27, 25, 21, 0.07),
+    0 16px 34px -24px rgba(90, 60, 25, 0.45);
+}
+
+html body .har-markor .markor,
+html body .modellrad .markor,
+html body .hustypval .markor {
+  background: linear-gradient(180deg, #38332c 0%, #1d1b17 55%, #141210 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(240, 181, 110, 0.24),
+    0 10px 22px -10px rgba(27, 25, 21, 0.65);
+}
+
+html body :is(.filter.sortering, .studio3d__val, .studio3d__vyer, .vemfilter, .hustypval) button {
+  color: var(--text-2);
+  font-weight: 500;
+  transition: color 0.35s ease;
+}
+
+html body :is(.filter.sortering, .studio3d__val, .studio3d__vyer, .vemfilter, .hustypval) button:hover {
+  color: var(--text);
+}
+
+html body :is(.filter.sortering, .studio3d__val, .studio3d__vyer, .vemfilter, .hustypval) button[aria-pressed="true"],
+html body :is(.filter.sortering, .studio3d__val, .studio3d__vyer, .vemfilter, .hustypval) button[aria-pressed="true"] b {
+  color: var(--krita);
+}
+
+.filter.sortering .filter__etikett {
+  margin-right: 4px;
+  padding-right: 14px;
+  box-shadow: inset -1px 0 0 rgba(27, 25, 21, 0.1);
+  letter-spacing: 0.16em;
+}
+
+/* Flikarna överst på kategorisidorna i en glaspill. */
+html body .katsida .category-filter {
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto clamp(2.5rem, 5vw, 4rem);
+  padding: 5px;
+  gap: 2px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.52));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(27, 25, 21, 0.07),
+    0 16px 34px -24px rgba(90, 60, 25, 0.45);
+}
+
+html body .katsida .category-filter a {
+  height: 42px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-2);
+  font-weight: 500;
+  box-shadow: none;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+html body .katsida .category-filter a:hover {
+  color: var(--text);
+  background: rgba(27, 25, 21, 0.05);
+}
+
+html body .katsida .category-filter a[aria-current="page"] {
+  color: var(--krita);
+  background: linear-gradient(180deg, #38332c 0%, #1d1b17 55%, #141210 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(240, 181, 110, 0.24),
+    0 10px 22px -10px rgba(27, 25, 21, 0.65);
+}
+
+html body .katsida .category-filter__delare {
+  align-self: center;
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: rgba(27, 25, 21, 0.12);
+}
+
+/* Ljuset bakom korten börjar längre ned, så det inte möter knapparna. */
+.katsida .model-grid::before {
+  inset: 12% -5% 0;
+}
+
+/* Mörkt läge. */
+html[data-tema="mork"] body :is(.filter.sortering, .studio3d__val, .studio3d__vyer, .vemfilter, .hustypval),
+html[data-tema="mork"] body .katsida .category-filter {
+  background: rgba(247, 245, 240, 0.06);
+  box-shadow: inset 0 1px 0 rgba(247, 245, 240, 0.08), inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] body .har-markor .markor,
+html[data-tema="mork"] body .modellrad .markor,
+html[data-tema="mork"] body .hustypval .markor,
+html[data-tema="mork"] body .katsida .category-filter a[aria-current="page"] {
+  background: linear-gradient(180deg, #f6c88f, var(--virke));
+  box-shadow: 0 10px 22px -10px rgba(240, 181, 110, 0.5);
+}
+
+html[data-tema="mork"] body :is(.filter.sortering, .studio3d__val, .studio3d__vyer, .vemfilter, .hustypval) button[aria-pressed="true"],
+html[data-tema="mork"] body :is(.filter.sortering, .studio3d__val, .studio3d__vyer, .vemfilter, .hustypval) button[aria-pressed="true"] b,
+html[data-tema="mork"] body .katsida .category-filter a[aria-current="page"] {
+  color: var(--kol);
+}
+
+@media (max-width: 400px) {
+  html body .katsida .category-filter a {
+    height: 38px;
+    padding: 0 11px;
+    font-size: 0.8125rem;
+  }
+
+  html body .katsida .category-filter__delare {
+    margin: 0 2px;
+  }
+}
+
+/* Offertutkastets svarsknappar (prissidan): gjorda för den mörka
+   panelen med vit text och vit kant - på den ljusa panelen syntes bara
+   den valda. Nu glasknappar med mörk text i ljust läge. */
+html:not([data-tema="mork"]) .tfraga {
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+html:not([data-tema="mork"]) .tfraga:focus-within {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+html:not([data-tema="mork"]) .tfraga legend {
+  color: var(--text);
+}
+
+html:not([data-tema="mork"]) .tfraga__nr {
+  color: var(--virke-djup);
+}
+
+html:not([data-tema="mork"]) .tval span {
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: var(--text-2);
+}
+
+html:not([data-tema="mork"]) .tval span:hover {
+  background: #fff;
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.2);
+}
+
+html:not([data-tema="mork"]) .tval input:checked + span {
+  background: linear-gradient(180deg, #f6c993, var(--virke));
+  color: var(--kol);
+  box-shadow: 0 8px 18px -8px rgba(240, 181, 110, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+html:not([data-tema="mork"]) .tval input:focus-visible + span {
+  outline-color: var(--virke-djup);
+}
+
+html:not([data-tema="mork"]) .prisoffert__lank a {
+  color: var(--virke-djup);
+  text-decoration-color: rgba(143, 84, 36, 0.4);
+}
+
+html:not([data-tema="mork"]) .prisoffert__lank a:hover {
+  color: var(--text);
+}
+
