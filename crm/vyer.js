@@ -1856,6 +1856,7 @@
      ================================================================ */
   var offFilter = 'alla', offSort = 'senaste', offSok = '';
   var OFF_ST = { utkast: ['#b8cde0', 'Utkast'], skickad: ['#f0b56e', 'Skickad'], godkand: ['#7fe0a6', 'Godkänd'] };
+  var OFF_FILTER_EMOJI = { alla: '📄', skickad: '⏳', snart: '⏰', godkand: '✅', utkast: '✏️' };
 
   // Allt om en offert på ett ställe.
   function offInfo(o) {
@@ -1868,7 +1869,7 @@
 
   function offRad(x) {
     var o = x.o, st = x.utgangen ? ['#a39b8e', 'Gått ut'] : OFF_ST[o.status] || OFF_ST.utkast;
-    var giltig = o.status === 'godkand' ? '<span class="tid">Blev order</span>' : x.utgangen ? '<span class="tid tid--varm">Gått ut</span>' :
+    var giltig = o.status === 'godkand' ? '<span class="tid tid--order">🏆 Blev order</span>' : x.utgangen ? '<span class="tid tid--varm">Gått ut</span>' :
       '<span class="offgiltig' + (x.snart ? ' offgiltig--varm' : '') + '"><span class="poang poang--' + (x.snart ? 'kall' : 'ljum') + '" style="--p:' + Math.round(Math.max(0, Math.min(1, x.kvar / x.giltig)) * 100) + '"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17"/><circle class="poang__fyll" cx="20" cy="20" r="17" pathLength="100"/></svg><b>' + Math.max(0, x.kvar) + '</b></span><small>' + (x.kvar === 1 ? 'dag kvar' : 'dagar kvar') + '</small></span>';
     return '<tr data-g="offert-oppna" data-id="' + o.id + '" class="' + (x.snart ? 'offrad--snart' : '') + '"><td><span class="tabell__hus">' + (x.m ? '<img src="' + x.m.tumme + '" alt="" loading="lazy">' : '') +
       '<span><b>' + e(o.nummer) + '</b><small>' + (x.m ? e(x.m.namn) + ' · ' : '') + IH.datum(o.skapad) + '</small></span></span></td>' +
@@ -1928,36 +1929,37 @@
     });
 
     var html = '<header class="vyhuvud"><div><p class="etikett">Sälj</p><h1>Offerter</h1><p>' + alla.length + ' offerter · totalt ' + IH.kort(sum(alla)) + '</p></div>' +
-      '<div class="vyhuvud__knappar"><label class="sok sok--liten">' + i('sok') + '<input type="search" placeholder="Sök kund, nummer eller hus…" value="' + e(offSok) + '" data-offsok></label></div></header>' +
+      '<div class="vyhuvud__knappar"><label class="sok sok--liten">' + i('sok') + '<input type="search" placeholder="Sök kund eller nummer…" value="' + e(offSok) + '" data-offsok></label></div></header>' +
 
       '<section class="offtopp kort kort--mork" data-in>' +
         '<div class="offtopp__ord">' +
           '<p class="etikett etikett--ljus">Offertläget</p>' +
           '<p class="offtopp__stort"><b class="tal" data-rakna="' + Math.round(sum(skickade)) + '" data-format="kort">' + IH.kort(sum(skickade)) + '</b><span>väntar på svar<small>' + skickade.length + (skickade.length === 1 ? ' offert' : ' offerter') + (snart.length ? ' · ' + snart.length + ' går ut inom tio dagar' : '') + '</small></span></p>' +
           '<div class="offtopp__tal">' +
-            '<div><small>Träffsäkerhet</small><b class="tal">' + (traff === null ? '–' : '<span data-rakna="' + traff + '">' + traff + '</span><em> %</em>') + '</b><span>' + (avgjorda ? godkanda.length + ' av ' + avgjorda + ' avgjorda' : 'inga avgjorda än') + '</span></div>' +
-            '<div><small>Tid till ja</small><b class="tal">' + (snittTid === null ? '–' : '<span data-rakna="' + snittTid + '">' + snittTid + '</span><em> d</em>') + '</b><span>' + (tider.length ? 'snitt för ' + tider.length + ' godkända' : 'inga godkända än') + '</span></div>' +
-            '<div><small>Godkänt värde</small><b class="tal" data-rakna="' + Math.round(sum(godkanda)) + '" data-format="kort">' + IH.kort(sum(godkanda)) + '</b><span>' + godkanda.length + ' blev order</span></div>' +
+            '<div><small><i aria-hidden="true">🎯</i>Träffsäkerhet</small><b class="tal">' + (traff === null ? '–' : '<span data-rakna="' + traff + '">' + traff + '</span><em> %</em>') + '</b><span>' + (avgjorda ? godkanda.length + ' av ' + avgjorda + ' avgjorda' : 'inga avgjorda än') + '</span></div>' +
+            '<div><small><i aria-hidden="true">⏱️</i>Tid till ja</small><b class="tal">' + (snittTid === null ? '–' : '<span data-rakna="' + snittTid + '">' + snittTid + '</span><em> d</em>') + '</b><span>' + (tider.length ? 'snitt för ' + tider.length + ' godkända' : 'inga godkända än') + '</span></div>' +
+            '<div><small><i aria-hidden="true">🏆</i>Godkänt värde</small><b class="tal" data-rakna="' + Math.round(sum(godkanda)) + '" data-format="kort">' + IH.kort(sum(godkanda)) + '</b><span>' + godkanda.length + ' blev order</span></div>' +
           '</div>' +
-          '<div class="offtopp__vecka"><small>Offererat per vecka</small><div class="offtopp__staplar">' + veckor.map(function (y, n) {
-            return '<span style="--a:' + (y.summa / maxV).toFixed(2) + ';--n:' + n + '" data-tip="Vecka ' + y.v + ' · ' + (y.antal === 1 ? '1 offert' : y.antal + ' offerter') + ' · ' + IH.kort(y.summa) + '"><i></i><small>' + y.v + '</small></span>';
+          '<div class="offtopp__vecka"><small>📊 Offererat per vecka<em>' + IH.kort(veckor.reduce(function (t, y) { return t + y.summa; }, 0)) + ' på åtta veckor</em></small><div class="offtopp__staplar">' + veckor.map(function (y, n) {
+            return '<span class="' + (y.summa ? 'har' : '') + '" style="--a:' + (y.summa / maxV).toFixed(2) + ';--n:' + n + '" data-tip="Vecka ' + y.v + ' · ' + (y.antal === 1 ? '1 offert' : y.antal + ' offerter') + ' · ' + IH.kort(y.summa) + '">' +
+              '<b>' + (y.summa ? IH.kort(y.summa) : '') + '</b><i></i><small>' + (n === veckor.length - 1 ? 'nu' : 'v.' + y.v) + '</small></span>';
           }).join('') + '</div></div>' +
         '</div>' +
         '<div class="offtopp__hoger">' +
-          '<div class="snartut"><div class="snartut__huvud"><p class="etikett etikett--ljus">Går ut snart</p><small>' + (snart.length ? 'Följ upp eller förläng innan tiden går ut' : 'Inget som brådskar') + '</small></div>' +
+          '<div class="snartut"><div class="snartut__huvud"><p class="etikett etikett--ljus">⏰ Går ut snart</p><small>' + (snart.length ? 'Följ upp eller förläng innan tiden går ut' : 'Inget som brådskar') + '</small></div>' +
             (snart.length ? '<div class="snartut__lista" data-stagger>' + snart.slice(0, 3).map(function (x) {
               return '<div class="snartut__rad"><span class="poang poang--kall" style="--p:' + Math.round(x.kvar / x.giltig * 100) + '"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17"/><circle class="poang__fyll" cx="20" cy="20" r="17" pathLength="100"/></svg><b>' + x.kvar + '</b></span>' +
                 '<span class="snartut__text"><b>' + e(x.k ? x.k.namn : '') + '</b><small>' + e(x.o.nummer) + ' · ' + IH.kr(x.summa) + ' · ' + (x.kvar === 1 ? '1 dag kvar' : x.kvar + ' dagar kvar') + '</small></span>' +
                 '<span class="snartut__knappar"><button class="knapp knapp--liten knapp--mork" type="button" data-g="offert-folj-upp" data-id="' + x.o.id + '">' + i('samtal') + 'Följ upp</button>' +
                 '<button class="knapp knapp--liten" type="button" data-g="offert-forlang" data-id="' + x.o.id + '">' + i('klocka') + '+14 d</button></span></div>';
-            }).join('') + '</div>' : '<p class="snartut__tom">' + i('bock') + 'Alla skickade offerter har mer än tio dagar kvar.</p>') + '</div>' +
+            }).join('') + '</div>' : '<p class="snartut__tom"><span aria-hidden="true">✅</span>Alla skickade offerter har mer än tio dagar kvar.</p>') + '</div>' +
           '<div class="offinsikt">' +
-            '<div class="permodell"><p class="etikett etikett--ljus">Per hus</p>' + (modeller.length ? '<div class="permodell__lista">' + modeller.map(function (x, n) {
+            '<div class="permodell"><p class="etikett etikett--ljus">🏠 Per hus</p>' + (modeller.length ? '<div class="permodell__lista">' + modeller.map(function (x, n) {
               return '<a class="permodell__rad" href="#/offerter" style="--a:' + (x.summa / maxM).toFixed(2) + ';--n:' + n + '">' + (x.m && x.m.tumme ? '<img src="' + x.m.tumme + '" alt="" loading="lazy">' : '<i></i>') +
                 '<span><b>' + e(x.m ? x.m.namn : '') + '</b><small>' + x.antal + (x.antal === 1 ? ' offert' : ' offerter') + (x.ja ? ' · ' + x.ja + ' ja' : '') + '</small><i class="permodell__stapel"></i></span><em class="tal">' + IH.kort(x.summa) + '</em></a>';
             }).join('') + '</div>' : '') + '</div>' +
-            '<div class="poster"><p class="etikett etikett--ljus">Vanligaste posterna</p><div class="poster__lista">' + topPoster.map(function (t) {
-              return '<span style="--a:' + (poster[t] / alla.length).toFixed(3) + '"><b>' + poster[t] + '</b>' + e(t) + '<small>' + Math.round(poster[t] / alla.length * 100) + ' %</small><i></i></span>';
+            '<div class="poster"><p class="etikett etikett--ljus">🧩 Vanligaste posterna</p><div class="poster__lista">' + topPoster.map(function (t) {
+              return '<span style="--a:' + (poster[t] / alla.length).toFixed(3) + '"><b class="poster__emoji" aria-hidden="true">' + postEmoji(t) + '</b>' + e(t) + '<small>' + poster[t] + ' st · ' + Math.round(poster[t] / alla.length * 100) + ' %</small><i></i></span>';
             }).join('') + '</div></div>' +
           '</div>' +
         '</div>' +
@@ -1965,7 +1967,7 @@
 
       '<div class="kundverktyg">' +
         '<div class="flikar flikar--filter" data-flikar role="toolbar" aria-label="Filter">' + FILTER.map(function (f) {
-          return '<button type="button" data-g="off-filter" data-f="' + f[0] + '" aria-pressed="' + (offFilter === f[0]) + '">' + f[1] + '<b>' + antal[f[0]] + '</b></button>';
+          return '<button type="button" data-g="off-filter" data-f="' + f[0] + '" aria-pressed="' + (offFilter === f[0]) + '"><i class="flik__emoji" aria-hidden="true">' + OFF_FILTER_EMOJI[f[0]] + '</i>' + f[1] + '<b>' + antal[f[0]] + '</b></button>';
         }).join('') + '</div>' +
         '<div class="kundverktyg__hoger"><label class="kundsort">' + i('lista') + '<select data-offsort aria-label="Sortera">' +
           [['senaste', 'Senaste först'], ['giltig', 'Går ut först'], ['summa', 'Störst summa']].map(function (o) { return '<option value="' + o[0] + '"' + (offSort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label></div>' +
@@ -2097,7 +2099,7 @@
             return '<button type="button" class="modellknapp' + (m.id === o.modell ? ' vald' : '') + '" data-g="offert-modell" data-id="' + o.id + '" data-m="' + m.id + '"' + (las ? ' disabled' : '') + ' title="' + e(m.namn) + '"><img src="' + m.tumme + '" alt=""><b>' + e(m.namn) + '</b></button>';
           }).join('') + '</div>' +
           '<div class="offertrader" data-rader>' + o.rader.map(function (r, n) {
-            return '<div class="offertrader__rad" data-n="' + n + '"><input value="' + e(r.text) + '" data-f="text" aria-label="Beskrivning"' + (las ? ' disabled' : '') + '>' +
+            return '<div class="offertrader__rad" data-n="' + n + '"><span class="offertrader__emoji" aria-hidden="true">' + (n === 0 ? '🏠' : postEmoji(r.text)) + '</span><input value="' + e(r.text) + '" data-f="text" aria-label="Beskrivning"' + (las ? ' disabled' : '') + '>' +
               '<input type="number" min="0" value="' + r.antal + '" data-f="antal" aria-label="Antal"' + (las ? ' disabled' : '') + '>' +
               '<input type="number" min="0" step="500" value="' + r.pris + '" data-f="pris" aria-label="Pris"' + (las ? ' disabled' : '') + '>' +
               (las ? '' : '<button class="ikonknapp" type="button" data-g="offert-bort" data-id="' + o.id + '" data-n="' + n + '" aria-label="Ta bort">' + i('stang') + '</button>') + '</div>';
@@ -2105,7 +2107,7 @@
           (las ? '' : '<div class="offertlagg"><select data-lagg aria-label="Lägg till rad"><option value="">+ Lägg till ur prislistan…</option>' + IH.db.prislista.poster.map(function (p) {
             return '<option value="' + p.id + '">' + e(p.text) + ' · ' + IH.kr(p.pris) + '</option>';
           }).join('') + '<option value="egen">Egen rad…</option></select></div>') +
-          '<div class="offertsumma"><span>Summa</span><b class="tal" data-summa>' + IH.kr(IH.summaOffert(o)) + '</b></div>' +
+          '<div class="offertsumma"><span><small>💰 Summa</small>' + o.rader.length + (o.rader.length === 1 ? ' rad' : ' rader') + ' · ändras direkt i offerten</span><b class="tal" data-summa>' + IH.kr(IH.summaOffert(o)) + '</b></div>' +
           '</div></section>' +
         '<div class="dokyta" data-in>' + dokument(o) + '</div>' +
       '</div>';

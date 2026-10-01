@@ -9481,3 +9481,255 @@ button.kal__rad:hover {
     pointer-events: auto;
   }
 }
+
+/* =====================================================================
+   Offerter, andra varvet (2026-10-09)
+   Talen i glasrutor med emoji, grafen per vecka med belopp och "v."-
+   etiketter i en egen glasruta, posterna och statusarna med emoji.
+   Den enskilda offerten: raderna har emoji och ljusa fält, summan är ett
+   ljust solkort i stället för svart och de klara stegen är varma.
+   ===================================================================== */
+.offtopp__tal {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.offtopp__tal > div {
+  padding: 12px 13px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.62));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 14px 28px -22px rgba(90, 60, 25, 0.5);
+}
+
+.offtopp__tal small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font: 600 0.6875rem/1.2 var(--rubrik);
+}
+
+.offtopp__tal small i {
+  font-size: 0.875rem;
+  font-style: normal;
+}
+
+.offtopp__vecka {
+  padding: 14px 14px 10px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.6));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 16px 30px -24px rgba(90, 60, 25, 0.5);
+}
+
+.offtopp__vecka > small {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 10px;
+  font: 600 0.75rem/1.2 var(--rubrik);
+  color: var(--text-2);
+}
+
+.offtopp__vecka > small em {
+  font: 500 0.6875rem/1.2 var(--sans);
+  font-style: normal;
+  color: var(--text-3);
+}
+
+.offtopp__staplar i {
+  height: calc(var(--a) * 84px + 5px);
+}
+
+.offtopp__staplar span:not(.har) i {
+  opacity: 0.5;
+}
+
+.offtopp__staplar b {
+  min-height: 10px;
+  font: 600 0.625rem/1 var(--rubrik);
+  white-space: nowrap;
+  color: var(--text-2);
+}
+
+.offtopp__staplar span:last-child b {
+  color: #8f5424;
+}
+
+.snartut__tom span {
+  font-size: 1rem;
+}
+
+.poster__lista .poster__emoji {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #fff6e8, #ffe2bd);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(201, 138, 69, 0.3);
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+/* Sökfälten i sidhuvudet får plats med hela texten. */
+@media (min-width: 901px) {
+  .vyhuvud .sok--liten {
+    width: 250px;
+  }
+}
+
+.tabell--offert2 .tid--order {
+  font: 600 0.75rem/1 var(--rubrik);
+  color: #1f6b3f;
+}
+
+.tabell--offert2 tr[data-g] {
+  transition: background 0.3s ease;
+}
+
+.tabell--offert2 tr[data-g]:active {
+  background: rgba(255, 236, 210, 0.75);
+}
+
+/* --- Den enskilda offerten ------------------------------------------------ */
+.ostatus__steg li.klar span {
+  background: linear-gradient(160deg, #f6c88f, #e3a35a);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 8px 16px -10px rgba(201, 128, 52, 0.75);
+  color: #4a2a0e;
+}
+
+.ostatus__steg::after {
+  background: linear-gradient(90deg, #e3a35a, #f6c88f);
+}
+
+.offertrader__rad {
+  grid-template-columns: 34px minmax(0, 1fr) 64px 120px 36px;
+}
+
+.offertrader__emoji {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: linear-gradient(160deg, #fff6e8, #ffe2bd);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(201, 138, 69, 0.28);
+  font-size: 0.9375rem;
+  line-height: 1;
+}
+
+.offertrader__rad input {
+  background: linear-gradient(160deg, #fff, #fffaf3);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.22), inset 0 1px 2px rgba(27, 25, 21, 0.04);
+  transition: box-shadow 0.3s ease;
+}
+
+.offertrader__rad input:focus {
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px #e8a456, 0 0 0 4px rgba(240, 181, 110, 0.18);
+}
+
+.offertlagg select {
+  border-color: rgba(201, 138, 69, 0.35);
+  background: rgba(255, 255, 255, 0.5);
+  transition: background 0.3s ease;
+}
+
+.offertlagg select:hover {
+  background: #fff;
+}
+
+.offertsumma {
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background:
+    radial-gradient(80% 120% at 100% 0%, rgba(255, 214, 160, 0.5), transparent 60%),
+    linear-gradient(160deg, #fffaf2, #fff0dc);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.3), 0 18px 34px -24px rgba(143, 84, 36, 0.6);
+  color: var(--text);
+}
+
+.offertsumma > span {
+  display: grid;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.offertsumma small {
+  font: 700 0.625rem/1 var(--rubrik);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a07650;
+}
+
+.offertsumma b {
+  font: 600 2rem/1 var(--rubrik);
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  background: linear-gradient(180deg, #e8a95e, #c98a45 55%, #8f5424);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (max-width: 900px) {
+  .offertrader__rad {
+    grid-template-columns: 30px minmax(0, 1fr) 50px 92px 30px;
+  }
+
+  .offertrader__emoji {
+    width: 30px;
+    height: 30px;
+  }
+
+  .offertsumma b {
+    font-size: 1.5rem;
+  }
+}
+
+/* Smal mobil: beskrivningen får en egen rad, antal och pris under. */
+@media (max-width: 640px) {
+  .offtopp__tal {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .offtopp__tal > div:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .offertrader__rad {
+    grid-template-columns: 30px minmax(0, 1fr) 56px 100px 30px;
+    grid-template-areas:
+      "e t t t t"
+      ". . a p x";
+    row-gap: 6px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(201, 138, 69, 0.14);
+  }
+
+  .offertrader__emoji {
+    grid-area: e;
+  }
+
+  .offertrader__rad input[data-f="text"] {
+    grid-area: t;
+  }
+
+  .offertrader__rad input[data-f="antal"] {
+    grid-area: a;
+  }
+
+  .offertrader__rad input[data-f="pris"] {
+    grid-area: p;
+  }
+
+  .offertrader__rad .ikonknapp {
+    grid-area: x;
+  }
+}
