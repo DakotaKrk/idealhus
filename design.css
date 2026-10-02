@@ -24074,3 +24074,660 @@ html[data-tema="mork"] .tv__regler[data-vald="utanfor"] [data-plan="utanfor"] {
   80% { transform: translateX(4px); }
   90% { transform: translateX(0); }
 }
+/* =====================================================================
+   Tomtens genomskärning (2026-10-09)
+   Efter en sökning flyttar markblocket in i svaret och ritas med tomtens
+   egen profil: jordarten ur SGU:s karta i rätt material, ett tunt ytlager
+   om kartan har ett, berget på modellens djup (hoptryckt när det är
+   djupt), regnet som sjunker i markens takt och ledningarna som okända.
+   ===================================================================== */
+html body .tomtskarning {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+  align-items: center;
+  gap: clamp(16px, 3vw, 40px);
+  margin-top: 4px;
+  padding: clamp(20px, 2.6vw, 34px) clamp(20px, 2.6vw, 34px) clamp(14px, 2vw, 24px);
+  border-radius: 28px;
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgba(255, 214, 160, 0.38), transparent 65%),
+    radial-gradient(60% 80% at 0% 100%, rgba(205, 228, 196, 0.34), transparent 65%),
+    linear-gradient(165deg, #fffdf9, #fbf5ec 60%, #f6f0e6);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 40px 80px -56px rgba(90, 60, 25, 0.55);
+}
+
+html body .tomtskarning__etikett {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  font: 600 0.75rem/1 var(--knappfont);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--virke-djup);
+}
+
+html body .tomtskarning__etikett::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--virke-djup), var(--virke));
+}
+
+html body .tomtskarning__rubrik {
+  margin: 0 0 12px;
+  font: 600 clamp(1.375rem, 1rem + 1vw, 1.875rem)/1.12 var(--serif);
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+html body .tomtskarning__text {
+  margin: 0 0 18px;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+html body .tomtskarning__noter {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html body .tomtskarning__noter li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 10px 13px 10px 10px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.6));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05);
+  font-size: 0.84375rem;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+html body .tomtskarning__noter li[hidden] {
+  display: none;
+}
+
+html body .tomtskarning__noter a {
+  font-weight: 600;
+  color: var(--virke-djup);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+html body .tomtskarning__ikon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: linear-gradient(160deg, #e2a865, #a96a2f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 14px -8px rgba(143, 84, 36, 0.7);
+}
+
+html body .tomtskarning__ikon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #fffaf2;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html body .tomtskarning__bild {
+  position: relative;
+  min-width: 0;
+  transition: opacity 0.4s var(--mjuk), filter 0.4s var(--mjuk);
+}
+
+/* Blocket syns här även när svaret visas (förut doldes det då). */
+html body .markkoll__scen .tomtskarning .vf3d.vf3d--mark {
+  display: block;
+  margin: 0;
+}
+
+/* Medan en ny punkt hämtas tonas den gamla bilden ned. */
+html body .tomtrapport--laddar .tomtskarning__bild {
+  opacity: 0.5;
+  filter: saturate(0.6);
+}
+
+/* Brickorna på tomtens bild. */
+html body .vf3d__chip--vatten {
+  --prick: #5a9bdc;
+}
+
+html body .vf3d__chip--okand .vf3d__chip-in {
+  outline: 1.5px dashed rgba(75, 143, 209, 0.55);
+  outline-offset: -4px;
+}
+
+html body .vf3d__chip--okand .vf3d__chip-in b {
+  color: #2f6096;
+}
+
+html body .vf3d--egen .vf3d__chip--lager .vf3d__chip-in b {
+  display: inline-block;
+  max-width: 15em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+
+/* Mörkt läge. */
+html[data-tema="mork"] .tomtskarning {
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgba(240, 181, 110, 0.12), transparent 65%),
+    linear-gradient(165deg, rgba(40, 36, 31, 0.96), rgba(24, 22, 19, 0.96));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08), 0 40px 80px -56px rgba(0, 0, 0, 0.8);
+}
+
+html[data-tema="mork"] .tomtskarning__rubrik {
+  color: #f7f5f0;
+}
+
+html[data-tema="mork"] .tomtskarning__text,
+html[data-tema="mork"] .tomtskarning__noter li {
+  color: rgba(247, 245, 240, 0.74);
+}
+
+html[data-tema="mork"] .tomtskarning__noter li {
+  background: linear-gradient(160deg, rgba(247, 245, 240, 0.07), rgba(247, 245, 240, 0.03));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] .tomtskarning__noter a {
+  color: #f0b56e;
+}
+
+@media (max-width: 900px) {
+  html body .tomtskarning {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 20px 16px 14px;
+  }
+
+  html body .tomtskarning__ord {
+    order: 2;
+  }
+}
+
+/* Smal skärm: lagrens namn på lagren; vatten och ledningar står i texten. */
+@media (max-width: 560px) {
+  html body .vf3d--egen [data-chip="vatten"],
+  html body .vf3d--egen [data-chip="ledningar"] {
+    display: none;
+  }
+
+  html body .vf3d--egen .vf3d__chip--lager .vf3d__chip-in b {
+    max-width: 11em;
+  }
+}
+
+/* PDF:en: bilden av marken under faktan. */
+@media print {
+  html.rapportlage .rapport__skarning {
+    margin: 8px 0 4px;
+    break-inside: avoid;
+  }
+
+  html.rapportlage .rapport__skarning svg {
+    display: block;
+    width: 100%;
+    max-width: 430px;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  html.rapportlage .rapport__skarning figcaption {
+    margin-top: 2px;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    color: #4f4a42;
+  }
+}
+/* Tomtens bild: lagrens namn står på lagren (långa SGU-namn klipptes
+   annars i vänsterkanten), som glasbrickor mitt på sidan som syns. */
+html body .vf3d--egen .vf3d__chip--lager::before {
+  display: none;
+}
+
+html body .vf3d--egen .vf3d__chip--lager .vf3d__chip-in {
+  right: auto;
+  left: 0;
+  transform: translate(-50%, -50%);
+  transform-origin: 50% 50%;
+  padding: 6px 11px 6px 8px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.82));
+}
+
+html body .vf3d--egen .vf3d__chip--lager .vf3d__chip-in::after {
+  display: none;
+}
+
+html body .vf3d--egen .vf3d__chip--lager .vf3d__chip-in b {
+  font-size: 0.8125rem;
+}
+/* =====================================================================
+   Tomtanalysen, andra varvet (2026-10-09, kunden: "mer proffsig, i fokus
+   efter resultatet och kartan under"). Ordningen i svaret: genomskärningen
+   med adressen som rubrik och de tre fakta bredvid, sedan kartan, sedan
+   korten som öppnar SGU:s och Lantmäteriets kartor vid tomten. Ritningen
+   står på ett ritpapper med rutnät och hörnmärken.
+   ===================================================================== */
+html body .tomtrapport__vy {
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(18px, 2.4vw, 28px);
+}
+
+html body .tomtskarning {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(16px, 2vw, 24px);
+  margin-top: 0;
+  padding: clamp(20px, 2.6vw, 32px);
+  scroll-margin-top: 96px;
+}
+
+/* --- Rubriken: adressen, en mening och underlaget -------------------- */
+html body .tomtskarning__huvud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px 28px;
+}
+
+html body .tomtskarning__titel {
+  min-width: 0;
+  max-width: 62ch;
+}
+
+html body .tomtskarning .tomtrapport__plats {
+  margin: 0 0 10px;
+  gap: 4px;
+}
+
+html body .tomtskarning .tomtrapport__plats strong {
+  font: 600 clamp(1.625rem, 1.1rem + 1.6vw, 2.375rem)/1.08 var(--serif);
+  letter-spacing: -0.025em;
+  color: var(--text);
+}
+
+html body .tomtskarning .tomtrapport__plats span {
+  font: 600 0.75rem/1.2 var(--knappfont);
+  letter-spacing: 0.04em;
+  color: #a07650;
+}
+
+html body .tomtskarning .tomtskarning__text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+html body .tomtskarning__kallor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html body .tomtskarning__kallor li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 11px 6px 9px;
+  border-radius: 999px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.7));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06);
+  font: 600 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.02em;
+  color: var(--text-2);
+}
+
+html body .tomtskarning__kallor i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3aaa68;
+  box-shadow: 0 0 0 3px rgba(58, 170, 104, 0.18);
+}
+
+/* --- Ritningen och faktan --------------------------------------------- */
+html body .tomtskarning__kropp {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: clamp(14px, 2vw, 22px);
+}
+
+/* Ritpapperet: rutnät som tonar ut, hörnmärken som på en ritning. */
+html body .tomtskarning__bild {
+  position: relative;
+  display: grid;
+  align-content: center;
+  min-height: 300px;
+  padding: 10px 6px 4px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.86), rgba(255, 252, 246, 0.6));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 26px 50px -38px rgba(90, 60, 25, 0.5);
+  isolation: isolate;
+}
+
+html body .tomtskarning__bild::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    linear-gradient(rgba(143, 84, 36, 0.07) 1px, transparent 1px) 0 0 / 26px 26px,
+    linear-gradient(90deg, rgba(143, 84, 36, 0.07) 1px, transparent 1px) 0 0 / 26px 26px;
+  -webkit-mask-image: radial-gradient(75% 70% at 50% 48%, #000 35%, transparent 100%);
+  mask-image: radial-gradient(75% 70% at 50% 48%, #000 35%, transparent 100%);
+}
+
+html body .tomtskarning__bild::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(#c98a45, #c98a45) left top / 14px 1.5px no-repeat,
+    linear-gradient(#c98a45, #c98a45) left top / 1.5px 14px no-repeat,
+    linear-gradient(#c98a45, #c98a45) right top / 14px 1.5px no-repeat,
+    linear-gradient(#c98a45, #c98a45) right top / 1.5px 14px no-repeat,
+    linear-gradient(#c98a45, #c98a45) left bottom / 14px 1.5px no-repeat,
+    linear-gradient(#c98a45, #c98a45) left bottom / 1.5px 14px no-repeat,
+    linear-gradient(#c98a45, #c98a45) right bottom / 14px 1.5px no-repeat,
+    linear-gradient(#c98a45, #c98a45) right bottom / 1.5px 14px no-repeat;
+  opacity: 0.55;
+}
+
+html body .tomtskarning__bild .vf3d--mark::before {
+  display: none;
+}
+
+html body .tomtskarning__bild .vf3d__tips {
+  right: 14px;
+  bottom: 14px;
+}
+
+/* Medan SGU svarar: en bricka mitt på ritningen. */
+html body .tomtskarning__laddar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  display: none;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  padding: 10px 16px 10px 12px;
+  border-radius: 999px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 250, 242, 0.9));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.3), 0 18px 34px -18px rgba(90, 60, 25, 0.6);
+  font: 600 0.8125rem/1 var(--knappfont);
+  color: #7a4a1c;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+
+html body .tomtskarning__laddar i {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(201, 138, 69, 0.25);
+  border-top-color: #c98a45;
+  border-radius: 50%;
+  animation: tomt-snurr 0.8s linear infinite;
+}
+
+@keyframes tomt-snurr {
+  to { transform: rotate(360deg); }
+}
+
+html body .tomtrapport--laddar .tomtskarning__laddar {
+  display: inline-flex;
+}
+
+html body .tomtrapport--laddar .tomtskarning__bild {
+  opacity: 1;
+  filter: none;
+}
+
+html body .tomtrapport--laddar .tomtskarning__bild .vf3d--mark {
+  opacity: 0.35;
+  filter: saturate(0.4) blur(0.5px);
+  transition: opacity 0.4s var(--mjuk), filter 0.4s var(--mjuk);
+}
+
+/* Faktan som tre datarader bredvid ritningen. */
+html body .tomtskarning__fakta {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+html body .tomtskarning .tomtfakta {
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 13px;
+  padding: 14px 15px 14px 13px;
+  border: 0;
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.7));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.05), 0 16px 30px -24px rgba(90, 60, 25, 0.5);
+}
+
+html body .tomtskarning .tomtfakta__ikon {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: linear-gradient(160deg, #e2a865, #a96a2f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 18px -10px rgba(143, 84, 36, 0.7);
+}
+
+html body .tomtskarning .tomtfakta__ikon svg {
+  width: 20px;
+  height: 20px;
+}
+
+html body .tomtskarning .tomtfakta__rubrik {
+  font: 600 0.6875rem/1.2 var(--knappfont);
+  letter-spacing: 0.12em;
+  color: #a07650;
+}
+
+html body .tomtskarning .tomtfakta__varde {
+  margin-top: 3px;
+  font: 600 1.1875rem/1.2 var(--serif);
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+html body .tomtskarning .tomtfakta__text {
+  margin-top: 5px;
+  font-size: 0.84375rem;
+  line-height: 1.5;
+}
+
+html body .tomtskarning .tomtrapport__knappar {
+  margin-top: 4px;
+}
+
+/* Noterna som en rad längst ned. */
+html body .tomtskarning .tomtskarning__noter {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+html body .tomtskarning .tomtskarning__noter li {
+  align-items: center;
+  padding: 9px 12px 9px 9px;
+  font-size: 0.78125rem;
+  line-height: 1.45;
+}
+
+html body .tomtskarning .tomtskarning__ikon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+}
+
+/* --- Kartan under --------------------------------------------------------- */
+html body .tomtrapport__vy .tomtrapport__karta {
+  gap: 12px;
+}
+
+html body .tomtrapport__kartrubrik {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 18px;
+}
+
+html body .tomtrapport__kartrubrik .tomtskarning__etikett {
+  margin: 0;
+}
+
+html body .tomtrapport__vy .tomtrapport__kartyta {
+  height: clamp(300px, 32vw, 420px);
+  border-radius: 24px;
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.06), 0 26px 50px -38px rgba(90, 60, 25, 0.5);
+}
+
+html body .tomtrapport__vy .tomtrapport__kalla {
+  max-width: 60ch;
+  text-align: right;
+}
+
+/* --- Korten som öppnar kartorna vid tomten ------------------------------- */
+html body .markkoll__mer span {
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #a07650;
+}
+
+html body .markkort--tomt .markkort__lank {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+html body .markkort--tomt .markkort__lank::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3aaa68;
+  box-shadow: 0 0 0 3px rgba(58, 170, 104, 0.18);
+}
+
+/* --- Mörkt läge ----------------------------------------------------------- */
+html[data-tema="mork"] .tomtskarning .tomtrapport__plats strong {
+  color: #f7f5f0;
+}
+
+html[data-tema="mork"] .tomtskarning__kallor li,
+html[data-tema="mork"] .tomtskarning__bild,
+html[data-tema="mork"] .tomtskarning .tomtfakta,
+html[data-tema="mork"] .tomtskarning__laddar {
+  background: linear-gradient(160deg, rgba(247, 245, 240, 0.07), rgba(247, 245, 240, 0.03));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+  color: rgba(247, 245, 240, 0.8);
+}
+
+html[data-tema="mork"] .tomtskarning .tomtfakta__varde {
+  color: #f7f5f0;
+}
+
+/* --- Mobil -------------------------------------------------------------- */
+@media (max-width: 1000px) {
+  html body .tomtskarning__kropp {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html body .tomtskarning__fakta {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  html body .tomtskarning__fakta .tomtrapport__knappar {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  html body .tomtskarning {
+    padding: 18px 14px;
+    border-radius: 24px;
+  }
+
+  html body .tomtskarning__bild {
+    min-height: 0;
+    padding: 4px 0 0;
+  }
+
+  html body .tomtrapport__vy .tomtrapport__kalla {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .tomtskarning__laddar i {
+    animation: none;
+  }
+}
+/* Mörkt läge: lagrens namn på lagren i mörkt glas. */
+html[data-tema="mork"] .vf3d--egen .vf3d__chip--lager .vf3d__chip-in {
+  background: linear-gradient(160deg, rgba(40, 36, 31, 0.94), rgba(24, 22, 19, 0.9));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12), 0 10px 20px -12px rgba(0, 0, 0, 0.8);
+}
+
+html[data-tema="mork"] .vf3d--egen .vf3d__chip--lager .vf3d__chip-in b {
+  color: #f7f5f0;
+}
+
+/* PDF:en: lagren som en förklaring under bilden. */
+@media print {
+  html.rapportlage .rapport__lager {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 16px;
+    margin: 0 0 6px;
+    padding: 0;
+    list-style: none;
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: #1b1915;
+  }
+
+  html.rapportlage .rapport__lager li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  html.rapportlage .rapport__lager i {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

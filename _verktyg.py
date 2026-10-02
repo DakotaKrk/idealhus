@@ -83,6 +83,23 @@ JORDTOLKNING = [
      "Enligt kartan ligger punkten i vatten. Flytta nålen till tomten."),
 ]
 
+# Ritningen av marken: vilket material ett jordartsnamn från SGU ritas
+# som. Samma ordning som JORDTOLKNING, så lerig morän inte blir ren morän
+# och lera inte blir berg. "Okand" ritas utan material.
+JORDBILD = [
+    ("torv|gyttja|dy\\b|kärr|mosse", "torv"),
+    ("fyllning", "fyllning"),
+    ("morän.*(ler|silt)|(ler|silt).*morän", "moranlera"),
+    ("lera|ler\\b|ler-", "lera"),
+    ("silt", "silt"),
+    ("morän", "moran"),
+    ("grus|rullsten", "grus"),
+    ("sand|isälv|svall", "sand"),
+    ("berg|häll", "berg"),
+    ("block|sten", "block"),
+    ("vatten", "vatten"),
+]
+
 GENOMSLAPP = {
     "3": "Regnvatten sjunker snabbt undan i marken.",
     "2": "Vatten sjunker undan i måttlig takt.",
@@ -299,7 +316,54 @@ KROPP = f'''    <main id="innehall">
             </ul>
 
             <div class="tomtrapport__vy" id="tomtrapport-vy" hidden>
+              <section class="tomtskarning" id="tomt-skarning" aria-labelledby="tomt-plats">
+                <header class="tomtskarning__huvud">
+                  <div class="tomtskarning__titel">
+                    <p class="tomtskarning__etikett">Din mark i genomskärning</p>
+                    <p class="tomtrapport__plats" id="tomt-plats"></p>
+                    <p class="tomtskarning__text" id="tomtskarning-text" aria-live="polite"></p>
+                  </div>
+                  <ul class="tomtskarning__kallor" aria-label="Underlag">
+                    <li><i aria-hidden="true"></i>SGU · jordartskarta</li>
+                    <li><i aria-hidden="true"></i>SGU · jorddjup 10 × 10 m</li>
+                    <li><i aria-hidden="true"></i>Öppna data</li>
+                  </ul>
+                </header>
+                <div class="tomtskarning__kropp">
+                  <div class="tomtskarning__bild" id="tomtskarning-bild">
+                    <p class="tomtskarning__laddar" aria-hidden="true"><i></i>Läser av marken …</p>
+                  </div>
+                  <div class="tomtskarning__fakta">
+                    <div class="tomtfakta">
+                      <span class="tomtfakta__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M3 9h18M3 14h18M3 19h18M7 4l2 5M14 4l-1 5"/></svg></span>
+                      <div class="tomtfakta__innehall" id="tomt-jord"></div>
+                    </div>
+                    <div class="tomtfakta">
+                      <span class="tomtfakta__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 3c3 4.2 5.5 7.4 5.5 10.5a5.5 5.5 0 0 1-11 0C6.5 10.4 9 7.2 12 3Z"/></svg></span>
+                      <div class="tomtfakta__innehall" id="tomt-vatten"></div>
+                    </div>
+                    <div class="tomtfakta">
+                      <span class="tomtfakta__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 3v14M7 12l5 5 5-5M4 21h16"/></svg></span>
+                      <div class="tomtfakta__innehall" id="tomt-djup"></div>
+                    </div>
+                    <div class="tomtrapport__knappar">
+                      <button class="kollen__dela kollen__pdf" type="button" data-skriv-ut>Spara tomtrapporten som PDF</button>
+                      <a class="tomtrapport__prata" href="#kontakt">Fråga oss vad det betyder</a>
+                    </div>
+                  </div>
+                </div>
+                <ul class="tomtskarning__noter">
+                  <li><span class="tomtskarning__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 4h16v16H4zM4 12h16M12 4v16"/></svg></span><span>Ritad för just den här punkten. Kartan visar det översta jordlagret, modellen djupet till berg.</span></li>
+                  <li data-not="skala" hidden><span class="tomtskarning__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg></span><span>Berget ligger djupt, så djupet är hoptryckt i bilden – brottet visar var.</span></li>
+                  <li><span class="tomtskarning__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M3 12h4l2-5 3 10 2-5h7"/></svg></span><span>Ledningar finns inte i öppna kartor. <a href="https://www.ledningskollen.se/" target="_blank" rel="noopener">Fråga gratis via Ledningskollen</a> innan ni gräver.</span></li>
+                </ul>
+              </section>
+
               <div class="tomtrapport__karta">
+                <div class="tomtrapport__kartrubrik">
+                  <p class="tomtskarning__etikett">Tomten på kartan</p>
+                  <p class="tomtrapport__tips">Står nålen fel? Dra den eller tryck där tomten ligger – genomskärningen ovanför ritas om.</p>
+                </div>
                 <div class="tomtrapport__kartyta" id="tomtkarta" role="region" aria-label="Karta med tomten utmärkt"></div>
                 <div class="tomtrapport__kartrad">
                   <label class="konfig__spegel">
@@ -307,32 +371,11 @@ KROPP = f'''    <main id="innehall">
                     <span class="konfig__vaxel" aria-hidden="true"></span>
                     Visa jordartskartan
                   </label>
-                  <p class="tomtrapport__tips">Står nålen fel? Dra den, eller tryck på kartan där tomten ligger.</p>
+                  <p class="tomtrapport__kalla">
+                    Jordart, genomsläpplighet och jorddjup: SGU, öppna data.
+                    Adressök och karta: © OpenStreetMap-bidragsgivare.
+                  </p>
                 </div>
-              </div>
-
-              <div class="tomtrapport__fakta">
-                <p class="tomtrapport__plats" id="tomt-plats"></p>
-                <div class="tomtfakta">
-                  <span class="tomtfakta__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M3 9h18M3 14h18M3 19h18M7 4l2 5M14 4l-1 5"/></svg></span>
-                  <div class="tomtfakta__innehall" id="tomt-jord"></div>
-                </div>
-                <div class="tomtfakta">
-                  <span class="tomtfakta__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 3c3 4.2 5.5 7.4 5.5 10.5a5.5 5.5 0 0 1-11 0C6.5 10.4 9 7.2 12 3Z"/></svg></span>
-                  <div class="tomtfakta__innehall" id="tomt-vatten"></div>
-                </div>
-                <div class="tomtfakta">
-                  <span class="tomtfakta__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 3v14M7 12l5 5 5-5M4 21h16"/></svg></span>
-                  <div class="tomtfakta__innehall" id="tomt-djup"></div>
-                </div>
-                <div class="tomtrapport__knappar">
-                  <button class="kollen__dela kollen__pdf" type="button" data-skriv-ut>Spara tomtrapporten som PDF</button>
-                  <a class="tomtrapport__prata" href="#kontakt">Fråga oss vad det betyder</a>
-                </div>
-                <p class="tomtrapport__kalla">
-                  Jordart, genomsläpplighet och jorddjup: SGU, öppna data.
-                  Adressök och karta: © OpenStreetMap-bidragsgivare.
-                </p>
               </div>
             </div>
           </div>
@@ -344,6 +387,9 @@ KROPP = f'''    <main id="innehall">
                   <radialGradient id="vfm-krona" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#a2c88a"/><stop offset="1" stop-color="#5f9064"/></radialGradient>
                   <radialGradient id="vfm-golv"><stop offset="0" stop-color="#5a3c1e" stop-opacity=".26"/><stop offset="1" stop-color="#5a3c1e" stop-opacity="0"/></radialGradient>
                   <linearGradient id="vfm-nal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6c88f"/><stop offset="1" stop-color="#c47a32"/></linearGradient>
+                  <linearGradient id="vfm-hall" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9bcc1"/><stop offset="1" stop-color="#8b8f97"/></linearGradient>
+                  <linearGradient id="vfm-mosse" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a9bf86"/><stop offset="1" stop-color="#7b9a62"/></linearGradient>
+                  <linearGradient id="vfm-vatten" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a9cfe8"/><stop offset="1" stop-color="#6ea4cf"/></linearGradient>
                   <filter id="vfm-mjuk" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3"/></filter>
                 </defs>
                 <g class="vf3d__varld"></g>
@@ -358,14 +404,14 @@ KROPP = f'''    <main id="innehall">
             </div>
           </div>
 
-          <p class="markkoll__mer">Gå djupare i kartorna</p>
+          <p class="markkoll__mer" id="markkoll-mer">Gå djupare i kartorna</p>
           <div class="markkoll__rad">
-''' + "\n".join(f'''            <a class="markkort" href="{lank}" target="_blank" rel="noopener">
+''' + "\n".join(f'''            <a class="markkort" href="{lank}" target="_blank" rel="noopener" data-karta="{lank}">
               <span class="markkort__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="{ikon}"/></svg></span>
               <span class="markkort__kalla">{kalla}</span>
               <strong>{titel}</strong>
               <span class="markkort__text">{text}</span>
-              <span class="markkort__lank">Öppna kartan</span>
+              <span class="markkort__lank" data-lanktext>Öppna kartan</span>
             </a>''' for titel, kalla, lank, ikon, text in MARKKOLL) + '''
           </div>
           <p class="markkoll__not">
@@ -1420,108 +1466,348 @@ SKRIPT = '''
         }
 
         /* --- Marken i genomskärning -------------------------------------- */
-        var LAGER = [
-          { namn: 'matjord', tj: 0.7, farg: [112, 80, 54] },
-          { namn: 'lera', tj: 1.3, farg: [178, 142, 106] },
-          { namn: 'moran', tj: 1.4, farg: [158, 149, 132] },
-          { namn: 'berg', tj: 1.2, farg: [116, 119, 126] }
+        // Innan någon sökt visar blocket fyra typiska lager. Efter en
+        // sökning ritas tomtens egen profil (window.idealhusMark): det
+        // översta jordlagret ur SGU:s karta med rätt material, ett tunt
+        // ytlager om kartan har ett, berget på det djup modellen anger
+        // (hoptryckt när det är djupt), vattnet som sjunker i den takt
+        // genomsläppligheten säger och ledningarna som okända.
+        var MATERIAL = {
+          matjord: [112, 80, 54], lera: [178, 142, 106], silt: [192, 168, 132], moranlera: [152, 136, 114],
+          moran: [158, 149, 132], sand: [218, 186, 130], grus: [192, 166, 126], torv: [96, 70, 48],
+          fyllning: [148, 128, 106], block: [138, 133, 124], berg: [116, 119, 126], vatten: [106, 160, 206],
+          okand: [170, 156, 136]
+        };
+        var PRICK = {
+          matjord: '#70503a', lera: '#b28e6a', silt: '#bfa684', moranlera: '#988872', moran: '#9e9584',
+          sand: '#d6b47c', grus: '#bea47c', torv: '#604630', fyllning: '#94806a', block: '#8a857c',
+          berg: '#74777e', vatten: '#6aa0ce', okand: '#aa9c88'
+        };
+        var STANDARD = [
+          { id: 'matjord', typ: 'matjord', tj: 0.7 },
+          { id: 'lera', typ: 'lera', tj: 1.3 },
+          { id: 'moran', typ: 'moran', tj: 1.4 },
+          { id: 'berg', typ: 'berg', tj: 1.2 }
         ];
+        var VATTENFART = { 3: [1.7, 1], 2: [2.9, 0.68], 1: [4.6, 0.32] };
+        var profil = null;
         var STENAR = [];
         (function () {
           var fro = 7;
           var slump = function () { fro = (fro * 9301 + 49297) % 233280; return fro / 233280; };
           for (var i = 0; i < 26; i++) STENAR.push([slump(), slump(), 0.1 + slump() * 0.16, slump()]);
         })();
+
+        // Djupet i bilden: meter till en höjd som får plats. Upp till några
+        // meter nästan skalenligt, sedan allt mer hoptryckt.
+        function visDjup(m) { return m <= 0 ? 0.32 : klamp(0.55 + 0.9 * Math.log(1 + m), 0.55, 3.6); }
+
+        // Tomtens profil ur SGU-svaret (se tomtrapporten).
+        function byggProfil(d) {
+          var lager = [], berg = d.klass === 'berg', vatten = d.klass === 'vatten';
+          var djup = berg ? 0 : (typeof d.djup === 'number' ? d.djup : null);
+          if (vatten) {
+            lager.push({ id: 'l0', typ: 'vatten', tj: 1.6, etikett: d.namn || 'Vatten' });
+            lager.push({ id: 'l1', typ: 'berg', tj: 1.15, etikett: 'Berg', berg: true, okant: true });
+            return { lager: lager, djup: null, vatten: 0, skalbrott: false, topp: 'vatten', jord: false };
+          }
+          if (!berg) {
+            var tot = djup === null ? 2.3 : visDjup(djup);
+            if (d.ytKlass && d.ytKlass !== d.klass && tot > 0.7) {
+              var tt = Math.min(0.34, tot * 0.28);
+              lager.push({ id: 'l' + lager.length, typ: d.ytKlass, tj: tt, etikett: d.ytNamn, tunt: true });
+              tot -= tt;
+            }
+            lager.push({ id: 'l' + lager.length, typ: d.klass || 'okand', tj: Math.max(0.3, tot), etikett: d.namn || 'Jordart okänd', huvud: true });
+          }
+          lager.push({ id: 'l' + lager.length, typ: 'berg', tj: berg ? 2.4 : 1.15, etikett: berg ? (d.namn || 'Berg') : 'Berg', berg: true, okant: djup === null });
+          var topp = berg ? 'hall' : (lager[0].typ === 'torv' ? 'mosse' : 'gras');
+          return { lager: lager, djup: djup, vatten: d.vatten || 0, skalbrott: djup !== null && djup > 6, topp: topp, jord: !berg };
+        }
+
+        function profilBrickor(P) {
+          var ut = P.lager.map(function (L) {
+            return { namn: L.id, klass: 'vf3d__chip--vanster vf3d__chip--lager', prick: PRICK[L.typ] || '#aa9c88', b: L.etikett };
+          });
+          ut.push({ namn: 'ledningar', klass: 'vf3d__chip--hoger vf3d__chip--ledning vf3d__chip--okand', b: 'Ledningar', em: 'okänt läge' });
+          if (P.vatten && P.jord) ut.push({ namn: 'vatten', klass: 'vf3d__chip--hoger vf3d__chip--vatten', b: { 3: 'Snabb', 2: 'Måttlig', 1: 'Långsam' }[P.vatten], em: 'dränering' });
+          ut.push({ namn: 'djup', klass: 'vf3d__chip--hoger vf3d__chip--brun', b: P.djup === null ? 'Okänt' : (P.djup === 0 ? 'Berg i ytan' : '≈ ' + P.djup + ' m'), em: P.djup === null ? 'djup till berg' : (P.djup === 0 ? '' : 'till berg') });
+          return ut;
+        }
+
+        // Stenar, block och grus på sidorna som syns (och några på toppen).
+        function stenar(K, L, T, sidor, X, Y, o) {
+          var g = '';
+          STENAR.forEach(function (st, n) {
+            if (n % o.var !== 0) return;
+            var s = sidor[n % 2], m = s[1] === 'x' ? Y : X;
+            var r = st[2] * o.storlek, u = -m + 0.35 + st[0] * (2 * m - 0.7), zz = T.botten + 0.12 + r + st[1] * Math.max(0.05, L.tj - 0.24 - 2 * r);
+            var pt = ring(0, 0, 0, r, 'y', 9).map(function (q) { return s[1] === 'x' ? [s[0], u + q[0], zz + q[2] * 0.75] : [u + q[0], s[0], zz + q[2] * 0.75]; });
+            g += yta(K, pt, st[3] > 0.5 ? o.ljus : o.mork, ' stroke="rgba(27,25,21,.18)" stroke-width=".6"');
+            if (n < 12 && o.topp) {
+              var tp = ring(-X + 0.5 + st[1] * (2 * X - 1), -Y + 0.5 + st[0] * (2 * Y - 1), T.topp + 0.002, r * 0.9, 'z', 8);
+              g += yta(K, tp, st[3] > 0.5 ? o.toppLjus : o.toppMork);
+            }
+          });
+          return g;
+        }
+        // Små korn som prickar, för sand och silt.
+        function korn(K, L, T, sidor, X, Y, farg, antal) {
+          var g = '', fro = 11;
+          var slump = function () { fro = (fro * 9301 + 49297) % 233280; return fro / 233280; };
+          sidor.forEach(function (s) {
+            var m = s[1] === 'x' ? Y : X;
+            for (var i = 0; i < antal; i++) {
+              var u = -m + 0.15 + slump() * (2 * m - 0.3), zz = T.botten + 0.06 + slump() * (L.tj - 0.12);
+              var q = K.p(s[1] === 'x' ? s[0] : u, s[1] === 'x' ? u : s[0], zz);
+              g += '<circle cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="' + (0.6 + slump() * 0.9).toFixed(1) + '" fill="' + (slump() > 0.5 ? farg[0] : farg[1]) + '"/>';
+            }
+          });
+          return g;
+        }
+
+        // Lagrets yta efter material.
+        function textur(K, L, T, sidor, p, X, Y) {
+          var g = '', typ = L.typ;
+          var rader = function (fr, farg, lut) {
+            sidor.forEach(function (s) {
+              var m = s[1] === 'x' ? Y : X;
+              fr.forEach(function (f) { g += linje(K, [p(s, -m, T.topp - L.tj * f), p(s, m, T.topp - L.tj * f + lut)], farg, 1); });
+            });
+          };
+          if (typ === 'lera') {
+            rader([0.3, 0.55, 0.8], 'rgba(255,255,255,.14)', 0.06);
+            g += linje(K, [[-X, -Y + 1.2, T.topp + 0.002], [X, -Y + 1.6, T.topp + 0.002]], 'rgba(255,255,255,.12)', 1);
+          } else if (typ === 'silt') {
+            rader([0.18, 0.36, 0.54, 0.72, 0.9], 'rgba(255,255,255,.13)', 0.03);
+            g += korn(K, L, T, sidor, X, Y, ['rgba(255,255,255,.35)', 'rgba(90,70,50,.22)'], 14);
+          } else if (typ === 'moranlera') {
+            rader([0.35, 0.7], 'rgba(255,255,255,.12)', 0.05);
+            g += stenar(K, L, T, sidor, X, Y, { var: 2, storlek: 0.8, ljus: '#c4bcac', mork: '#857d70', topp: true, toppLjus: '#cdc5b6', toppMork: '#938b7e' });
+          } else if (typ === 'moran') {
+            g += stenar(K, L, T, sidor, X, Y, { var: 1, storlek: 1, ljus: '#c9c2b4', mork: '#8e877a', topp: true, toppLjus: '#d2cbbd', toppMork: '#9a9385' });
+          } else if (typ === 'block') {
+            g += stenar(K, L, T, sidor, X, Y, { var: 3, storlek: 2.1, ljus: '#b9b4ab', mork: '#7d786f', topp: true, toppLjus: '#c4bfb6', toppMork: '#8a857c' });
+          } else if (typ === 'grus') {
+            g += stenar(K, L, T, sidor, X, Y, { var: 1, storlek: 0.42, ljus: '#e4d7bd', mork: '#9a8a6c', topp: true, toppLjus: '#ebdfc7', toppMork: '#a5957a' });
+            g += korn(K, L, T, sidor, X, Y, ['rgba(255,255,255,.4)', 'rgba(110,85,50,.25)'], 22);
+          } else if (typ === 'sand') {
+            g += korn(K, L, T, sidor, X, Y, ['rgba(255,255,255,.5)', 'rgba(140,100,50,.28)'], 40);
+            // Snedskiktning, som i en sandbank.
+            sidor.forEach(function (s) {
+              var m = s[1] === 'x' ? Y : X;
+              [-0.45, 0.1, 0.6].forEach(function (f) {
+                g += linje(K, [p(s, m * f - 0.5, T.botten + L.tj * 0.25), p(s, m * f + 0.6, T.topp - L.tj * 0.2)], 'rgba(255,255,255,.18)', 1);
+              });
+            });
+          } else if (typ === 'torv') {
+            sidor.forEach(function (s) {
+              var m = s[1] === 'x' ? Y : X;
+              [0.25, 0.45, 0.65, 0.85].forEach(function (f, i) {
+                var pts = [];
+                for (var u = -m; u <= m + 0.01; u += 0.4) pts.push(p(s, u, T.topp - L.tj * f + Math.sin(u * 3 + i) * 0.05));
+                g += linje(K, pts, i % 2 ? 'rgba(255,225,180,.16)' : 'rgba(20,12,6,.3)', 1.1);
+              });
+            });
+          } else if (typ === 'fyllning') {
+            var BITAR = ['#b5654a', '#8d8a84', '#c8b48c', '#6f6a64'];
+            STENAR.forEach(function (st, n) {
+              var s = sidor[n % 2], m = s[1] === 'x' ? Y : X;
+              var u = -m + 0.3 + st[0] * (2 * m - 0.6), zz = T.botten + 0.12 + st[1] * (L.tj - 0.24), w = 0.12 + st[2] * 0.6, hh = 0.07 + st[3] * 0.08;
+              g += yta(K, [p(s, u, zz), p(s, u + w, zz + 0.03), p(s, u + w, zz + hh + 0.03), p(s, u, zz + hh)], BITAR[n % 4], ' stroke="rgba(27,25,21,.18)" stroke-width=".5"');
+            });
+            g += korn(K, L, T, sidor, X, Y, ['rgba(255,255,255,.3)', 'rgba(40,30,20,.25)'], 16);
+          } else if (typ === 'berg') {
+            sidor.forEach(function (s) {
+              var m = s[1] === 'x' ? Y : X;
+              g += linje(K, [p(s, -m * 0.6, T.topp), p(s, -m * 0.5, T.topp - 0.4), p(s, -m * 0.56, T.topp - 0.75), p(s, -m * 0.4, T.botten + 0.15)], 'rgba(27,25,21,.28)', 1.1);
+              g += linje(K, [p(s, m * 0.3, T.topp), p(s, m * 0.38, T.topp - 0.5), p(s, m * 0.3, T.topp - 0.95)], 'rgba(27,25,21,.24)', 1);
+              g += linje(K, [p(s, m * 0.1, T.botten + 0.2), p(s, m * 0.62, T.topp - 0.3)], 'rgba(255,255,255,.12)', 1);
+            });
+            g += linje(K, [[-X + 0.8, -Y + 0.6, T.topp + 0.002], [-0.6, -0.3, T.topp + 0.002], [0.4, 0.8, T.topp + 0.002], [2.6, Y - 0.3, T.topp + 0.002]], 'rgba(27,25,21,.22)', 1.1);
+          } else if (typ === 'vatten') {
+            sidor.forEach(function (s) {
+              var m = s[1] === 'x' ? Y : X;
+              [0.3, 0.6].forEach(function (f, i) {
+                var pts = [];
+                for (var u = -m; u <= m + 0.01; u += 0.3) pts.push(p(s, u, T.topp - L.tj * f + Math.sin(u * 4 + i * 2) * 0.04));
+                g += linje(K, pts, 'rgba(255,255,255,.3)', 1.2);
+              });
+            });
+          } else if (typ === 'okand') {
+            // Okänd jordart: bara en svag snedstreckning, inget material.
+            sidor.forEach(function (s) {
+              var m = s[1] === 'x' ? Y : X;
+              for (var u = -m; u < m; u += 0.45) g += linje(K, [p(s, u, T.botten + 0.05), p(s, u + Math.min(0.45, L.tj * 0.6), Math.min(T.topp - 0.05, T.botten + 0.05 + L.tj * 0.9))], 'rgba(255,255,255,.16)', 1);
+            });
+          }
+          return g;
+        }
+
+        // Rör där ledningar kan gå: i färg på standardbilden, som streckade
+        // ringar med frågetecken på tomtens bild (ingen öppen data finns).
+        function ror(K, lz, vy, Y, t, tid, okant) {
+          var g = '';
+          // Okänt läge: en streckad zon där ledningar brukar ligga, ingen gissning om var.
+          if (okant) {
+            var kz = fas(t, 1.6, 0.7);
+            if (kz > 0.01) {
+              var fy0 = vy * Y + vy * 0.008, za = lz + 0.26, zb = lz - 0.26, x0 = -3.6, x1 = x0 + 7.2 * kz;
+              var puls = tid === null ? 0.75 : 0.6 + 0.25 * Math.sin(tid * 2.2);
+              g += yta(K, [[x0, fy0, zb], [x1, fy0, zb], [x1, fy0, za], [x0, fy0, za]], 'rgba(75,143,209,.10)',
+                ' stroke="rgba(75,143,209,' + (puls * kz).toFixed(2) + ')" stroke-width="1.3" stroke-dasharray="5 3.5"');
+              for (var hx = x0 + 0.35; hx < x1 - 0.1; hx += 0.55) g += linje(K, [[hx, fy0, zb + 0.06], [hx + 0.3, fy0, za - 0.06]], 'rgba(75,143,209,.22)', 1);
+            }
+          }
+          [[1.0, [229, 154, 60]], [1.75, [63, 163, 107]], [2.5, [75, 143, 209]]].forEach(function (rr, n) {
+            var rx = rr[0], fy = vy * Y, rad = 0.2;
+            if (okant) return;
+            var ut = fy + vy * 0.42 * fas(t, 1.6 + n * 0.12, 0.6);
+            var a1 = ring(rx, fy, lz, rad, 'y', 16), a2 = ring(rx, ut, lz, rad, 'y', 16);
+            var skal = holje(a1.concat(a2).map(function (q) { return K.p(q[0], q[1], q[2]); }));
+            g += '<polygon points="' + plan2d(skal) + '" fill="' + ton(rr[1], [0, vy, 0.4]) + '"/>';
+            g += yta(K, a2, ton(rr[1], [0, vy, 0.2]));
+            g += yta(K, ring(rx, ut, lz, rad * 0.55, 'y', 14), 'rgba(27,25,21,.55)');
+          });
+          return g;
+        }
+
+        // Regnet: streck som faller mot gräset och droppar som sjunker in i
+        // jorden på framsidan, i den takt genomsläppligheten säger.
+        function regn(K, vy, Y, X, zMark, T, L, v, t, tid) {
+          var fart = VATTENFART[v];
+          if (!fart) return '';
+          var g = '', k = fas(t, 2.2, 0.8);
+          if (k < 0.01) return '';
+          var fy = vy * Y, zA = T.topp, zB = T.topp - (L.tj - 0.12) * fart[1];
+          for (var i = 0; i < 5; i++) {
+            var u = -X + 0.9 + i * (2 * X - 1.8) / 4 + (i % 2 ? 0.18 : -0.12);
+            var f = tid === null ? ((i * 0.37 + 0.2) % 1) : ((tid / fart[0]) + i * 0.37) % 1;
+            if (f < 0.3) {
+              // Strecket i luften, ovanför gräset nära framkanten.
+              var zf = zMark + 1.5 * (1 - f / 0.3), yy = fy - vy * 0.25;
+              var a = K.p(u, yy, zf + 0.32), b = K.p(u, yy, zf);
+              g += '<line x1="' + a[0].toFixed(1) + '" y1="' + a[1].toFixed(1) + '" x2="' + b[0].toFixed(1) + '" y2="' + b[1].toFixed(1) +
+                '" stroke="rgba(90,150,215,' + (0.55 * k).toFixed(2) + ')" stroke-width="1.6" stroke-linecap="round"/>';
+            } else {
+              var ff = (f - 0.3) / 0.7, zz = zA - (zA - zB) * ff, syn = k * (ff < 0.85 ? 1 : (1 - ff) / 0.15);
+              var q = K.p(u, fy + vy * 0.012, zz), q0 = K.p(u, fy + vy * 0.012, zA);
+              g += '<line x1="' + q0[0].toFixed(1) + '" y1="' + q0[1].toFixed(1) + '" x2="' + q[0].toFixed(1) + '" y2="' + q[1].toFixed(1) +
+                '" stroke="rgba(75,143,209,' + (0.28 * syn).toFixed(2) + ')" stroke-width="2.4" stroke-linecap="round"/>';
+              var x = q[0], y = q[1];
+              g += '<path d="M' + x.toFixed(1) + ' ' + (y - 5).toFixed(1) + 'C' + (x + 3.4).toFixed(1) + ' ' + (y - 0.6).toFixed(1) + ' ' + (x + 3.4).toFixed(1) + ' ' + (y + 3).toFixed(1) + ' ' + x.toFixed(1) + ' ' + (y + 3).toFixed(1) +
+                'C' + (x - 3.4).toFixed(1) + ' ' + (y + 3).toFixed(1) + ' ' + (x - 3.4).toFixed(1) + ' ' + (y - 0.6).toFixed(1) + ' ' + x.toFixed(1) + ' ' + (y - 5).toFixed(1) + 'Z" fill="rgba(90,155,220,' + (0.95 * syn).toFixed(2) + ')" stroke="rgba(255,255,255,' + (0.8 * syn).toFixed(2) + ')" stroke-width=".8"/>';
+            }
+          }
+          // Lite vatten blir stående på ytan när marken släpper igenom dåligt.
+          if (v === 1) {
+            g += yta(K, ring(-1.9, vy * (Y - 1.0), zMark + 0.006, 0.62 * k, 'z', 20), 'rgba(90,150,210,.32)', ' stroke="rgba(255,255,255,.5)" stroke-width=".8"');
+            g += yta(K, ring(-2.05, vy * (Y - 1.05), zMark + 0.008, 0.18 * k, 'z', 10), 'rgba(255,255,255,.45)');
+          }
+          return g;
+        }
+
+        // Ett brott i blocket när djupet är hoptryckt i bilden.
+        function brott(K, z, sidor, p, X, Y) {
+          var g = '';
+          sidor.forEach(function (s) {
+            var m = s[1] === 'x' ? Y : X, a = [], b = [];
+            for (var u = -m, i = 0; u <= m + 0.01; u += 0.4, i++) {
+              var dz = i % 2 ? 0.09 : -0.09;
+              a.push(p(s, u, z + 0.1 + dz));
+              b.push(p(s, u, z - 0.1 + dz));
+            }
+            g += yta(K, a.concat(b.slice().reverse()), 'rgba(250,246,238,.94)');
+            g += linje(K, a, 'rgba(143,84,36,.55)', 1.2) + linje(K, b, 'rgba(143,84,36,.55)', 1.2);
+          });
+          return g;
+        }
+
         function markScen(K, t, tid, isar) {
           var h = '', id = 'vfm', X = 4, Y = 3, i;
+          var lager = profil ? profil.lager : STANDARD, n = lager.length, iB = n - 1;
           var gap = 0.5 + 1.1 * (1 - fas(t, 0.5, 1.6)) + isar;
-          var toppar = [], z = 0;
-          LAGER.forEach(function (L, j) {
-            var flyg = -2.4 * (1 - fas(t, 0.1 + (3 - j) * 0.2, 0.9));
-            toppar.push({ topp: z + flyg, botten: z - L.tj + flyg, a: fas(t, 0.1 + (3 - j) * 0.2, 0.5) });
+          // Blocket står mitt i bilden oavsett hur högt det blir.
+          var hojd = lager.reduce(function (s, L) { return s + L.tj; }, 0) + 0.5 * (n - 1);
+          var toppar = [], z = profil ? (hojd - 6.1) / 2 : 0;
+          lager.forEach(function (L, j) {
+            var k = n - 1 - j;
+            var flyg = -2.4 * (1 - fas(t, 0.1 + k * 0.2, 0.9));
+            toppar.push({ topp: z + flyg, botten: z - L.tj + flyg, a: fas(t, 0.1 + k * 0.2, 0.5) });
             z -= L.tj + gap;
           });
           var vy = K.mot([0, 1, 0]) > 0 ? 1 : -1, vx = K.mot([-1, 0, 0]) > 0 ? -1 : 1;
+          var topptyp = profil ? profil.topp : 'gras';
           // Skuggan under blocket.
-          var bot = toppar[3].botten;
+          var bot = toppar[iB].botten;
           h += '<ellipse cx="' + K.p(0, 0, bot)[0].toFixed(1) + '" cy="' + (K.p(0, 0, bot)[1] + 26).toFixed(1) + '" rx="' + (5.4 * K.S).toFixed(1) + '" ry="' + (1.5 * K.S).toFixed(1) + '" fill="url(#' + id + '-golv)"/>';
+          // Var ledningarna ritas: lerlagret på standardbilden, annars det
+          // översta lagret som inte är ett tunt ytlager.
+          var iL = 1;
+          if (profil) { iL = 0; while (iL < iB && lager[iL].tunt) iL++; }
+          var iH = -1;
+          if (profil) lager.forEach(function (L, j) { if (L.huvud) iH = j; });
           // Lagren nerifrån och upp.
-          for (var j = 3; j >= 0; j--) {
-            var L = LAGER[j], T = toppar[j];
+          for (var j = iB; j >= 0; j--) {
+            var L = lager[j], T = toppar[j], farg = MATERIAL[L.typ] || MATERIAL.okand;
             if (T.a < 0.01) continue;
-            var g = '<g opacity="' + T.a.toFixed(2) + '">';
-            var topp = j === 0 ? 'url(#' + id + '-gras)' : ton(L.farg, [0, 0, 1]);
-            g += lada(K, -X, X, -Y, Y, T.botten, T.topp, L.farg, topp);
+            var g = '<g opacity="' + (T.a * (L.okant ? 0.55 : 1)).toFixed(2) + '">';
+            var topp = ton(farg, [0, 0, 1]);
+            if (j === 0) topp = topptyp === 'hall' ? 'url(#' + id + '-hall)' : (topptyp === 'mosse' ? 'url(#' + id + '-mosse)' : (topptyp === 'vatten' ? 'url(#' + id + '-vatten)' : 'url(#' + id + '-gras)'));
+            g += lada(K, -X, X, -Y, Y, T.botten, T.topp, farg, topp);
             var sidor = [[vx * X, 'x', [vx, 0, 0]], [vy * Y, 'y', [0, vy, 0]]];
             var p = function (s, u, zz) { return s[1] === 'x' ? [s[0], u, zz] : [u, s[0], zz]; };
-            if (j === 0) {
+            // Gräskanten och rötterna överst.
+            if (j === 0 && (topptyp === 'gras' || topptyp === 'mosse')) {
               sidor.forEach(function (s) {
                 var m = s[1] === 'x' ? Y : X;
-                g += yta(K, [p(s, -m, T.topp - 0.14), p(s, m, T.topp - 0.14), p(s, m, T.topp), p(s, -m, T.topp)], ton([112, 158, 90], s[2]));
-                for (var r = -m + 0.25; r < m; r += 0.55) g += linje(K, [p(s, r, T.topp - 0.16), p(s, r + 0.08, T.topp - 0.42)], 'rgba(60,40,20,.25)', 1);
+                g += yta(K, [p(s, -m, T.topp - 0.14), p(s, m, T.topp - 0.14), p(s, m, T.topp), p(s, -m, T.topp)], ton(topptyp === 'mosse' ? [96, 128, 78] : [112, 158, 90], s[2]));
+                for (var r = -m + 0.25; r < m; r += 0.55) g += linje(K, [p(s, r, T.topp - 0.16), p(s, r + 0.08, T.topp - Math.min(0.42, L.tj - 0.04))], 'rgba(60,40,20,.25)', 1);
               });
             }
-            if (j === 1) {
-              sidor.forEach(function (s) {
-                var m = s[1] === 'x' ? Y : X;
-                [0.3, 0.55, 0.8].forEach(function (f) { g += linje(K, [p(s, -m, T.topp - L.tj * f), p(s, m, T.topp - L.tj * f + 0.06)], 'rgba(255,255,255,.14)', 1); });
-              });
-              g += linje(K, [[-X, -Y + 1.2, T.topp + 0.002], [X, -Y + 1.6, T.topp + 0.002]], 'rgba(255,255,255,.12)', 1);
-            }
-            if (j === 2) {
-              STENAR.forEach(function (st, n) {
-                var s = sidor[n % 2], m = s[1] === 'x' ? Y : X;
-                var u = -m + 0.35 + st[0] * (2 * m - 0.7), zz = T.botten + 0.25 + st[1] * (L.tj - 0.5);
-                var pt = ring(0, 0, 0, st[2], 'y', 9).map(function (q) { return s[1] === 'x' ? [s[0], u + q[0], zz + q[2] * 0.75] : [u + q[0], s[0], zz + q[2] * 0.75]; });
-                g += yta(K, pt, st[3] > 0.5 ? '#c9c2b4' : '#8e877a', ' stroke="rgba(27,25,21,.18)" stroke-width=".6"');
-                if (n < 12) {
-                  var tp = ring(-X + 0.5 + st[1] * (2 * X - 1), -Y + 0.5 + st[0] * (2 * Y - 1), T.topp + 0.002, st[2] * 0.9, 'z', 8);
-                  g += yta(K, tp, st[3] > 0.5 ? '#d2cbbd' : '#9a9385');
-                }
+            // Berg i dagen: mossa och sprickor på hällen.
+            if (j === 0 && topptyp === 'hall') {
+              [[-2.6, -1.4, 0.5], [2.9, 1.8, 0.42], [-0.6, 2.2, 0.36], [1.4, -2.3, 0.3]].forEach(function (mq) {
+                g += yta(K, ring(mq[0], mq[1], T.topp + 0.004, mq[2], 'z', 14), 'rgba(110,150,90,.55)');
               });
             }
-            if (j === 3) {
-              sidor.forEach(function (s, n) {
-                var m = s[1] === 'x' ? Y : X;
-                g += linje(K, [p(s, -m * 0.6, T.topp), p(s, -m * 0.5, T.topp - 0.4), p(s, -m * 0.56, T.topp - 0.75), p(s, -m * 0.4, T.botten + 0.15)], 'rgba(27,25,21,.28)', 1.1);
-                g += linje(K, [p(s, m * 0.3, T.topp), p(s, m * 0.38, T.topp - 0.5), p(s, m * 0.3, T.topp - 0.95)], 'rgba(27,25,21,.24)', 1);
-                g += linje(K, [p(s, m * 0.1, T.botten + 0.2), p(s, m * 0.62, T.topp - 0.3)], 'rgba(255,255,255,.12)', 1);
-              });
-              g += linje(K, [[-X + 0.8, -Y + 0.6, T.topp + 0.002], [-0.6, -0.3, T.topp + 0.002], [0.4, 0.8, T.topp + 0.002], [2.6, Y - 0.3, T.topp + 0.002]], 'rgba(27,25,21,.22)', 1.1);
-            }
-            // Ledningarna sticker ut ur lerans främre sida.
-            if (j === 1) {
-              var lz = T.topp - L.tj * 0.5;
-              [[1.0, [229, 154, 60]], [1.75, [63, 163, 107]], [2.5, [75, 143, 209]]].forEach(function (rr, n) {
-                var rx = rr[0], fy = vy * Y, ut = fy + vy * 0.42 * fas(t, 1.6 + n * 0.12, 0.6), rad = 0.2;
-                var a1 = ring(rx, fy, lz, rad, 'y', 16), a2 = ring(rx, ut, lz, rad, 'y', 16);
-                var skal = holje(a1.concat(a2).map(function (q) { return K.p(q[0], q[1], q[2]); }));
-                g += '<polygon points="' + plan2d(skal) + '" fill="' + ton(rr[1], [0, vy, 0.4]) + '"/>';
-                g += yta(K, a2, ton(rr[1], [0, vy, 0.2]));
-                g += yta(K, ring(rx, ut, lz, rad * 0.55, 'y', 14), 'rgba(27,25,21,.55)');
-              });
-            }
+            g += textur(K, L, T, sidor, p, X, Y);
+            if (L.okant) g += linje(K, [[-X, vy * Y, T.topp], [X, vy * Y, T.topp]], 'rgba(255,255,255,.7)', 1.4, ' stroke-dasharray="5 4"');
+            if (profil && j === iH && profil.skalbrott && T.a > 0.6) g += brott(K, (T.topp + T.botten) / 2, sidor, p, X, Y);
+            if (j === iL && T.a > 0.01) g += ror(K, T.topp - Math.min(L.tj * 0.5, profil ? 0.62 : 9), vy, Y, t, tid, !!profil);
             h += g + '</g>';
           }
-          // På gräset: gränsen, huset, träd och en nål för adressen.
+          // Skanningen: ett ljust band som sveper ned genom lagren när
+          // tomtens data har kommit.
+          if (profil && !lugn) {
+            var kS = (t - 1.1) / 1.3;
+            if (kS > 0 && kS < 1) {
+              var zs = toppar[0].topp + (toppar[iB].botten - toppar[0].topp) * mjuk(kS), aS = Math.sin(kS * Math.PI);
+              var ram = [[vx * X, -vy * Y, zs], [vx * X, vy * Y, zs], [-vx * X, vy * Y, zs]];
+              h += linje(K, ram, 'rgba(246,200,143,' + (0.35 * aS).toFixed(2) + ')', 7) + linje(K, ram, 'rgba(255,250,240,' + (0.95 * aS).toFixed(2) + ')', 1.6);
+            }
+          }
+          // På ytan: gränsen, huset, träd och en nål för adressen.
           var T0 = toppar[0], kT = fas(t, 1.5, 0.8);
           if (kT > 0.01 && T0.a > 0.5) {
             var zt = T0.topp;
             h += linje(K, [[-X + 0.4, -Y + 0.4, zt + 0.01], [X - 0.4, -Y + 0.4, zt + 0.01], [X - 0.4, Y - 0.4, zt + 0.01], [-X + 0.4, Y - 0.4, zt + 0.01], [-X + 0.4, -Y + 0.4, zt + 0.01]], '#e8a456', 1.8, ' stroke-dasharray="6 5" opacity="' + kT.toFixed(2) + '"');
             var lyft = function (html) { return '<g transform="translate(0,' + (-zt * CE * K.S).toFixed(1) + ')">' + html + '</g>'; };
-            var mini = { id: id, x0: 0.1, x1: 2.6, b: 1.0, e: 1.15, r: 1.85, ov: 0.15, oy: 0.15, skorsten: null, altan: null,
-              fonster: [{ v: 'y', s: 1, a0: 0.4, a1: 1.2, z0: 0.15, z1: 0.95, post: true }, { v: 'y', s: 1, a0: 1.6, a1: 2.2, z0: 0.15, z1: 0.95 },
-                { v: 'y', s: -1, a0: 0.8, a1: 1.6, z0: 0.45, z1: 0.9 }, { v: 'x', s: -1, a0: -0.3, a1: 0.3, z0: 0.15, z1: 0.95, t: 'dorr' },
-                { v: 'x', s: 1, a0: -0.35, a1: 0.35, z0: 0.4, z1: 0.9 }] };
-            var saker = [];
-            var lagg = function (x, y, html) { saker.push({ d: K.djup(x, y, 0), h: html }); };
-            lagg(1.35, -0.4, lyft(hus(K, mini, kT, kT, null)));
-            lagg(-3.0, -2.0, lyft(gran(K, -3.0, -2.0, 1.9, kT, lugn ? null : tid)));
-            lagg(3.3, -1.9, lyft(lovtrad(K, id, 3.3, -1.9, 1.8, 0.55, kT, lugn ? null : tid)));
-            lagg(-3.2, 2.1, lyft(buske(K, id, -3.2, 2.1, 0.32, kT)));
-            var sk = lyft(yta(K, [[0.1 - 0.15, -1.15, 0.005], [2.75, -1.15, 0.005], [2.75, 1.15, 0.005], [0.1 - 0.15, 1.15, 0.005]], 'rgba(40,28,16,.2)', ' filter="url(#' + id + '-mjuk)"'));
-            h += sk;
-            saker.sort(function (a, b) { return a.d - b.d; }).forEach(function (s) { h += s.h; });
+            if (topptyp !== 'vatten') {
+              var mini = { id: id, x0: 0.1, x1: 2.6, b: 1.0, e: 1.15, r: 1.85, ov: 0.15, oy: 0.15, skorsten: null, altan: null,
+                fonster: [{ v: 'y', s: 1, a0: 0.4, a1: 1.2, z0: 0.15, z1: 0.95, post: true }, { v: 'y', s: 1, a0: 1.6, a1: 2.2, z0: 0.15, z1: 0.95 },
+                  { v: 'y', s: -1, a0: 0.8, a1: 1.6, z0: 0.45, z1: 0.9 }, { v: 'x', s: -1, a0: -0.3, a1: 0.3, z0: 0.15, z1: 0.95, t: 'dorr' },
+                  { v: 'x', s: 1, a0: -0.35, a1: 0.35, z0: 0.4, z1: 0.9 }] };
+              var saker = [];
+              var lagg = function (x, y, html) { saker.push({ d: K.djup(x, y, 0), h: html }); };
+              lagg(1.35, -0.4, lyft(hus(K, mini, kT, kT, null)));
+              lagg(-3.0, -2.0, lyft(gran(K, -3.0, -2.0, 1.9, kT, lugn ? null : tid)));
+              if (topptyp !== 'hall') lagg(3.3, -1.9, lyft(lovtrad(K, id, 3.3, -1.9, 1.8, 0.55, kT, lugn ? null : tid)));
+              lagg(-3.2, 2.1, lyft(buske(K, id, -3.2, 2.1, 0.32, kT)));
+              var sk = lyft(yta(K, [[0.1 - 0.15, -1.15, 0.005], [2.75, -1.15, 0.005], [2.75, 1.15, 0.005], [0.1 - 0.15, 1.15, 0.005]], 'rgba(40,28,16,.2)', ' filter="url(#' + id + '-mjuk)"'));
+              h += sk;
+              saker.sort(function (a, b) { return a.d - b.d; }).forEach(function (s) { h += s.h; });
+            }
             // Nålen studsar över tomten.
             var kN = fas(t, 2.0, 0.6), studs = lugn ? 0 : Math.abs(Math.sin(tid * 2.2)) * 0.35;
             if (kN > 0.01) {
@@ -1534,27 +1820,46 @@ SKRIPT = '''
                 '<circle cx="0" cy="' + (-nr * 0.55).toFixed(1) + '" r="' + (nr * 0.36).toFixed(1) + '" fill="#fffaf2"/></g>';
             }
           }
+          // Regnet ovanpå och i jorden.
+          if (profil && profil.jord && iH >= 0 && toppar[iH].a > 0.9) h += regn(K, vy, Y, X, toppar[0].topp, toppar[iH], lager[iH], profil.vatten, t, lugn ? null : tid);
           // Djupet till berget, till höger om blocket.
           var kD = fas(t, 2.2, 0.8);
-          var dx = X + 0.45, dy = Y + 0.3, zb = toppar[3].topp;
-          if (kD > 0) {
-            h += matt(K, [dx, dy, toppar[0].topp], [dx, dy, toppar[0].topp + (zb - toppar[0].topp) * kD], '#8f5424', [0.22, 0, 0]);
+          var dx = X + 0.45, dy = Y + 0.3, zb = toppar[iB].topp, z0 = toppar[0].topp;
+          if (kD > 0 && !(profil && profil.djup === 0)) {
+            var okant = profil && profil.djup === null;
+            h += matt(K, [dx, dy, z0], [dx, dy, z0 + (zb - z0) * kD], '#8f5424', [0.22, 0, 0]);
+            if (profil) {
+              var q0 = K.p(dx + 0.34, dy, z0);
+              h += '<text x="' + q0[0].toFixed(1) + '" y="' + (q0[1] + 3.5).toFixed(1) + '" font-size="10.5" font-weight="700" fill="#8f5424" opacity="' + kD.toFixed(2) + '">0 m</text>';
+            }
+            if (okant) h += linje(K, [[dx, dy, z0], [dx, dy, z0 + (zb - z0) * kD]], 'rgba(250,246,238,.95)', 1.4, ' stroke-dasharray="3 4"');
+            if (profil && profil.skalbrott && kD > 0.6) {
+              var zm = (z0 + zb) / 2;
+              h += linje(K, [[dx - 0.28, dy, zm + 0.02], [dx + 0.28, dy, zm + 0.14]], '#8f5424', 1.6) + linje(K, [[dx - 0.28, dy, zm - 0.14], [dx + 0.28, dy, zm - 0.02]], '#8f5424', 1.6);
+            }
             h += linje(K, [[X, Y, zb], [dx + 0.2, dy, zb]], 'rgba(143,84,36,.5)', 1, ' stroke-dasharray="3 3"');
           }
           // Hörn för brickornas linjer.
           var minX = 1e9, maxX = -1e9;
           [[-X, -Y], [X, -Y], [X, Y], [-X, Y]].forEach(function (q) { var s = K.p(q[0], q[1], 0)[0]; minX = Math.min(minX, s); maxX = Math.max(maxX, s); });
           var ank = {}, syn = {}, start = {};
-          LAGER.forEach(function (L, j) {
+          lager.forEach(function (L, j) {
             var T = toppar[j];
-            ank[L.namn] = [vx * X, 0.5, (T.topp + T.botten) / 2];
-            syn[L.namn] = T.a > 0.9;
-            start[L.namn] = 2.0 + (3 - j) * 0.12;
+            ank[L.id] = [vx * X, 0.5, (T.topp + T.botten) / 2];
+            syn[L.id] = T.a > 0.9;
+            start[L.id] = 2.0 + (n - 1 - j) * 0.12;
           });
-          ank.ledningar = [2.5, vy * (Y + 0.42), toppar[1].topp - LAGER[1].tj * 0.5];
+          var lzL = toppar[iL].topp - Math.min(lager[iL].tj * 0.5, profil ? 0.62 : 9);
+          ank.ledningar = [2.5, vy * (Y + (profil ? 0.05 : 0.42)), lzL];
           syn.ledningar = vy > 0;
           start.ledningar = 2.4;
-          ank.djup = [dx, dy, zb];
+          if (profil && iH >= 0) {
+            var TH = toppar[iH];
+            ank.vatten = [-X + 0.9 + 3 * (2 * X - 1.8) / 4 + 0.18, vy * Y, TH.topp - lager[iH].tj * 0.64];
+            syn.vatten = TH.a > 0.9;
+            start.vatten = 2.6;
+          }
+          ank.djup = profil && profil.djup === 0 ? [dx - 0.45, dy - 0.3, z0] : [dx, dy, zb];
           syn.djup = true;
           start.djup = 2.7;
           return { h: h, ankare: ank, synlig: syn, start: start, kant: [minX, maxX] };
@@ -1570,7 +1875,11 @@ SKRIPT = '''
           var conf = typ === 'mark'
             ? { S: 30, cx: 300, cy: 150, bas: -33 * GRAD, min: -72 * GRAD, max: -8 * GRAD, scen: markScen }
             : { S: 30, cx: vb.width / 2, cy: 280, bas: -35 * GRAD, min: -100 * GRAD, max: 18 * GRAD, scen: husScen };
-          var brickor = [].map.call(el.querySelectorAll('[data-chip]'), function (b) { return { el: b, namn: b.getAttribute('data-chip'), in: false }; });
+          var brickor = [];
+          function lasBrickor() {
+            brickor = [].map.call(el.querySelectorAll('[data-chip]'), function (b) { return { el: b, namn: b.getAttribute('data-chip'), in: false }; });
+          }
+          lasBrickor();
           var skala = 1, vrid = 0, drar = false, dragX = 0, dragV = 0, isar = 0, isarMal = 0;
           var t0 = null, synlig = false, raf = 0, senast = 0, borjat = false;
           function matSkala() { skala = (svg.getBoundingClientRect().width || vb.width) / vb.width; }
@@ -1580,16 +1889,24 @@ SKRIPT = '''
             isar += (isarMal - isar) * 0.08;
             var r = conf.scen(K, t, tid, isar);
             varld.innerHTML = r.h;
-            brickor.forEach(function (b) {
+            // På tomtens bild får brickorna till höger inte krocka: djupet
+            // går före ledningarna, som går före vattnet (som också står i
+            // texten bredvid).
+            var tagna = [], PRIO = { djup: 1, ledningar: 2, vatten: 3 };
+            brickor.slice().sort(function (x, y) { return (PRIO[x.namn] || 9) - (PRIO[y.namn] || 9); }).forEach(function (b) {
               var a = r.ankare[b.namn];
               if (!a) return;
               var q = K.p(a[0], a[1], a[2]);
-              b.el.style.transform = 'translate(' + (q[0] * skala).toFixed(1) + 'px,' + (q[1] * skala).toFixed(1) + 'px)';
+              b.el.style.transform = 'translate(' + ((q[0] - vb.x) * skala).toFixed(1) + 'px,' + ((q[1] - vb.y) * skala).toFixed(1) + 'px)';
               if (r.kant) {
                 var stam = b.el.classList.contains('vf3d__chip--vanster') ? q[0] - r.kant[0] + 18 : r.kant[1] - q[0] + 18;
                 b.el.style.setProperty('--stam', Math.max(14, stam * skala).toFixed(1) + 'px');
               }
               var ska = t >= r.start[b.namn] && r.synlig[b.namn];
+              if (profil && typ === 'mark' && r.synlig[b.namn] && b.el.classList.contains('vf3d__chip--hoger')) {
+                if (tagna.some(function (y) { return Math.abs(y - q[1]) * skala < 34; })) ska = false;
+                else tagna.push(q[1]);
+              }
               if (ska !== b.in) { b.in = ska; b.el.classList.toggle('vf3d__chip--in', ska); }
             });
           }
@@ -1635,6 +1952,49 @@ SKRIPT = '''
           el.addEventListener('pointercancel', slapp);
           el.addEventListener('pointerenter', function () { isarMal = typ === 'mark' ? 0.35 : 0; });
           el.addEventListener('pointerleave', function () { isarMal = 0; });
+
+          // Tomtrapporten ritar om marken med tomtens egen profil, och
+          // PDF:en får en färdig bild av den.
+          if (typ === 'mark') {
+            var standardBrickor = [].map.call(el.querySelectorAll('[data-chip]'), function (b) { return b.outerHTML; }).join('');
+            // På smal skärm zoomas tomtens bild in på blocket.
+            var smalMQ = window.matchMedia ? window.matchMedia('(max-width: 560px)') : null;
+            var satRam = function () { svg.setAttribute('viewBox', !profil ? '0 0 640 400' : (smalMQ && smalMQ.matches ? '112 22 396 350' : '104 12 600 372')); matSkala(); };
+            if (smalMQ) {
+              var vidByte = function () { satRam(); if (lugn) rita(99, 0); };
+              if (smalMQ.addEventListener) smalMQ.addEventListener('change', vidByte); else if (smalMQ.addListener) smalMQ.addListener(vidByte);
+            }
+            var escT = function (x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+            window.idealhusMark = {
+              visa: function (d) {
+                profil = d ? byggProfil(d) : null;
+                [].forEach.call(el.querySelectorAll('[data-chip]'), function (b) { b.parentNode.removeChild(b); });
+                var html = profil ? profilBrickor(profil).map(function (c) {
+                  return '<span class="vf3d__chip ' + c.klass + '" data-chip="' + c.namn + '"' + (c.prick ? ' style="--prick:' + c.prick + '"' : '') + '>' +
+                    '<span class="vf3d__chip-in"><i></i><b>' + escT(c.b) + '</b>' + (c.em ? '<em>' + escT(c.em) + '</em>' : '') + '</span></span>';
+                }).join('') : standardBrickor;
+                var tips = el.querySelector('.vf3d__tips');
+                if (tips) tips.insertAdjacentHTML('beforebegin', html); else el.insertAdjacentHTML('beforeend', html);
+                lasBrickor();
+                el.classList.toggle('vf3d--egen', !!profil);
+                t0 = null;
+                vrid = 0;
+                satRam();
+                if (lugn) rita(99, 0); else kor();
+              },
+              bild: function () {
+                var K = new Kamera(conf.bas, conf.S, conf.cx, conf.cy);
+                var defs = svg.querySelector('defs');
+                // Egna id:n i PDF:en - sidans scen är dold vid utskrift, och
+                // toningar som pekar dit ritas då inte.
+                return ('<svg class="rapport__mark" viewBox="60 10 520 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+                  (defs ? defs.outerHTML : '') + conf.scen(K, 99, null, 0).h + '</svg>').split('vfm-').join('vfr-');
+              },
+              lager: function () {
+                return profil ? profil.lager.map(function (L) { return { namn: L.etikett, farg: PRICK[L.typ] || '#aa9c88' }; }) : [];
+              }
+            };
+          }
         });
       })();
 
@@ -1648,6 +2008,7 @@ SKRIPT = '''
         if (!sok) return;
         var JORD = ''' + json.dumps(JORDTOLKNING, ensure_ascii=False) + ''';
         var VATTEN = ''' + json.dumps(GENOMSLAPP, ensure_ascii=False) + ''';
+        var BILD = ''' + json.dumps(JORDBILD, ensure_ascii=False) + ''';
         var SGU = 'https://api.sgu.se/oppnadata/';
         var falt = document.getElementById('marksok-adress');
         var knapp = sok.querySelector('.marksok__knapp');
@@ -1877,6 +2238,107 @@ SKRIPT = '''
           return rader;
         }
 
+        // --- Genomskärningen ----------------------------------------------
+        function jordKlass(namn) {
+          for (var i = 0; i < BILD.length; i++) {
+            if (new RegExp(BILD[i][0], 'i').test(namn)) return BILD[i][1];
+          }
+          return 'okand';
+        }
+        // SGU skriver intervall med två bindestreck ("ler--block").
+        function snyggNamn(namn) { return String(namn).split('--').join('–'); }
+
+        function markData(t) {
+          var j = t.jord, d = {};
+          if (j && j.jg2_tx) {
+            d.namn = snyggNamn(j.jg2_tx);
+            d.klass = jordKlass(j.jg2_tx);
+          } else {
+            d.namn = j === null ? 'Ej kartlagt' : 'Jordart okänd';
+            d.klass = 'okand';
+          }
+          if (t.yt && (!j || t.yt !== j.jg2_tx)) {
+            d.ytNamn = snyggNamn(t.yt);
+            d.ytKlass = jordKlass(t.yt);
+          }
+          d.djup = typeof t.djup === 'number' ? t.djup : null;
+          d.vatten = j && j.genomslapp ? +j.genomslapp : 0;
+          return d;
+        }
+
+        function skarningText(d) {
+          if (d.klass === 'vatten') return 'Enligt kartan står nålen i vatten. Flytta den till tomten, så ritas marken där.';
+          var s = [];
+          if (d.klass === 'okand') {
+            s.push(d.namn === 'Ej kartlagt'
+              ? 'SGU:s detaljerade jordartskarta täcker inte just den här punkten, så jordlagret är ritat utan material.'
+              : 'Jordarten kunde inte hämtas just nu, så jordlagret är ritat utan material.');
+          } else if (d.klass === 'berg') {
+            s.push('Här är det ' + d.namn.toLowerCase() + ' i ytan.');
+          } else {
+            s.push('Överst ' + (d.ytNamn ? 'ett tunt lager ' + d.ytNamn.toLowerCase() + ' och därunder ' : '') + d.namn.toLowerCase() + '.');
+          }
+          if (d.klass !== 'berg') {
+            if (d.djup === null) s.push('Hur djupt berget ligger finns inte i modellen här.');
+            else if (d.djup === 0) s.push('Enligt modellen ligger berget precis under ytan.');
+            else s.push('Berget ligger ungefär ' + d.djup + ' meter ned' + (d.djup > 6 ? ', så grunden bärs av jordlagren.' : '.'));
+          }
+          if (d.vatten && d.klass !== 'berg') s.push(VATTEN[String(d.vatten)] || '');
+          return s.join(' ');
+        }
+
+        var skarning = document.getElementById('tomt-skarning');
+        // Blocket flyttar in i svaret så fort kartan visas; där står det
+        // tonat tills tomtens data har kommit.
+        function flyttaScen() {
+          var bild = document.getElementById('tomtskarning-bild');
+          var scen = document.querySelector('.vf3d--mark');
+          if (scen && bild && scen.parentNode !== bild) bild.appendChild(scen);
+        }
+        // SWEREF 99 TM (EPSG:3006) för länkarna till SGU och Lantmäteriet.
+        function sweref(lat, lon) {
+          var a = 6378137, f = 1 / 298.257222101, k0 = 0.9996, lon0 = 15 * Math.PI / 180;
+          var e2 = f * (2 - f), n = f / (2 - f), ah = a / (1 + n) * (1 + n * n / 4 + n * n * n * n / 64);
+          var A = e2, B = (5 * e2 * e2 - e2 * e2 * e2) / 6, C = (104 * Math.pow(e2, 3) - 45 * Math.pow(e2, 4)) / 120, D = 1237 * Math.pow(e2, 4) / 1260;
+          var b1 = n / 2 - 2 * n * n / 3 + 5 * Math.pow(n, 3) / 16 + 41 * Math.pow(n, 4) / 180, b2 = 13 * n * n / 48 - 3 * Math.pow(n, 3) / 5 + 557 * Math.pow(n, 4) / 1440;
+          var b3 = 61 * Math.pow(n, 3) / 240 - 103 * Math.pow(n, 4) / 140, b4 = 49561 * Math.pow(n, 4) / 161280;
+          var phi = lat * Math.PI / 180, sp = Math.sin(phi), dl = lon * Math.PI / 180 - lon0;
+          var ps = phi - sp * Math.cos(phi) * (A + B * sp * sp + C * Math.pow(sp, 4) + D * Math.pow(sp, 6));
+          var xi = Math.atan(Math.tan(ps) / Math.cos(dl)), tt = Math.cos(ps) * Math.sin(dl), eta = 0.5 * Math.log((1 + tt) / (1 - tt));
+          var N = k0 * ah * (xi + b1 * Math.sin(2 * xi) * Math.cosh(2 * eta) + b2 * Math.sin(4 * xi) * Math.cosh(4 * eta) + b3 * Math.sin(6 * xi) * Math.cosh(6 * eta) + b4 * Math.sin(8 * xi) * Math.cosh(8 * eta));
+          var E = k0 * ah * (eta + b1 * Math.cos(2 * xi) * Math.sinh(2 * eta) + b2 * Math.cos(4 * xi) * Math.sinh(4 * eta) + b3 * Math.cos(6 * xi) * Math.sinh(6 * eta) + b4 * Math.cos(8 * xi) * Math.sinh(8 * eta)) + 500000;
+          return [Math.round(E), Math.round(N)];
+        }
+        // Korten under kartan öppnar SGU:s och Lantmäteriets kartor vid tomten.
+        function lankaKort(t) {
+          var p = sweref(t.lat, t.lon), E = p[0], N = p[1], antal = 0;
+          [].forEach.call(document.querySelectorAll('.markkort[data-karta]'), function (k) {
+            var bas = k.getAttribute('data-karta'), ny = null;
+            if (bas.indexOf('apps.sgu.se/kartvisare/') >= 0) ny = bas.split('?')[0] + '?zoom=' + (E - 300) + ',' + (N - 200) + ',' + (E + 300) + ',' + (N + 200);
+            else if (bas.indexOf('minkarta.lantmateriet.se') >= 0) ny = 'https://minkarta.lantmateriet.se/plats/3006/v2.0/?e=' + E + '&n=' + N + '&z=12&mapprofile=karta&layers=%5B%5B%223%22%5D%2C%5B%221%22%5D%5D';
+            var txt = k.querySelector('[data-lanktext]');
+            if (ny) {
+              k.href = ny;
+              k.classList.add('markkort--tomt');
+              if (txt) txt.textContent = 'Öppna vid tomten';
+              antal++;
+            }
+          });
+          var mer = document.getElementById('markkoll-mer');
+          if (mer && antal) mer.innerHTML = 'Gå djupare i kartorna <span>· ' + esc(t.namn) + '</span>';
+        }
+        var fokusEfter = false;
+        function visaSkarning() {
+          if (!skarning) return;
+          var d = markData(tomt);
+          flyttaScen();
+          document.getElementById('tomtskarning-text').textContent = skarningText(d);
+          var skala = skarning.querySelector('[data-not="skala"]');
+          if (skala) skala.hidden = !(d.djup !== null && d.djup > 6 && d.klass !== 'berg' && d.klass !== 'vatten');
+          if (window.idealhusMark) window.idealhusMark.visa(d);
+          lankaKort(tomt);
+        }
+
         function koordinater(t) {
           return t.lat.toFixed(5).replace('.', ',') + ' N, ' + t.lon.toFixed(5).replace('.', ',') + ' E';
         }
@@ -1921,6 +2383,15 @@ SKRIPT = '''
           if (karta) karta.panTo([lat, lon]);
           ruta.classList.add('tomtrapport--laddar');
           ruta.setAttribute('aria-busy', 'true');
+          flyttaScen();
+          // Efter en sökning hamnar genomskärningen i fokus.
+          if (fokusEfter && skarning) {
+            fokusEfter = false;
+            requestAnimationFrame(function () {
+              var lugnt = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+              skarning.scrollIntoView({ behavior: lugnt ? 'auto' : 'smooth', block: 'start' });
+            });
+          }
           function ingen() { return undefined; }
           Promise.all([
             jordart(lat, lon).catch(ingen),
@@ -1930,6 +2401,7 @@ SKRIPT = '''
             if (nr !== anrop) return;
             tomt = { lat: lat, lon: lon, namn: namn, jord: svar[0], yt: svar[1], djup: svar[2] };
             rita();
+            visaSkarning();
             ruta.classList.remove('tomtrapport--laddar');
             ruta.removeAttribute('aria-busy');
           });
@@ -1949,6 +2421,7 @@ SKRIPT = '''
             status.textContent = a.exakt
               ? 'Hittade ' + a.namn + '. Flytta nålen om den inte står på tomten.'
               : 'Hittade ' + a.namn + ', men inte exakt var huset ligger. Dra nålen till tomten.';
+            fokusEfter = true;
             return visaKarta(a.lat, a.lon).then(function () { kolla(a.lat, a.lon, a.namn); });
           }).catch(function (err) {
             if (window.console) console.error(err);
@@ -1969,6 +2442,7 @@ SKRIPT = '''
                 return;
               }
               status.textContent = 'Nålen står där du är nu. Flytta den om tomten ligger en bit bort.';
+              fokusEfter = true;
               visaKarta(lat, lon).then(function () { kolla(lat, lon, 'Din position'); }, function () {
                 status.textContent = 'Kartan gick inte att ladda. Prova igen om en stund.';
               });
@@ -2008,6 +2482,10 @@ SKRIPT = '''
             h += '<h2>Marken</h2><dl class="rapport__fakta">' + faktarader(tomt).map(function (r) {
               return '<div><dt>' + r[0] + '</dt><dd><strong>' + esc(r[1]) + '</strong>' + (r[2] ? ' ' + esc(r[2]) : '') + '</dd></div>';
             }).join('') + '</dl>' +
+            (window.idealhusMark ? '<figure class="rapport__skarning">' + window.idealhusMark.bild() +
+              '<figcaption><ul class="rapport__lager">' + window.idealhusMark.lager().map(function (L) {
+                return '<li><i style="background:' + L.farg + '"></i>' + esc(L.namn) + '</li>';
+              }).join('') + '</ul>' + esc(text('#tomtskarning-text')) + '</figcaption></figure>' : '') +
             '<p class="rapport__kalla">Källa: Sveriges geologiska undersökning (SGU), öppna data. Kartorna är översiktliga och ersätter inte en geoteknisk bedömning på plats.</p>';
           }
 
