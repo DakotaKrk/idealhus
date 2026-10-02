@@ -3568,6 +3568,12 @@
      magnetiska knappar och en glidande markör i menyn (design.css 15). */
   document.documentElement.classList.add('ih-js');
 
+  // Sidfotens sociala ikoner ritas fram när sidfoten syns.
+  $$('.site-footer__sociala').forEach(function (el) {
+    if (lugn || !window.IntersectionObserver) { el.classList.add('syns'); return; }
+    narSynligt(el, function (e) { e.classList.add('syns'); }, 0.5);
+  });
+
   // Etikettstrecken ritas när de syns.
   $$('.ih-etikett, .section-label').forEach(function (el) {
     if (lugn) { el.classList.add('syns'); return; }

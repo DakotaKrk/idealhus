@@ -27337,3 +27337,161 @@ html body .mmeny .mmeny__kort--bred + .mmeny__etikett {
     margin: 0;
   }
 }
+/* Sociala medier i sidfoten (2026-10-02): tre runda glasknappar under
+   texten. Ikonerna ritas fram med ett pennstreck när sidfoten syns, och
+   vid hovring fylls knappen mörkt inifrån och ikonen ritas om i bärnsten. */
+html body .site-footer .site-footer__sociala {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+html body .site-footer .site-footer__sociala li {
+  margin: 0;
+  padding: 0;
+}
+
+html body .site-footer .site-footer__sociala .social {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 50%;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(255, 252, 246, 0.6));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(27, 25, 21, 0.08),
+    0 12px 24px -16px rgba(90, 60, 25, 0.6);
+  color: #8f5424;
+  text-decoration: none;
+  transition: transform 0.45s var(--mjuk), box-shadow 0.45s var(--mjuk), color 0.3s ease;
+}
+
+/* Fyllningen som växer ut från mitten. */
+html body .site-footer .site-footer__sociala .social::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(circle at 30% 25%, #3b362e, #1b1915 72%);
+  transform: scale(0);
+  transition: transform 0.5s var(--mjuk);
+}
+
+html body .site-footer .site-footer__sociala .social svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.5s var(--mjuk);
+}
+
+html body .site-footer .site-footer__sociala .social__prick {
+  fill: currentColor;
+  stroke: none;
+}
+
+html body .site-footer .site-footer__sociala .social:hover,
+html body .site-footer .site-footer__sociala .social:focus-visible {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 0 1px #1b1915,
+    0 18px 30px -14px rgba(27, 25, 21, 0.55);
+  color: #f0b56e;
+}
+
+html body .site-footer .site-footer__sociala .social:hover::before,
+html body .site-footer .site-footer__sociala .social:focus-visible::before {
+  transform: scale(1);
+}
+
+html body .site-footer .site-footer__sociala .social:hover svg {
+  transform: rotate(-8deg) scale(1.06);
+}
+
+html body .site-footer .site-footer__sociala .social:active {
+  transform: translateY(0) scale(0.94);
+  transition-duration: 0.08s;
+}
+
+html body .site-footer .site-footer__sociala .social:focus-visible {
+  outline: 2px solid #f0b56e;
+  outline-offset: 3px;
+}
+
+/* Mörkt läge: glas i grafit, bärnstensfyllning med mörk ikon vid hovring. */
+html[data-tema="mork"] body .site-footer .site-footer__sociala .social {
+  background: linear-gradient(160deg, rgba(247, 245, 240, 0.09), rgba(247, 245, 240, 0.03));
+  box-shadow:
+    inset 0 1px 0 rgba(247, 245, 240, 0.08),
+    0 0 0 1px rgba(247, 245, 240, 0.14),
+    0 12px 24px -16px rgba(0, 0, 0, 0.8);
+  color: #f0b56e;
+}
+
+html[data-tema="mork"] body .site-footer .site-footer__sociala .social::before {
+  background: radial-gradient(circle at 30% 25%, #f6c88f, #e8a456 72%);
+}
+
+html[data-tema="mork"] body .site-footer .site-footer__sociala .social:hover,
+html[data-tema="mork"] body .site-footer .site-footer__sociala .social:focus-visible {
+  box-shadow: 0 0 0 1px #f0b56e, 0 18px 30px -14px rgba(232, 164, 86, 0.55);
+  color: #1b1915;
+}
+
+/* Entrén: knapparna stiger fram en i taget och ikonerna ritas, och vid
+   hovring ritas ikonen om. Bara med rörelse påslagen. */
+@media (prefers-reduced-motion: no-preference) {
+  html.ih-js body .site-footer .site-footer__sociala li {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+    transition: opacity 0.6s ease calc(var(--i) * 0.12s), transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--i) * 0.12s);
+  }
+
+  html.ih-js body .site-footer .site-footer__sociala.syns li {
+    opacity: 1;
+    transform: none;
+  }
+
+  html.ih-js body .site-footer .site-footer__sociala .social__drag {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1.1s cubic-bezier(0.6, 0, 0.2, 1) calc(0.25s + var(--i) * 0.15s);
+  }
+
+  html.ih-js body .site-footer .site-footer__sociala.syns .social__drag {
+    stroke-dashoffset: 0;
+  }
+
+  html.ih-js body .site-footer .site-footer__sociala .social__prick {
+    transform: scale(0);
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) calc(1s + var(--i) * 0.15s);
+  }
+
+  html.ih-js body .site-footer .site-footer__sociala.syns .social__prick {
+    transform: scale(1);
+  }
+
+  html body .site-footer .site-footer__sociala .social:hover .social__drag {
+    stroke-dasharray: 1;
+    animation: social-rita 0.8s cubic-bezier(0.6, 0, 0.2, 1) both;
+  }
+}
+
+@keyframes social-rita {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
