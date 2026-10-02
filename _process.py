@@ -138,9 +138,37 @@ CHECK_HTML = "\n".join(
               <a class="checklista__steg" href="#steg-{s}">Steg {s:02d}</a>
             </li>''' for nyckel, s, text in CHECKLISTA)
 
+# Kortet som svävar över toppbilden (samma form som offertkortet på
+# Priser): de sju stegen med vem som gör vad, ett streck mellan skedena.
+SKEDESLUT = {spann[1] for _namn, spann, _t in FASER[:-1]}
+HERO_STEG = (
+    '        <div class="hoffert hoffert--steg" aria-hidden="true">\n'
+    '          <div class="hoffert__huvud"><span class="hoffert__typ">Sju steg · tre skeden</span><span class="hoffert__stampel">I ordning</span></div>\n'
+    '          <ul class="hoffert__lista">\n'
+    + "".join(f'            <li style="--i:{i}"{' class="hoffert__skede"' if i + 1 in SKEDESLUT else ''}>'
+              f'<i class="hoffert__prick hoffert__prick--{klass}"></i><span><b>{i + 1:02d}</b> {rubrik}</span>'
+              f'<em class="hoffert__vem hoffert__vem--{klass}">{VEMNAMN[klass]}</em></li>\n'
+              for i, (rubrik, _vem, klass, _text) in enumerate(STEG))
+    + '          </ul>\n'
+    '          <div class="hoffert__fot"><span>Hela vägen</span><strong>En kontakt</strong></div>\n'
+    '        </div>'
+)
+
+# Under tak: ett kort över bilden som ställer ute mot inne.
+TAKKORT = (
+    '              <div class="takkort" aria-hidden="true">\n'
+    '                <div class="takkort__rad"><span class="takkort__ikon"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 16a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 7.5a3.5 3.5 0 0 1 .5 6.97M9 19l-1 2M13 18l-1 2M16.5 18.5l-1 2"/></svg></span>'
+    '<p><strong>Utomhus</strong><span>regn, kyla och fukt</span></p><i class="hoffert__prick"></i></div>\n'
+    '                <div class="takkort__rad takkort__rad--inne"><span class="takkort__ikon takkort__ikon--koppar"><svg viewBox="0 0 24 24" focusable="false"><path d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5M10 20v-5h4v5"/></svg></span>'
+    '<p><strong>Inomhus</strong><span>jämn temperatur och fuktnivå</span></p><i class="hoffert__bock"></i></div>\n'
+    '                <div class="hoffert__fot"><span>Montaget</span><strong>dagar i stället för månader</strong></div>\n'
+    '              </div>'
+)
+
 KROPP = f'''    <main id="innehall">
       <section class="subpage-hero">
         <img class="subpage-hero__image" src="images/foto/dronare-montage.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Drönarbild av ett hus under montage, med inplastade väggar runt en betongplatta och en kran">
+{HERO_STEG}
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
@@ -168,7 +196,7 @@ KROPP = f'''    <main id="innehall">
       <section class="flode-intro" aria-labelledby="flode-rubrik">
         <div class="flode-intro__inre">
           <div class="flode-intro__ord">
-            <p class="section-label section-label--accent">Processen</p>
+            <p class="section-label section-label--accent">Tre skeden</p>
             <h2 class="flode-intro__titel" id="flode-rubrik">Sju steg, <em>i ordning.</em></h2>
             <p class="flode-intro__text">
               Ordningen spelar roll. Du kan inte bygga innan bygglovet är klart,
@@ -230,7 +258,7 @@ KROPP = f'''    <main id="innehall">
           </div>
 
           <div class="berattelse__spar">
-            <div class="berattelse__rail" aria-hidden="true"><i class="berattelse__railfyll"></i></div>
+            <div class="berattelse__rail" aria-hidden="true"><i class="berattelse__railfyll"></i><i class="berattelse__railkula"></i></div>
             <ol class="berattelse__lista">
 {STEG_HTML}
             </ol>
@@ -260,10 +288,11 @@ KROPP = f'''    <main id="innehall">
         </div>
       </section>
 
-      <section class="segment">
+      <section class="segment segment--tak">
         <article class="segment__block">
           <div>
-            <h2>Under tak, inte under presenning</h2>
+            <p class="section-label section-label--accent">Steg 04 · Tillverkning</p>
+            <h2>Under tak, <em>inte under presenning.</em></h2>
             <p>
               Ett hus som byggs utomhus möter regn, kyla och fukt medan det
               växer fram. Våra hus byggs inomhus, i jämn temperatur, och kommer
@@ -276,8 +305,11 @@ KROPP = f'''    <main id="innehall">
             </p>
             <a class="model-price__button" href="proffs.html">Se produktionen</a>
           </div>
-          <div class="segment__media">
-            <img src="images/foto/stommar-stapel.webp" loading="lazy" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra">
+          <div class="segment__bildram">
+            <div class="segment__media">
+              <img src="images/foto/stommar-stapel.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra">
+            </div>
+{TAKKORT}
           </div>
         </article>
       </section>

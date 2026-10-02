@@ -25161,3 +25161,443 @@ html[data-tema="mork"] .hoffert__andra em {
   background: rgba(240, 181, 110, 0.18);
   color: #f6c88f;
 }
+/* =====================================================================
+   Så fungerar det premium (2026-10-09)
+   Planen kom ur en granskning med tre perspektiv och en domare. Toppen
+   får ett stegkort över bilden (samma form som offertkortet på Priser).
+   Stegkorten och HUD:en fungerar i mörkt läge och på mobil. En kula
+   glider längs rälsen till den tända pricken. En slöja ligger bakom den
+   dockade raden, och tipset går undan för stegen. Checklistan får varmt
+   glas och koppar. "Under tak" får etikett, betonad rubrik, hela bilden
+   och ett ute/inne-kort.
+   ===================================================================== */
+
+/* --- 1. Stegkortet över toppbilden -------------------------------------- */
+html body .hoffert--steg .hoffert__lista li {
+  padding: 5px 4px;
+}
+
+html body .hoffert--steg .hoffert__lista li.hoffert__skede {
+  border-bottom: 1px dashed rgba(143, 84, 36, 0.28);
+}
+
+html body .hoffert--steg .hoffert__lista b {
+  margin-right: 3px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #a07650;
+}
+
+html body .hoffert__prick--vi {
+  background: var(--kol);
+  box-shadow: 0 0 0 3px rgba(27, 25, 21, 0.1);
+}
+
+html body .hoffert__prick--du {
+  background: #8fb0cf;
+  box-shadow: 0 0 0 3px rgba(143, 176, 207, 0.25);
+}
+
+html body .hoffert__lista em.hoffert__vem--vi {
+  background: rgba(27, 25, 21, 0.07);
+  color: #1b1915;
+}
+
+html body .hoffert__lista em.hoffert__vem--du {
+  background: rgba(143, 176, 207, 0.22);
+  color: #3d6a92;
+}
+
+html body .hoffert__lista em.hoffert__vem--bada {
+  background: rgba(240, 181, 110, 0.2);
+  color: #8f5424;
+}
+
+html[data-tema="mork"] body .hoffert__lista em.hoffert__vem--vi {
+  background: rgba(247, 245, 240, 0.1);
+  color: #f7f5f0;
+}
+
+html[data-tema="mork"] body .hoffert__lista em.hoffert__vem--du {
+  background: rgba(143, 176, 207, 0.18);
+  color: #b9d0e6;
+}
+
+html[data-tema="mork"] body .hoffert__lista em.hoffert__vem--bada {
+  background: rgba(240, 181, 110, 0.18);
+  color: #f6c88f;
+}
+
+html[data-tema="mork"] body .hoffert__prick--vi {
+  background: #f7f5f0;
+}
+
+/* Smalare skärmar: kortet får inte nå textspalten. */
+@media (min-width: 901px) and (max-width: 1100px) {
+  html body .subpage-hero.helbild .hoffert--steg {
+    display: none;
+  }
+}
+
+/* --- 2. Stegkorten och HUD:en i mörkt läge och på mobil ------------------- */
+html[data-tema="mork"] body .berattelse__kort {
+  background: linear-gradient(160deg, rgba(247, 245, 240, 0.07), rgba(247, 245, 240, 0.03));
+  box-shadow: inset 0 1px 0 rgba(247, 245, 240, 0.06), inset 0 0 0 1px rgba(247, 245, 240, 0.08), 0 30px 60px -44px rgba(0, 0, 0, 0.8);
+}
+
+html[data-tema="mork"] body .berattelse__steg.aktiv .berattelse__kort {
+  background:
+    radial-gradient(80% 70% at 100% 0%, rgba(240, 181, 110, 0.16), transparent 62%),
+    linear-gradient(160deg, rgba(40, 36, 31, 0.96), rgba(24, 22, 19, 0.94));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08), 0 0 0 2px #f0b56e, 0 0 0 7px rgba(240, 181, 110, 0.12), 0 44px 80px -44px rgba(0, 0, 0, 0.85);
+}
+
+html[data-tema="mork"] body .berattelse__matare {
+  background: radial-gradient(circle, rgba(33, 30, 25, 0.95) 55%, rgba(33, 30, 25, 0) 72%);
+}
+
+html[data-tema="mork"] body .flode__prickar a.klar i {
+  background: #c98a45;
+}
+
+html[data-tema="mork"] body .flode__prickar a.aktiv i {
+  background: #f0b56e;
+}
+
+html[data-tema="mork"] body .vemfilter button[aria-pressed="true"] small {
+  background: rgba(27, 25, 21, 0.16);
+  color: #1b1915;
+}
+
+@media (max-width: 1040px) {
+  html body .berattelse__kort {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- 3. Kulan på rälsen och pricken som tänds ------------------------------ */
+@media (min-width: 1041px) {
+  html body .berattelse__steg::before {
+    top: var(--prick, 50%);
+  }
+}
+
+html body .berattelse__railfyll {
+  transition: transform 0.8s var(--mjuk);
+}
+
+html body .berattelse__railkula {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff4e2, #f6c88f 35%, #c98a45);
+  box-shadow: 0 0 0 4px rgba(240, 181, 110, 0.25), 0 0 14px rgba(240, 181, 110, 0.8);
+  transform: translateY(0);
+  transition: transform 0.8s var(--mjuk);
+  pointer-events: none;
+}
+
+html body .berattelse__steg.aktiv::after {
+  content: "";
+  position: absolute;
+  left: -40px;
+  top: var(--prick, 50%);
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .berattelse__steg.aktiv::after {
+    animation: prick-ring 0.9s ease-out 0.45s both;
+  }
+}
+
+@keyframes prick-ring {
+  from { box-shadow: 0 0 0 0 rgba(240, 181, 110, 0.6); }
+  to { box-shadow: 0 0 0 18px rgba(240, 181, 110, 0); }
+}
+
+@media (max-width: 1040px) {
+  html body .berattelse__steg.aktiv::after {
+    left: -33px;
+    top: 34px;
+    margin-top: 0;
+  }
+}
+
+/* --- 4. Slöjan bakom den dockade raden ------------------------------------- */
+@media (min-width: 901px) {
+  html body .flode::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    z-index: 7;
+    display: block;
+    height: 184px;
+    margin: -92px 0 -92px;
+    background: linear-gradient(180deg, var(--ben) 0, var(--ben) 140px, transparent 184px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  html body .flode.flode--dockad::before {
+    opacity: 1;
+  }
+}
+
+html:not([data-tema="mork"]) body .flode__styr {
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 22px 46px -26px rgba(27, 25, 21, 0.5);
+}
+
+/* --- 5. Checklistan: varmt glas, koppar och en stämpel ---------------------- */
+html:not([data-tema="mork"]) body .checklista__lista li {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.7));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 18px 36px -30px rgba(90, 60, 25, 0.45);
+  transition: transform 0.4s var(--mjuk), box-shadow 0.4s;
+}
+
+html:not([data-tema="mork"]) body .checklista__lista li:hover {
+  background: linear-gradient(160deg, #fff, rgba(255, 255, 255, 0.82));
+  transform: translateY(-2px);
+}
+
+html:not([data-tema="mork"]) body .checklista__lista li:has(input:checked) {
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.3), 0 18px 36px -30px rgba(143, 84, 36, 0.5);
+}
+
+html:not([data-tema="mork"]) body .checklista__steg {
+  background: rgba(240, 181, 110, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.3);
+  color: #8f5424;
+}
+
+html:not([data-tema="mork"]) body .checklista__steg:hover {
+  background: linear-gradient(160deg, #e2a865, #a96a2f);
+  box-shadow: none;
+  color: #fffaf2;
+}
+
+html:not([data-tema="mork"]) body .checklista__ringspar {
+  stroke: rgba(201, 138, 69, 0.18);
+}
+
+html body .checklista__ringfyll {
+  stroke: #c98a45;
+  filter: drop-shadow(0 0 3px rgba(240, 181, 110, 0.7));
+}
+
+html body .checklista--klar .checklista__ringfyll {
+  stroke: #3aaa68;
+}
+
+html body .checklista--tom .checklista__ringfyll {
+  opacity: 0;
+}
+
+html:not([data-tema="mork"]) body .checklista__titel em,
+html:not([data-tema="mork"]) body .checklista__titel em.syns {
+  background-image: linear-gradient(-45deg,
+    #6e3d14 0%, #9a5a24 30%, #c98a45 40%, #f0b56e 46%, #ffe2b8 50%, #c98a45 56%, #9a5a24 68%, #6e3d14 100%);
+}
+
+html body .checklista__rad input:checked + .checklista__ruta {
+  background: linear-gradient(160deg, #e2a865, #a96a2f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 14px -8px rgba(143, 84, 36, 0.7);
+}
+
+html body .checklista__rad input:checked + .checklista__ruta svg {
+  stroke: #fffaf2;
+}
+
+html body .checklista--klar .checklista__matare p::after {
+  content: "Allt avbockat";
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  border: 1.5px solid rgba(47, 138, 82, 0.6);
+  border-radius: 6px;
+  font: 700 0.5625rem/1 var(--knappfont);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #2f8a52;
+  transform: rotate(-4deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .checklista--klar .checklista__matare p::after {
+    animation: hoffert-bock 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+html[data-tema="mork"] body .checklista--klar .checklista__matare p::after {
+  border-color: rgba(127, 214, 162, 0.5);
+  color: #8fe0b0;
+}
+
+/* --- 6. Under tak ------------------------------------------------------------- */
+html body .segment--tak .segment__block > .segment__bildram {
+  position: relative;
+  max-width: none;
+}
+
+html body .segment--tak .segment__media img {
+  aspect-ratio: 1800 / 1200;
+}
+
+html body .segment--tak .section-label {
+  margin-bottom: 16px;
+}
+
+html body .takkort {
+  width: 300px;
+  padding: 16px 16px 14px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 252, 246, 0.9));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 40px 70px -30px rgba(40, 26, 12, 0.55);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+html body .takkort__rad {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(143, 84, 36, 0.28);
+}
+
+html body .takkort__rad p {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+html body .takkort__rad strong {
+  font: 600 0.875rem/1.2 var(--knappfont);
+  color: var(--text);
+}
+
+html body .takkort__rad span:not(.takkort__ikon) {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--text-2);
+}
+
+html body .takkort__ikon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(27, 25, 21, 0.05);
+}
+
+html body .takkort__ikon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--text-3);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html body .takkort__ikon--koppar {
+  background: linear-gradient(160deg, #e2a865, #a96a2f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 18px -10px rgba(143, 84, 36, 0.7);
+}
+
+html body .takkort__ikon--koppar svg {
+  stroke: #fffaf2;
+}
+
+html body .takkort .hoffert__fot {
+  margin-top: 8px;
+  padding-top: 10px;
+}
+
+@media (min-width: 901px) {
+  html body .takkort {
+    position: absolute;
+    left: -28px;
+    bottom: 28px;
+    z-index: 2;
+    transform: rotate(-2deg);
+    transition: transform 0.8s var(--mjuk);
+  }
+
+  html body .segment--tak .segment__bildram:hover .takkort {
+    transform: rotate(-0.6deg) translateY(-4px);
+  }
+}
+
+@media (max-width: 900px) {
+  html body .takkort {
+    position: relative;
+    z-index: 2;
+    width: auto;
+    margin: -36px 16px 0;
+  }
+}
+
+html[data-tema="mork"] body .takkort {
+  background: linear-gradient(160deg, rgba(40, 36, 31, 0.96), rgba(24, 22, 19, 0.94));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1), 0 40px 70px -30px rgba(0, 0, 0, 0.8);
+}
+
+html[data-tema="mork"] body .takkort__rad strong {
+  color: #f7f5f0;
+}
+
+html[data-tema="mork"] body .takkort__rad span:not(.takkort__ikon) {
+  color: rgba(247, 245, 240, 0.72);
+}
+
+html[data-tema="mork"] body .takkort__ikon:not(.takkort__ikon--koppar) {
+  background: rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] body .takkort .hoffert__fot {
+  border-top-color: rgba(247, 245, 240, 0.6);
+}
+
+html[data-tema="mork"] body .takkort .hoffert__fot strong {
+  color: #f7f5f0;
+}
+/* Under tak: bildens höjd följer bredden (width/height-attributen gav
+   1200 px), och etiketten ärver inte styckets storlek och färg. */
+html body .segment--tak .segment__media img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+html body .segment--tak .segment__block p.section-label {
+  margin: 0 0 16px;
+  font: 600 0.75rem/1 var(--knappfont);
+  letter-spacing: 0.14em;
+  color: var(--virke-djup);
+}
+
+html[data-tema="mork"] body .segment--tak .segment__block p.section-label {
+  color: #f0b56e;
+}
+html body .takkort .hoffert__fot {
+  display: grid;
+  gap: 5px;
+  justify-content: start;
+}
+
+html body .takkort .hoffert__fot strong {
+  font-size: 1.0625rem;
+}

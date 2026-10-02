@@ -1718,6 +1718,10 @@
     var ram = $('.berattelse__ram', rot);
     var lista = $('.berattelse__lista', rot);
     var railFyll = $('.berattelse__railfyll', rot);
+    var railKula = $('.berattelse__railkula', rot);
+    var rail = $('.berattelse__rail', rot);
+    var styr = $('.flode__styr', sek);
+    var smal = window.matchMedia('(max-width: 900px)');
     var prickar = $$('[data-fard]', sek);
     var nu = $('[data-flode-nu]', sek);
     var hud = {
@@ -1809,11 +1813,21 @@
     var matt = null, bokad = false;
     function mat() {
       var y0 = window.scrollY;
+      var rr = rail ? rail.getBoundingClientRect() : null;
       matt = {
         lista: { topp: lista.getBoundingClientRect().top + y0, h: lista.offsetHeight },
+        rail: rr ? { topp: rr.top + y0, h: rail.offsetHeight } : null,
         steg: steg.map(function (s) {
-          var r = s.getBoundingClientRect();
-          return { topp: r.top + y0, botten: r.bottom + y0 };
+          var r = s.getBoundingClientRect(), prick;
+          if (bred.matches) {
+            var k = $('.berattelse__kort', s).getBoundingClientRect();
+            prick = k.top + k.height / 2 + y0;
+            s.style.setProperty('--prick', (prick - (r.top + y0)).toFixed(1) + 'px');
+          } else {
+            prick = r.top + y0 + 42;
+            s.style.removeProperty('--prick');
+          }
+          return { topp: r.top + y0, botten: r.bottom + y0, prick: prick };
         })
       };
     }
@@ -1824,8 +1838,22 @@
       var i = 0;
       matt.steg.forEach(function (r, j) { if (y >= r.topp) i = j; });
       visa(i);
-      var p = Math.min(1, Math.max(0, (y - matt.lista.topp) / matt.lista.h));
-      if (railFyll) railFyll.style.transform = 'scaleY(' + p.toFixed(4) + ')';
+      if (matt.rail && matt.rail.h) {
+        var sist = matt.steg[matt.steg.length - 1];
+        var spets = window.scrollY + window.innerHeight * 0.5 < matt.steg[0].topp ? 0
+          : (y >= sist.botten ? matt.rail.h : matt.steg[i].prick - matt.rail.topp);
+        spets = Math.min(matt.rail.h, Math.max(0, spets));
+        if (railFyll) railFyll.style.transform = 'scaleY(' + (spets / matt.rail.h).toFixed(4) + ')';
+        if (railKula) railKula.style.transform = 'translateY(' + spets.toFixed(1) + 'px)';
+      } else if (railFyll) {
+        var p = Math.min(1, Math.max(0, (y - matt.lista.topp) / matt.lista.h));
+        railFyll.style.transform = 'scaleY(' + p.toFixed(4) + ')';
+      }
+      // Raden ovanför stegen har dockat: en slöja bakom den döljer det som rullar förbi.
+      if (styr) {
+        var sr = styr.getBoundingClientRect();
+        sek.classList.toggle('flode--dockad', !smal.matches && sr.top <= 92.5 && sek.getBoundingClientRect().bottom > sr.bottom + 40);
+      }
     }
     function boka() {
       if (bokad) return;
@@ -1914,6 +1942,7 @@
       antal.textContent = klara + ' av ' + rutor.length;
       if (ring) ring.style.strokeDasharray = (klara / rutor.length * 100).toFixed(2) + ' 100';
       lista.classList.toggle('checklista--klar', klara === rutor.length);
+      lista.classList.toggle('checklista--tom', klara === 0);
     }
     rutor.forEach(function (r) {
       r.checked = !!sparat[r.getAttribute('data-check')];
@@ -2562,12 +2591,21 @@
       };
       window.addEventListener('scroll', kolla, { passive: true });
 
-      // Kontaktsektionen är redan samma uppmaning - där går tipset undan.
-      var kontakt = $('.contact-section');
-      if (kontakt && window.IntersectionObserver) {
-        new IntersectionObserver(function (poster) {
-          tips.classList.toggle('tipsruta--undan', poster[0].isIntersecting);
-        }, { rootMargin: '0px 0px -20% 0px' }).observe(kontakt);
+      // Kontaktsektionen är redan samma uppmaning, och stegen och
+      // checklistan på Så fungerar det ska läsas i lugn och ro - där går
+      // tipset undan.
+      var undan = $$('.contact-section, .flode, .checklista');
+      if (undan.length && window.IntersectionObserver) {
+        var iVagen = [];
+        var io = new IntersectionObserver(function (poster) {
+          poster.forEach(function (p) {
+            var i = iVagen.indexOf(p.target);
+            if (p.isIntersecting && i < 0) iVagen.push(p.target);
+            if (!p.isIntersecting && i >= 0) iVagen.splice(i, 1);
+          });
+          tips.classList.toggle('tipsruta--undan', iVagen.length > 0);
+        }, { rootMargin: '0px 0px -20% 0px' });
+        undan.forEach(function (u) { io.observe(u); });
       }
     }
   }
