@@ -407,7 +407,7 @@ MAIN = f'''    <main id="innehall">
           </div>
 
           <figure class="pf-topp__bild">
-            <span class="pf-topp__ram"><img src="images/foto/dronare-vaggblock.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Drönarbild av väggblock i trä bredvid en lastbil med takstolar"></span>
+            <span class="pf-topp__ram"><img src="images/foto/montor-vaggelement.webp" width="978" height="650" fetchpriority="high" decoding="async" alt="En montör i varselkläder och hjälm kontrollerar ett väggelement med vattenpass på bygget"></span>
           </figure>
         </div>
       </section>
@@ -468,12 +468,7 @@ MAIN = f'''    <main id="innehall">
             <p class="pf-tak__text">
               Isolering, ångspärr och beklädnad görs inomhus, i jämn temperatur
               och fuktnivå. Kvar på byggarbetsplatsen är att lyfta, koppla samman
-              och täta - och det går fort.
-            </p>
-            <p class="pf-tak__chips">
-              <span>Oberoende av väder</span>
-              <span>Jämnare kvalitet</span>
-              <span>Planeras in i er tidplan</span>
+              och täta – och det går fort.
             </p>
           </div>
 
@@ -525,10 +520,10 @@ MAIN = f'''    <main id="innehall">
             <p class="section-label section-label--accent">Första steget</p>
             <h2 class="contact-section__title">Låt oss börja med <em>ert projekt</em>.</h2>
             <p class="contact-section__text">
-              Berätta vad du funderar på, så återkommer vi med nästa tydliga
+              Berätta om projektet, så återkommer vi med nästa tydliga
               steg. Utan krav och utan säljsnack.
             </p>
-            <ul class="tillit" aria-label="Det du kan räkna med">
+            <ul class="tillit" aria-label="Det ni kan räkna med">
               <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg>Byggt under tak i Sverige</li>
               <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.9 3.9-6 7.5-6s6.6 2.1 7.5 6"/></svg>En kontakt hela vägen</li>
               <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h9l3.5 3.5v13.5H6zM9 11h6M9 14.5h6M9 18h3.5"/></svg>Offert post för post</li>
@@ -537,7 +532,7 @@ MAIN = f'''    <main id="innehall">
           </div>
 
           <div class="kontaktkort">
-            <p class="kontaktkort__rubrik">Hör av dig direkt</p>
+            <p class="kontaktkort__rubrik">Hör av er direkt</p>
 
             <div class="contact-section__meta">
               <div>

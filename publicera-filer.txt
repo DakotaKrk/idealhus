@@ -72,3 +72,8 @@ modeller/hus-r5.glb
 vendor/leaflet/leaflet.css
 vendor/leaflet/leaflet.js
 vendor/model-viewer.min.js
+images/hus-r1-800.webp
+images/hus-r2-800.webp
+images/hus-r3-800.webp
+images/hus-r4-800.webp
+images/hus-r5-800.webp

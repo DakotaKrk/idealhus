@@ -26,7 +26,7 @@ PROFFS_ETIKETT = "För dig som bygger"
 # tvingar besokaren att gissa vad skillnaden ar.
 KATEGORI_INFO = {
     "Attefallshus": ("tumme/meny-attefallshus.webp",
-                     "Utan bygglov, 30–50 m²"),
+                     "Tre modeller, utan bygglov"),
     "Fritidshus": ("tumme/meny-fritidshus.webp",
                    "För helger och långa somrar"),
     "Proffs": ("tumme/meny-proffs.webp",
@@ -43,15 +43,34 @@ MENY = [
 ]
 
 
+# Modellerna direkt i menyn (2026-10-02): en rad små länkar under
+# Attefallshus och Fritidshus, och samma rad i mobilmenyn.
+MENY_MODELLER = {
+    "attefallshus.html": [("Sadel 30", "attefallshus", 1), ("Sadel 30 Bred", "attefallshus", 2), ("Pulpet 30", "attefallshus", 3)],
+    "fritidshus.html": [("Kupa 40", "fritidshus", 1), ("Kupa 50", "fritidshus", 2)],
+}
+
+
+def modellankar(fil):
+    return "".join(f'<a href="huskort.html?typ={t}&amp;modell={n}">{namn}</a>' for namn, t, n in MENY_MODELLER.get(fil, []))
+
+
+GUIDELANKAR = ('<a href="attefallshus-regler.html">Attefallshus: reglerna</a>'
+               '<a href="aga-och-hyra-ut.html">Äga och hyra ut</a>')
+
+
 def kategorirad(namn, fil):
     bild, text = KATEGORI_INFO[namn]
-    return (f'              <a href="{fil}">\n'
-            f'                <img src="images/{bild}" alt="" loading="lazy" decoding="async">\n'
-            f'                <span>\n'
-            f'                  <strong>{namn}</strong>\n'
-            f'                  <em>{text}</em>\n'
-            f'                </span>\n'
-            f'              </a>')
+    rad = (f'              <a href="{fil}">\n'
+           f'                <img src="images/{bild}" alt="" loading="lazy" decoding="async">\n'
+           f'                <span>\n'
+           f'                  <strong>{namn}</strong>\n'
+           f'                  <em>{text}</em>\n'
+           f'                </span>\n'
+           f'              </a>')
+    if fil in MENY_MODELLER:
+        rad += f'\n              <p class="main-nav__modeller">{modellankar(fil)}</p>'
+    return rad
 
 
 # Ett verktyg att prova, sist i husmenyn - som "Prova"-kortet i
@@ -81,6 +100,8 @@ def dropdown(aktiv):
     rader.append('              <p class="main-nav__sub-etikett '
                  f'main-nav__sub-etikett--delad">{PROFFS_ETIKETT}</p>')
     rader += [kategorirad(n, f) for n, f in KATEGORIER_PROFFS]
+    rader.append('              <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">Bra att veta</p>')
+    rader.append(f'              <p class="main-nav__guider">{GUIDELANKAR}</p>')
     rader.append(TIPSKORT)
     val = "\n".join(rader)
     klass = "main-nav__link main-nav__toggle"
@@ -141,8 +162,11 @@ def mobilmeny():
             <div class="mmeny__hus">
 {hus}
             </div>
+            <p class="mmeny__modeller">{modellankar("attefallshus.html")}{modellankar("fritidshus.html")}</p>
             <p class="mmeny__etikett">{PROFFS_ETIKETT}</p>
 {proffs}
+            <p class="mmeny__etikett">Bra att veta</p>
+            <p class="mmeny__guider">{GUIDELANKAR}</p>
           </div>''']
     i = 1
     for namn, fil in MENY:
@@ -150,7 +174,9 @@ def mobilmeny():
             continue
         rader.append(f'          <a class="mmeny__lank" href="{fil}" style="--i:{i}"><span>{namn}</span>{MMENY_PIL}</a>')
         i += 1
-    rader.append(
+    # Verktyget står direkt efter husen i HTML:en också, så att tab-
+    # ordningen följer det man ser.
+    rader.insert(1,
         f'          <a class="mmeny__tips" href="vad-far-jag-bygga.html" style="--i:{i}">'
         '<span class="mmeny__tipsbild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false">'
         '<path pathLength="1" d="M8 15.3 3.5 17.4 12 21.4l8.5-4L16 15.3"/><path pathLength="1" d="M8 17.5v-6.3l4-3.6 4 3.6v6.3M11 17.5v-3h2v3"/>'
@@ -181,7 +207,8 @@ MENYSKRIPT = (r"<script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(
 VTSKRIPT = ("<script>(function(){function n(){var h=document.querySelector('.site-header');"
             "if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',"
             "function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){"
-            "if(!e.viewTransition)return;var h=n(),t=function(){if(h)h.style.viewTransitionName=''};"
+            "if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');"
+            "var h=n(),t=function(){if(h)h.style.viewTransitionName=''};"
             "e.viewTransition.finished.then(t,t)})})()</script>")
 TEMASKRIPT = TEMASKRIPT + MENYSKRIPT + VTSKRIPT
 
@@ -285,6 +312,7 @@ def header(aktiv):
         </nav>
 
         <div class="site-header__actions">
+          <button class="temaknapp" type="button" aria-pressed="false" aria-label="Byt till mörkt läge"><svg class="temaknapp__sol" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg><svg class="temaknapp__mane" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
           <a class="header-button" href="kontakt.html">Börja här</a>
 
           <button class="menu-button" type="button" aria-label="Öppna meny" aria-expanded="false" aria-controls="mobile-nav">
@@ -315,9 +343,8 @@ SIDFOT = '''    <footer class="site-footer">
 
         <div>
           <h2 class="site-footer__heading">Navigation</h2>
-          <nav class="site-footer__nav" aria-label="Sidfot navigation">
+          <nav class="site-footer__nav" aria-label="Sidfotens navigering">
             <a href="index.html">Hem</a>
-            <a href="attefallshus.html">Våra hus</a>
             <a href="priser.html">Priser</a>
             <a href="sa-fungerar-det.html">Så fungerar det</a>
             <a href="om-oss.html">Om oss</a>
@@ -330,7 +357,7 @@ SIDFOT = '''    <footer class="site-footer">
 
         <div>
           <h2 class="site-footer__heading">Våra hus</h2>
-          <nav class="site-footer__nav" aria-label="Sidfot husmodeller">
+          <nav class="site-footer__nav" aria-label="Sidfotens husmodeller">
 ''' + "\n".join(
     [f'            <a href="{fil}">{namn}</a>' for namn, fil in KATEGORIER_PRIVAT]
     + [f'            <span class="site-footer__etikett">{PROFFS_ETIKETT}</span>']
@@ -344,7 +371,7 @@ SIDFOT = '''    <footer class="site-footer">
             <a href="mailto:info@idealhus.se">info@idealhus.se</a><br>
             Stockholm, Sverige
           </p>
-          <a class="site-footer__button" href="kontakt.html">Boka rådgivning</a>
+          <a class="site-footer__button" href="kontakt.html">Hör av dig</a>
         </div>
       </div>
 

@@ -165,7 +165,7 @@ LOV = {
 INGAR = [
     ("Ritningar och underlag", "Det vi tar fram för att du ska kunna anmäla eller söka lov.",
      "M5 3.5h9.5L19 8v12.5H5zM14.5 3.5V8H19M8.5 12.5h7M8.5 16h5"),
-    ("Själva huset", "Tillverkat i Sverige, under tak, med de material och den nivå ni kommit överens om.",
+    ("Själva huset", "Tillverkat i Sverige, under tak, med de material och den nivå vi kommit överens om.",
      "M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5M10 20v-5h4v5"),
     ("Leverans till tomten", "Transport och lyft på plats, när framkomligheten är löst.",
      "M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"),
@@ -178,7 +178,7 @@ INGAR = [
 # Posterna som tillkommer. Varje post har en nyckel som kostnadskartan
 # använder för att säga "räkna med" eller "troligen liten" utifrån svaren.
 TILLKOMMER = [
-    ("grund", "Grunden", "Platta eller plintar ska vara gjuten innan huset kommer. Vad den kostar beror på marken."),
+    ("grund", "Grunden", "Plattan eller plintarna ska vara gjutna innan huset kommer. Vad grunden kostar beror på marken."),
     ("va", "El, vatten och avlopp", "Framdragning till huset, och anslutningsavgifter till kommunen eller föreningen."),
     ("mark", "Markarbete", "Röjning, schakt och infart om det behövs för att lastbil och kran ska komma fram."),
     ("avgift", "Kommunens avgifter", "Avgift för anmälan eller bygglov, och för eventuell strandskyddsdispens."),
@@ -248,12 +248,16 @@ def skalans_chips():
         for namn, yta, lank, bild, kat in _alla_hus())
 
 
+# Hela husfotot (med skylten) i kategorikorten.
+HELA = {'attefallshus.html': 'hus-r2', 'fritidshus.html': 'hus-r3'}
+
+
 def priskort():
     ut = []
     for namn, lank, pris, bild, lo, hi, spann, antal in KATEGORIER_PRIS:
         modeller = " ".join(f'<span>{m[0]}</span>' for m in M.modeller(lank))
         ut.append(f"""          <article class="pkort" data-min="{lo}" data-max="{hi}" data-namn="{namn}">
-            <a class="pkort__bild" href="{lank}" tabindex="-1" aria-hidden="true"><img src="images/{bild}" alt="" loading="lazy" decoding="async"></a>
+            <a class="pkort__bild" href="{lank}" tabindex="-1" aria-hidden="true"><img class="pkort__bak" src="images/{HELA[lank]}-800.webp" alt="" loading="lazy" decoding="async"><img class="pkort__foto" src="images/{HELA[lank]}-800.webp" srcset="images/{HELA[lank]}-800.webp 800w, images/{HELA[lank]}.webp 1600w" sizes="(max-width: 900px) 92vw, 320px" width="1600" height="1062" alt="" loading="lazy" decoding="async"></a>
             <span class="pkort__passar">Passar storleken</span>
             <div class="pkort__kropp">
               <p class="pkort__spann">{spann} · {antal} modeller</p>
@@ -365,14 +369,15 @@ HERO_OFFERT = (
 )
 
 PRISSIDA = f'''    <main id="innehall">
-      <section class="subpage-hero">
+      <section class="subpage-hero helbild">
+        <img class="helbild__bak" src="images/foto/stommar-stapel.webp" alt="" aria-hidden="true" decoding="async">
         <img class="subpage-hero__image" src="images/foto/stommar-stapel.webp" width="1800" height="1200" fetchpriority="high" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra">
 {HERO_OFFERT}
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
             <h1 class="subpage-hero__title">Vad ett hus kostar</h1>
-            <p class="subpage-hero__meta">Inget listpris, men inga gissningar heller. Här ser du vad som ingår, vad som tillkommer och vad som flyttar summan - innan du ber om en offert.</p>
+            <p class="subpage-hero__meta">Inget listpris, men inga gissningar heller. Här ser du vad som ingår, vad som tillkommer och vad som flyttar summan – innan du ber om en offert.</p>
             <div class="subpage-hero__actions">
               <a class="hero__link hero__link--solid" href="#ingar">Se vad som ingår</a>
               <a class="hero__link" href="#kontakt">Begär offert</a>
@@ -396,13 +401,12 @@ PRISSIDA = f'''    <main id="innehall">
         <div class="prisskala__inner">
           <div class="prisskala__topp">
             <div>
-              <p class="section-label section-label--accent">Prisnivåer</p>
-              <h2 class="prisskala__titel" id="prisskala-rubrik">Välj storlek. <em>Se vad som gäller.</em></h2>
+              <p class="section-label section-label--accent">Storlek och lov</p>
+              <h2 class="prisskala__titel" id="prisskala-rubrik">Välj storlek.<br> <em>Se vad som gäller.</em></h2>
             </div>
             <p class="prisskala__text">
               Ett hus har inget listpris som en bil. Dra i reglaget så ser du
-              vilka hus som ligger närmast, vad som gäller för lov och var
-              priset står.
+              vilka hus som ligger närmast och vad som gäller för lov.
             </p>
           </div>
 
@@ -479,7 +483,7 @@ PRISSIDA = f'''    <main id="innehall">
             <p class="prisoffert__text">
               Svara på fyra frågor om tomten, så fylls utkastet i: vad som
               ingår hos oss, och vilka poster hos andra som troligen blir
-              stora eller små. Inga belopp - de står i offerten.
+              stora eller små. Inga belopp – de står i offerten.
             </p>
             <form class="tfragor" id="kostnadskarta" aria-label="Frågor om tomten">
 {KARTFRAGOR}

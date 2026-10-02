@@ -41,6 +41,8 @@ KROPP = '''    <main id="innehall">
             <a href="attefallshus.html">Attefallshus</a>
             <a href="fritidshus.html">Fritidshus</a>
             <a href="proffs.html">Proffs</a>
+            <a href="priser.html">Priser</a>
+            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>
           </div>
         </div>
       </section>

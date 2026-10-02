@@ -60,9 +60,9 @@ GEMENSAMT = ("Huset byggs under tak i Sverige och kommer i färdiga delar till "
 BESKRIVNING = {
     "Sadel 30": ("Ett rum på 30 m² under ett brant sadeltak. Den smala formen, "
                  "8,33 × 3,49 meter, gör att huset får plats längs en häck eller "
-                 "en tomtgräns - som gästhus, ateljé eller för uthyrning."),
+                 "en tomtgräns – som gästhus, ateljé eller för uthyrning."),
     "Sadel 30 Bred": ("Två rum på 30 m² under ett sadeltak. Den bredare formen, "
-                 "7,14 × 4,20 meter, ger plats för ett sovrum och ett allrum - "
+                 "7,14 × 4,20 meter, ger plats för ett sovrum och ett allrum – "
                  "ett litet hus som går att bo i på riktigt."),
     "Pulpet 30": ("Två rum på 30 m² under ett nästan platt pulpettak. Formen, "
                   "7,50 × 4,00 meter, och de stora glaspartierna ger ett modernt "

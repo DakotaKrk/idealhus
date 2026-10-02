@@ -537,7 +537,7 @@ ut = (B.head("Äga och hyra ut | Idealhus",
              "Samäga stugan och räkna på uthyrningen: en kalender som fördelar "
              "årets veckor rättvist och en kalkyl över vad uthyrningen täcker.",
              "hus-r3.webp", fil="aga-och-hyra-ut.html")
-      + "\n" + B.header("") + "\n" + KROPP + B.SIDFOT + "\n" + B.skript(SKRIPT))
+      + "\n" + B.header("Våra hus") + "\n" + KROPP + B.SIDFOT + "\n" + B.skript(SKRIPT))
 
 io.open("aga-och-hyra-ut.html", "w", encoding="utf-8", newline="").write(ut.replace("\n", "\r\n"))
 print("aga-och-hyra-ut.html")

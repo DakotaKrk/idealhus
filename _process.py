@@ -44,7 +44,7 @@ KORTNAMN = ["Samtalet", "Modell", "Lov", "Tillverkning", "Grund", "Montage", "Be
 
 FASER = [
     ('Innan bygget', (1, 3), 'Vi ritar, räknar och tar fram underlaget. Du är byggherre och lämnar in till kommunen. Vi säger vad som ska med.'),
-    ('Medan huset byggs', (4, 5), 'Huset växer fram inomhus, i jämn temperatur. Under tiden ska marken vara redo när det kommer.'),
+    ('Medan huset byggs', (4, 5), 'Huset växer fram inomhus, i jämn temperatur. Under tiden gör du marken klar, så att allt är redo när huset kommer.'),
     ('På plats', (6, 7), 'Huset kommer på lastbil och monteras. Sedan går vi igenom det tillsammans, rum för rum.'),
 ]
 
@@ -166,7 +166,8 @@ TAKKORT = (
 )
 
 KROPP = f'''    <main id="innehall">
-      <section class="subpage-hero">
+      <section class="subpage-hero helbild">
+        <img class="helbild__bak" src="images/foto/dronare-montage.webp" alt="" aria-hidden="true" decoding="async">
         <img class="subpage-hero__image" src="images/foto/dronare-montage.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Drönarbild av ett hus under montage, med inplastade väggar runt en betongplatta och en kran">
 {HERO_STEG}
 
@@ -301,9 +302,9 @@ KROPP = f'''    <main id="innehall">
             </p>
             <p>
               Det ger också jämnare kvalitet mellan husen. Samma modell blir
-              samma hus, oavsett vilken vecka på året det tillverkades.
+              samma hus, oavsett vilken vecka på året det tillverkas.
             </p>
-            <a class="model-price__button" href="proffs.html">Se produktionen</a>
+            <a class="model-price__button" href="proffs.html#pf-band-titel">Se produktionen</a>
           </div>
           <div class="segment__bildram">
             <div class="segment__media">

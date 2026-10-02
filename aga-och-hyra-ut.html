@@ -25,10 +25,10 @@
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" as="image" href="images/hus-r3.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20261009k">
-    <link rel="stylesheet" href="design.css?v=20261009k">
-    <script src="premium.js?v=20261009k" defer></script>
-    <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
+    <link rel="stylesheet" href="styles.css?v=20261010h">
+    <link rel="stylesheet" href="design.css?v=20261010h">
+    <script src="premium.js?v=20261010h" defer></script>
+    <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -56,16 +56,17 @@
         <nav class="main-nav" aria-label="Huvudmeny">
           <a class="main-nav__link" href="index.html">Hem</a>
           <div class="main-nav__item" data-dropdown>
-            <button class="main-nav__link main-nav__toggle" type="button" aria-expanded="false" aria-controls="undermeny-hus">Våra hus<span class="main-nav__pil" aria-hidden="true"></span></button>
+            <button class="main-nav__link main-nav__link--active main-nav__toggle" type="button" aria-expanded="false" aria-controls="undermeny-hus">Våra hus<span class="main-nav__pil" aria-hidden="true"></span></button>
             <div class="main-nav__sub" id="undermeny-hus">
               <p class="main-nav__sub-etikett">För dig som ska bo</p>
               <a href="attefallshus.html">
                 <img src="images/tumme/meny-attefallshus.webp" alt="" loading="lazy" decoding="async">
                 <span>
                   <strong>Attefallshus</strong>
-                  <em>Utan bygglov, 30–50 m²</em>
+                  <em>Tre modeller, utan bygglov</em>
                 </span>
               </a>
+              <p class="main-nav__modeller"><a href="huskort.html?typ=attefallshus&amp;modell=1">Sadel 30</a><a href="huskort.html?typ=attefallshus&amp;modell=2">Sadel 30 Bred</a><a href="huskort.html?typ=attefallshus&amp;modell=3">Pulpet 30</a></p>
               <a href="fritidshus.html">
                 <img src="images/tumme/meny-fritidshus.webp" alt="" loading="lazy" decoding="async">
                 <span>
@@ -73,6 +74,7 @@
                   <em>För helger och långa somrar</em>
                 </span>
               </a>
+              <p class="main-nav__modeller"><a href="huskort.html?typ=fritidshus&amp;modell=1">Kupa 40</a><a href="huskort.html?typ=fritidshus&amp;modell=2">Kupa 50</a></p>
               <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
               <a href="proffs.html">
                 <img src="images/tumme/meny-proffs.webp" alt="" loading="lazy" decoding="async">
@@ -81,6 +83,8 @@
                   <em>Väggar, block och moduler</em>
                 </span>
               </a>
+              <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">Bra att veta</p>
+              <p class="main-nav__guider"><a href="attefallshus-regler.html">Attefallshus: reglerna</a><a href="aga-och-hyra-ut.html">Äga och hyra ut</a></p>
               <a class="main-nav__tips" href="vad-far-jag-bygga.html">
                 <span class="main-nav__tips-bild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M8 15.3 3.5 17.4 12 21.4l8.5-4L16 15.3"/><path d="M8 17.5v-6.3l4-3.6 4 3.6v6.3M11 17.5v-3h2v3"/><path d="M18.6 3v3.4M16.9 4.7h3.4"/></svg></span>
                 <span class="main-nav__tips-text">
@@ -100,6 +104,7 @@
         </nav>
 
         <div class="site-header__actions">
+          <button class="temaknapp" type="button" aria-pressed="false" aria-label="Byt till mörkt läge"><svg class="temaknapp__sol" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg><svg class="temaknapp__mane" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
           <a class="header-button" href="kontakt.html">Börja här</a>
 
           <button class="menu-button" type="button" aria-label="Öppna meny" aria-expanded="false" aria-controls="mobile-nav">
@@ -115,18 +120,21 @@
           <div class="mmeny__grupp" style="--i:0">
             <p class="mmeny__etikett">För dig som ska bo</p>
             <div class="mmeny__hus">
-            <a class="mmeny__kort" href="attefallshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-attefallshus.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Attefallshus</strong><em>Utan bygglov, 30–50 m²</em></span></a>
+            <a class="mmeny__kort" href="attefallshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-attefallshus.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Attefallshus</strong><em>Tre modeller, utan bygglov</em></span></a>
             <a class="mmeny__kort" href="fritidshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-fritidshus.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Fritidshus</strong><em>För helger och långa somrar</em></span></a>
             </div>
+            <p class="mmeny__modeller"><a href="huskort.html?typ=attefallshus&amp;modell=1">Sadel 30</a><a href="huskort.html?typ=attefallshus&amp;modell=2">Sadel 30 Bred</a><a href="huskort.html?typ=attefallshus&amp;modell=3">Pulpet 30</a><a href="huskort.html?typ=fritidshus&amp;modell=1">Kupa 40</a><a href="huskort.html?typ=fritidshus&amp;modell=2">Kupa 50</a></p>
             <p class="mmeny__etikett">För dig som bygger</p>
             <a class="mmeny__kort mmeny__kort--bred" href="proffs.html"><span class="mmeny__bild"><img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Proffs</strong><em>Väggar, block och moduler</em></span></a>
+            <p class="mmeny__etikett">Bra att veta</p>
+            <p class="mmeny__guider"><a href="attefallshus-regler.html">Attefallshus: reglerna</a><a href="aga-och-hyra-ut.html">Äga och hyra ut</a></p>
           </div>
+          <a class="mmeny__tips" href="vad-far-jag-bygga.html" style="--i:6"><span class="mmeny__tipsbild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path pathLength="1" d="M8 15.3 3.5 17.4 12 21.4l8.5-4L16 15.3"/><path pathLength="1" d="M8 17.5v-6.3l4-3.6 4 3.6v6.3M11 17.5v-3h2v3"/><path pathLength="1" d="M18.6 3v3.4M16.9 4.7h3.4"/></svg></span><span class="mmeny__tipstext"><span class="mmeny__prova">Prova</span><strong>Vad får jag bygga?</strong><em class="mmeny__tipsrad">Fem frågor · svar direkt</em></span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="mmeny__lank" href="index.html" style="--i:1"><span>Hem</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="mmeny__lank" href="priser.html" style="--i:2"><span>Priser</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="mmeny__lank" href="sa-fungerar-det.html" style="--i:3"><span>Så fungerar det</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="mmeny__lank" href="om-oss.html" style="--i:4"><span>Om oss</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="mmeny__lank" href="kontakt.html" style="--i:5"><span>Kontakt</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          <a class="mmeny__tips" href="vad-far-jag-bygga.html" style="--i:6"><span class="mmeny__tipsbild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path pathLength="1" d="M8 15.3 3.5 17.4 12 21.4l8.5-4L16 15.3"/><path pathLength="1" d="M8 17.5v-6.3l4-3.6 4 3.6v6.3M11 17.5v-3h2v3"/><path pathLength="1" d="M18.6 3v3.4M16.9 4.7h3.4"/></svg></span><span class="mmeny__tipstext"><span class="mmeny__prova">Prova</span><strong>Vad får jag bygga?</strong><em class="mmeny__tipsrad">Fem frågor · svar direkt</em></span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="mmeny__cta" href="kontakt.html" style="--i:8">Börja här</a>
           <p class="mmeny__kontakt" style="--i:9"><a href="mailto:info@idealhus.se">info@idealhus.se</a><span>Stockholm, Sverige</span></p>
         </div>
@@ -134,8 +142,9 @@
     </header>
 
     <main id="innehall">
-      <section class="subpage-hero">
+      <section class="subpage-hero helbild">
         <span class="ih-kant" aria-hidden="true"></span>
+        <img class="helbild__bak" src="images/hus-r3.webp" alt="" aria-hidden="true" decoding="async">
         <img class="subpage-hero__image" src="images/hus-r3.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Svart fritidshus med takkupa i en tallskog">
 
         <div class="subpage-hero__content-wrap">
@@ -156,10 +165,9 @@
           <p class="section-label section-label--accent">Verktyg</p>
           <h2 class="againtro__titel">Stugan blir lättare att äga <em>tillsammans</em>.</h2>
           <p class="againtro__text">
-            Många köper fritidshuset tillsammans med syskon
-            eller vänner, eller hyr ut de veckor de inte själva är där. Här är
-            två verktyg för just det: en kalender som fördelar veckorna
-            rättvist, och en kalkyl som visar vad uthyrningen täcker.
+            Många köper fritidshuset tillsammans med syskon eller vänner,
+            eller hyr ut de veckor de inte själva är där. Verktygen fungerar
+            var för sig – börja med det som passar er.
           </p>
           <nav class="againtro__hopp" aria-label="Verktygen på sidan">
             <a href="#samagare">Samägarkalendern</a>
@@ -175,8 +183,8 @@
             <h2 class="samagare__titel">Rättvis fördelning av <em>årets veckor</em>.</h2>
             <p class="samagare__text">
               Välj hur många ni är och skriv era namn. Storhelgerna fördelas
-              först och byter ägare ett steg varje år, sedan sommarveckorna
-              och sist resten, så att alla får lika många.
+              först och roterar ett steg varje år, sedan sommarveckorna och
+              sist resten, så att alla får så jämnt som möjligt.
             </p>
           </div>
 
@@ -214,7 +222,8 @@
 
           <div class="samagare__resultat">
             <ul class="samagare__legend" data-legend aria-label="Delägare och deras veckor"></ul>
-            <div class="samagare__rutnat" data-rutnat role="grid" aria-label="Årets veckor och vem som har dem"></div>
+            <div class="samagare__rutnat" data-rutnat role="group" aria-label="Årets veckor och vem som har dem"></div>
+            <p class="samagare__nyckel"><span aria-hidden="true">★</span> storhelg (sportlov, påsk, midsommar, jul och nyår) · <span class="samagare__nyckel-streck" aria-hidden="true"></span> sommarvecka (v. 26–32)</p>
             <p class="samagare__detalj" data-detalj aria-live="polite">Peka på en vecka för att se datum och vem som har den.</p>
           </div>
 
@@ -224,7 +233,7 @@
           </div>
           <p class="samagare__not">
             Kalenderfilen (.ics) fungerar i telefonens kalender, Google och
-            Outlook. Den skapas här i webbläsaren - inget skickas till oss.
+            Outlook. Den skapas här i webbläsaren – inget skickas till oss.
           </p>
         </div>
       </section>
@@ -252,7 +261,7 @@
               <div class="kalkyl__falt">
                 <label for="k-insats">Kontantinsats</label>
                 <div class="kalkyl__rad">
-                  <input type="range" id="k-insats" min="15" max="100" step="5" value="15" data-enhet="%">
+                  <input type="range" id="k-insats" min="10" max="100" step="5" value="15" data-enhet="%">
                   <output for="k-insats" data-ut="k-insats"></output>
                 </div>
               </div>
@@ -323,7 +332,7 @@
                   <span class="stapel__varde" data-v-kostnad></span>
                 </div>
                 <div class="stapel" data-stapel-hyra>
-                  <span class="stapel__etikett">Hyra kvar</span>
+                  <span class="stapel__etikett">Hyra netto</span>
                   <div class="stapel__spar">
                     <span class="stapel__del stapel__del--hyra" data-del-hyra></span>
                   </div>
@@ -332,7 +341,7 @@
                 <p class="stapel__forklaring">
                   <span><i class="stapel__prov stapel__prov--ranta"></i>Ränta</span>
                   <span><i class="stapel__prov stapel__prov--drift"></i>Drift</span>
-                  <span><i class="stapel__prov stapel__prov--hyra"></i>Hyra efter avgifter och skatt</span>
+                  <span><i class="stapel__prov stapel__prov--hyra"></i>Hyra netto, efter avgifter och skatt</span>
                 </p>
                 <div class="stapel__tips" data-stapel-tips hidden></div>
               </figure>
@@ -403,9 +412,8 @@
 
         <div>
           <h2 class="site-footer__heading">Navigation</h2>
-          <nav class="site-footer__nav" aria-label="Sidfot navigation">
+          <nav class="site-footer__nav" aria-label="Sidfotens navigering">
             <a href="index.html">Hem</a>
-            <a href="attefallshus.html">Våra hus</a>
             <a href="priser.html">Priser</a>
             <a href="sa-fungerar-det.html">Så fungerar det</a>
             <a href="om-oss.html">Om oss</a>
@@ -418,7 +426,7 @@
 
         <div>
           <h2 class="site-footer__heading">Våra hus</h2>
-          <nav class="site-footer__nav" aria-label="Sidfot husmodeller">
+          <nav class="site-footer__nav" aria-label="Sidfotens husmodeller">
             <a href="attefallshus.html">Attefallshus</a>
             <a href="fritidshus.html">Fritidshus</a>
             <span class="site-footer__etikett">För dig som bygger</span>
@@ -432,7 +440,7 @@
             <a href="mailto:info@idealhus.se">info@idealhus.se</a><br>
             Stockholm, Sverige
           </p>
-          <a class="site-footer__button" href="kontakt.html">Boka rådgivning</a>
+          <a class="site-footer__button" href="kontakt.html">Hör av dig</a>
         </div>
       </div>
 
@@ -898,7 +906,7 @@
             inp.placeholder = 'Delägare ' + (i + 1);
             inp.setAttribute('data-i', i);
             inp.value = gamla[i] || namn[i] || '';
-            inp.addEventListener('input', rita);
+            inp.addEventListener('input', ritaNamn);
             l.appendChild(inp);
             namnfalt.appendChild(l);
           }
@@ -915,7 +923,7 @@
             var li = document.createElement('li');
             li.style.setProperty('--farg', 'var(--del' + (i + 1) + ')');
             li.innerHTML = '<span class="samagare__prick" aria-hidden="true"></span><strong></strong>' +
-              '<span>' + r.rakna[i] + ' veckor · ' + r.sommar[i] + ' sommar · ' + r.helger[i] + ' storhelger</span>';
+              '<span>' + r.rakna[i] + ' veckor · ' + r.sommar[i] + ' sommar · ' + r.helger[i] + (r.helger[i] === 1 ? ' storhelg' : ' storhelger') + '</span>';
             li.querySelector('strong').textContent = namnAv(i);
             legend.appendChild(li);
           }
@@ -938,11 +946,42 @@
             b.querySelector('.vecka__ini').textContent = initialAv(o);
             nat.appendChild(b);
           }
-          var q = new URLSearchParams();
-          q.set('n', n); q.set('ar', ar); q.set('sportlov', sportlov);
-          var nn = []; for (i = 0; i < n; i++) nn.push(($('input[data-i="' + i + '"]', namnfalt) || {}).value || '');
-          if (nn.some(Boolean)) q.set('namn', nn.join('|'));
-          history.replaceState(null, '', '?' + q.toString() + location.hash);
+          skrivUrl();
+        }
+
+        // Namnen ändrar bara texterna - rutnätet byggs inte om (och
+        // spelar inte upp sin animation) för varje bokstav.
+        function ritaNamn() {
+          var r = senast;
+          if (!r) { rita(); return; }
+          $$('[data-legend] li', sek).forEach(function (li, i) {
+            var st = $('strong', li);
+            if (st) st.textContent = namnAv(i);
+          });
+          $$('[data-rutnat] .vecka', sek).forEach(function (b, k) {
+            var v = k + 1, o = r.agare[v];
+            var m = mandag(ar, v), sl = new Date(m); sl.setUTCDate(m.getUTCDate() + 6);
+            var info = 'Vecka ' + v + ' · ' + datum(m) + ' – ' + datum(sl) + ' · ' + namnAv(o) + (r.helg[v] ? ' · ' + r.helg[v] : '');
+            b.setAttribute('aria-label', info);
+            b.setAttribute('data-info', info);
+            $('.vecka__ini', b).textContent = initialAv(o);
+          });
+          skrivUrl();
+        }
+
+        // Adressen följer valen, men först när man ändrat något, och utan
+        // att andra parametrar försvinner.
+        var urlKlar = false, urlTimer = 0;
+        function skrivUrl() {
+          if (!urlKlar) { urlKlar = true; return; }
+          clearTimeout(urlTimer);
+          urlTimer = setTimeout(function () {
+            var q = new URLSearchParams(location.search);
+            q.set('n', n); q.set('ar', ar); q.set('sportlov', sportlov);
+            var nn = []; for (var i = 0; i < n; i++) nn.push(($('input[data-i="' + i + '"]', namnfalt) || {}).value || '');
+            if (nn.some(Boolean)) q.set('namn', nn.join('|')); else q.delete('namn');
+            history.replaceState(null, '', '?' + q.toString() + location.hash);
+          }, 400);
         }
 
         var detalj = $('[data-detalj]', sek);
@@ -1076,13 +1115,20 @@
         falt.forEach(function (f) { el[f].addEventListener('input', rita); });
 
         // Tooltip på staplarna, som en förklaring av varje del.
+        // Rutan står över delen man pekar på och tonar in och ut.
+        tips.hidden = false;
         sek.addEventListener('pointerover', function (e) {
           var d = e.target.closest('.stapel__del');
-          if (!d) { tips.hidden = true; return; }
+          if (!d) { tips.classList.remove('stapel__tips--syns'); return; }
           tips.textContent = d.getAttribute('data-tips');
-          tips.hidden = false;
+          var fr = tips.parentNode.getBoundingClientRect(), dr = d.getBoundingClientRect();
+          var x = dr.left - fr.left + dr.width / 2;
+          x = Math.max(tips.offsetWidth / 2, Math.min(fr.width - tips.offsetWidth / 2, x));
+          tips.style.left = x + 'px';
+          tips.style.top = (dr.top - fr.top - 8) + 'px';
+          tips.classList.add('stapel__tips--syns');
         });
-        sek.addEventListener('pointerleave', function () { tips.hidden = true; });
+        sek.addEventListener('pointerleave', function () { tips.classList.remove('stapel__tips--syns'); });
         rita();
       })();
     </script>

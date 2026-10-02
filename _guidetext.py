@@ -11,7 +11,7 @@ mot en aktuell källa. De skrevs om 1 december 2025 och kan skrivas om igen.
 
 FRAGOR = [
     ("Krävs det bygglov för ett attefallshus?",
-     "Nej, inte inom måtten nedan. Sedan 1 december 2025 krävs varken bygglov "
+     "Nej, inte så länge huset håller sig inom måtten. Sedan 1 december 2025 krävs varken bygglov "
      "eller anmälan för själva byggnaden. Men ska huset ha vatten, avlopp, "
      "ventilation eller eldstad krävs fortfarande en anmälan för de "
      "installationerna, och det gör de flesta hus som ska gå att bo i."),
@@ -163,9 +163,8 @@ def matt_rad(namn, inom, utanfor, enhet, andel_inom, andel_utanfor, notis=""):
 SEKTIONER = [
     ("andringen", "Vad som ändrades", '''
             <p>
-              Fram till december 2025 var ordningen den att ett attefallshus
-              krävde en anmälan till kommunen och ett startbesked innan bygget
-              fick börja. Både anmälningsplikten och startbeskedet är nu
+              Fram till 1 december 2025 krävde ett attefallshus en anmälan
+              till kommunen och ett startbesked innan bygget fick börja. Både anmälningsplikten och startbeskedet är nu
               slopade för komplementbyggnader och komplementbostadshus. Orden
               attefallshus och friggebod är samtidigt borta ur lagtexten och
               ersatta av <em>komplementbyggnad</em> och
@@ -203,9 +202,9 @@ SEKTIONER = [
     ("matten", "Måtten", '''
             <p>
               Den stora nyheten är att gränsen skiljer sig åt beroende på om
-              tomten ligger inom detaljplan eller inte. Sammanlagt-kolumnen är
-              en gemensam pott för alla lovfria komplementbyggnader på tomten,
-              inte per hus.
+              tomten ligger inom detaljplan eller inte. Måttet sammanlagt på
+              tomten är en gemensam pott för alla lovfria komplementbyggnader
+              på tomten, inte per hus.
             </p>
 
             <div class="rg-matt" data-plan="inom" data-rg-matt data-rg-in>
@@ -228,7 +227,7 @@ SEKTIONER = [
                     </figcaption>
                   </figure>
 
-                  <dl class="rg-matt__tal" aria-live="polite">
+                  <dl class="rg-matt__tal">
 ''' + "\n".join([
         matt_rad("Per byggnad", "30", "50", "m²", 0.46, 0.77),
         matt_rad("Sammanlagt på tomten", "45", "65", "m²", 0.69, 1),
@@ -291,8 +290,8 @@ SEKTIONER = [
               <blockquote>
                 <p>
                   Ett hus med kök och badrum har per definition vatten och avlopp.
-                  I praktiken passerar de flesta hus man ska kunna bo i alltså ändå
-                  kommunen, men för installationerna och inte för byggnaden.
+                  Därför måste de flesta hus man ska bo i ändå anmälas till
+                  kommunen – för installationerna, inte för byggnaden.
                 </p>
               </blockquote>
               <div class="rg-citat__delat">
@@ -317,9 +316,8 @@ SEKTIONER = [
               <h3 class="rg-vatten__titel">Strandskyddet påverkas inte av ändringen</h3>
               <p>
                 Inom strandskyddat område krävs strandskyddsdispens även för en
-                byggnad som annars är lovbefriad. Strandskyddet påverkas inte av
-                regeländringen, och det är en egen prövning hos kommunen eller
-                länsstyrelsen.
+                byggnad som annars är lovbefriad. Det är en egen prövning hos
+                kommunen eller länsstyrelsen.
               </p>
             </aside>'''),
 
@@ -336,7 +334,7 @@ SEKTIONER = [
                 <h3>En fullvärdig bostad</h3>
                 <ul class="rg-vs__lista">
                   <li>Kök och badrum</li>
-                  <li>Får bos i året om</li>
+                  <li>Går att bo i året om</li>
                 </ul>
               </div>
               <span class="rg-vs__eller" aria-hidden="true">eller</span>
@@ -469,7 +467,7 @@ GUIDE = f'''    <main id="innehall">
             <li><p><b data-rg-rakna="30">30</b><small>m²</small></p><span>per byggnad inom detaljplan</span></li>
             <li><p><b data-rg-rakna="50">50</b><small>m²</small></p><span>per byggnad utanför detaljplan</span></li>
             <li><p><b data-rg-rakna="4,0">4,0</b><small>m</small></p><span>nockhöjd inom detaljplan</span></li>
-            <li><p><b data-rg-rakna="4,5">4,5</b><small>m</small></p><span>till tomtgränsen</span></li>
+            <li><p><b data-rg-rakna="4,5">4,5</b><small>m</small></p><span>minst, till tomtgränsen</span></li>
           </ul>
         </div>
       </section>

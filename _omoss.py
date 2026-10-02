@@ -64,7 +64,7 @@ KROPP = f'''    <main id="innehall">
           <div class="siffror__grid siffror__grid--fyra">
             <div class="siffra ih-mork">
               <span class="ih-kant" aria-hidden="true"></span>
-              <p class="siffra__tal"><strong data-rakna="5">5</strong></p>
+              <p class="siffra__tal"><strong>5</strong></p>
               <p class="siffra__text">husmodeller, tre attefallshus och två fritidshus.</p>
             </div>
             <div class="siffra siffra--ljus">
@@ -72,12 +72,12 @@ KROPP = f'''    <main id="innehall">
               <p class="siffra__text">boyta i våra fem modeller, med ett eller två rum.</p>
             </div>
             <div class="siffra siffra--ljus">
-              <p class="siffra__tal"><strong data-rakna="1">1</strong></p>
+              <p class="siffra__tal"><strong>1</strong></p>
               <p class="siffra__text">kontakt, från första samtalet till besiktningen.</p>
             </div>
             <div class="siffra siffra--ljus">
               <p class="siffra__tal siffra__tal--ord">Under tak</p>
-              <p class="siffra__text">Varje hus byggs inomhus i Sverige, i jämn temperatur.</p>
+              <p class="siffra__text">– varje hus byggs inomhus i Sverige, i jämn temperatur.</p>
             </div>
           </div>
         </div>
@@ -94,8 +94,8 @@ KROPP = f'''    <main id="innehall">
           <h2 class="virke__rubrik">Från verkstad <em>till tomt.</em></h2>
           <p class="virke__text">
             Varje hus börjar som reglar och skivor i vår produktion och slutar
-            på en tomt. När huset byggs i Sverige kan vi följa varje moment på
-            nära håll - det ger kortare beslutsvägar, jämnare kvalitet och
+            på en tomt. Eftersom husen byggs här i Sverige kan vi följa varje
+            moment på nära håll – det ger kortare beslutsvägar, jämnare kvalitet och
             bättre kontroll över material och detaljer.
           </p>
           <p class="virke__chips">
@@ -115,8 +115,8 @@ KROPP = f'''    <main id="innehall">
           <p class="ih-etikett">Vilka vi är</p>
           <h2>Ett litet företag. <em>Raka svar.</em></h2>
           <p class="kontakt-topp__lead">
-            Idealhus är ett litet företag. Ni når oss direkt, utan växel och
-            utan säljorganisation emellan.
+            Du når oss direkt – utan växel och utan säljorganisation
+            emellan.
           </p>
           <p class="kontakt-topp__brod">
             Det betyder att den du pratar med i första samtalet är samma person
@@ -135,10 +135,10 @@ KROPP = f'''    <main id="innehall">
           </div>
 
           <div class="kontakt-direkt__rad">
-            <span class="kontakt-direkt__namn">Stockholm</span>
-            <span class="kontakt-direkt__roll">Här finns vi</span>
+            <span class="kontakt-direkt__namn">Så går det till</span>
+            <span class="kontakt-direkt__roll">Nästa steg</span>
             <span class="kontakt-direkt__lankar">
-              <a href="kontakt.html">Boka ett samtal</a>
+              <a href="sa-fungerar-det.html">Se hur ett projekt går till</a>
             </span>
           </div>
         </div>

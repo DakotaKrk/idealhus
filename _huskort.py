@@ -66,13 +66,12 @@ BLOCK = '''      /* MODELLER:START - skrivs av _huskort.py, andra inte for hand 
         // man tittar på som står förvalt.
         var modellval = document.getElementById('field-model');
         if (modellval && modellval.options.length) {
-          modellval.options[0].textContent = typ.namn + ', ' + m.namn.toLowerCase();
+          modellval.options[0].textContent = typ.namn + ', ' + m.namn;
           modellval.selectedIndex = 0;
         }
 
         document.querySelectorAll('[data-model-title]').forEach(function (element) {
-          var gemener = element.tagName === 'EM' || element.tagName === 'SPAN';
-          element.textContent = gemener ? m.namn.toLowerCase() : m.namn;
+          element.textContent = m.namn;
         });
 
         var heroBild = document.querySelector('.subpage-hero__image');
@@ -140,7 +139,17 @@ BLOCK = '''      /* MODELLER:START - skrivs av _huskort.py, andra inte for hand 
         var rymsLank = document.querySelector('[data-ryms]');
         if (rymsLank) {
           rymsLank.href = 'vad-far-jag-bygga.html?yta=' + m.yta + '&namn='
-            + encodeURIComponent(typ.namn + ', ' + m.namn.toLowerCase());
+            + encodeURIComponent(typ.namn + ', ' + m.namn);
+        }
+        // Planen är ett exempel på 30 m², ritad i Sadel 30 Breds mått.
+        // Kupa-husen har ingen ritad plan, och mått och rumsytor står bara
+        // kvar där de stämmer.
+        var plan = document.getElementById('planlosning');
+        if (plan) {
+          plan.hidden = m.yta !== 30;
+          if (m.namn !== 'Sadel 30 Bred') {
+            plan.querySelectorAll('.plan-matt, .plan-mattext--hus, .plan-yta-text').forEach(function (e) { e.remove(); });
+          }
         }
         document.querySelectorAll('[data-hus-kort]').forEach(function (k) {
           k.hidden = k.getAttribute('data-hus-kort') === slug + '-' + nr;
