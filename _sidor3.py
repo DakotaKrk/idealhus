@@ -16,8 +16,8 @@ from _guidetext import GUIDE, TOC_SKRIPT, faq_json  # noqa: E402
 POLICY = '''    <main id="innehall">
       <section class="guide-topp">
         <div class="guide-topp__inner">
-          <p class="section-label">Uppdaterad 24 september 2026</p>
-          <h1 class="guide-topp__titel">Integritetspolicy</h1>
+          <p class="section-label">Uppdaterad 2 oktober 2026</p>
+          <h1 class="guide-topp__titel">Integritets&shy;policy</h1>
           <p class="guide-topp__lead">
             Här står vad som händer med uppgifterna du lämnar när du hör av
             dig till oss. Kort sagt: de går direkt till oss, de lagras inte
@@ -47,9 +47,10 @@ POLICY = '''    <main id="innehall">
 
             <h2>Vilka uppgifter vi behandlar</h2>
             <p>
-              Om du fyller i kontaktformuläret lämnar du namn, e-postadress
-              och, om du vill, telefonnummer, ort, vilken husmodell du är
-              intresserad av och det du skriver i meddelandet. Vi behandlar
+              Om du fyller i kontaktformuläret lämnar du namn och e-postadress
+              och, om du vill, telefonnummer, kommun eller ort, var huset ska
+              stå, om du funderar på attefallshus eller fritidshus, vad huset
+              ska användas till och det du skriver i meddelandet. Vi behandlar
               bara det du själv skriver.
             </p>
 
@@ -92,12 +93,14 @@ POLICY = '''    <main id="innehall">
               kakor att klicka bort.
             </p>
             <p>
-              Däremot kommer webbplatsen ihåg tre val i din webbläsare (i
+              Däremot kommer webbplatsen ihåg några val i din webbläsare (i
               så kallad localStorage), så att du slipper göra om dem: om du
-              valt ljust eller mörkt läge, om du valt "Jag bygger åt andra"
-              på startsidan och när du senast stängde tipsrutan. De stannar i
-              din webbläsare, skickas aldrig till oss och försvinner om du
-              rensar webbplatsdata.
+              valt ljust eller mörkt läge, vilka punkter du bockat av i
+              checklistan på Så fungerar det och när du senast stängde eller
+              använde tipsrutan. Under besöket minns den också att menyn redan
+              har visats (i sessionStorage, som töms när du stänger fliken).
+              De stannar i din webbläsare, skickas aldrig till oss och
+              försvinner om du rensar webbplatsdata.
             </p>
 
             <h2>Uppgifter som lämnar din webbläsare ändå</h2>
@@ -106,21 +109,21 @@ POLICY = '''    <main id="innehall">
               funktion, och dem vill vi att du ska känna till:
             </p>
             <ul class="guide__lista">
-              <li>Webbplatsen ligger hos GitHub Pages. Din IP-adress syns i
-                deras loggar, som alla webbservrar har.</li>
-              <li>Typsnitten hämtas från Google Fonts, vilket innebär att din
-                IP-adress skickas till Google när sidan laddas.</li>
-              <li>Trycker du på "Se huset på din tomt" på en Android-telefon
+              <li>Webbplatsen ligger hos webbhotellet Loopia. Din IP-adress
+                syns i deras serverloggar, som hos alla webbhotell. Typsnitten
+                ligger också där, så inget hämtas från Google Fonts eller någon
+                annan typsnittstjänst.</li>
+              <li>Trycker du på ”Se huset på din tomt” på en Android-telefon
                 öppnas Googles AR-visare, som hämtar husets 3D-modell från
                 sajten. På iPhone sker det i telefonen utan någon tredje part.
                 3D-visningen i webbläsaren använder ingen extern tjänst.</li>
-              <li>Söker du på en adress under "Kolla din mark" på sidan
+              <li>Söker du på en adress under ”Kolla din mark” på sidan
                 Vad får jag bygga? skickas adressen till OpenStreetMap
                 Foundations söktjänst Nominatim, som svarar med en punkt på
                 kartan. Kartbilderna hämtas från OpenStreetMap, och punkten
                 skickas till Sveriges geologiska undersökning (SGU) för att
-                hämta uppgifterna om marken. Trycker du på "Använd min
-                position" frågar webbläsaren dig först, och positionen går
+                hämta uppgifterna om marken. Trycker du på ”Använd min
+                position” frågar webbläsaren dig först, och positionen går
                 samma väg. Ingenting av detta sparas på webbplatsen, och vi
                 ser aldrig adressen.</li>
             </ul>
@@ -129,9 +132,10 @@ POLICY = '''    <main id="innehall">
             <p>
               Du har rätt att få veta vilka uppgifter vi har om dig, att få dem
               rättade eller raderade, att invända mot behandlingen och att
-              begära att den begränsas. Hör av dig till någon av adresserna
-              ovan, så ordnar vi det. Är du inte nöjd med hur vi hanterar
-              saken kan du vända dig till Integritetsskyddsmyndigheten, IMY.
+              begära att den begränsas. Mejla oss på
+              <a href="mailto:info@idealhus.se">info@idealhus.se</a>, så ordnar
+              vi det. Är du inte nöjd med hur vi hanterar saken kan du vända
+              dig till Integritetsskyddsmyndigheten, IMY.
             </p>
           </div>
         </div>

@@ -634,7 +634,7 @@ h3 em,
   white-space: nowrap;
   cursor: pointer;
   transition: background-color 0.25s, border-color 0.25s, color 0.25s,
-    transform 0.35s var(--mjuk), box-shadow 0.35s var(--mjuk);
+    transform 0.35s var(--mjuk), box-shadow 0.35s var(--mjuk), scale 0.15s var(--mjuk);
 }
 
 .ih-knapp:hover,
@@ -5783,7 +5783,8 @@ html[data-tema="mork"] .ih-fraga {
 .site-footer__button,
 .contact-form button[type="submit"] {
   transition: background-color 0.25s, border-color 0.25s, color 0.25s,
-    transform 0.35s var(--mjuk), box-shadow 0.35s var(--mjuk), translate 0.4s var(--mjuk);
+    transform 0.35s var(--mjuk), box-shadow 0.35s var(--mjuk), translate 0.4s var(--mjuk),
+    scale 0.15s var(--mjuk);
 }
 
 /* Glans som drar förbi den fyllda knappen vid hovring. */
@@ -26101,12 +26102,6 @@ html body .site-footer .site-footer__button {
   color: #1b1915;
 }
 
-/* Knappar som saknade tryckkänsla. */
-html body :is(.ih-knapp, .kat-huvud__lankar a, .studio3d__val button, .studio3d__vyer button, .studio3d__ikon, .studio3d__matt, .jamfor-knapp, .kopiera, .jamforbar button):active {
-  transform: translateY(1px) scale(0.97);
-  transition-duration: 0.08s;
-}
-
 /* Tipset i telefonen: en smal remsa över hela bredden i stället för en
    fast ruta i hörnet. */
 @media (max-width: 700px) {
@@ -26337,13 +26332,7 @@ html body .pkort-rad:has(.pkort--passar) .pkort:not(.pkort--passar):hover {
 
 /* Tryckkänsla och mjuka övergångar på skalans och kartans val. */
 html body .prisskala__chip {
-  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
-}
-
-html body :is(.prisskala__modell, .prisskala__chip, .pkort__lank):active,
-html body .tval input + span:active {
-  transform: scale(0.97);
-  transition-duration: 0.08s;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease, scale 0.15s var(--mjuk);
 }
 /* Så fungerar det: rättelser efter granskningen (2026-10-02). */
 
@@ -26681,12 +26670,6 @@ html body .rg-fraga:not([open]):hover {
     inset 0 0 0 1px rgba(143, 84, 36, 0.24);
 }
 
-html body :is(.rg-kort__lank, .rg__prova, .rg-vidare__kort, .rg-slut__linje):active,
-html body .rg-fraga summary:active {
-  transform: translateY(0) scale(0.985);
-  transition-duration: 0.08s;
-}
-
 /* Korten tonar in kortare och snabbare. */
 html body [data-rg-in] {
   transition: opacity 0.55s var(--mjuk) var(--rg-d, 0s), transform 0.6s var(--mjuk) var(--rg-d, 0s),
@@ -26932,17 +26915,6 @@ html body .pf-lev__knapp:hover {
   box-shadow: 0 18px 36px -14px rgba(143, 84, 36, 0.75);
 }
 
-/* Tryckkänsla på sidans egna knappar och flikar. */
-html body :is(.pf-lev__knapp, .pf-band__pilar button, .pf-topp__tre a):active {
-  transform: translateY(0) scale(0.97);
-  transition-duration: 0.08s;
-}
-
-html body .pf-lev__val button:active {
-  transform: scale(0.98);
-  transition-duration: 0.08s;
-}
-
 /* Mörkt läge: vald flik i bärnsten, så den syns. */
 html[data-tema="mork"] body .pf-lev__val button[aria-selected="true"] {
   background: linear-gradient(160deg, rgba(240, 181, 110, 0.22), rgba(240, 181, 110, 0.08)), #2b2721;
@@ -27035,12 +27007,6 @@ html body .segment:not(.segment--tak) .segment__media img:not([src*="hus-r"]) {
   html body .siffror__grid--fyra .siffra__tal {
     font-size: 1.75rem;
   }
-}
-
-/* Tryckkänsla på sajtens vanligaste knappar. */
-html body :is(.hero__link, .kontaktkort__knapp, .site-footer__button, .header-button, .kopiera):active {
-  transform: translateY(1px) scale(0.97);
-  transition-duration: 0.08s;
 }
 /* Navigering och rörelse: rättelser efter granskningen (2026-10-02). */
 
@@ -29700,4 +29666,617 @@ html[data-tema="mork"] body .tomtteaser__rubrik {
   html body .tomtteaser__chip .vf3d__chip-in {
     transition: none;
   }
+}
+
+/* === Vad får jag bygga? – rättelser efter granskningen (2026-10-02) ======
+   Valt svar som försvann vid hover, mörkt läge i reglaget och
+   teckenförklaringen, svaret direkt efter frågorna på mobil, länkar som
+   inte svarade på hover, tydligare brickor på liten skärm, menykortet som
+   pekade på sidan man redan är på och marktexten som knuffade bilden. */
+
+/* Valt svar: den ljusa hovern tog över bakgrunden men lämnade den ljusa
+   texten kvar. Det valda svaret behåller sin mörka ton och lyfter lite. */
+html:not([data-tema="mork"]) body .tv__alt input:checked + span:hover {
+  background: linear-gradient(180deg, #38332c 0%, #1d1b17 55%, #141210 100%);
+  color: #f7f5f0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(240, 181, 110, 0.4),
+    0 14px 26px -12px rgba(27, 25, 21, 0.7);
+}
+
+/* Mörkt läge: värdet vid reglaget och teckenförklaringen hade kvar sina
+   vita ljusa rutor, med ljus text på vitt. */
+html[data-tema="mork"] body .tv__reglage output {
+  background: rgba(247, 245, 240, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+  color: #f7f5f0;
+}
+
+html[data-tema="mork"] body .tv__forklaring {
+  background: rgba(27, 25, 21, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12), 0 10px 20px -14px rgba(0, 0, 0, 0.6);
+  color: rgba(247, 245, 240, 0.74);
+}
+
+html[data-tema="mork"] body .tv__prick--nytt {
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.5);
+}
+
+/* Svaret om huset man kom från står under sammanfattningen, i samma
+   färg som svaret: grönt när det ryms, rött när det kräver lov. */
+html body .tv__svar .tv__summa + .kollen__valt {
+  margin: -8px 0 18px;
+}
+
+html:not([data-tema="mork"]) body .tv__svar .kollen__valt--ja {
+  background: rgba(76, 194, 127, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(47, 138, 82, 0.22);
+  color: #1f5c38;
+}
+
+html:not([data-tema="mork"]) body .tv__svar .kollen__valt--nej {
+  background: rgba(224, 118, 74, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(224, 118, 74, 0.3);
+  color: #8f3f1f;
+}
+
+html[data-tema="mork"] body .tv__svar .kollen__valt--ja {
+  box-shadow: inset 0 0 0 1px rgba(76, 194, 127, 0.35);
+}
+
+html[data-tema="mork"] body .tv__svar .kollen__valt--nej {
+  box-shadow: inset 0 0 0 1px rgba(224, 118, 74, 0.45);
+}
+
+/* "Så räknar vi" står efter svaret i koden, så att tabbordningen följer
+   det man ser. Bred skärm: under frågorna i vänster spalt, och fyller ut
+   den till svarets höjd. En spalt: frågorna, svaret och sist reglerna. */
+@media (min-width: 1041px) {
+  html body .tv__inre {
+    grid-template-rows: auto 1fr;
+    row-gap: 12px;
+  }
+
+  html body .tv__form {
+    align-self: start;
+    grid-template-rows: none;
+  }
+
+  html body .tv__hoger {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  html body .tv__regler {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 1040px) {
+  html body .tv__regler {
+    order: 3;
+  }
+}
+
+/* Teckenförklaringen i två rader om två på smal skärm, så att
+   "Tomtgräns" inte hamnar ensam. */
+@media (max-width: 620px) {
+  html body .tv__forklaring {
+    display: grid;
+    grid-template-columns: repeat(2, auto minmax(0, auto));
+    justify-content: start;
+    align-items: center;
+    gap: 7px 7px;
+    border-radius: 16px;
+  }
+
+  html body .tv__forklaring .tv__prick {
+    margin: 0;
+  }
+
+  html body .tv__forklaring .tv__prick:nth-of-type(even) {
+    margin-left: 8px;
+  }
+}
+
+/* Textlänkarna: understrukna som sidans andra länkar och tydliga vid
+   hover. */
+html body .tv__regler-not a,
+html body .tv__friskrivning a,
+html body .kollen-hus__tomt a,
+html body .tomtskarning__noter a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(143, 84, 36, 0.4);
+  transition: color 0.25s var(--mjuk), text-decoration-color 0.25s var(--mjuk);
+}
+
+html:not([data-tema="mork"]) body .tv__regler-not a:hover,
+html:not([data-tema="mork"]) body .tv__friskrivning a:hover,
+html:not([data-tema="mork"]) body .kollen-hus__tomt a:hover,
+html:not([data-tema="mork"]) body .tomtskarning__noter a:hover {
+  color: #1b1915;
+  text-decoration-color: currentColor;
+}
+
+html[data-tema="mork"] body .tv__regler-not a,
+html[data-tema="mork"] body .tv__friskrivning a {
+  color: var(--virke);
+}
+
+html[data-tema="mork"] body .tv__regler-not a,
+html[data-tema="mork"] body .tv__friskrivning a,
+html[data-tema="mork"] body .kollen-hus__tomt a,
+html[data-tema="mork"] body .tomtskarning__noter a {
+  text-decoration-color: rgba(240, 181, 110, 0.45);
+}
+
+html[data-tema="mork"] body .tv__regler-not a:hover,
+html[data-tema="mork"] body .tv__friskrivning a:hover,
+html[data-tema="mork"] body .kollen-hus__tomt a:hover,
+html[data-tema="mork"] body .tomtskarning__noter a:hover {
+  color: #f7f5f0;
+  text-decoration-color: currentColor;
+}
+
+/* "Använd min position" svarar också på hover. */
+html body .marksok__plats {
+  transition: color 0.25s var(--mjuk);
+}
+
+html:not([data-tema="mork"]) body .marksok__plats:hover {
+  color: #1b1915;
+}
+
+html[data-tema="mork"] body .marksok__plats:hover {
+  color: #f7f5f0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .marksok__plats svg {
+    transition: transform 0.35s var(--mjuk);
+  }
+
+  html body .marksok__plats:hover svg {
+    transform: scale(1.12);
+  }
+}
+
+/* Menykortet "Prova – Vad får jag bygga?" pekar på sidan man redan är på
+   här, så det visas inte på verktygets egen sida. */
+html body:has(.main-nav__verktyg[aria-current="page"]) .main-nav__sub .main-nav__tips,
+html body:has(.main-nav__verktyg[aria-current="page"]) .mmeny .mmeny__tips {
+  display: none;
+}
+
+/* Marktexten ovanför genomskärningen fylls i när datan kommit. Plats för
+   en vanlig marktext hålls ledig så att bilden under inte knuffas: två
+   rader på bred skärm, tre till fem på mobilen där texten radbryts mer. */
+html body .tomtskarning .tomtskarning__text:empty {
+  min-height: 3.2em;
+}
+
+@media (max-width: 620px) {
+  html body .tomtskarning .tomtskarning__text:empty {
+    min-height: 4.8em;
+  }
+}
+
+@media (max-width: 470px) {
+  html body .tomtskarning .tomtskarning__text:empty {
+    min-height: 6.4em;
+  }
+}
+
+@media (max-width: 400px) {
+  html body .tomtskarning .tomtskarning__text:empty {
+    min-height: 8em;
+  }
+}
+
+/* Integritetspolicyn, 404 och sidfotens nedersta rad (2026-10-02). */
+
+/* 404: kortet fyller första skärmen och innehållet står i mitten, i
+   stället för dubbel luft ovanför och ett tomt fält under länkarna. */
+html body .fyrafyra {
+  display: grid;
+  align-content: center;
+  min-height: min(calc(100vh - 106px), 920px);
+  min-height: min(calc(100svh - 106px), 920px);
+  padding-block: clamp(40px, 7vh, 88px);
+  padding-inline: 0;
+}
+
+html body .fyrafyra__inner {
+  padding-block: 0;
+}
+
+/* Ljust läge: ”Till startsidan” fick ljus text på nästan genomskinlig
+   botten vid hover. Mörk fyllning som de andra konturknapparna. */
+html:not([data-tema="mork"]) body .fyrafyra .knapp-linje:hover {
+  border-color: #1b1915;
+  background-color: #1b1915;
+  color: #f7f5f0;
+}
+
+/* Telefon: knapparna lika breda, under varandra. */
+@media (max-width: 480px) {
+  html body .fyrafyra__lankar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+}
+
+/* Snabblänkarna blir riktiga glaschips med mjuk hover. */
+html body .fyrafyra__hus {
+  margin-top: clamp(36px, 4vw, 48px);
+  padding-top: 24px;
+  gap: 8px;
+  align-items: center;
+}
+
+html body .fyrafyra__hus a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid rgba(247, 245, 240, 0.16);
+  border-radius: 999px;
+  background: rgba(247, 245, 240, 0.05);
+  color: #f7f5f0;
+  font: 500 0.8125rem/1 var(--knappfont);
+  text-decoration: none;
+  transition: background-color 0.3s var(--mjuk), border-color 0.3s var(--mjuk), color 0.3s var(--mjuk), transform 0.3s var(--mjuk);
+}
+
+html body .fyrafyra__hus a::after {
+  content: none;
+}
+
+html body .fyrafyra__hus a:hover {
+  border-color: #f7f5f0;
+  background: #f7f5f0;
+  color: #1b1915;
+}
+
+html:not([data-tema="mork"]) body .fyrafyra__hus a {
+  border-color: rgba(27, 25, 21, 0.12);
+  background: rgba(255, 255, 255, 0.55);
+  color: #1b1915;
+}
+
+html:not([data-tema="mork"]) body .fyrafyra__hus a:hover {
+  border-color: #1b1915;
+  background: #1b1915;
+  color: #f7f5f0;
+}
+
+html body .fyrafyra__hus a:focus-visible {
+  outline: 2px solid #f0b56e;
+  outline-offset: 2px;
+}
+
+html:not([data-tema="mork"]) body .fyrafyra__hus a:focus-visible {
+  outline-color: #8f5424;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body .fyrafyra__hus a:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* Policyn: samma luft före sidfoten som på de andra sidorna. */
+html body main > .guide {
+  padding-bottom: clamp(64px, 7vw, 104px);
+}
+
+/* Rubriken ryms på en rad på telefon; det mjuka bindestrecket tar
+   resten på de smalaste skärmarna. */
+@media (max-width: 480px) {
+  html body .guide-topp__titel {
+    font-size: clamp(2.1rem, 10vw, 2.8rem);
+  }
+}
+
+/* Mörkt läge: länken i texten syns utan hover. */
+html[data-tema="mork"] body .guide__text a {
+  color: #f7f5f0;
+  text-decoration-color: rgba(240, 181, 110, 0.55);
+}
+
+html[data-tema="mork"] body .guide__text a:hover {
+  text-decoration-color: #f0b56e;
+}
+
+/* Sidfotens nedersta rad i linje med spalterna ovanför (samma mått
+   som --inre). */
+html body .site-footer__bottom {
+  padding-inline: max(calc((100% - 1240px) / 2), clamp(16px, 4vw, 48px));
+}
+
+/* Känslan: tryck, fokusring, temabyte, glansen i sidhuvudet och
+   vägkortens lutning (2026-10-02). */
+
+/* Tryck: knappen krymper med egenskapen scale i stället för transform,
+   så trycket aldrig krockar med hovringens lyft (transform), magneten
+   (translate) eller lutningen. Alla tryckregler samlade här. */
+@media (prefers-reduced-motion: no-preference) {
+  html body :is(.ih-knapp, .hero__link, .knapp-fylld, .knapp-linje, .kontaktkort__knapp,
+    .site-footer__button, .header-button, .contact-form button[type="submit"], .contact-form__nasta,
+    .contact-form__bak, .model-price__button, .kopiera, .main-nav__verktyg, .kat-huvud__lankar a,
+    .kat-tillbaka, .studio3d__val button, .studio3d__vyer button, .studio3d__ikon, .studio3d__matt,
+    .jamfor-knapp, .jamforbar button, .prisskala__modell, .prisskala__chip, .pkort__lank,
+    .rg-kort__lank, .rg__prova, .rg-slut__linje, .pf-lev__knapp, .pf-band__pilar button,
+    .pf-topp__tre a):active,
+  html body .tval input + span:active {
+    scale: 0.97;
+  }
+
+  /* Stora kort trycks mindre, flikar lite, runda ikonknappar mer. */
+  html body :is(.vag, .rg-vidare__kort):active {
+    scale: 0.99;
+  }
+
+  html body :is(.rg-fraga summary, .pf-lev__val button):active {
+    scale: 0.985;
+  }
+
+  html body .site-header :is(.temaknapp, .menu-button):active {
+    scale: 0.92;
+  }
+
+  /* Sidfotens ikoner: lyftet ligger kvar och ikonen krymper. */
+  html body .site-footer .site-footer__sociala .social {
+    transition: transform 0.45s var(--mjuk), box-shadow 0.45s var(--mjuk), color 0.3s ease, scale 0.15s var(--mjuk);
+  }
+
+  html body .site-footer .site-footer__sociala .social:active {
+    transform: translateY(-3px);
+    scale: 0.94;
+    transition-duration: 0.45s, 0.45s, 0.3s, 0.15s;
+  }
+
+  /* Knappen i kontaktkortet och verktygspillen i sidhuvudet har egna
+     övergångar som saknade skalan, så trycket hoppade i en bildruta. */
+  html body .contact-section .kontaktkort__knapp {
+    transition: transform 0.45s var(--mjuk), box-shadow 0.45s var(--mjuk), scale 0.15s var(--mjuk);
+  }
+
+  html.ih-js body .contact-section .kontaktkort > .kontaktkort__knapp.glid {
+    transition:
+      opacity 0.8s ease calc(var(--i, 0) * 120ms),
+      translate 1s var(--mjuk) calc(var(--i, 0) * 120ms),
+      filter 0.8s ease calc(var(--i, 0) * 120ms),
+      transform 0.45s var(--mjuk),
+      box-shadow 0.45s var(--mjuk),
+      scale 0.15s var(--mjuk);
+  }
+
+  html body .main-nav .main-nav__verktyg {
+    transition: transform 0.4s var(--mjuk), box-shadow 0.4s var(--mjuk), scale 0.15s var(--mjuk);
+  }
+
+  /* Fler knappar i listan hade egna övergångar utan skalan: samma
+     övergångar som förut, med skalan tillagd. */
+  html body .kopiera {
+    transition:
+      color 0.25s var(--ease),
+      border-color 0.25s var(--ease),
+      background-color 0.25s var(--ease),
+      scale 0.15s var(--mjuk);
+  }
+
+  html body .contact-form__bak {
+    transition: border-color 0.25s, color 0.25s, scale 0.15s var(--mjuk);
+  }
+
+  html body :is(.kat-huvud__lankar a, .kat-tillbaka) {
+    transition:
+      background-color 0.25s ease,
+      color 0.25s ease,
+      transform 0.35s var(--mjuk),
+      scale 0.15s var(--mjuk);
+  }
+
+  html body .studio3d :is(.studio3d__val, .studio3d__vyer) button {
+    transition: color 0.35s ease, scale 0.15s var(--mjuk);
+  }
+
+  html body :is(.studio3d__matt, .studio3d__ikon) {
+    transition: background-color 0.3s, color 0.3s, transform 0.35s var(--mjuk), scale 0.15s var(--mjuk);
+  }
+
+  html body .jamfor-knapp {
+    transition:
+      background-color 0.3s var(--ease),
+      color 0.3s var(--ease),
+      border-color 0.3s var(--ease),
+      scale 0.15s var(--mjuk);
+  }
+
+  html body .jamforbar button {
+    transition: scale 0.15s var(--mjuk);
+  }
+
+  html body .prisskala__modell {
+    transition:
+      box-shadow 0.35s var(--mjuk),
+      background-color 0.35s,
+      transform 0.45s var(--mjuk),
+      opacity 0.35s,
+      scale 0.15s var(--mjuk);
+  }
+
+  html body .pkort__lank {
+    transition: gap 0.35s var(--mjuk), background-color 0.3s, scale 0.15s var(--mjuk);
+  }
+
+  html body .tval input + span {
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s, scale 0.15s var(--mjuk);
+  }
+
+  html body .pf-lev__knapp {
+    transition:
+      background-color 0.25s ease,
+      box-shadow 0.35s var(--mjuk),
+      transform 0.35s var(--mjuk),
+      scale 0.15s var(--mjuk);
+  }
+
+  html body .pf-band__pilar button {
+    transition:
+      background-color 0.35s ease,
+      color 0.35s ease,
+      opacity 0.35s ease,
+      transform 0.35s var(--mjuk),
+      scale 0.15s var(--mjuk);
+  }
+
+  html body .pf-topp__tre a {
+    transition: background-color 0.35s ease, color 0.35s ease, scale 0.15s var(--mjuk);
+  }
+
+  html body .pf-lev__val button {
+    transition:
+      background-color 0.45s ease,
+      color 0.45s ease,
+      box-shadow 0.45s ease,
+      transform 0.45s var(--mjuk),
+      scale 0.15s var(--mjuk);
+  }
+
+  html body .rg-kort__lank {
+    transition: transform 0.4s var(--mjuk), box-shadow 0.4s var(--mjuk), scale 0.15s var(--mjuk);
+  }
+
+  html body .rg__prova {
+    transition: transform 0.5s var(--mjuk), scale 0.15s var(--mjuk);
+  }
+
+  html body .rg-slut__linje {
+    transition:
+      background-color 0.35s ease,
+      color 0.35s ease,
+      transform 0.35s var(--mjuk),
+      scale 0.15s var(--mjuk);
+  }
+
+  html body .rg-vidare__kort[data-rg-in] {
+    transition:
+      opacity 0.55s var(--mjuk) var(--rg-d, 0s),
+      transform 0.6s var(--mjuk) var(--rg-d, 0s),
+      box-shadow 0.5s var(--mjuk),
+      scale 0.15s var(--mjuk);
+  }
+
+  /* Frågorna i reglerna och menyknappen hade ingen övergång alls. */
+  html body .rg-fraga summary,
+  html body .site-header .menu-button {
+    transition: scale 0.15s var(--mjuk);
+  }
+}
+
+/* Temaknappen: hovring och tryck även i ljust läge (regeln för knapparna
+   i sidhuvudet vann förut över :hover, så inget hände). */
+html body .site-header__actions > .temaknapp {
+  transition: background-color 0.3s var(--mjuk), box-shadow 0.3s var(--mjuk), scale 0.15s var(--mjuk);
+}
+
+html:not([data-tema="mork"]) body .site-header__actions > .temaknapp:hover {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.14), 0 8px 18px -12px rgba(90, 60, 25, 0.5);
+}
+
+/* "Börja här" i sidhuvudet: glansen syns när man pekar, som på knappen i
+   toppen (den svepte förut osynligt, med opacity 0 från det gamla
+   tryckskenet), och inget sken hamnar utanför knappen vid tryck. */
+html body .header-button::before,
+html body .header-button:active::before {
+  opacity: 1;
+  scale: none;
+  transition: transform 0.9s var(--mjuk);
+}
+
+/* Temabytet tonar: den nya bilden av sidan tonar fram över den gamla
+   (premium.js sätter .tema-vt under vy-övergången). Inget rör sig. */
+html.tema-vt::view-transition-old(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+html.tema-vt::view-transition-new(root) {
+  animation: tema-tona 0.35s ease both;
+  mix-blend-mode: normal;
+}
+
+@keyframes tema-tona {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Fokusringen: en och samma på hela sajten, 2 px i --fokus - koppar på
+   ljus botten och bärnsten i mörkt läge (via --virke-djup) och på mörka
+   ytor. Förut fick länkar och knappar ringen i textfärgen, så den blev
+   nästan svart runt bärnstensknapparna på mörk botten. */
+html body :focus-visible,
+html body :is(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--fokus, var(--virke-djup));
+  outline-offset: 3px;
+}
+
+/* Mörka ytor även i ljust läge: filmen i toppen och mätpanelen i reglerna. */
+html:not([data-tema="mork"]) body :is(.topp3__ram, .rg-matt__panel) {
+  --fokus: #f0b56e;
+}
+
+/* Listan och valrutan i kontaktformuläret får samma fokus som fälten
+   (förut en nästan osynlig skugga, i mörkt läge helt osynlig). */
+html body .contact-form :is(select, .valj__knapp):focus-visible {
+  outline: none;
+  border-color: var(--virke-djup);
+  box-shadow: 0 0 0 4px rgba(240, 181, 110, 0.28);
+}
+
+html[data-tema="mork"] body .contact-form :is(select, .valj__knapp):focus-visible {
+  box-shadow: 0 0 0 4px rgba(240, 181, 110, 0.2);
+}
+
+/* Delar med en egen ringfärg (bärnsten även på ljus botten) följer
+   samma system. */
+html body :is(.rg-fraga summary, .rg-vaxel button, .pf-lev__val button, .pf-band__rad):focus-visible,
+html body .checklista__rad input:focus-visible + .checklista__ruta,
+html body .main-nav__sub :is(.main-nav__modeller, .main-nav__guider) a:focus-visible,
+html body .site-footer .site-footer__sociala .social:focus-visible {
+  outline-color: var(--fokus, var(--virke-djup));
+}
+
+/* Adressfältet i "Kolla marken": raden runt fältet visar fokus med
+   sin egen kant och sitt sken, så fältet självt får ingen ring. */
+html body .marksok__rad input:focus-visible {
+  outline: none;
+}
+
+/* Vägkorten på startsidan: lutningen följer pekaren igen (inglidningens
+   transform: none vann förut, så korten stod stilla), och husbilden
+   zoomas inte vid hovring - den beskärs aldrig. */
+html.js-reveal body .vag.reveal--inne {
+  transform: perspective(1400px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: opacity 0.85s var(--mjuk) var(--reveal-delay, 0s), transform 0.6s var(--mjuk), scale 0.2s var(--mjuk);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html body .vag:hover {
+    will-change: transform;
+  }
+}
+
+html body .vag--hel:hover .vag__bild {
+  transform: none;
 }

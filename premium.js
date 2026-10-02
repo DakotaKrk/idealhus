@@ -2059,6 +2059,54 @@
     else window.addEventListener('load', forladda3d);
   }
 
+  // 3D-scenerna byggs i en lugn stund, inte mitt i rullningen. model-
+  // viewer länkar sina shaders i en enda lång uppgift (150-600 ms), och i
+  // standardläget (loading="auto") väntar den tills scenen syns - då
+  // rycker sidan just när man rullar dit. Därför laddas modellen direkt
+  // (loading="eager" i bygg) och bygget startar när sidan laddat och
+  // webbläsaren är ledig. Bygget väntar tills det varit lugnt i 1 s:
+  // ingen rullning, inget hjul och ingen fingerdragning, och minst 1 s
+  // sedan laddningen. Länkningen kommer ändå 0,3-0,5 s efter starten
+  // (när modellen laddats), så den som börjar rulla just då känner den
+  // fortfarande - fönstret går att krympa men inte stänga. Med Spara
+  // data byggs scenen först när den närmar sig, som förut.
+  var senastRullad = -1e4, rullLyss = false;
+  function rord() { senastRullad = performance.now(); }
+  function narRullningenVilar(fn) {
+    var vilat = performance.now() - senastRullad;
+    if (vilat >= 1000) fn();
+    else setTimeout(function () { narRullningenVilar(fn); }, 1010 - vilat);
+  }
+  // Samma väntan mellan motorn och scenen, som ett löfte.
+  function rullningenVilar() {
+    return new Promise(function (klar) { narRullningenVilar(klar); });
+  }
+  function byggILugn(sek, bygg, marginal) {
+    var startad = false;
+    if (!rullLyss) {
+      rullLyss = true;
+      ['scroll', 'wheel', 'touchmove'].forEach(function (typ) {
+        window.addEventListener(typ, rord, { passive: true });
+      });
+      // Laddningen räknas som en rörelse: lugnet mäts även från den.
+      if (document.readyState !== 'complete') window.addEventListener('load', rord);
+    }
+    function starta() {
+      if (startad) return;
+      startad = true;
+      narRullningenVilar(bygg);
+    }
+    if (!(navigator.connection && navigator.connection.saveData)) {
+      var ledig = function () {
+        if (window.requestIdleCallback) window.requestIdleCallback(starta, { timeout: 2500 });
+        else setTimeout(starta, 1200);
+      };
+      if (document.readyState === 'complete') ledig();
+      else window.addEventListener('load', ledig);
+    }
+    narSynligt(sek, starta, 0, marginal);
+  }
+
   (function () {
     var sek = $('#i-3d');
     var hero = $('[data-hus-bild]') || $('.subpage-hero__image');
@@ -2152,9 +2200,10 @@
     function bygg() {
       if (byggd) return;
       byggd = true;
-      laddaModelViewer().then(function () {
+      laddaModelViewer().then(rullningenVilar).then(function () {
         var mv = document.createElement('model-viewer');
         mv.setAttribute('src', 'modeller/hus-' + id + '.glb');
+        mv.setAttribute('loading', 'eager');
         mv.setAttribute('alt', '3D-modell av huset i skala 1:1');
         mv.setAttribute('camera-controls', '');
         mv.setAttribute('touch-action', 'pan-y');
@@ -2225,7 +2274,7 @@
       scen.appendChild(bild);
       scen.appendChild(ruta);
     }
-    narSynligt(sek, bygg, 0, '0px 0px 600px 0px');
+    byggILugn(sek, bygg, '0px 0px 600px 0px');
   })();
 
   /* --- 3D-studion på kategorisidorna ---------------------------------
@@ -2456,10 +2505,11 @@
     });
 
     function bygg() {
-      laddaModelViewer().then(function () {
+      laddaModelViewer().then(rullningenVilar).then(function () {
         mv = document.createElement('model-viewer');
         var attr = {
           src: 'modeller/hus-' + aktiv.id + '.glb',
+          loading: 'eager',
           alt: '3D-modell av ' + aktiv.namn + ' i skala 1:1',
           'camera-controls': '',
           'disable-zoom': '',
@@ -2521,7 +2571,7 @@
         if (t) t.textContent = '3D-modellen kunde inte laddas.';
       });
     }
-    narSynligt(sek, bygg, 0, '0px 0px 1200px 0px');
+    byggILugn(sek, bygg, '0px 0px 1200px 0px');
   })();
 
   // Korten för husen som finns i 3D får en liten märkning.
@@ -2571,15 +2621,27 @@
       var tc = $('meta[name="theme-color"]');
       if (tc) tc.setAttribute('content', mork ? '#141310' : '#1b1915');
     }
-    function vaxla() {
+    function byt() {
       var mork = html.getAttribute('data-tema') !== 'mork';
-      if (!lugn) {
-        html.classList.add('tema-byte');
-        setTimeout(function () { html.classList.remove('tema-byte'); }, 600);
-      }
       if (mork) html.setAttribute('data-tema', 'mork'); else html.removeAttribute('data-tema');
       lagra.spara('idealhus-tema', mork ? 'mork' : 'ljust');
       uppdatera();
+    }
+    // Temat tonar över i en vy-övergång: webbläsaren tonar mellan två
+    // bilder av sidan, så inget element behöver en egen övergång (en
+    // övergång på varje element kostade flera hundra ms och hackade).
+    // Utan stöd, eller med lugn rörelse, byts temat direkt. Sidhuvudets
+    // entré spelas inte om när övergången släpper (.meny-stilla).
+    function vaxla() {
+      if (lugn || !document.startViewTransition) { byt(); return; }
+      html.classList.add('meny-stilla', 'tema-vt');
+      var klar = function () { html.classList.remove('tema-vt'); };
+      try {
+        document.startViewTransition(byt).finished.then(klar, klar);
+      } catch (e) {
+        klar();
+        byt();
+      }
     }
     knapp.addEventListener('click', vaxla);
     if (rad) rad.addEventListener('click', vaxla);
@@ -2683,7 +2745,9 @@
      aldrig där det redan finns ett formulär eller verktyget självt,
      och inte igen på fjorton dagar efter att man stängt det. */
   var utan = ['index.html', '', 'huskort.html', 'priser.html', 'aga-och-hyra-ut.html', 'vad-far-jag-bygga.html', 'kontakt.html', '404.html', 'integritetspolicy.html', 'attefallshus-regler.html', 'proffs.html'];
-  if (utan.indexOf(sida) < 0) {
+  // En riktig 404 visas på den trasiga adressen, inte på 404.html, så
+  // sidan känns igen på sitt innehåll.
+  if (utan.indexOf(sida) < 0 && !$('.fyrafyra')) {
     var senast = Number(lagra.hamta('idealhus-tips') || 0);
     if (Date.now() - senast > 14 * 864e5) {
       var tips = document.createElement('aside');

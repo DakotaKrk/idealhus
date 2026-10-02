@@ -35,13 +35,13 @@ MODELLER = [
 MARKKOLL = [
     ("Tomtgränsen", "Lantmäteriet · Min karta", "https://minkarta.lantmateriet.se/",
      "M4 20 9 4l6 16 5-12M4 20h16",
-     "Se var fastighetsgränsen går och mät avståndet till grannen - 4,5 meter är gränsen utan medgivande."),
+     "Se var fastighetsgränsen går och mät avståndet till grannen – 4,5 meter är gränsen utan medgivande."),
     ("Jordarter", "SGU · Kartvisaren", "https://apps.sgu.se/kartvisare/kartvisare-jordarter-25-100.html",
      "M3 9h18M3 14h18M3 19h18M7 4l2 5M14 4l-1 5",
      "Visar om marken är berg, lera, sand eller morän. Det styr vilken grund som passar och hur mycket som ska grävas."),
     ("Djup till berg", "SGU · Kartvisaren", "https://apps.sgu.se/kartvisare/kartvisare-jorddjup.html",
      "M12 3v14M7 12l5 5 5-5M4 21h16",
-     "Ungefär hur djupt det är ned till berget. Grunt berg kan betyda plintar direkt på berget - eller sprängning."),
+     "Ungefär hur djupt det är ned till berget. Grunt berg kan betyda plintar direkt på berget – eller sprängning."),
     ("Ledningar i marken", "Ledningskollen", "https://www.ledningskollen.se/",
      "M3 12h4l2-5 3 10 2-5h7",
      "Gratis: ledningsägarna svarar med var el, fiber, vatten och avlopp går under tomten. Gör det innan grunden grävs."),
@@ -66,7 +66,7 @@ JORDTOLKNING = [
     ("lera|silt",
      "Lera och silt bär sämre och kan sätta sig. De tjälar också lätt, "
      "det vill säga fryser och lyfter på vintern. Platta på mark brukar "
-     "fungera med tjälisolering runt om - på djup lera kan en geoteknisk "
+     "fungera med tjälisolering runt om – på djup lera kan en geoteknisk "
      "bedömning behövas."),
     ("morän",
      "Morän är en blandning av sten, grus, sand och finare jord. Den bär "
@@ -127,8 +127,8 @@ FORMULAR = "\n\n".join([
     val(1, "plan", "Ligger tomten inom detaljplan?",
         [("inom", "Inom detaljplan"), ("utanfor", "Utanför detaljplan"),
          ("vetej", "Vet inte")],
-        "Står i kommunens karta, eller fråga bygglovsenheten. Är du osäker "
-        "räknar vi med det strängare."),
+        "Det syns i kommunens karta över detaljplaner – eller fråga "
+        "bygglovsenheten. Är du osäker räknar vi med det strängare."),
     f'''          <fieldset class="tv__fraga">
             <legend><span class="tv__nr" aria-hidden="true">02</span>Hur mycket komplementbyggnad finns redan på tomten?</legend>
             <p class="tv__hjalp">Attefallshus, friggebodar och andra lovbefriade byggnader, sammanlagt.</p>
@@ -143,7 +143,7 @@ FORMULAR = "\n\n".join([
     val(4, "bo", "Ska huset ha kök, badrum eller eldstad?",
         [("ja", "Ja, det ska gå att bo i"), ("nej", "Nej, gäststuga, kontor eller förråd")]),
     val(5, "vatten", "Ligger tomten nära vatten?",
-        [("nej", "Nej"), ("ja", "Ja, inom 100 m från strand"), ("vetej", "Vet inte")]),
+        [("nej", "Nej"), ("ja", "Ja, inom 100 m från stranden"), ("vetej", "Vet inte")]),
 ])
 
 KROPP = f'''    <main id="innehall">
@@ -155,8 +155,8 @@ KROPP = f'''    <main id="innehall">
             <h1 class="kollen-topp__titel">Vad får jag <em class="skimmer">bygga</em>?</h1>
             <p class="kollen-topp__text">
               Fem frågor om tomten. Sedan ser du hur stort hus som ryms utan
-              bygglov, hur högt det får bli och vad kommunen behöver veta -
-              medan tomten ritas upp bredvid.
+              bygglov, hur högt det får bli och vad kommunen behöver veta –
+              medan tomten ritas upp.
             </p>
             <div class="vf-topp__knappar">
               <a class="ih-knapp ih-knapp--virke" href="#rakna">Börja räkna<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -192,22 +192,6 @@ KROPP = f'''    <main id="innehall">
         <div class="tv__inre">
           <form class="tv__form" id="kollen" aria-label="Frågor om tomten">
 {FORMULAR}
-
-          <aside class="tv__regler" id="tv-regler" data-vald="inom" aria-label="Reglerna som verktyget räknar med">
-            <p class="tv__regler-rubrik"><span class="tv__regler-ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 19.5h16M6.5 19.5V9.8L12 5l5.5 4.8v9.7M10 19.5v-5h4v5"/></svg></span>Så räknar vi</p>
-            <table class="tv__regeltabell">
-              <thead>
-                <tr><td></td><th scope="col" data-plan="inom">Inom detaljplan</th><th scope="col" data-plan="utanfor">Utanför</th></tr>
-              </thead>
-              <tbody>
-                <tr><th scope="row">Största nya hus</th><td data-plan="inom">30 m²</td><td data-plan="utanfor">50 m²</td></tr>
-                <tr><th scope="row">Utan lov sammanlagt</th><td data-plan="inom">45 m²</td><td data-plan="utanfor">65 m²</td></tr>
-                <tr><th scope="row">Högsta nockhöjd</th><td data-plan="inom">4,0 m</td><td data-plan="utanfor">4,5 m</td></tr>
-                <tr><th scope="row">Till tomtgränsen</th><td data-plan="inom">4,5 m</td><td data-plan="utanfor">4,5 m</td></tr>
-              </tbody>
-            </table>
-            <p class="tv__regler-not">Närmare gränsen går med grannens medgivande. <a href="attefallshus-regler.html">Läs hela guiden</a></p>
-          </aside>
           </form>
 
           <div class="tv__hoger">
@@ -220,6 +204,7 @@ KROPP = f'''    <main id="innehall">
 
             <aside class="tv__svar" id="tv-svar" aria-live="polite">
               <p class="tv__summa" id="svar-summa"></p>
+              <p class="kollen__valt" id="svar-valt" hidden></p>
               <div class="tv__tal">
                 <div class="tv__talkort">
                   <p><strong id="svar-yta">30</strong><small>m²</small></p>
@@ -250,7 +235,6 @@ KROPP = f'''    <main id="innehall">
               <ul class="tv__status" id="svar-status" aria-label="Det här gäller"></ul>
               <a class="tv__ryms" id="svar-ryms" href="#husen"></a>
 
-              <p class="kollen__valt" id="svar-valt" hidden></p>
               <ul class="tv__lista" id="svar-lista"></ul>
 
               <div class="tv__knappar">
@@ -264,6 +248,22 @@ KROPP = f'''    <main id="innehall">
               </p>
             </aside>
           </div>
+
+          <aside class="tv__regler" id="tv-regler" data-vald="inom" aria-label="Reglerna som verktyget räknar med">
+            <p class="tv__regler-rubrik"><span class="tv__regler-ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 19.5h16M6.5 19.5V9.8L12 5l5.5 4.8v9.7M10 19.5v-5h4v5"/></svg></span>Så räknar vi</p>
+            <table class="tv__regeltabell">
+              <thead>
+                <tr><td></td><th scope="col" data-plan="inom">Inom detaljplan</th><th scope="col" data-plan="utanfor">Utanför</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Största nya hus</th><td data-plan="inom">30 m²</td><td data-plan="utanfor">50 m²</td></tr>
+                <tr><th scope="row">Utan lov sammanlagt</th><td data-plan="inom">45 m²</td><td data-plan="utanfor">65 m²</td></tr>
+                <tr><th scope="row">Högsta nockhöjd</th><td data-plan="inom">4,0 m</td><td data-plan="utanfor">4,5 m</td></tr>
+                <tr><th scope="row">Till tomtgränsen</th><td data-plan="inom">4,5 m</td><td data-plan="utanfor">4,5 m</td></tr>
+              </tbody>
+            </table>
+            <p class="tv__regler-not">Närmare gränsen går med grannens medgivande. <a href="attefallshus-regler.html">Läs hela guiden</a></p>
+          </aside>
         </div>
       </section>
 
@@ -276,7 +276,7 @@ KROPP = f'''    <main id="innehall">
           <div class="tvhus-rad" id="hus-lista"></div>
           <p class="kollen-hus__tomt" id="hus-tomt" hidden>
             Inget av våra hus ryms utan bygglov med de här svaren. Med
-            bygglov kan det bli större -
+            bygglov kan det bli större –
             <a href="fritidshus.html">se fritidshusen</a> eller
             <a href="kontakt.html">prata med oss</a>.
           </p>
@@ -289,7 +289,7 @@ KROPP = f'''    <main id="innehall">
             <p class="section-label section-label--accent">Kolla din mark</p>
             <h2 class="markkoll__titel">Vad finns <em>under gräset</em>?</h2>
             <p class="markkoll__text">
-              Det som ligger under marken avgör grunden och markarbetet - och
+              Det som ligger under marken avgör grunden och markarbetet – och
               är det som oftast överraskar. Skriv tomtens adress, så hämtar vi
               vad Sveriges geologiska undersökning vet om marken just där.
             </p>
@@ -411,7 +411,7 @@ KROPP = f'''    <main id="innehall">
               <span class="markkort__kalla">{kalla}</span>
               <strong>{titel}</strong>
               <span class="markkort__text">{text}</span>
-              <span class="markkort__lank" data-lanktext>Öppna kartan</span>
+              <span class="markkort__lank" data-lanktext>{"Gå till Ledningskollen" if kalla == "Ledningskollen" else "Öppna kartan"}</span>
             </a>''' for titel, kalla, lank, ikon, text in MARKKOLL) + '''
           </div>
           <p class="markkoll__not">
@@ -611,14 +611,41 @@ SKRIPT = '''
           h += lin([P(x + 0.24, y + 0.17, 0.1), P(x + 0.88, y + 0.17, 0.1)], '#2f6fae', 1.4);
           return h + '</g>';
         }
+        // På smal skärm blir bilden liten, så brickorna förstoras för att
+        // texten ska gå att läsa (etikettSkala). Då visas bara husets,
+        // höjdens och avståndets brickor – strandskyddet och det som redan
+        // finns står i rutorna under bilden. Brickorna hålls innanför
+        // bilden och flyttas isär om de skulle hamna på varandra.
+        var etikettSkala = 1;
+        function flytta(x, y) {
+          return 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')' + (etikettSkala !== 1 ? ' scale(' + etikettSkala + ')' : '');
+        }
         function etikett(p, text, klass) {
           var b = Math.round(text.length * 6.6 + 34);
-          return '<g class="tv-etikett ' + (klass || '') + '" transform="translate(' + p[0].toFixed(1) + ',' + p[1].toFixed(1) + ')">' +
+          return '<g class="tv-etikett ' + (klass || '') + '" data-x="' + p[0].toFixed(1) + '" data-y="' + p[1].toFixed(1) + '" transform="' + flytta(p[0], p[1]) + '">' +
             '<rect x="' + (-b / 2) + '" y="-13" width="' + b + '" height="26" rx="13"/>' +
             '<circle class="tv-etikett__prick" cx="' + (-b / 2 + 13) + '" cy="0" r="3.6"/>' +
             '<text x="' + (-b / 2 + 22) + '" y="4.3">' + text + '</text></g>';
         }
+        // Ett läge där brickan inte krockar med dem som redan står: där den
+        // hör hemma, annars strax under eller över den den krockar med.
+        function ledig(x, y, hw, hh, lagda) {
+          function krock(ny) {
+            return lagda.some(function (b) { return Math.abs(b.x - x) < b.hw + hw + 2 && Math.abs(b.y - ny) < b.hh + hh + 2; });
+          }
+          if (!krock(y)) return y;
+          var bast = y, avst = Infinity;
+          lagda.forEach(function (b) {
+            [b.y + b.hh + hh + 4, b.y - b.hh - hh - 4].forEach(function (ny) {
+              if (ny < hh + 4 || ny > 396 - hh || krock(ny) || Math.abs(ny - y) >= avst) return;
+              avst = Math.abs(ny - y);
+              bast = ny;
+            });
+          });
+          return bast;
+        }
         function passa() {
+          var lagda = [];
           Array.prototype.forEach.call(svg.querySelectorAll('.tv-etikett'), function (e) {
             var t = e.querySelector('text'), r = e.querySelector('rect'), c = e.querySelector('circle');
             if (!t || !t.getComputedTextLength) return;
@@ -629,6 +656,12 @@ SKRIPT = '''
             r.setAttribute('width', w.toFixed(1));
             c.setAttribute('cx', (-w / 2 + 13).toFixed(1));
             t.setAttribute('x', (-w / 2 + 22).toFixed(1));
+            var x = parseFloat(e.getAttribute('data-x')), y = parseFloat(e.getAttribute('data-y'));
+            var hw = w / 2 * etikettSkala, hh = 13 * etikettSkala;
+            var nx = Math.max(6 + hw, Math.min(594 - hw, x)), ny = ledig(nx, y, hw, hh, lagda);
+            lagda.push({ x: nx, y: ny, hw: hw, hh: hh });
+            var tf = flytta(nx, ny);
+            if (e.getAttribute('transform') !== tf) e.setAttribute('transform', tf);
           });
         }
         var GRAS = { t: 'url(#tv-gras)', x: '#5c7a48', y: '#6f8f58' };
@@ -644,18 +677,20 @@ SKRIPT = '''
         var VIRKE = { t: '#e8c48f', x: '#b7884d', y: '#cfa064' };
         var komma = function (v, d) { return v.toFixed(d).replace('.', ','); };
 
-        function rita(t) {
+        var PX0 = -5.5, PX1 = 5.5, PY0 = -4, PY1 = 4, IN = 0.3;
+        // Tomten ritas i lager som byggs om bara när det de visar har
+        // ändrats: marken och omgivningen när planen eller vattnet byts,
+        // förrådet, huset och måtten medan de glider mot nya värden.
+        function ritaMark(ute, vatten) {
           var h = '';
-          var PX0 = -5.5, PX1 = 5.5, PY0 = -4, PY1 = 4, IN = 0.3;
-          var ute = t.plan === 'utanfor';
           h += '<ellipse cx="' + OX + '" cy="' + (OY + 36) + '" rx="262" ry="126" fill="url(#tv-skugga)"/>';
           h += box(-8, -6.5, -0.35, 16, 13, 0.35, ute ? ANG : MARK);
           // Vattnet bakom tomten.
-          if (t.vatten !== 'nej') {
+          if (vatten !== 'nej') {
             h += poly([P(-8, -6.5, 0.01), P(8, -6.5, 0.01), P(8, -5.1, 0.01), P(-8, -5.1, 0.01)],
-              t.vatten === 'ja' ? 'url(#tv-vatten)' : 'rgba(91,143,191,.16)',
-              t.vatten === 'ja' ? '' : ' stroke="#5b8fbf" stroke-width="1.4" stroke-dasharray="5 5"');
-            if (t.vatten === 'ja') {
+              vatten === 'ja' ? 'url(#tv-vatten)' : 'rgba(91,143,191,.16)',
+              vatten === 'ja' ? '' : ' stroke="#5b8fbf" stroke-width="1.4" stroke-dasharray="5 5"');
+            if (vatten === 'ja') {
               h += lin([P(-8, -5.1, 0.02), P(8, -5.1, 0.02)], 'rgba(255,255,255,.75)', 2);
               for (var w = -7; w < 8; w += 2.4) h += lin([P(w, -5.85, 0.02), P(w + 1.0, -5.85, 0.02)], 'rgba(255,255,255,.7)', 1.5, ' class="tv-vag"');
               for (var w2 = -6; w2 < 8; w2 += 2.4) h += lin([P(w2, -6.25, 0.02), P(w2 + 0.8, -6.25, 0.02)], 'rgba(255,255,255,.5)', 1.3, ' class="tv-vag tv-vag--2"');
@@ -695,7 +730,7 @@ SKRIPT = '''
           for (var st = PY0; st < PY1; st += 1.6) {
             h += poly([P(PX0, st, 0.121), P(PX1, st, 0.121), P(PX1, st + 0.8, 0.121), P(PX0, st + 0.8, 0.121)], 'rgba(255,255,255,.07)');
           }
-          if (t.vatten === 'ja') h += poly([P(PX0, PY0, 0.13), P(PX1, PY0, 0.13), P(PX1, PY1, 0.13), P(PX0, PY1, 0.13)], 'rgba(91,143,191,.12)');
+          if (vatten === 'ja') h += poly([P(PX0, PY0, 0.13), P(PX1, PY0, 0.13), P(PX1, PY1, 0.13), P(PX0, PY1, 0.13)], 'rgba(91,143,191,.12)');
           h += lin([P(PX0 + IN, PY0 + IN, 0.14), P(PX1 - IN, PY0 + IN, 0.14), P(PX1 - IN, PY1 - IN, 0.14), P(PX0 + IN, PY1 - IN, 0.14), P(PX0 + IN, PY0 + IN, 0.14)],
             '#f0b56e', 2, ' stroke-dasharray="7 5" class="tv-grans"');
           [[PX0 + IN, PY0 + IN], [PX1 - IN, PY0 + IN], [PX1 - IN, PY1 - IN], [PX0 + IN, PY1 - IN]].forEach(function (k) {
@@ -719,9 +754,13 @@ SKRIPT = '''
           }
           // Lövträdet i trädgården bakom, till höger.
           h += lovtrad(4.75, -3.15, 2.1);
+          return h;
+        }
+        function ritaFanns(befintligt) {
+          var h = '';
           // Befintlig byggnad i hörnet bakom (1 ruta = 2 m).
-          if (t.befintligt > 0.5) {
-            var bb = Math.sqrt(t.befintligt * 1.3) / 2, bd = t.befintligt / 4 / bb;
+          if (befintligt > 0.5) {
+            var bb = Math.sqrt(befintligt * 1.3) / 2, bd = befintligt / 4 / bb;
             var bx0 = PX0 + 0.8, by0 = PY0 + 0.7;
             h += poly([P(bx0 + 0.2, by0 + 0.2, 0.13), P(bx0 + bb + 0.5, by0 + 0.2, 0.13), P(bx0 + bb + 0.5, by0 + bd + 0.5, 0.13), P(bx0 + 0.2, by0 + bd + 0.5, 0.13)], 'rgba(27,25,21,.16)');
             h += box(bx0, by0, 0.12, bb, bd, 1.1, BOD);
@@ -729,8 +768,9 @@ SKRIPT = '''
             h += box(bx0 - 0.1, by0 - 0.1, 1.22, bb + 0.2, bd + 0.2, 0.1, { t: '#6b4f36', x: '#4a3625', y: '#5a4230' });
             if (bb > 0.9) h += poly([P(bx0 + bb * 0.4, by0 + bd, 0.14), P(bx0 + bb * 0.4 + 0.45, by0 + bd, 0.14), P(bx0 + bb * 0.4 + 0.45, by0 + bd, 0.95), P(bx0 + bb * 0.4, by0 + bd, 0.95)], '#8a6a4b', ' stroke="#1b1915" stroke-width="1"');
           }
-          // Vimpeln bakom huset, till höger om förrådet.
-          h += vimpel(2.3, -3.35, 3.55);
+          return h;
+        }
+        function husGeo(t) {
           // Det nya huset: yta i m2, 1,6:1, nock efter planen.
           var yta = t.yta > 0.5 ? t.yta : t.perHus;
           var W = Math.sqrt(yta * 1.6) / 2, D = yta / 4 / W;
@@ -738,12 +778,14 @@ SKRIPT = '''
           var hx1 = PX1 - IN - dist, hx0 = hx1 - W;
           var hy0 = -D / 2 + 1.1, hy1 = hy0 + D;
           var ze = 1.3, zr = t.hojd / 2 + 0.12, spok = t.yta <= 0.5;
+          return { W: W, D: D, hx0: hx0, hx1: hx1, hy0: hy0, hy1: hy1, ze: ze, zr: zr, spok: spok };
+        }
+        function ritaHus(t, g) {
+          var h = '', W = g.W, D = g.D, hx0 = g.hx0, hx1 = g.hx1, hy0 = g.hy0, hy1 = g.hy1, ze = g.ze, zr = g.zr, spok = g.spok;
           h += poly([P(hx0 + 0.25, hy0 + 0.25, 0.13), P(hx1 + 0.6, hy0 + 0.25, 0.13), P(hx1 + 0.6, hy1 + 0.6, 0.13), P(hx0 + 0.25, hy1 + 0.6, 0.13)], spok ? 'none' : 'rgba(27,25,21,.2)');
-          var ytaEtikett = '';
           if (spok) {
             h += '<g class="tv-spok">' + hus(hx0, hy0, hx1, hy1, ze + 0.12, zr, { t: 'rgba(224,118,74,.08)', x: 'rgba(224,118,74,.12)', y: 'rgba(224,118,74,.1)' },
               { t: 'rgba(224,118,74,.1)', x: 'rgba(224,118,74,.14)' }, ' stroke="#e0764a" stroke-width="1.4" stroke-dasharray="5 4"') + '</g>';
-            ytaEtikett = etikett(P((hx0 + hx1) / 2, (hy0 + hy1) / 2, zr + 0.9), 'Kräver bygglov', 'tv-etikett--nej');
           } else {
             h += box(hx0 - 0.15, hy0 - 0.15, 0.12, W + 0.3, D + 0.3, 0.12, { t: '#dcd6cb', x: '#a9a297', y: '#bfb8ad' });
             h += '<g class="tv-hus">' + hus(hx0, hy0, hx1, hy1, ze + 0.12, zr + 0.12, FASAD, TAK);
@@ -768,8 +810,11 @@ SKRIPT = '''
             // Altanen framför.
             h += box(hx0 + 0.3, hy1, 0.12, Math.min(W - 0.6, 2.4), 0.55, 0.1, VIRKE);
             h += manniska(P(hx0 + 0.72, hy1 + 0.3, 0.22), '#f0b56e', '#2f3a48', '#3a2c22', 'vinkar');
-            ytaEtikett = etikett(P((hx0 + hx1) / 2, (hy0 + hy1) / 2, zr + 1.0), komma(t.yta, 0) + ' m²', 'tv-etikett--hus');
           }
+          return h;
+        }
+        function ritaFram(ute) {
+          var h = '';
           // Bostadshuset framme till vänster, gången ut till gatan och buskar.
           h += poly([P(-3.55, 3.3, 0.125), P(-3.1, 3.3, 0.125), P(-3.1, PY1, 0.125), P(-3.55, PY1, 0.125)], '#e6dfcf');
           h += villa(-5.0, 0.9, -1.9, 3.3, 1.4, 2.45, BOSTAD, true);
@@ -787,6 +832,10 @@ SKRIPT = '''
               '<rect x="' + (lt[0] - 5).toFixed(1) + '" y="' + (lt[1] - 5).toFixed(1) + '" width="10" height="8" rx="2.5" fill="#fff1d2" stroke="#1b1915" stroke-width="1.2"/>';
             h += gran(-7.4, 4.0, 2.0);
           }
+          return h;
+        }
+        function ritaMatt(t, g) {
+          var h = '', hx1 = g.hx1, hy0 = g.hy0, hy1 = g.hy1, zr = g.zr;
           // Nockhöjden vid gaveln.
           var hp0 = P(hx1 + 0.45, hy0 - 0.05, 0.12), hp1 = P(hx1 + 0.45, hy0 - 0.05, zr + 0.12);
           h += lin([hp0, hp1], '#8f5424', 1.5) + lin([[hp0[0] - 5, hp0[1]], [hp0[0] + 5, hp0[1]]], '#8f5424', 1.5) + lin([[hp1[0] - 5, hp1[1]], [hp1[0] + 5, hp1[1]]], '#8f5424', 1.5);
@@ -794,28 +843,57 @@ SKRIPT = '''
           var farg = t.grans === 'nara' ? '#e0764a' : (t.grans === 'medgivande' ? '#d9974f' : '#2f8a52');
           var dy = hy1 + 0.55, a0 = P(hx1, dy, 0.16), a1 = P(PX1 - IN, dy, 0.16);
           h += lin([a0, a1], farg, 2.2) + lin([P(hx1, dy - 0.2, 0.16), P(hx1, dy + 0.2, 0.16)], farg, 2.2) + lin([P(PX1 - IN, dy - 0.2, 0.16), P(PX1 - IN, dy + 0.2, 0.16)], farg, 2.2);
+          return h;
+        }
+        // Brickorna i eget lager överst.
+        function etiketter(t, g) {
+          var hx0 = g.hx0, hx1 = g.hx1, hy0 = g.hy0, hy1 = g.hy1, zr = g.zr;
+          var hp0 = P(hx1 + 0.45, hy0 - 0.05, 0.12), hp1 = P(hx1 + 0.45, hy0 - 0.05, zr + 0.12);
+          var dy = hy1 + 0.55, a0 = P(hx1, dy, 0.16), a1 = P(PX1 - IN, dy, 0.16);
           var avst = t.grans === 'langt' ? '4,5 m' : (t.grans === 'medgivande' ? 'Närmare · ja från grannen' : 'Närmare än 4,5 m');
-          // Brickorna i eget lager överst.
-          var e = ytaEtikett;
+          var e = g.spok ? etikett(P((hx0 + hx1) / 2, (hy0 + hy1) / 2, zr + 0.9), 'Kräver bygglov', 'tv-etikett--nej')
+            : etikett(P((hx0 + hx1) / 2, (hy0 + hy1) / 2, zr + 1.0), komma(t.yta, 0) + ' m²', 'tv-etikett--hus');
           e += etikett([hp1[0] + 32, (hp0[1] + hp1[1]) / 2], t.hojdText + ' m', 'tv-etikett--matt');
           e += etikett([(a0[0] + a1[0]) / 2 + 8, (a0[1] + a1[1]) / 2 + 22], avst, 'tv-etikett--' + (t.grans === 'nara' ? 'nej' : (t.grans === 'medgivande' ? 'villkor' : 'ja')));
+          // På smal skärm står de här två bara i rutorna under bilden.
+          if (etikettSkala > 1) return e;
           if (t.befintligt > 0.5) {
             var bb2 = Math.sqrt(t.befintligt * 1.3) / 2, bd2 = t.befintligt / 4 / bb2;
             e += etikett(P(PX0 + 0.8 + bb2 / 2, PY0 + 0.7 + bd2 / 2, 2.1), Math.round(t.befintligt) + ' m² finns', 'tv-etikett--ljus');
           }
           if (t.vatten === 'ja') e += etikett(P(0.5, -6.0, 0.3), 'Strandskydd · dispens krävs', 'tv-etikett--vatten');
           else if (t.vatten === 'vetej') e += etikett(P(0.5, -6.0, 0.3), 'Strandskydd? Kolla med kommunen', 'tv-etikett--vatten');
+          return e;
+        }
+        function lagret(namn, nyckel, bygg) {
+          if (lager.nycklar[namn] === nyckel) return;
+          lager.nycklar[namn] = nyckel;
+          lager[namn].innerHTML = bygg();
+        }
+        function rita(t) {
+          var ute = t.plan === 'utanfor';
           if (!lager) {
-            svg.innerHTML = DEFS + '<g class="tv-varld"></g><g class="tv-liv"></g><g class="tv-brickor"></g>';
-            lager = { varld: svg.querySelector('.tv-varld'), liv: svg.querySelector('.tv-liv'), brickor: svg.querySelector('.tv-brickor'), nyckel: '' };
+            svg.innerHTML = DEFS + '<g class="tv-varld"><g></g><g></g><g></g><g></g><g></g><g></g></g><g class="tv-liv"></g><g class="tv-brickor"></g>';
+            var v = svg.querySelector('.tv-varld').children;
+            lager = { mark: v[0], fanns: v[1], vimpel: v[2], hus: v[3], fram: v[4], matt: v[5],
+              liv: svg.querySelector('.tv-liv'), brickor: svg.querySelector('.tv-brickor'), nycklar: {} };
           }
-          lager.varld.innerHTML = h;
-          lager.brickor.innerHTML = e;
-          if (lager.nyckel !== (ute ? 'ute' : 'inne')) {
-            lager.nyckel = ute ? 'ute' : 'inne';
-            lager.liv.innerHTML = livet(ute);
+          var g = husGeo(t);
+          var husNyckel = [t.yta.toFixed(1), t.perHus, t.dist.toFixed(2), t.hojd.toFixed(2), t.bo].join('|');
+          lagret('mark', (ute ? 'ute|' : 'inne|') + t.vatten, function () { return ritaMark(ute, t.vatten); });
+          lagret('fanns', t.befintligt.toFixed(1), function () { return ritaFanns(t.befintligt); });
+          // Vimpeln bakom huset, till höger om förrådet.
+          lagret('vimpel', '1', function () { return vimpel(2.3, -3.35, 3.55); });
+          lagret('hus', husNyckel, function () { return ritaHus(t, g); });
+          lagret('fram', ute ? 'ute' : 'inne', function () { return ritaFram(ute); });
+          lagret('matt', husNyckel + '|' + t.grans, function () { return ritaMatt(t, g); });
+          lagret('liv', ute ? 'ute' : 'inne', function () { return livet(ute); });
+          var e = etiketter(t, g);
+          if (lager.nycklar.brickor !== e) {
+            lager.nycklar.brickor = e;
+            lager.brickor.innerHTML = e;
+            passa();
           }
-          passa();
         }
         var lager = null;
 
@@ -928,6 +1006,20 @@ SKRIPT = '''
           if (!nu || lugn) { nu = { yta: mal.yta, dist: mal.dist, befintligt: mal.befintligt, hojdTal: hojdTal }; steg(); return; }
           if (!raf) raf = requestAnimationFrame(steg);
         };
+        // Brickornas storlek följer bildens verkliga skala – på mobilen är
+        // det höjden som tar slut först – och de mäts om när typsnittet har
+        // laddats.
+        function nyBredd() {
+          var b = svg.getBoundingClientRect(), s = Math.min(b.width / 600, b.height / 400);
+          var k = s > 0 ? Math.round(Math.max(1, Math.min(1.5, 0.7 / s)) * 20) / 20 : 1;
+          if (k === etikettSkala) return;
+          etikettSkala = k;
+          if (lager) lager.nycklar.brickor = '';
+          if (mal && !raf) steg();
+        }
+        if (window.ResizeObserver) new ResizeObserver(nyBredd).observe(svg);
+        else window.addEventListener('resize', nyBredd);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (lager) passa(); });
       })();
 
       (function () {
@@ -947,11 +1039,19 @@ SKRIPT = '''
           return '<li class="kollen__punkt kollen__punkt--' + typ + '">' + text + '</li>';
         }
 
-        // Husen ur ritningarna R1-R5 finns i 3D - dit går kortet direkt.
+        // Husbilderna finns också 800 px breda, i samma format (ingen
+        // beskärning). Kortet tar den lilla och den stora bara vid behov.
+        function bild(m, sizes) {
+          if (!/^hus-r\\d\\.webp$/.test(m.bild)) return 'src="images/' + m.bild + '"';
+          var liten = 'images/' + m.bild.replace('.webp', '-800.webp');
+          return 'src="' + liten + '"' + (sizes ? ' srcset="' + liten + ' 800w, images/' + m.bild + ' 1600w" sizes="' + sizes + '"' : '');
+        }
+
+        // Husen ur ritningarna R1-R5 finns i 3D – dit går kortet direkt.
         function husKort(m, i, ok) {
           var med3d = /^hus-r\\d\\.webp$/.test(m.bild);
           return '<a class="tvhus' + (ok ? '' : ' tvhus--lov') + '" style="--i:' + i + '" href="huskort.html?typ=' + m.typ + '&amp;modell=' + m.nr + (med3d ? '#i-3d' : '') + '">' +
-            '<span class="tvhus__bild"><img src="images/' + m.bild + '" alt="" loading="lazy" decoding="async">' +
+            '<span class="tvhus__bild"><img ' + bild(m, '(max-width: 700px) 92vw, 320px') + ' alt="" loading="lazy" decoding="async">' +
             '<span class="tvhus__ryms">' + (ok ? 'Ryms' : 'Kräver bygglov') + '</span>' + (med3d ? '<span class="tvhus__3d">Se i 3D</span>' : '') + '</span>' +
             '<span class="tvhus__kropp"><span class="tvhus__typ">' + m.kategori + '</span>' +
             '<strong>' + m.namn + '</strong>' +
@@ -998,66 +1098,77 @@ SKRIPT = '''
           document.getElementById('yta-fanns').style.width = (fanns / totalt * 100).toFixed(2) + '%';
           document.getElementById('yta-nytt').style.width = (yta / totalt * 100).toFixed(2) + '%';
           document.getElementById('yta-kvar').style.width = (rest / totalt * 100).toFixed(2) + '%';
-          document.getElementById('svar-ytinfo').innerHTML =
+          satt(document.getElementById('svar-ytinfo'),
             '<span><i class="tv__ytprick tv__ytprick--fanns"></i>Finns ' + befintligt + '</span>' +
             '<span><i class="tv__ytprick tv__ytprick--nytt"></i>Nytt ' + yta + '</span>' +
             '<span><i class="tv__ytprick tv__ytprick--kvar"></i>Kvar ' + rest + '</span>' +
-            '<em>av ' + totalt + ' m² utan lov</em>';
+            '<em>av ' + totalt + ' m² utan lov</em>');
           // Huset i höjdrutan växer till nocken (4,5 m är fullt).
           document.getElementById('svar-nock').style.setProperty('--nock', (parseFloat(hojd.replace(',', '.')) / 4.5).toFixed(3));
           document.getElementById('tv-regler').setAttribute('data-vald', plan === 'utanfor' ? 'utanfor' : 'inom');
           document.getElementById('svar-hojdinfo').textContent = plan === 'utanfor' ? 'Utanför detaljplan'
             : (plan === 'vetej' ? 'Räknat som inom detaljplan' : 'Inom detaljplan');
 
+          // Det som kräver lov eller dispens oavsett storlek, och om huset
+          // man kom från ryms. Första punkten säger inte "utan lov" när
+          // något längre ned säger emot.
+          var grans = vald('grans'), vatten = vald('vatten');
+          var villkor = grans === 'nara' || vatten === 'ja';
+          var minsta = Math.min.apply(null, MODELLER.map(function (m) { return m.yta; }));
+          var franOk = !fran || (yta > 0 && fran <= yta);
           var p = [];
-          var lov = false;
           if (yta <= 0) {
-            lov = true;
-            p.push(punkt('lov', 'Tomten har redan ' + befintligt + ' m² av ' + totalt + ' m² som får byggas utan lov. Ett hus till kräver bygglov.'));
+            p.push(punkt('lov', 'Tomten har redan ' + befintligt + ' m² – ' +
+              (befintligt > totalt ? 'mer än de ' + totalt + ' m² som får byggas utan lov.' : 'hela den yta som får byggas utan lov.') +
+              ' Ett hus till kräver bygglov.'));
+          } else if (yta < minsta) {
+            p.push(punkt('info', 'Det finns ' + yta + ' m² kvar utan lov – för lite för något av våra hus.'));
+          } else if (villkor) {
+            p.push(punkt('info', 'Storleken, upp till ' + yta + ' m², klarar sig utan lov – men se nedan.'));
           } else {
             p.push(punkt('ok', 'Ett hus på upp till ' + yta + ' m² kräver varken bygglov eller anmälan för själva byggnaden.'));
           }
           if (plan === 'vetej') {
             p.push(punkt('info', 'Vi har räknat med inom detaljplan, som är strängast. Utanför kan det bli upp till 50 m².'));
           }
-          var grans = vald('grans');
           if (grans === 'nara') {
-            lov = true;
             p.push(punkt('lov', 'Närmare än 4,5 m från tomtgränsen utan grannens medgivande kräver bygglov.'));
           } else if (grans === 'medgivande') {
             p.push(punkt('info', 'Be om grannens medgivande skriftligt och spara det.'));
           }
           if (vald('bo') === 'ja') {
-            p.push(punkt('anmalan', 'Kök, badrum och eldstad anmäls till kommunen - för installationerna, inte för huset.'));
+            p.push(punkt('anmalan', 'Kök, badrum och eldstad anmäls till kommunen – för installationerna, inte för huset.'));
           }
-          var vatten = vald('vatten');
           if (vatten === 'ja') {
             p.push(punkt('lov', 'Inom strandskydd krävs dispens, även för ett annars lovbefriat hus.'));
           } else if (vatten === 'vetej') {
-            p.push(punkt('info', 'Kolla strandskyddet med kommunen. Det gäller oftast 100 m från strand.'));
+            p.push(punkt('info', 'Kolla strandskyddet med kommunen. Det gäller oftast 100 m från stranden.'));
           }
-          document.getElementById('svar-lista').innerHTML = p.join('');
+          satt(document.getElementById('svar-lista'), p.join(''));
           var valt = document.getElementById('svar-valt');
           if (fran) {
-            var ok = yta > 0 && fran <= yta;
             valt.hidden = false;
-            valt.className = 'kollen__valt kollen__valt--' + (ok ? 'ja' : 'nej');
-            valt.textContent = franNamn + ' (' + fran + ' m²) ' +
-              (ok ? 'ryms utan bygglov.' : 'ryms inte utan bygglov - det behöver sökas.');
+            valt.className = 'kollen__valt kollen__valt--' + (franOk ? 'ja' : 'nej');
+            valt.textContent = franNamn + ' (' + fran + ' m²) ' + (!franOk ? 'ryms inte utan bygglov – det behöver sökas.'
+              : (villkor ? 'ryms till ytan – men se nedan.' : 'ryms utan bygglov.'));
           }
-          document.getElementById('svar-summa').textContent = yta <= 0
-            ? 'Ett hus till kräver bygglov här.'
-            : (lov ? 'Det går, men något av svaren kräver lov eller dispens.'
-                   : 'Det här ser ut att gå utan bygglov.');
-          document.getElementById('tv-svar').setAttribute('data-status', yta <= 0 ? 'lov' : (lov ? 'villkor' : 'ok'));
+          // Det strängaste svaret styr. Kräver något svar lov eller dispens
+          // oavsett storlek läggs det till i stället för att ta över.
+          var ocksa = villkor ? ', och något av svaren kräver lov eller dispens.' : '.';
+          var summa = 'Det här ser ut att gå utan bygglov.', status = 'ok';
+          if (yta <= 0) { summa = 'Ett hus till kräver bygglov här.'; status = 'lov'; }
+          else if (yta < minsta) { summa = 'Bara ' + yta + ' m² kvar utan lov – våra hus kräver bygglov här' + ocksa; status = 'villkor'; }
+          else if (!franOk) { summa = franNamn + ' kräver bygglov här' + (villkor ? ocksa : ' – ett hus på upp till ' + yta + ' m² går utan.'); status = 'villkor'; }
+          else if (villkor) { summa = 'Det går, men något av svaren kräver lov eller dispens.'; status = 'villkor'; }
+          document.getElementById('svar-summa').textContent = summa;
+          document.getElementById('tv-svar').setAttribute('data-status', status);
           if (window.idealhusTomt) window.idealhusTomt({ plan: plan, yta: yta, perHus: perHus, hojd: hojd,
             befintligt: befintligt, grans: grans, bo: vald('bo'), vatten: vatten });
 
           var ryms = MODELLER.filter(function (m) { return yta > 0 && m.yta <= yta; })
             .sort(function (a, b) { return b.yta - a.yta; });
-          document.getElementById('hus-rubrik').textContent = yta > 0
-            ? (ryms.length ? ryms.length + (ryms.length === 1 ? ' modell' : ' modeller') : 'Inga modeller') +
-              ' upp till ' + yta + ' m²'
+          document.getElementById('hus-rubrik').textContent = ryms.length
+            ? ryms.length + (ryms.length === 1 ? ' modell' : ' modeller') + ' upp till ' + yta + ' m²'
             : 'Hus som kräver bygglov';
           // Husen som inte ryms står efter, nedtonade, med vad som krävs.
           var inte = MODELLER.filter(function (m) { return ryms.indexOf(m) === -1; })
@@ -1069,7 +1180,9 @@ SKRIPT = '''
           // Fyra rutor med det som gäller, i samma ordning som frågorna.
           var bo = vald('bo');
           var rutor = [
-            ['Bygglov', yta <= 0 || grans === 'nara' ? ['nej', 'Krävs'] : ['ok', 'Behövs inte'], 'M6.5 3.5h8L18.5 7.5v13h-12zM9.5 12h6M9.5 15.5h4'],
+            ['Bygglov', yta <= 0 || grans === 'nara' ? ['nej', 'Krävs']
+              : (!franOk ? ['villkor', 'Krävs för ' + (franModell ? franModell.namn : fran + ' m²')]
+                : (yta < minsta ? ['villkor', 'Krävs för våra hus'] : ['ok', 'Behövs inte'])), 'M6.5 3.5h8L18.5 7.5v13h-12zM9.5 12h6M9.5 15.5h4'],
             ['Anmälan', bo === 'ja' ? ['villkor', 'För kök, bad, eldstad'] : ['ok', 'Behövs inte'], 'M4 7h16v11H4zM4.5 7.5l7.5 6 7.5-6'],
             ['Grannen', grans === 'langt' ? ['ok', 'Behövs inte'] : (grans === 'medgivande' ? ['villkor', 'Skriftligt medgivande'] : ['nej', 'Medgivande saknas']), 'M3 20v-8l4.5-3.5L12 12v8M12 20v-5.5l4.5-3.5 4.5 3.5V20M2 20h20'],
             ['Strandskydd', vatten === 'ja' ? ['nej', 'Dispens krävs'] : (vatten === 'vetej' ? ['villkor', 'Kolla med kommunen'] : ['ok', 'Inte aktuellt']), 'M2.5 14c2.4 0 2.4-2 4.8-2s2.4 2 4.7 2 2.4-2 4.7-2 2.4 2 4.8 2M2.5 18.5c2.4 0 2.4-2 4.8-2s2.4 2 4.7 2 2.4-2 4.7-2 2.4 2 4.8 2M12 3.5v5M9.5 6l2.5-2.5L14.5 6']
@@ -1083,7 +1196,7 @@ SKRIPT = '''
           // Vilka av våra hus som ryms, med en länk ned till korten.
           var rymsLank = document.getElementById('svar-ryms');
           satt(rymsLank, '<span class="tv__ryms-bilder">' + (ryms.length ? ryms : MODELLER).slice(0, 3).map(function (m) {
-              return '<img src="images/' + m.bild + '" alt="" loading="lazy" decoding="async">';
+              return '<img ' + bild(m) + ' alt="" loading="lazy" decoding="async">';
             }).join('') + '</span>' +
             '<span class="tv__ryms-text"><strong>' + (ryms.length
               ? (ryms.length === MODELLER.length ? 'Alla våra hus ryms' : ryms.length + ' av våra ' + MODELLER.length + ' hus ryms')
@@ -1103,6 +1216,9 @@ SKRIPT = '''
         if (bef >= 0 && bef <= 65) reglage.value = bef;
         var fran = parseInt(adress.get('yta'), 10);
         var franNamn = (adress.get('namn') || 'Huset du tittade på').slice(0, 60);
+        var franModell = MODELLER.filter(function (m) { return franNamn.toLowerCase().indexOf(m.namn.toLowerCase()) !== -1; })
+          .sort(function (a, b) { return b.namn.length - a.namn.length; })[0];
+        if (franModell) franNamn = franModell.namn;
 
         function skrivAdress() {
           var q = new URLSearchParams();
@@ -1126,8 +1242,12 @@ SKRIPT = '''
         reglage.addEventListener('change', skrivAdress);
         // PDF:en visar länken till svaret, så adressen ska vara aktuell.
         window.addEventListener('beforeprint', skrivAdress);
-        form.addEventListener('input', rakna);
-        form.addEventListener('change', rakna);
+        var vantar = 0;
+        function planera() {
+          if (!vantar) vantar = requestAnimationFrame(function () { vantar = 0; rakna(); });
+        }
+        form.addEventListener('input', planera);
+        form.addEventListener('change', planera);
         form.addEventListener('submit', function (e) { e.preventDefault(); });
         rakna();
       })();
@@ -1152,6 +1272,15 @@ SKRIPT = '''
         function klamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
         function mjuk(t) { t = klamp(t, 0, 1); return 1 - Math.pow(1 - t, 3); }
         function fas(t, fran, langd) { return mjuk((t - fran) / langd); }
+        // Livet i scenen (vaggning, vind, rök och regn) pågår en stund efter
+        // bygget och saktar sedan mjukt in tills allt står still.
+        var VILA = 5.5, LANGD = 3, LIV_SLUT = VILA + LANGD;
+        function livTid(t) {
+          if (t <= VILA) return t;
+          var u = Math.min(1, (t - VILA) / LANGD);
+          return VILA + LANGD * (u - u * u * u + u * u * u * u / 2);
+        }
+        function svaj(t) { var u = klamp((t - VILA) / LANGD, 0, 1); return 1 - u * u * (3 - 2 * u); }
         function ton(c, n, a) {
           n = enhet(n);
           var d = n[0] * LJ[0] + n[1] * LJ[1] + n[2] * LJ[2];
@@ -1404,7 +1533,7 @@ SKRIPT = '''
 
           // Gränsen ritas fram, stolparna kommer upp.
           var kG = fas(t, 0.2, 1.4);
-          if (kG > 0) h += linje(K, delAv([[-G, -GY, 0.01], [G, -GY, 0.01], [G, GY, 0.01], [-G, GY, 0.01], [-G, -GY, 0.01]], kG), '#e8a456', 2.2, ' stroke-dasharray="8 6"' + (lugn ? '' : ' class="vf3d__grans"'));
+          if (kG > 0) h += linje(K, delAv([[-G, -GY, 0.01], [G, -GY, 0.01], [G, GY, 0.01], [-G, GY, 0.01], [-G, -GY, 0.01]], kG), '#e8a456', 2.2, ' stroke-dasharray="8 6"');
           // Stigen från dörren.
           [-2.55, -3.3, -4.05, -4.8, -5.55].forEach(function (px, i) {
             var g = fas(t, 1.6 + i * 0.06, 0.4);
@@ -1881,10 +2010,11 @@ SKRIPT = '''
           }
           lasBrickor();
           var skala = 1, vrid = 0, drar = false, dragX = 0, dragV = 0, isar = 0, isarMal = 0;
-          var t0 = null, synlig = false, raf = 0, senast = 0, borjat = false;
+          var t0 = null, synlig = false, raf = 0, senast = 0, borjat = false, stilla = false;
           function matSkala() { skala = (svg.getBoundingClientRect().width || vb.width) / vb.width; }
-          function rita(t, tid) {
-            var vinkel = klamp(conf.bas + vrid + (lugn ? 0 : Math.sin(tid * Math.PI * 2 / 18) * 9 * GRAD), conf.min, conf.max);
+          function rita(t) {
+            var tid = lugn ? 0 : livTid(t);
+            var vinkel = klamp(conf.bas + vrid + (lugn ? 0 : Math.sin(tid * Math.PI * 2 / 18) * 9 * GRAD * svaj(t)), conf.min, conf.max);
             var K = new Kamera(vinkel, conf.S, conf.cx, conf.cy);
             isar += (isarMal - isar) * 0.08;
             var r = conf.scen(K, t, tid, isar);
@@ -1910,17 +2040,21 @@ SKRIPT = '''
               if (ska !== b.in) { b.in = ska; b.el.classList.toggle('vf3d__chip--in', ska); }
             });
           }
+          // Bygget och livet pågår en stund. Sedan står scenen still och
+          // ritas bara om när någon vrider den eller den byter storlek.
           function ram(nu) {
             raf = 0;
             if (t0 === null) t0 = nu;
             var t = (nu - t0) / 1000;
-            if (nu - senast > 30 || drar) { rita(t, t); senast = nu; }
-            if (synlig && !document.hidden) raf = requestAnimationFrame(ram);
+            var ror = t < LIV_SLUT || drar || Math.abs(isarMal - isar) > 0.002;
+            if (ror ? (nu - senast > 30 || drar) : !stilla) { rita(t); senast = nu; stilla = !ror; }
+            if (ror && synlig && !document.hidden) raf = requestAnimationFrame(ram);
           }
           function kor() { if (!raf && synlig) raf = requestAnimationFrame(ram); }
+          function vack() { stilla = false; kor(); }
           matSkala();
           if (lugn) {
-            rita(99, 0);
+            rita(99);
             el.classList.add('vf3d--klar');
           } else {
             el.classList.add('vf3d--rorlig');
@@ -1932,8 +2066,9 @@ SKRIPT = '''
             if (io) io.observe(el); else { synlig = true; borjat = true; el.classList.add('vf3d--klar'); kor(); }
             document.addEventListener('visibilitychange', kor);
           }
-          if (window.ResizeObserver) new ResizeObserver(function () { matSkala(); if (lugn) rita(99, 0); }).observe(svg);
-          else window.addEventListener('resize', matSkala);
+          var omRita = function () { matSkala(); if (lugn) rita(99); else vack(); };
+          if (window.ResizeObserver) new ResizeObserver(omRita).observe(svg);
+          else window.addEventListener('resize', omRita);
 
           // Vrid med musen eller fingret (lodrätt drag skrollar sidan).
           el.addEventListener('pointerdown', function (e) {
@@ -1941,17 +2076,18 @@ SKRIPT = '''
             drar = true; dragX = e.clientX; dragV = vrid;
             el.classList.add('vf3d--drar', 'vf3d--provat');
             try { el.setPointerCapture(e.pointerId); } catch (x) {}
+            kor();
           });
           el.addEventListener('pointermove', function (e) {
             if (!drar) return;
             vrid = klamp(dragV + (e.clientX - dragX) * 0.007, conf.min - conf.bas, conf.max - conf.bas);
-            if (lugn) rita(99, 0);
+            if (lugn) rita(99);
           });
           var slapp = function () { drar = false; el.classList.remove('vf3d--drar'); };
           el.addEventListener('pointerup', slapp);
           el.addEventListener('pointercancel', slapp);
-          el.addEventListener('pointerenter', function () { isarMal = typ === 'mark' ? 0.35 : 0; });
-          el.addEventListener('pointerleave', function () { isarMal = 0; });
+          el.addEventListener('pointerenter', function () { isarMal = typ === 'mark' ? 0.35 : 0; kor(); });
+          el.addEventListener('pointerleave', function () { isarMal = 0; kor(); });
 
           // Tomtrapporten ritar om marken med tomtens egen profil, och
           // PDF:en får en färdig bild av den.
@@ -1961,7 +2097,7 @@ SKRIPT = '''
             var smalMQ = window.matchMedia ? window.matchMedia('(max-width: 560px)') : null;
             var satRam = function () { svg.setAttribute('viewBox', !profil ? '0 0 640 400' : (smalMQ && smalMQ.matches ? '112 22 396 350' : '104 12 600 372')); matSkala(); };
             if (smalMQ) {
-              var vidByte = function () { satRam(); if (lugn) rita(99, 0); };
+              var vidByte = function () { satRam(); if (lugn) rita(99); else vack(); };
               if (smalMQ.addEventListener) smalMQ.addEventListener('change', vidByte); else if (smalMQ.addListener) smalMQ.addListener(vidByte);
             }
             var escT = function (x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -1980,7 +2116,7 @@ SKRIPT = '''
                 t0 = null;
                 vrid = 0;
                 satRam();
-                if (lugn) rita(99, 0); else kor();
+                if (lugn) rita(99); else vack();
               },
               bild: function () {
                 var K = new Kamera(conf.bas, conf.S, conf.cx, conf.cy);
