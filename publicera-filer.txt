@@ -31,6 +31,7 @@ images/delning/dronare-platta.jpg
 images/delning/dronare-vaggblock.jpg
 images/delning/hus-r2.jpg
 images/delning/hus-r3.jpg
+images/delning/lyft-stommar.jpg
 images/delning/stommar-stapel.jpg
 images/foto/arbetare-vattenpass.webp
 images/foto/dronare-bygget.webp

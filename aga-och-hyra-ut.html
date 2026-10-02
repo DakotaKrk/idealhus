@@ -25,9 +25,9 @@
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" as="image" href="images/hus-r3.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20261010i">
-    <link rel="stylesheet" href="design.css?v=20261010i">
-    <script src="premium.js?v=20261010i" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261010j">
+    <link rel="stylesheet" href="design.css?v=20261010j">
+    <script src="premium.js?v=20261010j" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script type="application/ld+json">
     {
@@ -146,6 +146,14 @@
         <span class="ih-kant" aria-hidden="true"></span>
         <img class="helbild__bak" src="images/hus-r3.webp" alt="" aria-hidden="true" decoding="async">
         <img class="subpage-hero__image" src="images/hus-r3.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Svart fritidshus med takkupa i en tallskog">
+        <div class="hoffert hoffert--kalender" aria-hidden="true">
+          <div class="hoffert__huvud"><span class="hoffert__typ">Samägarkalendern</span><span class="hoffert__stampel">Rättvist</span></div>
+          <div class="hoffert__veckor">
+            <p><small>v 21</small><i style="--i:0;--farg:var(--del3)">3</i><i style="--i:1;--farg:var(--del1)">1</i><i style="--i:2;--farg:var(--del2)">2</i><i style="--i:3;--farg:var(--del3)">3</i><i style="--i:4;--farg:var(--del2)">2<sup>★</sup></i><i class="hoffert__sommar" style="--i:5;--farg:var(--del2)">2</i><i class="hoffert__sommar" style="--i:6;--farg:var(--del3)">3</i><i class="hoffert__sommar" style="--i:7;--farg:var(--del1)">1</i></p>
+            <p><small>v 29</small><i class="hoffert__sommar" style="--i:8;--farg:var(--del2)">2</i><i class="hoffert__sommar" style="--i:9;--farg:var(--del3)">3</i><i class="hoffert__sommar" style="--i:10;--farg:var(--del1)">1</i><i class="hoffert__sommar" style="--i:11;--farg:var(--del2)">2</i><i style="--i:12;--farg:var(--del1)">1</i><i style="--i:13;--farg:var(--del2)">2</i><i style="--i:14;--farg:var(--del3)">3</i><i style="--i:15;--farg:var(--del1)">1</i></p>
+          </div>
+          <div class="hoffert__fot"><span>Storhelgerna</span><strong>Roterar varje år</strong></div>
+        </div>
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
@@ -170,8 +178,22 @@
             var för sig – börja med det som passar er.
           </p>
           <nav class="againtro__hopp" aria-label="Verktygen på sidan">
-            <a href="#samagare">Samägarkalendern</a>
-            <a href="#kalkyl">Uthyrningskalkylen</a>
+            <a class="againtro__kort" href="#samagare">
+              <span class="againtro__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M6.5 5.5h11a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2zM4.5 10h15M8.5 3.5v4M15.5 3.5v4M8.5 13.75h.01M12 13.75h.01M15.5 13.75h.01M8.5 17h.01M12 17h.01"/></svg></span>
+              <span class="againtro__korttext">
+                <strong>Samägar&shy;kalendern</strong>
+                <span>En kalender som fördelar årets veckor rättvist</span>
+              </span>
+              <span class="againtro__pil" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span>
+            </a>
+            <a class="againtro__kort" href="#kalkyl">
+              <span class="againtro__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7.5 3.5h9a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2zM8.75 7h6.5v3h-6.5zM9 13.75h.01M12 13.75h.01M15 13.75h.01M9 17h.01M12 17h.01M15 17h.01"/></svg></span>
+              <span class="againtro__korttext">
+                <strong>Uthyrnings&shy;kalkylen</strong>
+                <span>En kalkyl som visar vad uthyrningen kan täcka</span>
+              </span>
+              <span class="againtro__pil" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span>
+            </a>
           </nav>
         </div>
       </section>

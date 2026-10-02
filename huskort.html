@@ -25,9 +25,9 @@
     <script>(function(){try{var p=new URLSearchParams(location.search),k={attefallshus:['r2','r1','r5'],fritidshus:['r3','r4']}[p.get('typ')],b=(k&&k[(parseInt(p.get('modell'),10)||1)-1])||'r2';window.ihHusBild='images/hus-'+b+'.webp';var l=document.createElement('link');l.rel='preload';l.as='image';l.href=window.ihHusBild;l.setAttribute('fetchpriority','high');document.head.appendChild(l);}catch(e){}})();</script>
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20261010i">
-    <link rel="stylesheet" href="design.css?v=20261010i">
-    <script src="premium.js?v=20261010i" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261010j">
+    <link rel="stylesheet" href="design.css?v=20261010j">
+    <script src="premium.js?v=20261010j" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script type="application/ld+json">
     {
@@ -155,9 +155,19 @@
             </div>
             <a class="kat-topp__ryms" data-ryms href="vad-far-jag-bygga.html">Ryms huset på din tomt?<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           </div>
-          <figure class="kat-topp__bild"><img data-hus-bild src="images/hus-r2.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Sadel 30, attefallshus i svensk natur"><script>if(window.ihHusBild)document.querySelector('[data-hus-bild]').src=window.ihHusBild;</script></figure>
+          <figure class="kat-topp__bild"><img data-hus-bild src="images/hus-r2.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Sadel 30, attefallshus i svensk natur"><script>if(window.ihHusBild)document.querySelector('[data-hus-bild]').src=window.ihHusBild;</script>
+            <div class="hoffert hoffert--fakta">
+              <p class="hoffert__huvud"><span class="hoffert__typ" data-model-title>Sadel 30</span></p>
+              <dl class="kat-topp__fakta hoffert__lista">
+                <div style="--i:0"><dt><i class="hoffert__bock"></i>Boyta</dt><dd><em data-hus="yta">30 m²</em></dd></div>
+                <div style="--i:1"><dt><i class="hoffert__bock"></i>Rum</dt><dd><em data-hus="rum">1 rum</em></dd></div>
+                <div style="--i:2"><dt><i class="hoffert__bock"></i>Yttermått</dt><dd><em data-hus="matt">8,33 × 3,49 m</em></dd></div>
+                <div class="hoffert__stampel"><dt>Leverans</dt><dd data-hus="lev">10 veckor</dd></div>
+                <div class="hoffert__fot"><dt>Pris</dt><dd>I offert</dd></div>
+              </dl>
+            </div>
+          </figure>
         </div>
-        <dl class="kat-topp__fakta"><div><dt>Boyta</dt><dd data-hus="yta">30 m²</dd></div><div><dt>Rum</dt><dd data-hus="rum">1 rum</dd></div><div><dt>Yttermått</dt><dd data-hus="matt">8,33 × 3,49 m</dd></div><div><dt>Leverans</dt><dd data-hus="lev">10 veckor</dd></div></dl>
       </section>
 
       <section class="hus3dvy" id="i-3d">
@@ -392,29 +402,30 @@
       <section class="hus-pris ih-sektion" id="pris" aria-labelledby="pris-rubrik">
         <div class="ih-inre">
           <div class="hus-pris__panel">
-            <div class="ih-huvud ih-huvud--mitt kat-mitt">
+            <div class="ih-huvud hus-pris__text">
               <p class="ih-etikett">Pris och upplägg</p>
               <h2 class="ih-rubrik" id="pris-rubrik">Priset sätts <em>efter din tomt.</em></h2>
               <p class="ih-ingress">Ett hus har inget listpris som en bil. Du får en offert där varje post står för sig, så du ser vad som ingår och vad som tillkommer innan du bestämmer dig.</p>
+              <p class="hus-pris__knappar"><a class="ih-knapp ih-knapp--virke" href="#kontakt">Fråga om pris<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="ih-knapp ih-knapp--kontur" href="priser.html">Så sätts priset</a></p>
             </div>
-            <div class="hus-pris__kort">
-              <article class="model-price__card">
-                <span>Pris</span>
-                <h3>I offert</h3>
-                <p>Storleken, planlösningen, materialen, tomten och avståndet styr summan.</p>
-              </article>
-              <article class="model-price__card">
-                <span>Leverans</span>
-                <h3>10 veckor</h3>
-                <p>Huset tillverkas under tak medan grunden och anslutningarna görs klara på tomten.</p>
-              </article>
-              <article class="model-price__card">
-                <span>Ingår</span>
-                <h3>Hus, leverans, montage</h3>
-                <p>Ritningar och underlag, själva huset, leverans till tomten, montage och slutbesiktning.</p>
-              </article>
+            <div class="hus-pris__offert">
+              <div class="hoffert hoffert--hus">
+                <div class="hoffert__huvud"><span class="hoffert__typ">Offert · utkast</span><span class="hoffert__stampel">Post för post</span></div>
+                <ul class="hoffert__lista">
+                  <li style="--i:0"><i class="hoffert__bock"></i><span>Ritningar och underlag</span><em>Ingår</em></li>
+                  <li style="--i:1"><i class="hoffert__bock"></i><span>Själva huset</span><em>Ingår</em></li>
+                  <li style="--i:2"><i class="hoffert__bock"></i><span>Leverans till tomten</span><em>Ingår</em></li>
+                  <li style="--i:3"><i class="hoffert__bock"></i><span>Montage</span><em>Ingår</em></li>
+                  <li style="--i:4"><i class="hoffert__bock"></i><span>Slutbesiktning</span><em>Ingår</em></li>
+                  <li class="hoffert__lev" style="--i:5"><i class="hoffert__prick"></i><span>Leverans</span><em data-hus="lev">10 veckor</em></li>
+                </ul>
+                <div class="hoffert__fot"><span>Summa</span><strong>Sätts i offerten</strong></div>
+              </div>
+              <div class="hus-pris__not">
+                <p><b>Summa</b> Storleken, planlösningen, materialen, tomten och avståndet styr summan.</p>
+                <p><b>Leverans</b> Huset tillverkas under tak medan grunden och anslutningarna görs klara på tomten.</p>
+              </div>
             </div>
-            <p class="hus-pris__knappar"><a class="ih-knapp ih-knapp--virke" href="#kontakt">Fråga om pris<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="ih-knapp ih-knapp--kontur" href="priser.html">Så sätts priset</a></p>
           </div>
         </div>
       </section>

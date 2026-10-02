@@ -25,9 +25,9 @@
     <link rel="preload" as="image" href="images/foto/montor-vaggelement.webp" fetchpriority="high">
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20261010i">
-    <link rel="stylesheet" href="design.css?v=20261010i">
-    <script src="premium.js?v=20261010i" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261010j">
+    <link rel="stylesheet" href="design.css?v=20261010j">
+    <script src="premium.js?v=20261010j" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script type="application/ld+json">
     {
@@ -162,6 +162,15 @@
 
           <figure class="pf-topp__bild">
             <span class="pf-topp__ram"><img src="images/foto/montor-vaggelement.webp" width="978" height="650" fetchpriority="high" decoding="async" alt="En montör i varselkläder och hjälm kontrollerar ett väggelement med vattenpass på bygget"></span>
+            <div class="hoffert hoffert--leverans" aria-hidden="true">
+              <div class="hoffert__huvud"><span class="hoffert__typ">Leverans · utkast</span><span class="hoffert__stampel">Under tak</span></div>
+              <ul class="hoffert__lista">
+                <li style="--i:0"><i class="hoffert__bock"></i><span><b>01</b> Utfackningsväggar</span></li>
+                <li style="--i:1"><i class="hoffert__bock"></i><span><b>02</b> Husblock</span></li>
+                <li style="--i:2"><i class="hoffert__bock"></i><span><b>03</b> Moduler</span></li>
+              </ul>
+              <div class="hoffert__fot"><span>Utförande</span><strong>Enligt er ritning</strong></div>
+            </div>
           </figure>
         </div>
       </section>
@@ -355,33 +364,15 @@
               elementen står på plats.
             </p>
           </header>
-          <ol class="pf-steg__lista" data-pf-steg>
-            <li class="pf-steg__linje" aria-hidden="true"><i></i></li>
-            <li class="pf-steg__steg" style="--i:0">
-              <span class="pf-steg__nod"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h9l3.5 3.5v13.5H6z" pathLength="1"/><path d="M9 11h6" pathLength="1"/><path d="M9 14.5h6" pathLength="1"/><path d="M9 18h3.5" pathLength="1"/></svg></span>
-              <span class="pf-steg__nr">01</span>
-              <h3>Ritning och förfrågan</h3>
-              <p>Ni skickar ritning och mängder. Vi går igenom vad som passar som väggar, block eller moduler.</p>
-            </li>
-            <li class="pf-steg__steg" style="--i:1">
-              <span class="pf-steg__nod"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h16v15H4z" pathLength="1"/><path d="M4 9.5h16" pathLength="1"/><path d="M9 3v4" pathLength="1"/><path d="M15 3v4" pathLength="1"/></svg></span>
-              <span class="pf-steg__nr">02</span>
-              <h3>Offert och tidplan</h3>
-              <p>Ni får en offert post för post, och leveranserna planeras in i er tidplan.</p>
-            </li>
-            <li class="pf-steg__steg" style="--i:2">
-              <span class="pf-steg__nod"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11 12 4l8.5 7" pathLength="1"/><path d="M6 9.5V20h12V9.5" pathLength="1"/></svg></span>
-              <span class="pf-steg__nr">03</span>
-              <h3>Tillverkning under tak</h3>
-              <p>Elementen byggs inomhus i Sverige, i jämn temperatur och fuktnivå.</p>
-            </li>
-            <li class="pf-steg__steg" style="--i:3">
-              <span class="pf-steg__nod"><svg class="pf-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17h13l3-4h2v4" pathLength="1"/><path d="M5 17v2" pathLength="1"/><path d="M17 17v2" pathLength="1"/><path d="M3 13h11V7H3z" pathLength="1"/></svg></span>
-              <span class="pf-steg__nr">04</span>
-              <h3>Leverans till bygget</h3>
-              <p>Elementen kommer på lastbil och lyfts på plats. Färre moment återstår på byggarbetsplatsen.</p>
-            </li>
+          <div class="prisvag__spar prisvag__spar--fyra" data-steglinje>
+          <span class="prisvag__linje" aria-hidden="true"><span></span></span>
+          <ol class="prisvag__steg">
+            <li><span class="prisvag__nr">1</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M6 3.5h9l3.5 3.5v13.5H6z"/><path d="M9 11h6"/><path d="M9 14.5h6"/><path d="M9 18h3.5"/></svg></span><h3>Ritning och förfrågan</h3><p>Ni skickar ritning och mängder. Vi går igenom vad som passar som väggar, block eller moduler.</p></div></li>
+            <li><span class="prisvag__nr">2</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 5h16v15H4z"/><path d="M4 9.5h16"/><path d="M9 3v4"/><path d="M15 3v4"/></svg></span><h3>Offert och tidplan</h3><p>Ni får en offert post för post, och leveranserna planeras in i er tidplan.</p></div></li>
+            <li><span class="prisvag__nr">3</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/></svg></span><h3>Tillverkning under tak</h3><p>Elementen byggs inomhus i Sverige, i jämn temperatur och fuktnivå.</p></div></li>
+            <li><span class="prisvag__nr">4</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M3 17h13l3-4h2v4"/><path d="M5 17v2"/><path d="M17 17v2"/><path d="M3 13h11V7H3z"/></svg></span><h3>Leverans till bygget</h3><p>Elementen kommer på lastbil och lyfts på plats. Färre moment återstår på byggarbetsplatsen.</p></div></li>
           </ol>
+          </div>
         </div>
       </section>
 

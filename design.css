@@ -27495,3 +27495,2209 @@ html[data-tema="mork"] body .site-footer .site-footer__sociala .social:focus-vis
   from { stroke-dashoffset: 1; }
   to { stroke-dashoffset: 0; }
 }
+
+/* =====================================================================
+   Kategorisidornas topp: faktakortet
+   Faktaremsan under toppen blir ett flytande kort vid fotots nedre
+   högra hörn, i samma form som offertkortet på Priser. Raderna bockas
+   av en i taget, stämpeln är den sista faktan och foten säger att
+   priset sätts i offerten. Fotot visas helt och lutar som på Priser.
+   Kortet ligger aldrig vid skylten nere till vänster, och bara över
+   marken framför huset. Fritidshusens två modellkort blir breda.
+   ===================================================================== */
+
+/* --- Fotot: hela bilden, lutningen från Priser ------------------------ */
+html body .kat-topp .kat-topp__bild {
+  position: relative;
+  z-index: 1;
+  aspect-ratio: auto;
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html body .kat-topp .kat-topp__bild img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1600 / 1062;
+  object-fit: contain;
+  border-radius: 26px;
+  background: #efebe3;
+  box-shadow: 0 50px 90px -48px rgba(60, 38, 16, 0.62), 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+/* --- Kortet ---------------------------------------------------------- */
+/* Kortets överkant ligger på 85 % av fotots höjd, nedanför skylten i
+   alla fem husbilderna, så kortet täcker bara marken. */
+html body .kat-topp .hoffert--fakta {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 300px;
+  margin: -10% -28px 0 auto;
+  padding: 16px 16px 14px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 252, 246, 0.88));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 30px 60px -44px rgba(90, 60, 25, 0.55),
+    0 14px 28px -18px rgba(90, 60, 25, 0.35);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  transform: rotate(-2deg);
+  text-align: left;
+}
+
+/* Huvudet håller plats åt stämpeln; blir det trångt bryts rubriken. */
+html body .kat-topp .hoffert--fakta .hoffert__huvud {
+  min-height: 46px;
+  margin: 0;
+  padding: 0 122px 12px 0;
+}
+
+html body .kat-topp .hoffert--fakta .hoffert__typ {
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  letter-spacing: 0.07em;
+  color: #8f5424;
+}
+
+/* Raderna: grön bock, namnet och värdet i en pill. */
+html body .kat-topp .kat-topp__fakta {
+  display: grid;
+  grid-template-columns: none;
+  gap: 0;
+  max-width: none;
+  margin: 6px 0 0;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  animation: none;
+}
+
+html body .kat-topp .kat-topp__fakta > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 4px;
+  border-bottom: 1px solid rgba(27, 25, 21, 0.06);
+  box-shadow: none;
+  text-align: left;
+}
+
+html body .kat-topp .kat-topp__fakta dt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 600 0.8125rem/1.25 var(--knappfont);
+  letter-spacing: 0;
+  text-transform: none;
+  color: #1b1915;
+}
+
+html body .kat-topp .kat-topp__fakta .hoffert__bock {
+  flex: none;
+}
+
+html body .kat-topp .kat-topp__fakta dd {
+  margin: 0;
+  font: 600 0.8125rem/1 var(--knappfont);
+  letter-spacing: 0;
+  white-space: nowrap;
+  color: #1b1915;
+}
+
+html body .kat-topp .kat-topp__fakta dd em {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(58, 170, 104, 0.12);
+  font: 700 0.75rem/1 var(--knappfont);
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  color: #1f7a45;
+}
+
+/* Stämpeln: den sista faktan, uppe till höger i huvudet. */
+html body .kat-topp .kat-topp__fakta > .hoffert__stampel {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: grid;
+  grid-template-columns: auto;
+  justify-items: center;
+  gap: 3px;
+  padding: 5px 7px 6px;
+  border: 1.5px solid rgba(143, 84, 36, 0.55);
+  border-radius: 7px;
+  transform: rotate(-4deg);
+}
+
+html body .kat-topp .kat-topp__fakta > .hoffert__stampel dt {
+  display: block;
+  font: 700 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8f5424;
+}
+
+html body .kat-topp .kat-topp__fakta > .hoffert__stampel dd {
+  font: 700 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8f5424;
+}
+
+/* Foten: Pris · I offert. */
+html body .kat-topp .kat-topp__fakta > .hoffert__fot {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 11px 4px 0;
+  border-top: 2px solid #1b1915;
+  border-bottom: 0;
+}
+
+html body .kat-topp .kat-topp__fakta > .hoffert__fot dt {
+  display: block;
+  font: 700 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+html body .kat-topp .kat-topp__fakta > .hoffert__fot dd {
+  font: 600 1rem/1 var(--serif);
+  color: #1b1915;
+}
+
+/* --- Stora skärmar: fotot lutar, kortet vid nedre högra hörnet --------- */
+@media (min-width: 901px) {
+  html body .kat-topp .kat-topp__bild {
+    perspective: 1600px;
+  }
+
+  html body .kat-topp .kat-topp__bild img {
+    transform: rotateY(-9deg) rotateX(3deg);
+    transform-origin: 100% 50%;
+  }
+}
+
+@media (min-width: 901px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
+  html body .kat-topp .kat-topp__bild img {
+    transition: transform 1s var(--mjuk);
+  }
+
+  html body .kat-topp .hoffert--fakta {
+    transition: transform 0.8s var(--mjuk);
+  }
+
+  html body .kat-topp .kat-topp__bild:hover img {
+    transform: rotateY(-3deg) rotateX(1deg);
+  }
+
+  html body .kat-topp .kat-topp__bild:hover .hoffert--fakta {
+    transform: rotate(-0.6deg) translateY(-4px);
+  }
+}
+
+/* Smala datorer: texten behåller sin bredd och fotot tar det mindre
+   mellanrummet. Upp till 1100 px blir kortet också smalare, så det
+   håller sig till höger om skylten. */
+@media (min-width: 901px) and (max-width: 1240px) {
+  html body .kat-topp .kat-topp__grid {
+    grid-template-columns: minmax(0, calc((100% - clamp(32px, 5vw, 80px)) / 2)) minmax(0, 1fr);
+    gap: 28px;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  html body .kat-topp .hoffert--fakta {
+    width: 256px;
+    padding: 14px 14px 12px;
+  }
+
+  html body .kat-topp .hoffert--fakta .hoffert__huvud {
+    padding-right: 120px;
+  }
+
+  html body .kat-topp .kat-topp__fakta > .hoffert__stampel {
+    top: 13px;
+    right: 13px;
+  }
+}
+
+/* Mellanstora skärmar: fotot överst, kortet inom toppens kant. */
+@media (min-width: 700px) and (max-width: 900px) {
+  html body .kat-topp .hoffert--fakta {
+    margin-right: 18px;
+  }
+}
+
+/* Mobil: kortet sticker fram under fotot, högerställt och rakt. Fotot
+   ligger över kortets överkant, så inget täcker skylten. Kortet är
+   tätare här, så knapparna hamnar nära första skärmen. */
+@media (max-width: 699px) {
+  html body .kat-topp .kat-topp__grid {
+    gap: 20px;
+  }
+
+  html body .kat-topp .kat-topp__bild img {
+    border-radius: 18px;
+  }
+
+  html body .kat-topp .hoffert--fakta {
+    z-index: 0;
+    width: min(300px, 100% - 20px);
+    margin: -24px 10px 0 auto;
+    padding: 33px 14px 12px;
+    border-radius: 0 0 20px 20px;
+    transform: none;
+  }
+
+  html body .kat-topp .hoffert--fakta .hoffert__huvud {
+    min-height: 42px;
+    padding: 0 116px 8px 0;
+  }
+
+  html body .kat-topp .kat-topp__fakta {
+    margin-top: 4px;
+  }
+
+  html body .kat-topp .kat-topp__fakta > div {
+    padding: 4px 4px;
+  }
+
+  html body .kat-topp .kat-topp__fakta dd em {
+    padding: 4px 9px;
+  }
+
+  html body .kat-topp .kat-topp__fakta > .hoffert__stampel {
+    top: 32px;
+    right: 13px;
+  }
+
+  html body .kat-topp .kat-topp__fakta > .hoffert__fot {
+    margin-top: 6px;
+    padding-top: 8px;
+  }
+}
+
+/* --- Rörelse: raderna bockas av en i taget, sedan stämpeln ------------ */
+@media (prefers-reduced-motion: no-preference) {
+  html body .kat-topp .hoffert--fakta {
+    animation: kat-fakta-in 0.9s var(--mjuk) 0.45s backwards;
+  }
+
+  html body .kat-topp .kat-topp__fakta > div {
+    animation: hoffert-rad 0.7s var(--mjuk) backwards;
+    animation-delay: calc(0.75s + var(--i, 0) * 0.18s);
+  }
+
+  html body .kat-topp .kat-topp__fakta .hoffert__bock {
+    animation-delay: calc(0.95s + var(--i, 0) * 0.18s);
+  }
+
+  html body .kat-topp .kat-topp__fakta dd em {
+    animation-delay: calc(1.05s + var(--i, 0) * 0.18s);
+  }
+
+  html body .kat-topp .kat-topp__fakta > .hoffert__stampel {
+    animation: kat-stampel 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 1.45s backwards;
+  }
+
+  html body .kat-topp .kat-topp__fakta > .hoffert__fot {
+    animation: hoffert-rad 0.8s var(--mjuk) 1.35s backwards;
+  }
+}
+
+@keyframes kat-fakta-in {
+  from { opacity: 0; translate: 0 18px; }
+}
+
+@keyframes kat-stampel {
+  from { opacity: 0; scale: 1.6; }
+}
+
+/* --- Mörkt läge -------------------------------------------------------- */
+html[data-tema="mork"] body .kat-topp .kat-topp__bild img {
+  background: #28241f;
+  box-shadow: 0 50px 90px -40px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] body .kat-topp .hoffert--fakta {
+  background: linear-gradient(160deg, rgba(40, 36, 31, 0.96), rgba(24, 22, 19, 0.94));
+  box-shadow: inset 0 1px 0 rgba(247, 245, 240, 0.08), inset 0 0 0 1px rgba(247, 245, 240, 0.1), 0 40px 70px -30px rgba(0, 0, 0, 0.8);
+}
+
+html[data-tema="mork"] body .kat-topp .hoffert--fakta .hoffert__typ {
+  color: #d9a46a;
+}
+
+html[data-tema="mork"] body .kat-topp .kat-topp__fakta > div {
+  border-bottom-color: rgba(247, 245, 240, 0.08);
+}
+
+html[data-tema="mork"] body .kat-topp .kat-topp__fakta dt,
+html[data-tema="mork"] body .kat-topp .kat-topp__fakta dd {
+  color: #f7f5f0;
+}
+
+html[data-tema="mork"] body .kat-topp .kat-topp__fakta dd em {
+  background: rgba(127, 214, 162, 0.16);
+  color: #8fe0b0;
+}
+
+html[data-tema="mork"] body .kat-topp .kat-topp__fakta > .hoffert__stampel {
+  border-color: rgba(240, 181, 110, 0.55);
+}
+
+html[data-tema="mork"] body .kat-topp .kat-topp__fakta > .hoffert__stampel dt {
+  color: #d9a46a;
+}
+
+html[data-tema="mork"] body .kat-topp .kat-topp__fakta > .hoffert__stampel dd {
+  color: #f0b56e;
+}
+
+html[data-tema="mork"] body .kat-topp .kat-topp__fakta > .hoffert__fot {
+  border-top-color: rgba(247, 245, 240, 0.6);
+}
+
+html[data-tema="mork"] body .kat-topp .kat-topp__fakta > .hoffert__fot dt {
+  color: rgba(247, 245, 240, 0.55);
+}
+
+/* --- Fritidshusen: två breda kort med hela fotot ------------------------ */
+@media (min-width: 1041px) {
+  html body .katsida .model-grid--tva {
+    max-width: 1220px;
+    gap: 24px;
+  }
+}
+
+/* =====================================================================
+   Stegkort (2026-10-02)
+   En stegkomponent överallt: stegen på kategorisidorna och på Proffs har
+   samma markup som "Tre steg till en offert" på Priser (.prisvag) –
+   siffran på rälsen, varmt glaskort och kopparrutan. I telefonen står
+   stegen som kompakta rader på en lodrät räls. Användningskorten och
+   regelsidans kort i 03 och 04 får samma glas och ruta. "Bra att veta"
+   blir en inskjuten panel med frågorna i regelsidans form.
+   ===================================================================== */
+
+/* --- Stegen ---------------------------------------------------------------- */
+html body .prisvag__kort {
+  text-align: left;
+}
+
+html body .at-steg__mer {
+  margin-top: clamp(32px, 4vw, 48px);
+}
+
+/* Fyra steg (Proffs): fyra i rad på bred skärm, två och två under det,
+   så att ingen rubrik bryts och texterna börjar på samma höjd. */
+@media (min-width: 1180px) {
+  html body .prisvag__spar--fyra .prisvag__steg {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 801px) and (max-width: 1179.98px) {
+  html body .prisvag__spar--fyra .prisvag__steg {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 28px;
+  }
+
+  html body .prisvag__spar--fyra .prisvag__linje {
+    display: none;
+  }
+}
+
+/* Tre smala kort (surfplatta): en rubrik kan brytas i två rader. Alla
+   rubriker får då två raders höjd, så att texterna börjar i linje. */
+@media (min-width: 801px) and (max-width: 939.98px) {
+  html body .at-steg .prisvag__kort h3 {
+    min-height: 2lh;
+  }
+}
+
+/* Telefon: kompakta rader på en lodrät räls. Rälsen ritas som en bit
+   under varje siffra och fylls när nästa steg tänds. */
+@media (max-width: 800px) {
+  html body .prisvag__linje {
+    display: none;
+  }
+
+  html body .prisvag__steg {
+    gap: 12px;
+  }
+
+  html body .prisvag__steg li {
+    position: relative;
+    padding-left: 54px;
+  }
+
+  html body .prisvag__steg .prisvag__nr {
+    position: absolute;
+    left: 0;
+    top: 12px;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    font-size: 1.0625rem;
+  }
+
+  html body .prisvag__steg li:not(:last-child)::before,
+  html body .prisvag__steg li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 19px;
+    top: 58px;
+    bottom: -18px;
+    width: 2px;
+    border-radius: 2px;
+  }
+
+  html body .prisvag__steg li:not(:last-child)::before {
+    background: rgba(201, 138, 69, 0.2);
+  }
+
+  html body .prisvag__steg li:not(:last-child)::after {
+    background: linear-gradient(#f6c88f, #c98a45);
+    transform: scaleY(0);
+    transform-origin: center top;
+    transition: transform 0.6s var(--mjuk);
+  }
+
+  html body .prisvag__steg li:has(+ li.tand)::after {
+    transform: scaleY(1);
+  }
+
+  html body .prisvag__kort {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    column-gap: 12px;
+    align-items: center;
+    padding: 14px 16px 16px;
+    border-radius: 20px;
+  }
+
+  html body .prisvag__kort::before {
+    top: 25px;
+  }
+
+  html body .prisvag__ikon {
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    border-radius: 12px;
+  }
+
+  html body .prisvag__ikon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  html body .prisvag__kort h3 {
+    margin: 0;
+    font-size: 1.0625rem;
+    line-height: 1.25;
+  }
+
+  html body .prisvag__kort p {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+    line-height: 1.55;
+  }
+}
+
+/* --- Användningskorten: varmt glas och kopparruta ---------------------------- */
+html body .at-anv__kort,
+html body .at-anv__kort:hover {
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 252, 246, 0.88));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 30px 60px -44px rgba(90, 60, 25, 0.55);
+  transform: none;
+}
+
+html body .katsida .at-anv__kort {
+  align-items: flex-start;
+  text-align: left;
+}
+
+@media (min-width: 701px) {
+  html body .katsida .at-anv__kort {
+    gap: 12px;
+    padding: 24px 22px 26px;
+  }
+
+  html body .katsida .at-anv__kort h3 {
+    margin-top: 6px;
+  }
+}
+
+html body .at-anv__ikon,
+html body .katsida .at-anv__ikon,
+html body .katsida .at-anv__kort .at-anv__ikon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #e2a865, #a96a2f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 12px 20px -10px rgba(143, 84, 36, 0.7);
+  color: #fffaf2;
+}
+
+html body .at-anv__ikon svg,
+html body .katsida .at-anv__ikon svg {
+  width: 22px;
+  height: 22px;
+  stroke: #fffaf2;
+  stroke-width: 1.7;
+}
+
+/* --- Regelsidan, 03 och 04: samma glas och ruta ------------------------------ */
+html body .rg-anmalan__kort,
+html body .rg-lov__rad,
+html body .rg-anmalan__kort:hover,
+html body .rg-lov__rad:hover {
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 252, 246, 0.88));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 30px 60px -44px rgba(90, 60, 25, 0.55);
+}
+
+html body .rg-anmalan__kort .rg-ikon,
+html body .rg-lov__rad .rg-ikon {
+  width: 44px;
+  height: 44px;
+  padding: 11px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #e2a865, #a96a2f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 12px 20px -10px rgba(143, 84, 36, 0.7);
+  stroke: #fffaf2;
+  stroke-width: 1.7;
+}
+
+/* Telefon: korten i 03 blir rader med rutan till vänster, som i 04. */
+@media (max-width: 700px) {
+  html body .rg-anmalan__kort {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: start;
+    padding: 18px;
+  }
+
+  html body .rg-anmalan__kort .rg-ikon {
+    grid-row: span 2;
+    margin: 0;
+  }
+
+  html body .rg-anmalan__kort h3 {
+    margin: 2px 0 4px;
+  }
+
+  html body .rg-lov__rad {
+    gap: 16px;
+    padding: 18px;
+  }
+}
+
+/* --- Bra att veta: en inskjuten panel ----------------------------------------- */
+html body main > .fragepanel.fragepanel {
+  margin-inline: 12px;
+  border-radius: 28px;
+  background:
+    radial-gradient(55% 70% at 100% 0%, rgba(255, 210, 150, 0.4), transparent 65%),
+    radial-gradient(50% 60% at 0% 100%, rgba(190, 220, 180, 0.3), transparent 65%),
+    linear-gradient(165deg, #fffdf9 0%, #fdf6ec 55%, #f6f2e8 100%);
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 40px 80px -52px rgba(90, 60, 25, 0.45);
+}
+
+@media (max-width: 620px) {
+  html body main > .fragepanel.fragepanel {
+    margin-inline: 10px;
+    border-radius: 18px;
+  }
+}
+
+html body .fragepanel__lank {
+  display: flex;
+  justify-content: center;
+  margin: clamp(24px, 3vw, 32px) 0 0;
+}
+
+/* Frågorna i regelsidans form: nummer, glasrad och ett ljust plus som
+   blir en kopparknapp när raden är öppen. */
+html body .fragepanel .ih-fragor {
+  gap: 10px;
+  counter-reset: fraga;
+}
+
+html body .fragepanel .ih-fraga {
+  counter-increment: fraga;
+  border: 0;
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 252, 246, 0.88));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 30px 60px -44px rgba(90, 60, 25, 0.55);
+  transition: opacity 0.9s var(--mjuk) var(--ih-droj, 0s), translate 1s var(--mjuk) var(--ih-droj, 0s),
+    box-shadow 0.45s var(--mjuk);
+}
+
+html body .fragepanel .ih-fraga:not([open]):hover {
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.24), 0 34px 64px -42px rgba(143, 84, 36, 0.5);
+}
+
+html body .fragepanel .ih-fraga[open] {
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.3), 0 34px 64px -42px rgba(143, 84, 36, 0.6);
+}
+
+html body .fragepanel .ih-fraga summary {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 36px;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 16px 16px 22px;
+  font: 600 1.0625rem/1.35 var(--knappfont);
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+/* Pekaren tonar hela den stängda raden, inte bara frågan – en tonad
+   fråga delade det öppna kortet i två och satt kvar efter ett tryck på
+   telefonen. Tonen finns bara med mus. */
+html body .fragepanel .ih-fraga summary,
+html body .fragepanel .ih-fraga summary:hover {
+  background: transparent;
+}
+
+html body .fragepanel .ih-fraga:not([open]) summary:active {
+  background: rgba(240, 181, 110, 0.14);
+}
+
+@media (hover: hover) {
+  html body .fragepanel .ih-fraga:not([open]):hover {
+    box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.24), 0 34px 64px -42px rgba(143, 84, 36, 0.5),
+      inset 0 0 0 100vmax rgba(240, 181, 110, 0.07);
+  }
+}
+
+html body .fragepanel .ih-fraga summary:focus-visible {
+  outline: 2px solid var(--virke);
+  outline-offset: -3px;
+  border-radius: 20px;
+}
+
+html body .fragepanel .ih-fraga summary::before {
+  content: counter(fraga, decimal-leading-zero);
+  content: counter(fraga, decimal-leading-zero) / "";
+  font: 600 0.75rem/1 var(--knappfont);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  color: var(--text-3);
+}
+
+html body .fragepanel .ih-fraga[open] summary::before {
+  color: var(--virke-djup);
+}
+
+html body .fragepanel .ih-fraga summary::after {
+  position: relative;
+  top: auto;
+  right: auto;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  background:
+    linear-gradient(#1b1915, #1b1915) center / 12px 2px no-repeat,
+    linear-gradient(#1b1915, #1b1915) center / 2px 12px no-repeat,
+    #f1ebe1;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+html body .fragepanel .ih-fraga[open] summary::after {
+  background:
+    linear-gradient(#fffaf2, #fffaf2) center / 12px 2px no-repeat,
+    linear-gradient(#fffaf2, #fffaf2) center / 2px 12px no-repeat,
+    linear-gradient(160deg, #e2a865, #a96a2f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 18px -10px rgba(143, 84, 36, 0.7);
+}
+
+html body .fragepanel .ih-fraga p {
+  max-width: calc(62ch + 84px);
+  padding: 0 24px 22px 60px;
+  font-size: 0.96875rem;
+  line-height: 1.7;
+}
+
+/* Bred skärm: rubriken står kvar till vänster, frågorna till höger. */
+@media (min-width: 1041px) {
+  html body .fragepanel__inre {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(48px, 6vw, 112px);
+    align-items: start;
+  }
+
+  html body main .fragepanel__sida.ih-huvud.ih-huvud.ih-huvud {
+    position: sticky;
+    top: var(--klister, 112px);
+    margin: 0;
+    text-align: left;
+  }
+
+  html body .katsida .fragepanel__sida.kat-mitt .ih-etikett {
+    justify-content: flex-start;
+  }
+
+  html body .katsida .fragepanel__sida.kat-mitt .ih-etikett::after {
+    display: none;
+  }
+
+  html body .katsida .fragepanel__sida .ih-rubrik {
+    max-width: 12ch;
+    margin-inline: 0;
+  }
+
+  html body .fragepanel__lank {
+    justify-content: flex-start;
+  }
+
+  html body .fragepanel .ih-fragor {
+    max-width: none;
+    margin: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  html body .fragepanel .ih-fraga summary {
+    grid-template-columns: 18px minmax(0, 1fr) 32px;
+    gap: 12px;
+    padding: 14px 14px 14px 16px;
+    font-size: 1rem;
+  }
+
+  html body .fragepanel .ih-fraga summary::after {
+    width: 32px;
+    height: 32px;
+  }
+
+  html body .fragepanel .ih-fraga p {
+    padding: 0 18px 18px 46px;
+  }
+}
+
+/* --- Mörkt läge ------------------------------------------------------------ */
+html[data-tema="mork"] body .at-anv__kort,
+html[data-tema="mork"] body .at-anv__kort:hover,
+html[data-tema="mork"] body .rg-anmalan__kort,
+html[data-tema="mork"] body .rg-lov__rad,
+html[data-tema="mork"] body .rg-anmalan__kort:hover,
+html[data-tema="mork"] body .rg-lov__rad:hover,
+html[data-tema="mork"] body .fragepanel .ih-fraga {
+  background: linear-gradient(160deg, rgba(40, 36, 31, 0.96), rgba(24, 22, 19, 0.94));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08), 0 30px 60px -36px rgba(0, 0, 0, 0.8);
+}
+
+/* Stegen: det tända kortet får ingen vit kant överst och en släckt
+   siffra lyser inte vit mot den mörka sidan. */
+html[data-tema="mork"] body .prisvag__steg li.tand .prisvag__kort {
+  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.3), 0 30px 60px -36px rgba(0, 0, 0, 0.8);
+}
+
+html[data-tema="mork"] body .prisvag__nr {
+  background: linear-gradient(160deg, #2a2621, #1f1c18);
+  box-shadow: inset 0 0 0 2px rgba(240, 181, 110, 0.3), 0 12px 24px -14px rgba(0, 0, 0, 0.8);
+  color: #f0b56e;
+}
+
+html[data-tema="mork"] body .fragepanel .ih-fraga:not([open]):hover {
+  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.22), 0 30px 60px -36px rgba(0, 0, 0, 0.8);
+}
+
+@media (hover: hover) {
+  html[data-tema="mork"] body .fragepanel .ih-fraga:not([open]):hover {
+    box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.22), 0 30px 60px -36px rgba(0, 0, 0, 0.8),
+      inset 0 0 0 100vmax rgba(240, 181, 110, 0.06);
+  }
+}
+
+html[data-tema="mork"] body .fragepanel .ih-fraga[open] {
+  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.3), 0 30px 60px -36px rgba(0, 0, 0, 0.8);
+}
+
+html[data-tema="mork"] body .fragepanel .ih-fraga summary::after {
+  background:
+    linear-gradient(#f7f5f0, #f7f5f0) center / 12px 2px no-repeat,
+    linear-gradient(#f7f5f0, #f7f5f0) center / 2px 12px no-repeat,
+    rgba(247, 245, 240, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+}
+
+html[data-tema="mork"] body .fragepanel .ih-fraga[open] summary::after {
+  background:
+    linear-gradient(#fffaf2, #fffaf2) center / 12px 2px no-repeat,
+    linear-gradient(#fffaf2, #fffaf2) center / 2px 12px no-repeat,
+    linear-gradient(160deg, #e2a865, #a96a2f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+html[data-tema="mork"] body main > .fragepanel.fragepanel {
+  background:
+    radial-gradient(60% 50% at 88% 8%, rgba(240, 181, 110, 0.14), transparent 70%),
+    radial-gradient(50% 60% at 0% 100%, rgba(63, 107, 80, 0.2), transparent 70%),
+    #0f0e0c;
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.06);
+}
+
+/* --- Lugn rörelse ---------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html body .prisvag__steg li:not(:last-child)::after,
+  html body .fragepanel .ih-fraga,
+  html body .fragepanel .ih-fraga summary::after,
+  html body .fragepanel .ih-fraga::details-content {
+    transition: none;
+  }
+}
+
+/* =====================================================================
+   Huskortets pris som offertkort (2026-10-02)
+   Prisdelen blir två spalter: texten och knapparna till vänster, till
+   höger samma offertkort som på Priser – fem poster som ingår, husets
+   leveranstid (fylls av huskort-skriptet) och summan som sätts i
+   offerten. Under kortet står vad som styr summan och leveransen. Under
+   960 px står texten först och kortet under, med noten bredvid kortet
+   ned till 700 px. Posterna bockas av när kortet syns (premium.js
+   sätter .vantar och sedan .syns).
+   ===================================================================== */
+
+/* --- Panelen i två spalter ------------------------------------------------- */
+html body .hus-pris__panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(340px, 33vw, 420px);
+  align-items: center;
+  gap: clamp(40px, 6vw, 96px);
+  padding-inline: clamp(20px, 5vw, 72px);
+  background:
+    radial-gradient(46% 70% at 84% 50%, rgba(255, 210, 150, 0.36), transparent 70%),
+    radial-gradient(60% 60% at 0% 100%, rgba(184, 205, 224, 0.2), transparent 60%),
+    linear-gradient(165deg, #fffdf9, #fdf6ec 55%, #f6f2e8);
+}
+
+html[data-tema="mork"] body .hus-pris__panel {
+  background:
+    radial-gradient(46% 70% at 84% 50%, rgba(240, 181, 110, 0.12), transparent 70%),
+    var(--vit);
+}
+
+/* Vänster: rubrikblocket och knapparna, vänsterställt. */
+html body main .hus-pris__text.ih-huvud.ih-huvud.ih-huvud {
+  margin: 0;
+  text-align: left;
+}
+
+html body .hus-pris__text .ih-rubrik {
+  max-width: 13ch;
+  text-wrap: balance;
+}
+
+html body .hus-pris__text .ih-ingress {
+  max-width: 34rem;
+}
+
+html body .hus-pris__text .hus-pris__knappar {
+  justify-content: flex-start;
+  margin: clamp(28px, 3vw, 40px) 0 0;
+}
+
+/* --- Höger: offertkortet, i flödet ---------------------------------------- */
+html body .hus-pris__offert {
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+}
+
+/* Ett ark till under kortet, som i en bunt utkast. */
+html body .hus-pris__offert::before {
+  content: "";
+  grid-area: 1 / 1;
+  align-self: stretch;
+  width: min(100%, 400px);
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.72), rgba(255, 250, 242, 0.5));
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.05), 0 24px 48px -36px rgba(90, 60, 25, 0.45);
+  transform: translate(6px, 4px) rotate(2.4deg);
+}
+
+html body .hus-pris .hoffert--hus {
+  grid-area: 1 / 1;
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: min(100%, 400px);
+  padding: 20px 20px 18px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 252, 246, 0.88));
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 30px 60px -44px rgba(90, 60, 25, 0.55),
+    0 40px 70px -40px rgba(40, 26, 12, 0.4);
+  transform: rotate(-1deg);
+}
+
+html body .hoffert--hus .hoffert__huvud {
+  padding-bottom: 12px;
+}
+
+html body .hoffert--hus .hoffert__typ,
+html body .hoffert--hus .hoffert__fot span {
+  font-size: 0.75rem;
+}
+
+html body .hoffert--hus .hoffert__typ {
+  white-space: nowrap;
+}
+
+html body .hoffert--hus .hoffert__stampel {
+  padding: 5px 9px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+html body .hoffert--hus .hoffert__lista {
+  margin-top: 10px;
+}
+
+html body .hoffert--hus .hoffert__lista li {
+  gap: 12px;
+  padding: 9px 6px;
+  font-size: 0.9375rem;
+}
+
+html body .hoffert--hus .hoffert__lista em {
+  padding: 4px 9px;
+  font-size: 0.75rem;
+}
+
+/* Leveransen: husets veckor på en varm rad, efter posterna. */
+html body .hoffert--hus .hoffert__lista li.hoffert__lev {
+  margin-top: 6px;
+  border-bottom: 0;
+  border-radius: 12px;
+  background: rgba(240, 181, 110, 0.14);
+}
+
+html body .hoffert--hus .hoffert__lista li:has(+ .hoffert__lev) {
+  border-bottom-color: transparent;
+}
+
+html body .hoffert--hus .hoffert__lista .hoffert__lev em {
+  background: rgba(240, 181, 110, 0.26);
+  font-variant-numeric: tabular-nums;
+  color: #8f5424;
+}
+
+html body .hoffert--hus .hoffert__fot {
+  margin-top: 14px;
+  padding: 12px 6px 0;
+}
+
+html body .hoffert--hus .hoffert__fot strong {
+  font-size: 1.25rem;
+}
+
+/* Noten under kortet: vad som styr summan och leveransen. */
+html body .hus-pris__not {
+  grid-area: 2 / 1;
+  display: grid;
+  gap: 8px;
+  width: min(100%, 400px);
+  padding: 0 6px;
+}
+
+html body .hus-pris__not p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--text-3);
+}
+
+html body .hus-pris__not b {
+  margin-right: 6px;
+  font: 700 0.75rem/1 var(--knappfont);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--virke-djup);
+}
+
+/* --- Rörelse: kortet lägger sig och posterna bockas av -------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  html body .hus-pris .hoffert--hus {
+    transition: opacity 0.9s var(--mjuk), transform 0.9s var(--mjuk);
+  }
+
+  html body .hus-pris .hoffert--hus.vantar:not(.syns) {
+    opacity: 0;
+    transform: translateY(22px) rotate(-3deg);
+  }
+
+  /* Arket under kortet kommer med kortet, inte före. */
+  html body .hus-pris__offert::before {
+    transition: opacity 0.9s var(--mjuk), transform 0.9s var(--mjuk);
+  }
+
+  html body .hus-pris__offert:has(.vantar:not(.syns))::before {
+    opacity: 0;
+    transform: translate(6px, 26px) rotate(1deg);
+  }
+
+  html body .hoffert--hus.vantar:not(.syns) .hoffert__lista li,
+  html body .hoffert--hus.vantar:not(.syns) .hoffert__fot strong {
+    opacity: 0;
+    animation: none;
+  }
+
+  html body .hoffert--hus.vantar:not(.syns) .hoffert__bock,
+  html body .hoffert--hus.vantar:not(.syns) .hoffert__prick,
+  html body .hoffert--hus.vantar:not(.syns) .hoffert__lista em {
+    animation: none;
+  }
+
+  html body .hoffert--hus .hoffert__lista li {
+    animation-delay: calc(0.35s + var(--i) * 0.24s);
+  }
+
+  html body .hoffert--hus .hoffert__bock,
+  html body .hoffert--hus .hoffert__prick {
+    animation-delay: calc(0.6s + var(--i) * 0.24s);
+  }
+
+  html body .hoffert--hus .hoffert__lista em {
+    animation-delay: calc(0.7s + var(--i) * 0.24s);
+  }
+
+  html body .hoffert--hus .hoffert__fot strong {
+    animation-delay: 2.1s;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  html body .hus-pris .hoffert--hus.syns:hover,
+  html body .hus-pris .hoffert--hus:not(.vantar):hover {
+    transform: rotate(-0.3deg) translateY(-4px);
+  }
+}
+
+/* --- Mörkt läge ------------------------------------------------------------ */
+html[data-tema="mork"] body .hus-pris .hoffert--hus {
+  background: linear-gradient(160deg, rgba(40, 36, 31, 0.96), rgba(24, 22, 19, 0.94));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1), 0 40px 70px -30px rgba(0, 0, 0, 0.8);
+}
+
+html[data-tema="mork"] body .hus-pris__offert::before {
+  background: rgba(247, 245, 240, 0.035);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.07), 0 24px 48px -30px rgba(0, 0, 0, 0.7);
+}
+
+html[data-tema="mork"] body .hoffert--hus .hoffert__lista li.hoffert__lev {
+  background: rgba(240, 181, 110, 0.1);
+}
+
+html[data-tema="mork"] body .hoffert--hus .hoffert__lista .hoffert__lev em {
+  background: rgba(240, 181, 110, 0.18);
+  color: #f6c88f;
+}
+
+html[data-tema="mork"] body .hus-pris__not p {
+  color: rgba(247, 245, 240, 0.66);
+}
+
+html[data-tema="mork"] body .hus-pris__not b {
+  color: #f0b56e;
+}
+
+/* --- Smalare skärmar: texten först, kortet under -------------------------- */
+@media (max-width: 960px) {
+  html body .hus-pris__panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(36px, 6vw, 48px);
+    background:
+      radial-gradient(70% 40% at 40% 78%, rgba(255, 210, 150, 0.34), transparent 70%),
+      radial-gradient(60% 40% at 100% 0%, rgba(184, 205, 224, 0.18), transparent 60%),
+      linear-gradient(165deg, #fffdf9, #fdf6ec 55%, #f6f2e8);
+  }
+
+  html[data-tema="mork"] body .hus-pris__panel {
+    background:
+      radial-gradient(70% 40% at 40% 78%, rgba(240, 181, 110, 0.1), transparent 70%),
+      var(--vit);
+  }
+
+  html body .hus-pris__offert {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+  }
+}
+
+/* Surfplatta: noten står bredvid kortet i stället för under, så ytan
+   till höger om kortet inte blir tom. Kortet får plats först, noten
+   minst 200 px. */
+@media (min-width: 700px) and (max-width: 960px) {
+  html body .hus-pris__offert {
+    grid-template-columns: minmax(0, 400px) minmax(200px, 1fr);
+    align-items: center;
+    column-gap: clamp(28px, 4vw, 56px);
+  }
+
+  html body .hus-pris__not {
+    grid-area: 1 / 2;
+    gap: 18px;
+    max-width: 22rem;
+    padding: 0;
+  }
+
+  /* I den smala spalten står etiketten på egen rad, som en rubrik. */
+  html body .hus-pris__not b {
+    display: block;
+    margin: 0 0 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  html body .hus-pris__panel {
+    padding-inline: 18px;
+  }
+
+  html body .hus-pris .hoffert--hus {
+    padding: 16px 14px 14px;
+    border-radius: 22px;
+  }
+
+  html body .hoffert--hus .hoffert__lista li {
+    gap: 10px;
+    padding: 8px 4px;
+  }
+
+  /* Etiketten och stämpeln ryms på en rad ned till 360 px. */
+  html body .hoffert--hus .hoffert__typ {
+    letter-spacing: 0.12em;
+  }
+
+  html body .hoffert--hus .hoffert__stampel {
+    padding: 4px 7px;
+    letter-spacing: 0.1em;
+  }
+
+  html body .hus-pris__text .hus-pris__knappar {
+    gap: 10px;
+  }
+}
+
+/* Smal telefon: stämpeln får gå ned på en egen rad, till höger, så att
+   kortet krymper med spalten i stället för att sticka ut. */
+@media (max-width: 359px) {
+  html body .hoffert--hus .hoffert__huvud {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
+  html body .hoffert--hus .hoffert__stampel {
+    margin-left: auto;
+  }
+}
+
+/* =====================================================================
+   Toppkort (2026-10-10)
+   Om oss, Kontakt, Äga och hyra ut och Proffs får samma lilla kort över
+   toppbilden som Priser och Så fungerar det, bara med text som redan
+   står på sidan: fakta ur sifferrutorna, förfrågans gång, en bit ur
+   samägarkalendern och det vi levererar. På Äga sitter kortet uppe vid
+   bildens vänstra hörn, i träden, så att huset och skylten syns hela.
+   På Proffs sitter det nere till vänster om byggfotot. "Vilka vi är" på
+   Om oss står ensam när de dubbla kontaktraderna är borta.
+   ===================================================================== */
+
+/* --- Rader med en förklaring under (Om oss) och korta rader (Proffs) ------- */
+html body .hoffert__lista small {
+  display: block;
+  margin-top: 3px;
+  font: 500 0.75rem/1.3 var(--sans);
+  color: var(--text-3);
+}
+
+html body :is(.hoffert--fakta, .hoffert--leverans) .hoffert__lista li {
+  grid-template-columns: 18px minmax(0, 1fr);
+  padding: 7px 4px;
+}
+
+html body .hoffert--fakta .hoffert__lista li {
+  align-items: start;
+}
+
+html body :is(.hoffert--fakta, .hoffert--leverans) .hoffert__lista li:last-child {
+  border-bottom: 0;
+}
+
+html body .hoffert--fakta .hoffert__bock {
+  margin-top: -1px;
+}
+
+html body :is(.hoffert--fakta, .hoffert--leverans) .hoffert__lista b {
+  margin-right: 2px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #8f5424;
+}
+
+html[data-tema="mork"] body :is(.hoffert--fakta, .hoffert--leverans) .hoffert__lista b {
+  color: #d9a46a;
+}
+
+/* Rubrik och stämpel på en rad. */
+html body :is(.hoffert--fakta, .hoffert--fraga, .hoffert--kalender, .hoffert--leverans) :is(.hoffert__typ, .hoffert__stampel) {
+  white-space: nowrap;
+}
+
+/* --- Kontakt: förfrågans gång -------------------------------------------- */
+html body .hoffert--fraga .hoffert__typ {
+  letter-spacing: 0.14em;
+}
+
+/* --- Äga: en bit ur samägarkalendern ---------------------------------------
+   Veckorna 21–36 som kalendern visar dem när sidan öppnas, i delägarnas
+   egna färger (--del1–3). Sommarveckorna har strecket, midsommar stjärnan. */
+html body .hoffert__veckor {
+  display: grid;
+  gap: 5px;
+  margin: 12px 0 0;
+}
+
+html body .hoffert__veckor p {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+html body .hoffert__veckor small {
+  flex: 0 0 30px;
+  font: 700 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.02em;
+  color: var(--text-3);
+}
+
+html body .hoffert__veckor i {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--farg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 4px 8px -5px rgba(27, 25, 21, 0.6);
+  font: 600 0.75rem/1 var(--knappfont);
+  font-style: normal;
+  color: #fff;
+}
+
+html body .hoffert__veckor i.hoffert__sommar::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 2px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+html body .hoffert__veckor sup {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 5px -1px rgba(27, 25, 21, 0.4);
+  font-size: 0.5625rem;
+  line-height: 1;
+  color: #c98a45;
+}
+
+html[data-tema="mork"] body .hoffert__veckor sup {
+  background: #28241f;
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  color: #f0b56e;
+}
+
+html body .hoffert--kalender .hoffert__fot {
+  margin-top: 14px;
+}
+
+/* --- Placering ------------------------------------------------------------ */
+@media (min-width: 901px) {
+  /* Om oss och Kontakt: samma plats som på Priser (gemensamma regeln).
+     Korten är bredare och ligger lite mer på bilden, med luft mot texten. */
+  html body .subpage-hero.helbild .hoffert--fakta {
+    right: calc(clamp(28px, 4vw, 64px) + min(var(--bildb, 54%), 54%) - 282px);
+    width: 304px;
+  }
+
+  html body .subpage-hero.helbild .hoffert--fraga {
+    right: calc(clamp(28px, 4vw, 64px) + min(var(--bildb, 54%), 54%) - 306px);
+    width: 328px;
+  }
+
+  /* Äga: i trädens hörn uppe till vänster, aldrig över huset eller skylten
+     (takets vänstra hörn sitter 30 % in och 32 % ner i bilden, kortet
+     slutar före). Minst 40 px luft upp mot rutans kant på höga skärmar. */
+  html body .subpage-hero.helbild .hoffert--kalender {
+    top: max(40px, calc(50% - min(var(--bildb, 54cqw), 54cqw) * 0.3319 - 10px));
+    bottom: auto;
+    right: calc(clamp(28px, 4vw, 64px) + min(var(--bildb, 54%), 54%) * 0.75);
+    width: 270px;
+  }
+
+  /* Proffs: nere till vänster om byggfotot. */
+  html body .pf-topp .hoffert--leverans {
+    position: absolute;
+    left: -28px;
+    bottom: clamp(-64px, -4vw, -40px);
+    z-index: 3;
+    display: block;
+    width: 264px;
+    padding: 16px 16px 14px;
+    border-radius: 22px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 252, 246, 0.9));
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 0 0 1px rgba(27, 25, 21, 0.06),
+      0 40px 70px -30px rgba(40, 26, 12, 0.55),
+      0 14px 28px -18px rgba(90, 60, 25, 0.4);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    transform: rotate(-2.2deg);
+    transition: transform 0.8s var(--mjuk);
+  }
+
+  html body .pf-topp:hover .hoffert--leverans {
+    transform: rotate(-0.6deg) translateY(-4px);
+  }
+
+  html[data-tema="mork"] body .pf-topp .hoffert--leverans {
+    background: linear-gradient(160deg, rgba(40, 36, 31, 0.96), rgba(24, 22, 19, 0.94));
+    box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1), 0 40px 70px -30px rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Proffs under 1000 px: bilden står under texten, kortet inom bildens kant. */
+@media (min-width: 901px) and (max-width: 1000px) {
+  html body .pf-topp .hoffert--leverans {
+    left: 20px;
+  }
+}
+
+/* Smalare skärmar: Äga-kortet skulle tränga sig mot ingressen. */
+@media (min-width: 901px) and (max-width: 1339px) {
+  html body .subpage-hero.helbild .hoffert--kalender {
+    display: none;
+  }
+}
+
+/* Proffs 1001–1100 px: bilden står bredvid texten men är smal, och kortet
+   skulle täcka montören. Samma gräns som stegkortet på Så fungerar det. */
+@media (min-width: 1001px) and (max-width: 1100px) {
+  html body .pf-topp .hoffert--leverans {
+    display: none;
+  }
+}
+
+/* Proffs 1101–1279 px: kortet hänger lägre, så att montören syns. */
+@media (min-width: 1101px) and (max-width: 1279px) {
+  html body .pf-topp .hoffert--leverans {
+    bottom: -80px;
+  }
+}
+
+/* Veckorna fylls i en i taget, sedan vilar kortet. */
+@media (prefers-reduced-motion: no-preference) {
+  html body .hoffert__veckor i {
+    animation: hoffert-bock 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    animation-delay: calc(0.6s + var(--i) * 0.07s);
+  }
+}
+
+/* --- Om oss: ljus himmel i toppbilden --------------------------------------
+   Lyftbilden har vit himmel i övre vänstra hörnet och flöt ihop med den
+   ljusa rutan. En tunn mörk kant håller ihop den, och i mörkt läge tonas
+   den ned lite mer än andra bilder så att himlen inte bländar. */
+html:not([data-tema="mork"]) body .subpage-hero.helbild .subpage-hero__image[src*="lyft-stommar"] {
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(27, 25, 21, 0.14);
+}
+
+@media (min-width: 901px) {
+  html:not([data-tema="mork"]) body .subpage-hero.helbild .subpage-hero__image[src*="lyft-stommar"] {
+    box-shadow: 0 50px 100px -30px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(27, 25, 21, 0.14);
+  }
+
+  /* Kortet ligger delvis mot den vita himlen: en mjuk skugga runt om
+     ger pappret en kant även upptill. */
+  html:not([data-tema="mork"]) body .subpage-hero.helbild .hoffert--fakta {
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 0 0 1px rgba(27, 25, 21, 0.09),
+      0 2px 16px -4px rgba(90, 60, 25, 0.18),
+      0 40px 70px -30px rgba(40, 26, 12, 0.55),
+      0 14px 28px -18px rgba(90, 60, 25, 0.4);
+  }
+}
+
+html[data-tema="mork"] body .subpage-hero.helbild .subpage-hero__image[src*="lyft-stommar"] {
+  filter: brightness(0.82) contrast(1.04);
+}
+
+/* --- Om oss: "Vilka vi är" står ensam -------------------------------------- */
+@media (min-width: 901px) {
+  html body .kontakt-topp--ensam {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html body .kontakt-topp--ensam > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    grid-template-rows: auto auto 1fr;
+    column-gap: clamp(32px, 7vw, 110px);
+  }
+
+  html body .kontakt-topp--ensam .ih-etikett {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  html body .kontakt-topp--ensam h2 {
+    grid-column: 1;
+    grid-row: 2 / 4;
+    margin: 16px 0 0;
+  }
+
+  html body .kontakt-topp--ensam .kontakt-topp__lead,
+  html body .kontakt-topp--ensam .kontakt-topp__brod {
+    grid-column: 2;
+    max-width: 34rem;
+    padding-left: clamp(20px, 2.4vw, 32px);
+    border-left: 1px solid rgba(143, 84, 36, 0.28);
+  }
+
+  html body .kontakt-topp--ensam .kontakt-topp__lead {
+    grid-row: 2;
+    margin: 16px 0 0;
+    padding-bottom: 18px;
+  }
+
+  html body .kontakt-topp--ensam .kontakt-topp__brod {
+    grid-row: 3;
+    margin: 0;
+  }
+
+  html[data-tema="mork"] body .kontakt-topp--ensam :is(.kontakt-topp__lead, .kontakt-topp__brod) {
+    border-left-color: rgba(240, 181, 110, 0.24);
+  }
+}
+
+/* Äga och hyra ut: introts två verktyg som kort i varmt glas (2026-10-02). */
+html body .againtro .againtro__hopp {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  width: min(100%, 760px);
+  margin: 36px auto 0;
+  text-align: left;
+}
+
+html body .againtro .againtro__kort {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 16px;
+  min-height: 104px;
+  padding: 18px 18px 18px 20px;
+  border: 0;
+  border-radius: 24px;
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgba(255, 214, 160, 0.22), transparent 65%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 252, 246, 0.88));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 30px 60px -44px rgba(90, 60, 25, 0.55);
+  color: var(--text);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.45s var(--mjuk), box-shadow 0.45s var(--mjuk);
+}
+
+html body .againtro .againtro__kort:is(:hover, :focus-visible) {
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(201, 138, 69, 0.32), 0 40px 70px -40px rgba(143, 84, 36, 0.6);
+}
+
+html body .againtro .againtro__kort:focus-visible {
+  outline: 2px solid #8f5424;
+  outline-offset: 3px;
+}
+
+html body .againtro__ikon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #e2a865, #a96a2f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 12px 20px -10px rgba(143, 84, 36, 0.7);
+  transition: transform 0.45s var(--mjuk);
+}
+
+html body .againtro__ikon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: #fffaf2;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html body .againtro__korttext {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  min-width: 0;
+}
+
+html body .againtro__korttext strong {
+  font: 600 1.0625rem/1.25 var(--knappfont);
+  letter-spacing: -0.01em;
+  color: var(--text);
+  /* Mjukt bindestreck i titlarna: blir det för trångt bryts ordet i
+     sammansättningen, med bindestreck. */
+  overflow-wrap: break-word;
+  hyphens: manual;
+}
+
+html body .againtro__korttext span {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+html body .againtro__pil {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(240, 181, 110, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.3);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+html body .againtro__pil svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #8f5424;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.45s var(--mjuk), stroke 0.3s ease;
+}
+
+html body .againtro__kort:is(:hover, :focus-visible) .againtro__pil {
+  background: #1b1915;
+  box-shadow: none;
+}
+
+html body .againtro__kort:is(:hover, :focus-visible) .againtro__pil svg {
+  stroke: #f7f5f0;
+}
+
+/* Lyft vid hovring och tangentbordsfokus, tryck vid klick. */
+@media (prefers-reduced-motion: no-preference) {
+  html body .againtro .againtro__kort:is(:hover, :focus-visible) {
+    transform: translateY(-2px);
+  }
+
+  html body .againtro__kort:is(:hover, :focus-visible) .againtro__ikon {
+    transform: rotate(-4deg);
+  }
+
+  html body .againtro__kort:is(:hover, :focus-visible) .againtro__pil svg {
+    transform: translateY(2px);
+  }
+
+  html body .againtro .againtro__kort:active {
+    transform: translateY(0) scale(0.985);
+    transition-duration: 0.08s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .againtro :is(.againtro__kort, .againtro__ikon, .againtro__pil, .againtro__pil svg) {
+    transition: none;
+  }
+}
+
+/* Mörkt läge. */
+html[data-tema="mork"] body .againtro .againtro__kort {
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgba(240, 181, 110, 0.1), transparent 65%),
+    linear-gradient(160deg, rgba(40, 36, 31, 0.96), rgba(24, 22, 19, 0.94));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08), 0 30px 60px -36px rgba(0, 0, 0, 0.8);
+}
+
+html[data-tema="mork"] body .againtro .againtro__kort:is(:hover, :focus-visible) {
+  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.32), 0 40px 70px -36px rgba(0, 0, 0, 0.85);
+}
+
+html[data-tema="mork"] body .againtro .againtro__kort:focus-visible {
+  outline-color: #f0b56e;
+}
+
+html[data-tema="mork"] body .againtro__korttext strong {
+  color: #f7f5f0;
+}
+
+html[data-tema="mork"] body .againtro__korttext span {
+  color: rgba(247, 245, 240, 0.72);
+}
+
+html[data-tema="mork"] body .againtro__pil {
+  background: rgba(247, 245, 240, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+}
+
+html[data-tema="mork"] body .againtro__pil svg {
+  stroke: #f0b56e;
+}
+
+html[data-tema="mork"] body .againtro__kort:is(:hover, :focus-visible) .againtro__pil {
+  background: #f0b56e;
+  box-shadow: none;
+}
+
+html[data-tema="mork"] body .againtro__kort:is(:hover, :focus-visible) .againtro__pil svg {
+  stroke: #1b1915;
+}
+
+/* Under 760 px (fler px med förstorad text, brytpunkten är i em): korten
+   som rader under varandra, ikonen till vänster. */
+@media (max-width: 47.5em) {
+  html body .againtro .againtro__hopp {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    margin-top: 28px;
+  }
+
+  html body .againtro .againtro__kort {
+    min-height: 0;
+    padding: 16px 16px 16px 18px;
+    border-radius: 22px;
+  }
+}
+
+/* Telefon: tätare rader och lite mindre text. */
+@media (max-width: 30em) {
+  html body .againtro .againtro__kort {
+    grid-template-columns: 44px minmax(0, 1fr) 32px;
+    gap: 14px;
+    padding: 16px 14px 16px 16px;
+  }
+
+  html body .againtro__korttext strong {
+    font-size: 1rem;
+  }
+
+  html body .againtro__korttext span {
+    font-size: 0.875rem;
+  }
+
+  html body .againtro__pil {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Smala telefoner (360 px och smalare, eller förstorad text): mindre
+   pilknapp och lite mindre titel, så att det långa ordet får plats. */
+@media (max-width: 22.5em) {
+  html body .againtro .againtro__kort {
+    grid-template-columns: 44px minmax(0, 1fr) 28px;
+    gap: 12px;
+    padding: 14px 12px 14px 14px;
+  }
+
+  html body .againtro__korttext strong {
+    font-size: 0.9375rem;
+  }
+
+  html body .againtro__pil {
+    width: 28px;
+    height: 28px;
+  }
+
+  html body .againtro__pil svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* De allra smalaste (320 px och smalare): pilen går bort, hela kortet är
+   ändå länken. */
+@media (max-width: 20em) {
+  html body .againtro .againtro__kort {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  html body .againtro__pil {
+    display: none;
+  }
+}
+
+/* Kalenderns veckorutor: en ljus kant upptill och hörn som följer rutans
+   storlek (10 px på de stora rutorna, 8 px som förut på de små). */
+html body .samagare .vecka {
+  border-radius: clamp(8px, 12%, 10px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+html body .samagare .vecka:hover,
+html body .samagare .vecka:focus-visible {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 8px 18px -8px rgba(0, 0, 0, 0.5), 0 0 0 2px var(--varm-papper), 0 0 0 4px var(--farg);
+}
+
+/* =====================================================================
+   Startsidan: husväljarens fakta och verktygsteasern (2026-10-02)
+   Husväljarens fakta blir fyra glasrutor som måtten på huskortet och
+   fyller luften mellan texten och knapparna. Teasern för "Vad får jag
+   bygga?" blir en ritpapperspanel med kopparhörn: tomten med huset i
+   verktygets bildspråk till vänster, prissidans lovgränsmätare och den
+   mörka knappen till höger. I telefonen står tomten ovanför mätaren.
+   ===================================================================== */
+
+/* --- 1. Husväljarens fakta: fyra glasrutor ---------------------------- */
+html body .husval .husval__fakta {
+  container-type: inline-size;
+  grid-template-columns: minmax(0, 1.22fr) minmax(0, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 18px 0 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+html body .husval .husval__fakta > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 13px 14px 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06);
+}
+
+html body .husval .husval__fakta > div > dt {
+  font: 700 0.625rem/1.2 var(--knappfont);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+html body .husval .husval__fakta > div > dd {
+  margin: 0;
+  font: 600 1.35rem/1.1 var(--knappfont);
+  font-size: min(1.35rem, 6.4cqi);
+  letter-spacing: -0.02em;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* Etiketten i koppar, före de äldre reglerna för texten i kortet. */
+html:not([data-tema="mork"]) body .husval .husval__info .husval__fakta > div > dt {
+  color: #a07650;
+}
+
+@media (min-width: 901px) {
+  /* Rutorna växer och fyller luften, knapparna ligger kvar nederst. */
+  html body .husval .husval__info .husval__panel .husval__fakta {
+    flex: 1 1 auto;
+    margin-bottom: 18px;
+  }
+
+  /* Det dolda kortet behåller samma uppställning som det synliga, så
+     rutorna och knapparna står still medan det tonar bort. */
+  html body .husval .husval__info .husval__panel[hidden] {
+    display: flex;
+  }
+
+  /* Fotot sträcks aldrig på höjden (då skulle det beskäras eller lägga
+     sig över kortet). Blir kortet högre står bilden mitt för det. */
+  html body .husval .husval__scen .husval__ruta {
+    align-self: center;
+  }
+}
+
+/* Smal dator och liggande surfplatta: fotot och kortet står kvar
+   bredvid varandra. Rutorna blir tätare och knapparna delar en rad,
+   så kortet blir ungefär lika högt som fotot och båda ryms på en
+   skärm. */
+@media (min-width: 901px) and (max-width: 1179px) {
+  html body .husval .husval__info .husval__panel {
+    padding: 22px;
+  }
+
+  html body .husval .husval__info .husval__panel .husval__fakta {
+    gap: 6px;
+    margin: 14px 0;
+  }
+
+  html body .husval .husval__fakta > div {
+    gap: 6px;
+    padding: 10px 12px;
+  }
+
+  html body .husval .husval__info .husval__knappar {
+    flex-wrap: nowrap;
+  }
+
+  html body .husval .husval__info .husval__knappar .ih-knapp {
+    min-width: 0;
+    padding-inline: 14px;
+  }
+}
+
+/* Telefonen: samma varma kort som på datorn, så rutorna syns. */
+@media (max-width: 900px) {
+  html:not([data-tema="mork"]) body .husval .husval__info .husval__panel {
+    background:
+      radial-gradient(120% 60% at 100% 0%, rgba(255, 214, 160, 0.3), transparent 60%),
+      linear-gradient(170deg, #fffdf9, #f8f3ea);
+  }
+}
+
+html[data-tema="mork"] body .husval .husval__fakta > div {
+  background: rgba(247, 245, 240, 0.05);
+  box-shadow: inset 0 1px 0 rgba(247, 245, 240, 0.06), 0 0 0 1px rgba(247, 245, 240, 0.09);
+}
+
+html[data-tema="mork"] body .husval .husval__info .husval__fakta > div > dt {
+  color: #d9a46a;
+}
+
+html[data-tema="mork"] body .husval .husval__fakta > div > dd {
+  color: #f7f5f0;
+}
+
+/* --- 2. Verktygsteasern: tomten på ritpapper -------------------------- */
+html body .tomtteaser {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: center;
+  gap: clamp(16px, 3vw, 48px);
+  padding: clamp(14px, 2.6vw, 36px);
+  border-radius: 32px;
+  background:
+    linear-gradient(rgba(143, 84, 36, 0.07) 1px, transparent 1px) 0 0 / 20px 20px,
+    linear-gradient(90deg, rgba(143, 84, 36, 0.07) 1px, transparent 1px) 0 0 / 20px 20px,
+    radial-gradient(60% 70% at 28% 100%, rgba(240, 181, 110, 0.22), transparent 70%),
+    linear-gradient(160deg, #fffdf9, #f8f1e6);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.14), 0 30px 60px -44px rgba(90, 60, 25, 0.55);
+}
+
+/* Kopparhörnen, som på ritningarna under "Vad som styr priset". */
+html body .tomtteaser::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  pointer-events: none;
+  background:
+    linear-gradient(#c98a45, #c98a45) left top / 14px 1.5px no-repeat,
+    linear-gradient(#c98a45, #c98a45) left top / 1.5px 14px no-repeat,
+    linear-gradient(#c98a45, #c98a45) right top / 14px 1.5px no-repeat,
+    linear-gradient(#c98a45, #c98a45) right top / 1.5px 14px no-repeat,
+    linear-gradient(#c98a45, #c98a45) left bottom / 14px 1.5px no-repeat,
+    linear-gradient(#c98a45, #c98a45) left bottom / 1.5px 14px no-repeat,
+    linear-gradient(#c98a45, #c98a45) right bottom / 14px 1.5px no-repeat,
+    linear-gradient(#c98a45, #c98a45) right bottom / 1.5px 14px no-repeat;
+  opacity: 0.55;
+}
+
+/* Tomten: statisk bild i verktygets färger, brickan över nocken. */
+html body .tomtteaser__scen {
+  position: relative;
+  min-width: 0;
+}
+
+html body .tomtteaser__scen::before {
+  content: "";
+  position: absolute;
+  inset: 6% 4% 2%;
+  border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 222, 176, 0.6), rgba(255, 222, 176, 0) 70%);
+  pointer-events: none;
+}
+
+html body .tomtteaser__svg {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+html body .tomtteaser__chip {
+  left: 55.67%;
+  top: 38.62%;
+}
+
+/* Kortet till höger: varmt glas med lovgränserna. */
+html body .tomtteaser__kort {
+  position: relative;
+  min-width: 0;
+  padding: clamp(20px, 2.4vw, 30px);
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 252, 246, 0.88));
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 30px 60px -44px rgba(90, 60, 25, 0.55);
+}
+
+html body .tomtteaser__kort .hoffert__huvud {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+html body .tomtteaser__kort .hoffert__typ,
+html body .tomtteaser__kort .hoffert__stampel {
+  font-size: 0.75rem;
+}
+
+html body .tomtteaser__tal {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 20px 0 22px;
+}
+
+html body .tomtteaser__grans {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  margin: 0;
+}
+
+html body .tomtteaser__siffra {
+  font: 600 clamp(2.5rem, 1.9rem + 1.4vw, 3.25rem)/1 var(--knappfont);
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+/* Talet räknas upp utan att "m²" flyttar sig. */
+html body .tomtteaser__siffra strong {
+  display: inline-block;
+  min-width: 1.2em;
+  font-weight: inherit;
+}
+
+html body .tomtteaser__siffra small {
+  font-size: 0.4em;
+  letter-spacing: 0;
+}
+
+html body .tomtteaser__text {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+html body .tomtteaser__text::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6f9a6a;
+  box-shadow: 0 0 0 3px rgba(111, 154, 106, 0.2);
+  transform: translateY(-1px);
+}
+
+html body .tomtteaser__grans--utanfor .tomtteaser__text::before {
+  background: #6f90af;
+  box-shadow: 0 0 0 3px rgba(111, 144, 175, 0.22);
+}
+
+/* Lovgränsmätaren från prissidan: grönt till 30 m², blått till 50 m².
+   Fyllningen växer fram när mätaren syns (premium.js sätter .syns). */
+html body .tomtteaser__spar {
+  width: auto;
+  max-width: none;
+  margin: 0 0 40px;
+}
+
+html body .tomtteaser__spar .tomtteaser__fyll {
+  inset: 0 auto 0 0;
+  width: 50%;
+  border-radius: 99px 0 0 99px;
+  background: linear-gradient(90deg, #6f9a6a, #a9c98e);
+  transform: none;
+  transition: transform 1s var(--mjuk) 0.15s;
+}
+
+html body .tomtteaser__spar .tomtteaser__fyll--utanfor {
+  left: 50%;
+  width: 33.33%;
+  border-radius: 0 99px 99px 0;
+  background: linear-gradient(90deg, #6f90af, #b8cde0);
+  transition-delay: 0.85s;
+}
+
+html.ih-js body .tomtteaser__spar:not(.syns) .tomtteaser__fyll {
+  transform: scaleX(0);
+}
+
+html body .tomtteaser__spar .granser__mark::before {
+  background: #1b1915;
+}
+
+html body .tomtteaser__rubrik {
+  margin: 0;
+  padding-top: 20px;
+  border-top: 1px dashed rgba(143, 84, 36, 0.28);
+  font: 600 clamp(1.375rem, 1.1rem + 0.6vw, 1.625rem)/1.15 var(--knappfont);
+  letter-spacing: -0.025em;
+  color: var(--text);
+}
+
+html body .tomtteaser__ingress {
+  max-width: 40ch;
+  margin: 8px 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+html body .tomtteaser__fot {
+  margin: 20px 0 0;
+}
+
+/* Brickan dyker upp när mätaren syns (utan :has står den bara kvar). */
+html.ih-js body .tomtteaser:not(:has(.tomtteaser__spar.syns)) .tomtteaser__chip::before,
+html.ih-js body .tomtteaser:not(:has(.tomtteaser__spar.syns)) .tomtteaser__chip .vf3d__chip-in {
+  opacity: 0;
+  scale: 0.86;
+}
+
+html body .tomtteaser__chip::before,
+html body .tomtteaser__chip .vf3d__chip-in {
+  transition-delay: 0.3s;
+}
+
+/* Mörkt läge: grafit i stället för papper, samma koppar. */
+html[data-tema="mork"] body .tomtteaser {
+  background:
+    linear-gradient(rgba(240, 181, 110, 0.06) 1px, transparent 1px) 0 0 / 20px 20px,
+    linear-gradient(90deg, rgba(240, 181, 110, 0.06) 1px, transparent 1px) 0 0 / 20px 20px,
+    radial-gradient(60% 70% at 28% 100%, rgba(240, 181, 110, 0.08), transparent 70%),
+    linear-gradient(160deg, rgba(247, 245, 240, 0.06), rgba(247, 245, 240, 0.02));
+  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.14), 0 30px 60px -40px rgba(0, 0, 0, 0.8);
+}
+
+html[data-tema="mork"] body .tomtteaser__scen::before {
+  background: radial-gradient(50% 50% at 50% 50%, rgba(240, 181, 110, 0.14), rgba(240, 181, 110, 0) 70%);
+}
+
+html[data-tema="mork"] body .tomtteaser__kort {
+  background: linear-gradient(160deg, rgba(40, 36, 31, 0.96), rgba(24, 22, 19, 0.94));
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08), 0 30px 60px -36px rgba(0, 0, 0, 0.8);
+}
+
+html[data-tema="mork"] body .tomtteaser__siffra,
+html[data-tema="mork"] body .tomtteaser__rubrik {
+  color: #f7f5f0;
+}
+
+html[data-tema="mork"] body .tomtteaser__text,
+html[data-tema="mork"] body .tomtteaser__ingress {
+  color: rgba(247, 245, 240, 0.74);
+}
+
+html[data-tema="mork"] body .tomtteaser__spar .granser__mark::before {
+  background: #f7f5f0;
+}
+
+html[data-tema="mork"] body .tomtteaser__rubrik {
+  border-top-color: rgba(240, 181, 110, 0.24);
+}
+
+/* Telefon och smal surfplatta: tomten överst, kortet under. Papperet
+   får en kant under kortet så att de nedre hörnen står fritt. */
+@media (max-width: 900px) {
+  html body .tomtteaser {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    padding: 14px 14px 32px;
+    border-radius: 26px;
+  }
+
+  html body .tomtteaser::after {
+    inset: 11px;
+  }
+
+  html body .tomtteaser__scen {
+    width: min(100%, 560px);
+    margin: 8px auto 0;
+  }
+
+  html body .tomtteaser__kort {
+    border-radius: 20px;
+  }
+}
+
+/* Brickan behåller läsbar storlek när verktygets brickor krymper. */
+@media (max-width: 560px) {
+  html body .tomtteaser__chip .vf3d__chip-in {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 420px) {
+  html body .tomtteaser__tal {
+    gap: 12px;
+  }
+
+  html body .tomtteaser__text {
+    gap: 7px;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .tomtteaser__spar .tomtteaser__fyll,
+  html body .tomtteaser__chip::before,
+  html body .tomtteaser__chip .vf3d__chip-in {
+    transition: none;
+  }
+}

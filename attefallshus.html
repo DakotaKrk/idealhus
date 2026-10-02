@@ -25,9 +25,9 @@
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" as="image" href="images/hus-r2.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20261010i">
-    <link rel="stylesheet" href="design.css?v=20261010i">
-    <script src="premium.js?v=20261010i" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261010j">
+    <link rel="stylesheet" href="design.css?v=20261010j">
+    <script src="premium.js?v=20261010j" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script type="application/ld+json">
     {
@@ -153,9 +153,19 @@
               <a class="ih-knapp ih-knapp--kontur" href="kontakt.html">Prata med oss</a>
             </div>
           </div>
-          <figure class="kat-topp__bild"><img src="images/hus-r2.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Sadel 30, ett attefallshus i ljust trä med svart sadeltak på en äng vid vatten"></figure>
+          <figure class="kat-topp__bild"><img src="images/hus-r2.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Sadel 30, ett attefallshus i ljust trä med svart sadeltak på en äng vid vatten">
+            <div class="hoffert hoffert--fakta">
+              <p class="hoffert__huvud"><span class="hoffert__typ">Attefallshus&nbsp;· fakta</span></p>
+              <dl class="kat-topp__fakta hoffert__lista">
+                <div style="--i:0"><dt><i class="hoffert__bock"></i>Boyta</dt><dd><em>30 m²</em></dd></div>
+                <div style="--i:1"><dt><i class="hoffert__bock"></i>Planlösning</dt><dd><em>1–2 rum</em></dd></div>
+                <div style="--i:2"><dt><i class="hoffert__bock"></i>Leveranstid</dt><dd><em>10–12 veckor</em></dd></div>
+                <div class="hoffert__stampel"><dt>Inom måtten</dt><dd>Inget bygglov</dd></div>
+                <div class="hoffert__fot"><dt>Pris</dt><dd>I offert</dd></div>
+              </dl>
+            </div>
+          </figure>
         </div>
-        <dl class="kat-topp__fakta"><div><dt>Boyta</dt><dd>30 m²</dd></div><div><dt>Planlösning</dt><dd>1–2 rum</dd></div><div><dt>Leveranstid</dt><dd>10–12 veckor</dd></div><div><dt>Inom måtten</dt><dd>Inget bygglov</dd></div></dl>
       </section>
 
       <section class="category" id="modeller">
@@ -349,30 +359,19 @@
 
       <section class="at-steg ih-sektion" aria-labelledby="steg-rubrik">
         <div class="ih-inre">
-          <div class="at-steg__kort">
-            <div class="ih-huvud ih-huvud--mitt kat-mitt">
-              <p class="ih-etikett">Så går det till</p>
-              <h2 class="ih-rubrik" id="steg-rubrik">Tre steg <em>till ditt hus.</em></h2>
-            </div>
-            <ol class="at-steg__lista">
-              <li>
-                <span class="at-steg__nr">01</span>
-                <h3>Du berättar om tomten</h3>
-                <p>Var den ligger, vad huset ska bli och ungefär när. Mer än så behöver vi inte för att börja.</p>
-              </li>
-              <li>
-                <span class="at-steg__nr">02</span>
-                <h3>Vi ritar och räknar</h3>
-                <p>Du får förslag på modell och en offert post för post. Du ser vad som ingår innan du bestämmer dig.</p>
-              </li>
-              <li>
-                <span class="at-steg__nr">03</span>
-                <h3>Huset kommer</h3>
-                <p>Byggt under tak i Sverige, levererat på lastbil och monterat på din tomt på några dagar.</p>
-              </li>
-            </ol>
-            <p class="at-steg__mer"><a class="ih-knapp ih-knapp--kontur" href="sa-fungerar-det.html">Läs hela processen</a></p>
+          <div class="ih-huvud ih-huvud--mitt kat-mitt">
+            <p class="ih-etikett">Så går det till</p>
+            <h2 class="ih-rubrik" id="steg-rubrik">Tre steg <em>till ditt hus.</em></h2>
           </div>
+          <div class="prisvag__spar" data-steglinje>
+          <span class="prisvag__linje" aria-hidden="true"><span></span></span>
+          <ol class="prisvag__steg">
+            <li><span class="prisvag__nr">1</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 5.5h16v10.5H10l-4.5 3.5V16H4z"/></svg></span><h3>Du berättar om tomten</h3><p>Var den ligger, vad huset ska bli och ungefär när. Mer än så behöver vi inte för att börja.</p></div></li>
+            <li><span class="prisvag__nr">2</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4.5 19.5l1-4.2L15.6 5.2a2.05 2.05 0 0 1 2.9 2.9L8.4 18.5z"/><path d="M13.8 7l3 3"/></svg></span><h3>Vi ritar och räknar</h3><p>Du får förslag på modell och en offert post för post. Du ser vad som ingår innan du bestämmer dig.</p></div></li>
+            <li><span class="prisvag__nr">3</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M3 17h13l3-4h2v4"/><path d="M5 17v2"/><path d="M17 17v2"/><path d="M3 13h11V7H3z"/></svg></span><h3>Huset kommer</h3><p>Byggt under tak i Sverige, levererat på lastbil och monterat på din tomt på några dagar.</p></div></li>
+          </ol>
+          </div>
+          <p class="at-steg__mer"><a class="ih-knapp ih-knapp--kontur" href="sa-fungerar-det.html">Läs hela processen</a></p>
         </div>
       </section>
 
@@ -390,11 +389,12 @@
         <div class="jamforruta__kolumner"></div>
       </dialog>
 
-      <section class="ih-sektion ih-sektion--sand">
-        <div class="ih-inre">
-          <div class="ih-huvud ih-huvud--mitt kat-mitt">
+      <section class="ih-sektion ih-sektion--sand fragepanel" aria-labelledby="fragor-rubrik">
+        <div class="ih-inre fragepanel__inre">
+          <div class="ih-huvud ih-huvud--mitt kat-mitt fragepanel__sida">
             <p class="ih-etikett">Frågor och svar</p>
-            <h2 class="ih-rubrik">Bra att <em>veta.</em></h2>
+            <h2 class="ih-rubrik" id="fragor-rubrik">Bra att <em>veta.</em></h2>
+            <p class="fragepanel__lank"><a class="ih-knapp ih-knapp--kontur" href="attefallshus-regler.html">Läs hela guiden</a></p>
           </div>
           <div class="ih-fragor">
             <details class="ih-fraga" open>

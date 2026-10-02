@@ -45,6 +45,15 @@
     narSynligt(el, function (e) { e.classList.add('syns'); }, 0.6);
   });
 
+  /* --- Offertkortet på huskortet ---------------------------------
+     Det ligger långt ned på sidan. Posterna bockas av när kortet
+     syns, inte vid inladdningen (design.css: Huskortets pris). */
+  $$('.hoffert--hus').forEach(function (el) {
+    if (lugn) return;
+    el.classList.add('vantar');
+    narSynligt(el, function (e) { e.classList.add('syns'); }, 0.35);
+  });
+
   /* --- Rubriker reser sig ord för ord ----------------------------
      Som Kasters rubriker: varje ord stiger ur sin egen mask. Rubriker
      med kursivt skimmerord eller innehåll som byts av skript (huskortet,
