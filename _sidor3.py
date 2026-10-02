@@ -198,7 +198,7 @@ def _kategori(namn, lank, pris):
     lista = M.modeller(lank)
     ytor = [m[2] for m in lista]
     bild = B.KATEGORI_INFO[namn][0]
-    spann = f"{min(ytor)}–{max(ytor)} m²"
+    spann = f"{min(ytor)} m²" if min(ytor) == max(ytor) else f"{min(ytor)}–{max(ytor)} m²"
     return (namn, lank, pris, bild, min(ytor), max(ytor), spann, len(lista))
 
 
@@ -351,9 +351,23 @@ def faktorer_html():
             </article>""" for i, (a, b) in enumerate(STYR, 1))
 
 
+# Offertkortet som svävar över toppbilden: posterna bockas av en i taget.
+HERO_OFFERT = (
+    '        <div class="hoffert" aria-hidden="true">\n'
+    '          <div class="hoffert__huvud"><span class="hoffert__typ">Offert · utkast</span><span class="hoffert__stampel">Post för post</span></div>\n'
+    '          <ul class="hoffert__lista">\n'
+    + "".join(f'            <li style="--i:{i}"><i class="hoffert__bock"></i><span>{a}</span><em>Ingår</em></li>\n'
+              for i, (a, _b, _d) in enumerate(INGAR))
+    + f'            <li class="hoffert__andra" style="--i:{len(INGAR)}"><i class="hoffert__prick"></i><span>Grund, el och VA, mark, avgifter</span><em>Hos andra</em></li>\n'
+    '          </ul>\n'
+    '          <div class="hoffert__fot"><span>Summa</span><strong>Sätts i offerten</strong></div>\n'
+    '        </div>'
+)
+
 PRISSIDA = f'''    <main id="innehall">
       <section class="subpage-hero">
         <img class="subpage-hero__image" src="images/foto/stommar-stapel.webp" width="1800" height="1200" fetchpriority="high" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra">
+{HERO_OFFERT}
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
@@ -526,9 +540,9 @@ PRISSIDA = f'''    <main id="innehall">
           <div class="prisvag__spar" data-steglinje>
           <span class="prisvag__linje" aria-hidden="true"><span></span></span>
           <ol class="prisvag__steg">
-            <li><span class="prisvag__nr">1</span><h3>Första samtalet</h3><p>Du berättar om tomten och vad huset ska användas till. Du behöver inte ha bestämt modell eller budget.</p></li>
-            <li><span class="prisvag__nr">2</span><h3>Val av modell</h3><p>Vi går igenom modellerna som passar tomten och vad som behöver anpassas.</p></li>
-            <li><span class="prisvag__nr">3</span><h3>Offert post för post</h3><p>Det står vad som ingår och vad som tillkommer, innan du bestämmer dig. Hela ordningen finns på <a href="sa-fungerar-det.html">Så fungerar det</a>.</p></li>
+            <li><span class="prisvag__nr">1</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 5.5h16v10.5H10l-4.5 3.5V16H4z"/></svg></span><h3>Första samtalet</h3><p>Du berättar om tomten och vad huset ska användas till. Du behöver inte ha bestämt modell eller budget.</p></div></li>
+            <li><span class="prisvag__nr">2</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5M10 20v-5h4v5"/></svg></span><h3>Val av modell</h3><p>Vi går igenom modellerna som passar tomten och vad som behöver anpassas.</p></div></li>
+            <li><span class="prisvag__nr">3</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M5 3.5h9.5L19 8v12.5H5zM14.5 3.5V8H19M9 14l2 2 4-4.2"/></svg></span><h3>Offert post för post</h3><p>Det står vad som ingår och vad som tillkommer, innan du bestämmer dig. Hela ordningen finns på <a href="sa-fungerar-det.html">Så fungerar det</a>.</p></div></li>
           </ol>
           </div>
           <p class="prisvag__knappar">

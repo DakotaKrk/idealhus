@@ -25,9 +25,9 @@
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" as="image" href="images/foto/stommar-stapel.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20261009d">
-    <link rel="stylesheet" href="design.css?v=20261009d">
-    <script src="premium.js?v=20261009d" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261009g">
+    <link rel="stylesheet" href="design.css?v=20261009g">
+    <script src="premium.js?v=20261009g" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script type="application/ld+json">
     {
@@ -137,6 +137,18 @@
       <section class="subpage-hero">
         <span class="ih-kant" aria-hidden="true"></span>
         <img class="subpage-hero__image" src="images/foto/stommar-stapel.webp" width="1800" height="1200" fetchpriority="high" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra">
+        <div class="hoffert" aria-hidden="true">
+          <div class="hoffert__huvud"><span class="hoffert__typ">Offert · utkast</span><span class="hoffert__stampel">Post för post</span></div>
+          <ul class="hoffert__lista">
+            <li style="--i:0"><i class="hoffert__bock"></i><span>Ritningar och underlag</span><em>Ingår</em></li>
+            <li style="--i:1"><i class="hoffert__bock"></i><span>Själva huset</span><em>Ingår</em></li>
+            <li style="--i:2"><i class="hoffert__bock"></i><span>Leverans till tomten</span><em>Ingår</em></li>
+            <li style="--i:3"><i class="hoffert__bock"></i><span>Montage</span><em>Ingår</em></li>
+            <li style="--i:4"><i class="hoffert__bock"></i><span>Slutbesiktning</span><em>Ingår</em></li>
+            <li class="hoffert__andra" style="--i:5"><i class="hoffert__prick"></i><span>Grund, el och VA, mark, avgifter</span><em>Hos andra</em></li>
+          </ul>
+          <div class="hoffert__fot"><span>Summa</span><strong>Sätts i offerten</strong></div>
+        </div>
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
@@ -460,9 +472,9 @@
           <div class="prisvag__spar" data-steglinje>
           <span class="prisvag__linje" aria-hidden="true"><span></span></span>
           <ol class="prisvag__steg">
-            <li><span class="prisvag__nr">1</span><h3>Första samtalet</h3><p>Du berättar om tomten och vad huset ska användas till. Du behöver inte ha bestämt modell eller budget.</p></li>
-            <li><span class="prisvag__nr">2</span><h3>Val av modell</h3><p>Vi går igenom modellerna som passar tomten och vad som behöver anpassas.</p></li>
-            <li><span class="prisvag__nr">3</span><h3>Offert post för post</h3><p>Det står vad som ingår och vad som tillkommer, innan du bestämmer dig. Hela ordningen finns på <a href="sa-fungerar-det.html">Så fungerar det</a>.</p></li>
+            <li><span class="prisvag__nr">1</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 5.5h16v10.5H10l-4.5 3.5V16H4z"/></svg></span><h3>Första samtalet</h3><p>Du berättar om tomten och vad huset ska användas till. Du behöver inte ha bestämt modell eller budget.</p></div></li>
+            <li><span class="prisvag__nr">2</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5M10 20v-5h4v5"/></svg></span><h3>Val av modell</h3><p>Vi går igenom modellerna som passar tomten och vad som behöver anpassas.</p></div></li>
+            <li><span class="prisvag__nr">3</span><div class="prisvag__kort"><span class="prisvag__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M5 3.5h9.5L19 8v12.5H5zM14.5 3.5V8H19M9 14l2 2 4-4.2"/></svg></span><h3>Offert post för post</h3><p>Det står vad som ingår och vad som tillkommer, innan du bestämmer dig. Hela ordningen finns på <a href="sa-fungerar-det.html">Så fungerar det</a>.</p></div></li>
           </ol>
           </div>
           <p class="prisvag__knappar">
