@@ -1840,8 +1840,7 @@
       visa(i);
       if (matt.rail && matt.rail.h) {
         var sist = matt.steg[matt.steg.length - 1];
-        var spets = window.scrollY + window.innerHeight * 0.5 < matt.steg[0].topp ? 0
-          : (y >= sist.botten ? matt.rail.h : matt.steg[i].prick - matt.rail.topp);
+        var spets = y >= sist.botten ? matt.rail.h : matt.steg[i].prick - matt.rail.topp;
         spets = Math.min(matt.rail.h, Math.max(0, spets));
         if (railFyll) railFyll.style.transform = 'scaleY(' + (spets / matt.rail.h).toFixed(4) + ')';
         if (railKula) railKula.style.transform = 'translateY(' + spets.toFixed(1) + 'px)';
@@ -1887,7 +1886,7 @@
     var steg3 = $('#steg-3'), steg6 = $('#steg-6');
     var leverans = {};
     try { leverans = JSON.parse(sek.getAttribute('data-leverans')); } catch (e) { leverans = {}; }
-    var orig = steg3 ? { h: $('h3', steg3).textContent, p: $('p', steg3).textContent } : null;
+    var orig = steg3 ? { h: $('h3', steg3).textContent, p: $('p', steg3).textContent, namn: steg3.getAttribute('data-namn') } : null;
     var chip = document.createElement('span');
     chip.className = 'flode__leverans';
     chip.hidden = true;
@@ -1914,7 +1913,9 @@
           $('h3', steg3).textContent = t[0];
           $('p', steg3).textContent = t[1];
           blinka($('.berattelse__kort', steg3));
+          steg3.setAttribute('data-namn', typ === 'alla' ? orig.namn : (typ === 'attefallshus' ? 'Anmälan' : 'Bygglov'));
           if (aktiv === 2 && hud.namn) hud.namn.textContent = t[0];
+          if (aktiv === 2 && nu) nu.textContent = '03 · ' + steg3.getAttribute('data-namn');
         }
         chip.hidden = typ === 'alla' || !leverans[typ];
         if (!chip.hidden) {
@@ -2594,16 +2595,18 @@
       // Kontaktsektionen är redan samma uppmaning, och stegen och
       // checklistan på Så fungerar det ska läsas i lugn och ro - där går
       // tipset undan.
-      var undan = $$('.contact-section, .flode, .checklista');
+      var undan = $$('.contact-section, .flode, .checklista, .segment--tak');
       if (undan.length && window.IntersectionObserver) {
-        var iVagen = [];
+        var iVagen = [], tipsTimer = 0;
         var io = new IntersectionObserver(function (poster) {
           poster.forEach(function (p) {
             var i = iVagen.indexOf(p.target);
             if (p.isIntersecting && i < 0) iVagen.push(p.target);
             if (!p.isIntersecting && i >= 0) iVagen.splice(i, 1);
           });
-          tips.classList.toggle('tipsruta--undan', iVagen.length > 0);
+          clearTimeout(tipsTimer);
+          if (iVagen.length) tips.classList.add('tipsruta--undan');
+          else tipsTimer = setTimeout(function () { tips.classList.remove('tipsruta--undan'); }, 500);
         }, { rootMargin: '0px 0px -20% 0px' });
         undan.forEach(function (u) { io.observe(u); });
       }

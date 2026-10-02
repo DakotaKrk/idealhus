@@ -25601,3 +25601,73 @@ html body .takkort .hoffert__fot {
 html body .takkort .hoffert__fot strong {
   font-size: 1.0625rem;
 }
+/* Så fungerar det: rättelser efter QA-granskningen (2026-10-09). */
+
+/* Raden får plats på en rad mellan 1041 och 1199 px (annars två rader
+   som täckte scenens överkant). Stegets namn står ändå i scenen. */
+@media (min-width: 1041px) and (max-width: 1199px) {
+  html body .flode__nu {
+    display: none;
+  }
+}
+
+/* Slöjan är helt täckande en bit förbi radens nederkant. */
+@media (min-width: 901px) {
+  html body .flode::before {
+    height: 204px;
+    margin: -102px 0 -102px;
+    background: linear-gradient(180deg, var(--ben) 0, var(--ben) 166px, transparent 204px);
+  }
+}
+
+/* Stämpeln på egen rad under "klara", och lite tydligare. */
+html body .checklista--klar .checklista__matare p::after {
+  display: table;
+  margin: 8px 0 0;
+  font-size: 0.625rem;
+}
+
+html:not([data-tema="mork"]) body .checklista--klar .checklista__matare p::after {
+  color: #24774a;
+}
+
+html body .checklista--klar .checklista__ringfyll {
+  filter: drop-shadow(0 0 3px rgba(76, 194, 127, 0.6));
+}
+
+/* Stegkortet över toppbilden ligger mer på bilden, med luft mot texten. */
+@media (min-width: 901px) {
+  html body .subpage-hero.helbild .hoffert--steg {
+    right: calc(clamp(28px, 4vw, 64px) + min(var(--bildb, 54%), 54%) - 282px);
+  }
+}
+
+/* Mörkt läge: kortets rubrik, siffror och stämpel läsbara. */
+html[data-tema="mork"] body .hoffert__typ,
+html[data-tema="mork"] body .hoffert--steg .hoffert__lista b {
+  color: #d9a46a;
+}
+
+html[data-tema="mork"] body .hoffert__stampel {
+  border-color: rgba(240, 181, 110, 0.55);
+  color: #f0b56e;
+}
+
+/* Mörkt läge: kommande steg syns som ringar på rälsen. */
+html[data-tema="mork"] body .berattelse__steg:not(.passerad)::before {
+  background: #141310;
+  box-shadow: inset 0 0 0 2px rgba(247, 245, 240, 0.28);
+}
+
+/* "Vi"-pricken syns på den mörka markeringen. */
+html body .vemfilter button[aria-pressed="true"] .vemprick--vi {
+  background: #f7f5f0;
+}
+
+/* Surfplatta: ute/inne-kortet blir inte en lång remsa. */
+@media (max-width: 900px) {
+  html body .takkort {
+    max-width: 420px;
+    margin: -36px auto 0 16px;
+  }
+}
