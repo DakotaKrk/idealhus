@@ -507,12 +507,12 @@
           '<img src="images/' + k.getAttribute('data-bild') + '" srcset="images/' + k.getAttribute('data-bild').replace('.webp', '-800.webp') + ' 800w, images/' + k.getAttribute('data-bild') + ' 1600w" sizes="(max-width: 700px) 92vw, 460px" alt="">' +
           '<h3>' + k.getAttribute('data-namn') + '</h3>' +
           '<dl>' +
-          '<div><dt>Boyta</dt><dd>' + stapel(tal(k, 'yta'), storstYta, 'm²') + '</dd></div>' +
+          '<div><dt>Yta</dt><dd>' + stapel(tal(k, 'yta'), storstYta, 'm²') + '</dd></div>' +
           '<div><dt>Rum</dt><dd>' + stapel(tal(k, 'rum'), storstRum, 'rum') + '</dd></div>' +
           '<div><dt>Leverans</dt><dd>' + stapel(tal(k, 'lev'), storstLev, 'v', true) + '</dd></div>' +
           '<div><dt>Pris</dt><dd><strong>I offert</strong></dd></div>' +
           '</dl>' +
-          '<a class="jamforruta__lank" href="' + lank + '">Se huskortet</a>' +
+          '<a class="jamforruta__lank" href="' + lank + '">Se ' + k.getAttribute('data-namn') + '</a>' +
           '</article>';
       }).join('');
       ruta.style.setProperty('--antal', valda.length);
@@ -2726,7 +2726,7 @@
   /* --- Huskortet: ryms huset på min tomt? ----------------------- */
   var ryms = $('[data-ryms]');
   if (ryms) {
-    var dt = $$('.model-specs dt').filter(function (d) { return d.textContent.trim() === 'Boyta'; })[0];
+    var dt = $$('.model-specs dt').filter(function (d) { return /^(Byggnadsarea|Yta|Boyta)$/.test(d.textContent.trim()); })[0];
     var yta = dt && parseInt(dt.nextElementSibling.textContent, 10);
     var namn = $('.subpage-hero__title');
     // Kategorin först i namnet: "Huskort 2" finns i båda kategorierna.
@@ -2744,7 +2744,7 @@
      Som Kasters lanseringsnotis: visas en gång efter halva sidan,
      aldrig där det redan finns ett formulär eller verktyget självt,
      och inte igen på fjorton dagar efter att man stängt det. */
-  var utan = ['index.html', '', 'huskort.html', 'priser.html', 'aga-och-hyra-ut.html', 'vad-far-jag-bygga.html', 'kontakt.html', '404.html', 'integritetspolicy.html', 'attefallshus-regler.html', 'proffs.html'];
+  var utan = ['index.html', '', 'huskort.html', 'sadel-30.html', 'sadel-30-bred.html', 'pulpet-30.html', 'kupa-40.html', 'kupa-50.html', 'priser.html', 'aga-och-hyra-ut.html', 'vad-far-jag-bygga.html', 'kontakt.html', '404.html', 'integritetspolicy.html', 'attefallshus-regler.html', 'proffs.html'];
   // En riktig 404 visas på den trasiga adressen, inte på 404.html, så
   // sidan känns igen på sitt innehåll.
   if (utan.indexOf(sida) < 0 && !$('.fyrafyra')) {

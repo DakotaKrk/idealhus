@@ -44,11 +44,11 @@ KALKYL_FALT = "\n".join([
 
 KROPP = f'''    <main id="innehall">
       <section class="subpage-hero">
-        <img class="subpage-hero__image" src="images/hus-r3.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Svart fritidshus med takkupa i en tallskog">
+        <img class="subpage-hero__image" src="images/hus-r3.webp" width="1600" height="1062" fetchpriority="high" decoding="async" alt="Kupa 40, svart fritidshus med takkupa och trädäck i en tallskog">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
-            <h1 class="subpage-hero__title">Äga och hyra ut</h1>
+            <h1 class="subpage-hero__title">Samäga och hyra ut</h1>
             <p class="subpage-hero__meta">Två verktyg för dig som delar stugan med andra: en kalender som fördelar årets veckor rättvist, och en kalkyl som visar vad uthyrningen kan täcka.</p>
             <div class="subpage-hero__actions">
               <a class="hero__link hero__link--solid" href="#samagare">Samägarkalendern</a>
@@ -533,9 +533,10 @@ SKRIPT = r'''
       })();
 '''
 
-ut = (B.head("Äga och hyra ut | Idealhus",
-             "Samäga stugan och räkna på uthyrningen: en kalender som fördelar "
-             "årets veckor rättvist och en kalkyl över vad uthyrningen täcker.",
+ut = (B.head("Samäga och hyra ut fritidshus – kalender och kalkyl | Idealhus",
+             "Samäga fritidshuset och räkna på uthyrningen: en kalender som fördelar "
+             "årets veckor rättvist och en kalkyl med Skatteverkets schablon för "
+             "uthyrning.",
              "hus-r3.webp", fil="aga-och-hyra-ut.html")
       + "\n" + B.header("Våra hus") + "\n" + KROPP + B.SIDFOT + "\n" + B.skript(SKRIPT))
 

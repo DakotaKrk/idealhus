@@ -3,7 +3,7 @@
 import re, io, os
 
 BAS = "https://idealhus.se/"
-CSS_V = "20261001c"
+CSS_V = "20261010l"
 
 # Husen for den som ska bo i dem, och det vi levererar till andra som
 # bygger. De sag likadana ut i menyn tidigare, som fem jamnstallda val.
@@ -34,7 +34,7 @@ KATEGORI_INFO = {
 }
 
 MENY = [
-    ("Hem", "index.html"),
+    ("Hem", "./"),
     ("__DROPDOWN__", None),
     ("Priser", "priser.html"),
     ("Så fungerar det", "sa-fungerar-det.html"),
@@ -44,15 +44,16 @@ MENY = [
 
 
 # Modellerna direkt i menyn (2026-10-02): en rad små länkar under
-# Attefallshus och Fritidshus, och samma rad i mobilmenyn.
+# Attefallshus och Fritidshus, och samma rad i mobilmenyn. Sedan
+# 2026-10-03 går de till modellernas egna sidor (_modeller.py SIDA).
 MENY_MODELLER = {
-    "attefallshus.html": [("Sadel 30", "attefallshus", 1), ("Sadel 30 Bred", "attefallshus", 2), ("Pulpet 30", "attefallshus", 3)],
-    "fritidshus.html": [("Kupa 40", "fritidshus", 1), ("Kupa 50", "fritidshus", 2)],
+    "attefallshus.html": [("Sadel 30", "sadel-30.html"), ("Sadel 30 Bred", "sadel-30-bred.html"), ("Pulpet 30", "pulpet-30.html")],
+    "fritidshus.html": [("Kupa 40", "kupa-40.html"), ("Kupa 50", "kupa-50.html")],
 }
 
 
 def modellankar(fil):
-    return "".join(f'<a href="huskort.html?typ={t}&amp;modell={n}">{namn}</a>' for namn, t, n in MENY_MODELLER.get(fil, []))
+    return "".join(f'<a href="{sida}">{namn}</a>' for namn, sida in MENY_MODELLER.get(fil, []))
 
 
 GUIDELANKAR = ('<a href="attefallshus-regler.html">Attefallshus: reglerna</a>'
@@ -249,8 +250,61 @@ def delningsbild(kalla):
     return ut
 
 
-def head(titel, beskrivning, forladdad=None, fil=None):
+# Alt-text för delningsbilderna (og:image:alt), samma text som husbilderna
+# har på sidorna. Nycklarna är filerna i images/delning/ (2026-10-03).
+DELNINGSALT = {
+    "hus-r1.jpg": "Sadel 30 Bred, svart attefallshus med sadeltak och glasgavel på en klippa vid havet",
+    "hus-r2.jpg": "Sadel 30, attefallshus i ljust trä med svart sadeltak på en äng vid vatten",
+    "hus-r3.jpg": "Kupa 40, svart fritidshus med takkupa och trädäck i en tallskog",
+    "hus-r4.jpg": "Kupa 50, ljusgrått fritidshus med takkupa på en gräsmatta bland björkar",
+    "hus-r5.jpg": "Pulpet 30, svart attefallshus med pulpettak och stora glaspartier i snöig skog",
+    "stommar-stapel.jpg": "Färdiga väggstommar i trä staplade på varandra",
+    "dronare-montage.jpg": "Drönarbild av ett hus under montage, med inplastade väggar runt en betongplatta och en kran",
+    "dronare-vaggblock.jpg": "Drönarbild av ett bygge med väggstommar i trä på marken och en lastbil med takstolar",
+    "lyft-stommar.jpg": "En kranarm lyfter en bunt väggstommar i trä ovanför väggar som redan står resta",
+    "dronare-platta.jpg": "Två personer i arbete på betongplattan mellan de resta väggarna",
+    "arbetare-vattenpass.jpg": "En snickare i varselkläder håller vattenpass mot en väggstomme",
+}
+
+# Organisationen och webbplatsen i strukturerad data (2026-10-03). Bara det
+# som står synligt på sajten: ingen gatuadress, inget telefonnummer, inget
+# organisationsnummer, inga sociala profiler (adresserna är okända) och
+# ingen areaServed. Sidornas egna noder (WebPage m.m.) underhålls i html.
+ORG = {
+    "@type": "Organization",
+    "@id": BAS + "#organisation",
+    "name": "Idealhus",
+    "legalName": "Idealhus AB",
+    "url": BAS,
+    "logo": BAS + "images/idealhus.svg",
+    "image": BAS + "images/hus-r2.webp",
+    "email": "info@idealhus.se",
+    "description": "Idealhus formger och bygger attefallshus och fritidshus och tillverkar byggelement för proffs, allt under tak i Sverige.",
+    "address": {"@type": "PostalAddress", "addressLocality": "Stockholm", "addressCountry": "SE"},
+}
+WEB = {
+    "@type": "WebSite",
+    "@id": BAS + "#webbplats",
+    "url": BAS,
+    "name": "Idealhus",
+    "inLanguage": "sv-SE",
+    "publisher": {"@id": BAS + "#organisation"},
+}
+
+
+def jsonld(noder=()):
+    """Ett enda JSON-LD-block med ORG, WEB och sidans egna noder."""
+    import json
+    g = {"@context": "https://schema.org", "@graph": [ORG, WEB] + list(noder)}
+    return "\n".join("    " + r for r in json.dumps(g, ensure_ascii=False, indent=2).split("\n"))
+
+
+def head(titel, beskrivning, forladdad=None, fil=None, ogtyp="website", delning=None, noder=()):
+    # delning: bilden som delningsbilden görs av, om den inte är forladdad.
+    # noder: sidans egna JSON-LD-noder efter ORG och WEB.
     pre = f'\n    <link rel="preload" as="image" href="images/{forladdad}" fetchpriority="high">' if forladdad else ""
+    bild = delningsbild(delning or forladdad or 'hus-r2.webp')
+    bildalt = DELNINGSALT.get(bild.split("/")[-1], "")
     return f'''<!doctype html>
 <html lang="sv">
   <head>
@@ -260,18 +314,19 @@ def head(titel, beskrivning, forladdad=None, fil=None):
     <meta name="description" content="{beskrivning}">
     <meta name="theme-color" content="#1b1915">
     <link rel="icon" href="images/idealhus.svg" type="image/svg+xml">
-    <link rel="icon" href="favicon.ico" sizes="32x32">
+    <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="canonical" href="{BAS}{fil or ''}">
 
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{ogtyp}">
     <meta property="og:locale" content="sv_SE">
     <meta property="og:site_name" content="Idealhus">
     <meta property="og:title" content="{titel}">
     <meta property="og:description" content="{beskrivning}">
-    <meta property="og:image" content="{BAS}images/{delningsbild(forladdad or 'hus-r2.webp')}">
+    <meta property="og:image" content="{BAS}images/{bild}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{bildalt}">
     <meta property="og:url" content="{BAS}{fil or ''}">
     <meta name="twitter:card" content="summary_large_image">
 
@@ -281,19 +336,7 @@ def head(titel, beskrivning, forladdad=None, fil=None):
     <script src="premium.js?v={CSS_V}" defer></script>
     {TEMASKRIPT}
     <script type="application/ld+json">
-    {{
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "@id": "{BAS}#organisation",
-      "name": "Idealhus",
-      "legalName": "Idealhus AB",
-      "url": "{BAS}",
-      "logo": "{BAS}images/idealhus_logo.svg",
-      "image": "{BAS}images/hus-r2.webp",
-      "email": "info@idealhus.se",
-      "description": "Idealhus formger och bygger attefallshus och fritidshus med skandinavisk design och svensk tillverkning.",
-      "areaServed": "SE"
-    }}
+{jsonld(noder)}
     </script>
   </head>
   <body>'''
@@ -303,7 +346,7 @@ def header(aktiv):
     return f'''    <a class="skip" href="#innehall">Hoppa till innehållet</a>
     <header class="site-header">
       <div class="site-header__inner">
-        <a class="logo" href="index.html" aria-label="Till Idealhus startsida">
+        <a class="logo" href="./" aria-label="Till Idealhus startsida">
           <img class="logo__svg" src="images/idealhus_logo.svg" width="1024" height="279" alt="Idealhus">
         </a>
 
@@ -349,7 +392,7 @@ SIDFOT = '''    <footer class="site-footer">
         <div>
           <h2 class="site-footer__heading">Navigation</h2>
           <nav class="site-footer__nav" aria-label="Sidfotens navigering">
-            <a href="index.html">Hem</a>
+            <a href="./">Hem</a>
             <a href="priser.html">Priser</a>
             <a href="sa-fungerar-det.html">Så fungerar det</a>
             <a href="om-oss.html">Om oss</a>

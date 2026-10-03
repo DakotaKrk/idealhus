@@ -10,6 +10,7 @@
 # 2026-09-08 (regelandringen 1 december 2025).
 import io
 import json
+import re
 
 import _bygg as B
 import _modeller as M
@@ -23,11 +24,44 @@ REGLER = {
 # Modellerna som JSON, sa sidan kan visa vilka hus som ryms. Samma
 # lista som korten och huskortet bygger pa - de kan inte glida isar.
 MODELLER = [
-    {"typ": typ, "kategori": namn, "nr": i, "namn": titel,
+    {"typ": typ, "kategori": namn, "nr": i, "namn": titel, "sida": M.SIDA[titel],
      "bild": bild, "yta": yta, "rum": rum}
     for typ, (namn, lista) in M.KATEGORIER.items()
     for i, (titel, bild, yta, rum, lev) in enumerate(lista, 1)
 ]
+
+
+# Husen som ryms i standardläget (inom detaljplan, inget befintligt på
+# tomten: 30 m²) står i HTML från början, så att korten och länkarna till
+# modellsidorna finns även utan JavaScript (2026-10-03). Samma HTML som
+# husKort() i skriptet ger, och satt() byter dem bara om svaren skiljer sig.
+def hus_kort(m, i, ok):
+    med3d = re.fullmatch(r"hus-r\d\.webp", m["bild"]) is not None
+    if med3d:
+        liten = "images/" + m["bild"].replace(".webp", "-800.webp")
+        bild = (f'src="{liten}" srcset="{liten} 800w, images/{m["bild"]} 1600w"'
+                ' sizes="(max-width: 700px) 92vw, 320px"')
+    else:
+        bild = f'src="images/{m["bild"]}"'
+    lov = "" if ok else " tvhus--lov"
+    ankare = "#i-3d" if med3d else ""
+    ryms = "Ryms" if ok else "Kräver bygglov"
+    tre_d = '<span class="tvhus__3d">Se i 3D</span>' if med3d else ""
+    return (f'<a class="tvhus{lov}" style="--i:{i}" href="{m["sida"]}{ankare}">'
+            f'<span class="tvhus__bild"><img {bild} alt="" loading="lazy" decoding="async">'
+            f'<span class="tvhus__ryms">{ryms}</span>{tre_d}</span>'
+            f'<span class="tvhus__kropp"><span class="tvhus__typ">{m["kategori"]}</span>'
+            f'<strong>{m["namn"]}</strong>'
+            f'<span class="tvhus__fakta"><b>{m["yta"]} m²</b><i></i>{m["rum"]} rum</span>'
+            f'<span class="tvhus__pil" aria-hidden="true"></span></span></a>')
+
+
+STANDARD_YTA = REGLER["inom"][0]
+_RYMS = sorted((m for m in MODELLER if m["yta"] <= STANDARD_YTA), key=lambda m: -m["yta"])
+_INTE = sorted((m for m in MODELLER if m["yta"] > STANDARD_YTA), key=lambda m: m["yta"])
+FORRENDERAD = ("".join(hus_kort(m, i, True) for i, m in enumerate(_RYMS))
+               + "".join(hus_kort(m, len(_RYMS) + i, False) for i, m in enumerate(_INTE)))
+HUS_RUBRIK = f"{len(_RYMS)} {'modell' if len(_RYMS) == 1 else 'modeller'} upp till {STANDARD_YTA} m²"
 
 
 # Öppna kartor och tjänster för att se vad som finns under marken.
@@ -152,7 +186,7 @@ KROPP = f'''    <main id="innehall">
         <div class="kollen-topp__inner vf-topp__inner">
           <div class="vf-topp__text">
             <p class="section-label section-label--accent">Verktyg</p>
-            <h1 class="kollen-topp__titel">Vad får jag <em class="skimmer">bygga</em>?</h1>
+            <h1 class="kollen-topp__titel">Vad får jag <em class="skimmer">bygga</em> på min tomt?</h1>
             <p class="kollen-topp__text">
               Fem frågor om tomten. Sedan ser du hur stort hus som ryms utan
               bygglov, hur högt det får bli och vad kommunen behöver veta –
@@ -244,7 +278,7 @@ KROPP = f'''    <main id="innehall">
 
               <p class="tv__friskrivning">
                 Vägledning, inte ett beslut. Detaljplanen och kommunen har
-                sista ordet. <a href="attefallshus-regler.html">Läs hela guiden</a>
+                sista ordet. <a href="attefallshus-regler.html">Läs guiden om reglerna</a>
               </p>
             </aside>
           </div>
@@ -262,7 +296,7 @@ KROPP = f'''    <main id="innehall">
                 <tr><th scope="row">Till tomtgränsen</th><td data-plan="inom">4,5 m</td><td data-plan="utanfor">4,5 m</td></tr>
               </tbody>
             </table>
-            <p class="tv__regler-not">Närmare gränsen går med grannens medgivande. <a href="attefallshus-regler.html">Läs hela guiden</a></p>
+            <p class="tv__regler-not">Närmare gränsen går med grannens medgivande. Måtten är kontrollerade den 2 oktober 2026 mot <a href="https://www.boverket.se/sv/PBL-kunskapsbanken/lov--byggande/anmalningsplikt/byggnader/nybyggnad/komplementbyggnad/" target="_blank" rel="noopener">Boverkets vägledning</a>. <a href="attefallshus-regler.html">Läs guiden om reglerna</a></p>
           </aside>
         </div>
       </section>
@@ -271,9 +305,9 @@ KROPP = f'''    <main id="innehall">
         <div class="kollen-hus__inner">
           <div class="kollen-hus__topp">
             <p class="section-label section-label--accent">Hus som ryms</p>
-            <h2 class="kollen-hus__titel" id="hus-rubrik">Modeller upp till 30 m²</h2>
+            <h2 class="kollen-hus__titel" id="hus-rubrik">{HUS_RUBRIK}</h2>
           </div>
-          <div class="tvhus-rad" id="hus-lista"></div>
+          <div class="tvhus-rad" id="hus-lista" data-forrenderad>{FORRENDERAD}</div>
           <p class="kollen-hus__tomt" id="hus-tomt" hidden>
             Inget av våra hus ryms utan bygglov med de här svaren. Med
             bygglov kan det bli större –
@@ -291,7 +325,7 @@ KROPP = f'''    <main id="innehall">
             <p class="markkoll__text">
               Det som ligger under marken avgör grunden och markarbetet – och
               är det som oftast överraskar. Skriv tomtens adress, så hämtar vi
-              vad Sveriges geologiska undersökning vet om marken just där.
+              vad Sveriges geologiska undersökning (SGU) vet om marken just där.
             </p>
           </div>
 
@@ -1050,7 +1084,7 @@ SKRIPT = '''
         // Husen ur ritningarna R1-R5 finns i 3D – dit går kortet direkt.
         function husKort(m, i, ok) {
           var med3d = /^hus-r\\d\\.webp$/.test(m.bild);
-          return '<a class="tvhus' + (ok ? '' : ' tvhus--lov') + '" style="--i:' + i + '" href="huskort.html?typ=' + m.typ + '&amp;modell=' + m.nr + (med3d ? '#i-3d' : '') + '">' +
+          return '<a class="tvhus' + (ok ? '' : ' tvhus--lov') + '" style="--i:' + i + '" href="' + m.sida + (med3d ? '#i-3d' : '') + '">' +
             '<span class="tvhus__bild"><img ' + bild(m, '(max-width: 700px) 92vw, 320px') + ' alt="" loading="lazy" decoding="async">' +
             '<span class="tvhus__ryms">' + (ok ? 'Ryms' : 'Kräver bygglov') + '</span>' + (med3d ? '<span class="tvhus__3d">Se i 3D</span>' : '') + '</span>' +
             '<span class="tvhus__kropp"><span class="tvhus__typ">' + m.kategori + '</span>' +
@@ -1064,6 +1098,14 @@ SKRIPT = '''
         // Byter innehåll bara när det ändrats, så att korten inte gör
         // entré på nytt för varje steg i reglaget.
         function satt(el, html) {
+          // #hus-lista är förrenderad i HTML. Första gången: byt bara om
+          // innehållet faktiskt skiljer sig, så att korten inte gör entré två gånger.
+          if (el.senast === undefined && el.hasAttribute('data-forrenderad')) {
+            var t = document.createElement('template');
+            t.innerHTML = html;
+            el.removeAttribute('data-forrenderad');
+            if (t.innerHTML === el.innerHTML) { el.senast = html; return; }
+          }
           if (el.senast !== html) { el.innerHTML = html; el.senast = html; }
         }
         function rulla(el, mal, dec) {
@@ -2661,9 +2703,10 @@ SKRIPT = '''
       })();
 '''
 
-ut = (B.head("Vad får jag bygga? | Idealhus",
-             "Svara på fem frågor om tomten och se hur stort attefallshus som "
-             "ryms, hur högt det får bli och vad kommunen behöver veta.",
+ut = (B.head("Vad får jag bygga på min tomt? Se storlek och höjd | Idealhus",
+             "Fem frågor om tomten visar hur stort attefallshus som ryms utan "
+             "bygglov, hur högt det får bli och vilka av våra hus som passar. Tar "
+             "under en minut.",
              None, fil="vad-far-jag-bygga.html")
       + "\n" + B.header(B.VERKTYG_NAMN) + "\n" + KROPP + B.SIDFOT + "\n" + B.skript(SKRIPT))
 

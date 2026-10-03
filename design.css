@@ -30280,3 +30280,39 @@ html.js-reveal body .vag.reveal--inne {
 html body .vag--hel:hover .vag__bild {
   transform: none;
 }
+
+/* SEO 2026-10-03: källraden i attefallsguiden länkar nu till Boverket.
+   Länkarna får samma utseende som guidens övriga textlänkar
+   (.rg-del > p:not([class]) a), annars syns de inte som länkar. */
+.rg-kallor a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--virke);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.3s ease;
+}
+
+.rg-kallor a:hover {
+  text-decoration-color: var(--virke-djup);
+}
+
+/* SEO 2026-10-03: husväljarens knappar heter nu "Se <modell>". "Se Sadel 30
+   Bred" + "Alla attefallshus" blev 7 px för bred för kortet, så knapparna
+   bröts på två rader (1180 px och uppåt) eller sköt ut kortet (901–1100 px).
+   Knapparna fyller ändå raden (flex 1 1 auto), så den mindre sidmarginalen
+   syns inte; den gör bara att paret ryms på en rad, som tänkt. */
+@media (min-width: 901px) {
+  html body .husval .husval__info .husval__panel {
+    min-width: 0;
+  }
+
+  html body .husval .husval__info .husval__knappar {
+    flex-wrap: nowrap;
+  }
+
+  html body .husval .husval__info .husval__knappar .ih-knapp {
+    min-width: 0;
+    padding-inline: 12px;
+  }
+}

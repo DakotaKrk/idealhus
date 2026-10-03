@@ -228,7 +228,7 @@ def _alla_hus():
     for kat, lank, *_ in PRISER:
         for i, m in enumerate(M.modeller(lank), 1):
             typ = lank.replace(".html", "")
-            ut.append((m[0], m[2], f"huskort.html?typ={typ}&amp;modell={i}", m[1], kat))
+            ut.append((m[0], m[2], M.SIDA[m[0]], m[1], kat))
     return ut
 
 
@@ -380,8 +380,8 @@ PRISSIDA = f'''    <main id="innehall">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
-            <h1 class="subpage-hero__title">Vad ett hus kostar</h1>
-            <p class="subpage-hero__meta">Inget listpris, men inga gissningar heller. Här ser du vad som ingår, vad som tillkommer och vad som flyttar summan – innan du ber om en offert.</p>
+            <h1 class="subpage-hero__title">Vad kostar ett hus från oss?</h1>
+            <p class="subpage-hero__meta">Ett hus från oss har inget listpris – priset sätts i en offert efter din tomt. Här ser du vad som ingår, vad som tillkommer och vad som styr summan.</p>
             <div class="subpage-hero__actions">
               <a class="hero__link hero__link--solid" href="#ingar">Se vad som ingår</a>
               <a class="hero__link" href="#kontakt">Begär offert</a>
@@ -483,7 +483,7 @@ PRISSIDA = f'''    <main id="innehall">
           <span class="ih-kant" aria-hidden="true"></span>
           <div class="prisoffert__ord">
             <p class="ih-etikett ih-etikett--ljus">Din kostnadskarta</p>
-            <h2 class="prisoffert__titel" id="prisoffert-rubrik">Offerten, <em>post för post.</em></h2>
+            <h2 class="prisoffert__titel" id="prisoffert-rubrik">Vad ingår i priset? <em>Post för post.</em></h2>
             <p class="prisoffert__text">
               Svara på fyra frågor om tomten, så fylls utkastet i: vad som
               ingår hos oss, och vilka poster hos andra som troligen blir
@@ -531,7 +531,7 @@ PRISSIDA = f'''    <main id="innehall">
         <div class="prisfaktorer__inner">
           <div class="prisfaktorer__topp">
             <p class="section-label section-label--accent">Vad som styr priset</p>
-            <h2 class="prisfaktorer__titel" id="prisfaktorer-rubrik">Fem saker <em>flyttar summan.</em></h2>
+            <h2 class="prisfaktorer__titel" id="prisfaktorer-rubrik">Fem saker <em>som styr priset.</em></h2>
           </div>
           <div class="prisfaktorer__grid">
 {faktorer_html()}
@@ -568,11 +568,12 @@ PRISSIDA = f'''    <main id="innehall">
 def bygg():
     ut = []
 
-    sida = (B.head("Attefallshus: reglerna efter 1 december 2025 | Idealhus",
-                   "Vad som gäller för attefallshus efter regeländringen: mått "
-                   "inom och utanför detaljplan, när anmälan krävs och när det "
-                   "behövs bygglov.",
-                   None, fil="attefallshus-regler.html")
+    sida = (B.head("Regler för attefallshus 2026 – mått och bygglov | Idealhus",
+                   "Reglerna för attefallshus sedan 1 december 2025: byggnadsarea 30 m² "
+                   "inom och 50 m² utanför detaljplan, nockhöjd, tomtgräns, anmälan och "
+                   "bygglov.",
+                   None, fil="attefallshus-regler.html", ogtyp="article",
+                   delning="hus-r1.webp")
             + "\n" + B.header("Våra hus") + "\n" + GUIDE + B.SIDFOT + "\n"
             + B.skript(TOC_SKRIPT))
     sida = sida.replace("  </body>",
@@ -582,9 +583,10 @@ def bygg():
             newline="").write(sida.replace("\n", "\r\n"))
     ut.append("attefallshus-regler.html")
 
-    sida = (B.head("Priser | Idealhus",
-                   "Vad ett hus fr\u00e5n Idealhus kostar: vad som ing\u00e5r, vad som "
-                   "tillkommer och vad som styr priset.",
+    sida = (B.head("Så sätts priset på attefallshus och fritidshus | Idealhus",
+                   "Ett hus från Idealhus har inget listpris. Se vad som ingår i offerten, "
+                   "vad som betalas till andra – grund, el, vatten och avlopp – och vad "
+                   "som styr priset.",
                    "foto/stommar-stapel.webp", fil="priser.html")
             + "\n" + B.header("Priser") + "\n" + PRISSIDA + B.SIDFOT + "\n"
             + B.skript())

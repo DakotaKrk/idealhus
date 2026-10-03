@@ -17,10 +17,15 @@ ETIKETT = {
     "fritidshus.html": "Våra hus · För dig som ska bo",
     "proffs.html": "Våra hus · För dig som bygger",
     "huskort.html": "Husmodell",
+    "sadel-30.html": "Husmodell",
+    "sadel-30-bred.html": "Husmodell",
+    "pulpet-30.html": "Husmodell",
+    "kupa-40.html": "Husmodell",
+    "kupa-50.html": "Husmodell",
     "priser.html": "Priser och offert",
     "sa-fungerar-det.html": "Processen",
-    "om-oss.html": "Om Idealhus",
-    "kontakt.html": "Kontakt",
+    "om-oss.html": "Om oss",
+    "kontakt.html": "Frågor och offert",
     "aga-och-hyra-ut.html": "Verktyg för ägare",
 }
 

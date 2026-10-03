@@ -6,6 +6,12 @@ import _modeller as M
 KONTAKT_SEKTION = open("_kontaktsektion.inc", encoding="utf-8").read()
 
 
+def ytetikett(ytor):
+    # 30 m²-husen anges med byggnadsarea (yttermåtten), Kupa-husens 40/50 m²
+    # är modellens storlek och får den neutrala etiketten Yta.
+    return "Byggnadsarea" if max(ytor) <= 30 else "Yta"
+
+
 def spann_text(a, b, enhet):
     return f"{a} {enhet}" if a == b else f"{a}–{b} {enhet}"
 
@@ -18,7 +24,7 @@ def fakta_bubblor(modeller):
         <div class="heroscen heroscen--kategori" aria-hidden="true">
           <div class="heroscen__chip heroscen__chip--a">
             <svg class="matare" viewBox="0 0 120 70"><path class="matare__spar" d="M10 64a50 50 0 0 1 100 0" pathLength="100"/><path class="matare__varde" d="M10 64a50 50 0 0 1 100 0" pathLength="100" style="--varde: 100"/></svg>
-            <p><strong>{spann_text(min(ytor), max(ytor), "m²")}</strong><span>boyta · {spann_text(min(rum), max(rum), "rum")}</span></p>
+            <p><strong>{spann_text(min(ytor), max(ytor), "m²")}</strong><span>{ytetikett(ytor).lower()} · {spann_text(min(rum), max(rum), "rum")}</span></p>
           </div>
           <div class="heroscen__chip heroscen__chip--b">
             <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"/></svg></span>
@@ -109,7 +115,7 @@ def studio3d(modeller):
           </div>
 
           <dl class="studio3d__fakta">
-            <div><dt>Boyta</dt><dd><strong data-3d-tal="yta" data-dec="0">{forsta[2]}</strong><span>m²</span></dd></div>
+            <div><dt>{ytetikett([m[2] for m in modeller])}</dt><dd><strong data-3d-tal="yta" data-dec="0">{forsta[2]}</strong><span>m²</span></dd></div>
             <div><dt>Yttermått</dt><dd><strong data-3d-tal="l" data-dec="2">{komma(l0)}</strong><span>×</span><strong data-3d-tal="b" data-dec="2">{komma(b0)}</strong><span>m</span></dd></div>
             <div><dt>Nockhöjd</dt><dd><strong data-3d-tal="h" data-dec="2">{komma(h0)}</strong><span>m</span></dd></div>
             <div><dt>Rum</dt><dd><strong data-3d-tal="rum" data-dec="0">{forsta[3]}</strong></dd></div>
@@ -152,21 +158,22 @@ def kategorisida(fil, namn, herobild, meta, rubrik, ingress, spann):
         f'          <button type="button" data-min="{a}" data-max="{b}"'
         f'{" aria-pressed=\"true\"" if i == 0 else " aria-pressed=\"false\""}>{txt}</button>'
         for i, (txt, a, b) in enumerate(spann))
-    boytefilter = ('\n            <div class="filter" role="group" aria-label="Filtrera på boyta">'
-                   '\n              <p class="filter__etikett">Boyta</p>\n' + knappar +
+    boytefilter = ('\n            <div class="filter" role="group" aria-label="Filtrera på yta">'
+                   '\n              <p class="filter__etikett">Yta</p>\n' + knappar +
                    '\n            </div>') if len(modeller) >= 4 else ''
 
+    # Sedan 2026-10-03 gar korten till modellens egen sida (M.SIDA).
     # Varje kort barde tidigare till samma huskort.html utan parameter, sa
     # alla tjugofyra landade pa "Huskort 1". Adressen bar nu kategorin och
     # modellens nummer; huskortssidan slar upp resten i samma tabell.
     typ = M.slug(fil)
     kort = "\n".join(f'''          <article class="model-card" data-yta="{yta}" data-rum="{rum}" data-lev="{lev}" data-nr="{i}" data-namn="{titel}" data-bild="{bild}">
-            <a class="model-card__media" href="huskort.html?typ={typ}&amp;modell={i}">
+            <a class="model-card__media" href="{M.SIDA[titel]}">
               <img src="images/{bild}" loading="lazy" decoding="async" alt="{titel}, {namn.lower()} i svensk natur">
               <span class="model-card__pill" aria-hidden="true">Se huskortet</span>
             </a>
             <div class="model-card__rad">
-              <h3 class="model-card__title"><a href="huskort.html?typ={typ}&amp;modell={i}">{titel}</a></h3>
+              <h3 class="model-card__title"><a href="{M.SIDA[titel]}">{titel}</a></h3>
               <p class="model-card__yta">{yta}<span>m²</span></p>
             </div>
             <p class="model-card__facts"><span>{rum} rum</span><span>Leverans {lev} v</span></p>
@@ -233,8 +240,8 @@ def kategorisida(fil, namn, herobild, meta, rubrik, ingress, spann):
     # Ingressen ar brodtext och blir 190-240 tecken i ett description-falt,
     # dar Google klipper vid ~160. Sidorna har darfor en egen kort text.
     kort_text = KORTA_BESKRIVNINGAR.get(fil, ingress)
-    ut = (B.head(f"{namn} | Idealhus",
-                 f"{namn} från Idealhus. {kort_text}", herobild, fil=fil)
+    titel, beskrivning = SEO.get(fil, (f"{namn} | Idealhus", f"{namn} från Idealhus. {kort_text}"))
+    ut = (B.head(titel, beskrivning, herobild, fil=fil)
           + "\n" + B.header("Våra hus") + "\n" + kropp + B.SIDFOT + "\n"
           + B.skript())
     open(fil, "w", encoding="utf-8", newline="").write(ut.replace("\n", "\r\n"))
@@ -254,8 +261,15 @@ FRAGOR = {
          "4,5 m från tomtgränsen, eller närmare om grannen ger sitt skriftliga "
          "medgivande."),
         ("Kan jag bo i huset året runt?",
-         "Ja, om det byggs som komplementbostadshus. Då ska det uppfylla kraven på "
+         "Ja, om det byggs som <a href=\"attefallshus-regler.html#skillnaden\">"
+         "komplementbostadshus</a>. Då ska det uppfylla kraven på "
          "en fullvärdig bostad, med kök och badrum."),
+        ("Vad ingår i priset?",
+         "Priset sätts i en offert efter din tomt. I vår del ingår ritningar och "
+         "underlag, själva huset, leverans till tomten, montage och slutbesiktning. "
+         "Grunden, el, vatten och avlopp, markarbete och kommunens avgifter betalas "
+         "till andra, och tillval tillkommer. <a href=\"priser.html\">Så sätts "
+         "priset</a>."),
     ],
     "fritidshus.html": [
         ("Behöver ett fritidshus bygglov?",
@@ -268,6 +282,12 @@ FRAGOR = {
         ("Går det att hyra ut stugan när vi inte är där?",
          "Uthyrningskalkylen visar vad uthyrningen kan täcka av kostnaderna, "
          "vecka för vecka."),
+        ("Vad ingår i priset?",
+         "Priset sätts i en offert efter din tomt. I vår del ingår ritningar och "
+         "underlag till bygglovet, själva huset, leverans till tomten, montage och "
+         "slutbesiktning. Grunden, el, vatten och avlopp, markarbete och kommunens "
+         "avgifter betalas till andra, och tillval tillkommer. <a "
+         "href=\"priser.html\">Så sätts priset</a>."),
     ],
 }
 
@@ -295,6 +315,15 @@ def fragor(fil):
       </section>
 '''
 
+
+# Title och description för kategorisidorna (2026-10-03): sökordet först,
+# varumärket sist, och bara fakta som står på sidan.
+SEO = {
+    "attefallshus.html": ("Attefallshus på 30 m² – tre modeller i trä | Idealhus",
+                          "Tre attefallshus i trä på 30 m², med sadeltak eller pulpettak. Byggda under tak i Sverige och monterade på din tomt. Inget bygglov för huset inom måtten."),
+    "fritidshus.html": ("Bygga fritidshus – 40 och 50 m² med takkupa | Idealhus",
+                        "Kupa 40 och Kupa 50 är fritidshus på 40 och 50 m² med takkupa. Byggda under tak i Sverige, monterade på din tomt. Kräver bygglov – underlaget tar vi fram."),
+}
 
 KORTA_BESKRIVNINGAR = {
     "attefallshus.html":

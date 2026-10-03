@@ -1,24 +1,32 @@
 # -*- coding: utf-8 -*-
 # Bygger 404-sidan, sitemap.xml och robots.txt. Kor: python _extra.py
-import datetime
 import io
 
 import _bygg as B
 
+# (fil, priority, lastmod). lastmod sätts för hand när sidans text, länkar
+# eller strukturerade data ändras på riktigt – aldrig vid en vanlig
+# publicering. Ett datum som byts varje gång slutar sökmotorerna lita på.
+# huskort.html är en omdirigering till modellsidorna och står inte med;
+# 404.html har noindex och står inte heller med (2026-10-03).
 SIDOR = [
-    ("", "1.0"),
-    ("attefallshus.html", "0.9"),
-    ("fritidshus.html", "0.9"),
-    ("proffs.html", "0.7"),
-    ("huskort.html", "0.6"),
-    ("sa-fungerar-det.html", "0.7"),
-    ("om-oss.html", "0.6"),
-    ("kontakt.html", "0.8"),
-    ("priser.html", "0.8"),
-    ("attefallshus-regler.html", "0.8"),
-    ("vad-far-jag-bygga.html", "0.8"),
-    ("aga-och-hyra-ut.html", "0.7"),
-    ("integritetspolicy.html", "0.3"),
+    ("", "1.0", "2026-10-03"),
+    ("attefallshus.html", "0.9", "2026-10-03"),
+    ("fritidshus.html", "0.9", "2026-10-03"),
+    ("sadel-30.html", "0.8", "2026-10-03"),
+    ("sadel-30-bred.html", "0.8", "2026-10-03"),
+    ("pulpet-30.html", "0.8", "2026-10-03"),
+    ("kupa-40.html", "0.8", "2026-10-03"),
+    ("kupa-50.html", "0.8", "2026-10-03"),
+    ("priser.html", "0.8", "2026-10-03"),
+    ("attefallshus-regler.html", "0.8", "2026-10-03"),
+    ("vad-far-jag-bygga.html", "0.8", "2026-10-03"),
+    ("sa-fungerar-det.html", "0.7", "2026-10-03"),
+    ("aga-och-hyra-ut.html", "0.7", "2026-10-03"),
+    ("proffs.html", "0.7", "2026-10-03"),
+    ("kontakt.html", "0.8", "2026-10-03"),
+    ("om-oss.html", "0.6", "2026-10-03"),
+    ("integritetspolicy.html", "0.3", "2026-10-03"),
 ]
 
 # --- 404 ------------------------------------------------------------------
@@ -34,7 +42,7 @@ KROPP = '''    <main id="innehall">
 
           <div class="fyrafyra__lankar">
             <a class="knapp-fylld" href="kontakt.html">Kontakta oss</a>
-            <a class="knapp-linje" href="index.html">Till startsidan</a>
+            <a class="knapp-linje" href="./">Till startsidan</a>
           </div>
 
           <div class="fyrafyra__hus">
@@ -60,6 +68,11 @@ ut = (B.head("Sidan finns inte | Idealhus",
 # hämtas från sajtens rot. Hopplänken (#innehall) skulle då gå till
 # startsidan, så den hoppar inom sidan med ett litet skript.
 ut = ut.replace('<meta charset="UTF-8">', '<meta charset="UTF-8">\n    <base href="%s">' % B.BAS, 1)
+# Felsidan ska inte indexeras: noindex, och ingen canonical eller og:url
+# som pekar på /404.html (2026-10-03).
+ut = ut.replace('initial-scale=1.0">', 'initial-scale=1.0">\n    <meta name="robots" content="noindex">', 1)
+ut = ut.replace('    <link rel="canonical" href="%s404.html">\n' % B.BAS, '', 1)
+ut = ut.replace('    <meta property="og:url" content="%s404.html">\n' % B.BAS, '', 1)
 ut = ut.replace("</body>", """    <script>
       document.querySelectorAll('a[href^="#"]').forEach(function (a) {
         a.addEventListener('click', function (e) {
@@ -76,14 +89,13 @@ ut = ut.replace("</body>", """    <script>
 io.open("404.html", "w", encoding="utf-8", newline="").write(ut.replace("\n", "\r\n"))
 
 # --- sitemap --------------------------------------------------------------
-idag = datetime.date.today().isoformat()
 rader = "\n".join(
     "  <url>\n"
     "    <loc>%s%s</loc>\n"
     "    <lastmod>%s</lastmod>\n"
     "    <priority>%s</priority>\n"
-    "  </url>" % (B.BAS, fil, idag, pri)
-    for fil, pri in SIDOR)
+    "  </url>" % (B.BAS, fil, lastmod, pri)
+    for fil, pri, lastmod in SIDOR)
 
 sitemap = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -104,7 +116,7 @@ import os
 import re
 
 SIDFILER = sorted(f for f in os.listdir(".") if f.endswith(".html") and not f.startswith("_")) + [
-    "styles.css", "design.css", "premium.js", "sitemap.xml", "robots.txt",
+    "styles.css", "design.css", "premium.js", "sitemap.xml", "robots.txt", "llms.txt",
     "favicon.ico", "apple-touch-icon.png", ".htaccess"]
 text = "".join(io.open(f, encoding="utf-8", errors="ignore").read()
                for f in SIDFILER if f.endswith((".html", ".css", ".js")))

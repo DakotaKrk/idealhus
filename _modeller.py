@@ -7,17 +7,19 @@ liten tabell over fyra bilder som ingen lankade till. Nu star bade
 korten och huskortet pa den har listan - _sidor.py laser den nar
 kategorisidorna byggs, _huskort.py skriver in den i huskort.html.
 
-Varje modell ar (namn, bild, boyta i m2, rum, leveransveckor).
+Varje modell ar (namn, bild, yta i m2, rum, leveransveckor).
 Ordningen ar samma som pa sidan: modell 1 ar forst.
 """
 
 # Bara de fem riktiga husen, ritade i ritningarna R1-R5 (2026-09-23).
 # De påhittade modellerna och kategorierna fjällstugor och villor togs
-# bort 2026-09-24 på kundens begäran. Boytan är räknad innanför
-# ytterväggarna, utan loft, och rummen är de som ritningen namnger.
+# bort 2026-09-24 på kundens begäran. Ytan är INTE boyta (rättat 2026-10-03,
+# ägaren bekräftade): för de tre 30 m²-husen är den byggnadsarean enligt
+# yttermåtten, för Kupa 40/50 är den modellens storlek. Rummen är de som
+# ritningen namnger.
 # Leveranstiden är fortfarande en platshållare.
-# Boytorna 30/30/30/40/50 m² är kundens besked 2026-10-05; namnen behölls.
-# Namnen (2026-09-30) beskriver taket och boytan - "Huskort 1" läste som
+# Ytorna 30/30/30/40/50 m² är kundens besked 2026-10-05; namnen behölls.
+# Namnen (2026-09-30) beskriver taket och ytan - "Huskort 1" läste som
 # en platshållare. Byt här om kunden ger modellerna egna namn.
 KATEGORIER = {
     "attefallshus": ("Attefallshus", [
@@ -72,6 +74,18 @@ BESKRIVNING = {
                 "Huset kräver bygglov."),
     "Kupa 50": ("Vårt största hus: 50 m² med takkupa, 12,50 × 3,90 meter. Två rum "
                 "och plats för både vardag och gäster. Huset kräver bygglov."),
+}
+
+
+# Varje modell har en egen sida sedan 2026-10-03 (huskort.html skickar
+# gamla länkar vidare dit). Menyerna, korten, prisskalan och verktyget
+# länkar hit. Sidorna underhålls för hand, som huskort.html.
+SIDA = {
+    "Sadel 30": "sadel-30.html",
+    "Sadel 30 Bred": "sadel-30-bred.html",
+    "Pulpet 30": "pulpet-30.html",
+    "Kupa 40": "kupa-40.html",
+    "Kupa 50": "kupa-50.html",
 }
 
 

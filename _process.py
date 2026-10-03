@@ -173,7 +173,7 @@ KROPP = f'''    <main id="innehall">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
-            <h1 class="subpage-hero__title">Så går det till</h1>
+            <h1 class="subpage-hero__title">Så går husbygget till</h1>
             <p class="subpage-hero__meta">Från första samtalet till slutbesiktningen: sju steg i tre skeden, och i varje steg står det vem som gör vad.</p>
             <div class="subpage-hero__actions">
               <a class="hero__link hero__link--solid" href="#steg-1">Följ stegen</a>
@@ -202,7 +202,7 @@ KROPP = f'''    <main id="innehall">
             <p class="flode-intro__text">
               Ordningen spelar roll. Du kan inte bygga innan bygglovet är klart,
               och vi kan inte tillverka innan modellen är bestämd. I varje steg
-              står det vem som gör vad - ingenting ska komma som en
+              står det vem som gör vad – ingenting ska komma som en
               överraskning halvvägs in.
             </p>
             <nav class="flode-intro__skeden" aria-label="De tre skedena">
@@ -319,9 +319,10 @@ KROPP = f'''    <main id="innehall">
 
 '''
 
-ut = (B.head("Så fungerar det | Idealhus",
-             "Från första samtalet till inflyttning. Sju steg, och vem som gör "
-             "vad i varje steg.",
+ut = (B.head("Bygga attefallshus eller fritidshus i sju steg | Idealhus",
+             "Så bygger du ett attefallshus eller fritidshus med Idealhus: sju steg "
+             "från första samtalet till slutbesiktning, och vem som gör vad i varje "
+             "steg.",
              "foto/dronare-montage.webp", fil="sa-fungerar-det.html")
       + "\n" + B.header("Så fungerar det") + "\n" + KROPP + B.SIDFOT + "\n" + B.skript())
 

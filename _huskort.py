@@ -4,6 +4,16 @@
 huskort.html underhalls for hand, men den har biten ska inte skrivas
 for hand: den ar samma data som kategorisidornas kort bygger pa. Skriptet
 byter ut allt mellan markorerna, resten av sidan ror det inte.
+
+Sedan 2026-10-03 har varje hus en egen sida (sadel-30.html, sadel-30-bred.html,
+pulpet-30.html, kupa-40.html, kupa-50.html; _modeller.py SIDA), och
+huskort.html ar bara en liten omdirigeringssida utan MODELLER-block: ett
+skript skickar gamla lankar huskort.html?typ=...&modell=... vidare, och utan
+JavaScript visas en lanklista till de fem sidorna. Skriptet har har darfor
+inget kvar att skriva och avbryter. Modellsidorna underhalls for hand:
+modellen, texterna och faktaraden star i deras HTML, och deras MODELLER-block
+ar en kopia med titel och alt per modell som laser modellen fran
+<main data-hus-typ data-hus-nr>. Det har skriptet ror dem inte.
 """
 import io
 import json
@@ -91,7 +101,7 @@ BLOCK = '''      /* MODELLER:START - skrivs av _huskort.py, andra inte for hand 
         // Bara de varden listan faktiskt har. Byggnadsarea och nockhojd
         // star kvar som X tills de ar bestamda.
         var varden = {
-          'Boyta': m.yta + ' m\\u00b2',
+          'Yta': m.yta + ' m\\u00b2',
           'Rum': m.rum + ' rum'
         };
         document.querySelectorAll('.model-specs dt').forEach(function (dt) {
@@ -160,6 +170,11 @@ BLOCK = '''      /* MODELLER:START - skrivs av _huskort.py, andra inte for hand 
 
 def main():
     s = io.open("huskort.html", encoding="utf-8", newline="").read().replace("\r\n", "\n")
+
+    # huskort.html ar en omdirigeringssida sedan 2026-10-03 (se ovan).
+    if START not in s:
+        print("huskort.html har inget MODELLER-block (omdirigeringssida) - inget skrivet")
+        return
 
     nytt = BLOCK % tabell()
 

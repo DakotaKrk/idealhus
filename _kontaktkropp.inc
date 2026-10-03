@@ -4,7 +4,7 @@
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
-            <h1 class="subpage-hero__title">Låt oss prata om din plats</h1>
+            <h1 class="subpage-hero__title">Kontakta Idealhus</h1>
             <p class="subpage-hero__meta">Du når oss direkt, utan växel och utan säljorganisation. Berätta kort om ditt projekt, så återkommer vi med nästa steg.</p>
             <div class="subpage-hero__actions">
               <a class="hero__link hero__link--solid" href="#kontaktformular">Till formuläret</a>

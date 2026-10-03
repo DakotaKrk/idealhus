@@ -8,12 +8,12 @@ PRINCIPER = [
      "Vi ritar inte ett hus och letar sedan efter en tomt. Vi börjar i platsen: "
      "väderstreck, utsikt, hur marken lutar och var solen står när ni faktiskt "
      "är där. Samma modell blir olika hus beroende på var den hamnar.",
-     "Svart attefallshus på klippor vid havet"),
+     "Sadel 30 Bred, svart attefallshus med sadeltak och glasgavel på en klippa vid havet"),
     ("Varje kvadrat räknas", "hus-r5.webp",
      "Ett litet hus ska kännas generöst i vardagen. Det handlar mindre om antal "
      "kvadratmeter och mer om var väggarna står, var ljuset kommer in och vad "
      "man ser när man kommer in genom dörren.",
-     "Svart hus med upplysta fönster bland snötäckta granar"),
+     "Pulpet 30, svart attefallshus med pulpettak och stora glaspartier i snöig skog"),
     ("Material som får leva", "foto/reglar.webp",
      "Vi väljer naturliga material som åldras vackert i stället för ytskikt som "
      "ska bytas. Trä som gråar jämnt, beslag som håller, detaljer som ser bättre "
@@ -37,8 +37,8 @@ KROPP = f'''    <main id="innehall">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
-            <h1 class="subpage-hero__title">Vi bygger hus som ska leva länge</h1>
-            <p class="subpage-hero__meta">Idealhus formger och bygger attefallshus och fritidshus. Husen växer fram under tak i Sverige, och du har samma kontakt från första samtalet till besiktningen.</p>
+            <h1 class="subpage-hero__title">Idealhus – hus som ska leva länge</h1>
+            <p class="subpage-hero__meta">Idealhus AB formger och bygger attefallshus och fritidshus och tillverkar byggelement för proffs, allt under tak i Sverige. Samma kontakt hela vägen.</p>
             <div class="subpage-hero__actions">
               <a class="hero__link hero__link--solid" href="attefallshus.html">Se våra hus</a>
               <a class="hero__link" href="sa-fungerar-det.html">Så går det till</a>
@@ -69,7 +69,7 @@ KROPP = f'''    <main id="innehall">
             </div>
             <div class="siffra siffra--ljus">
               <p class="siffra__tal">30–50<small> m²</small></p>
-              <p class="siffra__text">boyta i våra fem modeller, med ett eller två rum.</p>
+              <p class="siffra__text">i våra fem modeller, med ett eller två rum.</p>
             </div>
             <div class="siffra siffra--ljus">
               <p class="siffra__tal"><strong>1</strong></p>
@@ -113,7 +113,7 @@ KROPP = f'''    <main id="innehall">
       <section class="kontakt-topp">
         <div>
           <p class="ih-etikett">Vilka vi är</p>
-          <h2>Ett litet företag. <em>Raka svar.</em></h2>
+          <h2>Idealhus är ett litet företag. <em>Raka svar.</em></h2>
           <p class="kontakt-topp__lead">
             Du når oss direkt – utan växel och utan säljorganisation
             emellan.
@@ -148,9 +148,10 @@ KROPP = f'''    <main id="innehall">
 
 '''
 
-ut = (B.head("Om oss | Idealhus",
-             "Idealhus formger och bygger attefallshus och fritidshus under tak "
-             "i Sverige. Ett litet företag med en kontakt hela vägen.",
+ut = (B.head("Om oss – attefallshus, fritidshus och byggelement | Idealhus",
+             "Idealhus AB i Stockholm formger och bygger attefallshus och fritidshus "
+             "och tillverkar byggelement för proffs, under tak i Sverige. En kontakt "
+             "hela vägen.",
              "foto/arbetare-vattenpass.webp", fil="om-oss.html")
       + "\n" + B.header("Om oss") + "\n" + KROPP + B.SIDFOT + "\n" + B.skript())
 

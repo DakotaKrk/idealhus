@@ -21,7 +21,10 @@ AGA_B = ('            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>\n
 
 
 
-AKTIV = {"index.html": "Hem", "huskort.html": "Våra hus", "proffs.html": "Våra hus"}
+# huskort.html är en omdirigeringssida utan meny sedan 2026-10-03.
+AKTIV = {"index.html": "Hem", "proffs.html": "Våra hus",
+         "sadel-30.html": "Våra hus", "sadel-30-bred.html": "Våra hus", "pulpet-30.html": "Våra hus",
+         "kupa-40.html": "Våra hus", "kupa-50.html": "Våra hus"}
 
 
 def patcha(fil):
@@ -49,6 +52,11 @@ def patcha(fil):
     a = s.index('    <a class="skip"')
     b = s.index('</header>') + len('</header>')
     s = s[:a] + B.header(AKTIV[fil]).rstrip('\n') + s[b:]
+    if fil == "index.html":
+        # Hem går till ./ (2026-10-03). premium.js märker aktiv länk genom att
+        # jämföra href med filnamnet, så startsidans Hem-länkar märks här.
+        s = s.replace('href="./">Hem</a>', 'href="./" aria-current="page">Hem</a>', 1)
+        s = s.replace('<a class="mmeny__lank" href="./" style=', '<a class="mmeny__lank" href="./" aria-current="page" style=', 1)
     a = s.index('    <footer class="site-footer">')
     b = s.index('</footer>') + len('</footer>')
     s = s[:a] + B.SIDFOT.rstrip('\n') + s[b:]
@@ -69,7 +77,8 @@ def patcha(fil):
             ny = B.delningsbild("hus-r2.webp" if fil == "index.html" else kalla)
         rad = (f'    <meta property="og:image" content="https://idealhus.se/images/{ny}">\n'
                '    <meta property="og:image:width" content="1200">\n'
-               '    <meta property="og:image:height" content="630">\n')
+               '    <meta property="og:image:height" content="630">\n'
+               f'    <meta property="og:image:alt" content="{B.DELNINGSALT.get(ny.split("/")[-1], "")}">\n')
         slut = m.end()
         while s.startswith('    <meta property="og:image:', slut):
             slut = s.index('\n', slut) + 1
@@ -86,5 +95,6 @@ def patcha(fil):
     print(fil)
 
 
-for fil in ("index.html", "huskort.html", "proffs.html"):
+for fil in ("index.html", "proffs.html", "sadel-30.html", "sadel-30-bred.html",
+            "pulpet-30.html", "kupa-40.html", "kupa-50.html"):
     patcha(fil)

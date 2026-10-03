@@ -5,7 +5,8 @@ Sektionerna ligger som data, inte som en enda lång sträng: innehålls-
 förteckningen i vänsterkanten och rubrikerna i texten byggs ur samma
 lista, så de kan aldrig säga olika saker.
 
-Reglerna är kontrollerade 2026-09-08. Ändra dem inte utan att kontrollera
+Reglerna är kontrollerade 2026-09-08, och måtten dessutom mot Boverkets
+PBL kunskapsbank 2026-10-02. Ändra dem inte utan att kontrollera
 mot en aktuell källa. De skrevs om 1 december 2025 och kan skrivas om igen.
 """
 
@@ -16,7 +17,7 @@ FRAGOR = [
      "ventilation eller eldstad krävs fortfarande en anmälan för de "
      "installationerna, och det gör de flesta hus som ska gå att bo i."),
     ("Hur stort får huset vara?",
-     "Inom detaljplan högst 30 m² per byggnad och 45 m² sammanlagt på tomten, "
+     "Inom detaljplan högst 30 m² byggnadsarea per byggnad och 45 m² sammanlagt på tomten, "
      "med en nockhöjd på 4,0 meter. Utanför detaljplan är gränserna 50 m² per "
      "byggnad, 65 m² sammanlagt och 4,5 meter i nockhöjd."),
     ("Hur nära tomtgränsen får huset stå?",
@@ -161,7 +162,7 @@ def matt_rad(namn, inom, utanfor, enhet, andel_inom, andel_utanfor, notis=""):
 
 
 SEKTIONER = [
-    ("andringen", "Vad som ändrades", '''
+    ("andringen", "Vad ändrades 1 december 2025?", '''
             <p>
               Fram till 1 december 2025 krävde ett attefallshus en anmälan
               till kommunen och ett startbesked innan bygget fick börja. Både anmälningsplikten och startbeskedet är nu
@@ -197,14 +198,15 @@ SEKTIONER = [
             <p>
               Vi använder ändå ordet attefallshus här, eftersom det är det ordet
               alla söker på och känner igen. Det är samma sorts hus som avses.
-            </p>'''),
+            </p>''', "Vad som ändrades"),
 
-    ("matten", "Måtten", '''
+    ("matten", "Hur stort får ett attefallshus vara?", '''
             <p>
-              Den stora nyheten är att gränsen skiljer sig åt beroende på om
-              tomten ligger inom detaljplan eller inte. Måttet sammanlagt på
-              tomten är en gemensam pott för alla lovfria komplementbyggnader
-              på tomten, inte per hus.
+              Inom detaljplan får ett attefallshus ha en byggnadsarea på högst 30 m²
+              och en nockhöjd på högst 4,0 meter, och alla lovfria komplementbyggnader
+              på tomten får tillsammans ha högst 45 m². Utanför detaljplan är
+              gränserna 50 m², 4,5 meter och 65 m². Den sammanlagda ytan är en
+              gemensam pott för hela tomten, inte per hus.
             </p>
 
             <div class="rg-matt" data-plan="inom" data-rg-matt data-rg-in>
@@ -271,9 +273,9 @@ SEKTIONER = [
                   </tbody>
                 </table>
               </div>
-            </div>'''),
+            </div>''', "Måtten"),
 
-    ("anmalan", "När det ändå krävs en anmälan", '''
+    ("anmalan", "När krävs det ändå en anmälan?", '''
             <p>
               Anmälningsplikten är borta för byggnaden, men inte för det som
               händer inuti den. Anmälan krävs fortfarande om åtgärden:
@@ -298,9 +300,9 @@ SEKTIONER = [
                 <p class="rg-citat__rad rg-citat__rad--fri"><span>Själva byggnaden</span><b>Ingen anmälan</b></p>
                 <p class="rg-citat__rad"><span>Installationerna</span><b>Anmälan till kommunen</b></p>
               </div>
-            </figure>'''),
+            </figure>''', "När det ändå krävs en anmälan"),
 
-    ("bygglov", "När det krävs bygglov som vanligt", '''
+    ("bygglov", "När krävs det bygglov?", '''
             <ol class="rg-lov">
               <li class="rg-lov__rad" data-rg-in>''' + ikon("grans") + '''<div><h3>Närmare tomtgränsen</h3><p>Om huset placeras närmare tomtgränsen än 4,5 meter utan att grannen har gett sitt medgivande.</p></div></li>
               <li class="rg-lov__rad" data-rg-in>''' + ikon("kultur") + '''<div><h3>Kulturvärden och riksintressen</h3><p>I områden med särskilt kulturhistoriskt värde och inom vissa riksintressen.</p></div></li>
@@ -319,7 +321,7 @@ SEKTIONER = [
                 byggnad som annars är lovbefriad. Det är en egen prövning hos
                 kommunen eller länsstyrelsen.
               </p>
-            </aside>'''),
+            </aside>''', "När det krävs bygglov som vanligt"),
 
     ("skillnaden", "Komplementbyggnad eller komplementbostadshus?", '''
             <p class="rg-ingress">
@@ -350,14 +352,14 @@ SEKTIONER = [
                 </ul>
               </div>
               <p class="rg-vs__samma">''' + ikon("linjal") + '''Måtten och avstånden är desamma.</p>
-            </div>'''),
+            </div>''', "Komplementbyggnad eller komplementbostadshus?"),
 
-    ("fragor", "Vanliga frågor", '''
+    ("fragor", "Vanliga frågor om attefallshus", '''
             <div class="rg-fragor">
 ''' + fragor_html() + '''
-            </div>'''),
+            </div>''', "Vanliga frågor"),
 
-    ("vemgorvad", "Vem gör vad", '''
+    ("vemgorvad", "Vem gör vad när du bygger?", '''
             <div class="rg-roller">
               <div class="rg-roll rg-roll--vi" data-rg-in>
                 ''' + ikon("ritning") + '''
@@ -380,24 +382,33 @@ SEKTIONER = [
               ''' + ikon("bock", "rg-kallor__ikon") + '''
               <span>
                 Uppgifterna är kontrollerade den 8 september 2026 mot kommunala och
-                branschgemensamma sammanställningar av regeländringen. Reglerna kan
-                ändras och kommunen avgör i det enskilda fallet. Stäm alltid av med
-                din byggnadsnämnd innan du börjar bygga.
+                branschgemensamma sammanställningar av regeländringen. Måtten – 30 och
+                45 m² inom detaljplan, 50 och 65 m² utanför, nockhöjd 4,0 och 4,5 meter
+                – är dessutom kontrollerade den 2 oktober 2026 mot Boverkets PBL
+                kunskapsbank om
+                <a href="https://www.boverket.se/sv/PBL-kunskapsbanken/lov--byggande/anmalningsplikt/byggnader/nybyggnad/komplementbyggnad/" target="_blank" rel="noopener">komplementbyggnad</a>
+                och
+                <a href="https://www.boverket.se/sv/PBL-kunskapsbanken/lov--byggande/anmalningsplikt/byggnader/nybyggnad/komplementbostadshus/" target="_blank" rel="noopener">komplementbostadshus</a>.
+                Reglerna kan ändras och kommunen avgör i det enskilda fallet. Stäm
+                alltid av med din byggnadsnämnd innan du börjar bygga.
               </span>
-            </p>'''),
+            </p>''', "Vem gör vad"),
 ]
 
 
 def innehallsforteckning():
+    # Förteckningen behåller de korta etiketterna (sista fältet). Rubrikerna
+    # i texten är frågor sedan 2026-10-03, och långa etiketter gjorde den
+    # klibbiga spalten högre.
     return "\n".join(
-        f'                <li><a href="#{id_}"><span class="rg-toc__nr">{i:02d}</span>{rubrik_}</a></li>'
-        for i, (id_, rubrik_, _) in enumerate(SEKTIONER, 1))
+        f'                <li><a href="#{id_}"><span class="rg-toc__nr">{i:02d}</span>{kort}</a></li>'
+        for i, (id_, _, _, kort) in enumerate(SEKTIONER, 1))
 
 
 def sektioner_html():
     return "\n\n".join(
         rubrik(i, id_, text) + kropp + "\n          </section>"
-        for i, (id_, text, kropp) in enumerate(SEKTIONER, 1))
+        for i, (id_, text, kropp, _) in enumerate(SEKTIONER, 1))
 
 
 VIDARE = [
@@ -426,7 +437,7 @@ GUIDE = f'''    <main id="innehall">
         <div class="rg-topp__inre">
           <div class="rg-topp__ord">
             <p class="section-label">Guide</p>
-            <h1 class="guidehero__titel rg-topp__titel">Attefallshus: vad som gäller efter&nbsp;regeländringen</h1>
+            <h1 class="guidehero__titel rg-topp__titel">Attefallshus: reglerna efter 1&nbsp;december&nbsp;2025</h1>
             <p class="rg-topp__lead">
               Den 1 december 2025 skrevs reglerna om. Begreppen attefallshus och
               friggebod finns inte längre i lagen, anmälningsplikten för själva
@@ -434,13 +445,13 @@ GUIDE = f'''    <main id="innehall">
               inom. Här är vad det betyder i praktiken.
             </p>
             <p class="rg-topp__meta">
-              <span>Uppdaterad 8 september 2026</span>
+              <span>Uppdaterad 3 oktober 2026</span>
               <span>4 minuters läsning</span>
             </p>
           </div>
 
           <figure class="rg-topp__bild">
-            <span class="rg-topp__ram"><img src="images/hus-r1.webp" width="1600" height="1062" loading="eager" decoding="async" alt="Svart attefallshus på en klippa vid vatten"></span>
+            <span class="rg-topp__ram"><img src="images/hus-r1.webp" width="1600" height="1062" loading="eager" decoding="async" alt="Sadel 30 Bred, svart attefallshus med sadeltak och glasgavel på en klippa vid havet"></span>
             <svg class="rg-stampel" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
               <defs><path id="rg-stampel-ring" d="M60 60m-44 0a44 44 0 1 1 88 0a44 44 0 1 1-88 0"/></defs>
               <circle cx="60" cy="60" r="58"/>
