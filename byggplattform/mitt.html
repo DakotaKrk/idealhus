@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#7aa98c">
+    <title>Mitt bygge · Byggplattformen</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Crect x='2' y='3' width='22' height='14' rx='2.5' fill='%232b2722'/%3E%3Cpath d='M7 21v-4M19 21v-4' stroke='%232b2722' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M6.5 13.2 13 7.2l6.5 6' fill='none' stroke='%237aa98c' stroke-width='2.2'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/app.css?v=13">
+    <link rel="stylesheet" href="css/publik.css?v=17">
+    <style>
+      .mb { padding: 28px 0 80px; background: var(--yta); min-height: calc(100vh - 64px); }
+      .mb-plat { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); gap: 28px; padding: 36px 36px 32px 40px; border-radius: 22px; background: var(--p-bg); color: var(--p-text); }
+      .mb-plat h1 { font: 700 clamp(44px, 4.6vw, 72px)/0.92 var(--skylt); text-transform: uppercase; }
+      .mb-plat h1 em { padding: 0 0.08em; border-radius: 6px; background: var(--ram); color: #2b2722; font-style: normal; }
+      .mb-plat__under { margin-top: 12px; color: rgba(var(--p-rgb), 0.72); font-size: 17px; line-height: 25px; }
+      .mb-status { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 6px 12px; border-radius: 999px; background: rgba(var(--p-rgb), 0.08); font-size: 13px; font-weight: 600; }
+      .mb-status i { width: 8px; height: 8px; border-radius: 50%; background: var(--ram); }
+      .mb-linje { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 28px 0 0; padding: 0; list-style: none; }
+      .mb-linje li { display: grid; gap: 8px; }
+      .mb-linje li > i { height: 6px; border-radius: 3px; background: rgba(var(--p-rgb), 0.14); }
+      .mb-linje li.klar > i { background: var(--p-text); }
+      .mb-linje li.nu > i { background: var(--ram); }
+      .mb-linje b { font: 700 16px/1 var(--skylt); text-transform: uppercase; color: rgba(var(--p-rgb), 0.5); }
+      .mb-linje li.klar b { color: rgba(var(--p-rgb), 0.85); }
+      .mb-linje li.nu b { color: var(--ram); }
+      .mb-nu { margin-top: 22px; padding: 18px; border-radius: 16px; background: rgba(var(--p-rgb), 0.07); box-shadow: inset 0 0 0 1px rgba(var(--p-rgb), 0.12); }
+      .mb-nu small { display: block; margin-bottom: 4px; color: rgba(var(--p-rgb), 0.55); font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+      .mb-nu b { display: block; color: var(--p-text); font-size: 18px; }
+      .mb-nu p { margin-top: 4px; color: rgba(var(--p-rgb), 0.72); }
+      .mb-scen { position: relative; min-height: 380px; overflow: hidden; border-radius: 16px; background: #f8f7f3; }
+      .mb-scen model-viewer { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .mb-scen__etikett { position: absolute; left: 14px; bottom: 14px; display: grid; padding: 8px 12px; border-radius: 10px; background: rgba(var(--p-glas), 0.9); color: var(--p-text); }
+      .mb-scen__etikett b { font: 700 18px/1 var(--skylt); text-transform: uppercase; }
+      .mb-scen__etikett small { color: rgba(var(--p-rgb), 0.65); font-size: 12px; }
+      .mb-nat { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; align-items: start; }
+      .mb-kort { display: grid; gap: 12px; padding: 22px; border-radius: 18px; background: var(--ark); }
+      .mb-kort h2 { font: 700 22px/1 var(--skylt); text-transform: uppercase; }
+      .mb-val { display: grid; gap: 2px; margin: 0; }
+      .mb-val div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: center; padding: 9px 0; border-top: 1px solid var(--regel); }
+      .mb-val div:first-child { border-top: 0; }
+      .mb-val dt { color: var(--text-3); font-size: 13px; }
+      .mb-val dd { margin: 0; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+      .mb-val .pris { grid-column: 2; grid-row: 1 / span 2; color: var(--text-2); font-size: 13px; font-weight: 500; }
+      .mb-summa { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; border-top: 2px solid var(--text); }
+      .mb-summa b { font: 700 26px/1 var(--skylt); }
+      .mb-person { display: flex; align-items: center; gap: 12px; }
+      .mb-person .avatar { width: 44px; height: 44px; font-size: 15px; }
+      .mb-person b { display: block; font-size: 16px; }
+      .mb-person small { color: var(--text-3); }
+      .mb-skriv { display: grid; gap: 8px; }
+      .mb-skriv textarea { min-height: 84px; padding: 10px 12px; border: 1px solid var(--kontroll); border-radius: 10px; resize: vertical; }
+      .mb-skriv textarea:focus { outline: 0; border-color: var(--text); box-shadow: 0 0 0 3px rgba(122, 169, 140, 0.5); }
+      .mb-hand { display: grid; margin: 0; padding: 0; list-style: none; }
+      .mb-hand li { position: relative; display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 12px; padding: 8px 0; }
+      .mb-hand li::before { content: ""; position: absolute; left: 5px; top: 0; bottom: 0; width: 2px; background: var(--regel); }
+      .mb-hand li:first-child::before { top: 50%; }
+      .mb-hand li:last-child::before { bottom: 50%; }
+      .mb-hand li > i { position: relative; z-index: 1; width: 12px; height: 12px; margin-top: 4px; border: 2px solid var(--text); border-radius: 50%; background: var(--ark); }
+      .mb-hand li:first-child > i { background: var(--ram); }
+      .mb-hand b { display: block; font-weight: 500; }
+      .mb-hand small { color: var(--text-3); font-size: 12px; }
+      .mb-pris { display: grid; gap: 4px; }
+      .mb-pris b { font: 700 34px/1 var(--skylt); }
+      .mb-pris small { color: var(--text-3); }
+      .mb-tom { display: grid; justify-items: start; gap: 14px; max-width: 640px; padding: 40px; border-radius: 22px; background: var(--ark); }
+      .mb-tom h1 { font: 700 clamp(40px, 4.4vw, 64px)/0.95 var(--skylt); text-transform: uppercase; }
+      .mb-tom p { color: var(--text-2); font-size: 17px; }
+      .mb-exempel { display: flex; flex-wrap: wrap; gap: 8px; }
+      .mb-exempel button { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px 0 4px; border: 1px solid var(--kontroll); border-radius: 999px; background: var(--ark); font-weight: 600; transition: border-color 0.15s ease, transform 0.16s var(--ease-out); }
+      .mb-exempel button:hover { border-color: var(--text); }
+      .mb-exempel button:active { transform: scale(0.97); }
+      .mb-exempel img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+      .mb-exempel small { color: var(--text-3); font-weight: 500; }
+      .mb-in > * { animation: pub-upp 0.6s var(--ease-out) both; }
+      .mb-in > *:nth-child(2) { animation-delay: 0.1s; }
+      .mb-in > *:nth-child(3) { animation-delay: 0.2s; }
+      @media (prefers-reduced-motion: reduce) { .mb-in > * { animation: none; } }
+      @media (max-width: 1100px) { .mb-plat { grid-template-columns: minmax(0, 1fr); } .mb-nat { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+      @media (max-width: 700px) { .mb-plat { padding: 26px 20px; } .mb-nat { grid-template-columns: minmax(0, 1fr); } .mb-linje b { font-size: 12px; } }
+    </style>
+    <link rel="stylesheet" href="css/tema.css?v=16">
+  </head>
+  <body class="pub">
+    <header class="pub-topp">
+      <div class="pub-bredd pub-topp__inre">
+        <a class="marke" href="index.html" aria-label="Byggplattformen, startsidan"><span id="marke"></span><b>Byggplattformen</b></a>
+        <nav class="pub-nav" aria-label="Sidor"><a href="konsument.html">Välj hus</a><a href="mitt.html" aria-current="page">Mitt bygge</a></nav>
+        <div class="pub-topp__hoger"><a class="knapp knapp--ram" href="index.html">Startsidan</a></div>
+      </div>
+    </header>
+    <main class="mb"><div class="pub-bredd" id="mb"></div></main>
+    <footer class="pub-fot"><div class="pub-bredd pub-fot__inre"><span>Prototyp: din förfrågan och dina meddelanden sparas bara i den här webbläsaren.</span><span><a href="index.html">Startsidan</a> · <a href="app.html">För företag</a></span></div></footer>
+
+    <script src="js/data.js?v=13"></script>
+    <script src="js/mangd.js?v=13"></script>
+    <script>
+      (function () {
+        'use strict';
+        var D = window.BP_DATA, M = window.Mangd;
+        var e = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+        var kr = function (v) { return M.tal(Math.round(v || 0), 0) + ' kr'; };
+        var hus = function (id) { return D.HUS.filter(function (h) { return h.id === id; })[0]; };
+        var las = function (k, f) { try { return JSON.parse(localStorage.getItem(k)) || f; } catch (err) { return f; } };
+        var MAN = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+        var datum = function (iso) { var d = new Date(iso), n = Math.round((Date.now() - d) / 864e5); return n <= 0 ? 'i dag' : n === 1 ? 'i går' : n < 7 ? n + ' dagar sedan' : d.getDate() + ' ' + MAN[d.getMonth()]; };
+        var initialer = function (n) { return String(n).split(/\s+/).slice(0, 2).map(function (x) { return x[0]; }).join('').toUpperCase(); };
+        document.getElementById('marke').innerHTML = '<svg viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="3" width="22" height="14" rx="2.5" fill="#2b2722"/><path d="M7 21v-4M19 21v-4" stroke="#2b2722" stroke-width="2.4" stroke-linecap="round"/><path d="M6.5 13.2 13 7.2l6.5 6" fill="none" stroke="#7aa98c" stroke-width="2.2" stroke-linejoin="round"/><path d="M9.2 12v2.4h7.6V12" fill="none" stroke="#7aa98c" stroke-width="1.8"/></svg>';
+        var rot = document.getElementById('mb');
+        var db = las('bp-v1', null);
+
+        var STEG = [
+          { id: 'skickad', namn: 'Förfrågan', nu: 'Din förfrågan är skickad', text: 'Byggföretagen i plattformen ser den nu. När någon tar den blir den ett projekt och du ser det här.' },
+          { id: 'underlag', namn: 'Underlag', nu: 'Byggaren går igenom underlaget', text: 'Ritning och mått gås igenom innan materialet räknas.' },
+          { id: 'mangd', namn: 'Mängd', nu: 'Byggaren räknar materialet', text: 'Varje byggdel räknas ur huset och bekräftas. Sedan blir det en offert till dig.' },
+          { id: 'offert', namn: 'Offert', nu: 'Offerten är på väg', text: 'Materialet är räknat och priserna jämförs hos bygghandeln. Dina tillval kommer med som bilaga.' },
+          { id: 'order', namn: 'Order', nu: 'Materialet är beställt', text: 'Bygget planeras. Byggaren hör av sig om leverans och start.' }
+        ];
+
+        // Vilket bygge visar vi? Ditt eget (från förfrågan), annars ett exempel.
+        var mitt = las('bp-mitt', null);
+        // ?exempel=p2 visar en exempelkund direkt (bra för att visa sidan).
+        var valtExempel = new URLSearchParams(location.search).get('exempel');
+
+        function hitta() {
+          if (valtExempel && db) { var p0 = db.projekt.filter(function (p) { return p.id === valtExempel; })[0]; if (p0) return { kund: p0.kund, hus: p0.hus, tillval: p0.tillval, ort: p0.ort, p: p0, exempel: true }; }
+          if (!mitt) return null;
+          var lead = db && db.leads.filter(function (l) { return l.id === mitt.id; })[0];
+          var p = lead && lead.projekt && db.projekt.filter(function (x) { return x.id === lead.projekt; })[0];
+          if (!p && db && lead && lead.status === 'projekt') p = db.projekt.filter(function (x) { return x.kund === mitt.namn; })[0];
+          return { kund: mitt.namn, hus: mitt.hus, tillval: (p && p.tillval) || mitt.tillval || {}, ort: mitt.ort, p: p || null, tid: mitt.tid, text: mitt.text };
+        }
+
+        function rita() {
+          var x = hitta();
+          if (!x) { ritaTom(); return; }
+          var h = hus(x.hus), idx = x.p ? 1 + ['underlag', 'mangd', 'offert', 'order'].indexOf(x.p.steg) : 0, s = STEG[idx];
+          var fornamn = x.kund.split(' ')[0];
+          var valt = D.TILLVAL.map(function (g) { return { g: g, v: g.val.filter(function (v) { return v.id === (x.tillval || {})[g.id]; })[0] || g.val[0] }; });
+          var tsum = valt.reduce(function (t, y) { return t + y.v.pris; }, 0);
+          var mangd = h && idx >= 3 ? M.mangda(M.delarForHus(h).delar, D.RECEPT, D.MATERIAL) : null;
+          var hand = x.p ? x.p.handelser.slice(0, 6) : [{ tid: x.tid || new Date().toISOString(), text: 'Du skickade förfrågan om ' + (h ? h.namn : 'ett hus'), av: x.kund }];
+          rot.innerHTML = '<div class="mb-in">' +
+            '<section class="mb-plat" aria-labelledby="mb-rubrik"><div>' +
+              '<span class="mb-status"><i></i>' + (x.exempel ? 'Exempel · ' : '') + s.namn + '</span>' +
+              '<h1 id="mb-rubrik">Hej <em>' + e(fornamn) + '</em> <span class="emoji" aria-hidden="true" style="font-size:.75em">👋</span></h1>' +
+              '<p class="mb-plat__under">' + (x.p ? 'Ditt bygge: <b>' + e(x.p.namn) + '</b>' : 'Din förfrågan om ' + e(h ? h.namn : 'ett hus') + (x.ort ? ' i ' + e(x.ort) : '')) + '</p>' +
+              '<ol class="mb-linje" aria-label="Var ditt bygge står, steg ' + (idx + 1) + ' av 5">' + STEG.map(function (st, k) { return '<li class="' + (k < idx ? 'klar' : k === idx ? 'nu' : '') + '"' + (k === idx ? ' aria-current="step"' : '') + '><i></i><b>' + st.namn + '</b></li>'; }).join('') + '</ol>' +
+              '<div class="mb-nu" role="status"><small>🔨 Just nu</small><b>' + s.nu + '</b><p>' + s.text + '</p></div>' +
+            '</div>' +
+            '<div class="mb-scen">' + (h ? '<model-viewer id="mb-mv" src="' + h.modell + '" alt="' + e(h.namn) + ' med dina val" camera-controls disable-zoom touch-action="pan-y" interaction-prompt="none" auto-rotate rotation-per-second="8deg" shadow-intensity="0.9" shadow-softness="0.9" exposure="1.05" environment-image="modeller/himmel.png" tone-mapping="aces" camera-orbit="35deg 72deg auto"></model-viewer><span class="mb-scen__etikett"><b>' + e(h.namn) + '</b><small>' + h.kategori + ' · ' + h.yta + ' m² · med dina val</small></span>' : '') + '</div></section>' +
+            '<div class="mb-nat">' +
+              '<section class="mb-kort" aria-labelledby="mb-val"><h2 id="mb-val"><span class="emoji" aria-hidden="true">🎨</span>Dina val</h2><dl class="mb-val">' + valt.map(function (y) {
+                return '<div><dt>' + y.g.namn + '</dt><dd>' + (y.v.farg ? '<span class="farg" style="--f:' + y.v.farg + '"></span>' : '') + e(y.v.namn) + '</dd><span class="pris">' + (y.v.pris ? (y.v.pris > 0 ? '+' : '−') + kr(Math.abs(y.v.pris)) : 'ingår') + '</span></div>';
+              }).join('') + '</dl><div class="mb-summa"><span>Tillval</span><b>' + (tsum ? (tsum > 0 ? '+' : '−') + kr(Math.abs(tsum)) : 'Inga tillval') + '</b></div>' +
+              (mangd ? '<div class="mb-pris" style="margin-top:8px"><small>Material enligt byggarens mängd</small><b>' + kr(mangd.summa) + '</b><small>' + mangd.rader.length + ' rader · exempelpriser, arbete tillkommer</small></div>' : '') + '</section>' +
+              '<section class="mb-kort" aria-labelledby="mb-byggare"><h2 id="mb-byggare"><span class="emoji" aria-hidden="true">👷</span>Din byggare</h2>' + (x.p
+                ? '<div class="mb-person"><span class="avatar" style="--av:hsl(40 70% 85%)">LB</span><div><b>Lina Berg</b><small>Exempel Bygg AB · Kalkylator</small></div></div>' +
+                  '<form class="mb-skriv" id="mb-skriv"><label class="dold" for="mb-text">Meddelande till byggaren</label><textarea id="mb-text" placeholder="Skriv till byggaren …"></textarea><button class="knapp knapp--primar" type="submit">Skicka</button></form>'
+                : '<p style="color:var(--text-2)">Ingen byggare har tagit förfrågan än. Du får se namn och kontakt här så fort någon gör det.</p>') + '</section>' +
+              '<section class="mb-kort" aria-labelledby="mb-hand"><h2 id="mb-hand"><span class="emoji" aria-hidden="true">🕓</span>Det här har hänt</h2><ol class="mb-hand">' + hand.map(function (y) {
+                return '<li><i></i><span><b>' + e(y.text) + '</b><small>' + datum(y.tid) + ' · ' + e(y.av) + '</small></span></li>';
+              }).join('') + '</ol></section>' +
+            '</div>' +
+            (exempelLista().length ? '<div class="mb-exempel" style="margin-top:20px" aria-label="Se ett annat exempel">' + exempelLista() + '</div>' : '') +
+          '</div>';
+          farga(x, valt);
+          var f = document.getElementById('mb-skriv');
+          if (f) f.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            var t = document.getElementById('mb-text').value.trim();
+            if (!t) return;
+            x.p.handelser.unshift({ tid: new Date().toISOString(), text: 'Meddelande: "' + t + '"', av: x.kund });
+            try { localStorage.setItem('bp-v1', JSON.stringify(db)); } catch (err) { /* ingen lagring */ }
+            rita();
+          });
+          koppla();
+        }
+
+        function exempelLista() {
+          if (!db) return '';
+          return db.projekt.filter(function (p) { return p.hus; }).map(function (p) {
+            var h = hus(p.hus);
+            return '<button type="button" data-ex="' + p.id + '"><img src="' + h.bild + '" alt="">' + e(p.kund) + '<small>' + ({ underlag: 'Underlag', mangd: 'Mängd', offert: 'Offert', order: 'Order' })[p.steg] + '</small></button>';
+          }).join('');
+        }
+        function koppla() {
+          Array.prototype.forEach.call(document.querySelectorAll('[data-ex]'), function (b) {
+            b.addEventListener('click', function () { valtExempel = b.getAttribute('data-ex'); rita(); window.scrollTo({ top: 0 }); });
+          });
+        }
+
+        function ritaTom() {
+          rot.innerHTML = '<div class="mb-in"><section class="mb-tom" aria-labelledby="mb-rubrik"><h1 id="mb-rubrik">Mitt bygge</h1><p>Här följer du ditt bygge när du skickat en förfrågan: var det står, vad du valt och vad som händer härnäst.</p><a class="knapp knapp--primar knapp--jatte" href="konsument.html">Välj hus och skicka en förfrågan</a>' +
+            (db ? '<p style="font-size:14px;margin-top:6px">Eller se hur det ser ut för en exempelkund:</p><div class="mb-exempel">' + exempelLista() + '</div>' : '') + '</section></div>';
+          koppla();
+        }
+
+        // Huset i dina färger.
+        var TAK = { plat: '#3a3d40', papp: '#1c1c1c', sedum: '#5d7a3a' };
+        function linj(hex) { var n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function (c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }).concat([1]); }
+        function farga(x, valt) {
+          var mv = document.getElementById('mb-mv');
+          if (!mv) return;
+          var gor = function () {
+            ['fasad', 'panel'].forEach(function (n) { var m = mv.model.getMaterialByName(n); if (m && valt[0].v.farg) m.pbrMetallicRoughness.setBaseColorFactor(linj(valt[0].v.farg)); });
+            var t = mv.model.getMaterialByName('tak'); if (t) t.pbrMetallicRoughness.setBaseColorFactor(linj(TAK[valt[1].v.id] || TAK.plat));
+          };
+          mv.addEventListener('load', gor);
+        }
+
+        rita();
+        var s = document.createElement('script'); s.type = 'module'; s.src = 'vendor/model-viewer.min.js'; document.head.appendChild(s);
+      })();
+    </script>
+  </body>
+</html>

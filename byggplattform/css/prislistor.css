@@ -1,0 +1,254 @@
+/* ===== Prislistor ================================================================= */
+.pl-yta { display: grid; grid-template-columns: 300px minmax(0, 1fr); align-items: start; gap: 16px; }
+
+/* Listorna */
+.pl-listor { position: sticky; top: 16px; display: grid; gap: 8px; }
+.prl-lista { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 14px; border: 0; border-radius: 16px; background: var(--ark); box-shadow: 0 0 0 1px var(--kant); color: var(--text); text-align: left; transition: box-shadow 0.2s ease, transform 0.2s var(--ease-out), background-color 0.2s ease; }
+.prl-lista:hover { box-shadow: 0 0 0 1px var(--kontroll), 0 12px 26px -20px rgba(43, 39, 34, 0.45); transform: translateY(-1px); }
+.prl-lista:active { transform: scale(0.98); }
+.prl-lista--vald { box-shadow: 0 0 0 2px var(--primar); }
+.prl-lista__ikon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; background: var(--primar-ljus); color: var(--primar); }
+.prl-lista__ikon .i { width: 18px; height: 18px; }
+.prl-lista b { display: block; overflow: hidden; padding-right: 64px; font-size: 15px; white-space: nowrap; text-overflow: ellipsis; }
+.prl-lista small { color: var(--text-3); font-size: 12.5px; }
+.prl-lista__stapel { display: block; height: 4px; margin-top: 7px; overflow: hidden; border-radius: 2px; background: var(--regel); }
+.prl-lista__stapel i { display: block; width: calc(var(--a) * 100%); height: 100%; border-radius: 2px; background: var(--primar); }
+.pl-anvands { position: absolute; top: 12px; right: 12px; padding: 2px 8px; border-radius: 999px; background: var(--primar); color: #fff; font-size: 11.5px; font-weight: 600; }
+.prl-lista--ny { background: transparent; box-shadow: inset 0 0 0 1.5px var(--kontroll); border: 0; }
+.prl-lista--ny .prl-lista__ikon { background: var(--yta-2); color: var(--text-2); }
+
+/* Detaljen */
+.pl-detalj { overflow: hidden; }
+.pl-detalj__huvud { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 18px 20px; }
+.pl-detalj__huvud h2 { font: 700 26px/1.05 var(--skylt); letter-spacing: -0.01em; }
+.pl-detalj__huvud small { color: var(--text-3); }
+.pl-detalj__knappar { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.pl-paverkan { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 20px 14px; padding: 12px 16px; border-radius: 12px; background: var(--yta); font-size: 14px; color: var(--text-2); }
+.pl-paverkan b { color: var(--text); font-size: 15px; font-variant-numeric: tabular-nums; }
+.pl-paverkan--aktiv { background: var(--primar-ljus); }
+.pl-verktyg { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 0 20px 14px; }
+.pl-detalj .pl-sok { max-width: 300px; height: 38px; }
+.pl-tabell td { vertical-align: middle; }
+.pl-tabell td small { display: block; }
+.pl-koppla { width: 100%; max-width: 280px; height: 34px; padding: 0 8px; border: 1px solid var(--kontroll); border-radius: 8px; background: var(--ark); font-size: 13.5px; }
+.pl-koppla:focus { outline: 0; border-color: var(--primar); box-shadow: 0 0 0 3px var(--primar-ljus); }
+.prl-rad--ingen td { background: #faf8f3; }
+.pl-varn { color: #8a5a00; font-weight: 600; }
+.pl-ingenrad { padding: 28px 16px !important; color: var(--text-3); text-align: center; }
+.pl-chip { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: var(--yta-2); color: var(--text-2); font-size: 12.5px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pl-chip--upp { background: #f6e8e2; color: #8a4a36; }
+.pl-chip--ned { background: var(--gron-ljus); color: #3a6a51; }
+.pl-chip--ingen { background: #f3ede2; color: #6a5536; }
+
+/* Tomt läge */
+.pl-tom { display: grid; justify-items: center; gap: 12px; padding: 64px 24px; border-radius: 20px; background: var(--ark); box-shadow: 0 0 0 1px var(--kant); text-align: center; }
+.pl-tom__ikon { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 18px; background: var(--primar-ljus); color: var(--primar); }
+.pl-tom__ikon .i { width: 28px; height: 28px; }
+.pl-tom h2 { font: 700 30px/1 var(--skylt); }
+.pl-tom p { max-width: 60ch; color: var(--text-2); }
+.pl-tom__knappar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 8px; }
+
+/* --- Mata in ------------------------------------------------------------------------ */
+dialog.dialog--pris { width: min(920px, calc(100vw - 32px)); }
+.pi-satt { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 12px; background: var(--yta-2); }
+.pi-satt button { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border: 0; border-radius: 9px; background: transparent; color: var(--text-2); font-weight: 600; transition: background-color 0.15s ease, color 0.15s ease, transform 0.16s var(--ease-out); }
+.pi-satt button .i { width: 15px; height: 15px; }
+.pi-satt button:hover { color: var(--text); }
+.pi-satt button:active { transform: scale(0.97); }
+.pi-satt button[aria-selected="true"] { background: var(--ark); color: var(--text); box-shadow: 0 0 0 1px var(--kant); }
+.pi-panel[hidden], .pi-kolumner[hidden] { display: none; }
+.pi-panel textarea { min-height: 150px; font-family: var(--font); font-size: 14px; }
+.pi-exempel { justify-self: start; margin-top: 6px; }
+.pi-slapp { display: grid; justify-items: center; gap: 4px; padding: 36px 16px; border: 2px dashed var(--kontroll); border-radius: 16px; background: var(--yta); color: var(--text-2); text-align: center; cursor: pointer; transition: border-color 0.2s ease, background-color 0.2s ease; }
+.pi-slapp:hover, .pi-slapp.over { border-color: var(--primar); background: var(--primar-ljus); }
+.pi-slapp.klar { border-style: solid; border-color: var(--primar); }
+.pi-slapp .i { width: 28px; height: 28px; color: var(--primar); }
+.pi-slapp b { color: var(--text); font-size: 16px; }
+.pi-manuell { display: grid; gap: 6px; margin-bottom: 10px; }
+.pi-mrad { display: grid; grid-template-columns: 1fr 2.2fr 0.9fr 0.7fr 32px; gap: 6px; align-items: center; }
+.pi-mrad--huvud { color: var(--text-3); font-size: 12px; font-weight: 600; }
+.pi-mrad input { height: 36px; padding: 0 10px; border: 1px solid var(--kontroll); border-radius: 8px; background: var(--ark); }
+.pi-mrad input:focus { outline: 0; border-color: var(--primar); box-shadow: 0 0 0 3px var(--primar-ljus); }
+.pi-kolumner { padding: 14px; border-radius: 14px; background: var(--yta); }
+.pi-kolumner > p { margin-bottom: 10px; color: var(--text-2); font-size: 13.5px; }
+.pi-kolumner > p b { color: var(--text); }
+.pi-kol { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.pi-sammanf { margin-bottom: 8px; color: var(--text-2); font-size: 14px; }
+.pi-sammanf b { color: var(--text); }
+.pi-tabell { overflow: hidden; border-radius: 12px; box-shadow: 0 0 0 1px var(--kant); }
+.pi-tabell td small { display: block; color: var(--text-3); font-size: 12px; }
+.pi-fler { padding: 8px 12px; color: var(--text-3); font-size: 13px; }
+.pi-tom { padding: 18px; border-radius: 12px; background: var(--yta); color: var(--text-3); font-size: 13.5px; text-align: center; }
+.pi-namn { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; }
+
+@media (max-width: 1100px) {
+  .pl-yta { grid-template-columns: minmax(0, 1fr); }
+  .pl-listor { position: static; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+}
+@media (max-width: 640px) {
+  .pi-kol, .pi-namn { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .pi-mrad { grid-template-columns: 1fr 1.6fr 0.8fr 32px; }
+  .pi-mrad > :nth-child(4) { display: none; }
+}
+
+/* ===== Version 2: stegen, påverkan, insikter, grupper och rörelse ================== */
+.pl-listor__rubrik { padding: 0 4px 2px; color: var(--text-3); font-size: 12px; font-weight: 600; }
+.prl-lista__stapel i { transform-origin: left; animation: pl-vaxa 0.8s var(--ease-out) both 0.2s; }
+.pl-anvands-stor { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 999px; background: var(--primar-ljus); color: var(--primar); font-weight: 600; font-size: 14px; }
+.pl-anvands-stor .i { width: 15px; height: 15px; }
+
+/* Stegen för listan */
+.pl-stegen { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 4px 20px 16px; padding: 0; list-style: none; }
+.pl-stegen li { position: relative; animation: pl-upp 0.45s var(--ease-out) both; animation-delay: calc(var(--s) * 70ms + 120ms); }
+.pl-stegen li + li::before { content: ''; position: absolute; top: 19px; left: calc(-50% + 26px); right: calc(50% + 26px); height: 2px; border-radius: 1px; background: var(--regel); }
+.pl-stegen li.klar + li::before { background: var(--primar); transform-origin: left; animation: pl-vaxa 0.5s var(--ease-out) both; animation-delay: calc(var(--s) * 70ms + 260ms); }
+.pl-stegen a, .pl-stegen button, .pl-stegen div { position: relative; display: grid; justify-items: center; gap: 6px; width: 100%; padding: 0 6px; border: 0; background: none; color: var(--text); text-align: center; text-decoration: none; }
+.pl-stegen a, .pl-stegen button { cursor: pointer; }
+.pl-stegen i { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--yta-2); color: var(--text-2); font: 700 15px/1 var(--skylt); font-style: normal; transition: transform 0.2s var(--ease-out), background-color 0.2s ease; }
+.pl-stegen i .i { width: 18px; height: 18px; }
+.pl-stegen .klar i { background: var(--primar); color: #fff; }
+.pl-stegen .nasta i { background: var(--ark); color: var(--primar); box-shadow: inset 0 0 0 2px var(--primar); animation: pl-puls 2.4s ease-in-out infinite 1s; }
+.pl-stegen a:hover i, .pl-stegen button:hover i { transform: translateY(-2px); }
+.pl-stegen a:active i, .pl-stegen button:active i { transform: scale(0.94); }
+.pl-stegen b { font-size: 14px; }
+.pl-stegen small { display: block; color: var(--text-3); font-size: 12.5px; }
+.pl-stegen .nasta small { color: var(--primar); font-weight: 600; }
+
+/* Påverkan som två staplar */
+.pl-paverkan { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 16px 28px; padding: 18px 20px; }
+.pl-paverkan__text { display: grid; align-content: center; justify-items: start; gap: 6px; }
+.pl-paverkan__text small { color: var(--text-2); font-size: 13.5px; }
+.pl-paverkan__text b { color: var(--text); font: 700 34px/1 var(--skylt); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.pl-staplar { display: grid; align-content: center; gap: 10px; }
+.pl-staplar > div { display: grid; grid-template-columns: 92px minmax(0, 1fr) 64px; align-items: center; gap: 10px; }
+.pl-staplar small { color: var(--text-3); font-size: 12.5px; }
+.pl-staplar b { font-size: 14px; text-align: right; font-variant-numeric: tabular-nums; }
+.pl-staplar span { height: 12px; overflow: hidden; border-radius: 6px; background: rgba(255, 255, 255, 0.7); }
+.pl-staplar span i { display: block; width: calc(var(--a) * 100%); height: 100%; border-radius: 6px; background: #c9c2b4; transform-origin: left; animation: pl-vaxa 0.9s var(--ease-out) both 0.25s; }
+.pl-staplar .med span i { background: var(--primar); animation-delay: 0.4s; }
+
+/* Insikterna */
+.pl-insikter { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 0 20px 16px; }
+.pl-insikt { display: grid; align-content: start; gap: 8px; padding: 14px 16px; border-radius: 14px; background: var(--yta); animation: pl-upp 0.45s var(--ease-out) both 0.3s; }
+.pl-insikt:nth-child(2) { animation-delay: 0.37s; }
+.pl-insikt:nth-child(3) { animation-delay: 0.44s; }
+.pl-insikt h3 { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
+.pl-insikt ol, .pl-insikt ul { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; font-size: 13.5px; }
+.pl-insikt li { display: flex; justify-content: space-between; gap: 10px; }
+.pl-insikt li span { overflow: hidden; color: var(--text-2); white-space: nowrap; text-overflow: ellipsis; }
+.pl-insikt li b { flex: none; font-variant-numeric: tabular-nums; }
+.pl-insikt--ned li b { color: #3a6a51; }
+.pl-insikt--upp li b { color: #8a4a36; }
+.pl-insikt p { color: var(--text-3); font-size: 13.5px; }
+.pl-insikt .knapp { justify-self: start; }
+
+/* Filtret med en glidande markör */
+.pl-filter { position: relative; }
+.pl-filter__markor { position: absolute; top: 3px; bottom: 3px; left: 0; width: 0; border-radius: 8px; background: var(--ark); box-shadow: 0 0 0 1px var(--kontroll), 0 2px 6px -3px rgba(43, 39, 34, 0.3); transition: transform 0.3s var(--ease-out), width 0.3s var(--ease-out); }
+.pl-filter button { position: relative; z-index: 1; }
+.pl-filter button[aria-pressed="true"] { background: transparent; outline: 0; }
+
+/* Grupperna i tabellen */
+.pl-grupp th { padding: 18px 16px 8px; background: var(--ark); text-align: left; border-bottom: 1px solid var(--regel); }
+.pl-grupp th span { font: 700 17px/1 var(--skylt); letter-spacing: 0.01em; }
+.pl-grupp th small { margin-left: 10px; color: var(--text-3); font-size: 12.5px; font-weight: 400; }
+.pl-grupp b.ned { color: #3a6a51; }
+.pl-grupp b.upp { color: #8a4a36; }
+.pl-in { animation: pl-upp 0.4s var(--ease-out) both; animation-delay: calc(var(--r) * 22ms); }
+.prl-rad td { transition: background-color 0.15s ease; }
+.prl-rad:hover td { background: #faf8f3; }
+
+/* Skillnaden som stapel från mitten */
+.pl-diff { display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.pl-diff__spar { position: relative; width: 52px; height: 6px; border-radius: 3px; background: var(--regel); }
+.pl-diff__spar::before { content: ''; position: absolute; top: -3px; bottom: -3px; left: 50%; width: 1px; background: var(--kontroll); }
+.pl-diff__spar i { position: absolute; top: 0; bottom: 0; width: calc(var(--w) * 50%); border-radius: 3px; animation: pl-vaxa 0.6s var(--ease-out) both 0.15s; }
+.pl-diff__spar.upp i { left: 50%; background: #c98a72; transform-origin: left; }
+.pl-diff__spar.ned i { right: 50%; background: #6f9e83; transform-origin: right; }
+
+/* Förslag för okopplade rader */
+.pl-forslag { display: flex; align-items: center; gap: 6px; max-width: 280px; margin-bottom: 6px; padding: 5px 10px; border: 0; border-radius: 8px; background: var(--primar-ljus); color: var(--text-2); font-size: 12.5px; text-align: left; transition: transform 0.16s var(--ease-out), background-color 0.15s ease; }
+.pl-forslag .i { width: 13px; height: 13px; flex: none; color: var(--primar); }
+.pl-forslag b { color: var(--text); }
+.pl-forslag:hover { background: #d3e6da; }
+.pl-forslag:active { transform: scale(0.97); }
+
+/* Tom sida: filmen och de tre sätten */
+.pl-tom { gap: 20px; padding: 44px 24px 36px; }
+.pl-tom__text { display: grid; justify-items: center; gap: 8px; }
+.pl-demo { display: grid; grid-template-columns: minmax(0, 1fr) 80px minmax(0, 0.8fr); align-items: end; width: min(640px, 100%); padding: 18px; border-radius: 18px; background: var(--yta); text-align: left; }
+.pl-demo small { display: block; color: var(--text-3); font-size: 11.5px; font-weight: 600; }
+.pl-demo__lista, .pl-demo__mat, .pl-demo__flode { display: grid; grid-auto-rows: 34px; gap: 6px; }
+.pl-demo__lista small, .pl-demo__mat small { align-self: end; }
+.pl-demo__flode::before { content: ''; }
+.pl-demo__rad { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 0 10px; border-radius: 9px; background: var(--ark); box-shadow: 0 0 0 1px var(--kant); font-size: 12.5px; animation: pl-demo-rad 6s var(--ease-out) infinite; animation-delay: calc(var(--d) * 0.9s); }
+.pl-demo__rad span { color: var(--text-3); font-variant-numeric: tabular-nums; }
+.pl-demo__rad b { overflow: hidden; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.pl-demo__flode i { position: relative; }
+.pl-demo__flode i::before { content: ''; position: absolute; top: 50%; left: 8px; right: 8px; border-top: 2px dashed var(--kontroll); }
+.pl-demo__flode i::after { content: ''; position: absolute; top: 50%; left: 4px; width: 10px; height: 10px; margin-top: -4px; border-radius: 50%; background: var(--primar); opacity: 0; animation: pl-demo-prick 6s ease-in-out infinite; animation-delay: calc(var(--d) * 0.9s); }
+.pl-demo__chip { display: flex; align-items: center; gap: 8px; padding: 0 10px; border-radius: 9px; background: var(--ark); box-shadow: 0 0 0 1px var(--kant); font-size: 12.5px; font-weight: 600; animation: pl-demo-chip 6s var(--ease-out) infinite; animation-delay: calc(var(--d) * 0.9s); }
+.pl-demo__chip .i { flex: none; width: 12px; height: 12px; padding: 3px; border-radius: 50%; background: var(--primar); color: #fff; opacity: 0; transform: scale(0.6); animation: pl-demo-bock 6s var(--ease-out) infinite; animation-delay: calc(var(--d) * 0.9s); }
+.pl-satt { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: min(760px, 100%); }
+.pl-satt__kort { position: relative; display: grid; justify-items: start; gap: 4px; padding: 16px; border: 0; border-radius: 16px; background: var(--yta); box-shadow: inset 0 0 0 1px var(--kant); color: var(--text); text-align: left; transition: transform 0.2s var(--ease-out), box-shadow 0.2s ease, background-color 0.2s ease; animation: pl-upp 0.45s var(--ease-out) both; animation-delay: calc(var(--k) * 70ms + 200ms); }
+.pl-satt__kort:hover { background: var(--ark); box-shadow: inset 0 0 0 1px var(--kontroll), 0 14px 28px -22px rgba(43, 39, 34, 0.45); transform: translateY(-2px); }
+.pl-satt__kort:active { transform: scale(0.98); }
+.pl-satt__ikon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 6px; border-radius: 12px; background: var(--primar-ljus); color: var(--primar); }
+.pl-satt__ikon .i { width: 19px; height: 19px; }
+.pl-satt__kort b { font-size: 15px; }
+.pl-satt__kort small { color: var(--text-3); font-size: 12.5px; line-height: 1.4; }
+.pl-satt__pil { position: absolute; top: 18px; right: 16px; width: 16px; height: 16px; color: var(--text-3); transition: transform 0.2s var(--ease-out), color 0.2s ease; }
+.pl-satt__kort:hover .pl-satt__pil { transform: translateX(3px); color: var(--primar); }
+
+@keyframes pl-upp { from { opacity: 0; transform: translateY(8px); } }
+@keyframes pl-vaxa { from { transform: scaleX(0); } }
+@keyframes pl-puls { 0%, 100% { box-shadow: inset 0 0 0 2px var(--primar), 0 0 0 0 var(--primar-ljus); } 50% { box-shadow: inset 0 0 0 2px var(--primar), 0 0 0 6px var(--primar-ljus); } }
+@keyframes pl-demo-rad { 0%, 4% { box-shadow: 0 0 0 1px var(--kant); } 9%, 22% { box-shadow: 0 0 0 2px var(--primar); } 30%, 100% { box-shadow: 0 0 0 1px var(--kant); } }
+@keyframes pl-demo-prick { 0%, 8% { opacity: 0; transform: translateX(0); } 12% { opacity: 1; } 24% { opacity: 1; transform: translateX(56px); } 28%, 100% { opacity: 0; transform: translateX(56px); } }
+@keyframes pl-demo-chip { 0%, 22% { transform: none; box-shadow: 0 0 0 1px var(--kant); } 27% { transform: scale(1.04); box-shadow: 0 0 0 2px var(--primar); } 34%, 86% { transform: none; box-shadow: 0 0 0 1px #b9d6c4; } 94%, 100% { box-shadow: 0 0 0 1px var(--kant); } }
+@keyframes pl-demo-bock { 0%, 24% { opacity: 0; transform: scale(0.6); } 30%, 86% { opacity: 1; transform: none; } 94%, 100% { opacity: 0; transform: scale(0.6); } }
+
+@media (max-width: 1100px) { .pl-insikter, .pl-paverkan { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) {
+  .pl-satt { grid-template-columns: minmax(0, 1fr); }
+  .pl-demo { grid-template-columns: minmax(0, 1fr) 40px minmax(0, 0.8fr); }
+  .pl-demo__rad { grid-template-columns: minmax(0, 1fr) auto; }
+  .pl-demo__rad span:first-child { display: none; }
+  .pl-stegen small { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pl-in, .pl-insikt, .pl-stegen li, .pl-satt__kort, .pl-staplar span i, .pl-diff__spar i, .prl-lista__stapel i, .pl-stegen li.klar + li::before,
+  .pl-stegen .nasta i, .pl-demo__rad, .pl-demo__chip, .pl-demo__chip .i, .pl-demo__flode i::after { animation: none; }
+  .pl-demo__chip .i { opacity: 1; transform: none; }
+  .pl-filter__markor { transition: none; }
+}
+
+/* Mobil: varje rad blir ett kort i stället för en hoptryckt tabell */
+@media (max-width: 760px) {
+  .pl-detalj .tabellram { overflow: visible; }
+  .pl-tabell thead { display: none; }
+  .pl-tabell, .pl-tabell tbody { display: block; width: 100%; }
+  .pl-tabell tr.pl-grupp, .pl-tabell tr.pl-grupp th { display: block; }
+  .pl-tabell tr.pl-grupp th { padding: 18px 16px 8px; }
+  .pl-tabell tr.prl-rad { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; grid-template-areas: "namn namn diff" "koppla koppla koppla" "lista nu nu"; align-items: start; gap: 10px 12px; padding: 14px 16px; border-bottom: 1px solid var(--regel); }
+  .pl-tabell tr.prl-rad td { display: block; height: auto; min-width: 0; padding: 0 !important; border: 0; background: none !important; }
+  .pl-tabell tr.prl-rad td:nth-child(1) { grid-area: namn; }
+  .pl-tabell tr.prl-rad td:nth-child(2) { grid-area: koppla; }
+  .pl-tabell tr.prl-rad td:nth-child(3) { grid-area: lista; text-align: left; }
+  .pl-tabell tr.prl-rad td:nth-child(4) { grid-area: nu; text-align: right; }
+  .pl-tabell tr.prl-rad td:nth-child(5) { grid-area: diff; }
+  .pl-tabell tr.prl-rad td:nth-child(3)::before, .pl-tabell tr.prl-rad td:nth-child(4)::before { display: block; color: var(--text-3); font-size: 11.5px; font-weight: 600; }
+  .pl-tabell tr.prl-rad td:nth-child(3)::before { content: 'Listpris'; }
+  .pl-tabell tr.prl-rad td:nth-child(4)::before { content: 'Exempelpris nu'; }
+  .pl-tabell .pl-koppla, .pl-tabell .pl-forslag { max-width: none; }
+  .pl-tabell .pl-diff__spar { display: none; }
+  .pl-tabell .pl-ingenrad { display: block; }
+  .prl-rad--ingen { background: #faf8f3; }
+  .pl-detalj__huvud, .pl-verktyg { padding-left: 16px; padding-right: 16px; }
+  .pl-stegen, .pl-paverkan { margin-left: 16px; margin-right: 16px; }
+  .pl-insikter { padding: 0 16px 16px; }
+  .pl-detalj .pl-sok { max-width: none; flex: 1 1 100%; }
+  .pl-filter { overflow-x: auto; flex-wrap: nowrap; max-width: 100%; }
+  .pl-filter button { flex: none; }
+  .pl-paverkan__text b { font-size: 28px; }
+}

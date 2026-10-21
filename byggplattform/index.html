@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#f4f3ef">
+    <title>Byggplattformen · från hus i 3D till färdigt bygge</title>
+    <meta name="description" content="Välj ett hus i 3D, få materialet räknat post för post och följ bygget. För privatpersoner, byggföretag, husleverantörer och bygghandel.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Crect x='2' y='3' width='22' height='14' rx='2.5' fill='%232b2722'/%3E%3Cpath d='M7 21v-4M19 21v-4' stroke='%232b2722' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M6.5 13.2 13 7.2l6.5 6' fill='none' stroke='%237aa98c' stroke-width='2.2'/%3E%3C/svg%3E">
+    <link rel="preload" href="fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="css/app.css?v=19">
+    <link rel="stylesheet" href="css/tema.css?v=19">
+    <link rel="stylesheet" href="css/start.css?v=19">
+    <script>
+      // Gamla länkar till plattformen (#/projekt …) går vidare dit.
+      if (/^#\//.test(location.hash)) location.replace('app.html' + location.hash);
+    </script>
+  </head>
+  <body class="bh">
+    <a class="bh-hoppa" href="#innehall">Hoppa till innehållet</a>
+
+    <header class="bh-nav">
+      <a class="bh-marke" href="index.html" aria-label="Byggplattformen, startsidan"><svg viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="3" width="22" height="14" rx="2.5" fill="#2b2722"/><path d="M7 21v-4M19 21v-4" stroke="#2b2722" stroke-width="2.4" stroke-linecap="round"/><path d="M6.5 13.2 13 7.2l6.5 6" fill="none" stroke="#7aa98c" stroke-width="2.2" stroke-linejoin="round"/><path d="M9.2 12v2.4h7.6V12" fill="none" stroke="#7aa98c" stroke-width="1.8"/></svg><b>Byggplattformen</b></a>
+      <nav class="bh-nav__lankar" id="bh-meny" aria-label="Startsidan">
+        <a href="#for-dig">För dig</a>
+        <a href="#funktioner">Funktioner</a>
+        <a href="#husen">Husen</a>
+        <a href="#fragor">Frågor</a>
+        <a href="mitt.html">Mitt bygge</a>
+      </nav>
+      <a class="bh-knapp bh-knapp--liten bh-nav__cta" href="app.html">Öppna plattformen</a>
+      <button class="bh-nav__meny" type="button" aria-expanded="false" aria-controls="bh-meny" aria-label="Meny"><span></span><span></span></button>
+    </header>
+
+    <main id="innehall">
+      <!-- Hjälten -->
+      <section class="bh-hero" aria-labelledby="bh-rubrik">
+        <h1 id="bh-rubrik" class="bh-hero__rubrik"><span class="bh-ord">Från</span> <span class="bh-ord">hus</span> <span class="bh-ord">i</span> <span class="bh-ord">3D</span><br><span class="bh-ord bh-gron">till</span> <span class="bh-ord bh-gron">färdigt</span> <span class="bh-ord bh-gron">bygge</span></h1>
+        <p class="bh-hero__under">Välj ett hus och gör det till ditt. Byggaren räknar materialet post för post, och ni följer samma projekt hela vägen till order.</p>
+        <div class="bh-hero__knappar"><a class="bh-knapp" href="konsument.html">Välj ditt hus</a><a class="bh-knapp bh-knapp--vit" href="app.html">Jag är byggföretag</a></div>
+
+        <div class="bh-marken" aria-hidden="true">
+          <span class="bh-marke-rund bh-marke-rund--v"><svg viewBox="0 0 120 120"><defs><path id="cirkel1" d="M60 60m-44 0a44 44 0 1 1 88 0a44 44 0 1 1-88 0"/></defs><text><textPath href="#cirkel1">RITAT · RÄKNAT · BEKRÄFTAT · RITAT · RÄKNAT ·</textPath></text></svg><i><svg viewBox="0 0 24 24"><path d="M3 10.5 12 4l9 6.5"/><path d="M5.5 9v11h13V9"/><path d="M10 20v-5h4v5"/></svg></i></span>
+          <span class="bh-marke-rund bh-marke-rund--h"><svg viewBox="0 0 120 120"><defs><path id="cirkel2" d="M60 60m-44 0a44 44 0 1 1 88 0a44 44 0 1 1-88 0"/></defs><text><textPath href="#cirkel2">FRÅN UNDERLAG TILL ORDER · FRÅN UNDERLAG ·</textPath></text></svg><i><svg viewBox="0 0 24 24"><path d="M3 17 17 3l4 4L7 21z"/><path d="M7 13l2 2"/><path d="M10 10l2 2"/><path d="M13 7l2 2"/></svg></i></span>
+        </div>
+
+        <div class="bh-skarm" id="bh-skarm">
+          <div class="bh-skarm__ram"><img src="bilder/plattform-oversikt.jpg" width="1440" height="900" alt="Byggplattformens översikt: dagens uppgifter, ett hus i 3D och nyckeltal"></div>
+          <div class="bh-flyt bh-flyt--1" aria-hidden="true"><small>Materialet · Sadel 30 Bred</small><b id="flyt-summa">141 242 kr</b><span>exempelpriser, räknat ur husets mått</span></div>
+          <div class="bh-flyt bh-flyt--2" aria-hidden="true"><span class="bh-flyt__bock"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><b>Mängd godkänd</b><small>alla byggdelar bekräftade</small></span></div>
+        </div>
+      </section>
+
+      <!-- Tre fördelar -->
+      <section class="bh-fordelar" aria-label="Därför Byggplattformen">
+        <article class="bh-fordel">
+          <span class="bh-ikon"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 10h10"/><path d="M4 14h16"/><path d="M4 18h7"/><path d="M17 16l2 2 3-4"/></svg></span>
+          <h2>Varje siffra med källa</h2>
+          <p>Materialet räknas ur husets egna mått, och varje rad visar var den kommer ifrån.</p>
+        </article>
+        <article class="bh-fordel">
+          <span class="bh-ikon"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5"/><path d="M12 12v9"/><path d="M12 12 4 7.5"/></svg></span>
+          <h2>Kunden väljer i 3D</h2>
+          <p>Färg, tak, altan och insida väljs direkt på huset – och blir en bilaga till kontraktet.</p>
+        </article>
+        <article class="bh-fordel">
+          <span class="bh-ikon"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+          <h2>Ett flöde till order</h2>
+          <p>Underlag, mängd, offert och order på samma ställe, utan att byta verktyg.</p>
+        </article>
+      </section>
+
+      <!-- Anpassat för dig -->
+      <section class="bh-sektion" id="for-dig" aria-labelledby="for-dig-rubrik">
+        <div class="bh-huvud"><p class="bh-etikett">Anpassat för dig</p><h2 id="for-dig-rubrik">En plattform, fyra sätt att använda den</h2></div>
+        <div class="bh-roller">
+          <article class="bh-roll">
+            <div class="bh-roll__bild"><img src="bilder/hus-r2.webp" width="1600" height="1062" alt="Sadel 30 i ljust trä vid vattnet" loading="lazy"></div>
+            <div class="bh-roll__text"><h3>Privatperson</h3><p>Välj ett hus, gör det till ditt i 3D och skicka en förfrågan. Sedan följer du allt på Mitt bygge.</p><a class="bh-las" href="konsument.html">Välj ditt hus<span class="bh-pil" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></a></div>
+          </article>
+          <article class="bh-roll">
+            <div class="bh-roll__bild"><img src="bilder/hus-r4.webp" width="1600" height="1062" alt="Kupa 50 med takkupa bland tallarna" loading="lazy"></div>
+            <div class="bh-roll__text"><h3>Byggföretag</h3><p>Mängda ur modell eller ritning, bekräfta varje byggdel och ta projektet hela vägen till offert och order.</p><a class="bh-las" href="app.html">Läs mer om mängdning<span class="bh-pil" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></a></div>
+          </article>
+          <article class="bh-roll">
+            <div class="bh-roll__bild"><img src="bilder/hus-r1.webp" width="1600" height="1062" alt="Sadel 30 Bred på en klippa vid havet" loading="lazy"></div>
+            <div class="bh-roll__text"><h3>Husleverantör</h3><p>Låt kunden göra sina val i 3D och få full koll på tillvalen – valen blir en bilaga till kontraktet.</p><a class="bh-las" href="app.html#/tillval">Läs mer om tillval<span class="bh-pil" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></a></div>
+          </article>
+          <article class="bh-roll">
+            <div class="bh-roll__bild"><img src="bilder/hus-r3.webp" width="1600" height="1062" alt="Kupa 40 i skogen" loading="lazy"></div>
+            <div class="bh-roll__text"><h3>Bygghandel</h3><p>Ta emot materiallistor färdiga att prissätta och svara med pris, rabatt och leveranstid.</p><a class="bh-las" href="app.html#/forfragningar">Läs mer om förfrågningar<span class="bh-pil" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></a></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Smarta funktioner -->
+      <section class="bh-sektion bh-sektion--falt" id="funktioner" aria-labelledby="funk-rubrik">
+        <div class="bh-huvud"><p class="bh-etikett">Smarta funktioner</p><h2 id="funk-rubrik">Allt från ritning till order</h2></div>
+        <div class="bh-funk">
+          <article><span class="bh-ikon"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 10h10"/><path d="M4 14h16"/><path d="M4 18h7"/><path d="M17 16l2 2 3-4"/></svg></span><h3>Mängdning med källa</h3><p>Kända hus räknas exakt ur sina mått. Ritningar ritas av med kalibrerad skala och varje byggdel bekräftas.</p></article>
+          <article><span class="bh-ikon"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 4l9 6.5"/><path d="M5.5 9v11h13V9"/><path d="M10 20v-5h4v5"/></svg></span><h3>Husbibliotek i 3D</h3><p>Visa, jämför och mängda husen direkt. Se vilka som håller sig inom attefallsmåtten.</p></article>
+          <article><span class="bh-ikon"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.2 5.5.8-4 3.9.9 5.6L12 15.9 7.1 18.5l.9-5.6-4-3.9 5.5-.8z"/></svg></span><h3>Kundens tillval</h3><p>Kunden väljer i 3D och ser vad valen kostar. Valen blir en bilaga till kontraktet.</p></article>
+          <article><span class="bh-ikon"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8"/><path d="M8 12h5"/></svg></span><h3>Förfrågningar och offert</h3><p>Skicka materiallistan till bygghandeln och jämför svaren med pris, rabatt och leveranstid.</p></article>
+          <article><span class="bh-ikon"><svg viewBox="0 0 24 24"><path d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M3 19c.5-3 2.6-5 5-5s4.5 2 5 5"/><path d="M16 4h5v5"/><path d="M21 4l-6 6"/></svg></span><h3>Direkt till konsulter</h3><p>Beställ arkitekt, konstruktion, energiberäkning eller kontrollansvarig till projektet.</p></article>
+          <article><span class="bh-ikon"><svg viewBox="0 0 24 24"><path d="M3 17 17 3l4 4L7 21z"/><path d="M7 13l2 2"/><path d="M10 10l2 2"/><path d="M13 7l2 2"/></svg></span><h3>Samkapning</h3><p>Virket för flera projekt kapas i samma stänger, så att spillet minskar – och skillnaden syns i kronor.</p></article>
+        </div>
+      </section>
+
+      <!-- 3D: huset lager för lager -->
+      <section class="bh-sektion" id="lager" aria-labelledby="lager-rubrik">
+        <div class="bh-lager">
+          <div class="bh-lager__text">
+            <p class="bh-etikett">I 3D</p>
+            <h2 id="lager-rubrik">Se huset lager för lager</h2>
+            <p>Dra isär Sadel 30 Bred och se vad varje lager kostar i material – räknat ur husets egna mått.</p>
+            <div class="bh-segment" role="group" aria-label="Visa huset">
+              <button type="button" data-steg="0" aria-pressed="true">Hopsatt</button>
+              <button type="button" data-steg="1" aria-pressed="false">Taket av</button>
+              <button type="button" data-steg="2" aria-pressed="false">Alla lager</button>
+            </div>
+            <dl class="bh-lager__lista" id="lager-lista"></dl>
+            <p class="bh-lager__summa" id="lager-summa"></p>
+          </div>
+          <div class="bh-lager__scen">
+            <model-viewer id="lager-mv" src="modeller/hus-r1.glb" alt="Sadel 30 Bred i 3D, lager för lager" animation-name="sprang" environment-image="modeller/himmel.png" tone-mapping="aces" exposure="1.05" shadow-intensity="1" shadow-softness="0.6" camera-controls disable-zoom disable-pan touch-action="pan-y" interaction-prompt="none" auto-rotate auto-rotate-delay="3000" rotation-per-second="8deg" interpolation-decay="90"></model-viewer>
+            <span class="bh-lager__tips">Dra för att vrida</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Husbiblioteket -->
+      <section class="bh-sektion bh-sektion--falt" id="husen" aria-labelledby="husen-rubrik">
+        <div class="bh-huvud"><p class="bh-etikett">Husbiblioteket</p><h2 id="husen-rubrik">Fem hus med riktiga mått</h2><p>Idealhus modeller, från attefallshus på 30 m² till fritidshus på 50 m². Alla finns i 3D och kan mängdas direkt.</p></div>
+        <div class="bh-kategorier" aria-label="Kategorier"><span><b>3</b> attefallshus</span><span><b>2</b> fritidshus</span><span><b>5</b> hus i 3D</span></div>
+        <div class="bh-husen" id="husen-lista"></div>
+        <div class="bh-mitt-knapp"><a class="bh-knapp" href="konsument.html#husen">Titta in i biblioteket</a></div>
+      </section>
+
+      <!-- Så går det till -->
+      <section class="bh-sektion" id="sa-gar-det-till" aria-labelledby="steg-rubrik">
+        <div class="bh-huvud"><p class="bh-etikett">Så går det till</p><h2 id="steg-rubrik">Samma linje för dig och byggaren</h2></div>
+        <ol class="bh-steg">
+          <li><span class="bh-steg__nr">1</span><h3>Välj</h3><p>Du väljer hus och tillval och skickar en förfrågan. Byggaren får den som ett färdigt projekt.</p></li>
+          <li><span class="bh-steg__nr">2</span><h3>Räkna</h3><p>Byggaren räknar materialet ur husets mått och bekräftar varje byggdel.</p></li>
+          <li><span class="bh-steg__nr">3</span><h3>Jämför</h3><p>Materiallistan går till bygghandeln. Du får offerten post för post, med dina val som bilaga.</p></li>
+          <li><span class="bh-steg__nr">4</span><h3>Bygg</h3><p>Ordern läggs, virket kapas ihop och du följer allt på Mitt bygge.</p></li>
+        </ol>
+      </section>
+
+      <!-- Vanliga frågor -->
+      <section class="bh-sektion bh-sektion--falt" id="fragor" aria-labelledby="fragor-rubrik">
+        <div class="bh-fragor">
+          <div class="bh-huvud bh-huvud--vanster"><p class="bh-etikett">Vanliga frågor</p><h2 id="fragor-rubrik">Svar på det man brukar undra</h2><p>Hittar du inte svaret? Prova plattformen – allt i den är exempel och går att återställa.</p></div>
+          <div class="bh-fragor__lista">
+            <details><summary>Behöver jag kunna något om bygg?</summary><p>Nej. Som privatperson väljer du hus och färger på huset och skickar en förfrågan. Byggaren tar hand om materialet och offerten.</p></details>
+            <details><summary>Var kommer siffrorna ifrån?</summary><p>Ur husets egna mått och ur ett recept för varje byggdel, med spill och kapning i riktiga virkeslängder. Varje rad visar sin källa, och det som inte är bekräftat är avspärrat tills någon godkänt det.</p></details>
+            <details><summary>Kan jag använda en egen ritning?</summary><p>Ja. Ladda upp en bild av ritningen, sätt skalan, rita av väggar och ytor och bekräfta – sedan räknas materialet som för husen i biblioteket.</p></details>
+            <details><summary>Vad är Mitt bygge?</summary><p>Din egen sida när du skickat en förfrågan: där ser du var bygget står, dina val, vem som är din byggare och vad som hänt.</p></details>
+            <details><summary>Är priserna riktiga?</summary><p>Nej. Byggplattformen är en prototyp. Husen är Idealhus modeller med riktiga mått; priser, företag och personer är exempel.</p></details>
+          </div>
+        </div>
+      </section>
+
+      <!-- Kom igång: välj hus och färg -->
+      <section class="bh-sektion" id="borja" aria-labelledby="borja-rubrik">
+        <div class="bh-cta">
+          <div class="bh-cta__text">
+            <h2 id="borja-rubrik">Kom igång med ditt hus</h2>
+            <p>Välj hus och färg här – materialet räknas direkt. Fortsätt sedan och skicka en förfrågan till byggföretagen.</p>
+            <a class="bh-knapp bh-knapp--vit" href="app.html">Jag är byggföretag</a>
+          </div>
+          <div class="bh-kort">
+            <img class="bh-kort__bild" id="kort-bild" src="bilder/hus-r1.webp" width="1600" height="1062" alt="" loading="lazy">
+            <div class="bh-kort__val" role="group" aria-label="Hus" id="kort-hus"></div>
+            <div class="bh-kort__farg" role="group" aria-label="Fasadfärg" id="kort-farg"></div>
+            <p class="bh-kort__rad" id="kort-rad" aria-live="polite"></p>
+            <a class="bh-knapp bh-knapp--bred" id="kort-knapp" href="konsument.html">Fortsätt</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bh-fot">
+      <div class="bh-fot__inre">
+        <div><a class="bh-marke" href="index.html"><svg viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="3" width="22" height="14" rx="2.5" fill="#f4f3ef"/><path d="M7 21v-4M19 21v-4" stroke="#f4f3ef" stroke-width="2.4" stroke-linecap="round"/><path d="M6.5 13.2 13 7.2l6.5 6" fill="none" stroke="#7aa98c" stroke-width="2.2" stroke-linejoin="round"/><path d="M9.2 12v2.4h7.6V12" fill="none" stroke="#7aa98c" stroke-width="1.8"/></svg><b>Byggplattformen</b></a><p>Prototyp 2026. Husen är Idealhus modeller med riktiga mått; företag, personer och priser är exempel.</p></div>
+        <nav aria-label="Sidfot"><a href="konsument.html">Välj hus</a><a href="konsument.html#forfragan">Hitta byggare</a><a href="mitt.html">Mitt bygge</a><a href="app.html">Plattformen för företag</a></nav>
+      </div>
+    </footer>
+
+    <script src="js/data.js?v=19"></script>
+    <script src="js/mangd.js?v=19"></script>
+    <script src="js/scen.js?v=19"></script>
+    <script src="js/start.js?v=19"></script>
+    <script type="module" src="vendor/model-viewer.min.js"></script>
+  </body>
+</html>

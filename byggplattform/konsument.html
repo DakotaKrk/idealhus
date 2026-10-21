@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#7aa98c">
+    <title>Hitta ditt hus · Byggplattformen</title>
+    <link rel="preload" href="fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="css/app.css?v=2">
+    <style>
+      body { background: var(--ark); }
+      .k-topp { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 16px; height: 60px; padding: 0 max(20px, calc((100vw - 1240px) / 2)); background: var(--ram); }
+      .k-topp .marke { margin: 0; }
+      .k-topp nav { display: flex; gap: 4px; margin-left: auto; }
+      .k-topp nav a { display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: background-color 0.15s ease; }
+      .k-topp nav a:hover { background: var(--ram-hover); }
+      .k-topp nav a i { display: grid; place-items: center; width: 20px; height: 20px; margin-right: 7px; border: 1.5px solid currentColor; border-radius: 50%; font: 600 11px/1 var(--font); font-style: normal; transition: background-color 0.2s ease, color 0.2s ease; }
+      .k-topp nav a[aria-current="true"]:not(.knapp) { background: var(--ark); box-shadow: inset 0 0 0 1.5px var(--text); }
+      .k-topp nav a[aria-current="true"]:not(.knapp) i { border-color: var(--text); background: var(--text); color: var(--ram); }
+      .k-topp nav .knapp[aria-current="true"] { box-shadow: 0 0 0 2px var(--ram), 0 0 0 4px var(--text); }
+      .k-topp nav .knapp i { border-color: rgba(255, 255, 255, 0.6); }
+      .k-framsteg { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(43, 39, 34, 0.1); }
+      .k-framsteg i { display: block; height: 100%; background: var(--text); transform: scaleX(var(--p, 0)); transform-origin: left; }
+      [id] { scroll-margin-top: 76px; }
+      @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+      .k-valhint { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; font-weight: 600; font-size: 13px; }
+      .k-valhint svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s var(--ease-out); }
+      .hus:hover .k-valhint svg { transform: translateX(4px); }
+      .k-sektion { padding: 72px max(20px, calc((100vw - 1240px) / 2)); }
+      .k-hero { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 48px; align-items: center; padding-top: 40px; padding-bottom: 72px; background: var(--ram); }
+      .k-hero h1 { font: 700 clamp(44px, 5.4vw, 76px)/0.95 var(--skylt); letter-spacing: -0.005em; text-transform: uppercase; }
+      .k-hero h1 span { display: block; }
+      .k-hero p { max-width: 46ch; margin-top: 20px; font-size: 18px; line-height: 28px; color: var(--ram-text-2); }
+      .k-hero .knappar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+      .k-skylt { position: relative; border: 3px solid var(--text); border-radius: 18px; background: var(--ark); overflow: hidden; }
+      .k-skylt__rubrik { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 3px solid var(--text); background: var(--ram); font: 700 15px/1 var(--skylt); letter-spacing: 0.08em; text-transform: uppercase; }
+      .k-skylt__rubrik span { margin-left: auto; font-weight: 600; letter-spacing: 0.02em; text-transform: none; font-family: var(--font); font-size: 13px; }
+      .k-skylt model-viewer { display: block; width: 100%; height: 420px; background: #f8f7f3; }
+      .k-valj { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; padding: 12px; border-top: 1px solid var(--regel); }
+      .k-valj button { min-width: 0; padding: 8px 10px; }
+      .k-valj small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .k-valj button { flex: none; display: grid; gap: 2px; padding: 8px 12px; border: 1px solid var(--kontroll); border-radius: 10px; background: var(--ark); text-align: left; transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.16s var(--ease-out); }
+      .k-valj button:active { transform: scale(0.97); }
+      .k-valj button[aria-pressed="true"] { border-color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
+      .k-valj b { font: 700 16px/1 var(--skylt); }
+      .k-valj small { color: var(--text-3); font-size: 12px; }
+      .k-tillval { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px 14px; padding: 12px 14px 14px; border-top: 1px solid var(--regel); }
+      .k-tillval > b { font: 700 14px/1 var(--skylt); letter-spacing: 0.04em; text-transform: uppercase; }
+      .k-tillval__val { display: flex; flex-wrap: wrap; gap: 6px; }
+      .k-tillval button { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 11px; border: 1px solid var(--kontroll); border-radius: 999px; background: var(--ark); font-size: 13px; font-weight: 600; transition: border-color 0.15s ease, transform 0.16s var(--ease-out), box-shadow 0.15s ease; }
+      .k-tillval button:has(.farg) { padding-left: 6px; }
+      .k-tillval button:active { transform: scale(0.96); }
+      .k-tillval button[aria-pressed="true"] { border-color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
+      .k-tillval button small { color: var(--text-3); font-weight: 500; }
+      .k-tillval .farg { width: 20px; height: 20px; }
+      .k-valt { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 14px; border-radius: 12px; background: var(--ark); box-shadow: inset 0 0 0 1px var(--kant); font-size: 14px; }
+      .k-valt b { font-weight: 600; }
+      .k-valt .farg { width: 16px; height: 16px; }
+      .k-mitt { margin-left: 6px; }
+      .k-tack .knappar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+      .k-h2 { font: 700 clamp(30px, 3.4vw, 44px)/1 var(--skylt); text-transform: uppercase; margin-bottom: 8px; }
+      .k-under { color: var(--text-2); font-size: 16px; margin-bottom: 28px; max-width: 60ch; }
+      .k-linje { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 0; padding: 0; list-style: none; }
+      .k-linje li { position: relative; display: grid; align-content: start; gap: 8px; padding: 0 20px 0 0; }
+      .k-linje li::before { content: ""; position: absolute; top: 9px; left: 22px; right: 0; height: 4px; background: var(--text); }
+      .k-linje li:last-child::before { display: none; }
+      .k-linje i { position: relative; z-index: 1; width: 22px; height: 22px; border: 4px solid var(--text); border-radius: 50%; background: var(--ram); }
+      .k-linje b { font: 700 22px/1 var(--skylt); text-transform: uppercase; margin-top: 6px; }
+      .k-linje span { color: var(--text-2); }
+      .k-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; max-width: 760px; }
+      .k-form .hel { grid-column: 1 / -1; }
+      .k-tack { display: grid; gap: 8px; max-width: 760px; padding: 24px; border: 3px solid var(--text); border-radius: 16px; background: var(--gul-ljus); }
+      .k-tack b { font: 700 28px/1 var(--skylt); text-transform: uppercase; }
+      /* Så byggs huset: fast scen, rullningen plockar isär huset lager för lager */
+      .k-bygg { position: relative; height: 320vh; background: var(--ark); }
+      .k-bygg__fast { position: sticky; top: 60px; display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 40px; align-items: center; height: calc(100vh - 60px); padding: 0 max(20px, calc((100vw - 1240px) / 2)); }
+      .k-bygg__steg { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+      .k-bygg__steg li { position: relative; display: grid; gap: 2px; padding: 10px 14px 10px 30px; border-radius: 10px; color: var(--text-3); transition: background-color 0.25s ease, color 0.25s ease; }
+      .k-bygg__steg li::before { content: ""; position: absolute; left: 10px; top: 16px; width: 10px; height: 10px; border: 2px solid currentColor; border-radius: 50%; transition: background-color 0.25s ease, border-color 0.25s ease; }
+      .k-bygg__steg li b { font: 700 22px/1.1 var(--skylt); text-transform: uppercase; }
+      .k-bygg__steg li span { font-size: 14px; }
+      .k-bygg__steg li.nu { background: var(--gul-ljus); color: var(--text); }
+      .k-bygg__steg li.nu::before { background: var(--ram); border-color: var(--text); }
+      .k-bygg__steg li.klar { color: var(--text-2); }
+      .k-bygg__steg li.klar::before { background: var(--text); border-color: var(--text); }
+      .k-bygg__scen { position: relative; height: min(76vh, 680px); border: 3px solid var(--text); border-radius: 18px; background: #f8f7f3; overflow: hidden; }
+      .k-bygg__scen model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
+      .k-bygg__matare { position: absolute; left: 16px; right: 16px; bottom: 16px; height: 6px; border-radius: 3px; background: rgba(43, 39, 34, 0.12); overflow: hidden; }
+      .k-bygg__matare i { display: block; height: 100%; width: 100%; background: var(--text); transform: scaleX(var(--p, 0)); transform-origin: left; }
+      @media (max-width: 900px) {
+        .k-bygg { height: auto; }
+        .k-bygg__fast { position: static; height: auto; grid-template-columns: minmax(0, 1fr); padding-top: 48px; padding-bottom: 48px; }
+        .k-bygg__scen { height: 360px; }
+      }
+      .k-fot { padding: 28px max(20px, calc((100vw - 1240px) / 2)); background: var(--text); color: #d9d7d0; font-size: 13px; }
+      .k-fot a { color: var(--ram); }
+      .k-gra { background: var(--yta); }
+      main > .k-sektion:not(.k-hero):not(.k-gra) { background: var(--ark); }
+      @media (max-width: 900px) {
+        .k-hero { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+        .k-topp { flex-wrap: wrap; height: auto; gap: 8px 16px; padding-top: 10px; padding-bottom: 10px; }
+        .k-topp .marke { height: 36px; }
+        .k-topp nav { order: 3; width: 100%; margin-left: 0; overflow-x: auto; scrollbar-width: none; }
+        .k-topp nav a { flex: none; }
+        [id] { scroll-margin-top: 116px; }
+        .k-linje { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+        .k-linje li::before { left: 9px; top: 22px; right: auto; bottom: -18px; width: 4px; height: auto; }
+        .k-linje li { grid-template-columns: 22px minmax(0, 1fr); column-gap: 14px; row-gap: 2px; padding: 0; }
+        .k-linje i { grid-row: 1 / span 2; }
+        .k-linje b { grid-column: 2; margin-top: 0; }
+        .k-linje span { grid-column: 2; }
+        .k-form { grid-template-columns: minmax(0, 1fr); }
+        .k-sektion { padding-top: 48px; padding-bottom: 48px; }
+        .k-skylt model-viewer { height: 320px; }
+        .k-valj { display: flex; overflow-x: auto; scrollbar-width: none; }
+        .k-valj button { flex: none; }
+      }
+    </style>
+    <link rel="stylesheet" href="css/tema.css?v=16">
+  </head>
+  <body>
+    <header class="k-topp">
+      <a class="marke" href="index.html" id="marke"><b>Byggplattformen</b></a>
+      <nav aria-label="Sidan, steg för steg"><a href="#husen" data-spy="husen"><i>1</i>Husen</a><a href="#sa-byggs-huset" data-spy="sa-byggs-huset"><i>2</i>Så byggs huset</a><a href="#sa-gar-det-till" data-spy="sa-gar-det-till"><i>3</i>Så går det till</a><a class="knapp knapp--primar" href="#forfragan" data-spy="forfragan" style="height:36px"><i>4</i>Hitta byggare</a><a href="mitt.html" class="k-mitt">Mitt bygge</a></nav>
+      <span class="k-framsteg" aria-hidden="true"><i></i></span>
+    </header>
+
+    <main>
+      <section class="k-sektion k-hero" aria-labelledby="k-rubrik">
+        <div>
+          <h1 id="k-rubrik"><span>Se huset.</span><span>Få materialet.</span><span>Hitta byggaren.</span></h1>
+          <p>Välj ett hus och vrid på det i 3D. Byggaren räknar fram allt material post för post, och du ser var varje siffra kommer ifrån.</p>
+          <div class="knappar"><a class="knapp knapp--primar knapp--stor" href="#forfragan">Skicka en förfrågan</a><a class="knapp knapp--stor" href="#husen" style="background:transparent;border-color:var(--text)">Se alla hus</a></div>
+        </div>
+        <div class="k-skylt" aria-label="Huset i 3D">
+          <div class="k-skylt__rubrik" id="hus-rubrik">Hus</div>
+          <model-viewer id="k-mv" alt="Huset i 3D" camera-controls touch-action="pan-y" interaction-prompt="none" shadow-intensity="0.9" shadow-softness="0.9" exposure="1.05" environment-image="modeller/himmel.png" tone-mapping="aces" camera-orbit="35deg 72deg auto" auto-rotate auto-rotate-delay="1500" rotation-per-second="10deg"></model-viewer>
+          <div class="k-valj" id="k-valj" role="group" aria-label="Välj hus"></div>
+          <div class="k-tillval" id="k-tillval" aria-label="Gör huset till ditt"></div>
+        </div>
+      </section>
+
+      <section class="k-sektion k-gra" id="husen" aria-labelledby="husen-rubrik">
+        <h2 class="k-h2" id="husen-rubrik">Husen</h2>
+        <p class="k-under">Fem modeller från Idealhus, som exempel i prototypen. Fler leverantörer kan lägga in sina hus.</p>
+        <div class="husnat" id="k-husnat"></div>
+      </section>
+
+      <section class="k-bygg" id="sa-byggs-huset" aria-labelledby="bygg-rubrik">
+        <div class="k-bygg__fast">
+          <div class="k-bygg__text">
+            <h2 class="k-h2" id="bygg-rubrik">Så byggs huset</h2>
+            <p class="k-under">Rulla, så plockas huset isär lager för lager – samma lager som byggaren räknar material på.</p>
+            <ol class="k-bygg__steg">
+              <li data-steg="0" data-mat="betong,grus,gras"><b>Grunden</b><span>Plintar på grusbädd. Hur djupt till berg avgör hur den görs.</span></li>
+              <li data-steg="1" data-mat="golvskiva,tra"><b>Golvet</b><span>Bjälklag med isolering och golvskiva.</span></li>
+              <li data-steg="2" data-mat="fasad,panel,fog,karm,glas,dorr"><b>Väggarna</b><span>Färdiga väggblock med fönster och dörrar på plats.</span></li>
+              <li data-steg="3" data-mat="isolering,tra"><b>Isolering och takstolar</b><span>Det som syns när taket lyfts av.</span></li>
+              <li data-steg="4" data-mat="tak"><b>Taket</b><span>Lyfts på plats med kran – sista lagret.</span></li>
+            </ol>
+          </div>
+          <div class="k-bygg__scen"><model-viewer id="k-sprang" alt="Huset i sprängskiss, lager för lager" animation-name="sprang" interaction-prompt="none" shadow-intensity="0.8" shadow-softness="1" exposure="1.05" environment-image="modeller/himmel.png" tone-mapping="aces" camera-orbit="34deg 66deg 88%" camera-target="auto auto auto" field-of-view="28deg" disable-zoom></model-viewer>
+            <div class="k-bygg__matare" aria-hidden="true"><i></i></div></div>
+        </div>
+      </section>
+
+      <section class="k-sektion" id="sa-gar-det-till" aria-labelledby="steg-rubrik">
+        <h2 class="k-h2" id="steg-rubrik">Så går det till</h2>
+        <p class="k-under">Samma linje som byggaren följer i plattformen.</p>
+        <ol class="k-linje">
+          <li><i></i><b>Underlag</b><span>Du väljer hus eller laddar upp en egen skiss.</span></li>
+          <li><i></i><b>Mängd</b><span>Byggaren räknar materialet och bekräftar varje mått.</span></li>
+          <li><i></i><b>Offert</b><span>Du får ett pris post för post, med dina tillval.</span></li>
+          <li><i></i><b>Order</b><span>Materialet beställs och bygget planeras.</span></li>
+        </ol>
+      </section>
+
+      <section class="k-sektion k-gra" id="forfragan" aria-labelledby="form-rubrik">
+        <h2 class="k-h2" id="form-rubrik">Hitta byggare</h2>
+        <p class="k-under">Berätta vad du vill bygga, så skickas förfrågan till byggföretag i plattformen. I prototypen sparas den bara i din webbläsare.</p>
+        <form class="k-form" id="k-form" novalidate>
+          <label class="falt"><span>Ditt namn</span><input name="namn" autocomplete="name" required></label>
+          <label class="falt"><span>Ort</span><input name="ort" autocomplete="address-level2" required></label>
+          <label class="falt hel"><span>Hus</span><select name="hus" id="k-hus"></select></label>
+          <div class="hel k-valt" id="k-valt" aria-live="polite"></div>
+          <label class="falt hel"><span>Vad vill du bygga?</span><textarea name="text" placeholder="t.ex. gästhus i trädgården, vill börja till våren"></textarea></label>
+          <p class="hel" id="k-fel" role="alert" style="color:var(--rod);font-weight:500;min-height:20px"></p>
+          <div class="hel"><button class="knapp knapp--primar knapp--stor" type="submit">Skicka förfrågan</button></div>
+        </form>
+      </section>
+    </main>
+
+    <footer class="k-fot">Byggplattformen är en prototyp. Husen är Idealhus modeller med riktiga mått; allt annat är exempel. <a href="app.html">Till plattformen för byggföretag</a> · <a href="mitt.html">Mitt bygge</a> · <a href="index.html">Startsidan</a></footer>
+
+    <script src="js/data.js?v=2"></script>
+    <script src="js/mangd.js?v=2"></script>
+    <script>
+      (function () {
+        'use strict';
+        var D = window.BP_DATA, M = window.Mangd;
+        var e = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+        var marke = '<svg viewBox="0 0 26 26" aria-hidden="true" style="width:26px;height:26px"><rect x="2" y="3" width="22" height="14" rx="2.5" fill="#2b2722"/><path d="M7 21v-4M19 21v-4" stroke="#2b2722" stroke-width="2.4" stroke-linecap="round"/><path d="M6.5 13.2 13 7.2l6.5 6" fill="none" stroke="#7aa98c" stroke-width="2.2" stroke-linejoin="round"/><path d="M9.2 12v2.4h7.6V12" fill="none" stroke="#7aa98c" stroke-width="1.8"/></svg>';
+        document.getElementById('marke').insertAdjacentHTML('afterbegin', marke);
+
+        // Startsidan kan skicka med hus och färg (?hus=sadel-30-bred&fasad=falu).
+        var q = new URLSearchParams(location.search);
+        var vald = D.HUS.filter(function (h) { return h.id === q.get('hus'); })[0] || D.HUS[1];
+        var mv = document.getElementById('k-mv');
+        function visaHus(h) {
+          vald = h;
+          if (typeof bytSprang === 'function') bytSprang(h);
+          mv.setAttribute('src', h.modell);
+          document.getElementById('hus-rubrik').innerHTML = e(h.namn) + '<span>' + h.yta + ' m² · ' + M.tal(h.langd) + ' × ' + M.tal(h.bredd) + ' m</span>';
+          Array.prototype.forEach.call(document.querySelectorAll('#k-valj button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-hus') === h.id)); });
+          document.getElementById('k-hus').value = h.id;
+        }
+
+        /* Så byggs huset: rullningen styr sprängskissen. Steg 0–4 tänds i tur och
+           ordning och lyser upp sina material; huset börjar ihop och slutar isär. */
+        var bygg = document.getElementById('sa-byggs-huset'), smv = document.getElementById('k-sprang');
+        var steg = Array.prototype.slice.call(bygg.querySelectorAll('[data-steg]'));
+        var matare = bygg.querySelector('.k-bygg__matare');
+        var lugnt = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var smal = function () { return window.innerWidth <= 900; };
+        var orig = null, sistaSteg = -1, klarMv = false;
+        function lin(hex) { return hex; }
+        function markera(n) {
+          if (!klarMv || n === sistaSteg) return;
+          sistaSteg = n;
+          var mat = n < 0 ? null : steg[n].getAttribute('data-mat').split(',');
+          smv.model.materials.forEach(function (m, k) {
+            var traff = mat && mat.indexOf(m.name) !== -1;
+            var c = orig[k];
+            m.pbrMetallicRoughness.setBaseColorFactor([c[0], c[1], c[2], !mat || traff ? c[3] : 0.16]);
+            m.setAlphaMode(!mat || traff ? orig.lage[k] : 'BLEND');
+            m.setEmissiveFactor(traff ? [0.55, 0.4, 0.02] : [0, 0, 0]);
+          });
+          steg.forEach(function (li, k) { li.classList.toggle('nu', k === n); li.classList.toggle('klar', k < n); });
+        }
+        function rulla() {
+          if (!klarMv) return;
+          var p;
+          if (smal()) { p = 0.62; }
+          else {
+            var r = bygg.getBoundingClientRect();
+            p = Math.max(0, Math.min(1, -r.top / (r.height - window.innerHeight)));
+          }
+          smv.currentTime = Math.min(0.999, p * 1.25) * 0.999;
+          matare.style.setProperty('--p', p.toFixed(3));
+          markera(smal() ? -1 : Math.min(4, Math.floor(p * 5)));
+        }
+        smv.addEventListener('load', function () {
+          orig = smv.model.materials.map(function (m) { return m.pbrMetallicRoughness.baseColorFactor.slice(); });
+          orig.lage = smv.model.materials.map(function (m) { return m.getAlphaMode ? m.getAlphaMode() : 'OPAQUE'; });
+          smv.play(); smv.pause(); klarMv = true; rulla();
+        });
+        /* Du är här: menyn markerar avsnittet du läser och linjen under den visar
+           hur långt ned på sidan du kommit. */
+        var spyLankar = Array.prototype.slice.call(document.querySelectorAll('[data-spy]'));
+        var framsteg = document.querySelector('.k-framsteg');
+        function spana() {
+          var topp = document.querySelector('.k-topp').offsetHeight + 40, nu = null;
+          spyLankar.forEach(function (a) { var el = document.getElementById(a.getAttribute('data-spy')); if (el && el.getBoundingClientRect().top <= topp) nu = a; });
+          if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) nu = spyLankar[spyLankar.length - 1];
+          spyLankar.forEach(function (a) {
+            if (a !== nu) { a.removeAttribute('aria-current'); return; }
+            if (a.getAttribute('aria-current')) return;
+            a.setAttribute('aria-current', 'true');
+            // På mobilen rullar menyraden så att steget man är på syns.
+            var nav = a.parentNode;
+            if (nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: a.offsetLeft - 20, behavior: lugnt ? 'auto' : 'smooth' });
+          });
+          var max = document.documentElement.scrollHeight - window.innerHeight;
+          framsteg.style.setProperty('--p', max > 0 ? (window.scrollY / max).toFixed(3) : 0);
+        }
+        var vantar = 0;
+        window.addEventListener('scroll', function () { cancelAnimationFrame(vantar); vantar = requestAnimationFrame(function () { rulla(); spana(); }); }, { passive: true });
+        spana();
+        window.addEventListener('resize', rulla);
+        function bytSprang(h) { smv.setAttribute('src', h.modell.replace('modeller/', 'modeller/sprang/')); klarMv = false; sistaSteg = -1; }
+        // Gör det till ditt: fasadfärg och tak direkt på huset, med pris.
+        var tillval = { fasad: D.TILLVAL[0].val.some(function (v) { return v.id === q.get('fasad'); }) ? q.get('fasad') : 'svart', tak: 'plat', altan: 'ingen', invandig: 'gips' };
+        var TAK = { plat: '#3a3d40', papp: '#1c1c1c', sedum: '#5d7a3a' };
+        var linjar = function (hex) { var n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function (c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }).concat([1]); };
+        var grupp = function (id) { return D.TILLVAL.filter(function (g) { return g.id === id; })[0]; };
+        var valt = function (id) { return grupp(id).val.filter(function (v) { return v.id === tillval[id]; })[0]; };
+        var pris = function (v) { return v.pris ? (v.pris > 0 ? '+' : '−') + M.tal(Math.abs(v.pris), 0) + ' kr' : 'ingår'; };
+        function farga() {
+          if (!mv.model) return;
+          ['fasad', 'panel'].forEach(function (n) { var m = mv.model.getMaterialByName(n); if (m) m.pbrMetallicRoughness.setBaseColorFactor(linjar(valt('fasad').farg)); });
+          var t = mv.model.getMaterialByName('tak'); if (t) t.pbrMetallicRoughness.setBaseColorFactor(linjar(TAK[tillval.tak]));
+        }
+        mv.addEventListener('load', farga);
+        function ritaTillval() {
+          document.getElementById('k-tillval').innerHTML = ['fasad', 'tak'].map(function (gid) {
+            var g = grupp(gid);
+            return '<b>' + (gid === 'fasad' ? 'Färg' : 'Tak') + '</b><div class="k-tillval__val" role="group" aria-label="' + g.namn + '">' + g.val.map(function (v) {
+              return '<button type="button" data-tv="' + gid + '" data-v="' + v.id + '" aria-pressed="' + (tillval[gid] === v.id) + '">' + (v.farg ? '<span class="farg" style="--f:' + v.farg + '"></span>' : '') + e(v.namn) + ' <small>' + pris(v) + '</small></button>';
+            }).join('') + '</div>';
+          }).join('');
+          var sum = D.TILLVAL.reduce(function (t, g) { var v = g.val.filter(function (x) { return x.id === tillval[g.id]; })[0]; return t + (v ? v.pris : 0); }, 0);
+          var k = document.getElementById('k-valt');
+          if (k) k.innerHTML = 'Dina val: <span class="farg" style="--f:' + valt('fasad').farg + '"></span><b>' + e(valt('fasad').namn) + '</b> · <b>' + e(valt('tak').namn) + '</b> · ' + (sum ? 'tillval ' + (sum > 0 ? '+' : '−') + M.tal(Math.abs(sum), 0) + ' kr' : 'inga tillägg') + ' <a href="#k-rubrik" style="margin-left:auto">Ändra</a>';
+        }
+        document.addEventListener('click', function (ev) {
+          var b = ev.target.closest && ev.target.closest('[data-tv]');
+          if (!b) return;
+          tillval[b.getAttribute('data-tv')] = b.getAttribute('data-v');
+          ritaTillval(); farga();
+        });
+        ritaTillval();
+
+        document.getElementById('k-valj').innerHTML = D.HUS.map(function (h) { return '<button type="button" data-hus="' + h.id + '" aria-pressed="false"><b>' + e(h.namn) + '</b><small>' + h.kategori + ' · ' + h.yta + ' m²</small></button>'; }).join('');
+        document.getElementById('k-husnat').innerHTML = D.HUS.map(function (h) {
+          return '<a class="hus" href="#forfragan" data-hus="' + h.id + '"><div class="hus__bild"><img src="' + h.bild + '" alt="' + e(h.namn) + '" loading="lazy" decoding="async"></div><div class="hus__text"><div class="hus__rad"><b>' + e(h.namn) + '</b><span class="chip">' + h.kategori + '</span></div><div class="hus__fakta"><span>' + h.yta + ' m²</span><span>' + h.rum + ' rum</span><span>' + M.tal(h.langd) + ' × ' + M.tal(h.bredd) + ' m</span></div><small style="color:var(--text-2)">' + e(h.text) + '</small><span class="k-valhint">Välj det här huset<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span></div></a>';
+        }).join('');
+        document.getElementById('k-hus').innerHTML = D.HUS.map(function (h) { return '<option value="' + h.id + '">' + e(h.namn) + ' · ' + h.kategori + ' · ' + h.yta + ' m²</option>'; }).join('');
+        document.addEventListener('click', function (ev) {
+          var b = ev.target.closest && ev.target.closest('[data-hus]');
+          if (b) visaHus(D.HUS.filter(function (h) { return h.id === b.getAttribute('data-hus'); })[0]);
+        });
+
+        var s = document.createElement('script'); s.type = 'module'; s.src = 'vendor/model-viewer.min.js'; document.head.appendChild(s);
+        visaHus(vald);
+
+        document.getElementById('k-form').addEventListener('submit', function (ev) {
+          ev.preventDefault();
+          var f = ev.target, fel = document.getElementById('k-fel');
+          if (!f.namn.value.trim() || !f.ort.value.trim()) { fel.textContent = 'Skriv ditt namn och vilken ort du ska bygga i.'; (f.namn.value.trim() ? f.ort : f.namn).focus(); return; }
+          fel.textContent = '';
+          try {
+            // Inkorgen hämtas in av plattformen nästa gång den startar.
+            var inkorg = JSON.parse(localStorage.getItem('bp-inkorg') || '[]');
+            var lead = { id: 'l' + Date.now().toString(36), namn: f.namn.value.trim(), ort: f.ort.value.trim(), hus: f.hus.value, text: f.text.value.trim() || 'Ingen beskrivning', tid: new Date().toISOString(), status: 'ny', tillval: JSON.parse(JSON.stringify(tillval)) };
+            inkorg.push(lead);
+            localStorage.setItem('bp-inkorg', JSON.stringify(inkorg));
+            localStorage.setItem('bp-mitt', JSON.stringify(lead));
+          } catch (err) { /* ingen lagring */ }
+          var h = D.HUS.filter(function (x) { return x.id === f.hus.value; })[0];
+          f.outerHTML = '<div class="k-tack" role="status"><b>Tack, ' + e(f.namn.value.trim().split(' ')[0]) + '!</b><span>Förfrågan om ' + e(h.namn) + ' i ' + e(f.ort.value.trim()) + ' är skickad. Byggföretagen ser den på sin översikt, och du följer allt på Mitt bygge.</span><div class="knappar"><a class="knapp knapp--primar knapp--stor" href="mitt.html">Följ ditt bygge</a><a class="knapp knapp--stor" href="app.html">Se den som byggföretag</a></div></div>';
+        });
+      })();
+    </script>
+  </body>
+</html>
