@@ -11003,7 +11003,7 @@ select {
 
 /* Laptopskärmar (741–880 px höga, t.ex. 1366 × 768): alla menyval ryms utan
    "Mer" – loggan på en rad och lite tätare rader, foten som vanligt. */
-@media (min-height: 741px) and (max-height: 880px) {
+@media (min-height: 741px) and (max-height: 1020px) {
   .sido__logo {
     flex-direction: row;
     gap: 10px;
@@ -11334,5 +11334,84 @@ select {
 
   .sido-knapp:active {
     transform: scale(0.96);
+  }
+}
+
+/* Verktyg – Kolla marken (2026-10-21): hemsidans verktyg inbäddat i ett
+   ljust kort. Ramen tonar in när sidan laddat klart, med en lugn text
+   under tiden. */
+.verktygram {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  min-height: 560px;
+}
+
+.verktygram__ram {
+  display: block;
+  width: 100%;
+  height: 720px;
+  border: 0;
+  background: transparent;
+  color-scheme: light;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out);
+}
+
+.verktygram--klar .verktygram__ram {
+  opacity: 1;
+}
+
+.verktygram__laddar {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  margin: 0;
+  font: 500 0.875rem/1.4 var(--sans);
+  color: var(--text-3);
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.verktygram__laddar i {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid rgba(201, 138, 69, 0.22);
+  border-top-color: #c98a45;
+  border-radius: 50%;
+  animation: verktyg-snurr 0.8s linear infinite;
+}
+
+@keyframes verktyg-snurr {
+  to { transform: rotate(360deg); }
+}
+
+.verktygram--klar .verktygram__laddar {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verktygram__laddar i {
+    animation-duration: 2s;
+  }
+}
+
+/* Med Verktyg i menyn behövs lite tätare rader på de lägsta laptopskärmarna. */
+@media (min-height: 741px) and (max-height: 860px) {
+  .sido__rubrik {
+    margin: 7px 12px 2px;
+  }
+
+  .sido__lank {
+    min-height: 36px;
+  }
+
+  .sido__lank > .i {
+    width: 26px;
+    height: 26px;
+    padding: 5px;
   }
 }

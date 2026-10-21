@@ -154,7 +154,8 @@
     lista: 'M8 6h12|M8 12h12|M8 18h12|M4 6h.01|M4 12h.01|M4 18h.01',
     meny: 'M4 7h16|M4 12h16|M4 17h16',
     ljud: 'M4 9v6h4l5 4V5L8 9z|M16 9a4 4 0 0 1 0 6',
-    helskarm: 'M4 9V4h5|M20 9V4h-5|M4 15v5h5|M20 15v5h-5'
+    helskarm: 'M4 9V4h5|M20 9V4h-5|M4 15v5h5|M20 15v5h-5',
+    mark: 'M3 9h18|M3 14h18|M3 19h18|M7 4l2 5|M14 4l-1 5'
   };
   IH.i = function (namn, klass) {
     var d = IKONER[namn] || IKONER.hem;
@@ -292,6 +293,7 @@
     { rubrik: 'Sälj', poster: [['forfragningar', 'Förfrågningar', 'inkorg'], ['salj', 'Säljtavla', 'tavla'],
       ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote']] },
     { rubrik: 'Produktion', poster: [['produktion', 'Projekt', 'produktion']] },
+    { rubrik: 'Verktyg', poster: [['kolla-marken', 'Kolla marken', 'mark']] },
     { rubrik: 'Mitt', poster: [['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
   ];
 
@@ -580,7 +582,7 @@
   var MAC = /Mac|iPhone|iPad/.test(navigator.platform || '');
   var SIDOR = [['oversikt', 'Översikt', 'hem'], ['forfragningar', 'Förfrågningar', 'inkorg'], ['salj', 'Säljtavla', 'tavla'],
     ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote'],
-    ['produktion', 'Projekt', 'produktion'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']];
+    ['produktion', 'Projekt', 'produktion'], ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']];
   var ATGARDER = [['ny-kund', 'Ny kund', 'kunder', 'Privatperson eller företag'], ['ny-affar', 'Ny affär', 'tavla', 'Direkt på säljtavlan'],
     ['ny-forfragan', 'Ny förfrågan', 'inkorg', 'Någon ringde eller mejlade'], ['ny-uppgift', 'Ny uppgift', 'uppgift', 'Något att göra'],
     ['starta-mote', 'Starta kundmöte', 'mote', 'Presentationen i helskärm']];
@@ -812,7 +814,7 @@
   };
   IH.G.mer = function () {
     var poster = [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote'],
-      ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']];
+      ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']];
     IH.oppnaArk({
       titel: 'Mer', ikon: 'meny',
       kropp: '<div class="lista kort">' + poster.map(function (p) {

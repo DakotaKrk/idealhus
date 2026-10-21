@@ -518,6 +518,98 @@
   });
 
   /* ================================================================
+     Verktyg – Kolla marken
+     Hemsidans eget verktyg (vad-far-jag-bygga.html#kolla-marken) visas
+     inbäddat, så att 3D-marken, SGU-uppslagen och kartan är exakt samma
+     som kunderna ser. Allt annat på sidan döljs, och ramen växer med
+     innehållet så att det aldrig blir en rullning i rullningen.
+     ================================================================ */
+  var VERKTYG_CSS = [
+    'html,body{background:transparent!important;overflow:hidden!important;}',
+    'body>*:not(main),main>*:not(#kolla-marken){display:none!important;}',
+    // Hemsidans läsförloppslinje (body::before) hör till hemsidans meny.
+    'body::before,body::after{display:none!important;}',
+    'main{padding:0!important;margin:0!important;}',
+    '#kolla-marken{margin:0!important;padding:22px 4px 26px!important;background:transparent!important;}',
+    '#kolla-marken .markkoll__inner{max-width:none!important;width:auto!important;padding:0 22px!important;}',
+    // Hemsidans rubrik, kundtexter och kontaktlänkar – CRM:et har eget toppkort.
+    '.markkoll__topp,.markkoll__not,.tomtrapport__prata{display:none!important;}',
+    '#kolla-marken .markkoll__scen{margin-top:0!important;}',
+    // Knapparna i CRM:ets varma stil i stället för hemsidans svarta.
+    '.marksok__knapp{background:linear-gradient(160deg,#f6c88f,#e8a456 55%,#d38f45)!important;color:#1b1915!important;' +
+      'box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 14px 28px -14px rgba(201,128,52,.75)!important;font-weight:600!important;' +
+      'transition:transform .16s cubic-bezier(.23,1,.32,1),box-shadow .2s ease!important;}',
+    '.marksok__knapp:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 18px 32px -14px rgba(201,128,52,.85)!important;}',
+    '.marksok__knapp:active{transform:scale(.97)!important;}',
+    '.kollen__pdf{background:#fff!important;color:#8f5424!important;box-shadow:0 0 0 1px rgba(201,138,69,.35),0 10px 22px -14px rgba(143,84,36,.5)!important;}',
+    // Etiketterna med CRM:ets korta streck framför.
+    '.marksok__etikett,.markkoll__mer{padding-left:26px!important;background:linear-gradient(#c98a45,#c98a45) left center/16px 1.5px no-repeat!important;}',
+    '.marksok__etikett,.markkoll__mer{color:#8f5424!important;}',
+    ':focus-visible{outline:2px solid #b06a26!important;outline-offset:2px!important;}',
+    '::selection{background:rgba(240,181,110,.35);}'
+  ].join('');
+
+  // Hemsidans tilltal till kunden byts mot säljarens. Texterna skrivs av
+  // verktyget när man söker, så de byts även när de dyker upp senare.
+  var VERKTYG_TEXT = [
+    ['Din mark i genomskärning', 'Marken i genomskärning'],
+    ['Visa oss vad kartan säger, så berättar vi vad det betyder för grunden.', 'Jordarten finns inte i tolkningen – titta i SGU:s kartvisare nedan.']
+  ];
+
+  function verktygText(rot) {
+    var gang = rot.ownerDocument.createTreeWalker(rot, 4), nod;
+    while ((nod = gang.nextNode())) {
+      VERKTYG_TEXT.forEach(function (par) {
+        if (nod.nodeValue.indexOf(par[0]) !== -1) nod.nodeValue = nod.nodeValue.split(par[0]).join(par[1]);
+      });
+    }
+  }
+
+  IH.vyer['kolla-marken'] = function () {
+    var html = '<h1 class="dold">Kolla marken</h1>' +
+      '<section class="instopp verktygtopp kort kort--mork" data-in>' +
+        '<div class="instopp__ord"><p class="etikett etikett--ljus">Verktyg</p><h2>Vad finns under <span class="ihop">gräset? <span aria-hidden="true">🌱</span></span></h2>' +
+          '<p>Sök på kundens tomt inför platsbesöket eller offerten. Jordart, vatten i marken och djup till berg hämtas från SGU.</p></div>' +
+        '<div class="instopp__tal">' +
+          '<div><span aria-hidden="true">🪨</span><small>Underlag</small><b>SGU</b><em>Öppna data</em></div>' +
+          '<div><span aria-hidden="true">📍</span><small>Sök på</small><b>Adress</b><em>eller din position</em></div>' +
+          '<div><span aria-hidden="true">⚠️</span><small>Översiktligt</small><b>Ingen geoteknik</b><em>Bedöm på plats</em></div>' +
+        '</div></section>' +
+      '<section class="kort verktygram" data-in>' +
+        '<p class="verktygram__laddar" aria-hidden="true"><i></i>Hämtar verktyget …</p>' +
+        '<iframe class="verktygram__ram" src="../vad-far-jag-bygga.html?crm=1" title="Kolla marken"></iframe>' +
+      '</section>';
+    return {
+      titel: 'Kolla marken', html: html,
+      efter: function (rot) {
+        var ram = $('.verktygram__ram', rot), kort = $('.verktygram', rot);
+        if (!ram) return;
+        ram.addEventListener('load', function () {
+          var dok;
+          try { dok = ram.contentDocument; } catch (err) { dok = null; }
+          if (!dok || !dok.body) { kort.classList.add('verktygram--klar'); return; }
+          dok.documentElement.removeAttribute('data-tema');
+          var stil = dok.createElement('style');
+          stil.textContent = VERKTYG_CSS;
+          dok.head.appendChild(stil);
+          var sek = dok.getElementById('kolla-marken') || dok.body;
+          verktygText(sek);
+          if (window.MutationObserver) new MutationObserver(function () { verktygText(sek); }).observe(sek, { childList: true, subtree: true, characterData: true });
+          // Ramen följer innehållets höjd (sökningen fäller ut kartan och genomskärningen).
+          var hojd = function () {
+            var h = Math.ceil(sek.getBoundingClientRect().height);
+            if (h && Math.abs(ram.offsetHeight - h) > 1) ram.style.height = h + 'px';
+          };
+          hojd();
+          if (window.ResizeObserver) new ResizeObserver(hojd).observe(sek);
+          setTimeout(hojd, 400);
+          kort.classList.add('verktygram--klar');
+        });
+      }
+    };
+  };
+
+  /* ================================================================
      Förfrågningar – inkorgen
      ================================================================ */
   var fFilter = 'alla';
