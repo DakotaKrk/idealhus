@@ -215,7 +215,7 @@
 .mh-hm:active { transform: scale(0.96); }
 .mh-hm--nara { background: var(--yta); }
 .mh-hm--over { background: rgba(190, 128, 104, var(--t, 0.25)); color: #7a4632; }
-.mh-hm--under { background: rgba(104, 150, 122, var(--t, 0.25)); color: #2f5a44; }
+.mh-hm--under { background: rgba(104, 150, 122, var(--t, 0.25)); color: #4b5730; }
 .mh-hm--fet { box-shadow: inset 0 0 0 1px rgba(43, 39, 34, 0.25); }
 .mh-hm--fet b { font: 700 18px/1.1 var(--skylt); }
 .mh-jmf__forklaring { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--text-3); font-size: 12px; }

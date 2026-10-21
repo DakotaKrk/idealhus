@@ -15,7 +15,7 @@
 .ka-kalla { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; background: var(--primar-ljus); color: var(--text-2); font-size: 13px; text-decoration: none; transition: background-color 0.15s ease; }
 .ka-kalla .i { width: 14px; height: 14px; color: var(--primar); }
 .ka-kalla b { color: var(--text); }
-.ka-kalla:hover { background: #d3e6da; }
+.ka-kalla:hover { background: #e5e0c8; }
 .ka-not { margin: 0 22px 12px; }
 
 .ka-tabell { padding: 0 22px 8px; }
@@ -27,7 +27,7 @@
 .ka-rad__namn b { display: block; font-size: 14.5px; }
 .ka-rad__namn small { color: var(--text-3); font-size: 12.5px; }
 .ka-rad__stapel { height: 8px; overflow: hidden; border-radius: 4px; background: var(--yta-2); }
-.ka-rad__stapel i { display: block; width: calc(var(--a) * 100%); height: 100%; border-radius: 4px; background: #9fbfab; transform-origin: left; animation: ka-vaxa 0.8s var(--ease-out) both; animation-delay: calc(var(--r) * 45ms + 250ms); }
+.ka-rad__stapel i { display: block; width: calc(var(--a) * 100%); height: 100%; border-radius: 4px; background: #c2c097; transform-origin: left; animation: ka-vaxa 0.8s var(--ease-out) both; animation-delay: calc(var(--r) * 45ms + 250ms); }
 .ka-rad--egen .ka-rad__stapel i { background: #c9c2b4; }
 .ka-rad__netto { color: var(--text-2); }
 .ka-rad__pris { font-weight: 700; }

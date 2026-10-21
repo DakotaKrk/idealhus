@@ -40,7 +40,7 @@
      dess material som en lagerstapel – hovra ett lager så lyser det i modellen.
      Längs nederkanten nyckeltalen, som på de andra sidorna. */
   var vald = 0;
-  var GRUPPTON = ['#7aa98c', '#e9e6dc', '#bdb9ad', '#928e83', '#6c695f', '#a9c2b2', '#a19c8f', '#57554e'];
+  var GRUPPTON = ['#a8a873', '#e9e6dc', '#bdb9ad', '#928e83', '#6c695f', '#c9c6a2', '#a19c8f', '#57554e'];
 
   function uppgHus(k) { return k.p ? BP.hus(k.p.hus) : k.l ? BP.hus(k.l.hus) : null; }
   function uppgMangd(k, h) {
@@ -159,7 +159,7 @@
   /* --- Materialet just nu ---------------------------------------------------------------
      Varje grupp en stapel, uppdelad per projekt. Projekten i förklaringen går att
      slå av och på – summorna räknas om direkt. */
-  var PTON = ['#2f6a4f', '#7aa98c', '#a7b8a0', '#c98a5a', '#c9c5b9'];
+  var PTON = ['#55652e', '#a8a873', '#c8b89a', '#c98a5a', '#c9c5b9'];
   var avslagna = {};
   function materialData(db) {
     var akt = db.projekt.filter(function (p) { return p.steg !== 'order' && BP.mangdFor(p).rader.length; });

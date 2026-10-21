@@ -87,7 +87,7 @@
 
   function harnast(rader) {
     return '<nav class="vh sd-steg" style="--i:6" aria-labelledby="vh-rubrik"><h2 id="vh-rubrik">Vart härnäst?</h2><div class="vh__lista">' + lista(rader, function (x) {
-      return '<a class="vh__kort" href="' + x.href + '">' + em(x.emoji, 'vh__ikon') + '<span class="vh__text"><b>' + e(x.titel) + '</b><small>' + e(x.text) + '</small></span>' + i('pil', 'vh__pil') + '</a>';
+      return '<a class="vh__kort" href="' + x.href + '" data-sektion="' + ((x.href.match(/#\/(\w+)/) || [])[1] || '') + '">' + em(x.emoji, 'vh__ikon') + '<span class="vh__text"><b>' + e(x.titel) + '</b><small>' + e(x.text) + '</small></span>' + i('pil', 'vh__pil') + '</a>';
     }) + '</div></nav>';
   }
   var VART = {
@@ -532,7 +532,7 @@
 
   /* ===== Konsulter =============================================================================== */
   var KIKON = { arkitekt: 'arkitekt', konstruktion: 'konstruktion', energi: 'energi', ka: 'ka' };
-  var KEMOJI = { arkitekt: ['📐', '#e4ecf5'], konstruktion: ['🏗️', '#efe8d8'], energi: ['⚡', '#e2efe6'], ka: ['✅', '#ece7f3'] };
+  var KEMOJI = { arkitekt: ['📐', '#f3dccd'], konstruktion: ['🏗️', '#efe8d8'], energi: ['⚡', '#e6e6cc'], ka: ['✅', '#ecd8dc'] };
   BP.vyer.konsulter = function () {
     var anim = forst(), db = BP.db;
     var bestallda = [];
@@ -692,7 +692,7 @@
     var val = function (v, bild, titel, text, mark) {
       return '<label class="nm-val"><input type="radio" name="underlag" value="' + v + '"' + (nm.underlag === v ? ' checked' : '') + '><span class="nm-val__bild">' + bild + '</span><span class="nm-val__text"><b>' + titel + '</b><small>' + text + '</small></span><span class="nm-val__mark">' + mark + '</span><span class="nm-bock" aria-hidden="true">' + i('bock') + '</span></label>';
     };
-    var plan = '<svg viewBox="0 0 120 80" aria-hidden="true"><rect width="120" height="80" fill="#f4f6f2"/><path d="M0 16H120M0 32H120M0 48H120M0 64H120M20 0V80M40 0V80M60 0V80M80 0V80M100 0V80" stroke="#e2e8df"/><rect x="22" y="18" width="76" height="44" fill="none" stroke="#2b2722" stroke-width="4"/><path d="M62 20V44" stroke="#5c554b" stroke-width="2.5"/><path d="M34 18h16" stroke="#9fbfab" stroke-width="5"/></svg>';
+    var plan = '<svg viewBox="0 0 120 80" aria-hidden="true"><rect width="120" height="80" fill="#f4f6f2"/><path d="M0 16H120M0 32H120M0 48H120M0 64H120M20 0V80M40 0V80M60 0V80M80 0V80M100 0V80" stroke="#e2e8df"/><rect x="22" y="18" width="76" height="44" fill="none" stroke="#2b2722" stroke-width="4"/><path d="M62 20V44" stroke="#5c554b" stroke-width="2.5"/><path d="M34 18h16" stroke="#c2c097" stroke-width="5"/></svg>';
     var uppladd = '<span class="nm-val__ikon">' + i('uppladd') + '</span>';
     var html = sidhuvud({
       vy: 'mangdning', titel: 'Ny mängdning', foralder: ['Mängdning', '#/mangdning'],

@@ -13,7 +13,7 @@
 
 :root {
   /* Ramen */
-  --ram: #7aa98c;
+  --ram: #a8a873;
   --ram-hover: rgba(43, 39, 34, 0.08);
   --ram-text: #2b2722;
   --ram-text-2: rgba(43, 39, 34, 0.72);
@@ -28,14 +28,14 @@
   --text-2: #55534d;
   --text-3: #6b6963;
   /* Skyltfärger: bara för betydelse */
-  --bla: #1f5fad;
+  --bla: #7a4f2c;
   --bla-ljus: #e8f0fa;
   --rod: #c8232c;
   --rod-ljus: #fdeceb;
-  --gron: #1f7a4a;
+  --gron: #5a6a2a;
   --gron-ljus: #e3f3ea;
-  --gul-ljus: #eef4ef;
-  --data: #1f5fad;
+  --gul-ljus: #f4f1e7;
+  --data: #7a4f2c;
   --tejp: repeating-linear-gradient(-45deg, #ece4d6 0 7px, #c9b9a0 7px 14px); /* taste-skill-ignore: tejpen och spillets skraffering bär betydelse (obekräftat / spill) */
   /* Form */
   --r-ark: 16px;
@@ -66,7 +66,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-::selection { background: rgba(122, 169, 140, 0.55); color: var(--text); }
+::selection { background: rgba(168, 168, 115, 0.55); color: var(--text); }
 
 :focus-visible {
   outline: 2px solid var(--bla);
@@ -202,7 +202,7 @@ h1, h2, h3, p { margin: 0; }
   text-align: center;
 }
 
-.nav a[aria-current="page"] .nav__antal { background: rgba(122, 169, 140, 0.22); }
+.nav a[aria-current="page"] .nav__antal { background: rgba(168, 168, 115, 0.22); }
 
 .sida__fot {
   display: grid;
@@ -394,7 +394,7 @@ h1 {
   color: var(--text);
 }
 
-.knapp--gul:hover { background: #b9d1c1; border-color: #9fbfab; }
+.knapp--gul:hover { background: #d3cfae; border-color: #c2c097; }
 
 .knapp--text {
   border-color: transparent;
@@ -479,8 +479,8 @@ h1 {
   white-space: nowrap;
 }
 
-.chip--bla { background: var(--bla-ljus); color: #174a88; }
-.chip--gron { background: var(--gron-ljus); color: #155d37; }
+.chip--bla { background: var(--bla-ljus); color: #6a4528; }
+.chip--gron { background: var(--gron-ljus); color: #4f5a24; }
 .chip--rod { background: var(--rod-ljus); color: #8f1a20; }
 .chip--gul { background: var(--gul-ljus); color: #6b5300; }
 .chip--tejp {
@@ -885,7 +885,7 @@ tr.oppen .vik .i { transform: rotate(90deg); }
 .not .i { width: 16px; height: 16px; flex: none; margin-top: 1px; }
 .not--varning { background: #fff7e0; color: #5c4600; }
 .not--fel { background: var(--rod-ljus); color: #7a161b; }
-.not--info { background: var(--bla-ljus); color: #174a88; }
+.not--info { background: var(--bla-ljus); color: #6a4528; }
 .not--tejp { background: var(--gul-ljus); color: #4d3d00; position: relative; padding-left: 20px; overflow: hidden; }
 .not--tejp::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: var(--tejp); }
 .noter { display: grid; gap: 8px; }
@@ -1180,9 +1180,9 @@ dd { margin: 0; }
 .el-vagg.inner { stroke: #55534d; }
 .el-vagg.obekraftad { stroke: url(#tejpmonster); }
 .el-yta { fill: rgba(31, 95, 173, 0.08); stroke: var(--bla); stroke-width: 1.5; stroke-dasharray: 5 4; }
-.el-yta.obekraftad { fill: rgba(122, 169, 140, 0.18); }
+.el-yta.obekraftad { fill: rgba(168, 168, 115, 0.18); }
 .el-oppning { stroke: #fff; stroke-linecap: butt; }
-.el-vald { filter: drop-shadow(0 0 0.5px #1f5fad) drop-shadow(0 0 3px rgba(31, 95, 173, 0.55)); }
+.el-vald { filter: drop-shadow(0 0 0.5px #7a4f2c) drop-shadow(0 0 3px rgba(31, 95, 173, 0.55)); }
 .el-matt { font: 600 12px var(--font); fill: var(--text); paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
 .el-punkt { fill: var(--bla); stroke: #fff; stroke-width: 2; }
 .el-guide { stroke: var(--bla); stroke-width: 1; stroke-dasharray: 4 4; fill: none; }
@@ -1740,7 +1740,7 @@ a.del:hover { background: var(--yta); }
   .sida .marke { flex: 1; margin: 0; color: #fff; }
   .sida .marke svg rect { fill: var(--ram); }
   .sida .marke svg path[stroke="#2b2722"] { stroke: var(--ram); }
-  .sida .marke svg path[stroke="#7aa98c"] { stroke: #2b2722; }
+  .sida .marke svg path[stroke="#a8a873"] { stroke: #2b2722; }
 
   .sida__ny {
     display: grid;
@@ -1755,7 +1755,7 @@ a.del:hover { background: var(--yta); }
   }
 
   .sida__ny .i { width: 16px; height: 16px; stroke-width: 2.2; }
-  .sida__ny:hover { box-shadow: 0 0 0 1px rgba(122, 169, 140, 0.5), 0 0 18px 2px rgba(122, 169, 140, 0.45); }
+  .sida__ny:hover { box-shadow: 0 0 0 1px rgba(168, 168, 115, 0.5), 0 0 18px 2px rgba(168, 168, 115, 0.45); }
   .sida__ny:active { transform: scale(0.94); }
 
   .sida__sok {
@@ -1821,7 +1821,7 @@ a.del:hover { background: var(--yta); }
   }
 
   .sida-knapp .i { width: 15px; height: 15px; stroke-width: 2.2; transition: transform 0.45s var(--ease-drawer); }
-  .sida-knapp:hover, .sida-knapp:focus-visible { box-shadow: 0 0 0 3px var(--ram), 0 0 18px 4px rgba(122, 169, 140, 0.7); outline: none; }
+  .sida-knapp:hover, .sida-knapp:focus-visible { box-shadow: 0 0 0 3px var(--ram), 0 0 18px 4px rgba(168, 168, 115, 0.7); outline: none; }
   .sida-knapp:active { transform: scale(0.94); }
 
   /* Infälld: spalten och luften försvinner, handtaget blir en flik i kanten */
@@ -1842,7 +1842,7 @@ a.del:hover { background: var(--yta); }
   .sida .marke { color: #fff; }
   .sida .marke svg rect { fill: var(--ram); }
   .sida .marke svg path[stroke="#2b2722"] { stroke: var(--ram); }
-  .sida .marke svg path[stroke="#7aa98c"] { stroke: #2b2722; }
+  .sida .marke svg path[stroke="#a8a873"] { stroke: #2b2722; }
   .sida .nav a { color: #ebe8df; }
   .sida .nav__rubrik { color: rgba(255, 255, 255, 0.5); }
   .sida .nav a[aria-current="page"] { background: var(--ram); color: #2b2722; }
@@ -1926,7 +1926,7 @@ a.del:hover { background: var(--yta); }
 .valkommen__hus b { font: 700 16px/20px var(--skylt); }
 .valkommen__hus small { font-size: 12px; color: var(--text-3); }
 @media (hover: hover) and (pointer: fine) {
-  .valkommen__scen:hover .valkommen__hus { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(201, 138, 69, 0.3), 0 0 18px 2px rgba(122, 169, 140, 0.55); }
+  .valkommen__scen:hover .valkommen__hus { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(201, 138, 69, 0.3), 0 0 18px 2px rgba(168, 168, 115, 0.55); }
 }
 
 @media (max-width: 1100px) {

@@ -237,8 +237,8 @@
     return {
       titel: p.namn,
       bred: flik === 'ritning',
-      html: '<div class="smula"><a href="#/projekt">Projekt</a>' + i('hoger') + '<span>' + e(p.namn) + '</span></div><div style="height:8px"></div>' +
-        skylt(p, knappar) + flikar(p, flik) + ut.html,
+      html: '<section class="pr-topp"><div class="smula"><a href="#/projekt">Projekt</a>' + i('hoger') + '<span>' + e(p.namn) + '</span></div><div style="height:8px"></div>' +
+        skylt(p, knappar) + '</section>' + flikar(p, flik) + ut.html,
       efter: ut.efter
     };
   }

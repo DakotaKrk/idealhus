@@ -97,7 +97,7 @@
     return '<svg class="i' + (klass ? ' ' + klass : '') + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
       d.split('|').map(function (p) { return '<path d="' + p + '"/>'; }).join('') + '</svg>';
   };
-  BP.marke = '<svg viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="3" width="22" height="14" rx="2.5" fill="#2b2722"/><path d="M7 21v-4M19 21v-4" stroke="#2b2722" stroke-width="2.4" stroke-linecap="round"/><path d="M6.5 13.2 13 7.2l6.5 6" fill="none" stroke="#7aa98c" stroke-width="2.2" stroke-linejoin="round"/><path d="M9.2 12v2.4h7.6V12" fill="none" stroke="#7aa98c" stroke-width="1.8"/></svg>';
+  BP.marke = '<svg viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="3" width="22" height="14" rx="2.5" fill="#2b2722"/><path d="M7 21v-4M19 21v-4" stroke="#2b2722" stroke-width="2.4" stroke-linecap="round"/><path d="M6.5 13.2 13 7.2l6.5 6" fill="none" stroke="#a8a873" stroke-width="2.2" stroke-linejoin="round"/><path d="M9.2 12v2.4h7.6V12" fill="none" stroke="#a8a873" stroke-width="1.8"/></svg>';
 
   /* --- Lagring ---------------------------------------------------------------- */
   function dagar(n) { var d = new Date(); d.setDate(d.getDate() + n); d.setHours(9 + (Math.abs(n) % 7), 12, 0, 0); return d.toISOString(); }
@@ -281,6 +281,9 @@
     if (glid && markorY !== null && markorY !== y && !lugnt()) {
       m.style.transition = 'none'; m.style.transform = 'translateY(' + markorY + 'px)'; void m.offsetWidth; m.style.transition = '';
     } else { m.style.transition = 'none'; void m.offsetWidth; requestAnimationFrame(function () { m.style.transition = ''; }); }
+    var stil = getComputedStyle(akt);
+    m.style.setProperty('--ton', stil.getPropertyValue('--ton'));
+    m.style.setProperty('--tonfarg', stil.getPropertyValue('--tonfarg'));
     m.style.height = akt.offsetHeight + 'px';
     m.style.transform = 'translateY(' + y + 'px)';
     m.style.opacity = '1';
@@ -309,6 +312,8 @@
       var ut = fn(a.del) || {};
       var ark = $('#ark');
       ark.innerHTML = '<div class="vy' + (ut.bred ? ' vy--bred' : '') + (ny && !byte ? ' vy--in' : '') + '">' + (ut.html || '') + '</div>';
+      // Varje del av plattformen har sin pastell (samma som ikonen i menyn)
+      ark.setAttribute('data-sektion', a.vy === 'ritning' ? 'mangdning' : a.vy);
       document.title = (ut.titel ? ut.titel + ' · ' : '') + 'Byggplattformen';
       if (ny) ark.scrollTop = 0;
       $('#sida').innerHTML = sidomeny();

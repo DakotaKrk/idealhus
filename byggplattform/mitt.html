@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#7aa98c">
+    <meta name="theme-color" content="#a8a873">
     <title>Mitt bygge · Byggplattformen</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Crect x='2' y='3' width='22' height='14' rx='2.5' fill='%232b2722'/%3E%3Cpath d='M7 21v-4M19 21v-4' stroke='%232b2722' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M6.5 13.2 13 7.2l6.5 6' fill='none' stroke='%237aa98c' stroke-width='2.2'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="css/app.css?v=13">
@@ -51,7 +51,7 @@
       .mb-person small { color: var(--text-3); }
       .mb-skriv { display: grid; gap: 8px; }
       .mb-skriv textarea { min-height: 84px; padding: 10px 12px; border: 1px solid var(--kontroll); border-radius: 10px; resize: vertical; }
-      .mb-skriv textarea:focus { outline: 0; border-color: var(--text); box-shadow: 0 0 0 3px rgba(122, 169, 140, 0.5); }
+      .mb-skriv textarea:focus { outline: 0; border-color: var(--text); box-shadow: 0 0 0 3px rgba(168, 168, 115, 0.5); }
       .mb-hand { display: grid; margin: 0; padding: 0; list-style: none; }
       .mb-hand li { position: relative; display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 12px; padding: 8px 0; }
       .mb-hand li::before { content: ""; position: absolute; left: 5px; top: 0; bottom: 0; width: 2px; background: var(--regel); }
@@ -106,7 +106,7 @@
         var MAN = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
         var datum = function (iso) { var d = new Date(iso), n = Math.round((Date.now() - d) / 864e5); return n <= 0 ? 'i dag' : n === 1 ? 'i går' : n < 7 ? n + ' dagar sedan' : d.getDate() + ' ' + MAN[d.getMonth()]; };
         var initialer = function (n) { return String(n).split(/\s+/).slice(0, 2).map(function (x) { return x[0]; }).join('').toUpperCase(); };
-        document.getElementById('marke').innerHTML = '<svg viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="3" width="22" height="14" rx="2.5" fill="#2b2722"/><path d="M7 21v-4M19 21v-4" stroke="#2b2722" stroke-width="2.4" stroke-linecap="round"/><path d="M6.5 13.2 13 7.2l6.5 6" fill="none" stroke="#7aa98c" stroke-width="2.2" stroke-linejoin="round"/><path d="M9.2 12v2.4h7.6V12" fill="none" stroke="#7aa98c" stroke-width="1.8"/></svg>';
+        document.getElementById('marke').innerHTML = '<svg viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="3" width="22" height="14" rx="2.5" fill="#2b2722"/><path d="M7 21v-4M19 21v-4" stroke="#2b2722" stroke-width="2.4" stroke-linecap="round"/><path d="M6.5 13.2 13 7.2l6.5 6" fill="none" stroke="#a8a873" stroke-width="2.2" stroke-linejoin="round"/><path d="M9.2 12v2.4h7.6V12" fill="none" stroke="#a8a873" stroke-width="1.8"/></svg>';
         var rot = document.getElementById('mb');
         var db = las('bp-v1', null);
 

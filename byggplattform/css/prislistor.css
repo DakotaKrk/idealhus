@@ -37,7 +37,7 @@
 .pl-ingenrad { padding: 28px 16px !important; color: var(--text-3); text-align: center; }
 .pl-chip { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: var(--yta-2); color: var(--text-2); font-size: 12.5px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .pl-chip--upp { background: #f6e8e2; color: #8a4a36; }
-.pl-chip--ned { background: var(--gron-ljus); color: #3a6a51; }
+.pl-chip--ned { background: var(--gron-ljus); color: #56652f; }
 .pl-chip--ingen { background: #f3ede2; color: #6a5536; }
 
 /* Tomt läge */
@@ -137,7 +137,7 @@ dialog.dialog--pris { width: min(920px, calc(100vw - 32px)); }
 .pl-insikt li { display: flex; justify-content: space-between; gap: 10px; }
 .pl-insikt li span { overflow: hidden; color: var(--text-2); white-space: nowrap; text-overflow: ellipsis; }
 .pl-insikt li b { flex: none; font-variant-numeric: tabular-nums; }
-.pl-insikt--ned li b { color: #3a6a51; }
+.pl-insikt--ned li b { color: #56652f; }
 .pl-insikt--upp li b { color: #8a4a36; }
 .pl-insikt p { color: var(--text-3); font-size: 13.5px; }
 .pl-insikt .knapp { justify-self: start; }
@@ -152,7 +152,7 @@ dialog.dialog--pris { width: min(920px, calc(100vw - 32px)); }
 .pl-grupp th { padding: 18px 16px 8px; background: var(--ark); text-align: left; border-bottom: 1px solid var(--regel); }
 .pl-grupp th span { font: 700 17px/1 var(--skylt); letter-spacing: 0.01em; }
 .pl-grupp th small { margin-left: 10px; color: var(--text-3); font-size: 12.5px; font-weight: 400; }
-.pl-grupp b.ned { color: #3a6a51; }
+.pl-grupp b.ned { color: #56652f; }
 .pl-grupp b.upp { color: #8a4a36; }
 .pl-in { animation: pl-upp 0.4s var(--ease-out) both; animation-delay: calc(var(--r) * 22ms); }
 .prl-rad td { transition: background-color 0.15s ease; }
@@ -164,13 +164,13 @@ dialog.dialog--pris { width: min(920px, calc(100vw - 32px)); }
 .pl-diff__spar::before { content: ''; position: absolute; top: -3px; bottom: -3px; left: 50%; width: 1px; background: var(--kontroll); }
 .pl-diff__spar i { position: absolute; top: 0; bottom: 0; width: calc(var(--w) * 50%); border-radius: 3px; animation: pl-vaxa 0.6s var(--ease-out) both 0.15s; }
 .pl-diff__spar.upp i { left: 50%; background: #c98a72; transform-origin: left; }
-.pl-diff__spar.ned i { right: 50%; background: #6f9e83; transform-origin: right; }
+.pl-diff__spar.ned i { right: 50%; background: #8f9a5c; transform-origin: right; }
 
 /* Förslag för okopplade rader */
 .pl-forslag { display: flex; align-items: center; gap: 6px; max-width: 280px; margin-bottom: 6px; padding: 5px 10px; border: 0; border-radius: 8px; background: var(--primar-ljus); color: var(--text-2); font-size: 12.5px; text-align: left; transition: transform 0.16s var(--ease-out), background-color 0.15s ease; }
 .pl-forslag .i { width: 13px; height: 13px; flex: none; color: var(--primar); }
 .pl-forslag b { color: var(--text); }
-.pl-forslag:hover { background: #d3e6da; }
+.pl-forslag:hover { background: #e5e0c8; }
 .pl-forslag:active { transform: scale(0.97); }
 
 /* Tom sida: filmen och de tre sätten */
@@ -205,7 +205,7 @@ dialog.dialog--pris { width: min(920px, calc(100vw - 32px)); }
 @keyframes pl-puls { 0%, 100% { box-shadow: inset 0 0 0 2px var(--primar), 0 0 0 0 var(--primar-ljus); } 50% { box-shadow: inset 0 0 0 2px var(--primar), 0 0 0 6px var(--primar-ljus); } }
 @keyframes pl-demo-rad { 0%, 4% { box-shadow: 0 0 0 1px var(--kant); } 9%, 22% { box-shadow: 0 0 0 2px var(--primar); } 30%, 100% { box-shadow: 0 0 0 1px var(--kant); } }
 @keyframes pl-demo-prick { 0%, 8% { opacity: 0; transform: translateX(0); } 12% { opacity: 1; } 24% { opacity: 1; transform: translateX(56px); } 28%, 100% { opacity: 0; transform: translateX(56px); } }
-@keyframes pl-demo-chip { 0%, 22% { transform: none; box-shadow: 0 0 0 1px var(--kant); } 27% { transform: scale(1.04); box-shadow: 0 0 0 2px var(--primar); } 34%, 86% { transform: none; box-shadow: 0 0 0 1px #b9d6c4; } 94%, 100% { box-shadow: 0 0 0 1px var(--kant); } }
+@keyframes pl-demo-chip { 0%, 22% { transform: none; box-shadow: 0 0 0 1px var(--kant); } 27% { transform: scale(1.04); box-shadow: 0 0 0 2px var(--primar); } 34%, 86% { transform: none; box-shadow: 0 0 0 1px #ddd5b8; } 94%, 100% { box-shadow: 0 0 0 1px var(--kant); } }
 @keyframes pl-demo-bock { 0%, 24% { opacity: 0; transform: scale(0.6); } 30%, 86% { opacity: 1; transform: none; } 94%, 100% { opacity: 0; transform: scale(0.6); } }
 
 @media (max-width: 1100px) { .pl-insikter, .pl-paverkan { grid-template-columns: minmax(0, 1fr); } }

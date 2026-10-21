@@ -63,7 +63,7 @@
 .sh-ord { display: inline-block; }
 .sh__text p { max-width: 64ch; margin-top: 12px; font-size: 16px; line-height: 24px; color: rgba(var(--p-rgb), 0.72); text-wrap: pretty; }
 .sh__knappar { display: flex; flex: none; gap: 8px; margin-left: auto; }
-.sh .knapp--gul:hover { box-shadow: 0 0 0 1px rgba(122, 169, 140, 0.5), 0 0 22px 3px rgba(122, 169, 140, 0.4); }
+.sh .knapp--gul:hover { box-shadow: 0 0 0 1px rgba(168, 168, 115, 0.5), 0 0 22px 3px rgba(168, 168, 115, 0.4); }
 
 .sh__kpier { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); margin: 0 -28px; border-top: 1px solid rgba(var(--p-rgb), 0.1); }
 .sh-kpi { display: grid; align-content: start; gap: 3px; min-width: 0; padding: 15px 28px 18px; }
@@ -125,7 +125,7 @@
 }
 .pl-sok .i { width: 16px; height: 16px; flex: none; color: var(--text-3); }
 .pl-sok input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; }
-.pl-sok:focus-within { border-color: var(--text); box-shadow: 0 0 0 3px rgba(122, 169, 140, 0.5); }
+.pl-sok:focus-within { border-color: var(--text); box-shadow: 0 0 0 3px rgba(168, 168, 115, 0.5); }
 
 .pl-filter { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 11px; background: var(--yta-2); }
 .pl-filter button, .pl-vy button {
@@ -182,7 +182,7 @@
 .pl-steg__bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
 .pl-steg__bar i { height: 5px; border-radius: 3px; background: var(--regel); }
 .pl-steg__bar i.klar { background: var(--text); }
-.pl-steg__bar i.nu { background: var(--ram); box-shadow: inset 0 0 0 1px #9fbfab; }
+.pl-steg__bar i.nu { background: var(--ram); box-shadow: inset 0 0 0 1px #c2c097; }
 .pl-nastacell { min-width: 0; }
 .pl-nasta {
   position: relative;
@@ -208,7 +208,7 @@
 .pl-nasta--tejp { overflow: hidden; padding-left: 17px; border-color: #ead9a0; background: var(--gul-ljus); color: #4d3d00; }
 .pl-nasta--tejp::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 6px; background: var(--tejp); }
 .pl-nasta--vanta { border-style: dashed; color: var(--text-2); font-weight: 500; }
-.pl-nasta--klar { border-color: transparent; background: var(--gron-ljus); color: #155d37; }
+.pl-nasta--klar { border-color: transparent; background: var(--gron-ljus); color: #4f5a24; }
 .pl-varde { font-weight: 600; text-align: right; }
 .pl-varde small { font-weight: 400; }
 .pl-sen { font-size: 13px; text-align: right; color: var(--text-2); min-width: 0; }
@@ -279,7 +279,7 @@
 .bk__fakta b { color: var(--text); font-weight: 600; }
 .bk__attefall { display: inline-flex; justify-self: start; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: help; }
 .bk__attefall .i { width: 14px; height: 14px; }
-.bk__attefall.ok { background: var(--gron-ljus); color: #155d37; }
+.bk__attefall.ok { background: var(--gron-ljus); color: #4f5a24; }
 .bk__attefall.over { background: var(--yta-2); color: var(--text-2); }
 .bk__mangd { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; padding-top: 12px; border-top: 1px solid var(--regel); }
 .bk__mangd small { display: block; color: var(--text-3); font-size: 12px; }
@@ -323,7 +323,7 @@ dialog.dialog--bred { width: min(880px, calc(100vw - 32px)); max-width: none; }
 .jf-tabell tbody th { width: 150px; padding: 10px 10px 10px 0; color: var(--text-2); font-weight: 500; text-align: left; }
 .jf-tabell tbody td { padding: 10px; border-top: 1px solid var(--regel); font-weight: 500; }
 .jf-tabell tbody th { border-top: 1px solid var(--regel); }
-.jf-tabell td.jf-bast { background: var(--gron-ljus); color: #155d37; font-weight: 700; }
+.jf-tabell td.jf-bast { background: var(--gron-ljus); color: #4f5a24; font-weight: 700; }
 .jf-not { display: flex; align-items: center; gap: 8px; color: var(--text-3); font-size: 13px; }
 .jf-not .i { width: 15px; height: 15px; }
 
@@ -378,7 +378,7 @@ dialog.dialog--bred { width: min(880px, calc(100vw - 32px)); max-width: none; }
 .ff-jamfor__list { color: var(--text-2); font-size: 13px; }
 .ff-jamfor__list b { color: var(--text); }
 .ff-bud { display: grid; gap: 6px; padding: 12px; border: 1px solid var(--kant); border-radius: 12px; }
-.ff-bud--bast { border-color: #b9dcc7; background: #f6fbf8; }
+.ff-bud--bast { border-color: #ddd3b5; background: #fbf8f1; }
 .ff-bud__rad { display: flex; align-items: center; gap: 8px; }
 .ff-bud__pris { margin-left: auto; font: 700 22px/1 var(--skylt); }
 .ff-bud__stapel { height: 6px; overflow: hidden; border-radius: 3px; background: var(--regel); }
@@ -560,7 +560,7 @@ dialog.dialog--bred { width: min(880px, calc(100vw - 32px)); max-width: none; }
 .nm-val:active, .nm-hus:active { transform: scale(0.98); }
 .nm-val:has(input:checked), .nm-hus:has(input:checked) { background: var(--ark); box-shadow: inset 0 0 0 2px var(--primar); }
 .nm-val:has(input:focus-visible), .nm-hus:has(input:focus-visible) { outline: 2px solid var(--primar); outline-offset: 2px; }
-.nm-val__bild { display: grid; place-items: center; aspect-ratio: 16 / 9; overflow: hidden; background: #f4f6f2; }
+.nm-val__bild { display: grid; place-items: center; aspect-ratio: 16 / 9; overflow: hidden; background: #f8f5ee; }
 .nm-val__bild img, .nm-val__bild svg { width: 100%; height: 100%; object-fit: cover; }
 .nm-val__ikon { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 18px; background: var(--primar-ljus); color: var(--primar); }
 .nm-val__ikon .i { width: 28px; height: 28px; }
@@ -619,10 +619,10 @@ dialog.dialog--roll { width: min(720px, calc(100vw - 32px)); max-width: none; }
 .rv-kort[aria-pressed="true"] { background: var(--ark); box-shadow: inset 0 0 0 2px var(--primar); }
 .rv-ikon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--ton, var(--primar-ljus)); color: var(--tonfarg, var(--primar)); }
 .rv-ikon .i { width: 20px; height: 20px; }
-.rv-kort--bygg { --ton: #e4ecf5; --tonfarg: #2f5f8f; }
+.rv-kort--bygg { --ton: #f0e2c0; --tonfarg: #84601a; }
 .rv-kort--leverantor { --ton: #f7e3da; --tonfarg: #9a4b2c; }
-.rv-kort--handel { --ton: #e6eef3; --tonfarg: #3c6880; }
-.rv-kort--konsument { --ton: #e2efe6; --tonfarg: #2f6a4f; }
+.rv-kort--handel { --ton: #ecdfcf; --tonfarg: #7f5434; }
+.rv-kort--konsument { --ton: #e6e6cc; --tonfarg: #5a6630; }
 .rv-text { display: grid; gap: 2px; padding-right: 54px; }
 .rv-text b { font: 700 20px/1.1 var(--skylt); }
 .rv-text small { color: var(--text-3); font-size: 12.5px; }
