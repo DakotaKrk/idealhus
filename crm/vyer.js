@@ -403,7 +403,7 @@
     });
     var idag = new Date(); idag.setHours(23, 59, 59, 999);
     var uppg = db().uppgifter.filter(function (u) { return !u.klar && new Date(u.forfaller) <= idag; });
-    var senaste = db().forfragningar.slice().sort(function (a, b) { return b.skapad < a.skapad ? -1 : 1; }).slice(0, 5);
+    var senaste = db().forfragningar.slice().sort(function (a, b) { return b.skapad < a.skapad ? -1 : 1; }).slice(0, 10);
     var akt = db().aktiviteter.slice().sort(function (a, b) { return b.tid < a.tid ? -1 : 1; }).slice(0, 12);
     var fokus = smartaForslag();
 
@@ -481,21 +481,35 @@
   };
 
   // Översiktens två spalter ska sluta i jämnhöjd oavsett hur mycket data
-  // som finns: aktivitetslistan visar så många rader som får plats bredvid
-  // vänsterspalten (minst tre). Staplade spalter (smalt fönster) visar sex.
+  // som finns. Högerspalten för långt: korta aktiviteten (minst tre), visa
+  // fler förfrågningar till vänster (upp till tio), korta sedan Att göra och
+  // Fokus (minst tre var, "Alla" leder vidare). Vänsterspalten för lång: visa
+  // fler aktiviteter. Staplade spalter (smalt fönster): fem förfrågningar och
+  // sex aktiviteter.
   function balanseraOversikt() {
     var kol = document.querySelectorAll('.oversikt__kol');
-    var rader = document.querySelectorAll('.oversikt__kol .logg__rad');
-    if (kol.length !== 2 || !rader.length) return;
-    [].forEach.call(rader, function (r) { r.hidden = false; });
-    var sida = kol[0].getBoundingClientRect().top === kol[1].getBoundingClientRect().top;
-    var synliga = rader.length;
-    if (!sida) {
-      for (; synliga > 6; synliga--) rader[synliga - 1].hidden = true;
-      return;
+    if (kol.length !== 2) return;
+    var V = kol[0], H = kol[1];
+    var forf = V.querySelectorAll('.lista__rad'), akt = H.querySelectorAll('.logg__rad');
+    var uppg = H.querySelectorAll('.uppglista > li'), fok = H.querySelectorAll('.fokus__rad');
+    var visa = function (rader, n) { [].forEach.call(rader, function (r, k) { r.hidden = k >= n; }); return Math.min(n, rader.length); };
+    var nf = visa(forf, 5), na = visa(akt, 99), nu = visa(uppg, 99), nk = visa(fok, 99);
+    if (V.getBoundingClientRect().top !== H.getBoundingClientRect().top) { visa(akt, 6); return; }
+    var botten = function (el) { return el.getBoundingClientRect().bottom; };
+    var forLang = function () { return botten(H) > botten(V) + 2; };
+    while (forLang()) {
+      if (na > 3) akt[--na].hidden = true;
+      else if (nf < forf.length) forf[nf++].hidden = false;
+      else if (nu > 3) uppg[--nu].hidden = true;
+      else if (nk > 3) fok[--nk].hidden = true;
+      else break;
     }
-    var mal = kol[0].getBoundingClientRect().bottom + 2;
-    while (synliga > 3 && kol[1].getBoundingClientRect().bottom > mal) rader[--synliga].hidden = true;
+    // Blev vänster längst: fyll på med aktiviteter så länge de ryms.
+    while (na < akt.length) {
+      akt[na].hidden = false;
+      if (forLang()) { akt[na].hidden = true; break; }
+      na++;
+    }
   }
   var balansVantar;
   window.addEventListener('resize', function () {

@@ -11267,3 +11267,72 @@ select {
     transition: opacity 0.15s linear;
   }
 }
+
+/* Översiktens utjämning döljer och visar rader med hidden. */
+.oversikt [hidden] {
+  display: none !important;
+}
+
+/* Menyhandtaget lite tydligare (kunden såg det knappt): större, mörkare pil, varm kant. */
+@media (min-width: 1101px) {
+  .sido-knapp {
+    width: 24px;
+    height: 64px;
+    margin: -32px 0 0 -12px;
+    color: #8f5424;
+    box-shadow:
+      0 0 0 1px rgba(201, 138, 69, 0.32),
+      inset 0 1px 0 #ffffff,
+      0 2px 4px -2px rgba(90, 60, 25, 0.25),
+      0 12px 24px -12px rgba(143, 84, 36, 0.5);
+  }
+
+  .sido-knapp svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.4;
+  }
+
+  html[data-sido-dold] .sido-knapp {
+    width: 26px;
+    margin-left: 0;
+  }
+}
+
+/* Hovring på menyhandtaget (kunden: "pixelfel" när musen kom dit): pilen
+   flyttades 2 px och hamnade mellan pixlarna. Nu står pilen still och
+   handtaget får i stället ett mjukt varmt sken som tonar in. */
+@media (min-width: 1101px) {
+  .sido-knapp:hover svg,
+  .sido-knapp:focus-visible svg,
+  html[data-sido-dold] .sido-knapp:hover svg,
+  html[data-sido-dold] .sido-knapp:focus-visible svg {
+    translate: none;
+    animation: none;
+  }
+
+  html:not(.sido-glider) .sido-knapp {
+    transition: box-shadow 0.35s var(--ease-out), background-color 0.35s ease, color 0.25s ease, transform 0.16s var(--ease-out);
+  }
+
+  .sido-knapp:hover,
+  .sido-knapp:focus-visible {
+    transform: none;
+    background: #fffaf2;
+    color: #8f5424;
+    box-shadow:
+      0 0 0 1px rgba(214, 148, 78, 0.55),
+      inset 0 1px 0 #ffffff,
+      0 0 16px 2px rgba(240, 181, 110, 0.7),
+      0 0 40px 8px rgba(240, 181, 110, 0.32),
+      0 10px 22px -12px rgba(143, 84, 36, 0.5);
+  }
+
+  .sido-knapp:focus-visible {
+    outline: none;
+  }
+
+  .sido-knapp:active {
+    transform: scale(0.96);
+  }
+}
