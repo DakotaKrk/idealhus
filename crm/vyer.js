@@ -215,7 +215,7 @@
       man.forEach(function (x) { if (x.ar === d.getFullYear() && x.m === d.getMonth()) { x.summa += a.varde; x.antal += 1; } });
     });
     var max = Math.max.apply(null, man.map(function (x) { return x.summa; }).concat([1]));
-    var B = 520, H = 190, top = 26, bas = 160, fack = B / 6, bredd = 46;
+    var B = 520, H = 152, top = 24, bas = 124, fack = B / 6, bredd = 46;
     var hojd = function (v) { return v / max * (bas - top); };
     var staplar = man.map(function (x, n) {
       var mitt = fack * n + fack / 2, h = hojd(x.summa), y = bas - h, r = Math.min(6, h / 2);
@@ -2983,7 +2983,7 @@
     };
     var html = '<h1 class="dold">Inställningar</h1>' +
       '<section class="instopp kort kort--mork" data-in>' +
-        '<div class="instopp__ord"><p class="etikett etikett--ljus">Prislistan</p><h2>Priserna bakom varje offert <span aria-hidden="true">💰</span></h2>' +
+        '<div class="instopp__ord"><p class="etikett etikett--ljus">Prislistan</p><h2>Priserna bakom varje <span class="ihop">offert <span aria-hidden="true">💰</span></span></h2>' +
           '<p>Ändra ett pris och spara. Nya offerter och kalkylen i kundmötet räknar med det direkt – offerter som redan är skickade behåller sina priser.</p></div>' +
         '<div class="instopp__tal">' +
           '<div><span aria-hidden="true">🏠</span><small>Husen</small><b>' + (priser.length ? IH.kort(minP) + ' – ' + IH.kort(maxP) : '–') + '</b><em>' + hus.length + ' modeller</em></div>' +

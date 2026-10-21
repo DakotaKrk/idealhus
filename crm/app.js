@@ -316,6 +316,8 @@
       }).join('');
     }).join('');
     return '<a class="sido__logo" href="#/"><img src="../images/idealhus_logo.svg" alt="Idealhus"><span class="sido__crm">CRM <small>· Prototyp</small></span></a>' +
+      '<div class="sido__verktyg"><button class="sido__sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
+      '<button class="sido__ny" type="button" data-g="ny" aria-label="Ny" title="Ny  N">' + IH.i('plus') + '</button></div>' +
       '<nav class="sido__nav" aria-label="CRM"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
       '<div class="sido__fot"><button class="sido__mer" type="button" tabindex="-1" aria-hidden="true" data-g="sido-mer">Mer ' + IH.i('pil') + '</button>' +
       '<button class="anv" type="button" data-g="byt-anvandare"><span class="avatar" style="--av:' + jag.farg + '">' + IH.initialer(jag.namn) + '</span>' +
@@ -336,7 +338,9 @@
 
   function skal() {
     var app = $('#app');
-    app.innerHTML = '<aside class="sido">' + sidomeny() + '</aside>' +
+    app.innerHTML = '<aside class="sido" id="sidomeny">' + sidomeny() + '</aside>' +
+      '<div class="sido-kant"><button class="sido-knapp" type="button" data-sido-knapp aria-controls="sidomeny" aria-expanded="true" aria-label="Dölj menyn" title="Dölj menyn  [">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 9 12l5.5 5.5"/></svg></button></div>' +
       '<div class="huvud"><header class="topp">' +
       '<button class="sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök eller skriv ett kommando…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
       '<span class="proto">Prototyp · exempeldata</span>' +
@@ -345,6 +349,58 @@
       '<nav class="mobilmeny" aria-label="Meny">' + mobilmeny() + '</nav>' +
       '<div class="toaster" aria-live="polite"></div>';
   }
+
+  // Sidomenyn kan fällas in på dator (knappen på kanten eller [): menyn glider ut åt vänster
+  // och vyn glider efter (FLIP – en layoutändring, sedan bara transform). Valet sparas.
+  var datorBred = matchMedia('(min-width: 1101px)');
+  function sidoDold() { return document.documentElement.hasAttribute('data-sido-dold'); }
+  function sattSido(dold, animera) {
+    var huvud = $('.huvud');
+    var lugn = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var fore = animera && !lugn && datorBred.matches && huvud ? huvud.getBoundingClientRect().left : null;
+    document.documentElement.toggleAttribute('data-sido-dold', dold);
+    var k = $('[data-sido-knapp]'), text = dold ? 'Visa menyn' : 'Dölj menyn';
+    if (k) { k.setAttribute('aria-expanded', String(!dold)); k.setAttribute('aria-label', text); k.title = text + '  ['; }
+    var s = $('.sido'); if (s) s.inert = dold && datorBred.matches;
+    try { localStorage.setItem('ih-crm-sido-dold', dold ? '1' : '0'); } catch (e) { /* ingen lagring */ }
+    if (fore != null) {
+      var dx = fore - huvud.getBoundingClientRect().left;
+      if (dx && huvud.animate) huvud.animate([{ transform: 'translateX(' + dx + 'px)' }, { transform: 'none' }], { duration: 400, easing: 'cubic-bezier(.32, .72, 0, 1)' });
+    }
+    setTimeout(function () { window.dispatchEvent(new Event('resize')); }, animera ? 440 : 0);
+  }
+  document.addEventListener('click', function (ev) {
+    if (ev.target.closest && ev.target.closest('[data-sido-knapp]')) sattSido(!sidoDold(), true);
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key !== '[' || ev.ctrlKey || ev.metaKey || ev.altKey || !datorBred.matches || document.querySelector('.mote')) return;
+    if (ev.target.closest && ev.target.closest('input, textarea, select, [contenteditable], dialog')) return;
+    ev.preventDefault(); sattSido(!sidoDold(), false);
+  });
+  datorBred.addEventListener('change', function () { var s = $('.sido'); if (s) s.inert = sidoDold() && datorBred.matches; });
+  IH.sattSido = sattSido;
+
+  // Kortrutnät med en ofullständig sista rad (t.ex. 14 kunder i 3 spalter):
+  // sista raden centreras, så att sidan blir symmetrisk. Rutnätet får dubbelt
+  // så många spår och varje kort spänner över två – då kan raden flyttas ett
+  // halvt kort åt gången.
+  function centreraGrid(g) {
+    var barn = [].slice.call(g.children);
+    g.style.gridTemplateColumns = '';
+    barn.forEach(function (c) { c.style.gridColumn = ''; });
+    var n = getComputedStyle(g).gridTemplateColumns.split(' ').filter(Boolean).length;
+    var r = barn.length % n;
+    if (n < 2 || !r || !datorBred.matches) return;
+    g.style.gridTemplateColumns = 'repeat(' + n * 2 + ', minmax(0, 1fr))';
+    barn.forEach(function (c) { c.style.gridColumn = 'span 2'; });
+    barn[barn.length - r].style.gridColumn = (n - r + 1) + ' / span 2';
+  }
+  var centreraVantar = 0;
+  function centreraAlla() {
+    cancelAnimationFrame(centreraVantar);
+    centreraVantar = requestAnimationFrame(function () { [].forEach.call(document.querySelectorAll('.kundnat'), centreraGrid); });
+  }
+  window.addEventListener('resize', centreraAlla);
 
   // Sidomenyns markör glider till den valda raden.
   function flyttaMarkor(direkt) {
@@ -772,6 +828,8 @@
   IH.starta = function () {
     if (!inloggad()) { location.replace('logga-in.html'); return; }
     skal();
+    sattSido(sidoDold(), false);
+    new MutationObserver(centreraAlla).observe($('#vy'), { childList: true, subtree: true });
     kopplaHandelser();
     rita();
     requestAnimationFrame(function () { flyttaMarkor(true); });

@@ -10242,3 +10242,842 @@ button.kal__rad:hover {
     animation: none;
   }
 }
+
+/* =====================================================================
+   Skalet som i Uperformance (2026-10-21)
+   Dator: menyn och vyn är två egna rundade kort med samma luft (16 px)
+   mot fönstrets kanter och mellan sig – vyns första kort börjar i jämnhöjd
+   med menyn och fyller resten av bredden. Sök och "+ Ny" bor i menyn och
+   toppraden göms. Menyn fälls in med den runda knappen på kanten eller
+   [ – menyn glider ut åt vänster och vyn glider efter (FLIP i app.js).
+   ===================================================================== */
+.sido__verktyg {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 8px;
+  margin: 2px 0 12px;
+}
+
+.sido__sok {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 8px 0 14px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07), 0 10px 20px -18px rgba(90, 60, 25, 0.55);
+  color: rgba(27, 25, 21, 0.56);
+  font: 500 0.875rem/1 inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.sido__sok:hover {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, 0.4), 0 12px 24px -18px rgba(143, 84, 36, 0.6);
+}
+
+.sido__sok svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+.sido__sok span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sido__sok kbd {
+  flex: none;
+  padding: 4px 6px;
+  border-radius: 7px;
+  background: rgba(27, 25, 21, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.07);
+  color: rgba(27, 25, 21, 0.5);
+  font: 600 0.66rem/1 inherit;
+}
+
+.sido__ny {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #f7c98f, #eda75c);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 12px 22px -14px rgba(176, 106, 38, 0.75);
+  color: #1b1915;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+
+.sido__ny svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.4;
+}
+
+.sido__ny:hover {
+  transform: translateY(-1px) rotate(90deg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 16px 26px -14px rgba(176, 106, 38, 0.85);
+}
+
+.sido__ny:active {
+  transform: scale(0.94);
+}
+
+.sido-kant {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .sido__verktyg {
+    display: none;
+  }
+}
+
+@media (min-width: 1101px) {
+  body {
+    --ram: 12px;
+    --sido: clamp(240px, 17vw, 288px);
+    padding: 0;
+  }
+
+  /* Ingen ram runt hela fönstret – menyn och vyn är egna kort. */
+  body::before {
+    display: none;
+  }
+
+  .app {
+    grid-template-columns: calc(var(--sido) + var(--ram)) minmax(0, 1fr);
+    min-height: 100vh;
+    overflow-x: clip;
+  }
+
+  .topp {
+    display: none;
+  }
+
+  /* Menyn: ett rundat glaskort med luft runt om. */
+  .sido {
+    top: var(--ram);
+    height: calc(100vh - var(--ram) * 2);
+    margin: var(--ram) 0 var(--ram) var(--ram);
+    padding: 14px 14px 14px;
+    border-radius: 28px;
+    background:
+      radial-gradient(90% 26% at 50% 0%, rgba(255, 214, 160, 0.42), transparent 70%),
+      radial-gradient(80% 22% at 0% 100%, rgba(200, 225, 190, 0.32), transparent 70%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 252, 246, 0.78));
+    box-shadow:
+      0 0 0 1px rgba(201, 138, 69, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      0 34px 64px -44px rgba(90, 60, 25, 0.5),
+      0 12px 26px -22px rgba(90, 60, 25, 0.35);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
+  }
+
+  .sido::after {
+    border-radius: inherit;
+  }
+
+  /* Vyn: samma luft som runt menyn, och första kortet i jämnhöjd med menyn. */
+  .vy {
+    padding: var(--ram) var(--ram) 40px;
+  }
+
+  .stegband {
+    top: var(--ram);
+  }
+
+  .inkorg__lista {
+    top: var(--ram);
+    max-height: calc(100vh - var(--ram) * 2);
+  }
+
+  .kal__sida,
+  .dokyta {
+    top: var(--ram);
+  }
+
+  /* Knappen: rund, mitt på menyns kant, med en ring i sidans färg som skär in. */
+  .sido-kant {
+    display: block;
+    position: fixed;
+    top: var(--ram);
+    bottom: var(--ram);
+    left: calc(var(--ram) + var(--sido));
+    z-index: 36;
+    width: 0;
+    pointer-events: none;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .sido-knapp {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    padding: 0;
+    border: 1px solid rgba(201, 138, 69, 0.5);
+    border-radius: 50%;
+    background: linear-gradient(160deg, #ffffff, #fff3e1);
+    color: #b06a26;
+    box-shadow: 0 0 0 4px #f8f4ed, 0 10px 22px -10px rgba(143, 84, 36, 0.6);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.35s ease,
+      transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .sido-knapp svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .sido-knapp:hover,
+  .sido-knapp:focus-visible {
+    border-color: transparent;
+    background: linear-gradient(160deg, #f7c98f, #eda75c);
+    color: #1b1915;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px #f8f4ed, 0 14px 26px -10px rgba(176, 106, 38, 0.7);
+  }
+
+  .sido-knapp:focus-visible {
+    outline: 2px solid rgba(201, 138, 69, 0.8);
+    outline-offset: 7px;
+  }
+
+  .sido-knapp:active {
+    transform: scale(0.92);
+  }
+
+  /* Infälld meny: vyn tar hela bredden, knappen stannar vid vänsterkanten. */
+  html[data-sido-dold] .app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-sido-dold] .sido {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sido);
+    transform: translateX(calc(-100% - var(--ram) * 3));
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  html[data-sido-dold] .sido-kant {
+    transform: translateX(calc((var(--sido) + var(--ram)) * -1));
+  }
+
+  html[data-sido-dold] .sido-knapp {
+    left: 22px;
+  }
+
+  html[data-sido-dold] .sido-knapp svg {
+    transform: rotate(180deg);
+  }
+
+  html[data-sido-dold] .vy {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+}
+
+@media (min-width: 1101px) and (prefers-reduced-motion: reduce) {
+  .sido,
+  .sido-kant,
+  .sido-knapp,
+  .sido-knapp svg {
+    transition: none;
+  }
+}
+
+/* Knappen och kanten, andra varvet (2026-10-21): knappen står mitt i
+   mellanrummet mellan menyn och vyn, en tunn varm ljuslinje löper längs
+   mellanrummet med ett ljus som vandrar, och knappen pulserar mjukt.
+   Infälld meny: vyn får samma smala luft som annars (all yta används). */
+@media (min-width: 1101px) {
+  .sido-kant {
+    left: calc(var(--ram) + var(--sido) + var(--ram) / 2);
+  }
+
+  .sido-kant::before {
+    content: "";
+    position: absolute;
+    top: 6%;
+    bottom: 6%;
+    left: -0.5px;
+    width: 1px;
+    background: linear-gradient(180deg, rgba(240, 181, 110, 0) 0%, rgba(240, 181, 110, 0.55) 22%, rgba(214, 148, 78, 0.75) 50%, rgba(240, 181, 110, 0.55) 78%, rgba(240, 181, 110, 0) 100%);
+    transition: opacity 0.4s ease;
+  }
+
+  .sido-kant::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -1.5px;
+    width: 3px;
+    height: 110px;
+    border-radius: 3px;
+    opacity: 0;
+    background: linear-gradient(180deg, rgba(255, 214, 160, 0), #ffd39c 50%, rgba(255, 214, 160, 0));
+    box-shadow: 0 0 10px rgba(240, 181, 110, 0.85);
+    animation: kant-ljus 9s cubic-bezier(0.45, 0, 0.2, 1) 2s infinite;
+  }
+
+  @keyframes kant-ljus {
+    0% { opacity: 0; transform: translateY(0); }
+    8% { opacity: 0.9; }
+    40% { opacity: 0.9; transform: translateY(calc(100vh - 140px)); }
+    41%, 100% { opacity: 0; transform: translateY(calc(100vh - 140px)); }
+  }
+
+  .sido-knapp {
+    width: 34px;
+    height: 34px;
+    margin: -17px 0 0 -17px;
+    border: 1px solid rgba(214, 148, 78, 0.55);
+    background:
+      radial-gradient(120% 120% at 30% 20%, #ffffff 0%, #fff6ea 55%, #ffe8c8 100%);
+    color: #a55f1f;
+    box-shadow:
+      0 0 0 4px #f8f4ed,
+      inset 0 1px 0 #ffffff,
+      0 10px 24px -10px rgba(143, 84, 36, 0.65);
+  }
+
+  /* Mjuk puls som drar blicken till knappen, sedan vila. */
+  .sido-knapp::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(240, 181, 110, 0.75);
+    opacity: 0;
+    pointer-events: none;
+    animation: knapp-puls 4.5s ease-out 1.2s infinite;
+  }
+
+  @keyframes knapp-puls {
+    0% { opacity: 0.85; transform: scale(1); }
+    38% { opacity: 0; transform: scale(1.75); }
+    100% { opacity: 0; transform: scale(1.75); }
+  }
+
+  .sido-knapp svg {
+    position: relative;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .sido-knapp:hover svg,
+  .sido-knapp:focus-visible svg {
+    animation: pil-knuff 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) infinite alternate;
+  }
+
+  @keyframes pil-knuff {
+    from { translate: 0 0; }
+    to { translate: -2.5px 0; }
+  }
+
+  html[data-sido-dold] .sido-knapp:hover svg,
+  html[data-sido-dold] .sido-knapp:focus-visible svg {
+    animation-name: pil-knuff-ut;
+  }
+
+  @keyframes pil-knuff-ut {
+    from { translate: 0 0; }
+    to { translate: 2.5px 0; }
+  }
+
+  .sido-knapp:hover::before,
+  .sido-knapp:focus-visible::before {
+    animation: none;
+  }
+
+  /* Infälld meny: all yta till vyn – samma smala luft som annars. */
+  html[data-sido-dold] .vy {
+    padding-left: var(--ram);
+    padding-right: var(--ram);
+  }
+
+  html[data-sido-dold] .sido-kant::before,
+  html[data-sido-dold] .sido-kant::after {
+    opacity: 0;
+    animation: none;
+  }
+
+  html[data-sido-dold] .sido-knapp {
+    left: 12px;
+  }
+}
+
+@media (min-width: 1101px) and (prefers-reduced-motion: reduce) {
+  .sido-kant::after,
+  .sido-knapp::before,
+  .sido-knapp:hover svg {
+    animation: none;
+  }
+}
+
+/* Menyns markerade rad (2026-10-21): listan rullar och klippte pillens
+   tunna kant och skugga i sidorna – kanten såg avhuggen ut. Listan får
+   4 px inre luft (och lika mycket negativ marginal, så raderna står kvar
+   i linje med sökfältet) och pillen följer radernas bredd. */
+.sido__nav {
+  margin-left: -4px;
+  margin-right: -4px;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 3px;
+}
+
+.sido__markor {
+  left: 4px;
+  right: 4px;
+}
+
+/* Inga tomma ytor (2026-10-21): korten fördelar sitt innehåll över hela
+   höjden i stället för att lämna en tom yta längst ner. */
+@media (min-width: 1101px) {
+  /* Inställningar: raderna sprids jämnt, knappen står längst ner. */
+  .prisform > .kort__kropp {
+    justify-content: space-between;
+  }
+
+  .prisform .formular__knappar {
+    margin-top: 0;
+  }
+
+  /* Offerter: "Vanligaste posterna" fyller sin spalt. */
+  .poster__lista {
+    flex: 1;
+    align-content: space-evenly;
+  }
+}
+
+/* =====================================================================
+   Rörelserna enligt Emil Kowalskis designprinciper (2026-10-21)
+   - Starka egna kurvor: ease-out för det som kommer in, lådkurva för menyn.
+   - Det man ser ofta ska vara snabbt: sidbyte under en halv sekund, tät
+     stegring, tryck 160 ms, hovring 200 ms.
+   - Det man gör med tangentbordet (kommandopaletten, [) rör sig inte.
+   - Inget dyker upp från ingenting (scale 0).
+   - Reducerad rörelse: bara toning, ingen förflyttning.
+   ===================================================================== */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Sidbyte: den gamla vyn går ut snabbare än den nya kommer in. */
+::view-transition-old(vy) {
+  animation: vy-ut 0.16s var(--ease-out) both;
+}
+
+@keyframes vy-ut {
+  to { opacity: 0; transform: translateY(-6px); filter: blur(2px); }
+}
+
+.vy--in [data-in] {
+  animation-duration: 0.45s;
+  animation-timing-function: var(--ease-out);
+  animation-delay: calc(var(--in, 0) * 40ms);
+}
+
+@keyframes in-upp {
+  from { opacity: 0; transform: translateY(12px) scale(0.99); }
+}
+
+.vy--in [data-stagger] > * {
+  animation-duration: 0.4s;
+  animation-timing-function: var(--ease-out);
+  animation-delay: calc(0.05s + var(--in, 0) * 40ms + min(var(--k, 0), 10) * 35ms);
+}
+
+@keyframes in-rad {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+.vy--in .ord > span {
+  animation-duration: 0.5s;
+  animation-timing-function: var(--ease-out);
+  animation-delay: calc(0.03s + var(--o, 0) * 40ms);
+}
+
+.vy--in .rad-mask > span {
+  animation-duration: 0.55s;
+  animation-timing-function: var(--ease-out);
+  animation-delay: calc(0.06s + var(--o, 0) * 60ms);
+}
+
+/* Kommandopaletten öppnas med Ctrl K många gånger om dagen – ingen rörelse. */
+.palett,
+.palett.syns {
+  transform: translate(-50%, 0);
+  transition: opacity 0.1s var(--ease-out);
+}
+
+/* Tryck: svarar direkt. Hovring: kort och mjuk. */
+.knapp {
+  transition: transform 0.16s var(--ease-out), box-shadow 0.2s var(--ease-out), background-color 0.2s ease, color 0.2s ease;
+}
+
+.ikonknapp:active,
+.anv:active,
+.sido__smalt a:active,
+.sido__smalt button:active,
+.sido__sok:active {
+  transform: scale(0.97);
+}
+
+.aff,
+.kundkort,
+.dio,
+.sido__logo {
+  transition-duration: 0.2s;
+  transition-timing-function: var(--ease-out);
+}
+
+/* Hovringslyft bara med mus – pekskärmar får inga falska hovringar. */
+@media (hover: none) {
+  .knapp:hover,
+  .aff:hover,
+  .kundkort:hover,
+  .sido__logo:hover {
+    transform: none;
+  }
+}
+
+/* Bocken i kundmötets agenda: från halv storlek och genomskinlig, inte från ingenting. */
+.agenda__bock {
+  opacity: 0;
+  transform: scale(0.5);
+  transition: transform 0.25s var(--ease-out), opacity 0.18s ease;
+}
+
+.agenda__kort.med .agenda__bock {
+  opacity: 1;
+  transform: none;
+}
+
+/* Sidomenyn glider som en låda: 400 ms, iOS-kurva. */
+@media (min-width: 1101px) {
+  .sido {
+    transition: transform 0.4s var(--ease-drawer), opacity 0.3s var(--ease-out);
+  }
+
+  .sido-kant {
+    transition: transform 0.4s var(--ease-drawer);
+  }
+
+  .sido-knapp {
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s var(--ease-out),
+      transform 0.16s var(--ease-out), left 0.4s var(--ease-drawer);
+  }
+
+  .sido-knapp svg {
+    transition: transform 0.4s var(--ease-drawer);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vy--in [data-in],
+  .vy--in [data-stagger] > *,
+  .vy--in .ord > span,
+  .vy--in .rad-mask > span {
+    animation-name: bara-tona;
+    animation-duration: 0.2s;
+  }
+
+  @keyframes bara-tona {
+    from { opacity: 0; }
+  }
+
+  ::view-transition-old(vy) {
+    animation: bara-ut 0.12s linear both;
+  }
+
+  @keyframes bara-ut {
+    to { opacity: 0; }
+  }
+}
+
+/* =====================================================================
+   Proffslyftet (2026-10-21) – impeccable, taste-skill och Emil Kowalski
+   - Webbläsarens egna ytor (rullning, markör, fokus) i Idealhus färger.
+   - Siffror med lika breda tecken så att tal står still när de räknas.
+   - Inget som sticker ut ur sin ram, inga ord som blir ensamma på en rad.
+   - Kontroller i samma rad är lika höga; korten i samma rad slutar lika.
+   ===================================================================== */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(143, 84, 36, 0.3) transparent;
+}
+
+input,
+textarea,
+select {
+  caret-color: var(--virke-djup);
+}
+
+/* Den ljusa virkesfärgen syntes knappt mot det ljusa – fokus i djupare ek. */
+:focus-visible {
+  outline: 2px solid #b06a26;
+  outline-offset: 2px;
+}
+
+.vy {
+  font-variant-numeric: tabular-nums;
+}
+
+.vy h1,
+.vy h2 {
+  font-variant-numeric: normal;
+}
+
+/* Projekt: siffran och "dagar kvar" staplas i ringens mitt i stället för
+   att texten ligger lågt och sticker ut genom ringen. */
+.nedrakning__ring {
+  place-content: center;
+  gap: 3px;
+}
+
+.nedrakning__ring b {
+  margin-top: 0;
+}
+
+.nedrakning__ring small,
+.prodblock--montage .nedrakning__ring small {
+  position: static;
+  font-size: 0.5625rem;
+  letter-spacing: 0.06em;
+}
+
+/* Kunder: resans staplar använder höjden i sina kolumner. */
+@media (min-width: 1101px) {
+  .resakol__stapel {
+    height: calc(var(--a) * 170px + 6px);
+  }
+}
+
+/* Ortsikonen i kundkorten fick ingen luft när raden blev ett block (för …). */
+.kundkort__topp .kundkort__namn small .i {
+  margin-right: 5px;
+  vertical-align: -2px;
+}
+
+/* Säljtavla: stegnamnen på en rad, som grannarna. */
+.stegband button {
+  column-gap: 8px;
+}
+
+.stegband b {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Inställningar: emojin följer med sista ordet och rubriken balanseras. */
+.ihop {
+  white-space: nowrap;
+}
+
+.instopp__ord h2 {
+  text-wrap: balance;
+}
+
+/* Inställningar: husens rader växer i stället för att glesas ut, så att
+   de fem husen fyller samma höjd som de sju tillvalen bredvid. */
+@media (min-width: 1101px) {
+  .prisform > .kort__kropp {
+    justify-content: flex-start;
+  }
+
+  .prisform .prisrad {
+    flex: 1 1 auto;
+  }
+
+  .prisform .prisrad .tumme {
+    width: 84px;
+  }
+}
+
+/* Att göra: fält och knapp i raden "Ny uppgift" lika höga. */
+.nyuppg select,
+.nyuppg input[type="date"],
+.nyuppg .knapp {
+  height: 40px;
+  min-height: 40px;
+}
+
+.nyuppg .knapp {
+  padding-inline: 18px;
+}
+
+/* Översikten: "Per hus" tätare så att spalterna slutar i jämnhöjd. */
+.oversikt .perhus__rad {
+  padding-block: 4px;
+}
+
+/* Inga ensamma ord på sista raden i brödtext. */
+.vy p,
+.prodblock__huvud small {
+  text-wrap: pretty;
+}
+
+/* Att göra: antalet står längst till höger i gruppens huvud, som i översikten. */
+.uppgrupp .kort__huvud h2 {
+  flex: 1;
+  min-width: 0;
+}
+
+.uppgrupp .kort__huvud h2 > .chip {
+  margin-left: auto;
+}
+
+.oversikt .perhus {
+  padding-top: 6px;
+}
+
+/* Offerter: veckografen fyller vänsterspalten i toppkortet i stället för
+   att lämna en tom yta under sig; staplarna mäts mot grafens egen höjd. */
+@media (min-width: 1101px) {
+  .offtopp__ord {
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+  }
+
+  .offtopp__vecka {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .offtopp__staplar {
+    flex: 1;
+    height: auto;
+    min-height: 132px;
+    container-type: size;
+  }
+
+  .offtopp__staplar i {
+    max-width: 34px;
+    height: calc(var(--a) * (100cqh - 40px) + 5px);
+  }
+}
+
+/* Offerter: summorna högerställda så att siffrorna står under varandra. */
+.tabell--offert2 th:nth-child(3),
+.tabell--offert2 td:nth-child(3) {
+  padding-right: 40px;
+  text-align: right;
+}
+
+/* Laptopskärmar (741–880 px höga, t.ex. 1366 × 768): alla menyval ryms utan
+   "Mer" – loggan på en rad och lite tätare rader, foten som vanligt. */
+@media (min-height: 741px) and (max-height: 880px) {
+  .sido__logo {
+    flex-direction: row;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 18px;
+  }
+
+  .sido__logo img {
+    flex: none;
+    width: auto;
+    height: 26px;
+  }
+
+  .sido .sido__crm small {
+    display: none;
+  }
+
+  .sido__rubrik {
+    margin: 10px 12px 3px;
+  }
+
+  .sido__lank {
+    min-height: 40px;
+  }
+}
+
+/* Tryck (Emil Kowalski): allt man klickar på svarar direkt med en liten
+   nedtryckning, 160 ms ut och snabbt tillbaka. */
+.flikar button,
+.stegband button,
+.dagkort,
+.lista__rad,
+.perhus__rad,
+.varmrad {
+  transition-property: transform, background-color, box-shadow, color;
+  transition-duration: 0.2s;
+  transition-timing-function: var(--ease-out);
+}
+
+.flikar button:active,
+.stegband button:active,
+.dagkort:active,
+.lista__rad:active,
+.perhus__rad:active,
+.varmrad:active {
+  transform: scale(0.98);
+  transition-duration: 0.1s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flikar button:active,
+  .stegband button:active,
+  .dagkort:active,
+  .lista__rad:active,
+  .perhus__rad:active,
+  .varmrad:active {
+    transform: none;
+  }
+}
+
+/* Lugnare (impeccable): prickar som pulserar för evigt utan att något händer
+   står nu stilla – bara inkorgens klocka, som är live, får andas kvar. */
+.hero__datum i,
+.dio__ny i,
+.kundkort__flagga i,
+.kal__varn {
+  animation: none;
+}
+
+.nbs::after {
+  display: none;
+}
+
+/* Byns lappar: "Steg · N st" på en rad, som förut. */
+.stad__lapp small {
+  white-space: nowrap;
+}
