@@ -253,7 +253,6 @@
       '<div class="sida__fot">' + senastLank() +
         '<div class="sida__verktyg" role="group" aria-label="Genvägar">' +
           '<button class="sida__ikon" type="button" data-g="hitta-ratt" aria-label="Hitta rätt" data-tips="Hitta rätt  ?">' + BP.i('kompass') + '</button>' +
-          '<a class="sida__ikon" href="index.html" aria-label="Startsidan" data-tips="Startsidan">' + BP.i('bibliotek') + '</a>' +
           '<a class="sida__ikon" href="konsument.html" target="_blank" rel="noopener" aria-label="Sidan för privatpersoner" data-tips="Sidan för privatpersoner">' + BP.i('extern') + '</a>' +
         '</div>' +
         '<button class="anv" type="button" data-g="byt-roll" aria-label="Byt roll, nu ' + e(r.namn) + '"><span class="avatar" style="--av:' + BP.avfarg(r.person) + '">' + BP.initialer(r.person) + '</span><span class="anv__text"><b>' + e(r.person) + ' <i class="anv__proto">prototyp</i></b><small>' + e(r.foretag ? r.foretag + ' · ' + r.namn : r.namn) + '</small></span>' + BP.i('ned') + '</button></div>';
