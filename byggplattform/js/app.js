@@ -299,6 +299,22 @@
     placeraMarkor(true);
   }
 
+  // Sidokolumner som är kortare än innehållet bredvid följer med när man rullar. En kolumn
+  // som är högre än fönstret fastnar med nederkanten i fönstret, så att inget göms.
+  var KLIBBA = '.rutnat--huvud > .rutnat:last-child, .vy .rutnat:not(.rutnat--huvud) > .kort:first-child:has(> .delar), .ka-tb, .pl-listor, .ff-sido';
+  function klibba(rot) {
+    var satt = function () {
+      $$(KLIBBA, rot).forEach(function (el) {
+        var bredvid = el.parentElement && Array.prototype.some.call(el.parentElement.children, function (b) { return b !== el && b.offsetHeight > el.offsetHeight + 40; });
+        el.classList.toggle('klibbig', !!bredvid && window.innerWidth > 1100);
+        el.style.top = Math.min(16, window.innerHeight - el.offsetHeight - 16) + 'px';
+      });
+    };
+    satt();
+    setTimeout(satt, 600);
+  }
+  window.addEventListener('resize', function () { klibba($('#ark')); });
+
   var forraVy = null, forraAdress = null;
   var lugnt = function () { return window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; };
   function rita() {
@@ -320,6 +336,11 @@
       markeraMeny(a.vy);
       document.documentElement.classList.remove('meny-oppen');
       if (ut.efter) ut.efter(ark);
+      if (BP.sidScen) BP.sidScen(ark);
+      klibba(ark);
+      // Kort lutar mot pekaren och det som ligger längre ned glider in när det rullas fram
+      if (BP.luta) BP.luta(ark, '.vh__kort, .bk, .ko-kort, .pl-kort, .ov-snabb__kort, .pl-satt__kort, .ka-projekt a, .ov-bricka, .mh-k');
+      if (BP.glidIn && ny) BP.glidIn(ark, '.vy > .sd > .kort, .vy > .sd > section:not(.sh), .ov-nedre > *, .vh, .ka-rad, .bk');
       if (ny) BP.rakna(ark);
     };
     forraVy = nyckel;

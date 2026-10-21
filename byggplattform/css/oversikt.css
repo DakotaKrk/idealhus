@@ -330,3 +330,21 @@
 .ov-sam:hover { box-shadow: inset 0 0 0 1.5px #5a6a2a; transform: translateY(-1px); }
 .ov-sam:hover > .i:last-child { transform: translateX(3px); }
 .ov-sam > .i:last-child { transition: transform 0.2s var(--ease-out); }
+
+/* Vad vill du göra? */
+.ov-snabb { margin: 4px 0 22px; }
+.ov-snabb h2 { margin: 0 0 12px 2px; font: 700 22px/1 var(--skylt); letter-spacing: -0.005em; }
+.ov-snabb__lista { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.ov-snabb__kort { position: relative; display: grid; align-content: start; gap: 4px; min-height: 150px; padding: 16px; border-radius: 18px; background: var(--p-bg); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tonfarg) 14%, transparent); color: var(--text); text-decoration: none; transition: transform 0.45s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.25s ease; }
+.ov-snabb__kort:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tonfarg) 30%, transparent), 0 18px 34px -24px color-mix(in srgb, var(--tonfarg) 70%, transparent); }
+.ov-snabb__kort:active { transform: scale(0.97); }
+.ov-snabb__emoji { display: grid; place-items: center; width: 50px; height: 50px; margin-bottom: 10px; border-radius: 15px; background: rgba(255, 255, 255, 0.85); box-shadow: 0 8px 18px -12px color-mix(in srgb, var(--tonfarg) 70%, transparent); font-size: 26px; transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1); }
+.ov-snabb__kort:hover .ov-snabb__emoji { transform: translateY(-3px) rotate(-6deg) scale(1.06); }
+.ov-snabb__kort b { font-size: 15.5px; }
+.ov-snabb__kort small { color: var(--text-2); font-size: 12.5px; line-height: 1.35; }
+.ov-snabb__pil { position: absolute; top: 18px; right: 16px; width: 16px; height: 16px; color: var(--tonfarg); opacity: 0.6; transition: transform 0.25s var(--ease-out), opacity 0.2s ease; }
+.ov-snabb__kort:hover .ov-snabb__pil { transform: translateX(3px); opacity: 1; }
+.ov--entre .ov-snabb__kort { animation: sd-upp 0.6s var(--ease-out) both; animation-delay: calc(700ms + var(--n) * 70ms); }
+@media (max-width: 1280px) { .ov-snabb__lista { grid-template-columns: repeat(3, minmax(0, 1fr)); } .ov-snabb__kort { min-height: 0; } }
+@media (max-width: 640px) { .ov-snabb__lista { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .ov--entre .ov-snabb__kort { animation: none; } }

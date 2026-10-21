@@ -234,7 +234,7 @@
       '<div class="rutnat" style="grid-template-columns:260px minmax(0,1fr);align-items:start">' +
         '<nav class="kort" aria-label="Recept"><div class="delar">' + ids.map(function (id) {
           return '<button type="button" class="del" data-g="recept-valj" data-id="' + id + '" style="text-align:left;border-left:0;border-right:0;border-top:0;background:' + (id === receptVal ? 'var(--yta-2)' : 'transparent') + ';grid-template-columns:auto minmax(0,1fr)"><span class="typikon">' + i({ vagg: 'vagg', bjalklag: 'golv', tak: 'tak', grund: 'grund' }[R[id].typ] || 'recept') + '</span><span><b>' + e(R[id].namn) + '</b><small>' + R[id].rader.length + ' rader</small></span></button>';
-        }).join('') + '</div></nav>' +
+        }).join('') + '</div><div class="rec-tips"><b>Så räknas det</b><ul><li><b>kapas</b> – virket kapas ur hela längder med så lite spill som möjligt</li><li><b>%</b> – spill som läggs på mängden</li><li>Ett nytt pris räknar om alla projekt direkt</li></ul></div></nav>' +
         '<div class="rutnat">' +
           '<section class="kort"><header class="kort__huvud"><h2>' + e(rc.namn) + '</h2>' + (rc.tjocklek ? '<small>' + BP.tal(rc.tjocklek * 1000, 0) + ' mm</small>' : '') + '</header>' +
             '<div class="kort__kropp"><h3 style="font-size:12px;font-weight:600;color:var(--text-3);margin-bottom:8px">Uppbyggnad, inifrån och ut</h3><div class="kap">' + rc.skikt.map(function (s, n) { return '<span><span class="pos" style="min-width:22px;height:18px;font-size:11px">' + (n + 1) + '</span>' + e(s) + '</span>'; }).join('') + '</div></div>' +

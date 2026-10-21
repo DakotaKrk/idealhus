@@ -192,7 +192,7 @@
     var n = 0;
     return ordning.map(function (g) {
       var kr = grupper[g].reduce(function (t, x) { return t + kronor(x.r, bas, fb); }, 0);
-      return '<tr class="pl-grupp' + (anim ? ' pl-in' : '') + '" style="--r:' + Math.min(n++, 16) + '"><th colspan="5"><span>' + e(g) + '</span><small>' + grupper[g].length + ' rader' + (Math.abs(kr) >= 1 ? ' · <b class="' + (kr > 0 ? 'upp' : 'ned') + '">' + (kr > 0 ? '+' : '−') + BP.kr(Math.abs(kr)) + '</b> i projekten' : '') + '</small></th></tr>' +
+      return '<tr class="pl-grupp' + (anim ? ' pl-in' : '') + '" data-plgrupp="' + e(g) + '" style="--r:' + Math.min(n++, 16) + '"><th colspan="5"><span>' + e(g) + '</span><small>' + grupper[g].length + ' rader' + (Math.abs(kr) >= 1 ? ' · <b class="' + (kr > 0 ? 'upp' : 'ned') + '">' + (kr > 0 ? '+' : '−') + BP.kr(Math.abs(kr)) + '</b> i projekten' : '') + '</small></th></tr>' +
         grupper[g].map(function (x) {
           var m = x.m, f = !m ? forslag(x.r) : null;
           return '<tr class="prl-rad' + (m ? '' : ' prl-rad--ingen') + (anim ? ' pl-in' : '') + '" style="--r:' + Math.min(n++, 16) + '"><td style="padding-left:16px"><b>' + e(x.r.namn || '–') + '</b><small>' + e(x.r.artikel || 'inget artikelnummer') + (x.r.hur ? ' · ' + (x.r.hur === 'artikel' ? 'kopplad på artikelnummer' : x.r.hur === 'namn' ? 'kopplad på namn' : 'kopplad för hand') : '') + '</small></td>' +
@@ -249,6 +249,12 @@
         kolla: l.rader.filter(function (r) { return !r.material || enhetFel(r, bas[r.material]); }).length
       };
       var p = paverkan(l), dp = p.efter - p.fore, storst = Math.max(p.fore, p.efter);
+      var perGrupp = {};
+      l.rader.forEach(function (r) { var m = r.material && bas[r.material]; if (m) perGrupp[m.grupp || 'Övrigt'] = (perGrupp[m.grupp || 'Övrigt'] || 0) + kronor(r, bas, fb); });
+      var scenP = BP.db.projekt.filter(function (x) { return x.hus && BP.hus(x.hus); })[0], scenH = scenP && BP.hus3d ? BP.hus(scenP.hus) : null;
+      var scen = scenH ? '<div class="pl-scen" data-grupper="' + e(JSON.stringify(perGrupp)) + '">' + BP.hus3d.html(scenH, { fart: 5, vrid: true, alt: scenH.namn + ' i 3D – delarna som blir billigare eller dyrare med listan' }) +
+        '<div class="pl-scen__forklaring"><span class="ned">Billigare</span><span class="upp">Dyrare</span></div>' +
+        '<span class="pl-scen__lager" id="pl-scen-lager" aria-live="polite">' + e(scenH.namn) + ' · peka på en grupp</span></div>' : '';
       // Stegen för listan: vad som är klart och vad som återstår
       var steg = [
         { klar: true, namn: 'Inmatad', text: l.rader.length + ' rader' },
@@ -268,7 +274,7 @@
       var topp = function (tecken) { return medKr.filter(function (x) { return x.kr * tecken > 0; }).sort(function (a, b) { return Math.abs(b.kr) - Math.abs(a.kr); }).slice(0, 3); };
       var insikt = function (rubrik, emoji, rader, klass) {
         return '<div class="pl-insikt pl-insikt--' + klass + '"><h3><span aria-hidden="true">' + emoji + '</span>' + rubrik + '</h3>' + (rader.length ? '<ol>' + rader.map(function (x) {
-          return '<li><span>' + e(x.r.namn) + '</span><b>' + (x.kr > 0 ? '+' : '−') + BP.kr(Math.abs(x.kr)) + '</b></li>';
+          return '<li data-plgrupp="' + e((bas[x.r.material] || {}).grupp || '') + '"><span>' + e(x.r.namn) + '</span><b>' + (x.kr > 0 ? '+' : '−') + BP.kr(Math.abs(x.kr)) + '</b></li>';
         }).join('') + '</ol>' : '<p>Inga i den här listan.</p>') + '</div>';
       };
       var ingen = l.rader.filter(function (r) { return !r.material; }).length, enh = l.rader.filter(function (r) { return r.material && enhetFel(r, bas[r.material]); }).length;
@@ -281,11 +287,11 @@
             '<div class="pl-detalj__knappar">' + (l.aktiv ? '<span class="pl-anvands-stor">' + i('bock') + 'Används</span><button class="knapp knapp--text" type="button" data-g="pl-sluta" data-id="' + l.id + '">Sluta använda</button>' : '<button class="knapp knapp--primar" type="button" data-g="pl-anvand" data-id="' + l.id + '">' + i('bock') + 'Använd listan</button>') +
             '<button class="knapp knapp--text" type="button" data-g="pl-export" data-id="' + l.id + '">' + i('ladda') + 'CSV</button><button class="knapp knapp--text" type="button" data-g="pl-bort" data-id="' + l.id + '">' + i('radera') + 'Ta bort</button></div></header>' +
           stegHtml +
-          '<div class="pl-paverkan' + (l.aktiv ? ' pl-paverkan--aktiv' : '') + '">' +
+          '<div class="pl-paverkan' + (l.aktiv ? ' pl-paverkan--aktiv' : '') + (scen ? ' pl-paverkan--scen' : '') + '"><div class="pl-paverkan__vanster">' +
             '<div class="pl-paverkan__text"><small>' + (l.aktiv ? 'Materialet i alla projekt med listan' : 'Om du använder listan blir materialet i alla projekt') + '</small><b><span data-rakna="' + Math.round(p.efter) + '" data-format="kr">' + BP.kr(p.efter) + '</span></b>' +
               '<span class="pl-chip ' + (dp > 0 ? 'pl-chip--upp' : dp < 0 ? 'pl-chip--ned' : '') + '">' + (Math.abs(dp) >= 1 ? (dp > 0 ? '+' : '−') + BP.kr(Math.abs(dp)) + ' (' + procent(dp / p.fore) + ')' : 'ingen skillnad') + '</span></div>' +
             '<div class="pl-staplar" aria-hidden="true"><div><small>Exempelpriser</small><span><i style="--a:' + (p.fore / storst).toFixed(4) + '"></i></span><b>' + BP.kort(p.fore) + '</b></div><div class="med"><small>Med listan</small><span><i style="--a:' + (p.efter / storst).toFixed(4) + '"></i></span><b>' + BP.kort(p.efter) + '</b></div></div>' +
-          '</div>' +
+          '</div>' + scen + '</div>' +
           insikter +
           '<div class="pl-verktyg"><label class="pl-sok">' + i('sok') + '<input type="search" id="pl-sok" placeholder="Sök artikel eller namn" value="' + e(vy.q) + '" aria-label="Sök i prislistan"></label>' +
             '<div class="pl-filter" role="group" aria-label="Visa"><i class="pl-filter__markor" aria-hidden="true"></i>' + [['alla', 'Alla'], ['billigare', 'Billigare'], ['dyrare', 'Dyrare'], ['kolla', 'Att kolla']].map(function (f) { return '<button type="button" data-plf="' + f[0] + '" aria-pressed="' + (vy.filter === f[0]) + '">' + f[1] + '<span>' + antal[f[0]] + '</span></button>'; }).join('') + '</div></div>' +
@@ -301,12 +307,27 @@
           return '<button class="prl-lista' + (x.id === vy.vald ? ' prl-lista--vald' : '') + (x.aktiv ? ' prl-lista--aktiv' : '') + '" type="button" data-plv="' + x.id + '"><span class="prl-lista__ikon">' + i('pris') + '</span><span><b>' + e(x.namn) + '</b><small>' + e(x.leverantor || 'Egen lista') + ' · ' + mt + ' av ' + x.rader.length + ' kopplade</small><i class="prl-lista__stapel"><i style="--a:' + (mt / Math.max(1, x.rader.length)).toFixed(3) + '"></i></i></span>' + (x.aktiv ? '<span class="pl-anvands">Används</span>' : '') + '</button>';
         }).join('') +
         '<button class="prl-lista prl-lista--ny" type="button" data-g="pl-ny"><span class="prl-lista__ikon">' + i('plus') + '</span><span><b>Mata in prislista</b><small>Klistra in, ladda upp eller skriv in</small></span></button>' +
+        '<div class="pl-tips-kort"><b>Tips</b><ul><li>Markera raderna i Excel och klistra in – kolumnerna hittas själva.</li><li>Rader utan artikelnummer kopplas på namnet.</li><li>Byt lista när som helst; alla mängder räknas om.</li></ul></div>' +
       '</aside>' + detalj + '</div>';
     return {
       titel: 'Prislistor', html: BP.sdOmslag(html),
       efter: function (rot) {
         $$('[data-plv]', rot).forEach(function (b) { b.addEventListener('click', function () { vy.vald = b.getAttribute('data-plv'); vy.filter = 'alla'; vy.q = ''; nySida = true; BP.rita(); }); });
         if (!l) return;
+        var ps = $('.pl-scen', rot);
+        if (ps) {
+          var api = BP.hus3d.koppla($('.h3d', ps), { isar: 0.12, marg: 1.04 }), per = JSON.parse(ps.getAttribute('data-grupper')), lagerEl = $('#pl-scen-lager', ps), grund = lagerEl.textContent;
+          var maxKr = Math.max.apply(null, Object.keys(per).map(function (g) { return Math.abs(per[g]); }).concat([1]));
+          var karta = {};
+          Object.keys(per).forEach(function (g) { var t = 0.35 + 0.65 * Math.abs(per[g]) / maxKr; karta[g] = per[g] < 0 ? [0.012 * t, 0.06 * t, 0.018 * t] : per[g] > 0 ? [0.1 * t, 0.028 * t, 0.01 * t] : [0, 0, 0]; });
+          api.farga(karta);
+          var visaGrupp = function (g) {
+            api.markera(g);
+            lagerEl.textContent = g ? g + (per[g] ? ' · ' + (per[g] > 0 ? '+' : '−') + BP.kr(Math.abs(per[g])) + ' i projekten' : ' · ingen skillnad') : grund;
+          };
+          rot.addEventListener('mouseover', function (ev) { var t = ev.target.closest('[data-plgrupp]'); if (t && t.getAttribute('data-plgrupp')) visaGrupp(t.getAttribute('data-plgrupp')); });
+          rot.addEventListener('mouseout', function (ev) { var t = ev.target.closest('[data-plgrupp]'); if (t && !t.contains(ev.relatedTarget)) visaGrupp(null); });
+        }
         var kropp = $('#pl-kropp', rot), filter = $('.pl-filter', rot), markor = $('.pl-filter__markor', rot);
         // Markören glider till det valda filtret
         var flytta = function (direkt) {

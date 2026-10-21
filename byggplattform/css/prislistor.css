@@ -252,3 +252,19 @@ dialog.dialog--pris { width: min(920px, calc(100vw - 32px)); }
   .pl-filter button { flex: none; }
   .pl-paverkan__text b { font-size: 28px; }
 }
+
+/* Huset i påverkan: delarna glöder gröna (billigare) eller röda (dyrare) */
+.pl-paverkan--scen { grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr); align-items: stretch; }
+.pl-paverkan__vanster { display: grid; align-content: center; gap: 18px; }
+.pl-scen { position: relative; min-height: 270px; margin: -8px -10px -8px 0; border-radius: 14px; overflow: hidden; background: radial-gradient(ellipse at 50% 68%, rgba(255, 255, 255, 0.9), transparent 70%); } /* taste-skill-ignore: ljus bakom huset */
+.pl-scen__forklaring { position: absolute; top: 10px; right: 12px; display: flex; gap: 6px; pointer-events: none; }
+.pl-scen__forklaring span { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.85); font-size: 12px; font-weight: 600; }
+.pl-scen__forklaring span::before { content: ''; width: 8px; height: 8px; border-radius: 50%; }
+.pl-scen__forklaring .ned::before { background: #6f8f4e; }
+.pl-scen__forklaring .upp::before { background: #b8653f; }
+.pl-scen__lager { position: absolute; left: 50%; bottom: 10px; padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.9); color: var(--text-2); font-size: 12.5px; font-weight: 600; white-space: nowrap; transform: translateX(-50%); pointer-events: none; }
+.pl-grupp[data-plgrupp] th { cursor: default; }
+.pl-grupp[data-plgrupp]:hover th span { color: var(--tonfarg, var(--primar)); }
+.pl-insikt li[data-plgrupp] { border-radius: 6px; transition: background-color 0.15s ease; }
+.pl-insikt li[data-plgrupp]:hover { background: rgba(255, 255, 255, 0.7); }
+@media (max-width: 1100px) { .pl-paverkan--scen { grid-template-columns: minmax(0, 1fr); } .pl-scen { margin: 0; min-height: 240px; } }

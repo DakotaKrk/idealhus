@@ -56,18 +56,86 @@
   function sd(anim, html) { return '<div class="sd' + (anim ? ' sd--in' : '') + '">' + html + '</div>'; }
   function lista(rader, fn) { return rader.map(fn).join(''); }
 
+  /* --- Så funkar sidan: tre steg per sida, fälls ihop och minns det ---------------- */
+  var GUIDE = {
+    projekt: [['🔎', 'Hitta projektet', 'Sök eller filtrera på var det står'], ['👉', 'Se nästa steg', 'Knappen på raden visar vad som väntar'], ['🏗️', 'Öppna projektrummet', 'Mängd, ritning, tillval och händelser']],
+    mangdning: [['📏', 'Starta en mängdning', 'Ur ett hus, en ritning eller snabbmängd'], ['🚧', 'Bekräfta byggdelarna', 'Det obekräftade är avspärrat'], ['✅', 'Godkänn mängden', 'Sedan räknar du kundpris']],
+    bibliotek: [['🏡', 'Bläddra bland husen', 'Riktiga mått, i 3D'], ['⚖️', 'Jämför', 'Bocka i två eller tre hus'], ['📏', 'Mängda direkt', 'Materialet räknas ur modellen']],
+    tillval: [['🎨', 'Se vad kunderna valt', 'Färg, tak, altan och insida'], ['💰', 'Vad valen kostar', 'Över eller under grundpriset'], ['📊', 'Vad som är populärt', 'Andelar per val']],
+    forfragningar: [['💬', 'Kunder som hört av sig', 'Det som brådskar ligger överst'], ['⚖️', 'Jämför svaren', 'Partnernas pris mot listpris'], ['🤝', 'Välj och lägg order', 'Svaret blir en order']],
+    konsulter: [['👷', 'Välj tjänst', 'Arkitekt, konstruktion, energi eller KA'], ['🔗', 'Koppla till projektet', 'Modell och mängd följer med'], ['📨', 'Beställ', 'Status syns här']],
+    recept: [['🧱', 'Välj byggdel', 'Väggar, bjälklag, tak och grund'], ['🔍', 'Se hur det räknas', 'Varje rad visar sin regel'], ['✏️', 'Ändra pris eller recept', 'Alla projekt räknas om direkt']],
+    prislistor: [['📋', 'Mata in listan', 'Klistra in, ladda upp eller skriv in'], ['🔗', 'Kolla kopplingarna', 'Artikelnummer och namn matchas'], ['✅', 'Använd listan', 'Den blir nettot i kalkylen']],
+    kalkyl: [['🏠', 'Välj projekt', 'Nettot räknas ur mängden'], ['🎯', 'Klicka i ditt TB', 'Kundpriset räknas direkt'], ['📄', 'Skapa offert', 'Klar att skriva ut eller spara som PDF']]
+  };
+  function guideDold(vy) { try { return localStorage.getItem('bp-guide-' + vy) === 'dold'; } catch (err) { return false; } }
+  function guide(vy) {
+    var g = GUIDE[vy]; if (!g) return '';
+    return '<ol class="sh-guide" id="sh-guide"' + (guideDold(vy) ? ' hidden' : '') + '>' + g.map(function (x, n) {
+      return '<li style="--g:' + n + '"><span class="sh-guide__nr">' + (n + 1) + '</span>' + em(x[0], 'sh-guide__emoji') + '<span><b>' + x[1] + '</b><small>' + x[2] + '</small></span></li>';
+    }).join('') + '</ol>';
+  }
+  G['sh-guide'] = function (el) {
+    var g = $('#sh-guide'), vy = el.getAttribute('data-vy');
+    if (!g) return;
+    g.hidden = !g.hidden;
+    el.setAttribute('aria-expanded', String(!g.hidden));
+    try { localStorage.setItem('bp-guide-' + vy, g.hidden ? 'dold' : 'visad'); } catch (err) { /* ingen lagring */ }
+  };
+
+  /* --- Huset i sidhuvudet: varje sida visar det som sidan handlar om ------------------ */
+  var SCEN = {
+    projekt: { isar: 0 },
+    mangdning: { isar: 0.5, lager: true },
+    bibliotek: { husen: true },
+    tillval: { fasad: true },
+    forfragningar: { isar: 0 },
+    konsulter: { lager: ['Grund', 'Stomme', 'Isolering'], isar: 0.35 },
+    recept: { isar: 0.62, lager: true }
+  };
+  function scenHus() {
+    var p = BP.db.projekt.filter(function (x) { return x.hus && BP.hus(x.hus); })[0];
+    return p ? BP.hus(p.hus) : D.HUS[0];
+  }
+  function sidScen(vy) {
+    var c = SCEN[vy]; if (!c || !BP.hus3d) return '';
+    var h = scenHus();
+    return '<div class="sh__scen" data-scen="' + vy + '">' + BP.hus3d.html(h, { etikett: c.husen ? e(h.namn) : c.fasad ? e((FASAD[0] || [''])[0]) : c.lager ? '&nbsp;' : '' }) + '</div>';
+  }
+  var FASAD = D.TILLVAL[0].val.filter(function (v) { return v.farg; }).map(function (v) { return [v.namn, v.farg]; });
+  BP.sidScen = function (rot) {
+    var el = $('.sh__scen', rot); if (!el) return;
+    var c = SCEN[el.getAttribute('data-scen')] || {};
+    var h3 = $('.h3d', el), etikett = $('.h3d__etikett', el);
+    var api = BP.hus3d.koppla(h3, { isar: c.isar || 0, marg: 1.02 });
+    var n = 0, steg = null;
+    if (c.lager) {
+      var grupper = c.lager === true ? ['Grund', 'Stomme', 'Isolering', 'Fasad', 'Fönster och dörrar', 'Tak'] : c.lager;
+      steg = function () { var g = grupper[n++ % grupper.length]; api.markera(g); if (etikett) etikett.textContent = g; };
+    } else if (c.husen) {
+      steg = function () { var h = D.HUS[++n % D.HUS.length]; api.byt(h); if (etikett) etikett.textContent = h.namn; };
+    } else if (c.fasad) {
+      steg = function () { var f = FASAD[++n % FASAD.length]; api.fasad(f[1]); if (etikett) etikett.textContent = f[0]; };
+    }
+    if (!steg || lugnt()) return;
+    var tid = setInterval(function () { if (!document.body.contains(el)) { clearInterval(tid); return; } if (!el.matches(':hover')) steg(); }, c.husen ? 5200 : 2600);
+    setTimeout(steg, 1400);
+  };
+
   /* --- Sidhuvudet --------------------------------------------------------------- */
   function sidhuvud(o) {
     var steg = -1;
     FLODE.forEach(function (f, n) { if (f.vy === o.vy) steg = n; });
     var smula = '<a href="#/">Översikt</a>' + (GRUPP[o.vy] ? i('hoger') + '<span>' + GRUPP[o.vy] + '</span>' : '') + (o.foralder ? i('hoger') + '<a href="' + o.foralder[1] + '">' + o.foralder[0] + '</a>' : '') +
       i('hoger') + '<b aria-current="page">' + e(o.titel) + '</b>';
-    return '<section class="sh" aria-labelledby="sh-rubrik">' +
-      '<div class="sh__topp"><nav class="sh__smula" aria-label="Du är här">' + smula + '</nav>' + (steg >= 0 ? flodet(steg) : '') + '</div>' +
+    var scen = o.foralder ? '' : sidScen(o.vy), knappar = o.knappar ? '<div class="sh__knappar">' + o.knappar + '</div>' : '';
+    var guideKnapp = GUIDE[o.vy] ? '<button class="sh__hjalp" type="button" data-g="sh-guide" data-vy="' + o.vy + '" aria-controls="sh-guide" aria-expanded="' + !guideDold(o.vy) + '">' + i('info') + 'Så funkar sidan</button>' : '';
+    return '<section class="sh' + (scen ? ' sh--scen' : '') + '" aria-labelledby="sh-rubrik">' +
+      '<div class="sh__topp"><nav class="sh__smula" aria-label="Du är här">' + smula + '</nav>' + guideKnapp + (steg >= 0 ? flodet(steg) : '') + '</div>' +
       '<div class="sh__rad"><div class="sh__text"><div class="sh__titel">' + (EMOJI[o.vy] ? em(EMOJI[o.vy], 'sh__emoji') : '') + '<h1 id="sh-rubrik">' + o.titel.split(' ').map(function (w, n) {
           return '<span class="sh-mask"><span class="sh-ord" style="--o:' + n + '">' + e(w) + '</span></span>';
-        }).join(' ') + '</h1></div><p>' + o.under + '</p></div>' +
-        (o.knappar ? '<div class="sh__knappar">' + o.knappar + '</div>' : '') + '</div>' +
+        }).join(' ') + '</h1></div><p>' + o.under + '</p>' + (scen ? knappar : '') + '</div>' +
+        (scen || knappar) + '</div>' + guide(o.vy) +
       (o.kpi ? '<div class="sh__kpier" style="--n:' + o.kpi.length + '">' + o.kpi.map(function (k, n) {
         return '<div class="sh-kpi" style="--k:' + n + '"><small>' + e(k.namn) + '</small><b>' +
           (k.rakna != null ? '<span data-rakna="' + Math.round(k.rakna) + '"' + (k.format ? ' data-format="' + k.format + '"' : '') + '>' + k.varde + '</span>' : k.varde) +
@@ -322,7 +390,9 @@
             '<button class="knapp knapp--liten" type="button" data-g="hus-tillval" data-hus="' + h.id + '">' + i('tillval') + 'Tillval</button>' +
             '<label class="bk__jamfor"><input type="checkbox" data-jamfor="' + h.id + '"' + (bv.jamfor.indexOf(h.id) !== -1 ? ' checked' : '') + '>Jämför</label></div>' +
         '</div></article>';
-    }) + '</div>' +
+    }) + '<article class="bk bk--egen" id="bk-egen"><span class="bk-egen__emoji" aria-hidden="true">📐</span><h3>Inget hus som passar?</h3>' +
+      '<p>Skriv in egna mått i snabbmängden, eller släpp en ritning och rita väggarna – materialet räknas på samma sätt.</p>' +
+      '<div class="bk__knappar"><a class="knapp knapp--primar knapp--liten" href="#/mangdning">' + i('linjal') + 'Egna mått</a><a class="knapp knapp--liten" href="#/mangdning/ny">' + i('ritning') + 'Egen ritning</a></div></article></div>' +
     '<div class="bk-jamfor" id="bk-jamfor" hidden></div>' +
     vart('mangdning', 'tillval', 'projekt');
 
@@ -333,10 +403,15 @@
         var ordna = function () {
           var kort = $$('.bk', nat);
           var nyckel = { standard: function (x) { return D.HUS.indexOf(BP.hus(x)); }, yta: function (x) { return -BP.hus(x).yta; }, kvm: function (x) { var h = BP.hus(x); return husSumma(h) / h.yta; }, summa: function (x) { return husSumma(BP.hus(x)); } }[bv.sort];
+          kort = kort.filter(function (k) { return !k.classList.contains('bk--egen'); });
           kort.sort(function (a, b) { return nyckel(a.getAttribute('data-hus')) - nyckel(b.getAttribute('data-hus')); }).forEach(function (k) {
             nat.appendChild(k);
             k.hidden = bv.kat !== 'Alla' && k.getAttribute('data-kat') !== bv.kat;
           });
+          // Kortet för egna mått står sist och syns bara när raden annars blir halv
+          var egen = $('#bk-egen', nat), synliga = kort.filter(function (k) { return !k.hidden; }).length;
+          nat.appendChild(egen);
+          egen.hidden = synliga % 3 === 0;
         };
         var visaBar = function () {
           bar.hidden = !bv.jamfor.length;
@@ -511,6 +586,11 @@
                 '<button class="knapp knapp--liten' + (pr === min ? ' knapp--primar' : '') + '" type="button" data-g="valj-svar" data-id="' + p.id + '" data-f="' + f.id + '">Välj och lägg order</button></div>';
             }) + '</div></section>';
         }) : '<section class="kort"><div class="kort__kropp ff-tomt"><b>Inga svar att jämföra</b><span>När bygghandeln svarar på en materiallista ställs svaren mot varandra här.</span><a class="knapp knapp--liten" href="#/projekt">Välj ett projekt' + i('hoger') + '</a></div></section>') +
+      '<section class="kort ff-hur"><header class="kort__huvud"><h2>Så jämförs svaren</h2></header><ul class="ff-hur__lista">' +
+        '<li>' + em('🧾') + '<span><b>Mot listpriset</b><small>Materialet i mängden, med prislistan du använder</small></span></li>' +
+        '<li>' + em('🏷️') + '<span><b>Rabatt och leverans</b><small>Lägst pris först, med leveranstiden bredvid</small></span></li>' +
+        '<li>' + em('🤝') + '<span><b>Ett klick till order</b><small>Det valda svaret blir en order i projektet</small></span></li>' +
+      '</ul><a class="ff-hur__lank" href="#/prislistor">' + i('pris') + 'Mata in din prislista' + i('hoger') + '</a></section>' +
       '</div>' +
     '</div>' +
     vart('projekt', 'konsulter', 'tillval');

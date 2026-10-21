@@ -76,7 +76,9 @@
             '<div class="kort__kropp"><form class="mh-fraga__form" id="fraga-form"><label class="dold" for="fraga">Fråga</label>' + i('sok') + '<input id="fraga" autocomplete="off" placeholder="t.ex. hur mycket gips behövs?"><button class="knapp knapp--primar knapp--liten" type="submit">Fråga</button></form>' +
             '<div class="mh-forslag">' + ['Hur mycket gips?', 'Vad kostar taket?', 'Hur många reglar 45 × 170?', 'Var är spillet störst?'].map(function (f) { return '<button type="button" class="chip" data-fraga="' + e(f) + '">' + e(f) + '</button>'; }).join('') + '</div>' +
             '<div class="mh-svar" id="fraga-svar" aria-live="polite"></div></div></section>' +
-          '<label class="mh-slapp" id="slapp" tabindex="0"><input type="file" accept="image/*" hidden id="slapp-fil">' + i('uppladd') + '<b>Släpp en ritning här</b><small>PNG, JPG eller SVG – blir en ny mängdning med ritverktyget</small></label>' +
+          '<label class="mh-slapp" id="slapp" tabindex="0"><input type="file" accept="image/*" hidden id="slapp-fil">' + i('uppladd') + '<b>Släpp en ritning här</b><small>PNG, JPG eller SVG – blir en ny mängdning med ritverktyget</small>' +
+            '<svg class="mh-slapp__plan" viewBox="0 0 220 130" aria-hidden="true"><path class="rut" d="M0 26H220M0 52H220M0 78H220M0 104H220M44 0V130M88 0V130M132 0V130M176 0V130"/><path class="vagg" d="M30 20H190V110H30Z"/><path class="vagg vagg--inner" d="M110 20V72M110 72H190"/><path class="matt" d="M30 122H190"/><text x="110" y="128">7,2 m</text></svg>' +
+            '<ol class="mh-slapp__steg"><li><span>1</span>Släpp bilden</li><li><span>2</span>Sätt skalan</li><li><span>3</span>Rita väggarna</li></ol></label>' +
         '</div>' +
       '</div>' +
 

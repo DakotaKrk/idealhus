@@ -128,6 +128,22 @@
   /* --- Linjen: projekten åker ut till sin station ----------------------------------
      Fyra stationer på en linje. Under varje station hänger projekten som kort med
      bild, värde och nästa steg; obekräftade har tejpkant. */
+  // Vad vill du göra? Genvägarna till det man gör oftast, i varje dels färg.
+  function snabbval(db) {
+    var svar = db.leads.filter(function (l) { return l.status === 'ny'; }).length + db.projekt.reduce(function (t, p) { return t + p.forfragningar.filter(function (f) { return f.status === 'svar'; }).length; }, 0);
+    var val = [
+      ['mangdning', '📏', 'Ny mängdning', 'Ur ett hus, en ritning eller snabbmängd', '#/mangdning/ny'],
+      ['kalkyl', '🧮', 'Räkna kundpris', 'Klicka i ditt TB och skapa offert', '#/kalkyl'],
+      ['prislistor', '🏷️', 'Mata in prislista', 'Leverantörens nettopriser', '#/prislistor'],
+      ['bibliotek', '🏡', 'Jämför hus', 'Husmodellerna i 3D', '#/bibliotek'],
+      ['forfragningar', '💬', 'Svara kunder', svar ? svar + ' väntar på svar' : 'Förfrågningar och svar', '#/forfragningar'],
+      ['konsulter', '👷', 'Beställ konsult', 'Arkitekt, konstruktion, energi, KA', '#/konsulter']
+    ];
+    return '<section class="ov-snabb" aria-labelledby="ov-snabb-rubrik"><h2 id="ov-snabb-rubrik">Vad vill du göra?</h2><div class="ov-snabb__lista">' + val.map(function (v, n) {
+      return '<a class="ov-snabb__kort" href="' + v[4] + '" data-sektion="' + v[0] + '" style="--n:' + n + '"><span class="ov-snabb__emoji" aria-hidden="true">' + v[1] + '</span><b>' + v[2] + '</b><small>' + v[3] + '</small>' + i('pil', 'ov-snabb__pil') + '</a>';
+    }).join('') + '</div></section>';
+  }
+
   function linjen(db) {
     var stationer = ['underlag', 'mangd', 'offert', 'order'];
     var per = {};
@@ -243,7 +259,7 @@
     var entre = !sett && !lugnt();
     sett = true;
     var html = '<div class="ov' + (entre ? ' ov--entre' : '') + '">' +
-      hero(r, fraga, db) + linjen(db) +
+      hero(r, fraga, db) + snabbval(db) + linjen(db) +
       '<div class="ov-nedre">' + material(db) + sido(db) + '</div></div>';
 
     return {

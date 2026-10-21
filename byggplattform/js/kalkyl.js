@@ -71,8 +71,9 @@
       return { titel: 'Kalkyl och offert', html: BP.sdOmslag(html + valj + '<section class="ka-tom sd-steg" style="--i:1"><h2>Mängden är tom</h2><p>Kalkylen bygger på projektets mängd. Mängda projektet först, så räknas nettot fram här.</p><a class="knapp knapp--primar" href="#/projekt/' + p.id + '/mangd">' + i('mangd') + 'Till mängden</a></section>') };
     }
     var max = Math.max.apply(null, b.rader.map(function (r) { return r.netto; }));
+    var hus = p.hus && BP.hus(p.hus) && BP.hus3d ? BP.hus(p.hus) : null;
     var radHtml = function (r, n) {
-      return '<li class="ka-rad' + (r.egen ? ' ka-rad--egen' : '') + '" style="--r:' + n + '"><span class="ka-rad__namn"><b>' + e(r.namn) + '</b><small>' + (r.antal ? r.antal + ' artiklar' : r.egen === 'tillval' ? 'kundens val' : 'egen kostnad') + '</small></span>' +
+      return '<li class="ka-rad' + (r.egen ? ' ka-rad--egen' : '') + '" style="--r:' + n + '"' + (r.egen ? '' : ' data-grupp="' + e(r.namn) + '" tabindex="0"') + '><span class="ka-rad__namn"><b>' + e(r.namn) + '</b><small>' + (r.antal ? r.antal + ' artiklar' : r.egen === 'tillval' ? 'kundens val' : 'egen kostnad') + '</small></span>' +
         '<span class="ka-rad__stapel" aria-hidden="true"><i style="--a:' + (r.netto / max).toFixed(3) + '"></i></span><span class="ka-rad__netto">' + BP.kr(r.netto) + '</span><span class="ka-rad__pris" data-ka-rad="' + e(r.namn) + '">' + nr(r.pris) + '</span></li>';
     };
     html += valj + '<div class="ka">' +
@@ -80,6 +81,9 @@
         '<header class="ka-netto__huvud"><div><h2 id="ka-netto-rubrik">Nettokalkyl</h2><small>' + e(p.namn) + ' · ' + e(p.kund) + (p.ort ? ', ' + e(p.ort) : '') + '</small></div>' +
           '<a class="ka-kalla" href="#/prislistor">' + i('pris') + (b.lista ? 'Nettopriser från <b>' + e(b.lista.namn) + '</b>' : 'Exempelpriser – <b>mata in din prislista</b>') + '</a></header>' +
         (b.obekr ? '<p class="not not--varning ka-not">' + i('varning') + '<span>' + b.obekr + ' byggdelar är inte bekräftade – kalkylen kan ändras. <a href="#/projekt/' + p.id + '/mangd">Bekräfta i mängden</a></span></p>' : '') +
+        (hus ? '<div class="ka-scen">' + BP.hus3d.html(hus, { fart: 6, vrid: true, alt: hus.namn + ' i 3D – peka på en del i kalkylen så lyser den' }) +
+          '<div class="ka-scen__pris" id="ka-scen-pris"><small>Kundpris exkl. moms</small><b>' + nr(b.pris) + '</b><span id="ka-scen-tb">TB ' + pct(k.tb) + ' · ' + BP.kr(b.tb) + '</span></div>' +
+          '<div class="ka-scen__lager" id="ka-scen-lager" aria-live="polite">' + i('pekare') + '<span>Peka på en del i kalkylen – den lyser i huset</span></div></div>' : '') +
         '<div class="ka-tabell"><div class="ka-tabell__huvud"><span>Del</span><span></span><span>Netto</span><span>Kundpris</span></div><ol class="ka-rader" id="ka-rader">' + b.rader.map(radHtml).join('') + '</ol>' +
           '<div class="ka-summa"><span>Summa</span><span></span><span id="ka-netto">' + nr(b.netto) + '</span><span id="ka-pris-rad">' + nr(b.pris) + '</span></div></div>' +
         '<div class="ka-egna"><h3>Egna kostnader <small>netto, exkl. moms</small></h3><div class="ka-egna__falt">' +
@@ -88,7 +92,7 @@
       '</section>' +
       '<aside class="ka-tb kort sd-steg" style="--i:2" aria-labelledby="ka-tb-rubrik">' +
         '<h2 id="ka-tb-rubrik">Välj TB</h2>' +
-        '<div class="ka-tbval" role="radiogroup" aria-label="Täckningsbidrag">' + TBVAL.map(function (v) { return '<button type="button" role="radio" data-tb="' + v + '" aria-checked="' + (k.tb === v) + '">' + v + ' %</button>'; }).join('') + '</div>' +
+        '<div class="ka-tbval" role="radiogroup" aria-label="Täckningsbidrag">' + TBVAL.map(function (v) { return '<button type="button" role="radio" data-tb="' + v + '" aria-checked="' + (k.tb === v) + '">' + v + ' %<small>' + BP.kort(b.netto / (1 - v / 100)) + '</small></button>'; }).join('') + '</div>' +
         '<label class="ka-reglage"><span>Eget TB</span><input type="range" min="0" max="70" step="1" id="ka-tb" value="' + k.tb + '" aria-label="Eget TB i procent"><output id="ka-tb-ut">' + pct(k.tb) + '</output></label>' +
         '<div class="ka-stort"><small>Kundpris exkl. moms</small><b id="ka-pris">' + nr(b.pris) + '</b><span id="ka-inkl">' + BP.kr(b.pris + b.moms) + ' inkl. moms</span></div>' +
         '<div class="ka-andel" aria-hidden="true"><i class="ka-andel__netto" id="ka-a-netto" style="--a:' + (b.netto / b.pris).toFixed(4) + '"></i><i class="ka-andel__tb" id="ka-a-tb" style="--a:' + (b.tb / b.pris).toFixed(4) + '"></i></div>' +
@@ -107,6 +111,22 @@
       titel: 'Kalkyl och offert', html: BP.sdOmslag(html),
       efter: function (rot) {
         var sparTid;
+        // Huset: peka på en del i kalkylen så lyser den i modellen
+        var h3 = $('.ka-scen .h3d', rot);
+        if (h3) {
+          var api = BP.hus3d.koppla(h3, { isar: 0, marg: 1.06 }), lagerText = $('#ka-scen-lager span', rot), grundText = lagerText.textContent;
+          $$('[data-grupp]', rot).forEach(function (li) {
+            var pa = function () {
+              var g = li.getAttribute('data-grupp'), r = berakna(p).rader.filter(function (x) { return x.namn === g; })[0];
+              api.markera(g);
+              $$('[data-grupp]', rot).forEach(function (x) { x.classList.toggle('ka-rad--ton', x !== li); });
+              lagerText.textContent = g + ' · netto ' + BP.kr(r.netto) + ' → kund ' + BP.kr(r.pris) + (BP.GRUPP_MAT[g] && BP.GRUPP_MAT[g].length ? '' : ' · syns inte i modellen');
+            };
+            var av = function () { api.markera(null); $$('[data-grupp]', rot).forEach(function (x) { x.classList.remove('ka-rad--ton'); }); lagerText.textContent = grundText; };
+            li.addEventListener('mouseenter', pa); li.addEventListener('focus', pa);
+            li.addEventListener('mouseleave', av); li.addEventListener('blur', av);
+          });
+        }
         var uppdatera = function () {
           var n = berakna(p), kk = n.k;
           n.rader.forEach(function (r) { var el = $('[data-ka-rad="' + r.namn + '"] span', rot); if (el) rulla(el, r.pris); });
@@ -119,6 +139,12 @@
           $('#ka-a-netto', rot).style.setProperty('--a', (n.netto / n.pris).toFixed(4));
           $('#ka-a-tb', rot).style.setProperty('--a', (n.tb / n.pris).toFixed(4));
           $$('[data-tb]', rot).forEach(function (x) { x.setAttribute('aria-checked', String(+x.getAttribute('data-tb') === kk.tb)); });
+          var sp = $('#ka-scen-pris', rot);
+          if (sp) {
+            rulla($('b span', sp), n.pris);
+            $('#ka-scen-tb', rot).textContent = 'TB ' + pct(kk.tb) + ' · ' + BP.kr(n.tb);
+            sp.classList.remove('puls'); void sp.offsetWidth; sp.classList.add('puls');
+          }
           clearTimeout(sparTid); sparTid = setTimeout(BP.spara, 300);
         };
         $$('[data-tb]', rot).forEach(function (x) {
