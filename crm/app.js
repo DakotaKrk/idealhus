@@ -355,19 +355,18 @@
   var datorBred = matchMedia('(min-width: 1101px)');
   function sidoDold() { return document.documentElement.hasAttribute('data-sido-dold'); }
   function sattSido(dold, animera) {
-    var huvud = $('.huvud');
-    var lugn = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var fore = animera && !lugn && datorBred.matches && huvud ? huvud.getBoundingClientRect().left : null;
-    document.documentElement.toggleAttribute('data-sido-dold', dold);
+    // Glidningen sköts i CSS: menyns spalt växer och krymper mjukt och vyn
+    // följer med (ljus.css, "Menyn glider"). [ växlar utan rörelse.
+    var rot = document.documentElement;
+    rot.classList.toggle('sido-glider', !!animera);
+    clearTimeout(sattSido.t);
+    if (animera) sattSido.t = setTimeout(function () { rot.classList.remove('sido-glider'); }, 520);
+    rot.toggleAttribute('data-sido-dold', dold);
     var k = $('[data-sido-knapp]'), text = dold ? 'Visa menyn' : 'Dölj menyn';
     if (k) { k.setAttribute('aria-expanded', String(!dold)); k.setAttribute('aria-label', text); k.title = text + '  ['; }
     var s = $('.sido'); if (s) s.inert = dold && datorBred.matches;
     try { localStorage.setItem('ih-crm-sido-dold', dold ? '1' : '0'); } catch (e) { /* ingen lagring */ }
-    if (fore != null) {
-      var dx = fore - huvud.getBoundingClientRect().left;
-      if (dx && huvud.animate) huvud.animate([{ transform: 'translateX(' + dx + 'px)' }, { transform: 'none' }], { duration: 400, easing: 'cubic-bezier(.32, .72, 0, 1)' });
-    }
-    setTimeout(function () { window.dispatchEvent(new Event('resize')); }, animera ? 440 : 0);
+    setTimeout(function () { window.dispatchEvent(new Event('resize')); }, animera ? 500 : 0);
   }
   document.addEventListener('click', function (ev) {
     if (ev.target.closest && ev.target.closest('[data-sido-knapp]')) sattSido(!sidoDold(), true);

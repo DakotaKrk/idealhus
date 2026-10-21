@@ -11081,3 +11081,189 @@ select {
 .stad__lapp small {
   white-space: nowrap;
 }
+
+/* Menyknappen, tredje varvet (2026-10-21, kunden: "bättre snyggare
+   design"): ett lugnt handtag i menyns eget material i stället för en
+   orange ring med puls och glödande linje. Ute: en lodrät pill mitt i
+   mellanrummet. Infälld: en flik som sticker ut från fönstrets kant,
+   som handtaget på en låda. Rörelse bara vid hovring och tryck. */
+@media (min-width: 1101px) {
+  .sido-kant::before,
+  .sido-kant::after,
+  .sido-knapp::before {
+    display: none;
+  }
+
+  .sido-knapp {
+    width: 22px;
+    height: 56px;
+    margin: -28px 0 0 -11px;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffffff, #fbf6ee);
+    color: rgba(143, 84, 36, 0.78);
+    box-shadow:
+      0 0 0 1px rgba(27, 25, 21, 0.07),
+      inset 0 1px 0 #ffffff,
+      0 2px 4px -2px rgba(90, 60, 25, 0.22),
+      0 10px 22px -12px rgba(90, 60, 25, 0.45);
+    transition:
+      transform 0.16s var(--ease-out),
+      box-shadow 0.2s var(--ease-out),
+      background-color 0.2s ease,
+      color 0.2s ease,
+      left 0.4s var(--ease-drawer),
+      margin 0.4s var(--ease-drawer),
+      border-radius 0.4s var(--ease-drawer);
+  }
+
+  .sido-knapp svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.2;
+  }
+
+  .sido-knapp:hover,
+  .sido-knapp:focus-visible {
+    background: #ffffff;
+    color: #8f5424;
+    transform: none;
+    box-shadow:
+      0 0 0 1px rgba(201, 138, 69, 0.35),
+      inset 0 1px 0 #ffffff,
+      0 2px 4px -2px rgba(90, 60, 25, 0.25),
+      0 14px 28px -12px rgba(143, 84, 36, 0.5);
+  }
+
+  .sido-knapp:focus-visible {
+    outline: 2px solid #b06a26;
+    outline-offset: 3px;
+  }
+
+  .sido-knapp:active {
+    transform: scale(0.94);
+  }
+
+  /* Pilen knuffar en gång åt det håll menyn kommer att röra sig. */
+  .sido-knapp:hover svg,
+  .sido-knapp:focus-visible svg,
+  html[data-sido-dold] .sido-knapp:hover svg,
+  html[data-sido-dold] .sido-knapp:focus-visible svg {
+    animation: none;
+  }
+
+  .sido-knapp svg {
+    transition: transform 0.4s var(--ease-drawer), translate 0.2s var(--ease-out);
+  }
+
+  .sido-knapp:hover svg {
+    translate: -2px 0;
+  }
+
+  html[data-sido-dold] .sido-knapp:hover svg {
+    translate: 2px 0;
+  }
+
+  /* Infälld: fliken sitter i fönstrets vänsterkant. */
+  html[data-sido-dold] .sido-knapp {
+    left: calc(var(--ram) / -2);
+    width: 24px;
+    margin-left: 0;
+    border-radius: 0 14px 14px 0;
+  }
+}
+
+@media (min-width: 1101px) and (prefers-reduced-motion: reduce) {
+  .sido-knapp:hover svg,
+  html[data-sido-dold] .sido-knapp:hover svg {
+    translate: none;
+  }
+}
+
+.logg__rad[hidden] {
+  display: none;
+}
+
+/* Menyn glider (2026-10-21, kunden: "mjukare känsla, inte buggar"):
+   menyns spalt växer och krymper på riktigt, så vyn följer med utan att
+   hoppa eller lämna en tom remsa till höger. Spalten, menyn, kanten med
+   knappen och pilen delar samma tid och samma lådkurva. Klassen
+   sido-glider sätts av app.js bara när man klickar – [ och sidladdning
+   växlar utan rörelse. */
+@media (min-width: 1101px) {
+  :root {
+    --glid: 0.48s;
+  }
+
+  .huvud {
+    grid-column: 2;
+  }
+
+  html[data-sido-dold] .app {
+    grid-template-columns: 0px minmax(0, 1fr);
+  }
+
+  .sido {
+    width: var(--sido);
+  }
+
+  .app,
+  .sido,
+  .sido-kant,
+  .sido-knapp,
+  .sido-knapp svg {
+    transition: none;
+  }
+
+  .sido-glider .app {
+    transition: grid-template-columns var(--glid) var(--ease-drawer);
+  }
+
+  .sido-glider .sido {
+    transition: transform var(--glid) var(--ease-drawer), opacity calc(var(--glid) * 0.6) var(--ease-out);
+  }
+
+  .sido-glider .sido-kant {
+    transition: transform var(--glid) var(--ease-drawer);
+  }
+
+  .sido-glider .sido-knapp {
+    transition:
+      left var(--glid) var(--ease-drawer),
+      margin var(--glid) var(--ease-drawer),
+      width var(--glid) var(--ease-drawer),
+      border-radius var(--glid) var(--ease-drawer),
+      transform 0.16s var(--ease-out),
+      box-shadow 0.2s var(--ease-out),
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .sido-glider .sido-knapp svg {
+    transition: transform var(--glid) var(--ease-drawer), translate 0.2s var(--ease-out);
+  }
+
+  /* Hovring och tryck på knappen ska alltid kännas, även utan glidning. */
+  html:not(.sido-glider) .sido-knapp {
+    transition: transform 0.16s var(--ease-out), box-shadow 0.2s var(--ease-out), background-color 0.2s ease, color 0.2s ease;
+  }
+
+  html:not(.sido-glider) .sido-knapp svg {
+    transition: translate 0.2s var(--ease-out);
+  }
+
+  /* Menyn tonar ut lite före den glidit klart och in lite efter att den börjat. */
+  html.sido-glider:not([data-sido-dold]) .sido {
+    transition: transform var(--glid) var(--ease-drawer), opacity calc(var(--glid) * 0.7) var(--ease-out) calc(var(--glid) * 0.1);
+  }
+}
+
+@media (min-width: 1101px) and (prefers-reduced-motion: reduce) {
+  .sido-glider .app,
+  .sido-glider .sido,
+  .sido-glider .sido-kant,
+  .sido-glider .sido-knapp,
+  .sido-glider .sido-knapp svg {
+    transition: opacity 0.15s linear;
+  }
+}

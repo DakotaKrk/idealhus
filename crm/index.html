@@ -9,23 +9,26 @@
     <link rel="icon" href="../images/idealhus.svg" type="image/svg+xml">
     <!-- Ej inloggad: till inloggningen, med adressen man ville till. -->
     <script>try{if(!localStorage.getItem('ih-crm-inloggad'))location.replace('logga-in.html'+(location.hash.indexOf('#/')===0?'?nasta='+encodeURIComponent(location.hash):''))}catch(e){}</script>
+    <!-- Omladdning börjar alltid högst upp – annars återställer webbläsaren
+         rullningen innan vyn hunnit ritas och sidan hamnar en bit ned. -->
+    <script>try{if('scrollRestoration' in history)history.scrollRestoration='manual'}catch(e){}</script>
     <!-- Infälld sidomeny (dator) sätts före första målningen så att den inte blinkar till. -->
     <script>try{if(localStorage.getItem('ih-crm-sido-dold')==='1')document.documentElement.setAttribute('data-sido-dold','')}catch(e){}</script>
     <link rel="preload" href="../fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="../fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="../fonts/poppins-500.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="../fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="crm.css?v=20261021i">
-    <link rel="stylesheet" href="vyer.css?v=20261021i">
-    <link rel="stylesheet" href="mote.css?v=20261021i">
-    <link rel="stylesheet" href="ljus.css?v=20261021i">
+    <link rel="stylesheet" href="crm.css?v=20261021l">
+    <link rel="stylesheet" href="vyer.css?v=20261021l">
+    <link rel="stylesheet" href="mote.css?v=20261021l">
+    <link rel="stylesheet" href="ljus.css?v=20261021l">
   </head>
   <body>
     <div class="app" id="app"></div>
-    <script src="data.js?v=20261021i"></script>
-    <script src="app.js?v=20261021i"></script>
-    <script src="mote.js?v=20261021i"></script>
-    <script src="vyer.js?v=20261021i"></script>
+    <script src="data.js?v=20261021l"></script>
+    <script src="app.js?v=20261021l"></script>
+    <script src="mote.js?v=20261021l"></script>
+    <script src="vyer.js?v=20261021l"></script>
     <script>
       (function () {
         var klar = false;

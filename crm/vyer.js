@@ -404,7 +404,7 @@
     var idag = new Date(); idag.setHours(23, 59, 59, 999);
     var uppg = db().uppgifter.filter(function (u) { return !u.klar && new Date(u.forfaller) <= idag; });
     var senaste = db().forfragningar.slice().sort(function (a, b) { return b.skapad < a.skapad ? -1 : 1; }).slice(0, 5);
-    var akt = db().aktiviteter.slice().sort(function (a, b) { return b.tid < a.tid ? -1 : 1; }).slice(0, 6);
+    var akt = db().aktiviteter.slice().sort(function (a, b) { return b.tid < a.tid ? -1 : 1; }).slice(0, 12);
     var fokus = smartaForslag();
 
     var text = (nya.length ? '<b>' + nya.length + ' ' + (nya.length === 1 ? 'ny förfrågan' : 'nya förfrågningar') + '</b> väntar på svar. ' : 'Inga obesvarade förfrågningar. ') +
@@ -474,9 +474,34 @@
         lastbilsTurer(rot);
         IH.pausaUtanfor($('.hero', rot));
         kopplaGraf(rot);
+        balanseraOversikt();
+        setTimeout(balanseraOversikt, 700);
       }
     };
   };
+
+  // Översiktens två spalter ska sluta i jämnhöjd oavsett hur mycket data
+  // som finns: aktivitetslistan visar så många rader som får plats bredvid
+  // vänsterspalten (minst tre). Staplade spalter (smalt fönster) visar sex.
+  function balanseraOversikt() {
+    var kol = document.querySelectorAll('.oversikt__kol');
+    var rader = document.querySelectorAll('.oversikt__kol .logg__rad');
+    if (kol.length !== 2 || !rader.length) return;
+    [].forEach.call(rader, function (r) { r.hidden = false; });
+    var sida = kol[0].getBoundingClientRect().top === kol[1].getBoundingClientRect().top;
+    var synliga = rader.length;
+    if (!sida) {
+      for (; synliga > 6; synliga--) rader[synliga - 1].hidden = true;
+      return;
+    }
+    var mal = kol[0].getBoundingClientRect().bottom + 2;
+    while (synliga > 3 && kol[1].getBoundingClientRect().bottom > mal) rader[--synliga].hidden = true;
+  }
+  var balansVantar;
+  window.addEventListener('resize', function () {
+    cancelAnimationFrame(balansVantar);
+    balansVantar = requestAnimationFrame(balanseraOversikt);
+  });
 
   /* ================================================================
      Förfrågningar – inkorgen
