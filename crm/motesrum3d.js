@@ -175,7 +175,7 @@ function bygg() {
   // ljuset: solen genom fönstret, himmelsljus, pendellamporna
   scen.add(new THREE.HemisphereLight('#fff6ea', '#a4876a', 0.55));
   const sol = new THREE.DirectionalLight('#ffe7c4', 2.6); sol.position.set(5, 7, -9); sol.target.position.set(-0.5, 0, 0.8); sol.castShadow = true; sol.shadow.mapSize.set(2048, 2048);
-  Object.assign(sol.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 30 }); sol.shadow.bias = -0.0004; sol.shadow.normalBias = 0.03; scen.add(sol, sol.target);
+  Object.assign(sol.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 30 }); sol.shadow.bias = -0.0004; sol.shadow.normalBias = 0.03; sol.shadow.radius = 4; scen.add(sol, sol.target);
   const fyll = new THREE.PointLight('#ffd8a8', 6, 9, 2); fyll.position.set(-2.5, 3.2, 3); scen.add(fyll);
   // solstrålar: mjuka ljuskäglor med additiv blandning
   const straleM = new THREE.MeshBasicMaterial({ color: '#fff0cf', transparent: true, opacity: 0.06, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
@@ -184,10 +184,34 @@ function bygg() {
   const ND = 240, dpos = new Float32Array(ND * 3), dfas = []; for (let n = 0; n < ND; n++) { dpos[n * 3] = -2 + Math.random() * 6; dpos[n * 3 + 1] = 0.8 + Math.random() * 3.4; dpos[n * 3 + 2] = -3.6 + Math.random() * 4.2; dfas.push(Math.random() * 6); }
   const damm = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(dpos, 3)), new THREE.PointsMaterial({ color: '#fff3d8', size: 0.025, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false })); scen.add(damm);
 
+  // fler detaljer i rummet
+  const matta = lada(7.6, 0.012, 4.8, mat({ map: tex(256, 256, (g, w, h) => { g.fillStyle = '#b9ad9b'; g.fillRect(0, 0, w, h); for (let y = 0; y < h; y += 4) { g.fillStyle = y % 8 ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)'; g.fillRect(0, y, w, 2); } g.strokeStyle = 'rgba(80,60,40,.25)'; g.lineWidth = 6; g.strokeRect(10, 10, w - 20, h - 20); }, [3, 2]), roughness: 1 }), 0.006); matta.position.set(0, 0.006, 0.1); scen.add(matta);
+  const panelM = mat({ map: tex(512, 256, (g, w, h) => { g.fillStyle = '#c9a77c'; g.fillRect(0, 0, w, h); for (let x = 0; x < w; x += 20) { g.fillStyle = `hsl(31, 40%, ${52 + Math.random() * 8}%)`; g.fillRect(x, 0, 18, h); g.fillStyle = 'rgba(60,35,15,.4)'; g.fillRect(x + 18, 0, 2, h); } }, [8, 1]), roughness: 0.6 });
+  const panelB = lada(5.4, 1.1, 0.05, panelM, 0.01); panelB.position.set(-3.4, 0.55, -4.15); scen.add(panelB);
+  const panelL = lada(0.05, 1.1, 12, panelM, 0.01); panelL.position.set(-6.15, 0.55, 1.8); scen.add(panelL);
+  const gardM = mat({ color: '#e9e1d4', roughness: 1, side: THREE.DoubleSide });
+  [-1.35, 6.15].forEach((x) => { const gg = new THREE.Group(); for (let n = 0; n < 7; n++) { const v = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 3.8, 10, 1, true, 0, Math.PI), gardM); v.position.set(n * 0.1 - 0.3, 0, 0); v.rotation.y = n % 2 ? Math.PI : 0; v.castShadow = true; gg.add(v); } gg.position.set(x, 2.55, -3.95); scen.add(gg); });
+  const stang = cyl(0.02, 0.02, 7.8, M.krom, 10); stang.rotation.z = Math.PI / 2; stang.position.set(2.4, 4.5, -3.95); scen.add(stang);
+  const dorr = grupp(lada(1.1, 2.4, 0.06, mat({ color: '#e9e2d6', roughness: 0.7 }), 0.02)); dorr.position.set(-6.13, 1.2, 4.6); dorr.rotation.y = Math.PI / 2; scen.add(dorr);
+  const handtag = lada(0.16, 0.03, 0.04, M.krom, 0.01); handtag.position.set(-6.07, 1.15, 4.2); handtag.rotation.y = Math.PI / 2; scen.add(handtag);
+  const hangare = new THREE.Group(); hangare.position.set(-5.4, 0, 3.6); scen.add(hangare);
+  const hpel = cyl(0.03, 0.04, 1.9, M.svart, 10); hpel.position.y = 0.95; hangare.add(hpel); const hfot = cyl(0.25, 0.28, 0.04, M.svart, 24); hfot.position.y = 0.02; hangare.add(hfot);
+  const vast = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.12), mat({ color: '#e8ff2a', roughness: 0.7, emissive: '#8a9a00', emissiveIntensity: 0.15 })); vast.position.set(0.12, 1.45, 0.1); vast.rotation.y = 0.4; vast.castShadow = true; hangare.add(vast);
+  [0.25, 0.45].forEach((y) => { const r = lada(0.51, 0.04, 0.125, mat({ color: '#d9dde0', roughness: 0.2, metalness: 0.6 }), 0); r.position.set(0.12, 1.45 - 0.35 + y, 0.1); r.rotation.y = 0.4; hangare.add(r); });
+  const h3 = hjalm(); h3.position.set(0, 1.92, 0); h3.scale.setScalar(0.85); hangare.add(h3);
+  const sb = lada(2.6, 0.9, 0.55, mat({ color: '#2f2a26', roughness: 0.5 }), 0.02); sb.position.set(-3.6, 0.45, -3.82); scen.add(sb);
+  const sbTopp = lada(2.64, 0.04, 0.58, M.ek, 0.01); sbTopp.position.set(-3.6, 0.92, -3.82); scen.add(sbTopp);
+  const modell2 = husModell(); modell2.position.set(-4.2, 0.94, -3.8); modell2.scale.setScalar(0.7); modell2.rotation.y = 0.5; scen.add(modell2);
+  const termos = cyl(0.07, 0.07, 0.34, M.krom, 20); termos.position.set(-2.8, 1.11, -3.78); scen.add(termos);
+  [0, 1, 2].forEach((n) => { const k = kopp('#f4efe7'); k.position.set(-3.15 + n * 0.17, 0.94, -3.7); k.scale.setScalar(0.8); scen.add(k); });
+  // kontaktskuggor under saker, så de står på ytan
+  const skuggT = tex(128, 128, (g, w, h) => { const r = g.createRadialGradient(64, 64, 4, 64, 64, 62); r.addColorStop(0, 'rgba(0,0,0,.55)'); r.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = r; g.fillRect(0, 0, w, h); });
+  const kskugga = (x, y, z, sx, sz) => { const m2 = new THREE.Mesh(new THREE.PlaneGeometry(sx, sz), new THREE.MeshBasicMaterial({ map: skuggT, transparent: true, depthWrite: false, opacity: 0.6 })); m2.rotation.x = -Math.PI / 2; m2.position.set(x, y, z); scen.add(m2); };
+  kskugga(0, 0.015, 0, 7.4, 4.2); kskugga(-3.6, 0.012, -3.7, 3, 1); kskugga(-5.2, 0.012, 2.6, 0.9, 0.9); kskugga(5.6, 0.012, -3.5, 1.1, 1.1);
   // bordet och stolarna
   const b = bord(); scen.add(b);
   const stolar = [], STOLPOS = [[-2.2, 2.2, 0.05], [-0.75, 2.25, 0], [0.75, 2.25, 0], [2.2, 2.2, -0.05], [3.6, 0.6, -1.35], [-3.6, 0.6, 1.35]];
-  STOLPOS.forEach(([x, z, r], n) => { const s = stol(n % 2 ? null : '#4a423b'); s.position.set(x, 0, z); s.rotation.y = Math.PI + r; scen.add(s); stolar.push(s); });
+  STOLPOS.forEach(([x, z, r], n) => { const s = stol(n % 2 ? null : '#4a423b'); s.position.set(x, 0, z); s.rotation.y = Math.PI + r; scen.add(s); stolar.push(s); kskugga(x, 0.014, z, 1, 1); });
   [[-1.5, -2.2], [0, -2.25], [1.5, -2.2]].forEach(([x, z]) => { const s = stol('#4a423b'); s.position.set(x, 0, z); s.rotation.y = 0.04; scen.add(s); });
 
   // på bordet
@@ -251,11 +275,11 @@ function bygg() {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) starta(); });
   addEventListener('resize', storlek);
 }
-function storlek() { if (!S || !S.el) return; const w = S.el.clientWidth, h = S.el.clientHeight; if (!w || !h) return; S.renderer.setSize(w, h, false); S.comp.setSize(w, h); S.kamera.aspect = w / h; S.kamera.updateProjectionMatrix(); }
+function storlek() { if (!S || !S.el) return; const w = S.el.clientWidth, h = S.el.clientHeight; if (!w || !h) return; S.renderer.setSize(w, h, false); S.comp.setSize(w, h); S.kamera.aspect = w / h; const smal = w < 900; S.kamera.fov = smal ? 44 : 34; S.kamera.setViewOffset(w, h, smal ? 0 : -w * 0.2, smal ? 0 : -h * 0.02, w, h); S.kamera.updateProjectionMatrix(); }
 function starta() { if (S && !S.ram && S.synlig && !document.hidden && S.el && S.el.isConnected) { S.klocka.getDelta(); S.ram = requestAnimationFrame(ram); } }
 const tmp = new THREE.Vector3();
 function placeraPlatser() {
-  const rum = S.el.closest('.motescen__rum'); if (!rum) return;
+  const rum = S.el.parentElement && S.el.parentElement.querySelector('.motescen__rum'); if (!rum) return;
   const rr = rum.getBoundingClientRect(), dr = S.el.getBoundingClientRect();
   rum.querySelectorAll('.bord__plats').forEach((b, n) => {
     const s = S.stolar[n]; if (!s) { b.style.display = 'none'; return; }
@@ -280,7 +304,7 @@ function ram() {
   const nu = new Date(), sek = nu.getSeconds() + nu.getMilliseconds() / 1000, min = nu.getMinutes() + sek / 60, tim = (nu.getHours() % 12) + min / 60;
   S.vSek.rotation.z = -sek / 60 * Math.PI * 2; S.vMin.rotation.z = -min / 60 * Math.PI * 2; S.vTim.rotation.z = -tim / 12 * Math.PI * 2;
   // den valda kundens stol vrids lite mot bordet
-  const vald = S.el.closest('.motescen__rum') && [...S.el.closest('.motescen__rum').querySelectorAll('.bord__plats')].findIndex((b) => b.classList.contains('vald'));
+  const rumEl = S.el.parentElement && S.el.parentElement.querySelector('.motescen__rum'), vald = rumEl ? [...rumEl.querySelectorAll('.bord__plats')].findIndex((b) => b.classList.contains('vald')) : -1;
   S.stolar.forEach((s, n) => { const mal = n === vald ? Math.sin(t * 1.5) * 0.15 : 0; s.children.forEach((c) => { if (c.position.y > 0.8) c.rotation.y += (mal - c.rotation.y) * Math.min(1, dt * 4); }); });
   S.comp.render(dt); placeraPlatser();
   S.ram = requestAnimationFrame(ram);
@@ -289,7 +313,7 @@ function montera(el) {
   if (!stod) { el.remove(); return; }
   if (!S) bygg();
   S.el = el; el.appendChild(S.renderer.domElement);
-  const rum = el.closest('.motescen__rum'); if (rum) { rum.classList.add('motescen__rum--3d'); rum.addEventListener('pointermove', (ev) => { const r = rum.getBoundingClientRect(); S.musMal.set((ev.clientX - r.left) / r.width * 2 - 1, (ev.clientY - r.top) / r.height * 2 - 1); }); rum.addEventListener('pointerleave', () => S.musMal.set(0, 0)); }
+  const sek = el.parentElement; if (sek) sek.classList.add('motescen--3d'); const rum = sek && sek.querySelector('.motescen__rum'); if (rum) { rum.classList.add('motescen__rum--3d'); sek.addEventListener('pointermove', (ev) => { const r = sek.getBoundingClientRect(); S.musMal.set((ev.clientX - r.left) / r.width * 2 - 1, (ev.clientY - r.top) / r.height * 2 - 1); }); sek.addEventListener('pointerleave', () => S.musMal.set(0, 0)); }
   storlek(); starta();
 }
 if (IH) {

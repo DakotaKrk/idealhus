@@ -8208,3 +8208,14 @@ section.dk-hjalte.kort .dk-fack__alla { grid-column: 1 / -1; grid-auto-flow: col
 .hero__snabb button .i { background: #fbecd8; color: #8f5424; }
 .hero__snabb button:hover { background: #fff; box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .6), 0 12px 22px -14px rgba(90, 60, 25, .6); }
 .hero__snabb button:hover .i { background: linear-gradient(160deg, #f6c68d, #e29a4a); color: #1b1915; }
+
+/* Mötesrummet smälter in i hjälten: ingen ram, rummet ligger bakom hela kortet och tonar mjukt mot texten */
+.motescen.motescen--3d { position: relative; isolation: isolate; }
+.motescen--3d > .motesrum3d { position: absolute; inset: 0; z-index: 0; border-radius: inherit;
+  -webkit-mask-image: linear-gradient(90deg, transparent 30%, rgba(0, 0, 0, .5) 46%, #000 60%), linear-gradient(180deg, #000 80%, transparent);
+  -webkit-mask-composite: source-in; mask-image: linear-gradient(90deg, transparent 30%, rgba(0, 0, 0, .5) 46%, #000 60%), linear-gradient(180deg, #000 80%, transparent); mask-composite: intersect; }
+.motescen--3d > .motesrum3d::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(90% 80% at 75% 45%, transparent 55%, rgba(251, 244, 232, .35)); }
+.motescen--3d .motescen__ord { position: relative; z-index: 2; }
+.motescen--3d .motescen__rum { z-index: 1; }
+.motescen--3d .motescen__rum--3d { min-height: 440px; }
+@media (max-width: 900px) { .motescen--3d > .motesrum3d { -webkit-mask-image: linear-gradient(180deg, transparent 30%, #000 55%); mask-image: linear-gradient(180deg, transparent 30%, #000 55%); } }

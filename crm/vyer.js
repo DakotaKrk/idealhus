@@ -3093,7 +3093,7 @@
     }).join('');
     var rubrik = a && k ? 'Nästa möte med<br><em>' + e(forsta(k.namn)) + '.</em>' : 'Redo att<br><em>presentera.</em>';
     var text = a && k ? e(a.titel) + (m ? ' · ' + e(m.kategori) + ' ' + e(m.namn) : '') + ' · ' + (f ? e(f.miljo) + ' · ' : '') + e(k.ort) : 'Välj en kund runt bordet, eller kör presentationen generellt.';
-    return '<section class="motescen kort kort--mork" data-in>' +
+    return '<section class="motescen kort kort--mork" data-in><div class="motesrum3d" data-motesrum3d aria-hidden="true"></div>' +
       '<div class="motescen__ord">' +
         '<p class="etikett etikett--ljus">Kundmöte</p>' +
         '<h2 class="motescen__rubrik">' + rubrik + '</h2>' +
@@ -3110,7 +3110,6 @@
         '<p class="motescen__not">' + (redo.length ? redo.length + (redo.length === 1 ? ' affär väntar' : ' affärer väntar') + ' på ett första möte – klicka på en plats vid bordet.' : 'Inga affärer väntar på ett första möte.') + '</p>' +
       '</div>' +
       '<div class="motescen__rum">' +
-        '<div class="motesrum3d" data-motesrum3d aria-hidden="true"></div>' +
         '<div class="rum__scen" aria-hidden="true"><div class="bord"><i class="bord__skugga"></i><i class="bord__tjocklek"></i><i class="bord__skiva"></i><i class="bord__kant"></i><i class="bord__spot"></i>' + saker + '</div></div>' +
         platser +
       '</div>' +
