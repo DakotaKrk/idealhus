@@ -1153,3 +1153,5 @@ section.lp-mork .sh-knapp:not(.sh-knapp--accent) .emo-ik, section.sh-mork .sh-kn
 @container (max-width: 70px) { .pk-dag .pk-jobb { position: absolute; top: auto; bottom: 5px; right: 5px; width: 6px; height: 6px; } .pk-dag .pk-dag__topp b { font-size: .85rem; } }
 @container (max-width: 70px) { .pk-dag.idag .pk-dag__topp b { width: 21px; height: 21px; margin: 0; font-size: .68rem; box-shadow: 0 0 0 2px rgba(246, 198, 141, .2); } .pk-dag { padding: 6px 3px; } }
 .pk-knapp:not(.pk-knapp--accent) .emo-ik, .pk-panel__led .emo-ik, .pk-tom .i, .pk-lagg .i { filter: brightness(2.1) saturate(1.2); color: #ffd9a0; }
+/* Månadsväljaren i teamkalendern: knapparnas skuggor klipps inte i kanten */
+.lp-kal__man { padding: 6px; margin: -6px; }

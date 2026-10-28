@@ -1829,7 +1829,7 @@
             glas('Viktat värde', IH.kort(a.varde * r.p / 100), '', r.p + ' % av ' + IH.kort(a.varde))) +
       '</div></section>';
     var stegare = a.forlorad ? '' : '<ol class="stegare af-stegare" data-in>' + IH.SALJSTEG.map(function (st, n) {
-      return '<li class="' + (n < idx ? 'klar' : n === idx ? 'nu' : '') + '" style="--f:' + st.farg + '"><button type="button" data-g="aff-steg" data-id="' + a.id + '" data-steg="' + st.id + '"' + (n === idx ? ' aria-current="step"' : '') + '><i></i><span>' + e(st.namn) + '</span></button></li>';
+      return '<li class="' + (n < idx ? 'klar' : n === idx ? 'nu' : '') + '" style="--f:' + st.farg + '"><button type="button" data-g="aff-steg" data-id="' + a.id + '" data-steg="' + st.id + '"' + (n === idx ? ' aria-current="step"' : '') + ' title="' + e(st.namn) + '"><i></i><span class="st-lang">' + e(st.namn) + '</span><span class="st-kort">' + e(st.kort) + '</span></button></li>';
     }).join('') + '</ol>';
     var kort = function (namn, ikon, rubrik, inne, extra) {
       return '<section class="af-kort kort" data-af="' + namn + '"' + (extra || '') + '><h2>' + IH.emo(ikon) + rubrik + '</h2>' + inne + '</section>';

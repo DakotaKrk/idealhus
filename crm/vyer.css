@@ -8555,3 +8555,20 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .logga-mote .falt-rad { grid-template-columns: minmax(0, 1fr) 176px; }
 .logga-mote .antal-falt input { min-width: 44px; text-align: center; }
 @media (max-width: 700px) { .vy .kg__hoger, .vy .kg__vanster { min-width: 0; grid-template-columns: minmax(0, 1fr); } .vy .kg__hoger > *, .vy .kg__vanster > * { min-width: 0; } .vy .kkontakt__tal button { min-width: 0; } }
+/* Affärens stegrad: korta namn när raden är smal, aldrig ihopskrivna ord */
+.af-stegare { container-type: inline-size; column-gap: 6px; }
+.af-stegare .st-kort { display: none; }
+.af-stegare button span { overflow-wrap: normal; word-break: normal; hyphens: auto; }
+@container (max-width: 640px) { .af-stegare .st-lang { display: none; } .af-stegare .st-kort { display: inline; } }
+@container (max-width: 360px) { .af-stegare button span { font-size: .62rem; } }
+@container (max-width: 420px) { .af-stegare button span { font-size: .66rem; letter-spacing: -0.01em; } }
+/* Stegnamnen: aldrig ihop – varje namn stannar i sin kolumn */
+.af-stegare button span, .stegare button span { display: block; max-width: 100%; padding: 0 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; box-sizing: border-box; }
+.af-stegare li, .stegare li { min-width: 0; }
+/* Historikens anteckningsrad: fältet krymper, knappen stannar i rutan */
+.anteckna__rad { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.anteckna__rad input { flex: 1 1 auto; min-width: 0; width: auto; }
+.anteckna__rad .knapp { flex: none; }
+.anteckna { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.anteckna { container-type: inline-size; }
+@container (max-width: 340px) { .anteckna__rad { flex-wrap: wrap; } .anteckna__rad input { flex-basis: 100%; } .anteckna__rad .knapp { width: 100%; justify-content: center; } }
