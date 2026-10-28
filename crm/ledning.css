@@ -713,3 +713,7 @@ section.lp-mork .ao-text { position: relative; z-index: 1; }
 .avatar:has(> .narvaro-prick) { container-type: size; }
 .avatar > .narvaro-prick { width: clamp(6px, 28cqw, 16px); height: clamp(6px, 28cqw, 16px); right: -1px; bottom: -1px; box-shadow: 0 0 0 clamp(1.5px, 5cqw, 3px) #fff; }
 section.lp-mork .avatar > .narvaro-prick { box-shadow: 0 0 0 clamp(1.5px, 5cqw, 3px) #1f1a16; }
+/* Statusprickar på profilbilder med rundade hörn: pricken sitter på hörnet med en ren vit ring, inte halvt utanför */
+.avatar:not(.lp-rund) > .narvaro-prick { right: -3px; bottom: -3px; }
+.km .avatar > .narvaro-prick, .km-rad .avatar > .narvaro-prick, .km-topp .avatar > .narvaro-prick { width: 12px; height: 12px; right: -4px; bottom: -4px; box-shadow: 0 0 0 2.5px #fffdf9; }
+.km-rad .avatar > .narvaro-prick, .km-topp .avatar > .narvaro-prick, .km .avatar > .narvaro-prick { left: auto !important; top: auto !important; right: -4px !important; bottom: -4px !important; }

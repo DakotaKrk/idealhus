@@ -63,7 +63,7 @@
   var rollerFor = function (u) { return [ROLLNAMN[u.roll] || u.roll].concat(u.chef ? ['Chef'] : []); };
   function senastFor(u) {
     var n = narvaro(u.id);
-    if (['online', 'mote', 'upptagen', 'ute'].indexOf(n.id) >= 0) return { text: 'aktiv nu', nu: true };
+    if (n.id === 'online') return { text: 'aktiv nu', nu: true };
     var t = db().aktiviteter.filter(function (h) { return h.av === u.id; }).map(function (h) { return h.tid; }).sort().pop();
     return { text: t ? IH.sedan(t) : '–', nu: false };
   }
