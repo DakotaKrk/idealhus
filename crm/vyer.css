@@ -7870,3 +7870,57 @@ a.kh__chip:hover { background: #fff; color: var(--kol); }
 .prodvarn__pamin .i { width: 15px; height: 15px; }
 .prodvarn__pamin:hover { text-decoration: underline; text-underline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .nedrakning__ring::before { animation: none; } }
+
+/* Kundlistan som tabell (2026-10-31): kryssrutor och gruppåtgärder, sorterbara kolumner, resan som prickar,
+   kundhälsa, varför en kund behöver uppmärksamhet, ring och mejla direkt, summor i foten */
+.kl { padding: 6px; overflow: hidden; }
+.kl__tabell { width: 100%; border-collapse: separate; border-spacing: 0; }
+.kl__tabell thead th { position: sticky; top: 0; z-index: 1; padding: 12px 10px; background: rgba(251, 247, 240, .96); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); font: 600 .62rem/1 var(--rubrik); letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); text-align: left; }
+.kl__sort { display: inline-flex; align-items: center; gap: 5px; padding: 4px 6px; margin: -4px -6px; border: 0; border-radius: 8px; background: none; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; transition: background-color .2s, color .2s; }
+.kl__sort i { font-style: normal; opacity: .35; transition: opacity .2s; }
+.kl__sort:hover { background: rgba(27, 25, 21, .05); color: var(--kol); }
+.kl__sort:hover i, .kl__sort.akt i { opacity: 1; }
+.kl__sort.akt { color: var(--virke-djup); }
+.kl__tabell tbody tr { cursor: pointer; transition: background-color .2s; }
+.kl__tabell tbody td { padding: 12px 10px; border-top: 1px solid rgba(27, 25, 21, .05); vertical-align: middle; }
+.kl__tabell tbody tr:hover { background: rgba(246, 198, 141, .12); }
+.kl__tabell tbody tr.vald { background: rgba(246, 198, 141, .2); }
+.kl__tabell tbody tr.varm td:first-child { box-shadow: inset 3px 0 0 #e29a4a; }
+.kl__val { width: 36px; }
+.kl__kryss { display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 6px; background: #fff; box-shadow: inset 0 0 0 1.5px rgba(27, 25, 21, .2); color: transparent; cursor: pointer; transition: background-color .2s, box-shadow .2s, color .2s, transform .2s var(--studs); }
+.kl__kryss .i { width: 12px; height: 12px; }
+.kl__kryss:hover { box-shadow: inset 0 0 0 1.5px var(--virke); }
+.kl__kryss[aria-checked="true"] { background: #1b1915; box-shadow: none; color: #f6c68d; transform: scale(1.05); }
+.kl__kryss[aria-checked="mixed"] { background: #e29a4a; box-shadow: none; color: transparent; }
+.kl__typ { font-style: normal; padding: 1px 6px; border-radius: 999px; background: #e6eef2; color: #4f6f8f; font-size: .66rem; font-weight: 600; }
+.kl__tabell .tabell__hus small { display: block; font-size: .68rem; color: var(--text-3); }
+.kl__resa { display: grid; gap: 5px; }
+.kl__resa b { font: 600 .78rem/1 var(--rubrik); color: var(--text-2); }
+.kl__prickar { display: flex; gap: 3px; }
+.kl__prickar i { width: 14px; height: 5px; border-radius: 4px; background: rgba(27, 25, 21, .08); }
+.kl__prickar i.klar { background: color-mix(in srgb, var(--s) 70%, #c98a45); }
+.kl__prickar i.nu { background: var(--s); box-shadow: 0 0 0 2px color-mix(in srgb, var(--s) 30%, transparent); width: 20px; }
+.kl__vunnet { color: #1d6b40; }
+.kl__halsa { --hf: #22a35a; display: inline-flex; align-items: center; gap: 7px; font: 700 .82rem/1 var(--rubrik); color: var(--kol); }
+.kl__halsa[data-ton="gul"] { --hf: #e29a4a; } .kl__halsa[data-ton="rod"] { --hf: #d6453a; }
+.kl__halsa i { width: 22px; height: 22px; border-radius: 50%; background: conic-gradient(var(--hf) calc(var(--a) * 360deg), rgba(27, 25, 21, .08) 0); -webkit-mask: radial-gradient(closest-side, transparent 62%, #000 64%); mask: radial-gradient(closest-side, transparent 62%, #000 64%); }
+.kl__senast { display: grid; gap: 3px; }
+.kl__senast em { display: inline-flex; align-items: center; gap: 5px; font-style: normal; font-size: .7rem; font-weight: 600; color: #b5642a; }
+.kl__snabb { width: 110px; text-align: right; white-space: nowrap; }
+.kl__snabb a { display: inline-grid; place-items: center; width: 30px; height: 30px; margin-left: 2px; border-radius: 50%; color: var(--text-2); opacity: 0; transform: translateX(6px); transition: opacity .2s, transform .25s var(--mjuk), background-color .2s; }
+.kl__snabb a .i { width: 15px; height: 15px; }
+.kl__snabb a:hover { background: #1b1915; color: #fbf4e8; }
+.kl__tabell tbody tr:hover .kl__snabb a, .kl__tabell tbody tr:focus-within .kl__snabb a { opacity: 1; transform: none; }
+.kl__pil { display: inline-grid; place-items: center; width: 30px; height: 30px; margin-left: 4px; border-radius: 50%; background: #f3ede3; transition: background-color .2s, transform .25s var(--mjuk); }
+.kl__pil .i { width: 14px; height: 14px; }
+.kl__tabell tbody tr:hover .kl__pil { background: #e29a4a; color: #1b1915; transform: translateX(2px); }
+.kl__tabell tfoot td { padding: 14px 10px 10px; border-top: 1.5px solid rgba(27, 25, 21, .1); font: 600 .8rem/1 var(--rubrik); color: var(--text-2); }
+.kl__bulk { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 6px; padding: 10px 12px; border-radius: 16px; background: #1b1915; color: #fbf4e8; box-shadow: 0 16px 30px -18px rgba(27, 25, 21, .8); animation: kl-bulk .35s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes kl-bulk { from { opacity: 0; transform: translateY(-8px); } }
+.kl__bulk b { margin-right: 6px; font: 600 .86rem/1 var(--rubrik); color: #f6c68d; }
+.kl__bulk .knapp { background: rgba(255, 255, 255, .08); color: #fbf4e8; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14); }
+.kl__bulk .knapp:hover { background: rgba(255, 255, 255, .16); }
+.kl__avmarkera { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 0; border: 0; background: none; font: 600 .78rem/1 var(--rubrik); color: rgba(251, 244, 232, .7); cursor: pointer; }
+.kl__avmarkera .i { width: 13px; height: 13px; }
+.kundnat { justify-content: start; }
+@media (max-width: 1000px) { .kl__tabell th:nth-child(3), .kl__tabell td:nth-child(3), .kl__tabell th:nth-child(7), .kl__tabell td:nth-child(7) { display: none; } .kl__snabb a { opacity: 1; transform: none; } }
