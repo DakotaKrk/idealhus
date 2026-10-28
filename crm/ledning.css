@@ -717,3 +717,5 @@ section.lp-mork .avatar > .narvaro-prick { box-shadow: 0 0 0 clamp(1.5px, 5cqw, 
 .avatar:not(.lp-rund) > .narvaro-prick { right: -3px; bottom: -3px; }
 .km .avatar > .narvaro-prick, .km-rad .avatar > .narvaro-prick, .km-topp .avatar > .narvaro-prick { width: 12px; height: 12px; right: -4px; bottom: -4px; box-shadow: 0 0 0 2.5px #fffdf9; }
 .km-rad .avatar > .narvaro-prick, .km-topp .avatar > .narvaro-prick, .km .avatar > .narvaro-prick { left: auto !important; top: auto !important; right: -4px !important; bottom: -4px !important; }
+/* kontomenyn visar statusen i texten bredvid – ingen prick på bilden (den gav ett mörkt streck mot hörnet) */
+.km-rad .avatar > .narvaro-prick { display: none !important; }

@@ -8228,3 +8228,33 @@ html:not(.ingen-webgl) .motescen:has(> .motesrum3d.klar) .bord__plats { opacity:
 .motescen > .motesrum3d { opacity: 0; transition: opacity .9s ease .1s; }
 .motescen > .motesrum3d.klar { opacity: 1; }
 .motescen--3d .bord__plats { animation-delay: calc(.9s + var(--n) * .08s); }
+
+/* Säljtavlan smartare: verktygsrad (sök, Mina/Alla, filter med antal, sortering, kompakt), insikt per spalt och
+   snabbknappar på korten (ring, logga, uppgift och nästa steg); stegbandet utan avklippta namn */
+.tv-verktyg { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 4px; padding: 10px; border-radius: 20px; background: rgba(255, 255, 255, .7); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.tv-sok { flex: 1 1 240px; }
+.tv-seg { display: inline-flex; padding: 3px; border-radius: 999px; background: #f3ede3; }
+.tv-seg button { min-height: 30px; padding: 0 13px; border: 0; border-radius: 999px; background: none; font: 600 .78rem/1 var(--rubrik); color: var(--text-2); cursor: pointer; transition: background-color .2s, color .2s, box-shadow .2s; }
+.tv-seg button[aria-pressed="true"] { background: #fff; color: var(--kol); box-shadow: 0 4px 10px -6px rgba(60, 40, 15, .5); }
+.tv-verktyg .ap-filter em { margin-left: 3px; font-style: normal; opacity: .55; }
+.tv-ikon { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 12px; background: #f3ede3; color: var(--text-2); cursor: pointer; }
+.tv-ikon[aria-pressed="true"] { background: #1b1915; color: #f6c68d; }
+.tv-ikon .i { width: 16px; height: 16px; }
+.stegband .stegband__text b { white-space: nowrap; overflow: visible; text-overflow: clip; font-size: clamp(.78rem, .55rem + .45vw, .95rem); }
+.spalt__insikt { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.spalt__insikt span { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: rgba(27, 25, 21, .05); font: 600 .68rem/1.3 var(--rubrik); color: var(--text-2); }
+.spalt__insikt .i { width: 12px; height: 12px; }
+.spalt__insikt .varm { background: #fde9df; color: #b5532a; } .spalt__insikt .ok { background: #e1f3e7; color: #1d6b40; }
+.spalt__dolda { margin: 8px 0 0; font-size: .7rem; color: var(--text-3); }
+.aff { position: relative; }
+.aff__verktyg { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(27, 25, 21, .08); }
+.aff__verktyg button { display: inline-grid; place-items: center; min-width: 32px; height: 32px; padding: 0; border: 0; border-radius: 10px; background: #f7f1e8; color: var(--text-2); cursor: pointer; transition: background-color .2s, color .2s, transform .2s var(--studs); }
+.aff__verktyg button:hover { background: #1b1915; color: #f6c68d; transform: translateY(-1px); }
+.aff__verktyg .i { width: 15px; height: 15px; }
+.aff__verktyg .aff__vidare { display: inline-flex; gap: 5px; margin-left: auto; padding: 0 10px; background: color-mix(in srgb, var(--f) 22%, #fff); color: var(--kol); font: 600 .72rem/1 var(--rubrik); }
+.aff__verktyg .aff__vidare:hover { background: #1b1915; color: #fbf4e8; }
+.aff__verktyg .aff__vidare .i { width: 13px; height: 13px; }
+.tavla--kompakt .aff__nasta, .tavla--kompakt .aff__verktyg, .tavla--kompakt .aff__kund { display: none; }
+.tavla--kompakt .aff { padding-bottom: 10px; }
+.tavla--kompakt .aff__bild { width: 40px; height: 28px; }
+@media (hover: hover) { .aff__verktyg { opacity: .55; transition: opacity .25s; } .aff:hover .aff__verktyg, .aff:focus-within .aff__verktyg { opacity: 1; } }

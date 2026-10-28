@@ -1228,7 +1228,7 @@
   /* ================================================================
      Säljtavlan
      ================================================================ */
-  var tavlaLage = 'tavla';
+  var tavlaLage = 'tavla', tavlaUi = { sok: '', vem: 'alla', filter: 'alla', sort: 'andrad', kompakt: false };
 
   function nastaSteg(a) {
     var o = IH.offertFor(a.id);
@@ -1255,6 +1255,17 @@
     }
   }
 
+  function nastaStegId(a) { var ix = IH.SALJSTEG.findIndex(function (x) { return x.id === a.steg; }); var n = IH.SALJSTEG[ix + 1]; return n ? n.id : null; }
+  function tavlaPassar(a) {
+    var q = tavlaUi.sok.trim().toLowerCase(), k = IH.kund(a.kund), m = IH.modell(a.modell), d = IH.dagarSedan(a.andrad);
+    if (q && (a.titel + ' ' + (k ? k.namn + ' ' + k.ort : '') + ' ' + (m ? m.namn : '')).toLowerCase().indexOf(q) < 0) return false;
+    if (tavlaUi.vem === 'mina' && a.ansvarig !== IH.jag().id) return false;
+    if (tavlaUi.filter === 'still' && !(d > 10 && a.steg !== 'vunnen')) return false;
+    if (tavlaUi.filter === 'stora' && (a.varde || 0) < 600000) return false;
+    if (tavlaUi.filter === 'uppg' && !db().uppgifter.some(function (u) { return !u.klar && u.affar === a.id; })) return false;
+    return true;
+  }
+  var tavlaSort = function (l) { return l.sort(function (a, b) { return tavlaUi.sort === 'varde' ? (b.varde || 0) - (a.varde || 0) : tavlaUi.sort === 'chans' ? sannolikhet(b) * b.varde - sannolikhet(a) * a.varde : (b.andrad < a.andrad ? -1 : 1); }); };
   function affKort(a) {
     var k = IH.kund(a.kund);
     var m = IH.modell(a.modell);
@@ -1273,6 +1284,10 @@
         (a.steg === 'vunnen' ? '<span class="tid">vann ' + IH.sedan(a.vunnen) + '</span>'
           : '<span class="aff__tid aff__tid--' + tid + '" title="' + d + (d === 1 ? ' dag' : ' dagar') + ' i steget">' + (d === 0 ? 'I dag' : d + ' d') + (tid === 'still' ? ' · står still' : '') + '</span>') + '</div>' +
       (a.steg !== 'vunnen' ? '<p class="aff__nasta' + (d > 10 ? ' aff__nasta--varm' : '') + '"><span class="aff__nastaemoji" aria-hidden="true">' + nastaEmoji(a) + '</span>' + e(nastaSteg(a)) + '</p>' : '') +
+      (a.steg !== 'vunnen' ? '<div class="aff__verktyg">' + (k && k.telefon ? '<button type="button" data-g="kund-ring" data-tel="' + e(k.telefon) + '" title="Ring ' + e(k.namn) + '">' + i('tel') + '</button>' : '') +
+        '<button type="button" data-g="aff-logga" data-id="' + a.id + '" title="Logga ett samtal eller en anteckning">' + i('anteckning') + '</button>' +
+        '<button type="button" data-g="aff-uppg" data-id="' + a.id + '" title="Ny uppgift på affären">' + i('uppgift') + '</button>' +
+        (nastaStegId(a) ? '<button type="button" class="aff__vidare" data-g="aff-vidare" data-id="' + a.id + '" title="Flytta till ' + e(IH.steg(nastaStegId(a)).namn) + '">' + e(IH.steg(nastaStegId(a)).kort || IH.steg(nastaStegId(a)).namn) + i('pil') + '</button>' : '') + '</div>' : '') +
       '</article>';
   }
 
@@ -1381,13 +1396,24 @@
         return '<button type="button" data-g="till-spalt" data-steg="' + s.id + '" style="--f:' + s.farg + ';--a:' + andel.toFixed(3) + '">' +
           '<span class="stegband__emoji" aria-hidden="true">' + SALJ_EMOJI[s.id] + '</span><span class="stegband__text"><b>' + e(s.namn) + '</b><small>' + l.length + ' st · ' + IH.kort(summa(l)) + '</small></span><i></i></button>';
       }).join('') + '</div>' +
-      '<p class="tavla__tips"><svg class="emo-ik" aria-hidden="true"><use href="#i-glodlampa"/></svg> Dra korten mellan stegen – på mobilen håller du in kortet först. Släpp längst ned för att markera som förlorad.</p>' +
-      '<div class="tavla" data-tavla>' + IH.SALJSTEG.map(function (s) {
-        var l = (s.id === 'vunnen' ? vunna90 : oppna.filter(function (a) { return a.steg === s.id; }))
-          .sort(function (a, b) { return b.andrad < a.andrad ? -1 : 1; });
+      (function () {
+        var antal = function (f) { var g = tavlaUi.filter; tavlaUi.filter = f; var n = oppna.filter(tavlaPassar).length; tavlaUi.filter = g; return n; };
+        return '<div class="tv-verktyg"><label class="sok sok--liten tv-sok">' + i('sok') + '<input type="search" placeholder="Sök affär, kund, ort eller hus…" value="' + e(tavlaUi.sok) + '" data-tv-sok aria-label="Sök på tavlan"></label>' +
+          '<div class="tv-seg" role="group" aria-label="Vems">' + [['alla', 'Alla'], ['mina', 'Mina']].map(function (v) { return '<button type="button" data-g="tv-vem" data-f="' + v[0] + '" aria-pressed="' + (tavlaUi.vem === v[0]) + '">' + v[1] + '</button>'; }).join('') + '</div>' +
+          '<div class="ap-filterrad" role="group" aria-label="Filter">' + [['alla', 'Allt'], ['still', 'Står still'], ['uppg', 'Har uppgift'], ['stora', 'Över 600 tkr']].map(function (f) { return '<button type="button" class="ap-filter" data-g="tv-filter" data-f="' + f[0] + '" aria-pressed="' + (tavlaUi.filter === f[0]) + '">' + f[1] + ' <em>' + antal(f[0]) + '</em></button>'; }).join('') + '</div>' +
+          '<label class="kundsort">' + i('lista') + '<select data-tv-sort aria-label="Sortera korten">' + [['andrad', 'Senast ändrad'], ['varde', 'Störst värde'], ['chans', 'Viktat värde']].map(function (o) { return '<option value="' + o[0] + '"' + (tavlaUi.sort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' +
+          '<button type="button" class="tv-ikon" data-g="tv-kompakt" aria-pressed="' + tavlaUi.kompakt + '" title="' + (tavlaUi.kompakt ? 'Visa hela korten' : 'Kompakta kort – fler syns på en gång') + '">' + i(tavlaUi.kompakt ? 'kub' : 'lista') + '</button></div>';
+      })() +
+      '<p class="tavla__tips"><svg class="emo-ik" aria-hidden="true"><use href="#i-glodlampa"/></svg> Dra korten mellan stegen eller tryck på knappen med nästa steg på kortet. Släpp längst ned för att markera som förlorad.</p>' +
+      '<div class="tavla' + (tavlaUi.kompakt ? ' tavla--kompakt' : '') + '" data-tavla>' + IH.SALJSTEG.map(function (s) {
+        var alla = s.id === 'vunnen' ? vunna90 : oppna.filter(function (a) { return a.steg === s.id; });
+        var l = tavlaSort(alla.filter(tavlaPassar)), still = alla.filter(function (a) { return s.id !== 'vunnen' && IH.dagarSedan(a.andrad) > 10; }).length;
+        var snittD = alla.length ? Math.round(alla.reduce(function (t, a) { return t + IH.dagarSedan(a.andrad); }, 0) / alla.length) : 0;
         return '<section class="spalt" data-steg="' + s.id + '" style="--f:' + s.farg + '" id="spalt-' + s.id + '">' +
           '<header class="spalt__huvud"><div><b><span class="spalt__emoji" aria-hidden="true">' + SALJ_EMOJI[s.id] + '</span>' + e(s.namn) + '</b><span>' + l.length + '</span></div><p class="tal">' + IH.kort(summa(l)) + '</p>' +
-          '<small>' + (s.id === 'vunnen' ? 'senaste 90 dagarna' : s.sannolikhet + ' % chans · viktat ' + IH.kort(viktat(l))) + '</small></header>' +
+          '<small>' + (s.id === 'vunnen' ? 'senaste 90 dagarna' : s.sannolikhet + ' % chans · viktat ' + IH.kort(viktat(l))) + '</small>' +
+          (s.id !== 'vunnen' && alla.length ? '<div class="spalt__insikt"><span title="Genomsnittlig tid sedan senaste ändringen">' + i('klocka') + 'snitt ' + snittD + ' d</span>' + (still ? '<span class="varm" title="Affärer utan ändring på över 10 dagar">' + i('varning') + still + ' står still</span>' : '<span class="ok">' + i('bock') + 'i rörelse</span>') + '</div>' : '') +
+          (l.length < alla.length ? '<p class="spalt__dolda">' + (alla.length - l.length) + ' dolda av filtret</p>' : '') + '</header>' +
           '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(affKort).join('') : '<p class="spalt__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg></span>Dra hit en affär</p>') + '</div></section>';
       }).join('') + '</div>' +
       '<div class="forlustdocka" aria-hidden="true">' + i('stang') + 'Släpp här för att markera som förlorad</div>';
@@ -1396,6 +1422,8 @@
       titel: 'Säljtavla', html: html,
       efter: function (rot) {
         glidFlikar($('[data-flikar]', rot));
+        var ts = $('[data-tv-sok]', rot); if (ts) ts.addEventListener('input', function () { tavlaUi.sok = ts.value; var pos = ts.selectionStart; IH.rita(); var n = $('[data-tv-sok]'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } });
+        var tso = $('[data-tv-sort]', rot); if (tso) tso.addEventListener('change', function () { tavlaUi.sort = tso.value; IH.rita(); });
         var tavla = $('[data-tavla]', rot);
         if (tavla) { kopplaDra(tavla); kanter(tavla); }
         IH.pausaUtanfor($('.puls', rot));
@@ -1415,6 +1443,26 @@
   }
 
   G['tavla-lage'] = function (el) { tavlaLage = el.getAttribute('data-l'); IH.rita(); };
+  G['tv-vem'] = function (el) { tavlaUi.vem = el.getAttribute('data-f'); IH.rita(); };
+  G['tv-filter'] = function (el) { tavlaUi.filter = el.getAttribute('data-f'); IH.rita(); };
+  G['tv-kompakt'] = function () { tavlaUi.kompakt = !tavlaUi.kompakt; IH.rita(); };
+  G['aff-vidare'] = function (el) { var a = IH.affar(el.getAttribute('data-id')), n = a && nastaStegId(a); if (!n) return; var kort = el.closest('.aff'); flyttaAffar(a.id, n, kort ? kort.getBoundingClientRect() : null); };
+  G['aff-logga'] = function (el) {
+    var a = IH.affar(el.getAttribute('data-id')); if (!a) return; var k = IH.kund(a.kund);
+    IH.oppnaArk({ titel: 'Logga på affären', ikon: 'anteckning', under: e(a.titel) + (k ? ' · ' + e(k.namn) : ''), kropp: anteckningsForm(a.kund, a.id), fot: '<button class="knapp" type="button" data-g="stang-ark">Stäng</button>' });
+  };
+  G['aff-uppg'] = function (el) {
+    var a = IH.affar(el.getAttribute('data-id')); if (!a) return; var imorgon = new Date(Date.now() + 864e5);
+    IH.oppnaArk({ titel: 'Ny uppgift', ikon: 'uppgift', under: e(a.titel),
+      kropp: '<form class="formular" data-form="aff-uppg" id="aff-uppg-form"><input type="hidden" name="affar" value="' + a.id + '"><label class="falt"><span>Vad ska göras?</span><input name="text" required autofocus placeholder="T.ex. Skicka offert"></label><label class="falt"><span>Klart senast</span><input name="datum" type="date" value="' + IH.dagStr(imorgon) + '"></label>' +
+        '<div class="snabbval">' + [['I dag', 0], ['I morgon', 1], ['Om 3 dagar', 3], ['Nästa vecka', 7]].map(function (v) { return '<button type="button" class="ap-filter" data-g="kund-uppg-dag" data-d="' + v[1] + '">' + v[0] + '</button>'; }).join('') + '</div></form>',
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="aff-uppg-form">' + i('plus') + 'Lägg till</button>' });
+  };
+  FORM['aff-uppg'] = function (f, d) {
+    var a = IH.affar(d.get('affar')); if (!a) return;
+    db().uppgifter.push({ id: IH.nyttId('uppgift', 'u'), text: d.get('text'), forfaller: new Date((d.get('datum') || IH.dagStr()) + 'T09:00:00').toISOString(), klar: false, kund: a.kund, affar: a.id, ansvarig: IH.jag().id });
+    IH.spara(); IH.stangArk(true); IH.uppdateraMeny(); IH.rita(); IH.toast('Uppgiften är tillagd', d.get('text'), 'uppgift');
+  };
   G['till-spalt'] = function (el) {
     var s = $('#spalt-' + el.getAttribute('data-steg'));
     if (!s) return;
@@ -3606,7 +3654,7 @@
         ? '<span class="proj__montage proj__montage--klar"><svg class="emo-ik" aria-hidden="true"><use href="#i-nyckel"/></svg> Överlämnat</span>'
         : '<span class="proj__montage' + (dagar >= 0 && dagar <= 21 ? ' proj__montage--snart' : '') + '"><svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg> v. ' + IH.vecka(new Date(p.montage)) + (dagar >= 0 ? ' · om ' + dagar + ' d' : '') + '</span>') +
         '<span class="proj__check' + (klara === CHECK.length ? ' proj__check--klar' : '') + '" title="' + klara + ' av ' + CHECK.length + ' punkter klara"><i style="--a:' + (klara / CHECK.length).toFixed(2) + '"></i><small>' + (klara === CHECK.length ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-klar"/></svg> Allt klart' : klara + '/' + CHECK.length + ' klart') + '</small></span></div>' +
-      '<div class="aff__snabb">' +
+      '<div class="aff__verktyg">' +
         (k && k.telefon ? '<button type="button" data-g="kund-ring" data-tel="' + e(k.telefon) + '" title="Ring ' + e(forsta(k.namn)) + '" aria-label="Ring ' + e(forsta(k.namn)) + '">' + i('tel') + '</button>' : '') +
         (k ? '<button type="button" data-g="kund-oppna" data-id="' + k.id + '" title="Kundkortet" aria-label="Kundkortet">' + i('kunder') + '</button>' : '') +
         (nasta ? '<button type="button" data-g="proj-nasta" data-id="' + p.id + '" title="Nästa steg: ' + e(IH.projsteg(nasta).namn) + '" aria-label="Nästa steg: ' + e(IH.projsteg(nasta).namn) + '">' + i('pil') + '</button>' : '') +
