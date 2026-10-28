@@ -814,7 +814,7 @@
   }
 
   // Nästa bästa steg för förfrågan, med åtgärderna direkt i kortet.
-  function nastaBasta(f, aff) {
+  function ffNastaBasta(f, aff) {
     var h = vantat(f), kvar = SVARSMAL - h;
     var tel = '<a class="knapp knapp--virke" href="tel:' + e(f.telefon.replace(/\s/g, '')) + '">' + i('tel') + 'Ring ' + e(forsta(f.namn)) + '</a>';
     var utkast = '<button class="knapp knapp--glas" type="button" data-g="f-utkast" data-id="' + f.id + '">' + i('blixt') + 'Svarsutkast</button>';
@@ -873,7 +873,7 @@
         '<div class="fd__lage">' + statusChip(s.farg, s.namn) +
           '<button class="knapp knapp--liten" type="button" data-g="f-tilldela" data-id="' + f.id + '">' +
           (tilldelad ? avatar(tilldelad.namn, true, tilldelad.farg) + e(forsta(tilldelad.namn)) : i('kunder') + 'Ta den') + '</button></div>' +
-      '</header>' + forlopp(f) + nastaBasta(f, aff) +
+      '</header>' + forlopp(f) + ffNastaBasta(f, aff) +
       '<div class="fd__mitt"><div class="fd__bild" data-tilt><img src="' + (IH.MILJO[f.miljo] || '../images/hus-r2.webp') + '" alt="" decoding="async"><span class="fd__skylt"><small>Var ska huset stå?</small>' + e(f.miljo) + '</span></div>' +
       '<div class="fd__svar">' +
         '<div><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg></i><small>Vad funderar du på?</small><b>' + e(f.hustyp) + '</b></div>' +

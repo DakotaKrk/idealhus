@@ -103,8 +103,8 @@
   /* 03 Tider ------------------------------------------------------------------------------------- */
   const klocka = (iso) => new Date(iso).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
   const dagNr = (iso) => { const a = new Date(iso), b = new Date(); a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0); return Math.round((b - a) / 864e5); };
-  const dagRubrik = (iso) => { const n = dagNr(iso); return n === 0 ? 'Idag' : n === 1 ? 'Igår' : new Date(iso).toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' }); };
-  const listTid = (iso) => { const n = dagNr(iso); return n === 0 ? klocka(iso) : n === 1 ? 'Igår' : n < 6 ? new Date(iso).toLocaleDateString('sv-SE', { weekday: 'short' }) : new Date(iso).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' }); };
+  const dagRubrik = (iso) => { const n = dagNr(iso); return n === 0 ? 'I dag' : n === 1 ? 'I går' : new Date(iso).toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^./, (c) => c.toUpperCase()); };
+  const listTid = (iso) => { const n = dagNr(iso); return n === 0 ? klocka(iso) : n === 1 ? 'I går' : n < 6 ? new Date(iso).toLocaleDateString('sv-SE', { weekday: 'short' }) : new Date(iso).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' }); };
   const storlek = (b) => (b >= 1048576 ? (b / 1048576).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' kB');
 
   /* 04 Läget i gränssnittet ---------------------------------------------------------------------- */

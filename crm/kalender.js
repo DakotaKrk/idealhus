@@ -67,7 +67,7 @@
     p.innerHTML = `${ark ? `<div class="kal-ark-titel">${e(etikettFor(i))}</div>` : ''}
       <div class="kal-huvud"><div class="kal-manad" aria-live="polite"></div><div class="kal-stega"><button type="button" class="kal-steg" data-kal-steg="-1" aria-label="Föregående månad">${PIL(true)}</button><button type="button" class="kal-steg" data-kal-steg="1" aria-label="Nästa månad">${PIL(false)}</button></div></div>
       <div class="kal-rutnat"><div class="kal-rad kal-veckodagar" aria-hidden="true"><span class="kal-v">v.</span>${VECKODAGAR.map(([kort, langtNamn]) => `<span title="${langtNamn}">${kort}</span>`).join('')}</div><div class="kal-dagar"></div></div>
-      <div class="kal-fot"><button type="button" class="kal-knapp" data-kal="rensa">Rensa</button>${markerade(i).size ? `<span class="kal-forklaring"><i aria-hidden="true"></i>${e(i.dataset.kalMarkeraText || 'Markerad')}</span>` : ''}<button type="button" class="kal-knapp kal-idag" data-kal="idag">Idag</button></div>`;
+      <div class="kal-fot"><button type="button" class="kal-knapp" data-kal="rensa">Rensa</button>${markerade(i).size ? `<span class="kal-forklaring"><i aria-hidden="true"></i>${e(i.dataset.kalMarkeraText || 'Markerad')}</span>` : ''}<button type="button" class="kal-knapp kal-idag" data-kal="idag">I dag</button></div>`;
     (i.closest('dialog, .mote') || document.body).appendChild(p);
     if (harPopover) { p.popover = 'manual'; p.showPopover(); } else p.setAttribute('data-utan-popover', '');
     rita(); placera();
