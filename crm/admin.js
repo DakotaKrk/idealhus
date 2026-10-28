@@ -200,9 +200,9 @@
   IH.G['ad-aterstall'] = function (el) {
     if (IH.jag().roll !== 'admin') { IH.toast('Bara administratören kan återställa', null, 'las'); return; }
     if (!el.dataset.saker) { el.dataset.saker = '1'; el.innerHTML = i('varning') + 'Klicka igen för att återställa'; setTimeout(function () { if (el.isConnected) { delete el.dataset.saker; el.innerHTML = i('aterstall') + 'Återställ exempeldata'; } }, 4000); return; }
-    var gammal = (db().sakerhet || []).slice();
+    var gammal = (db().sakerhet || []).slice(), gammalHub = db().sakHub;
     IH.db = IH.skapaExempeldata();
-    IH.db.sakerhet = gammal;
+    IH.db.sakerhet = gammal; if (gammalHub) IH.db.sakHub = gammalHub;
     logg('aterstall', 'Exempeldatan återställdes.');
     IH.uppdateraMeny();
     IH.rita();

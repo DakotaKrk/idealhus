@@ -379,7 +379,7 @@
   function pkHandelser(u) {
     var idag = dag0(new Date()).getTime(), ut = [];
     db().aktiviteter.forEach(function (h) { if (h.av === u.id) ut.push({ id: h.id, dag: dag0(h.tid).getTime(), tid: h.tid, typ: PK_TYP[h.typ] ? h.typ : 'system', text: h.text, kund: h.kund, akt: true }); });
-    db().uppgifter.forEach(function (x) { if (!x.klar && x.ansvarig === u.id) { var d = dag0(x.forfaller).getTime(); ut.push({ id: x.id, dag: d, tid: x.forfaller, typ: d < idag ? 'sen' : 'uppg', text: x.text, kund: x.kund, uppg: true }); } });
+    db().uppgifter.forEach(function (x) { if (!x.klar && !x.kalAkt && x.ansvarig === u.id) { var d = dag0(x.forfaller).getTime(); ut.push({ id: x.id, dag: d, tid: x.forfaller, typ: d < idag ? 'sen' : 'uppg', text: x.text, kund: x.kund, uppg: true }); } });
     db().affarer.forEach(function (x) { if (x.steg === 'vunnen' && x.vunnen && x.ansvarig === u.id) ut.push({ id: x.id, dag: dag0(x.vunnen).getTime(), tid: x.vunnen, typ: 'vunnen', text: 'Vunnen: ' + x.titel, kund: x.kund, affar: x.id }); });
     return ut.sort(function (x, y) { return x.tid < y.tid ? -1 : 1; });
   }
@@ -409,7 +409,7 @@
         var m0 = new Date(start); m0.setDate(start.getDate() + v * 7);
         rader += '<span class="pk-v">' + veckonr(m0) + '</span>';
         for (var dd = 0; dd < 7; dd++) {
-          var d = new Date(m0); d.setDate(m0.getDate() + dd); var t = d.getTime(), h = alla.filter(function (x) { return x.dag === t; }), led = pkLedig(u, t), jobb = h.some(function (x) { return x.akt; });
+          var d = new Date(m0); d.setDate(m0.getDate() + dd); var t = d.getTime(), h = alla.filter(function (x) { return x.dag === t; }), led = pkLedig(u, t), jobb = t <= idag && h.some(function (x) { return x.akt; });
           rader += '<button type="button" class="pk-dag' + (d.getMonth() !== man ? ' ut' : '') + (t === idag ? ' idag' : '') + (t === valdT ? ' vald' : '') + (d.getDay() % 6 === 0 ? ' helg' : '') + (t < idag ? ' forbi' : '') + '" data-g="pk-dag" data-dag="' + dagISO(d) + '" style="--n:' + (v * 7 + dd) + '">' +
             '<span class="pk-dag__topp"><b>' + d.getDate() + '</b>' + (jobb ? '<i class="pk-jobb" title="Jobbade"></i>' : '') + '</span>' +
             (led ? '<span class="pk-led f-' + led.typ + '">' + e(FRANVARO[led.typ][0]) + '</span>' : '') +
@@ -463,10 +463,10 @@
     var p2 = function (v) { return String(v).padStart(2, '0'); }, f = function (d) { return d.getUTCFullYear() + p2(d.getUTCMonth() + 1) + p2(d.getUTCDate()) + 'T' + p2(d.getUTCHours()) + p2(d.getUTCMinutes()) + '00Z'; };
     var esc = function (t) { return String(t || '').replace(/[\\;,]/g, function (c) { return '\\' + c; }).replace(/\n/g, ' '); };
     var rader = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Legohus//CRM//SV'];
-    h.forEach(function (x) { var s2 = new Date(x.tid), k = x.kund && IH.kund(x.kund); rader.push('BEGIN:VEVENT', 'UID:' + x.id + '@legohus-crm', 'DTSTAMP:' + f(new Date()), 'DTSTART:' + f(s2), 'DTEND:' + f(new Date(s2.getTime() + 36e5)), 'SUMMARY:' + esc(PK_TYP[x.typ][0] + ': ' + x.text), 'DESCRIPTION:' + esc(k ? k.namn : ''), 'END:VEVENT'); });
+    h.forEach(function (x) { var s2 = new Date(x.tid), k = x.kund && IH.kund(x.kund); rader.push('BEGIN:VEVENT', 'UID:' + x.id + '@legohus-crm', 'DTSTAMP:' + f(new Date()), 'DTSTART:' + f(s2), 'DTEND:' + f(new Date(s2.getTime() + 36e5)), 'SUMMARY:' + esc(x.typ === 'vunnen' ? x.text : PK_TYP[x.typ][0] + ': ' + x.text), 'DESCRIPTION:' + esc(k ? k.namn : ''), 'END:VEVENT'); });
     rader.push('END:VCALENDAR');
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rader.join('\r\n')], { type: 'text/calendar' }));
-    a.download = 'kalender-' + u.namn.split(' ')[0].toLowerCase() + '-' + (pk.vy === 'ar' ? fran.getFullYear() : fran.toISOString().slice(0, 7)) + '.ics'; document.body.appendChild(a); a.click(); a.remove();
+    a.download = 'kalender-' + u.namn.split(' ')[0].toLowerCase() + '-' + (pk.vy === 'ar' ? fran.getFullYear() : dagISO(fran).slice(0, 7)) + '.ics'; document.body.appendChild(a); a.click(); a.remove();
     IH.toast('Kalenderfilen är klar', plural(h.length, 'händelse', 'händelser') + ' – öppna filen i din kalender.', 'kalender');
   };
 
@@ -710,7 +710,7 @@
     h.forEach(function (x) { var s = new Date(x.tid), u = IH.anvandare(x.u); rader.push('BEGIN:VEVENT', 'UID:' + x.id + '@legohus-crm', 'DTSTAMP:' + f(new Date()), 'DTSTART:' + f(s), 'DTEND:' + f(new Date(s.getTime() + 36e5)), 'SUMMARY:' + esc(x.text), 'DESCRIPTION:' + esc((u ? u.namn : '') + ' · ' + (KAL_TYP[x.slag] || '')), 'END:VEVENT'); });
     rader.push('END:VCALENDAR');
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rader.join('\r\n')], { type: 'text/calendar' }));
-    a.download = 'teamets-kalender-' + forsta.toISOString().slice(0, 7) + '.ics'; document.body.appendChild(a); a.click(); a.remove();
+    a.download = 'teamets-kalender-' + dagISO(forsta).slice(0, 7) + '.ics'; document.body.appendChild(a); a.click(); a.remove();
     IH.toast('Kalenderfilen är klar', plural(h.length, 'händelse', 'händelser') + ' – öppna filen i din kalender.', 'kalender');
   };
   document.addEventListener('submit', function (ev) {
@@ -754,7 +754,8 @@
     });
     var tot = { pipeline: sum(function (x) { return x.oppet; }), viktat: sum(function (x) { return x.viktat; }), vunnet: sum(function (x) { return x.vunnet90; }), mal: sum(function (x) { return x.malKvartal; }), vunnetMal: sum(function (x) { return x.malKvartal ? x.vunnet90 : 0; }) };
     var avgjorda = sum(function (x) { return x.vunna90.length + x.forlorade90; }), vg = avgjorda ? sum(function (x) { return x.vunna90.length; }) / avgjorda : null;
-    var aktivaNu = team.filter(function (x) { return BORTA.indexOf(narvaro(x.u.id).id) < 0; }).length;
+    var bortaIdag = function (id) { return BORTA.indexOf(narvaro(id).id) >= 0 || !!franvaroPa(id, dag0(new Date()).getTime()); };
+    var aktivaNu = team.filter(function (x) { return !bortaIdag(x.u.id); }).length;
     var oppnaN = sum(function (x) { return x.oppna.length; });
     var utan = db().affarer.filter(function (a) { return a.steg !== 'vunnen' && !a.forlorad && (!a.ansvarig || !IH.anvandare(a.ansvarig) || IH.anvandare(a.ansvarig).inaktiv); });
     var h = new Date().getHours(), hals = IH.hej();
@@ -784,7 +785,7 @@
       ].map(tal).join('') + '</div>' + '<div class="lp-mork__mitt">' + ring + lag + '</div>' + veckoStaplar + '</section>';
 
     // 01 Teamet just nu
-    var vald = team.filter(function (x) { var s = narvaro(x.u.id).id; return chefUi.filter === 'alla' || (chefUi.filter === 'tillganglig' ? s === 'online' : chefUi.filter === 'upptagen' ? UPPTAGEN.indexOf(s) >= 0 : BORTA.indexOf(s) >= 0); });
+    var vald = team.filter(function (x) { var s = narvaro(x.u.id).id; return chefUi.filter === 'alla' || (chefUi.filter === 'tillganglig' ? s === 'online' && !bortaIdag(x.u.id) : chefUi.filter === 'upptagen' ? UPPTAGEN.indexOf(s) >= 0 : bortaIdag(x.u.id)); });
     var kort = vald.map(function (x) {
       var n = narvaro(x.u.id), varn = [];
       if (x.stilla.length) varn.push(plural(x.stilla.length, 'affär står still', 'affärer står still'));
@@ -798,7 +799,7 @@
         '<header>' + avatar(x.u) + '<div><a href="#/profil/' + x.u.id + '"><b>' + e(x.u.namn) + '</b></a><small style="--n:' + n.farg + '"><i></i>' + e(n.namn) + (x.u.chef ? ' · Chef' : '') + (senast ? ' · aktiv ' + e(IH.sedan(senast.tid)) : '') + '</small></div>' +
           '<span class="lp-saljare__last" title="Öppna affärer just nu">' + plural(x.oppna.length, 'affär', 'affärer') + '</span></header>' +
         '<div class="lp-saljare__tal"><div><small>Öppet</small><b class="tal">' + IH.kort(x.oppet) + '</b></div><div><small>Viktat</small><b class="tal">' + IH.kort(x.viktat) + '</b></div><div><small>Vunnet 90 d</small><b class="tal">' + IH.kort(x.vunnet90) + '</b></div></div>' +
-        (x.malKvartal ? '<p class="lp-saljare__mal">' + pct(Math.min(1, x.vunnet90 / x.malKvartal)) + ' av kvartalsmålet ' + IH.kort(x.malKvartal) + '<span class="lp-mal__spar"><i style="--a:' + Math.min(1, x.vunnet90 / x.malKvartal).toFixed(3) + '"></i></span></p>' : '<p class="lp-saljare__mal lp-saljare__mal--tom">Inget mål satt · <button type="button" class="lp-lank" data-g="lp-mal" data-id="' + x.u.id + '">Sätt mål</button></p>') +
+        (x.malKvartal ? '<p class="lp-saljare__mal">' + pct(x.vunnet90 / x.malKvartal) + ' av kvartalsmålet ' + IH.kort(x.malKvartal) + '<span class="lp-mal__spar"><i style="--a:' + Math.min(1, x.vunnet90 / x.malKvartal).toFixed(3) + '"></i></span></p>' : '<p class="lp-saljare__mal lp-saljare__mal--tom">Inget mål satt · <button type="button" class="lp-lank" data-g="lp-mal" data-id="' + x.u.id + '">Sätt mål</button></p>') +
         '<ul class="lp-perSteg">' + perSteg.map(function (p) {
           return '<li style="--f:' + p.s.farg + ';--a:' + (p.l.length / maxS).toFixed(3) + '" title="' + e(p.s.namn) + ': ' + plural(p.l.length, 'affär', 'affärer') + (p.l.length ? ' · ' + IH.kort(p.l.reduce(function (t, a) { return t + a.varde; }, 0)) + ' · ' + e(p.l.map(function (a) { return a.titel; }).slice(0, 3).join(', ')) : '') + '"><span>' + e(p.s.kort) + '</span><i></i><b>' + p.l.length + '</b><small>' + (p.l.length ? IH.kort(p.l.reduce(function (t, a) { return t + a.varde; }, 0)) : '–') + '</small></li>';
         }).join('') + '</ul>' +
@@ -1005,9 +1006,9 @@
   };
   G['lp-rapport'] = function () {
     var q = function (x) { return '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"'; };
-    var rader = [['Säljare', 'Öppna affärer', 'Öppet värde', 'Viktat', 'Vunnet 90 d', 'Ordrar 90 d', 'Årsmål', 'Aktiviteter 14 d', 'Försenade uppgifter'].map(q).join(';')].concat(saljare().map(function (u) {
+    var rader = [['Säljare', 'Öppna affärer', 'Öppet värde', 'Viktat', 'Vunnet 90 d', 'Ordrar 90 d', 'Årsmål', 'Aktiviteter 14 d', 'Försenade uppgifter'].map(q).join(';')].concat(saljare().filter(function (u) { return !u.inaktiv; }).map(function (u) {
       var x = stat(u), v90 = x.aff.filter(function (a) { return a.steg === 'vunnen' && inom(a.vunnen, 90); });
-      return [u.namn, x.oppna.length, Math.round(x.oppet), Math.round(x.viktat), v90.reduce(function (t, a) { return t + a.varde; }, 0), v90.length, u.mal || '', x.akt.filter(function (h) { return IH.dagarSedan(h.tid) < 14; }).length, x.sena.length].map(q).join(';');
+      return [u.namn, x.oppna.length, Math.round(x.oppet), Math.round(x.viktat), v90.reduce(function (t, a) { return t + a.varde; }, 0), v90.length, u.mal || '', x.akt.filter(function (h) { return IH.dagarSedan(h.tid) < 14 && new Date(h.tid) <= new Date(); }).length, x.sena.length].map(q).join(';');
     }));
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rader.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
     a.download = 'legohus-forsaljning-' + new Date().toISOString().slice(0, 10) + '.csv'; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800);

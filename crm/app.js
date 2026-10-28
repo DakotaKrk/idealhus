@@ -97,7 +97,7 @@
   IH.sedan = function (iso) {
     var s = (Date.now() - new Date(iso).getTime()) / 1000;
     if (s < 0) {
-      var fram = Math.round(-s / 86400);
+      var a0 = new Date(); a0.setHours(0, 0, 0, 0); var b0 = new Date(iso); b0.setHours(0, 0, 0, 0); var fram = Math.round((b0 - a0) / 864e5);
       return fram <= 0 ? 'i dag' : fram === 1 ? 'i morgon' : 'om ' + fram + ' dagar';
     }
     if (s < 60) return 'nyss';
@@ -367,7 +367,7 @@
       (IH.vyVaxel ? IH.vyVaxel() : '') +
       '<nav class="sido__nav" aria-label="CRM"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
       '<div class="sido__fot"><button class="sido__mer" type="button" tabindex="-1" aria-hidden="true" data-g="sido-mer">Mer ' + IH.i('pil') + '</button>' +
-      '<button class="anv" type="button" data-g="konto-meny" aria-haspopup="dialog"><span class="avatar" style="--av:' + jag.farg + '">' + IH.initialer(jag.namn) +
+      '<button class="anv" type="button" data-g="konto-meny" aria-haspopup="dialog"><span class="avatar' + (jag.bild ? ' avatar--bild' : '') + '" style="--av:' + jag.farg + (jag.bild ? ';background-image:url(' + IH.e(jag.bild) + ');background-size:cover;color:transparent' : '') + '">' + IH.initialer(jag.namn) +
       (IH.narvaroPrick ? IH.narvaroPrick(jag.id) : '') + '</span>' +
       '<span><b>' + IH.e(jag.namn) + '</b><small class="anv__status">' + (IH.narvaro ? IH.e(IH.narvaro(jag.id).namn) + ' · ' : '') + IH.e(String(jag.titel || '').split(' · ')[0]) + '</small></span><span class="anv__chevron" aria-hidden="true">' + IH.i('chevron') + '</span></button>' +
       '<div class="sido__smalt"><a href="../index.html" data-g="lamna" title="Till hemsidan">' + IH.i('hem') + 'Hemsidan</a>' +
@@ -394,7 +394,7 @@
       '<div class="huvud"><header class="topp">' +
       '<button class="sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök eller skriv ett kommando…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
       '<span class="proto">Prototyp · exempeldata</span>' +
-      '<button class="knapp knapp--virke" type="button" data-g="ny">' + IH.i('plus') + 'Ny</button>' +
+      (IH.jag().roll === 'admin' ? '' : '<button class="knapp knapp--virke" type="button" data-g="ny">' + IH.i('plus') + 'Ny</button>') +
       '</header><main class="vy" id="vy" tabindex="-1"></main></div>' +
       '<nav class="mobilmeny" aria-label="Meny">' + mobilmeny() + '</nav>' +
       '<div class="toaster" aria-live="polite"></div>';
@@ -643,7 +643,9 @@
   var MAC = /Mac|iPhone|iPad/.test(navigator.platform || '');
   var SIDOR = [['oversikt', 'Översikt', 'hem'], ['forfragningar', 'Förfrågningar', 'inkorg'], ['salj', 'Säljtavla', 'tavla'],
     ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote'],
-    ['produktion', 'Projekt', 'produktion'], ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['chatt', 'Meddelanden', 'meddelande'], ['profil', 'Min profil', 'kunder'], ['chef', 'Försäljningsledning', 'graf'], ['installningar', 'Inställningar', 'installning']];
+    ['produktion', 'Projekt', 'produktion'], ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['chatt', 'Meddelanden', 'meddelande'], ['profil', 'Min profil', 'kunder'], ['chef', 'Försäljningsledning', 'graf'], ['installningar', 'Inställningar', 'installning'], ['kontroll', 'Kontrollcentral', 'graf'], ['admin', 'Adminpanel', 'installning'], ['sakerhet', 'Säkerhet', 'system']];
+  var ADMIN_SIDOR = ['oversikt', 'kontroll', 'admin', 'sakerhet', 'chatt', 'att-gora', 'profil', 'installningar'];
+  var sidaFor = function (x) { var j = IH.jag(); if (j.roll === 'admin') return ADMIN_SIDOR.indexOf(x[0]) >= 0; if (/^(kontroll|admin|sakerhet)$/.test(x[0])) return false; return x[0] !== 'chef' || j.chef; };
   var ATGARDER = [['ny-kund', 'Ny kund', 'kunder', 'Privatperson eller företag'], ['ny-affar', 'Ny affär', 'tavla', 'Direkt på säljtavlan'],
     ['ny-forfragan', 'Ny förfrågan', 'inkorg', 'Någon ringde eller mejlade'], ['ny-uppgift', 'Ny uppgift', 'uppgift', 'Något att göra'],
     ['starta-mote', 'Starta kundmöte', 'mote', 'Presentationen i helskärm']];
@@ -694,7 +696,7 @@
     if (!q) {
       html += grupp('Senaste', senaste().map(senasteRad).filter(Boolean).slice(0, 5));
       if (IH.jag().roll !== 'admin') html += grupp('Snabbåtgärder', ATGARDER.map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
-      html += grupp('Gå till', SIDOR.filter(function (x) { return x[0] !== IH.nuvarande.vy && (x[0] !== 'chef' || IH.jag().chef); }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
+      html += grupp('Gå till', SIDOR.filter(function (x) { return x[0] !== IH.nuvarande.vy && sidaFor(x); }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
     } else {
       var db = IH.db;
       var kunder = db.kunder.filter(function (k) { return traff(k.namn + ' ' + k.ort + ' ' + k.epost + ' ' + k.telefon, q, k.namn); }).slice(0, 5);
@@ -710,7 +712,7 @@
       html += grupp('Förfrågningar', forfragningar.map(function (f) { return rad('ga:#/forfragningar/' + f.id, IH.i('inkorg'), f.namn, f.hustyp + ' · ' + f.ort, 'Förfrågan'); }));
       html += grupp('Offerter', offerter.map(function (o) { var a = IH.affar(o.affar), k = a && IH.kund(a.kund); return rad('ga:#/offerter/' + o.id, IH.i('offert'), o.nummer, k ? k.namn : '', 'Offert'); }));
       html += grupp('Åtgärder', ATGARDER.filter(function (x) { return IH.jag().roll !== 'admin' && traff(x[1] + ' ' + x[3], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
-      html += grupp('Gå till', SIDOR.filter(function (x) { return (x[0] !== 'chef' || IH.jag().chef) && traff(x[1], q, x[1]); }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
+      html += grupp('Gå till', SIDOR.filter(function (x) { return sidaFor(x) && traff(x[1], q, x[1]); }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
       if (!html) html = '<p class="palett__tom">Inga träffar för ”' + IH.e(q) + '”</p>';
     }
     return html;
@@ -879,7 +881,8 @@
     IH.oppnaArk({
       titel: 'Mer', ikon: 'meny',
       kropp: '<div class="lista kort">' + poster.map(function (p) {
-        return '<a class="lista__rad" href="#/' + p[0] + '">' + IH.i(p[2]) + '<span class="lista__text"><b>' + p[1] + '</b></span>' + IH.i('pil') + '</a>';
+        var br = brickor()[p[0]];
+        return '<a class="lista__rad" href="#/' + p[0] + '">' + IH.i(p[2]) + '<span class="lista__text"><b>' + p[1] + '</b></span>' + (br && br[1] && br[0] ? '<em class="chip">' + br[0] + '</em>' : '') + IH.i('pil') + '</a>';
       }).join('') + (IH.jag().chef ? '<a class="lista__rad" href="#/chef">' + IH.i('graf') + '<span class="lista__text"><b>Försäljningsledning</b></span>' + IH.i('pil') + '</a>' : '') +
         '<a class="lista__rad" href="#/profil">' + IH.i('kunder') + '<span class="lista__text"><b>Min profil</b></span>' + IH.i('pil') + '</a>' +
         (IH.jag().roll === 'admin' ? '<a class="lista__rad" href="#/admin">' + IH.i('installning') + '<span class="lista__text"><b>Admin</b></span>' + IH.i('pil') + '</a><a class="lista__rad" href="#/sakerhet">' + IH.i('system') + '<span class="lista__text"><b>Säkerhet</b></span>' + IH.i('pil') + '</a>' : '') +

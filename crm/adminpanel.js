@@ -22,11 +22,14 @@
       if (x.titel) u.titel = x.titel;
       if ('mal' in x) u.mal = x.mal || undefined;
       if ('chef' in x) u.chef = x.chef || undefined;
+      ['epost', 'tel', 'om', 'bild', 'start'].forEach(function (f) { if (f in x) u[f] = x[f] || undefined; });
       u.inaktiv = !!x.inaktiv;
     });
   }
   function andra(id, falt) { var a = inst().konton || {}; a[id] = Object.assign(a[id] || {}, falt); sparaInst('konton', a); tillampa(); }
   tillampa();
+  // Ett inaktiverat konto loggas ut direkt (även om det loggades in innan det inaktiverades)
+  if (IH.riktigJag().inaktiv) { try { localStorage.removeItem('ih-crm-inloggad'); } catch (x) { /* privat läge */ } location.replace('logga-in.html?inaktiv=1'); }
   IH.andraKonto = andra;
   IH.arAktivt = function (u) { return !!u && !u.inaktiv; };
   var valjForra = IH.G['valj-anvandare'];

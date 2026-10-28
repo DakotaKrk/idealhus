@@ -116,3 +116,5 @@ a.sh-knapp { text-decoration: none; color: inherit; }
 .ap-atgarder [data-g="ap-aktiv"] { width: 116px; min-width: 116px; }
 .ap-plats--bred { width: 116px; }
 @media (max-width: 1100px) { .ap-atgarder [data-g="ap-aktiv"] { width: 34px; min-width: 34px; } .ap-plats--bred { width: 34px; } }
+
+@media (max-width: 700px) { .ap-tal .ao-tal { min-width: 0; } .ap-tal .ao-tal__text { min-width: 0; } .ap-tal .ao-tal strong { font-size: 1.1rem; white-space: normal; overflow-wrap: anywhere; } }

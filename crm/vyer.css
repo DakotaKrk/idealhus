@@ -8520,3 +8520,20 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 @media (max-width: 700px) { .samtal__fragor { grid-template-columns: 1fr; } }
 
 @media (max-width: 720px) { .kkontakt__tal { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 !important; } .kkontakt, .kg { min-width: 0; overflow: hidden; } }
+
+/* Mobil: kundlistans tabell visar namnet (kolumn 2 efter kryssrutan) och kundkortets huvud blir en kolumn */
+@media (max-width: 700px) {
+  .vy .tabell--kunder th:nth-child(2), .vy .tabell--kunder td:nth-child(2) { display: table-cell !important; }
+  .vy .kh { grid-template-columns: minmax(0, 1fr) !important; }
+  .vy .kh > * { min-width: 0; }
+}
+@media (min-width: 701px) and (max-width: 1150px) { .vy .kh { grid-template-columns: minmax(0, 1fr) auto !important; } }
+
+@media (max-width: 700px) {
+  .agk__rutnat--man .agk__dag header small { display: none; }
+  .agk__rutnat--man .agk__dag header { gap: 4px; flex-wrap: wrap; }
+  .agk__rutnat--man .agk__plus { display: none; }
+  .agk__rutnat--man .agk__u { padding: 3px; justify-content: center; }
+  .hero__fonster { transform: scale(.6); transform-origin: top right; opacity: .55; }
+}
+@media (hover: none) { .agk__plus { opacity: 1; transform: none; } .uppg__skjut { opacity: 1; } }

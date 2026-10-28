@@ -91,7 +91,7 @@
     if (!inst.kopia || IH.dagarSedan(inst.kopia) > 7) ut.push({ ikon: 'ladda-ner', text: inst.kopia ? 'Säkerhetskopian är ' + IH.dagarSedan(inst.kopia) + ' dagar gammal' : 'Ingen säkerhetskopia', under: 'Exportera all data som JSON', g: 'ad-exportera', knapp: 'Exportera' });
     if (dl.brott) ut.push({ ikon: 'nyckelverktyg', text: plural(dl.brott, 'trasig koppling', 'trasiga kopplingar'), under: brott[0], g: 'sh-skanna-ga', data: 'buggar', knapp: 'Kontrollera' });
     if (dr.fel.length) ut.push({ ikon: 'bugg', text: plural(dr.fel.length, 'fel', 'fel') + ' sedan sidan laddades', under: 'Skript eller filer som inte fungerade', g: 'sh-skanna-ga', data: 'buggar', knapp: 'Kontrollera' });
-    IH.ANVANDARE.filter(function (u) { return u.roll === 'salj' && !u.mal; }).forEach(function (u) { ut.push({ ikon: 'mal', text: u.namn + ' saknar årsmål', under: 'Försäljningsledningen räknar mot målet', lank: '#/profil/' + u.id, knapp: 'Profil' }); });
+    IH.ANVANDARE.filter(function (u) { return u.roll === 'salj' && !u.mal && !u.inaktiv; }).forEach(function (u) { ut.push({ ikon: 'mal', text: u.namn + ' saknar årsmål', under: 'Försäljningsledningen räknar mot målet', lank: '#/profil/' + u.id, knapp: 'Profil' }); });
     d.forfragningar.filter(function (f) { return f.status === 'ny' && !f.tilldelad; }).slice(0, 2).forEach(function (f) { ut.push({ ikon: 'inkorg', text: 'Förfrågan utan ansvarig: ' + f.namn, under: 'Kom ' + IH.sedan(f.skapad), lank: '#/forfragningar/' + f.id, knapp: 'Öppna' }); });
     return ut;
   }
@@ -111,9 +111,9 @@
     var fyndAlla = H ? H.kontroller.reduce(function (t, k) { var r = S.senast[k.id]; return r ? t.concat(r.fynd) : t; }, []) : [];
     var fyndN = function (a) { return fyndAlla.filter(function (x) { return x.allvar === a; }).length; };
     var h = new Date().getHours(), halsning = h < 5 ? 'God natt' : h < 10 ? 'God morgon' : h < 17 ? 'Hej' : 'God kväll';
-    var SAML = [['Kunder', 'kunder'], ['Förfrågningar', 'forfragningar'], ['Affärer', 'affarer'], ['Offerter', 'offerter'], ['Projekt', 'projekt'], ['Aktiviteter', 'aktiviteter'], ['Uppgifter', 'uppgifter']];
+    var SAML = [['Kunder', 'kunder'], ['Förfrågningar', 'forfragningar'], ['Affärer', 'affarer'], ['Offerter', 'offerter'], ['Projekt', 'projekt'], ['Aktiviteter', 'aktiviteter'], ['Uppgifter', 'uppgifter'], ['Dokument', 'dokument'], ['Frånvaro', 'franvaro']];
     var antal = function (s) { return (d[s] || []).length; };
-    var poster = SAML.reduce(function (t, s) { return t + antal(s[1]); }, 0) + ((d.chatt || {}).meddelanden || []).length;
+    var poster = SAML.reduce(function (t, s) { return t + antal(s[1]); }, 0);
     var handelser7 = d.aktiviteter.filter(function (x) { return IH.dagarSedan(x.tid) < 7; }).length;
     // Remsans extra: en liten bild av läget i varje ruta (trend, vilka, staplar, fördelning) och en knapp till nästa steg
     var forra = S.historik[1], sakDiff = senast && forra ? senast.poang - forra.poang : null;
@@ -129,8 +129,8 @@
         extra: '<span class="ao-x-folk">' + iTjanst.slice(0, 4).map(function (u) { return '<span class="avatar" style="--av:' + u.farg + '" title="' + e(u.namn + ' · ' + IH.narvaro(u.id).namn) + '">' + IH.initialer(u.namn) + '</span>'; }).join('') + '</span>' },
       { ikon: 'bugg', etikett: 'Fel i sidan', varde: String(dr.fel.length), under: dr.fel.length ? 'sedan laddning · senast ' + e(String(dr.fel[dr.fel.length - 1].text || dr.fel[dr.fel.length - 1]).slice(0, 30)) : 'buggfritt sedan laddning', ton: dr.fel.length ? 'gul' : 'gron', href: '#/sakerhet',
         extra: dr.fel.length ? '<span class="ao-x-knapp">Visa felen' + i('pil') + '</span>' : '<span class="ao-x-ok">' + i('bock') + '</span>' },
-      { ikon: 'nyckelverktyg', etikett: 'Kopplingar', varde: dl.brott ? dl.brott + ' fel' : 'OK', under: dl.brott ? 'trasiga – rättas i Adminpanelen' : 'kunder, affärer och projekt hänger ihop', ton: dl.brott ? 'gul' : 'gron', href: dl.brott ? '#/admin' : null,
-        extra: dl.brott ? '<span class="ao-x-knapp">Rätta' + i('pil') + '</span>' : '<span class="ao-x-ok">' + i('bock') + '</span>' },
+      { ikon: 'nyckelverktyg', etikett: 'Kopplingar', varde: dl.brott ? dl.brott + ' fel' : 'OK', under: dl.brott ? 'trasiga – se listan i Säkerhet' : 'kunder, affärer och projekt hänger ihop', ton: dl.brott ? 'gul' : 'gron', href: dl.brott ? '#/sakerhet' : null,
+        extra: dl.brott ? '<span class="ao-x-knapp">Visa' + i('pil') + '</span>' : '<span class="ao-x-ok">' + i('bock') + '</span>' },
       { ikon: 'databas', etikett: 'Poster', varde: poster.toLocaleString('sv-SE'), under: kb(dr.bytes) + ' · ' + SAML.slice().sort(function (a, c) { return antal(c[1]) - antal(a[1]); })[0][0].toLowerCase() + ' flest', ton: 'lila', href: '#/admin',
         extra: '<span class="ao-x-fordelning" title="' + e(SAML.map(function (x) { return x[0] + ' ' + antal(x[1]); }).join(' · ')) + '">' + SAML.map(function (x, n) { return antal(x[1]) ? '<i style="flex:' + antal(x[1]) + ';background:' + FARG[n] + '"></i>' : ''; }).join('') + '</span>' },
       { ikon: 'puls', etikett: 'Händelser', varde: String(handelser7), under: 'senaste 7 d' + (fore7 ? ' · ' + (handelser7 >= fore7 ? '↑ ' : '↓ ') + Math.abs(Math.round((handelser7 - fore7) / fore7 * 100)) + ' % mot veckan före' : ''), ton: 'is',
@@ -182,13 +182,14 @@
       '<div class="ao-fot"><button type="button" class="knapp knapp--liten" data-g="sh-skanna-ga" data-ids="buggar,lacka">' + ik('nyckelverktyg') + 'Kontrollera datan</button><button type="button" class="knapp knapp--liten" data-g="ad-exportera">' + ik('ladda-ner') + 'Exportera</button></div>',
       { halv: true, hoger: chip(dl.poang, 'Kvalitet ' + dl.poang + ' %') });
     // 04 Aktivitet
-    var varden = IH.ANVANDARE.map(function (u) { return perDag(u.id, dagar); }), maxV = Math.max.apply(null, [].concat.apply([1], varden));
+    var aktivaK = IH.ANVANDARE.filter(function (u) { return !u.inaktiv; });
+    var varden = aktivaK.map(function (u) { return perDag(u.id, dagar); }), maxV = Math.max.apply(null, [].concat.apply([1], varden));
     var VD = ['Sö', 'Må', 'Ti', 'On', 'To', 'Fr', 'Lö'];
-    var tot = IH.ANVANDARE.map(function (u, r) { return { u: u, n: varden[r].reduce(function (t, v) { return t + v; }, 0) }; }), mest = tot.slice().sort(function (a, b) { return b.n - a.n; })[0], tysta = tot.filter(function (x) { return !x.n; });
+    var tot = aktivaK.map(function (u, r) { return { u: u, n: varden[r].reduce(function (t, v) { return t + v; }, 0) }; }), mest = tot.slice().sort(function (a, b) { return b.n - a.n; })[0], tysta = tot.filter(function (x) { return !x.n; });
     var karta = band('04 · Aktivitet', 'Vem gör', 'vad och när',
       '<p class="lp-forklaring">Händelser i tidslinjerna per konto och dag – möten, samtal, mejl och anteckningar. Mörkare ruta = fler händelser.</p>' +
       '<div class="ao-karta" style="--dagar:' + dagar.length + '"><span></span>' + dagar.map(function (dd, n) { return '<small class="' + (dd.getDay() % 6 === 0 ? 'helg' : '') + (n === dagar.length - 1 ? ' nu' : '') + '">' + VD[dd.getDay()] + '</small>'; }).join('') +
-        IH.ANVANDARE.map(function (u, r) { return '<a class="ao-karta__vem" href="#/profil/' + u.id + '"><span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span>' + e(u.namn.split(' ')[0]) + '</a>' + varden[r].map(function (v, c) { return '<i class="' + (dagar[c].getDay() % 6 === 0 ? 'helg' : '') + (c === dagar.length - 1 ? ' nu' : '') + '" style="--v:' + (v / maxV).toFixed(2) + '" title="' + e(u.namn) + ', ' + IH.datum(dagar[c].toISOString()) + ': ' + v + '"></i>'; }).join(''); }).join('') + '</div>' +
+        aktivaK.map(function (u, r) { return '<a class="ao-karta__vem" href="#/profil/' + u.id + '"><span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span>' + e(u.namn.split(' ')[0]) + '</a>' + varden[r].map(function (v, c) { return '<i class="' + (dagar[c].getDay() % 6 === 0 ? 'helg' : '') + (c === dagar.length - 1 ? ' nu' : '') + '" style="--v:' + (v / maxV).toFixed(2) + '" title="' + e(u.namn) + ', ' + IH.datum(dagar[c].toISOString()) + ': ' + v + '"></i>'; }).join(''); }).join('') + '</div>' +
       '<div class="ao-skala"><span>Färre</span>' + [0.1, 0.35, 0.6, 0.85, 1].map(function (v) { return '<i style="--v:' + v + '"></i>'; }).join('') + '<span>Fler</span></div>' +
       '<div class="ao-statrad"><div><small>Händelser 14 d</small><strong>' + tot.reduce(function (t, x) { return t + x.n; }, 0) + '</strong><em>i tidslinjerna</em></div><div><small>Mest aktiv</small><strong>' + (mest && mest.n ? e(mest.u.namn.split(' ')[0]) : '–') + '</strong><em>' + (mest && mest.n ? plural(mest.n, 'händelse', 'händelser') : 'ingen aktivitet') + '</em></div>' +
         '<div><small>Tysta 14 d</small><strong>' + tysta.length + '</strong><em>' + (tysta.length ? e(tysta.map(function (x) { return x.u.namn.split(' ')[0]; }).join(', ')) : 'alla har loggat något') + '</em></div></div>',

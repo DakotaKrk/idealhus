@@ -231,7 +231,7 @@
     const k = kanal(del[0]) || kanal(sidKanal) || kanal(pref().senast) || lista[0];
     sidKanal = k.id; satPref('senast', k.id);
     const html = '<h1 class="dold">Meddelanden</h1><div class="ch' + (ui.info ? ' med-info' : '') + ' kort" data-in>' +
-      '<aside class="ch-lista"><header><div><h2>Meddelanden</h2><small>' + (olastaTotalt() ? olastaTotalt() + ' olästa' : 'Allt är läst') + '</small></div>' +
+      '<aside class="ch-lista"><header><div><h2>Meddelanden</h2><small>' + (olastaTotalt() ? olastaTotalt() + (olastaTotalt() === 1 ? ' oläst' : ' olästa') : 'Allt är läst') + '</small></div>' +
           '<button type="button" class="ch-ikonknapp ch-ruta" data-g="ch-pling" aria-pressed="' + (pref().pling !== false) + '" title="' + (pref().pling !== false ? 'Stäng av ljudet' : 'Slå på ljudet') + '">' + ik(pref().pling !== false ? 'ljud' : 'ljud-av') + '</button>' +
           '<button type="button" class="ch-ikonknapp ch-ruta" data-g="chf-min-sida" data-kanal="' + k.id + '" title="Minimera till en ikon">' + ik('minimera') + '</button>' +
           '<button type="button" class="ch-ikonknapp ch-ny" data-g="ch-ny-grupp" title="Ny grupp">' + ik('plus') + '</button></header>' +

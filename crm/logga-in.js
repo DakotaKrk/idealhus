@@ -32,6 +32,8 @@
   function logga(roll, knapp) {
     var r = ROLLER[roll];
     if (!r) return;
+    var inaktiv = false; try { inaktiv = !!(((JSON.parse(localStorage.getItem('ih-crm-admin')) || {}).konton || {})[roll] || {}).inaktiv; } catch (x) { inaktiv = false; }
+    if (inaktiv) { var fel = document.querySelector('[data-inaktiv-fel]'); if (!fel) { fel = document.createElement('p'); fel.setAttribute('data-inaktiv-fel', ''); fel.setAttribute('role', 'alert'); fel.style.cssText = 'margin:12px 0 0;padding:10px 14px;border-radius:12px;background:#fdecea;color:#a8432f;font-weight:600'; (knapp && knapp.parentNode ? knapp.parentNode : document.body).appendChild(fel); } fel.textContent = 'Kontot är inaktiverat. Kontakta administratören.'; return; }
     try {
       localStorage.setItem('ih-crm-inloggad', '1');
       localStorage.setItem('ih-crm-jag', roll);

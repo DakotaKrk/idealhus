@@ -233,11 +233,11 @@
       man.forEach(function (x) { if (x.ar === d.getFullYear() && x.m === d.getMonth()) { x.summa += a.varde; x.antal += 1; } });
     });
     var max = Math.max.apply(null, man.map(function (x) { return x.summa; }).concat([1]));
-    var B = 520, H = 152, top = 24, bas = 124, fack = B / 6, bredd = 46;
+    var B = 520, H = 152, top = 24, bas = 124, fack = B / man.length, bredd = man.length > 6 ? 26 : 46;
     var hojd = function (v) { return v / max * (bas - top); };
     var staplar = man.map(function (x, n) {
       var mitt = fack * n + fack / 2, h = hojd(x.summa), y = bas - h, r = Math.min(6, h / 2);
-      var nu2 = n === 5 ? ' graf__stapel--nu' : '';
+      var nu2 = n === man.length - 1 ? ' graf__stapel--nu' : '';
       var form = h > 0
         ? '<path class="graf__stapel' + nu2 + '" data-n="' + n + '" style="--i:' + n + '" d="M' + (mitt - bredd / 2).toFixed(1) + ' ' + bas + 'V' + (y + r).toFixed(1) +
           'Q' + (mitt - bredd / 2).toFixed(1) + ' ' + y.toFixed(1) + ' ' + (mitt - bredd / 2 + r).toFixed(1) + ' ' + y.toFixed(1) +
@@ -249,7 +249,7 @@
         '<rect class="graf__traff" x="' + (fack * n).toFixed(1) + '" y="0" width="' + fack.toFixed(1) + '" height="' + H + '" data-x="' + mitt.toFixed(1) + '" data-y="' + (bas - hojd(x.summa)).toFixed(1) + '"' +
         ' data-n="' + n + '" data-man="' + mnamn[x.m] + ' ' + x.ar + '" data-summa="' + x.summa + '" data-antal="' + x.antal + '"/>';
     }).join('');
-    return '<div class="graf__ram"><svg class="graf" viewBox="0 0 ' + B + ' ' + H + '" role="img" aria-label="Vunnet per månad, sex månader: ' +
+    return '<div class="graf__ram"><svg class="graf" viewBox="0 0 ' + B + ' ' + H + '" role="img" aria-label="Vunnet per månad, ' + (man.length === 12 ? 'tolv' : 'sex') + ' månader: ' +
       man.map(function (x) { return mnamn[x.m] + ' ' + IH.kort(x.summa); }).join(', ') + '">' +
       '<defs><linearGradient id="graf-stapel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6c88f"/><stop offset="1" stop-color="#e3a35a"/></linearGradient></defs>' +
       [1 / 3, 2 / 3].map(function (t) { return '<path class="graf__rut" d="M0 ' + (top + t * (bas - top)).toFixed(1) + 'H' + B + '"/>'; }).join('') +
@@ -408,7 +408,7 @@
   // Dagens läge i tre korta rader: vad som förfaller i dag, möten i dag och nästa montage
   function dagensLage(uppg, nastaMontage) {
     var i0 = new Date(); i0.setHours(0, 0, 0, 0); var i1 = new Date(i0.getTime() + 864e5);
-    var moten = db().aktiviteter.filter(function (h) { var t = new Date(h.tid); return h.typ === 'mote' && t >= new Date() && t < i1; });
+    var moten = db().aktiviteter.filter(function (h) { var t = new Date(h.tid); return h.typ === 'mote' && (!h.av || h.av === IH.jag().id) && t >= new Date() && t < i1; });
     var sena = uppg.filter(function (u) { return new Date(u.forfaller) < i0; }).length;
     var bit = function (ik, txt, href, varm) { return '<a class="hero__lage' + (varm ? ' varm' : '') + '" href="' + href + '">' + i(ik) + '<span>' + txt + '</span></a>'; };
     return '<div class="hero__lagen">' +
@@ -1718,7 +1718,7 @@
     a.vunnen = new Date().toISOString();
     a.forlorad = null;
     var o = IH.offertFor(a.id);
-    if (o) o.status = 'godkand';
+    if (o && o.status !== 'avbojd') { o.status = 'godkand'; var sum = IH.summaOffert(o); if (sum) a.varde = sum; }
     IH.logga('system', 'Order signerad.', a.kund, a.id);
     // Ett projekt till produktionen.
     if (!db().projekt.some(function (p) { return p.affar === a.id; })) {
@@ -1956,6 +1956,7 @@
   G['aff-ateruppta'] = function (el) {
     var a = IH.affar(el.getAttribute('data-id'));
     a.forlorad = null;
+    db().offerter.forEach(function (o) { if (o.affar === a.id && o.status === 'avbojd') { o.status = o.fore || 'skickad'; delete o.fore; } });
     a.andrad = new Date().toISOString();
     IH.logga('system', 'Affären återupptogs.', a.kund, a.id);
     IH.spara();
@@ -1979,6 +1980,7 @@
   FORM.forlora = function (f, d) {
     var a = IH.affar(d.get('id'));
     a.forlorad = { orsak: d.get('orsak'), kommentar: d.get('kommentar') || '', tid: new Date().toISOString() };
+    db().offerter.forEach(function (o) { if (o.affar === a.id && (o.status === 'skickad' || o.status === 'utkast')) { o.fore = o.status; o.status = 'avbojd'; } });
     a.andrad = new Date().toISOString();
     IH.logga('system', 'Förlorad: ' + d.get('orsak') + (d.get('kommentar') ? ' – ' + d.get('kommentar') : ''), a.kund, a.id);
     IH.spara();
@@ -2029,6 +2031,7 @@
       steg: d.get('steg'), forlorad: null, skapad: new Date().toISOString(), andrad: new Date().toISOString(), ansvarig: IH.jag().id, vunnen: null };
     db().affarer.push(a);
     if (f) { f.status = 'kvalificerad'; f.kund = kund.id; f.affar = a.id; f.last = true; }
+    else db().forfragningar.forEach(function (x) { if (x.status === 'ny' && !x.affar && (x.kund === kund.id || (kund.epost && x.epost === kund.epost))) { x.status = 'kvalificerad'; x.kund = kund.id; x.affar = a.id; } });
     IH.logga('system', 'Affären skapades' + (f ? ' från förfrågan' : '') + '.', kund.id, a.id);
     IH.spara();
     IH.stangArk(true);
@@ -2058,7 +2061,7 @@
   function kundInfo(k) {
     var aff = db().affarer.filter(function (a) { return a.kund === k.id; });
     var ff = db().forfragningar.filter(function (f) { return f.kund === k.id || f.epost === k.epost; });
-    var off = db().offerter.filter(function (o) { return o.kund === k.id && o.status !== 'ersatt'; });
+    var off = db().offerter.filter(function (o) { return o.kund === k.id && o.status !== 'ersatt' && o.status !== 'avbojd'; });
     var proj = db().projekt.filter(function (p) { return p.kund === k.id; });
     var oppen = aff.filter(function (a) { return a.steg !== 'vunnen' && !a.forlorad; });
     var vunnen = aff.filter(function (a) { return a.steg === 'vunnen'; });
@@ -2209,7 +2212,7 @@
         ? kundTabell(lista)
         : '<div class="kundnat">' + lista.map(kundkort).join('') + '</div>')
         : (kundSok ? tomt('kunder', 'Ingen kund matchar ”' + e(kundSok) + '”. Prova namn eller ort.', { text: 'Rensa sökningen', g: 'kund-sok-rensa', ikon: 'stang' })
-          : kundSteg !== null ? tomt('kunder', 'Ingen kund står i ' + e(RESA_STEG[kundSteg]) + ' just nu.', { text: 'Visa alla kunder', g: 'kund-steg', attr: 'data-n="' + kundSteg + '"', ikon: 'kunder' })
+          : kundSteg !== null ? tomt('kunder', 'Ingen kund står i steget ' + e(RESA_STEG[kundSteg][1]) + ' just nu.', { text: 'Visa alla kunder', g: 'kund-steg', attr: 'data-n="' + kundSteg + '"', ikon: 'kunder' })
           : tomt('kunder', 'Inga kunder ännu. En kund skapas när en förfrågan blir affär – eller direkt här.', { text: 'Lägg till kund', g: 'ny-kund' })));
 
     return {
@@ -2237,10 +2240,10 @@
     };
   };
   G['kund-oppna'] = function (el) { IH.ga('#/kunder/' + el.getAttribute('data-id')); };
-  G['kund-ring'] = function (el) { location.href = 'tel:' + el.getAttribute('data-tel').replace(/\s/g, ''); };
+  G['kund-ring'] = function (el) { var t = el.getAttribute('data-tel'); if (!t) { IH.toast('Inget telefonnummer', 'Lägg till ett nummer på kunden först.', 'tel'); return; } location.href = 'tel:' + t.replace(/\s/g, ''); };
   G['kund-mejl'] = function (el) { location.href = 'mailto:' + el.getAttribute('data-epost'); };
   G['kund-vy'] = function (el) { kundVy = el.getAttribute('data-vy'); IH.rita(); };
-  G['kund-export-alla'] = function () { kundValda = {}; db().kunder.forEach(function (k) { kundValda[k.id] = true; }); G['kund-bulk-csv'](); kundValda = {}; };
+  G['kund-export-alla'] = function () { var forra = kundValda; kundValda = {}; db().kunder.forEach(function (k) { kundValda[k.id] = true; }); var vk = valdaKunder; valdaKunder = function () { return db().kunder.slice(); }; try { G['kund-bulk-csv'](); } finally { valdaKunder = vk; kundValda = forra; } };
   G['kund-sort-kol'] = function (el) { var k = el.getAttribute('data-k'); if (kundSort === k) kundSortUpp = !kundSortUpp; else { kundSort = k; kundSortUpp = false; } IH.rita(); };
   G['kund-valj'] = function (el) { var id = el.getAttribute('data-id'); if (kundValda[id]) delete kundValda[id]; else kundValda[id] = true; IH.rita(); };
   G['kund-valj-alla'] = function (el) {
@@ -2249,7 +2252,7 @@
     if (el.getAttribute('data-av') || allaValda) kundValda = {}; else synliga.forEach(function (id) { kundValda[id] = true; });
     IH.rita();
   };
-  var valdaKunder = function () { return Object.keys(kundValda).map(IH.kund).filter(Boolean); };
+  var valdaKunder = function () { var syn = $$('.kl__tabell tbody tr[data-id]').map(function (r) { return r.getAttribute('data-id'); }); return Object.keys(kundValda).filter(function (id) { return !syn.length || syn.indexOf(id) >= 0; }).map(IH.kund).filter(Boolean); };
   G['kund-bulk-mejl'] = function () {
     var l = valdaKunder().filter(function (k) { return k.epost; }); if (!l.length) { IH.toast('Ingen e-post', 'De valda kunderna saknar e-postadress.', 'post'); return; }
     location.href = 'mailto:?bcc=' + l.map(function (k) { return encodeURIComponent(k.epost); }).join(',');
@@ -2306,7 +2309,7 @@
     var k = IH.kund(id);
     if (!k) return { titel: 'Kunder', html: '<a class="tillbaka" href="#/kunder">' + i('pilv') + 'Alla kunder</a>' + tomt('kunder', 'Kunden finns inte.') };
     var aff = db().affarer.filter(function (a) { return a.kund === k.id; });
-    var off = db().offerter.filter(function (o) { return o.kund === k.id && o.status !== 'ersatt'; });
+    var off = db().offerter.filter(function (o) { return o.kund === k.id && o.status !== 'ersatt' && o.status !== 'avbojd'; });
     var ff = db().forfragningar.filter(function (f) { return f.kund === k.id || f.epost === k.epost; });
     var proj = db().projekt.filter(function (p) { return p.kund === k.id; });
     var logg = db().aktiviteter.filter(function (h) { return h.kund === k.id; });
@@ -2468,7 +2471,7 @@
   function dokPoster() {
     var ut = [];
     db().offerter.filter(function (o) { return o.status !== 'ersatt'; }).forEach(function (o) {
-      var x = offInfo(o), st = o.status === 'godkand' ? ['Godkänd', 'gron', 'klar'] : x.utgangen ? ['Gått ut', 'gra', 'utgangen'] : o.status === 'skickad' ? (x.snart ? ['Går ut om ' + x.kvar + ' d', 'gul', 'vantar'] : ['Väntar på svar', 'bla', 'vantar']) : ['Utkast', 'gra', 'aktuell'];
+      var x = offInfo(o), st = o.status === 'avbojd' ? ['Avböjd · förlorad', 'gra', 'arkiv'] : o.status === 'godkand' ? ['Godkänd', 'gron', 'klar'] : x.utgangen ? ['Gått ut', 'gra', 'utgangen'] : o.status === 'skickad' ? (x.snart ? ['Går ut om ' + x.kvar + ' d', 'gul', 'vantar'] : ['Väntar på svar', 'bla', 'vantar']) : ['Utkast', 'gra', 'aktuell'];
       ut.push({ ansv: x.a ? x.a.ansvarig : null, id: o.id, fack: 'offert', namn: 'Offert ' + o.nummer, under: x.m ? x.m.kategori + ' ' + x.m.namn : '', k: x.k, varde: x.summa, vardeText: 'offererat', datum: o.skapad,
         datumUnder: o.status === 'skickad' && !x.utgangen ? 'gäller ' + Math.max(0, x.kvar) + ' d till' : '', status: st, href: '#/offerter/' + o.id, kvar: x.kvar, o: o });
       if (o.status === 'godkand' && x.a && x.a.steg === 'vunnen') ut.push({ ansv: x.a.ansvarig, o: o, a: x.a, id: 'ord-' + o.id, fack: 'order', namn: 'Order ' + o.nummer, under: x.a.titel, k: x.k, varde: x.summa, vardeText: 'ordervärde', datum: x.a.vunnen || o.skapad,
@@ -2720,7 +2723,7 @@
   G['dok-nollstall'] = function () { dokUi.fack = 'alla'; dokUi.lage = 'aktuella'; dokUi.sok = ''; dokUi.ar = 'alla'; IH.rita(); };
   G['dok-forlang'] = function (el) {
     var o = db().offerter.find(function (x) { return x.id === el.getAttribute('data-id'); }); if (!o) return;
-    o.giltig = (o.giltig || 30) + 14; IH.logga('system', 'Offert ' + o.nummer + ' förlängd 14 dagar.', o.kund, o.affar); IH.spara(); IH.stangArk(true); IH.rita();
+    o.giltig = Math.max(o.giltig || 30, IH.dagarSedan(o.skapad)) + 14; IH.logga('system', 'Offert ' + o.nummer + ' förlängd 14 dagar.', o.kund, o.affar); IH.spara(); IH.stangArk(true); IH.rita();
     IH.toast('Förlängd', 'Offert ' + o.nummer + ' gäller 14 dagar till.', 'kalender');
   };
   G['dok-flik'] = function (el) { dokUi.flik = el.getAttribute('data-f'); IH.rita(); };
@@ -2758,7 +2761,7 @@
       if (!ord && o.status === 'skickad' && k && k.epost) knappar.push('<a class="knapp" href="mailto:' + e(k.epost) + '?subject=' + encodeURIComponent('Offert ' + o.nummer + ' – Legohus') + '&body=' + encodeURIComponent('Hej ' + forsta(k.namn) + '!\n\nJag ville bara höra hur du tänker kring offerten ' + o.nummer + '. Säg till om du har frågor.\n\nVänliga hälsningar\n' + IH.jag().namn) + '">' + i('post') + 'Påminn via mejl</a>');
       if (k && k.telefon) knappar.push('<button class="knapp" type="button" data-g="kund-ring" data-tel="' + e(k.telefon) + '">' + i('tel') + 'Ring ' + e(forsta(k.namn)) + '</button>');
       if (a) knappar.push('<button class="knapp" type="button" data-g="aff-oppna" data-id="' + a.id + '">' + i('tavla') + 'Till affären</button>');
-    } else if (p.fack === 'underlag') {
+    } else if (p.check) {
       var pr = db().projekt.find(function (y) { return y.id === p.pid; }), klara = CHECK.filter(function (c) { return pr.check[c[0]]; }).length;
       tl('Projektet startade', pr.start, true); tl(p.namn + ' klart', p.status[2] === 'klar' ? pr.andrad : '', p.status[2] === 'klar'); if (pr.montage) tl('Montage', pr.montage, dagarTill(pr.montage) < 0);
       topp = '<small>Underlaget i projektet</small><b>' + klara + ' av ' + CHECK.length + '</b><em>punkter klara</em>';
@@ -2858,7 +2861,8 @@
     });
   };
   FORM['ny-kund'] = function (f, d) {
-    var k = { id: IH.nyttId('kund', 'k'), namn: d.get('namn'), telefon: d.get('telefon') || '', epost: d.get('epost') || '',
+    if (!String(d.get('namn') || '').trim()) { IH.toast('Skriv ett namn', null, 'varning'); return; }
+    var k = { id: IH.nyttId('kund', 'k'), namn: String(d.get('namn') || '').trim(), telefon: d.get('telefon') || '', epost: d.get('epost') || '',
       ort: d.get('ort') || '', typ: d.get('typ'), skapad: new Date().toISOString() };
     db().kunder.push(k);
     IH.spara();
@@ -2885,7 +2889,7 @@
      Offerter
      ================================================================ */
   var offFilter = 'alla', offSort = 'senaste', offSok = '';
-  var OFF_ST = { utkast: ['#b8cde0', 'Utkast'], skickad: ['#f0b56e', 'Skickad'], godkand: ['#7fe0a6', 'Godkänd'] };
+  var OFF_ST = { utkast: ['#b8cde0', 'Utkast'], skickad: ['#f0b56e', 'Skickad'], godkand: ['#7fe0a6', 'Godkänd'], avbojd: ['#c9c4bb', 'Avböjd'] };
   var OFF_FILTER_EMOJI = { alla: '<svg class="emo-ik" aria-hidden="true"><use href="#i-dokument"/></svg>', skickad: '⏳', snart: '⏰', godkand: '<svg class="emo-ik" aria-hidden="true"><use href="#i-klar"/></svg>', utkast: '<svg class="emo-ik" aria-hidden="true"><use href="#i-redigera"/></svg>' };
 
   // Allt om en offert på ett ställe.
@@ -2908,7 +2912,7 @@
       '<td><span class="tabell__snabb">' +
         (o.status === 'skickad' ? '<button type="button" data-g="offert-folj-upp" data-id="' + o.id + '" title="Följ upp i affären">' + i('samtal') + '</button>' : '') +
         (o.status === 'skickad' && x.kvar <= 10 ? '<button type="button" data-g="offert-forlang" data-id="' + o.id + '" title="Förläng 14 dagar">' + i('klocka') + '</button>' : '') +
-        (o.status !== 'utkast' ? '<button type="button" data-g="offert-ny-version" data-id="' + o.id + '" title="Ny version">' + i('kopiera') + '</button>' : '') +
+        (o.status !== 'utkast' && o.status !== 'godkand' && o.status !== 'avbojd' ? '<button type="button" data-g="offert-ny-version" data-id="' + o.id + '" title="Ny version">' + i('kopiera') + '</button>' : '') +
         '<button type="button" data-g="offert-oppna" data-id="' + o.id + '" title="Öppna">' + i('pil') + '</button>' +
       '</span></td></tr>';
   }
@@ -3034,10 +3038,10 @@
   G['offert-forlang'] = function (el) {
     var o = IH.offert(el.getAttribute('data-id'));
     if (!o) return;
-    o.giltig = (o.giltig || 30) + 14;
+    o.giltig = Math.max(o.giltig || 30, IH.dagarSedan(o.skapad)) + 14;
     IH.logga('system', 'Offert ' + o.nummer + ' förlängd med 14 dagar.', o.kund, o.affar);
     IH.spara();
-    IH.toast('Offerten är förlängd', o.nummer + ' gäller nu i ' + o.giltig + ' dagar', 'klocka');
+    IH.toast('Offerten är förlängd', o.nummer + ' gäller i ' + (o.giltig - IH.dagarSedan(o.skapad)) + ' dagar till', 'klocka');
     IH.rita();
     IH.lysUpp('tr[data-id="' + o.id + '"]', 'bytt');
   };
@@ -3118,7 +3122,7 @@
       '<header class="vyhuvud"><div><p class="etikett">Offert</p><h1>' + e(o.nummer) + '</h1><p>' + e(a ? a.titel : '') + '</p></div>' +
       '<div class="vyhuvud__knappar"><button class="knapp" type="button" data-g="skriv-ut">' + i('skrivut') + 'Skriv ut / PDF</button>' +
       (o.status === 'utkast' ? '<button class="knapp knapp--virke" type="button" data-g="offert-skicka" data-id="' + o.id + '">' + i('post') + 'Markera som skickad</button>' : '') +
-      (o.status === 'skickad' ? '<button class="knapp knapp--virke" type="button" data-g="aff-vinn" data-id="' + o.affar + '">' + i('trofe') + 'Kunden godkände</button>' : '') + '</div></header>' +
+      (o.status === 'skickad' && !(IH.affar(o.affar) && IH.affar(o.affar).steg === 'vunnen') ? '<button class="knapp knapp--virke" type="button" data-g="aff-vinn" data-id="' + o.affar + '">' + i('trofe') + 'Kunden godkände</button>' : '') + '</div></header>' +
       offertband(o) +
       '<div class="offertyta">' +
         '<section class="kort offertred" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('skriv') + '</span>Innehåll</h2>' +
@@ -3332,7 +3336,7 @@
   // Kommande möten och platsbesök ur uppgifterna, med en knapp som förbereder mötet för kundens affär
   function kommandeMoten() {
     var idag0 = new Date(); idag0.setHours(0, 0, 0, 0);
-    var l = db().uppgifter.filter(function (u) { return !u.klar && /möte|träff|bes[öo]k|visning/i.test(u.text) && new Date(u.forfaller) >= idag0; }).sort(function (x, y) { return x.forfaller < y.forfaller ? -1 : 1; }).slice(0, 4);
+    var l = db().uppgifter.filter(function (u) { return !u.klar && (!u.ansvarig || u.ansvarig === IH.jag().id) && /möte|träff|bes[öo]k|visning/i.test(u.text) && new Date(u.forfaller) >= idag0; }).sort(function (x, y) { return x.forfaller < y.forfaller ? -1 : 1; }).slice(0, 4);
     return '<section class="kort komm" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('kalender') + '</span>Kommande möten</h2>' + (l.length ? '<span class="chip">' + l.length + '</span>' : '') + '</header><div class="kort__kropp">' +
       (l.length ? '<ul class="komm__lista">' + l.map(function (u) {
         var kk = u.kund ? IH.kund(u.kund) : null, d = new Date(u.forfaller), t = dagarTill(u.forfaller), af = kk ? oppnaAffarer().filter(function (x) { return x.kund === kk.id; })[0] : null;
@@ -3362,7 +3366,7 @@
     var total = valda.reduce(function (t, id) { return t + (MOTE_MIN[id] || 0); }, 0);
 
     // Hållna möten ur historiken.
-    var moten = db().aktiviteter.filter(function (h) { return h.typ === 'mote'; }).sort(function (x, y) { return y.tid < x.tid ? -1 : 1; });
+    var moten = db().aktiviteter.filter(function (h) { return h.typ === 'mote' && new Date(h.tid) <= new Date() && !/^Platsbesök bokat/.test(h.text); }).sort(function (x, y) { return y.tid < x.tid ? -1 : 1; });
     var langder = moten.map(function (h) { return moteMinuter(h.text); }).filter(function (n) { return n !== null; });
     var snitt = langder.length ? Math.round(langder.reduce(function (t, n) { return t + n; }, 0) / langder.length) : null;
 
@@ -4208,6 +4212,7 @@
     clearTimeout(G['uppgift-klar'].t); G['uppgift-klar'].t = setTimeout(function () { var y = window.scrollY; IH.rita(); window.scrollTo(0, y); }, IH.lugn ? 0 : 650);
   };
   FORM.uppgift = function (f, d) {
+    if (!String(d.get('text') || '').trim()) return;
     db().uppgifter.push({ id: IH.nyttId('uppgift', 'u'), text: d.get('text'), forfaller: new Date((d.get('datum') || IH.dagStr()) + 'T09:00:00').toISOString(),
       klar: false, kund: d.get('kund') || null, affar: null, ansvarig: IH.jag().id });
     IH.spara();
