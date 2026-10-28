@@ -30,14 +30,35 @@ function tex(w, h, rita, rep) {
   if (rep) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep[0], rep[1]); }
   return t;
 }
-const panel = () => tex(256, 256, (g, w, h) => {
-  g.fillStyle = '#4a4038'; g.fillRect(0, 0, w, h);
-  for (let x = 0; x < w; x += 16) { g.fillStyle = `rgba(255,240,220,${0.03 + Math.random() * 0.04})`; g.fillRect(x + 2, 0, 12, h); g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(x, 0, 2, h); }
+const panel = () => tex(512, 256, (g, w, h) => {
+  g.fillStyle = '#3d3530'; g.fillRect(0, 0, w, h);
+  for (let x = 0; x < w; x += 32) {
+    const l = 50 + Math.random() * 14; g.fillStyle = `hsl(24, 13%, ${l / 4}%)`; g.fillRect(x, 0, 32, h);
+    const gr = g.createLinearGradient(x, 0, x + 32, 0); gr.addColorStop(0, 'rgba(255,235,210,.10)'); gr.addColorStop(0.5, 'rgba(255,235,210,0)'); gr.addColorStop(1, 'rgba(0,0,0,.25)'); g.fillStyle = gr; g.fillRect(x, 0, 32, h);
+    g.strokeStyle = 'rgba(255,225,190,.06)'; g.lineWidth = 1; for (let n = 0; n < 5; n++) { const ox = x + 5 + Math.random() * 22; g.beginPath(); g.moveTo(ox, 0); g.bezierCurveTo(ox + 3, h * 0.3, ox - 3, h * 0.7, ox + 1, h); g.stroke(); }
+    if (Math.random() < 0.4) { g.fillStyle = 'rgba(20,12,8,.35)'; g.beginPath(); g.ellipse(x + 16, Math.random() * h, 2.5, 4, 0, 0, 7); g.fill(); }
+    g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(x, 0, 2, h); g.fillStyle = 'rgba(255,240,220,.08)'; g.fillRect(x + 2, 0, 1, h);
+  }
 }, [3, 1]);
+const falsTak = () => tex(256, 256, (g, w, h) => {
+  g.fillStyle = '#2c2825'; g.fillRect(0, 0, w, h);
+  for (let x = 0; x < w; x += 32) { g.fillStyle = 'rgba(255,245,230,.12)'; g.fillRect(x, 0, 3, h); g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(x + 3, 0, 2, h); }
+}, [4, 1]);
+const plank = () => tex(256, 128, (g, w, h) => {
+  for (let y = 0; y < h; y += 16) { g.fillStyle = `hsl(30, 38%, ${58 + Math.random() * 8}%)`; g.fillRect(0, y, w, 16); g.fillStyle = 'rgba(70,40,15,.35)'; g.fillRect(0, y + 14, w, 2); for (let n = 0; n < 3; n++) { g.strokeStyle = 'rgba(120,75,35,.18)'; g.beginPath(); g.moveTo(0, y + 3 + n * 4); g.lineTo(w, y + 4 + n * 4); g.stroke(); } }
+});
+const plat = () => tex(256, 256, (g, w, h) => {
+  g.fillStyle = '#d9d6d0'; g.fillRect(0, 0, w, h);
+  for (let x = 0; x < w; x += 16) { g.fillStyle = 'rgba(255,255,255,.5)'; g.fillRect(x, 0, 3, h); g.fillStyle = 'rgba(0,0,0,.12)'; g.fillRect(x + 3, 0, 3, h); }
+}, [6, 1]);
 const M = {
   fasad: () => new THREE.MeshStandardMaterial({ map: panel(), roughness: 0.82, metalness: 0.02 }),
-  tak: new THREE.MeshStandardMaterial({ color: '#3a322c', roughness: 0.7, metalness: 0.15 }),
-  glas: () => new THREE.MeshStandardMaterial({ color: '#2b2f33', emissive: '#ffb05a', emissiveIntensity: 0.25, roughness: 0.15, metalness: 0.6 }),
+  tak: new THREE.MeshStandardMaterial({ map: falsTak(), roughness: 0.55, metalness: 0.35 }),
+  sockel: new THREE.MeshStandardMaterial({ color: '#7d7a76', roughness: 0.95 }),
+  svart: new THREE.MeshStandardMaterial({ color: '#232120', roughness: 0.5, metalness: 0.3 }),
+  stal: new THREE.MeshStandardMaterial({ color: '#7c8186', roughness: 0.4, metalness: 0.7 }),
+  dack: () => new THREE.MeshStandardMaterial({ map: plank(), roughness: 0.85 }),
+  glas: () => new THREE.MeshStandardMaterial({ color: '#40525c', emissive: '#ffb05a', emissiveIntensity: 0.12, roughness: 0.08, metalness: 0.7, envMapIntensity: 1.6 }),
   ram: new THREE.MeshStandardMaterial({ color: '#c79a62', roughness: 0.5 }),
   tra: new THREE.MeshStandardMaterial({ color: '#d9b083', roughness: 0.7 }),
   betong: new THREE.MeshStandardMaterial({ color: '#b9b3aa', roughness: 0.92 }),
@@ -64,7 +85,18 @@ function hus(m, opt = {}) {
   const kropp = lada(w, hv, d, fasad, 0.04); kropp.position.y = hv / 2; g.add(kropp);
   const glas = M.glas(); g.userData.glas = glas;
   // fönster och dörr på framsidan (+z) och en gavel
-  const f = (x, y, bw, bh, z = d / 2 + 0.03, rot = 0) => { const r = lada(bw + 0.12, bh + 0.12, 0.06, M.ram, 0.02), p = lada(bw, bh, 0.07, glas, 0); const q = grupp(r, p); q.position.set(x, y, z); q.rotation.y = rot; g.add(q); };
+  const f = (x, y, bw, bh, z = d / 2 + 0.03, rot = 0) => {
+    const r = lada(bw + 0.14, bh + 0.14, 0.07, M.svart, 0.02), p = lada(bw, bh, 0.08, glas, 0), q = grupp(r, p);
+    if (bw > 0.7) { const sp = lada(0.04, bh, 0.1, M.svart, 0); q.add(sp); }
+    const bl = lada(bw + 0.24, 0.04, 0.16, M.stal, 0.01); bl.position.set(0, -bh / 2 - 0.08, 0.06); q.add(bl);
+    const om = lada(bw + 0.26, 0.08, 0.05, M.ram, 0.01); om.position.set(0, bh / 2 + 0.11, 0.02); q.add(om);
+    q.position.set(x, y, z); q.rotation.y = rot; g.add(q);
+  };
+  const sockel = lada(w + 0.08, 0.32, d + 0.08, M.sockel, 0.02); sockel.position.y = -0.1; g.add(sockel);
+  const dack = lada(w * 0.62, 0.1, 1.5, M.dack(), 0.02); dack.position.set(-w * 0.12, 0.06, d / 2 + 0.78); g.add(dack);
+  for (let x = -w * 0.43; x <= w * 0.19; x += 0.34) { const sp = lada(0.04, 0.5, 0.04, M.svart, 0); sp.position.set(x, 0.36, d / 2 + 1.5); g.add(sp); }
+  const led = lada(w * 0.62, 0.05, 0.08, M.svart, 0.01); led.position.set(-w * 0.12, 0.62, d / 2 + 1.5); g.add(led);
+  const lampa = lada(0.14, 0.22, 0.1, new THREE.MeshStandardMaterial({ color: '#ffe2b0', emissive: '#ffcf8a', emissiveIntensity: 1.2 }), 0.03); lampa.position.set(w * 0.08 + 0.62, 2.05, d / 2 + 0.08); g.add(lampa);
   f(-w * 0.28, 1.35, w * 0.26, 1.5); f(w * 0.08, 1.15, 0.9, 2.0); f(w * 0.32, 1.45, w * 0.16, 0.9);
   f(0, 1.4, d * 0.45, 1.0, 0, Math.PI / 2); g.children[g.children.length - 1].position.set(w / 2 + 0.03, 1.4, 0);
   // taket
@@ -77,7 +109,8 @@ function hus(m, opt = {}) {
     const gg = new THREE.ExtrudeGeometry(gavel, { depth: d, bevelEnabled: false }); gg.translate(0, 0, -d / 2);
     const gm = new THREE.Mesh(gg, fasad); gm.position.y = hv; gm.castShadow = gm.receiveShadow = true; g.add(gm);
     [-1, 1].forEach((s) => { const p = lada(lang, 0.14, d + 0.5, M.tak, 0.03); p.position.set(s * (w / 4 + 0.02 * s), hv + rh / 2 + 0.07, 0); p.rotation.z = -s * a; g.add(p); });
-    const nock = lada(0.14, 0.12, d + 0.5, M.koppar, 0.02); nock.position.set(0, hv + rh + 0.1, 0); g.add(nock);
+    const nock = lada(0.14, 0.12, d + 0.5, M.svart, 0.02); nock.position.set(0, hv + rh + 0.1, 0); g.add(nock);
+    [-1, 1].forEach((sd) => { const r2 = cyl(0.07, 0.07, d + 0.5, M.svart, 10); r2.rotation.x = Math.PI / 2; r2.position.set(sd * (w / 2 + 0.3), hv - 0.02, 0); g.add(r2); const st = cyl(0.04, 0.04, hv, M.svart, 8); st.position.set(sd * (w / 2 + 0.3), hv / 2, d / 2 + 0.2); g.add(st); });
     g.userData.hojd = hv + rh;
   }
   g.userData.hojd = g.userData.hojd || hv + 0.5; g.userData.w = w; g.userData.d = d;
@@ -85,26 +118,84 @@ function hus(m, opt = {}) {
   return g;
 }
 
+
+/* Fordonen: hjul med däck och fälg, Legohus skåpbil och lastbil med flak ---------------------------- */
+function hjul(r, b) {
+  const g = new THREE.Group();
+  const dack = cyl(r, r, b, M.mork, 24); dack.rotation.x = Math.PI / 2; g.add(dack);
+  const falg = cyl(r * 0.58, r * 0.58, b + 0.02, M.stal, 20); falg.rotation.x = Math.PI / 2; g.add(falg);
+  const nav = cyl(r * 0.18, r * 0.18, b + 0.04, M.svart, 10); nav.rotation.x = Math.PI / 2; g.add(nav);
+  for (let n = 0; n < 5; n++) { const e = lada(r * 0.1, r * 0.5, b + 0.03, M.svart, 0); e.rotation.z = (n * Math.PI * 2) / 5; g.add(e); }
+  return g;
+}
+const LJUS_FRAM = new THREE.MeshStandardMaterial({ color: '#fff6e0', emissive: '#fff0c8', emissiveIntensity: 1.4 });
+const LJUS_BAK = new THREE.MeshStandardMaterial({ color: '#c0392b', emissive: '#ff3b2a', emissiveIntensity: 0.9 });
+function skapbil() {
+  const g = new THREE.Group(), lack = new THREE.MeshStandardMaterial({ color: '#f7f3ec', roughness: 0.3, metalness: 0.25 }), glas = M.glas();
+  const chassi = lada(2.7, 0.3, 1.1, M.svart, 0.06); chassi.position.y = 0.38; g.add(chassi);
+  const last = lada(1.9, 1.05, 1.16, lack, 0.12); last.position.set(-0.35, 1.05, 0); g.add(last);
+  const huv = lada(0.75, 0.55, 1.12, lack, 0.18); huv.position.set(0.95, 0.75, 0); g.add(huv);
+  const hytt = lada(0.55, 0.62, 1.12, lack, 0.14); hytt.position.set(0.62, 1.2, 0); g.add(hytt);
+  const vind = lada(0.05, 0.5, 1.0, glas, 0.02); vind.position.set(0.93, 1.17, 0); vind.rotation.z = -0.55; g.add(vind);
+  [-1, 1].forEach((sd) => { const sida = lada(0.42, 0.34, 0.03, glas, 0.01); sida.position.set(0.6, 1.24, sd * 0.575); g.add(sida); const sp = lada(0.08, 0.12, 0.14, M.svart, 0.02); sp.position.set(0.86, 1.08, sd * 0.66); g.add(sp); });
+  const rand = lada(1.92, 0.08, 1.18, M.koppar, 0.02); rand.position.set(-0.35, 0.82, 0); g.add(rand);
+  const logo = lada(0.5, 0.22, 1.18, M.koppar, 0.03); logo.position.set(-0.35, 1.18, 0); g.add(logo);
+  const grill = lada(0.04, 0.2, 0.7, M.svart, 0.01); grill.position.set(1.33, 0.68, 0); g.add(grill);
+  [-1, 1].forEach((sd) => { const f = lada(0.04, 0.1, 0.2, LJUS_FRAM, 0.02); f.position.set(1.33, 0.82, sd * 0.42); g.add(f); const b = lada(0.04, 0.16, 0.12, LJUS_BAK, 0.02); b.position.set(-1.31, 0.9, sd * 0.48); g.add(b); });
+  [1.36, -1.34].forEach((x) => { const st = lada(0.08, 0.14, 1.16, M.svart, 0.04); st.position.set(x, 0.48, 0); g.add(st); });
+  const hj = [0.85, -0.8].flatMap((x) => [-0.52, 0.52].map((z) => { const h = hjul(0.27, 0.2); h.position.set(x, 0.27, z); g.add(h); return h; }));
+  g.traverse((m) => { if (m.isMesh) m.castShadow = true; });
+  g.userData.hjul = hj; g.userData.r = 0.27; return g;
+}
+function lastbil() {
+  const g = new THREE.Group(), lack = new THREE.MeshStandardMaterial({ color: '#f2f0ec', roughness: 0.3, metalness: 0.3 }), glas = M.glas();
+  const ram = lada(7.6, 0.3, 1.1, M.svart, 0.04); ram.position.set(0.1, 0.62, 0); g.add(ram);
+  const hytt = lada(1.6, 1.75, 2.2, lack, 0.22); hytt.position.set(4.55, 1.55, 0); g.add(hytt);
+  const tak = lada(1.3, 0.35, 2.0, lack, 0.15); tak.position.set(4.4, 2.55, 0); g.add(tak);
+  const vind = lada(0.06, 0.8, 1.95, glas, 0.02); vind.position.set(5.36, 1.95, 0); g.add(vind);
+  [-1, 1].forEach((sd) => {
+    const sida = lada(0.7, 0.6, 0.03, glas, 0.01); sida.position.set(4.85, 1.95, sd * 1.11); g.add(sida);
+    const arm = lada(0.4, 0.05, 0.05, M.svart, 0); arm.position.set(5.3, 2.1, sd * 1.25); g.add(arm); const sp = lada(0.06, 0.4, 0.18, M.svart, 0.02); sp.position.set(5.48, 1.95, sd * 1.42); g.add(sp);
+    const tank = cyl(0.25, 0.25, 0.9, M.stal, 16); tank.rotation.z = Math.PI / 2; tank.position.set(3.3, 0.6, sd * 0.85); g.add(tank);
+    const fl = lada(0.04, 0.12, 0.34, LJUS_FRAM, 0.02); fl.position.set(5.37, 0.95, sd * 0.78); g.add(fl);
+    const bl = lada(0.04, 0.16, 0.2, LJUS_BAK, 0.02); bl.position.set(-3.68, 0.75, sd * 0.95); g.add(bl);
+  });
+  const rand = lada(1.62, 0.12, 2.22, M.koppar, 0.03); rand.position.set(4.55, 1.05, 0); g.add(rand);
+  const grill = lada(0.05, 0.6, 1.4, M.svart, 0.02); grill.position.set(5.37, 1.25, 0); g.add(grill);
+  const stot = lada(0.2, 0.25, 2.3, M.svart, 0.05); stot.position.set(5.4, 0.62, 0); g.add(stot);
+  const flak = lada(7.2, 0.18, 2.3, new THREE.MeshStandardMaterial({ map: plank(), roughness: 0.85 }), 0.03); flak.position.set(0.1, 0.86, 0); g.add(flak);
+  [-1, 1].forEach((sd) => { const kant = lada(7.2, 0.22, 0.06, M.stal, 0.02); kant.position.set(0.1, 1.04, sd * 1.15); g.add(kant); });
+  const gavel = lada(0.1, 0.9, 2.3, M.stal, 0.02); gavel.position.set(3.68, 1.4, 0); g.add(gavel);
+  const hj = [4.4, 0.5, -0.6, -2.6].flatMap((x) => [-0.98, 0.98].map((z) => { const h = hjul(0.46, 0.34); h.position.set(x, 0.46, z); g.add(h); return h; }));
+  g.traverse((m) => { if (m.isMesh) m.castShadow = true; });
+  g.userData.hjul = hj; g.userData.r = 0.46; g.userData.flak = 0.95; return g;
+}
+
 /* Stationerna ------------------------------------------------------------------------------------- */
+const JORD = tex(256, 128, (g, w, h) => { const l = g.createLinearGradient(0, 0, 0, h); l.addColorStop(0, '#8d6a4a'); l.addColorStop(1, '#6e5038'); g.fillStyle = l; g.fillRect(0, 0, w, h);
+  for (let n = 0; n < 160; n++) { g.fillStyle = ['rgba(40,25,12,.35)', 'rgba(190,160,120,.35)', 'rgba(120,110,100,.5)'][n % 3]; g.beginPath(); g.ellipse(Math.random() * w, Math.random() * h, 1 + Math.random() * 4, 1 + Math.random() * 2.5, 0, 0, 7); g.fill(); }
+  g.fillStyle = 'rgba(0,0,0,.18)'; for (let y = 30; y < h; y += 34) g.fillRect(0, y + Math.random() * 6, w, 2); }, [3, 1]);
+const GRAS = tex(256, 256, (g, w, h) => { g.fillStyle = '#9fb57f'; g.fillRect(0, 0, w, h); for (let n = 0; n < 2400; n++) { g.strokeStyle = ['rgba(70,100,50,.25)', 'rgba(200,215,150,.3)', 'rgba(120,150,80,.3)'][n % 3]; const x = Math.random() * w, y = Math.random() * h; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (Math.random() - 0.5) * 3, y - 3 - Math.random() * 4); g.stroke(); } }, [3, 3]);
 function platta(farg, topp) {
   const g = new THREE.Group();
-  const bas = lada(13.2, 1.2, 11.2, new THREE.MeshStandardMaterial({ color: '#e9dcc7', roughness: 0.9 }), 0.4); bas.position.y = -0.6; g.add(bas);
-  const yta = lada(12.6, 0.12, 10.6, new THREE.MeshStandardMaterial({ color: farg, roughness: 0.95 }), 0.3); yta.position.y = 0.02; g.add(yta);
+  const bas = lada(13.2, 1.3, 11.2, new THREE.MeshStandardMaterial({ map: JORD, roughness: 1 }), 0.35); bas.position.y = -0.6; g.add(bas);
+  const gras = lada(13.3, 0.22, 11.3, new THREE.MeshStandardMaterial({ map: GRAS, roughness: 1 }), 0.12); gras.position.y = -0.04; g.add(gras);
+  const yta = lada(11.6, 0.1, 9.6, new THREE.MeshStandardMaterial({ color: farg, roughness: 0.95 }), 0.3); yta.position.y = 0.04; g.add(yta);
   const kant = new THREE.Mesh(new THREE.TorusGeometry(1, 0.02, 6, 64), M.neon('#e9a25a', 1)); kant.rotation.x = Math.PI / 2; kant.scale.set(6.9, 5.9, 1); kant.position.y = -0.02; g.add(kant);
   g.userData.kant = kant;
   return g;
 }
-const LOV = ['#7f9a6c', '#8fa877', '#6f8c62'].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.9, flatShading: true }));
+const LOV = ['#7f9a6c', '#8fa877', '#6f8c62'].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.9 }));
 const TRAD = [];
 function trad(x, z, s = 1) {
   const v = LOV[Math.abs(Math.round(x * 7 + z * 3)) % 3], t = grupp(cyl(0.08 * s, 0.11 * s, 0.9 * s, M.tra, 8));
   t.children[0].position.y = 0.45 * s;
-  [[0.72, 1.2, 1.2], [0.54, 1.0, 1.8], [0.34, 0.8, 2.3]].forEach(([r, h, y]) => { const k = new THREE.Mesh(new THREE.ConeGeometry(r * s, h * s, 8), v); k.position.y = y * s; k.castShadow = k.receiveShadow = true; t.add(k); });
+  [[0.72, 1.2, 1.2], [0.54, 1.0, 1.8], [0.34, 0.8, 2.3]].forEach(([r, h, y]) => { const k = new THREE.Mesh(new THREE.ConeGeometry(r * s, h * s, 18), v); k.position.y = y * s; k.castShadow = k.receiveShadow = true; t.add(k); });
   t.position.set(x, 0, z); t.rotation.y = x + z; t.userData.vaj = Math.random() * 6; TRAD.push(t); return t;
 }
 
 /* Detaljerna: buskar, blommor, människor, koner, staket, lyktor, moln, fåglar och bilen ----------- */
-function buske(x, z, s = 1) { const b = new THREE.Mesh(new THREE.IcosahedronGeometry(0.45 * s, 0), LOV[(Math.round(x + z) & 1) + 1]); b.scale.y = 0.75; b.position.set(x, 0.28 * s, z); b.rotation.y = x; b.castShadow = b.receiveShadow = true; return b; }
+function buske(x, z, s = 1) { const b = new THREE.Mesh(new THREE.IcosahedronGeometry(0.45 * s, 3), LOV[(Math.round(x + z) & 1) + 1]); b.scale.y = 0.75; b.position.set(x, 0.28 * s, z); b.rotation.y = x; b.castShadow = b.receiveShadow = true; return b; }
 const BLOM = ['#f3d9b0', '#e9a25a', '#fbf6ee', '#e7a3a0', '#c9b4e0'].map((c) => new THREE.Color(c));
 function blommor(n, fri = [4.4, 3.6]) {
   const m = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.09, 0), new THREE.MeshStandardMaterial({ roughness: 0.7 }), n), o = new THREE.Object3D();
@@ -150,12 +241,12 @@ function dekor(st) {
   lagg(st[0], (t) => { ark.userData.h.rotation.x = -1.1 + Math.sin(t * 3) * 0.25; ark.userData.v.rotation.x = -0.3; ark.rotation.y = 2.1 + Math.sin(t * 0.6) * 0.25; });
   // 2 Fabriken: skorsten med rök, plankor och en snickare som går fram och tillbaka
   const sk = cyl(0.32, 0.4, 6.6, M.mork, 16); sk.position.set(4.8, 3.3, -3.6); st[1].add(sk, plankor(4.4, 3.6), plankor(-4.6, 3.4), buske(-5.6, -4.2));
-  const rok = [], rokMat = new THREE.MeshStandardMaterial({ color: '#d9d0c4', roughness: 1, transparent: true, flatShading: true, depthWrite: false });
-  for (let n = 0; n < 7; n++) { const r = new THREE.Mesh(new THREE.IcosahedronGeometry(0.4, 0), rokMat.clone()); st[1].add(r); rok.push(r); }
+  const rok = [], rokMat = new THREE.MeshStandardMaterial({ color: '#d9d0c4', roughness: 1, transparent: true, depthWrite: false });
+  for (let n = 0; n < 7; n++) { const r = new THREE.Mesh(new THREE.IcosahedronGeometry(0.4, 3), rokMat.clone()); st[1].add(r); rok.push(r); }
   const snick = gubbe('#c98a45', true, 1); st[1].add(snick);
-  lagg(st[1], (t) => {
+  lagg(st[1], (t, dt) => {
     rok.forEach((r, n) => { const a = (t * 0.18 + n / 7) % 1; r.position.set(4.8 + a * 1.6 + Math.sin(t + n) * 0.2, 6.7 + a * 3.2, -3.6 - a * 0.6); r.scale.setScalar(0.5 + a * 1.6); r.material.opacity = (1 - a) * 0.85; r.rotation.set(t * 0.3 + n, n, 0); });
-    snick.position.set(Math.sin(t * 0.45) * 2.4, 0.06, 3.3); snick.rotation.y = Math.cos(t * 0.45) > 0 ? Math.PI / 2 : -Math.PI / 2; promenera(snick, t);
+    snick.position.set(Math.sin(t * 0.45) * 2.4, 0.06, 3.3); trygg(snick, Math.cos(t * 0.45) > 0 ? Math.PI / 2 : -Math.PI / 2, dt); promenera(snick, t);
   });
   // 3 Grunden: två byggare och koner
   const b1 = gubbe('#e9a25a', true, 2), b2 = gubbe('#5b7f9e', true, 0); b1.position.set(-2.8, 0.06, 2.6); b2.position.set(3.2, 0.06, -3.6); b2.rotation.y = -0.6;
@@ -187,23 +278,30 @@ function natur(scen) {
   const r = slump(7), SLUT = AVST * 5;
   const fri = (x, z) => z > -7.5 && z < 9.5 && x > -8 && x < SLUT + 8; // stationerna och gången
   // marken: mjukt gräs med fläckar som tonar bort i diset
-  const grasTex = tex(256, 256, (g, w, h) => { g.fillStyle = '#d5dbb3'; g.fillRect(0, 0, w, h); for (let n = 0; n < 900; n++) { g.fillStyle = ['rgba(150,175,120,.10)', 'rgba(205,190,150,.10)', 'rgba(255,250,235,.12)'][n % 3]; g.beginPath(); g.arc(Math.random() * w, Math.random() * h, 2 + Math.random() * 9, 0, 7); g.fill(); } }, [160, 160]);
-  const mark = new THREE.Mesh(new THREE.PlaneGeometry(1400, 1400), new THREE.MeshStandardMaterial({ map: grasTex, roughness: 1 })); mark.rotation.x = -Math.PI / 2; mark.position.set(SLUT / 2, -0.62, 0); mark.receiveShadow = true; scen.add(mark);
-  const gron = ['#9fb487', '#8ea877', '#b1c095', '#a3b98c'].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 1, flatShading: true }));
+  const mark = new THREE.Mesh(new THREE.PlaneGeometry(1400, 1400), new THREE.MeshStandardMaterial({ color: '#c3cf9d', roughness: 1 })); mark.rotation.x = -Math.PI / 2; mark.position.set(SLUT / 2, -0.62, 0); mark.receiveShadow = true; scen.add(mark);
+  const gron = ['#9fb487', '#8ea877', '#b1c095', '#a3b98c'].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 1 }));
   // kullar bakom och berg längst bort
-  for (let n = 0; n < 16; n++) { const k = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 2), gron[n % 4]); const rad = 14 + r() * 18; k.scale.set(rad * 1.8, rad * 0.2, rad); k.position.set(-60 + n * 15 + r() * 8, -0.6, -78 - r() * 30); k.receiveShadow = true; scen.add(k); }
-  const berg = new THREE.MeshStandardMaterial({ color: '#c3cbc6', roughness: 1, flatShading: true }), sno = new THREE.MeshStandardMaterial({ color: '#fbfaf6', roughness: 0.9, flatShading: true });
-  for (let n = 0; n < 9; n++) { const h = 26 + r() * 26, rad = 22 + r() * 16, x = -70 + n * 30 + r() * 12, z = -170 - r() * 40; const b = new THREE.Mesh(new THREE.ConeGeometry(rad, h, 7), berg); b.position.set(x, h / 2 - 1, z); b.rotation.y = r() * 3; scen.add(b); const t = new THREE.Mesh(new THREE.ConeGeometry(rad * 0.3, h * 0.3, 7), sno); t.position.set(x, h - 1 - h * 0.15 + 0.2, z); t.rotation.y = b.rotation.y; scen.add(t); }
+  for (let n = 0; n < 16; n++) { const k = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 5), gron[n % 4]); const rad = 14 + r() * 18; k.scale.set(rad * 1.8, rad * 0.2, rad); k.position.set(-60 + n * 15 + r() * 8, -0.6, -78 - r() * 30); k.receiveShadow = true; scen.add(k); }
+  const berg = new THREE.MeshStandardMaterial({ color: '#c3cbc6', roughness: 1 }), sno = new THREE.MeshStandardMaterial({ color: '#fbfaf6', roughness: 0.9 });
+  for (let n = 0; n < 9; n++) { const h = 26 + r() * 26, rad = 22 + r() * 16, x = -70 + n * 30 + r() * 12, z = -170 - r() * 40; const b = new THREE.Mesh(new THREE.ConeGeometry(rad, h, 28), berg); b.position.set(x, h / 2 - 1, z); b.rotation.y = r() * 3; scen.add(b); const t = new THREE.Mesh(new THREE.ConeGeometry(rad * 0.3, h * 0.3, 28), sno); t.position.set(x, h - 1 - h * 0.15 + 0.2, z); t.rotation.y = b.rotation.y; scen.add(t); }
   // skogen: stammar och kronor som instanser
-  const N = 520, stam = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.1, 0.14, 1, 6), M.tra, N), krona = new THREE.InstancedMesh(new THREE.ConeGeometry(0.75, 2.3, 7), new THREE.MeshStandardMaterial({ roughness: 0.9, flatShading: true }), N);
-  const tonfarg = ['#6f8c62', '#7f9a6c', '#8fa877', '#5f7d57', '#94ad7c'].map((c) => new THREE.Color(c)), o = new THREE.Object3D();
+  const N = 340, kmat = new THREE.MeshStandardMaterial({ roughness: 0.9 }), stam = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.1, 0.14, 1, 6), M.tra, N);
+  const gran1 = new THREE.InstancedMesh(new THREE.ConeGeometry(0.9, 1.7, 18), kmat, N), gran2 = new THREE.InstancedMesh(new THREE.ConeGeometry(0.62, 1.4, 18), kmat, N), lov = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 3), kmat, N);
+  let kg = 0, kl = 0;
+  const tonfarg = ['#5d7f52', '#6e8f5c', '#7f9f66', '#55744c', '#8aa86e'].map((c) => new THREE.Color(c)), o = new THREE.Object3D();
   let k = 0;
-  const plantera = (x, z, s) => { if (k >= N || fri(x, z)) return; o.position.set(x, -0.6 + 0.5 * s, z); o.rotation.set(0, 0, 0); o.scale.setScalar(s); o.updateMatrix(); stam.setMatrixAt(k, o.matrix); o.position.y = -0.6 + 1.9 * s; o.rotation.y = r() * 6; o.updateMatrix(); krona.setMatrixAt(k, o.matrix); krona.setColorAt(k, tonfarg[k % 5]); k++; };
+  const plantera = (x, z, s) => {
+    if (k >= N || fri(x, z)) return; const f = tonfarg[k % 5];
+    o.position.set(x, -0.6 + 0.5 * s, z); o.rotation.set(0, 0, 0); o.scale.setScalar(s); o.updateMatrix(); stam.setMatrixAt(k, o.matrix); k++;
+    o.rotation.y = r() * 6;
+    if (r() < 0.35) { o.position.y = -0.6 + 1.75 * s; o.scale.set(s * 1.05, s * 0.95, s * 1.05); o.updateMatrix(); lov.setMatrixAt(kl, o.matrix); lov.setColorAt(kl++, f); return; }
+    o.position.y = -0.6 + 1.45 * s; o.updateMatrix(); gran1.setMatrixAt(kg, o.matrix); gran1.setColorAt(kg, f);
+    o.position.y = -0.6 + 2.35 * s; o.updateMatrix(); gran2.setMatrixAt(kg, o.matrix); gran2.setColorAt(kg++, f);
+  };
   // dunge-vis: grupper av träd bakom, glesare framför, och täta skogar i båda ändarna
-  for (let n = 0; n < 30; n++) { const cx = -30 + r() * (SLUT + 60), cz = -18 - r() * 32; const m = 5 + Math.floor(r() * 8); for (let j = 0; j < m; j++) plantera(cx + (r() - 0.5) * 9, cz + (r() - 0.5) * 7, 0.8 + r() * 1.1); }
+  for (let n = 0; n < 24; n++) { const cx = -30 + r() * (SLUT + 60), cz = -18 - r() * 32; const m = 4 + Math.floor(r() * 7); for (let j = 0; j < m; j++) plantera(cx + (r() - 0.5) * 9, cz + (r() - 0.5) * 7, 0.8 + r() * 1.1); }
   for (let n = 0; n < 5; n++) { const cx = n % 2 ? -14 - r() * 8 : SLUT + 14 + r() * 8, cz = 12 + r() * 10; for (let j = 0; j < 4; j++) plantera(cx + (r() - 0.5) * 5, cz + (r() - 0.5) * 4, 0.7 + r() * 0.6); }
-  for (let n = 0; n < 160; n++) { const v = n % 2 ? -16 - r() * 30 : SLUT + 16 + r() * 30; plantera(v, -30 + r() * 55, 0.9 + r() * 1.2); }
-  stam.count = krona.count = k; stam.castShadow = krona.castShadow = true; krona.receiveShadow = true; scen.add(stam, krona);
+  for (let n = 0; n < 110; n++) { const v = n % 2 ? -16 - r() * 30 : SLUT + 16 + r() * 30; plantera(v, -30 + r() * 55, 0.9 + r() * 1.2); }
   // sjön med strand, brygga, båt och ringar på vattnet
   const sjoX = SLUT * 0.55, sjoZ = -19;
   const strand = new THREE.Mesh(new THREE.CircleGeometry(1, 48), new THREE.MeshStandardMaterial({ color: '#e9dcbf', roughness: 1 })); strand.rotation.x = -Math.PI / 2; strand.scale.set(15.5, 7.6, 1); strand.position.set(sjoX, -0.6, sjoZ); strand.receiveShadow = true; scen.add(strand);
@@ -217,18 +315,42 @@ function natur(scen) {
   const ringMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, depthWrite: false }), ringar = [];
   for (let n = 0; n < 4; n++) { const q = new THREE.Mesh(new THREE.RingGeometry(0.9, 1, 40), ringMat.clone()); q.rotation.x = -Math.PI / 2; q.position.set(sjoX + 4 - n * 3, -0.55, sjoZ - 1 + (n % 2) * 2); scen.add(q); ringar.push(q); }
   // åkrar i fåror framför gången
-  [[-14, 14, 10, 6, '#dccb8f'], [SLUT * 0.3, -14, 14, 5, '#c9d49c'], [SLUT + 14, 15, 10, 6, '#e2c995']].forEach(([x, z, w, d, f]) => {
+  [[SLUT * 0.3, -14, 14, 5, '#c9d49c']].concat([0, 1, 2, 3, 4, 5].map((n) => [-6 + n * 18.5, 15.5 + (n % 2) * 1.2, 15, 6.5, ['#dccb8f', '#bccb8c', '#e2c995', '#c9d49c'][n % 4]])).forEach(([x, z, w, d, f]) => {
     const akr = new THREE.Group(), mat = new THREE.MeshStandardMaterial({ color: f, roughness: 1 }), mork = new THREE.MeshStandardMaterial({ color: new THREE.Color(f).multiplyScalar(0.86), roughness: 1 });
     for (let n = 0; n < d / 0.7; n++) { const rad = lada(w, 0.18, 0.4, n % 2 ? mat : mork, 0.08); rad.position.set(0, -0.52, -d / 2 + n * 0.7); rad.receiveShadow = true; akr.add(rad); }
     akr.position.set(x, 0, z); akr.rotation.y = 0.04; scen.add(akr);
   });
+  // häckar mellan gången och åkrarna, och lövträd längst fram
+  const NH = 150, hack = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.55, 2), new THREE.MeshStandardMaterial({ roughness: 1 }), NH);
+  for (let n = 0; n < NH; n++) { o.position.set(-14 + n * ((SLUT + 28) / NH) + (r() - 0.5) * 0.4, -0.45, 11.4 + (r() - 0.5) * 0.4); o.rotation.set(0, r() * 6, 0); o.scale.set(0.6 + r() * 0.3, 0.45 + r() * 0.2, 0.6); o.updateMatrix(); hack.setMatrixAt(n, o.matrix); hack.setColorAt(n, tonfarg[n % 5]); }
+  hack.castShadow = hack.receiveShadow = true; scen.add(hack);
+  for (let n = 0; n < 9; n++) { const cx = -6 + n * 12 + r() * 4; [0, 1, 2].forEach(() => plantera(cx + (r() - 0.5) * 4, 23 + r() * 6, 0.9 + r() * 0.5)); }
+  stam.count = k; gran1.count = gran2.count = kg; lov.count = kl;
+  [stam, gran1, gran2, lov].forEach((m) => { m.castShadow = m.receiveShadow = true; scen.add(m); });
+  // traktorn som plöjer åkern längst fram
+  const trak = new THREE.Group(), rod = new THREE.MeshStandardMaterial({ color: '#c8553d', roughness: 0.45, metalness: 0.15 });
+  const tk = lada(1.6, 0.7, 1, rod, 0.18); tk.position.set(0.3, 0.75, 0); trak.add(tk);
+  const th = lada(0.8, 0.8, 0.9, M.glas(), 0.12); th.position.set(-0.3, 1.45, 0); trak.add(th);
+  const tt = lada(0.95, 0.1, 1.05, rod, 0.04); tt.position.set(-0.3, 1.9, 0); trak.add(tt);
+  const trakHjul = [[-0.45, 0.48, 0.6], [0.75, 0.3, 0.38]].flatMap(([x, rr, w]) => [-0.62, 0.62].map((z) => { const h = cyl(rr, rr, 0.28, M.mork, 20); h.rotation.x = Math.PI / 2; h.position.set(x, rr, z); trak.add(h); return h; }));
+  const avgas = []; for (let n = 0; n < 5; n++) { const a = new THREE.Mesh(new THREE.IcosahedronGeometry(0.16, 2), new THREE.MeshStandardMaterial({ color: '#e9e4dc', roughness: 1, transparent: true, depthWrite: false })); trak.add(a); avgas.push(a); }
+  trak.traverse((m) => { if (m.isMesh) m.castShadow = true; }); scen.add(trak);
+  // får som betar på ängen bakom
+  const ull = new THREE.MeshStandardMaterial({ color: '#f7f3ec', roughness: 1 }), nos = new THREE.MeshStandardMaterial({ color: '#3d3833', roughness: 0.8 }), far = [];
+  for (let n = 0; n < 7; n++) {
+    const f = new THREE.Group(); const kr = new THREE.Mesh(new THREE.IcosahedronGeometry(0.45, 3), ull); kr.scale.set(1.25, 0.85, 0.9); kr.position.y = 0.62; f.add(kr);
+    const hv = new THREE.Group(); hv.position.set(0.55, 0.75, 0); f.add(hv); const hu = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 12), nos); hu.scale.set(1.3, 1, 0.9); hu.position.x = 0.12; hv.add(hu);
+    [[-0.3, -0.18], [-0.3, 0.18], [0.3, -0.18], [0.3, 0.18]].forEach(([x, z]) => { const b = cyl(0.05, 0.05, 0.4, nos, 8); b.position.set(x, 0.2, z); f.add(b); });
+    f.traverse((m) => { if (m.isMesh) m.castShadow = true; });
+    f.position.set(19 + (n % 4) * 2.4 + r(), -0.6, -10 - Math.floor(n / 4) * 2.4 - r()); f.rotation.y = r() * 6; f.userData = { hv, fas: r() * 6, bas: f.rotation.y }; scen.add(f); far.push(f);
+  }
+  // fjärilar vid stationerna
+  const fjMat = ['#f6c68d', '#ffffff', '#e7a3a0', '#c9b4e0'].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, side: THREE.DoubleSide })), fjarilar = [];
+  for (let n = 0; n < 14; n++) { const f = new THREE.Group(); [-1, 1].forEach((sd) => { const v = new THREE.Mesh(new THREE.CircleGeometry(0.16, 12), fjMat[n % 4]); v.geometry.translate(0.16 * sd, 0, 0); f.add(v); }); f.userData = { x: (n % 6) * AVST + (r() - 0.5) * 9, z: (r() - 0.5) * 8, fas: r() * 6 }; scen.add(f); fjarilar.push(f); }
   // stenar och gräs
-  const stenMat = new THREE.MeshStandardMaterial({ color: '#b9b4aa', roughness: 0.95, flatShading: true });
-  for (let n = 0; n < 40; n++) { const x = -20 + r() * (SLUT + 40), z = -9 - r() * 30; if (fri(x, z)) continue; const s = new THREE.Mesh(new THREE.DodecahedronGeometry(0.3 + r() * 0.7, 0), stenMat); s.position.set(x, -0.5, z); s.rotation.set(r() * 3, r() * 3, 0); s.scale.y = 0.6; s.castShadow = s.receiveShadow = true; scen.add(s); }
-  const NT = 900, tuva = new THREE.InstancedMesh(new THREE.ConeGeometry(0.12, 0.5, 4), new THREE.MeshStandardMaterial({ roughness: 1, flatShading: true }), NT); let nt = 0;
-  for (let f = 0; f < 4000 && nt < NT; f++) { const x = -18 + r() * (SLUT + 36), z = -14 + r() * 36; if (fri(x, z) && !(z > 8.3 && z < 9.5)) continue; o.position.set(x, -0.42, z); o.rotation.set((r() - 0.5) * 0.4, r() * 6, (r() - 0.5) * 0.4); o.scale.setScalar(0.7 + r() * 0.9); o.updateMatrix(); tuva.setMatrixAt(nt, o.matrix); tuva.setColorAt(nt, tonfarg[(nt * 7) % 5]); nt++; }
-  tuva.count = nt; scen.add(tuva);
-  const NB = 420, ang = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.1, 0), new THREE.MeshStandardMaterial({ roughness: 0.7 }), NB);
+  const stenMat = new THREE.MeshStandardMaterial({ color: '#b9b4aa', roughness: 0.95 });
+  for (let n = 0; n < 40; n++) { const x = -20 + r() * (SLUT + 40), z = -9 - r() * 30; if (fri(x, z)) continue; const s = new THREE.Mesh(new THREE.IcosahedronGeometry(0.3 + r() * 0.7, 2), stenMat); s.position.set(x, -0.5, z); s.rotation.set(r() * 3, r() * 3, 0); s.scale.y = 0.6; s.castShadow = s.receiveShadow = true; scen.add(s); }
+  const NB = 160, ang = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.1, 0), new THREE.MeshStandardMaterial({ roughness: 0.7 }), NB);
   for (let n = 0; n < NB; n++) { o.position.set(-16 + r() * (SLUT + 32), -0.5, 9.6 + r() * 14); o.rotation.set(0, 0, 0); o.scale.setScalar(0.6 + r() * 0.9); o.updateMatrix(); ang.setMatrixAt(n, o.matrix); ang.setColorAt(n, BLOM[n % BLOM.length]); }
   scen.add(ang);
   // vindkraftverk på kullarna
@@ -240,40 +362,106 @@ function natur(scen) {
     g.position.set(x, 0.5, z); g.traverse((m) => { if (m.isMesh) m.castShadow = true; }); scen.add(g); verk.push(nav);
   });
   return (t) => {
+    const ax = ((t * 0.06) % 2), fram = ax < 1, ap = fram ? ax : 2 - ax;
+    trak.position.set(-12.5 + ap * 25, -0.62, 14.6 + (fram ? 0 : 2.2)); trak.rotation.y = fram ? 0 : Math.PI;
+    trak.position.y = -0.62 + Math.abs(Math.sin(t * 8)) * 0.03; trakHjul.forEach((h) => { h.rotation.y = -t * 5; });
+    avgas.forEach((a, n) => { const q = (t * 0.8 + n / 5) % 1; a.position.set(0.55 - q * 0.6, 1.7 + q * 1.6, -0.3); a.scale.setScalar(0.6 + q * 2); a.material.opacity = (1 - q) * 0.6; });
+    far.forEach((f, n) => { const d = f.userData; d.hv.rotation.z = -0.5 + Math.max(0, Math.sin(t * 0.9 + d.fas)) * 0.8; f.rotation.y = d.bas + Math.sin(t * 0.15 + d.fas) * 0.6; });
+    fjarilar.forEach((f, n) => { const d = f.userData, a = t * 0.5 + d.fas; f.position.set(d.x + Math.cos(a) * 2.2, 0.9 + Math.sin(t * 2.3 + d.fas) * 0.35 + Math.sin(a * 2) * 0.3, d.z + Math.sin(a * 1.3) * 1.8); f.rotation.y = -a; const v = Math.sin(t * 22 + d.fas) * 1.1; f.children[0].rotation.y = v; f.children[1].rotation.y = -v; });
     verk.forEach((v, n) => { v.rotation.z = t * (0.7 + n * 0.12); });
     bat.position.set(sjoX + Math.cos(t * 0.12) * 7, -0.38 + Math.sin(t * 1.6) * 0.05, sjoZ + Math.sin(t * 0.12) * 2.6); bat.rotation.y = -t * 0.12 - Math.PI / 2; bat.rotation.z = Math.sin(t * 1.3) * 0.05;
     ringar.forEach((q, n) => { const a = (t * 0.25 + n / 4) % 1; q.scale.setScalar(0.3 + a * 2.4); q.material.opacity = (1 - a) * 0.5; });
     vatten.material.color.setHSL(0.53, 0.3, 0.66 + Math.sin(t * 0.8) * 0.015);
   };
 }
+/* Fler verkliga detaljer per station: bodbod, truck, armering, personbilar och trädgård ------------- */
+function personbil(farg) {
+  const g = new THREE.Group(), lack = new THREE.MeshStandardMaterial({ color: farg, roughness: 0.25, metalness: 0.45 }), glas = M.glas();
+  const kropp = lada(2.3, 0.5, 1.02, lack, 0.2); kropp.position.y = 0.5; g.add(kropp);
+  const kupe = lada(1.25, 0.46, 0.92, lack, 0.18); kupe.position.set(-0.15, 0.92, 0); g.add(kupe);
+  const rutor = lada(1.27, 0.32, 0.94, glas, 0.12); rutor.position.set(-0.15, 0.95, 0); g.add(rutor);
+  [-1, 1].forEach((sd) => { const f = lada(0.04, 0.08, 0.2, LJUS_FRAM, 0.02); f.position.set(1.15, 0.58, sd * 0.36); g.add(f); const b = lada(0.04, 0.08, 0.22, LJUS_BAK, 0.02); b.position.set(-1.15, 0.6, sd * 0.36); g.add(b); });
+  const hj = [0.72, -0.72].flatMap((x) => [-0.47, 0.47].map((z) => { const h = hjul(0.22, 0.16); h.position.set(x, 0.22, z); g.add(h); return h; }));
+  g.traverse((m) => { if (m.isMesh) m.castShadow = true; }); g.userData.hjul = hj; return g;
+}
+function bodbod() {
+  const g = new THREE.Group(), platM = new THREE.MeshStandardMaterial({ map: plat(), roughness: 0.55, metalness: 0.2 });
+  const kropp = lada(3, 1.5, 1.3, platM, 0.05); kropp.position.y = 0.95; g.add(kropp);
+  const tak = lada(3.1, 0.08, 1.4, M.stal, 0.02); tak.position.y = 1.74; g.add(tak);
+  [-0.8, 0.4].forEach((x) => { const f = lada(0.6, 0.45, 0.05, M.glas(), 0.02); f.position.set(x, 1.15, 0.66); g.add(f); });
+  const dorr = lada(0.5, 1.05, 0.05, new THREE.MeshStandardMaterial({ color: '#c98a45', roughness: 0.5 }), 0.02); dorr.position.set(1.15, 0.73, 0.66); g.add(dorr);
+  const trappa = lada(0.7, 0.2, 0.5, M.stal, 0.02); trappa.position.set(1.15, 0.12, 0.95); g.add(trappa);
+  [-1.3, 1.3].forEach((x) => [-0.5, 0.5].forEach((z) => { const b = lada(0.18, 0.2, 0.18, M.sockel, 0.02); b.position.set(x, 0.1, z); g.add(b); }));
+  g.traverse((m) => { if (m.isMesh) m.castShadow = m.receiveShadow = true; }); return g;
+}
+function truck() {
+  const g = new THREE.Group();
+  const kropp = lada(1.1, 0.55, 0.8, M.gul, 0.1); kropp.position.set(-0.1, 0.5, 0); g.add(kropp);
+  const vikt = lada(0.3, 0.6, 0.8, M.mork, 0.08); vikt.position.set(-0.6, 0.55, 0); g.add(vikt);
+  const stol = lada(0.35, 0.3, 0.4, M.svart, 0.06); stol.position.set(-0.15, 0.9, 0); g.add(stol);
+  [[0.25, 0.32], [0.25, -0.32], [-0.45, 0.32], [-0.45, -0.32]].forEach(([x, z]) => { const s = lada(0.05, 1.1, 0.05, M.svart, 0); s.position.set(x, 1.3, z); g.add(s); });
+  const skydd = lada(0.8, 0.05, 0.72, M.svart, 0.01); skydd.position.set(-0.1, 1.85, 0); g.add(skydd);
+  const mast = new THREE.Group(); mast.position.x = 0.5; g.add(mast);
+  [-0.25, 0.25].forEach((z) => { const m = lada(0.07, 1.9, 0.07, M.stal, 0); m.position.set(0, 1.05, z); mast.add(m); });
+  const gaffel = new THREE.Group(); mast.add(gaffel);
+  [-0.18, 0.18].forEach((z) => { const f = lada(0.9, 0.04, 0.1, M.stal, 0); f.position.set(0.48, 0, z); gaffel.add(f); });
+  const pall = plankor(0, 0); pall.scale.setScalar(0.42); pall.position.set(0.5, 0.02, 0); gaffel.add(pall);
+  const hj = [[0.3, 0.2], [-0.45, 0.17]].flatMap(([x, r]) => [-0.38, 0.38].map((z) => { const h = hjul(r, 0.14); h.position.set(x, r, z); g.add(h); return h; }));
+  g.traverse((m) => { if (m.isMesh) m.castShadow = true; }); g.userData = { hjul: hj, gaffel }; return g;
+}
+function trygg(gb, mal, dt) { let d = mal - gb.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); gb.rotation.y += d * Math.min(1, dt * 5); }
+function dekor2(st) {
+  const lagg = (s, f) => { const gammal = s.userData.tick; s.userData.tick = (t, dt) => { gammal(t, dt); f(t, dt); }; };
+  // 1: bodbod och utsättningspinnar med snöre
+  const bod = bodbod(); bod.position.set(3.4, 0.06, 3.4); st[0].add(bod);
+  const pinnar = [[-5.2, -3.8], [-2.6, -3.8], [-2.6, -2.4], [-5.2, -2.4]], snMat = new THREE.MeshBasicMaterial({ color: '#f07a3a' });
+  pinnar.forEach(([x, z], n) => { const p = cyl(0.03, 0.03, 0.5, M.tra, 6); p.position.set(x, 0.3, z); st[0].add(p); const [x2, z2] = pinnar[(n + 1) % 4]; const l = Math.hypot(x2 - x, z2 - z); const sn = cyl(0.008, 0.008, l, snMat, 4); sn.rotation.z = Math.PI / 2; sn.rotation.y = -Math.atan2(z2 - z, x2 - x); sn.position.set((x + x2) / 2, 0.45, (z + z2) / 2); st[0].add(sn); });
+  // 2: trucken kör pallar fram och tillbaka (backar i stället för att vända tvärt)
+  const tr = truck(); tr.position.set(0, 0.06, 1.9); st[1].add(tr); let trX = null;
+  lagg(st[1], (t, dt) => {
+    const x = Math.sin(t * 0.35) * 2.8; if (trX !== null) tr.userData.hjul.forEach((h) => { h.rotation.z -= (x - trX) / 0.18; }); trX = x; tr.position.x = x;
+    tr.userData.gaffel.position.y = 0.12 + Math.max(0, Math.sin(t * 0.35 + 1.6)) * 0.5;
+  });
+  // 3: armeringsnät innan plattan gjuts
+  const arm = new THREE.Group(), armM = new THREE.MeshStandardMaterial({ color: '#8a5a3c', roughness: 0.6, metalness: 0.5 });
+  for (let x = -3.2; x <= 3.21; x += 0.4) { const b = cyl(0.015, 0.015, 4.4, armM, 4); b.rotation.x = Math.PI / 2; b.position.set(x, 0, 0); arm.add(b); }
+  for (let z = -2.1; z <= 2.11; z += 0.4) { const b = cyl(0.015, 0.015, 6.6, armM, 4); b.rotation.z = Math.PI / 2; b.position.set(0, 0.03, z); arm.add(b); }
+  arm.position.set(0.6, 0.32, -0.6); st[2].add(arm);
+  const skott = grupp(lada(0.9, 0.35, 0.6, M.gul, 0.06), cyl(0.18, 0.18, 0.08, M.mork, 14)); skott.children[1].rotation.x = Math.PI / 2; skott.children[1].position.set(0.5, -0.12, 0); skott.position.set(-4.6, 0.3, 0.8); skott.rotation.y = 0.5; st[2].add(skott);
+  lagg(st[2], (t) => { const p = (t % 10) / 10; arm.visible = p > 0.18 && p < 0.42; });
+  // 5: besiktningsmannens bil på uppfarten
+  const bb = personbil('#5b7f9e'); bb.position.set(-2.6, 0.06, 4.2); bb.rotation.y = 0; st[4].add(bb);
+  // 6: familjens bil, trädgårdsmöbler och en gunga
+  const fb = personbil('#7d2e2a'); fb.position.set(-3, 0.06, 2.9); st[5].add(fb);
+  const bord = grupp(cyl(0.35, 0.35, 0.05, M.tra, 20), cyl(0.04, 0.04, 0.5, M.svart, 8)); bord.children[0].position.y = 0.52; bord.children[1].position.y = 0.26; bord.position.set(-1.8, 0.16, 2); st[5].add(bord);
+  [-0.55, 0.55].forEach((dx) => { const s = grupp(lada(0.36, 0.05, 0.36, M.tra, 0.02), lada(0.36, 0.4, 0.05, M.tra, 0.02)); s.children[0].position.y = 0.32; s.children[1].position.set(0, 0.52, -0.16); s.position.set(-1.8 + dx, 0.16, 2); s.rotation.y = dx > 0 ? -Math.PI / 2 : Math.PI / 2; st[5].add(s); });
+  const gstall = new THREE.Group(); [-0.8, 0.8].forEach((x) => [-1, 1].forEach((sd) => { const b = cyl(0.04, 0.04, 2.1, M.tra, 6); b.position.set(x, 1, sd * 0.3); b.rotation.x = sd * 0.25; gstall.add(b); })); const topp = cyl(0.05, 0.05, 1.8, M.tra, 8); topp.rotation.z = Math.PI / 2; topp.position.y = 2; gstall.add(topp);
+  const gunga = new THREE.Group(); gunga.position.y = 2; gstall.add(gunga); [-0.2, 0.2].forEach((x) => { const r = cyl(0.01, 0.01, 1.5, M.svart, 4); r.position.set(x, -0.75, 0); gunga.add(r); }); const sits = lada(0.5, 0.05, 0.22, M.koppar, 0.02); sits.position.y = -1.5; gunga.add(sits);
+  gstall.position.set(-4.4, 0.06, -1.6); gstall.rotation.y = 0.3; gstall.traverse((m) => { if (m.isMesh) m.castShadow = true; }); st[5].add(gstall);
+  lagg(st[5], (t) => { gunga.rotation.x = Math.sin(t * 1.8) * 0.5; });
+}
 function omgivning(scen) {
   const nat = natur(scen);
   // lyktor längs gången
   const lMat = M.neon('#ffd9a0', 1.1);
-  for (let x = -6; x < AVST * 5 + 8; x += 8) { const l = grupp(cyl(0.05, 0.07, 1.9, M.mork, 8), new THREE.Mesh(new THREE.SphereGeometry(0.17, 14, 10), lMat)); l.children[0].position.y = 0.95; l.children[1].position.y = 2; l.position.set(x, -0.55, 6.25); scen.add(l); }
+  for (let x = -6; x < AVST * 5 + 8; x += 8) { const l = grupp(cyl(0.05, 0.07, 1.9, M.mork, 8), new THREE.Mesh(new THREE.SphereGeometry(0.17, 14, 10), lMat)); l.children[0].position.y = 0.95; l.children[1].position.y = 2; l.position.set(x, -0.55, 9.8); scen.add(l); }
   // moln som driver förbi
-  const molnMat = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1, flatShading: true, transparent: true, opacity: 0.92 }), moln = [];
+  const molnMat = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1, transparent: true, opacity: 0.92 }), moln = [];
   for (let n = 0; n < 8; n++) {
-    const c = new THREE.Group(); [[0, 0, 1.6], [1.5, -0.2, 1.2], [-1.4, -0.3, 1.1], [0.6, 0.6, 1]].forEach(([x, y, r]) => { const b = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 1), molnMat); b.position.set(x, y, 0); b.scale.y = 0.7; b.castShadow = true; c.add(b); });
+    const c = new THREE.Group(); [[0, 0, 1.6], [1.5, -0.2, 1.2], [-1.4, -0.3, 1.1], [0.6, 0.6, 1]].forEach(([x, y, r]) => { const b = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 4), molnMat); b.position.set(x, y, 0); b.scale.y = 0.7; b.castShadow = true; c.add(b); });
     c.position.set(n * 14 - 10, 15 + (n % 3) * 1.5, -16 + (n % 2) * 6); c.scale.setScalar(0.8 + (n % 3) * 0.25); scen.add(c); moln.push(c);
   }
   // fåglar
   const fMat = new THREE.MeshBasicMaterial({ color: '#4a4038', side: THREE.DoubleSide }), faglar = [];
   for (let n = 0; n < 4; n++) { const f = new THREE.Group(); [-1, 1].forEach((s) => { const v = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.16), fMat); v.geometry.translate(0.25 * s, 0, 0); f.add(v); }); scen.add(f); faglar.push(f); }
-  // Legohus-bilen som kör längs gången
-  const bil = new THREE.Group(), lack = new THREE.MeshStandardMaterial({ color: '#fbf6ee', roughness: 0.35, metalness: 0.2 });
-  const kaross = lada(2.4, 0.9, 1.1, lack, 0.22); kaross.position.y = 0.75; bil.add(kaross);
-  const rand = lada(2.42, 0.12, 1.12, M.koppar, 0.04); rand.position.y = 0.62; bil.add(rand);
-  const ruta = lada(0.08, 0.42, 0.96, M.glas(), 0.02); ruta.position.set(1.17, 0.95, 0); bil.add(ruta);
-  const hjul = []; [-0.75, 0.75].forEach((x) => [-0.52, 0.52].forEach((z) => { const h = cyl(0.24, 0.24, 0.16, M.mork, 16); h.rotation.x = Math.PI / 2; h.position.set(x, 0.26, z); bil.add(h); hjul.push(h); }));
-  const fram = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 8), M.neon('#fff2c9', 2)); fram.position.set(1.2, 0.68, 0.38); const fram2 = fram.clone(); fram2.position.z = -0.38; bil.add(fram, fram2);
-  bil.position.set(-12, -0.52, 7.4); scen.add(bil);
+  // Legohus skåpbil i det närmre körfältet
+  const bil = skapbil(); bil.position.set(-12, -0.52, 6.4); scen.add(bil);
   return (t, dt, fokusX) => {
     nat(t);
     moln.forEach((c) => { c.position.x += dt * 0.5; if (c.position.x > AVST * 5 + 24) c.position.x = -24; });
     faglar.forEach((f, n) => { const a = t * 0.32 + n * 0.5; f.position.set(fokusX + Math.cos(a) * (7 + n), 10 + n * 0.6 + Math.sin(t * 0.9 + n) * 0.4, -3 + Math.sin(a) * 5); f.rotation.y = -a; f.children[0].rotation.z = Math.sin(t * 10 + n) * 0.6; f.children[1].rotation.z = -Math.sin(t * 10 + n) * 0.6; });
-    bil.position.x += dt * 3.2; if (bil.position.x > AVST * 5 + 14) bil.position.x = -14;
-    bil.position.y = -0.52 + Math.abs(Math.sin(t * 9)) * 0.015; hjul.forEach((h) => { h.rotation.y -= dt * 13; });
+    const fart = 3.4; bil.position.x += dt * fart; if (bil.position.x > AVST * 5 + 40) bil.position.x = -40;
+    bil.position.y = -0.52 + Math.abs(Math.sin(t * 9)) * 0.01; bil.userData.hjul.forEach((h) => { h.rotation.z -= (dt * fart) / bil.userData.r; });
     lMat.emissiveIntensity = 1 + Math.sin(t * 1.5) * 0.15;
   };
 }
@@ -329,8 +517,12 @@ function station2(modell) { // Tillverkning
   const g = platta('#cfc8bd', '#ffb35c');
   const hall = new THREE.Group();
   const golv = lada(11.4, 0.1, 8.6, new THREE.MeshStandardMaterial({ color: '#a39d94', roughness: 0.5, metalness: 0.1 }), 0.05); golv.position.y = 0.12; hall.add(golv);
-  [[-5.5, -4.1], [5.5, -4.1], [-5.5, 1.5], [5.5, 1.5], [0, -4.1]].forEach(([x, z]) => { const p = lada(0.25, 5, 0.25, M.mork, 0.03); p.position.set(x, 2.6, z); hall.add(p); });
-  for (let n = 0; n < 3; n++) { const tand = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 2.2, 1.2, 3, 1), new THREE.MeshStandardMaterial({ color: '#3a3632', roughness: 0.6, metalness: 0.3, side: THREE.DoubleSide })); tand.rotation.set(Math.PI / 2, Math.PI / 6, 0); tand.scale.set(1.9, 2.8, 1); tand.position.set(-3.6 + n * 3.6, 5.6, -1.3); tand.castShadow = true; hall.add(tand); }
+  [[-5.5, -4.1], [5.5, -4.1], [-5.5, 1.5], [5.5, 1.5], [0, -4.1]].forEach(([x, z]) => { const p = lada(0.22, 5, 0.22, M.stal, 0.02); p.position.set(x, 2.6, z); hall.add(p); });
+  const platM = new THREE.MeshStandardMaterial({ map: plat(), roughness: 0.6, metalness: 0.25 });
+  const bak = lada(11.2, 4.4, 0.14, platM, 0.02); bak.position.set(0, 2.3, -4.1); hall.add(bak);
+  [-1, 1].forEach((sd) => { const v = lada(0.14, 4.4, 4.2, platM, 0.02); v.position.set(sd * 5.5, 2.3, -2); hall.add(v); const port = lada(0.16, 1.4, 2.6, new THREE.MeshStandardMaterial({ color: '#c98a45', roughness: 0.5, metalness: 0.3 }), 0.02); port.position.set(sd * 5.52, 0.9, -1.4); hall.add(port); });
+  const skylt = lada(3.4, 0.6, 0.06, new THREE.MeshStandardMaterial({ color: '#1b1915', roughness: 0.4 }), 0.05); skylt.position.set(0, 4.05, -4.0); hall.add(skylt);
+  for (let n = 0; n < 3; n++) { const tand = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 2.2, 1.2, 3, 1), new THREE.MeshStandardMaterial({ color: '#3a3632', roughness: 0.45, metalness: 0.5, side: THREE.DoubleSide })); tand.rotation.set(Math.PI / 2, Math.PI / 6, 0); tand.scale.set(1.9, 2.8, 1); tand.position.set(-3.6 + n * 3.6, 5.6, -1.3); tand.castShadow = true; hall.add(tand); }
   const balk = lada(11.4, 0.28, 0.4, M.gul, 0.04); balk.position.set(0, 4.8, -1.3); hall.add(balk);
   const vagn = grupp(lada(0.8, 0.4, 0.7, M.gul, 0.06), cyl(0.02, 0.02, 1.6, M.mork, 6)); vagn.children[1].position.y = -1; vagn.position.set(0, 4.55, -1.3); hall.add(vagn);
   const lampor = []; [-3.6, 0, 3.6].forEach((x) => { const l = cyl(0.35, 0.5, 0.25, M.neon('#ffd9a0', 1.6), 16); l.position.set(x, 4.3, -1.3); hall.add(l); lampor.push(l); });
@@ -397,14 +589,8 @@ function station4(modell) { // Leverans & montage
   const g = platta('#cdd3b4', '#ffcf6b');
   const grund = lada(6.6, 0.4, 4.4, M.betong, 0.05); grund.position.set(-1.2, 0.2, -1.6); g.add(grund);
   const h = hus(modell); g.add(h);
-  // lastbilen
-  const bil = new THREE.Group(); g.add(bil);
-  const hytt = lada(1.6, 1.7, 2.1, new THREE.MeshStandardMaterial({ color: '#e8edf2', roughness: 0.35, metalness: 0.3 }), 0.25); hytt.position.set(4.6, 1.25, 0); bil.add(hytt);
-  const ruta = lada(0.1, 0.7, 1.8, M.glas(), 0.02); ruta.position.set(5.42, 1.6, 0); bil.add(ruta);
-  const flak = lada(7.4, 0.25, 2.3, M.mork, 0.04); flak.position.set(0.2, 0.75, 0); bil.add(flak);
-  [-2.6, -1.6, 0.8, 4.4].forEach((x) => [-1.05, 1.05].forEach((z) => { const h2 = cyl(0.42, 0.42, 0.32, M.mork, 18); h2.rotation.x = Math.PI / 2; h2.position.set(x, 0.42, z); bil.add(h2); }));
-  const lampa1 = cyl(0.12, 0.12, 0.05, M.neon('#fff2c9', 3), 12); lampa1.rotation.z = Math.PI / 2; lampa1.position.set(5.43, 0.9, 0.75); bil.add(lampa1);
-  const lampa2 = lampa1.clone(); lampa2.position.z = -0.75; bil.add(lampa2);
+  // lastbilen kör på vägen i det bortre körfältet
+  const bil = lastbil(); g.add(bil); const VAG_Z = 8.2, VAG_Y = -0.52; let forraX = null;
   // kranen
   const kran = new THREE.Group(); kran.position.set(-5.2, 0, 2.2); g.add(kran);
   const fot = lada(1.4, 0.3, 1.4, M.mork, 0.05); fot.position.y = 0.15; kran.add(fot);
@@ -418,20 +604,22 @@ function station4(modell) { // Leverans & montage
   const krok = lada(0.3, 0.3, 0.3, M.gul, 0.05); arm.add(krok);
   const lokalt = new THREE.Vector3();
   g.userData.tick = (t) => {
-    const p = (t % 12) / 12;
-    // 0–0.25 bilen kör in, 0.25–0.7 kranen lyfter, 0.7–0.85 sätter ner, 0.85–1 bilen kör iväg
-    const inX = lerp(-16, 1.4, ut(p / 0.25)), utX = lerp(1.4, 18, mjuk((p - 0.82) / 0.18));
-    bil.position.set(p < 0.82 ? inX : utX, 0, 3.4);
-    const lyft = mjuk((p - 0.28) / 0.42);
-    const fran = new THREE.Vector3(bil.position.x + 0.2, 0.9, 3.4), till = new THREE.Vector3(-1.2, 0.42, -1.6);
-    const pa = p < 0.28 ? fran : p < 0.7 ? new THREE.Vector3(lerp(fran.x, till.x, lyft), lerp(fran.y, till.y, lyft) + Math.sin(lyft * Math.PI) * 3.4, lerp(fran.z, till.z, lyft)) : till;
-    h.position.copy(pa); h.rotation.y = p < 0.28 ? 0 : p < 0.7 ? Math.sin(lyft * Math.PI) * 0.12 : 0;
-    h.userData.glas.emissiveIntensity = p > 0.72 ? 0.9 : 0.25;
+    const p = (t % 22) / 22;
+    // 0–0.32 bilen bromsar in längs vägen, 0.34–0.68 kranen lyfter, 0.7–0.78 sätter ner, 0.8–1 bilen kör vidare
+    const inX = lerp(-64, 1.4, ut(p / 0.32)), utX = lerp(1.4, 48, Math.pow(klamp((p - 0.8) / 0.2, 0, 1), 2));
+    const bx = p < 0.8 ? inX : utX; bil.position.set(bx, VAG_Y, VAG_Z);
+    if (forraX !== null) { const steg = bx - forraX; if (Math.abs(steg) < 5) bil.userData.hjul.forEach((w) => { w.rotation.z -= steg / bil.userData.r; }); }
+    forraX = bx; bil.position.y = VAG_Y + (Math.abs(bx - 1.4) > 0.05 ? Math.abs(Math.sin(t * 11)) * 0.012 : 0);
+    const lyft = mjuk((p - 0.34) / 0.34);
+    const fran = new THREE.Vector3(bil.position.x + 0.2, VAG_Y + bil.userData.flak, VAG_Z), till = new THREE.Vector3(-1.2, 0.42, -1.6);
+    const pa = p < 0.34 ? fran : p < 0.68 ? new THREE.Vector3(lerp(fran.x, till.x, lyft), lerp(fran.y, till.y, lyft) + Math.sin(lyft * Math.PI) * 3.4, lerp(fran.z, till.z, lyft)) : till;
+    h.position.copy(pa); h.rotation.y = p < 0.34 ? 0 : p < 0.68 ? Math.sin(lyft * Math.PI) * 0.12 : 0;
+    h.userData.glas.emissiveIntensity = p > 0.7 ? 0.6 : 0.12;
     // armen pekar mot huset, vajern hänger ner till taket
     lokalt.set(h.position.x - kran.position.x, 0, h.position.z - kran.position.z);
-    arm.rotation.y = -Math.atan2(lokalt.z, lokalt.x); const r = Math.min(7.4, Math.max(1.5, lokalt.length()));
+    arm.rotation.y = -Math.atan2(lokalt.z, lokalt.x); const r = Math.min(9.6, Math.max(1.5, lokalt.length()));
     const topp = h.position.y + (h.userData.hojd || 3) + 0.2; const lang = Math.max(0.3, 7.6 - topp);
-    krok.position.set(r, -lang, 0); vajer.position.set(r, -lang / 2, 0); vajer.scale.y = lang; vajer.visible = krok.visible = p < 0.86;
+    krok.position.set(r, -lang, 0); vajer.position.set(r, -lang / 2, 0); vajer.scale.y = lang; vajer.visible = krok.visible = p < 0.74;
     topplamp.material.emissiveIntensity = Math.sin(t * 5) > 0 ? 5 : 0.4;
 
   };
@@ -484,18 +672,18 @@ function station6(modell) { // Klart
 let S = null;
 function bygg(el) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0; renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95; renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scen = new THREE.Scene(); scen.background = himmel(); scen.fog = new THREE.Fog(HORISONT, 70, 140);
-  const pmrem = new THREE.PMREMGenerator(renderer); scen.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scen.environmentIntensity = 0.5;
+  const pmrem = new THREE.PMREMGenerator(renderer); scen.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scen.environmentIntensity = 0.3;
   const kamera = new THREE.PerspectiveCamera(30, 2, 0.5, 200);
-  scen.add(new THREE.HemisphereLight('#fff6ea', '#b8a68c', 0.9));
-  const sol = new THREE.DirectionalLight('#ffe9cc', 1.5); sol.castShadow = true; sol.shadow.mapSize.set(2048, 2048); sol.shadow.bias = -0.0004; sol.shadow.normalBias = 0.03;
+  scen.add(new THREE.HemisphereLight('#e4f0f6', '#a4b07f', 0.6));
+  const sol = new THREE.DirectionalLight('#fff0d8', 2.8); sol.castShadow = true; sol.shadow.mapSize.set(4096, 4096); sol.shadow.bias = -0.0003; sol.shadow.normalBias = 0.035;
   Object.assign(sol.shadow.camera, { left: -34, right: 34, top: 26, bottom: -26, near: 1, far: 110 }); scen.add(sol, sol.target);
   // vägen och den lysande banan genom alla steg
-  const vag = lada(AVST * 5 + 30, 0.06, 1.6, new THREE.MeshStandardMaterial({ color: '#e3d2b8', roughness: 0.95 }), 0.03); vag.position.set(AVST * 2.5, -0.55, 7.4); scen.add(vag);
-  for (let x = -12; x < AVST * 5 + 14; x += 1.6) { const s = lada(0.5, 0.02, 0.08, new THREE.MeshStandardMaterial({ color: '#c9a77c', roughness: 0.9 }), 0); s.position.set(x, -0.5, 7.4); scen.add(s); }
+  const vag = lada(AVST * 5 + 90, 0.06, 3.6, new THREE.MeshStandardMaterial({ color: '#d9c8ad', roughness: 0.95 }), 0.03); vag.position.set(AVST * 2.5, -0.55, 7.5); scen.add(vag);
+  for (let x = -44; x < AVST * 5 + 44; x += 1.6) { const s = lada(0.5, 0.02, 0.08, new THREE.MeshStandardMaterial({ color: '#c9a77c', roughness: 0.9 }), 0); s.position.set(x, -0.5, 7.4); scen.add(s); }
   const banaPunkter = []; for (let n = 0; n <= 5; n++) banaPunkter.push(new THREE.Vector3(n * AVST, 0.2, 5.6));
   const bana = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(banaPunkter), 200, 0.04, 8), M.neon('#e9a25a', 1.2)); scen.add(bana);
   const pulser = []; for (let n = 0; n < 6; n++) { const p = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 12), M.neon('#ffd9a0', 2.2)); scen.add(p); pulser.push(p); }
@@ -503,9 +691,10 @@ function bygg(el) {
   const mod = (n) => modeller[n % Math.max(1, modeller.length)];
   const stationer = [station1(mod(1)), station2(mod(2)), station3(), station4(mod(0)), station5(mod(3)), station6(mod(4))];
   stationer.forEach((s, n) => { s.position.x = n * AVST; scen.add(s); });
-  dekor(stationer); const omg = omgivning(scen);
+  dekor(stationer); dekor2(stationer); const omg = omgivning(scen);
   // efterbehandlingen: neonen och fönstren glöder
-  const comp = new EffectComposer(renderer); comp.addPass(new RenderPass(scen, kamera));
+  const mal = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
+  const comp = new EffectComposer(renderer, mal); comp.addPass(new RenderPass(scen, kamera));
   const bloom = new UnrealBloomPass(new THREE.Vector2(512, 256), 0.35, 0.4, 1.6); comp.addPass(bloom); comp.addPass(new OutputPass());
   S = { omg, renderer, scen, kamera, sol, comp, bloom, stationer, pulser, el: null, nu: 0, mal: new THREE.Vector3(), mot: new THREE.Vector3(), auto: !LUGN, hel: true, zoom: 1, pan: 0, drag: null, paus: 0, t: 0, synlig: false, ram: 0, klocka: new THREE.Clock() };
   S.mot.set(0, 1.2, 0); S.kamPos = new THREE.Vector3(30, 60, 110);
@@ -553,7 +742,7 @@ function nalar() {
     return '<button type="button" class="resa3d__nal" data-g="proj-oppna" data-id="' + p.id + '" data-i="' + i + '" data-j="' + j + '" style="--d:' + (n * 0.08) + 's"><img src="' + e(m ? m.tumme : '') + '" alt=""><span><b>' + e(k ? k.namn.split(' ')[0] : 'Projekt') + '</b><small>' + e(m ? m.namn : '') + '</small></span></button>';
   }).join('');
 }
-const tmp = new THREE.Vector3(), OFF = new THREE.Vector3(-6.5, 17.4, 40.6).normalize(), BAS = 44.6;
+const tmp = new THREE.Vector3(), OFF = new THREE.Vector3(-5, 13, 42).normalize(), BAS = 44.6;
 function placeraNalar() {
   const w = S.el.clientWidth, h = S.el.clientHeight;
   S.el.querySelectorAll('.resa3d__nal').forEach((b) => {
@@ -561,7 +750,7 @@ function placeraNalar() {
     tmp.set(i * AVST - 2.5 + j * 2.8, 6.4 + j * 0.2, -2.5).project(S.kamera);
     const syns = tmp.z < 1 && Math.abs(tmp.x) < 1.15 && Math.abs(tmp.y) < 1.15;
     b.style.transform = 'translate(' + ((tmp.x + 1) / 2 * w).toFixed(1) + 'px,' + ((1 - tmp.y) / 2 * h).toFixed(1) + 'px) translate(-50%,-100%)';
-    b.style.opacity = syns ? (i === S.nu ? 1 : 0.55) : 0; b.style.pointerEvents = syns ? '' : 'none';
+    b.style.opacity = syns ? (i === S.nu ? 1 : 0.85) : 0; b.style.pointerEvents = syns ? '' : 'none';
   });
 }
 function starta() { if (S && !S.ram && S.synlig && !document.hidden && S.el && S.el.isConnected) { S.klocka.getDelta(); S.ram = requestAnimationFrame(ram); } }
@@ -577,14 +766,14 @@ function ram() {
   const lo = halvB - 7, hi = AVST * 5 + 7 - halvB;
   const x = S.hel || lo >= hi ? AVST * 2.5 : klamp(S.nu * AVST + S.pan, lo, hi); if (!S.hel && lo < hi) S.pan = x - S.nu * AVST;
   const sv = LUGN ? 0 : Math.sin(S.t * 0.25) * dist * 0.03;
-  tmp.set(x - 0.5, 1.6 + dist * 0.06, -0.6); S.mal.copy(OFF).multiplyScalar(dist).add(tmp); S.mal.x += sv; S.mal.y += Math.sin(S.t * 0.3) * 0.5;
+  tmp.set(x - 0.5, 1.2 + dist * 0.035, -0.6); S.mal.copy(OFF).multiplyScalar(dist).add(tmp); S.mal.x += sv; S.mal.y += Math.sin(S.t * 0.3) * 0.5;
   const fart = S.drag ? 0.00001 : 0.0015;
   S.kamPos.lerp(S.mal, 1 - Math.pow(fart, dt));
   S.mot.lerp(tmp, 1 - Math.pow(fart, dt));
   const nu = S.kamPos.distanceTo(S.mot); S.scen.fog.near = nu * 1.4; S.scen.fog.far = nu * 3.2;
   const sk = S.sol.shadow.camera, sb = halvB + 9; if (Math.abs(sk.right - sb) > 0.5) { sk.left = -sb; sk.right = sb; sk.top = sb * 0.7; sk.bottom = -sb * 0.7; sk.updateProjectionMatrix(); }
   S.kamera.position.copy(S.kamPos); S.kamera.lookAt(S.mot);
-  S.sol.position.set(S.mot.x + 18, 40, 24); S.sol.target.position.copy(S.mot);
+  S.sol.position.set(S.mot.x + 22, 34, S.mot.z - 12); S.sol.target.position.copy(S.mot);
   S.stationer.forEach((s, n) => { if (Math.abs(n * AVST - S.mot.x) < halvB + AVST * 0.6) s.userData.tick(S.t + n * 1.7, dt); s.userData.kant.material.emissiveIntensity = n === S.nu ? 1.4 + Math.sin(S.t * 3) * 0.3 : 0.15; });
   S.pulser.forEach((p, n) => { const a = ((S.t * 0.09 + n / 6) % 1); p.position.set(a * AVST * 5, 0.2, 5.6); p.scale.setScalar(0.7 + Math.sin(S.t * 6 + n) * 0.25); });
   S.omg(S.t, dt, S.mot.x); TRAD.forEach((t) => { t.rotation.z = Math.sin(S.t * 1.2 + t.userData.vaj) * 0.035; });
