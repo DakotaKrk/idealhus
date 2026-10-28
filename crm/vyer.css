@@ -8604,3 +8604,5 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .inst-tal .inst-tal__status { font: 600 .7rem/1.2 var(--rubrik) !important; color: var(--text-2) !important; padding: 4px 10px !important; width: auto !important; height: auto !important; }
 .inst-tal em { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; font-size: .74rem; }
 .inst-tal .inst-tal__spann { width: auto !important; }
+/* Översikten: båda spalterna slutar på samma höjd – sista kortet i varje spalt växer så det fyller ut */
+@media (min-width: 1101px) { .vy .oversikt { align-items: stretch; } .vy .oversikt__kol { display: flex; flex-direction: column; } .vy .oversikt__kol > .kort:last-child { flex: 1 1 auto; } }
