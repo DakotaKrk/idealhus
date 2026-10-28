@@ -381,7 +381,7 @@ function bygg() {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) starta(); });
   addEventListener('resize', storlek);
 }
-function storlek() { if (!S || !S.el) return; const w = S.el.clientWidth, h = S.el.clientHeight; if (!w || !h) return; S.renderer.setSize(w, h, false); S.comp.setSize(w, h); S.kamera.aspect = w / h; const smal = w < 900; S.kamera.fov = smal ? 44 : 34; S.kamera.setViewOffset(w, h, smal ? 0 : -w * 0.2, smal ? 0 : -h * 0.02, w, h); S.kamera.updateProjectionMatrix(); }
+function storlek() { if (!S || !S.el) return; const w = S.el.clientWidth, h = S.el.clientHeight; if (!w || !h) return; S.renderer.setSize(w, h, false); S.comp.setSize(w, h); S.kamera.aspect = w / h; const smal = w < 900; S.utzoom = w / h < 1 ? 1 + (1 - w / h) * 0.85 : 1; S.kamera.fov = smal ? (w / h < 1 ? 52 : 44) : 34; S.kamera.setViewOffset(w, h, smal ? 0 : -w * 0.2, smal ? 0 : -h * 0.02, w, h); S.kamera.updateProjectionMatrix(); }
 function starta() { if (S && !S.ram && S.synlig && !document.hidden && S.el && S.el.isConnected) { S.klocka.getDelta(); S.ram = requestAnimationFrame(ram); } }
 const tmp = new THREE.Vector3();
 function placeraPlatser() {
@@ -400,7 +400,7 @@ function ram() {
   // kameran: en långsam glidning och lite följ-musen, aldrig ryckigt
   S.mus.lerp(S.musMal, 1 - Math.pow(0.02, dt));
   const a = Math.sin(t * 0.08) * 0.12 + S.mus.x * 0.12, intro = LUGN ? 1 : 1 - Math.pow(1 - Math.min(1, t / 2.8), 3);
-  const rad = 9.4 + (1 - intro) * 5;
+  const rad = (9.4 + (1 - intro) * 5) * (S.utzoom || 1);
   S.kamera.position.set(Math.sin(a + (1 - intro) * 0.4) * rad + 1.2, 5.3 + (1 - intro) * 2.2 + Math.sin(t * 0.11) * 0.12 - S.mus.y * 0.3, Math.cos(a + (1 - intro) * 0.4) * rad + 2.4);
   S.kamera.lookAt(0.2, 1.35, -0.4);
   S.snurr.rotation.y = t * 0.25;
