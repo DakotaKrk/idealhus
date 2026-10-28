@@ -299,7 +299,7 @@ function bygg() {
       rorelse.forEach((n) => { const c = klipp(n); if (c) akt[n] = mix.clipAction(c); });
       figurer.mixers.push(mix); return { f, mix, akt };
     };
-    const kavaj = mat({ color: '#2f3b4c', roughness: 0.6 }), ledK = mat({ color: '#c98a45', roughness: 0.45, metalness: 0.2 });
+    const kavaj = mat({ color: '#2f3b4c', roughness: 0.7 }), ledK = mat({ color: '#2a3442', roughness: 0.75 });
     const p = ny(-4.5, -2.95, 1.0, kavaj, ledK, ['Idle_Talking_Loop', 'Interact', 'Idle_Loop']);
     if (p.akt.Idle_Talking_Loop) p.akt.Idle_Talking_Loop.play();
     if (p.akt.Interact) { p.akt.Interact.setLoop(THREE.LoopOnce, 1); p.akt.Interact.clampWhenFinished = true; }
@@ -307,7 +307,7 @@ function bygg() {
     figurer.presentator = p;
     // två kollegor sitter på andra sidan bordet
     [[-1.5, -2.25, 0.04, '#7a5c45', 'Sitting_Talking_Loop'], [1.5, -2.25, 0.04, '#5b7f9e', 'Sitting_Idle_Loop']].forEach(([x, z, ry, farg, rorelse], n) => {
-      const k = ny(x, z, ry, mat({ color: farg, roughness: 0.65 }), mat({ color: '#e9dccb', roughness: 0.5 }), [rorelse]);
+      const k = ny(x, z, ry, mat({ color: farg, roughness: 0.65 }), mat({ color: new THREE.Color(farg).multiplyScalar(0.85), roughness: 0.75 }), [rorelse]);
       if (k.akt[rorelse]) { k.akt[rorelse].play(); k.akt[rorelse].time = n * 1.7; }
     });
     if (S) S.figurer = figurer;
