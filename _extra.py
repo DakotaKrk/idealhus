@@ -58,7 +58,7 @@ KROPP = '''    <main id="innehall">
 
 '''
 
-ut = (B.head("Sidan finns inte | Idealhus",
+ut = (B.head("Sidan finns inte | Legohus Stockholm",
              "Sidan du sökte finns inte. Här hittar du vägen vidare till "
              "våra hus, processen och kontakt.", None, fil="404.html")
       + "\n" + B.header("") + "\n" + KROPP + B.SIDFOT + "\n" + B.skript(""))

@@ -2,7 +2,7 @@
 # ar identiska pa alla sidor. Kors om nar mallen andras.
 import re, io, os
 
-BAS = "https://idealhus.se/"
+BAS = "https://legohusstockholm.se/"
 CSS_V = "20261010l"
 
 # Husen for den som ska bo i dem, och det vi levererar till andra som
@@ -186,7 +186,7 @@ def mobilmeny():
         '<strong>Vad får jag bygga?</strong><em class="mmeny__tipsrad">Fem frågor · svar direkt</em></span>' + MMENY_PIL + '</a>')
     rader.append(f'          <a class="mmeny__cta" href="kontakt.html" style="--i:{i + 2}">Börja här</a>')
     rader.append(f'          <p class="mmeny__kontakt" style="--i:{i + 3}">'
-                 '<a href="mailto:info@idealhus.se">info@idealhus.se</a><span>Stockholm, Sverige</span></p>')
+                 '<a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a><span>Stockholm, Sverige</span></p>')
     return "\n".join(rader)
 
 
@@ -273,20 +273,23 @@ DELNINGSALT = {
 ORG = {
     "@type": "Organization",
     "@id": BAS + "#organisation",
-    "name": "Idealhus",
-    "legalName": "Idealhus AB",
+    "name": "Legohus Stockholm",
+    "legalName": "LegoHus i Stockholm AB",
     "url": BAS,
-    "logo": BAS + "images/idealhus.svg",
+    "logo": BAS + "images/legohus.svg",
     "image": BAS + "images/hus-r2.webp",
-    "email": "info@idealhus.se",
-    "description": "Idealhus formger och bygger attefallshus och fritidshus och tillverkar byggelement för proffs, allt under tak i Sverige.",
+    "email": "kontakt@legohusstockholm.se",
+    "description": "Legohus Stockholm formger och bygger attefallshus och fritidshus och tillverkar byggelement för proffs, allt under tak i Sverige.",
     "address": {"@type": "PostalAddress", "addressLocality": "Stockholm", "addressCountry": "SE"},
+    "identifier": {"@type": "PropertyValue", "propertyID": "Organisationsnummer", "value": "559606-0524"},
+    "foundingDate": "2026-10-07",
+    "knowsAbout": ["Attefallshus", "Fritidshus", "Komplementbostadshus", "Utfackningsväggar", "Husmoduler", "Byggelement"],
 }
 WEB = {
     "@type": "WebSite",
     "@id": BAS + "#webbplats",
     "url": BAS,
-    "name": "Idealhus",
+    "name": "Legohus Stockholm",
     "inLanguage": "sv-SE",
     "publisher": {"@id": BAS + "#organisation"},
 }
@@ -313,14 +316,14 @@ def head(titel, beskrivning, forladdad=None, fil=None, ogtyp="website", delning=
     <title>{titel}</title>
     <meta name="description" content="{beskrivning}">
     <meta name="theme-color" content="#1b1915">
-    <link rel="icon" href="images/idealhus.svg?v=2" type="image/svg+xml">
-    <link rel="icon" href="favicon.ico?v=2" sizes="16x16 32x32 48x48">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+    <link rel="icon" href="images/legohus.svg?v=3" type="image/svg+xml">
+    <link rel="icon" href="favicon.ico?v=3" sizes="16x16 32x32 48x48">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
     <link rel="canonical" href="{BAS}{fil or ''}">
 
     <meta property="og:type" content="{ogtyp}">
     <meta property="og:locale" content="sv_SE">
-    <meta property="og:site_name" content="Idealhus">
+    <meta property="og:site_name" content="Legohus Stockholm">
     <meta property="og:title" content="{titel}">
     <meta property="og:description" content="{beskrivning}">
     <meta property="og:image" content="{BAS}images/{bild}">
@@ -346,8 +349,8 @@ def header(aktiv):
     return f'''    <a class="skip" href="#innehall">Hoppa till innehållet</a>
     <header class="site-header">
       <div class="site-header__inner">
-        <a class="logo" href="./" aria-label="Till Idealhus startsida">
-          <img class="logo__svg" src="images/idealhus_logo.svg" width="1024" height="279" alt="Idealhus">
+        <a class="logo" href="./" aria-label="Till Legohus Stockholms startsida">
+          <img class="logo__svg" src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
         </a>
 
         <nav class="main-nav" aria-label="Huvudmeny">
@@ -378,15 +381,10 @@ def header(aktiv):
 SIDFOT = '''    <footer class="site-footer">
       <div class="site-footer__inner">
         <div>
-          <img class="site-footer__logo" src="images/idealhus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Idealhus">
+          <img class="site-footer__logo" src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
           <p class="site-footer__text">
             Attefallshus, fritidshus och byggelement, byggda under tak i Sverige.
           </p>
-          <ul class="site-footer__sociala" aria-label="Idealhus i sociala medier">
-            <li style="--i:0"><a class="social social--instagram" href="https://www.instagram.com/idealhus.se/" target="_blank" rel="noopener" aria-label="Idealhus på Instagram"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect class="social__drag" pathLength="1" x="3.5" y="3.5" width="17" height="17" rx="5"/><circle class="social__drag" pathLength="1" cx="12" cy="12" r="4"/><circle class="social__prick" cx="17.2" cy="6.8" r="1.1"/></svg></a></li>
-            <li style="--i:1"><a class="social social--facebook" href="#" target="_blank" rel="noopener" aria-label="Idealhus på Facebook"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="social__drag" pathLength="1" d="M14.6 21v-7.3h2.6l.4-3.1h-3V8.7c0-.9.3-1.5 1.6-1.5h1.6V4.4a21 21 0 0 0-2.4-.1c-2.4 0-4 1.4-4 4.1v2.2H8.8v3.1h2.6V21"/></svg></a></li>
-            <li style="--i:2"><a class="social social--tiktok" href="#" target="_blank" rel="noopener" aria-label="Idealhus på TikTok"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="social__drag" pathLength="1" d="M13.6 3.5v11.2a3.3 3.3 0 1 1-3.3-3.3"/><path class="social__drag" pathLength="1" d="M13.6 3.5c.4 2.6 2.1 4.3 4.7 4.5"/></svg></a></li>
-          </ul>
         </div>
 
         <div>
@@ -416,7 +414,7 @@ SIDFOT = '''    <footer class="site-footer">
         <div>
           <h2 class="site-footer__heading">Kontakta oss</h2>
           <p class="site-footer__text">
-            <a href="mailto:info@idealhus.se">info@idealhus.se</a><br>
+            <a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a><br>
             Stockholm, Sverige
           </p>
           <a class="site-footer__button" href="kontakt.html">Hör av dig</a>
@@ -424,11 +422,11 @@ SIDFOT = '''    <footer class="site-footer">
       </div>
 
       <div class="site-footer__bottom">
-        <span>© 2026 Idealhus AB. Alla rättigheter förbehållna.</span>
+        <span>© 2026 LegoHus i Stockholm AB · Org.nr 559606-0524 · Godkänd för F-skatt</span>
         <a class="site-footer__policy" href="integritetspolicy.html">Integritetspolicy</a>
       </div>
 
-      <p class="site-footer__ord" aria-hidden="true">Idealhus</p>
+      <p class="site-footer__ord" aria-hidden="true">Legohus</p>
     </footer>
 '''
 

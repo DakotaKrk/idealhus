@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Bygger ikonernas rasterformat ur images/idealhus.svg. Kor: python _ikoner.py
+"""Bygger ikonernas rasterformat ur images/legohus.svg. Kor: python _ikoner.py
 
 SVG-ikonen ar redan inkopplad och racker for moderna webblasare. Tva
 lagen nas inte av den:
@@ -19,7 +19,7 @@ from PIL import Image, ImageDraw
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-KALLA = "images/idealhus.svg"
+KALLA = "images/legohus.svg"
 LOGO = "#82776b"      # --logo
 SAND = "#f3f1ed"      # --sand
 

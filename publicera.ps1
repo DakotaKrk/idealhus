@@ -1,5 +1,5 @@
 ﻿<#
-  Laddar upp hemsidan till Loopias webbhotell (idealhus.se) med krypterad
+  Laddar upp hemsidan till Loopias webbhotell (legohusstockholm.se) med krypterad
   FTP - explicit FTP över TLS, som Loopia rekommenderar.
 
   Kör i PowerShell, i mappen idealhus:
@@ -31,7 +31,9 @@ trap {
 }
 
 $Server = 'ftpcluster.loopia.se'
-$Doman = 'idealhus.se'
+# FTP-kontot heter fortfarande idealhus.se, men sajten ligger i den nya
+# domänens mapp.
+$Doman = 'legohusstockholm.se'
 
 $filer = @(Get-Content -LiteralPath 'publicera-filer.txt' -Encoding UTF8 |
     Where-Object { $_ -and -not $_.StartsWith('#') })
@@ -46,7 +48,7 @@ if ($Prova) {
 }
 
 Write-Host ""
-Write-Host "Ladda upp Idealhus till Loopia" -ForegroundColor Cyan
+Write-Host "Ladda upp Legohus Stockholm till Loopia" -ForegroundColor Cyan
 Write-Host ""
 
 # Uppladdningen görs av curl, som finns i Windows. curl frågar själv

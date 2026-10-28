@@ -10,12 +10,12 @@ web
 
 ## Users
 
-- **Sajten (idealhus.se):** privatpersoner som vill bygga attefallshus eller fritidshus, och byggföretag/entreprenörer som köper byggelement.
-- **CRM:et (`crm/`):** Idealhus egna medarbetare i två roller – **Sälj** (förfrågningar, säljtavla, kunder, offerter, kundmöten) och **Produktion** (projekt, montage, checklistor). De sitter främst vid dator; mobilen ska fungera men desktop är viktigast. CRM:et visas just nu som prototyp för ledningen (användarens chef).
+- **Sajten (legohusstockholm.se):** privatpersoner som vill bygga attefallshus eller fritidshus, och byggföretag/entreprenörer som köper byggelement.
+- **CRM:et (`crm/`):** Legohus Stockholms egna medarbetare i två roller – **Sälj** (förfrågningar, säljtavla, kunder, offerter, kundmöten) och **Produktion** (projekt, montage, checklistor). De sitter främst vid dator; mobilen ska fungera men desktop är viktigast. CRM:et visas just nu som prototyp för ledningen (användarens chef).
 
 ## Product Purpose
 
-Idealhus formger och bygger attefallshus och fritidshus och tillverkar byggelement för proffs, allt under tak i Sverige. Husen kommer i färdiga delar till tomten och monteras på några dagar. CRM:et samlar hela kundresan från förfrågan till nyckel på ett ställe, så att samma kontakt kan följa kunden från första samtalet till besiktningen.
+Legohus Stockholm formger och bygger attefallshus och fritidshus och tillverkar byggelement för proffs, allt under tak i Sverige. Husen kommer i färdiga delar till tomten och monteras på några dagar. CRM:et samlar hela kundresan från förfrågan till nyckel på ett ställe, så att samma kontakt kan följa kunden från första samtalet till besiktningen.
 
 ## Positioning
 
@@ -30,13 +30,13 @@ Fem egna husmodeller (Sadel 30, Sadel 30 Bred, Pulpet 30, Kupa 40, Kupa 50), byg
 ## Capabilities and Constraints
 
 - Statisk prototyp: HTML/CSS/vanilla JS, ingen byggkedja, data i `localStorage` (`ih-crm-v1`), demo-inloggning.
-- All data är exempeldata (påhittade namn Maja Lind/Jonas Ek, PTS-nummer 070-174 06 xx, `@example.com`). Priserna är exempel, inte Idealhus priser.
+- All data är exempeldata (påhittade namn Maja Lind/Jonas Ek, PTS-nummer 070-174 06 xx, `@example.com`). Priserna är exempel, inte Legohus Stockholms priser.
 - Svenska genomgående. Inga tredjepartstjänster för persondata.
 - Skarp version (ej byggd): egen server hos Loopia (PHP + databas) och riktig inloggning.
 
 ## Brand Commitments
 
-- Namnet Idealhus och logotypen i `images/idealhus_logo.svg` (varmgrått `#82776b`).
+- Namnet Legohus Stockholm och logotypen i `images/legohus_logo.svg` (varmgrått `#82776b`).
 - CRM:et ska vara **ljust, mjukt och varmt** – användaren har uttryckligen avvisat mörka rutor/brickor ("ser billigt ut"). Palett och typsnitt (Poppins + Manrope i `fonts/`) delas med sajten och ska inte bytas utan att fråga.
 - Inga stora sidrubriker i CRM-vyerna (användaren: "tar onödig plats").
 

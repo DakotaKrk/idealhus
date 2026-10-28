@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://idealhus.se/sitemap.xml
+Sitemap: https://legohusstockholm.se/sitemap.xml

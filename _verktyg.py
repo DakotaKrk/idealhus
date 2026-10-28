@@ -462,7 +462,7 @@ KROPP = f'''    <main id="innehall">
            hunnit laddas när utskriften görs. -->
       <div class="rapport" id="rapport">
         <div class="rapport__topp">
-          <img class="rapport__logo" src="images/idealhus_logo.svg" width="1024" height="279" alt="Idealhus">
+          <img class="rapport__logo" src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
           <p class="rapport__datum" id="rapport-datum"></p>
         </div>
         <div id="rapport-innehall"></div>
@@ -2683,7 +2683,7 @@ SKRIPT = '''
             return esc(a.textContent.trim());
           });
           h += '<div class="rapport__fot">' +
-            '<p><strong>Idealhus</strong> · ' + kontakt.join(' · ') + '</p>' +
+            '<p><strong>Legohus Stockholm</strong> · ' + kontakt.join(' · ') + '</p>' +
             '<p>Svaren som länk: ' + esc(location.href) + '</p>' +
             '<p>Vägledning, inte ett beslut. Detaljplanen och kommunen har sista ordet.</p></div>';
           document.getElementById('rapport-innehall').innerHTML = h;
@@ -2703,7 +2703,7 @@ SKRIPT = '''
       })();
 '''
 
-ut = (B.head("Vad får jag bygga på min tomt? Se storlek och höjd | Idealhus",
+ut = (B.head("Vad får jag bygga på min tomt? | Legohus Stockholm",
              "Fem frågor om tomten visar hur stort attefallshus som ryms utan "
              "bygglov, hur högt det får bli och vilka av våra hus som passar. Tar "
              "under en minut.",

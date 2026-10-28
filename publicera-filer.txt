@@ -58,8 +58,8 @@ images/hus-r2.webp
 images/hus-r3.webp
 images/hus-r4.webp
 images/hus-r5.webp
-images/idealhus.svg
-images/idealhus_logo.svg
+images/legohus.svg
+images/legohus_logo.svg
 images/tumme/hus-r1.webp
 images/tumme/hus-r2.webp
 images/tumme/hus-r3.webp

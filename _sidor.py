@@ -240,7 +240,7 @@ def kategorisida(fil, namn, herobild, meta, rubrik, ingress, spann):
     # Ingressen ar brodtext och blir 190-240 tecken i ett description-falt,
     # dar Google klipper vid ~160. Sidorna har darfor en egen kort text.
     kort_text = KORTA_BESKRIVNINGAR.get(fil, ingress)
-    titel, beskrivning = SEO.get(fil, (f"{namn} | Idealhus", f"{namn} från Idealhus. {kort_text}"))
+    titel, beskrivning = SEO.get(fil, (f"{namn} | Legohus Stockholm", f"{namn} från Legohus Stockholm. {kort_text}"))
     ut = (B.head(titel, beskrivning, herobild, fil=fil)
           + "\n" + B.header("Våra hus") + "\n" + kropp + B.SIDFOT + "\n"
           + B.skript())
@@ -319,9 +319,9 @@ def fragor(fil):
 # Title och description för kategorisidorna (2026-10-03): sökordet först,
 # varumärket sist, och bara fakta som står på sidan.
 SEO = {
-    "attefallshus.html": ("Attefallshus på 30 m² – tre modeller i trä | Idealhus",
+    "attefallshus.html": ("Attefallshus på 30 m² – tre modeller i trä | Legohus Stockholm",
                           "Tre attefallshus i trä på 30 m², med sadeltak eller pulpettak. Byggda under tak i Sverige och monterade på din tomt. Inget bygglov för huset inom måtten."),
-    "fritidshus.html": ("Bygga fritidshus – 40 och 50 m² med takkupa | Idealhus",
+    "fritidshus.html": ("Bygga fritidshus – 40 och 50 m² med takkupa | Legohus Stockholm",
                         "Kupa 40 och Kupa 50 är fritidshus på 40 och 50 m² med takkupa. Byggda under tak i Sverige, monterade på din tomt. Kräver bygglov – underlaget tar vi fram."),
 }
 

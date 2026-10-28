@@ -167,7 +167,7 @@ TAKKORT = (
 
 KROPP = f'''    <main id="innehall">
       <section class="subpage-hero helbild">
-        <img class="helbild__bak" src="images/foto/dronare-montage.webp" alt="" aria-hidden="true" decoding="async">
+        <img class="helbild__bak" src="images/foto/dronare-montage.webp" width="1600" height="900" alt="" aria-hidden="true" decoding="async">
         <img class="subpage-hero__image" src="images/foto/dronare-montage.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Drönarbild av ett hus under montage, med inplastade väggar runt en betongplatta och en kran">
 {HERO_STEG}
 
@@ -319,8 +319,8 @@ KROPP = f'''    <main id="innehall">
 
 '''
 
-ut = (B.head("Bygga attefallshus eller fritidshus i sju steg | Idealhus",
-             "Så bygger du ett attefallshus eller fritidshus med Idealhus: sju steg "
+ut = (B.head("Bygga attefallshus och fritidshus i 7 steg | Legohus Stockholm",
+             "Så bygger du ett attefallshus eller fritidshus med Legohus Stockholm: sju steg "
              "från första samtalet till slutbesiktning, och vem som gör vad i varje "
              "steg.",
              "foto/dronare-montage.webp", fil="sa-fungerar-det.html")

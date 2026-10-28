@@ -1704,7 +1704,7 @@
       h += box(3.2, 3.0, 0.95, 0.4, 0.45, 0.32, { t: '#4a443d', x: '#27231f', y: '#35302a' });
       var bf = P(3.6, 3.1, 1.2);
       h += '<rect x="' + (bf[0] - 1).toFixed(1) + '" y="' + (bf[1] - 12).toFixed(1) + '" width="2" height="12" fill="#1b1915"/><rect x="' + (bf[0] + 1).toFixed(1) + '" y="' + (bf[1] - 12).toFixed(1) + '" width="8" height="5" rx="1" fill="#f0b56e"/>';
-      // Nyckelöverlämningen: kunden och Idealhus, nyckeln mellan dem.
+      // Nyckelöverlämningen: kunden och Legohus Stockholm, nyckeln mellan dem.
       h += person(-2.7, 2.3, { t: '#8fb0cf', x: '#6f90af', y: '#7fa0bf' }, null, 'v-arbetare', null, [-1.62, 2.66, 1.18]);
       h += person(-0.35, 3.0, { t: '#3a352d', x: '#1b1915', y: '#2a2622' }, '#f0b56e', '', [-1.28, 2.84, 1.18]);
       var ny = P(-1.45, 2.75, 1.16);
@@ -4004,7 +4004,7 @@
         lin([P(x0 + 0.9, y1 + 1.6, 0), P(x0 + 0.9, y1 + 1.6, 1.1)], '#2b241d', 2.4) +
         poly(iY(y1 + 1.6, x0 - 1.0, x0 + 1.1, 0.8, 1.55), '#c9a06a');
       var sm = P(x0 + 0.05, y1 + 1.6, 1.12);
-      skylt += '<text class="rs-skylttext" x="' + sm[0].toFixed(1) + '" y="' + (sm[1] + 3).toFixed(1) + '" text-anchor="middle" transform="rotate(-30 ' + sm[0].toFixed(1) + ' ' + sm[1].toFixed(1) + ')">Idealhus</text>';
+      skylt += '<text class="rs-skylttext" x="' + sm[0].toFixed(1) + '" y="' + (sm[1] + 3).toFixed(1) + '" text-anchor="middle" transform="rotate(-30 ' + sm[0].toFixed(1) + ' ' + sm[1].toFixed(1) + ')">Legohus</text>';
       h += del(7, 99, trall + skylt, '--in-y:14px;--d:.5s');
       var bm = P(0, 0, zr + 2.6);
       var bock = '<g class="rs-bock" transform="translate(' + bm[0].toFixed(1) + ',' + bm[1].toFixed(1) + ')">' +

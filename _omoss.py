@@ -37,8 +37,8 @@ KROPP = f'''    <main id="innehall">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
-            <h1 class="subpage-hero__title">Idealhus – hus som ska leva länge</h1>
-            <p class="subpage-hero__meta">Idealhus AB formger och bygger attefallshus och fritidshus och tillverkar byggelement för proffs, allt under tak i Sverige. Samma kontakt hela vägen.</p>
+            <h1 class="subpage-hero__title">Legohus Stockholm – hus som ska leva länge</h1>
+            <p class="subpage-hero__meta">Legohus Stockholm formger och bygger attefallshus och fritidshus och tillverkar byggelement för proffs, allt under tak i Sverige. Samma kontakt hela vägen.</p>
             <div class="subpage-hero__actions">
               <a class="hero__link hero__link--solid" href="attefallshus.html">Se våra hus</a>
               <a class="hero__link" href="sa-fungerar-det.html">Så går det till</a>
@@ -113,7 +113,7 @@ KROPP = f'''    <main id="innehall">
       <section class="kontakt-topp">
         <div>
           <p class="ih-etikett">Vilka vi är</p>
-          <h2>Idealhus är ett litet företag. <em>Raka svar.</em></h2>
+          <h2>Legohus Stockholm är ett litet företag. <em>Raka svar.</em></h2>
           <p class="kontakt-topp__lead">
             Du når oss direkt – utan växel och utan säljorganisation
             emellan.
@@ -130,7 +130,7 @@ KROPP = f'''    <main id="innehall">
             <span class="kontakt-direkt__namn">Skriv till oss</span>
             <span class="kontakt-direkt__roll">E-post</span>
             <span class="kontakt-direkt__lankar">
-              <a href="mailto:info@idealhus.se">info@idealhus.se</a>
+              <a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>
             </span>
           </div>
 
@@ -148,8 +148,8 @@ KROPP = f'''    <main id="innehall">
 
 '''
 
-ut = (B.head("Om oss – attefallshus, fritidshus och byggelement | Idealhus",
-             "Idealhus AB i Stockholm formger och bygger attefallshus och fritidshus "
+ut = (B.head("Om oss – attefallshus och fritidshus | Legohus Stockholm",
+             "Legohus Stockholm formger och bygger attefallshus och fritidshus "
              "och tillverkar byggelement för proffs, under tak i Sverige. En kontakt "
              "hela vägen.",
              "foto/arbetare-vattenpass.webp", fil="om-oss.html")

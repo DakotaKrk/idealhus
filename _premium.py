@@ -75,7 +75,7 @@ def patcha(fil):
             ny = kalla
         else:
             ny = B.delningsbild("hus-r2.webp" if fil == "index.html" else kalla)
-        rad = (f'    <meta property="og:image" content="https://idealhus.se/images/{ny}">\n'
+        rad = (f'    <meta property="og:image" content="https://legohusstockholm.se/images/{ny}">\n'
                '    <meta property="og:image:width" content="1200">\n'
                '    <meta property="og:image:height" content="630">\n'
                f'    <meta property="og:image:alt" content="{B.DELNINGSALT.get(ny.split("/")[-1], "")}">\n')

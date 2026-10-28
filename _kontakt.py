@@ -14,9 +14,9 @@ FORMSKRIPT = "\n" + s[a2:b2]
 
 KROPP = open("_kontaktkropp.inc", encoding="utf-8").read().replace("__FORMULAR__", FORMULAR)
 
-ut = (B.head("Kontakt och offert på attefallshus och fritidshus | Idealhus",
-             "Kontakta Idealhus om attefallshus, fritidshus eller byggelement. Mejla "
-             "info@idealhus.se eller berätta kort om ditt projekt – vi svarar "
+ut = (B.head("Begär offert på attefallshus och fritidshus | Legohus Stockholm",
+             "Kontakta Legohus Stockholm om attefallshus, fritidshus eller byggelement. Mejla "
+             "kontakt@legohusstockholm.se eller berätta kort om ditt projekt – vi svarar "
              "själva, utan växel.",
              "foto/dronare-platta.webp", fil="kontakt.html")
       + "\n" + B.header("Kontakt") + "\n" + KROPP + B.SIDFOT + "\n"

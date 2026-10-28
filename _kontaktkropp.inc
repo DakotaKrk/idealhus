@@ -4,11 +4,11 @@
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
-            <h1 class="subpage-hero__title">Kontakta Idealhus</h1>
+            <h1 class="subpage-hero__title">Kontakta Legohus Stockholm</h1>
             <p class="subpage-hero__meta">Du når oss direkt, utan växel och utan säljorganisation. Berätta kort om ditt projekt, så återkommer vi med nästa steg.</p>
             <div class="subpage-hero__actions">
               <a class="hero__link hero__link--solid" href="#kontaktformular">Till formuläret</a>
-              <a class="hero__link" href="mailto:info@idealhus.se">info@idealhus.se</a>
+              <a class="hero__link" href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>
             </div>
           </div>
         </div>
@@ -34,7 +34,7 @@
             <span class="kontakt-direkt__namn">Skriv till oss</span>
             <span class="kontakt-direkt__roll">E-post</span>
             <span class="kontakt-direkt__lankar">
-              <a href="mailto:info@idealhus.se">info@idealhus.se</a>
+              <a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>
             </span>
           </div>
 

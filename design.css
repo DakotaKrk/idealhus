@@ -30316,3 +30316,1115 @@ html body .vag--hel:hover .vag__bild {
     padding-inline: 12px;
   }
 }
+
+/* =====================================================================
+   Linjerna (2026-10-03): ett enda system för alla linjer på sajten.
+   Allt som ritar en linje (skiljelinjer, etikettstreck, räls) står här.
+   - Hårfint: 1 px. Inga tjocka eller svarta streck.
+   - Färgen är virket med låg täckning, olika för ljust och mörkt läge:
+     --linje (skiljelinjer), --linje-stark (summan i offertkorten).
+   - Skiljelinjer tonar ut mot båda ändarna (border-image) i stället
+     för att klippas av, och har lika mycket luft ovanför som under,
+     minst 12 px till text och ikoner.
+   - Etikettstrecken: 28 x 1 px, helt virke, 10 px från texten och
+     speglade på centrerade etiketter.
+   - Räls går från första till sista steget och slutar där.
+   - Linjer som bara skräpade (strecket direkt under kontaktkortets
+     rubrik, streck mellan varje rad i offertkorten, strecket i
+     sidfotens husspalt) är borttagna; luften gör jobbet.
+   ===================================================================== */
+
+/* --- 1. Färger och toningar ------------------------------------------- */
+html body {
+  --linje: rgba(143, 84, 36, 0.2);
+  --linje-stark: rgba(143, 84, 36, 0.42);
+  --linje-ton: linear-gradient(90deg, transparent, var(--linje) 18%, var(--linje) 82%, transparent);
+  --linje-ton-stark: linear-gradient(90deg, transparent, var(--linje-stark) 12%, var(--linje-stark) 88%, transparent);
+  --linje-ton-lodrat: linear-gradient(180deg, transparent, var(--linje) 14%, var(--linje) 86%, transparent);
+}
+
+html[data-tema="mork"] body {
+  --linje: rgba(240, 181, 110, 0.17);
+  --linje-stark: rgba(240, 181, 110, 0.38);
+  --linje-ton: linear-gradient(90deg, transparent, var(--linje) 18%, var(--linje) 82%, transparent);
+  --linje-ton-stark: linear-gradient(90deg, transparent, var(--linje-stark) 12%, var(--linje-stark) 88%, transparent);
+  --linje-ton-lodrat: linear-gradient(180deg, transparent, var(--linje) 14%, var(--linje) 86%, transparent);
+}
+
+/* --- 2. Etikettstrecken ------------------------------------------------ */
+/* Färgen: mörkt virke på ljus yta, ljust virke på mörk. I mörkt läge
+   är --virke-djup samma ljusa virke. Etikettklassen står dubbelt i
+   väljarna för att vinna över äldre regler. */
+html body :is(.ih-etikett, .section-label, .kontaktkort__rubrik) {
+  --streck: var(--virke-djup);
+}
+
+html body .ih-etikett--ljus {
+  --streck: var(--virke);
+}
+
+html:not([data-tema="mork"]) body :is(
+    .subpage-hero,
+    .kollen-topp,
+    .guidehero,
+    .guide-topp,
+    .fyrafyra,
+    .pf-topp,
+    .kontaktkort,
+    .prisskala__svar,
+    .prisoffert,
+    .checklista,
+    .virke,
+    .tv__svar,
+    .rg-kort__tal,
+    .rg-fore__kol--efter,
+    .rg-citat,
+    .rg-vs__kort--bo,
+    .rg-slut,
+    .ih-mork,
+    .site-footer
+  ) .ih-etikett--ljus {
+  --streck: var(--virke-djup);
+}
+
+/* Strecket före texten. */
+html body :is(.ih-etikett.ih-etikett, .section-label.section-label)::before {
+  flex: none;
+  width: 28px;
+  height: 1px;
+  border-radius: 0;
+  background: var(--streck);
+  opacity: 1;
+}
+
+/* Strecket efter texten: samma streck spegelvänt. Texten slutar med
+   bokstavsavståndet (0,14em), så strecket flyttas in lika mycket och
+   står lika långt från texten som strecket före. */
+html body :is(
+    .katsida .kat-mitt,
+    .kat-topp__ord,
+    .contact-section .contact-section__inner,
+    .ih-huvud--mitt,
+    .ih-huvud--rad,
+    .manifest,
+    .prisskala__topp,
+    .prisfaktorer__topp,
+    .prisvag__topp,
+    .pf-lev__huvud,
+    .pf-band__huvud,
+    .pf-steg__huvud,
+    .againtro__inner,
+    .samagare__topp,
+    .kalkyl__topp,
+    .rg-slut__inre,
+    .kollen-hus__topp,
+    .markkoll__topp
+  ) :is(.ih-etikett.ih-etikett, .section-label.section-label)::after {
+  flex: none;
+  width: 28px;
+  height: 1px;
+  margin-inline-start: -0.14em;
+  border-radius: 0;
+  background: var(--streck);
+  opacity: 1;
+  transform-origin: right center;
+  transition: transform 0.9s var(--mjuk) 0.15s;
+}
+
+/* Centrerade etiketter som bara hade strecket före får det efter. */
+html body :is(
+    .ih-huvud--mitt,
+    .ih-huvud--rad,
+    .manifest,
+    .prisskala__topp,
+    .prisfaktorer__topp,
+    .prisvag__topp,
+    .pf-lev__huvud,
+    .pf-band__huvud,
+    .pf-steg__huvud,
+    .againtro__inner,
+    .samagare__topp,
+    .kalkyl__topp,
+    .rg-slut__inre,
+    .kollen-hus__topp,
+    .markkoll__topp
+  ) :is(.ih-etikett.ih-etikett, .section-label.section-label)::after {
+  content: "";
+  display: block;
+  position: static;
+}
+
+/* Strecket efter ritas samtidigt med strecket före, utifrån och in. */
+html.ih-js body :is(
+    .katsida .kat-mitt,
+    .kat-topp__ord,
+    .contact-section .contact-section__inner,
+    .ih-huvud--mitt,
+    .ih-huvud--rad,
+    .manifest,
+    .prisskala__topp,
+    .prisfaktorer__topp,
+    .prisvag__topp,
+    .pf-lev__huvud,
+    .pf-band__huvud,
+    .pf-steg__huvud,
+    .againtro__inner,
+    .samagare__topp,
+    .kalkyl__topp,
+    .rg-slut__inre,
+    .kollen-hus__topp,
+    .markkoll__topp
+  ) :is(.ih-etikett.ih-etikett, .section-label.section-label):not(.syns)::after {
+  transform: scaleX(0);
+}
+
+html.ih-js body :is(
+    .katsida .kat-mitt,
+    .kat-topp__ord,
+    .contact-section .contact-section__inner,
+    .ih-huvud--mitt,
+    .ih-huvud--rad,
+    .manifest,
+    .prisskala__topp,
+    .prisfaktorer__topp,
+    .prisvag__topp,
+    .pf-lev__huvud,
+    .pf-band__huvud,
+    .pf-steg__huvud,
+    .againtro__inner,
+    .samagare__topp,
+    .kalkyl__topp,
+    .rg-slut__inre,
+    .kollen-hus__topp,
+    .markkoll__topp
+  ) :is(.ih-etikett.ih-etikett, .section-label.section-label).syns::after {
+  transform: scaleX(1);
+}
+
+/* Kontaktkortets rubrik: två lika långa streck, 10 px från texten som
+   alla andra etiketter (förut 14). Bokstavsavståndet är 0,18em. */
+html body .contact-section .kontaktkort .kontaktkort__rubrik {
+  gap: 10px;
+}
+
+html body .contact-section .kontaktkort .kontaktkort__rubrik::before,
+html body .contact-section .kontaktkort .kontaktkort__rubrik::after {
+  flex: none;
+  width: 28px;
+  height: 1px;
+  border-radius: 0;
+  background: var(--streck);
+  opacity: 1;
+}
+
+html body .contact-section .kontaktkort .kontaktkort__rubrik::after {
+  margin-inline-start: -0.18em;
+}
+
+/* Mobilmenyns etiketter: samma streck som på sidorna (förut 16 x 1,5 px
+   i en ljusare toning, 8 px från texten). */
+html body .mmeny .mmeny__etikett {
+  gap: 10px;
+}
+
+html body .mmeny .mmeny__etikett::before {
+  flex: none;
+  width: 28px;
+  height: 1px;
+  border-radius: 0;
+  background: var(--virke-djup);
+}
+
+/* Vattenrutans etikett i guiden: samma mått, rutans egen blå färg. */
+html body .rg-vatten__etikett::before {
+  flex: none;
+  width: 28px;
+  height: 1px;
+}
+
+/* --- 3. Kontaktkortet (rutan "Hör av dig direkt") ---------------------- */
+/* Samma luft, 22 px (kortets gap), runt varje linje. Ingen linje direkt
+   under rubriken: den har redan sina streck. Linjen mellan e-post och
+   plats och linjen över löftena tonar ut mot kanterna. */
+html body .contact-section .kontaktkort .contact-section__meta > div,
+html:not([data-tema="mork"]) body .contact-section .kontaktkort .contact-section__meta > div {
+  padding: 22px 0;
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+html body .contact-section .kontaktkort .contact-section__meta > div:first-child,
+html:not([data-tema="mork"]) body .contact-section .kontaktkort .contact-section__meta > div:first-child {
+  padding-top: 0;
+  border-top: 0;
+  border-image: none;
+}
+
+html body .contact-section .kontaktkort .contact-section__meta > div:last-child {
+  padding-bottom: 0;
+}
+
+html body .contact-section .kontaktkort .tillit,
+html:not([data-tema="mork"]) body .contact-section .kontaktkort .tillit {
+  margin-top: 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+/* Under 900 px har platsraden 2–3 px högre radruta. */
+@media (max-width: 900px) {
+  html body .contact-section .kontaktkort .tillit,
+  html:not([data-tema="mork"]) body .contact-section .kontaktkort .tillit {
+    padding-top: 24px;
+  }
+}
+
+/* --- 4. Offertkorten (kvittona över toppbilderna m.fl.) ----------------- */
+/* Huvud, poster, summa. Huvudet och summan får varsin hårlinje med
+   14 px luft på båda sidor. Posterna står i luft utan streck emellan;
+   bockarna håller ordningen. Summan är en hårlinje i stället för 2 px
+   svart. */
+html body .hoffert .hoffert__huvud,
+html body .tomtteaser__kort .hoffert__huvud {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+html body .hoffert .hoffert__lista {
+  margin-top: 8px;
+}
+
+html body .hoffert .hoffert__lista li,
+html body .hoffert .hoffert__lista li.hoffert__skede,
+html[data-tema="mork"] body .hoffert .hoffert__lista li,
+html body .kat-topp .kat-topp__fakta > div,
+html[data-tema="mork"] body .kat-topp .kat-topp__fakta > div {
+  border-bottom: 0;
+}
+
+html body :is(.hoffert, .takkort) .hoffert__fot.hoffert__fot,
+html body .kat-topp .kat-topp__fakta > .hoffert__fot.hoffert__fot {
+  margin-top: 7px;
+  padding-top: 16px;
+  border-top: 1px solid var(--linje-stark);
+  border-image: var(--linje-ton-stark) 1;
+}
+
+/* Varianterna: luften mot raden ovanför följer radernas egen luft, så
+   att summalinjen står mitt emellan. */
+html body .hoffert--steg .hoffert__lista {
+  margin-top: 10px;
+}
+
+html body .hoffert--steg .hoffert__fot.hoffert__fot {
+  margin-top: 8px;
+}
+
+html body .hoffert--kalender .hoffert__veckor {
+  margin-top: 20px;
+}
+
+html body .hoffert--kalender .hoffert__fot.hoffert__fot {
+  margin-top: 14px;
+}
+
+html body .hoffert--hus .hoffert__fot.hoffert__fot {
+  margin-top: 15px;
+  padding-top: 17px;
+}
+
+html body .takkort .hoffert__fot.hoffert__fot {
+  margin-top: 0;
+}
+
+/* Kategorisidornas faktakort: stämpeln står uppe till höger i kortet,
+   så huvudet hålls så högt att linjen går fri under stämpeln. */
+html body .kat-topp .hoffert--fakta .hoffert__huvud {
+  min-height: 52px;
+}
+
+html body .kat-topp .kat-topp__fakta > .hoffert__fot.hoffert__fot {
+  margin-top: 6px;
+}
+
+@media (max-width: 699px) {
+  html body .kat-topp .hoffert--fakta .hoffert__huvud {
+    min-height: 52px;
+    padding-bottom: 8px;
+  }
+
+  html body .kat-topp .kat-topp__fakta {
+    margin-top: 9px;
+  }
+
+  html body .kat-topp .kat-topp__fakta > .hoffert__fot.hoffert__fot {
+    margin-top: 9px;
+  }
+}
+
+/* Stegkortet (Så fungerar det): de tre skedena skiljs av en hårlinje
+   med 12 px luft, de andra raderna står i luft. */
+html body .hoffert--steg .hoffert__lista li.hoffert__skede {
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+html body .hoffert--steg .hoffert__lista li.hoffert__skede + li {
+  padding-top: 12px;
+}
+
+/* Under tak-kortet: en linje mellan ute och inne, ingen under inne. */
+html body .takkort .takkort__rad {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+html body .takkort .takkort__rad:first-child {
+  padding-top: 0;
+}
+
+html body .takkort .takkort__rad--inne {
+  padding-top: 14px;
+  border-bottom: 0;
+  border-image: none;
+}
+
+/* Tomtkortet på startsidan: de stora talen står lika långt under
+   huvudets linje som stämpeln står över den (räknat på siffrornas
+   bläck; talens radruta är mycket högre än siffrorna). */
+html body .tomtteaser__kort .tomtteaser__tal {
+  margin-top: 12px;
+}
+
+/* Linjen över rubriken mitt emellan mätaren och rubriken. */
+html body .tomtteaser__kort .tomtteaser__rubrik,
+html[data-tema="mork"] body .tomtteaser__kort .tomtteaser__rubrik {
+  margin-top: 19px;
+  padding-top: 16px;
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+/* Priser: summan i den stora offerten och bandet överst på papperet.
+   Papperet är ljust även i mörkt läge. */
+html body .offert__papper {
+  --linje: rgba(143, 84, 36, 0.2);
+  --linje-stark: rgba(143, 84, 36, 0.42);
+  --linje-ton: linear-gradient(90deg, transparent, var(--linje) 8%, var(--linje) 92%, transparent);
+  --linje-ton-stark: linear-gradient(90deg, transparent, var(--linje-stark) 8%, var(--linje-stark) 92%, transparent);
+}
+
+html body .offert__fot {
+  margin-top: 9px;
+  padding-top: 22px;
+  border-top: 1px solid var(--linje-stark);
+  border-image: var(--linje-ton-stark) 1;
+}
+
+/* Huvudet och raderna i offerten: hårlinjer i virket, lika mycket luft
+   ovanför som under. */
+html body .offert__huvud {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+html body .orad {
+  padding: 14px 10px 12px;
+  border-bottom: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+html body .orad:last-child {
+  border-bottom: 0;
+  border-image: none;
+}
+
+html body .offert__papper::before {
+  left: clamp(22px, 3vw, 40px);
+  right: clamp(22px, 3vw, 40px);
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, rgba(143, 84, 36, 0), #8f5424 22%, #f0b56e 78%, rgba(240, 181, 110, 0));
+}
+
+/* --- 5. Skiljelinjer i övrigt ------------------------------------------ */
+/* Formuläret: linjerna mellan frågorna och före knapparna med samma
+   luft på båda sidor (legenden och knappen har några px egen luft). */
+html body .contact-section .valgrupp + .valgrupp {
+  padding-top: calc(clamp(24px, 2.6vw, 32px) - 2px);
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+html body .contact-section .contact-form__vidare {
+  padding-top: clamp(24px, 2.6vw, 32px);
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+html body .contact-section .contact-form__bottom {
+  margin-top: clamp(4px, 2.4vw - 18px, 10px);
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+/* Stegmätaren överst i formuläret: luft till stegets namn. */
+html body .contact-form__faser li {
+  gap: 14px;
+}
+
+/* Huskorten på kategorisidorna: synlig även i mörkt läge, mitt emellan
+   ytan (de stora siffrorna) och texten under. */
+html body .katsida .model-grid .model-card__rad {
+  border-bottom: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+html body .katsida .model-grid .model-card__tag {
+  margin-top: 14px;
+}
+
+@media (max-width: 760px) {
+  html body .katsida .model-grid .model-card__tag {
+    margin-top: 13.5px;
+  }
+}
+
+/* Pillerraden: den lodräta delaren syns i båda lägena och står lika
+   långt från knapparna på båda sidor. */
+html body .katsida .category-filter__delare {
+  width: 1px;
+  margin: 0 10px;
+  background: var(--linje-ton-lodrat);
+}
+
+/* Priser: faktaraderna under skalan. Skalans spår har 44 px marginal
+   för gränsernas text under sig (den marginalen slås ihop med vår), så
+   54 px ger 12 px från texten till första linjen (förut 2 px). */
+html body .prisskala__fakta,
+html:not([data-tema="mork"]) body .prisskala__fakta {
+  margin-top: 54px;
+}
+
+/* Panelerna i prisskalan: skarvarna mellan mätaren, ytan och svaret är
+   panelernas kanter, så de går hela vägen men i samma virkeston (förut
+   grå och olika). */
+html body .prisskala__yta,
+html:not([data-tema="mork"]) body .prisskala__yta {
+  border-top-color: var(--linje);
+}
+
+html:not([data-tema="mork"]) body .prisskala__svar {
+  border-top-color: var(--linje);
+  border-left-color: var(--linje);
+}
+
+html body .prisskala__fakta > div,
+html:not([data-tema="mork"]) body .prisskala__fakta > div {
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+html body .pkort__rader > div {
+  padding: 13px 0;
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+/* Verktyget: ingen linje direkt under svarskortet (det har egen kant). */
+html body .tv__lista .kollen__punkt,
+html:not([data-tema="mork"]) body .tv__lista .kollen__punkt {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+html body .tv__lista .kollen__punkt:first-child,
+html:not([data-tema="mork"]) body .tv__lista .kollen__punkt:first-child {
+  border-top: 0;
+  border-image: none;
+}
+
+/* Guiden: linjen före "Vidare härifrån", mitt emellan källorna och
+   korten (förut 96 px över och 31 under). */
+html body .rg-del:has(+ .rg-vidare) {
+  padding-bottom: calc(clamp(32px, 4vw, 44px) - 20px);
+}
+
+html body .rg-vidare {
+  padding-top: calc(clamp(32px, 4vw, 44px) + 3px);
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+/* Planritningens bildtext. */
+html body .planritning__text {
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+/* Tabellerna: radlinjerna i virkets ton och minst 12 px till texten. */
+html body .kalkyl__tabell :is(th, td) {
+  padding-block: 10px;
+  border-bottom-color: var(--linje);
+}
+
+html body .tv__regeltabell tbody :is(th, td),
+html[data-tema="mork"] body .tv__regeltabell tbody :is(th, td) {
+  padding-block: 12px;
+  border-top-color: var(--linje);
+}
+
+html body .rg-tabell :is(th, td) {
+  border-bottom-color: var(--linje);
+}
+
+/* 404: linjen över huslänkarna, lika långt från knapparna som från
+   länkarna. */
+html body .fyrafyra__hus {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+/* Menyn Våra hus: delarna syns i mörkt läge och har lika mycket luft
+   ovanför som under (förut 20 och 14 px). */
+html body .main-nav__sub-etikett--delad {
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--linje);
+  border-image: var(--linje-ton) 1;
+}
+
+/* Mobilmenyn: raka hårlinjer mellan sidorna i stället för överkanten på
+   rundade rader (den böjde sig ned i hörnen). */
+@media (max-width: 1040px) {
+  html body .mmeny .mmeny__lank + .mmeny__lank:not([aria-current="page"]),
+  html:not([data-tema="mork"]) body .mmeny .mmeny__lank + .mmeny__lank:not([aria-current="page"]) {
+    box-shadow: none;
+  }
+
+  html body .mmeny .mmeny__lank + .mmeny__lank:not(:hover, :active, [aria-current="page"]) {
+    background: var(--linje-ton) 50% 0 / calc(100% - 24px) 1px no-repeat;
+  }
+
+  html body .mmeny .mmeny__lank:is(:hover, :active, [aria-current="page"]) + .mmeny__lank:not(:hover, :active, [aria-current="page"]) {
+    background: none;
+  }
+}
+
+/* Sidfoten: linjerna i spalternas bredd, tonade, med samma luft på
+   båda sidor. Husspalten har ingen egen linje längre; etiketten räcker. */
+html body .site-footer__etikett {
+  margin-top: 18px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+html body .site-footer__inner {
+  padding-bottom: clamp(28px, 3vw, 36px);
+}
+
+html body .site-footer__bottom {
+  padding-top: clamp(28px, 3vw, 36px);
+  border-top: 0;
+  background-image: var(--linje-ton);
+  background-repeat: no-repeat;
+  background-position: 50% 0;
+  background-size: min(1240px, 100% - 2 * clamp(16px, 4vw, 48px)) 1px;
+}
+
+@media (max-width: 620px) {
+  html body .site-footer__inner > div:first-child {
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--linje);
+    border-image: var(--linje-ton) 1;
+  }
+
+  html body .site-footer__inner > div:last-child {
+    margin-top: -4px;
+    padding-top: 31px;
+    border-top: 1px solid var(--linje);
+    border-image: var(--linje-ton) 1;
+  }
+}
+
+/* --- 6. Räls och mätare ------------------------------------------------- */
+/* Stegrälsen går från första till sista siffran i stället för ut i
+   luften efter sista steget, och mitt genom siffrorna. Fyllningen når
+   varje siffra precis när den tänds (premium.js tänder steg i vid
+   (i + 0,35) / antal steg). */
+@media (min-width: 801px) {
+  html body .prisvag__spar .prisvag__linje {
+    top: 27px;
+    height: 2px;
+    right: calc((100% - 2 * clamp(14px, 1.6vw, 22px)) / 3 - 28px);
+  }
+
+  html body .prisvag__spar .prisvag__linje span {
+    transform: scaleX(clamp(0, (var(--fyll) - 0.11667) * 1.5, 1));
+  }
+}
+
+@media (min-width: 1180px) {
+  html body .prisvag__spar--fyra .prisvag__linje {
+    right: calc((100% - 3 * clamp(14px, 1.6vw, 22px)) / 4 - 28px);
+  }
+
+  html body .prisvag__spar--fyra .prisvag__linje span {
+    transform: scaleX(clamp(0, (var(--fyll) - 0.0875) * 1.33333, 1));
+  }
+}
+
+/* Kontaktstegen: linjen mellan siffrorna är hel hela vägen (förut tonade
+   den bort till 12 % och såg avbruten ut). */
+html body .contact-section .kontakt-tips li:not(:last-child)::after {
+  background: rgba(201, 138, 69, 0.45);
+}
+
+/* Så fungerar det: rälsen går från första stegets prick till sista
+   stegets prick (förut började den 400 px ovanför första och fortsatte
+   500 px ned i tom luft efter sista). Prickarna sitter mitt för korten på
+   stor skärm och 42 px ned i stegen på mobil, som premium.js räknar.
+   Utan stöd för ankare blir rälsen som förut. */
+@supports (anchor-name: --a) {
+  html body .berattelse__lista > .berattelse__steg:first-child {
+    anchor-name: --forsta-steget;
+  }
+
+  html body .berattelse__lista > .berattelse__steg:last-child {
+    anchor-name: --sista-steget;
+  }
+
+  html body .berattelse__lista > .berattelse__steg:first-child .berattelse__kort {
+    anchor-name: --forsta-kortet;
+  }
+
+  html body .berattelse__lista > .berattelse__steg:last-child .berattelse__kort {
+    anchor-name: --sista-kortet;
+  }
+
+  @media (min-width: 1041px) {
+    html body .berattelse__spar .berattelse__rail {
+      top: anchor(--forsta-kortet center);
+      bottom: anchor(--sista-kortet center);
+    }
+  }
+
+  @media (max-width: 1040px) {
+    html body .berattelse__spar .berattelse__rail {
+      top: calc(anchor(--forsta-steget top) + 42px);
+      bottom: calc(anchor(--sista-steget top) - 42px);
+    }
+  }
+}
+
+/* Skedeskorten: spåret syns även i mörkt läge och står 12 px under
+   rubriken. */
+html body .flode-intro__skeden i {
+  bottom: 10px;
+}
+
+html[data-tema="mork"] body .flode-intro__skeden i {
+  background: rgba(247, 245, 240, 0.1);
+}
+
+/* Sommarveckorna (Äga): strecket är vitt på delägarens färg i båda
+   lägena, och i de mindre rutorna under 900 px står det längre från
+   siffran. */
+html[data-tema="mork"] body .vecka--sommar::after {
+  background-color: rgba(255, 255, 255, 0.75);
+}
+
+@media (max-width: 900px) {
+  html body .vecka--sommar::after {
+    bottom: 3px;
+    left: 28%;
+    right: 28%;
+    height: 1.5px;
+  }
+}
+
+/* Flikarnas takt (husväljaren och Proffs): samma tunna ljuslinje längs
+   flikens nederkant, mellan hörnens rundning, i stället för en bit som
+   klistrades under bilden eller klipptes av hörnet. */
+html body .husval__val button[aria-selected="true"]::after {
+  right: 14px;
+  bottom: 0;
+  left: 14px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+}
+
+html body .pf-lev__tid {
+  right: 20px;
+  bottom: 0;
+  left: 20px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+}
+
+@media (max-width: 900px) {
+  html body .husval__val button[aria-selected="true"]::after {
+    right: 12px;
+    left: 12px;
+  }
+}
+
+@media (max-width: 700px) {
+  html body .pf-lev__val button {
+    padding-bottom: 16px;
+  }
+
+  html body .pf-lev__tid {
+    right: 16px;
+    left: 16px;
+  }
+}
+
+/* Vägen mellan verkstaden och tomten (Proffs): hel tonad linje. */
+html body .pf-flytt__vag::before {
+  height: 1px;
+  border-top: 0;
+  background: linear-gradient(90deg, transparent, rgba(240, 181, 110, 0.7) 20%, rgba(240, 181, 110, 0.7) 80%, transparent);
+}
+
+@media (max-width: 700px) {
+  html body .pf-flytt__vag::before {
+    width: 1px;
+    height: auto;
+    border-left: 0;
+    background: linear-gradient(180deg, transparent, rgba(240, 181, 110, 0.7) 20%, rgba(240, 181, 110, 0.7) 80%, transparent);
+  }
+}
+
+/* Prisskalans zoner: det inaktiva fältet syns även i mörkt läge, och
+   bubblan med måttet går fri från zonerna (den nuddade dem). */
+html[data-tema="mork"] body .zon::after {
+  background: rgba(247, 245, 240, 0.1);
+}
+
+html[data-tema="mork"] body .zon.aktiv::after {
+  background: linear-gradient(90deg, #c98a45, #f0b56e);
+}
+
+html body .prisskala__linjal {
+  grid-template-rows: 33px 50px 46px 22px;
+}
+
+/* Lovgränserna: tunnare markeringar som inte når ned i texten. */
+html body .granser__mark::before {
+  width: 1px;
+  height: 14px;
+  border-radius: 0;
+  background: rgba(27, 25, 21, 0.6);
+}
+
+html[data-tema="mork"] body .granser__mark::before {
+  background: rgba(247, 245, 240, 0.6);
+}
+
+/* Strecket under siffrorna (Om oss): hårfint och mitt emellan talet och
+   texten. */
+html body .siffror__grid--fyra .siffra__tal::after {
+  height: 1px;
+  margin-top: 12px;
+  border-radius: 0;
+  background: var(--virke-djup);
+}
+
+/* Talen är mindre under 1280 px, så strecket flyttas ned lika mycket. */
+@media (max-width: 1279px) {
+  html body .siffror__grid--fyra .siffra__tal::after {
+    margin-top: 15px;
+  }
+}
+
+html body .ih-mork .siffra__tal::after,
+html body .siffra.ih-mork .siffra__tal::after {
+  background: var(--virke);
+}
+
+/* Toppfilmen går en pixel utanför ramen och rundas bara av ramen. Med
+   egen rundning och exakt mått blev den vid skärmzoom en bråkdels pixel
+   smalare, och den ljusa stillbilden under glimtade fram i hörnen.
+   Chrome lägger filmen i ett eget lager som rundningen inte klipper,
+   så ramen får en mask - den klipper allt, även filmlagret. */
+html body .topp3__ram {
+  isolation: isolate;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+}
+
+html body .topp3__film {
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  border-radius: 0;
+}
+
+/* Prisskalans valda hus: bocken sticker upp 10 px med sin vita ring, men
+   raden skrollar i sidled på mobil och klipper allt utanför. Mer luft
+   upptill, lika mycket mindre marginal, så raden står kvar där den stod. */
+html body .prisskala__modeller {
+  padding-top: 14px;
+  margin-top: 16px;
+}
+
+/* =====================================================================
+   Premiumlyft 2026-10-28
+   1. Startsidans tre sektionshuvuden var samma centrerade stapel tre
+      gånger. På dator blir de ett tidningsuppslag: etikett och stor
+      rubrik till vänster, ingressen till höger mot rubrikens fot.
+   2. De minsta texterna (10-11 px versaler) lyfts till läsbar storlek
+      med lugnare spärrning.
+   ===================================================================== */
+@media (min-width: 1100px) {
+  html body main :is(.vagar, .husval, .siffror) .ih-huvud.ih-huvud.ih-huvud {
+    display: grid;
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    align-items: end;
+    column-gap: clamp(48px, 5vw, 96px);
+    max-width: none;
+    margin-inline: 0;
+    text-align: left;
+  }
+
+  html body main .vagar .ih-huvud.ih-huvud.ih-huvud > .ih-etikett {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  html body main .vagar .ih-huvud.ih-huvud.ih-huvud > .ih-rubrik {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  html body main .vagar .ih-huvud.ih-huvud.ih-huvud > .ih-ingress {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+
+  html body main :is(.husval, .siffror) .ih-huvud.ih-huvud.ih-huvud > div {
+    align-items: flex-start;
+  }
+
+  html body main :is(.vagar, .husval, .siffror) .ih-huvud.ih-huvud.ih-huvud :is(div, .ih-etikett, .ih-rubrik, .ih-ingress) {
+    text-align: left;
+  }
+
+  html body main :is(.vagar, .husval, .siffror) .ih-huvud .ih-etikett.ih-etikett {
+    justify-content: flex-start;
+  }
+
+  html body main :is(.vagar, .husval, .siffror) .ih-huvud .ih-etikett.ih-etikett::after {
+    display: none;
+  }
+
+  html body main :is(.vagar, .husval, .siffror) .ih-huvud .ih-rubrik.ih-rubrik {
+    max-width: 20ch;
+    margin-inline: 0;
+    font-size: clamp(3.25rem, 1.4rem + 2.6vw, 4.25rem);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  html body main :is(.vagar, .husval, .siffror) .ih-huvud .ih-ingress.ih-ingress {
+    max-width: 34rem;
+    margin: 0;
+    padding-bottom: 0.4rem;
+    font-size: 1.125rem;
+    line-height: 1.65;
+    color: var(--text);
+    text-wrap: pretty;
+  }
+}
+
+html body :is(.main-nav__sub-etikett, .main-nav__tips-etikett, .site-footer__etikett) {
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+}
+
+html body main :is(.husval dt, .husval__nr, .contact-section__meta-label, .kontaktkort__rubrik) {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+html body main .husval small {
+  font-size: 12px;
+}
+
+/* Premiumlyft: kontaktdelen. Kortet "Hör av dig direkt" var centrerat med
+   fyra små rutor; nu vänsterställt som resten av spalten, och rutorna blir
+   en lugn lista med ikon och text. Ingressen i full textfärg. */
+html body main .contact-section .contact-section__text.contact-section__text {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+html body main .contact-section .kontakt-tips.kontakt-tips span {
+  font-size: 1rem;
+}
+
+html body main .contact-section .kontaktkort.kontaktkort {
+  text-align: left;
+}
+
+html body main .contact-section .kontaktkort .kontaktkort__rubrik.kontaktkort__rubrik {
+  justify-content: flex-start;
+}
+
+html body main .contact-section .kontaktkort .kontaktkort__rubrik.kontaktkort__rubrik::after {
+  display: none;
+}
+
+html body main .contact-section .kontaktkort .contact-section__meta > div {
+  justify-items: start;
+  text-align: left;
+}
+
+html body main .contact-section .kontaktkort .contact-section__meta-label {
+  justify-content: flex-start;
+}
+
+html body main .contact-section .kontaktkort .contact-section__meta-value {
+  text-align: left;
+}
+
+html body main .contact-section .kontaktkort .tillit.tillit {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  text-align: left;
+}
+
+html body main .contact-section .kontaktkort .tillit.tillit li {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  min-height: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 15px;
+  color: var(--text);
+  text-align: left;
+}
+
+html body main .contact-section .kontaktkort .tillit.tillit svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  padding: 9px;
+  border-radius: 50%;
+}
+
+html body main .contact-section .kontaktkort.kontaktkort > *,
+html body main .contact-section .kontaktkort .contact-section__meta > div > * {
+  justify-self: start;
+  margin-inline: 0;
+}
+
+html body main .contact-section .kontaktkort .tillit.tillit {
+  justify-self: stretch;
+}
+
+html body main .contact-section .kontaktkort .tillit.tillit li {
+  justify-content: flex-start;
+}
+
+html body main .contact-section .kontaktkort .kopiera-rad.kopiera-rad {
+  justify-content: flex-start;
+}
+
+/* Premiumlyft: samma tidningsuppslag på attefallshus-, fritidshus- och
+   modellsidornas sektionshuvuden (dator). Rubriken till vänster,
+   ingressen till höger mot rubrikens fot, länkraden under ingressen. */
+@media (min-width: 1100px) {
+  html body main.katsida :is(.ih-huvud.ih-huvud--mitt.kat-mitt:not(.fragepanel__sida), .category__head.kat-mitt).kat-mitt {
+    display: grid;
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    grid-template-rows: auto auto;
+    align-items: end;
+    column-gap: clamp(48px, 5vw, 96px);
+    max-width: none;
+    margin-inline: 0;
+    text-align: left;
+  }
+
+  html body main.katsida :is(.ih-huvud.ih-huvud--mitt.kat-mitt, .category__head.kat-mitt).kat-mitt > * {
+    text-align: left;
+    margin-inline: 0;
+  }
+
+  html body main.katsida :is(.ih-huvud.ih-huvud--mitt.kat-mitt:not(.fragepanel__sida), .category__head.kat-mitt).kat-mitt > .ih-etikett {
+    grid-column: 1;
+    grid-row: 1;
+    justify-content: flex-start;
+  }
+
+  html body main.katsida :is(.ih-huvud.ih-huvud--mitt.kat-mitt:not(.fragepanel__sida), .category__head.kat-mitt).kat-mitt > .ih-etikett::after {
+    display: none;
+  }
+
+  html body main.katsida :is(.ih-huvud.ih-huvud--mitt.kat-mitt:not(.fragepanel__sida), .category__head.kat-mitt).kat-mitt > h2 {
+    grid-column: 1;
+    grid-row: 2;
+    max-width: 20ch;
+    font-size: clamp(3.25rem, 1.4rem + 2.6vw, 4.25rem);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  html body main.katsida :is(.ih-huvud.ih-huvud--mitt.kat-mitt:not(.fragepanel__sida), .category__head.kat-mitt).kat-mitt > :is(.ih-ingress, .category__ingress) {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    max-width: 34rem;
+    margin: 0;
+    padding-bottom: 0.4rem;
+    font-size: 1.125rem;
+    line-height: 1.65;
+    color: var(--text);
+    text-wrap: pretty;
+  }
+
+  html body main.katsida .category__head.kat-mitt.kat-mitt > .kat-huvud__lankar {
+    grid-column: 2;
+    grid-row: 3;
+    justify-content: flex-start;
+    margin-top: 1.25rem;
+  }
+
+  html body main.katsida .category__head.kat-mitt.kat-mitt > .category__count {
+    grid-column: 1;
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 600px) {
+  html body main .contact-section .kontaktkort .tillit.tillit {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+}
+
+
+/* Undersidornas toppbild har fast höjd (80vh, minst 580 px) och innehållet
+   ligger absolut i den. När spalten blir smal växer texten på höjden och
+   kortraden under knapparna klipptes (priser, om oss, så fungerar det vid
+   900-1300 px bredd). Höjden växer nu när skärmen blir smalare. */
+@media (min-width: 901px) {
+  html body .subpage-hero.helbild.helbild {
+    height: max(min(80vh, 740px), calc(950px - 22vw));
+  }
+}

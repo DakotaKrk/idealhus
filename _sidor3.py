@@ -40,9 +40,9 @@ POLICY = '''    <main id="innehall">
           <div class="guide__text">
             <h2>Vem som ansvarar</h2>
             <p>
-              Idealhus AB, organisationsnummer 559123-4567, Stockholm, är
+              LegoHus i Stockholm AB, organisationsnummer 559606-0524, Stockholm, är
               personuppgiftsansvarig för behandlingen som beskrivs här. Du når
-              oss på <a href="mailto:info@idealhus.se">info@idealhus.se</a>.
+              oss på <a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>.
             </p>
 
             <h2>Vilka uppgifter vi behandlar</h2>
@@ -133,7 +133,7 @@ POLICY = '''    <main id="innehall">
               Du har rätt att få veta vilka uppgifter vi har om dig, att få dem
               rättade eller raderade, att invända mot behandlingen och att
               begära att den begränsas. Mejla oss på
-              <a href="mailto:info@idealhus.se">info@idealhus.se</a>, så ordnar
+              <a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>, så ordnar
               vi det. Är du inte nöjd med hur vi hanterar saken kan du vända
               dig till Integritetsskyddsmyndigheten, IMY.
             </p>
@@ -374,7 +374,7 @@ HERO_OFFERT = (
 
 PRISSIDA = f'''    <main id="innehall">
       <section class="subpage-hero helbild">
-        <img class="helbild__bak" src="images/foto/stommar-stapel.webp" alt="" aria-hidden="true" decoding="async">
+        <img class="helbild__bak" src="images/foto/stommar-stapel.webp" width="1800" height="1200" alt="" aria-hidden="true" decoding="async">
         <img class="subpage-hero__image" src="images/foto/stommar-stapel.webp" width="1800" height="1200" fetchpriority="high" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra">
 {HERO_OFFERT}
 
@@ -501,7 +501,7 @@ PRISSIDA = f'''    <main id="innehall">
             <div class="offert__papper">
               <div class="offert__huvud">
                 <div class="offert__avsandare">
-                  <img class="offert__logo" src="images/idealhus_logo.svg" width="1024" height="279" alt="Idealhus">
+                  <img class="offert__logo" src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
                   <span class="offert__typ">Offert · utkast</span>
                 </div>
                 <span class="offert__stampel" aria-hidden="true">Post för post</span>
@@ -568,7 +568,7 @@ PRISSIDA = f'''    <main id="innehall">
 def bygg():
     ut = []
 
-    sida = (B.head("Regler för attefallshus 2026 – mått och bygglov | Idealhus",
+    sida = (B.head("Attefallshus regler 2026: mått och bygglov | Legohus Stockholm",
                    "Reglerna för attefallshus sedan 1 december 2025: byggnadsarea 30 m² "
                    "inom och 50 m² utanför detaljplan, nockhöjd, tomtgräns, anmälan och "
                    "bygglov.",
@@ -583,8 +583,8 @@ def bygg():
             newline="").write(sida.replace("\n", "\r\n"))
     ut.append("attefallshus-regler.html")
 
-    sida = (B.head("Så sätts priset på attefallshus och fritidshus | Idealhus",
-                   "Ett hus från Idealhus har inget listpris. Se vad som ingår i offerten, "
+    sida = (B.head("Pris på attefallshus och fritidshus | Legohus Stockholm",
+                   "Ett hus från Legohus Stockholm har inget listpris. Se vad som ingår i offerten, "
                    "vad som betalas till andra – grund, el, vatten och avlopp – och vad "
                    "som styr priset.",
                    "foto/stommar-stapel.webp", fil="priser.html")
@@ -594,8 +594,8 @@ def bygg():
             newline="").write(sida.replace("\n", "\r\n"))
     ut.append("priser.html")
 
-    sida = (B.head("Integritetspolicy | Idealhus",
-                   "Så behandlar Idealhus personuppgifter. Inga kakor, ingen "
+    sida = (B.head("Integritetspolicy | Legohus Stockholm",
+                   "Så behandlar Legohus Stockholm personuppgifter. Inga kakor, ingen "
                    "besöksstatistik, och kontaktformuläret skickas med ditt "
                    "eget e-postprogram.",
                    None, fil="integritetspolicy.html")

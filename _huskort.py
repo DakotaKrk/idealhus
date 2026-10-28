@@ -70,7 +70,7 @@ BLOCK = '''      /* MODELLER:START - skrivs av _huskort.py, andra inte for hand 
 
         // Kategorin med i titeln - "Huskort 2" finns både bland
         // attefallshusen och fritidshusen.
-        document.title = m.namn + ' \\u2013 ' + typ.namn + ' | Idealhus';
+        document.title = m.namn + ' \\u2013 ' + typ.namn + ' | Legohus Stockholm';
 
         // Formulärets modellval var alltid "Huskort 1". Nu är det huset
         // man tittar på som står förvalt.

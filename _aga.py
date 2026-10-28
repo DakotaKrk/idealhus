@@ -420,11 +420,11 @@ SKRIPT = r'''
           var r = senast; if (!r) return;
           var p = function (x) { return (x < 10 ? '0' : '') + x; };
           var f = function (d) { return d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate()); };
-          var rader = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Idealhus//Samagarkalender//SV', 'CALSCALE:GREGORIAN'];
+          var rader = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Legohus Stockholm//Samagarkalender//SV', 'CALSCALE:GREGORIAN'];
           for (var v = 1; v <= r.N; v++) {
             var m = mandag(ar, v), s = new Date(m); s.setUTCDate(m.getUTCDate() + 7);
             var titel = 'Stugan: ' + namnAv(r.agare[v]) + (r.helg[v] ? ' (' + r.helg[v] + ')' : '');
-            rader.push('BEGIN:VEVENT', 'UID:idealhus-' + ar + '-v' + v + '@idealhus.se',
+            rader.push('BEGIN:VEVENT', 'UID:idealhus-' + ar + '-v' + v + '@legohusstockholm.se',
               'DTSTAMP:' + f(new Date()) + 'T000000Z', 'DTSTART;VALUE=DATE:' + f(m), 'DTEND;VALUE=DATE:' + f(s),
               'SUMMARY:' + titel.replace(/[,;\\]/g, ' '), 'TRANSP:TRANSPARENT', 'END:VEVENT');
           }
@@ -533,7 +533,7 @@ SKRIPT = r'''
       })();
 '''
 
-ut = (B.head("Samäga och hyra ut fritidshus – kalender och kalkyl | Idealhus",
+ut = (B.head("Samäga och hyra ut ett fritidshus | Legohus Stockholm",
              "Samäga fritidshuset och räkna på uthyrningen: en kalender som fördelar "
              "årets veckor rättvist och en kalkyl med Skatteverkets schablon för "
              "uthyrning.",

@@ -56,15 +56,15 @@ block = "\n\n".join(f'''        <article class="segment__block">
             <a class="model-price__button" href="kontakt.html">Fråga om {namn.lower()}</a>
           </div>
           <div class="segment__media">
-            <img src="images/{bild}" loading="lazy" decoding="async" alt="{namn} i Idealhus produktion">
+            <img src="images/{bild}" loading="lazy" decoding="async" alt="{namn} i Legohus Stockholms produktion">
           </div>
         </article>''' for namn, bild, text, punkter in SEGMENT)
 
-skriv("proffs.html", "Proffs | Idealhus",
-      "Utfackningsväggar, husblock och moduler från Idealhus för byggföretag och entreprenörer.",
+skriv("proffs.html", "Proffs | Legohus Stockholm",
+      "Utfackningsväggar, husblock och moduler från Legohus Stockholm för byggföretag och entreprenörer.",
       "Våra hus",
       f'''    <main>
-{hero("generated-production-yard-01.webp", "Proffs", "Utfackningsväggar · husblock · moduler", "Idealhus produktion med trävirke och husblock")}
+{hero("generated-production-yard-01.webp", "Proffs", "Utfackningsväggar · husblock · moduler", "Legohus Stockholms produktion med trävirke och husblock")}
       <section class="process">
         <div class="process__head">
           <h2>För dig som bygger åt andra</h2>
@@ -101,8 +101,8 @@ steg = "\n".join(f'''          <li>
             <p>{text}</p>
           </li>''' for i, (rubrik, text) in enumerate(STEG, 1))
 
-skriv("sa-fungerar-det.html", "Så fungerar det | Idealhus",
-      "Från första samtalet till inflyttning. Så går ett husprojekt till hos Idealhus.",
+skriv("sa-fungerar-det.html", "Så fungerar det | Legohus Stockholm",
+      "Från första samtalet till inflyttning. Så går ett husprojekt till hos Legohus Stockholm.",
       "Så fungerar det",
       f'''    <main>
 {hero("generated-craft-cladding-01.webp", "Så fungerar det", "Från första samtalet till inflyttning", "Händer som arbetar med träpanel i verkstad")}
@@ -127,14 +127,14 @@ skriv("sa-fungerar-det.html", "Så fungerar det | Idealhus",
 
 
 # ---------------------------------------------------------------- Om oss
-skriv("om-oss.html", "Om oss | Idealhus",
-      "Idealhus formger och bygger attefallshus, fritidshus, fjällstugor och villor med svensk tillverkning.",
+skriv("om-oss.html", "Om oss | Legohus Stockholm",
+      "Legohus Stockholm formger och bygger attefallshus, fritidshus, fjällstugor och villor med svensk tillverkning.",
       "Om oss",
       '''    <main>
       <section class="textsida">
         <h1>Ett hus för dina planer.</h1>
         <p class="textsida__lead">
-          Att välja och bygga ett hus innebär många beslut. Idealhus gör det
+          Att välja och bygga ett hus innebär många beslut. Legohus Stockholm gör det
           enklare att hitta rätt bland våra husmodeller och anpassa dem efter
           dina behov.
         </p>
@@ -161,7 +161,7 @@ skriv("om-oss.html", "Om oss | Idealhus",
 
         <h2>Vilka vi är</h2>
         <p>
-          Idealhus är ett litet företag. Ni når oss direkt, utan
+          Legohus Stockholm är ett litet företag. Ni når oss direkt, utan
           växel och utan säljorganisation emellan.
         </p>
       </section>
@@ -171,7 +171,7 @@ skriv("om-oss.html", "Om oss | Idealhus",
           <article class="team-kort">
             <h3>Skriv till oss</h3>
             <p class="team-kort__roll">E-post</p>
-            <a href="mailto:info@idealhus.se">info@idealhus.se</a>
+            <a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>
           </article>
         </div>
       </section>
@@ -196,7 +196,7 @@ figurer = "\n".join(f'''          <figure>
             <figcaption>{t}</figcaption>
           </figure>''' for b, t in BILDER)
 
-skriv("referensprojekt.html", "Referensprojekt | Idealhus",
+skriv("referensprojekt.html", "Referensprojekt | Legohus Stockholm",
       "Hus vi ritat och byggt. Se hur kunderna använder sina hus.",
       "Referensprojekt",
       f'''    <main>

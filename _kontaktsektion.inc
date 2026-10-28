@@ -21,7 +21,7 @@
             <div class="contact-section__meta">
               <div>
                 <span class="contact-section__meta-label">E-post</span>
-                <a class="contact-section__meta-value" href="mailto:info@idealhus.se">info@idealhus.se</a>
+                <a class="contact-section__meta-value" href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>
               </div>
               <div>
                 <span class="contact-section__meta-label">Plats</span>
