@@ -679,3 +679,12 @@ section.lp-mork .ao-text { position: relative; z-index: 1; }
 .lp-mane__ljus { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 28% 38%, #fff8e4, #f8dc9a 50%, #e6ae55 85%); filter: drop-shadow(0 0 10px rgba(255, 214, 140, .8)); }
 @keyframes lp-mane2 { 0%, 100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-5px) rotate(-2deg); } }
 @keyframes lp-gloria { 50% { opacity: .55; transform: scale(1.08); } }
+
+/* Aktivitetsstaplarna: tal ovanpå, dagens stapel markerad, datumaxel under */
+.lp-staplar i { position: relative; }
+.lp-staplar i em { position: absolute; left: 50%; bottom: calc(100% + 3px); transform: translateX(-50%); font: 600 .62rem/1 var(--rubrik); font-style: normal; color: var(--virke-djup); }
+.lp-staplar i.idag { box-shadow: 0 0 0 1.5px var(--virke-djup); }
+.lp-staplar { margin-top: 24px; }
+.lp-staplar__axel { display: flex; gap: 4px; margin-top: 6px; }
+.lp-staplar__axel span { flex: 1; min-width: 3px; font: 600 .58rem/1 var(--rubrik); color: var(--text-3); white-space: nowrap; overflow: visible; }
+.lp-staplar__axel span:last-child { display: flex; justify-content: flex-end; color: var(--virke-djup); }

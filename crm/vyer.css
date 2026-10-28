@@ -8190,3 +8190,6 @@ section.dk-hjalte.kort .dk-fack__alla { grid-column: 1 / -1; grid-auto-flow: col
 .hero__snabb button::before { display: none; }
 .hero__snabb button .i { width: 24px; height: 24px; padding: 5px; }
 .hero__fonster { animation-fill-mode: backwards; }
+
+/* Modellnamnet i säljtavlans kort på en rad */
+.aff__modell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }

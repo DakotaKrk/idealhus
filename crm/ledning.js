@@ -239,9 +239,10 @@
   }
   var VECKODAG = ['sö', 'må', 'ti', 'on', 'to', 'fr', 'lö'];
   function staplar(dagar, klass) {
-    var max = Math.max.apply(null, dagar.map(function (d) { return d.antal; }).concat([1]));
-    return '<span class="' + klass + '" aria-hidden="true">' + dagar.map(function (d) {
-      return '<i style="--h:' + (d.antal / max).toFixed(3) + '" class="' + (d.antal ? 'pa' : '') + (d.dag.getDay() % 6 === 0 ? ' helg' : '') + '" title="' + IH.datum(d.dag.toISOString()) + ': ' + d.antal + '"></i>';
+    // skalan räknar med minst tre händelser, så en enda händelse inte ser ut som en full dag
+    var max = Math.max.apply(null, dagar.map(function (d) { return d.antal; }).concat([3])), idag = dag0(new Date()).getTime();
+    return '<span class="' + klass + '">' + dagar.map(function (d) {
+      return '<i style="--h:' + (d.antal / max).toFixed(3) + '" class="' + (d.antal ? 'pa' : '') + (d.dag.getDay() % 6 === 0 ? ' helg' : '') + (d.dag.getTime() === idag ? ' idag' : '') + '" title="' + e(IH.datum(d.dag.toISOString())) + ': ' + (d.antal ? d.antal + (d.antal === 1 ? ' händelse' : ' händelser') : 'ingen aktivitet') + '">' + (d.antal && klass.indexOf('liten') < 0 ? '<em>' + d.antal + '</em>' : '') + '</i>';
     }).join('') + '</span>';
   }
   var saljare = function () { return IH.ANVANDARE.filter(function (u) { return u.roll === 'salj'; }); };
@@ -268,7 +269,7 @@
       '<div class="lp-rutnat">' +
         '<section class="kort lp-kort" data-in><h2>' + IH.emo('stapel') + 'Aktivitet 30 dagar</h2>' +
           '<p class="lp-forklaring">Samtal, möten, mejl och anteckningar som ' + (ar ? 'du' : e(u.namn.split(' ')[0])) + ' har loggat, en stapel per dag.</p>' +
-          staplar(dagar, 'lp-staplar') + '<p class="lp-summa"><b>' + st.akt.filter(function (h) { return IH.dagarSedan(h.tid) < 30; }).length + '</b> aktiviteter · <b>' + dagar.filter(function (d) { return d.antal; }).length + '</b> aktiva dagar</p></section>' +
+          staplar(dagar, 'lp-staplar') + '<span class="lp-staplar__axel" aria-hidden="true">' + dagar.map(function (d, n) { return '<span>' + (n === dagar.length - 1 ? 'i dag' : n % 7 === 0 && n < dagar.length - 4 ? d.dag.getDate() + '/' + (d.dag.getMonth() + 1) : '') + '</span>'; }).join('') + '</span><p class="lp-summa"><b>' + st.akt.filter(function (h) { return IH.dagarSedan(h.tid) < 30; }).length + '</b> aktiviteter · <b>' + dagar.filter(function (d) { return d.antal; }).length + '</b> aktiva dagar</p></section>' +
         (u.roll === 'salj' ? '<section class="kort lp-kort" data-in><h2>' + IH.emo('portfolj') + 'Affärer</h2>' + (st.oppna.length ? '<ul class="lp-affarer">' + st.oppna.sort(function (a, b) { return b.varde - a.varde; }).map(function (a) {
             var s = IH.steg(a.steg), idx = IH.SALJSTEG.indexOf(s), k = IH.kund(a.kund);
             return '<li><a href="#/salj/' + a.id + '"><span><b>' + e(a.titel) + '</b><small>' + e(k ? k.namn : '') + ' · ' + e(s.namn) + '</small></span><b class="tal">' + IH.kort(a.varde) + '</b>' +
