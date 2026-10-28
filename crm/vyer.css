@@ -8280,3 +8280,36 @@ html:not(.ingen-webgl) .motescen:has(> .motesrum3d.klar) .bord__plats { opacity:
 @media (max-width: 1100px) { .tv-fokus { grid-template-columns: 1fr; } }
 .tv-fokus > p small { font: 500 .72rem/1.35 var(--rubrik) !important; font-weight: 500 !important; }
 .tv-fokus > p { font-size: .95rem; }
+/* Intäkter: period och export, läget i en mening */
+.ik-verktyg { display: inline-flex; align-items: center; gap: 6px; }
+.ik-insikt { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 4px; }
+.ik-insikt > * { display: grid; gap: 3px; padding: 12px 14px; border-radius: 16px; background: linear-gradient(160deg, #fffaf2, #fbf1e1); box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .3); color: inherit; text-decoration: none; transition: transform .25s var(--mjuk); }
+.ik-insikt a:hover { transform: translateY(-2px); }
+.ik-insikt small { font: 600 .6rem/1 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: var(--virke-djup); }
+.ik-insikt b { font: 700 1.25rem/1.1 var(--rubrik); }
+.ik-insikt em { font-style: normal; font-size: .74rem; color: var(--text-3); }
+.ik-insikt em[data-upp="true"] { color: #1d6b40; font-weight: 600; } .ik-insikt em[data-upp="false"] { color: #b23a2a; font-weight: 600; }
+.perhus__rad, .perhus li { cursor: default; }
+/* Tavlan: kort fade i kanten och runda pilar som visar att det finns fler steg, i stället för avklippta kort */
+.tavla-ram { position: relative; }
+.tavla.kan-hoger { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
+.tavla.kan-vanster { -webkit-mask-image: linear-gradient(90deg, transparent, #000 36px); mask-image: linear-gradient(90deg, transparent, #000 36px); }
+.tavla.kan-vanster.kan-hoger { -webkit-mask-image: linear-gradient(90deg, transparent, #000 36px, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, transparent, #000 36px, #000 calc(100% - 36px), transparent); }
+.tavla { scroll-snap-type: x mandatory; scroll-padding: 0 2px; }
+.tavla .spalt { scroll-snap-align: start; }
+.tavla-pil { position: absolute; z-index: 5; top: 70px; display: grid; place-items: center; width: 42px; height: 42px; border: 0; border-radius: 50%; background: #1b1915; color: #fbf4e8; box-shadow: 0 12px 24px -10px rgba(27, 25, 21, .7), 0 0 0 4px rgba(251, 247, 240, .9); cursor: pointer; opacity: 0; pointer-events: none; transform: scale(.8); transition: opacity .25s, transform .3s var(--studs), background-color .2s; }
+.tavla-pil .i { width: 18px; height: 18px; }
+.tavla-pil--v { left: -8px; } .tavla-pil--h { right: -8px; }
+.tavla-ram.kan-hoger .tavla-pil--h, .tavla-ram.kan-vanster .tavla-pil--v { opacity: 1; pointer-events: auto; transform: none; }
+.tavla-pil:hover { background: #e29a4a; color: #1b1915; }
+/* korten krymper till spalten: inget flödar ut åt höger */
+.tavla .spalt, .tavla .spalt__kort, .tavla .aff { min-width: 0; }
+.tavla .aff { overflow: hidden; }
+.aff__verktyg { min-width: 0; }
+.aff__verktyg .aff__vidare { min-width: 0; max-width: 46%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; justify-content: flex-start; }
+.aff__fot { min-width: 0; gap: 6px; }
+.aff__nasta { min-width: 0; }
+.stegband .stegband__text { min-width: 0; }
+.stegband .stegband__text b { overflow: hidden; text-overflow: ellipsis; font-size: clamp(.74rem, .5rem + .42vw, .92rem); }
+.tavla .aff__fot { flex-wrap: wrap; row-gap: 6px; }
+.aff__verktyg .aff__vidare { max-width: none; }

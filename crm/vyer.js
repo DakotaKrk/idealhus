@@ -206,11 +206,24 @@
       }).join('') + '</div>';
   }
 
+  var intaktPeriod = 6;
+  // Läget i en mening: den här månaden mot samma dagar förra månaden, och vad som ligger nära att vinnas (viktat)
+  function intaktInsikt(oppna) {
+    var nu = new Date(), i0 = new Date(nu.getFullYear(), nu.getMonth(), 1), f0 = new Date(nu.getFullYear(), nu.getMonth() - 1, 1);
+    var iMan = 0, fMan = 0, fSamma = 0;
+    db().affarer.forEach(function (a) { if (a.steg !== 'vunnen' || !a.vunnen) return; var d = new Date(a.vunnen); if (d >= i0) iMan += a.varde || 0; else if (d >= f0) { fMan += a.varde || 0; if (d.getDate() <= nu.getDate()) fSamma += a.varde || 0; } });
+    var nara = oppna.filter(function (a) { return a.steg === 'forhandling' || a.steg === 'offert'; }), naraV = nara.reduce(function (t, a) { return t + (a.varde || 0) * sannolikhet(a) / 100; }, 0);
+    var mn = nu.toLocaleDateString('sv-SE', { month: 'long' }), fmn = f0.toLocaleDateString('sv-SE', { month: 'long' });
+    var jmf = fSamma ? Math.round((iMan - fSamma) / fSamma * 100) : null;
+    return '<div class="ik-insikt">' +
+      '<span><small>' + mn.charAt(0).toUpperCase() + mn.slice(1) + ' hittills</small><b>' + IH.kort(iMan) + '</b>' + (jmf != null ? '<em data-upp="' + (jmf >= 0) + '" title="Mot samma dagar i ' + fmn + '">' + (jmf >= 0 ? '↑ ' : '↓ ') + Math.abs(jmf) + ' % mot samma dagar i ' + fmn + '</em>' : '<em>Hela ' + fmn + ': ' + IH.kort(fMan) + '</em>') + '</span>' +
+      '<a href="#/salj"><small>Nära att vinnas</small><b>' + IH.kort(naraV) + '</b><em>' + nara.length + ' affärer i offert och förhandling, viktat</em></a></div>';
+  }
   function intaktsgraf() {
     var nu = new Date();
     var mnamn = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
     var man = [];
-    for (var n = 5; n >= 0; n--) {
+    for (var n = intaktPeriod - 1; n >= 0; n--) {
       var d = new Date(nu.getFullYear(), nu.getMonth() - n, 1);
       man.push({ ar: d.getFullYear(), m: d.getMonth(), summa: 0, antal: 0 });
     }
@@ -461,10 +474,10 @@
           }).join('') + '</div>' +
         '</section>' +
         '<section class="kort" data-in>' +
-          '<header class="kort__huvud"><h2><span class="kort__ikon">' + i('graf') + '</span>Intäkter</h2><span class="chip">Vunnet per månad</span></header>' +
+          '<header class="kort__huvud"><h2><span class="kort__ikon">' + i('graf') + '</span>Intäkter</h2><span class="ik-verktyg"><span class="tv-seg" role="group" aria-label="Period">' + [[6, '6 mån'], [12, '12 mån']].map(function (x) { return '<button type="button" data-g="ik-period" data-f="' + x[0] + '" aria-pressed="' + (intaktPeriod === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</span><button type="button" class="tv-ikon" data-g="ik-csv" title="Exportera vunna affärer som CSV">' + i('skrivut') + '</button></span></header>' +
           '<div class="kort__kropp"><div class="graf__tal"><div><small>Vunnet i år</small><b class="tal" data-rakna="' + Math.round(summa(vunnet)) + '" data-format="kr">' + IH.kr(summa(vunnet)) + '</b></div>' +
           '<div><small>Viktad pipeline</small><b class="tal" data-rakna="' + Math.round(viktat(oppna)) + '" data-format="kr">' + IH.kr(viktat(oppna)) + '</b></div>' +
-          '<div><small>Snittorder</small><b class="tal" data-rakna="' + Math.round(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '" data-format="kr">' + IH.kr(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '</b></div></div>' + intaktsgraf() + perHus() + '</div>' +
+          '<div><small>Snittorder</small><b class="tal" data-rakna="' + Math.round(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '" data-format="kr">' + IH.kr(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '</b></div></div>' + intaktInsikt(oppna) + intaktsgraf() + perHus() + '</div>' +
         '</section>' +
       '</div><div class="oversikt__kol">' +
         (fokus.length ? '<section class="kort" data-in>' +
@@ -1282,12 +1295,12 @@
       '<span class="aff__kund">' + kundAvatar(k, true) + e(k ? k.namn : '') + '</span>' +
       '<div class="aff__fot"><span class="tal">' + IH.kort(a.varde) + '</span>' +
         (a.steg === 'vunnen' ? '<span class="tid">vann ' + IH.sedan(a.vunnen) + '</span>'
-          : '<span class="aff__tid aff__tid--' + tid + '" title="' + d + (d === 1 ? ' dag' : ' dagar') + ' i steget">' + (d === 0 ? 'I dag' : d + ' d') + (tid === 'still' ? ' · står still' : '') + '</span>') + '</div>' +
+          : '<span class="aff__tid aff__tid--' + tid + '" title="' + d + (d === 1 ? ' dag' : ' dagar') + ' i steget">' + (d === 0 ? 'I dag' : d + ' d') + '</span>') + '</div>' +
       (a.steg !== 'vunnen' ? '<p class="aff__nasta' + (d > 10 ? ' aff__nasta--varm' : '') + '"><span class="aff__nastaemoji" aria-hidden="true">' + nastaEmoji(a) + '</span>' + e(nastaSteg(a)) + '</p>' : '') +
       (a.steg !== 'vunnen' ? '<div class="aff__verktyg">' + (k && k.telefon ? '<button type="button" data-g="kund-ring" data-tel="' + e(k.telefon) + '" title="Ring ' + e(k.namn) + '">' + i('tel') + '</button>' : '') +
         '<button type="button" data-g="aff-logga" data-id="' + a.id + '" title="Logga ett samtal eller en anteckning">' + i('anteckning') + '</button>' +
         '<button type="button" data-g="aff-uppg" data-id="' + a.id + '" title="Ny uppgift på affären">' + i('uppgift') + '</button>' +
-        (nastaStegId(a) ? '<button type="button" class="aff__vidare" data-g="aff-vidare" data-id="' + a.id + '" title="Flytta till ' + e(IH.steg(nastaStegId(a)).namn) + '">' + e(IH.steg(nastaStegId(a)).kort || IH.steg(nastaStegId(a)).namn) + i('pil') + '</button>' : '') + '</div>' : '') +
+        (nastaStegId(a) ? '<button type="button" class="aff__vidare" data-g="aff-vidare" data-id="' + a.id + '" title="Flytta till ' + e(IH.steg(nastaStegId(a)).namn) + '">Vidare' + i('pil') + '</button>' : '') + '</div>' : '') +
       '</article>';
   }
 
@@ -1414,6 +1427,7 @@
         }).join('') + '</div>';
       })() +
       '<p class="tavla__tips"><svg class="emo-ik" aria-hidden="true"><use href="#i-glodlampa"/></svg> Dra korten mellan stegen eller tryck på knappen med nästa steg på kortet. Släpp längst ned för att markera som förlorad.</p>' +
+      '<div class="tavla-ram"><button type="button" class="tavla-pil tavla-pil--v" data-g="tavla-rulla" data-d="-1" aria-label="Visa tidigare steg">' + i('pilv') + '</button><button type="button" class="tavla-pil tavla-pil--h" data-g="tavla-rulla" data-d="1" aria-label="Visa fler steg">' + i('pil') + '</button>' +
       '<div class="tavla' + (tavlaUi.kompakt ? ' tavla--kompakt' : '') + '" data-tavla>' + IH.SALJSTEG.map(function (s) {
         var alla = s.id === 'vunnen' ? vunna90 : oppna.filter(function (a) { return a.steg === s.id; });
         var l = tavlaSort(alla.filter(tavlaPassar)), maxV = Math.max.apply(null, alla.map(function (a) { return a.varde || 0; }).concat([1])), still = alla.filter(function (a) { return s.id !== 'vunnen' && IH.dagarSedan(a.andrad) > 10; }).length;
@@ -1426,6 +1440,7 @@
           '<i class="spalt__viktat" title="Viktat ' + IH.kort(viktat(alla)) + ' av ' + IH.kort(summa(alla)) + '" style="--a:' + (summa(alla) ? viktat(alla) / summa(alla) : 0).toFixed(3) + '"></i>' +
           '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(function (a) { return affKort(a).replace('class="aff ', 'style="--v:' + ((a.varde || 0) / maxV).toFixed(3) + '" class="aff '); }).join('') : '<p class="spalt__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg></span>Dra hit en affär</p>') + '</div></section>';
       }).join('') + '</div>' +
+      '</div>' +
       '<div class="forlustdocka" aria-hidden="true">' + i('stang') + 'Släpp här för att markera som förlorad</div>';
     }
     return {
@@ -1446,13 +1461,22 @@
     var satt = function () {
       el.classList.toggle('kan-vanster', el.scrollLeft > 4);
       el.classList.toggle('kan-hoger', el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+      var ram = el.parentElement; if (ram && ram.classList.contains('tavla-ram')) { ram.classList.toggle('kan-vanster', el.scrollLeft > 4); ram.classList.toggle('kan-hoger', el.scrollLeft + el.clientWidth < el.scrollWidth - 4); }
     };
     el.addEventListener('scroll', satt, { passive: true });
     if (window.ResizeObserver) new ResizeObserver(satt).observe(el);
     satt();
   }
 
+  G['ik-period'] = function (el) { intaktPeriod = +el.getAttribute('data-f'); IH.rita(); };
+  G['ik-csv'] = function () {
+    var esc = function (v) { v = String(v == null ? '' : v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var rader = [['Vunnen', 'Affär', 'Kund', 'Hus', 'Värde (kr)', 'Säljare']].concat(db().affarer.filter(function (a) { return a.steg === 'vunnen' && a.vunnen; }).sort(function (a, b) { return a.vunnen < b.vunnen ? 1 : -1; }).map(function (a) { var k = IH.kund(a.kund), m = IH.modell(a.modell), u = IH.anvandare(a.ansvarig); return [IH.datum(a.vunnen, true), a.titel, k ? k.namn : '', m ? m.namn : '', a.varde, u ? u.namn : '']; }));
+    var l = document.createElement('a'); l.href = URL.createObjectURL(new Blob(['\ufeff' + rader.map(function (r) { return r.map(esc).join(';'); }).join('\r\n')], { type: 'text/csv' })); l.download = 'vunna-affarer-' + IH.dagStr() + '.csv'; document.body.appendChild(l); l.click(); l.remove();
+    IH.toast('Exporterat', (rader.length - 1) + ' vunna affärer till CSV.', 'skrivut');
+  };
   G['tavla-lage'] = function (el) { tavlaLage = el.getAttribute('data-l'); IH.rita(); };
+  G['tavla-rulla'] = function (el) { var t = $('[data-tavla]'); if (!t) return; var sp = t.querySelector('.spalt'), w = sp ? sp.getBoundingClientRect().width + 12 : 280; t.scrollBy({ left: +el.getAttribute('data-d') * w * 2, behavior: IH.lugn ? 'auto' : 'smooth' }); };
   G['tv-vem'] = function (el) { tavlaUi.vem = el.getAttribute('data-f'); IH.rita(); };
   G['tv-filter'] = function (el) { tavlaUi.filter = el.getAttribute('data-f'); IH.rita(); };
   G['tv-kompakt'] = function () { tavlaUi.kompakt = !tavlaUi.kompakt; IH.rita(); };
