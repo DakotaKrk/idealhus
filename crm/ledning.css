@@ -640,3 +640,8 @@ section.lp-mork .lp-veckor__staplar small { font: 600 .58rem/1 var(--rubrik); le
 section.lp-mork .lp-veckor__staplar .nu ~ small { color: #f6c68d; }
 @media (max-width: 1100px) { section.lp-mork .ap-tal { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 760px) { section.ao-hjalte.lp-chefhjalte.lp-mork { grid-template-columns: 1fr; grid-template-areas: "text" "mitt" "tal" "veckor"; } }
+
+/* Accentknappen i den mörka hjälten behåller kopparn vid hovring och tryck */
+section.lp-mork .sh-knapp--accent, section.lp-mork .sh-knapp--accent:hover, section.lp-mork .sh-knapp--accent:focus-visible { background: linear-gradient(160deg, #f8d09b, #e29a4a); color: #1b1915; border-color: transparent; }
+section.lp-mork .sh-knapp--accent:hover { transform: translateY(-1px); box-shadow: 0 18px 34px -14px rgba(226, 154, 74, 1); }
+section.lp-mork .sh-knapp--accent .emo-ik, section.lp-mork .sh-knapp--accent span { color: #1b1915; }
