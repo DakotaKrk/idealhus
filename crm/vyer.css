@@ -8219,3 +8219,12 @@ section.dk-hjalte.kort .dk-fack__alla { grid-column: 1 / -1; grid-auto-flow: col
 .motescen--3d .motescen__rum { z-index: 1; }
 .motescen--3d .motescen__rum--3d { min-height: 440px; }
 @media (max-width: 900px) { .motescen--3d > .motesrum3d { -webkit-mask-image: linear-gradient(180deg, transparent 30%, #000 55%); mask-image: linear-gradient(180deg, transparent 30%, #000 55%); } }
+
+/* Den gamla bordsscenen visas aldrig när 3D fungerar – bara utan WebGL. Rummet tonar in mjukt när det ritats,
+   och stolsbrickorna väntar tills de satts på stolarna */
+html:not(.ingen-webgl) .motescen .rum__scen { display: none; }
+html:not(.ingen-webgl) .motescen .bord__plats { opacity: 0; transition: opacity .5s ease; }
+html:not(.ingen-webgl) .motescen:has(> .motesrum3d.klar) .bord__plats { opacity: 1; }
+.motescen > .motesrum3d { opacity: 0; transition: opacity .9s ease .1s; }
+.motescen > .motesrum3d.klar { opacity: 1; }
+.motescen--3d .bord__plats { animation-delay: calc(.9s + var(--n) * .08s); }

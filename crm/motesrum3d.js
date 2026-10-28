@@ -265,11 +265,39 @@ function bygg() {
   const visare = (l, b2, m2) => { const g = new THREE.Group(); const v = lada(b2, l, 0.01, m2, 0); v.position.y = l / 2 - 0.03; g.add(v); g.position.z = 0.04; klocka.add(g); return g; };
   const vTim = visare(0.18, 0.025, M.svart), vMin = visare(0.27, 0.018, M.svart), vSek = visare(0.3, 0.007, mat({ color: '#c9542f' }));
   // pendellamporna över bordet
-  const lampor = []; [-1.7, 0, 1.7].forEach((x) => { const sladd = cyl(0.006, 0.006, 1.4, M.svart, 6); sladd.position.set(x, 4.6, 0); scen.add(sladd); const skarm2 = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.32, 32, 1, true), mat({ color: '#1f1d1b', roughness: 0.4, metalness: 0.6, side: THREE.DoubleSide })); skarm2.position.set(x, 3.75, 0); skarm2.castShadow = true; scen.add(skarm2); const glod = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 12), M.lampa); glod.position.set(x, 3.62, 0); scen.add(glod); const l = new THREE.SpotLight('#ffcf8f', 9, 6, 0.75, 0.6, 1.6); l.position.set(x, 3.6, 0); l.target.position.set(x, 1.5, 0); scen.add(l, l.target); lampor.push(l); });
+  const lampor = [], pendlar = []; [-1.7, 0, 1.7].forEach((x) => {
+    const p = new THREE.Group(); p.position.set(x, 5.3, 0); scen.add(p); pendlar.push(p);
+    const sladd = cyl(0.006, 0.006, 1.4, M.svart, 6); sladd.position.y = -0.7; p.add(sladd);
+    const skarm2 = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.32, 32, 1, true), mat({ color: '#1f1d1b', roughness: 0.4, metalness: 0.6, side: THREE.DoubleSide })); skarm2.position.y = -1.55; skarm2.castShadow = true; p.add(skarm2);
+    const insida = new THREE.Mesh(new THREE.ConeGeometry(0.29, 0.31, 32, 1, true), mat({ color: '#f3e6d2', roughness: 0.6, side: THREE.BackSide, emissive: '#ffcf8f', emissiveIntensity: 0.6 })); insida.position.y = -1.55; p.add(insida);
+    const glod = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 12), M.lampa); glod.position.y = -1.68; p.add(glod);
+    const l = new THREE.SpotLight('#ffcf8f', 9, 6, 0.75, 0.6, 1.6); l.position.y = -1.7; p.add(l); l.target.position.set(x, 1.5, 0); scen.add(l.target); lampor.push(l);
+  });
+  // utanför fönstret: moln som driver, fåglar som flyger förbi och granar som vajar
+  const molnT = tex(1024, 256, (g, w, h) => { g.clearRect(0, 0, w, h); g.fillStyle = 'rgba(255,255,255,.85)'; [[120, 90, 80], [420, 60, 110], [760, 110, 90], [960, 70, 60]].forEach(([x, y, r]) => { g.beginPath(); g.ellipse(x, y, r, r * 0.32, 0, 0, 7); g.ellipse(x + r * 0.55, y + 8, r * 0.75, r * 0.28, 0, 0, 7); g.ellipse(x - r * 0.5, y + 10, r * 0.6, r * 0.25, 0, 0, 7); g.fill(); }); }, [1, 1]);
+  molnT.wrapS = THREE.RepeatWrapping;
+  const molnPlan = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 1.6), new THREE.MeshBasicMaterial({ map: molnT, transparent: true, depthWrite: false, toneMapped: false })); molnPlan.position.set(2.4, 3.75, -4.165); scen.add(molnPlan);
+  const fagelM = new THREE.MeshBasicMaterial({ color: '#3b3a3c', side: THREE.DoubleSide }), faglar = [];
+  for (let n = 0; n < 4; n++) { const f = new THREE.Group(); [-1, 1].forEach((sd) => { const v = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.025), fagelM); v.geometry.translate(0.045 * sd, 0, 0); f.add(v); }); f.position.z = -4.16; scen.add(f); faglar.push({ f, fas: n * 0.7, y: 3.6 + (n % 2) * 0.25 }); }
+  const granar = []; [[-0.6, 0.55], [0.15, 0.7], [1.6, 0.5], [3.3, 0.62], [4.9, 0.58], [5.5, 0.48]].forEach(([x, s2]) => { const gr = new THREE.Group(); gr.position.set(x, 1.6, -4.5); scen.add(gr); [[0.42, 0.9, 0.45], [0.32, 0.7, 0.95], [0.2, 0.5, 1.35]].forEach(([r, h, y]) => { const k = new THREE.Mesh(new THREE.ConeGeometry(r * s2, h * s2, 10), mat({ color: '#4f6b48', roughness: 0.9 })); k.position.y = y * s2; gr.add(k); }); granar.push(gr); });
+  // arkitekten vid whiteboarden pekar på husets resa
+  const ark = new THREE.Group(); ark.position.set(-2.2, 0, -3.3); ark.rotation.y = -0.35; scen.add(ark);
+  const hud = mat({ color: '#d9a882', roughness: 0.6 }), trojaM = mat({ color: '#3e5f84', roughness: 0.85 }), byxM = mat({ color: '#2b2a2c', roughness: 0.8 });
+  [-0.11, 0.11].forEach((x) => { const ben = cyl(0.075, 0.07, 0.86, byxM, 12); ben.position.set(x, 0.43, 0); ark.add(ben); const sko = lada(0.12, 0.07, 0.24, M.svart, 0.03); sko.position.set(x, 0.035, 0.05); ark.add(sko); });
+  const kropp = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 0.48, 6, 16), trojaM); kropp.scale.z = 0.72; kropp.position.y = 1.15; kropp.castShadow = true; ark.add(kropp);
+  const huvud = new THREE.Mesh(new THREE.SphereGeometry(0.13, 24, 18), hud); huvud.position.y = 1.62; huvud.castShadow = true; ark.add(huvud);
+  const har = new THREE.Mesh(new THREE.SphereGeometry(0.135, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat({ color: '#3a2a20', roughness: 0.9 })); har.position.y = 1.64; har.rotation.x = -0.25; ark.add(har);
+  const armV = new THREE.Group(); armV.position.set(-0.24, 1.36, 0); ark.add(armV); const av = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.44, 4, 10), trojaM); av.position.y = -0.24; armV.add(av);
+  const armH = new THREE.Group(); armH.position.set(0.24, 1.36, 0); ark.add(armH); const ah = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.44, 4, 10), trojaM); ah.position.y = -0.24; armH.add(ah);
+  const pekare = cyl(0.008, 0.008, 0.5, M.svart, 6); pekare.position.set(0, -0.68, 0); armH.add(pekare);
+  const pparm = lada(0.24, 0.3, 0.03, mat({ color: '#c98a45', roughness: 0.5 }), 0.01); pparm.position.set(0, -0.48, 0.08); armV.add(pparm);
+  // laptopens staplar växer och krymper som om kalkylen räknas om
+  const lapStaplar = []; for (let n = 0; n < 5; n++) { const st = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.2), new THREE.MeshBasicMaterial({ color: n === 3 ? '#e29a4a' : '#f2d4ab', toneMapped: false })); st.geometry.translate(0, 0.1, 0); st.position.set(-0.13 + n * 0.08, 0.08, 0.014); lock.add(st); lapStaplar.push(st); }
+
 
   const comp = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
   comp.addPass(new RenderPass(scen, kamera)); const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.35, 0.5, 0.92); comp.addPass(bloom); comp.addPass(new OutputPass());
-  S = { renderer, scen, kamera, comp, bloom, stolar, snurr, anga, stralar, damm, dpos, dfas, ND, vTim, vMin, vSek, lampor, el: null, t: 0, ram: 0, synlig: false, mus: new THREE.Vector2(), musMal: new THREE.Vector2(), klocka: new THREE.Clock() };
+  S = { pendlar, molnT, faglar, granar, ark, armH, armV, huvud, lapStaplar, vaxter: [lov, vaxt2], renderer, scen, kamera, comp, bloom, stolar, snurr, anga, stralar, damm, dpos, dfas, ND, vTim, vMin, vSek, lampor, el: null, t: 0, ram: 0, synlig: false, mus: new THREE.Vector2(), musMal: new THREE.Vector2(), klocka: new THREE.Clock() };
   renderer.domElement.className = 'motesrum3d__duk';
   new IntersectionObserver((r) => { S.synlig = r[0].isIntersecting; if (S.synlig) starta(); }, { threshold: 0.05 }).observe(renderer.domElement);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) starta(); });
@@ -297,6 +325,18 @@ function ram() {
   S.kamera.position.set(Math.sin(a) * 9.4 + 1.2, 5.3 + Math.sin(t * 0.11) * 0.12 - S.mus.y * 0.3, Math.cos(a) * 9.4 + 2.4);
   S.kamera.lookAt(0.2, 1.35, -0.4);
   S.snurr.rotation.y = t * 0.25;
+  S.pendlar.forEach((p, n) => { p.rotation.z = Math.sin(t * 0.9 + n * 1.3) * 0.012; p.rotation.x = Math.cos(t * 0.7 + n) * 0.008; });
+  S.molnT.offset.x = (t * 0.006) % 1;
+  S.faglar.forEach((x, n) => { const q = ((t * 0.07 + x.fas) % 1.6) - 0.2; x.f.position.set(-0.8 + q * 5.6, x.y + Math.sin(q * 6 + n) * 0.08, -4.16); const v = Math.sin(t * 12 + n) * 0.7; x.f.children[0].rotation.y = v; x.f.children[1].rotation.y = -v; x.f.visible = q > 0 && q < 1.25; });
+  S.granar.forEach((g, n) => { g.rotation.z = Math.sin(t * 0.8 + n) * 0.03; });
+  S.vaxter.forEach((v, n) => { v.rotation.z = Math.sin(t * 0.6 + n * 2) * 0.012; v.rotation.x = Math.cos(t * 0.5 + n) * 0.01; });
+  // arkitekten: pekar på stegen ett i taget, vänder huvudet mot bordet ibland, andas
+  const pek = (t * 0.25) % 6, mot = Math.sin(t * 0.3) > 0.6;
+  S.armH.rotation.z = -1.2 - Math.sin(pek / 6 * Math.PI) * 0.35 + Math.sin(t * 2) * 0.03; S.armH.rotation.x = -0.4;
+  S.armV.rotation.z = 0.15; S.armV.rotation.x = -0.5;
+  S.huvud.rotation.y += ((mot ? 0.9 : -0.3) - S.huvud.rotation.y) * Math.min(1, dt * 2);
+  S.ark.children[2].scale.y = 1 + Math.sin(t * 1.6) * 0.012;
+  S.lapStaplar.forEach((st, n) => { st.scale.y = 0.4 + (Math.sin(t * 0.8 + n * 1.3) * 0.5 + 0.5) * 0.9; });
   S.anga.forEach((x) => { const q = (t * 0.35 + x.fas) % 1; x.m.position.set(x.k.position.x + Math.sin(t * 2 + x.fas * 9) * 0.03 * q, 1.75 + q * 0.5, x.k.position.z + Math.cos(t * 1.7 + x.fas * 7) * 0.03 * q); x.m.scale.setScalar(0.6 + q * 1.8); x.m.material.opacity = Math.sin(q * Math.PI) * 0.22; });
   S.stralar.forEach((s, n) => { s.material.opacity = 0.045 + Math.sin(t * 0.5 + n * 1.7) * 0.02; });
   for (let n = 0; n < S.ND; n++) { S.dpos[n * 3 + 1] += Math.sin(t * 0.4 + S.dfas[n]) * 0.0009; S.dpos[n * 3] += Math.cos(t * 0.3 + S.dfas[n]) * 0.0007; }
@@ -310,11 +350,12 @@ function ram() {
   S.ram = requestAnimationFrame(ram);
 }
 function montera(el) {
-  if (!stod) { el.remove(); return; }
+  if (!stod) { document.documentElement.classList.add('ingen-webgl'); el.remove(); return; }
   if (!S) bygg();
   S.el = el; el.appendChild(S.renderer.domElement);
   const sek = el.parentElement; if (sek) sek.classList.add('motescen--3d'); const rum = sek && sek.querySelector('.motescen__rum'); if (rum) { rum.classList.add('motescen__rum--3d'); sek.addEventListener('pointermove', (ev) => { const r = sek.getBoundingClientRect(); S.musMal.set((ev.clientX - r.left) / r.width * 2 - 1, (ev.clientY - r.top) / r.height * 2 - 1); }); sek.addEventListener('pointerleave', () => S.musMal.set(0, 0)); }
   storlek(); starta();
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('klar')));
 }
 if (IH) {
   const sok = () => { const el = document.querySelector('[data-motesrum3d]:not([data-monterad])'); if (el) { el.setAttribute('data-monterad', ''); montera(el); } };
