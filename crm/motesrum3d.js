@@ -65,8 +65,8 @@ const T = {
   }),
   // utsikten: målad i lager med luftperspektiv – himmel med solsken, fjärran berg, åsar med granskog som blir
   // mörkare och skarpare närmare, en äng i solljus med björkar, en grusväg och ett Legohus med varma fönster
-  utsikt: () => tex(2048, 1024, (g, w, h) => {
-    let fro = 11; const r = () => { fro = (fro * 16807) % 2147483647; return (fro - 1) / 2147483646; };
+  utsikt: (lager) => tex(2048, 1024, (g, w, h) => {
+    let fro = 11; const bak = lager !== 'fram'; const r = () => { fro = (fro * 16807) % 2147483647; return (fro - 1) / 2147483646; };
     const himmel = g.createLinearGradient(0, 0, 0, h * 0.62); himmel.addColorStop(0, '#7fb1d3'); himmel.addColorStop(0.55, '#bcd7e6'); himmel.addColorStop(1, '#f4e6cf'); g.fillStyle = himmel; g.fillRect(0, 0, w, h);
     const sol = g.createRadialGradient(w * 0.78, h * 0.18, 10, w * 0.78, h * 0.18, w * 0.42); sol.addColorStop(0, 'rgba(255,246,220,.95)'); sol.addColorStop(0.12, 'rgba(255,236,196,.55)'); sol.addColorStop(1, 'rgba(255,230,190,0)'); g.fillStyle = sol; g.fillRect(0, 0, w, h);
     // mjuka moln i flera lager
@@ -91,6 +91,10 @@ const T = {
     dis(0.07);
     skog((x) => h * 0.56 - Math.sin(x / 240 + 2) * 26, 70, '#6f8f72', 20);
     dis(0.06);
+    // solstrålar genom diset
+    for (let n = 0; n < 7; n++) { g.save(); g.translate(w * 0.78, h * 0.18); g.rotate(0.35 + n * 0.16); const st = g.createLinearGradient(0, 0, 0, h); st.addColorStop(0, 'rgba(255,240,210,.16)'); st.addColorStop(1, 'rgba(255,240,210,0)'); g.fillStyle = st; g.fillRect(-14 - n * 3, 0, 28 + n * 6, h); g.restore(); }
+    if (bak) return;
+    g.clearRect(0, 0, w, h);
     // ängen i solljus
     const ang = g.createLinearGradient(0, h * 0.6, 0, h); ang.addColorStop(0, '#b9c58a'); ang.addColorStop(0.5, '#a3b673'); ang.addColorStop(1, '#8aa060'); g.fillStyle = ang; g.beginPath(); g.moveTo(0, h); for (let x = 0; x <= w; x += 16) g.lineTo(x, h * 0.64 - Math.sin(x / 400) * 14); g.lineTo(w, h); g.fill();
     for (let n = 0; n < 5000; n++) { const x = r() * w, y = h * 0.64 + r() * h * 0.36; g.strokeStyle = r() < 0.5 ? 'rgba(80,100,50,.25)' : 'rgba(230,236,170,.3)'; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (r() - 0.5) * 3, y - 3 - r() * 6 * (y / h)); g.stroke(); }
@@ -231,11 +235,14 @@ function bygg() {
   // rummet: golv, två väggar, tak-kant, fönsterväggen med utsikt
   const golv = new THREE.Mesh(new THREE.PlaneGeometry(16, 12), mat({ map: T.golv(), roughness: 0.55, metalness: 0.02 })); golv.rotation.x = -Math.PI / 2; golv.receiveShadow = true; scen.add(golv);
   const vaggM = mat({ map: T.vagg(), roughness: 0.95 });
-  const bak = new THREE.Mesh(new THREE.PlaneGeometry(16, 6), vaggM); bak.position.set(0, 3, -4.2); bak.receiveShadow = true; scen.add(bak);
+  // bakväggen med ett hål för fönstret, så att utsikten bakom syns på djupet
+  [[-8, -0.9, 0, 6], [5.7, 8, 0, 6], [-0.9, 5.7, 0, 1.1], [-0.9, 5.7, 4.4, 6]].forEach(([x1, x2, y1, y2]) => { const d = new THREE.Mesh(new THREE.PlaneGeometry(x2 - x1, y2 - y1), vaggM); d.position.set((x1 + x2) / 2, (y1 + y2) / 2, -4.2); d.receiveShadow = true; scen.add(d); });
+  const nisch = mat({ color: '#e6ddcf', roughness: 0.9 }); [[2.4, 1.1, 6.6, 0.02, 0.4], [2.4, 4.4, 6.6, 0.02, 0.4], [-0.9, 2.75, 0.02, 3.3, 0.4], [5.7, 2.75, 0.02, 3.3, 0.4]].forEach(([x, y, w2, h2, d2]) => { const k = new THREE.Mesh(new THREE.BoxGeometry(w2 + (w2 < 1 ? 0 : 0), h2 < 1 ? 0.02 : h2, d2), nisch); k.position.set(x, y, -4.4); scen.add(k); });
   const vanster = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), vaggM); vanster.rotation.y = Math.PI / 2; vanster.position.set(-6.2, 3, 1.8); vanster.receiveShadow = true; scen.add(vanster); const hoger = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), vaggM); hoger.rotation.y = -Math.PI / 2; hoger.position.set(7.6, 3, 1.8); hoger.receiveShadow = true; scen.add(hoger);
   const sockel = lada(16, 0.14, 0.04, M.vit, 0.01); sockel.position.set(0, 0.07, -4.18); scen.add(sockel);
   // fönstret: utsikt, karmar, glas med reflex
-  const utsikt = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 3.2), new THREE.MeshBasicMaterial({ map: T.utsikt(), toneMapped: false })); utsikt.position.set(2.4, 2.75, -4.17); scen.add(utsikt);
+  const utsikt = new THREE.Mesh(new THREE.PlaneGeometry(13, 6.5), new THREE.MeshBasicMaterial({ map: T.utsikt('bak'), toneMapped: false })); utsikt.position.set(2.4, 1.75, -9.5); scen.add(utsikt);
+  const utsiktFram = new THREE.Mesh(new THREE.PlaneGeometry(8.6, 4.3), new THREE.MeshBasicMaterial({ map: T.utsikt('fram'), toneMapped: false, transparent: true })); utsiktFram.position.set(2.4, 2.45, -5.4); scen.add(utsiktFram);
   const karm = M.svart; [[2.4, 4.4, 6.6, 0.12], [2.4, 1.1, 6.6, 0.12]].forEach(([x, y, w]) => { const k = lada(w, 0.12, 0.14, karm, 0.01); k.position.set(x, y, -4.12); scen.add(k); });
   [-0.9, 0.7, 2.4, 4.1, 5.7].forEach((x) => { const k = lada(0.1, 3.4, 0.14, karm, 0.01); k.position.set(x, 2.75, -4.12); scen.add(k); });
   const fbank = lada(6.8, 0.06, 0.4, M.vit, 0.02); fbank.position.set(2.4, 1.04, -3.98); scen.add(fbank);
@@ -348,9 +355,19 @@ function bygg() {
   // utanför fönstret: moln som driver, fåglar som flyger förbi och granar som vajar
   const molnT = tex(1024, 256, (g, w, h) => { g.clearRect(0, 0, w, h); g.fillStyle = 'rgba(255,255,255,.85)'; [[120, 90, 80], [420, 60, 110], [760, 110, 90], [960, 70, 60]].forEach(([x, y, r]) => { g.beginPath(); g.ellipse(x, y, r, r * 0.32, 0, 0, 7); g.ellipse(x + r * 0.55, y + 8, r * 0.75, r * 0.28, 0, 0, 7); g.ellipse(x - r * 0.5, y + 10, r * 0.6, r * 0.25, 0, 0, 7); g.fill(); }); }, [1, 1]);
   molnT.wrapS = THREE.RepeatWrapping;
-  const molnPlan = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 1.6), new THREE.MeshBasicMaterial({ map: molnT, transparent: true, depthWrite: false, toneMapped: false })); molnPlan.position.set(2.4, 3.75, -4.165); scen.add(molnPlan);
-  const fagelM = new THREE.MeshBasicMaterial({ color: '#3b3a3c', side: THREE.DoubleSide }), faglar = [];
-  for (let n = 0; n < 4; n++) { const f = new THREE.Group(); [-1, 1].forEach((sd) => { const v = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.025), fagelM); v.geometry.translate(0.045 * sd, 0, 0); f.add(v); }); f.position.z = -4.16; scen.add(f); faglar.push({ f, fas: n * 0.7, y: 3.6 + (n % 2) * 0.25 }); }
+  const molnPlan = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 1.6), new THREE.MeshBasicMaterial({ map: molnT, transparent: true, depthWrite: false, toneMapped: false })); molnPlan.scale.set(1.8, 1.8, 1); molnPlan.position.set(2.4, 4.6, -8.8); scen.add(molnPlan);
+  // fåglarna: riktiga siluetter med kropp, stjärt och ledade vingar som slår och glider, i en liten flock
+  const fagelM = new THREE.MeshBasicMaterial({ color: '#2f2c2b', side: THREE.DoubleSide }), faglar = [];
+  const vingForm = new THREE.Shape(); vingForm.moveTo(0, 0); vingForm.quadraticCurveTo(0.09, 0.05, 0.2, 0.01); vingForm.quadraticCurveTo(0.12, -0.012, 0, -0.03); vingForm.closePath();
+  const vingGeo = new THREE.ShapeGeometry(vingForm);
+  for (let n = 0; n < 5; n++) {
+    const f = new THREE.Group();
+    const kr = new THREE.Mesh(new THREE.SphereGeometry(0.022, 10, 8), fagelM); kr.scale.set(2.4, 0.9, 0.9); f.add(kr);
+    const st = new THREE.Mesh(new THREE.ConeGeometry(0.018, 0.05, 4), fagelM); st.rotation.z = Math.PI / 2; st.position.x = -0.06; f.add(st);
+    const vingar = [-1, 1].map((sd) => { const v = new THREE.Mesh(vingGeo, fagelM); v.rotation.x = -Math.PI / 2; v.scale.set(0.9, sd, 1); const led = new THREE.Group(); led.add(v); f.add(led); return { led, sd }; });
+    f.userData.vingar = vingar; f.scale.setScalar(1.4 - n * 0.12); scen.add(f);
+    faglar.push({ f, fas: n * 0.9, y: 4.0 + (n % 3) * 0.22, z: -7.2 + (n % 2) * 0.6 });
+  }
   const granar = [];
   // laptopens staplar växer och krymper som om kalkylen räknas om
   const lapStaplar = []; for (let n = 0; n < 5; n++) { const st = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.2), new THREE.MeshBasicMaterial({ color: n === 3 ? '#e29a4a' : '#f2d4ab', toneMapped: false })); st.geometry.translate(0, 0.1, 0); st.position.set(-0.13 + n * 0.08, 0.08, 0.014); lock.add(st); lapStaplar.push(st); }
@@ -389,7 +406,14 @@ function ram() {
   S.snurr.rotation.y = t * 0.25;
   S.pendlar.forEach((p, n) => { p.rotation.z = Math.sin(t * 0.9 + n * 1.3) * 0.012; p.rotation.x = Math.cos(t * 0.7 + n) * 0.008; });
   S.molnT.offset.x = (t * 0.006) % 1;
-  S.faglar.forEach((x, n) => { const q = ((t * 0.07 + x.fas) % 1.6) - 0.2; x.f.position.set(-0.8 + q * 5.6, x.y + Math.sin(q * 6 + n) * 0.08, -4.16); const v = Math.sin(t * 12 + n) * 0.7; x.f.children[0].rotation.y = v; x.f.children[1].rotation.y = -v; x.f.visible = q > 0 && q < 1.25; });
+  S.faglar.forEach((x, n) => {
+    const q = ((t * 0.045 + x.fas * 0.08) % 1.4) - 0.2, glid = Math.sin(t * 0.7 + n) > 0.2;
+    x.f.position.set(-2.5 + q * 10 + Math.sin(n * 2.1) * 0.5, x.y + Math.sin(q * 5 + n) * 0.25, x.z + Math.cos(n) * 0.3);
+    x.f.rotation.set(0, 0, Math.sin(q * 5 + n) * 0.12);
+    const slag = glid ? 0.15 + Math.sin(t * 2 + n) * 0.05 : Math.sin(t * 13 + n * 1.7) * 0.8;
+    x.f.userData.vingar.forEach((w) => { w.led.rotation.x = w.sd * slag; });
+    x.f.visible = q > -0.1 && q < 1.15;
+  });
   S.granar.forEach((g, n) => { g.rotation.z = Math.sin(t * 0.8 + n) * 0.03; });
   S.vaxter.forEach((v, n) => { v.rotation.z = Math.sin(t * 0.6 + n * 2) * 0.012; v.rotation.x = Math.cos(t * 0.5 + n) * 0.01; });
   S.lapStaplar.forEach((st, n) => { st.scale.y = 0.4 + (Math.sin(t * 0.8 + n * 1.3) * 0.5 + 0.5) * 0.9; });
