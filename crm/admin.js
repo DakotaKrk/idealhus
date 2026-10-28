@@ -190,6 +190,12 @@
     logg('export', 'All data exporterad som JSON.');
     IH.rita();
   };
+  // Återställ-knappen i sidomenyn: två klick inom fyra sekunder, sedan samma återställning som i adminpanelen
+  IH.G['sido-aterstall'] = function (el) {
+    if (!el.dataset.saker) { el.dataset.saker = '1'; el.classList.add('vill'); IH.toast('Klicka igen för att återställa', 'Exempeldatan läggs tillbaka som den var från början. Säkerhetsloggen finns kvar.', 'aterstall');
+      setTimeout(function () { if (el.isConnected) { delete el.dataset.saker; el.classList.remove('vill'); } }, 4000); return; }
+    IH.G['ad-aterstall']({ dataset: { saker: '1' }, isConnected: false });
+  };
   IH.G['ad-aterstall'] = function (el) {
     if (!el.dataset.saker) { el.dataset.saker = '1'; el.innerHTML = i('varning') + 'Klicka igen för att återställa'; setTimeout(function () { if (el.isConnected) { delete el.dataset.saker; el.innerHTML = i('aterstall') + 'Återställ exempeldata'; } }, 4000); return; }
     var gammal = (db().sakerhet || []).slice();

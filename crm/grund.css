@@ -252,3 +252,35 @@ html[data-sido-tat="2"] body .sido .sido__rubrik { margin: 6px 12px 2px; }
 
 .ih-tips kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; margin-left: 8px; padding: 0 5px; border-radius: 6px; background: rgba(255, 255, 255, .14); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .18); font: 600 .7rem/1 var(--rubrik); color: #fbf4e8; vertical-align: middle; }
 .ih-tips span { display: flex; align-items: center; }
+
+/* Kontokortet i sidomenyn som Uperformance: statusprick framför Online, rund pil nedåt, enkla länkar och återställ */
+.sido .sido__fot .anv { align-items: center; }
+.sido .anv__status { display: flex; align-items: center; gap: 6px; }
+.sido .anv__status i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--n); box-shadow: 0 0 6px var(--n); }
+.sido .anv__chevron { display: grid; place-items: center; flex: none; width: 30px; height: 30px; margin-left: auto; border-radius: 50%; background: var(--ben); box-shadow: inset 0 0 0 1px var(--kant); color: var(--text-2); transition: background-color .2s, color .2s, transform .3s var(--mjuk); }
+.sido .anv__chevron .i { width: 14px; height: 14px; }
+.sido .anv:hover .anv__chevron { background: #1b1915; color: #f6c68d; }
+html[data-konto-oppen] .sido .anv__chevron { transform: rotate(180deg); }
+.sido .sido__smalt { display: flex; align-items: center; gap: 4px; }
+.sido .sido__smalt > a, .sido .sido__smalt > button { flex: none; width: auto; padding: 8px 10px; border: 0; border-radius: 12px; background: transparent; box-shadow: none; }
+.sido .sido__smalt > a:hover, .sido .sido__smalt > button:hover { background: var(--ben); }
+.sido .sido__aterstall { margin-left: auto; display: grid; place-items: center; padding: 8px !important; color: var(--text-3); transition: transform .5s var(--mjuk), color .2s, background-color .2s; }
+.sido .sido__aterstall:hover { transform: rotate(-120deg); color: var(--text); }
+.sido .sido__aterstall.vill { color: #fff; background: var(--rod) !important; }
+.sido .sido__aterstall .i { margin: 0; }
+
+.sido .anv > span.anv__chevron { flex: 0 0 30px; width: 30px; height: 30px; min-width: 0; padding: 0; margin-left: 4px; }
+.sido .anv > span:nth-child(2) { flex: 1 1 auto; min-width: 0; }
+.sido .anv__status { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sido .sido__smalt { gap: 0; }
+.sido .sido__smalt > a, .sido .sido__smalt > button { padding: 8px 8px; }
+
+.sido .anv .anv__chevron .i { width: 14px !important; height: 14px !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: inherit !important; transform: none !important; }
+
+/* Låga skärmar: kortet och ikonerna delar rad – då ingen pil, och ikonerna är runda knappar */
+@media (max-height: 740px) {
+  .sido .anv > span.anv__chevron { display: none; }
+  .sido .sido__smalt { gap: 2px; }
+  .sido .sido__smalt > a, .sido .sido__smalt > button { width: 34px; height: 34px; padding: 0 !important; display: grid; place-items: center; }
+  .sido .sido__aterstall { margin-left: 0; }
+}
