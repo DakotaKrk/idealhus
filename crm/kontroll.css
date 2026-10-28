@@ -281,3 +281,7 @@ section.ao-hjalte .ao-remsa { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .ao-upp__text strong { text-wrap: balance; }
 .ao-upp { container-type: inline-size; }
 @container (max-width: 440px) { .ao-upp li { grid-template-columns: 34px minmax(0, 1fr); } .ao-upp li > .knapp { grid-column: 2; justify-self: start; } }
+/* Förslagslistan: aldrig bredare än kortet, samma luft på båda sidor */
+.ao-upp { min-width: 0; max-width: 100%; box-sizing: border-box; margin-inline: 0; padding-inline: 0; }
+.ao-upp li { max-width: 100%; box-sizing: border-box; min-width: 0; }
+.ao-band { min-width: 0; }
