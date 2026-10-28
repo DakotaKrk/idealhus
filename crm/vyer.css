@@ -7799,3 +7799,29 @@ a.kh__chip:hover { background: #fff; color: var(--kol); }
 @media (prefers-reduced-motion: reduce) { .kh__glod, .kh__halsa circle:last-child { animation: none; } }
 
 .kg .ka, .kg .kkontakt__tal { padding: 0 14px 14px; }
+
+/* Kundhälsan, rättad och levande: ingen fyrkant runt glöden (overflow synlig, glöden är en egen suddig ring),
+   bågen ritas in med gradient, en ljuskomet löper runt och auran andas. Knapparna ryms på en rad. */
+.kh__halsa { --h1: #7fe0a6; --h2: #1f9f58; width: 140px; height: 140px; }
+.kh__halsa[data-ton="gul"] { --h1: #ffd9a0; --h2: #e29a4a; }
+.kh__halsa[data-ton="rod"] { --h1: #f6a596; --h2: #d6453a; }
+.kh__halsa svg { overflow: visible; }
+.kh__halsa circle:first-child, .kh__halsa circle:last-child { filter: none; }
+.kh__halsa .kh__s1 { stop-color: var(--h1); } .kh__halsa .kh__s2 { stop-color: var(--h2); }
+.kh__halsa circle.kh__spar { stroke: rgba(27, 25, 21, .07); stroke-width: 8; stroke-dasharray: none; animation: none; }
+.kh__halsa circle.kh__bage, .kh__halsa circle.kh__glod { stroke-width: 8; stroke-dasharray: 100; stroke-dashoffset: calc(100 - var(--a) * 100); animation: kh-ring 1.6s cubic-bezier(.22, 1, .36, 1) both; }
+.kh__halsa circle.kh__glod { stroke-width: 14; opacity: .55; filter: blur(5px); animation: kh-ring 1.6s cubic-bezier(.22, 1, .36, 1) both, kh-andas 3.2s ease-in-out 1.6s infinite; }
+@keyframes kh-andas { 50% { opacity: .2; } }
+.kh__halsa circle.kh__komet { stroke: #fff; stroke-width: 8; stroke-dasharray: 3 97; stroke-dashoffset: 0; opacity: 0; filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px var(--h1)); animation: kh-komet 4.5s linear 1.7s infinite, kh-tona .6s ease 1.7s forwards; }
+@keyframes kh-komet { to { stroke-dashoffset: -100; } }
+@keyframes kh-tona { to { opacity: .9; } }
+.kh__aura { position: absolute; inset: 10px; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--h1) 45%, transparent), transparent); filter: blur(12px); animation: kh-aura 3.2s ease-in-out infinite; pointer-events: none; }
+@keyframes kh-aura { 50% { transform: scale(1.12); opacity: .55; } }
+.kh__halsa b { position: relative; font-variant-numeric: tabular-nums; }
+.kh__halsa small { color: var(--h2); }
+/* knappar och kontakt: kompaktare så de ryms */
+.kh__knappar .knapp { min-height: 40px; padding: 0 15px; font-size: .86rem; }
+.kh__knappar .knapp .i { width: 15px; height: 15px; }
+.kh { grid-template-columns: minmax(0, 1fr) auto minmax(180px, 210px); gap: 22px 26px; }
+.kh__tal > div { min-width: 0; }
+@media (prefers-reduced-motion: reduce) { .kh__halsa circle, .kh__aura { animation: none !important; } .kh__halsa circle.kh__komet { display: none; } }

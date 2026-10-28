@@ -2180,7 +2180,8 @@
             '<button class="knapp" type="button" data-g="starta-mote" data-kund="' + k.id + '">' + i('mote') + 'Kundmöte</button></div>' +
         '</div></div>' +
         '<div class="kh__halsa" data-ton="' + halsaTon + '" style="--a:' + (halsa / 100).toFixed(2) + '" title="Kundhälsa: räknas ur senaste kontakten, öppna affärer, köp och försenade uppgifter">' +
-          '<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42"/><circle cx="50" cy="50" r="42" pathLength="100"/></svg>' +
+          '<i class="kh__aura" aria-hidden="true"></i><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="kh-g-' + k.id + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" class="kh__s1"/><stop offset="1" class="kh__s2"/></linearGradient></defs>' +
+            '<circle class="kh__spar" cx="50" cy="50" r="42"/><circle class="kh__glod" cx="50" cy="50" r="42" pathLength="100" stroke="url(#kh-g-' + k.id + ')"/><circle class="kh__bage" cx="50" cy="50" r="42" pathLength="100" stroke="url(#kh-g-' + k.id + ')"/><circle class="kh__komet" cx="50" cy="50" r="42" pathLength="100"/></svg>' +
           '<span><b>' + halsa + '</b><small>' + halsaText + '</small></span></div>' +
         '<div class="kh__tal">' +
           '<div title="Öppna affärer: ' + info.oppen.length + ' st"><small>Öppet värde</small><b class="tal">' + IH.kort(info.oppet) + '</b><em>' + info.oppen.length + ' öppna</em></div>' +
@@ -2224,7 +2225,13 @@
             anteckningsForm(k.id, '') + tidslinje(loggVisa, histTyp === 'alla' ? null : 'Inga ' + (AKT_NAMN_K[histTyp] || '').toLowerCase() + ' loggade ännu.') + '</div></section>' +
         '</div>' +
       '</div>';
-    return { titel: k.namn, html: html };
+    return { titel: k.namn, html: html, efter: function (yta) {
+      // kundhälsan räknar upp i takt med att ringen ritas
+      var tal = yta.querySelector('.kh__halsa b'); if (!tal || IH.lugn) return;
+      var mal = +tal.textContent, t0 = performance.now() + 150;
+      var steg = function (nu) { var p2 = Math.min(1, Math.max(0, (nu - t0) / 1400)); tal.textContent = Math.round(mal * (1 - Math.pow(1 - p2, 3))); if (p2 < 1) requestAnimationFrame(steg); };
+      requestAnimationFrame(steg);
+    } };
   }
   var kundHist = {}, AKT_NAMN_K = { samtal: 'Samtal', mejl: 'Mejl', mote: 'Möte', notis: 'Anteckning', system: 'System' };
   G['kund-hist'] = function (el) { var id = el.getAttribute('data-id'), t = el.getAttribute('data-typ'); kundHist[id] = kundHist[id] === t ? 'alla' : t; IH.rita(); };
