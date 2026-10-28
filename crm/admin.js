@@ -28,7 +28,7 @@
     var fran = IH.jag().namn;
     valj(el);
     logg('konto', 'Kontobyte: ' + fran + ' → ' + IH.jag().namn + '.');
-    if (arAdmin()) IH.ga('#/admin');
+    if (arAdmin()) IH.ga('#/kontroll');
   };
 
   /* 02 Inställningar och utloggning vid inaktivitet --------------------------------------------- */
@@ -55,7 +55,7 @@
   }, 5000);
 
   /* 03 Kontrollerna (säkerhetshubben) ------------------------------------------------------------- */
-  var KANDA = ['data.js', 'app.js', 'mote.js', 'vyer.js', 'ledning.js', 'chatt.js', 'admin.js', 'valj.js', 'kalender.js', 'overgang.js', 'grund.js'];
+  var KANDA = ['data.js', 'app.js', 'mote.js', 'vyer.js', 'ledning.js', 'chatt.js', 'admin.js', 'kontroll.js', 'valj.js', 'kalender.js', 'overgang.js', 'grund.js'];
   function kopplingsBrott() {
     var d = db(), fel = [];
     var finns = function (lista, id) { return !id || lista.some(function (x) { return x.id === id; }); };
@@ -83,6 +83,8 @@
     ];
   }
   function poang(k) { return Math.round(k.reduce(function (t, x) { return t + (x.ok ? 1 : x.varn ? 0.5 : 0); }, 0) / k.length * 100); }
+  IH.sak = { kontroller: kontroller, poang: poang, inst: inst, kopplingsBrott: kopplingsBrott, logg: logg };
+  var skannar = -1; // index för kontrollen som körs just nu (ljuset löper runt dess ring)
 
   /* 04 Säkerhetshubben #/sakerhet ----------------------------------------------------------------- */
   IH.vyer.sakerhet = function () {
@@ -91,23 +93,39 @@
     var R0 = 34, steg = 9;
     var ringar = k.map(function (x, n) {
       var r = R0 + n * steg, O = 2 * Math.PI * r;
-      return '<circle cx="100" cy="100" r="' + r + '" class="ad-ring__spar"/><circle cx="100" cy="100" r="' + r + '" class="ad-ring__bage' + (x.ok ? '' : x.varn ? ' varn' : ' fel') + '" style="--f:' + x.farg + ';stroke-dasharray:' + (O * (x.ok ? 1 : x.varn ? 0.5 : 0.15)).toFixed(1) + ' ' + O.toFixed(1) + ';--d:' + (n * 90) + 'ms"/>';
+      var kord = skannar >= 0 && n > skannar;
+      return '<circle cx="100" cy="100" r="' + r + '" class="ad-ring__spar"/>' + (n === skannar ? '<circle cx="100" cy="100" r="' + r + '" class="ad-ring__ljus" style="--f:' + x.farg + ';--O:' + O.toFixed(1) + '"/>' :
+        '<circle cx="100" cy="100" r="' + r + '" class="ad-ring__bage' + (kord ? ' vantar' : x.ok ? '' : x.varn ? ' varn' : ' fel') + '" style="--f:' + x.farg + ';stroke-dasharray:' + (O * (kord ? 0.04 : x.ok ? 1 : x.varn ? 0.5 : 0.15)).toFixed(1) + ' ' + O.toFixed(1) + ';--d:' + (n * 90) + 'ms"/>');
     }).join('');
     var html = '<section class="ad-hjalte kort kort--mork" data-in>' +
         '<svg class="ad-ring" viewBox="0 0 200 200" aria-hidden="true">' + ringar + '</svg>' +
         '<div><p class="etikett etikett--ljus">Säkerhetshubben</p><h1>' + p + ' <small>av 100</small></h1><p>' + k.filter(function (x) { return x.ok; }).length + ' av ' + k.length + ' kontroller är gröna. Kontrollerna körs i din webbläsare varje gång sidan öppnas.</p>' +
-        '<button class="knapp knapp--virke" type="button" data-g="ad-skanna">' + i('aterstall') + 'Kör kontrollerna igen</button></div></section>' +
+        '<button class="knapp knapp--virke" type="button" data-g="ad-skanna"' + (skannar >= 0 ? ' disabled' : '') + '>' + i('aterstall') + (skannar >= 0 ? 'Kontrollerar ' + (skannar + 1) + ' av ' + k.length + '…' : 'Kör kontrollerna igen') + '</button></div></section>' +
       '<div class="ad-kontroller">' + k.map(function (x) {
-        return '<article class="ad-kontroll kort' + (x.ok ? ' ok' : x.varn ? ' varn' : ' fel') + '" style="--f:' + x.farg + '" data-in><header><i></i><b>' + e(x.namn) + '</b><span>' + (x.ok ? 'OK' : x.varn ? 'Bör ses över' : 'Åtgärda') + '</span></header>' +
+        var n = k.indexOf(x), lage = skannar < 0 ? '' : n === skannar ? ' skannas' : n > skannar ? ' vantar' : '';
+        return '<article class="ad-kontroll kort' + (x.ok ? ' ok' : x.varn ? ' varn' : ' fel') + lage + '" style="--f:' + x.farg + '"' + (skannar < 0 ? ' data-in' : '') + '><header><i></i><b>' + e(x.namn) + '</b><span>' + (lage === ' skannas' ? 'Kontrolleras…' : lage === ' vantar' ? 'Väntar' : x.ok ? 'OK' : x.varn ? 'Bör ses över' : 'Åtgärda') + '</span></header>' +
           '<p>' + e(x.text) + '</p>' + (x.detaljer && x.detaljer.length ? '<ul>' + x.detaljer.map(function (t) { return '<li>' + e(t) + '</li>'; }).join('') + '</ul>' : '') + '</article>';
       }).join('') + '<article class="ad-kontroll ad-kontroll--alla kort" data-in><header>' + IH.emo('skold') + '<b>Hela skyddet</b></header><p>Det här är en prototyp: data ligger i webbläsaren. Skarp drift behöver server, riktig inloggning med tvåstegsverifiering, behörigheter i databasen, kryptering och daglig säkerhetskopia.</p></article></div>';
     return { titel: 'Säkerhet', html: html };
   };
+  // Skanningen går kontroll för kontroll: ljuset löper runt ringen som kontrolleras, sedan fylls den med resultatet
   IH.G['ad-skanna'] = function () {
-    var k = kontroller();
-    logg('skanning', 'Kontrollerna körda: ' + poang(k) + ' av 100.');
-    IH.rita();
-    IH.toast('Kontrollerna är klara', poang(k) + ' av 100', 'system');
+    if (skannar >= 0) return;
+    var antal = kontroller().length, steg = IH.lugn ? 0 : 650;
+    skannar = 0; IH.rita();
+    var nasta = function () {
+      skannar++;
+      if (skannar >= antal || !/^#\/sakerhet/.test(location.hash)) {
+        skannar = -1;
+        var k = kontroller();
+        logg('skanning', 'Kontrollerna körda: ' + poang(k) + ' av 100.');
+        IH.rita();
+        IH.toast('Kontrollerna är klara', poang(k) + ' av 100', 'system');
+        return;
+      }
+      IH.rita(); setTimeout(nasta, steg);
+    };
+    setTimeout(nasta, steg);
   };
 
   /* 05 Adminpanelen #/admin ----------------------------------------------------------------------- */

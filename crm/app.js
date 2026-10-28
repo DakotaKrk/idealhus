@@ -319,7 +319,7 @@
       // Försäljningsledningen syns bara för chefen (ledning.js)
       var poster = grupp.rubrik === 'Sälj' && jag.chef ? grupp.poster.concat([['chef', 'Ledning', 'graf']]) : grupp.poster;
       // Admin och Säkerhet syns bara för adminkontot (admin.js)
-      if (grupp.rubrik === 'Mitt' && jag.roll === 'admin') poster = poster.concat([['admin', 'Admin', 'installning'], ['sakerhet', 'Säkerhet', 'system']]);
+      if (grupp.rubrik === 'Mitt' && jag.roll === 'admin') poster = poster.concat([['kontroll', 'Kontrollcentral', 'graf'], ['admin', 'Admin', 'installning'], ['sakerhet', 'Säkerhet', 'system']]);
       return (grupp.rubrik ? '<p class="sido__rubrik">' + grupp.rubrik + '</p>' : '') + poster.map(function (p) {
         var br = b[p[0]];
         var bricka = br && br[0] ? '<span class="sido__bricka' + (br[1] ? ' sido__bricka--varm' : '') + '">' + br[0] + '</span>' : '';
