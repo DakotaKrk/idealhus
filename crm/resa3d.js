@@ -177,7 +177,77 @@ function dekor(st) {
   st[5].add(...fam, staket(-6, 6, 4.95, 0.5), bl, blommor(46, [4.4, 3.4]), buske(-3.6, 0.5), buske(3.6, 0.5, 0.9), buske(-2.6, 0.7, 0.7));
   lagg(st[5], (t) => { vinka(fam[0], t, 0); vinka(fam[1], t, 2); vinka(fam[2], t * 1.3, 1, true); fam[2].position.y = 0.06 + Math.abs(Math.sin(t * 4)) * 0.25; });
 }
+/* Naturen runt resan: mark till horisonten, kullar, berg, skog, sjö med båt, åkrar, stenar, gräs och vindkraftverk */
+const HORISONT = '#f1ece0';
+function himmel() {
+  return tex(16, 512, (g, w, h) => { const l = g.createLinearGradient(0, 0, 0, h); l.addColorStop(0, '#b7d3e0'); l.addColorStop(0.45, '#dfe9e6'); l.addColorStop(0.75, HORISONT); l.addColorStop(1, HORISONT); g.fillStyle = l; g.fillRect(0, 0, w, h); });
+}
+function slump(fro) { let s = fro; return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
+function natur(scen) {
+  const r = slump(7), SLUT = AVST * 5;
+  const fri = (x, z) => z > -7.5 && z < 9.5 && x > -8 && x < SLUT + 8; // stationerna och gången
+  // marken: mjukt gräs med fläckar som tonar bort i diset
+  const grasTex = tex(256, 256, (g, w, h) => { g.fillStyle = '#d5dbb3'; g.fillRect(0, 0, w, h); for (let n = 0; n < 900; n++) { g.fillStyle = ['rgba(150,175,120,.10)', 'rgba(205,190,150,.10)', 'rgba(255,250,235,.12)'][n % 3]; g.beginPath(); g.arc(Math.random() * w, Math.random() * h, 2 + Math.random() * 9, 0, 7); g.fill(); } }, [160, 160]);
+  const mark = new THREE.Mesh(new THREE.PlaneGeometry(1400, 1400), new THREE.MeshStandardMaterial({ map: grasTex, roughness: 1 })); mark.rotation.x = -Math.PI / 2; mark.position.set(SLUT / 2, -0.62, 0); mark.receiveShadow = true; scen.add(mark);
+  const gron = ['#9fb487', '#8ea877', '#b1c095', '#a3b98c'].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 1, flatShading: true }));
+  // kullar bakom och berg längst bort
+  for (let n = 0; n < 16; n++) { const k = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 2), gron[n % 4]); const rad = 14 + r() * 18; k.scale.set(rad * 1.8, rad * 0.2, rad); k.position.set(-60 + n * 15 + r() * 8, -0.6, -78 - r() * 30); k.receiveShadow = true; scen.add(k); }
+  const berg = new THREE.MeshStandardMaterial({ color: '#c3cbc6', roughness: 1, flatShading: true }), sno = new THREE.MeshStandardMaterial({ color: '#fbfaf6', roughness: 0.9, flatShading: true });
+  for (let n = 0; n < 9; n++) { const h = 26 + r() * 26, rad = 22 + r() * 16, x = -70 + n * 30 + r() * 12, z = -170 - r() * 40; const b = new THREE.Mesh(new THREE.ConeGeometry(rad, h, 7), berg); b.position.set(x, h / 2 - 1, z); b.rotation.y = r() * 3; scen.add(b); const t = new THREE.Mesh(new THREE.ConeGeometry(rad * 0.3, h * 0.3, 7), sno); t.position.set(x, h - 1 - h * 0.15 + 0.2, z); t.rotation.y = b.rotation.y; scen.add(t); }
+  // skogen: stammar och kronor som instanser
+  const N = 520, stam = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.1, 0.14, 1, 6), M.tra, N), krona = new THREE.InstancedMesh(new THREE.ConeGeometry(0.75, 2.3, 7), new THREE.MeshStandardMaterial({ roughness: 0.9, flatShading: true }), N);
+  const tonfarg = ['#6f8c62', '#7f9a6c', '#8fa877', '#5f7d57', '#94ad7c'].map((c) => new THREE.Color(c)), o = new THREE.Object3D();
+  let k = 0;
+  const plantera = (x, z, s) => { if (k >= N || fri(x, z)) return; o.position.set(x, -0.6 + 0.5 * s, z); o.rotation.set(0, 0, 0); o.scale.setScalar(s); o.updateMatrix(); stam.setMatrixAt(k, o.matrix); o.position.y = -0.6 + 1.9 * s; o.rotation.y = r() * 6; o.updateMatrix(); krona.setMatrixAt(k, o.matrix); krona.setColorAt(k, tonfarg[k % 5]); k++; };
+  // dunge-vis: grupper av träd bakom, glesare framför, och täta skogar i båda ändarna
+  for (let n = 0; n < 30; n++) { const cx = -30 + r() * (SLUT + 60), cz = -18 - r() * 32; const m = 5 + Math.floor(r() * 8); for (let j = 0; j < m; j++) plantera(cx + (r() - 0.5) * 9, cz + (r() - 0.5) * 7, 0.8 + r() * 1.1); }
+  for (let n = 0; n < 5; n++) { const cx = n % 2 ? -14 - r() * 8 : SLUT + 14 + r() * 8, cz = 12 + r() * 10; for (let j = 0; j < 4; j++) plantera(cx + (r() - 0.5) * 5, cz + (r() - 0.5) * 4, 0.7 + r() * 0.6); }
+  for (let n = 0; n < 160; n++) { const v = n % 2 ? -16 - r() * 30 : SLUT + 16 + r() * 30; plantera(v, -30 + r() * 55, 0.9 + r() * 1.2); }
+  stam.count = krona.count = k; stam.castShadow = krona.castShadow = true; krona.receiveShadow = true; scen.add(stam, krona);
+  // sjön med strand, brygga, båt och ringar på vattnet
+  const sjoX = SLUT * 0.55, sjoZ = -19;
+  const strand = new THREE.Mesh(new THREE.CircleGeometry(1, 48), new THREE.MeshStandardMaterial({ color: '#e9dcbf', roughness: 1 })); strand.rotation.x = -Math.PI / 2; strand.scale.set(15.5, 7.6, 1); strand.position.set(sjoX, -0.6, sjoZ); strand.receiveShadow = true; scen.add(strand);
+  const vatten = new THREE.Mesh(new THREE.CircleGeometry(1, 48), new THREE.MeshStandardMaterial({ color: '#8fbfc9', roughness: 0.12, metalness: 0.15, envMapIntensity: 1.4 })); vatten.rotation.x = -Math.PI / 2; vatten.scale.set(14, 6.4, 1); vatten.position.set(sjoX, -0.57, sjoZ); scen.add(vatten);
+  const brygga = grupp(lada(1.2, 0.12, 4.2, M.tra, 0.02)); brygga.children[0].position.y = -0.38; [[-0.5, -1.8], [0.5, -1.8], [-0.5, 0], [0.5, 0], [-0.5, 1.8], [0.5, 1.8]].forEach(([x, z]) => { const p = cyl(0.06, 0.06, 0.6, M.tra, 6); p.position.set(x, -0.6, z); brygga.add(p); }); brygga.position.set(sjoX - 5, 0, sjoZ + 4.6); scen.add(brygga);
+  const bat = new THREE.Group(); const skrov = lada(2, 0.4, 0.8, new THREE.MeshStandardMaterial({ color: '#c98a45', roughness: 0.5 }), 0.18); bat.add(skrov);
+  const mast = cyl(0.04, 0.04, 2.4, M.vit, 6); mast.position.y = 1.3; bat.add(mast);
+  const segelF = new THREE.Shape(); segelF.moveTo(0, 0); segelF.lineTo(1.1, 0); segelF.lineTo(0, 2); segelF.closePath();
+  const segel = new THREE.Mesh(new THREE.ShapeGeometry(segelF), new THREE.MeshStandardMaterial({ color: '#fbf6ee', roughness: 0.7, side: THREE.DoubleSide })); segel.position.set(0.05, 0.35, 0); bat.add(segel);
+  bat.traverse((m) => { if (m.isMesh) m.castShadow = true; }); scen.add(bat);
+  const ringMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, depthWrite: false }), ringar = [];
+  for (let n = 0; n < 4; n++) { const q = new THREE.Mesh(new THREE.RingGeometry(0.9, 1, 40), ringMat.clone()); q.rotation.x = -Math.PI / 2; q.position.set(sjoX + 4 - n * 3, -0.55, sjoZ - 1 + (n % 2) * 2); scen.add(q); ringar.push(q); }
+  // åkrar i fåror framför gången
+  [[-14, 14, 10, 6, '#dccb8f'], [SLUT * 0.3, -14, 14, 5, '#c9d49c'], [SLUT + 14, 15, 10, 6, '#e2c995']].forEach(([x, z, w, d, f]) => {
+    const akr = new THREE.Group(), mat = new THREE.MeshStandardMaterial({ color: f, roughness: 1 }), mork = new THREE.MeshStandardMaterial({ color: new THREE.Color(f).multiplyScalar(0.86), roughness: 1 });
+    for (let n = 0; n < d / 0.7; n++) { const rad = lada(w, 0.18, 0.4, n % 2 ? mat : mork, 0.08); rad.position.set(0, -0.52, -d / 2 + n * 0.7); rad.receiveShadow = true; akr.add(rad); }
+    akr.position.set(x, 0, z); akr.rotation.y = 0.04; scen.add(akr);
+  });
+  // stenar och gräs
+  const stenMat = new THREE.MeshStandardMaterial({ color: '#b9b4aa', roughness: 0.95, flatShading: true });
+  for (let n = 0; n < 40; n++) { const x = -20 + r() * (SLUT + 40), z = -9 - r() * 30; if (fri(x, z)) continue; const s = new THREE.Mesh(new THREE.DodecahedronGeometry(0.3 + r() * 0.7, 0), stenMat); s.position.set(x, -0.5, z); s.rotation.set(r() * 3, r() * 3, 0); s.scale.y = 0.6; s.castShadow = s.receiveShadow = true; scen.add(s); }
+  const NT = 900, tuva = new THREE.InstancedMesh(new THREE.ConeGeometry(0.12, 0.5, 4), new THREE.MeshStandardMaterial({ roughness: 1, flatShading: true }), NT); let nt = 0;
+  for (let f = 0; f < 4000 && nt < NT; f++) { const x = -18 + r() * (SLUT + 36), z = -14 + r() * 36; if (fri(x, z) && !(z > 8.3 && z < 9.5)) continue; o.position.set(x, -0.42, z); o.rotation.set((r() - 0.5) * 0.4, r() * 6, (r() - 0.5) * 0.4); o.scale.setScalar(0.7 + r() * 0.9); o.updateMatrix(); tuva.setMatrixAt(nt, o.matrix); tuva.setColorAt(nt, tonfarg[(nt * 7) % 5]); nt++; }
+  tuva.count = nt; scen.add(tuva);
+  const NB = 420, ang = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.1, 0), new THREE.MeshStandardMaterial({ roughness: 0.7 }), NB);
+  for (let n = 0; n < NB; n++) { o.position.set(-16 + r() * (SLUT + 32), -0.5, 9.6 + r() * 14); o.rotation.set(0, 0, 0); o.scale.setScalar(0.6 + r() * 0.9); o.updateMatrix(); ang.setMatrixAt(n, o.matrix); ang.setColorAt(n, BLOM[n % BLOM.length]); }
+  scen.add(ang);
+  // vindkraftverk på kullarna
+  const verk = [];
+  [[-10, -70], [SLUT * 0.3, -84], [SLUT * 0.7, -78], [SLUT + 14, -72]].forEach(([x, z], n) => {
+    const g = new THREE.Group(), hoj = 11 + (n % 2) * 2; const torn = cyl(0.18, 0.4, hoj, M.vit, 10); torn.position.y = hoj / 2; g.add(torn);
+    const nav = new THREE.Group(); nav.position.set(0, hoj, 0.4); g.add(nav); nav.add(lada(0.5, 0.5, 1.1, M.vit, 0.15));
+    for (let b = 0; b < 3; b++) { const blad = lada(0.26, 4.6, 0.08, M.vit, 0.04); blad.geometry.translate(0, 2.3, 0); blad.rotation.z = (b * Math.PI * 2) / 3; blad.position.z = 0.6; nav.add(blad); }
+    g.position.set(x, 0.5, z); g.traverse((m) => { if (m.isMesh) m.castShadow = true; }); scen.add(g); verk.push(nav);
+  });
+  return (t) => {
+    verk.forEach((v, n) => { v.rotation.z = t * (0.7 + n * 0.12); });
+    bat.position.set(sjoX + Math.cos(t * 0.12) * 7, -0.38 + Math.sin(t * 1.6) * 0.05, sjoZ + Math.sin(t * 0.12) * 2.6); bat.rotation.y = -t * 0.12 - Math.PI / 2; bat.rotation.z = Math.sin(t * 1.3) * 0.05;
+    ringar.forEach((q, n) => { const a = (t * 0.25 + n / 4) % 1; q.scale.setScalar(0.3 + a * 2.4); q.material.opacity = (1 - a) * 0.5; });
+    vatten.material.color.setHSL(0.53, 0.3, 0.66 + Math.sin(t * 0.8) * 0.015);
+  };
+}
 function omgivning(scen) {
+  const nat = natur(scen);
   // lyktor längs gången
   const lMat = M.neon('#ffd9a0', 1.1);
   for (let x = -6; x < AVST * 5 + 8; x += 8) { const l = grupp(cyl(0.05, 0.07, 1.9, M.mork, 8), new THREE.Mesh(new THREE.SphereGeometry(0.17, 14, 10), lMat)); l.children[0].position.y = 0.95; l.children[1].position.y = 2; l.position.set(x, -0.55, 6.25); scen.add(l); }
@@ -199,6 +269,7 @@ function omgivning(scen) {
   const fram = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 8), M.neon('#fff2c9', 2)); fram.position.set(1.2, 0.68, 0.38); const fram2 = fram.clone(); fram2.position.z = -0.38; bil.add(fram, fram2);
   bil.position.set(-12, -0.52, 7.4); scen.add(bil);
   return (t, dt, fokusX) => {
+    nat(t);
     moln.forEach((c) => { c.position.x += dt * 0.5; if (c.position.x > AVST * 5 + 24) c.position.x = -24; });
     faglar.forEach((f, n) => { const a = t * 0.32 + n * 0.5; f.position.set(fokusX + Math.cos(a) * (7 + n), 10 + n * 0.6 + Math.sin(t * 0.9 + n) * 0.4, -3 + Math.sin(a) * 5); f.rotation.y = -a; f.children[0].rotation.z = Math.sin(t * 10 + n) * 0.6; f.children[1].rotation.z = -Math.sin(t * 10 + n) * 0.6; });
     bil.position.x += dt * 3.2; if (bil.position.x > AVST * 5 + 14) bil.position.x = -14;
@@ -416,13 +487,12 @@ function bygg(el) {
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0; renderer.outputColorSpace = THREE.SRGBColorSpace;
-  const scen = new THREE.Scene(); scen.background = new THREE.Color('#f6eee2'); scen.fog = new THREE.Fog('#f6eee2', 70, 140);
+  const scen = new THREE.Scene(); scen.background = himmel(); scen.fog = new THREE.Fog(HORISONT, 70, 140);
   const pmrem = new THREE.PMREMGenerator(renderer); scen.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scen.environmentIntensity = 0.5;
   const kamera = new THREE.PerspectiveCamera(30, 2, 0.5, 200);
   scen.add(new THREE.HemisphereLight('#fff6ea', '#b8a68c', 0.9));
   const sol = new THREE.DirectionalLight('#ffe9cc', 1.5); sol.castShadow = true; sol.shadow.mapSize.set(2048, 2048); sol.shadow.bias = -0.0004; sol.shadow.normalBias = 0.03;
   Object.assign(sol.shadow.camera, { left: -34, right: 34, top: 26, bottom: -26, near: 1, far: 110 }); scen.add(sol, sol.target);
-  const mark = new THREE.Mesh(new THREE.PlaneGeometry(400, 120), new THREE.MeshStandardMaterial({ color: '#f2e8d8', roughness: 1 })); mark.rotation.x = -Math.PI / 2; mark.position.y = -1.2; mark.receiveShadow = true; scen.add(mark);
   // vägen och den lysande banan genom alla steg
   const vag = lada(AVST * 5 + 30, 0.06, 1.6, new THREE.MeshStandardMaterial({ color: '#e3d2b8', roughness: 0.95 }), 0.03); vag.position.set(AVST * 2.5, -0.55, 7.4); scen.add(vag);
   for (let x = -12; x < AVST * 5 + 14; x += 1.6) { const s = lada(0.5, 0.02, 0.08, new THREE.MeshStandardMaterial({ color: '#c9a77c', roughness: 0.9 }), 0); s.position.set(x, -0.5, 7.4); scen.add(s); }
@@ -471,7 +541,7 @@ function uppdateraUi() {
   const kn = S.el.querySelector('[data-resa-auto]'); if (kn) { kn.setAttribute('aria-pressed', String(S.auto)); kn.title = S.auto ? 'Pausa resan' : 'Spela resan'; kn.innerHTML = '<svg class="emo-ik" aria-hidden="true"><use href="#i-' + (S.auto ? 'minus-cirkel' : 'film') + '"/></svg>' + (S.auto ? 'Pausa' : 'Spela'); }
   S.el.querySelectorAll('[data-resa-prick]').forEach((p, k) => p.setAttribute('aria-current', String(k === S.nu)));
   const hk = S.el.querySelector('[data-resa-hel]'); if (hk) hk.setAttribute('aria-pressed', String(S.hel));
-  const blk = S.el.closest('.prodblock--fabrik'); if (blk) blk.querySelectorAll('.fabrik__station').forEach((s, k) => s.classList.toggle('resa-nu', k === S.nu));
+  const blk = S.el.closest('.prodblock--fabrik'); if (blk) { blk.querySelectorAll('.fabrik__station').forEach((s, k) => { s.classList.toggle('resa-nu', k === S.nu); s.classList.toggle('resa-forbi', k < S.nu); }); const f = blk.querySelector('.fabrik'); if (f) f.style.setProperty('--nu', S.nu); }
 }
 function nalar() {
   // kundernas hus som nålar på sitt steg
