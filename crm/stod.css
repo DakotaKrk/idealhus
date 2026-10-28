@@ -1,5 +1,5 @@
 /* Legohus CRM – supportläget (stod.js): bandet över innehållet och teamraderna i administratörens meny. */
-.stod-band { position: fixed; top: calc(var(--ram, 12px) + 10px); left: 50%; z-index: 960; display: flex; align-items: center; gap: 14px; box-sizing: border-box; width: min(1100px, calc(100vw - 32px));
+.stod-band { position: fixed; top: var(--ram, 12px); left: 50%; z-index: 960; display: flex; align-items: center; gap: 14px; box-sizing: border-box; width: min(1100px, calc(100vw - 32px));
   min-height: 58px; padding: 8px 8px 8px 10px; border-radius: 20px; color: #fbf4e8;
   background: radial-gradient(80% 140% at 0% 0%, rgba(240, 181, 110, .22), transparent 60%), linear-gradient(160deg, #2c2721, #1b1915);
   box-shadow: 0 24px 48px -22px rgba(27, 25, 21, .75), inset 0 0 0 1px rgba(240, 181, 110, .3); animation: stod-in .55s cubic-bezier(.22, 1, .36, 1) both; }
@@ -33,7 +33,15 @@
 .stod-band__ut .emo-ik { width: 15px; height: 15px; }
 /* En tunn varm ram runt fönstret visar att man är i någon annans konto */
 html[data-support] body::after { content: ""; position: fixed; inset: 0; z-index: 959; pointer-events: none; box-shadow: inset 0 0 0 2px rgba(240, 181, 110, .7); }
-@media (min-width: 721px) { html[data-support] body .vy { padding-top: calc(var(--ram, 12px) + 78px); } }
+/* Bandet tar 58 px + 12 px luft upptill – sidorna, chatten och de klistrade spalterna räknar med det, så att allt
+   fortfarande börjar och slutar i jämnhöjd med menyn */
+html[data-support] { --stod: 70px; }
+@media (min-width: 721px) {
+  html[data-support] body .vy { padding-top: calc(var(--ram, 12px) + var(--stod)); }
+  html[data-support] body .ch { height: calc(100vh - 2 * var(--ram, 12px) - var(--stod)); min-height: 470px; }
+  html[data-support] body .stegband, html[data-support] body .kal__sida, html[data-support] body .dokyta { top: calc(var(--ram, 12px) + var(--stod)); }
+  html[data-support] body .inkorg__lista { top: calc(var(--ram, 12px) + var(--stod)); max-height: calc(100vh - 2 * var(--ram, 12px) - var(--stod)); }
+}
 @media (max-width: 1180px) { .stod-band__fakta { display: none; } }
 @media (max-width: 900px) { .stod-band__val button > span:last-child { display: none; } .stod-band__val button { padding: 0 4px; } }
 @media (max-width: 720px) { .stod-band { top: auto; bottom: 86px; } .stod-band__text small, .stod-band__ut span { display: none; } }

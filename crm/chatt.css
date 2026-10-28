@@ -377,3 +377,54 @@
 .chf-ikon[data-i-docka]:hover .emo-ik { transform: rotate(-8deg) scale(1.08); }
 html[data-sido-dold] body:has(.chf-dock) .sido-knapp { box-shadow: 0 8px 18px -10px rgba(143, 84, 36, .6); }
 @media (prefers-reduced-motion: reduce) { .chf-dock, .chf-dock[data-ut], .chf-dock::before, .chf-dock__led, .chf-dock__led b { animation: none !important; } }
+
+/* 13 Modernare chatt (2026-10-29): lättare knappar utan ramar, kollegorna som en rad runda avatarer, listans valda
+   rad som en mjuk platta, dagsrubrikerna klistras som glaspiller (överlappar inte bubblorna), en luftig skrivruta med
+   mjuk ram och tangenttipsen bara när rutan har fokus */
+.ch-ruta, .ch-topp__knappar .ch-ruta { width: 36px; height: 36px; border-radius: 50%; background: transparent; box-shadow: none; color: var(--text-2); transition: background-color .2s, color .2s, transform .25s var(--studs); }
+.ch-ruta:hover, .ch-topp__knappar .ch-ruta:hover { background: rgba(27, 25, 21, .05); color: var(--kol); box-shadow: none; }
+.ch-ruta[aria-pressed="true"] { background: var(--virke-ljus); color: var(--virke-djup); box-shadow: none; }
+.ch-ruta .emo-ik { width: 18px; height: 18px; }
+.ch-lista > header .ch-ny { width: 36px; height: 36px; border-radius: 12px; box-shadow: 0 8px 16px -10px rgba(143, 84, 36, .8); }
+.ch-lista h2 { font-size: 1.25rem; }
+/* Kollegorna: runda avatarer med namnet under, utan kort runt */
+.ch-team { gap: 4px; padding: 2px 0 4px; }
+.ch-teamkort { width: 64px; padding: 6px 2px; border-radius: 14px; background: none; box-shadow: none; }
+.ch-teamkort:hover { background: rgba(255, 255, 255, .7); box-shadow: none; transform: translateY(-1px); }
+.ch-teamkort.vald { background: #fff; box-shadow: 0 6px 16px -12px rgba(90, 60, 25, .6); }
+.ch-teamkort .avatar { width: 44px; height: 44px; border-radius: 50%; margin-bottom: 4px; box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px rgba(240, 181, 110, .5); }
+.ch-teamkort b { font-size: .76rem; }
+.ch-teamkort small { font-size: .64rem; }
+/* Samtalslistan */
+.ch-rad { gap: 11px; padding: 9px 10px; border-radius: 14px; }
+.ch-rad .avatar, .ch-rad .ch-kanalikon { border-radius: 50%; }
+.ch-rad:hover { background: rgba(255, 255, 255, .7); }
+.ch-rad.vald { background: #fff; box-shadow: 0 6px 18px -14px rgba(90, 60, 25, .55); }
+.ch-rad.vald::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 0 3px 3px 0; background: linear-gradient(180deg, var(--virke-2), var(--virke-djup)); }
+.ch-rad { position: relative; }
+/* Huvudet i tråden */
+.ch-topp { padding: 10px 14px 10px 18px; background: rgba(255, 253, 249, .8); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.ch-topp__knappar { gap: 2px; }
+/* Dagsrubrikerna: klistrade glaspiller utan linjer, så de aldrig ligger över en bubbla med streck */
+.ch-dag { margin: 16px 0 6px; }
+.ch-dag::before, .ch-dag::after { display: none; }
+.ch-dag span { padding: 5px 12px; border-radius: 999px; background: rgba(255, 255, 255, .82); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: 0 0 0 1px rgba(27, 25, 21, .06), 0 6px 14px -10px rgba(90, 60, 25, .4); font-size: .66rem; }
+/* Skrivrutan */
+.ch-fot { padding: 6px 18px 14px; }
+.ch-snabb { gap: 6px; margin-bottom: 8px; }
+.ch-snabb button { padding: 5px 11px; background: rgba(255, 255, 255, .7); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); font-size: .76rem; transition: background-color .2s, box-shadow .2s, transform .2s var(--studs); }
+.ch-snabb button:hover { background: #fff; box-shadow: inset 0 0 0 1px var(--virke); transform: translateY(-1px); }
+.ch-snabb__etikett { font-size: .6rem; }
+.ch-skriv { padding: 6px 6px 6px 8px; border-radius: 18px; background: #fff; box-shadow: 0 0 0 1px rgba(27, 25, 21, .08), 0 10px 24px -18px rgba(90, 60, 25, .6); }
+.ch-skriv:focus-within { box-shadow: 0 0 0 1.5px var(--virke), 0 0 0 5px rgba(240, 181, 110, .16), 0 12px 28px -18px rgba(90, 60, 25, .6); }
+.ch-skriv textarea { font-size: .92rem; }
+.ch-skriv textarea:disabled { cursor: not-allowed; color: var(--text-3); }
+.ch-skriv:has(textarea:disabled) { background: #f7f2ea; box-shadow: 0 0 0 1px rgba(27, 25, 21, .06); }
+.ch-skicka { width: 38px; height: 38px; border-radius: 13px; }
+.ch-tips { max-height: 0; margin: 0 4px; overflow: hidden; opacity: 0; transition: max-height .3s var(--mjuk), opacity .25s, margin .3s; font-size: .68rem; }
+.ch-fot:focus-within .ch-tips { max-height: 60px; margin-top: 7px; opacity: 1; }
+/* Inställningarna nertill i listan: en kompakt rad */
+.ch-kort { gap: 6px; padding-top: 10px; }
+.ch-vaxel { padding: 8px 10px; border-radius: 14px; background: rgba(255, 255, 255, .6); }
+.ch-vaxel__ikon { width: 30px; height: 30px; }
+.ch-tipskort { padding: 10px 12px; }
