@@ -1,147 +1,600 @@
-/* Legohus CRM – chatten (2026-10-28, efter Uperformance CRM:s chatt.js).
-   #/chatt[/kanal]: samtalen till vänster (Hela teamet + ett privat samtal per kollega), tråden i mitten med
-   datumrubriker och "Nya meddelanden"-linjen, och skrivrutan (Enter skickar, Shift+Enter ny rad). #kund och
-   #affär i texten blir klickbara kort. Olästa räknas per konto och syns som bricka i menyn.
-   Data i db.chatt = { meddelanden, last } – sparas med resten i webbläsaren. Prototyp: kollegorna svarar inte. */
+/* Legohus CRM – chatten (2026-10-28, samma funktioner som Uperformance CRM:s chatt.js, i Legohus kod och färger).
+   - #/chatt[/id]: samtalen (sök, Ny grupp, olästa och @-bricka), tråden och om samtalet (medlemmar, bjud in, byt namn,
+     delade filer, tysta, lämna). Hela teamet + privata samtal (räknas fram) + grupper (sparas).
+   - Meddelanden: datumrubriker, "Nya meddelanden", reaktioner, svara med citat, kopiera, ändra och ta bort det egna
+     (med Ångra), "ändrad", "Läst" i privata samtal, bilder och filer, stora emoji när meddelandet bara är emoji.
+   - Skrivrutan: @ föreslår kollegor, # föreslår kunder och affärer (pilar, Enter/Tab, Esc), emoji-panel, bifoga/dra in/klistra
+     in filer (bilder skalas till JPEG), Enter skickar, Shift+Enter ny rad, ↑ i tom ruta ändrar ditt senaste, snabbsvar.
+   - Flytande fönster som följer med mellan sidorna: dra i huvudet, ändra storlek i hörnet, Stör ej, helsida, minimera, stäng.
+     Minimerat blir det en ikon under menyknappen (infälld meny) eller nere till höger, med olästbricka och puls; ikonen kan
+     dras (högerklick lägger tillbaka den).
+   - Olästa per konto i menyn och fliktiteln, mjukt pling (WebAudio) och valfri avisering på skrivbordet när fliken inte syns.
+   Data i db.chatt = { kanaler, meddelanden, last, tyst } i webbläsaren; flikarna synkar via storage. Prototyp. */
 (function () {
   'use strict';
-  var IH = window.IH;
-  var e = IH.e, i = IH.i;
-  var db = function () { return IH.db; };
+  const IH = window.IH;
+  const e = IH.e, i = IH.i, ik = (n) => IH.emo(n);
+  const db = () => IH.db;
+  const jag = () => IH.jag().id;
+  const anv = (id) => IH.anvandare(id) || { id, namn: 'Okänd', farg: '#ccc', titel: '' };
+  const fornamn = (u) => String(u.namn || '').split(' ')[0];
+  const lugn = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const pek = () => matchMedia('(hover: none), (pointer: coarse)').matches;
+  const nyId = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  const PREF = 'ih-crm-chatt';
+  const pref = () => { try { return JSON.parse(localStorage.getItem(PREF)) || {}; } catch (x) { return {}; } };
+  const satPref = (k, v) => { const p = pref(); p[k] = v; try { localStorage.setItem(PREF, JSON.stringify(p)); } catch (x) { /* privat läge */ } };
 
-  /* 01 Data och exempel ------------------------------------------------------------------------- */
-  function chatt() {
-    var d = db();
-    if (!d.chatt) {
-      var t = function (dagar, h, m) { var x = new Date(); x.setDate(x.getDate() + dagar); x.setHours(h, m, 0, 0); return x.toISOString(); };
-      var aff = d.affarer.filter(function (a) { return a.steg === 'offert'; })[0];
-      d.chatt = {
-        meddelanden: [
-          { id: 'm1', kanal: 'team', av: 'ab', tid: t(-2, 8, 12), text: 'God morgon! Veckomöte kl 9 som vanligt – ta med det som står still i tavlan.' },
-          { id: 'm2', kanal: 'team', av: 'je', tid: t(-2, 8, 31), text: 'Stommarna till nästa montage är klara i verkstaden. Lastbilen är bokad.' },
-          { id: 'm3', kanal: 'team', av: 'eb', tid: t(-1, 14, 5), text: 'Platsbesöket i Tyresö gick bra. Bra väg fram för kranen.' },
-          { id: 'm4', kanal: 'team', av: 'ab', tid: t(0, 7, 58), text: 'Snyggt jobbat med veckans ordrar allihop!' + (aff ? ' Glöm inte att följa upp [[affar:' + aff.id + ']].' : '') },
-          { id: 'm5', kanal: 'p-ab-ml', av: 'ab', tid: t(-1, 16, 40), text: 'Har du hunnit ringa om sjötomten? Säg till om du vill att jag följer med på platsbesöket.' },
-          { id: 'm6', kanal: 'p-je-ml', av: 'je', tid: t(0, 9, 15), text: 'Kan du kolla med kunden om grunden är gjuten innan vi bokar montaget?' }
-        ],
-        last: {}
-      };
+  /* 01 Data ------------------------------------------------------------------------------------- */
+  function C() {
+    const d = db();
+    if (!d.chatt) d.chatt = {};
+    const c = d.chatt;
+    c.kanaler = c.kanaler || []; c.meddelanden = c.meddelanden || []; c.last = c.last || {}; c.tyst = c.tyst || {};
+    if (!c.exempel) {
+      c.exempel = true;
+      const t = (dagar, h, m) => { const x = new Date(); x.setDate(x.getDate() + dagar); x.setHours(h, m, 0, 0); return x.toISOString(); };
+      const aff = d.affarer.filter((a) => a.steg === 'offert')[0];
+      const finns = new Set(c.meddelanden.map((m) => m.id));
+      [{ id: 'm1', kanal: 'team', av: 'ab', tid: t(-2, 8, 12), text: 'God morgon! Veckomöte kl 9 som vanligt – ta med det som står still i tavlan.' },
+        { id: 'm2', kanal: 'team', av: 'je', tid: t(-2, 8, 31), text: 'Stommarna till nästa montage är klara i verkstaden. Lastbilen är bokad.', reakt: { '👍': ['ab', 'eb'] } },
+        { id: 'm3', kanal: 'team', av: 'eb', tid: t(-1, 14, 5), text: 'Platsbesöket i Tyresö gick bra. Bra väg fram för kranen.' },
+        { id: 'm4', kanal: 'team', av: 'ab', tid: t(0, 7, 58), text: 'Snyggt jobbat med veckans ordrar allihop!' + (aff ? ' @Maja glöm inte att följa upp [[affar:' + aff.id + ']].' : '') },
+        { id: 'm5', kanal: 'p-ab-ml', av: 'ab', tid: t(-1, 16, 40), text: 'Har du hunnit ringa om sjötomten? Säg till om du vill att jag följer med på platsbesöket.' },
+        { id: 'm6', kanal: 'p-je-ml', av: 'je', tid: t(0, 9, 15), text: 'Kan du kolla med kunden om grunden är gjuten innan vi bokar montaget?' }
+      ].forEach((m) => { if (!finns.has(m.id)) c.meddelanden.push(m); });
     }
-    return d.chatt;
+    return c;
   }
-  var privat = function (a, b) { return 'p-' + [a, b].sort().join('-'); };
+  const privatId = (a, b) => 'p-' + [a, b].sort().join('-');
   function kanaler() {
-    var jag = IH.jag();
-    var lista = [{ id: 'team', namn: 'Hela teamet', under: IH.ANVANDARE.length + ' personer', team: true }];
-    IH.ANVANDARE.forEach(function (u) { if (u.id !== jag.id) lista.push({ id: privat(jag.id, u.id), namn: u.namn, under: u.titel, u: u }); });
+    const mig = jag(), lista = [{ id: 'team', typ: 'team', namn: 'Hela teamet', medlemmar: IH.ANVANDARE.map((u) => u.id) }];
+    IH.ANVANDARE.forEach((u) => { if (u.id !== mig) lista.push({ id: privatId(mig, u.id), typ: 'privat', medlemmar: [mig, u.id] }); });
+    C().kanaler.forEach((k) => { if ((k.medlemmar || []).indexOf(mig) >= 0) lista.push(k); });
     return lista;
   }
-  var iKanal = function (k) { return chatt().meddelanden.filter(function (m) { return m.kanal === k; }); };
-  function senastLast(k) { var l = chatt().last[IH.jag().id]; return (l && l[k]) || ''; }
-  function olasta(k) {
-    var jag = IH.jag().id, last = senastLast(k);
-    return iKanal(k).filter(function (m) { return m.av !== jag && m.tid > last; }).length;
+  const kanal = (id) => kanaler().filter((k) => k.id === id)[0] || null;
+  const motpart = (k) => (k.typ === 'privat' ? anv(k.medlemmar.filter((x) => x !== jag())[0]) : null);
+  const kanalNamn = (k) => (k.typ === 'privat' ? motpart(k).namn : k.namn || 'Grupp');
+  const iKanal = (id) => C().meddelanden.filter((m) => m.kanal === id).sort((a, b) => (a.tid < b.tid ? -1 : 1));
+  const senast = (id) => { const l = iKanal(id); return l[l.length - 1] || null; };
+  const lastTill = (id, uid) => (C().last[uid || jag()] || {})[id] || '';
+  const olasta = (id) => iKanal(id).filter((m) => !m.system && !m.borttagen && m.av !== jag() && m.tid > lastTill(id)).length;
+  const namnerMig = (m) => new RegExp('@' + fornamn(IH.jag()) + '\\b', 'i').test(m.text || '');
+  const olastaNamn = (id) => iKanal(id).some((m) => m.av !== jag() && m.tid > lastTill(id) && namnerMig(m));
+  const olastaTotalt = () => kanaler().reduce((t, k) => t + olasta(k.id), 0);
+  IH.chattOlasta = olastaTotalt;
+  const tystad = (id) => (C().tyst[jag()] || []).indexOf(id) >= 0;
+  function markeraLast(id) {
+    const c = C(), m = senast(id); if (!m) return;
+    c.last[jag()] = c.last[jag()] || {};
+    if (!c.last[jag()][id] || c.last[jag()][id] < m.tid) { c.last[jag()][id] = m.tid; IH.spara(); IH.uppdateraMeny(); satTitel(); }
   }
-  IH.chattOlasta = function () { return kanaler().reduce(function (t, k) { return t + olasta(k.id); }, 0); };
-  function markeraLast(k) {
-    var c = chatt(), jag = IH.jag().id, m = iKanal(k), sista = m.length ? m[m.length - 1].tid : '';
-    c.last[jag] = c.last[jag] || {};
-    if (sista && c.last[jag][k] !== sista) { c.last[jag][k] = sista; IH.spara(); IH.uppdateraMeny(); }
-  }
+  function systemMedd(kid, text) { C().meddelanden.push({ id: nyId('s'), kanal: kid, av: jag(), tid: new Date().toISOString(), text, system: true }); }
 
-  /* 02 Text: radbrytningar, länkar och #-kort ---------------------------------------------------- */
-  var URL_RE = /(https?:\/\/[^\s<]+)/g;
-  function textHtml(t) {
-    return String(t || '').split(/(\[\[(?:kund|affar):[a-z0-9]+\]\])/).map(function (bit) {
-      var m = /^\[\[(kund|affar):([a-z0-9]+)\]\]$/.exec(bit);
-      if (m) {
-        if (m[1] === 'kund') { var k = IH.kund(m[2]); return k ? '<a class="ch-obj" href="#/kunder/' + k.id + '">' + i('kunder') + e(k.namn) + '</a>' : ''; }
-        var a = IH.affar(m[2]); return a ? '<a class="ch-obj" href="#/salj/' + a.id + '">' + i('tavla') + e(a.titel) + '</a>' : '';
-      }
-      return e(bit).replace(URL_RE, '<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g, '<br>');
-    }).join('');
+  /* 02 Text: länkar, @namn, #kort, stora emoji ---------------------------------------------------- */
+  const OBJ = /\[\[(kund|affar):([a-z0-9]+)\]\]/g;
+  const URL_RE = /\bhttps?:\/\/[^\s<>"'\[\]]+[^\s<>"'\[\].,;:!?)]/g;
+  const BARA_EMOJI = /^(?:\p{Extended_Pictographic}|\p{Emoji_Modifier}|‍|️|\s)+$/u;
+  const objekt = (typ, id) => {
+    const o = typ === 'kund' ? IH.kund(id) : IH.affar(id); if (!o) return null;
+    return typ === 'kund' ? { namn: o.namn, under: o.ort, href: '#/kunder/' + o.id, ikon: 'kunder' } : { namn: o.titel, under: IH.steg(o.steg).namn, href: '#/salj/' + o.id, ikon: 'portfolj' };
+  };
+  function bit(t) {
+    return e(t).replace(/(^|\s)@([A-ZÅÄÖ][\wåäöÅÄÖ-]+)/g, (m, f, n) => f + '<span class="ch-omn' + (n.toLowerCase() === fornamn(IH.jag()).toLowerCase() ? ' ch-omn--mig' : '') + '">@' + n + '</span>')
+      .replace(/\[\[(kund|affar):([a-z0-9]+)\]\]/g, (m, typ, id) => { const o = objekt(typ, id); return o ? '<a class="ch-obj" href="' + o.href + '">' + ik(o.ikon) + '<span><b>' + e(o.namn) + '</b>' + (o.under ? '<small>' + e(o.under) + '</small>' : '') + '</span></a>' : ''; });
   }
-  // "#Kundnamn" skrivet för hand blir en länk när namnet finns
+  function formatera(text) {
+    const r = String(text || ''); let ut = '', p = 0, m;
+    URL_RE.lastIndex = 0;
+    while ((m = URL_RE.exec(r))) { ut += bit(r.slice(p, m.index)) + '<a href="' + e(m[0]) + '" target="_blank" rel="noopener noreferrer">' + e(m[0]) + '</a>'; p = m.index + m[0].length; }
+    return (ut + bit(r.slice(p))).replace(/\n/g, '<br>');
+  }
+  const klartext = (t) => String(t || '').replace(OBJ, (m, typ, id) => { const o = objekt(typ, id); return o ? '#' + o.namn : ''; });
+  // "#Namn" skrivet för hand (eller valt i förslagen) blir en länk – längsta namnen först
   function medLankar(t) {
-    var namn = db().kunder.map(function (k) { return ['kund', k.id, k.namn]; }).concat(db().affarer.map(function (a) { return ['affar', a.id, a.titel]; }))
-      .sort(function (x, y) { return y[2].length - x[2].length; });
-    namn.forEach(function (n) { t = t.split('#' + n[2]).join('[[' + n[0] + ':' + n[1] + ']]'); });
+    const d = db(), namn = d.kunder.map((k) => ['kund', k.id, k.namn]).concat(d.affarer.map((a) => ['affar', a.id, a.titel])).sort((x, y) => y[2].length - x[2].length);
+    namn.forEach((n) => { t = t.split('#' + n[2]).join('[[' + n[0] + ':' + n[1] + ']]'); });
     return t;
   }
-  var klartext = function (t) { return String(t || '').replace(/\[\[(kund|affar):([a-z0-9]+)\]\]/g, function (x, typ, id) { var o = typ === 'kund' ? IH.kund(id) : IH.affar(id); return o ? '#' + (o.namn || o.titel) : ''; }); };
 
-  /* 03 Vyn #/chatt[/kanal] ------------------------------------------------------------------------ */
-  var valdKanal = null;
-  IH.vyer.chatt = function (del) {
-    var jag = IH.jag(), lista = kanaler();
-    var k = lista.filter(function (x) { return x.id === del[0]; })[0] || lista.filter(function (x) { return x.id === valdKanal; })[0] || lista[0];
-    valdKanal = k.id;
-    var forraLast = senastLast(k.id);
-    var avatar = function (u, liten) { return '<span class="avatar' + (liten ? ' avatar--liten' : '') + '" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + (IH.narvaroPrick ? IH.narvaroPrick(u.id) : '') + '</span>'; };
-    var samtal = lista.map(function (x) {
-      var m = iKanal(x.id), sista = m[m.length - 1], n = x.id === k.id ? 0 : olasta(x.id); // det öppna samtalet blir läst nu
-      return '<a class="ch-samtal' + (x.id === k.id ? ' vald' : '') + '" href="#/chatt/' + x.id + '"' + (x.id === k.id ? ' aria-current="page"' : '') + '>' +
-        (x.team ? '<span class="avatar ch-team">' + IH.emo('kunder') + '</span>' : avatar(x.u)) +
-        '<span class="ch-samtal__text"><b>' + e(x.namn) + '</b><small>' + (sista ? e((sista.av === jag.id ? 'Du: ' : '') + klartext(sista.text)) : e(x.under)) + '</small></span>' +
-        '<span class="ch-samtal__hoger">' + (sista ? '<small>' + tidKort(sista.tid) + '</small>' : '') + (n ? '<i class="ch-olast">' + n + '</i>' : '') + '</span></a>';
-    }).join('');
-    var msg = iKanal(k.id), forraDag = '', nyLinje = false, forraAv = null, forraTid = 0;
-    var trad = msg.length ? msg.map(function (m) {
-      var u = IH.anvandare(m.av) || { namn: 'Okänd', farg: '#ccc', id: '' }, egen = m.av === jag.id;
-      var dag = new Date(m.tid).toDateString(), h = '';
-      if (dag !== forraDag) { h += '<p class="ch-dag"><span>' + dagRubrik(m.tid) + '</span></p>'; forraDag = dag; forraAv = null; }
-      if (!nyLinje && !egen && m.tid > forraLast && forraLast) { h += '<p class="ch-ny"><span>Nya meddelanden</span></p>'; nyLinje = true; forraAv = null; }
-      var fortsatt = forraAv === m.av && new Date(m.tid) - forraTid < 5 * 60000;
-      forraAv = m.av; forraTid = new Date(m.tid);
-      return h + '<div class="ch-msg' + (egen ? ' ch-msg--egen' : '') + (fortsatt ? ' ch-msg--fortsatt' : '') + '" data-id="' + m.id + '">' +
-        (egen || fortsatt ? '' : avatar(u, true)) + '<div class="ch-bubbla">' + (egen || fortsatt ? '' : '<b class="ch-namn">' + e(u.namn) + '</b>') +
-        '<div class="ch-text">' + textHtml(m.text) + '</div><small class="ch-tid">' + klocka(m.tid) + '</small></div></div>';
-    }).join('') : '<div class="ch-tomt">' + IH.emo('prat', 'ch-tomt__ikon') + '<b>Inga meddelanden än</b><p>Skriv det första – ' + (k.team ? 'alla i teamet ser det.' : 'bara ni två ser samtalet.') + '</p></div>';
-    var html = '<h1 class="dold">Meddelanden</h1><div class="ch kort" data-in>' +
-      '<aside class="ch-lista"><header><h2>Meddelanden</h2></header><nav aria-label="Samtal">' + samtal + '</nav></aside>' +
-      '<section class="ch-tradyta" aria-label="' + e(k.namn) + '">' +
-        '<header class="ch-topp">' + (k.team ? '<span class="avatar ch-team">' + IH.emo('kunder') + '</span>' : avatar(k.u)) +
-          '<div><b>' + e(k.namn) + '</b><small>' + (k.team ? IH.ANVANDARE.map(function (u) { return u.namn.split(' ')[0]; }).join(', ') : (IH.narvaro ? e(IH.narvaro(k.u.id).namn) + ' · ' : '') + e(k.under)) + '</small></div>' +
-          (k.u ? '<a class="knapp knapp--liten" href="#/profil/' + k.u.id + '">' + i('kunder') + 'Profil</a>' : '') + '</header>' +
-        '<div class="ch-trad" data-ch-trad>' + trad + '</div>' +
-        '<form class="ch-skriv" data-ch-skriv data-kanal="' + k.id + '"><textarea name="text" rows="1" placeholder="Skriv till ' + e(k.team ? 'hela teamet' : k.namn.split(' ')[0]) + '… (#kund eller #affär länkar)" aria-label="Meddelande"></textarea>' +
-          '<button class="knapp knapp--virke" type="submit" aria-label="Skicka">' + i('pil') + '</button></form>' +
-        '<p class="ch-tips">Enter skickar · Shift + Enter ny rad · #Kundnamn blir en länk</p>' +
-      '</section></div>';
-    return { titel: 'Meddelanden', html: html, efter: function (rot) {
-      var t = rot.querySelector('[data-ch-trad]');
-      if (t) { var ny = t.querySelector('.ch-ny'); t.scrollTop = ny ? ny.offsetTop - 60 : t.scrollHeight; }
-      markeraLast(k.id);
-      var f = rot.querySelector('[data-ch-skriv] textarea'); if (f && matchMedia('(min-width: 860px)').matches) f.focus({ preventScroll: true });
-    } };
-  };
-  function klocka(iso) { var d = new Date(iso); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
-  // Kalenderdagar, inte timmar: något från i går kväll är "I går" även om det är mindre än ett dygn sedan
-  function dagarBak(iso) { var a = new Date(iso), b = new Date(); a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0); return Math.round((b - a) / 864e5); }
-  function dagRubrik(iso) { var n = dagarBak(iso); return n === 0 ? 'I dag' : n === 1 ? 'I går' : IH.datum(iso); }
-  function tidKort(iso) { return dagarBak(iso) === 0 ? klocka(iso) : dagRubrik(iso); }
+  /* 03 Tider ------------------------------------------------------------------------------------- */
+  const klocka = (iso) => new Date(iso).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+  const dagNr = (iso) => { const a = new Date(iso), b = new Date(); a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0); return Math.round((b - a) / 864e5); };
+  const dagRubrik = (iso) => { const n = dagNr(iso); return n === 0 ? 'Idag' : n === 1 ? 'Igår' : new Date(iso).toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' }); };
+  const listTid = (iso) => { const n = dagNr(iso); return n === 0 ? klocka(iso) : n === 1 ? 'Igår' : n < 6 ? new Date(iso).toLocaleDateString('sv-SE', { weekday: 'short' }) : new Date(iso).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' }); };
+  const storlek = (b) => (b >= 1048576 ? (b / 1048576).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' kB');
 
-  /* 04 Skicka ------------------------------------------------------------------------------------ */
-  function skicka(form) {
-    var ruta = form.querySelector('textarea'), text = ruta.value.trim();
-    if (!text) return;
-    var c = chatt();
-    c.meddelanden.push({ id: 'm' + Date.now().toString(36), kanal: form.getAttribute('data-kanal'), av: IH.jag().id, tid: new Date().toISOString(), text: medLankar(text).slice(0, 4000) });
-    IH.spara();
-    ruta.value = '';
-    IH.rita();
+  /* 04 Läget i gränssnittet ---------------------------------------------------------------------- */
+  const ui = { sok: '', info: false, emoji: false, svar: null, andrar: null, bilagor: [], utkast: {}, nya: new Set(), forslag: null, verktyg: null };
+  const EMOJI = [['Vanliga', '👍 ❤️ 😊 😂 🙌 👏 🎉 🔥 ✅ 👀 🙏 💪 😅 🤔 😮 😢 👌 ✨ 💯 🚀'], ['Bygget', '🏠 🏡 🏗️ 🔨 🪵 🧱 🚚 📐 🔑 🌲 🌊 ☀️ 🌧️ ❄️ ☕ 📅 📞 ✉️ 📄 💰']];
+  const SNABB = ['👍', '❤️', '😊', '🎉'];
+
+  /* 05 Ritning: listan, tråden och om samtalet ---------------------------------------------------- */
+  const avatar = (u, liten) => '<span class="avatar' + (liten ? ' avatar--liten' : '') + '" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + (IH.narvaroPrick ? IH.narvaroPrick(u.id) : '') + '</span>';
+  const kanalAvatar = (k, liten) => (k.typ === 'privat' ? avatar(motpart(k), liten) : '<span class="avatar ch-gruppav' + (liten ? ' avatar--liten' : '') + '">' + ik(k.typ === 'team' ? 'kunder' : 'prat') + '</span>');
+  function listaHtml(aktiv) {
+    const q = ui.sok.trim().toLowerCase();
+    let lista = kanaler().map((k) => ({ k, m: senast(k.id) })).sort((a, b) => ((b.m ? b.m.tid : '') > (a.m ? a.m.tid : '') ? 1 : -1));
+    if (q) lista = lista.filter((x) => kanalNamn(x.k).toLowerCase().indexOf(q) >= 0 || iKanal(x.k.id).some((m) => klartext(m.text).toLowerCase().indexOf(q) >= 0));
+    return lista.map(({ k, m }) => {
+      const n = k.id === aktiv ? 0 : olasta(k.id), at = k.id !== aktiv && olastaNamn(k.id);
+      const forhand = m ? (m.av === jag() ? 'Du: ' : k.typ !== 'privat' && !m.system ? fornamn(anv(m.av)) + ': ' : '') + (m.borttagen ? 'Meddelandet togs bort' : klartext(m.text) || (m.filer && m.filer.length ? 'Fil: ' + m.filer[0].namn : '')) : 'Inga meddelanden än';
+      return '<a class="ch-rad' + (k.id === aktiv ? ' vald' : '') + (n ? ' olast' : '') + '" href="#/chatt/' + k.id + '" data-ch-kanal="' + k.id + '">' + kanalAvatar(k) +
+        '<span class="ch-rad__text"><b>' + e(kanalNamn(k)) + (tystad(k.id) ? ik('bjallra-av') : '') + '</b><small>' + e(forhand) + '</small></span>' +
+        '<span class="ch-rad__hoger">' + (m ? '<small>' + listTid(m.tid) + '</small>' : '') + (at ? '<i class="ch-at">@</i>' : n ? '<i class="ch-olast">' + n + '</i>' : '') + '</span></a>';
+    }).join('') || '<p class="ch-inga">Inga samtal matchar.</p>';
   }
-  document.addEventListener('submit', function (ev) {
-    var f = ev.target.closest && ev.target.closest('[data-ch-skriv]'); if (!f) return;
-    ev.preventDefault(); skicka(f);
+  function meddHtml(m, foreg) {
+    const u = anv(m.av), egen = m.av === jag();
+    if (m.system) return '<p class="ch-system">' + e(m.text) + '</p>';
+    const fortsatt = foreg && !foreg.system && foreg.av === m.av && new Date(m.tid) - new Date(foreg.tid) < 5 * 60000 && dagNr(foreg.tid) === dagNr(m.tid);
+    const bara = !m.borttagen && m.text && BARA_EMOJI.test(m.text) && [...m.text.trim()].length <= 8;
+    const svar = m.svar ? '<button type="button" class="ch-citat" data-ch-hoppa="' + m.svar.mid + '"><b>' + e(fornamn(anv(m.svar.av))) + '</b><span>' + e(m.svar.text) + '</span></button>' : '';
+    const filer = (m.filer || []).map((f) => (f.typ && f.typ.indexOf('image/') === 0 && f.data
+      ? '<a class="ch-bild" href="' + f.data + '" download="' + e(f.namn) + '"><img src="' + f.data + '" alt="' + e(f.namn) + '" loading="lazy"></a>'
+      : '<a class="ch-fil"' + (f.data ? ' href="' + f.data + '" download="' + e(f.namn) + '"' : '') + '>' + ik('gem') + '<span><b>' + e(f.namn) + '</b><small>' + storlek(f.storlek || 0) + '</small></span></a>')).join('');
+    const reakt = m.reakt ? Object.keys(m.reakt).filter((x) => m.reakt[x].length).map((x) => '<button type="button" class="ch-reakt' + (m.reakt[x].indexOf(jag()) >= 0 ? ' min' : '') + '" data-g="ch-reagera" data-mid="' + m.id + '" data-emoji="' + x + '" title="' + e(m.reakt[x].map((id) => fornamn(anv(id))).join(', ')) + '">' + x + ' <b>' + m.reakt[x].length + '</b></button>').join('') : '';
+    const verktyg = m.borttagen ? '' : '<span class="ch-verktyg" role="toolbar" aria-label="Åtgärder">' + SNABB.map((x) => '<button type="button" data-g="ch-reagera" data-mid="' + m.id + '" data-emoji="' + x + '" aria-label="Reagera ' + x + '">' + x + '</button>').join('') +
+      '<button type="button" data-g="ch-svara" data-mid="' + m.id + '" title="Svara">' + ik('retur') + '</button><button type="button" data-g="ch-kopiera" data-mid="' + m.id + '" title="Kopiera">' + i('kopiera') + '</button>' +
+      (egen ? '<button type="button" data-g="ch-andra" data-mid="' + m.id + '" title="Ändra">' + ik('redigera') + '</button><button type="button" data-g="ch-ta-bort" data-mid="' + m.id + '" title="Ta bort">' + ik('papperskorg') + '</button>' : '') + '</span>';
+    return '<div class="ch-medd' + (egen ? ' egen' : '') + (fortsatt ? ' fortsatt' : '') + (namnerMig(m) && !egen ? ' namner' : '') + (ui.nya.has(m.id) ? ' ny' : '') + (ui.andrar === m.id ? ' andras' : '') + (ui.verktyg === m.id ? ' visa-verktyg' : '') + '" data-mid="' + m.id + '">' +
+      (egen ? '' : fortsatt ? '<span class="ch-medd__plats"></span>' : avatar(u, true)) +
+      '<div class="ch-medd__kropp">' + (egen || fortsatt ? '' : '<b class="ch-medd__namn">' + e(u.namn) + '<small>' + klocka(m.tid) + '</small></b>') +
+        '<div class="ch-bubbla' + (bara ? ' stor' : '') + (m.borttagen ? ' borta' : '') + '">' + svar + (m.borttagen ? '<i>Meddelandet togs bort</i>' : formatera(m.text)) + filer +
+          (egen || fortsatt ? '<small class="ch-tid">' + klocka(m.tid) + (m.andrad ? ' · ändrad' : '') + '</small>' : m.andrad ? '<small class="ch-tid">ändrad</small>' : '') + '</div>' +
+        (reakt ? '<div class="ch-reaktioner">' + reakt + '</div>' : '') + '</div>' + verktyg + '</div>';
+  }
+  function tradHtml(k) {
+    const lista = iKanal(k.id), forra = lastTill(k.id);
+    let html = '', dag = '', ny = false, foreg = null;
+    lista.forEach((m) => {
+      const d = new Date(m.tid).toDateString();
+      if (d !== dag) { html += '<p class="ch-dag"><span>' + dagRubrik(m.tid) + '</span></p>'; dag = d; foreg = null; }
+      if (!ny && forra && m.tid > forra && m.av !== jag() && !m.system) { html += '<p class="ch-nya"><span>Nya meddelanden</span></p>'; ny = true; foreg = null; }
+      html += meddHtml(m, foreg); foreg = m;
+    });
+    // "Läst" under mitt senaste i ett privat samtal
+    const sist = lista[lista.length - 1];
+    if (k.typ === 'privat' && sist && sist.av === jag() && lastTill(k.id, motpart(k).id) >= sist.tid) html += '<p class="ch-last">' + ik('bock') + 'Läst</p>';
+    return html || '<div class="ch-tomt">' + ik('prat') + '<b>Inga meddelanden än</b><p>Skriv det första – ' + (k.typ === 'privat' ? 'bara ni två ser samtalet.' : 'alla i samtalet ser det.') + '</p></div>';
+  }
+  // Snabbsvar på det senaste meddelandet (enkla regler på svenska, som i Uperformance) – klick lägger texten i rutan
+  function snabbsvar(k) {
+    const m = senast(k.id); if (!m || m.av === jag() || m.system || m.borttagen) return [];
+    const t = klartext(m.text || '').toLowerCase();
+    if (/\?\s*$/.test(t)) return ['Ja, det fixar jag', 'Jag kollar och återkommer', 'Nej, tyvärr inte'];
+    if (/tack/.test(t)) return ['Varsågod!', 'Inga problem 😊', 'Självklart!'];
+    if (/snyggt|bra jobb|grattis|vunnit|order|klar/.test(t)) return ['Toppen, tack!', 'Snyggt jobbat 🙌', 'Perfekt!'];
+    if (/god morgon|hej|hallå/.test(t)) return ['God morgon!', 'Hej! 😊', 'Hej, hur går det?'];
+    if (/kan du|glöm inte|kolla|boka|ring/.test(t)) return ['Jag tar det!', 'Fixar det i dag', 'Klart, återkommer'];
+    return ['👍', 'Toppen, tack!', 'Uppfattat'];
+  }
+  // Ljud, avisering och tips längst ned i listan (korten med reglage från Uperformance)
+  function installningarHtml() {
+    const ljud = pref().pling !== false, kan = 'Notification' in window, avis = kan && !!pref().avisera && Notification.permission === 'granted';
+    const rad = (g, ikon, titel, under, pa) => '<button type="button" class="ch-vaxel" data-g="' + g + '" role="switch" aria-checked="' + pa + '">' +
+      '<span class="ch-vaxel__ikon">' + ik(ikon) + '</span><span class="ch-vaxel__text"><b>' + titel + '</b><small>' + under + '</small></span><i class="ch-vaxel__reglage" aria-hidden="true"></i></button>';
+    return '<div class="ch-kort">' + rad('ch-pling', ljud ? 'bjallra' : 'bjallra-av', 'Ljud vid nya meddelanden', ljud ? 'På – ett mjukt pling' : 'Av', ljud) +
+      (kan ? rad('ch-avisera', 'bjallra', 'Avisering på skrivbordet', avis ? 'På – när fliken inte syns' : 'Av', avis) : '') +
+      '<div class="ch-tipskort"><span class="ch-vaxel__ikon">' + ik('glodlampa') + '</span><div><b>Tips</b><p>' + (pek()
+        ? 'Tryck på ett meddelande för att svara, reagera eller ändra ditt eget. Bifoga filer med gemet – farliga filtyper stoppas.'
+        : 'Dra in eller klistra in filer i ett samtal – farliga filtyper stoppas först. Håll musen över ett meddelande för att svara, reagera eller ändra ditt eget. Knappen med minus gör chatten till en ikon som följer med dig.') + '</p></div></div></div>';
+  }
+  function skrivHtml(k) {
+    const andrar = ui.andrar && C().meddelanden.filter((m) => m.id === ui.andrar)[0];
+    const svar = ui.svar && C().meddelanden.filter((m) => m.id === ui.svar)[0];
+    const bilagor = ui.bilagor.map((b, n) => '<span class="ch-bilaga">' + (b.data && b.typ.indexOf('image/') === 0 ? '<img src="' + b.data + '" alt="">' : ik('gem')) + '<span>' + e(b.namn) + '</span><button type="button" data-g="ch-bilaga-bort" data-n="' + n + '" aria-label="Ta bort ' + e(b.namn) + '">' + i('stang') + '</button></span>').join('');
+    const snabb = !andrar && !svar && !ui.bilagor.length ? snabbsvar(k) : [];
+    return (snabb.length ? '<div class="ch-snabb"><span class="ch-snabb__etikett">' + ik('gnista') + 'Snabbsvar</span>' + snabb.map((x) => '<button type="button" data-g="ch-snabb" data-text="' + e(x) + '">' + e(x) + '</button>').join('') + '</div>' : '') +
+      (andrar ? '<div class="ch-skriv__lage">' + ik('redigera') + '<span><b>Ändrar meddelandet</b><small>Enter sparar · Esc avbryter</small></span><button type="button" data-g="ch-avbryt" aria-label="Avbryt">' + i('stang') + '</button></div>' : '') +
+      (svar ? '<div class="ch-skriv__lage">' + ik('retur') + '<span><b>Svarar ' + e(fornamn(anv(svar.av))) + '</b><small>' + e(klartext(svar.text).slice(0, 90)) + '</small></span><button type="button" data-g="ch-avbryt" aria-label="Avbryt">' + i('stang') + '</button></div>' : '') +
+      (bilagor ? '<div class="ch-bilagor">' + bilagor + '</div>' : '') +
+      '<form class="ch-skriv" data-ch-skriv data-kanal="' + k.id + '">' +
+        '<button type="button" class="ch-ikonknapp" data-g="ch-emoji" aria-label="Emoji" aria-expanded="' + ui.emoji + '">' + ik('smiley') + '</button>' +
+        '<label class="ch-ikonknapp" title="Bifoga fil eller bild">' + ik('gem') + '<input type="file" multiple data-ch-fil hidden></label>' +
+        '<textarea name="text" rows="1" placeholder="' + (andrar ? 'Ändra meddelandet' : 'Skriv till ' + e(k.typ === 'privat' ? fornamn(motpart(k)) : kanalNamn(k))) + '… (@kollega, #kund)" aria-label="Meddelande">' + e(andrar ? klartext(andrar.text) : ui.utkast[k.id] || '') + '</textarea>' +
+        '<button class="ch-skicka" type="submit" aria-label="' + (andrar ? 'Spara' : 'Skicka') + '">' + ik(andrar ? 'bock' : 'skicka') + '</button>' +
+        (ui.emoji ? '<div class="ch-emojipanel">' + EMOJI.map((g) => '<p>' + g[0] + '</p><div>' + g[1].split(' ').map((x) => '<button type="button" data-g="ch-emoji-in" data-emoji="' + x + '">' + x + '</button>').join('') + '</div>').join('') + '</div>' : '') +
+        '<div class="ch-forslag" data-ch-forslag hidden></div>' +
+      '</form>';
+  }
+  function infoHtml(k) {
+    const filer = iKanal(k.id).filter((m) => m.filer && !m.borttagen).reduce((t, m) => t.concat(m.filer), []).slice(-8).reverse();
+    return '<aside class="ch-info"><header><b>Om samtalet</b><button type="button" class="ch-ikonknapp" data-g="ch-info" aria-label="Stäng">' + i('stang') + '</button></header>' +
+      '<p class="ch-info__rub">Medlemmar · ' + k.medlemmar.length + '</p><ul class="ch-medlemmar">' + k.medlemmar.map((id) => { const u = anv(id); return '<li>' + avatar(u, true) + '<span><b>' + e(u.namn) + (id === jag() ? ' (du)' : '') + '</b><small>' + e(IH.narvaro ? IH.narvaro(id).namn : u.titel) + '</small></span></li>'; }).join('') + '</ul>' +
+      (k.typ === 'grupp' ? '<button class="knapp knapp--liten" type="button" data-g="ch-bjud" data-kanal="' + k.id + '">' + ik('anvandare-plus') + 'Bjud in</button>' +
+        '<form class="ch-namnform" data-ch-namn data-kanal="' + k.id + '"><label><span>Gruppens namn</span><input name="namn" maxlength="40" value="' + e(k.namn || '') + '"></label><button class="knapp knapp--liten" type="submit">Spara</button></form>' : '') +
+      '<p class="ch-info__rub">Delade filer</p>' + (filer.length ? '<ul class="ch-delade">' + filer.map((f) => '<li>' + ik(f.typ && f.typ.indexOf('image/') === 0 ? 'bild' : 'gem') + '<span>' + e(f.namn) + '</span></li>').join('') + '</ul>' : '<p class="ch-info__tom">Inga filer än.</p>') +
+      '<div class="ch-info__knappar"><button class="knapp knapp--liten" type="button" data-g="ch-tyst" data-kanal="' + k.id + '">' + ik(tystad(k.id) ? 'bjallra' : 'bjallra-av') + (tystad(k.id) ? 'Slå på ljud' : 'Tysta samtalet') + '</button>' +
+      (k.typ === 'grupp' ? '<button class="knapp knapp--liten knapp--fara" type="button" data-g="ch-lamna" data-kanal="' + k.id + '">Lämna gruppen</button>' : '') + '</div></aside>';
+  }
+  function toppHtml(k, iFonster) {
+    const mot = motpart(k);
+    return '<header class="ch-topp">' + (iFonster ? '<button type="button" class="ch-ikonknapp" data-g="chf-lista" aria-label="Alla samtal">' + i('pilv') + '</button>' : '') + kanalAvatar(k) +
+      '<div class="ch-topp__text"><b>' + e(kanalNamn(k)) + '</b><small>' + (mot ? e((IH.narvaro ? IH.narvaro(mot.id).namn + ' · ' : '') + mot.titel) : e(k.medlemmar.map((id) => fornamn(anv(id))).join(', '))) + '</small></div>' +
+      (iFonster ? '' : '<button type="button" class="ch-ikonknapp" data-g="chf-oppna" data-kanal="' + k.id + '" title="Öppna i eget fönster">' + ik('minimera') + '</button><button type="button" class="ch-ikonknapp" data-g="ch-info" aria-pressed="' + ui.info + '" title="Om samtalet">' + ik('info') + '</button>') + '</header>';
+  }
+
+  /* 06 Sidan #/chatt[/id] ------------------------------------------------------------------------ */
+  let sidKanal = null;
+  IH.vyer.chatt = function (del) {
+    const lista = kanaler();
+    const k = kanal(del[0]) || kanal(sidKanal) || kanal(pref().senast) || lista[0];
+    sidKanal = k.id; satPref('senast', k.id);
+    const html = '<h1 class="dold">Meddelanden</h1><div class="ch' + (ui.info ? ' med-info' : '') + ' kort" data-in>' +
+      '<aside class="ch-lista"><header><h2>Meddelanden</h2><button type="button" class="ch-ikonknapp ch-ny" data-g="ch-ny-grupp" title="Ny grupp">' + ik('plus') + '</button></header>' +
+        '<label class="ch-sok">' + ik('sok') + '<input type="search" data-ch-sok placeholder="Sök i samtalen" value="' + e(ui.sok) + '" aria-label="Sök i samtalen"></label>' +
+        '<nav aria-label="Samtal" data-ch-listan>' + listaHtml(k.id) + '</nav>' +
+        installningarHtml() + '</aside>' +
+      '<section class="ch-tradyta" data-ch-yta="sida">' + toppHtml(k) + '<div class="ch-trad" data-ch-trad>' + tradHtml(k) + '</div>' +
+        '<div class="ch-fot">' + skrivHtml(k) + '<p class="ch-tips">' + (pek() ? 'Tryck på ett meddelande för att svara eller reagera' : 'Enter skickar · Shift + Enter ny rad · ↑ ändrar ditt senaste · @ nämner · # länkar') + '</p></div></section>' +
+      (ui.info ? infoHtml(k) : '') + '</div>';
+    return { titel: 'Meddelanden', html, efter: (rot) => efterTrad(rot, k) };
+  };
+  function efterTrad(rot, k) {
+    const t = rot.querySelector('[data-ch-trad]');
+    if (t) { const ny = t.querySelector('.ch-nya'); t.scrollTop = ny ? ny.offsetTop - 40 : t.scrollHeight; }
+    if (document.visibilityState === 'visible') markeraLast(k.id);
+    ui.nya.clear();
+    const ruta = rot.querySelector('[data-ch-skriv] textarea');
+    if (ruta) { vaxa(ruta); if (!pek() && !(document.activeElement && document.activeElement.matches('[data-ch-sok]'))) { ruta.focus({ preventScroll: true }); const l = ruta.value.length; ruta.setSelectionRange(l, l); } }
+  }
+  function ritaAllt() {
+    if (/^#\/chatt/.test(location.hash)) IH.rita();
+    ritaFonster(); IH.uppdateraMeny(); satTitel();
+  }
+
+  /* 07 Flytande fönstret ------------------------------------------------------------------------- */
+  const FL = 'ih-crm-chattfonster';
+  const fl = (() => { try { return JSON.parse(localStorage.getItem(FL)) || {}; } catch (x) { return {}; } })();
+  const sparaFl = () => { try { localStorage.setItem(FL, JSON.stringify(fl)); } catch (x) { /* */ } };
+  let fonster = null, ikon = null;
+  function klam() {
+    const w = Math.min(fl.w || 380, innerWidth - 24), h = Math.min(fl.h || 540, innerHeight - 24);
+    fl.w = w; fl.h = h;
+    fl.x = Math.max(120 - w, Math.min(innerWidth - 120, fl.x == null ? innerWidth - w - 24 : fl.x));
+    fl.y = Math.max(12, Math.min(innerHeight - 60, fl.y == null ? innerHeight - h - 24 : fl.y));
+  }
+  function ritaFonster() {
+    const paSidan = /^#\/chatt/.test(location.hash);
+    if (!fl.oppen || paSidan) { if (fonster) { fonster.remove(); fonster = null; } if (ikon) { ikon.remove(); ikon = null; } return; }
+    if (fl.min) {
+      if (fonster) { fonster.remove(); fonster = null; }
+      if (!ikon) { ikon = document.createElement('button'); ikon.type = 'button'; ikon.className = 'chf-ikon'; ikon.setAttribute('aria-label', 'Öppna chatten'); document.body.appendChild(ikon); kopplaIkon(ikon); }
+      const n = olastaTotalt();
+      ikon.innerHTML = ik('prat') + (n ? '<i class="ch-olast">' + n + '</i>' : '');
+      ikon.toggleAttribute('data-puls', !!n);
+      placeraIkon();
+      return;
+    }
+    if (ikon) { ikon.remove(); ikon = null; }
+    if (!fonster) { fonster = document.createElement('section'); fonster.className = 'chf'; fonster.setAttribute('aria-label', 'Chatten'); document.body.appendChild(fonster); kopplaFonster(fonster); }
+    klam();
+    Object.assign(fonster.style, { left: fl.x + 'px', top: fl.y + 'px', width: fl.w + 'px', height: fl.h + 'px' });
+    const k = fl.kanal && kanal(fl.kanal);
+    const fokus = document.activeElement && fonster.contains(document.activeElement) && document.activeElement.tagName === 'TEXTAREA';
+    fonster.innerHTML = '<header class="chf-huvud" data-chf-dra>' + ik('prat') + '<b>' + (k ? e(kanalNamn(k)) : 'Meddelanden') + '</b>' +
+      '<button type="button" class="ch-ikonknapp" data-g="chf-storej" aria-pressed="' + !!pref().storEj + '" title="Stör ej">' + ik(pref().storEj ? 'bjallra-av' : 'bjallra') + '</button>' +
+      '<a class="ch-ikonknapp" href="#/chatt' + (k ? '/' + k.id : '') + '" title="Helsida">' + ik('helskarm') + '</a>' +
+      '<button type="button" class="ch-ikonknapp" data-g="chf-min" title="Minimera">' + ik('minimera') + '</button>' +
+      '<button type="button" class="ch-ikonknapp" data-g="chf-stang" title="Stäng">' + i('stang') + '</button></header>' +
+      (k ? '<div class="chf-kropp ch-tradyta" data-ch-yta="fonster">' + toppHtml(k, true) + '<div class="ch-trad" data-ch-trad>' + tradHtml(k) + '</div><div class="ch-fot">' + skrivHtml(k) + '</div></div>'
+        : '<nav class="chf-kropp chf-lista" aria-label="Samtal" data-ch-listan>' + listaHtml(null) + '</nav>') +
+      '<span class="chf-storlek" data-chf-storlek aria-hidden="true"></span>';
+    if (k) {
+      const t = fonster.querySelector('[data-ch-trad]'); t.scrollTop = t.scrollHeight; markeraLast(k.id); ui.nya.clear();
+      const r = fonster.querySelector('textarea'); if (r) { vaxa(r); if (fokus) r.focus({ preventScroll: true }); }
+    }
+  }
+  function placeraIkon() {
+    if (!ikon) return;
+    const rals = document.documentElement.hasAttribute('data-sido-dold') && matchMedia('(min-width: 1101px)').matches;
+    const kn = [...document.querySelectorAll('[data-sido-knapp], .sido-knapp')].filter((x) => x.getBoundingClientRect().width)[0];
+    ikon.style.right = ikon.style.bottom = ikon.style.left = ikon.style.top = '';
+    if (fl.ikonX != null) { ikon.style.left = fl.ikonX + 'px'; ikon.style.top = fl.ikonY + 'px'; return; }
+    if (rals && kn) { const r = kn.getBoundingClientRect(); ikon.style.left = (r.left + r.width / 2 - 22) + 'px'; ikon.style.top = (r.bottom + 14) + 'px'; }
+    else { ikon.style.right = '22px'; ikon.style.bottom = '22px'; }
+  }
+  addEventListener('resize', () => { if (fonster) ritaFonster(); placeraIkon(); });
+  new MutationObserver(() => setTimeout(placeraIkon, 650)).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sido-dold'] });
+  function dra(ev, flytt, klar) {
+    const x0 = ev.clientX, y0 = ev.clientY; let rord = false;
+    const flytta = (e2) => { const dx = e2.clientX - x0, dy = e2.clientY - y0; if (!rord && Math.hypot(dx, dy) < 4) return; rord = true; flytt(dx, dy); };
+    const slapp = () => { removeEventListener('pointermove', flytta); removeEventListener('pointerup', slapp); klar(rord); };
+    addEventListener('pointermove', flytta); addEventListener('pointerup', slapp);
+  }
+  function kopplaFonster(f) {
+    f.addEventListener('pointerdown', (ev) => {
+      if (ev.button !== 0) return;
+      const huvud = ev.target.closest('[data-chf-dra]'), horn = ev.target.closest('[data-chf-storlek]');
+      if (huvud && !ev.target.closest('button, a')) {
+        const x = fl.x, y = fl.y; f.setAttribute('data-drar', '');
+        dra(ev, (dx, dy) => { fl.x = x + dx; fl.y = y + dy; klam(); f.style.left = fl.x + 'px'; f.style.top = fl.y + 'px'; }, () => { f.removeAttribute('data-drar'); sparaFl(); });
+      } else if (horn) {
+        const w = fl.w, h = fl.h; ev.preventDefault();
+        dra(ev, (dx, dy) => { fl.w = Math.max(300, w + dx); fl.h = Math.max(360, h + dy); f.style.width = fl.w + 'px'; f.style.height = fl.h + 'px'; }, () => { klam(); sparaFl(); });
+      }
+    });
+  }
+  function kopplaIkon(b) {
+    b.addEventListener('pointerdown', (ev) => {
+      if (ev.button !== 0) return;
+      const r = b.getBoundingClientRect();
+      dra(ev, (dx, dy) => { fl.ikonX = Math.max(6, Math.min(innerWidth - 50, r.left + dx)); fl.ikonY = Math.max(6, Math.min(innerHeight - 50, r.top + dy)); b.style.left = fl.ikonX + 'px'; b.style.top = fl.ikonY + 'px'; b.style.right = b.style.bottom = ''; },
+        (rord) => { if (rord) { sparaFl(); b.dataset.dragen = '1'; setTimeout(() => { delete b.dataset.dragen; }, 50); } });
+    });
+    b.addEventListener('click', () => { if (b.dataset.dragen) return; fl.min = false; sparaFl(); ritaFonster(); });
+    b.addEventListener('contextmenu', (ev) => { ev.preventDefault(); fl.ikonX = fl.ikonY = null; sparaFl(); placeraIkon(); IH.toast('Ikonen är tillbaka', 'Under menyknappen när menyn är infälld.', 'samtal'); });
+  }
+  IH.chattOppna = (kid) => { fl.oppen = true; fl.min = false; if (kid) fl.kanal = kid; sparaFl(); ritaFonster(); };
+  addEventListener('hashchange', () => setTimeout(ritaFonster, 0));
+
+  /* 08 Åtgärder ---------------------------------------------------------------------------------- */
+  const G = IH.G;
+  const meddelande = (id) => C().meddelanden.filter((m) => m.id === id)[0];
+  const ytaFor = (el) => (el && el.closest('[data-ch-yta]')) || document;
+  G['ch-reagera'] = (el) => {
+    const m = meddelande(el.getAttribute('data-mid')); if (!m) return;
+    const x = el.getAttribute('data-emoji'); m.reakt = m.reakt || {}; const l = m.reakt[x] = m.reakt[x] || [];
+    const n = l.indexOf(jag()); if (n >= 0) l.splice(n, 1); else l.push(jag());
+    ui.verktyg = null; IH.spara(); ritaAllt();
+  };
+  G['ch-svara'] = (el) => { ui.svar = el.getAttribute('data-mid'); ui.andrar = null; ui.verktyg = null; const iF = !!el.closest('.chf'); ritaAllt(); fokusText(iF); };
+  G['ch-kopiera'] = (el) => { const m = meddelande(el.getAttribute('data-mid')); if (!m) return; try { navigator.clipboard.writeText(klartext(m.text)); IH.toast('Kopierat', null, 'kopiera'); } catch (x) { /* */ } ui.verktyg = null; };
+  G['ch-andra'] = (el) => { ui.andrar = el.getAttribute('data-mid'); ui.svar = null; ui.verktyg = null; const iF = !!el.closest('.chf'); ritaAllt(); fokusText(iF); };
+  G['ch-avbryt'] = (el) => { ui.andrar = null; ui.svar = null; const iF = !!el.closest('.chf'); ritaAllt(); fokusText(iF); };
+  let angra = null;
+  G['ch-ta-bort'] = (el) => {
+    const m = meddelande(el.getAttribute('data-mid')); if (!m || m.av !== jag()) return;
+    const kopia = { text: m.text, filer: m.filer };
+    m.borttagen = true; m.text = ''; delete m.filer; ui.verktyg = null; IH.spara(); ritaAllt();
+    if (angra) angra.remove();
+    angra = document.createElement('div'); angra.className = 'ch-angra'; angra.setAttribute('role', 'status');
+    angra.innerHTML = '<span>Meddelandet togs bort</span><button type="button">Ångra</button>';
+    const den = angra;
+    den.querySelector('button').addEventListener('click', () => { m.borttagen = false; m.text = kopia.text; if (kopia.filer) m.filer = kopia.filer; IH.spara(); ritaAllt(); den.remove(); });
+    document.body.appendChild(den);
+    setTimeout(() => { if (den.isConnected) den.remove(); }, 6000);
+  };
+  G['ch-emoji'] = () => { ui.emoji = !ui.emoji; ritaAllt(); };
+  G['ch-emoji-in'] = (el) => {
+    const f = el.closest('form'), r = f.querySelector('textarea'), x = el.getAttribute('data-emoji');
+    const a = r.selectionStart == null ? r.value.length : r.selectionStart, b = r.selectionEnd == null ? r.value.length : r.selectionEnd;
+    r.value = r.value.slice(0, a) + x + r.value.slice(b); ui.utkast[f.getAttribute('data-kanal')] = r.value;
+    r.focus(); r.setSelectionRange(a + x.length, a + x.length);
+  };
+  G['ch-snabb'] = (el) => { const f = ytaFor(el).querySelector('[data-ch-skriv]'); const r = f.querySelector('textarea'); r.value = el.getAttribute('data-text'); ui.utkast[f.getAttribute('data-kanal')] = r.value; r.focus(); };
+  G['ch-bilaga-bort'] = (el) => { ui.bilagor.splice(+el.getAttribute('data-n'), 1); ritaAllt(); };
+  G['ch-info'] = () => { ui.info = !ui.info; IH.rita(); };
+  G['ch-tyst'] = (el) => {
+    const kid = el.getAttribute('data-kanal'), c = C(), l = c.tyst[jag()] = c.tyst[jag()] || [], n = l.indexOf(kid);
+    if (n >= 0) l.splice(n, 1); else l.push(kid);
+    IH.spara(); ritaAllt(); IH.toast(n >= 0 ? 'Ljudet är på' : 'Samtalet är tystat', null, 'samtal');
+  };
+  G['ch-lamna'] = (el) => {
+    const k = C().kanaler.filter((x) => x.id === el.getAttribute('data-kanal'))[0]; if (!k) return;
+    if (!el.dataset.saker) { el.dataset.saker = '1'; el.textContent = 'Klicka igen för att lämna'; return; }
+    systemMedd(k.id, fornamn(IH.jag()) + ' lämnade gruppen'); k.medlemmar = k.medlemmar.filter((x) => x !== jag());
+    IH.spara(); ui.info = false; sidKanal = 'team'; IH.ga('#/chatt/team');
+  };
+  G['ch-pling'] = () => { satPref('pling', pref().pling === false); IH.rita(); };
+  G['ch-avisera'] = () => {
+    if (!('Notification' in window)) return;
+    if (pref().avisera) { satPref('avisera', false); IH.rita(); return; }
+    Notification.requestPermission().then((p) => { satPref('avisera', p === 'granted'); IH.rita(); if (p !== 'granted') IH.toast('Aviseringar är avstängda i webbläsaren', null, 'varning'); });
+  };
+  G['chf-oppna'] = (el) => { fl.oppen = true; fl.min = false; fl.kanal = el.getAttribute('data-kanal'); sparaFl(); IH.ga('#/'); };
+  G['ch-skriv-till'] = (el) => { const uid = el.getAttribute('data-uid'); if (uid === jag()) return; fl.oppen = true; fl.min = false; fl.kanal = privatId(jag(), uid); sparaFl(); ritaFonster(); fokusText(true); };
+  G['chf-min'] = () => { fl.min = true; sparaFl(); ritaFonster(); };
+  G['chf-stang'] = () => { fl.oppen = false; sparaFl(); ritaFonster(); };
+  G['chf-lista'] = () => { fl.kanal = null; sparaFl(); ritaFonster(); };
+  G['chf-kanal'] = (el) => { fl.kanal = el.getAttribute('data-kanal'); sparaFl(); ritaFonster(); fokusText(true); };
+  G['chf-storej'] = () => { satPref('storEj', !pref().storEj); ritaFonster(); IH.toast(pref().storEj ? 'Stör ej är på' : 'Stör ej är av', pref().storEj ? 'Inga ljud eller notiser från chatten.' : null, 'samtal'); };
+  G['ch-ny-grupp'] = () => {
+    IH.oppnaArk({
+      titel: 'Ny grupp', under: 'Välj kollegor och ge gruppen ett namn.', ikon: 'samtal',
+      kropp: '<form id="ch-ny-form" data-ch-ny><label class="falt"><span>Namn</span><input name="namn" maxlength="40" placeholder="T.ex. Montage vecka 46"></label>' +
+        '<div class="ch-valj">' + IH.ANVANDARE.filter((u) => u.id !== jag()).map((u) => '<label><input type="checkbox" name="vem" value="' + u.id + '">' + avatar(u, true) + '<span><b>' + e(u.namn) + '</b><small>' + e(u.titel) + '</small></span></label>').join('') + '</div></form>',
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="ch-ny-form">' + ik('plus') + 'Skapa grupp</button>'
+    });
+  };
+  G['ch-bjud'] = (el) => {
+    const k = C().kanaler.filter((x) => x.id === el.getAttribute('data-kanal'))[0]; if (!k) return;
+    const kvar = IH.ANVANDARE.filter((u) => k.medlemmar.indexOf(u.id) < 0);
+    if (!kvar.length) { IH.toast('Alla är redan med', null, 'kunder'); return; }
+    IH.oppnaArk({ titel: 'Bjud in till ' + k.namn, ikon: 'kunder',
+      kropp: '<form id="ch-bjud-form" data-ch-bjud data-kanal="' + k.id + '"><div class="ch-valj">' + kvar.map((u) => '<label><input type="checkbox" name="vem" value="' + u.id + '">' + avatar(u, true) + '<span><b>' + e(u.namn) + '</b><small>' + e(u.titel) + '</small></span></label>').join('') + '</div></form>',
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="ch-bjud-form">Bjud in</button>' });
+  };
+  function fokusText(iFonster) { requestAnimationFrame(() => { const rot = iFonster && fonster ? fonster : document.querySelector('[data-ch-yta="sida"]') || fonster; const r = rot && rot.querySelector('[data-ch-skriv] textarea'); if (r) { r.focus({ preventScroll: true }); const l = r.value.length; r.setSelectionRange(l, l); } }); }
+  const vaxa = (r) => { r.style.height = 'auto'; r.style.height = Math.min(r.scrollHeight, 160) + 'px'; };
+  // I fönstret byter samtalsraderna samtal i fönstret i stället för att lämna sidan
+  document.addEventListener('click', (ev) => {
+    const rad = ev.target.closest && ev.target.closest('.chf [data-ch-kanal]');
+    if (rad) { ev.preventDefault(); fl.kanal = rad.getAttribute('data-ch-kanal'); sparaFl(); ritaFonster(); fokusText(true); }
+  }, true);
+
+  /* 09 Skicka, formulär och tangenter ------------------------------------------------------------- */
+  function skicka(f) {
+    const kid = f.getAttribute('data-kanal'), r = f.querySelector('textarea'), text = r.value.trim(), iF = !!f.closest('.chf');
+    if (ui.andrar) {
+      const m = meddelande(ui.andrar); ui.andrar = null;
+      if (m && m.av === jag() && text && medLankar(text) !== m.text) { m.text = medLankar(text).slice(0, 4000); m.andrad = new Date().toISOString(); IH.spara(); }
+      ritaAllt(); fokusText(iF); return;
+    }
+    if (!text && !ui.bilagor.length) return;
+    const m = { id: nyId('m'), kanal: kid, av: jag(), tid: new Date().toISOString(), text: medLankar(text).slice(0, 4000) };
+    if (ui.bilagor.length) m.filer = ui.bilagor.map((b) => ({ id: b.id, namn: b.namn, typ: b.typ, storlek: b.storlek, data: b.data }));
+    const s = ui.svar && meddelande(ui.svar); if (s) m.svar = { mid: s.id, av: s.av, text: klartext(s.text).slice(0, 140) || (s.filer && s.filer[0] ? s.filer[0].namn : '') };
+    C().meddelanden.push(m); kanda.add(m.id); ui.nya.add(m.id); ui.bilagor = []; ui.svar = null; ui.emoji = false; ui.utkast[kid] = '';
+    try { IH.spara(); } catch (x) { IH.toast('Meddelandet kunde inte sparas', 'Lagringen i webbläsaren är full – ta bort några bilder.', 'varning'); C().meddelanden.pop(); }
+    markeraLast(kid); ritaAllt(); fokusText(iF);
+  }
+  document.addEventListener('submit', (ev) => {
+    const t = ev.target;
+    if (t.matches('[data-ch-skriv]')) { ev.preventDefault(); skicka(t); }
+    else if (t.matches('[data-ch-ny]')) {
+      ev.preventDefault();
+      const vem = [...t.querySelectorAll('input[name=vem]:checked')].map((x) => x.value);
+      if (!vem.length) { IH.toast('Välj minst en kollega', null, 'varning'); return; }
+      const namn = t.namn.value.trim() || [fornamn(IH.jag())].concat(vem.map((x) => fornamn(anv(x)))).join(', ');
+      const k = { id: nyId('g'), typ: 'grupp', namn: namn.slice(0, 40), medlemmar: [jag()].concat(vem), skapad: new Date().toISOString() };
+      C().kanaler.push(k); systemMedd(k.id, fornamn(IH.jag()) + ' skapade gruppen'); IH.spara(); IH.stangArk(); IH.ga('#/chatt/' + k.id);
+    } else if (t.matches('[data-ch-bjud]')) {
+      ev.preventDefault();
+      const k = C().kanaler.filter((x) => x.id === t.getAttribute('data-kanal'))[0], vem = [...t.querySelectorAll('input[name=vem]:checked')].map((x) => x.value);
+      if (!k || !vem.length) return;
+      k.medlemmar = k.medlemmar.concat(vem); systemMedd(k.id, fornamn(IH.jag()) + ' bjöd in ' + vem.map((x) => fornamn(anv(x))).join(', '));
+      IH.spara(); IH.stangArk(); ritaAllt();
+    } else if (t.matches('[data-ch-namn]')) {
+      ev.preventDefault();
+      const k = C().kanaler.filter((x) => x.id === t.getAttribute('data-kanal'))[0], n = t.namn.value.trim().slice(0, 40);
+      if (!k || !n || n === k.namn) return;
+      k.namn = n; systemMedd(k.id, fornamn(IH.jag()) + ' döpte om gruppen till ' + n); IH.spara(); ritaAllt(); IH.toast('Gruppen har fått nytt namn', null, 'skriv');
+    }
   });
-  document.addEventListener('keydown', function (ev) {
-    var f = ev.target.closest && ev.target.closest('[data-ch-skriv]'); if (!f || ev.target.tagName !== 'TEXTAREA') return;
-    if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); skicka(f); }
+  // @ och # – förslag medan man skriver
+  function forslagFor(r) {
+    const fore = r.value.slice(0, r.selectionStart), m = /(^|\s)([@#])([^\s@#]{0,30})$/.exec(fore);
+    if (!m) return null;
+    const q = m[3].toLowerCase(), k = kanal(r.closest('form').getAttribute('data-kanal'));
+    let lista;
+    if (m[2] === '@') lista = (k ? k.medlemmar : []).filter((id) => id !== jag()).map(anv).filter((u) => u.namn.toLowerCase().indexOf(q) >= 0).map((u) => ({ text: '@' + fornamn(u) + ' ', namn: u.namn, under: u.titel, av: u }));
+    else lista = db().kunder.filter((x) => x.namn.toLowerCase().indexOf(q) >= 0).map((x) => ({ text: '#' + x.namn + ' ', namn: x.namn, under: 'Kund · ' + (x.ort || ''), ikon: 'kunder' }))
+      .concat(db().affarer.filter((a) => a.titel.toLowerCase().indexOf(q) >= 0).map((a) => ({ text: '#' + a.titel + ' ', namn: a.titel, under: 'Affär · ' + IH.steg(a.steg).namn, ikon: 'portfolj' })));
+    return lista.length ? { lista: lista.slice(0, 7), fran: fore.length - m[2].length - m[3].length, vald: 0 } : null;
+  }
+  function visaForslag(r, behallVal) {
+    const box = r.closest('form').querySelector('[data-ch-forslag]');
+    const vald = behallVal && ui.forslag ? ui.forslag.vald : 0;
+    ui.forslag = forslagFor(r);
+    if (!ui.forslag) { box.hidden = true; return; }
+    ui.forslag.vald = Math.min(vald, ui.forslag.lista.length - 1);
+    box.hidden = false;
+    box.innerHTML = ui.forslag.lista.map((x, n) => '<button type="button" class="' + (n === ui.forslag.vald ? 'vald' : '') + '" data-ch-valj="' + n + '">' + (x.av ? avatar(x.av, true) : '<span class="ch-forslag__ikon">' + ik(x.ikon) + '</span>') + '<span><b>' + e(x.namn) + '</b><small>' + e(x.under) + '</small></span></button>').join('');
+  }
+  function valjForslag(r, n) {
+    const f = ui.forslag; if (!f) return;
+    const x = f.lista[n], slut = r.value.slice(r.selectionStart);
+    r.value = r.value.slice(0, f.fran) + x.text + slut; const p = f.fran + x.text.length; r.setSelectionRange(p, p);
+    ui.forslag = null; r.closest('form').querySelector('[data-ch-forslag]').hidden = true; r.focus();
+    ui.utkast[r.closest('form').getAttribute('data-kanal')] = r.value;
+  }
+  document.addEventListener('mousedown', (ev) => { const b = ev.target.closest && ev.target.closest('[data-ch-valj]'); if (!b) return; ev.preventDefault(); valjForslag(b.closest('form').querySelector('textarea'), +b.getAttribute('data-ch-valj')); });
+  document.addEventListener('input', (ev) => {
+    const t = ev.target;
+    if (t.matches && t.matches('[data-ch-sok]')) { ui.sok = t.value; document.querySelectorAll('.ch-lista [data-ch-listan]').forEach((n) => { n.innerHTML = listaHtml(sidKanal); }); return; }
+    if (!(t.closest && t.closest('[data-ch-skriv]')) || t.tagName !== 'TEXTAREA') return;
+    vaxa(t); ui.utkast[t.closest('form').getAttribute('data-kanal')] = t.value; visaForslag(t);
   });
-  // Skrivrutan växer med texten (högst sex rader)
-  document.addEventListener('input', function (ev) {
-    if (!(ev.target.closest && ev.target.closest('[data-ch-skriv]')) || ev.target.tagName !== 'TEXTAREA') return;
-    var r = ev.target; r.style.height = 'auto'; r.style.height = Math.min(r.scrollHeight, 150) + 'px';
+  document.addEventListener('keydown', (ev) => {
+    const r = ev.target; if (!(r.closest && r.closest('[data-ch-skriv]')) || r.tagName !== 'TEXTAREA') return;
+    const f = ui.forslag;
+    if (f && (ev.key === 'ArrowDown' || ev.key === 'ArrowUp')) { ev.preventDefault(); f.vald = (f.vald + (ev.key === 'ArrowDown' ? 1 : -1) + f.lista.length) % f.lista.length; r.closest('form').querySelectorAll('[data-ch-valj]').forEach((b, j) => b.classList.toggle('vald', j === f.vald)); return; }
+    if (f && (ev.key === 'Enter' || ev.key === 'Tab')) { ev.preventDefault(); valjForslag(r, f.vald); return; }
+    if (ev.key === 'Escape') { if (f) { ui.forslag = null; r.closest('form').querySelector('[data-ch-forslag]').hidden = true; } else if (ui.andrar || ui.svar || ui.emoji) { ui.andrar = ui.svar = null; ui.emoji = false; const iF = !!r.closest('.chf'); ritaAllt(); fokusText(iF); } return; }
+    if (ev.key === 'ArrowUp' && !r.value) {
+      const kid = r.closest('form').getAttribute('data-kanal'), egna = iKanal(kid).filter((m) => m.av === jag() && !m.borttagen && !m.system);
+      if (egna.length) { ev.preventDefault(); ui.andrar = egna[egna.length - 1].id; const iF = !!r.closest('.chf'); ritaAllt(); fokusText(iF); }
+      return;
+    }
+    if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); skicka(r.closest('form')); }
   });
+  // Citatet hoppar till originalet; tryck på ett meddelande (pekskärm) visar verktygen
+  document.addEventListener('click', (ev) => {
+    const c = ev.target.closest && ev.target.closest('[data-ch-hoppa]');
+    if (c) { const m = ytaFor(c).querySelector('.ch-medd[data-mid="' + c.getAttribute('data-ch-hoppa') + '"]'); if (m) { m.scrollIntoView({ block: 'center', behavior: lugn() ? 'auto' : 'smooth' }); m.classList.remove('blixt'); void m.offsetWidth; m.classList.add('blixt'); } return; }
+    if (pek()) {
+      const m = ev.target.closest && ev.target.closest('.ch-medd');
+      if (m && !ev.target.closest('button, a')) { ui.verktyg = ui.verktyg === m.getAttribute('data-mid') ? null : m.getAttribute('data-mid'); document.querySelectorAll('.ch-medd').forEach((x) => x.classList.toggle('visa-verktyg', x.getAttribute('data-mid') === ui.verktyg)); }
+    }
+  });
+
+  /* 10 Filer: välj, dra in, klistra in – bilder skalas till JPEG ---------------------------------- */
+  const TAK = 2.5 * 1048576;
+  const FARLIG = /\.(exe|bat|cmd|com|js|vbs|ps1|msi|scr|jar|html?|svg|hta|lnk)$/i;
+  function lasFil(fil) {
+    return new Promise((klar) => {
+      const r = new FileReader();
+      if (FARLIG.test(fil.name)) { klar({ fel: fil.name + ' – filtypen är inte tillåten' }); return; }
+      if (fil.type.indexOf('image/') === 0) {
+        r.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            const s = Math.min(1, 1280 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+            c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+            const data = c.toDataURL('image/jpeg', 0.82);
+            klar({ id: nyId('f'), namn: fil.name.replace(/\.\w+$/, '') + '.jpg', typ: 'image/jpeg', storlek: Math.round(data.length * 0.75), data });
+          };
+          img.onerror = () => klar({ fel: fil.name + ' – bilden gick inte att läsa' }); img.src = r.result;
+        };
+        r.readAsDataURL(fil);
+      } else if (fil.size <= 900 * 1024) {
+        r.onload = () => klar({ id: nyId('f'), namn: fil.name, typ: fil.type || 'application/octet-stream', storlek: fil.size, data: r.result }); r.readAsDataURL(fil);
+      } else klar({ fel: fil.name + ' – större än 900 kB' });
+    });
+  }
+  function laggTill(filer, iF) {
+    Promise.all([...filer].slice(0, 6).map(lasFil)).then((lista) => {
+      const fel = lista.filter((x) => x && x.fel).map((x) => x.fel);
+      let summa = ui.bilagor.reduce((t, b) => t + b.storlek, 0);
+      lista.forEach((b) => { if (b && !b.fel) { if (summa + b.storlek > TAK) fel.push(b.namn + ' – bilagorna blir för stora'); else { ui.bilagor.push(b); summa += b.storlek; } } });
+      if (fel.length) IH.toast('Några filer bifogades inte', fel.join(' · '), 'varning');
+      ritaAllt(); fokusText(iF);
+    });
+  }
+  document.addEventListener('change', (ev) => { if (ev.target.matches && ev.target.matches('[data-ch-fil]')) { laggTill(ev.target.files, !!ev.target.closest('.chf')); ev.target.value = ''; } });
+  const harFiler = (ev) => ev.dataTransfer && [...ev.dataTransfer.types].indexOf('Files') >= 0;
+  document.addEventListener('dragover', (ev) => { const z = ev.target.closest && ev.target.closest('[data-ch-yta]'); if (z && harFiler(ev)) { ev.preventDefault(); z.setAttribute('data-slapp', ''); } });
+  document.addEventListener('dragleave', (ev) => { const z = ev.target.closest && ev.target.closest('[data-ch-yta]'); if (z && !z.contains(ev.relatedTarget)) z.removeAttribute('data-slapp'); });
+  document.addEventListener('drop', (ev) => { const z = ev.target.closest && ev.target.closest('[data-ch-yta]'); if (!z || !harFiler(ev)) return; ev.preventDefault(); z.removeAttribute('data-slapp'); laggTill(ev.dataTransfer.files, !!z.closest('.chf')); });
+  document.addEventListener('paste', (ev) => { if (!(ev.target.closest && ev.target.closest('[data-ch-skriv]'))) return; const f = [...((ev.clipboardData || {}).files || [])]; if (f.length) { ev.preventDefault(); laggTill(f, !!ev.target.closest('.chf')); } });
+
+  /* 11 Nytt från en annan flik: pling, notis och avisering ---------------------------------------- */
+  let kanda = new Set(C().meddelanden.map((m) => m.id));
+  function pling() {
+    if (pref().pling === false || pref().storEj) return;
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)(), t = ac.currentTime;
+      [[880, 0], [1320, 0.12]].forEach(([hz, d]) => {
+        const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sine'; o.frequency.value = hz;
+        g.gain.setValueAtTime(0, t + d); g.gain.linearRampToValueAtTime(0.08, t + d + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.35);
+        o.connect(g).connect(ac.destination); o.start(t + d); o.stop(t + d + 0.4);
+      });
+      setTimeout(() => ac.close(), 900);
+    } catch (x) { /* inget ljud */ }
+  }
+  function kolla() {
+    const nya = C().meddelanden.filter((m) => !kanda.has(m.id));
+    kanda = new Set(C().meddelanden.map((m) => m.id));
+    const tillMig = nya.filter((m) => m.av !== jag() && !m.system && kanal(m.kanal) && !tystad(m.kanal));
+    if (!tillMig.length) return;
+    const m = tillMig[tillMig.length - 1], u = anv(m.av), k = kanal(m.kanal);
+    pling();
+    const syns = (/^#\/chatt/.test(location.hash) && sidKanal === m.kanal) || (fl.oppen && !fl.min && fl.kanal === m.kanal);
+    if (!syns && !pref().storEj) IH.toast(fornamn(u) + (namnerMig(m) ? ' nämnde dig' : k.typ === 'privat' ? '' : ' i ' + kanalNamn(k)), klartext(m.text).slice(0, 90) || 'Skickade en fil', 'samtal', { lank: '#/chatt/' + m.kanal, knapp: 'Svara' });
+    if (pref().avisera && document.visibilityState === 'hidden' && !pref().storEj && 'Notification' in window && Notification.permission === 'granted') {
+      try { const n = new Notification(u.namn + (k.typ === 'privat' ? '' : ' · ' + kanalNamn(k)), { body: klartext(m.text).slice(0, 140), tag: m.kanal, silent: true }); n.onclick = () => { focus(); location.hash = '#/chatt/' + m.kanal; n.close(); }; } catch (x) { /* */ }
+    }
+  }
+  addEventListener('storage', (ev) => { if (ev.key === IH.NYCKEL) setTimeout(() => { kolla(); ritaFonster(); satTitel(); }, 60); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && /^#\/chatt/.test(location.hash) && sidKanal) markeraLast(sidKanal); });
+
+  /* 12 Fliktiteln: "(3) Säljtavla · Legohus CRM" ------------------------------------------------- */
+  function satTitel() {
+    const n = olastaTotalt(), ren = document.title.replace(/^\(\d+\)\s/, '');
+    const ny = (n ? '(' + n + ') ' : '') + ren;
+    if (document.title !== ny) document.title = ny;
+  }
+  const titel = document.querySelector('title');
+  if (titel) new MutationObserver(satTitel).observe(titel, { childList: true });
+
+  // Kontobyte i demon: ingen gammal tråd, inga utkast eller val följer med
+  const valjAnv = G['valj-anvandare'];
+  G['valj-anvandare'] = (el) => {
+    ui.sok = ''; ui.svar = ui.andrar = null; ui.emoji = false; ui.bilagor = []; ui.utkast = {}; sidKanal = null; fl.kanal = null; sparaFl();
+    valjAnv(el); kanda = new Set(C().meddelanden.map((m) => m.id)); ritaFonster(); satTitel();
+  };
+  setTimeout(() => { ritaFonster(); satTitel(); }, 0);
 })();

@@ -151,3 +151,4 @@
   .lp-band { padding: 18px; }
 }
 @media (prefers-reduced-motion: reduce) { .lp-staplar i, .lp-mal__spar i, .lp-pipe__stapel { animation: none; } }
+.lp-skriv { margin-top: 12px; }
