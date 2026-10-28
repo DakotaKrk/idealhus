@@ -390,7 +390,7 @@
     app.innerHTML = '<aside class="sido" id="sidomeny">' + sidomeny() + '</aside>' +
       '<div class="sido-kant"><button class="sido-knapp" type="button" data-sido-knapp aria-controls="sidomeny" aria-expanded="true" aria-label="Dölj menyn" title="Dölj menyn  [">' +
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 9 12l5.5 5.5"/></svg></button>' +
-      '<button class="sido-kant__konto" type="button" data-g="konto-meny" aria-label="Kontot och Logga ut" title="' + IH.e(IH.jag().namn) + '"><span class="avatar" style="--av:' + IH.jag().farg + '">' + IH.initialer(IH.jag().namn) + '</span></button></div>' +
+      '</div>' +
       '<div class="huvud"><header class="topp">' +
       '<button class="sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök eller skriv ett kommando…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
       '<span class="proto">Prototyp · exempeldata</span>' +
