@@ -2925,7 +2925,7 @@
       var namn = function (p) { var k = IH.kund(p.kund); return k ? forsta(k.namn) : 'Projekt'; };
       if (l.length === 1) {
         var m = IH.modell(l[0].modell), k = IH.kund(l[0].kund);
-        return '<span class="fabrik__hus"><button type="button" data-g="proj-oppna" data-id="' + l[0].id + '" style="--j:0" title="' + e(k ? k.namn : '') + ' · ' + e(m ? m.namn : '') + '"><img src="' + (m ? m.tumme : '') + '" alt="' + e(m ? m.namn : '') + '"><span>' + e(namn(l[0])) + '</span></button></span>';
+        return '<span class="fabrik__hus"><button type="button" data-g="proj-oppna" data-id="' + l[0].id + '" style="--j:0" title="' + e(k ? k.namn : '') + ' · ' + e(m ? m.namn : '') + '"><img src="' + (m ? m.tumme : '') + '" alt="' + e(m ? m.namn : '') + '"><span>' + e(namn(l[0])) + '</span><small class="fabrik__vecka">' + e(m ? m.namn : '') + (l[0].montage ? ' · v. ' + IH.vecka(new Date(l[0].montage)) : '') + '</small></button></span>';
       }
       var visa = l.slice(0, 3), mer = l.length - visa.length;
       return '<span class="fabrik__hus"><button type="button" class="fabrik__stapel" data-g="steg-hus" data-steg="' + s.id + '" title="Visa alla ' + l.length + ' hus i ' + e(s.namn.toLowerCase()) + '">' +
