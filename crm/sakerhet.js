@@ -183,14 +183,16 @@
   var ui = { oppen: null };
 
   /* 03 Skanningen -------------------------------------------------------------------------------- */
+  var ETIKETT = { start: 'START', ok: ' OK ', medel: 'VARN', hog: 'FEL ', '': 'INFO' };
+  function radHtml(x) { return '<time>' + e(x.tid || '') + '</time><b class="sh-tagg sh-tagg--' + (x.ton || 'info') + '">' + (ETIKETT[x.ton || ''] || 'INFO') + '</b><span>' + e(x.text) + '</span>'; }
   async function skanna(ids) {
     if (skan.kor) return;
     var valda = ids && ids.length ? KONTROLLER.filter(function (k) { return ids.indexOf(k.id) >= 0; }) : KONTROLLER;
     skan.kor = true; skan.logg = []; skan.pct = 0;
     var skriv = function (text, ton) {
-      skan.logg.push({ text: text, ton: ton || '' });
+      var tid = new Date().toLocaleTimeString('sv-SE'); skan.logg.push({ text: text, ton: ton || '', tid: tid });
       var t = document.querySelector('[data-sh-terminal]');
-      if (t) { var p = document.createElement('p'); p.className = 'sh-rad' + (ton ? ' sh-rad--' + ton : ''); p.textContent = '› ' + text; t.appendChild(p); while (t.children.length > 70) t.firstElementChild.remove(); t.scrollTop = t.scrollHeight; }
+      if (t) { var p = document.createElement('p'); p.className = 'sh-rad' + (ton ? ' sh-rad--' + ton : ''); p.innerHTML = radHtml({ text: text, ton: ton, tid: tid }); t.appendChild(p); while (t.children.length > 70) t.firstElementChild.remove(); t.scrollTop = t.scrollHeight; }
     };
     skriv('Startar ' + (valda.length === KONTROLLER.length ? 'full skanning – sju kontroller' : valda.map(function (k) { return k.namn.toLowerCase(); }).join(', ')), 'start');
     var S = hub();
@@ -272,12 +274,41 @@
       '<article class="sh-kontroll sh-kontroll--total" data-lage="' + (p == null ? 'ny' : p >= 90 ? 'ok' : p >= 70 ? 'medel' : 'hog') + '"><header><span class="sh-kontroll__ikon">' + ik('skold') + '</span><div><h3>Hela skyddet</h3><p>Alla sju kontroller i en skanning – tar några sekunder.</p></div><span class="sh-lampa"></span></header>' +
         '<div class="sh-kontroll__fot"><strong>' + (p == null ? 'Inte skannat' : p + ' av 100') + '</strong><small>' + (senast ? IH.sedan(senast.tid) : '') + '</small><button type="button" class="knapp knapp--virke knapp--liten" data-g="sh-skanna" data-ids=""' + (skan.kor ? ' disabled' : '') + '>' + ik('radar') + 'Skanna allt</button></div></article>';
     var hist = S.historik.slice(0, 12).reverse();
-    var terminal = '<section class="ad-band kort sh-terminalkort"><h2>' + ik('server') + 'Skanningens logg</h2><div class="sh-terminal" data-sh-terminal role="log" aria-live="polite">' +
+    var vilo = []; if (senast) { var st = new Date(senast.tid).toLocaleTimeString('sv-SE'); vilo.push({ tid: st, ton: 'start', text: 'Senaste skanningen ' + new Date(senast.tid).toLocaleDateString('sv-SE') + ' av ' + ((IH.anvandare(senast.av) || {}).namn || '') });
+      KONTROLLER.forEach(function (k) { var r = S.senast[k.id]; if (!r) return; var vk = r.fynd.filter(function (x) { return x.allvar !== 'info'; }); vilo.push({ tid: new Date(r.tid).toLocaleTimeString('sv-SE'), ton: !vk.length ? 'ok' : vk.some(function (x) { return x.allvar === 'hog'; }) ? 'hog' : 'medel', text: (k.namn + ' ').padEnd(22, '.') + ' ' + poang(r.fynd) + '/100' + (vk.length ? '  ' + vk[0].text.slice(0, 60) + (vk.length > 1 ? ' (+' + (vk.length - 1) + ')' : '') : '') }); });
+      vilo.push({ tid: st, ton: senast.poang >= 90 ? 'ok' : senast.poang >= 70 ? 'medel' : 'hog', text: 'Säkerhetspoäng ' + senast.poang + ' av 100' }); }
+    else vilo.push({ tid: new Date().toLocaleTimeString('sv-SE'), ton: 'start', text: 'Redo. Tryck på Skanna allt eller kör en kontroll.' });
+    var rader = skan.logg.length ? skan.logg : vilo;
+    var terminal = '<section class="ad-band kort sh-terminalkort"><h2>' + ik('server') + 'Skanningens logg' + (skan.kor ? '<small class="sh-antal sh-antal--live"><i></i>Skannar ' + skan.pct + ' %</small>' : '') + '</h2>' +
+      '<div class="sh-konsol"><div class="sh-konsol__list"><i></i><i></i><i></i><span>legohus-crm · säkerhet</span><em>' + (skan.kor ? 'kör' : 'redo') + '</em></div>' +
+      '<div class="sh-terminal" data-sh-terminal role="log" aria-live="polite">' + rader.map(function (x) { return '<p class="sh-rad' + (x.ton ? ' sh-rad--' + x.ton : '') + '">' + radHtml(x) + '</p>'; }).join('') + '</div>' +
+      '<div class="sh-konsol__status"><span>' + plural(KONTROLLER.length, 'kontroll', 'kontroller') + '</span><span>' + (senast ? 'senast ' + IH.sedan(senast.tid) : 'aldrig skannat') + '</span><span>' + (p == null ? '–' : p + '/100') + '</span>' +
+        '<button type="button" data-g="sh-skanna" data-ids=""' + (skan.kor ? ' disabled' : '') + '>' + ik('radar') + 'Kör igen</button><button type="button" data-g="sh-kopiera">' + ik('skold') + 'Kopiera</button></div></div></section>';
       (skan.logg.length ? skan.logg : [{ text: senast ? 'Senaste skanningen: ' + senast.poang + ' av 100 (' + new Date(senast.tid).toLocaleString('sv-SE') + ')' : 'Redo. Tryck på Skanna allt.', ton: 'start' }]).map(function (x) { return '<p class="sh-rad' + (x.ton ? ' sh-rad--' + x.ton : '') + '">› ' + e(x.text) + '</p>'; }).join('') + '</div></section>';
-    var historik = '<section class="ad-band kort"><h2>' + ik('stapel') + 'Poängen över tid' + (S.historik.length ? '<small class="sh-antal">' + plural(S.historik.length, 'skanning', 'skanningar') + '</small>' : '') + '</h2>' +
-      (hist.length > 1 ? '<div class="sh-spark">' + sparkline(hist.map(function (x) { return x.poang || 0; }), 360, 70) + '</div>' : '') +
-      (S.historik.length ? '<ul class="sh-histlista">' + S.historik.slice(0, 5).map(function (x) { var t = x.poang >= 90 ? 'gron' : x.poang >= 70 ? 'gul' : 'rod'; return '<li><strong data-ton="' + t + '">' + x.poang + '</strong><span>' + (x.vad === 'allt' ? 'Full skanning' : x.vad.split(',').map(function (id) { return KORT[id] || id; }).join(', ')) + '<small>' + e((IH.anvandare(x.av) || {}).namn || '') + ' · ' + IH.sedan(x.tid) + '</small></span></li>'; }).join('') + '</ul>' : '<p class="ad-not">Ingen skanning gjord ännu.</p>') +
-      '<p class="ad-etikett">Säkerhetsloggen</p>' + ((db().sakerhet || []).length ? '<ol class="ad-logg">' + db().sakerhet.slice(0, 5).map(function (h) { var u = IH.anvandare(h.av); return '<li><span class="ad-logg__typ">' + e(h.typ) + '</span><span>' + e(String(h.text).slice(0, 96)) + '</span><small>' + IH.sedan(h.tid) + '</small></li>'; }).join('') + '</ol>' : '<p class="ad-not">Inga händelser ännu.</p>') + '</section>';
+    // Poängen över tid: diagram 0–100 med zonerna (åtgärda, bör ses över, skyddat), punkter med värde och datum,
+    // trend mot förra skanningen; säkerhetsloggen med typfilter, ikon per typ och Visa fler
+    var serie = S.historik.slice(0, 12).reverse(), BB = 520, HH = 160, PL = 34, PR = 14, PT = 22, PB = 26, IN = 26;
+    var xv = function (n) { return serie.length < 2 ? PL + (BB - PL - PR) / 2 : PL + IN + n * (BB - PL - PR - IN * 2) / (serie.length - 1); }, yv = function (v) { return PT + (100 - v) / 100 * (HH - PT - PB); };
+    var zon = function (fran, till, cls, text) { return '<rect x="' + PL + '" y="' + yv(till) + '" width="' + (BB - PL - PR) + '" height="' + (yv(fran) - yv(till)) + '" class="sh-zon sh-zon--' + cls + '"/><text x="' + (BB - PR - 4) + '" y="' + (yv(till) + 11) + '" class="sh-zon__text">' + text + '</text>'; };
+    var diagram = serie.length ? '<svg class="sh-diagram" viewBox="0 0 ' + BB + ' ' + HH + '" role="img" aria-label="Säkerhetspoängen över tid">' +
+      zon(0, 70, 'rod', 'Åtgärda') + zon(70, 90, 'gul', 'Se över') + zon(90, 100, 'gron', 'Skyddat') +
+      [0, 70, 90, 100].map(function (v) { return '<line x1="' + PL + '" x2="' + (BB - PR) + '" y1="' + yv(v) + '" y2="' + yv(v) + '" class="sh-diagram__grid"/><text x="' + (PL - 6) + '" y="' + (yv(v) + 3) + '" class="sh-diagram__y">' + v + '</text>'; }).join('') +
+      (serie.length > 1 ? '<path class="sh-diagram__yta" d="M' + xv(0) + ' ' + yv(0) + serie.map(function (x, n) { return 'L' + xv(n).toFixed(1) + ' ' + yv(x.poang || 0).toFixed(1); }).join('') + 'L' + xv(serie.length - 1) + ' ' + yv(0) + 'Z"/><path class="sh-diagram__linje" pathLength="1" d="' + serie.map(function (x, n) { return (n ? 'L' : 'M') + xv(n).toFixed(1) + ' ' + yv(x.poang || 0).toFixed(1); }).join('') + '"/>' : '') +
+      serie.map(function (x, n) { var t = x.poang >= 90 ? 'gron' : x.poang >= 70 ? 'gul' : 'rod', d = new Date(x.tid); return '<g class="sh-diagram__punkt" data-ton="' + t + '" style="--n:' + n + '"><title>' + x.poang + ' av 100 · ' + d.toLocaleString('sv-SE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</title><circle cx="' + xv(n).toFixed(1) + '" cy="' + yv(x.poang || 0).toFixed(1) + '" r="5"/><text x="' + xv(n).toFixed(1) + '" y="' + (yv(x.poang || 0) - 10).toFixed(1) + '" class="sh-diagram__v">' + x.poang + '</text>' +
+        (n === 0 || n === serie.length - 1 || serie.length <= 6 ? '<text x="' + xv(n).toFixed(1) + '" y="' + (HH - 6) + '" class="sh-diagram__x">' + d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' }) + (serie.length <= 3 ? ' ' + d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }) : '') + '</text>' : '') + '</g>'; }).join('') + '</svg>' : '';
+    var TYPER = [['alla', 'Allt'], ['skanning', 'Skanning'], ['filskanning', 'Filer'], ['konto', 'Konton'], ['support', 'Support'], ['atkomst', 'Åtkomst']];
+    var TYPIKON = { skanning: 'radar', filskanning: 'dokument', konto: 'anvandare-plus', support: 'kunder', atkomst: 'las' };
+    var hLogg = (db().sakerhet || []).filter(function (h) { return !ui.typ || ui.typ === 'alla' || h.typ === ui.typ; }), visa = ui.fler ? 30 : 6;
+    var historik = '<section class="ad-band kort sh-histkort"><h2>' + ik('stapel') + 'Poängen över tid' + (S.historik.length ? '<small class="sh-antal">' + plural(S.historik.length, 'skanning', 'skanningar') + '</small>' : '') + '</h2>' +
+      (diagram ? diagram + (function () { var v = S.historik.map(function (x) { return x.poang || 0; }), snitt = Math.round(v.reduce(function (t, x) { return t + x; }, 0) / v.length);
+        return '<div class="sh-diagram__fakta"><span><small>Senast</small><b>' + v[0] + '</b></span><span><small>Snitt</small><b>' + snitt + '</b></span><span><small>Bäst</small><b>' + Math.max.apply(null, v) + '</b></span><span><small>Lägst</small><b>' + Math.min.apply(null, v) + '</b></span></div>' +
+          '<p class="sh-diagram__forkl">Varje punkt är en skanning (0–100). <i class="gron"></i>90 och uppåt är skyddat, <i class="gul"></i>70–89 bör ses över, <i class="rod"></i>under 70 behöver åtgärdas. Håll musen över en punkt för tiden.</p>'; })() : '<p class="ad-not">Ingen skanning gjord ännu – kör en så ritas kurvan här.</p>') +
+      (S.historik.length ? '<ul class="sh-histlista">' + S.historik.slice(0, 4).map(function (x, n) { var t = x.poang >= 90 ? 'gron' : x.poang >= 70 ? 'gul' : 'rod', f = S.historik[n + 1], diff = f ? x.poang - f.poang : null;
+        return '<li><strong data-ton="' + t + '">' + x.poang + '</strong><span>' + (x.vad === 'allt' ? 'Full skanning' : x.vad.split(',').map(function (id) { return KORT[id] || id; }).join(', ')) + '<small>' + e((IH.anvandare(x.av) || {}).namn || '') + ' · ' + IH.sedan(x.tid) + '</small></span>' +
+          (diff == null ? '<em class="sh-trend">första</em>' : '<em class="sh-trend" data-riktning="' + (diff > 0 ? 'upp' : diff < 0 ? 'ner' : 'lika') + '">' + (diff > 0 ? '↑ +' + diff : diff < 0 ? '↓ ' + diff : '± 0') + '</em>') + '</li>'; }).join('') + '</ul>' : '') +
+      '<div class="sh-logghuvud"><p class="ad-etikett">Säkerhetsloggen</p><div class="ap-filterrad" role="group" aria-label="Typ">' + TYPER.filter(function (t) { return t[0] === 'alla' || (db().sakerhet || []).some(function (h) { return h.typ === t[0]; }); }).map(function (t) { return '<button type="button" class="ap-filter" data-g="sh-loggtyp" data-f="' + t[0] + '" aria-pressed="' + ((ui.typ || 'alla') === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div></div>' +
+      (hLogg.length ? '<ol class="sh-logg">' + hLogg.slice(0, visa).map(function (h) { return '<li data-typ="' + e(h.typ) + '"><span class="sh-logg__ikon">' + ik(TYPIKON[h.typ] || 'info') + '</span><span class="sh-logg__text"><b>' + e(String(h.text).slice(0, 110)) + '</b><small>' + e(h.typ) + ' · ' + e((IH.anvandare(h.av) || {}).namn || 'systemet') + '</small></span><time title="' + new Date(h.tid).toLocaleString('sv-SE') + '">' + IH.sedan(h.tid) + '</time></li>'; }).join('') + '</ol>' +
+        (hLogg.length > 6 ? '<button type="button" class="sh-fler" data-g="sh-loggfler">' + (ui.fler ? 'Visa färre' : 'Visa alla ' + Math.min(30, hLogg.length)) + '</button>' : '') : '<p class="ad-not">Inga händelser ' + (ui.typ && ui.typ !== 'alla' ? 'av den typen ' : '') + 'ännu.</p>') + '</section>';
     var logg = db().sakerhet || [], nu0 = Date.now(), inom = function (h, d) { return nu0 - new Date(h.tid) < d * 864e5; };
     var vecka = []; for (var dd = 6; dd >= 0; dd--) { var d0 = new Date(); d0.setHours(0, 0, 0, 0); d0.setDate(d0.getDate() - dd); var d1 = new Date(d0.getTime() + 864e5); vecka.push({ d: d0, n: logg.filter(function (h) { var t = new Date(h.tid); return t >= d0 && t < d1; }).length }); }
     var vmax = Math.max.apply(null, vecka.map(function (x) { return x.n; }).concat([1]));
@@ -314,6 +345,8 @@
   IH.G['sh-skanna-ga'] = function (el) { var ids = el.getAttribute('data-ids'); IH.ga('#/sakerhet'); setTimeout(function () { skanna(ids ? ids.split(',') : null); }, 350); };
   IH.G['sh-rensa-fel'] = function () { felLista.length = 0; IH.rita(); IH.toast('Felloggen är rensad', null, 'aterstall'); };
   IH.G['sh-skanna'] = function (el) { var ids = el.getAttribute('data-ids'); skanna(ids ? ids.split(',') : null); };
+  IH.G['sh-loggtyp'] = function (el) { ui.typ = el.getAttribute('data-f'); ui.fler = false; IH.rita(); };
+  IH.G['sh-loggfler'] = function () { ui.fler = !ui.fler; IH.rita(); };
   IH.G['sh-visa'] = function (el) { var id = el.getAttribute('data-id'); ui.oppen = ui.oppen === id ? null : id; IH.rita(); };
   IH.G['sh-uppdatera'] = function () { location.reload(); };
   IH.G['sh-auto'] = function () { var S = hub(); S.auto = !S.auto; IH.spara(); IH.rita(); IH.toast(S.auto ? 'Automatisk skanning på' : 'Automatisk skanning av', S.auto ? 'Sidan skannar själv när det gått ett dygn.' : '', 'radar'); };

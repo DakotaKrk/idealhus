@@ -257,3 +257,71 @@ section.sh-mork .sh-delar li:nth-child(1) { --i: 0; } section.sh-mork .sh-delar 
 .sh-stilla .sh-drift__ruta > span { animation-name: sh-ikon-glod !important; }
 .sh-stilla .sh-ticker__rull:not(.sh-ticker__rull--still) { animation-name: sh-ticker !important; }
 .sh-stilla .sh-drift__live i { animation-name: sh-live !important; }
+
+/* Poängen över tid och säkerhetsloggen */
+.sh-diagram { width: 100%; height: auto; margin: 6px 0 14px; overflow: visible; }
+.sh-zon { opacity: .5; } .sh-zon--rod { fill: #fde6e1; } .sh-zon--gul { fill: #fbefd2; } .sh-zon--gron { fill: #e1f3e7; }
+.sh-zon__text { font: 600 9px var(--rubrik); text-anchor: end; fill: rgba(27, 25, 21, .35); letter-spacing: .08em; text-transform: uppercase; }
+.sh-diagram__grid { stroke: rgba(27, 25, 21, .06); stroke-dasharray: 3 4; }
+.sh-diagram__y { font: 600 9px var(--rubrik); text-anchor: end; fill: var(--text-3); }
+.sh-diagram__x { font: 600 9px var(--rubrik); text-anchor: middle; fill: var(--text-3); }
+.sh-diagram__yta { fill: url(#sh-yta); fill: rgba(226, 154, 74, .12); }
+.sh-diagram__linje { fill: none; stroke: #c98a45; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: sh-rita 1.2s cubic-bezier(.22, 1, .36, 1) .2s forwards; }
+@keyframes sh-rita { to { stroke-dashoffset: 0; } }
+.sh-diagram__punkt circle { fill: #fff; stroke-width: 3; stroke: var(--pt, #c98a45); transform-box: fill-box; transform-origin: center; animation: sh-punkt .5s cubic-bezier(.34, 1.56, .64, 1) backwards; animation-delay: calc(.3s + var(--n) * .08s); }
+.sh-diagram__punkt[data-ton="gron"] { --pt: #22a35a; } .sh-diagram__punkt[data-ton="gul"] { --pt: #d08a2e; } .sh-diagram__punkt[data-ton="rod"] { --pt: #d6453a; }
+.sh-diagram__punkt:hover circle { r: 7; }
+@keyframes sh-punkt { from { transform: scale(0); } }
+.sh-diagram__v { font: 700 11px var(--rubrik); text-anchor: middle; fill: var(--kol); }
+.sh-histlista li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; }
+.sh-trend { padding: 3px 9px; border-radius: 999px; background: #f3ede3; font: 600 .7rem/1.2 var(--rubrik); font-style: normal; color: var(--text-2); }
+.sh-trend[data-riktning="upp"] { background: #e1f3e7; color: #1d6b40; } .sh-trend[data-riktning="ner"] { background: #fde6e1; color: #b23a2a; }
+.sh-logghuvud { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: 18px 0 8px; }
+.sh-logghuvud .ad-etikett { margin: 0; }
+.sh-logg { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.sh-logg li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 14px; background: #fbf8f3; transition: background-color .2s; animation: in-rad .45s var(--mjuk) backwards; }
+.sh-logg li:hover { background: #fff; }
+.sh-logg__ikon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: #f3ede3; color: var(--text-2); }
+.sh-logg__ikon .emo-ik { width: 16px; height: 16px; }
+.sh-logg li[data-typ="skanning"] .sh-logg__ikon { background: #e3f4ef; color: #2f8a72; }
+.sh-logg li[data-typ="filskanning"] .sh-logg__ikon { background: #e3eef7; color: #3f6aa8; }
+.sh-logg li[data-typ="konto"] .sh-logg__ikon, .sh-logg li[data-typ="atkomst"] .sh-logg__ikon { background: #fbefd2; color: #8f5424; }
+.sh-logg li[data-typ="support"] .sh-logg__ikon { background: #ece6f8; color: #6a55b8; }
+.sh-logg__text { display: grid; gap: 2px; min-width: 0; }
+.sh-logg__text b { font: 500 .86rem/1.35 var(--rubrik); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.sh-logg__text small { font-size: .7rem; color: var(--text-3); }
+.sh-logg time { font-size: .74rem; color: var(--text-3); white-space: nowrap; }
+.sh-fler { display: block; margin: 10px auto 0; padding: 7px 14px; border: 0; border-radius: 999px; background: #f3ede3; font: 600 .78rem/1 var(--rubrik); cursor: pointer; }
+
+/* Konsolen: fönsterlist med lampor, rader med klockslag och färgad etikett, statusrad med knappar */
+.sh-terminalkort { display: flex; flex-direction: column; }
+.sh-konsol { flex: 1; display: flex; flex-direction: column; min-height: 360px; border-radius: 18px; overflow: hidden; background: #0e0d0b; box-shadow: 0 24px 50px -30px rgba(0, 0, 0, .8), inset 0 0 0 1px rgba(143, 224, 200, .14); }
+.sh-konsol__list { display: flex; align-items: center; gap: 7px; padding: 10px 14px; background: linear-gradient(180deg, #24211d, #1a1815); border-bottom: 1px solid rgba(255, 255, 255, .06); }
+.sh-konsol__list i { width: 11px; height: 11px; border-radius: 50%; background: #e0654f; } .sh-konsol__list i:nth-child(2) { background: #e9b04a; } .sh-konsol__list i:nth-child(3) { background: #4fbf7a; }
+.sh-konsol__list span { margin-left: 10px; font: 500 .74rem/1 ui-monospace, Consolas, monospace; color: rgba(243, 237, 228, .6); }
+.sh-konsol__list em { margin-left: auto; padding: 3px 8px; border-radius: 6px; background: rgba(143, 224, 200, .12); font: 600 .66rem/1 ui-monospace, Consolas, monospace; font-style: normal; color: #8fe0c8; text-transform: uppercase; letter-spacing: .1em; }
+.sh-konsol .sh-terminal { flex: 1; height: auto !important; max-height: 420px; margin: 0; border-radius: 0; box-shadow: none !important; padding: 12px 14px; background: radial-gradient(90% 60% at 50% 0%, rgba(143, 224, 200, .05), transparent), repeating-linear-gradient(180deg, rgba(255, 255, 255, .015) 0 1px, transparent 1px 3px), #0e0d0b !important; }
+.sh-konsol .sh-rad { display: grid; grid-template-columns: 62px 46px minmax(0, 1fr); gap: 10px; align-items: baseline; margin: 0; padding: 3px 0; font: 500 .78rem/1.5 ui-monospace, Consolas, monospace; color: #e9e2d6; animation: sh-rad-in .35s ease-out backwards; white-space: pre-wrap; }
+@keyframes sh-rad-in { from { opacity: 0; transform: translateX(-6px); } }
+.sh-konsol .sh-rad time { color: rgba(243, 237, 228, .35); }
+.sh-tagg { padding: 1px 0; border-radius: 4px; text-align: center; font-weight: 700; font-size: .66rem; background: rgba(255, 255, 255, .06); color: #cfc7bb; }
+.sh-tagg--ok { background: rgba(79, 191, 122, .16); color: #7fe0a6; } .sh-tagg--medel { background: rgba(233, 176, 74, .16); color: #f2c46a; } .sh-tagg--hog { background: rgba(224, 101, 79, .18); color: #ff9a85; } .sh-tagg--start { background: rgba(143, 224, 200, .14); color: #8fe0c8; }
+.sh-rad--hog span { color: #ffb4a3; } .sh-rad--ok span { color: #c8f2da; }
+.sh-konsol__status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 9px 14px; background: #171512; border-top: 1px solid rgba(255, 255, 255, .06); font: 500 .7rem/1 ui-monospace, Consolas, monospace; color: rgba(243, 237, 228, .5); }
+.sh-konsol__status button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 0; border-radius: 8px; background: rgba(255, 255, 255, .06); font: 600 .72rem/1 var(--rubrik); color: #f3ede4; cursor: pointer; transition: background-color .2s; }
+.sh-konsol__status button:first-of-type { margin-left: auto; }
+.sh-konsol__status button:hover:not(:disabled) { background: rgba(143, 224, 200, .16); }
+.sh-konsol__status button:disabled { opacity: .4; }
+.sh-konsol__status .emo-ik { width: 13px; height: 13px; }
+.sh-antal--live { display: inline-flex; align-items: center; gap: 6px; color: #2f8a72 !important; }
+.sh-antal--live i { width: 7px; height: 7px; border-radius: 50%; background: #2f8a72; animation: sh-live 1.4s ease-out infinite; }
+.sh-terminal .sh-rad:last-child::after { content: none; }
+.sh-terminal .sh-rad:last-child span::after { content: "▍"; margin-left: 4px; color: #8fe0c8; animation: sh-markor 1s steps(1) infinite; }
+.sh-diagram__fakta { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: -4px 0 8px; }
+.sh-diagram__fakta span { display: grid; gap: 2px; padding: 8px 10px; border-radius: 12px; background: #fbf8f3; }
+.sh-diagram__fakta small { font: 600 .6rem/1 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+.sh-diagram__fakta b { font: 700 1.1rem/1.1 var(--rubrik); }
+.sh-diagram__forkl { margin: 0 0 12px; font-size: .74rem; line-height: 1.6; color: var(--text-3); }
+.sh-diagram__forkl i { display: inline-block; width: 9px; height: 9px; margin: 0 4px 0 6px; border-radius: 3px; vertical-align: -1px; }
+.sh-diagram__forkl i.gron { background: #bfe6cc; } .sh-diagram__forkl i.gul { background: #f6dfa8; } .sh-diagram__forkl i.rod { background: #f6c3b8; }
+.sh-zon { opacity: .7; }
