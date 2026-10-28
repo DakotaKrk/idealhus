@@ -2948,7 +2948,7 @@
         block('<svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg>', 'Nästa montage', 'Dagar kvar, och vad som ska vara klart innan lastbilen kommer.', nedrakning, 'prodblock--montage') +
         block('<svg class="emo-ik" aria-hidden="true"><use href="#i-varning"/></svg>', 'Att åtgärda', 'Det som saknas inför montagen. Viktigast först – klicka för att öppna projektet.', lista, 'prodblock--varn') +
       '</div>' +
-      block('<svg class="emo-ik" aria-hidden="true"><use href="#i-fabrik"/></svg>', 'Var husen är just nu', 'Varje hus står på sitt steg, från ritning till nyckel. Klicka på ett hus för att öppna det.', fabrik, 'prodblock--fabrik') +
+      block('<svg class="emo-ik" aria-hidden="true"><use href="#i-fabrik"/></svg>', 'Husets resa', 'Från ritning till nyckel i 3D – resan spelas upp av sig själv. Klicka på ett steg för att flyga dit och på ett hus för att öppna det.', '<div class="resa3d" data-resa3d role="img" aria-label="Husets resa i 3D, från ritning till nyckel"></div>' + fabrik, 'prodblock--fabrik') +
     '</section>';
   }
 
