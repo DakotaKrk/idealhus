@@ -4285,10 +4285,23 @@
       '<section class="instopp kort kort--mork" data-in>' +
         '<div class="instopp__ord"><p class="etikett etikett--ljus">Prislistan</p><h2>Priserna bakom varje <span class="ihop">offert <span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-pengar"/></svg></span></span></h2>' +
           '<p>Ändra ett pris och spara. Nya offerter och kalkylen i kundmötet räknar med det direkt – offerter som redan är skickade behåller sina priser.</p></div>' +
-        '<div class="instopp__tal">' +
-          '<div><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg></span><small>Husen</small><b>' + (priser.length ? IH.kort(minP) + ' – ' + IH.kort(maxP) : '–') + '</b><em>' + hus.length + ' modeller</em></div>' +
-          '<div><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-rutnat"/></svg></span><small>Tillval och poster</small><b>' + pl.poster.length + ' st</b><em>' + (pl.poster.length ? 'från ' + IH.kort(Math.min.apply(null, pl.poster.map(function (p) { return p.pris || 0; }))) : 'inga än') + '</em></div>' +
-          '<div><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-ladda-ner"/></svg></span><small>Senast sparad</small><b>' + sparad + '</b><em>Exempelpriser</em></div>' +
+        (function () {
+          var ut = function (v) { return IH.kort(v).replace(/\s*tkr$/, ''); };
+          var snitt = priser.length ? priser.reduce(function (t, p) { return t + p; }, 0) / priser.length : 0;
+          var pp = pl.poster.map(function (p) { return p.pris || 0; }), pmin = pp.length ? Math.min.apply(null, pp) : 0, pmax = pp.length ? Math.max.apply(null, pp) : 0;
+          var prick = function (v, lo, hi) { return hi > lo ? ((v - lo) / (hi - lo) * 100).toFixed(1) : 50; };
+          return '<div class="instopp__tal inst-tal">' +
+            '<div style="--n:0"><span class="inst-tal__ikon" aria-hidden="true">' + i('hus') + '</span><small>Husen</small><b>' + (priser.length ? ut(minP) + '–' + ut(maxP) + '<i> tkr</i>' : '–') + '</b>' +
+              (priser.length > 1 ? '<span class="inst-tal__spann" aria-hidden="true">' + priser.map(function (p) { return '<i style="--x:' + prick(p, minP, maxP) + '%"></i>'; }).join('') + '</span>' : '') +
+              '<em>' + hus.length + ' modeller' + (snitt ? ' · snitt ' + IH.kort(snitt) : '') + '</em></div>' +
+            '<div style="--n:1"><span class="inst-tal__ikon" aria-hidden="true">' + i('rutnat') + '</span><small>Tillval och poster</small><b>' + pl.poster.length + '<i> st</i></b>' +
+              (pp.length > 1 ? '<span class="inst-tal__spann" aria-hidden="true">' + pp.map(function (p) { return '<i style="--x:' + prick(p, pmin, pmax) + '%"></i>'; }).join('') + '</span>' : '') +
+              '<em>' + (pp.length ? IH.kort(pmin) + ' – ' + IH.kort(pmax) : 'inga än') + '</em></div>' +
+            '<div style="--n:2"><span class="inst-tal__ikon" aria-hidden="true">' + i('klocka') + '</span><small>Senast sparad</small><b>' + (pl.sparad ? sparad : 'Inte ändrad') + '</b>' +
+              '<span class="inst-tal__status' + (pl.sparad ? ' andrad' : '') + '"><i></i>' + (pl.sparad ? 'Egna priser' : 'Exempelpriser') + '</span>' +
+              '<em>' + (pl.sparad ? 'nya offerter räknar med dem' : 'ändra ett pris och tryck Spara') + '</em></div>' +
+          '</div>';
+        })() +
         '</div></section>' +
       '<div class="rutnat rutnat--2 prisrutnat">' +
       '<form class="kort prisform" data-form="prislista" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('hus') + '</span>Husen</h2><span class="chip">Pris per hus</span></header><div class="kort__kropp prislista">' +

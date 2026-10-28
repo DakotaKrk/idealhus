@@ -8588,3 +8588,19 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .logga-mote .falt-rad { grid-template-columns: minmax(0, 1fr) minmax(0, 168px) !important; }
 .logga-mote .antal-falt { min-width: 0; max-width: 100%; box-sizing: border-box; }
 @container (max-width: 420px) { .logga-mote .falt-rad { grid-template-columns: minmax(0, 1fr) !important; } .logga-mote .antal-falt { max-width: 200px; } }
+/* Prislistans tal: lugnare kort med ikonplatta, värde på en rad, liten spannstapel och status */
+.inst-tal { align-items: stretch; }
+.inst-tal > div { display: grid !important; grid-template-rows: auto auto auto 1fr; align-content: start; gap: 6px; padding: 18px 20px !important; animation: in-rad .55s var(--mjuk) backwards; animation-delay: calc(.1s + var(--n) * .07s); }
+.inst-tal__ikon { display: grid; place-items: center; width: 38px; height: 38px; margin-bottom: 6px; border-radius: 12px; background: var(--virke-ljus); color: var(--virke-djup); box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .25); }
+.inst-tal__ikon .i { width: 18px; height: 18px; }
+.inst-tal b { font: 700 1.45rem/1.1 var(--rubrik) !important; letter-spacing: -0.02em; white-space: nowrap; }
+.inst-tal b i { font-style: normal; font-size: .9rem; font-weight: 600; color: var(--text-3); }
+.inst-tal__spann { position: relative; display: block; height: 6px; margin: 4px 0 2px; border-radius: 6px; background: linear-gradient(90deg, rgba(246, 198, 141, .35), rgba(201, 138, 69, .35)); }
+.inst-tal__spann i { position: absolute; top: 50%; left: var(--x); width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #c98a45; box-shadow: 0 0 0 2px #fff; }
+.inst-tal__status { display: inline-flex; align-items: center; gap: 6px; justify-self: start; padding: 3px 9px; border-radius: 999px; background: var(--ben); font: 600 .7rem/1.2 var(--rubrik); color: var(--text-2); }
+.inst-tal__status i { width: 7px; height: 7px; border-radius: 50%; background: #c9c4bb; }
+.inst-tal__status.andrad i { background: #2e8c57; box-shadow: 0 0 6px rgba(46, 140, 87, .5); }
+.inst-tal em { align-self: end; }
+.inst-tal .inst-tal__status { font: 600 .7rem/1.2 var(--rubrik) !important; color: var(--text-2) !important; padding: 4px 10px !important; width: auto !important; height: auto !important; }
+.inst-tal em { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; font-size: .74rem; }
+.inst-tal .inst-tal__spann { width: auto !important; }
