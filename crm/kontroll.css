@@ -241,3 +241,32 @@ a.ao-tal:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1.5px var(
 .ao-o3 b { background: #8b7dff; box-shadow: 0 0 10px 4px rgba(139, 125, 255, .8), 0 0 24px 8px rgba(139, 125, 255, .35); }
 .ao-karna:hover .ao-komet { animation-duration: 2.4s; }
 @media (prefers-reduced-motion: reduce) { .ao-komet, .ao-glodlager .ao-ring-glod, .ao-streck, .ao-mitt { animation: none; } }
+
+/* Remsan smartare: varje ruta har en liten bild av läget till höger och lyfts mjukt */
+.ao-tal--smart { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; padding: 14px 16px; overflow: hidden; animation: in-rad .55s var(--mjuk) backwards; animation-delay: calc(.1s + var(--n) * .05s); }
+.ao-tal--smart::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 0 3px 3px 0; background: var(--ton, var(--virke)); opacity: .7; }
+.ao-tal--smart .ao-tal__ikon { width: 42px; height: 42px; border-radius: 14px; }
+.ao-tal--smart .ao-tal__ikon .emo-ik, .ao-tal--smart .ao-tal__ikon .i { width: 19px; height: 19px; }
+.ao-tal--smart strong { font-size: 1.4rem; }
+.ao-tal__extra { display: grid; justify-items: end; align-content: center; gap: 8px; min-width: 0; }
+.ao-x-mat { display: block; width: 84px; height: 6px; border-radius: 6px; background: rgba(27, 25, 21, .08); overflow: hidden; }
+.ao-x-mat i { display: block; height: 100%; width: calc(var(--a) * 100%); border-radius: inherit; background: linear-gradient(90deg, #8fcf9a, #2e8c57); transform-origin: left; animation: lp-vaxa 1s var(--mjuk) backwards .3s; }
+.ao-x-knapp { display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 999px; background: var(--ben); font: 600 .72rem/1 var(--rubrik); color: var(--text-2); opacity: .75; transition: opacity .2s, background-color .2s, color .2s; }
+.ao-x-knapp .i { width: 12px; height: 12px; transition: transform .3s var(--mjuk); }
+a.ao-tal--smart:hover .ao-x-knapp { opacity: 1; background: #1b1915; color: #f6c68d; }
+a.ao-tal--smart:hover .ao-x-knapp .i { transform: translateX(2px); }
+.ao-x-ok { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(46, 140, 87, .12); color: #1d6b40; }
+.ao-x-ok .i { width: 14px; height: 14px; }
+.ao-x-folk { display: flex; }
+.ao-x-folk .avatar { width: 28px; height: 28px; margin-left: -8px; border-radius: 50%; font-size: .55rem; box-shadow: 0 0 0 2px #fff; }
+.ao-x-folk .avatar:first-child { margin-left: 0; }
+.ao-x-fordelning { display: flex; gap: 2px; width: 96px; height: 8px; }
+.ao-x-fordelning i { border-radius: 3px; transform-origin: left; animation: lp-vaxa .8s var(--mjuk) backwards .3s; }
+.ao-x-staplar { display: flex; align-items: flex-end; gap: 3px; height: 30px; }
+.ao-x-staplar i { width: 7px; height: calc(4px + var(--h) * 26px); border-radius: 3px; background: rgba(106, 169, 232, .45); transform-origin: bottom; animation: lp-vaxa-y .7s var(--mjuk) backwards .3s; }
+.ao-x-staplar i.idag { background: #3f6aa8; }
+@keyframes lp-vaxa-y { from { transform: scaleY(0); } }
+
+section.ao-hjalte .ao-remsa { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 900px) { section.ao-hjalte .ao-remsa { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { section.ao-hjalte .ao-remsa { grid-template-columns: 1fr; } }

@@ -97,6 +97,7 @@
   }
 
   /* Vyn ---------------------------------------------------------------------------------------------- */
+  var antalLageTal = function (l, konton) { return konton.filter(function (x) { return x.h.lage === l; }).length; };
   IH.vyer.kontroll = function () {
     if (IH.jag().roll !== 'admin') return { titel: 'Kontrollcentral', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + ik('las') + 'Bara för administratören</h2><p class="ad-not">Byt till kontot Admin i kontomenyn.</p></section>' };
     var d = db(), u0 = IH.jag(), H = IH.sakHub, S = H ? H.hub() : { senast: {}, historik: [] };
@@ -114,13 +115,26 @@
     var antal = function (s) { return (d[s] || []).length; };
     var poster = SAML.reduce(function (t, s) { return t + antal(s[1]); }, 0) + ((d.chatt || {}).meddelanden || []).length;
     var handelser7 = d.aktiviteter.filter(function (x) { return IH.dagarSedan(x.tid) < 7; }).length;
+    // Remsans extra: en liten bild av läget i varje ruta (trend, vilka, staplar, fördelning) och en knapp till nästa steg
+    var forra = S.historik[1], sakDiff = senast && forra ? senast.poang - forra.poang : null;
+    var iTjanst = IH.ANVANDARE.filter(function (u) { return IH.narvaro && ['online', 'mote', 'upptagen', 'ute'].indexOf(IH.narvaro(u.id).id) >= 0; });
+    var per7 = []; for (var q = 6; q >= 0; q--) per7.push(d.aktiviteter.filter(function (x) { return IH.dagarSedan(x.tid) === q; }).length);
+    var fore7 = d.aktiviteter.filter(function (x) { var g = IH.dagarSedan(x.tid); return g >= 7 && g < 14; }).length;
+    var max7 = Math.max.apply(null, per7.concat([1]));
+    var FARG = ['#e29a4a', '#6aa9e8', '#8fcf9a', '#a98be0', '#e8c25a', '#7fc6c9', '#d08a8a'];
     var remsa = [
-      { ikon: 'skold', etikett: 'Säkerhet', varde: sakP == null ? '–' : sakP + '/100', under: senast ? IH.sedan(senast.tid) : 'ej skannat', ton: tonFor(sakP), href: '#/sakerhet' },
-      { ikon: 'anstallda', etikett: 'I tjänst nu', varde: nuN + '/' + IH.ANVANDARE.length, under: konton.filter(function (x) { return x.h.lage === 'bra'; }).length + ' mår bra', ton: 'is', href: '#/admin' },
-      { ikon: 'bugg', etikett: 'Fel i sidan', varde: String(dr.fel.length), under: dr.fel.length ? 'sedan laddning' : 'buggfritt', ton: dr.fel.length ? 'gul' : 'gron' },
-      { ikon: 'nyckelverktyg', etikett: 'Kopplingar', varde: dl.brott ? dl.brott + ' fel' : 'OK', under: dl.brott ? 'trasiga' : 'allt hänger ihop', ton: dl.brott ? 'gul' : 'gron' },
-      { ikon: 'databas', etikett: 'Poster', varde: poster.toLocaleString('sv-SE'), under: kb(dr.bytes), ton: 'lila' },
-      { ikon: 'puls', etikett: 'Händelser', varde: String(handelser7), under: 'senaste 7 dagarna', ton: 'is' }
+      { ikon: 'skold', etikett: 'Säkerhet', varde: sakP == null ? '–' : sakP + '/100', under: senast ? IH.sedan(senast.tid) + (sakDiff ? ' · ' + (sakDiff > 0 ? '↑ ' : '↓ ') + Math.abs(sakDiff) + ' mot förra' : '') : 'ej skannat', ton: tonFor(sakP), href: '#/sakerhet',
+        extra: '<span class="ao-x-mat" style="--a:' + ((sakP || 0) / 100).toFixed(2) + '"><i></i></span><span class="ao-x-knapp">' + (senast ? 'Visa' : 'Skanna') + i('pil') + '</span>' },
+      { ikon: 'anstallda', etikett: 'I tjänst nu', varde: nuN + '/' + IH.ANVANDARE.length, under: konton.filter(function (x) { return x.h.lage === 'bra'; }).length + ' mår bra' + (antalLageTal('hjalp', konton) ? ' · ' + antalLageTal('hjalp', konton) + ' behöver hjälp' : ''), ton: 'is', href: '#/admin',
+        extra: '<span class="ao-x-folk">' + iTjanst.slice(0, 4).map(function (u) { return '<span class="avatar" style="--av:' + u.farg + '" title="' + e(u.namn + ' · ' + IH.narvaro(u.id).namn) + '">' + IH.initialer(u.namn) + '</span>'; }).join('') + '</span>' },
+      { ikon: 'bugg', etikett: 'Fel i sidan', varde: String(dr.fel.length), under: dr.fel.length ? 'sedan laddning · senast ' + e(String(dr.fel[dr.fel.length - 1].text || dr.fel[dr.fel.length - 1]).slice(0, 30)) : 'buggfritt sedan laddning', ton: dr.fel.length ? 'gul' : 'gron', href: '#/sakerhet',
+        extra: dr.fel.length ? '<span class="ao-x-knapp">Visa felen' + i('pil') + '</span>' : '<span class="ao-x-ok">' + i('bock') + '</span>' },
+      { ikon: 'nyckelverktyg', etikett: 'Kopplingar', varde: dl.brott ? dl.brott + ' fel' : 'OK', under: dl.brott ? 'trasiga – rättas i Adminpanelen' : 'kunder, affärer och projekt hänger ihop', ton: dl.brott ? 'gul' : 'gron', href: dl.brott ? '#/admin' : null,
+        extra: dl.brott ? '<span class="ao-x-knapp">Rätta' + i('pil') + '</span>' : '<span class="ao-x-ok">' + i('bock') + '</span>' },
+      { ikon: 'databas', etikett: 'Poster', varde: poster.toLocaleString('sv-SE'), under: kb(dr.bytes) + ' · ' + SAML.slice().sort(function (a, c) { return antal(c[1]) - antal(a[1]); })[0][0].toLowerCase() + ' flest', ton: 'lila', href: '#/admin',
+        extra: '<span class="ao-x-fordelning" title="' + e(SAML.map(function (x) { return x[0] + ' ' + antal(x[1]); }).join(' · ')) + '">' + SAML.map(function (x, n) { return antal(x[1]) ? '<i style="flex:' + antal(x[1]) + ';background:' + FARG[n] + '"></i>' : ''; }).join('') + '</span>' },
+      { ikon: 'puls', etikett: 'Händelser', varde: String(handelser7), under: 'senaste 7 d' + (fore7 ? ' · ' + (handelser7 >= fore7 ? '↑ ' : '↓ ') + Math.abs(Math.round((handelser7 - fore7) / fore7 * 100)) + ' % mot veckan före' : ''), ton: 'is',
+        extra: '<span class="ao-x-staplar" aria-hidden="true">' + per7.map(function (v, n) { return '<i style="--h:' + (v / max7).toFixed(2) + '" class="' + (n === 6 ? 'idag' : '') + '" title="' + v + '"></i>'; }).join('') + '</span>' }
     ];
     var knapp = function (attr, ikon, text, accent) { var a = attr.indexOf('href') === 0; return '<' + (a ? 'a' : 'button type="button"') + ' class="sh-knapp' + (accent ? ' sh-knapp--accent' : '') + '" ' + attr + '>' + ik(ikon) + '<span>' + text + '</span></' + (a ? 'a' : 'button') + '>'; };
     var hjalte = '<section class="ao-hjalte kort" data-ton="' + tonFor(total) + '"><div class="sh-rutnat" aria-hidden="true"></div>' +
@@ -130,7 +144,7 @@
         '<div class="sh-knappar">' + knapp('data-g="sh-skanna-ga"', 'radar', 'Skanna allt', true) + knapp('href="#/admin"', 'server', 'Adminpanelen') + knapp('href="#/sakerhet"', 'skold', 'Säkerhet') + knapp('data-g="km-nytt-konto"', 'anvandare-plus', 'Nytt konto') + '</div>' +
         '<p class="sh-senast">' + (senast ? 'Senaste skanningen ' + IH.sedan(senast.tid) + ' av ' + e((IH.anvandare(senast.av) || {}).namn || '') + ' – ' + senast.poang + ' av 100' : 'Ingen säkerhetsskanning gjord ännu – systemhälsan räknar säkerheten först när en finns.') + '</p></div>' +
       '<div class="ao-karnkol">' + karna(delar, total) + '<ul class="ao-delar">' + delar.map(function (x) { return '<li data-del="' + x.id + '"><i></i><span>' + x.namn + '</span><strong>' + (x.p == null ? '–' : x.p) + '</strong></li>'; }).join('') + '</ul></div>' +
-      '<div class="ao-remsa">' + remsa.map(function (x) { return '<' + (x.href ? 'a href="' + x.href + '"' : 'div') + ' class="ao-tal" data-ton="' + x.ton + '"><span class="ao-tal__ikon">' + ik(x.ikon) + '</span><span class="ao-tal__text"><small>' + x.etikett + '</small><strong>' + e(x.varde) + '</strong><em>' + e(x.under) + '</em></span></' + (x.href ? 'a' : 'div') + '>'; }).join('') + '</div></section>';
+      '<div class="ao-remsa">' + remsa.map(function (x, n) { return '<' + (x.href ? 'a href="' + x.href + '"' : 'div') + ' class="ao-tal ao-tal--smart" data-ton="' + x.ton + '" style="--n:' + n + '"><span class="ao-tal__ikon">' + ik(x.ikon) + '</span><span class="ao-tal__text"><small>' + x.etikett + '</small><strong>' + e(x.varde) + '</strong><em title="' + x.under + '">' + x.under + '</em></span>' + (x.extra ? '<span class="ao-tal__extra">' + x.extra + '</span>' : '') + '</' + (x.href ? 'a' : 'div') + '>'; }).join('') + '</div></section>';
     var band = function (nr, rubrik, em, inne, opts) {
       opts = opts || {};
       return '<section class="ao-band kort' + (opts.halv ? ' ao-band--halv' : '') + '"><header class="ao-band__huvud"><div><p class="ao-ogon">' + nr + '</p><h2>' + rubrik + ' <em>' + em + '</em></h2>' + (opts.ingress ? '<p class="ao-band__ingress">' + opts.ingress + '</p>' : '') + '</div>' + (opts.hoger || '') + '</header>' + inne + '</section>';
