@@ -568,12 +568,12 @@
   IH.vyer['kolla-marken'] = function () {
     var html = '<h1 class="dold">Kolla marken</h1>' +
       '<section class="instopp verktygtopp kort kort--mork" data-in>' +
-        '<div class="instopp__ord"><p class="etikett etikett--ljus">Verktyg</p><h2>Vad finns under <span class="ihop">gräset? <span aria-hidden="true">🌱</span></span></h2>' +
+        '<div class="instopp__ord"><p class="etikett etikett--ljus">Verktyg</p><h2>Vad finns under <span class="ihop">gräset? <span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-grodd"/></svg></span></span></h2>' +
           '<p>Sök på kundens tomt inför platsbesöket eller offerten. Jordart, vatten i marken och djup till berg hämtas från SGU.</p></div>' +
         '<div class="instopp__tal">' +
-          '<div><span aria-hidden="true">🪨</span><small>Underlag</small><b>SGU</b><em>Öppna data</em></div>' +
-          '<div><span aria-hidden="true">📍</span><small>Sök på</small><b>Adress</b><em>eller din position</em></div>' +
-          '<div><span aria-hidden="true">⚠️</span><small>Översiktligt</small><b>Ingen geoteknik</b><em>Bedöm på plats</em></div>' +
+          '<div><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-fjall"/></svg></span><small>Underlag</small><b>SGU</b><em>Öppna data</em></div>' +
+          '<div><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-plats"/></svg></span><small>Sök på</small><b>Adress</b><em>eller din position</em></div>' +
+          '<div><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-varning"/></svg></span><small>Översiktligt</small><b>Ingen geoteknik</b><em>Bedöm på plats</em></div>' +
         '</div></section>' +
       '<section class="kort verktygram" data-in>' +
         '<p class="verktygram__laddar" aria-hidden="true"><i></i>Hämtar verktyget …</p>' +
@@ -615,9 +615,9 @@
   var fFilter = 'alla';
 
   // Emoji för miljön, källan och statusen – samma i listan, toppen och läsrutan.
-  var MILJO_EMOJI = { 'Vid havet': '🌊', 'I skogen': '🌲', 'På fjället': '🏔️', 'I trädgården': '🌷' };
-  var KALLA_EMOJI = { 'Webbformulär': '🌐', 'Verktyget': '🧭', 'Mejl': '✉️', 'Telefon': '📞' };
-  var FSTATUS_EMOJI = { alla: '📬', ny: '✨', kontaktad: '📞', kvalificerad: '🤝', ej: '💤' };
+  var MILJO_EMOJI = { 'Vid havet': '<svg class="emo-ik" aria-hidden="true"><use href="#i-hav"/></svg>', 'I skogen': '<svg class="emo-ik" aria-hidden="true"><use href="#i-skog"/></svg>', 'På fjället': '<svg class="emo-ik" aria-hidden="true"><use href="#i-fjall"/></svg>', 'I trädgården': '<svg class="emo-ik" aria-hidden="true"><use href="#i-grodd"/></svg>' };
+  var KALLA_EMOJI = { 'Webbformulär': '<svg class="emo-ik" aria-hidden="true"><use href="#i-webb"/></svg>', 'Verktyget': '<svg class="emo-ik" aria-hidden="true"><use href="#i-kompass"/></svg>', 'Mejl': '<svg class="emo-ik" aria-hidden="true"><use href="#i-mejl"/></svg>', 'Telefon': '<svg class="emo-ik" aria-hidden="true"><use href="#i-samtal"/></svg>' };
+  var FSTATUS_EMOJI = { alla: '<svg class="emo-ik" aria-hidden="true"><use href="#i-inkorg"/></svg>', ny: '<svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg>', kontaktad: '<svg class="emo-ik" aria-hidden="true"><use href="#i-samtal"/></svg>', kvalificerad: '<svg class="emo-ik" aria-hidden="true"><use href="#i-handslag"/></svg>', ej: '<svg class="emo-ik" aria-hidden="true"><use href="#i-minus-cirkel"/></svg>' };
   function vantatText(h) { return h < 1 ? 'under 1 h' : h < 48 ? Math.floor(h) + ' h' : Math.floor(h / 24) + ' dagar'; }
 
   function fRad(f, vald) {
@@ -857,10 +857,10 @@
       '</header>' + forlopp(f) + nastaBasta(f, aff) +
       '<div class="fd__mitt"><div class="fd__bild" data-tilt><img src="' + (IH.MILJO[f.miljo] || '../images/hus-r2.webp') + '" alt="" decoding="async"><span class="fd__skylt"><small>Var ska huset stå?</small>' + e(f.miljo) + '</span></div>' +
       '<div class="fd__svar">' +
-        '<div><i aria-hidden="true">🏠</i><small>Vad funderar du på?</small><b>' + e(f.hustyp) + '</b></div>' +
-        '<div><i aria-hidden="true">🎯</i><small>Användning</small><b>' + e(f.anvandning) + '</b></div>' +
-        '<div><i aria-hidden="true">📍</i><small>Ort</small><b>' + e(f.ort) + '</b></div>' +
-        '<div><i aria-hidden="true">' + (KALLA_EMOJI[f.kalla] || '📨') + '</i><small>Kom via</small><b>' + e(f.kalla) + '</b></div>' +
+        '<div><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg></i><small>Vad funderar du på?</small><b>' + e(f.hustyp) + '</b></div>' +
+        '<div><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-mal"/></svg></i><small>Användning</small><b>' + e(f.anvandning) + '</b></div>' +
+        '<div><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-plats"/></svg></i><small>Ort</small><b>' + e(f.ort) + '</b></div>' +
+        '<div><i aria-hidden="true">' + (KALLA_EMOJI[f.kalla] || '<svg class="emo-ik" aria-hidden="true"><use href="#i-skicka"/></svg>') + '</i><small>Kom via</small><b>' + e(f.kalla) + '</b></div>' +
       '</div></div>' +
       '<blockquote class="fd__citat">' + markera(String(f.beskrivning || '')) + '</blockquote>' + smartKort(f) +
       '<div class="fd__kontakt">' +
@@ -871,7 +871,7 @@
       '<div class="fd__forslag" data-tilt><img src="' + forslag.m.tumme + '" alt="" loading="lazy">' +
         '<div><small class="etikett">Förslag</small><b>' + e(forslag.m.kategori) + ' ' + e(forslag.m.namn) + (forslag.m.yta ? ' · ' + forslag.m.yta + ' m²' : '') + '</b><p>' + e(forslag.varfor) + '</p></div></div>' +
       '<div class="fd__logg"><h3>Historik</h3>' + (kund ? anteckningsForm(kund.id, aff ? aff.id : '') : '') +
-        (kund ? tidslinje(logg, 'Ingen aktivitet än.') : '<p class="fd__logg-tom"><span aria-hidden="true">🕰️</span><span><b>Ingen historik än</b>Den börjar när förfrågan har blivit en kund – markera den som kontaktad så skapas kundkortet.</span></p>') + '</div>' +
+        (kund ? tidslinje(logg, 'Ingen aktivitet än.') : '<p class="fd__logg-tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-klocka"/></svg></span><span><b>Ingen historik än</b>Den börjar när förfrågan har blivit en kund – markera den som kontaktad så skapas kundkortet.</span></p>') + '</div>' +
       '</section>';
   }
 
@@ -976,18 +976,18 @@
       '<div class="ipuls__ord">' +
         '<div class="ipuls__topp"><p class="etikett etikett--ljus">Inkorgen just nu</p><span class="ipuls__live"><i></i>' + String(nu.getHours()).padStart(2, '0') + ':' + String(nu.getMinutes()).padStart(2, '0') + '</span></div>' +
         '<p class="ipuls__stort"><b class="tal" data-rakna="' + nya.length + '">' + nya.length + '</b><span>' + (nya.length === 1 ? 'ny förfrågan' : 'nya förfrågningar') + '<small>' +
-          (nya.length ? 'väntar på svar · äldsta ' + text : 'allt är besvarat ✨') + '</small></span></p>' +
+          (nya.length ? 'väntar på svar · äldsta ' + text : 'allt är besvarat') + '</small></span></p>' +
         (forst ? '<a class="ipuls__forst' + (vantat(forst) > SVARSMAL ? ' ipuls__forst--over' : '') + '" href="#/forfragningar/' + forst.id + '">' +
           avatar(forst.namn, false, kundfarg(forst.kund || forst.id)) +
-          '<span><small>Börja med</small><b>' + e(forst.namn) + '</b><em>' + (MILJO_EMOJI[forst.miljo] || '🏠') + ' ' + e(forst.ort) + ' · väntat ' + vantatText(vantat(forst)) + '</em></span>' +
+          '<span><small>Börja med</small><b>' + e(forst.namn) + '</b><em>' + (MILJO_EMOJI[forst.miljo] || '<svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg>') + ' ' + e(forst.ort) + ' · väntat ' + vantatText(vantat(forst)) + '</em></span>' +
           '<i class="ipuls__pil">' + i('pil') + '</i></a>' : '') +
         '<div class="ipuls__vecka"><div class="ipuls__staplar">' + dagar.map(function (x, n) {
           return '<span class="' + (n === 6 ? 'idag' : '') + '" style="--a:' + (x.antal / maxDag).toFixed(3) + ';--n:' + n + '" data-tip="' + (n === 6 ? 'I dag' : DAG[x.d.getDay()] + ' ' + IH.datum(x.d.toISOString())) + ' · ' + (x.antal === 1 ? '1 förfrågan' : x.antal ? x.antal + ' förfrågningar' : 'inga förfrågningar') + '"><b>' + (x.antal || '') + '</b><i></i><small>' + DAG[x.d.getDay()] + '</small></span>';
         }).join('') + '</div><p><b class="tal" data-rakna="' + vecka + '">' + vecka + '</b> in de senaste 7 dagarna</p></div>' +
         '<div class="ipuls__tal">' +
-          '<div><small><i aria-hidden="true">🔥</i>Varma just nu</small><b class="tal">' + nya.filter(function (f) { return leadpoang(f).p >= 70; }).length + '<em> av ' + nya.length + '</em></b>' +
+          '<div><small><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-eld"/></svg></i>Varma just nu</small><b class="tal">' + nya.filter(function (f) { return leadpoang(f).p >= 70; }).length + '<em> av ' + nya.length + '</em></b>' +
             '<span class="ipuls__prickar">' + nya.slice(0, 12).map(function (f) { var p = leadpoang(f).p; return '<i class="' + (p >= 70 ? 'varm' : p >= 50 ? 'ljum' : '') + '"></i>'; }).join('') + '</span></div>' +
-          '<div><small><i aria-hidden="true">🤝</i>Blev affär</small><b class="tal">' + konv + '<em> %</em></b><span class="ipuls__mini" style="--a:' + (konv / 100).toFixed(2) + '"><i></i></span></div>' +
+          '<div><small><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-handslag"/></svg></i>Blev affär</small><b class="tal">' + konv + '<em> %</em></b><span class="ipuls__mini" style="--a:' + (konv / 100).toFixed(2) + '"><i></i></span></div>' +
         '</div>' +
         '<div class="ipuls__kalla"><small>Kom via</small><span class="kallbar">' + kallLista.map(function (k, n) {
             return '<i style="flex:' + kallor[k] + ';--k:' + KFARG[n % KFARG.length] + ';--n:' + n + '"></i>';
@@ -1224,15 +1224,15 @@
   }
 
   // Emoji för säljstegen och nästa steg – i stegbandet, spalterna och korten.
-  var SALJ_EMOJI = { ny: '📥', kontakt: '📞', besok: '📍', offert: '🧾', forhandling: '🤝', vunnen: '🏆' };
+  var SALJ_EMOJI = { ny: '<svg class="emo-ik" aria-hidden="true"><use href="#i-inkorg"/></svg>', kontakt: '<svg class="emo-ik" aria-hidden="true"><use href="#i-samtal"/></svg>', besok: '<svg class="emo-ik" aria-hidden="true"><use href="#i-plats"/></svg>', offert: '<svg class="emo-ik" aria-hidden="true"><use href="#i-dokument"/></svg>', forhandling: '<svg class="emo-ik" aria-hidden="true"><use href="#i-handslag"/></svg>', vunnen: '<svg class="emo-ik" aria-hidden="true"><use href="#i-medalj"/></svg>' };
   function nastaEmoji(a) {
     switch (a.steg) {
-      case 'ny': return '📞';
-      case 'kontakt': return '📍';
-      case 'besok': return IH.offertFor(a.id) ? '📨' : '🧾';
-      case 'offert': return IH.dagarSedan(a.andrad) > 4 ? '📨' : '⏳';
-      case 'forhandling': return '✍️';
-      default: return '👉';
+      case 'ny': return '<svg class="emo-ik" aria-hidden="true"><use href="#i-samtal"/></svg>';
+      case 'kontakt': return '<svg class="emo-ik" aria-hidden="true"><use href="#i-plats"/></svg>';
+      case 'besok': return IH.offertFor(a.id) ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-skicka"/></svg>' : '<svg class="emo-ik" aria-hidden="true"><use href="#i-dokument"/></svg>';
+      case 'offert': return IH.dagarSedan(a.andrad) > 4 ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-skicka"/></svg>' : '⏳';
+      case 'forhandling': return '<svg class="emo-ik" aria-hidden="true"><use href="#i-signera"/></svg>';
+      default: return '<svg class="emo-ik" aria-hidden="true"><use href="#i-pil"/></svg>';
     }
   }
 
@@ -1360,14 +1360,14 @@
         return '<button type="button" data-g="till-spalt" data-steg="' + s.id + '" style="--f:' + s.farg + ';--a:' + andel.toFixed(3) + '">' +
           '<span class="stegband__emoji" aria-hidden="true">' + SALJ_EMOJI[s.id] + '</span><span class="stegband__text"><b>' + e(s.namn) + '</b><small>' + l.length + ' st · ' + IH.kort(summa(l)) + '</small></span><i></i></button>';
       }).join('') + '</div>' +
-      '<p class="tavla__tips">💡 Dra korten mellan stegen – på mobilen håller du in kortet först. Släpp längst ned för att markera som förlorad.</p>' +
+      '<p class="tavla__tips"><svg class="emo-ik" aria-hidden="true"><use href="#i-glodlampa"/></svg> Dra korten mellan stegen – på mobilen håller du in kortet först. Släpp längst ned för att markera som förlorad.</p>' +
       '<div class="tavla" data-tavla>' + IH.SALJSTEG.map(function (s) {
         var l = (s.id === 'vunnen' ? vunna90 : oppna.filter(function (a) { return a.steg === s.id; }))
           .sort(function (a, b) { return b.andrad < a.andrad ? -1 : 1; });
         return '<section class="spalt" data-steg="' + s.id + '" style="--f:' + s.farg + '" id="spalt-' + s.id + '">' +
           '<header class="spalt__huvud"><div><b><span class="spalt__emoji" aria-hidden="true">' + SALJ_EMOJI[s.id] + '</span>' + e(s.namn) + '</b><span>' + l.length + '</span></div><p class="tal">' + IH.kort(summa(l)) + '</p>' +
           '<small>' + (s.id === 'vunnen' ? 'senaste 90 dagarna' : s.sannolikhet + ' % chans · viktat ' + IH.kort(viktat(l))) + '</small></header>' +
-          '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(affKort).join('') : '<p class="spalt__tom"><span aria-hidden="true">✨</span>Dra hit en affär</p>') + '</div></section>';
+          '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(affKort).join('') : '<p class="spalt__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg></span>Dra hit en affär</p>') + '</div></section>';
       }).join('') + '</div>' +
       '<div class="forlustdocka" aria-hidden="true">' + i('stang') + 'Släpp här för att markera som förlorad</div>';
     }
@@ -1534,7 +1534,7 @@
     a.forlorad = null;
     var o = IH.offertFor(a.id);
     if (o) o.status = 'godkand';
-    IH.logga('system', 'Order signerad. 🎉', a.kund, a.id);
+    IH.logga('system', 'Order signerad.', a.kund, a.id);
     // Ett projekt till produktionen.
     if (!db().projekt.some(function (p) { return p.affar === a.id; })) {
       var montage = new Date(); montage.setDate(montage.getDate() + 84);
@@ -1750,8 +1750,8 @@
       '<span class="kundkort__resa" title="' + (x.steg < 0 ? 'Ingen kontakt än' : RESA_STEG[x.steg][1]) + '">' + RESA_STEG.map(function (st, n) {
         return '<i class="' + (n < x.steg ? 'klar' : n === x.steg ? 'nu' : '') + '"></i>';
       }).join('') + '<small>' + (x.steg < 0 ? 'Ingen kontakt' : RESA_EMOJI[x.steg] + ' ' + RESA_STEG[x.steg][1]) + '</small></span>' +
-      '<span class="kundkort__tal"><span' + (x.oppet ? '' : ' class="noll"') + '><small>💼 Öppet</small><b class="tal">' + (x.oppet ? IH.kort(x.oppet) : '–') + '</b></span>' +
-        '<span' + (x.vunnet ? ' class="vunnet"' : ' class="noll"') + '><small>🏆 Vunnet</small><b class="tal">' + (x.vunnet ? IH.kort(x.vunnet) : '–') + '</b></span></span>' +
+      '<span class="kundkort__tal"><span' + (x.oppet ? '' : ' class="noll"') + '><small><svg class="emo-ik" aria-hidden="true"><use href="#i-portfolj"/></svg> Öppet</small><b class="tal">' + (x.oppet ? IH.kort(x.oppet) : '–') + '</b></span>' +
+        '<span' + (x.vunnet ? ' class="vunnet"' : ' class="noll"') + '><small><svg class="emo-ik" aria-hidden="true"><use href="#i-medalj"/></svg> Vunnet</small><b class="tal">' + (x.vunnet ? IH.kort(x.vunnet) : '–') + '</b></span></span>' +
       '<span class="kundkort__fot"><span>' + (x.senast ? i('klocka') + IH.sedan(x.senast.tid) : 'Ingen aktivitet') + '</span>' +
         (x.vunnen.length ? '<span class="status" style="--s:#7fe0a6">Kund</span>' : x.oppen.length ? '<span class="status" style="--s:#f0b56e">Affär pågår</span>' : '') + '</span>' +
       '<span class="kundkort__snabb">' +
@@ -1803,16 +1803,16 @@
           '<p class="etikett etikett--ljus">Kundbasen</p>' +
           '<p class="kundtopp__stort"><b class="tal" data-rakna="' + alla.length + '">' + alla.length + '</b><span>kunder<small>' + (senasteKund ? 'senast ' + e(forsta(senasteKund.k.namn)) + ' · ' + IH.datum(senasteKund.k.skapad) : 'inga kunder än') + '</small></span></p>' +
           '<div class="kundtopp__tal">' +
-            '<div><small><i aria-hidden="true">💼</i>Affär pågår</small><b class="tal" data-rakna="' + antal.pagar + '">' + antal.pagar + '</b></div>' +
-            '<div><small><i aria-hidden="true">🏡</i>Har köpt hus</small><b class="tal" data-rakna="' + antal.kund + '">' + antal.kund + '</b></div>' +
-            '<div><small><i aria-hidden="true">🏢</i>Företag</small><b class="tal" data-rakna="' + foretag + '">' + foretag + '</b></div>' +
+            '<div><small><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-portfolj"/></svg></i>Affär pågår</small><b class="tal" data-rakna="' + antal.pagar + '">' + antal.pagar + '</b></div>' +
+            '<div><small><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg></i>Har köpt hus</small><b class="tal" data-rakna="' + antal.kund + '">' + antal.kund + '</b></div>' +
+            '<div><small><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-byggnad"/></svg></i>Företag</small><b class="tal" data-rakna="' + foretag + '">' + foretag + '</b></div>' +
           '</div>' +
           '<div class="kundtopp__typ"><span class="kallbar"><i style="flex:' + (alla.length - foretag) + ';--k:#f0b56e;--n:0"></i><i style="flex:' + Math.max(foretag, 0.001) + ';--k:#9fc2c9;--n:1"></i></span>' +
             '<span class="kallbar__lista"><span style="--k:#f0b56e"><i></i>Privatpersoner<b>' + (alla.length - foretag) + '</b></span><span style="--k:#9fc2c9"><i></i>Företag<b>' + foretag + '</b></span></span></div>' +
           // Behöver uppmärksamhet: vem och varför, de tre första.
-          (varma.length ? '<div class="kundtopp__varma"><small>🔔 Behöver uppmärksamhet</small><div class="varmlista">' + varma.slice(0, 3).map(function (x) {
-              var skal = x.nyaF ? ['✨', x.nyaF === 1 ? 'Ny förfrågan' : x.nyaF + ' nya förfrågningar']
-                : x.sena ? ['⏰', x.sena === 1 ? 'Försenad uppföljning' : x.sena + ' försenade uppföljningar'] : ['📨', 'Följ upp offerten'];
+          (varma.length ? '<div class="kundtopp__varma"><small><svg class="emo-ik" aria-hidden="true"><use href="#i-bjallra"/></svg> Behöver uppmärksamhet</small><div class="varmlista">' + varma.slice(0, 3).map(function (x) {
+              var skal = x.nyaF ? ['<svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg>', x.nyaF === 1 ? 'Ny förfrågan' : x.nyaF + ' nya förfrågningar']
+                : x.sena ? ['⏰', x.sena === 1 ? 'Försenad uppföljning' : x.sena + ' försenade uppföljningar'] : ['<svg class="emo-ik" aria-hidden="true"><use href="#i-skicka"/></svg>', 'Följ upp offerten'];
               return '<button type="button" class="varmrad" data-g="kund-oppna" data-id="' + x.k.id + '">' + kundAvatar(x.k, true) +
                 '<span><b>' + e(x.k.namn) + '</b><em>' + skal[0] + ' ' + skal[1] + '</em></span>' + i('pil') + '</button>';
             }).join('') + (varma.length > 3 ? '<button type="button" class="varmrad varmrad--fler" data-g="kund-filter" data-f="varm">+' + (varma.length - 3) + ' till · visa alla</button>' : '') + '</div></div>' : '') +
@@ -1877,8 +1877,8 @@
 
   // Var kunden är på resan: Förfrågan → Affär → Offert → Order → Montage → Nyckel.
   var RESA_STEG = [['inkorg', 'Förfrågan'], ['tavla', 'Affär'], ['offert', 'Offert'], ['trofe', 'Order'], ['produktion', 'Montage'], ['hus', 'Nyckel']];
-  var RESA_EMOJI = ['📥', '💼', '🧾', '✍️', '🏗️', '🔑'];
-  var KUND_FILTER_EMOJI = { alla: '👥', pagar: '💼', kund: '🏡', foretag: '🏢', varm: '🔔' };
+  var RESA_EMOJI = ['<svg class="emo-ik" aria-hidden="true"><use href="#i-inkorg"/></svg>', '<svg class="emo-ik" aria-hidden="true"><use href="#i-portfolj"/></svg>', '<svg class="emo-ik" aria-hidden="true"><use href="#i-dokument"/></svg>', '<svg class="emo-ik" aria-hidden="true"><use href="#i-signera"/></svg>', '<svg class="emo-ik" aria-hidden="true"><use href="#i-projekt"/></svg>', '<svg class="emo-ik" aria-hidden="true"><use href="#i-nyckel"/></svg>'];
+  var KUND_FILTER_EMOJI = { alla: '<svg class="emo-ik" aria-hidden="true"><use href="#i-kunder"/></svg>', pagar: '<svg class="emo-ik" aria-hidden="true"><use href="#i-portfolj"/></svg>', kund: '<svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg>', foretag: '<svg class="emo-ik" aria-hidden="true"><use href="#i-byggnad"/></svg>', varm: '<svg class="emo-ik" aria-hidden="true"><use href="#i-bjallra"/></svg>' };
   function resaSteg(ff, aff, off, proj) {
     var nu = -1;
     if (ff.length) nu = 0;
@@ -1984,7 +1984,7 @@
      ================================================================ */
   var offFilter = 'alla', offSort = 'senaste', offSok = '';
   var OFF_ST = { utkast: ['#b8cde0', 'Utkast'], skickad: ['#f0b56e', 'Skickad'], godkand: ['#7fe0a6', 'Godkänd'] };
-  var OFF_FILTER_EMOJI = { alla: '📄', skickad: '⏳', snart: '⏰', godkand: '✅', utkast: '✏️' };
+  var OFF_FILTER_EMOJI = { alla: '<svg class="emo-ik" aria-hidden="true"><use href="#i-dokument"/></svg>', skickad: '⏳', snart: '⏰', godkand: '<svg class="emo-ik" aria-hidden="true"><use href="#i-klar"/></svg>', utkast: '<svg class="emo-ik" aria-hidden="true"><use href="#i-redigera"/></svg>' };
 
   // Allt om en offert på ett ställe.
   function offInfo(o) {
@@ -1997,7 +1997,7 @@
 
   function offRad(x) {
     var o = x.o, st = x.utgangen ? ['#a39b8e', 'Gått ut'] : OFF_ST[o.status] || OFF_ST.utkast;
-    var giltig = o.status === 'godkand' ? '<span class="tid tid--order">🏆 Blev order</span>' : x.utgangen ? '<span class="tid tid--varm">Gått ut</span>' :
+    var giltig = o.status === 'godkand' ? '<span class="tid tid--order"><svg class="emo-ik" aria-hidden="true"><use href="#i-medalj"/></svg> Blev order</span>' : x.utgangen ? '<span class="tid tid--varm">Gått ut</span>' :
       '<span class="offgiltig' + (x.snart ? ' offgiltig--varm' : '') + '"><span class="poang poang--' + (x.snart ? 'kall' : 'ljum') + '" style="--p:' + Math.round(Math.max(0, Math.min(1, x.kvar / x.giltig)) * 100) + '"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17"/><circle class="poang__fyll" cx="20" cy="20" r="17" pathLength="100"/></svg><b>' + Math.max(0, x.kvar) + '</b></span><small>' + (x.kvar === 1 ? 'dag kvar' : 'dagar kvar') + '</small></span>';
     return '<tr data-g="offert-oppna" data-id="' + o.id + '" class="' + (x.snart ? 'offrad--snart' : '') + '"><td><span class="tabell__hus">' + (x.m ? '<img src="' + x.m.tumme + '" alt="" loading="lazy">' : '') +
       '<span><b>' + e(o.nummer) + '</b><small>' + (x.m ? e(x.m.namn) + ' · ' : '') + IH.datum(o.skapad) + '</small></span></span></td>' +
@@ -2063,11 +2063,11 @@
           '<p class="etikett etikett--ljus">Offertläget</p>' +
           '<p class="offtopp__stort"><b class="tal" data-rakna="' + Math.round(sum(skickade)) + '" data-format="kort">' + IH.kort(sum(skickade)) + '</b><span>väntar på svar<small>' + skickade.length + (skickade.length === 1 ? ' offert' : ' offerter') + (snart.length ? ' · ' + snart.length + ' går ut inom tio dagar' : '') + '</small></span></p>' +
           '<div class="offtopp__tal">' +
-            '<div><small><i aria-hidden="true">🎯</i>Träffsäkerhet</small><b class="tal">' + (traff === null ? '–' : '<span data-rakna="' + traff + '">' + traff + '</span><em> %</em>') + '</b><span>' + (avgjorda ? godkanda.length + ' av ' + avgjorda + ' avgjorda' : 'inga avgjorda än') + '</span></div>' +
+            '<div><small><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-mal"/></svg></i>Träffsäkerhet</small><b class="tal">' + (traff === null ? '–' : '<span data-rakna="' + traff + '">' + traff + '</span><em> %</em>') + '</b><span>' + (avgjorda ? godkanda.length + ' av ' + avgjorda + ' avgjorda' : 'inga avgjorda än') + '</span></div>' +
             '<div><small><i aria-hidden="true">⏱️</i>Tid till ja</small><b class="tal">' + (snittTid === null ? '–' : '<span data-rakna="' + snittTid + '">' + snittTid + '</span><em> d</em>') + '</b><span>' + (tider.length ? 'snitt för ' + tider.length + ' godkända' : 'inga godkända än') + '</span></div>' +
-            '<div><small><i aria-hidden="true">🏆</i>Godkänt värde</small><b class="tal" data-rakna="' + Math.round(sum(godkanda)) + '" data-format="kort">' + IH.kort(sum(godkanda)) + '</b><span>' + godkanda.length + ' blev order</span></div>' +
+            '<div><small><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-medalj"/></svg></i>Godkänt värde</small><b class="tal" data-rakna="' + Math.round(sum(godkanda)) + '" data-format="kort">' + IH.kort(sum(godkanda)) + '</b><span>' + godkanda.length + ' blev order</span></div>' +
           '</div>' +
-          '<div class="offtopp__vecka"><small>📊 Offererat per vecka<em>' + IH.kort(veckor.reduce(function (t, y) { return t + y.summa; }, 0)) + ' på åtta veckor</em></small><div class="offtopp__staplar">' + veckor.map(function (y, n) {
+          '<div class="offtopp__vecka"><small><svg class="emo-ik" aria-hidden="true"><use href="#i-stapel"/></svg> Offererat per vecka<em>' + IH.kort(veckor.reduce(function (t, y) { return t + y.summa; }, 0)) + ' på åtta veckor</em></small><div class="offtopp__staplar">' + veckor.map(function (y, n) {
             return '<span class="' + (y.summa ? 'har' : '') + '" style="--a:' + (y.summa / maxV).toFixed(2) + ';--n:' + n + '" data-tip="Vecka ' + y.v + ' · ' + (y.antal === 1 ? '1 offert' : y.antal + ' offerter') + ' · ' + IH.kort(y.summa) + '">' +
               '<b>' + (y.summa ? IH.kort(y.summa) : '') + '</b><i></i><small>' + (n === veckor.length - 1 ? 'nu' : 'v.' + y.v) + '</small></span>';
           }).join('') + '</div></div>' +
@@ -2079,13 +2079,13 @@
                 '<span class="snartut__text"><b>' + e(x.k ? x.k.namn : '') + '</b><small>' + e(x.o.nummer) + ' · ' + IH.kr(x.summa) + ' · ' + (x.kvar === 1 ? '1 dag kvar' : x.kvar + ' dagar kvar') + '</small></span>' +
                 '<span class="snartut__knappar"><button class="knapp knapp--liten knapp--mork" type="button" data-g="offert-folj-upp" data-id="' + x.o.id + '">' + i('samtal') + 'Följ upp</button>' +
                 '<button class="knapp knapp--liten" type="button" data-g="offert-forlang" data-id="' + x.o.id + '">' + i('klocka') + '+14 d</button></span></div>';
-            }).join('') + '</div>' : '<p class="snartut__tom"><span aria-hidden="true">✅</span>Alla skickade offerter har mer än tio dagar kvar.</p>') + '</div>' +
+            }).join('') + '</div>' : '<p class="snartut__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-klar"/></svg></span>Alla skickade offerter har mer än tio dagar kvar.</p>') + '</div>' +
           '<div class="offinsikt">' +
-            '<div class="permodell"><p class="etikett etikett--ljus">🏠 Per hus</p>' + (modeller.length ? '<div class="permodell__lista">' + modeller.map(function (x, n) {
+            '<div class="permodell"><p class="etikett etikett--ljus"><svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg> Per hus</p>' + (modeller.length ? '<div class="permodell__lista">' + modeller.map(function (x, n) {
               return '<a class="permodell__rad" href="#/offerter" style="--a:' + (x.summa / maxM).toFixed(2) + ';--n:' + n + '">' + (x.m && x.m.tumme ? '<img src="' + x.m.tumme + '" alt="" loading="lazy">' : '<i></i>') +
                 '<span><b>' + e(x.m ? x.m.namn : '') + '</b><small>' + x.antal + (x.antal === 1 ? ' offert' : ' offerter') + (x.ja ? ' · ' + x.ja + ' ja' : '') + '</small><i class="permodell__stapel"></i></span><em class="tal">' + IH.kort(x.summa) + '</em></a>';
             }).join('') + '</div>' : '') + '</div>' +
-            '<div class="poster"><p class="etikett etikett--ljus">🧩 Vanligaste posterna</p><div class="poster__lista">' + topPoster.map(function (t) {
+            '<div class="poster"><p class="etikett etikett--ljus"><svg class="emo-ik" aria-hidden="true"><use href="#i-rutnat"/></svg> Vanligaste posterna</p><div class="poster__lista">' + topPoster.map(function (t) {
               return '<span style="--a:' + (poster[t] / alla.length).toFixed(3) + '"><b class="poster__emoji" aria-hidden="true">' + postEmoji(t) + '</b>' + e(t) + '<small>' + poster[t] + ' st · ' + Math.round(poster[t] / alla.length * 100) + ' %</small><i></i></span>';
             }).join('') + '</div></div>' +
           '</div>' +
@@ -2226,7 +2226,7 @@
             return '<button type="button" class="modellknapp' + (m.id === o.modell ? ' vald' : '') + '" data-g="offert-modell" data-id="' + o.id + '" data-m="' + m.id + '"' + (las ? ' disabled' : '') + ' title="' + e(m.namn) + '"><img src="' + m.tumme + '" alt=""><b>' + e(m.namn) + '</b></button>';
           }).join('') + '</div>' +
           '<div class="offertrader" data-rader>' + o.rader.map(function (r, n) {
-            return '<div class="offertrader__rad" data-n="' + n + '"><span class="offertrader__emoji" aria-hidden="true">' + (n === 0 ? '🏠' : postEmoji(r.text)) + '</span><input value="' + e(r.text) + '" data-f="text" aria-label="Beskrivning"' + (las ? ' disabled' : '') + '>' +
+            return '<div class="offertrader__rad" data-n="' + n + '"><span class="offertrader__emoji" aria-hidden="true">' + (n === 0 ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg>' : postEmoji(r.text)) + '</span><input value="' + e(r.text) + '" data-f="text" aria-label="Beskrivning"' + (las ? ' disabled' : '') + '>' +
               '<input type="number" min="0" value="' + r.antal + '" data-f="antal" aria-label="Antal"' + (las ? ' disabled' : '') + '>' +
               '<input type="number" min="0" step="500" value="' + r.pris + '" data-f="pris" aria-label="Pris"' + (las ? ' disabled' : '') + '>' +
               (las ? '' : '<button class="ikonknapp" type="button" data-g="offert-bort" data-id="' + o.id + '" data-n="' + n + '" aria-label="Ta bort">' + i('stang') + '</button>') + '</div>';
@@ -2234,7 +2234,7 @@
           (las ? '' : '<div class="offertlagg"><select data-lagg aria-label="Lägg till rad"><option value="">+ Lägg till ur prislistan…</option>' + IH.db.prislista.poster.map(function (p) {
             return '<option value="' + p.id + '">' + e(p.text) + ' · ' + IH.kr(p.pris) + '</option>';
           }).join('') + '<option value="egen">Egen rad…</option></select></div>') +
-          '<div class="offertsumma"><span><small>💰 Summa</small>' + o.rader.length + (o.rader.length === 1 ? ' rad' : ' rader') + ' · ändras direkt i offerten</span><b class="tal" data-summa>' + IH.kr(IH.summaOffert(o)) + '</b></div>' +
+          '<div class="offertsumma"><span><small><svg class="emo-ik" aria-hidden="true"><use href="#i-pengar"/></svg> Summa</small>' + o.rader.length + (o.rader.length === 1 ? ' rad' : ' rader') + ' · ändras direkt i offerten</span><b class="tal" data-summa>' + IH.kr(IH.summaOffert(o)) + '</b></div>' +
           '</div></section>' +
         '<div class="dokyta" data-in>' + dokument(o) + '</div>' +
       '</div>';
@@ -2380,9 +2380,9 @@
         '<h2 class="motescen__rubrik">' + rubrik + '</h2>' +
         '<p class="motescen__text">' + text + '</p>' +
         '<div class="motescen__chips">' +
-          '<span><i aria-hidden="true">🖼️</i>' + N + (N === 1 ? ' bild' : ' bilder') + ' · ≈ ' + total + ' min</span>' +
-          '<span><i aria-hidden="true">🤝</i>' + moten.length + (moten.length === 1 ? ' möte hållet' : ' möten hållna') + (snitt !== null ? ' · snitt ' + snitt + ' min' : '') + '</span>' +
-          (besok ? '<span><i aria-hidden="true">📍</i>Platsbesök ' + e(IH.sedan(besok.forfaller)) + (besokKund ? ' · ' + e(forsta(besokKund.namn)) : '') + '</span>' : '') +
+          '<span><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-bild"/></svg></i>' + N + (N === 1 ? ' bild' : ' bilder') + ' · ≈ ' + total + ' min</span>' +
+          '<span><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-handslag"/></svg></i>' + moten.length + (moten.length === 1 ? ' möte hållet' : ' möten hållna') + (snitt !== null ? ' · snitt ' + snitt + ' min' : '') + '</span>' +
+          (besok ? '<span><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-plats"/></svg></i>Platsbesök ' + e(IH.sedan(besok.forfaller)) + (besokKund ? ' · ' + e(forsta(besokKund.namn)) : '') + '</span>' : '') +
         '</div>' +
         '<div class="motescen__knappar">' +
           '<button class="knapp knapp--virke knapp--stor" type="button" data-g="starta-mote"' + (a ? ' data-affar="' + a.id + '"' : '') + ' data-bilder="' + valda.join(',') + '">' + i('mote') + 'Starta presentation</button>' +
@@ -2463,11 +2463,11 @@
             '<div><small>Mötet öppnar med</small><b>' + (k && k.typ !== 'foretag' ? 'Välkommen, ' + e(forsta(k.namn)) + '.' : 'Hus formade för platsen.') + '</b>' +
             '<span>' + (m ? e(m.kategori) + ' ' + e(m.namn) : '') + (f ? ' · ' + e(f.miljo) : '') + (k ? ' · ' + e(k.ort) : '') + '</span>' +
             (f ? '<em>“' + e(f.beskrivning) + '”</em>' : '<em>Ingen förfrågan kopplad – bilden "Er förfrågan" hoppas över.</em>') + '</div></div>'
-            : '<p class="forhand__tom"><span aria-hidden="true">👥</span>Utan vald affär visas presentationen generellt, utan kundens namn och förfrågan.</p>') +
+            : '<p class="forhand__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-kunder"/></svg></span>Utan vald affär visas presentationen generellt, utan kundens namn och förfrågan.</p>') +
 
           '<div class="falt"><span>Upplägg' + (lage ? '' : ' · eget val') + '</span><div class="upplagg" role="toolbar">' + Object.keys(MOTE_LAGEN).map(function (l) {
             var ids = MOTE_LAGEN[l][1].filter(function (id) { return id !== 'er' || f; });
-            return '<button type="button" class="upplagg__val' + (lage === l ? ' vald' : '') + '" data-g="mote-lage" data-l="' + l + '" aria-pressed="' + (lage === l) + '"><i class="upplagg__emoji" aria-hidden="true">' + ({ fullt: '🎬', kort: '⚡', kalkyl: '🧮' }[l] || '') + '</i><b>' + MOTE_LAGEN[l][0] + '</b><small>' + ids.length + ' bilder · ' + ids.reduce(function (t, id) { return t + MOTE_MIN[id]; }, 0) + ' min</small></button>';
+            return '<button type="button" class="upplagg__val' + (lage === l ? ' vald' : '') + '" data-g="mote-lage" data-l="' + l + '" aria-pressed="' + (lage === l) + '"><i class="upplagg__emoji" aria-hidden="true">' + ({ fullt: '<svg class="emo-ik" aria-hidden="true"><use href="#i-film"/></svg>', kort: '<svg class="emo-ik" aria-hidden="true"><use href="#i-blixt"/></svg>', kalkyl: '<svg class="emo-ik" aria-hidden="true"><use href="#i-kalkyl"/></svg>' }[l] || '') + '</i><b>' + MOTE_LAGEN[l][0] + '</b><small>' + ids.length + ' bilder · ' + ids.reduce(function (t, id) { return t + MOTE_MIN[id]; }, 0) + ' min</small></button>';
           }).join('') + '</div></div>' +
 
           '<fieldset class="falt"><span>Bilder i presentationen – klicka för att ta bort eller lägga till</span><div class="agenda" data-agenda>' + IH.MOTE_BILDER.map(function (bb, n) {
@@ -2487,12 +2487,12 @@
           '<section class="kort" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('klocka') + '</span>Tidigare möten</h2>' + (moten.length ? '<span class="chip">' + moten.length + '</span>' : '') + '</header>' +
             '<div class="kort__kropp">' + (moten.length ? '<div class="tidigare" data-stagger>' + moten.slice(0, 6).map(function (h) {
               var kk = IH.kund(h.kund), mins = moteMinuter(h.text), text = String(h.text).replace(/^Kundmöte \(\d+ min\):\s*/, '').replace(/^Platsbesök bokat i kundmötet.*$/, 'Platsbesök bokat i kundmötet');
-              return '<a class="tidigare__rad" href="#/kunder/' + (kk ? kk.id : '') + '">' + kundAvatar(kk, true) + '<span><b>' + e(kk ? kk.namn : 'Okänd kund') + '</b><small>🤝 ' + IH.datum(h.tid) + '</small><em>' + e(text) + '</em></span>' + (mins ? '<i class="tidigare__min">' + mins + ' min</i>' : '') + '</a>';
+              return '<a class="tidigare__rad" href="#/kunder/' + (kk ? kk.id : '') + '">' + kundAvatar(kk, true) + '<span><b>' + e(kk ? kk.namn : 'Okänd kund') + '</b><small><svg class="emo-ik" aria-hidden="true"><use href="#i-handslag"/></svg> ' + IH.datum(h.tid) + '</small><em>' + e(text) + '</em></span>' + (mins ? '<i class="tidigare__min">' + mins + ' min</i>' : '') + '</a>';
             }).join('') + '</div>' : '<p class="forhand__tom">' + i('anteckning') + 'Anteckningar från mötena hamnar här. Tryck N under presentationen för att anteckna.</p>') + '</div></section>' +
           '<section class="kort motekort" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('blixt') + '</span>Så funkar det</h2></header>' +
-            '<div class="kort__kropp"><ul class="motetips"><li><i class="motetips__emoji" aria-hidden="true">👆</i><span><b>Pil höger/vänster</b> eller svep för att byta bild – <b>K</b> hoppar till kalkylen, <b>N</b> öppnar anteckningarna.</span></li>' +
-            '<li><i class="motetips__emoji" aria-hidden="true">🏠</i><span>Husen visas i <b>3D</b> – dra för att vrida, som på huskortet.</span></li>' +
-            '<li><i class="motetips__emoji" aria-hidden="true">🧾</i><span>Spara kalkylen som offert och boka platsbesök direkt i mötet.</span></li></ul>' +
+            '<div class="kort__kropp"><ul class="motetips"><li><i class="motetips__emoji" aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-pil"/></svg></i><span><b>Pil höger/vänster</b> eller svep för att byta bild – <b>K</b> hoppar till kalkylen, <b>N</b> öppnar anteckningarna.</span></li>' +
+            '<li><i class="motetips__emoji" aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg></i><span>Husen visas i <b>3D</b> – dra för att vrida, som på huskortet.</span></li>' +
+            '<li><i class="motetips__emoji" aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-dokument"/></svg></i><span>Spara kalkylen som offert och boka platsbesök direkt i mötet.</span></li></ul>' +
             '<div class="tangenter"><p class="etikett etikett--ljus">Kortkommandon i presentationen</p><div class="tangenter__lista">' +
             [['→', 'Nästa bild'], ['←', 'Förra bilden'], ['K', 'Till kalkylen'], ['N', 'Anteckningar'], ['Home', 'Första bilden'], ['End', 'Sista bilden'], ['Esc', 'Stäng']].map(function (t) {
               return '<span><kbd>' + t[0] + '</kbd>' + t[1] + '</span>';
@@ -2580,13 +2580,13 @@
      Projekttavlan ligger kvar längst ned. */
   var kalForskjut = 0, kalVald = null, kalAv = {};
   var KAL_SLAG = [
-    ['montage', 'Montage', '🚚', '#f0b56e'],
-    ['start', 'Projektstart', '🏁', '#9fc2c9'],
-    ['uppgift', 'Att göra', '✅', '#a9c8a4'],
-    ['mote', 'Möten', '🤝', '#b8cde0'],
-    ['offert', 'Offert går ut', '🧾', '#e8c98f']
+    ['montage', 'Montage', '<svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg>', '#f0b56e'],
+    ['start', 'Projektstart', '<svg class="emo-ik" aria-hidden="true"><use href="#i-flagga"/></svg>', '#9fc2c9'],
+    ['uppgift', 'Att göra', '<svg class="emo-ik" aria-hidden="true"><use href="#i-klar"/></svg>', '#a9c8a4'],
+    ['mote', 'Möten', '<svg class="emo-ik" aria-hidden="true"><use href="#i-handslag"/></svg>', '#b8cde0'],
+    ['offert', 'Offert går ut', '<svg class="emo-ik" aria-hidden="true"><use href="#i-dokument"/></svg>', '#e8c98f']
   ];
-  var STEG_EMOJI = { underlag: '📐', tillverkning: '🏭', grund: '🧱', montage: '🚚', besiktning: '🔍', klart: '🔑' };
+  var STEG_EMOJI = { underlag: '<svg class="emo-ik" aria-hidden="true"><use href="#i-linjal"/></svg>', tillverkning: '<svg class="emo-ik" aria-hidden="true"><use href="#i-fabrik"/></svg>', grund: '<svg class="emo-ik" aria-hidden="true"><use href="#i-tegel"/></svg>', montage: '<svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg>', besiktning: '<svg class="emo-ik" aria-hidden="true"><use href="#i-sok"/></svg>', klart: '<svg class="emo-ik" aria-hidden="true"><use href="#i-nyckel"/></svg>' };
   var VECKODAG = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
   var MANAD = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
   function slag(id) { for (var n = 0; n < KAL_SLAG.length; n++) if (KAL_SLAG[n][0] === id) return KAL_SLAG[n]; return KAL_SLAG[0]; }
@@ -2625,10 +2625,10 @@
   // Det som saknas, i klartext och med vems del det är (2026-10-08:
   // "gör så man förstår lättare").
   var SAKNAS = {
-    ritning: ['Ritningarna är inte klara', 'Vår del', '📐'],
-    lov: ['Bygglov eller anmälan är inte inlämnad', 'Kundens del', '📝'],
-    grund: ['Grund, el, vatten och avlopp är inte klart', 'Kundens del', '🧱'],
-    framkomlighet: ['Vägen för lastbil och kran är inte klar', 'Kundens del', '🚛']
+    ritning: ['Ritningarna är inte klara', 'Vår del', '<svg class="emo-ik" aria-hidden="true"><use href="#i-linjal"/></svg>'],
+    lov: ['Bygglov eller anmälan är inte inlämnad', 'Kundens del', '<svg class="emo-ik" aria-hidden="true"><use href="#i-anteckning"/></svg>'],
+    grund: ['Grund, el, vatten och avlopp är inte klart', 'Kundens del', '<svg class="emo-ik" aria-hidden="true"><use href="#i-tegel"/></svg>'],
+    framkomlighet: ['Vägen för lastbil och kran är inte klar', 'Kundens del', '<svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg>']
   };
   var CHECK_KORT = { ritning: 'Ritningar', lov: 'Bygglov/anmälan', grund: 'Grund och anslutningar', framkomlighet: 'Väg för lastbil och kran' };
 
@@ -2642,14 +2642,14 @@
         if (p.check[c[0]]) return;
         var s = SAKNAS[c[0]];
         var bradskar = t !== null && t <= 21;
-        ut.push({ vikt: (bradskar ? 0 : 2) + (s[1] === 'Vår del' ? 1 : 0), emoji: bradskar ? '⚠️' : s[2], text: s[0], del: s[1],
+        ut.push({ vikt: (bradskar ? 0 : 2) + (s[1] === 'Vår del' ? 1 : 0), emoji: bradskar ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-varning"/></svg>' : s[2], text: s[0], del: s[1],
           under: (k ? k.namn : 'Kunden') + ' · ' + (m ? m.namn : 'huset'),
           nar: t === null ? '' : (t > 0 ? 'om ' + t + ' d' : t === 0 ? 'i dag' : 'passerat'), id: p.id, varm: bradskar });
       });
       if (p.montage) { var v = IH.vecka(new Date(p.montage)); (veckor[v] = veckor[v] || []).push(p); }
     });
     Object.keys(veckor).forEach(function (v) {
-      if (veckor[v].length > 1) ut.push({ vikt: 0, emoji: '📅', text: veckor[v].length + ' montage samma vecka', del: 'Planering', under: 'Vecka ' + v, nar: 'v. ' + v, id: veckor[v][0].id, varm: true });
+      if (veckor[v].length > 1) ut.push({ vikt: 0, emoji: '<svg class="emo-ik" aria-hidden="true"><use href="#i-kalender"/></svg>', text: veckor[v].length + ' montage samma vecka', del: 'Planering', under: 'Vecka ' + v, nar: 'v. ' + v, id: veckor[v][0].id, varm: true });
     });
     return ut.sort(function (a, b) { return a.vikt - b.vikt; });
   }
@@ -2666,7 +2666,7 @@
       var slut = new Date(nasta.montage);
       var andel = Math.max(0.04, Math.min(1, (Date.now() - start.getTime()) / Math.max(1, slut - start)));
       mening = 'Nästa hus som monteras är <b>' + e(m ? m.namn : 'huset') + '</b> hos ' + e(k ? k.namn : 'kunden') + (k && k.ort ? ' i ' + e(k.ort) : '') +
-        ', om <b>' + t + (t === 1 ? ' dag' : ' dagar') + '</b>. ' + (saknas.length ? saknas.length + (saknas.length === 1 ? ' sak' : ' saker') + ' måste bli klara innan dess.' : 'Allt är klart inför montaget. ✨');
+        ', om <b>' + t + (t === 1 ? ' dag' : ' dagar') + '</b>. ' + (saknas.length ? saknas.length + (saknas.length === 1 ? ' sak' : ' saker') + ' måste bli klara innan dess.' : 'Allt är klart inför montaget.');
       nedrakning = '<button class="nedrakning" type="button" data-g="proj-oppna" data-id="' + nasta.id + '" style="--a:' + andel.toFixed(3) + ';--p:' + Math.round((1 - Math.min(t, 70) / 70) * 100) + '">' +
         '<span class="nedrakning__ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52"/><circle class="nedrakning__fyll" cx="60" cy="60" r="52" pathLength="100"/></svg>' +
           '<b class="tal" data-rakna="' + t + '">' + t + '</b><small>' + (t === 1 ? 'dag kvar' : 'dagar kvar') + '</small></span>' +
@@ -2675,22 +2675,22 @@
           '<span class="nedrakning__datum">' + i('kalender') + dagNamn(slut) + ' · v. ' + IH.vecka(slut) + '</span></span>' +
         '<span class="nedrakning__lista"><small>Klart innan lastbilen kommer?</small>' + CHECK.map(function (c) {
             var klar = !!nasta.check[c[0]];
-            return '<span class="' + (klar ? 'klar' : 'saknas') + '"><i aria-hidden="true">' + (klar ? '✓' : '✕') + '</i>' + CHECK_KORT[c[0]] +
+            return '<span class="' + (klar ? 'klar' : 'saknas') + '"><i aria-hidden="true">' + (klar ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-bock"/></svg>' : '<svg class="emo-ik" aria-hidden="true"><use href="#i-stang"/></svg>') + '</i>' + CHECK_KORT[c[0]] +
               '<em>' + (c[0] === 'ritning' ? 'Vi' : 'Kunden') + '</em></span>';
           }).join('') + '</span>' +
-        '<span class="nedrakning__vag" aria-hidden="true"><span class="nedrakning__ande nedrakning__ande--start">🏁 Start ' + IH.datum(start.toISOString()) + '</span>' +
-          '<span class="nedrakning__ande nedrakning__ande--slut">Montage ' + IH.datum(slut.toISOString()) + ' 🏠</span>' +
-          '<i class="nedrakning__spar"></i><span class="nedrakning__bil">🚚</span></span>' +
+        '<span class="nedrakning__vag" aria-hidden="true"><span class="nedrakning__ande nedrakning__ande--start"><svg class="emo-ik" aria-hidden="true"><use href="#i-flagga"/></svg> Start ' + IH.datum(start.toISOString()) + '</span>' +
+          '<span class="nedrakning__ande nedrakning__ande--slut">Montage ' + IH.datum(slut.toISOString()) + ' <svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg></span>' +
+          '<i class="nedrakning__spar"></i><span class="nedrakning__bil"><svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg></span></span>' +
       '</button>';
     } else {
-      mening = aktiva.length ? 'Inga montage är inplanerade framåt ännu. Sätt montagedag i projekten.' : 'Inga hus i produktion just nu. När en affär vinns hamnar den här. 🌱';
-      nedrakning = '<p class="prodblock__tom"><span aria-hidden="true">🗓️</span>Inget montage inplanerat.</p>';
+      mening = aktiva.length ? 'Inga montage är inplanerade framåt ännu. Sätt montagedag i projekten.' : 'Inga hus i produktion just nu. När en affär vinns hamnar den här.';
+      nedrakning = '<p class="prodblock__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-kalender"/></svg></span>Inget montage inplanerat.</p>';
     }
     var steg = IH.PROJSTEG;
     var fabrik = '<div class="fabrik" aria-label="Husen per steg"><i class="fabrik__band" aria-hidden="true"></i>' + steg.map(function (s, n) {
       var l = proj.filter(function (p) { return p.steg === s.id; });
       return '<div class="fabrik__station' + (l.length ? ' fabrik__station--har' : '') + '" style="--f:' + s.farg + ';--n:' + n + '" title="' + e(s.text) + '">' +
-        '<span class="fabrik__emoji" aria-hidden="true">' + (STEG_EMOJI[s.id] || '🏠') + '<i>' + (n + 1) + '</i></span>' +
+        '<span class="fabrik__emoji" aria-hidden="true">' + (STEG_EMOJI[s.id] || '<svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg>') + '<i>' + (n + 1) + '</i></span>' +
         '<b>' + e(s.namn) + '</b><small>' + (l.length ? l.length + ' hus' : 'inga hus') + '</small>' +
         '<span class="fabrik__hus">' + l.map(function (p, j) {
           var m = IH.modell(p.modell), k = IH.kund(p.kund);
@@ -2706,17 +2706,17 @@
           '<span><b>' + e(v.text) + '</b><small>' + e(v.under) + '</small></span>' +
           '<span class="prodvarn__meta"><em class="prodvarn__del' + (v.del === 'Vår del' ? ' prodvarn__del--var' : '') + '">' + e(v.del) + '</em>' + (v.nar ? '<small>Montage ' + e(v.nar) + '</small>' : '') + '</span></button></li>';
       }).join('') + '</ul>' + (varn.length > 4 ? '<p class="prodvarn__fler">+' + (varn.length - 4) + ' till – öppna projekten för att se allt</p>' : '')
-      : '<p class="prodblock__tom"><span aria-hidden="true">✨</span>Inget saknas inför montagen.</p>';
+      : '<p class="prodblock__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg></span>Inget saknas inför montagen.</p>';
     return '<section class="prodtopp kort kort--mork" data-in>' +
       '<div class="prodtopp__intro"><p class="etikett etikett--ljus">Läget just nu</p>' +
-        '<h2 class="prodtopp__titel"><b class="tal" data-rakna="' + aktiva.length + '">' + aktiva.length + '</b> hus på väg <span class="prodtopp__emoji" aria-hidden="true">🏗️</span></h2>' +
+        '<h2 class="prodtopp__titel"><b class="tal" data-rakna="' + aktiva.length + '">' + aktiva.length + '</b> hus på väg <span class="prodtopp__emoji" aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-projekt"/></svg></span></h2>' +
         '<p class="prodtopp__text">' + mening + '</p></div>' +
       (nyckel || '') +
       '<div class="prodtopp__rad">' +
-        block('🚚', 'Nästa montage', 'Dagar kvar, och vad som ska vara klart innan lastbilen kommer.', nedrakning, 'prodblock--montage') +
-        block('⚠️', 'Att åtgärda', 'Det som saknas inför montagen. Viktigast först – klicka för att öppna projektet.', lista, 'prodblock--varn') +
+        block('<svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg>', 'Nästa montage', 'Dagar kvar, och vad som ska vara klart innan lastbilen kommer.', nedrakning, 'prodblock--montage') +
+        block('<svg class="emo-ik" aria-hidden="true"><use href="#i-varning"/></svg>', 'Att åtgärda', 'Det som saknas inför montagen. Viktigast först – klicka för att öppna projektet.', lista, 'prodblock--varn') +
       '</div>' +
-      block('🏭', 'Var husen är just nu', 'Varje hus står på sitt steg, från ritning till nyckel. Klicka på ett hus för att öppna det.', fabrik, 'prodblock--fabrik') +
+      block('<svg class="emo-ik" aria-hidden="true"><use href="#i-fabrik"/></svg>', 'Var husen är just nu', 'Varje hus står på sitt steg, från ritning till nyckel. Klicka på ett hus för att öppna det.', fabrik, 'prodblock--fabrik') +
     '</section>';
   }
 
@@ -2763,7 +2763,7 @@
           }).join('') + (l.length > 3 ? '<span class="kal__fler">+' + (l.length - 3) + ' till</span>' : '') + '</button>';
       }
       rutor += '<div class="kal__vecka' + (veckansMontage > 1 ? ' kal__vecka--full' : '') + '"><span class="kal__vnr" title="Vecka ' + IH.vecka(mand) + '">v.' + IH.vecka(mand) +
-        (veckansMontage ? '<em>' + veckansMontage + ' 🚚</em>' : '') + '</span>' + dagar + '</div>';
+        (veckansMontage ? '<em>' + veckansMontage + ' <svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg></em>' : '') + '</span>' + dagar + '</div>';
     }
     // Sidan: vald dag och de närmaste två veckorna.
     var valdDag = new Date(vald + 'T12:00:00');
@@ -2772,7 +2772,7 @@
       var s = slag(h.slag), d = new Date(h.dag + 'T12:00:00');
       var inne = '<span class="kal__radikon" style="--f:' + s[3] + '">' + (h.slag === 'montage' && h.bild ? '<img src="' + h.bild + '" alt="">' : s[2]) + '</span>' +
         '<span class="kal__radtext"><b>' + e(h.titel) + '</b><small>' + (visaDag ? dagNamn(d) + (h.under ? ' · ' : '') : '') + e(h.under) + '</small>' +
-        (h.varning ? '<em>⚠️ ' + e(h.varning) + '</em>' : '') + (h.klar ? '<em class="klar">✓ Klart</em>' : '') + '</span>';
+        (h.varning ? '<em><svg class="emo-ik" aria-hidden="true"><use href="#i-varning"/></svg> ' + e(h.varning) + '</em>' : '') + (h.klar ? '<em class="klar"><svg class="emo-ik" aria-hidden="true"><use href="#i-bock"/></svg> Klart</em>' : '') + '</span>';
       return h.g ? '<button type="button" class="kal__rad" data-g="' + h.g + '" data-id="' + e(h.id) + '">' + inne + i('pil') + '</button>' : '<div class="kal__rad">' + inne + '</div>';
     };
     var snart = synliga.filter(function (h) { var t = dagarTill(h.dag + 'T12:00:00'); return t >= 0 && t <= 14 && h.dag !== vald && !h.klar; })
@@ -2782,14 +2782,14 @@
       '<div class="kal__valdag"><span class="kal__valdatum"><b>' + valdDag.getDate() + '</b><small>' + MANAD[valdDag.getMonth()].slice(0, 3) + '</small></span>' +
         '<span><small>' + (t === 0 ? 'I dag' : t === 1 ? 'I morgon' : t === -1 ? 'I går' : (t > 0 ? 'Om ' + t + ' dagar' : t * -1 + ' dagar sedan')) + ' · v. ' + IH.vecka(valdDag) + '</small><b>' + dagNamn(valdDag) + '</b></span></div>' +
       (valdaH.length ? '<div class="kal__lista" data-stagger>' + valdaH.map(function (h) { return rad(h, false); }).join('') + '</div>'
-        : '<p class="kal__tom"><span aria-hidden="true">' + (valdDag.getDay() % 6 === 0 ? '🌿' : '🌤️') + '</span>Inget inplanerat den här dagen.</p>') +
+        : '<p class="kal__tom"><span aria-hidden="true">' + (valdDag.getDay() % 6 === 0 ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-grodd"/></svg>' : '<svg class="emo-ik" aria-hidden="true"><use href="#i-sol"/></svg>') + '</span>Inget inplanerat den här dagen.</p>') +
       '</div><div class="kal__sidadel"><p class="etikett etikett--ljus kal__snartrubrik">Närmaste två veckorna</p>' +
       (snart.length ? '<div class="kal__lista kal__lista--snart">' + snart.slice(0, 6).map(function (h) { return rad(h, true); }).join('') + '</div>'
-        : '<p class="kal__tom"><span aria-hidden="true">🌱</span>Lugnt framåt.</p>') +
+        : '<p class="kal__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-grodd"/></svg></span>Lugnt framåt.</p>') +
     '</div></aside>';
-    var hjalp = '<p class="kal__hjalp"><span>👆 Klicka på en dag för att se allt som händer då.</span><span><b class="kal__hjalpvnr">1 🚚</b> = montage den veckan</span>' +
+    var hjalp = '<p class="kal__hjalp"><span><svg class="emo-ik" aria-hidden="true"><use href="#i-pil"/></svg> Klicka på en dag för att se allt som händer då.</span><span><b class="kal__hjalpvnr">1 <svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg></b> = montage den veckan</span>' +
       '<span><b class="kal__hjalpvarn">!</b> = saker kvar inför montaget</span><span>Knapparna ovanför tänder och släcker.</span></p>';
-    return '<section class="kal kort" data-in><div class="kal__ram"><div class="prodblock__huvud kal__rubrik"><span class="prodblock__emoji" aria-hidden="true">📅</span>' +
+    return '<section class="kal kort" data-in><div class="kal__ram"><div class="prodblock__huvud kal__rubrik"><span class="prodblock__emoji" aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-kalender"/></svg></span>' +
       '<span><h3>Kalender</h3><p>Montage, projektstarter, uppgifter, möten och offerter som går ut.</p></span></div>' + huvud + hjalp + '<div class="kal__kropp"><div class="kal__rutnat">' + rutor + '</div>' + sida + '</div></div></section>';
   }
 
@@ -2802,17 +2802,17 @@
     var nk = nasta ? IH.kund(nasta.kund) : null;
     var html = '<h1 class="dold">Projekt</h1>' +
       prodTopp(proj, aktiva, nyckelband([
-        ['🏗️', 'Aktiva projekt', aktiva.length, 'tal', proj.length - aktiva.length + ' klara'],
-        ['🚚', 'Nästa montage', nasta ? 'v. ' + IH.vecka(new Date(nasta.montage)) : '–', 'text', nasta ? e(nk ? nk.namn : '') + ' · om ' + dagarTill(nasta.montage) + ' d' : 'inget planerat'],
-        ['✅', 'Checklistor klara', punkter ? klaraP / punkter * 100 : 0, 'pct', klaraP + ' av ' + punkter + ' punkter', punkter ? klaraP / punkter : 0],
-        ['💰', 'Värde i produktion', aktiva.reduce(function (s, p) { var a = p.affar ? IH.affar(p.affar) : null; return s + (a ? a.varde : 0); }, 0), 'kort', 'signerade ordrar']
+        ['<svg class="emo-ik" aria-hidden="true"><use href="#i-projekt"/></svg>', 'Aktiva projekt', aktiva.length, 'tal', proj.length - aktiva.length + ' klara'],
+        ['<svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg>', 'Nästa montage', nasta ? 'v. ' + IH.vecka(new Date(nasta.montage)) : '–', 'text', nasta ? e(nk ? nk.namn : '') + ' · om ' + dagarTill(nasta.montage) + ' d' : 'inget planerat'],
+        ['<svg class="emo-ik" aria-hidden="true"><use href="#i-klar"/></svg>', 'Checklistor klara', punkter ? klaraP / punkter * 100 : 0, 'pct', klaraP + ' av ' + punkter + ' punkter', punkter ? klaraP / punkter : 0],
+        ['<svg class="emo-ik" aria-hidden="true"><use href="#i-pengar"/></svg>', 'Värde i produktion', aktiva.reduce(function (s, p) { var a = p.affar ? IH.affar(p.affar) : null; return s + (a ? a.varde : 0); }, 0), 'kort', 'signerade ordrar']
       ])) +
       kalender() +
       '<div class="prodrubrik"><p class="etikett">Alla projekt</p><h2>Från ritning till nyckel</h2><p>Varje kolumn är ett steg. När ett steg är klart flyttar du huset vidare med pilen på kortet, eller öppnar projektet och väljer steg.</p></div>' +
       '<div class="tavla tavla--prod">' + IH.PROJSTEG.map(function (s) {
         var l = proj.filter(function (p) { return p.steg === s.id; });
         return '<section class="spalt" style="--f:' + s.farg + '"><header class="spalt__huvud"><div><b><span class="spalt__emoji" aria-hidden="true">' + (STEG_EMOJI[s.id] || '') + '</span>' + e(s.namn) + '</b><span>' + l.length + '</span></div><small>' + e(s.text) + '</small></header>' +
-          '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(projKort).join('') : '<p class="spalt__tom"><span aria-hidden="true">✨</span>Inget här just nu</p>') + '</div></section>';
+          '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(projKort).join('') : '<p class="spalt__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg></span>Inget här just nu</p>') + '</div></section>';
       }).join('') + '</div>';
     return {
       titel: 'Projekt', html: html,
@@ -2851,11 +2851,11 @@
     var dagar = dagarTill(p.montage);
     return '<article class="aff aff--proj" data-g="proj-oppna" data-id="' + p.id + '" tabindex="0" role="button" style="--f:' + s.farg + '" aria-label="' + e(k ? k.namn : '') + ', ' + e(m ? m.namn : '') + ', ' + e(s.namn) + '">' +
       '<div class="aff__topp">' + (m ? '<span class="aff__bild"><img src="' + m.tumme + '" alt="" loading="lazy"></span>' : '') + '<span class="aff__modell">' + e(m ? m.namn : '') + '</span>' + ring(klara / CHECK.length * 100, s.farg) + '</div>' +
-      '<b class="aff__titel">' + e(k ? k.namn : '') + '</b><span class="aff__kund">📍 ' + e(k ? k.ort : '') + '</span>' +
+      '<b class="aff__titel">' + e(k ? k.namn : '') + '</b><span class="aff__kund"><svg class="emo-ik" aria-hidden="true"><use href="#i-plats"/></svg> ' + e(k ? k.ort : '') + '</span>' +
       '<div class="aff__fot proj__fot">' + (p.steg === 'klart'
-        ? '<span class="proj__montage proj__montage--klar">🔑 Överlämnat</span>'
-        : '<span class="proj__montage' + (dagar >= 0 && dagar <= 21 ? ' proj__montage--snart' : '') + '">🚚 v. ' + IH.vecka(new Date(p.montage)) + (dagar >= 0 ? ' · om ' + dagar + ' d' : '') + '</span>') +
-        '<span class="proj__check' + (klara === CHECK.length ? ' proj__check--klar' : '') + '" title="' + klara + ' av ' + CHECK.length + ' punkter klara"><i style="--a:' + (klara / CHECK.length).toFixed(2) + '"></i><small>' + (klara === CHECK.length ? '✅ Allt klart' : klara + '/' + CHECK.length + ' klart') + '</small></span></div>' +
+        ? '<span class="proj__montage proj__montage--klar"><svg class="emo-ik" aria-hidden="true"><use href="#i-nyckel"/></svg> Överlämnat</span>'
+        : '<span class="proj__montage' + (dagar >= 0 && dagar <= 21 ? ' proj__montage--snart' : '') + '"><svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg> v. ' + IH.vecka(new Date(p.montage)) + (dagar >= 0 ? ' · om ' + dagar + ' d' : '') + '</span>') +
+        '<span class="proj__check' + (klara === CHECK.length ? ' proj__check--klar' : '') + '" title="' + klara + ' av ' + CHECK.length + ' punkter klara"><i style="--a:' + (klara / CHECK.length).toFixed(2) + '"></i><small>' + (klara === CHECK.length ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-klar"/></svg> Allt klart' : klara + '/' + CHECK.length + ' klart') + '</small></span></div>' +
       '<div class="aff__snabb">' +
         (k && k.telefon ? '<button type="button" data-g="kund-ring" data-tel="' + e(k.telefon) + '" title="Ring ' + e(forsta(k.namn)) + '" aria-label="Ring ' + e(forsta(k.namn)) + '">' + i('tel') + '</button>' : '') +
         (k ? '<button type="button" data-g="kund-oppna" data-id="' + k.id + '" title="Kundkortet" aria-label="Kundkortet">' + i('kunder') + '</button>' : '') +
@@ -2962,16 +2962,16 @@
   // emoji, tiden står i klartext ("I dag", "I morgon", "Försenad 2 dagar")
   // och raden har snabbknappar för att ringa eller öppna kunden.
   var UPPG_TYP = [
-    [/offert/i, '🧾', 'Offert'],
-    [/platsbesök|besök|tomtkoll/i, '📍', 'Platsbesök'],
-    [/^ring|samtal|telefon/i, '📞', 'Samtal'],
-    [/mejl|mail|skicka/i, '✉️', 'Mejl'],
-    [/möte|träff/i, '🤝', 'Möte'],
-    [/boka|montage|kran|leverans/i, '📅', 'Bokning']
+    [/offert/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-dokument"/></svg>', 'Offert'],
+    [/platsbesök|besök|tomtkoll/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-plats"/></svg>', 'Platsbesök'],
+    [/^ring|samtal|telefon/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-samtal"/></svg>', 'Samtal'],
+    [/mejl|mail|skicka/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-mejl"/></svg>', 'Mejl'],
+    [/möte|träff/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-handslag"/></svg>', 'Möte'],
+    [/boka|montage|kran|leverans/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-kalender"/></svg>', 'Bokning']
   ];
   function uppgTyp(text) {
     for (var n = 0; n < UPPG_TYP.length; n++) if (UPPG_TYP[n][0].test(text || '')) return UPPG_TYP[n];
-    return [null, '✅', 'Uppgift'];
+    return [null, '<svg class="emo-ik" aria-hidden="true"><use href="#i-klar"/></svg>', 'Uppgift'];
   }
   function uppgNar(u) {
     var t = dagarTill(u.forfaller);
@@ -3002,9 +3002,9 @@
     var u = db().uppgifter.slice().sort(function (a, b) { return a.forfaller < b.forfaller ? -1 : 1; });
     var grupper = [
       ['Försenade', u.filter(function (x) { return !x.klar && new Date(x.forfaller) < idag0; }), '⏰', 'Det här skulle ha gjorts tidigare.'],
-      ['I dag', u.filter(function (x) { return !x.klar && new Date(x.forfaller) >= idag0 && new Date(x.forfaller) <= idag1; }), '☀️', 'Bocka av när det är gjort.'],
-      ['Kommande', u.filter(function (x) { return !x.klar && new Date(x.forfaller) > idag1; }), '🗓️', 'Det som väntar de närmaste dagarna.'],
-      ['Klara', u.filter(function (x) { return x.klar; }), '✅', 'Bra jobbat. Klicka på bocken för att ångra.']
+      ['I dag', u.filter(function (x) { return !x.klar && new Date(x.forfaller) >= idag0 && new Date(x.forfaller) <= idag1; }), '<svg class="emo-ik" aria-hidden="true"><use href="#i-sol"/></svg>', 'Bocka av när det är gjort.'],
+      ['Kommande', u.filter(function (x) { return !x.klar && new Date(x.forfaller) > idag1; }), '<svg class="emo-ik" aria-hidden="true"><use href="#i-kalender"/></svg>', 'Det som väntar de närmaste dagarna.'],
+      ['Klara', u.filter(function (x) { return x.klar; }), '<svg class="emo-ik" aria-hidden="true"><use href="#i-klar"/></svg>', 'Bra jobbat. Klicka på bocken för att ångra.']
     ];
     var dagens = u.filter(function (x) { return new Date(x.forfaller) <= idag1 && (!x.klar || (x.klarTid && new Date(x.klarTid) >= idag0)); });
     var dagKlara = dagens.filter(function (x) { return x.klar; }).length;
@@ -3020,7 +3020,7 @@
     var mening = kvarIdag.length
       ? 'Du har <b>' + kvarIdag.length + (kvarIdag.length === 1 ? ' uppgift' : ' uppgifter') + ' kvar i dag</b>' + (sena ? ', varav ' + sena + ' försenad' + (sena === 1 ? '' : 'e') : '') + '.' +
         (imorgon.length ? ' I morgon väntar ' + imorgon.length + (imorgon.length === 1 ? ' till.' : ' till.') : '')
-      : (dagens.length ? 'Allt för i dag är klart. ✨' : 'Inget inplanerat i dag.') + (imorgon.length ? ' I morgon väntar ' + imorgon.length + (imorgon.length === 1 ? ' uppgift.' : ' uppgifter.') : '');
+      : (dagens.length ? 'Allt för i dag är klart.' : 'Inget inplanerat i dag.') + (imorgon.length ? ' I morgon väntar ' + imorgon.length + (imorgon.length === 1 ? ' uppgift.' : ' uppgifter.') : '');
     var DAGK = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
     var vecka = [];
     for (var v = 0; v < 7; v++) {
@@ -3029,7 +3029,7 @@
       vecka.push({ d: d, l: u.filter(function (x) { return !x.klar && new Date(x.forfaller) >= d && new Date(x.forfaller) <= d1; }) });
     }
     var h = new Date().getHours();
-    var dygnEmoji = h < 5 || h >= 22 ? '🌙' : h < 10 ? '🌅' : h < 17 ? '☀️' : '🌆';
+    var dygnEmoji = h < 5 || h >= 22 ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-mane"/></svg>' : h < 10 ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-soluppgang"/></svg>' : h < 17 ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-sol"/></svg>' : '<svg class="emo-ik" aria-hidden="true"><use href="#i-mane"/></svg>';
     var topp = '<section class="dagtopp kort kort--mork" data-in>' +
       '<div class="dagtopp__ord"><p class="etikett etikett--ljus">Din dag · ' + dagNamn(idag0) + '</p>' +
         '<h2>' + IH.hej() + ', ' + e(forsta(jag.namn)) + '. <span class="dagtopp__emoji" aria-hidden="true">' + dygnEmoji + '</span></h2>' +
@@ -3040,7 +3040,7 @@
         }).join('') + '</div>' : '') + '</div>' +
       '<div class="dagtopp__ring' + (dagens.length && dagKlara === dagens.length ? ' dagtopp__ring--klar' : '') + (dagKlara ? '' : ' dagtopp__ring--noll') + '" style="--p:' + (andel * 100).toFixed(1) + '">' +
         '<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50"/><circle class="dagtopp__fyll" cx="60" cy="60" r="50" pathLength="100"/></svg>' +
-        '<span><b>' + dagKlara + '<em>/' + dagens.length + '</em></b><small>' + (dagens.length && dagKlara === dagens.length ? 'Dagen är klar 🎉' : 'klara i dag') + '</small></span></div>' +
+        '<span><b>' + dagKlara + '<em>/' + dagens.length + '</em></b><small>' + (dagens.length && dagKlara === dagens.length ? 'Dagen är klar' : 'klara i dag') + '</small></span></div>' +
       '<div class="dagtopp__vecka" aria-label="De närmaste sju dagarna">' + vecka.map(function (x, n) {
         var helg = x.d.getDay() % 6 === 0;
         return '<span class="dagkort' + (n === 0 ? ' dagkort--idag' : '') + (helg ? ' dagkort--helg' : '') + (x.l.length ? ' dagkort--har' : '') + '" style="--n:' + n + '">' +
@@ -3053,7 +3053,7 @@
       topp + '<form class="nyuppg kort" data-form="uppgift" data-in><span class="nyuppg__plus" aria-hidden="true">' + i('plus') + '</span><input name="text" placeholder="Ny uppgift – t.ex. Ring Karin om tomten" required autocomplete="off">' +
       '<select name="kund" aria-label="Kund"><option value="">Ingen kund</option>' + db().kunder.map(function (k) { return '<option value="' + k.id + '">' + e(k.namn) + '</option>'; }).join('') + '</select>' +
       '<input type="date" name="datum" value="' + IH.dagStr() + '" aria-label="Datum"><button class="knapp knapp--mork knapp--liten" type="submit">Lägg till</button></form>' +
-      '<p class="nyuppg__tips">💡 Skriv som du pratar – "Ring …", "Skicka offert …" eller "Platsbesök …" får rätt ikon av sig själv.</p>' +
+      '<p class="nyuppg__tips"><svg class="emo-ik" aria-hidden="true"><use href="#i-glodlampa"/></svg> Skriv som du pratar – "Ring …", "Skicka offert …" eller "Platsbesök …" får rätt ikon av sig själv.</p>' +
       grupper.filter(function (g) { return g[1].length; }).map(function (g) {
         return '<section class="kort uppgrupp' + (g[0] === 'Försenade' ? ' uppgrupp--sen' : '') + (g[0] === 'Klara' ? ' uppgrupp--klara' : '') + '" data-in><header class="kort__huvud"><h2><span class="uppgrupp__emoji" aria-hidden="true">' + g[2] + '</span>' +
           '<span class="uppgrupp__namn">' + g[0] + '<small>' + g[3] + '</small></span><b class="chip">' + g[1].length + '</b></h2></header>' +
@@ -3094,9 +3094,9 @@
   // kvadratmeter, ändringar som lyser med skillnaden och en knapp som
   // räknar dem. Tillvalen får emoji efter vad de är. Återställningen
   // kräver ett andra klick.
-  var POST_EMOJI = [[/frakt|leverans/i, '🚚'], [/montage/i, '🔧'], [/kran/i, '🏗️'], [/ritning|bygglov/i, '📐'], [/altan|trä/i, '🪵'],
-    [/kök|badrum/i, '🛁'], [/kamin|skorsten|eldstad/i, '🔥']];
-  function postEmoji(t) { for (var n = 0; n < POST_EMOJI.length; n++) if (POST_EMOJI[n][0].test(t)) return POST_EMOJI[n][1]; return '➕'; }
+  var POST_EMOJI = [[/frakt|leverans/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg>'], [/montage/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-nyckelverktyg"/></svg>'], [/kran/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-projekt"/></svg>'], [/ritning|bygglov/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-linjal"/></svg>'], [/altan|trä/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-virke"/></svg>'],
+    [/kök|badrum/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-bad"/></svg>'], [/kamin|skorsten|eldstad/i, '<svg class="emo-ik" aria-hidden="true"><use href="#i-eld"/></svg>']];
+  function postEmoji(t) { for (var n = 0; n < POST_EMOJI.length; n++) if (POST_EMOJI[n][0].test(t)) return POST_EMOJI[n][1]; return '<svg class="emo-ik" aria-hidden="true"><use href="#i-plus"/></svg>'; }
   function prisText(n) { return String(Math.round(n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
   function prisTal(v) { return Number(String(v || '').replace(/[^0-9]/g, '')) || 0; }
 
@@ -3114,12 +3114,12 @@
     };
     var html = '<h1 class="dold">Inställningar</h1>' +
       '<section class="instopp kort kort--mork" data-in>' +
-        '<div class="instopp__ord"><p class="etikett etikett--ljus">Prislistan</p><h2>Priserna bakom varje <span class="ihop">offert <span aria-hidden="true">💰</span></span></h2>' +
+        '<div class="instopp__ord"><p class="etikett etikett--ljus">Prislistan</p><h2>Priserna bakom varje <span class="ihop">offert <span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-pengar"/></svg></span></span></h2>' +
           '<p>Ändra ett pris och spara. Nya offerter och kalkylen i kundmötet räknar med det direkt – offerter som redan är skickade behåller sina priser.</p></div>' +
         '<div class="instopp__tal">' +
-          '<div><span aria-hidden="true">🏠</span><small>Husen</small><b>' + (priser.length ? IH.kort(minP) + ' – ' + IH.kort(maxP) : '–') + '</b><em>' + hus.length + ' modeller</em></div>' +
-          '<div><span aria-hidden="true">🧩</span><small>Tillval och poster</small><b>' + pl.poster.length + ' st</b><em>' + (pl.poster.length ? 'från ' + IH.kort(Math.min.apply(null, pl.poster.map(function (p) { return p.pris || 0; }))) : 'inga än') + '</em></div>' +
-          '<div><span aria-hidden="true">💾</span><small>Senast sparad</small><b>' + sparad + '</b><em>Exempelpriser</em></div>' +
+          '<div><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg></span><small>Husen</small><b>' + (priser.length ? IH.kort(minP) + ' – ' + IH.kort(maxP) : '–') + '</b><em>' + hus.length + ' modeller</em></div>' +
+          '<div><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-rutnat"/></svg></span><small>Tillval och poster</small><b>' + pl.poster.length + ' st</b><em>' + (pl.poster.length ? 'från ' + IH.kort(Math.min.apply(null, pl.poster.map(function (p) { return p.pris || 0; }))) : 'inga än') + '</em></div>' +
+          '<div><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-ladda-ner"/></svg></span><small>Senast sparad</small><b>' + sparad + '</b><em>Exempelpriser</em></div>' +
         '</div></section>' +
       '<div class="rutnat rutnat--2 prisrutnat">' +
       '<form class="kort prisform" data-form="prislista" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('hus') + '</span>Husen</h2><span class="chip">Pris per hus</span></header><div class="kort__kropp prislista">' +
@@ -3132,7 +3132,7 @@
           return rad(p.text, '', '<span class="prisrad__emoji" aria-hidden="true">' + postEmoji(p.text) + '</span>', 'p-' + p.id, p.pris || 0);
         }).join('') + '<div class="formular__knappar"><button class="knapp knapp--mork prisform__spara" type="submit" data-spara>Spara priserna</button></div></div></form>' +
       '</div>' +
-      '<section class="kort kort--mork installning__proto" data-in><span class="installning__emoji" aria-hidden="true">🧪</span><div><p class="etikett etikett--ljus">Prototyp</p><h2>Allt sparas i den här webbläsaren</h2>' +
+      '<section class="kort kort--mork installning__proto" data-in><span class="installning__emoji" aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-kolv"/></svg></span><div><p class="etikett etikett--ljus">Prototyp</p><h2>Allt sparas i den här webbläsaren</h2>' +
         '<p>Kunderna, förfrågningarna och priserna är påhittade exempel. Den skarpa versionen tar emot riktiga förfrågningar från formuläret på legohusstockholm.se och kräver inloggning med lösenord.</p></div>' +
         '<button class="knapp knapp--glas" type="button" data-g="aterstall">' + i('aterstall') + '<span>Återställ exempeldata</span></button></section>';
     return {

@@ -18,3 +18,8 @@
   .antal-knapp[data-antal-steg="1"] { right: 4px; }
 }
 @media (prefers-reduced-motion: reduce) { .antal-knapp { transition: none; } }
+
+/* Linjeikonerna i stället för emoji (ikonbladet i index.html, flyttat från Uperformance CRM).
+   De ärver storleken från sin plats (1em) och ritas i den djupa virkesfärgen. */
+.emo-ik { display: inline-block; flex: none; width: 1.05em; height: 1.05em; vertical-align: -0.16em; overflow: visible;
+  fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; color: var(--virke-djup); }
