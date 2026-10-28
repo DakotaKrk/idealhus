@@ -8551,3 +8551,7 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .ag-flytta .i { width: 13px; height: 13px; }
 .ag-flytta input { width: 128px; padding: 2px 4px; border: 0; background: transparent; font: inherit; color: inherit; }
 @media (max-width: 560px) { form.nyuppg.kort input[name="text"] { font-size: .92rem; } }
+@media (max-width: 700px) { .vy .kg { grid-template-columns: minmax(0, 1fr) !important; } .vy .kg > *, .vy .kkontakt { min-width: 0; max-width: 100%; } .vy .kkontakt__tal { width: 100%; } }
+.logga-mote .falt-rad { grid-template-columns: minmax(0, 1fr) 176px; }
+.logga-mote .antal-falt input { min-width: 44px; text-align: center; }
+@media (max-width: 700px) { .vy .kg__hoger, .vy .kg__vanster { min-width: 0; grid-template-columns: minmax(0, 1fr); } .vy .kg__hoger > *, .vy .kg__vanster > * { min-width: 0; } .vy .kkontakt__tal button { min-width: 0; } }

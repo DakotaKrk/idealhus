@@ -471,3 +471,5 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; 
 @media (max-width: 720px) { .chf .chf-huvud > b { visibility: hidden; } .chf .ch-fot { padding: 6px 8px 10px !important; } .chf .ch-fot > * { margin-left: 0 !important; } }
 /* Chattsidan på mobil: skrivrutan står kvar ovanför bottenmenyn */
 @media (max-width: 720px) { .vy .ch .ch-fot { position: fixed; left: 10px; right: 10px; bottom: 78px; z-index: 40; border-radius: 18px; background: #fffdf9; box-shadow: 0 -6px 24px -12px rgba(60, 40, 15, .45); } .vy .ch .ch-trad { padding-bottom: 120px; } }
+/* Supportläget på mobil: skrivrutan hamnar ovanför bandet */
+@media (max-width: 720px) { html[data-support] .vy .ch .ch-fot { bottom: 150px; } html[data-support] .vy .ch .ch-trad { padding-bottom: 200px; } }
