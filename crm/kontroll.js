@@ -205,6 +205,8 @@
     return { titel: 'Kontrollcentral', html: html };
   };
 
+  IH.adminForslag = function () { var brott = IH.sak ? IH.sak.kopplingsBrott() : []; return forslagLista(brott, dataLage(brott), driftLage()); };
+
   /* Verktygen ------------------------------------------------------------------------------------------ */
   var G = IH.G;
   var ladda = function (namn, text, typ) { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: typ })); a.download = namn; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800); };

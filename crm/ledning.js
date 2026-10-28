@@ -79,7 +79,7 @@
         (jag.roll === 'admin' ? lank('#/kontroll', 'server', 'Kontrollcentralen', 'Systemhälsan och kontona') + lank('#/sakerhet', 'skold', 'Säkerhetshubben', 'Sju kontroller') : '') +
         lank('#/chatt', 'prat', 'Meddelanden', olasta ? olasta + ' olästa' : 'Allt är läst') + lank('#/att-gora', 'todo', 'Att göra', 'Dina uppgifter') +
       '</nav>' +
-      '<section class="km-del km-konton"><p class="km-rubrik">Byt konto</p><div class="km-kontolista">' + IH.ANVANDARE.filter(function (u) { return u.id !== jag.id; }).map(function (u) {
+      '<section class="km-del km-konton"><p class="km-rubrik">Byt konto</p><div class="km-kontolista">' + IH.ANVANDARE.filter(function (u) { return u.id !== jag.id && !u.inaktiv; }).map(function (u) {
         return '<button type="button" class="km-konto" data-g="valj-anvandare" data-id="' + u.id + '" title="' + e(u.titel + ' · ' + narvaro(u.id).namn) + '">' + avatar(u) +
           '<span><b>' + e(u.namn) + '</b><small>' + e(u.titel.split(' · ')[0]) + '</small></span></button>';
       }).join('') + '</div>' +

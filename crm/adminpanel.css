@@ -1,0 +1,115 @@
+/* Legohus CRM – adminpanelen (adminpanel.js): samma upplägg som Uperformance, i Legohus färger. Bygger på kontroll.css (ao-*). */
+.ap-hjalte { grid-template-columns: minmax(0, 1fr) minmax(320px, 440px); }
+.ap-tal { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ap-tal .ao-tal { padding: 14px; }
+.ap-tal .ao-tal strong { font-size: 1.35rem; }
+
+/* Filter och sök */
+.ap-filterrad { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; }
+.ap-filter { min-height: 34px; padding: 6px 13px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); font: 600 .78rem/1 var(--rubrik); color: var(--text-2); cursor: pointer; transition: background-color .2s, box-shadow .2s, color .2s, transform .15s; }
+.ap-filter:hover { box-shadow: inset 0 0 0 1.5px var(--virke); }
+.ap-filter:active { transform: scale(.96); }
+.ap-filter[aria-pressed="true"] { background: var(--kol); box-shadow: none; color: #fff; }
+.ap-sok { width: 180px; min-height: 34px; padding: 6px 14px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); font: inherit; font-size: .82rem; }
+.ap-sok:focus { outline: none; box-shadow: inset 0 0 0 1.5px var(--virke); }
+
+/* 01 Kontotabellen */
+.ap-tabell { display: grid; }
+.ap-rad { display: grid; grid-template-columns: minmax(200px, 1.6fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(90px, .7fr) auto; align-items: center; gap: 14px; padding: 10px 12px; border-radius: 16px; transition: background-color .2s; }
+.ap-rad:not(.ap-rad--huvud):hover { background: #fff; }
+.ap-rad + .ap-rad:not([hidden]) { box-shadow: 0 -1px 0 rgba(27, 25, 21, .05); }
+.ap-rad[hidden] { display: none; }
+.ap-rad--huvud { padding-top: 0; padding-bottom: 8px; font: 600 .66rem/1 var(--rubrik); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
+.ap-vem { display: flex; align-items: center; gap: 12px; min-width: 0; color: inherit; text-decoration: none; }
+.ap-vem .avatar { flex: none; width: 40px; height: 40px; }
+.ap-vem > span:last-child { display: grid; min-width: 0; }
+.ap-vem strong { font: 600 .92rem/1.2 var(--rubrik); }
+.ap-vem small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .76rem; color: var(--text-3); }
+.ap-du { margin-left: 4px; padding: 2px 7px; border-radius: 999px; background: var(--virke-ljus); font: 600 .62rem/1 var(--rubrik); color: var(--virke-djup); vertical-align: middle; }
+.ap-roller { display: flex; flex-wrap: wrap; gap: 4px; }
+.ap-roll { padding: 4px 9px; border-radius: 999px; background: #f3ece1; font: 600 .7rem/1.1 var(--rubrik); color: var(--text-2); }
+.ap-roll[data-roll="Admin"] { background: var(--kol); color: #fff; }
+.ap-roll[data-roll="Chef"] { background: var(--virke-ljus); color: var(--virke-djup); }
+.ap-roll[data-roll="Produktion"] { background: #e1f3e7; color: #1d6b40; }
+.ap-rad .lp-status { font-size: .8rem; color: var(--text-2); }
+.ap-senast { font-size: .8rem; color: var(--text-3); }
+.ap-atgarder { display: flex; justify-content: flex-end; gap: 6px; }
+.ap-atgarder .knapp { gap: 6px; }
+.ap-atgarder .emo-ik { width: 15px; height: 15px; }
+.ap-ikonknapp { width: 34px; padding: 0; justify-content: center; }
+.ap-plats { width: 34px; }
+.ap-plats--bred { width: 104px; }
+.ap-atgarder [data-g="ap-aktiv"] { min-width: 104px; justify-content: center; }
+.ap-atgarder .knapp:disabled { opacity: .45; cursor: not-allowed; }
+.ap-inaktiv .ap-vem, .ap-inaktiv .ap-roller, .ap-inaktiv .ap-senast { opacity: .5; }
+.ap-tom { padding: 12px; }
+
+/* 02 Förslag */
+.ap-snabb { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.ap-snabb .emo-ik { width: 15px; height: 15px; }
+.ap-upp { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+
+/* 03 Behörighetsmatrisen */
+.ap-matris { display: grid; }
+.ap-matris__rad { display: grid; grid-template-columns: minmax(0, 1fr) repeat(4, 56px); align-items: center; padding: 9px 6px; border-radius: 12px; font-size: .84rem; }
+.ap-matris__rad:not(.ap-matris__huvud):hover { background: #fff; }
+.ap-matris__rad + .ap-matris__rad { box-shadow: 0 -1px 0 rgba(27, 25, 21, .05); }
+.ap-matris__huvud { font: 600 .66rem/1 var(--rubrik); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
+.ap-matris__rad > span:not(:first-child) { display: grid; place-items: center; }
+.ap-matris [data-ratt="ja"] .emo-ik { width: 22px; height: 22px; padding: 4px; box-sizing: border-box; border-radius: 50%; background: #e1f3e7; color: #1d7a47; }
+.ap-matris [data-ratt="nej"] i { font-style: normal; color: #c9c2b6; }
+
+/* 04 Inställningar */
+.ap-inst { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 6px; }
+.ap-inst + .ap-inst { box-shadow: 0 -1px 0 rgba(27, 25, 21, .06); }
+.ap-inst > div { display: grid; gap: 3px; min-width: 0; }
+.ap-inst strong { font: 600 .88rem/1.2 var(--rubrik); }
+.ap-inst small { font-size: .78rem; line-height: 1.45; color: var(--text-3); }
+.ap-inst .knapp { flex: none; gap: 6px; }
+.ap-inst .emo-ik { width: 15px; height: 15px; }
+.ap-select { flex: none; min-height: 38px; padding: 6px 34px 6px 14px; border: 0; border-radius: 12px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%237a7266' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") right 12px center / 12px no-repeat;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .12); font: 600 .82rem/1 var(--rubrik); color: var(--kol); appearance: none; cursor: pointer; }
+.ap-select:focus { outline: none; box-shadow: inset 0 0 0 1.5px var(--virke); }
+
+/* 05 Data och system */
+.ap-data { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ap-data li { display: grid; grid-template-columns: 110px minmax(0, 1fr) 44px; align-items: center; gap: 12px; font-size: .84rem; }
+.ap-data strong { font: 700 .86rem/1 var(--rubrik); text-align: right; }
+.ap-stapel { height: 8px; border-radius: 8px; background: #f3ece1; overflow: hidden; }
+.ap-stapel i { display: block; width: calc(var(--andel) * 100%); height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--virke-2), var(--virke-djup)); transform-origin: left; animation: ap-stapel .9s var(--mjuk) both; }
+@keyframes ap-stapel { from { transform: scaleX(0); } }
+.ap-fakta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 16px 0 0; }
+.ap-fakta > div { padding: 10px 12px; border-radius: 14px; background: #fbf7f0; min-width: 0; }
+.ap-fakta dt { font: 600 .64rem/1.2 var(--rubrik); letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+.ap-fakta dd { margin: 3px 0 0; font-size: .8rem; line-height: 1.35; }
+.ao-fot label.knapp { cursor: pointer; }
+.ao-fot .knapp .i { width: 15px; height: 15px; }
+
+/* 06 Loggen */
+.ap-typ { display: inline-block; margin-right: 6px; padding: 1px 7px; border-radius: 999px; background: #f3ece1; font: 600 .62rem/1.5 var(--rubrik); color: var(--text-2); }
+.ap-typ[data-typ="konto"] { background: #e2eef6; color: #3c6c8c; }
+.ap-typ[data-typ="sakerhet"] { background: var(--virke-ljus); color: var(--virke-djup); }
+
+@media (max-width: 1100px) {
+  .ap-rad { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) auto; }
+  .ap-rad > :nth-child(3), .ap-rad > :nth-child(4) { display: none; }
+  .ap-knapptext { display: none; }
+  .ap-atgarder [data-g="ap-aktiv"] { min-width: 34px; width: 34px; padding: 0; }
+  .ap-plats--bred { width: 34px; }
+}
+@media (max-width: 1000px) { .ap-hjalte { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) {
+  .ap-rad { grid-template-columns: minmax(0, 1fr) auto; } .ap-rad > :nth-child(2) { display: none; }
+  .ap-filterrad { justify-content: flex-start; } .ap-sok { width: 100%; } .ap-fakta { grid-template-columns: minmax(0, 1fr); }
+  .ap-matris__rad { grid-template-columns: minmax(0, 1fr) repeat(4, 40px); } .ap-inst { flex-direction: column; align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) { .ap-stapel i { animation: none; } }
+
+/* Fasta mått så att raderna linjerar även när knappar saknas, och väljaren tar inte hela bredden */
+.ap-rad { grid-template-columns: minmax(200px, 1.6fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(90px, .7fr) 262px; }
+.ap-plats { display: inline-block; flex: none; }
+.ap-inst > div { flex: 1; }
+.ap-inst .ap-select { width: auto; min-width: 150px; flex: none; }
+a.sh-knapp { text-decoration: none; color: inherit; }
+@media (max-width: 1100px) { .ap-rad { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) 122px; } }
+@media (max-width: 600px) { .ap-rad { grid-template-columns: minmax(0, 1fr) 122px; } }

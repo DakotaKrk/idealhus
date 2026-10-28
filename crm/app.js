@@ -803,7 +803,7 @@
     var jag = IH.jag();
     IH.oppnaArk({
       titel: 'Byt användare', under: 'Exempelanvändare i prototypen.', ikon: 'kunder',
-      kropp: '<div class="lista kort">' + IH.ANVANDARE.map(function (u) {
+      kropp: '<div class="lista kort">' + IH.ANVANDARE.filter(function (u) { return !u.inaktiv; }).map(function (u) {
         return '<button class="lista__rad" type="button" data-g="valj-anvandare" data-id="' + u.id + '"><span class="avatar" style="--av:' + u.farg + '">' +
           IH.initialer(u.namn) + '</span><span class="lista__text"><b>' + IH.e(u.namn) + '</b><small>' + u.titel + '</small></span>' +
           (u.id === jag.id ? '<span class="status" style="--s:#7fe0a6">Inloggad</span>' : IH.i('pil')) + '</button>';
