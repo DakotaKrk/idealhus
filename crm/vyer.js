@@ -18,15 +18,20 @@
   function viktat(lista) {
     return lista.reduce(function (s, a) { return s + (a.varde || 0) * sannolikhet(a) / 100; }, 0);
   }
-  function sannolikhet(a) {
-    if (a.steg === 'vunnen') return 100;
-    var bas = IH.steg(a.steg).sannolikhet;
+  // Chansen att affären blir order: grundchansen för steget, justerad efter signalerna.
+  // sannSkal ger samma räkning i ord – den visas när man håller över ringen på kortet.
+  function sannRakna(a) {
+    if (a.steg === 'vunnen') return { p: 100, skal: ['Order signerad'] };
+    var s = IH.steg(a.steg), bas = s.sannolikhet, skal = ['Grundchans ' + bas + ' % för ' + s.namn.toLowerCase()];
     var dagar = IH.dagarSedan(a.andrad);
     var o = IH.offertFor(a.id);
-    if (o && o.status === 'skickad' && a.steg === 'offert') bas += 5;
-    if (dagar > 14) bas -= 10;
-    return Math.max(5, Math.min(95, bas));
+    if (o && o.status === 'skickad' && a.steg === 'offert') { bas += 5; skal.push('+5 %: offerten är skickad'); }
+    if (dagar > 14) { bas -= 10; skal.push('−10 %: ingen rörelse på ' + dagar + ' dagar'); }
+    else if (dagar <= 3) { bas += 5; skal.push('+5 %: rörelse de senaste dagarna'); }
+    return { p: Math.max(5, Math.min(95, bas)), skal: skal };
   }
+  function sannolikhet(a) { return sannRakna(a).p; }
+  function sannSkal(a) { return sannRakna(a).skal.join('\n'); }
   IH.sannolikhet = sannolikhet;
   function vunnetIAr() {
     var ar = new Date().getFullYear();
@@ -56,8 +61,8 @@
     }
     return '<div class="tom">' + i(ikon) + '<p>' + text + '</p>' + k + '</div>';
   }
-  function ring(p, farg) {
-    return '<span class="ring" style="--p:' + Math.round(p) + ';--f:' + (farg || 'var(--virke)') + '"><b>' + Math.round(p) + '</b></span>';
+  function ring(p, farg, titel) {
+    return '<span class="ring" style="--p:' + Math.round(p) + ';--f:' + (farg || 'var(--virke)') + '"' + (titel ? ' title="' + e(titel) + '"' : '') + '><b>' + Math.round(p) + '</b></span>';
   }
   function forsta(namn) { return String(namn || '').split(' ')[0]; }
   var DAGAR = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
@@ -1246,7 +1251,8 @@
     var tid = d <= 3 ? 'farsk' : d <= 10 ? 'lugn' : 'still';
     return '<article class="aff aff--' + tid + '" data-aff="' + a.id + '" tabindex="0" style="--f:' + s.farg + '" aria-label="' + e(a.titel) + ', ' + IH.kort(a.varde) + '">' +
       '<div class="aff__topp">' + (m ? '<span class="aff__bild"><img src="' + m.tumme + '" alt="" loading="lazy" decoding="async"></span>' : '') +
-      '<span class="aff__modell">' + (m ? e(m.namn) : '') + '</span>' + (a.steg === 'vunnen' ? '<span class="aff__vunnen">' + i('trofe') + '</span>' : ring(p, s.farg)) + '</div>' +
+      '<span class="aff__modell">' + (m ? e(m.namn) : '') + '</span>' + (a.steg === 'vunnen' ? '<span class="aff__vunnen">' + i('trofe') + '</span>' : ring(p, s.farg, sannSkal(a))) +
+        (a.steg !== 'vunnen' ? '<button type="button" class="aff__flytta" data-g="aff-flyttmeny" data-id="' + a.id + '" aria-label="Flytta affären" title="Flytta">' + i('pil') + '</button>' : '') + '</div>' +
       '<b class="aff__titel">' + e(a.titel) + '</b>' +
       '<span class="aff__kund">' + kundAvatar(k, true) + e(k ? k.namn : '') + '</span>' +
       '<div class="aff__fot"><span class="tal">' + IH.kort(a.varde) + '</span>' +
@@ -1409,7 +1415,7 @@
     var docka = $('.forlustdocka');
     tavla.addEventListener('pointerdown', function (ev) {
       var kort = ev.target.closest('.aff');
-      if (!kort || ev.button !== 0) return;
+      if (!kort || ev.button !== 0 || ev.target.closest('button')) return;
       var startX = ev.clientX, startY = ev.clientY, drar = false, flyg = null, forraX = startX, lutning = 0;
       var rect = kort.getBoundingClientRect();
       var id = kort.getAttribute('data-aff');
@@ -1448,9 +1454,11 @@
         var under = document.elementFromPoint(e2.clientX, e2.clientY);
         var spalt = under && under.closest('.spalt');
         var iDocka = under && under.closest('.forlustdocka');
-        var nyttMal = iDocka ? 'forlorad' : spalt ? spalt.getAttribute('data-steg') : null;
+        var iBand = under && under.closest('.stegband [data-steg]');
+        var nyttMal = iDocka ? 'forlorad' : spalt ? spalt.getAttribute('data-steg') : iBand ? iBand.getAttribute('data-steg') : null;
         if (nyttMal !== mal) {
-          $$('.spalt--mal').forEach(function (x) { x.classList.remove('spalt--mal'); });
+          $$('.spalt--mal, .stegband--mal').forEach(function (x) { x.classList.remove('spalt--mal', 'stegband--mal'); });
+          if (iBand && nyttMal !== aff.steg) iBand.classList.add('stegband--mal');
           if (docka) docka.classList.toggle('mal', nyttMal === 'forlorad');
           if (spalt && nyttMal !== aff.steg) spalt.classList.add('spalt--mal');
           mal = nyttMal;
@@ -1467,7 +1475,7 @@
         document.removeEventListener('pointercancel', slapp);
         if (!drar) return;
         document.documentElement.classList.remove('drar');
-        $$('.spalt--mal').forEach(function (x) { x.classList.remove('spalt--mal'); });
+        $$('.spalt--mal, .stegband--mal').forEach(function (x) { x.classList.remove('spalt--mal', 'stegband--mal'); });
         if (docka) docka.classList.remove('syns', 'mal');
         var klar = function () { if (flyg) flyg.remove(); kort.classList.remove('aff--spok'); };
         if (mal === 'forlorad') { klar(); forloraArk(id); return; }
@@ -1494,13 +1502,25 @@
     });
     tavla.addEventListener('click', function (ev) {
       var kort = ev.target.closest('.aff');
-      if (!kort || kort.dataset.dragen) return;
+      if (!kort || kort.dataset.dragen || ev.target.closest('button')) return;
       affArk(kort.getAttribute('data-aff'));
     });
     tavla.addEventListener('keydown', function (ev) {
       var kort = ev.target.closest('.aff');
       if (!kort) return;
+      if (ev.target !== kort) return;
       if (ev.key === 'Enter') { affArk(kort.getAttribute('data-aff')); return; }
+      if (!ev.shiftKey && /^Arrow(Up|Down|Left|Right)$/.test(ev.key)) {
+        var spalt = kort.closest('.spalt'), iSpalt = $$('.aff', spalt), n = iSpalt.indexOf(kort), mal = null;
+        if (ev.key === 'ArrowUp') mal = iSpalt[n - 1];
+        else if (ev.key === 'ArrowDown') mal = iSpalt[n + 1];
+        else {
+          var spalter = $$('.spalt', tavla), j = spalter.indexOf(spalt), dir = ev.key === 'ArrowRight' ? 1 : -1;
+          for (j += dir; j >= 0 && j < spalter.length && !mal; j += dir) { var l = $$('.aff', spalter[j]); if (l.length) mal = l[Math.min(n, l.length - 1)]; }
+        }
+        if (mal) { ev.preventDefault(); mal.focus(); mal.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: IH.lugn ? 'auto' : 'smooth' }); }
+        return;
+      }
       if (ev.shiftKey && (ev.key === 'ArrowRight' || ev.key === 'ArrowLeft')) {
         ev.preventDefault();
         var a = IH.affar(kort.getAttribute('data-aff'));
@@ -1514,19 +1534,80 @@
     var a = IH.affar(id);
     if (!a || a.steg === steg) return;
     var fran = IH.steg(a.steg).namn;
+    var forraKort = rect ? null : $('.aff[data-aff="' + id + '"]');
+    var fore = forraKort ? forraKort.getBoundingClientRect() : null;
     a.steg = steg;
     a.andrad = new Date().toISOString();
     if (steg === 'vunnen') {
-      vinn(a, rect);
+      vinn(a, rect || fore);
       return;
     }
     a.vunnen = null;
     IH.logga('system', 'Flyttad från ' + fran + ' till ' + IH.steg(steg).namn + '.', a.kund, a.id);
     IH.spara();
     IH.ritaOm();
+    if (fore) flipFran(id, fore);
     IH.lysUpp('[data-aff="' + id + '"]', 'aff--ny');
     IH.toast('Flyttad till ' + IH.steg(steg).namn, a.titel, 'tavla');
   }
+
+  // Kortet flyger från sin gamla plats till den nya i en båge (samma rörelse som i Uperformance).
+  function flipFran(id, fran) {
+    var ny = $('.aff[data-aff="' + id + '"]');
+    if (!ny || !fran || IH.lugn || !ny.animate) return;
+    ny.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    var till = ny.getBoundingClientRect();
+    var dx = fran.left - till.left, dy = fran.top - till.top, r = dx >= 0 ? -1 : 1;
+    ny.style.zIndex = 60;
+    var anim = ny.animate([
+      { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(1.05)' },
+      { transform: 'translate(' + (dx * 0.5) + 'px,' + (dy * 0.5 - 50) + 'px) perspective(900px) rotateY(' + (r * 26) + 'deg) rotateZ(' + (-r * 5) + 'deg) scale(1.12)', offset: 0.45 },
+      { transform: 'translate(0,0) scale(1)' }
+    ], { duration: 850, easing: 'cubic-bezier(.22,1,.36,1)' });
+    anim.onfinish = function () { ny.style.zIndex = ''; };
+  }
+
+  // 4. Flyttmenyn: en knapp på kortet med alla steg – för pekskärmar och för den som inte vill dra.
+  var flyttmeny = null;
+  function stangFlyttmeny() {
+    if (!flyttmeny) return;
+    flyttmeny.remove(); flyttmeny = null;
+    document.removeEventListener('pointerdown', utanforFlyttmeny, true);
+  }
+  function utanforFlyttmeny(ev) { if (flyttmeny && !flyttmeny.contains(ev.target) && !ev.target.closest('[data-g="aff-flyttmeny"]')) stangFlyttmeny(); }
+  G['aff-flyttmeny'] = function (el) {
+    var id = el.getAttribute('data-id'), a = IH.affar(id);
+    var forra = flyttmeny && flyttmeny.getAttribute('data-id');
+    stangFlyttmeny();
+    if (!a || forra === id) return;
+    flyttmeny = document.createElement('div');
+    flyttmeny.className = 'flyttmeny';
+    flyttmeny.setAttribute('role', 'menu');
+    flyttmeny.setAttribute('data-id', id);
+    flyttmeny.innerHTML = '<p>Flytta till</p>' + IH.SALJSTEG.map(function (s) {
+      return '<button type="button" role="menuitem" data-g="aff-flytta-till" data-id="' + id + '" data-steg="' + s.id + '" style="--f:' + s.farg + '"' + (s.id === a.steg ? ' disabled aria-current="true"' : '') + '>' +
+        '<span class="flyttmeny__prick"></span>' + e(s.namn) + (s.id === a.steg ? '<small>nu</small>' : '') + '</button>';
+    }).join('') + '<button type="button" role="menuitem" class="flyttmeny__fara" data-g="aff-flytta-till" data-id="' + id + '" data-steg="forlorad">' + i('stang') + 'Förlorad</button>';
+    document.body.appendChild(flyttmeny);
+    var r = el.getBoundingClientRect(), b = flyttmeny.offsetWidth, h = flyttmeny.offsetHeight;
+    flyttmeny.style.left = Math.max(8, Math.min(window.innerWidth - b - 8, r.right - b)) + 'px';
+    flyttmeny.style.top = (r.bottom + h + 8 > window.innerHeight ? Math.max(8, r.top - h - 6) : r.bottom + 6) + 'px';
+    var forsta = flyttmeny.querySelector('button:not([disabled])');
+    if (forsta) forsta.focus({ preventScroll: true });
+    setTimeout(function () { document.addEventListener('pointerdown', utanforFlyttmeny, true); }, 0);
+  };
+  G['aff-flytta-till'] = function (el) {
+    var id = el.getAttribute('data-id'), steg = el.getAttribute('data-steg');
+    stangFlyttmeny();
+    if (steg === 'forlorad') forloraArk(id); else flyttaAffar(id, steg);
+  };
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && flyttmeny) { var id = flyttmeny.getAttribute('data-id'); stangFlyttmeny(); var k = $('.aff[data-aff="' + id + '"] .aff__flytta'); if (k) k.focus(); }
+    // "/" söker på säljtavlan, som i Uperformance (Ctrl K fungerar överallt)
+    if (ev.key === '/' && !ev.ctrlKey && !ev.metaKey && !ev.altKey && /^#\/salj/.test(location.hash) &&
+      !(ev.target.closest && ev.target.closest('input, textarea, select, [contenteditable], dialog'))) { ev.preventDefault(); if (IH.oppnaPalett) IH.oppnaPalett(); }
+  });
+  window.addEventListener('hashchange', stangFlyttmeny);
 
   function vinn(a, rect) {
     a.steg = 'vunnen';
