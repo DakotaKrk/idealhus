@@ -227,7 +227,8 @@
     var mitt = skan.kor ? '<small>Skannar</small><strong data-sh-pct>' + skan.pct + ' %</strong><span>' + e(skan.nu ? KORT[skan.nu] : 'Sju kontroller') + '</span>'
       : p == null ? '<span class="sh-mitt__ikon">' + ik('skold') + '</span><small>Säkerhet</small><span>Redo att skanna</span>'
       : '<strong>' + p + '</strong><small>Säkerhetspoäng</small><span>' + e(status) + '</span>';
-    return '<div class="sh-karna" data-sh-tilt aria-hidden="true"><div class="sh-scen"><i class="sh-golv"></i><i class="sh-orbit sh-o1"><b></b></i><i class="sh-orbit sh-o2"><b></b></i>' +
+    var noder = ''; for (var q = 0; q < 12; q++) { var vv = q / 12 * Math.PI * 2; noder += '<i class="sh-nod" style="left:' + (50 + Math.cos(vv) * 49).toFixed(1) + '%;top:' + (50 + Math.sin(vv) * 49).toFixed(1) + '%;--n:' + q + '"></i>'; }
+    return '<div class="sh-karna" data-sh-tilt aria-hidden="true"><div class="sh-scen"><i class="sh-golv"></i><i class="sh-svep"></i><i class="sh-puls"></i><i class="sh-puls sh-puls--2"></i><i class="sh-puls sh-puls--3"></i>' + noder + '<i class="sh-orbit sh-o1"><b></b></i><i class="sh-orbit sh-o2"><b></b></i>' +
       '<svg class="sh-ringar" viewBox="0 0 240 240"><path d="' + streck + '" class="sh-streck"/>' + ringar + '</svg><div class="sh-mitt">' + mitt + '</div></div></div>';
   }
 
@@ -248,7 +249,8 @@
     var knapp = function (ids, ikon, text, accent) { return '<button type="button" class="sh-knapp' + (accent ? ' sh-knapp--accent' : '') + '" data-g="sh-skanna" data-ids="' + ids + '"' + (skan.kor ? ' disabled' : '') + '>' + ik(ikon) + '<span>' + text + '</span></button>'; };
     var delar = '<ul class="sh-delar">' + KONTROLLER.map(function (k) { var r = S.senast[k.id]; return '<li data-lage="' + lageFor(r) + '" style="--d:' + FARG[k.id] + '"><i></i><span>' + KORT[k.id] + '</span><strong>' + (r ? poang(r.fynd) : '–') + '</strong></li>'; }).join('') +
       '<li class="sh-delar__total" data-ton="' + ton + '">' + ik(p == null ? 'radar' : p >= 90 ? 'skold' : 'skold-larm') + '<span>' + status + '</span><strong>' + (p == null ? '–' : p) + '</strong></li></ul>';
-    var hjalte = '<section class="sh-hjalte kort" data-ton="' + ton + '"' + (skan.kor ? ' data-skannar' : '') + '><div class="sh-rutnat" aria-hidden="true"></div>' +
+    var regn = ''; for (var c = 0; c < 18; c++) { var rad = ''; for (var z = 0; z < 22; z++) rad += '0123456789ABCDEF'.charAt((c * 7 + z * 13 + (z * c) % 5) % 16) + (z % 4 === 3 ? ' ' : ''); regn += '<span style="--n:' + c + ';left:' + (c * 5.6 + 1).toFixed(1) + '%">' + rad + '</span>'; }
+    var hjalte = '<section class="sh-hjalte sh-mork kort kort--mork" data-ton="' + ton + '"' + (skan.kor ? ' data-skannar' : '') + '><div class="sh-regn" aria-hidden="true">' + regn + '</div><div class="sh-rutnat" aria-hidden="true"></div><i class="sh-skanlinje" aria-hidden="true"></i>' +
       '<div class="sh-text"><p class="etikett"><i class="sh-live"></i>Säkerhetshubben · demoläget</p><h1>Säkerhet <em>i realtid.</em></h1>' +
         '<p class="sh-ingress">Kontrollerna körs i webbläsaren mot sidans kod och CRM:ets data – skadlig kod, uppdateringar, buggar, läckor, intrångsförsök, avvikande beteende och sådant som är trasigt.</p>' +
         '<div class="sh-knappar">' + knapp('', 'radar', 'Skanna allt', true) + knapp('uppdatering', 'uppgradera', 'Sök uppdateringar') + knapp('buggar', 'nyckelverktyg', 'Kontrollera buggar') + knapp('lacka', 'fingeravtryck', 'Läckkontroll') + knapp('intrang,beteende', 'skold-larm', 'Intrång och beteende') + '</div>' +
@@ -276,7 +278,21 @@
       (hist.length > 1 ? '<div class="sh-spark">' + sparkline(hist.map(function (x) { return x.poang || 0; }), 360, 70) + '</div>' : '') +
       (S.historik.length ? '<ul class="sh-histlista">' + S.historik.slice(0, 5).map(function (x) { var t = x.poang >= 90 ? 'gron' : x.poang >= 70 ? 'gul' : 'rod'; return '<li><strong data-ton="' + t + '">' + x.poang + '</strong><span>' + (x.vad === 'allt' ? 'Full skanning' : x.vad.split(',').map(function (id) { return KORT[id] || id; }).join(', ')) + '<small>' + e((IH.anvandare(x.av) || {}).namn || '') + ' · ' + IH.sedan(x.tid) + '</small></span></li>'; }).join('') + '</ul>' : '<p class="ad-not">Ingen skanning gjord ännu.</p>') +
       '<p class="ad-etikett">Säkerhetsloggen</p>' + ((db().sakerhet || []).length ? '<ol class="ad-logg">' + db().sakerhet.slice(0, 5).map(function (h) { var u = IH.anvandare(h.av); return '<li><span class="ad-logg__typ">' + e(h.typ) + '</span><span>' + e(String(h.text).slice(0, 96)) + '</span><small>' + IH.sedan(h.tid) + '</small></li>'; }).join('') + '</ol>' : '<p class="ad-not">Inga händelser ännu.</p>') + '</section>';
-    var html = hjalte + '<section class="ad-band kort sh-kontrollband"><h2>' + ik('skold') + 'Sju kontroller<small class="sh-antal">Varje kontroll kan köras för sig. Fynd med åtgärd har en knapp.</small></h2><div class="sh-kontroller">' + kontroller + '</div></section>' +
+    var logg = db().sakerhet || [], nu0 = Date.now(), inom = function (h, d) { return nu0 - new Date(h.tid) < d * 864e5; };
+    var vecka = []; for (var dd = 6; dd >= 0; dd--) { var d0 = new Date(); d0.setHours(0, 0, 0, 0); d0.setDate(d0.getDate() - dd); var d1 = new Date(d0.getTime() + 864e5); vecka.push({ d: d0, n: logg.filter(function (h) { var t = new Date(h.tid); return t >= d0 && t < d1; }).length }); }
+    var vmax = Math.max.apply(null, vecka.map(function (x) { return x.n; }).concat([1]));
+    var stoppade = logg.filter(function (h) { return h.typ === 'filskanning' && /Stoppad/.test(h.text); }).length, granskade = logg.filter(function (h) { return h.typ === 'filskanning'; }).length;
+    var konton = logg.filter(function (h) { return (h.typ === 'konto' || h.typ === 'atkomst') && inom(h, 30); }).length;
+    var drift = '<section class="sh-drift kort" data-in><header><span class="sh-drift__live"><i></i>Live</span><h2>Driftläget <em>just nu</em></h2><small>Räknat ur säkerhetsloggen i den här webbläsaren</small></header>' +
+      '<div class="sh-drift__tal">' + [
+        ['skold', 'Säkerhetspoäng', p == null ? '–' : p, p == null ? 'kör en skanning' : status, ton],
+        ['fingeravtryck', 'Händelser 7 dagar', logg.filter(function (h) { return inom(h, 7); }).length, plural(logg.length, 'händelse', 'händelser') + ' totalt', 'is'],
+        ['skold-larm', 'Stoppade filer', stoppade, plural(granskade, 'fil granskad', 'filer granskade'), stoppade ? 'rod' : 'gron'],
+        ['anvandare-plus', 'Konto och åtkomst', konton, 'ändringar 30 dagar', 'gul']
+      ].map(function (x, n) { return '<div class="sh-drift__ruta" data-ton="' + x[4] + '" style="--n:' + n + '"><span>' + ik(x[0]) + '</span><small>' + x[1] + '</small><b>' + x[2] + '</b><em>' + e(x[3]) + '</em></div>'; }).join('') + '</div>' +
+      '<div class="sh-drift__nedre"><div class="sh-vecka"><small>Händelser per dag</small><div>' + vecka.map(function (x, n) { return '<span style="--h:' + (x.n / vmax).toFixed(3) + ';--n:' + n + '" title="' + x.d.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' }) + ': ' + plural(x.n, 'händelse', 'händelser') + '"><i></i><b>' + 'SMTOTFL'.charAt(x.d.getDay()) + '</b></span>'; }).join('') + '</div></div>' +
+        '<div class="sh-ticker" aria-label="Senaste händelserna"><small>Senaste händelserna</small><div class="sh-ticker__band"><div class="sh-ticker__rull">' + (logg.length ? logg.slice(0, 8).concat(logg.slice(0, 8)).map(function (h) { return '<p><span class="sh-ticker__typ">' + e(h.typ) + '</span>' + e(String(h.text).slice(0, 90)) + '<time>' + IH.sedan(h.tid) + '</time></p>'; }).join('') : '<p>Inga händelser ännu – skanna, ladda upp en fil eller ändra ett konto så syns det här.</p>') + '</div></div></div></div></section>';
+    var html = hjalte + drift + '<section class="ad-band kort sh-kontrollband"><h2>' + ik('skold') + 'Sju kontroller<small class="sh-antal">Varje kontroll kan köras för sig. Fynd med åtgärd har en knapp.</small></h2><div class="sh-kontroller">' + kontroller + '</div></section>' +
       '<div class="ad-tva">' + terminal + historik + '</div>';
     return { titel: 'Säkerhet', html: html, efter: function (rot) { var t = rot.querySelector('[data-sh-terminal]'); if (t) t.scrollTop = t.scrollHeight; } };
   };
