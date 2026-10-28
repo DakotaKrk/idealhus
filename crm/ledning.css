@@ -395,3 +395,94 @@ html[data-vy-chef] .sido .sido__lank[data-vy="chef"] > .i { color: var(--virke-d
 .lp-kalform__typ input:focus-visible + span { outline: 2px solid var(--virke); outline-offset: 2px; }
 .lp-kalform__rad { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 900px) { .lp-kal__plus { opacity: 1; transform: none; width: 18px; height: 18px; } .lp-kal__tips { display: none; } }
+/* Kalendern, finare: initial i stället för prick, veckan vi är i, passerade dagar dämpade, dra och släpp, vyväxel och listvy */
+.lp-kal__dag { min-height: 104px; }
+.lp-kal__dag.vecka:not(.idag) { box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .28); }
+.lp-kal__dag.forbi:not(.idag) > .lp-kal__topp b { color: var(--text-3); }
+.lp-kal__dag.forbi:not(.idag) .lp-kal__h:not([data-sen]) { opacity: .7; }
+.lp-kal__h { gap: 5px; padding: 3px 6px 3px 3px; font-size: .68rem; border-radius: 8px; }
+.lp-kal__h i { display: grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; background: var(--av); font: 700 .5rem/1 var(--rubrik); font-style: normal; color: #fff; }
+.lp-kal__h[draggable="true"] { cursor: grab; }
+.lp-kal__h.drar { opacity: .4; }
+.lp-drar .lp-kal__dag:not(.utanfor) { outline: 1.5px dashed rgba(226, 154, 74, .35); outline-offset: -4px; }
+.lp-kal__dag.drop { background: #fde9cc; outline: 2px solid #e29a4a !important; outline-offset: -2px; transform: scale(1.02); }
+.lp-kal__vy { display: inline-flex; margin-left: 8px; padding: 3px; border-radius: 999px; background: #f3ede3; }
+.lp-kal__vy button { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: none; font: 600 .74rem/1 var(--rubrik); color: var(--text-2); cursor: pointer; transition: background-color .25s, color .25s, box-shadow .25s; }
+.lp-kal__vy button .i { width: 14px; height: 14px; }
+.lp-kal__vy button[aria-pressed="true"] { background: #fff; color: var(--kol); box-shadow: 0 4px 10px -6px rgba(60, 40, 15, .5); }
+.lp-kal__ledig { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: #e1f3e7; font: 600 .76rem/1 var(--rubrik); color: #1d6b40; cursor: pointer; transition: transform .2s var(--studs); }
+.lp-kal__ledig:hover { transform: translateY(-1px); }
+.lp-kal__ledig .i { width: 14px; height: 14px; }
+.lp-agenda { display: grid; gap: 10px; }
+.lp-agenda__dag { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; padding: 12px; border-radius: 18px; background: #fbf8f3; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .04); animation: in-rad .5s var(--mjuk) backwards; }
+.lp-agenda__dag.idag { background: #fff6ea; box-shadow: inset 0 0 0 1.5px rgba(226, 154, 74, .55); }
+.lp-agenda__dag.sen { background: #fff7f5; }
+.lp-agenda__dag header { display: flex; align-items: flex-start; gap: 10px; }
+.lp-agenda__dag header b { font: 700 1.8rem/1 var(--rubrik); color: var(--kol); }
+.lp-agenda__dag header span { display: grid; gap: 2px; font: 600 .82rem/1.2 var(--rubrik); text-transform: capitalize; }
+.lp-agenda__dag header small { font: 500 .7rem/1.2 var(--rubrik); text-transform: none; color: var(--text-3); }
+.lp-agenda__dag header .ch-ruta { margin-left: auto; }
+.lp-agenda .lp-daglista { margin: 0; }
+@media (max-width: 760px) { .lp-agenda__dag { grid-template-columns: 1fr; } }
+
+/* 01 korten: belastning, närmast att stänga och veckodagar under staplarna */
+.lp-saljare header { position: relative; }
+.lp-saljare__last { margin-left: auto; align-self: flex-start; padding: 4px 10px; border-radius: 999px; background: #f3ede3; font: 600 .68rem/1.2 var(--rubrik); color: var(--text-2); }
+.lp-nasta { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "s p" "b p" "t p"; align-items: center; gap: 1px 10px; margin: 12px 0 4px; padding: 10px 12px; border-radius: 14px; background: linear-gradient(160deg, #fff8ee, #fbefdd); color: inherit; text-decoration: none; box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .35); transition: transform .25s var(--mjuk), box-shadow .25s; }
+.lp-nasta:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .6), 0 12px 22px -16px rgba(90, 60, 25, .6); }
+.lp-nasta small { grid-area: s; font: 600 .6rem/1.2 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: var(--virke-djup); }
+.lp-nasta b { grid-area: b; font: 600 .88rem/1.3 var(--rubrik); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.lp-nasta span { grid-area: t; font-size: .74rem; color: var(--text-2); }
+.lp-nasta .i { grid-area: p; width: 16px; height: 16px; color: var(--virke-djup); transition: transform .25s var(--mjuk); }
+.lp-nasta:hover .i { transform: translateX(3px); }
+.lp-vecka small em { margin-left: 8px; font-style: normal; font-weight: 500; color: var(--text-3); }
+.lp-vecka__dagar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin-top: 4px; }
+.lp-vecka__dagar span { font: 600 .58rem/1 var(--rubrik); text-align: center; text-transform: capitalize; color: var(--text-3); }
+.lp-vecka__dagar .idag { color: var(--virke-djup); }
+
+/* 04 att agera på: filter, Fördela smart, brådskande rader */
+.lp-agera__verktyg { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.lp-agera__verktyg .ap-filter em { margin-left: 4px; font-style: normal; opacity: .6; }
+.lp-agera__verktyg .emo-ik { width: 15px; height: 15px; }
+.lp-agera li { transition: transform .25s var(--mjuk), box-shadow .25s; }
+.lp-agera li:hover { transform: translateY(-1px); }
+.lp-agera li[data-brattom="varm"] { box-shadow: inset 3px 0 0 #f0b56e; }
+.lp-agera li[data-brattom="het"] { box-shadow: inset 3px 0 0 #e0654f; }
+.lp-agera li[data-brattom="het"] .lp-agera__typ { color: #b23a2a !important; }
+.lp-agera__knappar { flex-wrap: wrap; justify-content: flex-end; }
+.lp-mer { margin: 8px 4px 0; font-size: .78rem; color: var(--text-3); }
+
+/* 05 pipeline: klickbar förklaring med antal och största affären */
+.lp-pipe + .lp-teckenforklaring a { display: inline-flex; align-items: center; gap: 6px; color: inherit; text-decoration: none; }
+.lp-pipe + .lp-teckenforklaring a i { width: 10px; height: 10px; border-radius: 3px; background: var(--f); }
+.lp-pipe + .lp-teckenforklaring a b { font-weight: 600; color: var(--text-3); }
+.lp-pipe + .lp-teckenforklaring a:hover b { color: var(--kol); }
+.lp-storst { display: flex; align-items: center; gap: 12px; margin: 12px 0; padding: 12px 14px; border-radius: 16px; background: #fff; color: inherit; text-decoration: none; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); transition: transform .25s var(--mjuk), box-shadow .25s; }
+.lp-storst:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .5), 0 12px 22px -16px rgba(90, 60, 25, .6); }
+.lp-storst .emo-ik { width: 22px; height: 22px; }
+.lp-storst span { display: grid; gap: 2px; min-width: 0; }
+.lp-storst small { font: 600 .6rem/1.2 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+.lp-storst b { font: 600 .9rem/1.3 var(--rubrik); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.lp-storst em { margin-left: auto; font: 600 .82rem/1 var(--rubrik); font-style: normal; color: var(--virke-djup); white-space: nowrap; }
+
+/* 06 aktivitet: datum, i dag, måndagar som veckogräns, trend och teamets rad */
+.lp-karta small em { display: block; margin-top: 2px; font-style: normal; font-weight: 500; opacity: .75; }
+.lp-karta small.idag { color: var(--virke-djup); }
+.lp-karta i.idag { box-shadow: inset 0 0 0 1.5px var(--virke-djup); }
+.lp-karta i.mandag, .lp-karta small.mandag { margin-left: 4px; }
+.lp-karta__namn { display: flex; align-items: center; gap: 8px; }
+.lp-karta__namn .avatar { width: 24px; height: 24px; border-radius: 50%; font-size: .5rem; }
+.lp-karta b { display: grid; justify-items: end; gap: 2px; }
+.lp-trend { font: 600 .62rem/1 var(--rubrik); color: #1d6b40; }
+.lp-trend[data-upp="false"] { color: #b23a2a; }
+.lp-karta__team { padding-top: 6px; border-top: 1px dashed rgba(27, 25, 21, .12); font-weight: 700; }
+.lp-karta i.lp-karta__tot { background: color-mix(in srgb, #8f5424 calc(var(--a) * 70%), #f3ede3); color: #fff; }
+.lp-karta i.lp-karta__tot:not(.pa) { background: #f3ede3; }
+
+/* 07 topplistan: period, stapel mot ledaren och medalj */
+.lp-topp__stapel { display: block; height: 4px; margin-top: 6px; border-radius: 4px; background: rgba(27, 25, 21, .06); overflow: hidden; }
+.lp-topp__stapel i { display: block; width: calc(var(--a) * 100%); height: 100%; border-radius: inherit; background: linear-gradient(90deg, #f6c68d, #e29a4a); transform-origin: left; animation: ap-stapel .9s var(--mjuk) both; }
+.lp-topp li.forst .lp-topp__plats { background: linear-gradient(160deg, #ffe2a8, #f0b56e); }
+.lp-topp__plats .emo-ik { width: 16px; height: 16px; }
+.lp-topp__summa { margin: 12px 4px 0; font-size: .8rem; color: var(--text-2); }
+.lp-topp__summa b { color: var(--kol); }
