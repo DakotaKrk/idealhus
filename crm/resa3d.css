@@ -1,5 +1,5 @@
 /* Legohus CRM – husets resa i 3D (resa3d.js): duken, texten om steget, kundernas hus som nålar och reglagen. */
-.resa3d { position: relative; height: clamp(360px, 46vw, 520px); margin: 4px 0 18px; border-radius: 22px; overflow: hidden; isolation: isolate;
+.resa3d { position: relative; height: clamp(380px, 44vw, 560px); margin: 4px 0 18px; border-radius: 22px; overflow: hidden; isolation: isolate;
   background: radial-gradient(80% 60% at 50% 0%, #fff6e8, #efe2cd); box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .35), 0 24px 50px -30px rgba(90, 60, 25, .6); }
 .resa3d__duk { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; cursor: grab; }
 .resa3d__lager { position: absolute; inset: 0; pointer-events: none; }
