@@ -688,3 +688,23 @@ section.lp-mork .ao-text { position: relative; z-index: 1; }
 .lp-staplar__axel { display: flex; gap: 4px; margin-top: 6px; }
 .lp-staplar__axel span { flex: 1; min-width: 3px; font: 600 .58rem/1 var(--rubrik); color: var(--text-3); white-space: nowrap; overflow: visible; }
 .lp-staplar__axel span:last-child { display: flex; justify-content: flex-end; color: var(--virke-djup); }
+
+/* Stjärnfallet, rätt riktat: huvudet först och svansen bakåt längs banan, snett nedåt åt vänster.
+   Två fall med olika takt så det inte blir förutsägbart. Månens mörka del utan grå skiva. */
+.lp-fall { left: 96%; top: 6%; width: 74px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, #fff 0, rgba(255, 236, 200, .85) 12%, rgba(255, 210, 150, .25) 55%, transparent); transform-origin: 0 50%; transform: rotate(-28deg); opacity: 0; filter: drop-shadow(0 0 4px rgba(255, 230, 190, .9)); animation: lp-fall2 11s linear 2.5s infinite; }
+.lp-fall::before { content: ""; position: absolute; left: -3px; top: -2px; width: 6px; height: 6px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px 3px rgba(255, 236, 200, .9); }
+.lp-fall--2 { left: 70%; top: -4%; width: 56px; animation-duration: 17s; animation-delay: 8s; }
+@keyframes lp-fall2 {
+  0% { opacity: 0; transform: translate(0, 0) rotate(-28deg) scaleX(.3); }
+  1.5% { opacity: 1; transform: translate(-14px, 7px) rotate(-28deg) scaleX(1); }
+  7% { opacity: 1; transform: translate(-96px, 51px) rotate(-28deg) scaleX(1); }
+  9% { opacity: 0; transform: translate(-120px, 64px) rotate(-28deg) scaleX(.4); }
+  100% { opacity: 0; transform: translate(-120px, 64px) rotate(-28deg) scaleX(.4); }
+}
+.lp-mane::before { background: none; box-shadow: none; }
+.lp-stjarna { animation-duration: 3.4s; animation-timing-function: ease-in-out; }
+
+.lp-fall { left: 250px; top: 4px; }
+.lp-fall--2 { left: 205px; top: -14px; }
+.hero__fonster .lp-fall { left: 118px; top: 6px; width: 46px; }
+.hero__fonster .lp-fall--2 { display: none; }

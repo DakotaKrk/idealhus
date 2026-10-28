@@ -545,7 +545,7 @@
     var natt = h >= 18 || h < 5, morgon = h >= 5 && h < 10;
     var stjarnor = [[8, 18, 1.1, 0], [86, 10, .8, .7], [94, 62, 1, 1.4], [16, 78, .7, 2.1], [70, 88, .9, .4], [40, 4, .6, 1.8], [100, 30, .7, 2.6]];
     if (natt) return '<span class="lp-himmel lp-himmel--natt" aria-hidden="true">' + stjarnor.map(function (st) { return '<i class="lp-stjarna" style="left:' + st[0] + '%;top:' + st[1] + '%;--s:' + st[2] + ';--d:' + st[3] + 's"></i>'; }).join('') +
-      '<i class="lp-fall"></i><span class="lp-mane"><i class="lp-mane__ljus"></i><i class="lp-krater" style="left:24%;top:38%;--k:14%"></i><i class="lp-krater" style="left:16%;top:62%;--k:9%"></i><i class="lp-krater" style="left:34%;top:72%;--k:7%"></i><i class="lp-krater" style="left:30%;top:20%;--k:6%"></i></span></span>';
+      '<i class="lp-fall"></i><i class="lp-fall lp-fall--2"></i><span class="lp-mane"><i class="lp-mane__ljus"></i><i class="lp-krater" style="left:24%;top:38%;--k:14%"></i><i class="lp-krater" style="left:16%;top:62%;--k:9%"></i><i class="lp-krater" style="left:34%;top:72%;--k:7%"></i><i class="lp-krater" style="left:30%;top:20%;--k:6%"></i></span></span>';
     return '<span class="lp-himmel lp-himmel--' + (morgon ? 'morgon' : 'dag') + '" aria-hidden="true"><span class="lp-sol">' + [0, 1, 2, 3, 4, 5, 6, 7].map(function (n) { return '<i style="--r:' + n * 45 + 'deg"></i>'; }).join('') + '</span></span>';
   }
   IH.himlen = himlen;
