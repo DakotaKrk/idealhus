@@ -299,7 +299,7 @@
       ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote']] },
     { rubrik: 'Produktion', poster: [['produktion', 'Projekt', 'produktion']] },
     { rubrik: 'Verktyg', poster: [['kolla-marken', 'Kolla marken', 'mark']] },
-    { rubrik: 'Mitt', poster: [['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
+    { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'samtal'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
   ];
 
   function brickor() {
@@ -309,7 +309,7 @@
     var proj = db.projekt.filter(function (p) { return p.steg !== 'klart'; }).length;
     var idag = new Date(); idag.setHours(23, 59, 59, 999);
     var uppg = db.uppgifter.filter(function (u) { return !u.klar && new Date(u.forfaller) <= idag; }).length;
-    return { forfragningar: [nya, true], salj: [oppna], kunder: [db.kunder.length], produktion: [proj], 'att-gora': [uppg, true] };
+    return { forfragningar: [nya, true], salj: [oppna], kunder: [db.kunder.length], produktion: [proj], 'att-gora': [uppg, true], chatt: [IH.chattOlasta ? IH.chattOlasta() : 0, true] };
   }
 
   function sidomeny() {
@@ -821,7 +821,7 @@
     if (nav) nav.scrollBy({ top: nav.clientHeight * 0.7, behavior: 'smooth' });
   };
   IH.G.mer = function () {
-    var poster = [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote'],
+    var poster = [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote'], ['chatt', 'Meddelanden', 'samtal'],
       ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']];
     IH.oppnaArk({
       titel: 'Mer', ikon: 'meny',

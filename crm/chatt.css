@@ -1,0 +1,66 @@
+/* Legohus CRM – chatten (chatt.js), efter Uperformance CRM:s chatt.css, i Legohus färger. */
+.ch { display: grid; grid-template-columns: minmax(250px, 320px) minmax(0, 1fr); height: calc(100vh - 48px); min-height: 520px; overflow: hidden; }
+.ch-lista { display: flex; flex-direction: column; min-height: 0; padding: 18px 12px; background: linear-gradient(180deg, #fffdf9, #faf5ec); box-shadow: inset -1px 0 0 rgba(27, 25, 21, .07); }
+.ch-lista header h2 { margin: 2px 8px 14px; font: 700 1.3rem/1.1 var(--rubrik); letter-spacing: -0.02em; }
+.ch-lista nav { display: grid; gap: 2px; overflow-y: auto; }
+.ch-samtal { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 16px; color: inherit; text-decoration: none; transition: background-color .2s; }
+.ch-samtal:hover { background: rgba(255, 255, 255, .8); }
+.ch-samtal.vald { background: #fff; box-shadow: 0 8px 20px -14px rgba(90, 60, 25, .5), inset 0 0 0 1px rgba(240, 181, 110, .45); }
+.ch-samtal__text { flex: 1; display: grid; min-width: 0; }
+.ch-samtal__text b { font: 600 .92rem/1.2 var(--rubrik); }
+.ch-samtal__text small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .8rem; color: var(--text-3); }
+.ch-samtal__hoger { display: grid; justify-items: end; gap: 4px; flex: none; }
+.ch-samtal__hoger small { font-size: .72rem; color: var(--text-3); }
+.ch-olast { display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--virke); color: var(--kol); font: 700 .7rem/1 var(--rubrik); font-style: normal; }
+.ch-team { display: grid; place-items: center; background: var(--virke-ljus); color: var(--virke-djup); }
+.ch-team .emo-ik { width: 18px; height: 18px; }
+
+.ch-tradyta { display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; min-width: 0; min-height: 0; }
+.ch-topp { display: flex; align-items: center; gap: 12px; padding: 16px 22px; box-shadow: inset 0 -1px 0 rgba(27, 25, 21, .07); }
+.ch-topp > div { flex: 1; display: grid; min-width: 0; }
+.ch-topp b { font: 600 1.05rem/1.2 var(--rubrik); }
+.ch-topp small { font-size: .8rem; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch-trad { overflow-y: auto; overscroll-behavior: contain; padding: 18px 22px 10px; display: flex; flex-direction: column; gap: 4px; }
+.ch-dag, .ch-ny { position: sticky; top: 0; z-index: 1; display: flex; justify-content: center; margin: 12px 0 8px; }
+.ch-dag span { padding: 5px 12px; border-radius: 999px; background: rgba(255, 255, 255, .92); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); font: 600 .72rem/1 var(--rubrik); color: var(--text-3); }
+.ch-ny { position: static; align-items: center; gap: 10px; color: var(--rod); }
+.ch-ny::before, .ch-ny::after { content: ""; flex: 1; height: 1px; background: rgba(217, 87, 63, .35); }
+.ch-ny span { font: 600 .72rem/1 var(--rubrik); }
+.ch-msg { display: flex; align-items: flex-end; gap: 10px; max-width: min(620px, 82%); margin-top: 8px; animation: ch-in .35s var(--mjuk) backwards; }
+.ch-msg--fortsatt { margin-top: 0; padding-left: 42px; }
+.ch-msg--egen { align-self: flex-end; flex-direction: row-reverse; padding-left: 0; }
+.ch-msg .avatar--liten { width: 32px; height: 32px; flex: none; font-size: .72rem; }
+@keyframes ch-in { from { opacity: 0; transform: translateY(6px); } }
+.ch-bubbla { position: relative; padding: 10px 14px 8px; border-radius: 18px 18px 18px 6px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07), 0 6px 16px -14px rgba(90, 60, 25, .5); }
+.ch-msg--egen .ch-bubbla { border-radius: 18px 18px 6px 18px; background: linear-gradient(160deg, #fdeccf, #f9dcae); box-shadow: 0 6px 16px -12px rgba(143, 84, 36, .5); }
+.ch-namn { display: block; margin-bottom: 2px; font: 600 .78rem/1.2 var(--rubrik); color: var(--virke-djup); }
+.ch-text { font-size: .95rem; line-height: 1.5; overflow-wrap: anywhere; }
+.ch-text a { color: var(--virke-djup); }
+.ch-tid { display: block; margin-top: 3px; text-align: right; font-size: .68rem; color: var(--text-3); }
+.ch-obj { display: inline-flex; align-items: center; gap: 6px; margin: 2px 0; padding: 3px 10px 3px 6px; border-radius: 999px; background: rgba(255, 255, 255, .8);
+  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .55); font: 600 .82rem/1.3 var(--rubrik); color: var(--text) !important; text-decoration: none; vertical-align: baseline; }
+.ch-obj:hover { background: var(--virke-ljus); }
+.ch-obj .i { width: 14px; height: 14px; color: var(--virke-djup); }
+.ch-tomt { margin: auto; display: grid; justify-items: center; gap: 6px; text-align: center; color: var(--text-2); }
+.ch-tomt b { font: 600 1.05rem/1.2 var(--rubrik); color: var(--text); }
+.ch-tomt p { margin: 0; }
+.ch-tomt__ikon.emo-ik { width: 26px; height: 26px; padding: 14px; border-radius: 18px; background: var(--virke-ljus); box-sizing: content-box; margin-bottom: 6px; }
+.ch-skriv { display: flex; align-items: flex-end; gap: 10px; margin: 8px 22px 0; padding: 8px 8px 8px 16px; border-radius: 22px; background: #fff;
+  box-shadow: inset 0 0 0 1.5px rgba(27, 25, 21, .1), 0 10px 24px -18px rgba(90, 60, 25, .5); transition: box-shadow .2s; }
+.ch-skriv:focus-within { box-shadow: inset 0 0 0 1.5px var(--virke), 0 0 0 4px rgba(240, 181, 110, .18); }
+.ch-skriv textarea { flex: 1; min-height: 24px; max-height: 150px; padding: 8px 0; border: 0; background: none; resize: none; font: inherit; line-height: 1.5; outline: none; }
+.ch-skriv .knapp { width: 42px; height: 42px; padding: 0; justify-content: center; border-radius: 50%; flex: none; }
+.ch-tips { margin: 6px 22px 14px; font-size: .74rem; color: var(--text-3); }
+
+@media (max-width: 860px) {
+  .ch { grid-template-columns: minmax(0, 1fr); height: auto; min-height: 0; }
+  .ch-lista { padding: 12px; box-shadow: inset 0 -1px 0 rgba(27, 25, 21, .07); }
+  .ch-lista nav { display: flex; overflow-x: auto; gap: 6px; }
+  .ch-samtal { flex: none; }
+  .ch-samtal__text small, .ch-samtal__hoger small { display: none; }
+  .ch-trad { max-height: 60vh; min-height: 320px; }
+  .ch-msg { max-width: 92%; }
+  .ch-tips { display: none; }
+  .ch-skriv { margin-bottom: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .ch-msg { animation: none; } }
