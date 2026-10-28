@@ -622,3 +622,21 @@ section.lp-mork .ao-tal__ikon { background: rgba(246, 198, 141, .14); box-shadow
 @media (max-width: 1250px) { section.ao-hjalte.lp-chefhjalte.lp-mork { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "text mitt" "tal tal" "veckor veckor"; } }
 @media (max-width: 760px) { section.ao-hjalte.lp-chefhjalte.lp-mork { grid-template-columns: 1fr; grid-template-areas: "text" "mitt" "tal" "veckor"; padding: 28px 22px; } }
 @media (prefers-reduced-motion: reduce) { .lp-mork__glod, .lp-ring__bage, .lp-ring__glod, .lp-veckor__staplar i { animation: none; } }
+
+/* Hjälten, rättad: rubriken får plats på två rader, rutorna i en rad under, inga understrukna initialer och
+   veckostaplar som smala pelare med belopp och veckonummer */
+section.ao-hjalte.lp-chefhjalte.lp-mork { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "text mitt" "tal tal" "veckor veckor"; gap: 26px 48px; }
+section.lp-mork h1 { font-size: clamp(2.2rem, 1.2rem + 2.4vw, 3.6rem); }
+section.lp-mork h1 em { display: block; }
+section.lp-mork .ap-tal { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+section.lp-mork .ao-tal small, section.lp-mork .ao-tal__text > span:last-child, section.lp-mork .ao-tal em { white-space: normal; overflow: visible; text-overflow: clip; }
+section.lp-mork .lp-lag a, section.lp-mork .lp-lag .avatar { text-decoration: none; }
+section.lp-mork .lp-veckor__staplar { height: 92px; gap: 10px; }
+section.lp-mork .lp-veckor__staplar > span { display: grid; grid-template-rows: auto 1fr auto; justify-items: center; align-items: end; height: 100%; gap: 4px; }
+section.lp-mork .lp-veckor__staplar i { width: min(30px, 70%); height: calc(4px + var(--h) * 54px); border-radius: 8px 8px 3px 3px; align-self: end; }
+section.lp-mork .lp-veckor__staplar i.nu { outline: none; box-shadow: 0 0 0 1.5px rgba(246, 198, 141, .75); }
+section.lp-mork .lp-veckor__staplar em { font: 600 .62rem/1 var(--rubrik); font-style: normal; color: #f6c68d; min-height: .62rem; }
+section.lp-mork .lp-veckor__staplar small { font: 600 .58rem/1 var(--rubrik); letter-spacing: .04em; color: rgba(251, 244, 232, .45); text-transform: none; }
+section.lp-mork .lp-veckor__staplar .nu ~ small { color: #f6c68d; }
+@media (max-width: 1100px) { section.lp-mork .ap-tal { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) { section.ao-hjalte.lp-chefhjalte.lp-mork { grid-template-columns: 1fr; grid-template-areas: "text" "mitt" "tal" "veckor"; } }

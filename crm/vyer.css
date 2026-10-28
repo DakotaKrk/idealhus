@@ -4784,8 +4784,9 @@ kbd {
   height: 120px;
   margin: -60px 0 0 -50px;
   transform-style: preserve-3d;
-  transform: rotateX(58deg) rotateZ(-38deg);
-  animation: bygge-andas 7s ease-in-out 2.4s infinite alternate, bygge-vagg 16s ease-in-out 2s infinite alternate;
+  transform: rotateX(58deg) rotateZ(-38deg) scale3d(1.15, 1.15, 1.15);
+  animation: bygge-andas 9s ease-in-out 2.6s infinite alternate, bygge-vagg 24s ease-in-out 2.6s infinite alternate;
+  will-change: transform;
 }
 
 @keyframes bygge-andas {
@@ -4794,8 +4795,8 @@ kbd {
 }
 
 @keyframes bygge-vagg {
-  from { transform: rotateX(58deg) rotateZ(-38deg); }
-  to { transform: rotateX(55deg) rotateZ(-28deg); }
+  from { transform: rotateX(58deg) rotateZ(-38deg) scale3d(1.15, 1.15, 1.15); }
+  to { transform: rotateX(56deg) rotateZ(-31deg) scale3d(1.15, 1.15, 1.15); }
 }
 
 .bygge__plan i {
@@ -4834,13 +4835,14 @@ kbd {
   inset: 0;
   transform-style: preserve-3d;
   transition: transform 0.6s var(--mjuk);
-  animation: lager-in 1.3s var(--studs) backwards;
+  animation: lager-in 1.2s cubic-bezier(.22, 1.2, .36, 1) backwards;
   animation-delay: calc(0.25s + var(--n) * 0.24s);
 }
 
 @keyframes lager-in {
-  0% { visibility: hidden; transform: translateZ(260px); }
-  1% { visibility: visible; }
+  0% { visibility: hidden; transform: translateZ(220px); }
+  1% { visibility: visible; transform: translateZ(220px); }
+  100% { transform: translateZ(0); }
 }
 
 /* Hovring på raden eller delen lyfter ut samma del. */
