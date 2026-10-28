@@ -11,7 +11,7 @@
   var IH = window.IH = window.IH || {};
 
   IH.NYCKEL = 'ih-crm-v1';
-  IH.VERSION = 2; // 2: teamet (fyra konton) och ansvarig säljare per affär
+  IH.VERSION = 3; // 2: teamet och ansvarig säljare per affär · 3: kontona Ahmed, Sahand och Admin
 
   /* --- Husen (samma som _modeller.py) ------------------------------ */
   IH.MODELLER = [
@@ -98,10 +98,8 @@
   };
 
   IH.ANVANDARE = [
-    { id: 'ml', namn: 'Maja Lind', roll: 'salj', titel: 'Sälj', farg: 'linear-gradient(135deg,#f0b56e,#8f5424)', mal: 900000 },
-    { id: 'ab', namn: 'Anders Berg', roll: 'salj', chef: true, titel: 'Sälj · Försäljningschef', farg: 'linear-gradient(135deg,#b8cde0,#4f6f8f)', mal: 1200000 },
-    { id: 'eb', namn: 'Elin Björk', roll: 'salj', titel: 'Sälj', farg: 'linear-gradient(135deg,#d7c2e0,#7b5c8f)', mal: 800000 },
-    { id: 'je', namn: 'Jonas Ek', roll: 'prod', titel: 'Produktion', farg: 'linear-gradient(135deg,#7fe0a6,#3f6b50)' },
+    { id: 'ah', namn: 'Ahmed', roll: 'salj', titel: 'Sälj', farg: 'linear-gradient(135deg,#f0b56e,#8f5424)' },
+    { id: 'sa', namn: 'Sahand', roll: 'salj', titel: 'Sälj', farg: 'linear-gradient(135deg,#b8cde0,#4f6f8f)' },
     { id: 'ad', namn: 'Admin', roll: 'admin', titel: 'Administratör', farg: 'linear-gradient(135deg,#c9c4bb,#4f4a42)' }
   ];
 
@@ -164,7 +162,7 @@
         miljo: f[1], hustyp: f[2], anvandning: f[3], beskrivning: f[4],
         namn: k.namn, telefon: k.telefon, epost: k.epost, ort: k.ort,
         kund: f[6] === 'kvalificerad' || f[6] === 'kontaktad' ? k.id : null, affar: null,
-        tilldelad: f[6] === 'ny' ? null : 'ml', last: f[6] !== 'ny'
+        tilldelad: f[6] === 'ny' ? null : 'ah', last: f[6] !== 'ny'
       });
     });
 
@@ -189,7 +187,7 @@
         id: nid('affar', 'a'), kund: k.id, titel: a[5], modell: a[1], varde: a[3],
         steg: a[2] === 'forlorad' ? 'offert' : a[2], forlorad: a[2] === 'forlorad' ? { orsak: 'Tomten passade inte', tid: dagar(a[4] + 6) } : null,
         skapad: dagar(a[4] - 6), andrad: dagar(a[4] + (a[2] === 'vunnen' ? 2 : 0)),
-        ansvarig: ['ml', 'eb', 'ml', 'ab'][i % 4], vunnen: a[2] === 'vunnen' ? dagar(a[4] + 2) : null
+        ansvarig: ['ah', 'sa'][i % 2], vunnen: a[2] === 'vunnen' ? dagar(a[4] + 2) : null
       };
       db.affarer.push(aff);
       // Förfrågan som blev affären.
@@ -221,7 +219,7 @@
     // Aktiviteter och att göra.
     function akt(dag, typ, text, kund, affar) {
       var af = db.affarer.filter(function (x) { return x.id === affar; })[0];
-      db.aktiviteter.push({ id: nid('aktivitet', 'h'), tid: dagar(dag, 11), typ: typ, text: text, kund: kund, affar: affar, av: af ? af.ansvarig : 'ml' });
+      db.aktiviteter.push({ id: nid('aktivitet', 'h'), tid: dagar(dag, 11), typ: typ, text: text, kund: kund, affar: affar, av: af ? af.ansvarig : 'ah' });
     }
     akt(-2, 'samtal', 'Ringde och gick igenom strandskyddet. Skickar karta över tomten.', 'k4', 'a1');
     akt(-3, 'mote', 'Platsbesök bokat till nästa vecka.', 'k5', 'a2');
@@ -230,7 +228,7 @@
     akt(-8, 'mote', 'Digitalt möte om husblock för tolv tomter.', 'k9', 'a5');
     akt(-26, 'system', 'Order signerad.', 'k14', 'a9');
     function uppg(dag, text, kund, affar, klar) {
-      db.uppgifter.push({ id: nid('uppgift', 'u'), text: text, forfaller: dagar(dag, 9), klar: !!klar, kund: kund, affar: affar, ansvarig: 'ml' });
+      db.uppgifter.push({ id: nid('uppgift', 'u'), text: text, forfaller: dagar(dag, 9), klar: !!klar, kund: kund, affar: affar, ansvarig: 'ah' });
     }
     uppg(0, 'Ring Karin Holm om sjötomten', 'k1', null);
     uppg(0, 'Ring Henrik Dahl om ateljén', 'k13', null);

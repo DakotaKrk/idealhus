@@ -350,3 +350,30 @@
 .ch-medd:not(.fortsatt):not(.egen) .ch-verktyg { top: -8px; }
 .ch-system { font-size: .74rem; }
 .ch-intro { margin-bottom: 8px; }
+
+/* 12 Dockan (2026-10-29): menyknappen och den minimerade chatten i en gemensam kapsel på rälsen, med en ledning
+   emellan där ett ljus vandrar. Kapseln växer fram nedåt från knappen, ikonen landar med en studs och ledningen
+   lyser upp; oläst gör ljuset varmare och snabbare. */
+.chf-dock { position: fixed; z-index: 34; width: 56px; border-radius: 28px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 246, 232, .88)); box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .28), 0 18px 34px -22px rgba(143, 84, 36, .55);
+  transform-origin: 50% 0; animation: chf-dock-in .55s cubic-bezier(.22, 1, .36, 1) both; }
+.chf-dock::before { content: ""; position: absolute; inset: -5px; border-radius: 33px; border: 1px dashed rgba(201, 138, 69, .22); opacity: 0; transition: opacity .3s; }
+.chf-dock[data-olast]::before { opacity: 1; animation: chf-dock-andas 2.6s ease-in-out infinite; }
+.chf-dock[data-ut] { animation: chf-dock-ut .3s ease-in both; }
+@keyframes chf-dock-in { from { opacity: 0; transform: scaleY(.35); } }
+@keyframes chf-dock-ut { to { opacity: 0; transform: scaleY(.4); } }
+@keyframes chf-dock-andas { 50% { inset: -8px; opacity: .45; } }
+.chf-dock__led { position: absolute; left: 50%; top: var(--led-top, 44px); bottom: var(--led-botten, 55px); width: 2px; margin-left: -1px; border-radius: 2px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(201, 138, 69, .15), rgba(201, 138, 69, .45), rgba(201, 138, 69, .15)); }
+.chf-dock__led b { position: absolute; left: 0; right: 0; height: 8px; border-radius: 2px; background: linear-gradient(180deg, transparent, var(--virke-djup), transparent); animation: chf-led 2.4s ease-in-out infinite; }
+.chf-dock[data-olast] .chf-dock__led b { background: linear-gradient(180deg, transparent, #e8762c, transparent); animation-duration: 1.1s; }
+@keyframes chf-led { from { top: -10px; } to { top: 100%; } }
+.chf-dock[data-landar] .chf-dock__led { animation: chf-led-tand .8s ease-out; }
+@keyframes chf-led-tand { 0% { background: rgba(201, 138, 69, .15); } 35% { background: var(--virke); box-shadow: 0 0 8px var(--virke); } }
+/* Ikonen i dockan: ingen egen halo (kapseln är ramen) och lite mindre så de två hör ihop */
+.chf-ikon[data-i-docka] { width: 44px; height: 44px; box-shadow: 0 10px 22px -12px rgba(143, 84, 36, .7), inset 0 0 0 1px rgba(201, 138, 69, .5); }
+.chf-ikon[data-i-docka]:hover { box-shadow: 0 14px 26px -12px rgba(143, 84, 36, .8), inset 0 0 0 1.5px var(--virke); }
+.chf-ikon[data-i-docka] .emo-ik { transition: transform .35s var(--studs); }
+.chf-ikon[data-i-docka]:hover .emo-ik { transform: rotate(-8deg) scale(1.08); }
+html[data-sido-dold] body:has(.chf-dock) .sido-knapp { box-shadow: 0 8px 18px -10px rgba(143, 84, 36, .6); }
+@media (prefers-reduced-motion: reduce) { .chf-dock, .chf-dock[data-ut], .chf-dock::before, .chf-dock__led, .chf-dock__led b { animation: none !important; } }

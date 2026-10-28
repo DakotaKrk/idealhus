@@ -1429,3 +1429,6 @@
   background: radial-gradient(circle at 35% 35%, #ffe2b8, #e8a456 70%);
   box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.18), 0 0 8px rgba(240, 181, 110, 0.55);
 }
+
+/* Admin under de två säljarna, över hela bredden (2026-10-29) */
+.roll[data-roll="ad"] { grid-column: 1 / -1; }

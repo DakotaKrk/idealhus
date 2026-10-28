@@ -24,7 +24,7 @@
     { id: 'osynlig', namn: 'Osynlig', farg: '#c9c4bb' }
   ];
   // Exempel: så står kollegorna när prototypen öppnas
-  var START = { ml: 'online', ab: 'mote', eb: 'ute', je: 'online' };
+  var START = { ah: 'online', sa: 'mote' };
   function lasNarvaro() { try { return JSON.parse(localStorage.getItem('ih-crm-narvaro')) || {}; } catch (x) { return {}; } }
   function narvaro(uid) {
     var s = lasNarvaro()[uid] || START[uid] || 'online';
@@ -55,6 +55,7 @@
     setTimeout(function () { p.remove(); }, IH.lugn ? 0 : 220);
     document.removeEventListener('pointerdown', utanforKm, true);
   }
+  IH.stangKm = function () { stangKm(); };
   function utanforKm(ev) { if (km && !km.contains(ev.target) && !ev.target.closest('[data-g="konto-meny"]') && !ev.target.closest('.ark, .slojan')) stangKm(); }
   var NARV_IKON = { online: 'bock', mote: 'mote', upptagen: 'minus-cirkel', strax: 'timglas', lunch: 'kaffe', ute: 'byggnad', semester: 'sol', sjuk: 'termometer', osynlig: 'oga-av' };
   var SNABB = ['online', 'mote', 'upptagen', 'lunch', 'osynlig'];
@@ -240,7 +241,7 @@
   /* 05 Försäljningsledningen #/chef --------------------------------------------------------------- */
   IH.vyer.chef = function () {
     var jag = IH.jag();
-    if (!jag.chef) return { titel: 'Ledning', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort lp-kort"><h2>' + IH.emo('las') + 'Bara för försäljningschefen</h2><p class="lp-tom">Byt till Anders Berg i kontomenyn för att se försäljningsledningen.</p></section>' };
+    if (!jag.chef) return { titel: 'Ledning', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort lp-kort"><h2>' + IH.emo('las') + 'Bara för försäljningschefen</h2><p class="lp-tom">Administratören kan göra en säljare till försäljningschef under Ändra i adminpanelen.</p></section>' };
     var team = saljare().map(stat);
     var sum = function (f) { return team.reduce(function (t, x) { return t + f(x); }, 0); };
     var kvartal = Math.floor(new Date().getMonth() / 3) + 1;

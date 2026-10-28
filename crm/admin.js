@@ -17,7 +17,7 @@
   function logg(typ, text) {
     var d = db();
     d.sakerhet = d.sakerhet || [];
-    d.sakerhet.unshift({ tid: new Date().toISOString(), typ: typ, text: text, av: IH.jag().id });
+    d.sakerhet.unshift({ tid: new Date().toISOString(), typ: typ, text: text, av: (IH.riktigJag || IH.jag)().id });
     if (d.sakerhet.length > 300) d.sakerhet.length = 300;
     IH.spara();
   }

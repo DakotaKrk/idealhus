@@ -7,8 +7,9 @@
   'use strict';
   var lugn = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var ROLLER = {
-    ml: { namn: 'Maja Lind', forsta: 'Maja', titel: 'Sälj', av: 'linear-gradient(135deg,#f6c68d,#c98a45)', start: '#/' },
-    je: { namn: 'Jonas Ek', forsta: 'Jonas', titel: 'Produktion', av: 'linear-gradient(135deg,#a8ebc3,#3f9a63)', start: '#/produktion' }
+    ah: { namn: 'Ahmed', forsta: 'Ahmed', titel: 'Sälj', av: 'linear-gradient(135deg,#f0b56e,#8f5424)', start: '#/' },
+    sa: { namn: 'Sahand', forsta: 'Sahand', titel: 'Sälj', av: 'linear-gradient(135deg,#b8cde0,#4f6f8f)', start: '#/' },
+    ad: { namn: 'Admin', forsta: 'Admin', titel: 'Administratör', av: 'linear-gradient(135deg,#c9c4bb,#4f4a42)', start: '#/kontroll' }
   };
   var MAN = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
   var DAG = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
@@ -23,7 +24,8 @@
   if (dEl) dEl.textContent = DAG[nu.getDay()].charAt(0).toUpperCase() + DAG[nu.getDay()].slice(1) + ' ' + nu.getDate() + ' ' + MAN[nu.getMonth()];
 
   function initialer(namn) {
-    return namn.split(' ').map(function (d) { return d.charAt(0); }).join('').toUpperCase();
+    var ord = namn.split(' ');
+    return (ord.length === 1 ? ord[0].slice(0, 2) : ord.map(function (d) { return d.charAt(0); }).join('')).toUpperCase();
   }
 
   // Välkommen-ögonblicket, sedan in i CRM:et.

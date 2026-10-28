@@ -36,11 +36,24 @@
     if (e.key === 'ih-crm-inloggad' && !e.newValue) location.replace('logga-in.html');
   });
 
-  IH.jag = function () {
+  IH.riktigJag = function () {
     var id = null;
     try { id = localStorage.getItem('ih-crm-jag'); } catch (e) { id = null; }
     return IH.ANVANDARE.filter(function (u) { return u.id === id; })[0] || IH.ANVANDARE[0];
   };
+  // Supportläget (stod.js): administratören ser och arbetar i någon annans konto – IH.jag() är då det kontot
+  var visaSomId = null;
+  try { visaSomId = localStorage.getItem('ih-crm-visa-som'); } catch (e) { visaSomId = null; }
+  IH.visarSom = function () {
+    if (!visaSomId || IH.riktigJag().roll !== 'admin') return null;
+    var u = IH.ANVANDARE.filter(function (x) { return x.id === visaSomId; })[0];
+    return u && u.roll !== 'admin' && !u.inaktiv ? u : null;
+  };
+  IH.sattVisaSom = function (id) {
+    visaSomId = id || null;
+    try { if (id) localStorage.setItem('ih-crm-visa-som', id); else localStorage.removeItem('ih-crm-visa-som'); } catch (e) { /* privat läge */ }
+  };
+  IH.jag = function () { return IH.visarSom() || IH.riktigJag(); };
   IH.anvandare = function (id) { return IH.ANVANDARE.filter(function (u) { return u.id === id; })[0] || null; };
 
   IH.nyttId = function (typ, prefix) {
@@ -94,6 +107,8 @@
     return d === 1 ? 'i går' : d < 30 ? d + ' dagar sedan' : IH.datum(iso);
   };
   IH.initialer = function (namn) {
+    var ord = String(namn || '?').trim().split(/\s+/);
+    if (ord.length === 1) return ord[0].slice(0, 2).toUpperCase();
     return String(namn || '?').replace(/ (AB|ek\. förening)$/i, '').split(/\s+/).map(function (d) { return d.charAt(0); })
       .slice(0, 2).join('').toUpperCase();
   };
@@ -301,6 +316,12 @@
     { rubrik: 'Verktyg', poster: [['kolla-marken', 'Kolla marken', 'mark']] },
     { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'samtal'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
   ];
+  // Administratörens meny (som i Uperformance): översikten, ledningen och det egna – säljarnas delar nås via supportläget
+  var ADMIN_MENY = [
+    { rubrik: null, poster: [['oversikt', 'Översikt', 'hem']] },
+    { rubrik: 'Ledning', poster: [['kontroll', 'Kontrollcentral', 'graf'], ['admin', 'Adminpanel', 'installning'], ['sakerhet', 'Säkerhet', 'system']] },
+    { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'samtal'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
+  ];
 
   function brickor() {
     var db = IH.db;
@@ -315,16 +336,19 @@
   function sidomeny() {
     var jag = IH.jag();
     var b = brickor();
-    var nav = MENY.map(function (grupp) {
+    var nav = (jag.roll === 'admin' ? ADMIN_MENY : MENY).map(function (grupp) {
       // Försäljningsledningen syns bara för chefen (ledning.js)
       var poster = grupp.rubrik === 'Sälj' && jag.chef ? grupp.poster.concat([['chef', 'Ledning', 'graf']]) : grupp.poster;
-      // Admin och Säkerhet syns bara för adminkontot (admin.js)
-      if (grupp.rubrik === 'Mitt' && jag.roll === 'admin') poster = poster.concat([['kontroll', 'Kontrollcentral', 'graf'], ['admin', 'Admin', 'installning'], ['sakerhet', 'Säkerhet', 'system']]);
       return (grupp.rubrik ? '<p class="sido__rubrik">' + grupp.rubrik + '</p>' : '') + poster.map(function (p) {
         var br = b[p[0]];
         var bricka = br && br[0] ? '<span class="sido__bricka' + (br[1] ? ' sido__bricka--varm' : '') + '">' + br[0] + '</span>' : '';
         return '<a class="sido__lank" href="#/' + p[0] + '" data-vy="' + p[0] + '">' + IH.i(p[2]) + '<span>' + p[1] + '</span>' + bricka + '</a>';
       }).join('');
+    }).join('');
+    // Administratören går in i teamets konton härifrån (supportläget, stod.js)
+    if (jag.roll === 'admin') nav += '<p class="sido__rubrik">Teamet</p>' + IH.ANVANDARE.filter(function (u) { return u.roll !== 'admin' && !u.inaktiv; }).map(function (u) {
+      return '<button class="sido__lank sido__konto" type="button" data-g="visa-som" data-id="' + u.id + '" title="Gå in i ' + IH.e(u.namn) + 's konto (supportläge)">' +
+        '<span class="avatar" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + (IH.narvaroPrick ? IH.narvaroPrick(u.id) : '') + '</span><span>' + IH.e(u.namn) + '</span><span class="sido__ga">Gå in</span></button>';
     }).join('');
     return '<a class="sido__logo" href="#/"><img src="../images/legohus_logo.svg" alt="Legohus Stockholm"><span class="sido__crm">CRM <small>· Prototyp</small></span></a>' +
       '<div class="sido__verktyg"><button class="sido__sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
