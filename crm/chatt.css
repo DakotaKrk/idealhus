@@ -446,3 +446,17 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { box-shadow: 0 8px 18px -1
 .chf-ikon .ch-olast { min-width: 20px; height: 20px; font-size: .66rem; box-shadow: 0 0 0 2px #fff, 0 4px 10px -4px rgba(143, 84, 36, .7); animation: chf-siffra .5s cubic-bezier(.34, 1.56, .64, 1) both; }
 @keyframes chf-siffra { from { transform: scale(0); } }
 @media (prefers-reduced-motion: reduce) { .chf-ikon[data-puls], .chf-ikon[data-puls] .emo-ik, .chf-ikon .ch-olast { animation: none; } }
+
+/* Dockan, renare: en enda glaskapsel – kantens linjer och pillret bakom menyknappen döljs när dockan finns, ingen
+   streckad ram, mjuk glöd vid olästa; knapparna utan egna ringar och med samma storlek, ljuset vandrar i en tunn ledning */
+html[data-sido-dold] body:has(.chf-dock) .sido-kant::before, html[data-sido-dold] body:has(.chf-dock) .sido-kant::after { opacity: 0 !important; transition: opacity .25s; }
+.chf-dock { z-index: 35; width: 58px; border-radius: 29px; background: linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(255, 247, 236, .94)); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .22), 0 1px 0 rgba(255, 255, 255, .9) inset, 0 20px 40px -24px rgba(143, 84, 36, .6); }
+.chf-dock::before { inset: -1px; border: 0; border-radius: inherit; box-shadow: 0 0 0 0 rgba(232, 118, 44, 0); }
+.chf-dock[data-olast]::before { opacity: 1; animation: chf-dock-glod 2.8s ease-in-out infinite; }
+@keyframes chf-dock-glod { 0%, 100% { box-shadow: 0 0 0 0 rgba(232, 154, 74, 0), 0 0 0 0 rgba(232, 154, 74, 0); } 50% { box-shadow: 0 0 0 4px rgba(232, 154, 74, .14), 0 0 22px rgba(232, 154, 74, .35); } }
+html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; height: 40px; margin: -20px 0 0 -20px; box-shadow: 0 6px 14px -8px rgba(143, 84, 36, .5); border-color: rgba(201, 138, 69, .35); }
+.chf-ikon[data-i-docka] { width: 40px; height: 40px; box-shadow: 0 6px 14px -8px rgba(143, 84, 36, .5), inset 0 0 0 1px rgba(201, 138, 69, .35); }
+.chf-ikon[data-i-docka] .emo-ik { width: 18px; height: 18px; }
+.chf-ikon[data-i-docka] .ch-olast { top: -5px; right: -7px; }
+.chf-dock__led { width: 1.5px; margin-left: -.75px; }

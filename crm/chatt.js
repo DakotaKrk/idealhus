@@ -309,9 +309,9 @@
   function dockFor(kn) {
     if (!kn) { if (dock) { const d = dock; dock = null; d.setAttribute('data-ut', ''); setTimeout(() => d.remove(), 320); } return; }
     if (!dock) { dock = document.createElement('div'); dock.className = 'chf-dock'; dock.setAttribute('aria-hidden', 'true'); dock.innerHTML = '<i class="chf-dock__led"><b></b></i>'; document.body.appendChild(dock); }
-    const r = kn.getBoundingClientRect(), t = r.top - (parseFloat(kn.style.translate.split(' ')[1]) || 0) - 9, botten = parseFloat(ikon.style.top) + 44 + 7;
-    Object.assign(dock.style, { left: (r.left + r.width / 2 - 28) + 'px', top: t + 'px', height: (botten - t) + 'px' });
-    dock.style.setProperty('--led-top', (r.height + 13) + 'px'); dock.style.setProperty('--led-botten', (44 + 11) + 'px');
+    const r = kn.getBoundingClientRect(), t = r.top - (parseFloat(kn.style.translate.split(' ')[1]) || 0) - 9, botten = parseFloat(ikon.style.top) + 40 + 9;
+    Object.assign(dock.style, { left: (r.left + r.width / 2 - 29) + 'px', top: t + 'px', height: (botten - t) + 'px' });
+    dock.style.setProperty('--led-top', (r.height + 11) + 'px'); dock.style.setProperty('--led-botten', (40 + 11) + 'px');
     dock.toggleAttribute('data-olast', ikon.hasAttribute('data-puls'));
   }
   function flyg(fran) {
@@ -332,7 +332,7 @@
     if (fl.ikonX != null && sr && sr.width && fl.ikonX < sr.right && fl.ikonY + 44 > sr.top && fl.ikonY < sr.bottom) { fl.ikonX = fl.ikonY = null; sparaFl(); }
     const iDocka = !!(rals && kn && fl.ikonX == null);
     if (fl.ikonX != null) { ikon.style.left = fl.ikonX + 'px'; ikon.style.top = fl.ikonY + 'px'; }
-    else if (iDocka) { const r = kn.getBoundingClientRect(); ikon.style.left = (r.left + r.width / 2 - 22) + 'px'; ikon.style.top = (r.bottom + 20) + 'px'; }
+    else if (iDocka) { const r = kn.getBoundingClientRect(); ikon.style.left = (r.left + r.width / 2 - 20) + 'px'; ikon.style.top = (r.bottom + 14) + 'px'; }
     else { ikon.style.right = '22px'; ikon.style.bottom = '22px'; }
     ikon.toggleAttribute('data-i-docka', iDocka);
     dockFor(iDocka ? kn : null);
@@ -340,7 +340,7 @@
     varIDocka = iDocka;
   }
   addEventListener('resize', () => { if (fonster) ritaFonster(); placeraIkon(); });
-  new MutationObserver(() => setTimeout(placeraIkon, 650)).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sido-dold'] });
+  new MutationObserver(() => { clearTimeout(placeraIkon.t); placeraIkon.t = setTimeout(placeraIkon, 620); setTimeout(placeraIkon, 1100); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sido-dold'] });
   function dra(ev, flytt, klar) {
     const x0 = ev.clientX, y0 = ev.clientY; let rord = false;
     const flytta = (e2) => { const dx = e2.clientX - x0, dy = e2.clientY - y0; if (!rord && Math.hypot(dx, dy) < 4) return; rord = true; flytt(dx, dy); };
