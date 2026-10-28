@@ -2919,15 +2919,25 @@
       nedrakning = '<p class="prodblock__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-kalender"/></svg></span>Inget montage inplanerat.</p>';
     }
     var steg = IH.PROJSTEG;
+    // husen i ett steg: ett hus visas med bild och namn, flera som en stapel med +N; stapeln öppnar en lista
+    var stegHus = function (s, l) {
+      if (!l.length) return '<span class="fabrik__hus"></span>';
+      var namn = function (p) { var k = IH.kund(p.kund); return k ? forsta(k.namn) : 'Projekt'; };
+      if (l.length === 1) {
+        var m = IH.modell(l[0].modell), k = IH.kund(l[0].kund);
+        return '<span class="fabrik__hus"><button type="button" data-g="proj-oppna" data-id="' + l[0].id + '" style="--j:0" title="' + e(k ? k.namn : '') + ' · ' + e(m ? m.namn : '') + '"><img src="' + (m ? m.tumme : '') + '" alt="' + e(m ? m.namn : '') + '"><span>' + e(namn(l[0])) + '</span></button></span>';
+      }
+      var visa = l.slice(0, 3), mer = l.length - visa.length;
+      return '<span class="fabrik__hus"><button type="button" class="fabrik__stapel" data-g="steg-hus" data-steg="' + s.id + '" title="Visa alla ' + l.length + ' hus i ' + e(s.namn.toLowerCase()) + '">' +
+        '<span class="fabrik__bilder">' + visa.map(function (p, j) { var m = IH.modell(p.modell); return '<img src="' + (m ? m.tumme : '') + '" alt="" style="--j:' + j + '">'; }).join('') + (mer > 0 ? '<i>+' + mer + '</i>' : '') + '</span>' +
+        '<span>' + e(namn(l[0])) + ' +' + (l.length - 1) + '</span></button></span>';
+    };
     var fabrik = '<div class="fabrik" aria-label="Husen per steg"><i class="fabrik__band" aria-hidden="true"></i>' + steg.map(function (s, n) {
       var l = proj.filter(function (p) { return p.steg === s.id; });
       return '<div class="fabrik__station' + (l.length ? ' fabrik__station--har' : '') + '" style="--f:' + s.farg + ';--n:' + n + '" title="' + e(s.text) + '">' +
         '<span class="fabrik__emoji" aria-hidden="true">' + (STEG_EMOJI[s.id] || '<svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg>') + '<i>' + (n + 1) + '</i></span>' +
         '<b>' + e(s.namn) + '</b><small>' + (l.length ? l.length + ' hus' : 'inga hus') + '</small>' +
-        '<span class="fabrik__hus">' + l.map(function (p, j) {
-          var m = IH.modell(p.modell), k = IH.kund(p.kund);
-          return '<button type="button" data-g="proj-oppna" data-id="' + p.id + '" style="--j:' + j + '" title="' + e(k ? k.namn : '') + ' · ' + e(m ? m.namn : '') + '"><img src="' + (m ? m.tumme : '') + '" alt="' + e(m ? m.namn : '') + '"><span>' + e(k ? forsta(k.namn) : '') + '</span></button>';
-        }).join('') + '</span></div>';
+        stegHus(s, l) + '</div>';
     }).join('') + '</div>';
     var block = function (emoji, rubrik, hjalp, inne, klass) {
       return '<div class="prodblock' + (klass ? ' ' + klass : '') + '"><div class="prodblock__huvud"><span class="prodblock__emoji" aria-hidden="true">' + emoji + '</span>' +
@@ -3121,6 +3131,18 @@
   }
   IH.projArk = projArk;
   G['proj-oppna'] = function (el) { projArk(el.getAttribute('data-id')); };
+  // alla hus i ett steg, när de är fler än ett
+  G['steg-hus'] = function (el) {
+    var id = el.getAttribute('data-steg'), st = IH.PROJSTEG.find(function (x) { return x.id === id; }) || { namn: 'Steget' };
+    var l = (IH.db.projekt || []).filter(function (p) { return p.steg === id; });
+    IH.oppnaArk({
+      titel: st.namn, ikon: 'fabrik', under: l.length + ' hus i det här steget',
+      kropp: '<div class="lista">' + l.map(function (p) {
+        var m = IH.modell(p.modell), k = IH.kund(p.kund);
+        return '<button class="lista__rad" type="button" data-g="proj-oppna" data-id="' + p.id + '">' + (m ? tumme(m.tumme) : '') + '<span class="lista__text"><b>' + e(k ? k.namn : 'Projekt') + '</b><small>' + e(m ? m.namn : '') + (p.montage ? ' · montage v. ' + IH.vecka(new Date(p.montage)) : '') + '</small></span></button>';
+      }).join('') + '</div>'
+    });
+  };
   // Nästa steg direkt från kortet.
   G['proj-nasta'] = function (el) {
     var p = IH.projekt(el.getAttribute('data-id'));

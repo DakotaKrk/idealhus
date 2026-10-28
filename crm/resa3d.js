@@ -228,7 +228,9 @@ function gubbe(klader, hjalm, n = 0, s = 1) {
   g.traverse((o) => { if (o.isMesh) o.castShadow = true; });
   g.scale.setScalar(s); return g;
 }
-const promenera = (gb, t) => { const u = gb.userData, v = Math.sin(t * 7); u.v.rotation.x = v * 0.55; u.h.rotation.x = -v * 0.55; u.vb.rotation.x = -v * 0.5; u.hb.rotation.x = v * 0.5; u.bas.position.y = Math.abs(Math.cos(t * 7)) * 0.04; };
+const promenera = (gb, fas, amp = 1) => { const u = gb.userData, v = Math.sin(fas) * amp; u.v.rotation.x = v * 0.55; u.h.rotation.x = -v * 0.55; u.vb.rotation.x = -v * 0.5; u.hb.rotation.x = v * 0.5; u.bas.position.y = Math.abs(Math.cos(fas)) * 0.045 * amp; u.bas.rotation.z = Math.sin(fas) * 0.03 * amp; };
+// stegfasen räknas fram ur sträckan: ett steg per ~0,55 m, armar och ben vilar när personen står still
+const kliv = (gb, fart, dt) => { const u = gb.userData; u.fas = (u.fas || 0) + fart * dt * 5.7; u.amp = lerp(u.amp || 0, Math.min(1, fart * 1.4), Math.min(1, dt * 6)); promenera(gb, u.fas, u.amp); };
 const vinka = (gb, t, fas = 0, bada) => { gb.userData.h.rotation.z = 2.5 + Math.sin(t * 7 + fas) * 0.35; if (bada) gb.userData.v.rotation.z = -2.5 - Math.sin(t * 7 + fas + 1) * 0.35; };
 function kon(x, z) {
   const orange = new THREE.MeshStandardMaterial({ color: '#f07a3a', roughness: 0.5 });
@@ -257,9 +259,10 @@ function dekor(st) {
   const rok = [], rokMat = new THREE.MeshStandardMaterial({ color: '#d9d0c4', roughness: 1, transparent: true, depthWrite: false });
   for (let n = 0; n < 7; n++) { const r = new THREE.Mesh(new THREE.IcosahedronGeometry(0.4, 3), rokMat.clone()); st[1].add(r); rok.push(r); }
   const snick = gubbe('#c98a45', true, 1); st[1].add(snick);
+  const bar = lada(0.12, 0.08, 2.2, M.tra, 0.02); bar.position.set(0.24, 1.3, 0); bar.rotation.x = 0.15; snick.userData.bas.add(bar);
   lagg(st[1], (t, dt) => {
     rok.forEach((r, n) => { const a = (t * 0.18 + n / 7) % 1; r.position.set(4.8 + a * 1.6 + Math.sin(t + n) * 0.2, 6.7 + a * 3.2, -3.6 - a * 0.6); r.scale.setScalar(0.5 + a * 1.6); r.material.opacity = (1 - a) * 0.85; r.rotation.set(t * 0.3 + n, n, 0); });
-    snick.position.set(Math.sin(t * 0.45) * 2.4, 0.06, 3.3); trygg(snick, Math.cos(t * 0.45) > 0 ? Math.PI / 2 : -Math.PI / 2, dt); promenera(snick, t);
+    const vx = Math.cos(t * 0.45) * 2.4 * 0.45; snick.position.set(Math.sin(t * 0.45) * 2.4, 0.06, 3.3); if (Math.abs(vx) > 0.05) trygg(snick, vx > 0 ? Math.PI / 2 : -Math.PI / 2, dt); kliv(snick, Math.abs(vx), dt);
   });
   // 3 Grunden: två byggare och koner
   const b1 = gubbe('#e9a25a', true, 2), b2 = gubbe('#5b7f9e', true, 0); b1.position.set(-2.8, 0.06, 2.6); b2.position.set(3.2, 0.06, -3.6); b2.rotation.y = -0.6;
@@ -272,7 +275,7 @@ function dekor(st) {
   // 5 Besiktningen: besiktningsmannen går runt huset med sin pärm
   const bes = gubbe('#4a4038', false, 0), parm = lada(0.32, 0.42, 0.05, new THREE.MeshStandardMaterial({ color: '#e9a25a', roughness: 0.5 }), 0.02);
   parm.position.set(0, -0.5, 0.12); bes.userData.v.add(parm); st[4].add(bes, blommor(34, [4.6, 3.6]), buske(-5.6, -1.4), buske(5.6, 0.6, 1.1));
-  lagg(st[4], (t) => { const a = t * 0.35; bes.position.set(Math.cos(a) * 4.4, 0.06, -0.8 + Math.sin(a) * 3.2); bes.rotation.y = -a; promenera(bes, t); bes.userData.v.rotation.x = -1.2; });
+  lagg(st[4], (t, dt) => { const a = t * 0.35, vx = -Math.sin(a) * 4.4 * 0.35, vz = Math.cos(a) * 3.2 * 0.35; bes.position.set(Math.cos(a) * 4.4, 0.06, -0.8 + Math.sin(a) * 3.2); trygg(bes, Math.atan2(vx, vz), dt); kliv(bes, Math.hypot(vx, vz), dt); bes.userData.v.rotation.x = -1.2; });
   // 6 Klart: familjen vinkar vid trappan, staket, brevlåda och rabatter
   const fam = [gubbe('#c98a45', false, 0), gubbe('#7f9a6c', false, 1), gubbe('#e7a3a0', false, 2, 0.62)];
   fam[0].position.set(2, 0.06, 3.4); fam[1].position.set(3.1, 0.06, 3.2); fam[2].position.set(2.6, 0.06, 3.7);
@@ -351,14 +354,39 @@ function natur(scen) {
   for (let n = 0; n < 9; n++) { const cx = -6 + n * 12 + r() * 4; [0, 1, 2].forEach(() => plantera(cx + (r() - 0.5) * 4, 23 + r() * 6, 0.9 + r() * 0.5)); }
   stam.count = k; gran1.count = gran2.count = gran3.count = kg; lov.count = kl; lov2.count = kl2;
   [stam, gran1, gran2, gran3, lov, lov2].forEach((m) => { m.castShadow = m.receiveShadow = true; scen.add(m); });
-  // traktorn som plöjer åkern längst fram
-  const trak = new THREE.Group(), rod = new THREE.MeshStandardMaterial({ color: '#c8553d', roughness: 0.45, metalness: 0.15 });
-  const tk = lada(1.6, 0.7, 1, rod, 0.18); tk.position.set(0.3, 0.75, 0); trak.add(tk);
-  const th = lada(0.8, 0.8, 0.9, M.glas(), 0.12); th.position.set(-0.3, 1.45, 0); trak.add(th);
-  const tt = lada(0.95, 0.1, 1.05, rod, 0.04); tt.position.set(-0.3, 1.9, 0); trak.add(tt);
-  const trakHjul = [[-0.45, 0.48, 0.6], [0.75, 0.3, 0.38]].flatMap(([x, rr, w]) => [-0.62, 0.62].map((z) => { const h = cyl(rr, rr, 0.28, M.mork, 20); h.rotation.x = Math.PI / 2; h.position.set(x, rr, z); trak.add(h); return h; }));
-  const avgas = []; for (let n = 0; n < 5; n++) { const a = new THREE.Mesh(new THREE.IcosahedronGeometry(0.16, 2), new THREE.MeshStandardMaterial({ color: '#e9e4dc', roughness: 1, transparent: true, depthWrite: false })); trak.add(a); avgas.push(a); }
+  // traktorn som harvar åkern längst fram: kör en jämn slinga, svänger med framhjulen och dammar bakom sig
+  const trak = new THREE.Group(), rod = new THREE.MeshStandardMaterial({ color: '#b8402b', roughness: 0.35, metalness: 0.25 });
+  const chassi = lada(2.3, 0.35, 0.7, M.svart, 0.06); chassi.position.set(0.15, 0.62, 0); trak.add(chassi);
+  const motor = lada(1.25, 0.62, 0.78, rod, 0.16); motor.position.set(0.72, 1.0, 0); trak.add(motor);
+  const grill = lada(0.05, 0.45, 0.6, M.svart, 0.02); grill.position.set(1.35, 0.98, 0); trak.add(grill);
+  [-0.22, 0.22].forEach((z) => { const l = lada(0.04, 0.08, 0.12, LJUS_FRAM, 0.02); l.position.set(1.37, 1.15, z); trak.add(l); });
+  const golv = lada(1.1, 0.12, 1.3, M.svart, 0.03); golv.position.set(-0.45, 1.0, 0); trak.add(golv);
+  [[0.05, 0.6], [0.05, -0.6], [-0.95, 0.6], [-0.95, -0.6]].forEach(([x, z]) => { const st = lada(0.06, 1.1, 0.06, M.svart, 0); st.position.set(x, 1.6, z); trak.add(st); });
+  const tak = lada(1.2, 0.1, 1.4, rod, 0.04); tak.position.set(-0.45, 2.18, 0); trak.add(tak);
+  const rutor = lada(1.0, 0.95, 1.2, new THREE.MeshStandardMaterial({ color: '#9fb6c0', roughness: 0.05, metalness: 0.5, transparent: true, opacity: 0.45 }), 0.02); rutor.position.set(-0.45, 1.6, 0); trak.add(rutor);
+  const stol = lada(0.35, 0.4, 0.4, M.svart, 0.06); stol.position.set(-0.6, 1.25, 0); trak.add(stol);
+  const forare = gubbe('#5b7f9e', false, 2, 0.75); forare.position.set(-0.55, 0.62, 0); forare.rotation.y = Math.PI / 2; forare.userData.vb.rotation.x = forare.userData.hb.rotation.x = -1.4; forare.userData.v.rotation.x = forare.userData.h.rotation.x = -0.9; trak.add(forare);
+  const ror = cyl(0.04, 0.05, 0.9, M.svart, 8); ror.position.set(1.05, 1.65, -0.25); trak.add(ror);
+  [-1, 1].forEach((sd) => { const sk = lada(0.75, 0.06, 0.32, rod, 0.03); sk.position.set(-0.6, 1.22, sd * 0.78); trak.add(sk); });
+  const bak = [-1, 1].map((sd) => { const h = hjul(0.55, 0.36); h.position.set(-0.6, 0.55, sd * 0.78); trak.add(h); return h; });
+  const fram = [-1, 1].map((sd) => { const st = new THREE.Group(); st.position.set(0.95, 0.32, sd * 0.62); trak.add(st); const h = hjul(0.32, 0.22); st.add(h); return { st, h }; });
+  const harv = new THREE.Group(); harv.position.set(-1.9, 0, 0); trak.add(harv);
+  const balk = lada(0.2, 0.15, 2.0, M.stal, 0.03); balk.position.y = 0.45; harv.add(balk); const drag = lada(0.6, 0.08, 0.08, M.stal, 0); drag.position.set(0.4, 0.5, 0); harv.add(drag);
+  for (let n = 0; n < 7; n++) { const p = lada(0.05, 0.4, 0.05, M.stal, 0); p.position.set(0, 0.25, -0.9 + n * 0.3); p.rotation.z = 0.3; harv.add(p); }
+  const avgas = []; for (let n = 0; n < 6; n++) { const a = new THREE.Mesh(new THREE.IcosahedronGeometry(0.14, 2), new THREE.MeshStandardMaterial({ color: '#d8d3cb', roughness: 1, transparent: true, depthWrite: false })); scen.add(a); avgas.push(a); }
+  const damm = []; for (let n = 0; n < 8; n++) { const a = new THREE.Mesh(new THREE.IcosahedronGeometry(0.3, 2), new THREE.MeshStandardMaterial({ color: '#cdb892', roughness: 1, transparent: true, depthWrite: false })); scen.add(a); damm.push(a); }
   trak.traverse((m) => { if (m.isMesh) m.castShadow = true; }); scen.add(trak);
+  // slingan: två raka sträckor och två halvcirklar, parametriserad på sträcka
+  const RAK = 22, RAD = 1.5, X0 = -11, Z0 = 14.3, VARV = 2 * RAK + 2 * Math.PI * RAD;
+  const slinga = (d, ut) => {
+    d = ((d % VARV) + VARV) % VARV;
+    if (d < RAK) return ut.set(X0 + d, 0, Z0, 0);
+    d -= RAK; if (d < Math.PI * RAD) { const a = d / RAD; return ut.set(X0 + RAK + Math.sin(a) * RAD, 0, Z0 + RAD - Math.cos(a) * RAD, a); }
+    d -= Math.PI * RAD; if (d < RAK) return ut.set(X0 + RAK - d, 0, Z0 + 2 * RAD, Math.PI);
+    d -= RAK; const a = d / RAD; return ut.set(X0 - Math.sin(a) * RAD, 0, Z0 + RAD + Math.cos(a) * RAD, Math.PI + a);
+  };
+  const tp = new THREE.Vector4(), tp2 = new THREE.Vector4(), tmpV = new THREE.Vector3(); let trakD = 0, trakVinkel = 0;
+
   // får som betar på ängen bakom
   const ull = new THREE.MeshStandardMaterial({ color: '#f7f3ec', roughness: 1 }), nos = new THREE.MeshStandardMaterial({ color: '#3d3833', roughness: 0.8 }), far = [];
   for (let n = 0; n < 7; n++) {
@@ -385,11 +413,16 @@ function natur(scen) {
     for (let b = 0; b < 3; b++) { const blad = lada(0.26, 4.6, 0.08, M.vit, 0.04); blad.geometry.translate(0, 2.3, 0); blad.rotation.z = (b * Math.PI * 2) / 3; blad.position.z = 0.6; nav.add(blad); }
     g.position.set(x, 0.5, z); g.traverse((m) => { if (m.isMesh) m.castShadow = true; }); scen.add(g); verk.push(nav);
   });
-  return (t) => {
-    const ax = ((t * 0.06) % 2), fram = ax < 1, ap = fram ? ax : 2 - ax;
-    trak.position.set(-12.5 + ap * 25, -0.62, 14.6 + (fram ? 0 : 2.2)); trak.rotation.y = fram ? 0 : Math.PI;
-    trak.position.y = -0.62 + Math.abs(Math.sin(t * 8)) * 0.03; trakHjul.forEach((h) => { h.rotation.y = -t * 5; });
-    avgas.forEach((a, n) => { const q = (t * 0.8 + n / 5) % 1; a.position.set(0.55 - q * 0.6, 1.7 + q * 1.6, -0.3); a.scale.setScalar(0.6 + q * 2); a.material.opacity = (1 - q) * 0.6; });
+  return (t, dt) => {
+    // traktorn: jämn fart, riktningen ur slingans tangent, framhjulen styr in i kurvan
+    const fartT = 2.2, ds = fartT * (dt || 0); trakD += ds; slinga(trakD, tp); slinga(trakD + 1.2, tp2);
+    trak.position.set(tp.x, -0.62 + Math.sin(t * 13) * 0.008, tp.z); trak.rotation.y = -tp.w;
+    let styr = tp2.w - tp.w; styr = Math.atan2(Math.sin(styr), Math.cos(styr)); trakVinkel = lerp(trakVinkel, klamp(styr * 1.4, -0.6, 0.6), Math.min(1, (dt || 0) * 4));
+    fram.forEach((f) => { f.st.rotation.y = trakVinkel; f.h.rotation.z -= ds / 0.32; }); bak.forEach((h) => { h.rotation.z -= ds / 0.55; });
+    tmpV.set(1.05, 2.1, -0.25); trak.localToWorld(tmpV);
+    avgas.forEach((a, n) => { const q = (t * 0.7 + n / 6) % 1; if (q < 0.05) a.userData.p = tmpV.clone(); const b = a.userData.p || tmpV; a.position.set(b.x - q * 0.4, b.y + q * 1.8, b.z + q * 0.3); a.scale.setScalar(0.5 + q * 2.2); a.material.opacity = (1 - q) * 0.5; });
+    tmpV.set(-1.9, 0.2, 0); trak.localToWorld(tmpV);
+    damm.forEach((a, n) => { const q = (t * 0.45 + n / 8) % 1; if (q < 0.04) a.userData.p = tmpV.clone(); const b = a.userData.p || tmpV; a.position.set(b.x, b.y + q * 0.9, b.z); a.scale.setScalar(0.4 + q * 2.4); a.material.opacity = (1 - q) * 0.35; });
     far.forEach((f, n) => { const d = f.userData; d.hv.rotation.z = -0.5 + Math.max(0, Math.sin(t * 0.9 + d.fas)) * 0.8; f.rotation.y = d.bas + Math.sin(t * 0.15 + d.fas) * 0.6; });
     fjarilar.forEach((f, n) => { const d = f.userData, a = t * 0.5 + d.fas; f.position.set(d.x + Math.cos(a) * 2.2, 0.9 + Math.sin(t * 2.3 + d.fas) * 0.35 + Math.sin(a * 2) * 0.3, d.z + Math.sin(a * 1.3) * 1.8); f.rotation.y = -a; const v = Math.sin(t * 22 + d.fas) * 1.1; f.children[0].rotation.y = v; f.children[1].rotation.y = -v; });
     verk.forEach((v, n) => { v.rotation.z = t * (0.7 + n * 0.12); });
@@ -483,14 +516,32 @@ function omgivning(scen) {
     c.position.set(n * 14 - 10, 15 + (n % 3) * 1.5, -16 + (n % 2) * 6); c.scale.setScalar(0.8 + (n % 3) * 0.25); scen.add(c); moln.push(c);
   }
   // fåglar
-  const fMat = new THREE.MeshBasicMaterial({ color: '#4a4038', side: THREE.DoubleSide }), faglar = [];
-  for (let n = 0; n < 4; n++) { const f = new THREE.Group(); [-1, 1].forEach((s) => { const v = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.16), fMat); v.geometry.translate(0.25 * s, 0, 0); f.add(v); }); scen.add(f); faglar.push(f); }
+  const fKropp = new THREE.MeshStandardMaterial({ color: '#3d3833', roughness: 0.8 }), fVit = new THREE.MeshStandardMaterial({ color: '#efe9e0', roughness: 0.8 }), fNabb = new THREE.MeshStandardMaterial({ color: '#e9a25a', roughness: 0.5 }), faglar = [];
+  for (let n = 0; n < 7; n++) {
+    const f = new THREE.Group(), k = new THREE.Mesh(new THREE.SphereGeometry(0.16, 14, 10), n % 3 ? fKropp : fVit); k.scale.set(0.8, 0.75, 1.7); f.add(k);
+    const hu = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 8), fKropp); hu.position.set(0, 0.06, 0.28); f.add(hu);
+    const nb = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.12, 8), fNabb); nb.rotation.x = Math.PI / 2; nb.position.set(0, 0.05, 0.4); f.add(nb);
+    const st = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.25, 4), fKropp); st.scale.y = 0.25; st.rotation.x = -Math.PI / 2; st.position.z = -0.32; f.add(st);
+    const vingar = [-1, 1].map((sd) => { const inre = new THREE.Group(); inre.position.set(sd * 0.1, 0.03, 0.02); f.add(inre); const a = lada(0.36, 0.025, 0.24, fKropp, 0.01); a.position.x = sd * 0.18; inre.add(a); const yttre = new THREE.Group(); yttre.position.x = sd * 0.36; inre.add(yttre); const b = lada(0.34, 0.02, 0.18, fKropp, 0.01); b.position.set(sd * 0.16, 0, -0.03); b.rotation.y = sd * 0.2; yttre.add(b); return { inre, yttre, sd }; });
+    f.userData = { vingar, off: new THREE.Vector3((n % 3 - 1) * 1.6 - Math.floor(n / 3) * 0.4, (n % 2) * 0.5, -Math.floor(n / 3) * 1.4 - Math.abs(n % 3 - 1) * 0.9), fas: n * 0.9, roll: 0 };
+    f.scale.setScalar(1.3); scen.add(f); faglar.push(f);
+  }
+  const flockBana = (t, ut) => ut.set(AVST * 2.5 + Math.sin(t * 0.045) * AVST * 3.2, 11 + Math.sin(t * 0.17) * 1.2, -6 + Math.sin(t * 0.09) * 9);
+  const fp = new THREE.Vector3(), fp2 = new THREE.Vector3(), fram3 = new THREE.Vector3(), upp3 = new THREE.Vector3(0, 1, 0);
   // Legohus skåpbil i det närmre körfältet
   const bil = skapbil(); bil.position.set(-12, -0.52, 6.4); scen.add(bil);
   return (t, dt, fokusX) => {
-    nat(t);
+    nat(t, dt);
     moln.forEach((c) => { c.position.x += dt * 0.5; if (c.position.x > AVST * 5 + 24) c.position.x = -24; });
-    faglar.forEach((f, n) => { const a = t * 0.32 + n * 0.5; f.position.set(fokusX + Math.cos(a) * (7 + n), 10 + n * 0.6 + Math.sin(t * 0.9 + n) * 0.4, -3 + Math.sin(a) * 5); f.rotation.y = -a; f.children[0].rotation.z = Math.sin(t * 10 + n) * 0.6; f.children[1].rotation.z = -Math.sin(t * 10 + n) * 0.6; });
+    flockBana(t, fp); flockBana(t + 0.5, fp2); fram3.subVectors(fp2, fp).normalize(); const kurs = Math.atan2(fram3.x, fram3.z);
+    flockBana(t + 1.5, fp2); const sving = Math.atan2(fp2.x - fp.x, fp2.z - fp.z) - kurs;
+    faglar.forEach((f) => {
+      const u = f.userData; tmp.copy(u.off).applyAxisAngle(upp3, kurs); f.position.copy(fp).add(tmp); f.position.y += Math.sin(t * 0.8 + u.fas) * 0.25;
+      u.roll = lerp(u.roll, klamp(-Math.atan2(Math.sin(sving), Math.cos(sving)) * 1.2, -0.6, 0.6), Math.min(1, dt * 2));
+      f.rotation.set(-fram3.y * 0.8, kurs, u.roll, 'YXZ');
+      const slag = mjuk((Math.sin(t * 0.5 + u.fas) + 0.3) * 1.5), v = Math.sin(t * 11 + u.fas);
+      u.vingar.forEach((w) => { w.inre.rotation.z = w.sd * (v * 0.65 * slag + (1 - slag) * 0.08); w.yttre.rotation.z = w.sd * (v * 0.45 * slag - 0.05); });
+    });
     const fart = 3.4; bil.position.x += dt * fart; if (bil.position.x > AVST * 5 + 40) bil.position.x = -40;
     bil.position.y = -0.52 + Math.abs(Math.sin(t * 9)) * 0.01; bil.userData.hjul.forEach((h) => { h.rotation.z -= (dt * fart) / bil.userData.r; });
     lMat.emissiveIntensity = 1 + Math.sin(t * 1.5) * 0.15;
@@ -774,18 +825,19 @@ function nalar() {
   // kundernas hus som nålar på sitt steg
   const lager = S.el.querySelector('[data-resa-nalar]'); if (!lager) return;
   const proj = (IH.db.projekt || []).filter((p) => IH.PROJSTEG.some((s) => s.id === p.steg));
-  lager.innerHTML = proj.map((p, n) => {
-    const k = IH.kund(p.kund), m = IH.modell && IH.modell(p.modell), i = IH.PROJSTEG.findIndex((s) => s.id === p.steg);
-    const sam = proj.filter((q) => q.steg === p.steg), j = sam.indexOf(p);
-    return '<button type="button" class="resa3d__nal" data-g="proj-oppna" data-id="' + p.id + '" data-i="' + i + '" data-j="' + j + '" style="--d:' + (n * 0.08) + 's"><img src="' + e(m ? m.tumme : '') + '" alt=""><span><b>' + e(k ? k.namn.split(' ')[0] : 'Projekt') + '</b><small>' + e(m ? m.namn : '') + '</small></span></button>';
+  lager.innerHTML = IH.PROJSTEG.map((st, i) => {
+    const l = proj.filter((p) => p.steg === st.id); if (!l.length) return '';
+    const forst = (p) => { const k = IH.kund(p.kund); return k ? k.namn.split(' ')[0] : 'Projekt'; }, bild = (p) => { const m = IH.modell && IH.modell(p.modell); return m ? m.tumme : ''; };
+    if (l.length === 1) { const m = IH.modell && IH.modell(l[0].modell); return '<button type="button" class="resa3d__nal" data-g="proj-oppna" data-id="' + l[0].id + '" data-i="' + i + '"><img src="' + e(bild(l[0])) + '" alt=""><span><b>' + e(forst(l[0])) + '</b><small>' + e(m ? m.namn : '') + '</small></span></button>'; }
+    return '<button type="button" class="resa3d__nal resa3d__nal--flera" data-g="steg-hus" data-steg="' + st.id + '" data-i="' + i + '"><span class="resa3d__bilder">' + l.slice(0, 3).map((p) => '<img src="' + e(bild(p)) + '" alt="">').join('') + '</span><span><b>' + l.length + ' hus</b><small>' + e(forst(l[0])) + ' +' + (l.length - 1) + '</small></span></button>';
   }).join('');
 }
 const tmp = new THREE.Vector3(), OFF = new THREE.Vector3(-5, 13, 42).normalize(), BAS = 44.6;
 function placeraNalar() {
   const w = S.el.clientWidth, h = S.el.clientHeight;
   S.el.querySelectorAll('.resa3d__nal').forEach((b) => {
-    const i = +b.dataset.i, j = +b.dataset.j;
-    tmp.set(i * AVST - 2.5 + j * 2.8, 6.4 + j * 0.2, -2.5).project(S.kamera);
+    const i = +b.dataset.i;
+    tmp.set(i * AVST - 1, 6.6, -2.5).project(S.kamera);
     const syns = tmp.z < 1 && Math.abs(tmp.x) < 1.15 && Math.abs(tmp.y) < 1.15;
     b.style.transform = 'translate(' + ((tmp.x + 1) / 2 * w).toFixed(1) + 'px,' + ((1 - tmp.y) / 2 * h).toFixed(1) + 'px) translate(-50%,-100%)';
     b.style.opacity = syns ? (i === S.nu ? 1 : 0.85) : 0; b.style.pointerEvents = syns ? '' : 'none';

@@ -73,3 +73,16 @@
 .resa3d__z:hover { background: rgba(27, 25, 21, .06); color: var(--kol); }
 .resa3d__duk:active { cursor: grabbing; }
 @media (max-width: 760px) { .resa3d__zoom { top: auto; bottom: 64px; right: 12px; } }
+
+/* Många hus i samma steg: bilderna läggs omlott med +N, och listan öppnas med ett klick */
+.resa3d__nal .resa3d__bilder { display: flex; align-items: center; }
+.resa3d__bilder img { margin-left: -12px; box-shadow: 0 0 0 2px #fffdf9; }
+.resa3d__bilder img:first-child { margin-left: 0; }
+.fabrik__stapel { display: grid; justify-items: center; gap: 3px; padding: 0; border: 0; background: none; cursor: pointer; }
+.fabrik__bilder { position: relative; display: flex; align-items: center; }
+.fabrik__bilder img { width: 46px; margin-left: -22px; transition: transform .35s var(--studs); }
+.fabrik__bilder img:first-child { margin-left: 0; }
+.fabrik__stapel:hover .fabrik__bilder img { transform: translateX(calc(var(--j) * 6px)); }
+.fabrik__bilder i { display: grid; place-items: center; min-width: 26px; height: 26px; margin-left: -10px; padding: 0 6px; border-radius: 999px; background: #1b1915; font: 700 .66rem/1 var(--rubrik); font-style: normal; color: #fbf4e8; box-shadow: 0 0 0 2px #fff; }
+.fabrik__stapel > span:last-child { font: 600 .625rem/1 var(--rubrik); color: var(--text-2); }
+.fabrik__hus { min-height: 64px; }
