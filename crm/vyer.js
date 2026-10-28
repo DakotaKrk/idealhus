@@ -3301,6 +3301,46 @@
     }).join('') + '</div>';
   }
 
+  // Samtalsstöd för vald affär: det kunden nämnt (med färdiga svar) och frågorna som återstår – bockas av under mötet
+  var moteFragor = {};
+  function samtalsstod(a, k, f) {
+    var am = f ? amnen(f) : [], har = function (id) { return am.some(function (x) { return x.a.id === id; }); };
+    var besok = db().uppgifter.some(function (u) { return u.kund === a.kund && /bes[öo]k/i.test(u.text); }), off = IH.offertFor(a.id);
+    var fragor = [];
+    if (!har('storlek')) fragor.push(['storlek', 'Hur stort vill ni bygga?']);
+    if (!har('detaljplan')) fragor.push(['plan', 'Ligger tomten inom eller utanför detaljplan?']);
+    if (!har('tidplan')) fragor.push(['tid', 'När vill ni att huset står klart?']);
+    if (k && k.typ !== 'foretag' && !har('aretrunt')) fragor.push(['bo', 'Ska huset användas året runt?']);
+    if (!besok) fragor.push(['besok', 'När passar ett platsbesök på tomten?']);
+    if (!off) fragor.push(['budget', 'Vilken budget har ni tänkt er?']);
+    fragor.push(['beslut', 'Vem mer är med och bestämmer?']);
+    var bockat = moteFragor[a.id] || {}, klara = fragor.filter(function (x) { return bockat[x[0]]; }).length;
+    return '<div class="samtal"><div class="samtal__huvud"><p class="etikett">Samtalsstöd</p><span class="samtal__matare" style="--a:' + (fragor.length ? klara / fragor.length : 0).toFixed(2) + '"><i></i></span><small>' + klara + ' av ' + fragor.length + ' frågor</small></div>' +
+      (am.length ? '<div class="samtal__nämnt"><small>Kunden nämnde</small><div>' + am.map(function (x) { return '<span class="samtal__chip" title="' + e(x.a.svar || x.a.skal || '') + '">' + i(x.a.ikon || 'bock') + e(x.namn) + '</span>'; }).join('') + '</div></div>' : '') +
+      (am.filter(function (x) { return x.a.svar; }).length ? '<div class="samtal__svar">' + am.filter(function (x) { return x.a.svar; }).slice(0, 3).map(function (x) { return '<p><b>' + e(x.namn) + '</b>' + e(x.a.svar) + '</p>'; }).join('') + '</div>' : '') +
+      '<ul class="samtal__fragor">' + fragor.map(function (x) { return '<li><button type="button" data-g="mote-fraga" data-id="' + a.id + '" data-f="' + x[0] + '" aria-pressed="' + !!bockat[x[0]] + '"><i>' + i('bock') + '</i>' + e(x[1]) + '</button></li>'; }).join('') + '</ul></div>';
+  }
+  // Kommande möten och platsbesök ur uppgifterna, med en knapp som förbereder mötet för kundens affär
+  function kommandeMoten() {
+    var idag0 = new Date(); idag0.setHours(0, 0, 0, 0);
+    var l = db().uppgifter.filter(function (u) { return !u.klar && /möte|träff|bes[öo]k|visning/i.test(u.text) && new Date(u.forfaller) >= idag0; }).sort(function (x, y) { return x.forfaller < y.forfaller ? -1 : 1; }).slice(0, 4);
+    return '<section class="kort komm" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('kalender') + '</span>Kommande möten</h2>' + (l.length ? '<span class="chip">' + l.length + '</span>' : '') + '</header><div class="kort__kropp">' +
+      (l.length ? '<ul class="komm__lista">' + l.map(function (u) {
+        var kk = u.kund ? IH.kund(u.kund) : null, d = new Date(u.forfaller), t = dagarTill(u.forfaller), af = kk ? oppnaAffarer().filter(function (x) { return x.kund === kk.id; })[0] : null;
+        return '<li><span class="komm__datum' + (t === 0 ? ' idag' : '') + '"><b>' + d.getDate() + '</b><small>' + MANAD[d.getMonth()].slice(0, 3) + '</small></span><span class="komm__text"><b>' + e(u.text) + '</b><small>' + (kk ? e(kk.namn) + ' · ' : '') + (t === 0 ? 'i dag' : t === 1 ? 'i morgon' : 'om ' + t + ' dagar') + '</small></span>' +
+          (af ? '<button type="button" class="knapp knapp--liten' + (af.id === moteAffar ? ' knapp--virke' : '') + '" data-g="mote-forbered" data-id="' + af.id + '">' + i(af.id === moteAffar ? 'bock' : 'mote') + (af.id === moteAffar ? 'Förberett' : 'Förbered') + '</button>' : '') + '</li>';
+      }).join('') + '</ul>' : '<p class="forhand__tom">' + i('kalender') + 'Inga möten eller platsbesök inbokade. Lägg till dem under Att göra.</p>') + '</div></section>';
+  }
+  // Logga mötet efteråt: anteckning, längd och nästa steg – blir en aktivitet och en uppgift
+  function loggaMote(a, k) {
+    var imorgon = new Date(); imorgon.setDate(imorgon.getDate() + 7);
+    return '<section class="kort logga-mote" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('anteckning') + '</span>Logga mötet</h2></header>' +
+      '<form class="kort__kropp formular" data-form="mote-logga"><div class="falt-rad"><label class="falt"><span>Kund</span><select name="kund" required><option value="">Välj kund …</option>' + db().kunder.slice().sort(function (x, y) { return x.namn.localeCompare(y.namn, 'sv'); }).map(function (kk) { return '<option value="' + kk.id + '"' + (k && k.id === kk.id ? ' selected' : '') + '>' + e(kk.namn) + '</option>'; }).join('') + '</select></label>' +
+        '<label class="falt falt--smal"><span>Minuter</span><input name="min" type="number" min="5" max="480" step="5" value="30"></label></div>' +
+        '<label class="falt"><span>Det ni kom fram till</span><textarea name="text" rows="2" required maxlength="400" placeholder="T.ex. Vill ha Sadel 30 med braskamin, tomten är inom detaljplan"></textarea></label>' +
+        '<div class="falt-rad"><label class="falt"><span>Nästa steg</span><input name="nasta" maxlength="120" placeholder="T.ex. Skicka offert"></label><label class="falt falt--smal"><span>Senast</span><input name="datum" type="date" value="' + IH.dagStr(imorgon) + '"></label></div>' +
+        '<div class="formular__knappar"><button class="knapp knapp--virke" type="submit">' + i('bock') + 'Spara mötet</button></div></form></section>';
+  }
   IH.vyer.mote = function () {
     var oppna = oppnaAffarer();
     var a = moteAffar ? IH.affar(moteAffar) : null;
@@ -3373,11 +3413,12 @@
             return '<li class="' + (c[0] ? 'klar' : '') + '"><i>' + i(c[0] ? 'bock' : 'klocka') + '</i><span><b>' + c[1] + '</b><small>' + c[2] + '</small></span>' + c[3] + '</li>';
           }).join('') + '</ul></div>' : '') +
 
+          (a ? samtalsstod(a, k, f) : '') +
           '<div class="formular__knappar"><button class="knapp knapp--mork" type="submit">' + i('mote') + 'Starta presentation</button>' +
           '<button class="knapp" type="button" data-g="starta-mote" data-start="kalkyl"' + (a ? ' data-affar="' + a.id + '"' : '') + '>' + i('kub') + 'Öppna kalkylen direkt</button></div></form></section>' +
 
-        '<div class="rutnat">' +
-          '<section class="kort" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('klocka') + '</span>Tidigare möten</h2>' + (moten.length ? '<span class="chip">' + moten.length + '</span>' : '') + '</header>' +
+        '<div class="rutnat">' + kommandeMoten() + loggaMote(a, k) +
+          '<section class="kort" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('klocka') + '</span>Tidigare möten</h2>' + (moten.length ? '<span class="chip">' + moten.length + (snitt ? ' · snitt ' + snitt + ' min' : '') + '</span>' : '') + '</header>' +
             '<div class="kort__kropp">' + (moten.length ? '<div class="tidigare" data-stagger>' + moten.slice(0, 6).map(function (h) {
               var kk = IH.kund(h.kund), mins = moteMinuter(h.text), text = String(h.text).replace(/^Kundmöte \(\d+ min\):\s*/, '').replace(/^Platsbesök bokat i kundmötet.*$/, 'Platsbesök bokat i kundmötet');
               return '<a class="tidigare__rad" href="#/kunder/' + (kk ? kk.id : '') + '">' + kundAvatar(kk, true) + '<span><b>' + e(kk ? kk.namn : 'Okänd kund') + '</b><small><svg class="emo-ik" aria-hidden="true"><use href="#i-handslag"/></svg> ' + IH.datum(h.tid) + '</small><em>' + e(text) + '</em></span>' + (mins ? '<i class="tidigare__min">' + mins + ' min</i>' : '') + '</a>';
@@ -3429,6 +3470,24 @@
   };
   G['mote-valj'] = function (el) { moteAffar = el.getAttribute('data-id'); IH.rita(); window.scrollTo({ top: 0, behavior: lugnRorelse() ? 'auto' : 'smooth' }); };
   G['mote-lage'] = function (el) { moteBilder = MOTE_LAGEN[el.getAttribute('data-l')][1].slice(); IH.rita(); };
+  G['mote-fraga'] = function (el) {
+    var id = el.getAttribute('data-id'), f = el.getAttribute('data-f'); moteFragor[id] = moteFragor[id] || {}; moteFragor[id][f] = !moteFragor[id][f];
+    var y = window.scrollY; IH.rita(); window.scrollTo(0, y);
+  };
+  G['mote-forbered'] = function (el) {
+    moteAffar = el.getAttribute('data-id'); IH.rita();
+    setTimeout(function () { var x = $('[data-moteaffar]'); if (x) x.closest('.kort').scrollIntoView({ behavior: IH.lugn ? 'auto' : 'smooth', block: 'start' }); }, 60);
+  };
+  FORM['mote-logga'] = function (f, d) {
+    var k = IH.kund(d.get('kund')); if (!k) return;
+    var min = Math.max(5, Math.min(480, +d.get('min') || 30)), text = String(d.get('text') || '').trim(), nasta = String(d.get('nasta') || '').trim();
+    var af = oppnaAffarer().filter(function (x) { return x.kund === k.id; })[0] || null;
+    IH.logga('mote', 'Kundmöte (' + min + ' min): ' + text, k.id, af ? af.id : null);
+    if (af) af.andrad = new Date().toISOString();
+    if (nasta) db().uppgifter.push({ id: IH.nyttId('uppgift', 'u'), text: nasta, forfaller: new Date((d.get('datum') || IH.dagStr()) + 'T09:00:00').toISOString(), klar: false, kund: k.id, affar: af ? af.id : null, ansvarig: IH.jag().id });
+    IH.spara(); IH.uppdateraMeny(); IH.rita();
+    IH.toast('Mötet är sparat', k.namn + (nasta ? ' · nästa steg: ' + nasta : ''), 'mote');
+  };
   G['mote-boka'] = function (el) {
     var a = IH.affar(el.getAttribute('data-id'));
     if (!a) return;

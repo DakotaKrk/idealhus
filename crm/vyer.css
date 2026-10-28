@@ -8478,3 +8478,43 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .ml-anvand { font-size: .72rem; color: var(--text-3); }
 .ml-exempel { padding: 16px; border-radius: 16px; background: linear-gradient(170deg, #f6efe3, #efe5d4); max-height: 66vh; overflow: auto; }
 @media (max-width: 900px) { .ml-forslag__lista { grid-template-columns: 1fr; } section.dk-hjalte .ml-stats { grid-template-columns: 1fr; } }
+
+/* Kundmöte smartare: samtalsstöd, kommande möten och logga mötet */
+.samtal { display: grid; gap: 12px; margin: 4px 0 6px; padding: 16px; border-radius: 18px; background: linear-gradient(170deg, #fffaf2, #fff); box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .28); }
+.samtal__huvud { display: flex; align-items: center; gap: 12px; }
+.samtal__huvud .etikett { margin: 0; }
+.samtal__matare { flex: 1; height: 6px; border-radius: 6px; background: rgba(27, 25, 21, .08); overflow: hidden; }
+.samtal__matare i { display: block; height: 100%; width: calc(var(--a) * 100%); border-radius: inherit; background: linear-gradient(90deg, #8fcf9a, #2e8c57); transition: width .5s var(--mjuk); }
+.samtal__huvud small { font-size: .74rem; color: var(--text-3); white-space: nowrap; }
+.samtal__nämnt small { display: block; margin-bottom: 6px; font: 700 .64rem/1 var(--rubrik); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
+.samtal__nämnt > div { display: flex; flex-wrap: wrap; gap: 6px; }
+.samtal__chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .35); font: 600 .74rem/1 var(--rubrik); color: var(--virke-djup); }
+.samtal__chip .i { width: 13px; height: 13px; }
+.samtal__svar { display: grid; gap: 6px; }
+.samtal__svar p { margin: 0; padding: 10px 12px; border-radius: 12px; background: #fff; box-shadow: inset 3px 0 0 #e29a4a; font-size: .82rem; line-height: 1.45; color: var(--text-2); }
+.samtal__svar b { display: block; margin-bottom: 2px; font: 600 .78rem/1.2 var(--rubrik); color: var(--text); }
+.samtal__fragor { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.samtal__fragor button { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 11px; border: 0; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .08); font: 500 .8rem/1.3 inherit; color: var(--text); text-align: left; cursor: pointer; transition: background-color .2s, box-shadow .2s, transform .25s var(--mjuk); }
+.samtal__fragor button:hover { box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .45); }
+.samtal__fragor button:active { transform: scale(.98); }
+.samtal__fragor button i { display: grid; place-items: center; flex: none; width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(27, 25, 21, .2); color: transparent; transition: background-color .2s, color .2s, box-shadow .2s; }
+.samtal__fragor button i .i { width: 11px; height: 11px; }
+.samtal__fragor button[aria-pressed="true"] { background: rgba(46, 140, 87, .06); color: var(--text-3); }
+.samtal__fragor button[aria-pressed="true"] i { background: #2e8c57; color: #fff; box-shadow: none; }
+.komm__lista { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.komm__lista li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); }
+.komm__datum { display: grid; place-items: center; width: 44px; height: 48px; border-radius: 13px; background: var(--ben); line-height: 1; }
+.komm__datum b { font: 700 1.1rem/1 var(--rubrik); }
+.komm__datum small { margin-top: 3px; font: 700 .62rem/1 var(--rubrik); letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); }
+.komm__datum.idag { background: linear-gradient(160deg, #f8d09b, #e29a4a); }
+.komm__datum.idag small { color: #1b1915; }
+.komm__text { display: grid; min-width: 0; }
+.komm__text b { font: 600 .86rem/1.3 var(--rubrik); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.komm__text small { font-size: .74rem; color: var(--text-3); }
+.logga-mote .falt-rad { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 10px; }
+.logga-mote .falt-rad > * { min-width: 0; }
+.logga-mote input, .logga-mote select, .logga-mote textarea, .logga-mote .valj-knapp { width: 100%; max-width: 100%; box-sizing: border-box; }
+.rutnat--mote > .rutnat { align-content: start; align-items: start; }
+.rutnat--mote > .rutnat > .kort { align-self: start; }
+.logga-mote textarea { resize: vertical; }
+@media (max-width: 700px) { .samtal__fragor { grid-template-columns: 1fr; } }
