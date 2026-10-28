@@ -1,5 +1,5 @@
 /* ============================================================
-   Idealhus CRM – kärnan (prototyp, 2026-10-01)
+   Legohus CRM – kärnan (prototyp, 2026-10-01)
    Lagring i webbläsaren, navigering (#/...), skalet (sidomeny,
    toppen, mobilmenyn), sök, panelen från höger, meddelanden och
    konfetti. Vyerna ligger i vyer.js och registreras i IH.vyer;
@@ -21,6 +21,8 @@
       db = IH.skapaExempeldata();
       try { localStorage.setItem(IH.NYCKEL, JSON.stringify(db)); } catch (e) { /* privat läge */ }
     }
+    // Namnbytet till Legohus: sparade offertnummer börjar på LH i stället för IH.
+    (db.offerter || []).forEach(function (o) { if (/^IH-/.test(o.nummer || '')) o.nummer = 'LH-' + o.nummer.slice(3); });
     return db;
   }
   IH.db = ladda();
@@ -317,7 +319,7 @@
         return '<a class="sido__lank" href="#/' + p[0] + '" data-vy="' + p[0] + '">' + IH.i(p[2]) + '<span>' + p[1] + '</span>' + bricka + '</a>';
       }).join('');
     }).join('');
-    return '<a class="sido__logo" href="#/"><img src="../images/idealhus_logo.svg" alt="Idealhus"><span class="sido__crm">CRM <small>· Prototyp</small></span></a>' +
+    return '<a class="sido__logo" href="#/"><img src="../images/legohus_logo.svg" alt="Legohus Stockholm"><span class="sido__crm">CRM <small>· Prototyp</small></span></a>' +
       '<div class="sido__verktyg"><button class="sido__sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
       '<button class="sido__ny" type="button" data-g="ny" aria-label="Ny" title="Ny  N">' + IH.i('plus') + '</button></div>' +
       '<nav class="sido__nav" aria-label="CRM"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
@@ -488,7 +490,7 @@
     var bytt = forraVy === null || forraVy.split('/')[0] !== adr.vy;
     var gor = function () {
       yta.innerHTML = ut.html;
-      document.title = (ut.titel ? ut.titel + ' · ' : '') + 'Idealhus CRM';
+      document.title = (ut.titel ? ut.titel + ' · ' : '') + 'Legohus CRM';
       if (bytt) {
         yta.classList.remove('vy--in');
         void yta.offsetWidth;

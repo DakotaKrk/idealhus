@@ -1,5 +1,5 @@
 /* ============================================================
-   Idealhus CRM – vyerna och åtgärderna (prototyp, 2026-10-01)
+   Legohus CRM – vyerna och åtgärderna (prototyp, 2026-10-01)
    Varje vy returnerar { titel, html, efter }. Knappar anropar
    IH.G[namn] via data-g, formulär IH.FORM[namn] via data-form.
    ============================================================ */
@@ -786,12 +786,12 @@
     var harPlan = amn.some(function (x) { return x.a.id === 'detaljplan'; });
     var fraga = harPlan ? 'Finns det redan några byggnader på tomten?' : 'Ligger tomten inom detaljplan, och finns det redan byggnader på den?';
     if (ton === 'kort') {
-      return 'Hej ' + forsta(f.namn) + '!\n\nTack för din förfrågan om ' + typ + ' i ' + f.ort + '. ' + fraga + '\n\nNär passar det att ringa en kvart?\n\nVänliga hälsningar\n' + jag.namn + '\nIdealhus';
+      return 'Hej ' + forsta(f.namn) + '!\n\nTack för din förfrågan om ' + typ + ' i ' + f.ort + '. ' + fraga + '\n\nNär passar det att ringa en kvart?\n\nVänliga hälsningar\n' + jag.namn + '\nLegohus Stockholm';
     }
     return 'Hej ' + forsta(f.namn) + '!\n\nTack för din förfrågan om ' + typ + (var_ ? ' ' + var_ : '') + ' i ' + f.ort + '. Jag heter ' + forsta(jag.namn) + ' och hjälper dig vidare.\n\n' +
       (stycken.length ? stycken.join('\n\n') + '\n\n' : '') +
       'För att kunna säga vad som ryms och vad det kostar vill jag gärna veta lite mer om tomten. ' + fraga + '\n\n' +
-      'När passar det att ringa en kvart?\n\nVänliga hälsningar\n' + jag.namn + '\nIdealhus';
+      'När passar det att ringa en kvart?\n\nVänliga hälsningar\n' + jag.namn + '\nLegohus Stockholm';
   }
 
   // Nästa bästa steg för förfrågan, med åtgärderna direkt i kortet.
@@ -876,7 +876,7 @@
   }
 
   // Samma fråga som formuläret på sajten: var ska huset stå? Varje svar
-  // är en liten miljö i 3D med ett Idealhus på tomten.
+  // är en liten miljö i 3D med ett Legohus på tomten.
   var fMiljo = null;
   var MILJOER = [
     ['Vid havet', 'hav', '#9fc2c9'],
@@ -1123,7 +1123,7 @@
     var f = IH.forfragan(el.getAttribute('data-id'));
     var t = $('[data-utkast]');
     if (!f || !t) return;
-    window.location.href = 'mailto:' + encodeURIComponent(f.epost) + '?subject=' + encodeURIComponent('Din förfrågan till Idealhus') + '&body=' + encodeURIComponent(t.value);
+    window.location.href = 'mailto:' + encodeURIComponent(f.epost) + '?subject=' + encodeURIComponent('Din förfrågan till Legohus Stockholm') + '&body=' + encodeURIComponent(t.value);
   };
 
   G['f-filter'] = function (el) { fFilter = el.getAttribute('data-f'); IH.ga('#/forfragningar'); };
@@ -1158,7 +1158,7 @@
     var jag = IH.jag();
     var text = 'Hej ' + forsta(f.namn) + '!\n\nTack för din förfrågan om ' + f.hustyp.toLowerCase().replace('vet inte än', 'ett hus') +
       ' i ' + f.ort + '. Jag heter ' + jag.namn + ' och hjälper dig vidare.\n\nFör att kunna säga vad som ryms och vad det kostar vill jag gärna veta lite mer om tomten: ' +
-      'ligger den inom detaljplan, och finns det redan byggnader på den?\n\nNär passar det att ringa en kvart?\n\nVänliga hälsningar\n' + jag.namn + '\nIdealhus';
+      'ligger den inom detaljplan, och finns det redan byggnader på den?\n\nNär passar det att ringa en kvart?\n\nVänliga hälsningar\n' + jag.namn + '\nLegohus Stockholm';
     var klar = function () { IH.toast('Svarsmallen är kopierad', 'Klistra in i ditt mejl.', 'kopiera'); };
     if (navigator.clipboard) navigator.clipboard.writeText(text).then(klar, klar); else klar();
   };
@@ -1260,7 +1260,7 @@
   // från grunden (ny förfrågan) till taket (förhandling) som hänger i
   // kranen. Delarna sänks på plats en i taget; listan bredvid visar
   // summorna, och hovring på en rad lyfter ut samma byggdel.
-  // Ett Idealhus i CSS 3D: långvägg, gavel med glasparti, altan och
+  // Ett Legohus Stockholm i CSS 3D: långvägg, gavel med glasparti, altan och
   // två takfall. Måtten kommer från --W/--D/--Hw/--R/--L hos föräldern.
   function hus3() {
     return '<span class="hus3"><i class="hus3__skugga"></i><i class="hus3__ljus hus3__ljus--gavel"></i><i class="hus3__ljus hus3__ljus--sida"></i>' +
@@ -2162,7 +2162,7 @@
     var pl = IH.db.prislista;
     db().offerter.forEach(function (x) { if (x.affar === a.id && x.status !== 'godkand') x.status = 'ersatt'; });
     db().lopnr.offert += 1;
-    var o = { id: 'o' + db().lopnr.offert, nummer: 'IH-' + new Date().getFullYear() + '-' + db().lopnr.offert, affar: a.id, kund: a.kund, modell: a.modell,
+    var o = { id: 'o' + db().lopnr.offert, nummer: 'LH-' + new Date().getFullYear() + '-' + db().lopnr.offert, affar: a.id, kund: a.kund, modell: a.modell,
       rader: rader || [{ text: m.kategori + ' ' + m.namn + (m.yta ? ', ' + m.yta + ' m²' : ''), antal: 1, pris: pl.modeller[m.id] || 0 }]
         .concat(pl.poster.filter(function (p) { return p.id === 'frakt' || p.id === 'montage'; }).map(function (p) { return { text: p.text, antal: 1, pris: p.pris }; })),
       status: 'utkast', skapad: new Date().toISOString(), giltig: 30 };
@@ -2179,10 +2179,10 @@
     var jag = IH.jag();
     var sum = IH.summaOffert(o);
     return '<article class="dok" id="dok">' +
-      '<header class="dok__huvud"><img src="../images/idealhus_logo.svg" alt="Idealhus"><div><b>Offert</b><span>' + e(o.nummer) + '</span></div></header>' +
+      '<header class="dok__huvud"><img src="../images/legohus_logo.svg" alt="Legohus Stockholm"><div><b>Offert</b><span>' + e(o.nummer) + '</span></div></header>' +
       (m ? '<div class="dok__bild"><img src="' + m.bild + '" alt=""><span>' + e(m.kategori + ' ' + m.namn) + '</span></div>' : '') +
       '<div class="dok__parter"><div><small>Till</small><b>' + e(k ? k.namn : '') + '</b><span>' + e(k ? k.ort : '') + '</span><span>' + e(k ? k.epost : '') + '</span></div>' +
-      '<div><small>Från</small><b>Idealhus</b><span>' + e(jag.namn) + '</span><span>info@idealhus.se</span></div>' +
+      '<div><small>Från</small><b>Legohus Stockholm</b><span>' + e(jag.namn) + '</span><span>kontakt@legohusstockholm.se</span></div>' +
       '<div><small>Datum</small><b>' + IH.datum(o.skapad, true) + '</b><span>Giltig i ' + o.giltig + ' dagar</span></div></div>' +
       '<table class="dok__rader"><thead><tr><th>Beskrivning</th><th>Antal</th><th>À-pris</th><th>Summa</th></tr></thead><tbody data-stagger>' +
       o.rader.map(function (r) {
@@ -2878,7 +2878,7 @@
       }).join('') + '</ol>' +
       '<section class="projark__check"><h3>' + i('uppgift') + 'Innan montaget</h3><ul>' + CHECK.map(function (c) {
         return '<li><button type="button" class="checkrad' + (p.check[c[0]] ? ' klar' : '') + '" data-g="proj-check" data-id="' + p.id + '" data-c="' + c[0] + '" aria-pressed="' + !!p.check[c[0]] + '"><span>' + i('bock') + '</span>' + e(c[1]) +
-          (c[0] === 'grund' || c[0] === 'framkomlighet' || c[0] === 'lov' ? '<small>Kunden</small>' : '<small>Idealhus</small>') + '</button></li>';
+          (c[0] === 'grund' || c[0] === 'framkomlighet' || c[0] === 'lov' ? '<small>Kunden</small>' : '<small>Legohus</small>') + '</button></li>';
       }).join('') + '</ul></section>' +
       '<form class="formular projark__datum" data-form="proj-montage"><input type="hidden" name="id" value="' + p.id + '"><label class="falt"><span>Montagedag</span>' +
       '<input type="date" name="montage" value="' + IH.dagStr(montage) + '"></label><button class="knapp knapp--liten" type="submit">Spara datum</button></form>' +
@@ -3133,7 +3133,7 @@
         }).join('') + '<div class="formular__knappar"><button class="knapp knapp--mork prisform__spara" type="submit" data-spara>Spara priserna</button></div></div></form>' +
       '</div>' +
       '<section class="kort kort--mork installning__proto" data-in><span class="installning__emoji" aria-hidden="true">🧪</span><div><p class="etikett etikett--ljus">Prototyp</p><h2>Allt sparas i den här webbläsaren</h2>' +
-        '<p>Kunderna, förfrågningarna och priserna är påhittade exempel. Den skarpa versionen tar emot riktiga förfrågningar från formuläret på idealhus.se och kräver inloggning med lösenord.</p></div>' +
+        '<p>Kunderna, förfrågningarna och priserna är påhittade exempel. Den skarpa versionen tar emot riktiga förfrågningar från formuläret på legohusstockholm.se och kräver inloggning med lösenord.</p></div>' +
         '<button class="knapp knapp--glas" type="button" data-g="aterstall">' + i('aterstall') + '<span>Återställ exempeldata</span></button></section>';
     return {
       titel: 'Inställningar', html: html,

@@ -1,5 +1,5 @@
 /* ============================================================
-   Idealhus CRM – kundmötet (prototyp, 2026-10-01)
+   Legohus CRM – kundmötet (prototyp, 2026-10-01)
    Helskärmspresentation som i Uperformance: bilderna vrids in i
    3D, husen visas som riktiga 3D-modeller (model-viewer, samma
    filer som huskortet) och kalkylen räknar live med prislistan.
@@ -32,7 +32,7 @@
     ['Leverans och montage', 'Huset kommer på lastbil och monteras på dagar.', 'vi'],
     ['Slutbesiktning', 'Vi går igenom huset tillsammans, rum för rum.', 'tillsammans']
   ];
-  var VEM = { vi: ['hus', 'Idealhus'], ni: ['plats', 'Ni'], tillsammans: ['kunder', 'Tillsammans'] };
+  var VEM = { vi: ['hus', 'Legohus'], ni: ['plats', 'Ni'], tillsammans: ['kunder', 'Tillsammans'] };
 
   // Hussiluetten på regelbilden: fasad i skala (53 px per meter,
   // marken på y 300). Nockhöjd 4,0 m inom och 4,5 m utanför detaljplan.
@@ -68,7 +68,7 @@
     switch (id) {
       case 'titel':
         return '<div class="mb mb--titel"><div class="mb__in mb__in--delad"><div>' +
-          '<p class="mb__etikett" data-m-in>Idealhus' + (k ? ' · för ' + e(k.namn) : '') + '</p>' +
+          '<p class="mb__etikett" data-m-in>Legohus Stockholm' + (k ? ' · för ' + e(k.namn) : '') + '</p>' +
           '<h1 class="mb__titel" data-m-in>' + (forn && s.kund.typ !== 'foretag' ? 'Välkommen,<br><em>' + e(forn) + '.</em>' : 'Hus formade<br><em>för platsen.</em>') + '</h1>' +
           '<p class="mb__text" data-m-in>Attefallshus och fritidshus, byggda under tak i Sverige och monterade på tomten på några dagar.</p></div>' +
           '<figure class="mb__foto" data-m-in><img src="' + (m && m.glb ? m.bild : '../images/hus-r1.webp') + '" alt=""></figure></div></div>';
@@ -144,7 +144,7 @@
           }).join('') + '</ol><div class="nasta__knappar" data-m-in>' +
           (s.affar ? '<button class="knapp knapp--virke knapp--stor" type="button" data-mote="boka">' + IH.i('kalender') + 'Boka platsbesök</button>' : '') +
           (s.kund && s.kund.epost ? '<button class="knapp knapp--glas knapp--stor" type="button" data-mote="sammanfattning">' + IH.i('post') + 'Mejla en sammanfattning</button>' : '') +
-          '</div><p class="mb__kontakt" data-m-in>info@idealhus.se · Stockholm, Sverige</p></div></div>';
+          '</div><p class="mb__kontakt" data-m-in>kontakt@legohusstockholm.se · Stockholm, Sverige</p></div></div>';
     }
     return '';
   }
@@ -361,7 +361,7 @@
       kalkylRader().forEach(function (r) { rader.push('– ' + r.text + ': ' + IH.kr(r.pris)); });
       rader.push('Totalt: ' + IH.kr(s.forraSumma), 'Grund, bygglov och anslutningar tillkommer.', '');
     }
-    rader.push('Nästa steg är ett platsbesök där vi tittar på tomten, marken och vägen fram.', '', 'Vänliga hälsningar', IH.jag().namn, 'Idealhus · info@idealhus.se');
+    rader.push('Nästa steg är ett platsbesök där vi tittar på tomten, marken och vägen fram.', '', 'Vänliga hälsningar', IH.jag().namn, 'Legohus Stockholm · kontakt@legohusstockholm.se');
     window.location.href = 'mailto:' + encodeURIComponent(k.epost) + '?subject=' + encodeURIComponent('Sammanfattning av vårt möte') + '&body=' + encodeURIComponent(rader.join('\n'));
   }
 
@@ -394,7 +394,7 @@
       el.innerHTML = '<div class="mote__scen">' + bilder.map(function (id, n) {
         return '<section class="mote__bild" data-n="' + n + '" data-id="' + id + '">' + bildHtml(id) + '</section>';
       }).join('') + '</div>' +
-        '<header class="mote__topp"><img src="../images/idealhus_logo.svg" alt="Idealhus">' + (s.kund ? '<span class="mote__kund">' + e(s.kund.namn) + '</span>' : '') +
+        '<header class="mote__topp"><img src="../images/legohus_logo.svg" alt="Legohus Stockholm">' + (s.kund ? '<span class="mote__kund">' + e(s.kund.namn) + '</span>' : '') +
         '<span class="mote__tid" title="Mötets längd">' + IH.i('klocka') + '<b data-mtid>0:00</b></span>' +
         '<button class="mote__ikon" type="button" data-mote="anteckna" aria-label="Anteckningar (N)" aria-pressed="false">' + IH.i('anteckning') + '</button>' +
         '<button class="mote__ikon" type="button" data-mote="helskarm" aria-label="Helskärm">' + IH.i('helskarm') + '</button>' +

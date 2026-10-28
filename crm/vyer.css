@@ -1,5 +1,5 @@
 /* ============================================================
-   Idealhus CRM – vyerna, rörelsen och 3D (prototyp, 2026-10-01)
+   Legohus CRM – vyerna, rörelsen och 3D (prototyp, 2026-10-01)
    Bara transform och opacitet rör sig. 3D: husbyn på översikten,
    huset i sprängskiss på säljtavlan, lyfta kort när man drar,
    lutande kort (data-tilt) och modellerna i model-viewer.
@@ -2602,7 +2602,7 @@ html[data-lamnar]::after {
 /* --- Inkorgen ------------------------------------------------------ */
 /* --- Inkorgen: puls och "Var ska huset stå?" ---------------------------
    Vänster: läget just nu. Höger: fyra miljöer i CSS 3D – havet, skogen,
-   fjället och trädgården – med ett Idealhus på varje tomt (samma hus
+   fjället och trädgården – med ett Legohus på varje tomt (samma hus
    som i byn) och fakta om förfrågningarna där. Vi ser tomterna från
    −x/+y: sidorna mot oss är framkanten (y = T) och vänster kant (x = 0).
    Husen, granarna och topparna reser sig när .ipuls får .vaxt. */

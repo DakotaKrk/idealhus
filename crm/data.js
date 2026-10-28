@@ -1,9 +1,9 @@
 /* ============================================================
-   Idealhus CRM – data (prototyp, 2026-10-01)
+   Legohus CRM – data (prototyp, 2026-10-01)
    Husen, flödena och exempeldatan. Inga riktiga kunder: namn,
    telefonnummer (PTS fiktiva serie 070-174 06 05–99) och
    e-post (@example.com) är påhittade. Priserna är exempel och
-   ändras under Inställningar – de är inte Idealhus priser.
+   ändras under Inställningar – de är inte Legohus Stockholms priser.
    Allt sparas i webbläsaren (localStorage, IH.NYCKEL).
    ============================================================ */
 (function () {
@@ -199,7 +199,7 @@
         rader.push({ text: 'Montage på plats', antal: 1, pris: 45000 });
         if (i % 2) rader.push({ text: 'Altan i trä, 12 m²', antal: 1, pris: 38000 });
         db.lopnr.offert += 1;
-        db.offerter.push({ id: 'o' + db.lopnr.offert, nummer: 'IH-' + new Date().getFullYear() + '-' + db.lopnr.offert,
+        db.offerter.push({ id: 'o' + db.lopnr.offert, nummer: 'LH-' + new Date().getFullYear() + '-' + db.lopnr.offert,
           affar: aff.id, kund: k.id, modell: a[1], rader: rader,
           status: a[2] === 'vunnen' ? 'godkand' : 'skickad', skapad: dagar(a[4] - 1), giltig: 30 });
       }

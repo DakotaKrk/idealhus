@@ -1,4 +1,4 @@
-/* Idealhus CRM – inloggningen (prototyp, 2026-10-02).
+/* Legohus CRM – inloggningen (prototyp, 2026-10-02).
    Ingen riktig inloggning: rollen sparas i webbläsaren och man
    skickas till CRM:et (eller dit man var på väg, ?nasta=#/...).
    Hälsningen följer tiden på dygnet, och den som varit inne förut
