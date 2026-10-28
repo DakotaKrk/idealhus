@@ -2406,7 +2406,7 @@
     var median = svarstider.length ? svarstider[Math.floor(svarstider.length / 2)] : null;
     var sum = function (l) { return l.reduce(function (t, p) { return t + (p.varde || 0); }, 0); };
     var att = dokAtt(alla);
-    var stat = function (ikon, etikett, tal, under, ton) { return '<div class="dk-stat" data-ton="' + ton + '"><small>' + i(ikon) + etikett + '</small><b>' + tal + '</b><em>' + under + '</em></div>'; };
+    var stat = function (ikon, etikett, tal, under, ton, lage) { return '<button type="button" class="dk-stat" data-ton="' + ton + '" data-g="dok-lage" data-l="' + lage + '" title="Visa ' + etikett.toLowerCase().replace('&amp;', 'och') + '"><small><span class="dk-stat__ik">' + i(ikon) + '</span>' + etikett + '</small><b data-dok-rakna="' + tal + '">' + tal + '</b><em>' + under + '</em></button>'; };
     var fackUnder = function (f) {
       var l = alla.filter(function (p) { return p.fack === f.id; });
       if (f.id === 'offert') return [vantar.length + ' väntar', godk.length + ' godkända'].join(' · ');
@@ -2429,11 +2429,11 @@
           '<div class="dk-hjalte__knappar"><label class="knapp knapp--virke dk-ladda">' + i('plus') + 'Ladda upp<input type="file" multiple data-dok-fil hidden></label>' +
             '<button class="knapp" type="button" data-g="dok-csv">' + i('skrivut') + 'Exportera listan</button></div></div>' +
         '<div class="dk-stats">' +
-          stat('klocka', 'Väntar på svar', vantar.length, IH.kort(sum(vantar)) + ' i offerter', 'bla') +
-          stat('trofe', 'Godkänt & signerat', godk.length, IH.kort(sum(godk)) + ' blev order', 'gron') +
-          stat('kalender', 'Går ut inom 7 dagar', snart.length, snart.length ? e(snart.map(function (p) { return p.o.nummer; }).join(', ')) : 'inget går ut', snart.length ? 'rod' : 'gra') +
-          '<div class="dk-stat dk-stat--bred"><small>' + i('trend') + 'Kunderna svarar på</small><b>' + (median == null ? '–' : median + (median === 1 ? ' dag' : ' dagar')) + '</b><em>' + (svarstider.length ? 'median av ' + svarstider.length + ' godkända offerter' : 'ingen offert godkänd ännu') + '</em>' +
-            '<span class="dk-tidslinje"><span><i></i><b>Skickad</b></span><span class="dk-tidslinje__mitt"></span><span><i></i><b>Godkänd</b><small>' + (median == null ? '' : median + ' d') + '</small></span></span></div>' +
+          stat('klocka', 'Väntar på svar', vantar.length, IH.kort(sum(vantar)) + ' i offerter', 'bla', 'vantar') +
+          stat('trofe', 'Godkänt & signerat', godk.length, IH.kort(sum(godk)) + ' blev order', 'gron', 'klara') +
+          stat('kalender', 'Går ut inom 7 dagar', snart.length, snart.length ? e(snart.map(function (p) { return p.o.nummer; }).join(', ')) : 'inget går ut', snart.length ? 'rod' : 'gra', 'vantar') +
+          '<div class="dk-stat dk-stat--bred"><small><span class="dk-stat__ik">' + i('trend') + '</span>Kunderna svarar på</small><b>' + (median == null ? '–' : median + (median === 1 ? ' dag' : ' dagar')) + '</b><em>' + (svarstider.length ? 'median av ' + svarstider.length + ' godkända offerter' : 'ingen offert godkänd ännu') + '</em>' +
+            '<span class="dk-tidslinje"><span><i>' + i('offert') + '</i><b>Skickad</b><small>dag 0</small></span><span class="dk-tidslinje__mitt"><em></em></span><span><i>' + i('bock') + '</i><b>Godkänd</b><small>' + (median == null ? '–' : 'dag ' + median) + '</small></span></span></div>' +
         '</div>' +
         '<div class="dk-blick"><p class="etikett">Arkivet i en blick</p><div class="dk-fack">' + DOK_FACK.map(function (f, n) {
           var l = alla.filter(function (p) { return p.fack === f.id; });

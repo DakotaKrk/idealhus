@@ -8102,3 +8102,35 @@ section.dk-hjalte.kort .dk-verktyg .kundsort .i { color: rgba(251, 244, 232, .7)
 .dkd__fakta dt { font: 600 .66rem/1.5 var(--rubrik); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
 .dkd__fakta dd { margin: 0; font-size: .86rem; line-height: 1.5; }
 .dkd__fakta small { color: var(--text-3); }
+
+/* Valjrutorna i den mörka dokumenthjälten: ljus text och ljus pil (valj.js byter select mot en knapp) */
+section.dk-hjalte.kort .dk-verktyg .valj-knapp { color: #fbf4e8 !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fbf4e8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important; }
+section.dk-hjalte.kort .dk-verktyg .kundsort { padding-left: 14px; }
+
+/* Mätarna i dokumenthjälten: klickbara, egen färg per mätare med en tunn ljuslist, ikon i tonad ruta,
+   och svarstiden som en bana där en ljuspunkt reser från Skickad till Godkänd */
+section.dk-hjalte.kort .dk-stat { --st: #f6c68d; position: relative; border-top: 0; border-left: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; transition: background-color .3s; }
+section.dk-hjalte.kort .dk-stat::before { content: ""; position: absolute; left: 22px; right: 22px; top: 0; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--st), transparent); opacity: .7; }
+section.dk-hjalte.kort .dk-stat:hover { background: rgba(255, 255, 255, .05); }
+section.dk-hjalte.kort .dk-stat[data-ton="bla"] { --st: #9cc3ea; } section.dk-hjalte.kort .dk-stat[data-ton="gron"] { --st: #7fe0a6; } section.dk-hjalte.kort .dk-stat[data-ton="rod"] { --st: #ff9a85; } section.dk-hjalte.kort .dk-stat[data-ton="gra"] { --st: #b9ad9b; }
+section.dk-hjalte.kort .dk-stat small { align-items: flex-start; }
+section.dk-hjalte.kort .dk-stat small .i { width: auto; height: auto; padding: 0; background: none; }
+.dk-stat__ik { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 10px; background: color-mix(in srgb, var(--st) 16%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--st) 30%, transparent); color: var(--st); }
+.dk-stat__ik .i { width: 15px !important; height: 15px !important; }
+section.dk-hjalte.kort .dk-stat b { margin-top: 4px; font-size: 2.3rem; font-variant-numeric: tabular-nums; text-shadow: 0 0 24px color-mix(in srgb, var(--st) 35%, transparent); }
+section.dk-hjalte.kort .dk-stat--bred b { font-size: 2.1rem; }
+section.dk-hjalte.kort .dk-stat--bred { cursor: default; }
+section.dk-hjalte.kort .dk-tidslinje { grid-template-columns: 74px 1fr 74px; align-items: center; margin-top: 18px; }
+section.dk-hjalte.kort .dk-tidslinje > span:not(.dk-tidslinje__mitt) { gap: 6px; }
+section.dk-hjalte.kort .dk-tidslinje i { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(160deg, #f8d09b, #e29a4a); box-shadow: 0 0 0 5px rgba(246, 198, 141, .12), 0 0 18px rgba(255, 170, 80, .55); color: #1b1915; }
+section.dk-hjalte.kort .dk-tidslinje i .i { width: 15px; height: 15px; }
+section.dk-hjalte.kort .dk-tidslinje b { letter-spacing: .1em; }
+section.dk-hjalte.kort .dk-tidslinje small { font: 600 .74rem/1 var(--rubrik); text-transform: none; color: #f6c68d; }
+section.dk-hjalte.kort .dk-tidslinje__mitt { position: relative; align-self: start; height: 2px; margin-top: 16px; background: linear-gradient(90deg, rgba(246, 198, 141, .9), rgba(226, 154, 74, .9)); }
+.dk-tidslinje__mitt em { position: absolute; top: -4px; left: 0; width: 10px; height: 10px; border-radius: 50%; background: #fff3dc; box-shadow: 0 0 10px 3px rgba(255, 210, 150, .9); animation: dk-res 3.6s cubic-bezier(.45, 0, .2, 1) 1s infinite; }
+@keyframes dk-res { 0% { left: 0; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { left: calc(100% - 10px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .dk-tidslinje__mitt em { animation: none; display: none; } }
+
+section.dk-hjalte.kort .dk-stat .dk-tidslinje b { margin: 0; font: 600 .6rem/1 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: rgba(251, 244, 232, .65); text-shadow: none; }
+section.dk-hjalte.kort .dk-stat .dk-tidslinje small { font: 600 .74rem/1 var(--rubrik); letter-spacing: 0; text-transform: none; color: #f6c68d; }
+section.dk-hjalte.kort .dk-verktyg .valj-knapp { background-image: none !important; }
