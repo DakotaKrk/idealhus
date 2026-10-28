@@ -79,3 +79,15 @@ html[data-sido-tat] .sido__konto .avatar { width: 29px; height: 29px; }
 /* Stör ej: en liten måne på bubblan */
 .chf-ikon[data-tyst]::before { content: ""; position: absolute; left: -2px; bottom: -2px; width: 16px; height: 16px; border-radius: 50%; background: #4f4a42 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 14.6A8.2 8.2 0 1 1 9.4 4a6.6 6.6 0 0 0 10.6 10.6z' fill='%23fbf4e8'/%3E%3C/svg%3E") center / 10px no-repeat; box-shadow: 0 0 0 2px #fff; }
 @media (prefers-reduced-motion: reduce) { .stod-band, .stod-band[data-ut], .stod-band__ikon i, .chf-meny, .chf-meny[data-ut] { animation: none; } }
+
+/* Bandet i samma varma stengrå som de andra mörka ytorna, med ljusa ikoner */
+.stod-band { background: radial-gradient(80% 140% at 0% 0%, rgba(246, 198, 141, .16), transparent 60%), linear-gradient(160deg, #5f5851, #47413b); box-shadow: 0 24px 48px -22px rgba(40, 34, 28, .6), inset 0 0 0 1px rgba(255, 245, 230, .18); }
+.stod-band__ikon { background: rgba(246, 198, 141, .2); box-shadow: inset 0 0 0 1px rgba(246, 198, 141, .4); color: #ffd9a0; }
+.stod-band__ikon .emo-ik, .stod-band__fakta .emo-ik { filter: brightness(2.1) saturate(1.2); opacity: 1; }
+.stod-band__ikon i { box-shadow: 0 0 0 2px #544d46; animation: none; }
+.stod-band__text small, .stod-band__fakta { color: rgba(255, 244, 230, .75); }
+.stod-band__val { background: rgba(255, 245, 230, .08); box-shadow: inset 0 0 0 1px rgba(255, 245, 230, .14); }
+.stod-band__val button { color: rgba(255, 244, 230, .8); }
+.stod-band__val button[aria-pressed="true"] { background: rgba(246, 198, 141, .24); box-shadow: inset 0 0 0 1px rgba(246, 198, 141, .55); }
+.stod-band__val .avatar { box-shadow: 0 0 0 2px rgba(255, 245, 230, .55); }
+.stod-band__fakta { border-left-color: rgba(255, 245, 230, .18); }

@@ -1101,7 +1101,7 @@ section.lp-mork .ao-tal__ikon, .lp-mk .lp-om-ikon { background: rgba(255, 220, 1
 .lp-mk .lp-om-skriv > .i:last-child, .lp-mk .lp-om-chatta > .i:last-child { transition: transform .3s var(--mjuk); }
 
 /* Lagets bilder i säljchefens topp: ljus tunn ring som passar stengrått i stället för svart */
-section.lp-mork .lp-lag a { display: block; width: 34px; height: 34px; flex: none; box-shadow: none; }
+section.lp-mork .lp-lag a { display: block; flex: none; line-height: 0; box-shadow: none; }
 section.lp-mork .lp-lag a .avatar { box-shadow: 0 0 0 2px rgba(255, 245, 230, .6), 0 6px 14px -6px rgba(30, 24, 18, .6); }
 section.lp-mork .lp-lag .narvaro-prick { box-shadow: 0 0 0 2px #4d4741; }
 
