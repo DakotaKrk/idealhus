@@ -290,3 +290,11 @@ html[data-konto-oppen] .sido .anv__chevron { transform: rotate(180deg); }
 @media (max-height: 740px) { .sido .anv { padding: 7px 8px !important; } .sido .anv .avatar { width: 34px !important; height: 34px !important; } .sido .sido__smalt > a, .sido .sido__smalt > button { padding: 6px 8px !important; } }
 .sido .sido__smalt > a, .sido .sido__smalt > button { font-weight: 600 !important; color: var(--text-2) !important; }
 .sido .sido__smalt > a:hover, .sido .sido__smalt > button:hover { color: var(--text) !important; }
+
+/* Infälld sidomeny: kontot (och Logga ut) nås från en rund knapp längst ner vid kanten */
+.sido-kant__konto { display: none; }
+@media (min-width: 721px) {
+  html[data-sido-dold] .sido-kant__konto { position: fixed; left: calc(var(--ram, 12px) + 6px); bottom: calc(var(--ram, 12px) + 8px); z-index: 50; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 8px 20px -10px rgba(60, 40, 15, .5), inset 0 0 0 1px var(--kant); cursor: pointer; transition: transform .3s var(--mjuk); }
+  html[data-sido-dold] .sido-kant__konto:hover { transform: scale(1.06); }
+  html[data-sido-dold] .sido-kant__konto .avatar { width: 32px; height: 32px; border-radius: 50%; font-size: .62rem; }
+}

@@ -2067,10 +2067,11 @@
     var idag0 = new Date(); idag0.setHours(0, 0, 0, 0);
     var sena = db().uppgifter.filter(function (u) { return u.kund === k.id && !u.klar && new Date(u.forfaller) < idag0; }).length;
     var nyaF = ff.filter(function (f) { return f.status === 'ny'; }).length;
+    var utanKontakt = !aff.length && !ff.length && !senast;
     return {
       k: k, aff: aff, oppen: oppen, vunnen: vunnen, senast: senast, hus: senasteAff ? IH.modell(senasteAff.modell) : null,
-      steg: resaSteg(ff, aff, off, proj), oppet: summa(oppen), vunnet: summa(vunnen), sena: sena, nyaF: nyaF,
-      varm: nyaF > 0 || sena > 0 || oppen.some(function (a) { return a.steg === 'offert' && IH.dagarSedan(a.andrad) > 4; })
+      steg: Math.max(0, resaSteg(ff, aff, off, proj)), oppet: summa(oppen), vunnet: summa(vunnen), sena: sena, nyaF: nyaF, utanKontakt: utanKontakt,
+      varm: utanKontakt || nyaF > 0 || sena > 0 || oppen.some(function (a) { return a.steg === 'offert' && IH.dagarSedan(a.andrad) > 4; })
     };
   }
 
@@ -2176,7 +2177,7 @@
           // Behöver uppmärksamhet: vem och varför, de tre första.
           (varma.length ? '<div class="kundtopp__varma"><small><svg class="emo-ik" aria-hidden="true"><use href="#i-bjallra"/></svg> Behöver uppmärksamhet</small><div class="varmlista">' + varma.slice(0, 3).map(function (x) {
               var skal = x.nyaF ? ['<svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg>', x.nyaF === 1 ? 'Ny förfrågan' : x.nyaF + ' nya förfrågningar']
-                : x.sena ? ['⏰', x.sena === 1 ? 'Försenad uppföljning' : x.sena + ' försenade uppföljningar'] : ['<svg class="emo-ik" aria-hidden="true"><use href="#i-skicka"/></svg>', 'Följ upp offerten'];
+                : x.utanKontakt ? ['<svg class="emo-ik" aria-hidden="true"><use href="#i-samtal"/></svg>', 'Ny kund – ta första kontakten'] : x.sena ? ['⏰', x.sena === 1 ? 'Försenad uppföljning' : x.sena + ' försenade uppföljningar'] : ['<svg class="emo-ik" aria-hidden="true"><use href="#i-skicka"/></svg>', 'Följ upp offerten'];
               return '<div class="varmrad varmrad--rad">' + '<button type="button" class="varmrad__oppna" data-g="kund-oppna" data-id="' + x.k.id + '">' + kundAvatar(x.k, true) +
                 '<span><b>' + e(x.k.namn) + '</b><em>' + skal[0] + ' ' + skal[1] + '</em></span></button>' +
                 '<span class="varmrad__snabb">' + (x.k.telefon ? '<a href="tel:' + e(x.k.telefon.replace(/\s/g, '')) + '" title="Ring ' + e(x.k.telefon) + '" aria-label="Ring">' + i('tel') + '</a>' : '') + (x.k.epost ? '<a href="mailto:' + e(x.k.epost) + '" title="Mejla ' + e(x.k.epost) + '" aria-label="Mejla">' + i('post') + '</a>' : '') +
@@ -2862,6 +2863,7 @@
     db().kunder.push(k);
     IH.spara();
     IH.stangArk(true);
+    IH.uppdateraMeny();
     IH.toast('Kunden är sparad', k.namn, 'kunder');
     IH.ga('#/kunder/' + k.id);
     IH.uppdateraMeny();
@@ -4331,6 +4333,7 @@
      Ny – snabbmenyn och formulären
      ================================================================ */
   G.ny = function () {
+    if (IH.jag().roll === 'admin') { IH.toast('Administratören skapar inte affärer', 'Gå in i en säljares konto via supportläget för att arbeta som säljare.', 'las'); return; }
     var val = [['ny-forfragan', 'inkorg', 'Förfrågan', 'Någon ringde eller mejlade'], ['ny-affar', 'tavla', 'Affär', 'Direkt på säljtavlan'],
       ['ny-kund', 'kunder', 'Kund', 'Privatperson eller företag'], ['ny-uppgift', 'uppgift', 'Uppgift', 'Något att göra']];
     IH.oppnaArk({

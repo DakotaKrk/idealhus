@@ -363,7 +363,7 @@
     }).join('');
     return '<a class="sido__logo" href="#/"><img src="../images/legohus_logo.svg" alt="Legohus Stockholm"><span class="sido__crm">CRM <small>· Prototyp</small></span></a>' +
       '<div class="sido__verktyg"><button class="sido__sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
-      '<button class="sido__ny" type="button" data-g="ny" aria-label="Ny" title="Ny  N">' + IH.i('plus') + '</button></div>' +
+      (jag.roll === 'admin' ? '' : '<button class="sido__ny" type="button" data-g="ny" aria-label="Ny" title="Ny  N">' + IH.i('plus') + '</button>') + '</div>' +
       (IH.vyVaxel ? IH.vyVaxel() : '') +
       '<nav class="sido__nav" aria-label="CRM"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
       '<div class="sido__fot"><button class="sido__mer" type="button" tabindex="-1" aria-hidden="true" data-g="sido-mer">Mer ' + IH.i('pil') + '</button>' +
@@ -377,19 +377,20 @@
 
   function mobilmeny() {
     var b = brickor();
-    var poster = [['oversikt', 'Översikt', 'hem'], ['forfragningar', 'Inkorg', 'inkorg'], ['salj', 'Tavla', 'tavla'],
-      ['produktion', 'Projekt', 'produktion']];
+    var poster = IH.jag().roll === 'admin' ? [['oversikt', 'Översikt', 'hem'], ['kontroll', 'Kontroll', 'graf'], ['admin', 'Admin', 'installning'], ['sakerhet', 'Säkerhet', 'system']]
+      : [['oversikt', 'Översikt', 'hem'], ['forfragningar', 'Inkorg', 'inkorg'], ['salj', 'Tavla', 'tavla'], ['produktion', 'Projekt', 'produktion']];
     return poster.map(function (p) {
       var br = b[p[0]];
       return '<a href="#/' + p[0] + '" data-vy="' + p[0] + '">' + IH.i(p[2]) + p[1] + (br && br[1] && br[0] ? '<i>' + br[0] + '</i>' : '') + '</a>';
-    }).join('') + '<button type="button" data-g="mer">' + IH.i('meny') + 'Mer</button>';
+    }).join('') + '<button type="button" data-g="mer" data-mer>' + IH.i('meny') + 'Mer</button>';
   }
 
   function skal() {
     var app = $('#app');
     app.innerHTML = '<aside class="sido" id="sidomeny">' + sidomeny() + '</aside>' +
       '<div class="sido-kant"><button class="sido-knapp" type="button" data-sido-knapp aria-controls="sidomeny" aria-expanded="true" aria-label="Dölj menyn" title="Dölj menyn  [">' +
-      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 9 12l5.5 5.5"/></svg></button></div>' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 9 12l5.5 5.5"/></svg></button>' +
+      '<button class="sido-kant__konto" type="button" data-g="konto-meny" aria-label="Kontot och Logga ut" title="' + IH.e(IH.jag().namn) + '"><span class="avatar" style="--av:' + IH.jag().farg + '">' + IH.initialer(IH.jag().namn) + '</span></button></div>' +
       '<div class="huvud"><header class="topp">' +
       '<button class="sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök eller skriv ett kommando…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
       '<span class="proto">Prototyp · exempeldata</span>' +
@@ -516,6 +517,7 @@
 
   function markera(direkt) {
     var vy = IH.nuvarande.vy;
+    var mer = $('.mobilmeny [data-mer]'); if (mer) mer.classList.toggle('aktiv', !$('.mobilmeny [data-vy="' + vy + '"]'));
     $$('[data-vy]').forEach(function (a) {
       var ja = a.getAttribute('data-vy') === vy;
       // Ett litet hopp i ikonen när raden blir vald (inte vid omritning).
@@ -691,7 +693,7 @@
     var html = '';
     if (!q) {
       html += grupp('Senaste', senaste().map(senasteRad).filter(Boolean).slice(0, 5));
-      html += grupp('Snabbåtgärder', ATGARDER.map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
+      if (IH.jag().roll !== 'admin') html += grupp('Snabbåtgärder', ATGARDER.map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
       html += grupp('Gå till', SIDOR.filter(function (x) { return x[0] !== IH.nuvarande.vy && (x[0] !== 'chef' || IH.jag().chef); }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
     } else {
       var db = IH.db;
@@ -707,7 +709,7 @@
       html += grupp('Affärer', affarer.map(function (a) { var k = IH.kund(a.kund); return rad('ga:#/salj/' + a.id, IH.i('tavla'), a.titel, (k ? k.namn + ' · ' : '') + IH.kort(a.varde), 'Affär'); }));
       html += grupp('Förfrågningar', forfragningar.map(function (f) { return rad('ga:#/forfragningar/' + f.id, IH.i('inkorg'), f.namn, f.hustyp + ' · ' + f.ort, 'Förfrågan'); }));
       html += grupp('Offerter', offerter.map(function (o) { var a = IH.affar(o.affar), k = a && IH.kund(a.kund); return rad('ga:#/offerter/' + o.id, IH.i('offert'), o.nummer, k ? k.namn : '', 'Offert'); }));
-      html += grupp('Åtgärder', ATGARDER.filter(function (x) { return traff(x[1] + ' ' + x[3], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
+      html += grupp('Åtgärder', ATGARDER.filter(function (x) { return IH.jag().roll !== 'admin' && traff(x[1] + ' ' + x[3], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
       html += grupp('Gå till', SIDOR.filter(function (x) { return (x[0] !== 'chef' || IH.jag().chef) && traff(x[1], q, x[1]); }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
       if (!html) html = '<p class="palett__tom">Inga träffar för ”' + IH.e(q) + '”</p>';
     }
@@ -872,7 +874,7 @@
     if (nav) nav.scrollBy({ top: nav.clientHeight * 0.7, behavior: 'smooth' });
   };
   IH.G.mer = function () {
-    var poster = [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote'], ['chatt', 'Meddelanden', 'meddelande'],
+    var poster = IH.jag().roll === 'admin' ? [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] : [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote'], ['chatt', 'Meddelanden', 'meddelande'],
       ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']];
     IH.oppnaArk({
       titel: 'Mer', ikon: 'meny',

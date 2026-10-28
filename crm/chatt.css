@@ -463,3 +463,5 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; 
 
 /* Mobil: bubblan ligger ovanför bottenmenyn så att Mer går att nå */
 @media (max-width: 720px) { .chf-ikon:not([data-i-docka]) { bottom: 92px !important; right: 14px !important; } }
+
+@media (max-width: 720px) { .chf { bottom: 84px !important; height: min(72vh, calc(100vh - 110px)) !important; } }

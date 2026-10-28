@@ -191,9 +191,11 @@
     });
   }
   addEventListener('hashchange', function () {
-    var h = location.hash || '#/';
+    var h = location.hash || '#/', st = history.state;
     if (/^#\/chef/.test(h)) { senastChef = h; lageNu = 'chef'; }
     else if (!/^#\/profil/.test(h)) { lageNu = 'salj'; senastSalj = h; }
+    else if (st && st.ihLage) lageNu = st.ihLage;
+    try { history.replaceState(Object.assign({}, st || {}, { ihLage: lageNu }), ''); } catch (x) { /* utan historik */ }
     vaxelLage();
   });
   IH.G['vy-byt'] = function (el) {
@@ -571,7 +573,7 @@
     var typ = function (t) { return chefUi.kalTyp === 'alla' || chefUi.kalTyp === t; };
     var idag = dag0(new Date()).getTime(), ut = [];
     if (typ('akt')) db().aktiviteter.forEach(function (h) { if (vem(h.av)) ut.push({ id: h.id, slag: 'akt', dag: dag0(h.tid).getTime(), tid: h.tid, u: h.av, text: h.text, typ: h.typ, kund: h.kund, affar: h.affar }); });
-    if (typ('uppg')) db().uppgifter.forEach(function (x) { if (!x.klar && vem(x.ansvarig)) { var d = dag0(x.forfaller).getTime(); ut.push({ id: x.id, slag: 'uppg', dag: d, tid: x.forfaller, u: x.ansvarig, text: x.text, kund: x.kund, affar: x.affar, sen: d < idag }); } });
+    if (typ('uppg')) db().uppgifter.forEach(function (x) { if (!x.klar && !x.kalAkt && vem(x.ansvarig)) { var d = dag0(x.forfaller).getTime(); ut.push({ id: x.id, slag: 'uppg', dag: d, tid: x.forfaller, u: x.ansvarig, text: x.text, kund: x.kund, affar: x.affar, sen: d < idag }); } });
     if (typ('vunnen')) db().affarer.forEach(function (a) { if (a.steg === 'vunnen' && a.vunnen && vem(a.ansvarig)) ut.push({ id: a.id, slag: 'vunnen', dag: dag0(a.vunnen).getTime(), tid: a.vunnen, u: a.ansvarig, text: 'Vunnen: ' + a.titel, kund: a.kund, affar: a.id }); });
     return ut.sort(function (a, b) { return new Date(a.tid) - new Date(b.tid); });
   }
@@ -717,7 +719,12 @@
     var text = t.text.value.trim(), u = IH.anvandare(t.vem.value); if (!text || !u) return;
     var nar = new Date(t.datum.value + 'T' + (t.tid.value || '09:00') + ':00'), typ = t.typ.value, kund = t.kund.value || null;
     if (typ === 'uppgift') db().uppgifter.push({ id: IH.nyttId('uppgift', 'u'), text: text, forfaller: nar.toISOString(), klar: false, kund: kund, affar: null, ansvarig: u.id, av: IH.jag().id });
-    else db().aktiviteter.push({ id: IH.nyttId('aktivitet', 'h'), tid: nar.toISOString(), typ: typ, text: text, kund: kund, affar: null, av: u.id });
+    else {
+      var aid = IH.nyttId('aktivitet', 'h');
+      db().aktiviteter.push({ id: aid, tid: nar.toISOString(), typ: typ, text: text, kund: kund, affar: null, av: u.id });
+      if (nar > new Date()) db().uppgifter.push({ id: IH.nyttId('uppgift', 'u'), text: (typ === 'mote' ? 'Möte: ' : 'Samtal: ') + text, forfaller: nar.toISOString(), klar: false, kund: kund, affar: null, ansvarig: u.id, av: IH.jag().id, kalAkt: aid });
+      IH.uppdateraMeny();
+    }
     // hoppa till månaden där det hamnade så att man ser det
     var nu = new Date(); chefUi.kalMan = (nar.getFullYear() - nu.getFullYear()) * 12 + nar.getMonth() - nu.getMonth();
     IH.stangArk(); omRita();
