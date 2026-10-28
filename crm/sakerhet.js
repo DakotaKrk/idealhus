@@ -21,9 +21,10 @@
   // Innehållspolicyn stoppar främmande skript, ramar och anrop utåt – varje stopp loggas som ett intrångsförsök
   document.addEventListener('securitypolicyviolation', function (ev) { felLista.push('Stoppat av innehållspolicyn: ' + ev.violatedDirective + ' ' + (ev.blockedURI || 'inbyggd kod')); if (IH.sakLogg) IH.sakLogg('intrang', 'Innehållspolicyn stoppade ' + (ev.blockedURI || 'inbyggd kod') + ' (' + ev.violatedDirective + ').'); });
   // Försök att öppna adminsidor utan att vara admin loggas (kontrollen Intrång)
-  addEventListener('hashchange', function () {
+  var kollaAtkomst = function () {
     if (/^#\/(admin|sakerhet|kontroll)/.test(location.hash) && !arAdmin() && !(IH.visarSom && IH.visarSom()) && IH.sakLogg) IH.sakLogg('atkomst', IH.jag().namn + ' försökte öppna ' + location.hash.slice(2) + ' utan behörighet.');
-  });
+  };
+  addEventListener('hashchange', kollaAtkomst); setTimeout(kollaAtkomst, 0);
 
   var ALLVAR = { hog: { namn: 'Hög', minus: 25 }, medel: { namn: 'Medel', minus: 10 }, lag: { namn: 'Låg', minus: 3 }, info: { namn: 'Info', minus: 0 } };
   var FARG = { kod: '#3f6b50', uppdatering: '#4f6f8f', buggar: '#7b5c8f', lacka: '#c4577e', intrang: '#3d8a96', beteende: '#e8a456', trasigt: '#8f5424' };
@@ -251,7 +252,7 @@
       pts.map(function (p) { return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3" class="sh-spark__prick"/>'; }).join('') + '</svg>';
   }
   IH.vyer.sakerhet = function () {
-    if (!arAdmin()) return { titel: 'Säkerhet', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + ik('las') + 'Bara för administratören</h2><p class="ad-not">Byt till kontot Admin i kontomenyn för att se säkerhetshubben.</p></section>' };
+    if (!arAdmin()) return { titel: 'Säkerhet', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + ik('las') + 'Bara för administratören</h2><p class="ad-not">' + (IH.visarSom && IH.visarSom() ? 'Du är i supportläget – tryck Tillbaka till Admin i bandet överst' : 'Byt till kontot Admin i kontomenyn') + ' för att se säkerhetshubben.</p></section>' };
     var S = hub(), p = total(), senast = S.historik[0];
     var ton = p == null ? 'is' : p >= 90 ? 'gron' : p >= 70 ? 'gul' : 'rod';
     var status = p == null ? 'Inte skannat ännu' : p >= 90 ? 'Skyddat' : p >= 70 ? 'Bör ses över' : 'Åtgärda nu';
@@ -359,7 +360,7 @@
       var u = String(t)
         .replace(/\b(?:19|20)?\d{6}[-+]?\d{4}\b/g, function (x) { var d10 = x.replace(/\D/g, '').slice(-10); return luhn(d10) ? 'ÅÅMMDD-XXXX' : x; })
         .replace(/\b(?:\d[ -]?){13,19}\b/g, function (x) { var y = x.replace(/\D/g, ''); return y.length >= 13 && luhn(y) ? '**** **** **** ' + y.slice(-4) + (/\s$/.test(x) ? ' ' : '') : x; })
-        .replace(/(lösenord|password|lösen)(\s*[:=]\s*)\S+/gi, '$1$2••••••');
+        .replace(/(lösenord|password|lösen)\s*[:=]\s*\S+/gi, '$1 (dolt)');
       if (u !== t) n++; return u;
     };
     ['kunder', 'affarer', 'aktiviteter', 'uppgifter', 'forfragningar', 'offerter'].forEach(function (sm) { (d[sm] || []).forEach(function (x) { Object.keys(x).forEach(function (f) { if (typeof x[f] === 'string') x[f] = maska(x[f]); }); }); });

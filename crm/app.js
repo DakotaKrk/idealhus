@@ -814,7 +814,7 @@
       }
       if (inmatning || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === '/') { e.preventDefault(); IH.oppnaPalett(); }
-      if (e.key === 'n' || e.key === 'N') { e.preventDefault(); IH.G.ny(); }
+      if ((e.key === 'n' || e.key === 'N') && !document.querySelector('.mote:not(.stanger), .mote-presentation, [data-mote-oppen]')) { e.preventDefault(); IH.G.ny(); }
     });
     document.addEventListener('submit', function (e) {
       var f = e.target.closest('[data-form]');

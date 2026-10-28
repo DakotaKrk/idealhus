@@ -88,7 +88,7 @@
         '<span role="cell"><span class="lp-status" style="--n:' + (u.inaktiv ? '#b9b2a6' : n.farg) + '"><i></i>' + e(u.inaktiv ? 'Inaktiverat' : n.namn) + '</span></span>' +
         '<span role="cell" class="ap-senast">' + e(senastAktiv(u)) + '</span>' +
         '<span role="cell" class="ap-atgarder"><button type="button" class="knapp knapp--liten" data-g="ap-andra" data-id="' + u.id + '" title="Ändra ' + e(u.namn) + '">' + ik('redigera') + '<span class="ap-knapptext">Ändra</span></button>' +
-          (u.id !== mig.id && !u.inaktiv ? '<button type="button" class="knapp knapp--liten ap-ikonknapp" data-g="valj-anvandare" data-id="' + u.id + '" title="Logga in som ' + e(u.namn) + '">' + ik('logga-ut') + '</button>' : '<span class="ap-plats"></span>') +
+          (u.id !== mig.id && !u.inaktiv && u.roll !== 'admin' ? '<button type="button" class="knapp knapp--liten ap-ikonknapp" data-g="valj-anvandare" data-id="' + u.id + '" title="Logga in som ' + e(u.namn) + '">' + ik('logga-ut') + '</button>' : '<span class="ap-plats"></span>') +
           (u.id !== mig.id ? '<button type="button" class="knapp knapp--liten" data-g="ap-aktiv" data-id="' + u.id + '"' + (sista ? ' disabled title="Det måste finnas minst en aktiv administratör"' : '') + '>' + ik(u.inaktiv ? 'bock' : 'las') + '<span class="ap-knapptext">' + (u.inaktiv ? 'Aktivera' : 'Inaktivera') + '</span></button>' : '<span class="ap-plats ap-plats--bred"></span>') +
         '</span></div>';
     }).join('');

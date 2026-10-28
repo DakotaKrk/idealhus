@@ -298,3 +298,5 @@ html[data-konto-oppen] .sido .anv__chevron { transform: rotate(180deg); }
   html[data-sido-dold] .sido-kant__konto:hover { transform: scale(1.06); }
   html[data-sido-dold] .sido-kant__konto .avatar { width: 32px; height: 32px; border-radius: 50%; font-size: .62rem; }
 }
+
+.sido__merantal:empty { display: none; }

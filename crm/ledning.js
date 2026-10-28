@@ -453,7 +453,7 @@
     var d = dag0(new Date()); if (pkLedig(u, d.getTime())) return;
     franvaroLista().push({ id: 'fv' + Date.now().toString(36), u: u.id, typ: 'sjuk', fran: d.toISOString(), till: d.toISOString() });
     try { var nv = JSON.parse(localStorage.getItem('ih-crm-narvaro')) || {}; nv[u.id] = 'sjuk'; localStorage.setItem('ih-crm-narvaro', JSON.stringify(nv)); } catch (x) { /* privat läge */ }
-    IH.spara(); IH.rita();
+    IH.spara(); IH.rita(); IH.uppdateraMeny();
     IH.toast(u.id === IH.jag().id ? 'Du är sjukanmäld i dag' : u.namn + ' är sjukanmäld i dag', 'Krya på dig! Syns i Vem jobbar när.', 'termometer');
   };
   IH.G['pk-ics'] = function (el) {
@@ -461,11 +461,12 @@
     var nu = new Date(), fran = pk.vy === 'ar' ? new Date(nu.getFullYear() + Math.floor((nu.getMonth() + pk.man) / 12), 0, 1) : new Date(nu.getFullYear(), nu.getMonth() + pk.man, 1);
     var till = pk.vy === 'ar' ? new Date(fran.getFullYear() + 1, 0, 1) : new Date(fran.getFullYear(), fran.getMonth() + 1, 1);
     var h = pkHandelser(u).filter(function (x) { return x.dag >= fran.getTime() && x.dag < till.getTime(); });
-    franvaroLista().forEach(function (f) { if (f.u === u.id && dag0(f.till).getTime() >= fran.getTime() && dag0(f.fran).getTime() < till.getTime()) h.push({ id: f.id, tid: f.fran, typ: 'franvaro', text: FRANVARO[f.typ][0] }); });
+    franvaroLista().forEach(function (f) { if (f.u === u.id && dag0(f.till).getTime() >= fran.getTime() && dag0(f.fran).getTime() < till.getTime()) h.push({ id: f.id, tid: f.fran, slut: f.till, heldag: true, typ: 'franvaro', text: FRANVARO[f.typ][0] }); });
     var p2 = function (v) { return String(v).padStart(2, '0'); }, f = function (d) { return d.getUTCFullYear() + p2(d.getUTCMonth() + 1) + p2(d.getUTCDate()) + 'T' + p2(d.getUTCHours()) + p2(d.getUTCMinutes()) + '00Z'; };
     var esc = function (t) { return String(t || '').replace(/[\\;,]/g, function (c) { return '\\' + c; }).replace(/\n/g, ' '); };
     var rader = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Legohus//CRM//SV'];
-    h.forEach(function (x) { var s2 = new Date(x.tid), k = x.kund && IH.kund(x.kund); rader.push('BEGIN:VEVENT', 'UID:' + x.id + '@legohus-crm', 'DTSTAMP:' + f(new Date()), 'DTSTART:' + f(s2), 'DTEND:' + f(new Date(s2.getTime() + 36e5)), 'SUMMARY:' + esc(x.typ === 'vunnen' || x.typ === 'franvaro' ? x.text : PK_TYP[x.typ][0] + ': ' + x.text), 'DESCRIPTION:' + esc(k ? k.namn : ''), 'END:VEVENT'); });
+    var dagF = function (d) { return dagISO(d).replace(/-/g, ''); };
+    h.forEach(function (x) { var s2 = new Date(x.tid), k = x.kund && IH.kund(x.kund); var slut2 = x.heldag ? new Date(dag0(x.slut).getTime() + 864e5) : null; rader.push('BEGIN:VEVENT', 'UID:' + x.id + '@legohus-crm', 'DTSTAMP:' + f(new Date()), x.heldag ? 'DTSTART;VALUE=DATE:' + dagF(s2) : 'DTSTART:' + f(s2), x.heldag ? 'DTEND;VALUE=DATE:' + dagF(slut2) : 'DTEND:' + f(new Date(s2.getTime() + 36e5)), 'SUMMARY:' + esc(x.typ === 'vunnen' || x.typ === 'franvaro' ? x.text : PK_TYP[x.typ][0] + ': ' + x.text), 'DESCRIPTION:' + esc(k ? k.namn : ''), 'END:VEVENT'); });
     rader.push('END:VCALENDAR');
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rader.join('\r\n')], { type: 'text/calendar' }));
     a.download = 'kalender-' + u.namn.split(' ')[0].toLowerCase() + '-' + (pk.vy === 'ar' ? fran.getFullYear() : dagISO(fran).slice(0, 7)) + '.ics'; document.body.appendChild(a); a.click(); a.remove();
@@ -610,7 +611,7 @@
         '<span class="lp-kal__vy" role="group" aria-label="Vy">' + vyKnapp('man', 'Månad', 'kalender') + vyKnapp('lista', 'Lista', 'lista') + '</span>' +
         '<button type="button" class="knapp knapp--virke lp-kal__ny" data-g="lp-kal-ny">' + i('plus') + 'Lägg till</button></div></div>' +
       '<div class="lp-kal__lage">' +
-        '<span><b>' + vecka.filter(function (x) { return x.slag === 'akt'; }).length + '</b> möten och samtal kommande 7 dagar</span>' +
+        '<span>' + (function (n) { return '<b>' + n + '</b> ' + (n === 1 ? 'möte eller samtal' : 'möten och samtal'); })(vecka.filter(function (x) { return x.slag === 'akt'; }).length) + ' kommande 7 dagar</span>' +
         '<span><b>' + vecka.filter(function (x) { return x.slag === 'uppg'; }).length + '</b> uppgifter förfaller</span>' +
         (sena.length ? '<button type="button" class="lp-kal__sena" data-g="lp-kal-sena">' + i('varning') + plural(sena.length, 'försenad uppgift', 'försenade uppgifter') + '</button>' : '<span class="lp-kal__ok">' + i('bock') + 'Inget försenat</span>') +
         (ledig ? '<button type="button" class="lp-kal__ledig" data-g="lp-kal-ny" data-dag="' + (IH.dagStr ? IH.dagStr(ledig) : ledig.toISOString().slice(0, 10)) + '" title="Första vardagen utan möten' + (chefUi.kalVem !== 'alla' ? ' för ' + e((IH.anvandare(chefUi.kalVem) || {}).namn || '') : ' i teamet') + ' – boka något där">' + i('stjarna') + 'Ledig dag: ' + e(ledig.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' })) + '</button>' : '') +
@@ -696,7 +697,8 @@
     var u = db().uppgifter.find(function (x) { return x.id === el.getAttribute('data-id'); }); if (!u) return;
     var d = new Date(u.forfaller), idag = dag0(new Date()); if (d < idag) d = new Date(idag.getTime() + 9 * 36e5); d.setDate(d.getDate() + 1); u.forfaller = d.toISOString();
     var rad = el.closest('.lp-dagrad'); if (rad) { rad.classList.add('klar'); setTimeout(function () { rad.remove(); }, 380); }
-    omRita(); IH.toast('Flyttad', u.text + ' – nu ' + d.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' }) + '.', 'kalender');
+    omRita(); if (document.querySelector('.lp-daglista')) setTimeout(function () { kalDag(dagISO(new Date(u.forfaller))); }, 420);
+    IH.toast('Flyttad', u.text + ' – nu ' + d.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' }) + '.', 'kalender');
   };
   IH.G['lp-kal-allaidag'] = function () {
     var idag = dag0(new Date()), n = 0;
@@ -754,8 +756,10 @@
       x.vunnet90 = x.vunna90.reduce(function (t, a) { return t + (a.varde || 0); }, 0);
       x.forlorade90 = x.forlorade.filter(function (a) { return inom(a.andrad, 90); }).length;
       x.malKvartal = x.u.mal ? x.u.mal / 4 : 0;
+      var kv0 = new Date(); kv0 = new Date(kv0.getFullYear(), Math.floor(kv0.getMonth() / 3) * 3, 1);
+      x.vunnetKv = x.vunna.filter(function (a) { return a.vunnen && new Date(a.vunnen) >= kv0; }).reduce(function (t, a) { return t + (a.varde || 0); }, 0);
     });
-    var tot = { pipeline: sum(function (x) { return x.oppet; }), viktat: sum(function (x) { return x.viktat; }), vunnet: sum(function (x) { return x.vunnet90; }), mal: sum(function (x) { return x.malKvartal; }), vunnetMal: sum(function (x) { return x.malKvartal ? x.vunnet90 : 0; }) };
+    var tot = { pipeline: sum(function (x) { return x.oppet; }), viktat: sum(function (x) { return x.viktat; }), vunnet: sum(function (x) { return x.vunnet90; }), mal: sum(function (x) { return x.malKvartal; }), vunnetMal: sum(function (x) { return x.malKvartal ? x.vunnetKv : 0; }) };
     var avgjorda = sum(function (x) { return x.vunna90.length + x.forlorade90; }), vg = avgjorda ? sum(function (x) { return x.vunna90.length; }) / avgjorda : null;
     var bortaIdag = function (id) { return BORTA.indexOf(narvaro(id).id) >= 0 || !!franvaroPa(id, dag0(new Date()).getTime()); };
     var aktivaNu = team.filter(function (x) { return !bortaIdag(x.u.id); }).length;
@@ -788,7 +792,7 @@
       ].map(tal).join('') + '</div>' + '<div class="lp-mork__mitt">' + ring + lag + '</div>' + veckoStaplar + '</section>';
 
     // 01 Teamet just nu
-    var vald = team.filter(function (x) { var s = narvaro(x.u.id).id; return chefUi.filter === 'alla' || (chefUi.filter === 'tillganglig' ? s === 'online' && !bortaIdag(x.u.id) : chefUi.filter === 'upptagen' ? UPPTAGEN.indexOf(s) >= 0 : bortaIdag(x.u.id)); });
+    var vald = team.filter(function (x) { var s = narvaro(x.u.id).id; return chefUi.filter === 'alla' || (chefUi.filter === 'tillganglig' ? s === 'online' && !bortaIdag(x.u.id) : chefUi.filter === 'upptagen' ? UPPTAGEN.indexOf(s) >= 0 && !bortaIdag(x.u.id) : bortaIdag(x.u.id)); });
     var kort = vald.map(function (x) {
       var n = narvaro(x.u.id), varn = [];
       if (x.stilla.length) varn.push(plural(x.stilla.length, 'affär står still', 'affärer står still'));
@@ -802,7 +806,7 @@
         '<header>' + avatar(x.u) + '<div><a href="#/profil/' + x.u.id + '"><b>' + e(x.u.namn) + '</b></a><small style="--n:' + n.farg + '"><i></i>' + e(n.namn) + (x.u.chef ? ' · Chef' : '') + (senast ? ' · ' + e(senastFor(x.u).nu ? 'aktiv nu' : 'aktiv ' + IH.sedan(senast.tid)) : '') + '</small></div>' +
           '<span class="lp-saljare__last" title="Öppna affärer just nu">' + plural(x.oppna.length, 'affär', 'affärer') + '</span></header>' +
         '<div class="lp-saljare__tal"><div><small>Öppet</small><b class="tal">' + IH.kort(x.oppet) + '</b></div><div><small>Viktat</small><b class="tal">' + IH.kort(x.viktat) + '</b></div><div><small>Vunnet 90 d</small><b class="tal">' + IH.kort(x.vunnet90) + '</b></div></div>' +
-        (x.malKvartal ? '<p class="lp-saljare__mal">' + pct(x.vunnet90 / x.malKvartal) + ' av kvartalsmålet ' + IH.kort(x.malKvartal) + '<span class="lp-mal__spar"><i style="--a:' + Math.min(1, x.vunnet90 / x.malKvartal).toFixed(3) + '"></i></span></p>' : '<p class="lp-saljare__mal lp-saljare__mal--tom">Inget mål satt · <button type="button" class="lp-lank" data-g="lp-mal" data-id="' + x.u.id + '">Sätt mål</button></p>') +
+        (x.malKvartal ? '<p class="lp-saljare__mal">' + pct(x.vunnetKv / x.malKvartal) + ' av kvartalsmålet ' + IH.kort(x.malKvartal) + '<span class="lp-mal__spar"><i style="--a:' + Math.min(1, x.vunnetKv / x.malKvartal).toFixed(3) + '"></i></span></p>' : '<p class="lp-saljare__mal lp-saljare__mal--tom">Inget mål satt · <button type="button" class="lp-lank" data-g="lp-mal" data-id="' + x.u.id + '">Sätt mål</button></p>') +
         '<ul class="lp-perSteg">' + perSteg.map(function (p) {
           return '<li style="--f:' + p.s.farg + ';--a:' + (p.l.length / maxS).toFixed(3) + '" title="' + e(p.s.namn) + ': ' + plural(p.l.length, 'affär', 'affärer') + (p.l.length ? ' · ' + IH.kort(p.l.reduce(function (t, a) { return t + a.varde; }, 0)) + ' · ' + e(p.l.map(function (a) { return a.titel; }).slice(0, 3).join(', ')) : '') + '"><span>' + e(p.s.kort) + '</span><i></i><b>' + p.l.length + '</b><small>' + (p.l.length ? IH.kort(p.l.reduce(function (t, a) { return t + a.varde; }, 0)) : '–') + '</small></li>';
         }).join('') + '</ul>' +
@@ -952,7 +956,7 @@
   G['lp-kopiera'] = function (el) {
     var t = el.getAttribute('data-text') || '';
     var klar = function () { IH.toast('Kopierat', t, 'kopiera'); };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(klar, klar); else klar();
+    var nej = function () { IH.toast('Kunde inte kopiera', 'Markera texten och kopiera själv: ' + t, 'varning'); }; if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(klar, nej); else nej();
   };
   // Profilbild: beskärs till en kvadrat och skalas till 320 px (JPEG) och sparas på kontot
   document.addEventListener('change', function (ev) {
@@ -1038,7 +1042,7 @@
       var u = IH.anvandare(t.vem.value), text = t.text.value.trim(); if (!u || !text) return;
       db().uppgifter.push({ id: IH.nyttId('uppgift', 'u'), text: text, forfaller: new Date(t.datum.value + 'T09:00:00').toISOString(), klar: false, kund: null, affar: null, ansvarig: u.id, av: IH.jag().id });
       IH.spara(); IH.stangArk(); IH.uppdateraMeny(); IH.rita();
-      if (u.id === IH.jag().id) IH.toast('Uppgiften är tillagd', text, 'todo'); else IH.toast('Uppgiften är given', u.namn + ' ser den under Att göra.', 'todo');
+      if (u.id === IH.jag().id) IH.toast('Uppgiften är tillagd', text, 'todo'); else { IH.toast('Uppgiften är given', u.namn + ' ser den under Att göra.', 'todo'); if (IH.chattSkickaTill) IH.chattSkickaTill(u.id, 'Ny uppgift till dig: ' + text + ' (klar senast ' + t.datum.value + ').'); }
     }
     if (t.matches('[data-lp-fordela]')) {
       ev.preventDefault();

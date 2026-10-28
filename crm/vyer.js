@@ -446,8 +446,8 @@
           '<h1 class="hero__titel"><span class="rad-mask"><span style="--o:0">' + IH.hej() + ',</span></span><span class="rad-mask"><span style="--o:1"><em>' + e(forsta(jag.namn)) + '.</em></span></span></h1>' +
           '<p class="hero__text">' + text + '</p>' +
           dagensLage(uppg, nastaMontage) +
-          '<div class="hero__snabb" role="group" aria-label="Snabbt">' + [['ny-forfragan', 'Förfrågan', 'inkorg'], ['ny-kund', 'Kund', 'kunder'], ['ny-affar', 'Affär', 'tavla'], ['ny-uppgift', 'Uppgift', 'uppgift'], ['starta-mote', 'Kundmöte', 'mote']].map(function (b, n) {
-            return '<button type="button" data-g="' + b[0] + '" style="--n:' + n + '" title="Ny ' + b[1].toLowerCase() + '">' + i(b[2]) + '<span>' + b[1] + '</span></button>'; }).join('') + '</div>' +
+          (IH.jag().roll === 'admin' ? '' : '<div class="hero__snabb" role="group" aria-label="Snabbt">' + [['ny-forfragan', 'Förfrågan', 'inkorg'], ['ny-kund', 'Kund', 'kunder'], ['ny-affar', 'Affär', 'tavla'], ['ny-uppgift', 'Uppgift', 'uppgift'], ['starta-mote', 'Kundmöte', 'mote']].map(function (b, n) {
+            return '<button type="button" data-g="' + b[0] + '" style="--n:' + n + '" title="Ny ' + b[1].toLowerCase() + '">' + i(b[2]) + '<span>' + b[1] + '</span></button>'; }).join('') + '</div>') +
           '<div class="hero__kpi">' +
             kpi('inkorg', 'Nya förfrågningar', nya.length, 'tal', nya.length ? 'senaste ' + IH.sedan(nya.sort(function (a, b) { return b.skapad < a.skapad ? -1 : 1; })[0].skapad) : 'allt besvarat', '#/forfragningar', sjuDagar()) +
             kpi('graf', 'Öppen pipeline', summa(oppna), 'kort', oppna.length + ' affärer · viktat ' + IH.kort(viktat(oppna)), '#/salj',
@@ -630,10 +630,11 @@
           // Ramen följer innehållets höjd (sökningen fäller ut kartan och genomskärningen).
           var hojd = function () {
             var h = Math.ceil(sek.getBoundingClientRect().height);
-            if (h && Math.abs(ram.offsetHeight - h) > 1) ram.style.height = h + 'px';
+            if (!ram.isConnected) { if (ro) ro.disconnect(); return; }
+            if (h && Math.abs(ram.offsetHeight - h) > 1) requestAnimationFrame(function () { ram.style.height = h + 'px'; });
           };
           hojd();
-          if (window.ResizeObserver) new ResizeObserver(hojd).observe(sek);
+          var ro = window.ResizeObserver ? new ResizeObserver(hojd) : null; if (ro) ro.observe(sek);
           setTimeout(hojd, 400);
           kort.classList.add('verktygram--klar');
         });
@@ -1360,16 +1361,17 @@
 
   function smartaForslag() {
     var ut = [];
-    db().forfragningar.filter(function (f) { return f.status === 'ny'; }).slice(0, 2).forEach(function (f) {
+    var mig = IH.jag().id, minaA = oppnaAffarer().filter(function (a) { return !a.ansvarig || a.ansvarig === mig; });
+    db().forfragningar.filter(function (f) { return f.status === 'ny' && (!f.tilldelad || f.tilldelad === mig); }).slice(0, 2).forEach(function (f) {
       ut.push(['inkorg', 'Ny förfrågan väntar: ' + f.namn, f.hustyp + ' · ' + f.ort + ' · ' + IH.sedan(f.skapad), '#/forfragningar/' + f.id, 'Svara']);
     });
-    oppnaAffarer().filter(function (a) { return a.steg === 'offert' && IH.dagarSedan(a.andrad) > 4; }).slice(0, 2).forEach(function (a) {
+    minaA.filter(function (a) { return a.steg === 'offert' && IH.dagarSedan(a.andrad) > 4; }).slice(0, 2).forEach(function (a) {
       var k = IH.kund(a.kund);
       ut.push(['post', 'Följ upp offerten: ' + (k ? k.namn : a.titel), IH.dagarSedan(a.andrad) + ' dagar sedan offerten skickades', '#/salj/' + a.id, 'Följ upp']);
     });
-    var stilla = oppnaAffarer().filter(function (a) { return IH.dagarSedan(a.andrad) > 10 && a.steg !== 'offert'; })[0];
+    var stilla = minaA.filter(function (a) { return IH.dagarSedan(a.andrad) > 10 && a.steg !== 'offert'; })[0];
     if (stilla) ut.push(['klocka', 'Står still: ' + stilla.titel, IH.dagarSedan(stilla.andrad) + ' d i ' + IH.steg(stilla.steg).namn.toLowerCase(), '#/salj/' + stilla.id, 'Öppna']);
-    var bast = oppnaAffarer().sort(function (a, b) { return b.varde * sannolikhet(b) - a.varde * sannolikhet(a); })[0];
+    var bast = minaA.slice().sort(function (a, b) { return b.varde * sannolikhet(b) - a.varde * sannolikhet(a); })[0];
     if (bast) ut.push(['stjarna', 'Störst viktat värde: ' + bast.titel, sannolikhet(bast) + ' % av ' + IH.kort(bast.varde), '#/salj/' + bast.id, 'Öppna']);
     return ut.slice(0, 4);
   }
@@ -1721,6 +1723,7 @@
     a.vunnen = new Date().toISOString();
     a.forlorad = null;
     var o = IH.offertFor(a.id);
+    if (o && o.status === 'utkast') { var sk = db().offerter.filter(function (x) { return x.affar === a.id && (x.status === 'skickad' || x.status === 'ersatt'); }).sort(function (x, y) { return x.skapad < y.skapad ? 1 : -1; })[0]; if (sk) { o.status = 'ersatt'; o = sk; } }
     if (o && o.status !== 'avbojd') { o.status = 'godkand'; var sum = IH.summaOffert(o); if (sum) a.varde = sum; }
     IH.logga('system', 'Order signerad.', a.kund, a.id);
     // Ett projekt till produktionen.
@@ -2035,7 +2038,7 @@
       }
     });
   }
-  G['ny-affar'] = function () { affarsForm({}); };
+  G['ny-affar'] = function () { if (IH.jag().roll === 'admin') { IH.toast('Administratören skapar inte säljposter', 'Gå in i en säljares konto via supportläget.', 'las'); return; } affarsForm({}); };
   FORM['ny-affar'] = function (form, d) {
     var f = d.get('forfragan') ? IH.forfragan(d.get('forfragan')) : null;
     var kund = f ? kundFranForfragan(f) : IH.kund(d.get('kund'));
@@ -2085,7 +2088,7 @@
     var utanKontakt = !aff.length && !ff.length && !senast;
     return {
       k: k, aff: aff, oppen: oppen, vunnen: vunnen, senast: senast, hus: senasteAff ? IH.modell(senasteAff.modell) : null,
-      steg: Math.max(0, resaSteg(ff, aff, off, proj)), oppet: summa(oppen), vunnet: summa(vunnen), sena: sena, nyaF: nyaF, utanKontakt: utanKontakt,
+      steg: Math.max(0, resaSteg(ff, aff.filter(function (a) { return !a.forlorad; }), off, proj)), oppet: summa(oppen), vunnet: summa(vunnen), sena: sena, nyaF: nyaF, utanKontakt: utanKontakt,
       varm: utanKontakt || nyaF > 0 || sena > 0 || oppen.some(function (a) { return a.steg === 'offert' && IH.dagarSedan(a.andrad) > 4; })
     };
   }
@@ -2120,7 +2123,7 @@
   }
   var RESA_FARG = ['#b8cde0', '#9fc2c9', '#e8c98f', '#7fe0a6', '#f0b56e', '#7fe0a6'];
   var kundValda = {};
-  function varfor(x) { return x.nyaF ? (x.nyaF === 1 ? 'Ny förfrågan' : x.nyaF + ' nya förfrågningar') : x.sena ? (x.sena === 1 ? 'Försenad uppföljning' : x.sena + ' försenade uppföljningar') : x.varm ? 'Följ upp offerten' : ''; }
+  function varfor(x) { return x.nyaF ? (x.nyaF === 1 ? 'Ny förfrågan' : x.nyaF + ' nya förfrågningar') : x.sena ? (x.sena === 1 ? 'Försenad uppföljning' : x.sena + ' försenade uppföljningar') : x.utanKontakt ? 'Ny kund – ta första kontakten' : x.varm ? 'Följ upp offerten' : ''; }
   function kundrad(x) {
     var k = x.k, h = kundHalsa(x), ton = h >= 75 ? 'gron' : h >= 50 ? 'gul' : 'rod', vald = !!kundValda[k.id];
     return '<tr data-g="kund-oppna" data-id="' + k.id + '" class="' + (vald ? 'vald' : '') + (x.varm ? ' varm' : '') + '">' +
@@ -2271,7 +2274,7 @@
   };
   G['kund-bulk-csv'] = function () {
     var esc = function (v) { v = String(v == null ? '' : v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-    var rader = [['Namn', 'Typ', 'Ort', 'Telefon', 'E-post', 'På resan', 'Öppet (kr)', 'Vunnet (kr)', 'Senaste kontakt']].concat(valdaKunder().map(function (k) { var x = kundInfo(k); return [k.namn, k.typ === 'foretag' ? 'Företag' : 'Privat', k.ort, k.telefon, k.epost, x.steg < 0 ? 'Ingen kontakt' : RESA_STEG[x.steg][1], x.oppet, x.vunnet, x.senast ? IH.datum(x.senast.tid) : '']; }));
+    var rader = [['Namn', 'Typ', 'Ort', 'Telefon', 'E-post', 'På resan', 'Öppet (kr)', 'Vunnet (kr)', 'Senaste kontakt']].concat(valdaKunder().map(function (k) { var x = kundInfo(k); return [k.namn, k.typ === 'foretag' ? 'Företag' : 'Privat', k.ort, k.telefon, k.epost, x.steg < 0 || x.utanKontakt ? 'Ingen kontakt' : RESA_STEG[x.steg][1], x.oppet, x.vunnet, x.senast ? IH.datum(x.senast.tid) : '']; }));
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + rader.map(function (r) { return r.map(esc).join(';'); }).join('\r\n')], { type: 'text/csv' }));
     a.download = 'kunder-' + IH.dagStr() + '.csv'; document.body.appendChild(a); a.click(); a.remove();
     IH.toast('Exporterat', rader.length - 1 + ' kunder till CSV.', 'skrivut');
@@ -2408,8 +2411,8 @@
             (uppg.length ? '<ul class="uppglista" data-stagger>' + uppg.map(uppgiftRad).join('') + '</ul>' : '<p class="kund-tom">Inga öppna uppgifter för ' + e(forsta(k.namn)) + '.</p>') + '</div></section>' +
           '<section class="kort" data-in id="kund-historik"><header class="kort__huvud"><h2><span class="kort__ikon">' + i('klocka') + '</span>Historik <em class="rakna">' + logg.length + '</em></h2>' +
             (histTyp !== 'alla' ? '<button class="knapp knapp--liten" type="button" data-g="kund-hist" data-id="' + k.id + '" data-typ="alla">Visa allt' + i('stang') + '</button>' : '') + '</header><div class="kort__kropp">' +
-            anteckningsForm(k.id, '') + tidslinje(loggVisa, histTyp === 'alla' ? null : 'Inga ' + (AKT_NAMN_K[histTyp] || '').toLowerCase() + ' loggade ännu.') + '</div></section>' +
-        (function () { var fl = (db().dokument || []).filter(function (d) { return d.kund === k.id; }).sort(function (x, y) { return x.tid < y.tid ? 1 : -1; });
+            anteckningsForm(k.id, '') + tidslinje(loggVisa, histTyp === 'alla' ? null : 'Inga ' + ({ samtal: 'samtal', mejl: 'mejl', mote: 'möten', notis: 'anteckningar', besok: 'besök' }[histTyp] || 'händelser') + ' loggade ännu.') + '</div></section>' +
+        (function () { var fl = (db().dokument || []).filter(function (d) { return d.kund === k.id && !d.arkiv; }).sort(function (x, y) { return x.tid < y.tid ? 1 : -1; });
           return '<section class="kort" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('mapp') + '</span>Dokument <em class="rakna">' + fl.length + '</em></h2><a class="kortlank" href="#/dokument">Alla dokument' + i('pil') + '</a></header><div class="kort__kropp">' +
             (fl.length ? '<ul class="dk__lista">' + fl.slice(0, 6).map(function (d) { var f = DOK_FACK.find(function (x) { return x.id === (d.kat || gissaKat(d.namn, d.typ)); }) || DOK_FACK[DOK_FACK.length - 1];
               return '<li class="dk__rad" data-g="dok-fil" data-id="' + d.id + '" role="button" tabindex="0"><span class="dk__ikon dk__ikon--fil" style="--t:' + f.ton + '">' + e((d.ext || 'fil').slice(0, 4).toUpperCase()) + '</span><span class="dk__namn"><b>' + e(d.namn) + '</b><small>' + e(f.namn + ' · ' + IH.datum(d.tid)) + '</small></span></li>'; }).join('') + '</ul>'
@@ -2813,6 +2816,7 @@
     void k0;
   }
   FORM['dok-upp'] = function (f, d) {
+    dokUi.sok = ''; dokUi.ar = 'alla';
     var dd = db(); if (!dd.dokument) dd.dokument = [];
     var pr = d.get('projekt') ? dd.projekt.find(function (x) { return x.id === d.get('projekt'); }) : null, kund = d.get('kund') || (pr ? pr.kund : null);
     var nya = dokVantar.map(function (fil, n) { return { fil: fil, rad: { id: IH.nyttId('dokument', 'd'), namn: fil.name, ext: (fil.name.split('.').pop() || '').toLowerCase(), storlek: fil.size, typ: fil.type, tid: new Date().toISOString(), av: IH.jag().id, kund: kund, projekt: pr ? pr.id : null, kat: d.get('kat' + n) || gissaKat(fil.name, fil.type) } }; });
@@ -2868,6 +2872,7 @@
 
   G['ny-affar-kund'] = function (el) { affarsForm({ kund: el.getAttribute('data-id') }); };
   G['ny-kund'] = function () {
+    if (IH.jag().roll === 'admin') { IH.toast('Administratören skapar inte säljposter', 'Gå in i en säljares konto via supportläget.', 'las'); return; }
     IH.oppnaArk({
       titel: 'Ny kund', ikon: 'kunder',
       kropp: '<form class="formular" data-form="ny-kund" id="ny-kund-form">' +
@@ -3119,10 +3124,10 @@
   // Offertens läge (Utkast → Skickad → Godkänd) och hur länge den gäller.
   function offertband(o) {
     var STEG = [['skriv', 'Utkast'], ['post', 'Skickad'], ['trofe', 'Godkänd']];
-    var nu = o.status === 'godkand' ? 2 : o.status === 'skickad' ? 1 : 0;
+    var nu = o.status === 'godkand' ? 2 : o.status === 'skickad' || o.status === 'ersatt' || o.status === 'avbojd' ? 1 : 0;
     var giltig = o.giltig || 30, gatt = IH.dagarSedan(o.skapad), kvar = giltig - gatt;
     var andel = Math.max(0, Math.min(1, kvar / giltig));
-    var text = o.status === 'godkand' ? 'Godkänd – blev en order' : kvar > 0 ? kvar + (kvar === 1 ? ' dag kvar' : ' dagar kvar') + ' av ' + giltig : 'Giltighetstiden har gått ut';
+    var text = o.status === 'godkand' ? 'Godkänd – blev en order' : o.status === 'ersatt' ? 'Ersatt av en nyare version' : o.status === 'avbojd' ? 'Avböjd – affären är förlorad' : kvar > 0 ? kvar + (kvar === 1 ? ' dag kvar' : ' dagar kvar') + ' av ' + giltig : 'Giltighetstiden har gått ut';
     return '<section class="ostatus kort" data-in style="--nu:' + nu + '"><ol class="ostatus__steg">' + STEG.map(function (st, n) {
         return '<li class="' + (n < nu ? 'klar' : n === nu ? 'nu' : '') + '"><span>' + i(n < nu ? 'bock' : st[0]) + '</span><b>' + st[1] + '</b></li>';
       }).join('') + '</ol>' +
@@ -3134,7 +3139,7 @@
     var o = IH.offert(id);
     if (!o) return { titel: 'Offerter', html: '<a class="tillbaka" href="#/offerter">' + i('pilv') + 'Alla offerter</a>' + tomt('offert', 'Offerten finns inte.') };
     var a = IH.affar(o.affar);
-    var las = o.status === 'godkand';
+    var las = /^(godkand|ersatt|avbojd)$/.test(o.status);
     var html = '<a class="tillbaka" href="#/offerter">' + i('pilv') + 'Alla offerter</a>' +
       '<header class="vyhuvud"><div><p class="etikett">Offert</p><h1>' + e(o.nummer) + '</h1><p>' + e(a ? a.titel : '') + '</p></div>' +
       '<div class="vyhuvud__knappar"><button class="knapp" type="button" data-g="skriv-ut">' + i('skrivut') + 'Skriv ut / PDF</button>' +
@@ -3144,7 +3149,7 @@
       (o.status === 'skickad' ? '<div class="off-not" data-in>' + i('varning') + '<span><b>Offerten är redan skickad.</b> Ändrar du här ser kunden inte ändringen – skapa en ny version och skicka den i stället.</span><button type="button" class="knapp knapp--liten knapp--virke" data-g="offert-ny-version" data-id="' + o.id + '">' + i('kopiera') + 'Ny version</button></div>' : '') +
       '<div class="offertyta">' +
         '<section class="kort offertred" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('skriv') + '</span>Innehåll</h2>' +
-          (las ? '<span class="status" style="--s:#7fe0a6">Godkänd – låst</span>' : '<span class="status" style="--s:' + (o.status === 'skickad' ? '#f0b56e' : '#b8cde0') + '">' + (o.status === 'skickad' ? 'Skickad' : 'Utkast') + '</span>') + '</header>' +
+          (las ? '<span class="status" style="--s:' + (o.status === 'godkand' ? '#7fe0a6' : '#c9c4bb') + '">' + (o.status === 'godkand' ? 'Godkänd' : o.status === 'ersatt' ? 'Ersatt' : 'Avböjd') + ' – låst</span>' : '<span class="status" style="--s:' + (o.status === 'skickad' ? '#f0b56e' : '#b8cde0') + '">' + (o.status === 'skickad' ? 'Skickad' : 'Utkast') + '</span>') + '</header>' +
           '<div class="kort__kropp">' +
           '<div class="modellrad modellrad--liten">' + IH.MODELLER.map(function (m) {
             return '<button type="button" class="modellknapp' + (m.id === o.modell ? ' vald' : '') + '" data-g="offert-modell" data-id="' + o.id + '" data-m="' + m.id + '"' + (las ? ' disabled' : '') + ' title="' + e(m.namn) + '"><img src="' + m.tumme + '" alt=""><b>' + e(m.namn) + '</b></button>';
@@ -3176,7 +3181,7 @@
           var sum = IH.summaOffert(o);
           $('[data-summa]', rot).textContent = IH.kr(sum);
           $('.dokyta', rot).innerHTML = dokument(o);
-          if (a && sum) { a.varde = sum; IH.spara(); }
+          if (a && sum && !/^(godkand|ersatt|avbojd)$/.test(o.status)) { a.varde = sum; IH.spara(); }
         });
         var lagg = $('[data-lagg]', rot);
         if (lagg) lagg.addEventListener('change', function () {
@@ -3198,6 +3203,7 @@
   }
   G['offert-modell'] = function (el) {
     var o = IH.offert(el.getAttribute('data-id'));
+    if (!o || /^(godkand|ersatt|avbojd)$/.test(o.status)) return;
     var m = IH.modell(el.getAttribute('data-m'));
     o.modell = m.id;
     o.rader[0] = { text: m.kategori + ' ' + m.namn + (m.yta ? ', ' + m.yta + ' m²' : ''), antal: 1, pris: IH.db.prislista.modeller[m.id] || 0 };
@@ -3208,6 +3214,7 @@
   };
   G['offert-bort'] = function (el) {
     var o = IH.offert(el.getAttribute('data-id'));
+    if (!o || /^(godkand|ersatt|avbojd)$/.test(o.status)) return;
     o.rader.splice(Number(el.getAttribute('data-n')), 1);
     var a = IH.affar(o.affar);
     if (a) a.varde = IH.summaOffert(o);
@@ -3392,7 +3399,7 @@
     var redo = oppna.filter(function (x) { return x.steg === 'ny' || x.steg === 'kontakt' || x.steg === 'besok'; })
       .sort(function (x, y) { return IH.dagarSedan(y.andrad) - IH.dagarSedan(x.andrad); });
     var idag0 = new Date(); idag0.setHours(0, 0, 0, 0);
-    var besok = db().uppgifter.filter(function (u) { return !u.klar && /bes[öo]k/i.test(u.text) && new Date(u.forfaller) >= idag0; })
+    var besok = db().uppgifter.filter(function (u) { return !u.klar && (!u.ansvarig || u.ansvarig === IH.jag().id) && /bes[öo]k/i.test(u.text) && new Date(u.forfaller) >= idag0; })
       .sort(function (x, y) { return x.forfaller < y.forfaller ? -1 : 1; })[0];
     var besokKund = besok && besok.kund ? IH.kund(besok.kund) : null;
 
@@ -4075,7 +4082,7 @@
     var seg = function (v, t) { return '<button type="button" data-g="ag-vy" data-f="' + v + '" aria-pressed="' + (agUi.vy === v) + '">' + t + '</button>'; };
     return '<section class="kort agk" data-in><header class="agk__huvud">' +
         '<div><p class="etikett">Planering</p><h2>' + e(rubrik.charAt(0).toUpperCase() + rubrik.slice(1)) + '</h2>' +
-          '<p class="agk__lage"><span><b>' + tot + '</b> öppna i perioden</span>' + (tyngst ? '<span>Mest på <b>' + VECKODAG[tyngst.d.getDay()] + ' ' + tyngst.d.getDate() + '/' + (tyngst.d.getMonth() + 1) + '</b> (' + tyngst.k + ')</span>' : '') + (sena ? '<span class="sen"><b>' + sena + '</b> försenade</span>' : '') + '</p></div>' +
+          '<p class="agk__lage"><span><b>' + tot + '</b> öppna i perioden</span>' + (tyngst ? '<span>Mest på <b>' + VECKODAG[tyngst.d.getDay()] + ' ' + tyngst.d.getDate() + '/' + (tyngst.d.getMonth() + 1) + '</b> (' + tyngst.k + ')</span>' : '') + (sena ? '<span class="sen"><b>' + sena + '</b> ' + (sena === 1 ? 'försenad' : 'försenade') + '</span>' : '') + '</p></div>' +
         '<div class="agk__verktyg"><span class="agk__nav"><button type="button" data-g="ag-off" data-d="-1" aria-label="Föregående">' + i('pilv') + '</button>' + (agUi.off ? '<button type="button" class="agk__idag" data-g="ag-off" data-d="0">I dag</button>' : '') + '<button type="button" data-g="ag-off" data-d="1" aria-label="Nästa">' + i('pil') + '</button></span>' +
           '<span class="tv-seg" role="group" aria-label="Vy">' + seg('vecka', 'Vecka') + seg('tva', '2 veckor') + seg('man', 'Månad') + '</span></div></header>' +
       '<div class="agk__rutnat agk__rutnat--' + agUi.vy + '"' + (agUi.vy !== 'vecka' ? '' : '') + '>' + (agUi.vy === 'man' ? ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map(function (x) { return '<span class="agk__vd">' + x + '</span>'; }).join('') : '') + dagHtml + '</div>' +
@@ -4099,7 +4106,7 @@
     var dagKlara = dagens.filter(function (x) { return x.klar; }).length;
     var andel = dagens.length ? dagKlara / dagens.length : 1;
     var kvarIdag = dagens.filter(function (x) { return !x.klar; });
-    var sena = grupper[0][1].length;
+    var sena = uVem.filter(function (x) { return !x.klar && new Date(x.forfaller) < idag0; }).length;
     // Dagens uppgifter per typ, till meningen och brickorna.
     var perTyp = {};
     kvarIdag.forEach(function (x) { var t = uppgTyp(x.text); (perTyp[t[2]] = perTyp[t[2]] || [t[1], t[2], 0])[2] += 1; });
@@ -4379,6 +4386,7 @@
   };
   G['ny-uppgift'] = function () { IH.stangArk(true); IH.ga('#/att-gora'); setTimeout(function () { var x = $('.nyuppg input[name="text"]'); if (x) x.focus(); }, 80); };
   G['ny-forfragan'] = function () {
+    if (IH.jag().roll === 'admin') { IH.toast('Administratören skapar inte säljposter', 'Gå in i en säljares konto via supportläget.', 'las'); return; }
     IH.oppnaArk({
       titel: 'Lägg in förfrågan', under: 'När någon ringer eller mejlar – samma frågor som formuläret på sajten.', ikon: 'inkorg', bred: true,
       kropp: '<form class="formular" data-form="ny-forfragan" id="nyf-form">' +

@@ -91,7 +91,7 @@
     if (!inst.kopia || IH.dagarSedan(inst.kopia) > 7) ut.push({ ikon: 'ladda-ner', text: inst.kopia ? 'Säkerhetskopian är ' + IH.dagarSedan(inst.kopia) + ' dagar gammal' : 'Ingen säkerhetskopia', under: 'Exportera all data som JSON', g: 'ad-exportera', knapp: 'Exportera' });
     if (dl.brott) ut.push({ ikon: 'nyckelverktyg', text: plural(dl.brott, 'trasig koppling', 'trasiga kopplingar'), under: brott[0], g: 'sh-skanna-ga', data: 'buggar', knapp: 'Kontrollera' });
     if (dr.fel.length) ut.push({ ikon: 'bugg', text: plural(dr.fel.length, 'fel', 'fel') + ' sedan sidan laddades', under: 'Skript eller filer som inte fungerade', g: 'sh-skanna-ga', data: 'buggar', knapp: 'Kontrollera' });
-    IH.ANVANDARE.filter(function (u) { return u.roll === 'salj' && !u.mal && !u.inaktiv; }).forEach(function (u) { ut.push({ ikon: 'mal', text: u.namn + ' saknar årsmål', under: 'Försäljningsledningen räknar mot målet', lank: '#/profil/' + u.id, knapp: 'Profil' }); });
+    IH.ANVANDARE.filter(function (u) { return u.roll === 'salj' && !u.mal && !u.inaktiv; }).forEach(function (u) { ut.push({ ikon: 'mal', text: u.namn + ' saknar årsmål', under: 'Försäljningsledningen räknar mot målet', g: 'lp-mal', knapp: 'Sätt mål' }); });
     d.forfragningar.filter(function (f) { return f.status === 'ny' && !f.tilldelad; }).slice(0, 2).forEach(function (f) { ut.push({ ikon: 'inkorg', text: 'Förfrågan utan ansvarig: ' + f.namn, under: 'Kom ' + IH.sedan(f.skapad), lank: '#/forfragningar/' + f.id, knapp: 'Öppna' }); });
     return ut;
   }

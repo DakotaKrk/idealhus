@@ -316,6 +316,7 @@
     }
     document.removeEventListener('keydown', s.tangent);
     el.classList.add('stanger');
+    setTimeout(function () { if (IH.ritaOm) IH.ritaOm(); }, IH.lugn ? 0 : 540);
     if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function () {});
     setTimeout(function () { el.remove(); }, IH.lugn ? 0 : 520);
     document.documentElement.style.overflow = '';
