@@ -63,12 +63,60 @@ const T = {
     g.strokeStyle = '#2e8b57'; g.lineWidth = 5; g.beginPath(); g.moveTo(80, 440); g.lineTo(100, 462); g.lineTo(140, 418); g.stroke(); g.fillStyle = '#2e8b57'; g.font = '500 28px Poppins, sans-serif'; g.fillText('Tomt OK · väg för kranbil', 160, 452);
     g.strokeStyle = '#1b3f73'; g.lineWidth = 3; g.strokeRect(640, 390, 300, 120); g.beginPath(); g.moveTo(640, 390); g.lineTo(790, 330); g.lineTo(940, 390); g.stroke();
   }),
-  utsikt: () => tex(1024, 512, (g, w, h) => {
-    const l = g.createLinearGradient(0, 0, 0, h); l.addColorStop(0, '#9fc4dc'); l.addColorStop(0.55, '#e5eef0'); l.addColorStop(0.62, '#f5ead8'); l.addColorStop(1, '#a9b886'); g.fillStyle = l; g.fillRect(0, 0, w, h);
-    g.fillStyle = 'rgba(255,255,255,.75)'; [[200, 90, 70], [620, 60, 90], [880, 120, 60]].forEach(([x, y, r]) => { g.beginPath(); g.ellipse(x, y, r, r * 0.35, 0, 0, 7); g.ellipse(x + r * 0.6, y + 6, r * 0.7, r * 0.3, 0, 0, 7); g.fill(); });
-    g.fillStyle = '#b8c3b6'; g.beginPath(); g.moveTo(0, 300); for (let x = 0; x <= w; x += 32) g.lineTo(x, 280 - Math.sin(x / 140) * 30 - Math.sin(x / 50) * 6); g.lineTo(w, h); g.lineTo(0, h); g.fill();
-    for (let k = 0; k < 80; k++) { const x = Math.random() * w, s = 16 + Math.random() * 34, y = 330 + Math.random() * 90; g.fillStyle = `hsl(${105 + Math.random() * 20}, 22%, ${24 + Math.random() * 14}%)`; g.beginPath(); g.moveTo(x, y - s * 2.4); g.lineTo(x + s * 0.6, y); g.lineTo(x - s * 0.6, y); g.fill(); }
-    g.fillStyle = '#2b2622'; g.fillRect(700, 360, 110, 54); g.beginPath(); g.moveTo(690, 362); g.lineTo(755, 318); g.lineTo(820, 362); g.fill(); g.fillStyle = '#ffd18a'; g.fillRect(720, 376, 22, 26); g.fillRect(770, 376, 22, 26);
+  // utsikten: målad i lager med luftperspektiv – himmel med solsken, fjärran berg, åsar med granskog som blir
+  // mörkare och skarpare närmare, en äng i solljus med björkar, en grusväg och ett Legohus med varma fönster
+  utsikt: () => tex(2048, 1024, (g, w, h) => {
+    let fro = 11; const r = () => { fro = (fro * 16807) % 2147483647; return (fro - 1) / 2147483646; };
+    const himmel = g.createLinearGradient(0, 0, 0, h * 0.62); himmel.addColorStop(0, '#7fb1d3'); himmel.addColorStop(0.55, '#bcd7e6'); himmel.addColorStop(1, '#f4e6cf'); g.fillStyle = himmel; g.fillRect(0, 0, w, h);
+    const sol = g.createRadialGradient(w * 0.78, h * 0.18, 10, w * 0.78, h * 0.18, w * 0.42); sol.addColorStop(0, 'rgba(255,246,220,.95)'); sol.addColorStop(0.12, 'rgba(255,236,196,.55)'); sol.addColorStop(1, 'rgba(255,230,190,0)'); g.fillStyle = sol; g.fillRect(0, 0, w, h);
+    // mjuka moln i flera lager
+    const moln = (x, y, sk, a) => { for (let n = 0; n < 9; n++) { const rx = (40 + r() * 70) * sk, ry = rx * 0.42, cx = x + (r() - 0.5) * 180 * sk, cy = y + (r() - 0.5) * 22 * sk; const m = g.createRadialGradient(cx, cy, 2, cx, cy, rx); m.addColorStop(0, `rgba(255,255,255,${a})`); m.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = m; g.beginPath(); g.ellipse(cx, cy, rx, ry, 0, 0, 7); g.fill(); } };
+    moln(380, 150, 1.4, 0.8); moln(1050, 110, 1.1, 0.7); moln(1650, 210, 0.9, 0.6); moln(700, 260, 0.7, 0.5);
+    // en ås av granar som silhuett: taggiga toppar i olika storlek
+    const skog = (bas, hojd, farg, tat, fran = 0, till = w) => {
+      g.fillStyle = farg; g.beginPath(); g.moveTo(fran, h);
+      for (let x = fran; x <= till; x += tat * (0.55 + r() * 0.7)) {
+        const th = hojd * (0.55 + r() * 0.6), y = bas(x), bred = tat * (1.1 + r() * 0.6) * Math.min(1.3, hojd / 70);
+        g.lineTo(x - bred / 2, y); for (let k = 1; k <= 5; k++) { const yy = y - th * k / 5; g.lineTo(x - bred / 2 * (1 - k / 5) - bred * 0.12, yy + th * 0.06); g.lineTo(x - bred / 2 * (1 - k / 5), yy); }
+        g.lineTo(x, y - th - th * 0.08); for (let k = 5; k >= 1; k--) { const yy = y - th * k / 5; g.lineTo(x + bred / 2 * (1 - k / 5), yy); g.lineTo(x + bred / 2 * (1 - k / 5) + bred * 0.12, yy + th * 0.06); } g.lineTo(x + bred / 2, y);
+      }
+      g.lineTo(till, h); g.closePath(); g.fill();
+    };
+    // fjärran berg med snö
+    g.fillStyle = '#b9c9d3'; g.beginPath(); g.moveTo(0, h); for (let x = 0; x <= w; x += 8) g.lineTo(x, h * 0.42 - Math.sin(x / 260) * 40 - Math.sin(x / 90 + 1) * 14 - Math.max(0, 70 - Math.abs(x - 1300) / 3)); g.lineTo(w, h); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); for (let x = 1120; x <= 1480; x += 8) g.lineTo(x, h * 0.42 - Math.sin(x / 260) * 40 - Math.sin(x / 90 + 1) * 14 - Math.max(0, 70 - Math.abs(x - 1300) / 3) + 3); for (let x = 1480; x >= 1120; x -= 8) g.lineTo(x, h * 0.42 + 14 - Math.abs(x - 1300) / 8 - Math.sin(x / 40) * 5); g.fill();
+    const dis = (a) => { g.fillStyle = `rgba(232,236,232,${a})`; g.fillRect(0, 0, w, h); };
+    dis(0.1);
+    skog((x) => h * 0.5 - Math.sin(x / 300) * 22, 46, '#8fa79a', 14);
+    dis(0.07);
+    skog((x) => h * 0.56 - Math.sin(x / 240 + 2) * 26, 70, '#6f8f72', 20);
+    dis(0.06);
+    // ängen i solljus
+    const ang = g.createLinearGradient(0, h * 0.6, 0, h); ang.addColorStop(0, '#b9c58a'); ang.addColorStop(0.5, '#a3b673'); ang.addColorStop(1, '#8aa060'); g.fillStyle = ang; g.beginPath(); g.moveTo(0, h); for (let x = 0; x <= w; x += 16) g.lineTo(x, h * 0.64 - Math.sin(x / 400) * 14); g.lineTo(w, h); g.fill();
+    for (let n = 0; n < 5000; n++) { const x = r() * w, y = h * 0.64 + r() * h * 0.36; g.strokeStyle = r() < 0.5 ? 'rgba(80,100,50,.25)' : 'rgba(230,236,170,.3)'; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (r() - 0.5) * 3, y - 3 - r() * 6 * (y / h)); g.stroke(); }
+    for (let n = 0; n < 260; n++) { g.fillStyle = ['#fff7e8', '#f6d36b', '#e7a3a0', '#c9b4e0'][n % 4]; g.beginPath(); g.arc(r() * w, h * 0.7 + r() * h * 0.3, 1.5 + r() * 2, 0, 7); g.fill(); }
+    // grusvägen fram till huset
+    g.fillStyle = '#d8c7a6'; g.beginPath(); g.moveTo(w * 0.62, h); g.bezierCurveTo(w * 0.66, h * 0.86, w * 0.7, h * 0.76, w * 0.735, h * 0.7); g.lineTo(w * 0.75, h * 0.7); g.bezierCurveTo(w * 0.73, h * 0.78, w * 0.74, h * 0.88, w * 0.8, h); g.fill();
+    // Legohus: svart panel, sadeltak, varma fönster, trädäck och skugga
+    const hx = w * 0.7, hy = h * 0.69, hw = 230, hh = 92;
+    g.fillStyle = 'rgba(40,50,30,.35)'; g.beginPath(); g.ellipse(hx + hw / 2, hy + 6, hw * 0.62, 14, 0, 0, 7); g.fill();
+    g.fillStyle = '#26221f'; g.fillRect(hx, hy - hh, hw, hh);
+    for (let x = hx + 6; x < hx + hw; x += 9) { g.fillStyle = 'rgba(255,240,220,.06)'; g.fillRect(x, hy - hh, 2, hh); }
+    g.fillStyle = '#1b1816'; g.beginPath(); g.moveTo(hx - 16, hy - hh + 2); g.lineTo(hx + hw / 2, hy - hh - 70); g.lineTo(hx + hw + 16, hy - hh + 2); g.fill();
+    g.fillStyle = '#c98a45'; g.fillRect(hx + hw / 2 - 2, hy - hh - 70, 4, 6);
+    [[20, 26, 52, 48], [96, 18, 38, 74], [156, 26, 52, 48]].forEach(([x, y, fw, fh]) => { const fg = g.createLinearGradient(0, hy - hh + y, 0, hy - hh + y + fh); fg.addColorStop(0, '#ffe2a8'); fg.addColorStop(1, '#f2a65a'); g.fillStyle = fg; g.fillRect(hx + x, hy - hh + y, fw, fh); g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(hx + x + fw / 2 - 1, hy - hh + y, 2, fh); });
+    const sken = g.createRadialGradient(hx + hw / 2, hy - hh / 2, 10, hx + hw / 2, hy - hh / 2, 220); sken.addColorStop(0, 'rgba(255,200,120,.25)'); sken.addColorStop(1, 'rgba(255,200,120,0)'); g.fillStyle = sken; g.fillRect(hx - 220, hy - hh - 220, hw + 440, hh + 440);
+    g.fillStyle = '#b98a58'; g.fillRect(hx - 30, hy - 8, hw * 0.7, 10);
+    // närmaste skogsbrynet, mörkt och skarpt, lämnar plats för huset
+    skog((x) => h * 0.69 + Math.sin(x / 180) * 8, 150, '#3f5a3e', 34, 0, w * 0.6);
+    skog((x) => h * 0.7 + Math.sin(x / 180) * 8, 150, '#3f5a3e', 34, w * 0.86, w);
+    // björkar i förgrunden
+    [[w * 0.6, 1.0], [w * 0.92, 1.25], [w * 0.08, 1.15]].forEach(([x, sk]) => {
+      const y = h * 0.86; g.fillStyle = '#efe9df'; g.fillRect(x - 5 * sk, y - 260 * sk, 10 * sk, 260 * sk);
+      for (let k = 0; k < 12; k++) { g.fillStyle = '#2b2622'; g.fillRect(x - 5 * sk + r() * 4, y - r() * 250 * sk, 4 + r() * 5, 2); }
+      for (let k = 0; k < 7; k++) { const ya = y - (250 - k * 22) * sk, xa = x + (k % 2 ? 1 : -1) * (12 + k * 8) * sk; g.strokeStyle = '#5a4a3e'; g.lineWidth = 2 * sk; g.beginPath(); g.moveTo(x, ya + 10 * sk); g.quadraticCurveTo(xa, ya - 6 * sk, xa + (k % 2 ? 8 : -8) * sk, ya + 26 * sk); g.stroke(); }
+      for (let k = 0; k < 150; k++) { const yy = y - 270 * sk + r() * 190 * sk, spread = 22 + (yy - (y - 270 * sk)) * 0.32, xx = x + (r() - 0.5) * 2 * spread * sk; g.fillStyle = `hsla(${70 + r() * 25}, ${40 + r() * 15}%, ${38 + r() * 22}%, .9)`; g.beginPath(); g.ellipse(xx, yy, 4 * sk, 6 * sk, r() * 3, 0, 7); g.fill(); }
+    });
   }),
   skarm: () => tex(512, 320, (g, w, h) => {
     g.fillStyle = '#fbf6ee'; g.fillRect(0, 0, w, h); g.fillStyle = '#1b1915'; g.fillRect(0, 0, 90, h);
@@ -92,7 +140,7 @@ function material() {
   M.svart = mat({ color: '#1b1a19', roughness: 0.5, metalness: 0.2 });
   M.papper = mat({ color: '#fbfaf6', roughness: 0.9 });
   M.gul = mat({ color: '#f2b51e', roughness: 0.35, metalness: 0.05 });
-  M.glas = mat({ color: '#d9ecf2', roughness: 0.02, metalness: 0.1, transparent: true, opacity: 0.18 });
+  M.glas = mat({ color: '#d9ecf2', roughness: 0.02, metalness: 0.1, transparent: true, opacity: 0.07 });
   M.panel = mat({ color: '#2a2521', roughness: 0.8 });
   M.lampa = mat({ color: '#fff3d6', emissive: '#ffd69a', emissiveIntensity: 2.4 });
 }
@@ -104,13 +152,34 @@ function bord() {
   [-2.6, 2.6].forEach((x) => { const t = lada(0.1, 0.06, 2.5, M.stal, 0.02); t.position.set(x, 0.08, 0); g.add(t); });
   return g;
 }
+// kontorsstolen i rummets skala (bordet står i dubbel skala): stoppad sits och rygg med söm, mekanism under sitsen,
+// gaskolv med skydd, femarmat fotkryss som sluttar ner till dubbla hjul som står på golvet, och armstöd
 function stol(farg) {
-  const g = new THREE.Group(), tyg = farg ? mat({ color: farg, roughness: 0.92 }) : M.tyg;
-  const sits = lada(0.62, 0.12, 0.6, tyg, 0.06); sits.position.y = 0.92; g.add(sits);
-  const rygg = lada(0.6, 0.66, 0.1, tyg, 0.06); rygg.position.set(0, 1.36, -0.28); rygg.rotation.x = -0.12; g.add(rygg);
-  const pelare = cyl(0.04, 0.04, 0.6, M.krom); pelare.position.y = 0.58; g.add(pelare);
-  for (let n = 0; n < 5; n++) { const a = n * Math.PI * 2 / 5, ben = lada(0.34, 0.04, 0.06, M.svart, 0.02); ben.position.set(Math.cos(a) * 0.17, 0.12, Math.sin(a) * 0.17); ben.rotation.y = -a; g.add(ben); const hj = cyl(0.04, 0.04, 0.04, M.svart, 12); hj.rotation.z = Math.PI / 2; hj.position.set(Math.cos(a) * 0.33, 0.05, Math.sin(a) * 0.33); g.add(hj); }
-  [-1, 1].forEach((s) => { const arm = lada(0.06, 0.04, 0.4, M.svart, 0.02); arm.position.set(s * 0.32, 1.12, -0.02); g.add(arm); const st = lada(0.04, 0.2, 0.04, M.svart, 0.01); st.position.set(s * 0.32, 1.02, -0.16); g.add(st); });
+  const g = new THREE.Group(), tyg = farg ? mat({ color: farg, roughness: 0.92 }) : M.tyg, plast = mat({ color: '#1e1d1c', roughness: 0.55 }), aluM = mat({ color: '#b9bec2', roughness: 0.3, metalness: 0.9 });
+  const sits = lada(0.96, 0.15, 0.9, tyg, 0.07); sits.position.y = 0.95; g.add(sits);
+  const sitsSkal = lada(0.98, 0.05, 0.92, plast, 0.03); sitsSkal.position.y = 0.865; g.add(sitsSkal);
+  const som = lada(0.9, 0.006, 0.006, mat({ color: '#00000033', roughness: 1 }), 0); som.position.set(0, 1.026, 0.1); g.add(som);
+  const mek = lada(0.36, 0.08, 0.36, plast, 0.02); mek.position.y = 0.8; g.add(mek);
+  const spak = cyl(0.012, 0.012, 0.22, aluM, 8); spak.rotation.z = Math.PI / 2; spak.position.set(0.25, 0.8, 0.08); g.add(spak);
+  const rygg = new THREE.Group(); rygg.position.set(0, 1.05, -0.42); rygg.rotation.x = -0.14; g.add(rygg);
+  const ryggDyna = lada(0.9, 0.92, 0.13, tyg, 0.08); ryggDyna.position.y = 0.55; rygg.add(ryggDyna);
+  const ryggSkal = lada(0.92, 0.94, 0.04, plast, 0.06); ryggSkal.position.set(0, 0.55, -0.07); rygg.add(ryggSkal);
+  const svank = lada(0.7, 0.16, 0.03, tyg, 0.05); svank.position.set(0, 0.32, 0.075); rygg.add(svank);
+  const ryggBage = lada(0.08, 0.32, 0.05, plast, 0.02); ryggBage.position.set(0, 0.06, -0.06); rygg.add(ryggBage);
+  const skydd = cyl(0.09, 0.08, 0.3, plast, 20); skydd.position.y = 0.36; g.add(skydd);
+  const kolv = cyl(0.045, 0.045, 0.32, aluM, 20); kolv.position.y = 0.62; g.add(kolv);
+  const nav = cyl(0.13, 0.15, 0.08, aluM, 24); nav.position.y = 0.2; g.add(nav);
+  for (let n = 0; n < 5; n++) {
+    const a = n * Math.PI * 2 / 5 + 0.3, arm = new THREE.Group(); arm.rotation.y = -a; g.add(arm);
+    const ben = lada(0.52, 0.06, 0.09, aluM, 0.025); ben.position.set(0.36, 0.17, 0); ben.rotation.z = -0.1; arm.add(ben);
+    const gaffel = lada(0.06, 0.09, 0.07, plast, 0.02); gaffel.position.set(0.6, 0.12, 0); arm.add(gaffel);
+    [-0.035, 0.035].forEach((z) => { const hjul = cyl(0.065, 0.065, 0.035, plast, 20); hjul.rotation.x = Math.PI / 2; hjul.position.set(0.62, 0.065, z); arm.add(hjul); });
+  }
+  [-1, 1].forEach((sd) => {
+    const stod = lada(0.06, 0.32, 0.08, plast, 0.02); stod.position.set(sd * 0.47, 1.06, -0.12); g.add(stod);
+    const ovan = lada(0.11, 0.05, 0.42, plast, 0.025); ovan.position.set(sd * 0.47, 1.24, -0.04); g.add(ovan);
+  });
+  g.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   return g;
 }
 function husModell() {
@@ -210,9 +279,9 @@ function bygg() {
   kskugga(0, 0.015, 0, 7.4, 4.2); kskugga(-3.6, 0.012, -3.7, 3, 1); kskugga(-5.2, 0.012, 2.6, 0.9, 0.9); kskugga(5.6, 0.012, -3.5, 1.1, 1.1);
   // bordet och stolarna
   const b = bord(); scen.add(b);
-  const stolar = [], STOLPOS = [[-2.2, 2.2, 0.05], [-0.75, 2.25, 0], [0.75, 2.25, 0], [2.2, 2.2, -0.05], [3.6, 0.6, -1.35], [-3.6, 0.6, 1.35]];
-  STOLPOS.forEach(([x, z, r], n) => { const s = stol(n % 2 ? null : '#4a423b'); s.position.set(x, 0, z); s.rotation.y = Math.PI + r; scen.add(s); stolar.push(s); kskugga(x, 0.014, z, 1, 1); });
-  [[-1.5, -2.2], [0, -2.25], [1.5, -2.2]].forEach(([x, z]) => { const s = stol('#4a423b'); s.position.set(x, 0, z); s.rotation.y = 0.04; scen.add(s); });
+  const stolar = [], STOLPOS = [[-2.2, 2.2, 0.05], [-0.75, 2.25, 0], [0.75, 2.25, 0], [2.2, 2.2, -0.05], [4.0, 0.5, 0], [-4.0, 0.5, 0]];
+  STOLPOS.forEach(([x, z, r], n) => { const s = stol(n % 2 ? null : '#4a423b'); s.position.set(x, 0, z); s.rotation.y = Math.atan2(-x * (Math.abs(x) > 3 ? 1 : 0.25), -z) + r; scen.add(s); stolar.push(s); kskugga(x, 0.014, z, 1, 1); });
+  [[-1.5, -2.2], [0, -2.25], [1.5, -2.2]].forEach(([x, z]) => { const s = stol('#4a423b'); s.position.set(x, 0, z); s.rotation.y = Math.atan2(-x * 0.25, -z); scen.add(s); });
 
   // på bordet
   const Y = 1.575;
@@ -282,7 +351,7 @@ function bygg() {
   const molnPlan = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 1.6), new THREE.MeshBasicMaterial({ map: molnT, transparent: true, depthWrite: false, toneMapped: false })); molnPlan.position.set(2.4, 3.75, -4.165); scen.add(molnPlan);
   const fagelM = new THREE.MeshBasicMaterial({ color: '#3b3a3c', side: THREE.DoubleSide }), faglar = [];
   for (let n = 0; n < 4; n++) { const f = new THREE.Group(); [-1, 1].forEach((sd) => { const v = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.025), fagelM); v.geometry.translate(0.045 * sd, 0, 0); f.add(v); }); f.position.z = -4.16; scen.add(f); faglar.push({ f, fas: n * 0.7, y: 3.6 + (n % 2) * 0.25 }); }
-  const granar = []; [[-0.6, 0.55], [0.15, 0.7], [1.6, 0.5], [3.3, 0.62], [4.9, 0.58], [5.5, 0.48]].forEach(([x, s2]) => { const gr = new THREE.Group(); gr.position.set(x, 1.6, -4.5); scen.add(gr); [[0.42, 0.9, 0.45], [0.32, 0.7, 0.95], [0.2, 0.5, 1.35]].forEach(([r, h, y]) => { const k = new THREE.Mesh(new THREE.ConeGeometry(r * s2, h * s2, 10), mat({ color: '#4f6b48', roughness: 0.9 })); k.position.y = y * s2; gr.add(k); }); granar.push(gr); });
+  const granar = [];
   // laptopens staplar växer och krymper som om kalkylen räknas om
   const lapStaplar = []; for (let n = 0; n < 5; n++) { const st = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.2), new THREE.MeshBasicMaterial({ color: n === 3 ? '#e29a4a' : '#f2d4ab', toneMapped: false })); st.geometry.translate(0, 0.1, 0); st.position.set(-0.13 + n * 0.08, 0.08, 0.014); lock.add(st); lapStaplar.push(st); }
 
