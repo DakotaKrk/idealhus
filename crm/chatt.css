@@ -428,3 +428,21 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { box-shadow: 0 8px 18px -1
 .ch-vaxel { padding: 8px 10px; border-radius: 14px; background: rgba(255, 255, 255, .6); }
 .ch-vaxel__ikon { width: 30px; height: 30px; }
 .ch-tipskort { padding: 10px 12px; }
+
+/* Chattbubblan, mjukare: tunn kant i stället för den tjocka ringen, en mjuk glöd som andas och olästa meddelanden
+   som sprids i två lugna vågor; siffran studsar in */
+.chf-ikon { box-shadow: 0 12px 26px -12px rgba(143, 84, 36, .6), inset 0 0 0 1px rgba(201, 138, 69, .45), 0 0 0 1px rgba(255, 255, 255, .9); }
+.chf-ikon[data-i-docka] { box-shadow: 0 10px 22px -12px rgba(143, 84, 36, .6), inset 0 0 0 1px rgba(201, 138, 69, .45); }
+.chf-ikon[data-puls]::after { inset: 0; box-shadow: none; border-radius: 50%; animation: chf-vag 2.8s cubic-bezier(.2, .7, .3, 1) infinite; transform: none; opacity: 1; }
+@keyframes chf-vag {
+  0% { box-shadow: 0 0 0 0 rgba(226, 154, 74, .42), 0 0 0 0 rgba(226, 154, 74, .28); }
+  70% { box-shadow: 0 0 0 11px rgba(226, 154, 74, 0), 0 0 0 20px rgba(226, 154, 74, 0); }
+  100% { box-shadow: 0 0 0 11px rgba(226, 154, 74, 0), 0 0 0 20px rgba(226, 154, 74, 0); }
+}
+.chf-ikon[data-puls] { background: radial-gradient(circle at 35% 30%, #fff, #fff4e4 60%, #fde6c6); animation: chf-in .35s var(--mjuk) both, chf-andas 2.8s ease-in-out .4s infinite; }
+@keyframes chf-andas { 50% { box-shadow: 0 14px 30px -12px rgba(226, 154, 74, .75), inset 0 0 0 1px rgba(226, 154, 74, .7), 0 0 18px rgba(255, 190, 110, .45); } }
+.chf-ikon[data-puls] .emo-ik { animation: chf-vicka 2.8s ease-in-out infinite; }
+@keyframes chf-vicka { 0%, 70%, 100% { transform: none; } 78% { transform: rotate(-10deg); } 86% { transform: rotate(8deg); } 93% { transform: rotate(-4deg); } }
+.chf-ikon .ch-olast { min-width: 20px; height: 20px; font-size: .66rem; box-shadow: 0 0 0 2px #fff, 0 4px 10px -4px rgba(143, 84, 36, .7); animation: chf-siffra .5s cubic-bezier(.34, 1.56, .64, 1) both; }
+@keyframes chf-siffra { from { transform: scale(0); } }
+@media (prefers-reduced-motion: reduce) { .chf-ikon[data-puls], .chf-ikon[data-puls] .emo-ik, .chf-ikon .ch-olast { animation: none; } }
