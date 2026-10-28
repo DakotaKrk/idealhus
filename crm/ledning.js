@@ -318,9 +318,9 @@
       ruta('kalender', 'I teamet', '<strong>' + tidTxt + '</strong><em>' + (u.start ? 'sedan ' + new Date(u.start).toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' }) : (kanAndra ? '<button type="button" class="lp-textknapp" data-g="lp-andra-profil" data-id="' + u.id + '">Ange startdatum</button>' : 'inget startdatum')) + '</em>') +
       (u.roll === 'salj' ? ruta('mal', 'Årsmål ' + new Date().getFullYear(), u.mal ? '<strong>' + IH.kort(st.vunnet) + ' <span>av ' + IH.kort(u.mal) + '</span></strong><span class="lp-om-matare" style="--a:' + andel.toFixed(3) + '"><i></i></span><em>' + Math.round(andel * 100) + ' % av målet' + (IH.jag().chef ? ' · <button type="button" class="lp-textknapp" data-g="lp-mal">Ändra</button>' : '') + '</em>' : '<strong>Inget satt</strong>' + (IH.jag().chef ? '<em><button type="button" class="lp-textknapp" data-g="lp-mal">Sätt mål</button></em>' : '')) :
         ruta('blixt', 'Senast aktiv', '<strong>' + e(senastFor(u).text) + '</strong><em>' + e(narvaro(u.id).namn) + '</em>')) +
-      ruta('sol', 'Frånvaro', nasta ? '<strong>' + e(FRANVARO[nasta.typ][0]) + '</strong><em>' + kortDatum(new Date(nasta.fran)) + (nasta.till !== nasta.fran ? '–' + kortDatum(new Date(nasta.till)) : '') + (ar || IH.jag().chef ? ' · <button type="button" class="lp-textknapp" data-g="lp-franvaro" data-fid="' + nasta.id + '" data-uid="' + u.id + '" data-dag="' + nasta.fran.slice(0, 10) + '">Ändra</button>' : '') + '</em>' : '<strong>Inget inlagt</strong>' + (ar || IH.jag().chef ? '<em><button type="button" class="lp-textknapp" data-g="lp-franvaro" data-uid="' + u.id + '">Lägg in ledighet</button></em>' : ''));
-    var senaste = db().aktiviteter.filter(function (h) { return h.av === u.id; }).sort(function (a, c) { return new Date(c.tid) - new Date(a.tid); }).slice(0, 4);
-    return '<section class="kort lp-band2 lp-omkort" data-in><header class="lp-band2__huvud"><div><p class="ao-ogon">Om</p><h2>Om <em>' + (ar ? 'dig' : e(fornamn)) + '</em></h2></div>' +
+      ruta('flyg', 'Arbetsdagar', '<span class="lp-vdagar">' + ['M', 'T', 'O', 'T', 'F', 'L', 'S'].map(function (d, k) { return '<i' + (k < 5 ? ' class="pa"' : '') + '>' + d + '</i>'; }).join('') + '</span>' + (nasta ? '<em><b class="lp-fvchip">' + e(FRANVARO[nasta.typ][0]) + '</b> ' + kortDatum(new Date(nasta.fran)) + (nasta.till !== nasta.fran ? '–' + kortDatum(new Date(nasta.till)) : '') + (ar || IH.jag().chef ? ' · <button type="button" class="lp-textknapp" data-g="lp-franvaro" data-fid="' + nasta.id + '" data-uid="' + u.id + '" data-dag="' + nasta.fran.slice(0, 10) + '">Ändra</button>' : '') + '</em>' : '<em>Ingen frånvaro inlagd' + (ar || IH.jag().chef ? ' · <button type="button" class="lp-textknapp" data-g="lp-franvaro" data-uid="' + u.id + '">Lägg in</button>' : '') + '</em>'));
+    var senaste = db().aktiviteter.filter(function (h) { return h.av === u.id; }).sort(function (a, c) { return new Date(c.tid) - new Date(a.tid); }).slice(0, 7);
+    return '<section class="kort kort--mork lp-band2 lp-mk lp-omkort" data-in><header class="lp-band2__huvud"><div><p class="ao-ogon">Om</p><h2>Om <em>' + (ar ? 'dig' : e(fornamn)) + '</em></h2></div>' +
         (kanAndra ? '<button type="button" class="knapp knapp--liten" data-g="lp-andra-profil" data-id="' + u.id + '">' + i('skriv') + 'Ändra</button>' : '') + '</header>' +
       (u.om ? '<blockquote class="lp-om-citat"><span aria-hidden="true">”</span>' + e(u.om) + '</blockquote>' : ar ? '<button type="button" class="lp-om-skriv" data-g="lp-andra-profil" data-id="' + u.id + '" data-fokus="om">' + i('skriv') + '<span><strong>Berätta om dig</strong><small>Några rader om vad du jobbar med och hur man når dig bäst – syns för hela teamet.</small></span>' + i('pil') + '</button>' : '<p class="lp-om-ingen">' + e(fornamn) + ' har inte skrivit någon presentation än.</p>') +
       (kontakt ? '<div class="lp-om-kontakt">' + kontakt + '</div>' : '') +
@@ -330,7 +330,9 @@
         var k = h.kund && IH.kund(h.kund);
         return '<li><span class="lp-senaste__ikon" data-typ="' + (h.typ || 'notis') + '">' + i(AKT_IKON[h.typ] || 'anteckning') + '</span><span><strong>' + e(String(h.text).slice(0, 96)) + (String(h.text).length > 96 ? '…' : '') + '</strong><small>' + e((AKT_NAMN[h.typ] || 'Aktivitet') + (k ? ' · ' + k.namn : '') + ' · ' + IH.sedan(h.tid)) + '</small></span>' +
           (k ? '<a class="lp-om-mini" href="#/kunder/' + k.id + '" aria-label="Öppna kunden">' + i('pil') + '</a>' : '') + '</li>';
-      }).join('') + '</ul>' : '<p class="lp-tom">Inget i tidslinjerna ännu.</p>') + '</section>';
+      }).join('') + '</ul>' : '<p class="lp-tom">Inget i tidslinjerna ännu.</p>') +
+      '<div class="lp-genvagar"><p class="lp-del">Genvägar</p><div>' + [['#/salj', 'tavla', 'Säljtavlan', plural(st.oppna.length, 'affär', 'affärer')], ['#/kunder', 'kunder', 'Kunder', plural(db().kunder.length, 'kund', 'kunder')], ['#/att-gora', 'uppgift', 'Att göra', st.uppg.length + ' öppna'], ['#/dokument', 'mapp', 'Dokument', 'alla filer']].map(function (g, n) {
+        return '<a href="' + g[0] + '" style="--n:' + n + '"><span class="lp-om-ikon">' + i(g[1]) + '</span><b>' + g[2] + '</b><small>' + g[3] + '</small></a>'; }).join('') + '</div></div></section>';
   }
   // Arbetskortet: tre tal, staplarna 30 dagar med fördelning per typ, de största öppna affärerna och att göra
   function arbeteKort(u, ar, st) {
@@ -345,7 +347,7 @@
     var idag0 = dag0(new Date()).getTime();
     var datumChip = function (x) { var d = dag0(x.forfaller).getTime(), n = Math.round((d - idag0) / 864e5); return '<span class="lp-arb-datum" data-lage="' + (n < 0 ? 'sen' : n === 0 ? 'idag' : 'snart') + '">' + (n < 0 ? plural(-n, 'dag', 'dagar') + ' sen' : n === 0 ? 'I dag' : n === 1 ? 'I morgon' : kortDatum(new Date(x.forfaller))) + '</span>'; };
     var uppg = st.uppg.slice().sort(function (a, c) { return a.forfaller < c.forfaller ? -1 : 1; });
-    return '<section class="kort lp-band2 lp-arbkort" data-in><header class="lp-band2__huvud"><div><p class="ao-ogon">Arbete</p><h2>Aktivitet <em>och arbete</em></h2></div><span class="lp-h2-chip">Senaste 30 dagarna</span></header>' +
+    return '<section class="kort kort--mork lp-band2 lp-mk lp-arbkort" data-in><header class="lp-band2__huvud"><div><p class="ao-ogon">Arbete</p><h2>Aktivitet <em>och arbete</em></h2></div><span class="lp-h2-chip">Senaste 30 dagarna</span></header>' +
       '<div class="lp-arb-trio">' +
         tal('stapel', 'Händelser', nu30, diff ? (diff > 0 ? '+' : '−') + Math.abs(diff) + ' mot förra 30 d' : 'som förra 30 d', diff > 0 ? 'bra' : diff < 0 ? 'gul' : '') +
         (u.roll === 'salj' ? tal('portfolj', 'Öppna affärer', st.oppna.length, IH.kort(st.oppet) + ' i pipeline') : tal('byggnad', 'Pågående projekt', proj.length, proj.length ? 'i produktion' : 'inga just nu')) +
@@ -368,13 +370,103 @@
         }).join('') + '</ul>' + (uppg.length > 5 ? '<a class="lp-textlank" href="#/att-gora">+' + (uppg.length - 5) + ' till · visa alla</a>' : '') : '<p class="lp-tom">' + IH.emo('klar') + 'Inga öppna uppgifter.</p>') +
       '</section>';
   }
-  // Kalendern på profilen: samma kalender som försäljningsledningen, bara för den här personen
-  function profilKalender(u, ar) {
-    var forra = chefUi.kalVem; chefUi.kalVem = 'alla';
-    var inne = kalender([{ u: u }]);
-    chefUi.kalVem = forra;
-    return chefBand('Kalender', ar ? 'Min' : e(u.namn.split(' ')[0]) + 's', 'kalender', inne, { klass: 'lp-pkal', ingress: ar ? 'Möten, samtal, uppgifter och vunna affärer. Klicka på en dag för att lägga till.' : 'Det ' + e(u.namn.split(' ')[0]) + ' har inbokat och har gjort.' });
+  // Kalendern på profilen (som Uperformance): månad med veckonummer eller hela året, dagens panel med det som är inbokat,
+  // ledighet och sjukanmälan. Allt räknas ur datan för den här personen.
+  var pk = { man: 0, vy: 'man', dag: null };
+  var PK_TYP = { mote: ['Möte', '#a98be0'], samtal: ['Samtal', '#6aa9e8'], mejl: ['Mejl', '#7fc6c9'], besok: ['Besök', '#8fcf9a'], notis: ['Anteckning', '#c9b48f'], system: ['Aktivitet', '#7fd1b0'], uppg: ['Uppgift', '#e8c25a'], sen: ['Försenad', '#e8806a'], vunnen: ['Vunnen', '#f6c68d'] };
+  function pkHandelser(u) {
+    var idag = dag0(new Date()).getTime(), ut = [];
+    db().aktiviteter.forEach(function (h) { if (h.av === u.id) ut.push({ id: h.id, dag: dag0(h.tid).getTime(), tid: h.tid, typ: PK_TYP[h.typ] ? h.typ : 'system', text: h.text, kund: h.kund, akt: true }); });
+    db().uppgifter.forEach(function (x) { if (!x.klar && x.ansvarig === u.id) { var d = dag0(x.forfaller).getTime(); ut.push({ id: x.id, dag: d, tid: x.forfaller, typ: d < idag ? 'sen' : 'uppg', text: x.text, kund: x.kund, uppg: true }); } });
+    db().affarer.forEach(function (x) { if (x.steg === 'vunnen' && x.vunnen && x.ansvarig === u.id) ut.push({ id: x.id, dag: dag0(x.vunnen).getTime(), tid: x.vunnen, typ: 'vunnen', text: 'Vunnen: ' + x.titel, kund: x.kund, affar: x.id }); });
+    return ut.sort(function (x, y) { return x.tid < y.tid ? -1 : 1; });
   }
+  function pkLedig(u, t) { return franvaroLista().find(function (f) { return f.u === u.id && t >= dag0(f.fran).getTime() && t <= dag0(f.till).getTime(); }); }
+  function profilKalender(u, ar) {
+    var nu = new Date(), idag = dag0(nu).getTime(), alla = pkHandelser(u), kanLeda = ar || IH.jag().chef;
+    var valdT = pk.dag ? dag0(new Date(pk.dag + 'T12:00:00')).getTime() : idag;
+    var forsta = new Date(nu.getFullYear(), nu.getMonth() + pk.man, 1), man = forsta.getMonth();
+    var rubrik = pk.vy === 'ar' ? String(forsta.getFullYear()) : forsta.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' });
+    var huvud = '<div class="pk-huvud"><div class="pk-nav"><button type="button" data-g="pk-man" data-d="-1" aria-label="Föregående">' + i('pilv') + '</button><b>' + e(rubrik.charAt(0).toUpperCase() + rubrik.slice(1)) + '</b><button type="button" data-g="pk-man" data-d="1" aria-label="Nästa">' + i('pil') + '</button></div>' +
+      (pk.man || pk.dag ? '<button type="button" class="pk-piller" data-g="pk-man" data-d="0">I dag</button>' : '') +
+      '<span class="pk-hoger"><span class="pk-seg" role="group" aria-label="Vy"><button type="button" data-g="pk-vy" data-f="man" aria-pressed="' + (pk.vy === 'man') + '">Månad</button><button type="button" data-g="pk-vy" data-f="ar" aria-pressed="' + (pk.vy === 'ar') + '">År</button></span>' +
+      '<button type="button" class="pk-piller" data-g="pk-ics" data-id="' + u.id + '">' + i('kalender') + 'Kalenderfil</button></span></div>';
+    var yta;
+    if (pk.vy === 'ar') {
+      yta = '<div class="pk-ar">' + Array.from({ length: 12 }, function (_, m) {
+        var f1 = new Date(forsta.getFullYear(), m, 1), st0 = new Date(f1), celler = '', antal = 0; st0.setDate(1 - ((f1.getDay() + 6) % 7));
+        for (var n = 0; n < 42; n++) { var d = new Date(st0); d.setDate(st0.getDate() + n); var t = d.getTime(), c = alla.filter(function (x) { return x.dag === t; }).length, led = pkLedig(u, t); if (d.getMonth() === m) antal += c;
+          celler += '<i class="' + (d.getMonth() !== m ? 'ut' : '') + (t === idag ? ' idag' : '') + (led ? ' ledig' : '') + (c && d.getMonth() === m ? ' pa' : '') + '" style="--v:' + Math.min(1, c / 3).toFixed(2) + '" title="' + (d.getMonth() === m ? e(kortDatum(d)) + ': ' + plural(c, 'händelse', 'händelser') : '') + '"></i>'; }
+        var mn = f1.toLocaleDateString('sv-SE', { month: 'long' });
+        return '<button type="button" class="pk-arman' + (m === nu.getMonth() && f1.getFullYear() === nu.getFullYear() ? ' nu' : '') + '" data-g="pk-ga-man" data-m="' + m + '" data-y="' + f1.getFullYear() + '"><span><b>' + e(mn.charAt(0).toUpperCase() + mn.slice(1)) + '</b><small>' + antal + '</small></span><span class="pk-arman__rutor">' + celler + '</span></button>';
+      }).join('') + '</div>';
+    } else {
+      var start = new Date(forsta); start.setDate(1 - ((forsta.getDay() + 6) % 7));
+      var rader = '';
+      for (var v = 0; v < Math.ceil(((forsta.getDay() + 6) % 7 + new Date(forsta.getFullYear(), man + 1, 0).getDate()) / 7); v++) {
+        var m0 = new Date(start); m0.setDate(start.getDate() + v * 7);
+        rader += '<span class="pk-v">' + veckonr(m0) + '</span>';
+        for (var dd = 0; dd < 7; dd++) {
+          var d = new Date(m0); d.setDate(m0.getDate() + dd); var t = d.getTime(), h = alla.filter(function (x) { return x.dag === t; }), led = pkLedig(u, t), jobb = h.some(function (x) { return x.akt; });
+          rader += '<button type="button" class="pk-dag' + (d.getMonth() !== man ? ' ut' : '') + (t === idag ? ' idag' : '') + (t === valdT ? ' vald' : '') + (d.getDay() % 6 === 0 ? ' helg' : '') + (t < idag ? ' forbi' : '') + '" data-g="pk-dag" data-dag="' + dagISO(d) + '" style="--n:' + (v * 7 + dd) + '">' +
+            '<span class="pk-dag__topp"><b>' + d.getDate() + '</b>' + (jobb ? '<i class="pk-jobb" title="Jobbade"></i>' : '') + '</span>' +
+            (led ? '<span class="pk-led f-' + led.typ + '">' + e(FRANVARO[led.typ][0]) + '</span>' : '') +
+            h.slice(0, led ? 1 : 2).map(function (x) { var k = x.kund && IH.kund(x.kund); return '<span class="pk-h" style="--k:' + PK_TYP[x.typ][1] + '">' + e(PK_TYP[x.typ][0]) + (k ? ' · ' + e(k.namn) : '') + '</span>'; }).join('') +
+            (h.length > (led ? 1 : 2) ? '<small class="pk-fler">+' + (h.length - (led ? 1 : 2)) + '</small>' : '') + '</button>';
+        }
+      }
+      yta = '<div class="pk-rutnat"><span class="pk-v pk-v--rubrik">V</span>' + ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map(function (x) { return '<span class="pk-vd">' + x + '</span>'; }).join('') + rader + '</div>';
+    }
+    // dagens panel
+    var vd = new Date(valdT), hd = alla.filter(function (x) { return x.dag === valdT; }), ledV = pkLedig(u, valdT);
+    var dtxt = vd.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' });
+    var panel = '<aside class="pk-panel"><h3>' + (valdT === idag ? 'I dag, ' : '') + e(valdT === idag ? dtxt : dtxt.charAt(0).toUpperCase() + dtxt.slice(1)) + '</h3>' +
+      (ledV ? '<div class="pk-panel__led f-' + ledV.typ + '">' + IH.emo(FRANVARO[ledV.typ][1]) + '<span><b>' + e(FRANVARO[ledV.typ][0]) + '</b><small>' + kortDatum(new Date(ledV.fran)) + (ledV.till !== ledV.fran ? '–' + kortDatum(new Date(ledV.till)) : '') + '</small></span>' + (kanLeda ? '<button type="button" class="pk-mini" data-g="lp-franvaro" data-fid="' + ledV.id + '" data-uid="' + u.id + '" aria-label="Ändra frånvaron">' + i('skriv') + '</button>' : '') + '</div>' : '') +
+      (hd.length ? '<ul class="pk-lista">' + hd.map(function (x, n) {
+        var k = x.kund && IH.kund(x.kund), tid = new Date(x.tid), kl = x.akt ? tid.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }) : '';
+        return '<li style="--k:' + PK_TYP[x.typ][1] + ';--n:' + n + '"><span class="pk-lista__typ">' + e(PK_TYP[x.typ][0]) + (kl ? ' · ' + kl : '') + '</span><b>' + e(x.text) + '</b>' + (k ? '<a href="#/kunder/' + k.id + '">' + e(k.namn) + i('pil') + '</a>' : '') + '</li>';
+      }).join('') + '</ul>' : '<p class="pk-tom">' + i('kalender') + 'Inget inbokat den här dagen.</p>') +
+      (kanLeda ? '<button type="button" class="pk-lagg" data-g="pk-ny" data-dag="' + dagISO(vd) + '" data-id="' + u.id + '">' + i('plus') + 'Lägg till den här dagen</button>' : '') +
+      '<div class="pk-panel__fot">' + (kanLeda ? '<button type="button" class="pk-knapp pk-knapp--accent" data-g="lp-franvaro" data-uid="' + u.id + '" data-dag="' + dagISO(vd) + '">' + IH.emo('flyg') + 'Ansök om ledighet</button>' +
+        (pkLedig(u, idag) ? '' : '<button type="button" class="pk-knapp" data-g="pk-sjuk" data-id="' + u.id + '">' + IH.emo('termometer') + (ar ? 'Sjukanmäl i dag' : 'Sjukanmäl ' + e(u.namn.split(' ')[0]) + ' i dag') + '</button>') : '') + '</div></aside>';
+    var forkl = '<p class="pk-forkl">' + ['mote', 'samtal', 'mejl', 'besok', 'system', 'uppg', 'sen', 'vunnen'].map(function (k) { return '<span style="--k:' + PK_TYP[k][1] + '"><i></i>' + PK_TYP[k][0] + '</span>'; }).join('') + '<span class="pk-forkl__led"><i></i>Frånvaro</span><span class="pk-forkl__jobb"><i></i>Jobbade</span></p>';
+    return '<section class="pk kort kort--mork" data-in><header class="pk-titel"><div><p class="etikett">Kalender</p><h2>' + (ar ? 'Min' : e(u.namn.split(' ')[0]) + 's') + ' <em>kalender</em></h2></div>' +
+      '<p>' + plural(alla.filter(function (x) { return x.dag >= idag && x.dag < idag + 7 * 864e5; }).length, 'händelse', 'händelser') + ' kommande 7 dagar · ' + plural(alla.filter(function (x) { return x.typ === 'sen'; }).length, 'försenad', 'försenade') + '</p></header>' +
+      '<div class="pk-kropp"><div class="pk-vanster">' + huvud + yta + forkl + '</div>' + panel + '</div></section>';
+  }
+  IH.G['pk-man'] = function (el) { var d = +el.getAttribute('data-d'); if (!d) { pk.man = 0; pk.dag = null; } else pk.man += pk.vy === 'ar' ? d * 12 : d; IH.rita(); };
+  IH.G['pk-vy'] = function (el) { pk.vy = el.getAttribute('data-f'); IH.rita(); };
+  IH.G['pk-ga-man'] = function (el) { var nu = new Date(); pk.man = (+el.getAttribute('data-y') - nu.getFullYear()) * 12 + (+el.getAttribute('data-m') - nu.getMonth()); pk.vy = 'man'; IH.rita(); };
+  IH.G['pk-dag'] = function (el) {
+    pk.dag = el.getAttribute('data-dag');
+    var y = window.scrollY; IH.rita(); window.scrollTo(0, y);
+  };
+  IH.G['pk-ny'] = function (el) {
+    var u = IH.anvandare(el.getAttribute('data-id')); if (!u) return;
+    IH.oppnaArk({ titel: 'Lägg till i kalendern', ikon: 'kalender', under: 'Möten och samtal loggas på ' + e(u.namn.split(' ')[0]) + ', uppgifter hamnar under Att göra.', kropp: kalForm(el.getAttribute('data-dag'), [{ u: u }]),
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="lp-kal-form">' + i('plus') + 'Lägg till</button>' });
+  };
+  IH.G['pk-sjuk'] = function (el) {
+    var u = IH.anvandare(el.getAttribute('data-id')); if (!u) return;
+    var d = dag0(new Date()); if (pkLedig(u, d.getTime())) return;
+    franvaroLista().push({ id: 'fv' + Date.now().toString(36), u: u.id, typ: 'sjuk', fran: d.toISOString(), till: d.toISOString() });
+    IH.spara(); IH.rita();
+    IH.toast(u.id === IH.jag().id ? 'Du är sjukanmäld i dag' : u.namn + ' är sjukanmäld i dag', 'Krya på dig! Syns i Vem jobbar när.', 'termometer');
+  };
+  IH.G['pk-ics'] = function (el) {
+    var u = IH.anvandare(el.getAttribute('data-id')); if (!u) return;
+    var nu = new Date(), fran = pk.vy === 'ar' ? new Date(nu.getFullYear() + Math.floor((nu.getMonth() + pk.man) / 12), 0, 1) : new Date(nu.getFullYear(), nu.getMonth() + pk.man, 1);
+    var till = pk.vy === 'ar' ? new Date(fran.getFullYear() + 1, 0, 1) : new Date(fran.getFullYear(), fran.getMonth() + 1, 1);
+    var h = pkHandelser(u).filter(function (x) { return x.dag >= fran.getTime() && x.dag < till.getTime(); });
+    var p2 = function (v) { return String(v).padStart(2, '0'); }, f = function (d) { return d.getUTCFullYear() + p2(d.getUTCMonth() + 1) + p2(d.getUTCDate()) + 'T' + p2(d.getUTCHours()) + p2(d.getUTCMinutes()) + '00Z'; };
+    var esc = function (t) { return String(t || '').replace(/[\\;,]/g, function (c) { return '\\' + c; }).replace(/\n/g, ' '); };
+    var rader = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Legohus//CRM//SV'];
+    h.forEach(function (x) { var s2 = new Date(x.tid), k = x.kund && IH.kund(x.kund); rader.push('BEGIN:VEVENT', 'UID:' + x.id + '@legohus-crm', 'DTSTAMP:' + f(new Date()), 'DTSTART:' + f(s2), 'DTEND:' + f(new Date(s2.getTime() + 36e5)), 'SUMMARY:' + esc(PK_TYP[x.typ][0] + ': ' + x.text), 'DESCRIPTION:' + esc(k ? k.namn : ''), 'END:VEVENT'); });
+    rader.push('END:VCALENDAR');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rader.join('\r\n')], { type: 'text/calendar' }));
+    a.download = 'kalender-' + u.namn.split(' ')[0].toLowerCase() + '-' + (pk.vy === 'ar' ? fran.getFullYear() : fran.toISOString().slice(0, 7)) + '.ics'; document.body.appendChild(a); a.click(); a.remove();
+    IH.toast('Kalenderfilen är klar', plural(h.length, 'händelse', 'händelser') + ' – öppna filen i din kalender.', 'kalender');
+  };
 
   /* 05 Försäljningsledningen #/chef – samma upplägg som Uperformance visaChef: hjälten med verktygen och fyra tal, sedan
      01 Teamet just nu (filter), 02 Vem jobbar när, 03 Teamets kalender, 04 Att agera på (fördela, påminn), 05 Pipeline per
