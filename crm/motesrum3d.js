@@ -305,7 +305,6 @@ function bygg() {
   const kavaj = new THREE.Mesh(new THREE.LatheGeometry(profil([[0.158, -0.06], [0.162, 0.12], [0.183, 0.3], [0.2, 0.44], [0.185, 0.53], [0.09, 0.585]]), 40, Math.PI * 0.12, Math.PI * 1.76), kavajM);
   kavaj.scale.z = 0.66; kavaj.castShadow = true; kropp.add(kavaj);
   const slag = [-1, 1].map((sd) => { const l = new THREE.Mesh(new THREE.PlaneGeometry(0.07, 0.24), mat({ color: '#28323f', roughness: 0.7, side: THREE.DoubleSide })); l.position.set(sd * 0.055, 0.4, 0.118); l.rotation.set(-0.15, 0, sd * 0.32); kropp.add(l); return l; });
-  void slag;
   const slips = new THREE.Mesh(new THREE.PlaneGeometry(0.035, 0.26), mat({ color: '#c98a45', roughness: 0.5, side: THREE.DoubleSide })); slips.position.set(0, 0.38, 0.105); slips.rotation.x = -0.12; kropp.add(slips);
   const knut = lada(0.04, 0.035, 0.02, mat({ color: '#b5783a' }), 0.008); knut.position.set(0, 0.52, 0.09); kropp.add(knut);
   const balte = cyl(0.157, 0.157, 0.04, mat({ color: '#2a1e16', roughness: 0.5 }), 32); balte.scale.z = 0.64; balte.position.y = 0.0; kropp.add(balte);
@@ -359,6 +358,14 @@ function bygg() {
   const golvSkugga = new THREE.Mesh(new THREE.CircleGeometry(0.42, 32), new THREE.MeshBasicMaterial({ color: '#000', transparent: true, opacity: 0.18, depthWrite: false })); golvSkugga.rotation.x = -Math.PI / 2; golvSkugga.position.y = 0.012; ark.add(golvSkugga);
   void ben;
   const arkBen = ben;
+  // Arkitekten som en ren skalfigur, som i arkitektens egna modeller: en matt, mjuk form utan ansikte och små detaljer
+  // – det ser avsiktligt och elegant ut i stället för en halvverklig docka
+  const figurM = new THREE.MeshStandardMaterial({ color: '#efe5d8', roughness: 0.55, metalness: 0 });
+  huvud.children.forEach((o) => { o.visible = o === skalle || o === kak; });
+  [slips, knut, ficka, fpenna, bricka, brickaLogga, ur, kavaj, krage, balte, spanne].concat(slag).forEach((o) => { o.visible = false; });
+  ark.traverse((o) => { if (o.isMesh && o !== golvSkugga && o !== arkRulle) { o.material = figurM; if (o.geometry && o.geometry.type === 'RoundedBoxGeometry' && o.position.y < -0.47) o.visible = false; } });
+  arkRulle.material = mat({ color: '#c98a45', roughness: 0.5 });
+  kak.scale.set(0.9, 0.8, 0.95); skalle.scale.set(0.95, 1.12, 1);
   // laptopens staplar växer och krymper som om kalkylen räknas om
   const lapStaplar = []; for (let n = 0; n < 5; n++) { const st = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.2), new THREE.MeshBasicMaterial({ color: n === 3 ? '#e29a4a' : '#f2d4ab', toneMapped: false })); st.geometry.translate(0, 0.1, 0); st.position.set(-0.13 + n * 0.08, 0.08, 0.014); lock.add(st); lapStaplar.push(st); }
 
