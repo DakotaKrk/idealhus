@@ -1068,3 +1068,20 @@ section.lp-band2.lp-mk { background: radial-gradient(130% 90% at 0% 0%, #2b241c,
 
 .lp-vdagar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; max-width: 196px; }
 .lp-vdagar i { width: auto; height: 22px; min-width: 0; border-radius: 7px; }
+
+/* Mörka ytor i varm stengrå (taupe) – neutral, så orange knappar, emoji, ikoner och menyn syns tydligt och inget skär sig */
+:root { --brun-yta: radial-gradient(110% 90% at 0% 0%, rgba(246, 198, 141, .16), transparent 55%), radial-gradient(90% 110% at 100% 100%, rgba(255, 255, 255, .06), transparent 60%), linear-gradient(160deg, #5f5851, #4a443e 55%, #3d3833); }
+html body section.lp-phjalte.lp-mork, html body section.ao-hjalte.lp-chefhjalte.lp-mork, html body section.pk.kort--mork, html body section.lp-band2.lp-mk, html body section.sh-hjalte.sh-mork, html body section.dk-hjalte.kort {
+  background: var(--brun-yta); box-shadow: 0 30px 60px -34px rgba(40, 34, 28, .65), inset 0 0 0 1px rgba(255, 245, 230, .14), inset 0 1px 0 rgba(255, 245, 230, .18); }
+html body section.lp-band2.lp-mk { background: radial-gradient(130% 90% at 0% 0%, rgba(246, 198, 141, .12), transparent 55%), linear-gradient(165deg, #5b544d, #433d38 70%); }
+html body section.pk.kort--mork { background: radial-gradient(120% 120% at 100% 0%, rgba(246, 198, 141, .12), transparent 55%), linear-gradient(165deg, #5a534c, #413b36 70%); }
+/* glasytor och text får lite mer kontrast mot det ljusare bruna */
+.lp-mork .ao-tal, .lp-mk .lp-om-chatta, .lp-mk .lp-om-kanal, .lp-mk .lp-om-ruta, .lp-mk .lp-arb-tal, .lp-mk .lp-genvagar a, .lp-mk .lp-om-citat, .lp-mk .lp-om-senast li, .lp-mk .lp-arb-lista li > a, .lp-mk .lp-arb-graf, .pk-dag, .pk-panel, .pk-arman, .pk-nav { background-color: rgba(255, 240, 220, .08); }
+.pk-dag.helg { background: rgba(255, 240, 220, .05); }
+.lp-mork small, .lp-mk small, .pk small, .pk-vd, .pk-v { color: rgba(255, 244, 230, .72); }
+.lp-mk .lp-om-ruta small, .lp-mk .lp-arb-tal small, .lp-mk .lp-om-kanal small, .lp-mk .lp-del, .lp-mk .ao-ogon, .pk-titel .etikett { color: rgba(255, 236, 210, .75); }
+section.lp-mork .ao-tal__ikon, .lp-mk .lp-om-ikon { background: rgba(255, 220, 170, .16); box-shadow: inset 0 0 0 1px rgba(255, 220, 170, .32); }
+.lp-mk .lp-staplar i, .pk-arman__rutor i { background: rgba(255, 240, 220, .12); }
+.lp-mk .lp-staplar i.pa { background: linear-gradient(180deg, #ffe2b5, #f0b56e); }
+.lp-mk .lp-h2-chip, .pk-titel > p { color: rgba(255, 244, 230, .82); }
+.lp-pbild .avatar--stor .narvaro-prick { box-shadow: 0 0 0 4px #554e47; }
