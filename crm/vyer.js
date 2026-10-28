@@ -1404,17 +1404,27 @@
           '<label class="kundsort">' + i('lista') + '<select data-tv-sort aria-label="Sortera korten">' + [['andrad', 'Senast ändrad'], ['varde', 'Störst värde'], ['chans', 'Viktat värde']].map(function (o) { return '<option value="' + o[0] + '"' + (tavlaUi.sort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' +
           '<button type="button" class="tv-ikon" data-g="tv-kompakt" aria-pressed="' + tavlaUi.kompakt + '" title="' + (tavlaUi.kompakt ? 'Visa hela korten' : 'Kompakta kort – fler syns på en gång') + '">' + i(tavlaUi.kompakt ? 'kub' : 'lista') + '</button></div>';
       })() +
+      (function () {
+        var poang = function (a) { var d = IH.dagarSedan(a.andrad), u = db().uppgifter.some(function (x) { return !x.klar && x.affar === a.id && new Date(x.forfaller) < new Date(); }); return (a.varde || 0) / 1e5 * sannolikhet(a) / 50 + Math.min(d, 30) * 0.6 + (u ? 12 : 0) + (a.steg === 'offert' && d > 4 ? 8 : 0); };
+        var topp = oppna.slice().sort(function (a, b) { return poang(b) - poang(a); }).slice(0, 3);
+        if (!topp.length) return '';
+        return '<div class="tv-fokus"><p><span>' + i('blixt') + '</span>Fokus i dag<small>de affärer som tjänar mest på en kontakt nu</small></p>' + topp.map(function (a, n) {
+          var k = IH.kund(a.kund), d = IH.dagarSedan(a.andrad), st = IH.steg(a.steg);
+          return '<button type="button" class="tv-fokus__kort" data-g="aff-oppna" data-id="' + a.id + '" style="--f:' + st.farg + ';--n:' + n + '"><b>' + (n + 1) + '</b><span><strong>' + e(a.titel) + '</strong><small>' + e(k ? k.namn : '') + ' · ' + e(st.namn) + ' · ' + (d ? d + ' d sedan' : 'i dag') + '</small><em>' + e(nastaSteg(a)) + '</em></span><i>' + IH.kort(a.varde) + '</i></button>';
+        }).join('') + '</div>';
+      })() +
       '<p class="tavla__tips"><svg class="emo-ik" aria-hidden="true"><use href="#i-glodlampa"/></svg> Dra korten mellan stegen eller tryck på knappen med nästa steg på kortet. Släpp längst ned för att markera som förlorad.</p>' +
       '<div class="tavla' + (tavlaUi.kompakt ? ' tavla--kompakt' : '') + '" data-tavla>' + IH.SALJSTEG.map(function (s) {
         var alla = s.id === 'vunnen' ? vunna90 : oppna.filter(function (a) { return a.steg === s.id; });
-        var l = tavlaSort(alla.filter(tavlaPassar)), still = alla.filter(function (a) { return s.id !== 'vunnen' && IH.dagarSedan(a.andrad) > 10; }).length;
+        var l = tavlaSort(alla.filter(tavlaPassar)), maxV = Math.max.apply(null, alla.map(function (a) { return a.varde || 0; }).concat([1])), still = alla.filter(function (a) { return s.id !== 'vunnen' && IH.dagarSedan(a.andrad) > 10; }).length;
         var snittD = alla.length ? Math.round(alla.reduce(function (t, a) { return t + IH.dagarSedan(a.andrad); }, 0) / alla.length) : 0;
         return '<section class="spalt" data-steg="' + s.id + '" style="--f:' + s.farg + '" id="spalt-' + s.id + '">' +
           '<header class="spalt__huvud"><div><b><span class="spalt__emoji" aria-hidden="true">' + SALJ_EMOJI[s.id] + '</span>' + e(s.namn) + '</b><span>' + l.length + '</span></div><p class="tal">' + IH.kort(summa(l)) + '</p>' +
           '<small>' + (s.id === 'vunnen' ? 'senaste 90 dagarna' : s.sannolikhet + ' % chans · viktat ' + IH.kort(viktat(l))) + '</small>' +
           (s.id !== 'vunnen' && alla.length ? '<div class="spalt__insikt"><span title="Genomsnittlig tid sedan senaste ändringen">' + i('klocka') + 'snitt ' + snittD + ' d</span>' + (still ? '<span class="varm" title="Affärer utan ändring på över 10 dagar">' + i('varning') + still + ' står still</span>' : '<span class="ok">' + i('bock') + 'i rörelse</span>') + '</div>' : '') +
           (l.length < alla.length ? '<p class="spalt__dolda">' + (alla.length - l.length) + ' dolda av filtret</p>' : '') + '</header>' +
-          '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(affKort).join('') : '<p class="spalt__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg></span>Dra hit en affär</p>') + '</div></section>';
+          '<i class="spalt__viktat" title="Viktat ' + IH.kort(viktat(alla)) + ' av ' + IH.kort(summa(alla)) + '" style="--a:' + (summa(alla) ? viktat(alla) / summa(alla) : 0).toFixed(3) + '"></i>' +
+          '<div class="spalt__kort" data-stagger>' + (l.length ? l.map(function (a) { return affKort(a).replace('class="aff ', 'style="--v:' + ((a.varde || 0) / maxV).toFixed(3) + '" class="aff '); }).join('') : '<p class="spalt__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg></span>Dra hit en affär</p>') + '</div></section>';
       }).join('') + '</div>' +
       '<div class="forlustdocka" aria-hidden="true">' + i('stang') + 'Släpp här för att markera som förlorad</div>';
     }
