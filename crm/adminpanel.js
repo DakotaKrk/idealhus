@@ -27,6 +27,7 @@
   }
   function andra(id, falt) { var a = inst().konton || {}; a[id] = Object.assign(a[id] || {}, falt); sparaInst('konton', a); tillampa(); }
   tillampa();
+  IH.andraKonto = andra;
   IH.arAktivt = function (u) { return !!u && !u.inaktiv; };
   var valjForra = IH.G['valj-anvandare'];
   IH.G['valj-anvandare'] = function (el) {

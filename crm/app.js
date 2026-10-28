@@ -337,8 +337,8 @@
     var jag = IH.jag();
     var b = brickor();
     var nav = (jag.roll === 'admin' ? ADMIN_MENY : MENY).map(function (grupp) {
-      // Försäljningsledningen syns bara för chefen (ledning.js)
-      var poster = grupp.rubrik === 'Sälj' && jag.chef ? grupp.poster.concat([['chef', 'Ledning', 'graf']]) : grupp.poster;
+      // Försäljningen (chefsvyn) syns bara för chefen, under Översikt som i Uperformance (ledning.js)
+      var poster = !grupp.rubrik && jag.chef && jag.roll !== 'admin' ? grupp.poster.concat([['chef', 'Försäljning', 'graf']]) : grupp.poster;
       return (grupp.rubrik ? '<p class="sido__rubrik">' + grupp.rubrik + '</p>' : '') + poster.map(function (p) {
         var br = b[p[0]];
         var bricka = br && br[0] ? '<span class="sido__bricka' + (br[1] ? ' sido__bricka--varm' : '') + '">' + br[0] + '</span>' : '';
@@ -353,6 +353,7 @@
     return '<a class="sido__logo" href="#/"><img src="../images/legohus_logo.svg" alt="Legohus Stockholm"><span class="sido__crm">CRM <small>· Prototyp</small></span></a>' +
       '<div class="sido__verktyg"><button class="sido__sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
       '<button class="sido__ny" type="button" data-g="ny" aria-label="Ny" title="Ny  N">' + IH.i('plus') + '</button></div>' +
+      (IH.vyVaxel ? IH.vyVaxel() : '') +
       '<nav class="sido__nav" aria-label="CRM"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
       '<div class="sido__fot"><button class="sido__mer" type="button" tabindex="-1" aria-hidden="true" data-g="sido-mer">Mer ' + IH.i('pil') + '</button>' +
       '<button class="anv" type="button" data-g="konto-meny" aria-haspopup="dialog"><span class="avatar" style="--av:' + jag.farg + '">' + IH.initialer(jag.namn) +

@@ -98,7 +98,7 @@
   };
 
   IH.ANVANDARE = [
-    { id: 'ah', namn: 'Ahmed', roll: 'salj', titel: 'Sälj', farg: 'linear-gradient(135deg,#f0b56e,#8f5424)' },
+    { id: 'ah', namn: 'Ahmed', roll: 'salj', chef: true, titel: 'Sälj · Försäljningschef', farg: 'linear-gradient(135deg,#f0b56e,#8f5424)' },
     { id: 'sa', namn: 'Sahand', roll: 'salj', titel: 'Sälj', farg: 'linear-gradient(135deg,#b8cde0,#4f6f8f)' },
     { id: 'ad', namn: 'Admin', roll: 'admin', titel: 'Administratör', farg: 'linear-gradient(135deg,#c9c4bb,#4f4a42)' }
   ];

@@ -164,6 +164,50 @@
     IH.toast('Status: ' + narvaro(jag.id).namn, 'Kollegorna ser den i teamet.', 'kunder');
   };
 
+  /* 02b Säljvy och chefsvy (som i Uperformance): för den som är både säljare och chef. Växeln överst i menyn byter
+     mellan den egna försäljningen och teamets – var och en minns var man var senast. En kollegas profil som öppnas
+     från chefsvyn hör till chefsvyn. */
+  var senastSalj = '#/', senastChef = '#/chef', lageNu = /^#\/chef/.test(location.hash || '') ? 'chef' : 'salj';
+  var arChefsSaljare = function () { var j = IH.jag(); return !!j.chef && j.roll === 'salj'; };
+  var chefslage = function () {
+    var h = location.hash || '';
+    if (/^#\/chef/.test(h)) return true;
+    var m = h.match(/^#\/profil\/([\w-]+)/);
+    return !!m && m[1] !== IH.jag().id && lageNu === 'chef';
+  };
+  IH.vyVaxel = function () {
+    if (!arChefsSaljare()) return '';
+    var chef = chefslage();
+    return '<div class="vy-vaxel" data-vy-vaxel data-lage="' + (chef ? 'chef' : 'salj') + '" role="group" aria-label="Vy"><span class="vy-vaxel__puck" aria-hidden="true"></span>' +
+      '<button type="button" data-g="vy-byt" data-vy-till="salj" aria-pressed="' + !chef + '">' + IH.emo('trend') + 'Säljvy</button>' +
+      '<button type="button" data-g="vy-byt" data-vy-till="chef" aria-pressed="' + chef + '">' + IH.emo('krona') + 'Chefsvy</button></div>';
+  };
+  function vaxelLage() {
+    var chef = chefslage();
+    document.documentElement.toggleAttribute('data-vy-chef', chef && arChefsSaljare());
+    document.querySelectorAll('[data-vy-vaxel]').forEach(function (v) {
+      v.setAttribute('data-lage', chef ? 'chef' : 'salj');
+      v.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String((b.getAttribute('data-vy-till') === 'chef') === chef)); });
+    });
+  }
+  addEventListener('hashchange', function () {
+    var h = location.hash || '#/';
+    if (/^#\/chef/.test(h)) { senastChef = h; lageNu = 'chef'; }
+    else if (!/^#\/profil/.test(h)) { lageNu = 'salj'; senastSalj = h; }
+    vaxelLage();
+  });
+  IH.G['vy-byt'] = function (el) {
+    var chef = el.getAttribute('data-vy-till') === 'chef';
+    if (chef === chefslage()) return;
+    var vy = document.querySelector('.vy');
+    if (vy && !IH.lugn) { vy.setAttribute('data-vy-byte', chef ? 'till-chef' : 'till-salj'); clearTimeout(IH.G['vy-byt'].t); IH.G['vy-byt'].t = setTimeout(function () { vy.removeAttribute('data-vy-byte'); }, 900); }
+    lageNu = chef ? 'chef' : 'salj';
+    vaxelLage();
+    IH.ga(chef ? senastChef : senastSalj);
+    IH.toast(chef ? 'Chefsvy – teamets försäljning' : 'Säljvy – din egen försäljning', null, chef ? 'krona' : 'trend');
+  };
+  setTimeout(vaxelLage, 0);
+
   /* 03 Räknare per konto ------------------------------------------------------------------------- */
   var dag0 = function (d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
   function stat(u) {
@@ -238,83 +282,233 @@
     return { titel: ar ? 'Min profil' : u.namn, html: html };
   };
 
-  /* 05 Försäljningsledningen #/chef --------------------------------------------------------------- */
+  /* 05 Försäljningsledningen #/chef – samma upplägg som Uperformance visaChef: hjälten med verktygen och fyra tal, sedan
+     01 Teamet just nu (filter), 02 Vem jobbar när, 03 Teamets kalender, 04 Att agera på (fördela, påminn), 05 Pipeline per
+     säljare, 06 Aktivitet 14 dagar och 07 Topplistan 90 dagar. Allt räknas ur datan – inga påhittade siffror. */
+  var chefUi = { filter: 'alla', kalVem: 'alla', kalMan: 0 };
+  var plural = function (n, en, flera) { return n + ' ' + (n === 1 ? en : flera); };
+  var pct = function (x) { return Math.round(x * 100) + ' %'; };
+  var inom = function (iso, d) { return iso && IH.dagarSedan(iso) < d; };
+  var BORTA = ['semester', 'sjuk', 'offline', 'osynlig'], UPPTAGEN = ['upptagen', 'mote', 'strax', 'lunch', 'ute'];
+  var chefBand = function (nr, rubrik, em, inne, opts) {
+    opts = opts || {};
+    return '<section class="ao-band kort' + (opts.klass ? ' ' + opts.klass : '') + '"><header class="ao-band__huvud"><div><p class="ao-ogon">' + nr + '</p><h2>' + rubrik + ' <em>' + em + '</em></h2>' + (opts.ingress ? '<p class="ao-band__ingress">' + opts.ingress + '</p>' : '') + '</div>' + (opts.hoger || '') + '</header>' + inne + '</section>';
+  };
+  function kalender(team) {
+    var nu = new Date(), forsta = new Date(nu.getFullYear(), nu.getMonth() + chefUi.kalMan, 1), man = forsta.getMonth();
+    var start = new Date(forsta); start.setDate(1 - ((forsta.getDay() + 6) % 7));
+    var vem = function (id) { return chefUi.kalVem === 'alla' ? team.some(function (x) { return x.u.id === id; }) : id === chefUi.kalVem; };
+    var handelser = [];
+    db().aktiviteter.forEach(function (h) { if (vem(h.av)) handelser.push({ dag: dag0(h.tid).getTime(), u: h.av, text: h.text, typ: 'akt' }); });
+    db().uppgifter.forEach(function (x) { if (!x.klar && vem(x.ansvarig)) handelser.push({ dag: dag0(x.forfaller).getTime(), u: x.ansvarig, text: x.text, typ: 'uppg' }); });
+    db().affarer.forEach(function (a) { if (a.steg === 'vunnen' && a.vunnen && vem(a.ansvarig)) handelser.push({ dag: dag0(a.vunnen).getTime(), u: a.ansvarig, text: 'Vunnen: ' + a.titel, typ: 'vunnen' }); });
+    var idag = dag0(nu).getTime(), celler = '';
+    for (var n = 0; n < 42; n++) {
+      var d = new Date(start); d.setDate(start.getDate() + n);
+      var h = handelser.filter(function (x) { return x.dag === d.getTime(); });
+      celler += '<div class="lp-kal__dag' + (d.getMonth() !== man ? ' utanfor' : '') + (d.getTime() === idag ? ' idag' : '') + (d.getDay() % 6 === 0 ? ' helg' : '') + '"><b>' + d.getDate() + '</b>' +
+        h.slice(0, 3).map(function (x) { var u = IH.anvandare(x.u) || { farg: '#ccc', namn: '' }; return '<span class="lp-kal__h" data-typ="' + x.typ + '" style="--av:' + u.farg + '" title="' + e(u.namn + ': ' + x.text) + '"><i></i>' + e(x.text) + '</span>'; }).join('') +
+        (h.length > 3 ? '<small>+' + (h.length - 3) + ' till</small>' : '') + '</div>';
+    }
+    var namn = forsta.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' });
+    return '<div class="lp-kal__verktyg"><div class="ap-filterrad" role="group" aria-label="Person">' + [{ id: 'alla', namn: 'Alla' }].concat(team.map(function (x) { return { id: x.u.id, namn: x.u.namn.split(' ')[0] }; })).map(function (p) {
+        return '<button type="button" class="ap-filter" data-g="lp-kal-vem" data-f="' + p.id + '" aria-pressed="' + (chefUi.kalVem === p.id) + '">' + e(p.namn) + '</button>'; }).join('') + '</div>' +
+      '<div class="lp-kal__man"><button type="button" class="ch-ruta" data-g="lp-kal-man" data-d="-1" aria-label="Föregående månad">' + i('pilv') + '</button><b>' + e(namn.charAt(0).toUpperCase() + namn.slice(1)) + '</b>' +
+        '<button type="button" class="ch-ruta" data-g="lp-kal-man" data-d="1" aria-label="Nästa månad">' + i('pil') + '</button>' + (chefUi.kalMan ? '<button type="button" class="ap-filter" data-g="lp-kal-man" data-d="0">I dag</button>' : '') + '</div></div>' +
+      '<div class="lp-kal"><span>Må</span><span>Ti</span><span>On</span><span>To</span><span>Fr</span><span>Lö</span><span>Sö</span>' + celler + '</div>' +
+      '<p class="lp-teckenforklaring lp-kal__forkl"><span data-typ="akt"><i></i>Möten, samtal och mejl</span><span data-typ="uppg"><i></i>Uppgift förfaller</span><span data-typ="vunnen"><i></i>Vunnen affär</span></p>';
+  }
   IH.vyer.chef = function () {
     var jag = IH.jag();
-    if (!jag.chef) return { titel: 'Ledning', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort lp-kort"><h2>' + IH.emo('las') + 'Bara för försäljningschefen</h2><p class="lp-tom">Administratören kan göra en säljare till försäljningschef under Ändra i adminpanelen.</p></section>' };
-    var team = saljare().map(stat);
+    if (!jag.chef) return { titel: 'Försäljning', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort lp-kort"><h2>' + IH.emo('las') + 'Bara för försäljningschefen</h2><p class="lp-tom">Administratören kan göra en säljare till försäljningschef under Ändra i adminpanelen.</p></section>' };
+    var team = saljare().filter(function (u) { return !u.inaktiv; }).map(stat);
     var sum = function (f) { return team.reduce(function (t, x) { return t + f(x); }, 0); };
-    var kvartal = Math.floor(new Date().getMonth() / 3) + 1;
-    var band = function (nr, titel, forklaring, inne, klass) {
-      return '<section class="lp-band kort' + (klass ? ' ' + klass : '') + '" data-in><header><span class="lp-nr">' + nr + '</span><div><h2>' + titel + '</h2><p class="lp-forklaring">' + forklaring + '</p></div></header>' + inne + '</section>';
-    };
+    team.forEach(function (x) {
+      x.vunna90 = x.aff.filter(function (a) { return a.steg === 'vunnen' && inom(a.vunnen, 90); });
+      x.vunnet90 = x.vunna90.reduce(function (t, a) { return t + (a.varde || 0); }, 0);
+      x.forlorade90 = x.forlorade.filter(function (a) { return inom(a.andrad, 90); }).length;
+      x.malKvartal = x.u.mal ? x.u.mal / 4 : 0;
+    });
+    var tot = { pipeline: sum(function (x) { return x.oppet; }), viktat: sum(function (x) { return x.viktat; }), vunnet: sum(function (x) { return x.vunnet90; }), mal: sum(function (x) { return x.malKvartal; }) };
+    var avgjorda = sum(function (x) { return x.vunna90.length + x.forlorade90; }), vg = avgjorda ? sum(function (x) { return x.vunna90.length; }) / avgjorda : null;
+    var aktivaNu = team.filter(function (x) { return BORTA.indexOf(narvaro(x.u.id).id) < 0; }).length;
+    var oppnaN = sum(function (x) { return x.oppna.length; });
+    var utan = db().affarer.filter(function (a) { return a.steg !== 'vunnen' && !a.forlorad && (!a.ansvarig || !IH.anvandare(a.ansvarig) || IH.anvandare(a.ansvarig).inaktiv); });
+    var h = new Date().getHours(), hals = h < 10 ? 'God morgon' : h < 17 ? 'Hej' : 'God kväll';
+    var tal = function (x) { return '<' + (x.href ? 'a href="' + x.href + '"' : 'div') + ' class="ao-tal" data-ton="' + (x.ton || 'is') + '"><span class="ao-tal__ikon">' + IH.emo(x.ikon) + '</span><span class="ao-tal__text"><small>' + x.etikett + '</small><strong>' + e(x.varde) + '</strong><em>' + e(x.under) + '</em>' + (x.andel != null ? '<span class="lp-glasmatare" style="--andel:' + x.andel.toFixed(3) + '"><i></i></span>' : '') + '</span></' + (x.href ? 'a' : 'div') + '>'; };
+    var hjalte = '<section class="ap-hjalte ao-hjalte kort lp-chefhjalte"><div class="sh-rutnat" aria-hidden="true"></div>' +
+      '<div class="ao-text"><p class="etikett"><i class="sh-live"></i>Försäljningsledning · live ur CRM:et</p><h1>' + hals + ', ' + e(jag.namn.split(' ')[0]) + '. <em>Så går teamet.</em></h1>' +
+        '<p class="ao-ingress">' + plural(team.length, 'säljare', 'säljare') + ' · ' + aktivaNu + ' i tjänst nu · ' + plural(oppnaN, 'öppen affär', 'öppna affärer') + (utan.length ? ' · <strong class="lp-varm">' + plural(utan.length, 'affär', 'affärer') + ' utan ansvarig</strong>' : '') + '</p>' +
+        '<div class="sh-knappar"><button type="button" class="sh-knapp sh-knapp--accent" data-g="km-nytt-konto">' + IH.emo('anvandare-plus') + '<span>Lägg till säljare</span></button>' +
+          '<button type="button" class="sh-knapp" data-g="lp-mal">' + IH.emo('mal') + '<span>Sätt mål</span></button><button type="button" class="sh-knapp" data-g="lp-uppgift">' + IH.emo('todo') + '<span>Ge uppgift</span></button>' +
+          '<button type="button" class="sh-knapp" data-g="lp-rapport">' + IH.emo('ladda-ner') + '<span>Exportera rapport</span></button></div></div>' +
+      '<div class="ap-tal">' + [
+        { ikon: 'portfolj', etikett: 'Teamets pipeline', varde: IH.kort(tot.pipeline), under: plural(oppnaN, 'affär', 'affärer') + ' öppna', href: '#/salj', ton: 'lila' },
+        { ikon: 'mal', etikett: 'Viktad prognos', varde: IH.kort(tot.viktat), under: 'värde × chansen att vinna', ton: 'is' },
+        { ikon: 'medalj', etikett: 'Vunnet 90 dagar', varde: IH.kort(tot.vunnet), under: tot.mal ? pct(tot.vunnet / tot.mal) + ' av kvartalsmålet ' + IH.kort(tot.mal) : 'inget mål satt', ton: 'gron', andel: tot.mal ? Math.min(1, tot.vunnet / tot.mal) : null },
+        { ikon: 'trend', etikett: 'Vinstgrad 90 d', varde: vg == null ? '–' : pct(vg), under: 'vunna av avgjorda affärer', ton: 'gul' }
+      ].map(tal).join('') + '</div></section>';
+
     // 01 Teamet just nu
-    var kort = team.map(function (x) {
+    var vald = team.filter(function (x) { var s = narvaro(x.u.id).id; return chefUi.filter === 'alla' || (chefUi.filter === 'tillganglig' ? s === 'online' : chefUi.filter === 'upptagen' ? UPPTAGEN.indexOf(s) >= 0 : BORTA.indexOf(s) >= 0); });
+    var kort = vald.map(function (x) {
       var n = narvaro(x.u.id), varn = [];
-      if (x.stilla.length) varn.push(x.stilla.length + (x.stilla.length === 1 ? ' affär står still' : ' affärer står still'));
-      if (x.sena.length) varn.push(x.sena.length + (x.sena.length === 1 ? ' försenad uppgift' : ' försenade uppgifter'));
+      if (x.stilla.length) varn.push(plural(x.stilla.length, 'affär står still', 'affärer står still'));
+      if (x.sena.length) varn.push(plural(x.sena.length, 'försenad uppgift', 'försenade uppgifter'));
       var perSteg = IH.SALJSTEG.slice(0, -1).map(function (s) { return { s: s, l: x.oppna.filter(function (a) { return a.steg === s.id; }) }; });
       var maxS = Math.max.apply(null, perSteg.map(function (p) { return p.l.length; }).concat([1]));
       return '<article class="lp-saljare">' +
-        '<header>' + avatar(x.u) + '<div><a href="#/profil/' + x.u.id + '"><b>' + e(x.u.namn) + '</b></a><small style="--n:' + n.farg + '"><i></i>' + e(n.namn) + '</small></div></header>' +
-        '<div class="lp-saljare__tal"><div><small>Öppet</small><b class="tal">' + IH.kort(x.oppet) + '</b></div><div><small>Viktat</small><b class="tal">' + IH.kort(x.viktat) + '</b></div><div><small>Vunnet i år</small><b class="tal">' + IH.kort(x.vunnet) + '</b></div></div>' +
-        (x.u.mal ? '<p class="lp-saljare__mal">' + Math.round(Math.min(1, x.vunnet / x.u.mal) * 100) + ' % av årets mål på ' + IH.kort(x.u.mal) + '<span class="lp-mal__spar"><i style="--a:' + Math.min(1, x.vunnet / x.u.mal).toFixed(3) + '"></i></span></p>' : '') +
+        '<header>' + avatar(x.u) + '<div><a href="#/profil/' + x.u.id + '"><b>' + e(x.u.namn) + '</b></a><small style="--n:' + n.farg + '"><i></i>' + e(n.namn) + (x.u.chef ? ' · Chef' : '') + '</small></div></header>' +
+        '<div class="lp-saljare__tal"><div><small>Öppet</small><b class="tal">' + IH.kort(x.oppet) + '</b></div><div><small>Viktat</small><b class="tal">' + IH.kort(x.viktat) + '</b></div><div><small>Vunnet 90 d</small><b class="tal">' + IH.kort(x.vunnet90) + '</b></div></div>' +
+        (x.malKvartal ? '<p class="lp-saljare__mal">' + pct(Math.min(1, x.vunnet90 / x.malKvartal)) + ' av kvartalsmålet ' + IH.kort(x.malKvartal) + '<span class="lp-mal__spar"><i style="--a:' + Math.min(1, x.vunnet90 / x.malKvartal).toFixed(3) + '"></i></span></p>' : '<p class="lp-saljare__mal lp-saljare__mal--tom">Inget mål satt · <button type="button" class="lp-lank" data-g="lp-mal" data-id="' + x.u.id + '">Sätt mål</button></p>') +
         '<ul class="lp-perSteg">' + perSteg.map(function (p) {
           return '<li style="--f:' + p.s.farg + ';--a:' + (p.l.length / maxS).toFixed(3) + '"><span>' + e(p.s.kort) + '</span><i></i><b>' + p.l.length + '</b><small>' + (p.l.length ? IH.kort(p.l.reduce(function (t, a) { return t + a.varde; }, 0)) : '–') + '</small></li>';
         }).join('') + '</ul>' +
         '<div class="lp-vecka"><small>Aktivitet 7 dagar</small>' + staplar(perDag(x.akt, 7), 'lp-staplar lp-staplar--liten') + '</div>' +
         (varn.length ? '<p class="lp-varning">' + IH.emo('varning') + e(varn.join(' · ')) + '</p>' : '<p class="lp-lugnt">' + IH.emo('klar') + 'Inget som väntar</p>') +
-        '<footer><a class="knapp knapp--liten" href="#/profil/' + x.u.id + '">' + i('kunder') + 'Profil</a>' + (x.u.id !== jag.id ? '<button class="knapp knapp--liten" type="button" data-g="ch-skriv-till" data-uid="' + x.u.id + '">' + i('samtal') + 'Skriv</button>' : '') + '</footer></article>';
-    }).join('');
-    // 02 Pipeline per säljare
+        '<footer><a class="knapp knapp--liten" href="#/profil/' + x.u.id + '">' + i('kunder') + 'Profil</a>' +
+          '<button class="knapp knapp--liten" type="button" data-g="lp-uppgift" data-id="' + x.u.id + '">' + IH.emo('todo') + 'Uppgift</button>' +
+          (x.u.id !== jag.id ? '<button class="knapp knapp--liten" type="button" data-g="ch-skriv-till" data-uid="' + x.u.id + '">' + i('samtal') + 'Skriv</button>' : '') + '</footer></article>';
+    }).join('') || '<p class="lp-tom">Ingen i teamet har den statusen just nu.</p>';
+    var filter = [['alla', 'Alla'], ['tillganglig', 'Tillgängliga'], ['upptagen', 'Upptagna'], ['borta', 'Borta']].map(function (f) { return '<button type="button" class="ap-filter" data-g="lp-chef-filter" data-f="' + f[0] + '" aria-pressed="' + (chefUi.filter === f[0]) + '">' + f[1] + '</button>'; }).join('');
+
+    // 02 Vem jobbar när: status nu och loggat arbete måndag–söndag den här veckan
+    var mandag = dag0(new Date()); mandag.setDate(mandag.getDate() - ((mandag.getDay() + 6) % 7));
+    var vecka = []; for (var d = 0; d < 7; d++) { var x0 = new Date(mandag); x0.setDate(mandag.getDate() + d); vecka.push(x0); }
+    var idag0 = dag0(new Date()).getTime();
+    var narv = '<div class="lp-narv"><span></span>' + vecka.map(function (v) { return '<small class="' + (v.getTime() === idag0 ? 'idag' : '') + (v.getDay() % 6 === 0 ? ' helg' : '') + '">' + VECKODAG[v.getDay()] + ' ' + v.getDate() + '</small>'; }).join('') + '<small>Nu</small>' +
+      team.map(function (x) {
+        var n = narvaro(x.u.id);
+        return '<a class="lp-narv__vem" href="#/profil/' + x.u.id + '">' + avatar(x.u) + e(x.u.namn.split(' ')[0]) + '</a>' + vecka.map(function (v) {
+          var nasta = new Date(v); nasta.setDate(v.getDate() + 1);
+          var antal = x.akt.filter(function (h) { var t = new Date(h.tid); return t >= v && t < nasta; }).length, framtid = v.getTime() > idag0;
+          return '<i class="' + (antal ? 'pa' : '') + (framtid ? ' framtid' : '') + (v.getTime() === idag0 ? ' idag' : '') + '" title="' + e(x.u.namn) + ', ' + IH.datum(v.toISOString()) + ': ' + (framtid ? 'kommande' : plural(antal, 'händelse', 'händelser')) + '">' + (antal || '') + '</i>';
+        }).join('') + '<span class="lp-status" style="--n:' + n.farg + '"><i></i>' + e(n.namn) + '</span>';
+      }).join('') + '</div>';
+
+    // 04 Att agera på – med Fördela och Påminn direkt i raden
+    var lista = [];
+    team.forEach(function (x) {
+      x.stilla.forEach(function (a) { lista.push({ typ: 'Står still', ikon: 'klocka', text: a.titel, under: x.u.namn + ' · ' + IH.dagarSedan(a.andrad) + ' dagar i ' + IH.steg(a.steg).namn.toLowerCase(), href: '#/salj/' + a.id, vikt: IH.dagarSedan(a.andrad), affar: a.id, uid: x.u.id }); });
+      x.sena.forEach(function (u) { lista.push({ typ: 'Försenad uppgift', ikon: 'larm', text: u.text, under: x.u.namn + ' · skulle vara klar ' + IH.datum(u.forfaller), href: '#/att-gora', vikt: 20 + IH.dagarSedan(u.forfaller), uid: x.u.id }); });
+    });
+    utan.forEach(function (a) { lista.push({ typ: 'Ingen ansvarig', ikon: 'portfolj', text: a.titel, under: 'Affär utan ansvarig säljare', href: '#/salj/' + a.id, vikt: 40, affar: a.id }); });
+    db().forfragningar.filter(function (f) { return f.status === 'ny' && !f.tilldelad; }).forEach(function (f) {
+      lista.push({ typ: 'Ingen ansvarig', ikon: 'inkorg', text: f.namn + (f.ort ? ' · ' + f.ort : ''), under: 'Ny förfrågan ' + IH.sedan(f.tid || f.skapad), href: '#/forfragningar/' + f.id, vikt: 30, forfragan: f.id });
+    });
+    lista.sort(function (a, b) { return b.vikt - a.vikt; });
+    var uppm = lista.length ? '<ul class="ao-upp lp-agera">' + lista.slice(0, 7).map(function (r) {
+      return '<li><span class="ao-upp__ikon">' + IH.emo(r.ikon) + '</span><a class="ao-upp__text" href="' + r.href + '"><small class="lp-agera__typ">' + e(r.typ) + '</small><strong>' + e(r.text) + '</strong><small>' + e(r.under) + '</small></a><span class="lp-agera__knappar">' +
+        (r.affar || r.forfragan ? '<button type="button" class="knapp knapp--liten" data-g="lp-fordela"' + (r.affar ? ' data-affar="' + r.affar + '"' : ' data-forfragan="' + r.forfragan + '"') + '>Fördela</button>' : '') +
+        (r.uid && r.uid !== jag.id ? '<button type="button" class="knapp knapp--liten" data-g="lp-pamin" data-uid="' + r.uid + '" data-text="' + e(r.typ + ': ' + r.text) + '">Påminn</button>' : '') + '</span></li>';
+    }).join('') + '</ul>' : '<div class="ao-lugnt ao-lugnt--stor">' + IH.emo('skold') + '<div><strong>Inget att agera på</strong><small>Inga affärer står still, inga uppgifter är försenade och allt har en ansvarig.</small></div></div>';
+
+    // 05 Pipeline per säljare
     var maxP = Math.max.apply(null, team.map(function (x) { return x.oppet; }).concat([1]));
     var pipe = '<ul class="lp-pipe">' + team.map(function (x) {
       return '<li><span class="lp-pipe__namn">' + avatar(x.u) + e(x.u.namn.split(' ')[0]) + '</span><span class="lp-pipe__stapel" style="--a:' + (x.oppet / maxP).toFixed(3) + '">' + IH.SALJSTEG.slice(0, -1).map(function (s) {
         var v = x.oppna.filter(function (a) { return a.steg === s.id; }).reduce(function (t, a) { return t + a.varde; }, 0);
         return v ? '<i style="--f:' + s.farg + ';flex:' + v + '" title="' + e(s.namn) + ': ' + IH.kr(v) + '"></i>' : '';
       }).join('') + '</span><b class="tal">' + IH.kort(x.oppet) + '</b><small>viktat ' + IH.kort(x.viktat) + '</small></li>';
-    }).join('') + '</ul><p class="lp-summa">Teamet: <b>' + IH.kort(sum(function (x) { return x.oppet; })) + '</b> öppet · <b>' + IH.kort(sum(function (x) { return x.viktat; })) + '</b> viktat</p>' +
-      '<p class="lp-teckenforklaring">' + IH.SALJSTEG.slice(0, -1).map(function (s) { return '<span style="--f:' + s.farg + '"><i></i>' + e(s.namn) + '</span>'; }).join('') + '</p>';
-    // 03 Aktivitet 14 dagar
-    var dagar14 = perDag([], 14);
-    var maxA = 1;
-    var rader = team.map(function (x) { var d = perDag(x.akt, 14); d.forEach(function (y) { if (y.antal > maxA) maxA = y.antal; }); return { x: x, d: d }; });
-    var karta = '<div class="lp-karta" style="--n:14"><span></span>' + dagar14.map(function (d) { return '<small class="' + (d.dag.getDay() % 6 === 0 ? 'helg' : '') + '">' + VECKODAG[d.dag.getDay()] + '</small>'; }).join('') + '<span class="lp-karta__summa">Summa</span>' +
+    }).join('') + '</ul><p class="lp-teckenforklaring">' + IH.SALJSTEG.slice(0, -1).map(function (s) { return '<span style="--f:' + s.farg + '"><i></i>' + e(s.namn) + '</span>'; }).join('') + '</p>' +
+      '<div class="ao-statrad"><div><small>Öppet</small><strong>' + IH.kort(tot.pipeline) + '</strong><em>' + plural(oppnaN, 'affär', 'affärer') + '</em></div><div><small>Viktat</small><strong>' + IH.kort(tot.viktat) + '</strong><em>prognos</em></div><div><small>Snitt per affär</small><strong>' + (oppnaN ? IH.kort(tot.pipeline / oppnaN) : '–') + '</strong><em>öppet värde</em></div></div>';
+    // 06 Aktivitet 14 dagar
+    var dagar14 = perDag([], 14), maxA = 1;
+    var rader = team.map(function (x) { var dd = perDag(x.akt, 14); dd.forEach(function (y) { if (y.antal > maxA) maxA = y.antal; }); return { x: x, d: dd }; });
+    var karta = '<div class="lp-karta" style="--n:14"><span></span>' + dagar14.map(function (dd) { return '<small class="' + (dd.dag.getDay() % 6 === 0 ? 'helg' : '') + '">' + VECKODAG[dd.dag.getDay()] + '</small>'; }).join('') + '<span class="lp-karta__summa">Summa</span>' +
       rader.map(function (r) {
-        var tot = r.d.reduce(function (t, y) { return t + y.antal; }, 0);
+        var t = r.d.reduce(function (s, y) { return s + y.antal; }, 0);
         return '<span class="lp-karta__namn">' + e(r.x.u.namn.split(' ')[0]) + '</span>' + r.d.map(function (y) {
           return '<i style="--a:' + (y.antal / maxA).toFixed(3) + '" class="' + (y.antal ? 'pa' : '') + '" title="' + IH.datum(y.dag.toISOString()) + ': ' + y.antal + '">' + (y.antal || '') + '</i>';
-        }).join('') + '<b>' + tot + '</b>';
+        }).join('') + '<b>' + t + '</b>';
       }).join('') + '</div>';
-    // 04 Behöver din uppmärksamhet
-    var lista = [];
-    team.forEach(function (x) {
-      x.stilla.forEach(function (a) { lista.push({ typ: 'Står still', ikon: 'klocka', text: a.titel, under: x.u.namn + ' · ' + IH.dagarSedan(a.andrad) + ' dagar i ' + IH.steg(a.steg).namn.toLowerCase(), href: '#/salj/' + a.id, vikt: IH.dagarSedan(a.andrad) }); });
-      x.sena.forEach(function (u) { lista.push({ typ: 'Försenad uppgift', ikon: 'larm', text: u.text, under: x.u.namn + ' · skulle vara klar ' + IH.datum(u.forfaller), href: '#/att-gora', vikt: 20 + IH.dagarSedan(u.forfaller) }); });
-    });
-    db().forfragningar.filter(function (f) { return f.status === 'ny' && !f.tilldelad; }).forEach(function (f) {
-      lista.push({ typ: 'Ingen ansvarig', ikon: 'inkorg', text: f.namn + (f.ort ? ' · ' + f.ort : ''), under: 'Ny förfrågan ' + IH.sedan(f.tid || f.skapad), href: '#/forfragningar/' + f.id, vikt: 30 });
-    });
-    lista.sort(function (a, b) { return b.vikt - a.vikt; });
-    var uppm = lista.length ? '<ul class="lp-uppm">' + lista.slice(0, 8).map(function (r) {
-      return '<li><a href="' + r.href + '">' + IH.emo(r.ikon, 'lp-uppm__ikon') + '<span><small>' + e(r.typ) + '</small><b>' + e(r.text) + '</b><em>' + e(r.under) + '</em></span>' + i('pil') + '</a></li>';
-    }).join('') + '</ul>' : '<p class="lp-tom">' + IH.emo('klar') + ' Inget som väntar på dig just nu.</p>';
-    // 05 Topplistan
-    var topp = team.slice().sort(function (a, b) { return b.vunnet - a.vunnet || b.viktat - a.viktat; });
+    // 07 Topplistan 90 dagar
+    var topp = team.slice().sort(function (a, b) { return b.vunnet90 - a.vunnet90 || b.viktat - a.viktat; });
     var topplista = '<ol class="lp-topp">' + topp.map(function (x, n) {
-      return '<li class="' + (n === 0 && x.vunnet ? 'forst' : '') + '"><span class="lp-topp__plats">' + (n + 1) + '</span>' + avatar(x.u) + '<span><a href="#/profil/' + x.u.id + '"><b>' + e(x.u.namn) + '</b></a><small>' + x.vunna.length + (x.vunna.length === 1 ? ' order' : ' ordrar') + (x.vinstgrad !== null ? ' · vinstgrad ' + Math.round(x.vinstgrad * 100) + ' %' : '') + '</small></span><b class="tal">' + IH.kort(x.vunnet) + '</b></li>';
+      var g = x.vunna90.length + x.forlorade90;
+      return '<li class="' + (n === 0 && x.vunnet90 ? 'forst' : '') + '"><span class="lp-topp__plats">' + (n + 1) + '</span>' + avatar(x.u) + '<span><a href="#/profil/' + x.u.id + '"><b>' + e(x.u.namn) + '</b></a><small>' + plural(x.vunna90.length, 'order', 'ordrar') + (g ? ' · vinstgrad ' + pct(x.vunna90.length / g) : '') + '</small></span><b class="tal">' + IH.kort(x.vunnet90) + '</b></li>';
     }).join('') + '</ol>';
 
-    var html = '<section class="lp-hjalte kort kort--mork" data-in><p class="etikett etikett--ljus">Försäljningsledning · kvartal ' + kvartal + '</p>' +
-        '<h1>Teamet har <em>' + IH.kort(sum(function (x) { return x.oppet; })) + '</em> i pipelinen</h1>' +
-        '<p>' + team.length + ' säljare · ' + IH.kort(sum(function (x) { return x.viktat; })) + ' viktat · ' + IH.kort(sum(function (x) { return x.vunnet; })) + ' vunnet i år' + (lista.length ? ' · <b>' + lista.length + '</b> saker behöver din uppmärksamhet' : '') + '.</p></section>' +
-      band('01', 'Teamet just nu', 'Status, siffrorna och affärerna per steg för varje säljare. Varningarna säger var någon behöver hjälp.', '<div class="lp-team">' + kort + '</div>') +
-      '<div class="lp-tva">' +
-        band('02', 'Behöver din uppmärksamhet', 'Affärer som stått still mer än två veckor, försenade uppgifter och förfrågningar utan ansvarig – det viktigaste först.', uppm) +
-        band('03', 'Topplistan', 'Vunnet värde i år. Vinstgraden räknas på avslutade affärer (vunna och förlorade).', topplista) +
-      '</div>' +
-      band('04', 'Pipeline per säljare', 'Öppet värde per säljare, uppdelat på säljstegen. Håll över en del för beloppet.', pipe) +
-      band('05', 'Aktivitet 14 dagar', 'Loggade samtal, möten, mejl och anteckningar per dag. Mörkare ruta = fler.', karta);
-    return { titel: 'Försäljningsledning', html: html };
+    var html = hjalte +
+      chefBand('01 · Teamet', 'Teamet', 'just nu', '<div class="lp-team">' + kort + '</div>', { ingress: 'Status, pipeline, kvartalsmålet och veckans aktivitet per säljare – klicka för profilen.', hoger: '<div class="ap-filterrad" role="group" aria-label="Visa">' + filter + '</div>' }) +
+      chefBand('02 · Närvaro', 'Vem jobbar', 'när', narv, { ingress: 'Statusen just nu och det som loggats i CRM:et varje dag den här veckan.' }) +
+      chefBand('03 · Kalender', 'Teamets', 'kalender', kalender(team), { ingress: 'Möten, samtal och mejl, uppgifter som förfaller och vunna affärer – för hela teamet eller en person.' }) +
+      '<div class="ao-tva">' + chefBand('04 · Att agera på', 'Behöver din', 'uppmärksamhet', uppm, { hoger: lista.length ? '<span class="ao-band__tal">' + lista.length + '</span>' : '' }) +
+        chefBand('05 · Pipeline', 'Pipeline', 'per säljare', pipe) + '</div>' +
+      '<div class="ao-tva">' + chefBand('06 · Aktivitet', 'Aktivitet', '14 dagar', karta) +
+        chefBand('07 · Resultat', 'Topplistan', '90 dagar', topplista) + '</div>';
+    return { titel: 'Försäljning', html: html };
   };
+
+  /* Chefens verktyg ------------------------------------------------------------------------------ */
+  var G = IH.G;
+  var valSaljare = function (namn, vald) { return '<label class="falt"><span>Säljare</span><select name="' + namn + '">' + saljare().filter(function (u) { return !u.inaktiv; }).map(function (u) { return '<option value="' + u.id + '"' + (u.id === vald ? ' selected' : '') + '>' + e(u.namn) + '</option>'; }).join('') + '</select></label>'; };
+  G['lp-chef-filter'] = function (el) { chefUi.filter = el.getAttribute('data-f'); IH.rita(); };
+  G['lp-kal-vem'] = function (el) { chefUi.kalVem = el.getAttribute('data-f'); IH.rita(); };
+  G['lp-kal-man'] = function (el) { var d = +el.getAttribute('data-d'); chefUi.kalMan = d ? chefUi.kalMan + d : 0; IH.rita(); };
+  G['lp-mal'] = function (el) {
+    var id = el.getAttribute('data-id');
+    var lista = saljare().filter(function (u) { return !u.inaktiv && (!id || u.id === id); });
+    IH.oppnaArk({ titel: 'Säljmål', under: 'Årsmål per säljare – kvartalsmålet är en fjärdedel.', ikon: 'mal',
+      kropp: '<form id="lp-mal-form" data-lp-mal class="km-form">' + lista.map(function (u) {
+        return '<label class="falt"><span>' + e(u.namn) + ' – årsmål i kronor</span><input name="' + u.id + '" type="number" min="0" step="50000" value="' + (u.mal || '') + '" placeholder="T.ex. 900000"></label>';
+      }).join('') + '</form>',
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="lp-mal-form">' + i('bock') + 'Spara målen</button>' });
+  };
+  G['lp-uppgift'] = function (el) {
+    var id = el.getAttribute('data-id'), imorgon = new Date(); imorgon.setDate(imorgon.getDate() + 1);
+    IH.oppnaArk({ titel: 'Ge en uppgift', under: 'Hamnar under Att göra hos säljaren.', ikon: 'todo',
+      kropp: '<form id="lp-uppg-form" data-lp-uppgift class="km-form">' + valSaljare('vem', id) +
+        '<label class="falt"><span>Uppgift</span><input name="text" required maxlength="120" placeholder="T.ex. Ring kunden om grunden"></label>' +
+        '<label class="falt"><span>Klar senast</span><input name="datum" type="date" required value="' + imorgon.toISOString().slice(0, 10) + '"></label></form>',
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="lp-uppg-form">' + i('plus') + 'Ge uppgiften</button>' });
+  };
+  G['lp-fordela'] = function (el) {
+    var aid = el.getAttribute('data-affar'), fid = el.getAttribute('data-forfragan');
+    var a = aid && IH.affar(aid), f = fid && IH.forfragan(fid);
+    IH.oppnaArk({ titel: 'Fördela', under: e(a ? a.titel : f ? f.namn : ''), ikon: 'kunder',
+      kropp: '<form id="lp-ford-form" data-lp-fordela="' + (aid || '') + '" data-lp-forfragan="' + (fid || '') + '" class="km-form">' + valSaljare('vem', a ? a.ansvarig : null) +
+        '<label class="km-kryss"><input type="checkbox" name="meddela" checked> Skicka ett meddelande till säljaren</label></form>',
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="lp-ford-form">' + i('bock') + 'Fördela</button>' });
+  };
+  G['lp-pamin'] = function (el) {
+    var u = IH.anvandare(el.getAttribute('data-uid')); if (!u) return;
+    if (IH.chattSkickaTill && IH.chattSkickaTill(u.id, 'Påminnelse – ' + el.getAttribute('data-text') + '. Hör av dig om du behöver hjälp!')) IH.toast('Påminnelsen är skickad', 'Till ' + u.namn + ' i chatten.', 'samtal');
+    else IH.toast('Kunde inte skicka', 'Chatten är skrivskyddad i supportläget.', 'varning');
+  };
+  G['lp-rapport'] = function () {
+    var q = function (x) { return '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"'; };
+    var rader = [['Säljare', 'Öppna affärer', 'Öppet värde', 'Viktat', 'Vunnet 90 d', 'Ordrar 90 d', 'Årsmål', 'Aktiviteter 14 d', 'Försenade uppgifter'].map(q).join(';')].concat(saljare().map(function (u) {
+      var x = stat(u), v90 = x.aff.filter(function (a) { return a.steg === 'vunnen' && inom(a.vunnen, 90); });
+      return [u.namn, x.oppna.length, Math.round(x.oppet), Math.round(x.viktat), v90.reduce(function (t, a) { return t + a.varde; }, 0), v90.length, u.mal || '', x.akt.filter(function (h) { return IH.dagarSedan(h.tid) < 14; }).length, x.sena.length].map(q).join(';');
+    }));
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rader.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'legohus-forsaljning-' + new Date().toISOString().slice(0, 10) + '.csv'; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+    IH.toast('Rapporten är nedladdad', 'Teamets försäljning som CSV – öppnas i Excel.', 'ladda-ner');
+  };
+  document.addEventListener('submit', function (ev) {
+    var t = ev.target; if (!t.matches) return;
+    if (t.matches('[data-lp-mal]')) {
+      ev.preventDefault();
+      [].slice.call(t.elements).forEach(function (f) { if (!f.name) return; var u = IH.anvandare(f.name), v = Math.max(0, Math.round(+f.value || 0)); if (u && IH.andraKonto) IH.andraKonto(u.id, { mal: v }); else if (u) u.mal = v || undefined; });
+      IH.stangArk(); IH.rita(); IH.toast('Målen är sparade', 'Kvartalsmålet är en fjärdedel av årsmålet.', 'mal');
+    }
+    if (t.matches('[data-lp-uppgift]')) {
+      ev.preventDefault();
+      var u = IH.anvandare(t.vem.value), text = t.text.value.trim(); if (!u || !text) return;
+      db().uppgifter.push({ id: IH.nyttId('uppgift', 'u'), text: text, forfaller: new Date(t.datum.value + 'T09:00:00').toISOString(), klar: false, kund: null, affar: null, ansvarig: u.id, av: IH.jag().id });
+      IH.spara(); IH.stangArk(); IH.uppdateraMeny(); IH.rita();
+      IH.toast('Uppgiften är given', u.namn + ' ser den under Att göra.', 'todo');
+    }
+    if (t.matches('[data-lp-fordela]')) {
+      ev.preventDefault();
+      var till = IH.anvandare(t.vem.value), a = IH.affar(t.getAttribute('data-lp-fordela')), f = IH.forfragan(t.getAttribute('data-lp-forfragan')); if (!till) return;
+      if (a) { a.ansvarig = till.id; a.andrad = new Date().toISOString(); IH.logga('system', 'Fördelad till ' + till.namn + ' av ' + IH.jag().namn + '.', a.kund, a.id); }
+      if (f) { f.tilldelad = till.id; }
+      IH.spara();
+      if (t.meddela.checked && till.id !== IH.jag().id && IH.chattSkickaTill) IH.chattSkickaTill(till.id, 'Jag har gett dig ' + (a ? 'affären ' + a.titel : 'förfrågan från ' + f.namn) + '. Hör av dig om du har frågor!');
+      IH.stangArk(); IH.uppdateraMeny(); IH.rita();
+      IH.toast('Fördelad', (a ? a.titel : f ? f.namn : '') + ' → ' + till.namn, 'kunder');
+    }
+  });
 })();

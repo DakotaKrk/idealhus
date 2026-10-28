@@ -468,6 +468,13 @@
   };
   G['chf-oppna'] = (el) => { fl.oppen = true; fl.min = false; fl.kanal = el.getAttribute('data-kanal'); sparaFl(); IH.ga('#/'); };
   G['ch-skriv-till'] = (el) => { const uid = el.getAttribute('data-uid'); if (uid === jag()) return; fl.oppen = true; fl.min = false; fl.kanal = privatId(jag(), uid); sparaFl(); ritaFonster(); fokusText(true); };
+  // Ett meddelande från mig till en kollega (chefens påminnelser och fördelningar) – inte i supportläget
+  IH.chattSkickaTill = (uid, text) => {
+    if ((IH.visarSom && IH.visarSom()) || uid === jag()) return false;
+    const m = { id: nyId('m'), kanal: privatId(jag(), uid), av: jag(), tid: new Date().toISOString(), text };
+    C().meddelanden.push(m); kanda.add(m.id); IH.spara(); IH.uppdateraMeny(); if (fonster) ritaFonster();
+    return true;
+  };
   G['chf-min-sida'] = (el) => { fl.oppen = true; fl.min = true; fl.kanal = el.getAttribute('data-kanal'); sparaFl(); IH.ga('#/'); };
   G['chf-min'] = () => { fl.min = true; sparaFl(); ritaFonster(); };
   G['chf-stang'] = () => { fl.oppen = false; sparaFl(); ritaFonster(); };
