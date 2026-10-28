@@ -538,6 +538,15 @@
     IH.toast(typ === 'uppgift' ? 'Uppgiften är lagd' : 'Inlagt i kalendern', text + ' · ' + nar.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' }), 'kalender');
   });
 
+  // Himlen i hjälten efter tiden på dygnet: månskära med kratrar och tindrande stjärnor på kvällen och natten,
+  // en sol som går upp på morgonen och en sol med strålar på dagen
+  function himlen(h) {
+    var natt = h >= 17 || h < 5, morgon = h >= 5 && h < 10;
+    var stjarnor = [[8, 18, 1.1, 0], [86, 10, .8, .7], [94, 62, 1, 1.4], [16, 78, .7, 2.1], [70, 88, .9, .4], [40, 4, .6, 1.8], [100, 30, .7, 2.6]];
+    if (natt) return '<span class="lp-himmel lp-himmel--natt" aria-hidden="true">' + stjarnor.map(function (st) { return '<i class="lp-stjarna" style="left:' + st[0] + '%;top:' + st[1] + '%;--s:' + st[2] + ';--d:' + st[3] + 's"></i>'; }).join('') +
+      '<i class="lp-fall"></i><span class="lp-mane"><i class="lp-mane__skugga"></i><i class="lp-krater" style="left:24%;top:38%;--k:14%"></i><i class="lp-krater" style="left:16%;top:62%;--k:9%"></i><i class="lp-krater" style="left:34%;top:72%;--k:7%"></i><i class="lp-krater" style="left:30%;top:20%;--k:6%"></i></span></span>';
+    return '<span class="lp-himmel lp-himmel--' + (morgon ? 'morgon' : 'dag') + '" aria-hidden="true"><span class="lp-sol">' + [0, 1, 2, 3, 4, 5, 6, 7].map(function (n) { return '<i style="--r:' + n * 45 + 'deg"></i>'; }).join('') + '</span></span>';
+  }
   IH.vyer.chef = function () {
     var jag = IH.jag();
     if (!jag.chef) return { titel: 'Försäljning', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort lp-kort"><h2>' + IH.emo('las') + 'Bara för försäljningschefen</h2><p class="lp-tom">Administratören kan göra en säljare till försäljningschef under Ändra i adminpanelen.</p></section>' };
@@ -567,7 +576,7 @@
     var veckoStaplar = '<div class="lp-veckor"><small>Vunnet per vecka · 12 veckor · ' + IH.kort(veckorV.reduce(function (t, v) { return t + v; }, 0)) + '</small><span class="lp-veckor__staplar">' + veckorV.map(function (v, n) {
       var vnr = veckonr(new Date(Date.now() - (11 - n) * 7 * 864e5));
       return '<span title="Vecka ' + vnr + (n === 11 ? ' (den här veckan)' : '') + ': ' + (v ? IH.kr(v) : 'inget vunnet') + '"><em>' + (v ? IH.kort(v) : '') + '</em><i style="--h:' + (v / maxV).toFixed(3) + ';--n:' + n + '" class="' + (v ? 'pa' : '') + (n === 11 ? ' nu' : '') + '"></i><small>v' + vnr + '</small></span>'; }).join('') + '</span></div>';
-    var hjalte = '<section class="ap-hjalte ao-hjalte kort lp-chefhjalte lp-mork"><div class="sh-rutnat" aria-hidden="true"></div><i class="lp-mork__glod" aria-hidden="true"></i><i class="lp-mork__glod lp-mork__glod--2" aria-hidden="true"></i>' +
+    var hjalte = '<section class="ap-hjalte ao-hjalte kort lp-chefhjalte lp-mork"><div class="sh-rutnat" aria-hidden="true"></div><i class="lp-mork__glod" aria-hidden="true"></i><i class="lp-mork__glod lp-mork__glod--2" aria-hidden="true"></i>' + himlen(h) +
       '<div class="ao-text"><p class="etikett"><i class="sh-live"></i>Försäljningsledning · live ur CRM:et</p><h1>' + hals + ', ' + e(jag.namn.split(' ')[0]) + '. <em>Så går teamet.</em></h1>' +
         '<p class="ao-ingress">' + plural(team.length, 'säljare', 'säljare') + ' · ' + aktivaNu + ' i tjänst nu · ' + plural(oppnaN, 'öppen affär', 'öppna affärer') + (utan.length ? ' · <strong class="lp-varm">' + plural(utan.length, 'affär', 'affärer') + ' utan ansvarig</strong>' : '') + '</p>' +
         '<div class="sh-knappar"><button type="button" class="sh-knapp sh-knapp--accent" data-g="km-nytt-konto">' + IH.emo('anvandare-plus') + '<span>Lägg till säljare</span></button>' +

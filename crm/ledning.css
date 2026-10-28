@@ -645,3 +645,24 @@ section.lp-mork .lp-veckor__staplar .nu ~ small { color: #f6c68d; }
 section.lp-mork .sh-knapp--accent, section.lp-mork .sh-knapp--accent:hover, section.lp-mork .sh-knapp--accent:focus-visible { background: linear-gradient(160deg, #f8d09b, #e29a4a); color: #1b1915; border-color: transparent; }
 section.lp-mork .sh-knapp--accent:hover { transform: translateY(-1px); box-shadow: 0 18px 34px -14px rgba(226, 154, 74, 1); }
 section.lp-mork .sh-knapp--accent .emo-ik, section.lp-mork .sh-knapp--accent span { color: #1b1915; }
+
+/* Himlen i chefens hjälte: månen med kratrar, stjärnor som tindrar och ett stjärnfall; solen på dagen */
+.lp-himmel { position: absolute; z-index: 0; left: min(46%, 600px); top: 24px; width: 120px; height: 100px; pointer-events: none; }
+.lp-mane { position: absolute; left: 22px; top: 14px; width: 72px; height: 72px; border-radius: 50%; overflow: hidden;
+  background: radial-gradient(circle at 30% 30%, #fff6dc, #f6d58e 55%, #e2a94f); box-shadow: 0 0 24px rgba(255, 214, 140, .55), 0 0 60px rgba(255, 190, 100, .25); animation: lp-mane 7s ease-in-out infinite; }
+@keyframes lp-mane { 50% { transform: translateY(-4px) rotate(-4deg); box-shadow: 0 0 30px rgba(255, 214, 140, .7), 0 0 80px rgba(255, 190, 100, .32); } }
+.lp-mane__skugga { position: absolute; z-index: 2; left: 34%; top: -10%; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle at 40% 40%, #2a221b, #1a1612); box-shadow: -4px 2px 10px rgba(0, 0, 0, .35); }
+.lp-krater { position: absolute; width: var(--k); height: var(--k); border-radius: 50%; background: rgba(176, 120, 50, .35); box-shadow: inset 1px 1px 2px rgba(120, 80, 30, .45); }
+.lp-stjarna { position: absolute; width: calc(var(--s) * 4px); height: calc(var(--s) * 4px); background: #fff7e6; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); filter: drop-shadow(0 0 3px #ffe3ad); animation: lp-tindra 2.8s ease-in-out infinite; animation-delay: var(--d); }
+@keyframes lp-tindra { 50% { opacity: .25; transform: scale(.6) rotate(45deg); } }
+.lp-fall { position: absolute; left: 0; top: 0; width: 60px; height: 1.5px; border-radius: 2px; background: linear-gradient(90deg, rgba(255, 240, 210, .9), transparent); transform: rotate(28deg); opacity: 0; animation: lp-fall 9s ease-in 3s infinite; }
+@keyframes lp-fall { 0% { opacity: 0; transform: translate(80px, -20px) rotate(28deg); } 3% { opacity: 1; } 10% { opacity: 0; transform: translate(-40px, 44px) rotate(28deg); } 100% { opacity: 0; } }
+.lp-sol { position: absolute; left: 30px; top: 18px; width: 56px; height: 56px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff3d6, #ffc46b 60%, #e29a4a); box-shadow: 0 0 30px rgba(255, 196, 107, .7), 0 0 70px rgba(255, 170, 80, .35); animation: lp-sol 30s linear infinite; }
+.lp-sol i { position: absolute; left: 50%; top: 50%; width: 4px; height: 14px; margin: -7px 0 0 -2px; border-radius: 4px; background: linear-gradient(#ffd9a0, transparent); transform: rotate(var(--r)) translateY(-44px); animation: lp-straal 2.6s ease-in-out infinite; animation-delay: calc(var(--r) / 360deg * 1.3s); }
+@keyframes lp-sol { to { transform: rotate(360deg); } }
+@keyframes lp-straal { 50% { height: 20px; opacity: .55; } }
+.lp-himmel--morgon .lp-sol { top: 40px; box-shadow: 0 0 30px rgba(255, 150, 80, .7), 0 0 70px rgba(255, 120, 60, .35); }
+section.lp-mork .ao-text { position: relative; z-index: 1; }
+@media (max-width: 1250px) { .lp-himmel { left: auto; right: 260px; } }
+@media (max-width: 760px) { .lp-himmel { right: 10px; top: 10px; transform: scale(.7); } }
+@media (prefers-reduced-motion: reduce) { .lp-himmel * { animation: none !important; } }
