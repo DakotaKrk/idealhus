@@ -1065,3 +1065,6 @@ section.lp-band2.lp-mk { background: radial-gradient(130% 90% at 0% 0%, #2b241c,
 .lp-vdagar i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 8px; background: rgba(255, 255, 255, .06); font: 700 .66rem/1 var(--rubrik); font-style: normal; color: rgba(251, 244, 232, .45); }
 .lp-vdagar i.pa { background: linear-gradient(160deg, #f6c68d, #e29a4a); color: #1b1915; box-shadow: 0 4px 12px -4px rgba(226, 154, 74, .8); }
 .lp-fvchip { padding: 2px 7px; border-radius: 999px; background: rgba(120, 170, 230, .25); font-weight: 700; }
+
+.lp-vdagar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; max-width: 196px; }
+.lp-vdagar i { width: auto; height: 22px; min-width: 0; border-radius: 7px; }
