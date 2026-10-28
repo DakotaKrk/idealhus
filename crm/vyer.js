@@ -3840,16 +3840,77 @@
       '<span class="uppg__typ" title="' + typ[2] + '" aria-hidden="true">' + typ[1] + '</span>' +
       '<span class="uppg__text"><b>' + e(u.text) + '</b><small>' + (k ? '<a href="#/kunder/' + k.id + '">' + e(k.namn) + '</a> · ' : '') + typ[2] + '</small></span>' +
       '<span class="uppg__nar' + (nar[0] ? ' uppg__nar--' + nar[0] : '') + '">' + nar[1] + '</span>' +
+      (!u.klar ? '<button type="button" class="uppg__skjut" data-g="ag-skjut" data-id="' + u.id + '" title="Skjut upp en dag" aria-label="Skjut upp en dag">+1 d</button>' : '') +
       (k && !u.klar ? '<span class="uppg__snabb">' +
         (k.telefon ? '<button type="button" data-g="kund-ring" data-tel="' + e(k.telefon) + '" title="Ring ' + e(forsta(k.namn)) + '" aria-label="Ring ' + e(forsta(k.namn)) + '">' + i('tel') + '</button>' : '') +
         '<button type="button" data-g="kund-oppna" data-id="' + k.id + '" title="Kundkortet" aria-label="Kundkortet">' + i('kunder') + '</button></span>' : '') +
       '</li>';
   }
 
+  // Planeringen på Att göra: vy (vecka, två veckor, månad), förskjutning och filter. Allt räknas ur uppgifterna.
+  var agUi = { vy: 'vecka', off: 0, vem: 'mina', typ: 'alla', sok: '' };
+  var agFilter = function (x) {
+    if (agUi.vem === 'mina' && x.ansvarig && x.ansvarig !== IH.jag().id) return false;
+    if (agUi.typ !== 'alla' && uppgTyp(x.text)[2] !== agUi.typ) return false;
+    if (agUi.sok) { var k = x.kund && IH.kund(x.kund), q = agUi.sok.toLowerCase(); if ((x.text + ' ' + (k ? k.namn : '')).toLowerCase().indexOf(q) < 0) return false; }
+    return true;
+  };
+  function agKalender(alla) {
+    var idag0 = new Date(); idag0.setHours(0, 0, 0, 0);
+    var start, dagar, rubrik;
+    if (agUi.vy === 'man') {
+      var f = new Date(idag0.getFullYear(), idag0.getMonth() + agUi.off, 1);
+      start = new Date(f); start.setDate(1 - ((f.getDay() + 6) % 7));
+      dagar = Math.ceil((((f.getDay() + 6) % 7) + new Date(f.getFullYear(), f.getMonth() + 1, 0).getDate()) / 7) * 7;
+      rubrik = f.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' });
+    } else {
+      var n = agUi.vy === 'tva' ? 14 : 7;
+      start = new Date(idag0); start.setDate(idag0.getDate() - ((idag0.getDay() + 6) % 7) + agUi.off * n);
+      dagar = n;
+      var slut = new Date(start); slut.setDate(start.getDate() + n - 1);
+      rubrik = 'Vecka ' + veckaNr(start) + (n === 14 ? '–' + veckaNr(slut) : '') + ' · ' + start.getDate() + ' ' + MANAD[start.getMonth()].slice(0, 3) + ' – ' + slut.getDate() + ' ' + MANAD[slut.getMonth()].slice(0, 3);
+    }
+    var max = 1, celler = [], tot = 0, sena = 0;
+    for (var d = 0; d < dagar; d++) {
+      var dag = new Date(start); dag.setDate(start.getDate() + d);
+      var dag1 = new Date(dag); dag1.setHours(23, 59, 59, 999);
+      var l = alla.filter(function (x) { var t = new Date(x.forfaller); return t >= dag && t <= dag1; });
+      if (l.filter(function (x) { return !x.klar; }).length > max) max = l.filter(function (x) { return !x.klar; }).length;
+      celler.push({ d: dag, l: l });
+    }
+    var tyngst = null;
+    celler.forEach(function (c) { var k = c.l.filter(function (x) { return !x.klar; }).length; tot += k; if (c.d < idag0) sena += k; if (k && (!tyngst || k > tyngst.k)) tyngst = { d: c.d, k: k }; });
+    var visa = agUi.vy === 'man' ? 2 : agUi.vy === 'tva' ? 3 : 5;
+    var dagHtml = celler.map(function (c, n) {
+      var t = c.d.getTime(), ut = agUi.vy === 'man' && c.d.getMonth() !== new Date(idag0.getFullYear(), idag0.getMonth() + agUi.off, 1).getMonth();
+      var oppna = c.l.filter(function (x) { return !x.klar; }), klara = c.l.length - oppna.length, ds = IH.dagStr(c.d);
+      return '<div class="agk__dag' + (t === idag0.getTime() ? ' idag' : '') + (t < idag0.getTime() ? ' forbi' : '') + (c.d.getDay() % 6 === 0 ? ' helg' : '') + (ut ? ' ut' : '') + (oppna.some(function (x) { return t < idag0.getTime(); }) ? ' sen' : '') + '" data-ag-dag="' + ds + '" style="--n:' + n + ';--last:' + (oppna.length / max).toFixed(2) + '">' +
+        '<header><span><small>' + VECKODAG[c.d.getDay()].slice(0, 3) + '</small><b>' + c.d.getDate() + '</b></span>' +
+          (oppna.length ? '<em>' + oppna.length + '</em>' : klara ? '<em class="klar">' + i('bock') + '</em>' : '') +
+          '<button type="button" class="agk__plus" data-g="ag-ny-dag" data-dag="' + ds + '" aria-label="Ny uppgift ' + e(dagNamn(c.d)) + '" title="Ny uppgift den här dagen">' + i('plus') + '</button></header>' +
+        '<i class="agk__last" aria-hidden="true"></i>' +
+        '<div class="agk__lista">' + c.l.slice(0, visa).map(function (x) {
+          var typ = uppgTyp(x.text), k = x.kund && IH.kund(x.kund);
+          return '<span class="agk__u' + (x.klar ? ' klar' : '') + (!x.klar && t < idag0.getTime() ? ' sen' : '') + '" draggable="' + !x.klar + '" data-ag-uppg="' + x.id + '" title="' + e(x.text + (k ? ' · ' + k.namn : '')) + '">' + typ[1] + '<span>' + e(x.text) + '</span></span>';
+        }).join('') + (c.l.length > visa ? '<button type="button" class="agk__fler" data-g="ag-dag-visa" data-dag="' + ds + '">+' + (c.l.length - visa) + ' till</button>' : '') +
+        (!c.l.length && !ut ? '<span class="agk__fritt">' + (c.d.getDay() % 6 === 0 ? 'Helg' : 'Fritt') + '</span>' : '') + '</div></div>';
+    }).join('');
+    var seg = function (v, t) { return '<button type="button" data-g="ag-vy" data-f="' + v + '" aria-pressed="' + (agUi.vy === v) + '">' + t + '</button>'; };
+    return '<section class="kort agk" data-in><header class="agk__huvud">' +
+        '<div><p class="etikett">Planering</p><h2>' + e(rubrik.charAt(0).toUpperCase() + rubrik.slice(1)) + '</h2>' +
+          '<p class="agk__lage"><span><b>' + tot + '</b> öppna i perioden</span>' + (tyngst ? '<span>Mest på <b>' + VECKODAG[tyngst.d.getDay()] + ' ' + tyngst.d.getDate() + '/' + (tyngst.d.getMonth() + 1) + '</b> (' + tyngst.k + ')</span>' : '') + (sena ? '<span class="sen"><b>' + sena + '</b> försenade</span>' : '') + '</p></div>' +
+        '<div class="agk__verktyg"><span class="agk__nav"><button type="button" data-g="ag-off" data-d="-1" aria-label="Föregående">' + i('pilv') + '</button>' + (agUi.off ? '<button type="button" class="agk__idag" data-g="ag-off" data-d="0">I dag</button>' : '') + '<button type="button" data-g="ag-off" data-d="1" aria-label="Nästa">' + i('pil') + '</button></span>' +
+          '<span class="tv-seg" role="group" aria-label="Vy">' + seg('vecka', 'Vecka') + seg('tva', '2 veckor') + seg('man', 'Månad') + '</span></div></header>' +
+      '<div class="agk__rutnat agk__rutnat--' + agUi.vy + '"' + (agUi.vy !== 'vecka' ? '' : '') + '>' + (agUi.vy === 'man' ? ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map(function (x) { return '<span class="agk__vd">' + x + '</span>'; }).join('') : '') + dagHtml + '</div>' +
+      '<p class="agk__tips">' + IH.emo('glodlampa') + 'Dra en uppgift till en annan dag för att flytta den. Tryck på + för att lägga till en uppgift den dagen.</p></section>';
+  }
+  function veckaNr(d) { var t = new Date(d); t.setHours(0, 0, 0, 0); t.setDate(t.getDate() + 3 - (t.getDay() + 6) % 7); var v1 = new Date(t.getFullYear(), 0, 4); return 1 + Math.round(((t - v1) / 864e5 - 3 + (v1.getDay() + 6) % 7) / 7); }
+
   IH.vyer['att-gora'] = function () {
     var idag0 = new Date(); idag0.setHours(0, 0, 0, 0);
     var idag1 = new Date(); idag1.setHours(23, 59, 59, 999);
-    var u = db().uppgifter.slice().sort(function (a, b) { return a.forfaller < b.forfaller ? -1 : 1; });
+    var allaU = db().uppgifter.slice().sort(function (a, b) { return a.forfaller < b.forfaller ? -1 : 1; });
+    var u = allaU.filter(agFilter);
     var grupper = [
       ['Försenade', u.filter(function (x) { return !x.klar && new Date(x.forfaller) < idag0; }), '⏰', 'Det här skulle ha gjorts tidigare.'],
       ['I dag', u.filter(function (x) { return !x.klar && new Date(x.forfaller) >= idag0 && new Date(x.forfaller) <= idag1; }), '<svg class="emo-ik" aria-hidden="true"><use href="#i-sol"/></svg>', 'Bocka av när det är gjort.'],
@@ -3899,8 +3960,15 @@
           '<em>' + (x.l.length ? x.l.length + (x.l.length === 1 ? ' uppgift' : ' uppgifter') : 'fritt') + '</em></span>';
       }).join('') + '</div>' +
     '</section>';
+    var typer = ['alla'].concat(UPPG_TYP.map(function (t) { return t[2]; })).concat(['Uppgift']);
+    var verktyg = '<div class="agv" data-in>' +
+      '<label class="agv__sok">' + i('sok') + '<input type="search" data-ag-sok placeholder="Sök uppgift eller kund" value="' + e(agUi.sok) + '" aria-label="Sök"></label>' +
+      '<span class="tv-seg" role="group" aria-label="Vems">' + [['mina', 'Mina'], ['alla', 'Alla']].map(function (x) { return '<button type="button" data-g="ag-vem" data-f="' + x[0] + '" aria-pressed="' + (agUi.vem === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</span>' +
+      '<span class="agv__typer">' + typer.map(function (t) { var n = allaU.filter(function (x) { return !x.klar && (t === 'alla' || uppgTyp(x.text)[2] === t); }).length; if (t !== 'alla' && !n) return ''; return '<button type="button" class="ap-filter" data-g="ag-typ" data-f="' + t + '" aria-pressed="' + (agUi.typ === t) + '">' + (t === 'alla' ? 'Allt' : t) + ' <b>' + n + '</b></button>'; }).join('') + '</span>' +
+      '<span class="agv__hoger">' + (grupper[0][1].length ? '<button type="button" class="ap-filter agv__flytta" data-g="ag-sena-idag">' + i('klocka') + 'Flytta ' + grupper[0][1].length + ' försenade till i dag</button>' : '') +
+        '<button type="button" class="tv-ikon" data-g="ag-csv" title="Exportera uppgifterna som CSV">' + i('skrivut') + '</button></span></div>';
     var html = '<h1 class="dold">Att göra</h1>' +
-      topp + '<form class="nyuppg kort" data-form="uppgift" data-in><span class="nyuppg__plus" aria-hidden="true">' + i('plus') + '</span><input name="text" placeholder="Ny uppgift – t.ex. Ring Karin om tomten" required autocomplete="off">' +
+      topp + agKalender(u) + verktyg + '<form class="nyuppg kort" data-form="uppgift" data-in><span class="nyuppg__plus" aria-hidden="true">' + i('plus') + '</span><input name="text" placeholder="Ny uppgift – t.ex. Ring Karin om tomten" required autocomplete="off">' +
       '<select name="kund" aria-label="Kund"><option value="">Ingen kund</option>' + db().kunder.map(function (k) { return '<option value="' + k.id + '">' + e(k.namn) + '</option>'; }).join('') + '</select>' +
       '<input type="date" name="datum" value="' + IH.dagStr() + '" aria-label="Datum"><button class="knapp knapp--mork knapp--liten" type="submit">Lägg till</button></form>' +
       '<p class="nyuppg__tips"><svg class="emo-ik" aria-hidden="true"><use href="#i-glodlampa"/></svg> Skriv som du pratar – "Ring …", "Skicka offert …" eller "Platsbesök …" får rätt ikon av sig själv.</p>' +
@@ -3911,6 +3979,60 @@
       }).join('');
     return { titel: 'Att göra', html: html };
   };
+  G['ag-vy'] = function (el) { agUi.vy = el.getAttribute('data-f'); agUi.off = 0; IH.rita(); };
+  G['ag-off'] = function (el) { var d = +el.getAttribute('data-d'); agUi.off = d ? agUi.off + d : 0; IH.rita(); };
+  G['ag-vem'] = function (el) { agUi.vem = el.getAttribute('data-f'); IH.rita(); };
+  G['ag-typ'] = function (el) { agUi.typ = el.getAttribute('data-f'); IH.rita(); };
+  G['ag-ny-dag'] = function (el) {
+    var f = $('.nyuppg'); if (!f) return;
+    f.datum.value = el.getAttribute('data-dag'); f.datum.dispatchEvent(new Event('change', { bubbles: true }));
+    f.scrollIntoView({ behavior: IH.lugn ? 'auto' : 'smooth', block: 'center' });
+    setTimeout(function () { f.text.focus(); }, IH.lugn ? 0 : 350);
+    f.classList.remove('nyuppg--puls'); void f.offsetWidth; f.classList.add('nyuppg--puls');
+  };
+  G['ag-dag-visa'] = function (el) {
+    var ds = el.getAttribute('data-dag'), d0 = new Date(ds + 'T00:00:00'), d1 = new Date(ds + 'T23:59:59');
+    var l = db().uppgifter.filter(function (x) { var t = new Date(x.forfaller); return t >= d0 && t <= d1 && agFilter(x); });
+    IH.oppnaArk({ titel: dagNamn(d0), under: l.length + (l.length === 1 ? ' uppgift' : ' uppgifter'), ikon: 'kalender', kropp: '<ul class="uppglista">' + l.map(uppgiftRad).join('') + '</ul>',
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Stäng</button>' });
+  };
+  var flyttaTill = function (u, ds) { var t = new Date(u.forfaller), n = new Date(ds + 'T00:00:00'); n.setHours(t.getHours() || 9, t.getMinutes()); u.forfaller = n.toISOString(); };
+  G['ag-skjut'] = function (el) {
+    var u = db().uppgifter.filter(function (x) { return x.id === el.getAttribute('data-id'); })[0]; if (!u) return;
+    var bas = new Date(Math.max(new Date(u.forfaller).getTime(), new Date().setHours(0, 0, 0, 0))); bas.setDate(bas.getDate() + 1);
+    flyttaTill(u, IH.dagStr(bas)); IH.spara(); IH.rita(); IH.uppdateraMeny();
+    IH.toast('Uppskjuten', u.text + ' · ' + dagNamn(bas), 'klocka');
+  };
+  G['ag-sena-idag'] = function () {
+    var idag0 = new Date(); idag0.setHours(0, 0, 0, 0);
+    var l = db().uppgifter.filter(function (x) { return !x.klar && new Date(x.forfaller) < idag0 && agFilter(x); });
+    l.forEach(function (x) { flyttaTill(x, IH.dagStr()); });
+    IH.spara(); IH.rita(); IH.uppdateraMeny();
+    IH.toast('Flyttade till i dag', l.length + (l.length === 1 ? ' uppgift' : ' uppgifter') + ' ligger nu på i dag.', 'kalender');
+  };
+  G['ag-csv'] = function () {
+    var esc = function (v) { v = String(v == null ? '' : v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var rader = [['Datum', 'Uppgift', 'Typ', 'Kund', 'Ansvarig', 'Klar']].concat(db().uppgifter.filter(agFilter).sort(function (a, b) { return a.forfaller < b.forfaller ? -1 : 1; }).map(function (x) {
+      var k = x.kund && IH.kund(x.kund), a = x.ansvarig && IH.anvandare(x.ansvarig); return [IH.dagStr(new Date(x.forfaller)), x.text, uppgTyp(x.text)[2], k ? k.namn : '', a ? a.namn : '', x.klar ? 'Ja' : 'Nej']; }));
+    var l = document.createElement('a'); l.href = URL.createObjectURL(new Blob(['\ufeff' + rader.map(function (r) { return r.map(esc).join(';'); }).join('\r\n')], { type: 'text/csv' })); l.download = 'att-gora-' + IH.dagStr() + '.csv'; document.body.appendChild(l); l.click(); l.remove();
+    IH.toast('Exporterat', (rader.length - 1) + ' uppgifter till CSV.', 'skrivut');
+  };
+  // sök medan man skriver (ritar om efter en kort paus och behåller markören)
+  document.addEventListener('input', function (ev) {
+    var t = ev.target; if (!t.matches || !t.matches('[data-ag-sok]')) return;
+    clearTimeout(G['ag-csv'].t); G['ag-csv'].t = setTimeout(function () { agUi.sok = t.value.trim(); IH.rita(); var n = $('[data-ag-sok]'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 220);
+  });
+  // dra uppgifter mellan dagarna i planeringen
+  document.addEventListener('dragstart', function (ev) { var c = ev.target.closest && ev.target.closest('[data-ag-uppg]'); if (!c) return; ev.dataTransfer.setData('text/ag-uppg', c.getAttribute('data-ag-uppg')); ev.dataTransfer.effectAllowed = 'move'; c.classList.add('drar'); document.documentElement.classList.add('ag-drar'); });
+  document.addEventListener('dragend', function () { document.documentElement.classList.remove('ag-drar'); document.querySelectorAll('.agk .drar, .agk .drop').forEach(function (x) { x.classList.remove('drar', 'drop'); }); });
+  document.addEventListener('dragover', function (ev) { var d = ev.target.closest && ev.target.closest('[data-ag-dag]'); if (!d || !document.documentElement.classList.contains('ag-drar')) return; ev.preventDefault(); document.querySelectorAll('.agk .drop').forEach(function (x) { if (x !== d) x.classList.remove('drop'); }); d.classList.add('drop'); });
+  document.addEventListener('drop', function (ev) {
+    var d = ev.target.closest && ev.target.closest('[data-ag-dag]'); if (!d) return;
+    var id = ev.dataTransfer.getData('text/ag-uppg'); if (!id) return; ev.preventDefault();
+    var u = db().uppgifter.filter(function (x) { return x.id === id; })[0]; if (!u) return;
+    var ds = d.getAttribute('data-ag-dag'); flyttaTill(u, ds); IH.spara(); IH.rita(); IH.uppdateraMeny();
+    IH.toast('Flyttad', u.text + ' · ' + dagNamn(new Date(ds + 'T12:00:00')), 'kalender');
+  });
   G['uppgift-klar'] = function (el) {
     var u = db().uppgifter.filter(function (x) { return x.id === el.getAttribute('data-id'); })[0];
     if (!u) return;
