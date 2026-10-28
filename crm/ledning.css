@@ -152,3 +152,61 @@
 }
 @media (prefers-reduced-motion: reduce) { .lp-staplar i, .lp-mal__spar i, .lp-pipe__stapel { animation: none; } }
 .lp-skriv { margin-top: 12px; }
+
+/* Kontomenyn (ledning.js): täcker sidomenyn exakt på dator, annars i ett ark */
+.km-panel { position: fixed; z-index: 950; display: flex; flex-direction: column; gap: 12px; padding: 16px 14px 14px; border-radius: 28px; overflow: hidden auto;
+  background: linear-gradient(180deg, #fffdf9, #fbf4e8); box-shadow: 0 30px 70px -30px rgba(60, 40, 15, .55), inset 0 0 0 1px rgba(240, 181, 110, .45);
+  animation: km-in .32s var(--mjuk) both; transform-origin: bottom left; }
+.km-panel[data-stanger] { animation: km-ut .2s ease-in both; }
+@keyframes km-in { from { opacity: 0; transform: translateY(14px) scale(.97); } }
+@keyframes km-ut { to { opacity: 0; transform: translateY(10px) scale(.98); } }
+html[data-konto-oppen] .anv { opacity: 0; pointer-events: none; }
+.km-huvud { display: flex; align-items: center; gap: 12px; }
+.km-huvud > div { flex: 1; display: grid; min-width: 0; }
+.km-huvud b { font: 700 1.05rem/1.2 var(--rubrik); }
+.km-huvud small { font-size: .78rem; color: var(--text-3); }
+.km-huvud .lp-status { margin-top: 3px; font-size: .78rem; color: var(--text-2); }
+.km-huvud .avatar--stor { width: 52px; height: 52px; font-size: 1.05rem; }
+.km-tal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.km-tal a { display: grid; gap: 2px; padding: 10px 8px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); color: inherit; text-decoration: none; text-align: center; transition: box-shadow .2s, transform .15s; }
+.km-tal a:hover { box-shadow: inset 0 0 0 1.5px var(--virke); }
+.km-tal a:active { transform: scale(.96); }
+.km-tal b { font: 700 1.25rem/1 var(--rubrik); }
+.km-tal small { font-size: .68rem; color: var(--text-3); }
+.km-del { display: grid; gap: 8px; }
+.km-rubrik { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 2px; font: 600 .68rem/1 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+.km-rubrik small { font: 500 .7rem/1 var(--sans); letter-spacing: 0; text-transform: none; }
+.km-del .km-status__val { display: flex; flex-wrap: wrap; gap: 5px; }
+.km-del .km-status__val button { min-height: 30px; padding: 5px 10px; font-size: .74rem; border-radius: 999px; white-space: nowrap; }
+.km-lankar { gap: 2px; }
+.km-lank { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; color: inherit; text-decoration: none; transition: background-color .2s; }
+.km-lank:hover { background: #fff; }
+.km-lank > .emo-ik { width: 17px; height: 17px; padding: 7px; flex: none; border-radius: 11px; background: var(--virke-ljus); box-sizing: content-box; }
+.km-lank span { flex: 1; display: grid; min-width: 0; }
+.km-lank b { font: 600 .86rem/1.2 var(--rubrik); }
+.km-lank small { font-size: .74rem; color: var(--text-3); }
+.km-lank > .i { width: 14px; height: 14px; color: var(--text-3); }
+.km-kontolista { display: grid; gap: 2px; }
+.km-konto { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 8px; border: 0; border-radius: 14px; background: none; text-align: left; font: inherit; cursor: pointer; transition: background-color .2s; }
+.km-konto:hover { background: #fff; }
+.km-konto.vald { background: #fff; box-shadow: inset 0 0 0 1.5px rgba(240, 181, 110, .6); cursor: default; }
+.km-konto .avatar { width: 34px; height: 34px; font-size: .75rem; flex: none; }
+.km-konto span { flex: 1; display: grid; min-width: 0; }
+.km-konto b { font: 600 .84rem/1.2 var(--rubrik); }
+.km-konto small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .72rem; color: var(--text-3); }
+.km-konto em { padding: 3px 8px; border-radius: 999px; background: var(--virke-ljus); font: 600 .66rem/1 var(--rubrik); font-style: normal; color: var(--virke-djup); }
+.km-ny { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 38px; border: 1.5px dashed rgba(143, 84, 36, .35); border-radius: 14px; background: none; font: 600 .82rem/1 var(--rubrik); color: var(--virke-djup); cursor: pointer; transition: background-color .2s, border-color .2s; }
+.km-ny:hover { background: #fff; border-color: var(--virke); }
+.km-ny .emo-ik { width: 16px; height: 16px; }
+.km-fot { display: flex; gap: 8px; margin-top: auto; padding-top: 6px; }
+.km-fot .knapp { flex: 1; justify-content: center; }
+.km-panel[data-tat] { gap: 9px; padding: 12px 12px; }
+.km-panel[data-tat] .km-tal a { padding: 7px 6px; }
+.km-panel[data-tat] .km-lank small, .km-panel[data-tat] .km-konto small { display: none; }
+.km-ark { display: grid; gap: 14px; }
+.km-form { display: grid; gap: 12px; }
+.km-kryss { display: flex; align-items: center; gap: 10px; font-size: .9rem; }
+.km-kryss input { width: 18px; height: 18px; accent-color: var(--virke-djup); }
+/* Chattikonen göms medan en panel eller kontomenyn är öppen (den låg annars över knappar i arkets fot) */
+body:has(.ark.syns) .chf-ikon, html[data-konto-oppen] .chf-ikon { opacity: 0; pointer-events: none; transform: scale(.8); }
+@media (prefers-reduced-motion: reduce) { .km-panel, .km-panel[data-stanger] { animation: none; } }

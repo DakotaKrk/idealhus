@@ -115,7 +115,7 @@
   const kanalAvatar = (k, liten) => (k.typ === 'privat' ? avatar(motpart(k), liten) : '<span class="avatar ch-gruppav' + (liten ? ' avatar--liten' : '') + '">' + ik(k.typ === 'team' ? 'kunder' : 'prat') + '</span>');
   function listaHtml(aktiv) {
     const q = ui.sok.trim().toLowerCase();
-    let lista = kanaler().map((k) => ({ k, m: senast(k.id) })).sort((a, b) => ((b.m ? b.m.tid : '') > (a.m ? a.m.tid : '') ? 1 : -1));
+    let lista = kanaler().map((k) => ({ k, m: senast(k.id) })).filter((x) => x.m || x.k.typ !== 'privat' || x.k.id === aktiv).sort((a, b) => ((b.m ? b.m.tid : '') > (a.m ? a.m.tid : '') ? 1 : -1));
     if (q) lista = lista.filter((x) => kanalNamn(x.k).toLowerCase().indexOf(q) >= 0 || iKanal(x.k.id).some((m) => klartext(m.text).toLowerCase().indexOf(q) >= 0));
     return lista.map(({ k, m }) => {
       const n = k.id === aktiv ? 0 : olasta(k.id), at = k.id !== aktiv && olastaNamn(k.id);
@@ -147,7 +147,7 @@
   }
   function tradHtml(k) {
     const lista = iKanal(k.id), forra = lastTill(k.id);
-    let html = '', dag = '', ny = false, foreg = null;
+    let html = '<div class="ch-intro">' + kanalAvatar(k) + '<div><b>' + e(kanalNamn(k)) + '</b><small>' + (k.typ === 'privat' ? 'Början på ert samtal' : k.typ === 'team' ? 'Alla i teamet · ' + k.medlemmar.length + ' personer' : 'Gruppen · ' + k.medlemmar.length + ' personer') + '</small></div></div>', dag = '', ny = false, foreg = null;
     lista.forEach((m) => {
       const d = new Date(m.tid).toDateString();
       if (d !== dag) { html += '<p class="ch-dag"><span>' + dagRubrik(m.tid) + '</span></p>'; dag = d; foreg = null; }
@@ -157,7 +157,7 @@
     // "Läst" under mitt senaste i ett privat samtal
     const sist = lista[lista.length - 1];
     if (k.typ === 'privat' && sist && sist.av === jag() && lastTill(k.id, motpart(k).id) >= sist.tid) html += '<p class="ch-last">' + ik('bock') + 'Läst</p>';
-    return html || '<div class="ch-tomt">' + ik('prat') + '<b>Inga meddelanden än</b><p>Skriv det första – ' + (k.typ === 'privat' ? 'bara ni två ser samtalet.' : 'alla i samtalet ser det.') + '</p></div>';
+    return lista.length ? html : html + '<div class="ch-tomt">' + ik('prat') + '<b>Inga meddelanden än</b><p>Skriv det första – ' + (k.typ === 'privat' ? 'bara ni två ser samtalet.' : 'alla i samtalet ser det.') + '</p></div>';
   }
   // Snabbsvar på det senaste meddelandet (enkla regler på svenska, som i Uperformance) – klick lägger texten i rutan
   function snabbsvar(k) {
@@ -172,11 +172,10 @@
   }
   // Ljud, avisering och tips längst ned i listan (korten med reglage från Uperformance)
   function installningarHtml() {
-    const ljud = pref().pling !== false, kan = 'Notification' in window, avis = kan && !!pref().avisera && Notification.permission === 'granted';
+    const kan = 'Notification' in window, avis = kan && !!pref().avisera && Notification.permission === 'granted';
     const rad = (g, ikon, titel, under, pa) => '<button type="button" class="ch-vaxel" data-g="' + g + '" role="switch" aria-checked="' + pa + '">' +
       '<span class="ch-vaxel__ikon">' + ik(ikon) + '</span><span class="ch-vaxel__text"><b>' + titel + '</b><small>' + under + '</small></span><i class="ch-vaxel__reglage" aria-hidden="true"></i></button>';
-    return '<div class="ch-kort">' + rad('ch-pling', ljud ? 'bjallra' : 'bjallra-av', 'Ljud vid nya meddelanden', ljud ? 'På – ett mjukt pling' : 'Av', ljud) +
-      (kan ? rad('ch-avisera', 'bjallra', 'Avisering på skrivbordet', avis ? 'På – när fliken inte syns' : 'Av', avis) : '') +
+    return '<div class="ch-kort">' + (kan ? rad('ch-avisera', 'bjallra', 'Avisering på skrivbordet', avis ? 'På – när fliken inte syns' : 'Av', avis) : '') +
       '<div class="ch-tipskort"><span class="ch-vaxel__ikon">' + ik('glodlampa') + '</span><div><b>Tips</b><p>' + (pek()
         ? 'Tryck på ett meddelande för att svara, reagera eller ändra ditt eget. Bifoga filer med gemet – farliga filtyper stoppas.'
         : 'Dra in eller klistra in filer i ett samtal – farliga filtyper stoppas först. Håll musen över ett meddelande för att svara, reagera eller ändra ditt eget. Knappen med minus gör chatten till en ikon som följer med dig.') + '</p></div></div></div>';
@@ -213,7 +212,12 @@
     const mot = motpart(k);
     return '<header class="ch-topp">' + (iFonster ? '<button type="button" class="ch-ikonknapp" data-g="chf-lista" aria-label="Alla samtal">' + i('pilv') + '</button>' : '') + kanalAvatar(k) +
       '<div class="ch-topp__text"><b>' + e(kanalNamn(k)) + '</b><small>' + (mot ? e((IH.narvaro ? IH.narvaro(mot.id).namn + ' · ' : '') + mot.titel) : e(k.medlemmar.map((id) => fornamn(anv(id))).join(', '))) + '</small></div>' +
-      (iFonster ? '' : '<button type="button" class="ch-ikonknapp" data-g="chf-oppna" data-kanal="' + k.id + '" title="Öppna i eget fönster">' + ik('minimera') + '</button><button type="button" class="ch-ikonknapp" data-g="ch-info" aria-pressed="' + ui.info + '" title="Om samtalet">' + ik('info') + '</button>') + '</header>';
+      (iFonster ? '' : '<span class="ch-topp__knappar">' +
+        (k.typ === 'grupp' ? '<button type="button" class="ch-ikonknapp ch-ruta" data-g="ch-bjud" data-kanal="' + k.id + '" title="Bjud in">' + ik('anvandare-plus') + '</button>' : '') +
+        '<button type="button" class="ch-ikonknapp ch-ruta" data-g="ch-tyst" data-kanal="' + k.id + '" aria-pressed="' + tystad(k.id) + '" title="' + (tystad(k.id) ? 'Slå på ljud' : 'Tysta samtalet') + '">' + ik(tystad(k.id) ? 'ljud-av' : 'ljud') + '</button>' +
+        '<button type="button" class="ch-ikonknapp ch-ruta" data-g="ch-info" aria-pressed="' + ui.info + '" title="Om samtalet">' + ik('info') + '</button>' +
+        '<button type="button" class="ch-ikonknapp ch-ruta" data-g="chf-oppna" data-kanal="' + k.id + '" title="Öppna i eget fönster">' + ik('helskarm-ut') + '</button>' +
+        '<button type="button" class="ch-ikonknapp ch-ruta" data-g="chf-min-sida" data-kanal="' + k.id + '" title="Minimera till en ikon">' + ik('minimera') + '</button></span>') + '</header>';
   }
 
   /* 06 Sidan #/chatt[/id] ------------------------------------------------------------------------ */
@@ -223,12 +227,19 @@
     const k = kanal(del[0]) || kanal(sidKanal) || kanal(pref().senast) || lista[0];
     sidKanal = k.id; satPref('senast', k.id);
     const html = '<h1 class="dold">Meddelanden</h1><div class="ch' + (ui.info ? ' med-info' : '') + ' kort" data-in>' +
-      '<aside class="ch-lista"><header><h2>Meddelanden</h2><button type="button" class="ch-ikonknapp ch-ny" data-g="ch-ny-grupp" title="Ny grupp">' + ik('plus') + '</button></header>' +
-        '<label class="ch-sok">' + ik('sok') + '<input type="search" data-ch-sok placeholder="Sök i samtalen" value="' + e(ui.sok) + '" aria-label="Sök i samtalen"></label>' +
+      '<aside class="ch-lista"><header><div><h2>Meddelanden</h2><small>' + (olastaTotalt() ? olastaTotalt() + ' olästa' : 'Allt är läst') + '</small></div>' +
+          '<button type="button" class="ch-ikonknapp ch-ruta" data-g="ch-pling" aria-pressed="' + (pref().pling !== false) + '" title="' + (pref().pling !== false ? 'Stäng av ljudet' : 'Slå på ljudet') + '">' + ik(pref().pling !== false ? 'ljud' : 'ljud-av') + '</button>' +
+          '<button type="button" class="ch-ikonknapp ch-ruta" data-g="chf-min-sida" data-kanal="' + k.id + '" title="Minimera till en ikon">' + ik('minimera') + '</button>' +
+          '<button type="button" class="ch-ikonknapp ch-ny" data-g="ch-ny-grupp" title="Ny grupp">' + ik('plus') + '</button></header>' +
+        '<label class="ch-sok">' + ik('sok') + '<input type="search" data-ch-sok placeholder="Sök i samtalen …" value="' + e(ui.sok) + '" aria-label="Sök i samtalen"></label>' +
+        '<div class="ch-team" role="list" aria-label="Kollegor">' + IH.ANVANDARE.filter((u) => u.id !== jag()).map((u) => {
+          const n = IH.narvaro ? IH.narvaro(u.id) : { namn: '' }, pid = privatId(jag(), u.id);
+          return '<a role="listitem" class="ch-teamkort' + (pid === k.id ? ' vald' : '') + '" href="#/chatt/' + pid + '" title="Skriv till ' + e(u.namn) + ' – ' + e(n.namn) + ' · ' + e(u.titel) + '">' + avatar(u) + '<b>' + e(fornamn(u)) + '</b><small>' + e(n.namn) + '</small></a>';
+        }).join('') + '</div>' +
         '<nav aria-label="Samtal" data-ch-listan>' + listaHtml(k.id) + '</nav>' +
         installningarHtml() + '</aside>' +
       '<section class="ch-tradyta" data-ch-yta="sida">' + toppHtml(k) + '<div class="ch-trad" data-ch-trad>' + tradHtml(k) + '</div>' +
-        '<div class="ch-fot">' + skrivHtml(k) + '<p class="ch-tips">' + (pek() ? 'Tryck på ett meddelande för att svara eller reagera' : 'Enter skickar · Shift + Enter ny rad · ↑ ändrar ditt senaste · @ nämner · # länkar') + '</p></div></section>' +
+        '<div class="ch-fot">' + skrivHtml(k) + '<p class="ch-tips">' + (pek() ? 'Tryck på ett meddelande för att svara eller reagera' : '<kbd>Enter</kbd> skickar · <kbd>Shift</kbd> + <kbd>Enter</kbd> ny rad · <kbd>@</kbd> nämn en kollega · <kbd>#</kbd> länka en kund eller affär · <kbd>↑</kbd> ändra ditt senaste · farliga filtyper stoppas') + '</p></div></section>' +
       (ui.info ? infoHtml(k) : '') + '</div>';
     return { titel: 'Meddelanden', html, efter: (rot) => efterTrad(rot, k) };
   };
@@ -386,6 +397,7 @@
   };
   G['chf-oppna'] = (el) => { fl.oppen = true; fl.min = false; fl.kanal = el.getAttribute('data-kanal'); sparaFl(); IH.ga('#/'); };
   G['ch-skriv-till'] = (el) => { const uid = el.getAttribute('data-uid'); if (uid === jag()) return; fl.oppen = true; fl.min = false; fl.kanal = privatId(jag(), uid); sparaFl(); ritaFonster(); fokusText(true); };
+  G['chf-min-sida'] = (el) => { fl.oppen = true; fl.min = true; fl.kanal = el.getAttribute('data-kanal'); sparaFl(); IH.ga('#/'); };
   G['chf-min'] = () => { fl.min = true; sparaFl(); ritaFonster(); };
   G['chf-stang'] = () => { fl.oppen = false; sparaFl(); ritaFonster(); };
   G['chf-lista'] = () => { fl.kanal = null; sparaFl(); ritaFonster(); };

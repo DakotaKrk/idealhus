@@ -254,3 +254,33 @@
 .ch-snabb__etikett { display: inline-flex; align-items: center; gap: 6px; margin-right: 4px; font: 600 .68rem/1 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
 .ch-snabb__etikett .emo-ik { width: 15px; height: 15px; color: var(--virke); }
 @media (max-width: 860px) { .ch-kort { display: none; } }
+
+/* 09 Packat som i Uperformance (2026-10-28): huvudet med knappar i rutor, teamraden, introt och tangenterna */
+.ch-lista { gap: 12px; padding: 16px 12px 12px; }
+.ch-lista > header { align-items: flex-start; gap: 6px; padding: 0 2px 0 6px; }
+.ch-lista > header > div { flex: 1; display: grid; min-width: 0; }
+.ch-lista > header small { font-size: .82rem; color: var(--text-3); }
+.ch-ruta { width: 38px; height: 38px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); }
+.ch-ruta:hover, .ch-ruta[aria-pressed="true"] { background: #fff; box-shadow: inset 0 0 0 1.5px var(--virke); color: var(--virke-djup); }
+.ch-ny { width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(160deg, var(--virke-2), var(--virke)); color: var(--kol); box-shadow: 0 8px 18px -10px rgba(143, 84, 36, .8); }
+.ch-ny:hover { background: linear-gradient(160deg, var(--virke-2), var(--virke)); color: var(--kol); transform: scale(1.05); }
+.ch-team { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; margin: 0 -2px; scrollbar-width: thin; }
+.ch-teamkort { position: relative; display: grid; justify-items: center; gap: 2px; flex: none; width: 76px; padding: 10px 4px 8px; border-radius: 18px; background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .08); color: inherit; text-decoration: none; text-align: center; transition: box-shadow .2s, transform .2s var(--studs); }
+.ch-teamkort:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1.5px var(--virke), 0 10px 20px -14px rgba(90, 60, 25, .6); }
+.ch-teamkort.vald { box-shadow: inset 0 0 0 1.5px var(--virke); background: #fffaf2; }
+.ch-teamkort .avatar { width: 42px; height: 42px; font-size: .85rem; margin-bottom: 4px; }
+.ch-teamkort b { font: 600 .8rem/1.2 var(--rubrik); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch-teamkort small { font-size: .68rem; color: var(--text-3); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch-topp { gap: 12px; padding: 12px 16px; }
+.ch-topp__knappar { display: flex; gap: 6px; }
+.ch-intro { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 6px 0 4px; padding: 14px 0 6px; }
+.ch-intro > div { display: grid; }
+.ch-intro b { font: 600 1.05rem/1.2 var(--rubrik); }
+.ch-intro small { font-size: .82rem; color: var(--text-3); }
+.ch-intro .avatar { width: 46px; height: 46px; }
+.ch-tips kbd { display: inline-block; padding: 1px 6px; border-radius: 6px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .14), 0 1px 0 rgba(27, 25, 21, .1); font: 600 .68rem/1.5 var(--rubrik); color: var(--text-2); }
+.ch-tips { line-height: 1.9; }
+.chf .ch-intro { padding-top: 8px; }
+@media (max-width: 1250px) { .ch-topp__knappar .ch-ruta { width: 34px; height: 34px; } }
+@media (max-width: 860px) { .ch-team { display: none; } .ch-topp__knappar [data-g="chf-oppna"] { display: none; } }
