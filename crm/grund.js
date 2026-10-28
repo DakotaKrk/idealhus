@@ -73,7 +73,7 @@
       mer.innerHTML = IH.i('prickar') + '<span>Mer</span><b class="sido__merantal"></b>';
       nav.appendChild(mer);
       // det man använder minst flyttas först; okända rader (t.ex. Teamet) efter dem, nerifrån
-      var ORDNING = ['installningar', 'kolla-marken', 'mote', 'att-gora', 'offerter', 'produktion', 'chatt', 'chef', 'kunder', 'forfragningar', 'salj', 'oversikt'];
+      var ORDNING = ['installningar', 'kolla-marken', 'dokument', 'mote', 'att-gora', 'offerter', 'produktion', 'chatt', 'chef', 'kunder', 'forfragningar', 'salj', 'oversikt'];
       var vikt = function (el) { var i = ORDNING.indexOf(el.getAttribute('data-vy')); return i < 0 ? -1 : i; };
       var rader = Array.prototype.slice.call(nav.querySelectorAll('.sido__lank:not(.sido__merknapp)')).map(function (el, i) { return { el: el, i: i }; });
       rader.sort(function (a, b) { return vikt(a.el) - vikt(b.el) || b.i - a.i; });

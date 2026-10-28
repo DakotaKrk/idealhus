@@ -156,6 +156,12 @@
     trofe: 'M8 4h8v5a4 4 0 0 1-8 0z|M8 6H5a3 3 0 0 0 3 4|M16 6h3a3 3 0 0 1-3 4|M12 13v4|M8.5 20h7',
     anteckning: 'M5 4h14v11l-5 5H5z|M14 20v-5h5',
     prickar: 'M5 12h.01|M12 12h.01|M19 12h.01',
+    linjal: 'M3 16.5 16.5 3 21 7.5 7.5 21z|M7 12.5l1.5 1.5|M10 9.5l1.5 1.5|M13 6.5l1.5 1.5',
+    gem: 'M20 11.5l-8.3 8.3a5 5 0 0 1-7.1-7.1l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9',
+    rutnat: 'M4 4h7v7H4z|M13 4h7v7h-7z|M4 13h7v7H4z|M13 13h7v7h-7z',
+    larm: 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16z|M12 9v4l2.5 2|M4 5l3-2|M20 5l-3-2',
+    trend: 'M3 17l6-6 4 4 8-8|M15 7h6v6',
+    mapp: 'M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2h8.5A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z',
     meddelande: 'M4 5.5A2.5 2.5 0 0 1 6.5 3h8A2.5 2.5 0 0 1 17 5.5v5a2.5 2.5 0 0 1-2.5 2.5H9l-4 3.5V13a2.5 2.5 0 0 1-1-2z|M17 8h.5A2.5 2.5 0 0 1 20 10.5V15a2.5 2.5 0 0 1-1 2v3l-3.5-3H11a2.5 2.5 0 0 1-2-1',
     samtal: 'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z',
     motesikon: 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z|M3 20c.6-3.6 3-5.5 6-5.5|M15 14.5h6v6h-6z',
@@ -313,7 +319,7 @@
   var MENY = [
     { rubrik: null, poster: [['oversikt', 'Översikt', 'hem']] },
     { rubrik: 'Sälj', poster: [['forfragningar', 'Förfrågningar', 'inkorg'], ['salj', 'Säljtavla', 'tavla'],
-      ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote']] },
+      ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote']] },
     { rubrik: 'Produktion', poster: [['produktion', 'Projekt', 'produktion']] },
     { rubrik: 'Verktyg', poster: [['kolla-marken', 'Kolla marken', 'mark']] },
     { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
@@ -630,7 +636,7 @@
   /* --- Kommandopaletten (Ctrl/⌘ K) ------------------------------------ */
   var MAC = /Mac|iPhone|iPad/.test(navigator.platform || '');
   var SIDOR = [['oversikt', 'Översikt', 'hem'], ['forfragningar', 'Förfrågningar', 'inkorg'], ['salj', 'Säljtavla', 'tavla'],
-    ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote'],
+    ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote'],
     ['produktion', 'Projekt', 'produktion'], ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']];
   var ATGARDER = [['ny-kund', 'Ny kund', 'kunder', 'Privatperson eller företag'], ['ny-affar', 'Ny affär', 'tavla', 'Direkt på säljtavlan'],
     ['ny-forfragan', 'Ny förfrågan', 'inkorg', 'Någon ringde eller mejlade'], ['ny-uppgift', 'Ny uppgift', 'uppgift', 'Något att göra'],
