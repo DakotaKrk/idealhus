@@ -118,7 +118,8 @@
         st.forEach(function (s) { if (/(lösenord|password|lösen)\s*[:=]\s*\S+/i.test(s.text)) f.push({ allvar: 'hog', text: 'Lösenord i klartext i ' + SAML[s.samling].toLowerCase() }); });
         await vila();
         logg('Kontrollerar att adressen inte bär persondata');
-        if (/@|\b\d{6}[-+]?\d{4}\b/.test(decodeURIComponent(location.search + location.hash))) f.push({ allvar: 'medel', text: 'Adressen innehåller e-post eller personnummer' });
+        if (/@|\b\d{6}[-+]?\d{4}\b/.test(decodeURIComponent(location.search + location.hash))) f.push({ allvar: 'medel', text: 'Adressen innehåller e-post eller personnummer', atgard: { g: 'sh-rensa-adress', text: 'Rensa adressen' } });
+        f.forEach(function (x) { if (!x.atgard && /personnummer|kortnummer|lösenord/i.test(x.text)) x.atgard = { g: 'sh-maska', text: 'Maskera' }; });
         return f;
       } },
     { id: 'intrang', namn: 'Intrångsförsök', under: 'Okända konton, behörighetsförsök och inloggningen', ikon: 'skold-larm',
@@ -351,6 +352,22 @@
   IH.G['sh-rensa-fel'] = function () { felLista.length = 0; IH.rita(); IH.toast('Felloggen är rensad', null, 'aterstall'); };
   IH.G['sh-skanna'] = function (el) { var ids = el.getAttribute('data-ids'); skanna(ids ? ids.split(',') : null); };
   // Rensar farliga mönster ur all lagrad text (skripttaggar, javascript:-länkar, händelseattribut, ramar)
+  // Maskerar läckor i lagrad text: personnummer och kortnummer (bara de som klarar Luhn) och lösenord i klartext
+  IH.G['sh-maska'] = function () {
+    var n = 0, d = db();
+    var maska = function (t) {
+      var u = String(t)
+        .replace(/\b(?:19|20)?\d{6}[-+]?\d{4}\b/g, function (x) { var d10 = x.replace(/\D/g, '').slice(-10); return luhn(d10) ? 'ÅÅMMDD-XXXX' : x; })
+        .replace(/\b(?:\d[ -]?){13,19}\b/g, function (x) { var y = x.replace(/\D/g, ''); return y.length >= 13 && luhn(y) ? '**** **** **** ' + y.slice(-4) + (/\s$/.test(x) ? ' ' : '') : x; })
+        .replace(/(lösenord|password|lösen)(\s*[:=]\s*)\S+/gi, '$1$2••••••');
+      if (u !== t) n++; return u;
+    };
+    ['kunder', 'affarer', 'aktiviteter', 'uppgifter', 'forfragningar', 'offerter'].forEach(function (sm) { (d[sm] || []).forEach(function (x) { Object.keys(x).forEach(function (f) { if (typeof x[f] === 'string') x[f] = maska(x[f]); }); }); });
+    ((d.chatt || {}).meddelanden || []).forEach(function (m) { if (m.text) m.text = maska(m.text); });
+    if (IH.sakLogg) IH.sakLogg('skanning', 'Maskerade läckor i ' + plural(n, 'fält', 'fält') + '.'); IH.spara();
+    IH.toast(n ? 'Maskerat' : 'Inget att maskera', n ? plural(n, 'fält', 'fält') + ' maskerades.' : 'Inga läckor hittades.', 'skold'); skanna(['lacka']);
+  };
+  IH.G['sh-rensa-adress'] = function () { history.replaceState(null, '', location.pathname + '#/sakerhet'); IH.toast('Adressen är rensad', null, 'skold'); skanna(['lacka']); };
   IH.G['sh-rensa-text'] = function () {
     var n = 0, d = db(), tvatta = function (t) { var u = String(t).replace(/<\s*\/?\s*(script|iframe|object|embed)[^>]*>/gi, '').replace(/javascript:/gi, '').replace(/\bon(error|load|click|mouseover)\s*=/gi, ''); if (u !== t) n++; return u; };
     ['kunder', 'affarer', 'aktiviteter', 'uppgifter', 'forfragningar', 'offerter'].forEach(function (sm) { (d[sm] || []).forEach(function (x) { Object.keys(x).forEach(function (f) { if (typeof x[f] === 'string') x[f] = tvatta(x[f]); }); }); });

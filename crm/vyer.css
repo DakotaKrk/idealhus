@@ -8539,3 +8539,14 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 @media (hover: none) { .agk__plus { opacity: 1; transform: none; } .uppg__skjut { opacity: 1; } }
 
 @media (max-width: 560px) { .dk-stats:not(.ml-stats) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } .kundtopp__tal { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } .dk-stat small, .kundtopp__tal small { word-break: normal; hyphens: auto; } }
+
+.off-not { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; padding: 12px 14px; border-radius: 16px; background: #fff6e6; box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .4); font-size: .86rem; color: var(--text-2); }
+.off-not > .i { flex: none; width: 18px; height: 18px; color: #b06a26; }
+.off-not span { flex: 1; min-width: 0; }
+@media (max-width: 700px) { .off-not { flex-wrap: wrap; } }
+/* Kundmötet på mobil: tipstexten får en egen ljus platta så den syns över 3D-rummet */
+@media (max-width: 700px) { .motescen__not { position: relative; z-index: 3; padding: 8px 12px; border-radius: 12px; background: rgba(255, 252, 246, .92); box-shadow: 0 6px 16px -10px rgba(60, 40, 15, .4); } }
+
+.ag-flytta { display: inline-flex; align-items: center; gap: 6px; margin-left: 6px; padding: 4px 8px; border-radius: 10px; background: var(--ben); font: 600 .72rem/1 var(--rubrik); color: var(--text-2); cursor: pointer; }
+.ag-flytta .i { width: 13px; height: 13px; }
+.ag-flytta input { width: 128px; padding: 2px 4px; border: 0; background: transparent; font: inherit; color: inherit; }

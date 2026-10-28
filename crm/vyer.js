@@ -3141,6 +3141,7 @@
       (o.status === 'utkast' ? '<button class="knapp knapp--virke" type="button" data-g="offert-skicka" data-id="' + o.id + '">' + i('post') + 'Markera som skickad</button>' : '') +
       (o.status === 'skickad' && !(IH.affar(o.affar) && IH.affar(o.affar).steg === 'vunnen') ? '<button class="knapp knapp--virke" type="button" data-g="aff-vinn" data-id="' + o.affar + '">' + i('trofe') + 'Kunden godkände</button>' : '') + '</div></header>' +
       offertband(o) +
+      (o.status === 'skickad' ? '<div class="off-not" data-in>' + i('varning') + '<span><b>Offerten är redan skickad.</b> Ändrar du här ser kunden inte ändringen – skapa en ny version och skicka den i stället.</span><button type="button" class="knapp knapp--liten knapp--virke" data-g="offert-ny-version" data-id="' + o.id + '">' + i('kopiera') + 'Ny version</button></div>' : '') +
       '<div class="offertyta">' +
         '<section class="kort offertred" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('skriv') + '</span>Innehåll</h2>' +
           (las ? '<span class="status" style="--s:#7fe0a6">Godkänd – låst</span>' : '<span class="status" style="--s:' + (o.status === 'skickad' ? '#f0b56e' : '#b8cde0') + '">' + (o.status === 'skickad' ? 'Skickad' : 'Utkast') + '</span>') + '</header>' +
@@ -4170,7 +4171,7 @@
   G['ag-dag-visa'] = function (el) {
     var ds = el.getAttribute('data-dag'), d0 = new Date(ds + 'T00:00:00'), d1 = new Date(ds + 'T23:59:59');
     var l = db().uppgifter.filter(function (x) { var t = new Date(x.forfaller); return t >= d0 && t <= d1 && agFilter(x); });
-    IH.oppnaArk({ titel: dagNamn(d0), under: l.length + (l.length === 1 ? ' uppgift' : ' uppgifter'), ikon: 'kalender', kropp: '<ul class="uppglista" data-ag-dagark="' + ds + '">' + l.map(uppgiftRad).join('') + '</ul>',
+    IH.oppnaArk({ titel: dagNamn(d0), under: l.length + (l.length === 1 ? ' uppgift' : ' uppgifter'), ikon: 'kalender', kropp: '<ul class="uppglista" data-ag-dagark="' + ds + '">' + l.map(function (x) { return uppgiftRad(x).replace(/<\/li>$/, (x.klar ? '' : '<label class="ag-flytta">' + i('kalender') + '<span>Flytta</span><input type="date" value="' + ds + '" data-ag-flytta="' + x.id + '" aria-label="Flytta till dag"></label>') + '</li>'); }).join('') + '</ul>',
       fot: '<button class="knapp" type="button" data-g="stang-ark">Stäng</button>' });
   };
   var flyttaTill = function (u, ds) { var t = new Date(u.forfaller), n = new Date(ds + 'T00:00:00'); n.setHours(t.getHours() || 9, t.getMinutes()); u.forfaller = n.toISOString(); };
@@ -4198,6 +4199,15 @@
   document.addEventListener('input', function (ev) {
     var t = ev.target; if (!t.matches || !t.matches('[data-ag-sok]')) return;
     clearTimeout(G['ag-csv'].t); G['ag-csv'].t = setTimeout(function () { agUi.sok = t.value.trim(); IH.rita(); var n = $('[data-ag-sok]'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 220);
+  });
+  // flytta via datumfältet i dagens lista (fungerar på pekskärm)
+  document.addEventListener('change', function (ev) {
+    var t = ev.target; if (!t.matches || !t.matches('[data-ag-flytta]') || !t.value) return;
+    var u = db().uppgifter.filter(function (x) { return x.id === t.getAttribute('data-ag-flytta'); })[0]; if (!u) return;
+    var fran = t.closest('[data-ag-dagark]').getAttribute('data-ag-dagark');
+    flyttaTill(u, t.value); IH.spara(); IH.rita(); IH.uppdateraMeny();
+    G['ag-dag-visa']({ getAttribute: function () { return fran; } });
+    IH.toast('Flyttad', u.text + ' · ' + dagNamn(new Date(t.value + 'T12:00:00')), 'kalender');
   });
   // dra uppgifter mellan dagarna i planeringen
   document.addEventListener('dragstart', function (ev) { var c = ev.target.closest && ev.target.closest('[data-ag-uppg]'); if (!c) return; ev.dataTransfer.setData('text/ag-uppg', c.getAttribute('data-ag-uppg')); ev.dataTransfer.effectAllowed = 'move'; c.classList.add('drar'); document.documentElement.classList.add('ag-drar'); });
