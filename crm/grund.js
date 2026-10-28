@@ -133,3 +133,54 @@
   try { document.fonts.ready.then(anpassaSido); } catch (x) { /* äldre webbläsare */ }
   setTimeout(anpassaSido, 0);
 })();
+
+/* Förklaringar vid hovring på hela sidan: allt med title (staplar, prickar, ikoner, knappar) visar ett mjukt
+   kort direkt ovanför – i stället för webbläsarens sega gula ruta. Titeln flyttas till data-tips medan musen
+   är där, så den inbyggda inte också dyker upp; den läggs tillbaka efteråt. Pekskärmar visar den vid tryck. */
+(function () {
+  'use strict';
+  var tips = null, mal = null, visaT = 0, gomT = 0;
+  function skapa() { tips = document.createElement('div'); tips.className = 'ih-tips'; tips.setAttribute('role', 'tooltip'); document.body.appendChild(tips); }
+  function placera() {
+    if (!mal || !tips) return;
+    var r = mal.getBoundingClientRect(), b = tips.offsetWidth, h = tips.offsetHeight;
+    var x = Math.max(8, Math.min(innerWidth - b - 8, r.left + r.width / 2 - b / 2)), ovan = r.top - h - 10 > 8;
+    var y = ovan ? r.top - h - 10 : r.bottom + 10;
+    tips.style.transform = 'translate(' + Math.round(x) + 'px,' + Math.round(y) + 'px)';
+    tips.classList.toggle('under', !ovan);
+    tips.style.setProperty('--pil', Math.round(r.left + r.width / 2 - x) + 'px');
+  }
+  function visa(el) {
+    var text = el.getAttribute('data-tips') || el.getAttribute('title') || el.getAttribute('aria-label'); if (!text) return;
+    if (el.hasAttribute('title')) { el.setAttribute('data-tips', text); el.removeAttribute('title'); }
+    if (!tips) skapa();
+    mal = el; clearTimeout(gomT);
+    var k = text.indexOf(': '), rubrik = k > 0 && k < 40 ? text.slice(0, k) : '', resten = rubrik ? text.slice(k + 2) : text;
+    tips.innerHTML = (rubrik ? '<b>' + IH.e(rubrik) + '</b>' : '') + '<span>' + IH.e(resten) + '</span>';
+    placera();
+    clearTimeout(visaT); visaT = setTimeout(function () { if (mal === el) tips.classList.add('syns'); }, tips.classList.contains('syns') ? 0 : 140);
+  }
+  function gom() {
+    clearTimeout(visaT);
+    if (mal && mal.hasAttribute('data-tips') && !mal.hasAttribute('title')) mal.setAttribute('title', mal.getAttribute('data-tips'));
+    mal = null; if (tips) { tips.classList.remove('syns'); }
+  }
+  // title, eller aria-label på knappar och länkar som bara är en ikon
+  var hittaMal = function (t) {
+    var el = t && t.closest && t.closest('[title], [data-tips], button[aria-label], a[aria-label], [role="button"][aria-label]'); if (!el || el.closest('.ih-tips')) return null;
+    if (el.getAttribute('title') || el.getAttribute('data-tips')) return el;
+    return el.textContent.trim() === '' ? el : null;
+  };
+  document.addEventListener('pointerover', function (ev) {
+    if (ev.pointerType === 'touch') return;
+    var el = hittaMal(ev.target); if (el === mal) return;
+    if (mal) gom(); if (el) visa(el);
+  });
+  document.addEventListener('pointerout', function (ev) { if (mal && !mal.contains(ev.relatedTarget)) gom(); });
+  document.addEventListener('pointerdown', function (ev) { if (ev.pointerType === 'touch') { var el = hittaMal(ev.target); if (el) { visa(el); clearTimeout(gomT); gomT = setTimeout(gom, 2200); } } else gom(); }, true);
+  addEventListener('scroll', function () { if (mal) placera(); }, true);
+  addEventListener('hashchange', gom);
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') gom(); });
+  document.addEventListener('focusin', function (ev) { var el = hittaMal(ev.target); if (el && el.matches(':focus-visible')) visa(el); });
+  document.addEventListener('focusout', gom);
+})();
