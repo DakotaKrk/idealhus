@@ -1155,3 +1155,11 @@ section.lp-mork .sh-knapp:not(.sh-knapp--accent) .emo-ik, section.sh-mork .sh-kn
 .pk-knapp:not(.pk-knapp--accent) .emo-ik, .pk-panel__led .emo-ik, .pk-tom .i, .pk-lagg .i { filter: brightness(2.1) saturate(1.2); color: #ffd9a0; }
 /* Månadsväljaren i teamkalendern: knapparnas skuggor klipps inte i kanten */
 .lp-kal__man { padding: 6px; margin: -6px; }
+/* Smala dagar (oavsett skärm): händelserna som små prickar bredvid varandra under datumet */
+@container (max-width: 70px) {
+  .pk-dag { flex-direction: row; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 3px; }
+  .pk-dag .pk-dag__topp { flex: 1 0 100%; justify-content: center; }
+  .pk-dag .pk-h, .pk-dag .pk-led { display: inline-block; flex: none; width: 7px; height: 7px; padding: 0; font-size: 0; border-radius: 50%; box-shadow: none; background: var(--k, rgba(120, 170, 230, .8)); }
+  .pk-dag .pk-fler { font-size: .55rem; line-height: 7px; }
+}
+@media (max-width: 700px) { .pk-dag { padding: 6px 3px; gap: 2px; } .pk-dag .pk-h, .pk-dag .pk-led { width: 6px !important; height: 6px !important; } }
