@@ -541,12 +541,13 @@
   // Himlen i hjälten efter tiden på dygnet: månskära med kratrar och tindrande stjärnor på kvällen och natten,
   // en sol som går upp på morgonen och en sol med strålar på dagen
   function himlen(h) {
-    var natt = h >= 17 || h < 5, morgon = h >= 5 && h < 10;
+    var natt = h >= 18 || h < 5, morgon = h >= 5 && h < 10;
     var stjarnor = [[8, 18, 1.1, 0], [86, 10, .8, .7], [94, 62, 1, 1.4], [16, 78, .7, 2.1], [70, 88, .9, .4], [40, 4, .6, 1.8], [100, 30, .7, 2.6]];
     if (natt) return '<span class="lp-himmel lp-himmel--natt" aria-hidden="true">' + stjarnor.map(function (st) { return '<i class="lp-stjarna" style="left:' + st[0] + '%;top:' + st[1] + '%;--s:' + st[2] + ';--d:' + st[3] + 's"></i>'; }).join('') +
       '<i class="lp-fall"></i><span class="lp-mane"><i class="lp-mane__ljus"></i><i class="lp-krater" style="left:24%;top:38%;--k:14%"></i><i class="lp-krater" style="left:16%;top:62%;--k:9%"></i><i class="lp-krater" style="left:34%;top:72%;--k:7%"></i><i class="lp-krater" style="left:30%;top:20%;--k:6%"></i></span></span>';
     return '<span class="lp-himmel lp-himmel--' + (morgon ? 'morgon' : 'dag') + '" aria-hidden="true"><span class="lp-sol">' + [0, 1, 2, 3, 4, 5, 6, 7].map(function (n) { return '<i style="--r:' + n * 45 + 'deg"></i>'; }).join('') + '</span></span>';
   }
+  IH.himlen = himlen;
   IH.vyer.chef = function () {
     var jag = IH.jag();
     if (!jag.chef) return { titel: 'Försäljning', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort lp-kort"><h2>' + IH.emo('las') + 'Bara för försäljningschefen</h2><p class="lp-tom">Administratören kan göra en säljare till försäljningschef under Ändra i adminpanelen.</p></section>' };
@@ -563,7 +564,7 @@
     var aktivaNu = team.filter(function (x) { return BORTA.indexOf(narvaro(x.u.id).id) < 0; }).length;
     var oppnaN = sum(function (x) { return x.oppna.length; });
     var utan = db().affarer.filter(function (a) { return a.steg !== 'vunnen' && !a.forlorad && (!a.ansvarig || !IH.anvandare(a.ansvarig) || IH.anvandare(a.ansvarig).inaktiv); });
-    var h = new Date().getHours(), hals = h < 10 ? 'God morgon' : h < 17 ? 'Hej' : 'God kväll';
+    var h = new Date().getHours(), hals = IH.hej();
     var tal = function (x) { return '<' + (x.href ? 'a href="' + x.href + '"' : 'div') + ' class="ao-tal" data-ton="' + (x.ton || 'is') + '"><span class="ao-tal__ikon">' + IH.emo(x.ikon) + '</span><span class="ao-tal__text"><small>' + x.etikett + '</small><strong>' + e(x.varde) + '</strong><em>' + e(x.under) + '</em>' + (x.andel != null ? '<span class="lp-glasmatare" style="--andel:' + x.andel.toFixed(3) + '"><i></i></span>' : '') + '</span></' + (x.href ? 'a' : 'div') + '>'; };
     // kvartalsringen: vunnet mot teamets kvartalsmål, eller vinstgraden om inget mål är satt
     var ringAndel = tot.mal ? Math.min(1, tot.vunnet / tot.mal) : vg || 0;

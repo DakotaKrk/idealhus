@@ -8150,3 +8150,43 @@ section.dk-hjalte.kort .dk-fack__alla { grid-column: 1 / -1; grid-auto-flow: col
 .dk-upp__namn small { font-size: .72rem; color: var(--text-3); }
 .dk-upp__rad select { min-height: 38px; padding: 0 10px; border: 0; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .12); font: 600 .8rem/1 var(--rubrik); }
 @media (max-width: 1150px) { section.dk-hjalte.kort .dk-fack { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Översiktens himmel: ett runt fönster uppe till höger med samma måne och sol som säljchefen – natthimmel
+   med stjärnor och månskära på kvällen, ljus himmel med sol och drivande moln på dagen */
+.hero > .hero__himmel { display: none; }
+.hero__fonster { position: absolute; z-index: 0; top: 22px; right: 26px; width: 132px; height: 132px; border-radius: 50%; overflow: hidden; pointer-events: none;
+  background: radial-gradient(circle at 70% 25%, #fff7e2, #ffe1b0 40%, #f7c58a 75%, #eeb06e); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .6), inset 0 -10px 24px rgba(200, 120, 50, .25), 0 20px 40px -22px rgba(200, 120, 50, .55);
+  animation: hf-in .9s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes hf-in { from { opacity: 0; transform: scale(.85) translateY(-6px); } }
+.hero__fonster[data-dygn="morgon"] { background: radial-gradient(circle at 50% 90%, #ffd2a8, #fbe7d0 45%, #cfe2ee 100%); }
+.hero__fonster[data-dygn="dag"] { background: radial-gradient(circle at 70% 25%, #ffffff, #e4f0f7 45%, #c4dceb 100%); }
+.hero__fonster[data-dygn="kvall"], .hero__fonster[data-dygn="natt"] { background: radial-gradient(circle at 70% 20%, #3a3350, #241f33 55%, #15121c); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12), 0 22px 44px -22px rgba(30, 20, 50, .7), 0 0 50px rgba(255, 200, 130, .18); }
+.hero__fonster[data-dygn="kvall"] { background: radial-gradient(circle at 50% 110%, #c9774a, #6e4a5a 40%, #2a2338 75%, #1a1622); }
+.hero__fonster .lp-himmel { left: 6px; top: 16px; transform: scale(.95); }
+.hero__fonster .lp-himmel--dag .lp-sol, .hero__fonster .lp-himmel--morgon .lp-sol { left: 34px; top: 22px; }
+.hero__fonster .lp-himmel--morgon .lp-sol { top: 52px; }
+.hero__moln { position: absolute; left: -40px; top: 78px; width: 56px; height: 18px; border-radius: 20px; background: rgba(255, 255, 255, .92); box-shadow: 14px -8px 0 2px rgba(255, 255, 255, .92), 30px -2px 0 -2px rgba(255, 255, 255, .92); animation: hf-moln 22s linear infinite; opacity: .9; }
+.hero__moln--2 { top: 40px; transform: scale(.6); animation-duration: 30s; animation-delay: -12s; opacity: .7; }
+.hero__fonster[data-dygn="kvall"] .hero__moln, .hero__fonster[data-dygn="natt"] .hero__moln { background: rgba(120, 100, 140, .35); box-shadow: 14px -8px 0 2px rgba(120, 100, 140, .35), 30px -2px 0 -2px rgba(120, 100, 140, .35); }
+@keyframes hf-moln { to { left: 160px; } }
+/* dagens läge och snabbknapparna */
+.hero__lagen { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+.hero__lage { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 12px; border-radius: 999px; background: rgba(255, 255, 255, .72); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); font-size: .78rem; color: var(--text-2); text-decoration: none; transition: background-color .2s, transform .25s var(--mjuk); }
+.hero__lage:hover { background: #fff; transform: translateY(-1px); color: var(--kol); }
+.hero__lage .i { width: 14px; height: 14px; color: var(--virke-djup); }
+.hero__lage b { color: var(--kol); }
+.hero__lage.varm { background: #fde9df; color: #8f3f1f; }
+.hero__snabb { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 6px; }
+.hero__snabb button { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 13px 0 6px; border: 0; border-radius: 999px; background: #1b1915; font: 600 .78rem/1 var(--rubrik); color: #fbf4e8; cursor: pointer; transition: transform .25s var(--studs), box-shadow .25s, background-color .2s; animation: in-rad .5s var(--mjuk) backwards; animation-delay: calc(.35s + var(--n) * .05s); }
+.hero__snabb button .i { width: 26px; height: 26px; padding: 6px; border-radius: 50%; background: linear-gradient(160deg, #f6c68d, #e29a4a); color: #1b1915; }
+.hero__snabb button::before { content: "+"; order: 2; margin-left: -2px; font-weight: 700; color: #f6c68d; }
+.hero__snabb button span { order: 3; }
+.hero__snabb button:hover { transform: translateY(-2px); box-shadow: 0 12px 22px -12px rgba(27, 25, 21, .7); }
+@media (max-width: 900px) { .hero__fonster { width: 96px; height: 96px; top: 14px; right: 14px; } .hero__fonster .lp-himmel { transform: scale(.7); left: -6px; top: 4px; } }
+@media (prefers-reduced-motion: reduce) { .hero__fonster, .hero__moln, .hero__snabb button { animation: none; } }
+
+.hero__snabb { gap: 5px; }
+.hero__snabb button { gap: 6px; min-height: 32px; padding: 0 11px 0 4px; font-size: .74rem; }
+.hero__snabb button::before { display: none; }
+.hero__snabb button .i { width: 24px; height: 24px; padding: 5px; }
+.hero__fonster { animation-fill-mode: backwards; }

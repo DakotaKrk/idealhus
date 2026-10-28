@@ -279,7 +279,7 @@
   // dagsljus och kvällsljus.
   function dygn() {
     var h = new Date().getHours();
-    return h < 5 || h >= 22 ? 'natt' : h < 10 ? 'morgon' : h < 17 ? 'dag' : 'kvall';
+    return h < 5 || h >= 22 ? 'natt' : h < 10 ? 'morgon' : h < 18 ? 'dag' : 'kvall';
   }
 
   // Solljuset över byn: strålar från solen, damm som glittrar i ljuset,
@@ -392,6 +392,17 @@
     return '<span class="kpi__dagar">' + antal.map(function (a, n) { return '<i style="--a:' + (a / max).toFixed(2) + ';--n:' + n + '"' + (n === 6 ? ' class="idag"' : '') + '></i>'; }).join('') + '</span>';
   }
 
+  // Dagens läge i tre korta rader: vad som förfaller i dag, möten i dag och nästa montage
+  function dagensLage(uppg, nastaMontage) {
+    var i0 = new Date(); i0.setHours(0, 0, 0, 0); var i1 = new Date(i0.getTime() + 864e5);
+    var moten = db().aktiviteter.filter(function (h) { var t = new Date(h.tid); return h.typ === 'mote' && t >= new Date() && t < i1; });
+    var sena = uppg.filter(function (u) { return new Date(u.forfaller) < i0; }).length;
+    var bit = function (ik, txt, href, varm) { return '<a class="hero__lage' + (varm ? ' varm' : '') + '" href="' + href + '">' + i(ik) + '<span>' + txt + '</span></a>'; };
+    return '<div class="hero__lagen">' +
+      bit('uppgift', uppg.length ? '<b>' + uppg.length + '</b> att göra i dag' + (sena ? ' · ' + sena + ' sena' : '') : 'Inget att göra i dag', '#/att-gora', sena > 0) +
+      bit('kalender', moten.length ? '<b>' + moten.length + '</b> ' + (moten.length === 1 ? 'möte' : 'möten') + ' kvar i dag' : 'Inga fler möten i dag', '#/chef') +
+      (nastaMontage ? bit('produktion', 'Montage om <b>' + Math.max(0, Math.round((new Date(nastaMontage.montage) - new Date()) / 864e5)) + ' d</b>', '#/produktion') : '') + '</div>';
+  }
   IH.vyer.oversikt = function () {
     var jag = IH.jag();
     var oppna = oppnaAffarer();
@@ -416,11 +427,14 @@
       'Pipelinen är på <b>' + IH.kort(summa(oppna)) + '</b> och ' + proj.length + ' ' + (proj.length === 1 ? 'hus är' : 'hus är') + ' i produktion.';
 
     var html =
-      '<section class="hero kort kort--mork hero--' + dygn() + '" data-in><i class="hero__himmel" aria-hidden="true"></i>' + ljusfall() +
+      '<section class="hero kort kort--mork hero--' + dygn() + '" data-in><span class="hero__fonster" data-dygn="' + dygn() + '">' + (IH.himlen ? IH.himlen(new Date().getHours()) : '') + '<i class="hero__moln"></i><i class="hero__moln hero__moln--2"></i></span>' + ljusfall() +
         '<div class="hero__ord">' +
           '<p class="hero__datum"><i></i>' + datumrad() + '</p>' +
           '<h1 class="hero__titel"><span class="rad-mask"><span style="--o:0">' + IH.hej() + ',</span></span><span class="rad-mask"><span style="--o:1"><em>' + e(forsta(jag.namn)) + '.</em></span></span></h1>' +
           '<p class="hero__text">' + text + '</p>' +
+          dagensLage(uppg, nastaMontage) +
+          '<div class="hero__snabb" role="group" aria-label="Snabbt">' + [['ny-forfragan', 'Förfrågan', 'inkorg'], ['ny-kund', 'Kund', 'kunder'], ['ny-affar', 'Affär', 'tavla'], ['ny-uppgift', 'Uppgift', 'uppgift'], ['starta-mote', 'Kundmöte', 'mote']].map(function (b, n) {
+            return '<button type="button" data-g="' + b[0] + '" style="--n:' + n + '" title="Ny ' + b[1].toLowerCase() + '">' + i(b[2]) + '<span>' + b[1] + '</span></button>'; }).join('') + '</div>' +
           '<div class="hero__kpi">' +
             kpi('inkorg', 'Nya förfrågningar', nya.length, 'tal', nya.length ? 'senaste ' + IH.sedan(nya.sort(function (a, b) { return b.skapad < a.skapad ? -1 : 1; })[0].skapad) : 'allt besvarat', '#/forfragningar', sjuDagar()) +
             kpi('graf', 'Öppen pipeline', summa(oppna), 'kort', oppna.length + ' affärer · viktat ' + IH.kort(viktat(oppna)), '#/salj',
