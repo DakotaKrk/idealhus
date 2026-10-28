@@ -258,9 +258,11 @@ function bygg() {
   const loader = new THREE.TextureLoader(); const modeller = (IH && IH.MODELLER) || [];
   modeller.slice(0, 3).forEach((m, n) => { const t = loader.load(m.bild || m.tumme); t.colorSpace = THREE.SRGBColorSpace; const ram = lada(0.92, 0.66, 0.04, M.svart, 0.01); ram.position.set(-6.15, 2.9, 1.2 + n * 1.15); ram.rotation.y = Math.PI / 2; scen.add(ram); const bild = new THREE.Mesh(new THREE.PlaneGeometry(0.84, 0.58), mat({ map: t, roughness: 0.4 })); bild.position.set(-6.12, 2.9, 1.2 + n * 1.15); bild.rotation.y = Math.PI / 2; scen.add(bild); });
   // väggklockan med visare som går
-  const klocka = new THREE.Group(); klocka.position.set(-0.9, 3.85, -4.12); scen.add(klocka);
+  const klocka = new THREE.Group(); klocka.position.set(-3.6, 4.15, -4.12); scen.add(klocka);
   const urtavla = cyl(0.36, 0.36, 0.05, M.vit, 48); urtavla.rotation.x = Math.PI / 2; klocka.add(urtavla);
-  const urram = new THREE.Mesh(new THREE.TorusGeometry(0.37, 0.03, 12, 48), M.svart); klocka.add(urram);
+  const urram = new THREE.Mesh(new THREE.TorusGeometry(0.37, 0.035, 16, 64), M.ekKant); urram.castShadow = true; klocka.add(urram);
+  const nav = cyl(0.025, 0.025, 0.03, M.svart, 16); nav.rotation.x = Math.PI / 2; nav.position.z = 0.06; klocka.add(nav);
+  const urglas = new THREE.Mesh(new THREE.CircleGeometry(0.36, 48), mat({ color: '#ffffff', roughness: 0.02, metalness: 0.2, transparent: true, opacity: 0.12 })); urglas.position.z = 0.07; klocka.add(urglas);
   for (let n = 0; n < 12; n++) { const s = lada(0.02, n % 3 ? 0.04 : 0.08, 0.01, M.svart, 0); s.position.set(Math.sin(n / 12 * Math.PI * 2) * 0.3, Math.cos(n / 12 * Math.PI * 2) * 0.3, 0.03); s.rotation.z = -n / 12 * Math.PI * 2; klocka.add(s); }
   const visare = (l, b2, m2) => { const g = new THREE.Group(); const v = lada(b2, l, 0.01, m2, 0); v.position.y = l / 2 - 0.03; g.add(v); g.position.z = 0.04; klocka.add(g); return g; };
   const vTim = visare(0.18, 0.025, M.svart), vMin = visare(0.27, 0.018, M.svart), vSek = visare(0.3, 0.007, mat({ color: '#c9542f' }));
@@ -284,11 +286,28 @@ function bygg() {
   const ark = new THREE.Group(); ark.position.set(-2.2, 0, -3.3); ark.rotation.y = -0.35; scen.add(ark);
   const hud = mat({ color: '#d9a882', roughness: 0.6 }), trojaM = mat({ color: '#3e5f84', roughness: 0.85 }), byxM = mat({ color: '#2b2a2c', roughness: 0.8 });
   [-0.11, 0.11].forEach((x) => { const ben = cyl(0.075, 0.07, 0.86, byxM, 12); ben.position.set(x, 0.43, 0); ark.add(ben); const sko = lada(0.12, 0.07, 0.24, M.svart, 0.03); sko.position.set(x, 0.035, 0.05); ark.add(sko); });
-  const kropp = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 0.48, 6, 16), trojaM); kropp.scale.z = 0.72; kropp.position.y = 1.15; kropp.castShadow = true; ark.add(kropp);
-  const huvud = new THREE.Mesh(new THREE.SphereGeometry(0.13, 24, 18), hud); huvud.position.y = 1.62; huvud.castShadow = true; ark.add(huvud);
-  const har = new THREE.Mesh(new THREE.SphereGeometry(0.135, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat({ color: '#3a2a20', roughness: 0.9 })); har.position.y = 1.64; har.rotation.x = -0.25; ark.add(har);
+  const kropp = new THREE.Mesh(new THREE.CapsuleGeometry(0.19, 0.46, 8, 24), trojaM); kropp.name = 'kropp'; kropp.scale.z = 0.72; kropp.position.y = 1.15; kropp.castShadow = true; ark.add(kropp);
   const armV = new THREE.Group(); armV.position.set(-0.24, 1.36, 0); ark.add(armV); const av = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.44, 4, 10), trojaM); av.position.y = -0.24; armV.add(av);
   const armH = new THREE.Group(); armH.position.set(0.24, 1.36, 0); ark.add(armH); const ah = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.44, 4, 10), trojaM); ah.position.y = -0.24; armH.add(ah);
+  const hals = cyl(0.055, 0.06, 0.12, hud, 16); hals.position.y = 1.5; ark.add(hals);
+  const krage = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.02, 8, 24), mat({ color: '#f4f1ea', roughness: 0.7 })); krage.rotation.x = Math.PI / 2; krage.position.y = 1.46; ark.add(krage);
+  const huvud = new THREE.Group(); huvud.position.y = 1.64; ark.add(huvud);
+  const skalle = new THREE.Mesh(new THREE.SphereGeometry(0.12, 32, 24), hud); skalle.scale.set(0.92, 1.1, 1); skalle.castShadow = true; huvud.add(skalle);
+  const kak = new THREE.Mesh(new THREE.SphereGeometry(0.1, 24, 16), hud); kak.scale.set(0.85, 0.7, 0.9); kak.position.set(0, -0.06, 0.02); huvud.add(kak);
+  [-1, 1].forEach((sd) => {
+    const ora = new THREE.Mesh(new THREE.SphereGeometry(0.028, 12, 10), hud); ora.scale.set(0.5, 1, 0.8); ora.position.set(sd * 0.112, 0, 0); huvud.add(ora);
+    const oga = new THREE.Mesh(new THREE.SphereGeometry(0.012, 12, 10), mat({ color: '#1f1a17', roughness: 0.2 })); oga.position.set(sd * 0.042, 0.015, 0.108); huvud.add(oga);
+    const bryn = lada(0.045, 0.008, 0.01, mat({ color: '#3a2a20' }), 0.003); bryn.position.set(sd * 0.043, 0.045, 0.108); bryn.rotation.z = sd * -0.12; huvud.add(bryn);
+    const lins = new THREE.Mesh(new THREE.TorusGeometry(0.026, 0.004, 8, 24), M.svart); lins.position.set(sd * 0.043, 0.015, 0.118); huvud.add(lins);
+    const skalm = lada(0.004, 0.004, 0.11, M.svart, 0); skalm.position.set(sd * 0.1, 0.02, 0.065); huvud.add(skalm);
+  });
+  const brygga = lada(0.02, 0.004, 0.004, M.svart, 0); brygga.position.set(0, 0.018, 0.12); huvud.add(brygga);
+  const nasa = new THREE.Mesh(new THREE.ConeGeometry(0.014, 0.04, 10), hud); nasa.rotation.x = Math.PI / 2 + 0.3; nasa.position.set(0, -0.012, 0.122); huvud.add(nasa);
+  const mun = lada(0.035, 0.005, 0.005, mat({ color: '#9b5a48' }), 0.002); mun.position.set(0, -0.055, 0.108); huvud.add(mun);
+  const harM = mat({ color: '#3a2a20', roughness: 0.85 });
+  const har = new THREE.Mesh(new THREE.SphereGeometry(0.126, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.55), harM); har.scale.set(0.95, 1.05, 1.02); har.position.set(0, 0.012, -0.008); har.rotation.x = -0.18; huvud.add(har);
+  const lugg = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 10), harM); lugg.scale.set(1.6, 0.5, 0.8); lugg.position.set(0.02, 0.085, 0.07); lugg.rotation.z = -0.3; huvud.add(lugg);
+  [-1, 1].forEach((sd) => { const hand = new THREE.Mesh(new THREE.SphereGeometry(0.045, 14, 10), hud); hand.position.y = -0.5; (sd < 0 ? armV : armH).add(hand); });
   const pekare = cyl(0.008, 0.008, 0.5, M.svart, 6); pekare.position.set(0, -0.68, 0); armH.add(pekare);
   const pparm = lada(0.24, 0.3, 0.03, mat({ color: '#c98a45', roughness: 0.5 }), 0.01); pparm.position.set(0, -0.48, 0.08); armV.add(pparm);
   // laptopens staplar växer och krymper som om kalkylen räknas om
@@ -335,7 +354,7 @@ function ram() {
   S.armH.rotation.z = -1.2 - Math.sin(pek / 6 * Math.PI) * 0.35 + Math.sin(t * 2) * 0.03; S.armH.rotation.x = -0.4;
   S.armV.rotation.z = 0.15; S.armV.rotation.x = -0.5;
   S.huvud.rotation.y += ((mot ? 0.9 : -0.3) - S.huvud.rotation.y) * Math.min(1, dt * 2);
-  S.ark.children[2].scale.y = 1 + Math.sin(t * 1.6) * 0.012;
+  S.ark.getObjectByName('kropp').scale.y = 1 + Math.sin(t * 1.6) * 0.012;
   S.lapStaplar.forEach((st, n) => { st.scale.y = 0.4 + (Math.sin(t * 0.8 + n * 1.3) * 0.5 + 0.5) * 0.9; });
   S.anga.forEach((x) => { const q = (t * 0.35 + x.fas) % 1; x.m.position.set(x.k.position.x + Math.sin(t * 2 + x.fas * 9) * 0.03 * q, 1.75 + q * 0.5, x.k.position.z + Math.cos(t * 1.7 + x.fas * 7) * 0.03 * q); x.m.scale.setScalar(0.6 + q * 1.8); x.m.material.opacity = Math.sin(q * Math.PI) * 0.22; });
   S.stralar.forEach((s, n) => { s.material.opacity = 0.045 + Math.sin(t * 0.5 + n * 1.7) * 0.02; });
