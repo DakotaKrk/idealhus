@@ -120,3 +120,8 @@ a.sh-knapp { text-decoration: none; color: inherit; }
 @media (max-width: 700px) { .ap-tal .ao-tal { min-width: 0; } .ap-tal .ao-tal__text { min-width: 0; } .ap-tal .ao-tal strong { font-size: 1.1rem; white-space: normal; overflow-wrap: anywhere; } }
 .ap-tal .ao-tal em { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; }
 .ap-tal .ao-tal strong { overflow-wrap: anywhere; }
+/* Adminpanelens rutor: texten bryter rad och krymper när rutan är smal, inget går över kanten */
+.ap-tal .ao-tal { container-type: inline-size; overflow: hidden; }
+.ap-tal .ao-tal__text { min-width: 0; }
+.ap-tal .ao-tal small { white-space: normal; overflow-wrap: anywhere; hyphens: auto; }
+@container (max-width: 220px) { .ap-tal .ao-tal strong { font-size: 1.05rem !important; } .ap-tal .ao-tal small { font-size: .6rem; letter-spacing: .04em; } .ap-tal .ao-tal__ikon { width: 32px; height: 32px; } }

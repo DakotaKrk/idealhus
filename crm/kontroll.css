@@ -275,3 +275,9 @@ section.ao-hjalte .ao-remsa { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .ao-tal--smart em { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; }
 @container (max-width: 240px) { .ao-tal__extra { display: none; } }
 .ao-forslag small, .ao-forslag em, [class*="forslag"] small { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
+/* Förslagen i kontrollcentralen: förklaringen syns hela, knappen hamnar under texten när raden är smal */
+.ao-upp__text { min-width: 0; }
+.ao-upp__text small { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; line-height: 1.35; }
+.ao-upp__text strong { text-wrap: balance; }
+.ao-upp { container-type: inline-size; }
+@container (max-width: 440px) { .ao-upp li { grid-template-columns: 34px minmax(0, 1fr); } .ao-upp li > .knapp { grid-column: 2; justify-self: start; } }
