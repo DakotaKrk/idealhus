@@ -8313,3 +8313,33 @@ html:not(.ingen-webgl) .motescen:has(> .motesrum3d.klar) .bord__plats { opacity:
 .stegband .stegband__text b { overflow: hidden; text-overflow: ellipsis; font-size: clamp(.74rem, .5rem + .42vw, .92rem); }
 .tavla .aff__fot { flex-wrap: wrap; row-gap: 6px; }
 .aff__verktyg .aff__vidare { max-width: none; }
+
+/* Kundbasen: fyra tal, snabbknappar i Behöver uppmärksamhet, resan med andel, vilka som står där och pilar mellan stegen */
+.kundtopp__tal { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+.kt-ny b { color: #1d6b40; }
+.varmrad--rad { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; padding: 0 8px 0 0; }
+.varmrad__oppna { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 8px 10px; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.varmrad__oppna span { display: grid; min-width: 0; }
+.varmrad__oppna b, .varmrad__oppna em { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.varmrad__snabb { display: flex; gap: 4px; }
+.varmrad__snabb a, .varmrad__snabb button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: #f7f1e8; color: var(--text-2); cursor: pointer; transition: background-color .2s, color .2s; }
+.varmrad__snabb a:hover, .varmrad__snabb button:hover { background: #1b1915; color: #f6c68d; }
+.varmrad__snabb .i { width: 14px; height: 14px; }
+.kt-export { width: 48px; height: 48px; border-radius: 16px; background: rgba(255, 255, 255, .85); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .08); }
+.resakol { position: relative; }
+.resakol__steg { position: relative; }
+.resakol__andel { font: 600 .66rem/1 var(--rubrik); color: var(--text-3); margin-top: -4px; }
+.resakol__vilka { display: flex; justify-content: center; min-height: 26px; margin-top: 8px; }
+.resakol__vilka .avatar { width: 24px; height: 24px; margin-left: -7px; border-radius: 50%; font-size: .5rem; box-shadow: 0 0 0 2px #fff; }
+.resakol__vilka .avatar:first-child { margin-left: 0; }
+.resakol__pil { display: none; }
+@media (min-width: 1200px) { .resakol { column-gap: 14px; } .resakol__pil { position: absolute; display: grid; place-items: center; width: 18px; height: 18px; margin-left: -16px; bottom: 58px; border-radius: 50%; background: #fff; color: var(--virke-djup); box-shadow: 0 2px 6px rgba(60, 40, 15, .2); z-index: 2; pointer-events: none; } .resakol__pil .i { width: 11px; height: 11px; } }
+
+/* Behöver uppmärksamhet: en rad med knapparna bredvid, inte staplade */
+.kundtopp__varma .varmrad.varmrad--rad { grid-template-columns: minmax(0, 1fr) auto; gap: 6px; padding: 2px 8px 2px 0; }
+.kundtopp__varma .varmrad.varmrad--rad:active { transform: none; }
+.varmrad > .varmrad__snabb { display: flex; flex-direction: row; gap: 4px; }
+.resakol__vilka .avatar { margin-left: -4px; font-size: .45rem; letter-spacing: -.02em; }
+
+.kundtopp__varma .varmrad--rad .varmrad__oppna { padding: 9px 10px; }
+.varmrad__oppna em { line-height: 1.35; }

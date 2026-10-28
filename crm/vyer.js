@@ -2162,6 +2162,7 @@
             '<div><small><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-portfolj"/></svg></i>Affär pågår</small><b class="tal" data-rakna="' + antal.pagar + '">' + antal.pagar + '</b></div>' +
             '<div><small><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg></i>Har köpt hus</small><b class="tal" data-rakna="' + antal.kund + '">' + antal.kund + '</b></div>' +
             '<div><small><i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-byggnad"/></svg></i>Företag</small><b class="tal" data-rakna="' + foretag + '">' + foretag + '</b></div>' +
+            (function () { var ny30 = alla.filter(function (x) { return x.k.skapad && IH.dagarSedan(x.k.skapad) < 30; }).length; return '<div class="kt-ny"><small><i aria-hidden="true">' + i('plus') + '</i>Nya 30 d</small><b class="tal">' + ny30 + '</b></div>'; })() +
           '</div>' +
           '<div class="kundtopp__typ"><span class="kallbar"><i style="flex:' + (alla.length - foretag) + ';--k:#f0b56e;--n:0"></i><i style="flex:' + Math.max(foretag, 0.001) + ';--k:#9fc2c9;--n:1"></i></span>' +
             '<span class="kallbar__lista"><span style="--k:#f0b56e"><i></i>Privatpersoner<b>' + (alla.length - foretag) + '</b></span><span style="--k:#9fc2c9"><i></i>Företag<b>' + foretag + '</b></span></span></div>' +
@@ -2169,15 +2170,19 @@
           (varma.length ? '<div class="kundtopp__varma"><small><svg class="emo-ik" aria-hidden="true"><use href="#i-bjallra"/></svg> Behöver uppmärksamhet</small><div class="varmlista">' + varma.slice(0, 3).map(function (x) {
               var skal = x.nyaF ? ['<svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg>', x.nyaF === 1 ? 'Ny förfrågan' : x.nyaF + ' nya förfrågningar']
                 : x.sena ? ['⏰', x.sena === 1 ? 'Försenad uppföljning' : x.sena + ' försenade uppföljningar'] : ['<svg class="emo-ik" aria-hidden="true"><use href="#i-skicka"/></svg>', 'Följ upp offerten'];
-              return '<button type="button" class="varmrad" data-g="kund-oppna" data-id="' + x.k.id + '">' + kundAvatar(x.k, true) +
-                '<span><b>' + e(x.k.namn) + '</b><em>' + skal[0] + ' ' + skal[1] + '</em></span>' + i('pil') + '</button>';
+              return '<div class="varmrad varmrad--rad">' + '<button type="button" class="varmrad__oppna" data-g="kund-oppna" data-id="' + x.k.id + '">' + kundAvatar(x.k, true) +
+                '<span><b>' + e(x.k.namn) + '</b><em>' + skal[0] + ' ' + skal[1] + '</em></span></button>' +
+                '<span class="varmrad__snabb">' + (x.k.telefon ? '<a href="tel:' + e(x.k.telefon.replace(/\s/g, '')) + '" title="Ring ' + e(x.k.telefon) + '" aria-label="Ring">' + i('tel') + '</a>' : '') + (x.k.epost ? '<a href="mailto:' + e(x.k.epost) + '" title="Mejla ' + e(x.k.epost) + '" aria-label="Mejla">' + i('post') + '</a>' : '') +
+                '<button type="button" data-g="kund-oppna" data-id="' + x.k.id + '" aria-label="Öppna kunden">' + i('pil') + '</button></span></div>';
             }).join('') + (varma.length > 3 ? '<button type="button" class="varmrad varmrad--fler" data-g="kund-filter" data-f="varm">+' + (varma.length - 3) + ' till · visa alla</button>' : '') + '</div></div>' : '') +
         '</div>' +
         '<div class="kundtopp__resa"><div class="toppverktyg"><label class="sok sok--liten">' + i('sok') + '<input type="search" placeholder="Sök namn eller ort…" value="' + e(kundSok) + '" data-kundsok aria-label="Sök kund"></label>' +
-          '<button class="knapp knapp--mork" type="button" data-g="ny-kund">' + i('plus') + 'Ny kund</button></div><div class="kundtopp__resahuvud"><p class="etikett etikett--ljus">Var på resan?</p><small>' + (kundSteg === null ? 'Klicka på ett steg för att filtrera' : 'Visar ' + RESA_STEG[kundSteg][1].toLowerCase()) + '</small></div>' +
+          '<button class="tv-ikon kt-export" type="button" data-g="kund-export-alla" title="Exportera alla kunder som CSV">' + i('skrivut') + '</button><button class="knapp knapp--mork" type="button" data-g="ny-kund">' + i('plus') + 'Ny kund</button></div><div class="kundtopp__resahuvud"><p class="etikett etikett--ljus">Var på resan?</p><small>' + (kundSteg === null ? 'Klicka på ett steg för att filtrera' : 'Visar ' + RESA_STEG[kundSteg][1].toLowerCase()) + '</small></div>' +
           '<div class="resakol">' + RESA_STEG.map(function (st, n) {
             return '<button type="button" class="resakol__steg' + (kundSteg === n ? ' vald' : '') + '" data-g="kund-steg" data-n="' + n + '" style="--n:' + n + ';--a:' + (perSteg[n] / maxSteg).toFixed(2) + '" aria-pressed="' + (kundSteg === n) + '">' +
-              '<b>' + perSteg[n] + '</b><i class="resakol__stapel"></i><span class="resakol__ikon resakol__ikon--emoji" aria-hidden="true">' + RESA_EMOJI[n] + '</span><small>' + st[1] + '</small></button>';
+              '<b>' + perSteg[n] + '</b><span class="resakol__andel">' + (alla.length ? Math.round(perSteg[n] / alla.length * 100) : 0) + ' %</span><i class="resakol__stapel"></i>' +
+              '<span class="resakol__vilka">' + alla.filter(function (x) { return x.steg === n; }).slice(0, 3).map(function (x) { return kundAvatar(x.k, true); }).join('') + '</span>' +
+              '<span class="resakol__ikon resakol__ikon--emoji" aria-hidden="true">' + RESA_EMOJI[n] + '</span><small>' + st[1] + '</small></button>';
           }).join('') + '</div></div>' +
       '</section>' +
 
@@ -2227,6 +2232,7 @@
   G['kund-ring'] = function (el) { location.href = 'tel:' + el.getAttribute('data-tel').replace(/\s/g, ''); };
   G['kund-mejl'] = function (el) { location.href = 'mailto:' + el.getAttribute('data-epost'); };
   G['kund-vy'] = function (el) { kundVy = el.getAttribute('data-vy'); IH.rita(); };
+  G['kund-export-alla'] = function () { kundValda = {}; db().kunder.forEach(function (k) { kundValda[k.id] = true; }); G['kund-bulk-csv'](); kundValda = {}; };
   G['kund-sort-kol'] = function (el) { var k = el.getAttribute('data-k'); if (kundSort === k) kundSortUpp = !kundSortUpp; else { kundSort = k; kundSortUpp = false; } IH.rita(); };
   G['kund-valj'] = function (el) { var id = el.getAttribute('data-id'); if (kundValda[id]) delete kundValda[id]; else kundValda[id] = true; IH.rita(); };
   G['kund-valj-alla'] = function (el) {
