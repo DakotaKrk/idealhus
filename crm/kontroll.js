@@ -102,12 +102,12 @@
     if (IH.jag().roll !== 'admin') return { titel: 'Kontrollcentral', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + ik('las') + 'Bara för administratören</h2><p class="ad-not">Byt till kontot Admin i kontomenyn.</p></section>' };
     var d = db(), u0 = IH.jag(), H = IH.sakHub, S = H ? H.hub() : { senast: {}, historik: [] };
     var brott = IH.sak ? IH.sak.kopplingsBrott() : [], dl = dataLage(brott), dr = driftLage();
-    var konton = IH.ANVANDARE.map(function (u) { return { u: u, h: kontoHalsa(u, brott) }; });
+    var konton = IH.ANVANDARE.filter(function (u) { return !u.inaktiv; }).map(function (u) { return { u: u, h: kontoHalsa(u, brott) }; });
     var kontoP = Math.round(konton.reduce(function (t, x) { return t + x.h.poang; }, 0) / konton.length);
     var sakP = H ? H.total() : null, senast = S.historik[0];
     var delar = [{ id: 'sakerhet', namn: 'Säkerhet', p: sakP }, { id: 'konton', namn: 'Konton', p: kontoP }, { id: 'data', namn: 'Data', p: dl.poang }, { id: 'drift', namn: 'Drift', p: dr.poang }];
     var giltiga = delar.filter(function (x) { return x.p != null; }), total = giltiga.length ? Math.round(giltiga.reduce(function (t, x) { return t + x.p; }, 0) / giltiga.length) : null;
-    var nuN = IH.ANVANDARE.filter(function (u) { return IH.narvaro && ['online', 'mote', 'upptagen', 'ute'].indexOf(IH.narvaro(u.id).id) >= 0; }).length;
+    var nuN = IH.ANVANDARE.filter(function (u) { return !u.inaktiv && IH.narvaro && ['online', 'mote', 'upptagen', 'ute'].indexOf(IH.narvaro(u.id).id) >= 0; }).length;
     var fyndAlla = H ? H.kontroller.reduce(function (t, k) { var r = S.senast[k.id]; return r ? t.concat(r.fynd) : t; }, []) : [];
     var fyndN = function (a) { return fyndAlla.filter(function (x) { return x.allvar === a; }).length; };
     var h = new Date().getHours(), halsning = h < 5 ? 'God natt' : h < 10 ? 'God morgon' : h < 17 ? 'Hej' : 'God kväll';
@@ -117,7 +117,7 @@
     var handelser7 = d.aktiviteter.filter(function (x) { return IH.dagarSedan(x.tid) < 7; }).length;
     // Remsans extra: en liten bild av läget i varje ruta (trend, vilka, staplar, fördelning) och en knapp till nästa steg
     var forra = S.historik[1], sakDiff = senast && forra ? senast.poang - forra.poang : null;
-    var iTjanst = IH.ANVANDARE.filter(function (u) { return IH.narvaro && ['online', 'mote', 'upptagen', 'ute'].indexOf(IH.narvaro(u.id).id) >= 0; });
+    var iTjanst = IH.ANVANDARE.filter(function (u) { return !u.inaktiv && IH.narvaro && ['online', 'mote', 'upptagen', 'ute'].indexOf(IH.narvaro(u.id).id) >= 0; });
     var per7 = []; for (var q = 6; q >= 0; q--) per7.push(d.aktiviteter.filter(function (x) { return IH.dagarSedan(x.tid) === q; }).length);
     var fore7 = d.aktiviteter.filter(function (x) { var g = IH.dagarSedan(x.tid); return g >= 7 && g < 14; }).length;
     var max7 = Math.max.apply(null, per7.concat([1]));
@@ -125,7 +125,7 @@
     var remsa = [
       { ikon: 'skold', etikett: 'Säkerhet', varde: sakP == null ? '–' : sakP + '/100', under: senast ? IH.sedan(senast.tid) + (sakDiff ? ' · ' + (sakDiff > 0 ? '↑ ' : '↓ ') + Math.abs(sakDiff) + ' mot förra' : '') : 'ej skannat', ton: tonFor(sakP), href: '#/sakerhet',
         extra: '<span class="ao-x-mat" style="--a:' + ((sakP || 0) / 100).toFixed(2) + '"><i></i></span><span class="ao-x-knapp">' + (senast ? 'Visa' : 'Skanna') + i('pil') + '</span>' },
-      { ikon: 'anstallda', etikett: 'I tjänst nu', varde: nuN + '/' + IH.ANVANDARE.length, under: konton.filter(function (x) { return x.h.lage === 'bra'; }).length + ' mår bra' + (antalLageTal('hjalp', konton) ? ' · ' + antalLageTal('hjalp', konton) + ' behöver hjälp' : ''), ton: 'is', href: '#/admin',
+      { ikon: 'anstallda', etikett: 'I tjänst nu', varde: nuN + '/' + konton.length, under: konton.filter(function (x) { return x.h.lage === 'bra'; }).length + ' mår bra' + (antalLageTal('hjalp', konton) ? ' · ' + antalLageTal('hjalp', konton) + ' behöver hjälp' : ''), ton: 'is', href: '#/admin',
         extra: '<span class="ao-x-folk">' + iTjanst.slice(0, 4).map(function (u) { return '<span class="avatar" style="--av:' + u.farg + '" title="' + e(u.namn + ' · ' + IH.narvaro(u.id).namn) + '">' + IH.initialer(u.namn) + '</span>'; }).join('') + '</span>' },
       { ikon: 'bugg', etikett: 'Fel i sidan', varde: String(dr.fel.length), under: dr.fel.length ? 'sedan laddning · senast ' + e(String(dr.fel[dr.fel.length - 1].text || dr.fel[dr.fel.length - 1]).slice(0, 30)) : 'buggfritt sedan laddning', ton: dr.fel.length ? 'gul' : 'gron', href: '#/sakerhet',
         extra: dr.fel.length ? '<span class="ao-x-knapp">Visa felen' + i('pil') + '</span>' : '<span class="ao-x-ok">' + i('bock') + '</span>' },

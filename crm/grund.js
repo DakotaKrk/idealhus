@@ -125,7 +125,7 @@
     if (!(ev.target.closest && ev.target.closest('.sido__merpop'))) stangMer();
   });
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') stangMer(); });
-  addEventListener('hashchange', stangMer);
+  addEventListener('hashchange', function () { stangMer(); setTimeout(anpassaSido, 30); });
   var forra = IH.uppdateraMeny;
   IH.uppdateraMeny = function () { var r = forra.apply(this, arguments); anpassaSido(); return r; };
   var t = 0;

@@ -413,7 +413,7 @@
     var bit = function (ik, txt, href, varm) { return '<a class="hero__lage' + (varm ? ' varm' : '') + '" href="' + href + '">' + i(ik) + '<span>' + txt + '</span></a>'; };
     return '<div class="hero__lagen">' +
       bit('uppgift', uppg.length ? '<b>' + uppg.length + '</b> att göra i dag' + (sena ? ' · ' + sena + ' sena' : '') : 'Inget att göra i dag', '#/att-gora', sena > 0) +
-      bit('kalender', moten.length ? '<b>' + moten.length + '</b> ' + (moten.length === 1 ? 'möte' : 'möten') + ' kvar i dag' : 'Inga fler möten i dag', '#/chef') +
+      bit('kalender', moten.length ? '<b>' + moten.length + '</b> ' + (moten.length === 1 ? 'möte' : 'möten') + ' kvar i dag' : 'Inga fler möten i dag', IH.jag().chef ? '#/chef' : '#/att-gora') +
       (nastaMontage ? bit('produktion', 'Montage om <b>' + Math.max(0, Math.round((new Date(nastaMontage.montage) - new Date()) / 864e5)) + ' d</b>', '#/produktion') : '') + '</div>';
   }
   IH.vyer.oversikt = function () {
@@ -431,7 +431,7 @@
       return { namn: s.id === 'vunnen' ? 'Vunnet 90 d' : s.namn, kort: s.id === 'vunnen' ? 'Vunnet' : s.kort, farg: s.farg, summa: summa(l), antal: l.length };
     });
     var idag = new Date(); idag.setHours(23, 59, 59, 999);
-    var uppg = db().uppgifter.filter(function (u) { return !u.klar && new Date(u.forfaller) <= idag; });
+    var uppg = db().uppgifter.filter(function (u) { return !u.klar && (!u.ansvarig || u.ansvarig === IH.jag().id) && new Date(u.forfaller) <= idag; });
     var senaste = db().forfragningar.slice().sort(function (a, b) { return b.skapad < a.skapad ? -1 : 1; }).slice(0, 10);
     var akt = db().aktiviteter.slice().sort(function (a, b) { return b.tid < a.tid ? -1 : 1; }).slice(0, 12);
     var fokus = smartaForslag();
@@ -1627,6 +1627,7 @@
     });
   }
 
+  var projOppnad = null; // adressen vars projektpanel redan öppnats – omritningar öppnar den inte igen
   function flyttaAffar(id, steg, rect) {
     var a = IH.affar(id);
     if (!a || a.steg === steg) return;
@@ -1638,6 +1639,12 @@
     if (steg === 'vunnen') {
       vinn(a, rect || fore);
       return;
+    }
+    if (a.vunnen) {
+      var ob = IH.offertFor(a.id); if (ob && ob.status === 'godkand') ob.status = 'skickad';
+      var pi = db().projekt.findIndex(function (p) { return p.affar === a.id && p.steg === 'underlag' && !Object.keys(p.check || {}).some(function (c) { return p.check[c]; }); });
+      if (pi >= 0) db().projekt.splice(pi, 1);
+      else if (db().projekt.some(function (p) { return p.affar === a.id; })) IH.toast('Projektet ligger kvar', 'Det är redan påbörjat i produktionen – ändra det där om det ska bort.', 'varning');
     }
     a.vunnen = null;
     IH.logga('system', 'Flyttad från ' + fran + ' till ' + IH.steg(steg).namn + '.', a.kund, a.id);
@@ -2296,7 +2303,7 @@
 
   function kundSida(id) {
     var k = IH.kund(id);
-    if (!k) return { titel: 'Kunder', html: tomt('kunder', 'Kunden finns inte.') };
+    if (!k) return { titel: 'Kunder', html: '<a class="tillbaka" href="#/kunder">' + i('pilv') + 'Alla kunder</a>' + tomt('kunder', 'Kunden finns inte.') };
     var aff = db().affarer.filter(function (a) { return a.kund === k.id; });
     var off = db().offerter.filter(function (o) { return o.kund === k.id && o.status !== 'ersatt'; });
     var ff = db().forfragningar.filter(function (f) { return f.kund === k.id || f.epost === k.epost; });
@@ -3102,7 +3109,7 @@
 
   function offertSida(id) {
     var o = IH.offert(id);
-    if (!o) return { titel: 'Offerter', html: tomt('offert', 'Offerten finns inte.') };
+    if (!o) return { titel: 'Offerter', html: '<a class="tillbaka" href="#/offerter">' + i('pilv') + 'Alla offerter</a>' + tomt('offert', 'Offerten finns inte.') };
     var a = IH.affar(o.affar);
     var las = o.status === 'godkand';
     var html = '<a class="tillbaka" href="#/offerter">' + i('pilv') + 'Alla offerter</a>' +
@@ -3803,7 +3810,8 @@
         rot.addEventListener('keydown', function (ev) {
           if (ev.key === 'Enter' && ev.target.classList && ev.target.classList.contains('aff--proj')) { ev.preventDefault(); projArk(ev.target.getAttribute('data-id')); }
         });
-        if (del[0]) setTimeout(function () { projArk(del[0]); }, 60);
+        if (del[0] && projOppnad !== location.hash) { projOppnad = location.hash; setTimeout(function () { projArk(del[0]); }, 60); }
+        if (!del[0]) projOppnad = null;
       }
     };
   };
@@ -4109,7 +4117,7 @@
     var verktyg = '<div class="agv" data-in>' +
       '<label class="agv__sok">' + i('sok') + '<input type="search" data-ag-sok placeholder="Sök uppgift eller kund" value="' + e(agUi.sok) + '" aria-label="Sök"></label>' +
       '<span class="tv-seg" role="group" aria-label="Vems">' + [['mina', 'Mina'], ['alla', 'Alla']].map(function (x) { return '<button type="button" data-g="ag-vem" data-f="' + x[0] + '" aria-pressed="' + (agUi.vem === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</span>' +
-      '<span class="agv__typer">' + typer.map(function (t) { var n = allaU.filter(function (x) { return !x.klar && (t === 'alla' || uppgTyp(x.text)[2] === t); }).length; if (t !== 'alla' && !n) return ''; return '<button type="button" class="ap-filter" data-g="ag-typ" data-f="' + t + '" aria-pressed="' + (agUi.typ === t) + '">' + (t === 'alla' ? 'Allt' : t) + ' <b>' + n + '</b></button>'; }).join('') + '</span>' +
+      '<span class="agv__typer">' + typer.map(function (t) { var n = allaU.filter(function (x) { return !x.klar && (agUi.vem !== 'mina' || !x.ansvarig || x.ansvarig === IH.jag().id) && (t === 'alla' || uppgTyp(x.text)[2] === t); }).length; if (t !== 'alla' && !n) return ''; return '<button type="button" class="ap-filter" data-g="ag-typ" data-f="' + t + '" aria-pressed="' + (agUi.typ === t) + '">' + (t === 'alla' ? 'Allt' : t) + ' <b>' + n + '</b></button>'; }).join('') + '</span>' +
       '<span class="agv__hoger">' + (grupper[0][1].length ? '<button type="button" class="ap-filter agv__flytta" data-g="ag-sena-idag">' + i('klocka') + 'Flytta ' + grupper[0][1].length + ' försenade till i dag</button>' : '') +
         '<button type="button" class="tv-ikon" data-g="ag-csv" title="Exportera uppgifterna som CSV">' + i('skrivut') + '</button></span></div>';
     var html = '<h1 class="dold">Att göra</h1>' +
@@ -4191,16 +4199,18 @@
     if (u.klar) {
       var r = el.getBoundingClientRect();
       rad.classList.add('uppg--pang');
-      if (!IH.lugn) setTimeout(function () { IH.uppdateraMeny(); }, 50);
       IH.toast('Klart!', u.text, 'bock');
       void r;
-    } else IH.uppdateraMeny();
+    }
+    IH.uppdateraMeny();
+    clearTimeout(G['uppgift-klar'].t); G['uppgift-klar'].t = setTimeout(function () { var y = window.scrollY; IH.rita(); window.scrollTo(0, y); }, IH.lugn ? 0 : 650);
   };
   FORM.uppgift = function (f, d) {
     db().uppgifter.push({ id: IH.nyttId('uppgift', 'u'), text: d.get('text'), forfaller: new Date((d.get('datum') || IH.dagStr()) + 'T09:00:00').toISOString(),
       klar: false, kund: d.get('kund') || null, affar: null, ansvarig: IH.jag().id });
     IH.spara();
-    IH.ritaOm();
+    if (f.closest && f.closest('.ark')) IH.stangArk(true);
+    IH.ritaOm(); IH.uppdateraMeny();
     IH.toast('Uppgiften är tillagd', d.get('text'), 'uppgift');
   };
 

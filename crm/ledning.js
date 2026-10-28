@@ -64,7 +64,7 @@
   function senastFor(u) {
     var n = narvaro(u.id);
     if (n.id === 'online') return { text: 'aktiv nu', nu: true };
-    var t = db().aktiviteter.filter(function (h) { return h.av === u.id; }).map(function (h) { return h.tid; }).sort().pop();
+    var t = db().aktiviteter.filter(function (h) { return h.av === u.id && new Date(h.tid) <= new Date(); }).map(function (h) { return h.tid; }).sort().pop();
     return { text: t ? IH.sedan(t) : '–', nu: false };
   }
   function kontoRad(u, jag) {
@@ -595,7 +595,7 @@
     }
     var namn = forsta.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' });
     var ledig = null;
-    for (var k = 1; k <= 14 && !ledig; k++) { var lk = new Date(idag + k * 864e5 + 3e6); lk = dag0(lk); if (lk.getDay() % 6 === 0) continue; if (!alla.some(function (x) { return x.slag === 'akt' && x.dag === lk.getTime(); })) ledig = lk; }
+    for (var k = 1; k <= 14 && !ledig; k++) { var lk = new Date(idag + k * 864e5 + 3e6); lk = dag0(lk); if (lk.getDay() % 6 === 0) continue; if (!alla.some(function (x) { return x.slag === 'akt' && x.dag === lk.getTime(); }) && !(chefUi.kalVem !== 'alla' && franvaroPa(chefUi.kalVem, lk.getTime()))) ledig = lk; }
     var vyKnapp = function (v, txt, ik) { return '<button type="button" data-g="lp-kal-vy" data-f="' + v + '" aria-pressed="' + (chefUi.kalVy === v) + '">' + i(ik) + txt + '</button>'; };
     var chip = function (t, txt) { return '<button type="button" class="ap-filter" data-g="lp-kal-typ" data-f="' + t + '" aria-pressed="' + (chefUi.kalTyp === t) + '">' + (t !== 'alla' ? '<i class="lp-kal__prick" data-typ="' + t + '"></i>' : '') + txt + '</button>'; };
     return '<div class="lp-kal__verktyg">' +
@@ -745,7 +745,7 @@
       x.forlorade90 = x.forlorade.filter(function (a) { return inom(a.andrad, 90); }).length;
       x.malKvartal = x.u.mal ? x.u.mal / 4 : 0;
     });
-    var tot = { pipeline: sum(function (x) { return x.oppet; }), viktat: sum(function (x) { return x.viktat; }), vunnet: sum(function (x) { return x.vunnet90; }), mal: sum(function (x) { return x.malKvartal; }) };
+    var tot = { pipeline: sum(function (x) { return x.oppet; }), viktat: sum(function (x) { return x.viktat; }), vunnet: sum(function (x) { return x.vunnet90; }), mal: sum(function (x) { return x.malKvartal; }), vunnetMal: sum(function (x) { return x.malKvartal ? x.vunnet90 : 0; }) };
     var avgjorda = sum(function (x) { return x.vunna90.length + x.forlorade90; }), vg = avgjorda ? sum(function (x) { return x.vunna90.length; }) / avgjorda : null;
     var aktivaNu = team.filter(function (x) { return BORTA.indexOf(narvaro(x.u.id).id) < 0; }).length;
     var oppnaN = sum(function (x) { return x.oppna.length; });
@@ -753,12 +753,12 @@
     var h = new Date().getHours(), hals = IH.hej();
     var tal = function (x) { return '<' + (x.href ? 'a href="' + x.href + '"' : 'div') + ' class="ao-tal" data-ton="' + (x.ton || 'is') + '"><span class="ao-tal__ikon">' + IH.emo(x.ikon) + '</span><span class="ao-tal__text"><small>' + x.etikett + '</small><strong>' + e(x.varde) + '</strong><em>' + e(x.under) + '</em>' + (x.andel != null ? '<span class="lp-glasmatare" style="--andel:' + x.andel.toFixed(3) + '"><i></i></span>' : '') + '</span></' + (x.href ? 'a' : 'div') + '>'; };
     // kvartalsringen: vunnet mot teamets kvartalsmål, eller vinstgraden om inget mål är satt
-    var ringAndel = tot.mal ? Math.min(1, tot.vunnet / tot.mal) : vg || 0;
+    var ringAndel = tot.mal ? Math.min(1, tot.vunnetMal / tot.mal) : vg || 0;
     var veckorV = []; for (var w = 11; w >= 0; w--) { var vs = Date.now() - (w + 1) * 7 * 864e5, ve = Date.now() - w * 7 * 864e5; veckorV.push(team.reduce(function (t, x) { return t + x.aff.filter(function (a) { return a.steg === 'vunnen' && a.vunnen && new Date(a.vunnen) >= vs && new Date(a.vunnen) < ve; }).reduce(function (s2, a) { return s2 + (a.varde || 0); }, 0); }, 0)); }
     var maxV = Math.max.apply(null, veckorV.concat([1]));
     var ring = '<div class="lp-ring" style="--a:' + ringAndel.toFixed(3) + '"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="lp-ring-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd9a0"/><stop offset="1" stop-color="#e29a4a"/></linearGradient></defs>' +
       '<circle cx="60" cy="60" r="50" class="lp-ring__spar"/><circle cx="60" cy="60" r="50" class="lp-ring__glod"/><circle cx="60" cy="60" r="50" class="lp-ring__bage"/></svg>' +
-      '<div class="lp-ring__mitt"><b>' + Math.round(ringAndel * 100) + ' %</b><small>' + (tot.mal ? 'av kvartalsmålet' : 'vinstgrad 90 d') + '</small>' + (tot.mal ? '<em>' + IH.kort(tot.vunnet) + ' / ' + IH.kort(tot.mal) + '</em>' : '<em>Sätt mål för att följa kvartalet</em>') + '</div></div>';
+      '<div class="lp-ring__mitt"><b>' + Math.round(ringAndel * 100) + ' %</b><small>' + (tot.mal ? 'av kvartalsmålet' : 'vinstgrad 90 d') + '</small>' + (tot.mal ? '<em>' + IH.kort(tot.vunnetMal) + ' / ' + IH.kort(tot.mal) + '</em>' : '<em>Sätt mål för att följa kvartalet</em>') + '</div></div>';
     var lag = '<div class="lp-lag">' + team.map(function (x) { var n = narvaro(x.u.id); return '<a href="#/profil/' + x.u.id + '" title="' + e(x.u.namn) + ': ' + e(n.namn) + ' · ' + IH.kort(x.oppet) + ' öppet">' + avatar(x.u) + '</a>'; }).join('') + '<span>' + plural(aktivaNu, 'i tjänst', 'i tjänst') + '</span></div>';
     var veckoStaplar = '<div class="lp-veckor"><small>Vunnet per vecka · 12 veckor · ' + IH.kort(veckorV.reduce(function (t, v) { return t + v; }, 0)) + '</small><span class="lp-veckor__staplar">' + veckorV.map(function (v, n) {
       var vnr = veckonr(new Date(Date.now() - (11 - n) * 7 * 864e5));
@@ -772,7 +772,7 @@
       '<div class="ap-tal">' + [
         { ikon: 'portfolj', etikett: 'Teamets pipeline', varde: IH.kort(tot.pipeline), under: plural(oppnaN, 'affär', 'affärer') + ' öppna', href: '#/salj', ton: 'lila' },
         { ikon: 'mal', etikett: 'Viktad prognos', varde: IH.kort(tot.viktat), under: 'värde × chansen att vinna', ton: 'is' },
-        { ikon: 'medalj', etikett: 'Vunnet 90 dagar', varde: IH.kort(tot.vunnet), under: tot.mal ? pct(tot.vunnet / tot.mal) + ' av kvartalsmålet ' + IH.kort(tot.mal) : 'inget mål satt', ton: 'gron', andel: tot.mal ? Math.min(1, tot.vunnet / tot.mal) : null },
+        { ikon: 'medalj', etikett: 'Vunnet 90 dagar', varde: IH.kort(tot.vunnet), under: tot.mal ? pct(tot.vunnetMal / tot.mal) + ' av kvartalsmålet ' + IH.kort(tot.mal) : 'inget mål satt', ton: 'gron', andel: tot.mal ? Math.min(1, tot.vunnetMal / tot.mal) : null },
         { ikon: 'trend', etikett: 'Vinstgrad 90 d', varde: vg == null ? '–' : pct(vg), under: 'vunna av avgjorda affärer', ton: 'gul' }
       ].map(tal).join('') + '</div>' + '<div class="lp-mork__mitt">' + ring + lag + '</div>' + veckoStaplar + '</section>';
 
@@ -784,7 +784,7 @@
       if (x.sena.length) varn.push(plural(x.sena.length, 'försenad uppgift', 'försenade uppgifter'));
       var perSteg = IH.SALJSTEG.slice(0, -1).map(function (s) { return { s: s, l: x.oppna.filter(function (a) { return a.steg === s.id; }) }; });
       var maxS = Math.max.apply(null, perSteg.map(function (p) { return p.l.length; }).concat([1]));
-      var senast = x.akt.slice().sort(function (a, b) { return new Date(b.tid) - new Date(a.tid); })[0];
+      var senast = x.akt.filter(function (h) { return new Date(h.tid) <= new Date(); }).sort(function (a, b) { return new Date(b.tid) - new Date(a.tid); })[0];
       var stegIx = function (a) { return IH.SALJSTEG.findIndex(function (s2) { return s2.id === a.steg; }); };
       var nasta = x.oppna.slice().sort(function (a, b) { return stegIx(b) - stegIx(a) || (b.varde || 0) - (a.varde || 0); })[0];
       return '<article class="lp-saljare">' +
@@ -963,7 +963,7 @@
     IH.oppnaArk({ titel: 'Ny uppgift', under: 'Hamnar under Att göra.', ikon: 'todo',
       kropp: '<form id="lp-uppg-form" data-lp-uppgift class="km-form"><input type="hidden" name="vem" value="' + e(el.getAttribute('data-id')) + '">' +
         '<label class="falt"><span>Uppgift</span><input name="text" required maxlength="120" placeholder="T.ex. Ring kunden om grunden"></label>' +
-        '<label class="falt"><span>Klar senast</span><input name="datum" type="date" required value="' + imorgon.toISOString().slice(0, 10) + '"></label></form>',
+        '<label class="falt"><span>Klar senast</span><input name="datum" type="date" required value="' + dagISO(imorgon) + '"></label></form>',
       fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="lp-uppg-form">' + i('plus') + 'Lägg till</button>' });
     setTimeout(function () { var x = document.querySelector('#lp-uppg-form input[name="text"]'); if (x) x.focus(); }, 80);
   };
@@ -980,7 +980,7 @@
     IH.oppnaArk({ titel: 'Ge en uppgift', under: 'Hamnar under Att göra hos säljaren.', ikon: 'todo',
       kropp: '<form id="lp-uppg-form" data-lp-uppgift class="km-form">' + valSaljare('vem', id) +
         '<label class="falt"><span>Uppgift</span><input name="text" required maxlength="120" placeholder="T.ex. Ring kunden om grunden"></label>' +
-        '<label class="falt"><span>Klar senast</span><input name="datum" type="date" required value="' + imorgon.toISOString().slice(0, 10) + '"></label></form>',
+        '<label class="falt"><span>Klar senast</span><input name="datum" type="date" required value="' + dagISO(imorgon) + '"></label></form>',
       fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="lp-uppg-form">' + i('plus') + 'Ge uppgiften</button>' });
   };
   G['lp-fordela'] = function (el) {

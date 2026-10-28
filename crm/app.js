@@ -340,7 +340,7 @@
     var oppna = db.affarer.filter(function (a) { return a.steg !== 'vunnen' && !a.forlorad; }).length;
     var proj = db.projekt.filter(function (p) { return p.steg !== 'klart'; }).length;
     var idag = new Date(); idag.setHours(23, 59, 59, 999);
-    var uppg = db.uppgifter.filter(function (u) { return !u.klar && new Date(u.forfaller) <= idag; }).length;
+    var jagId = IH.jag().id, uppg = db.uppgifter.filter(function (u) { return !u.klar && (!u.ansvarig || u.ansvarig === jagId) && new Date(u.forfaller) <= idag; }).length;
     return { forfragningar: [nya, true], salj: [oppna], kunder: [db.kunder.length], produktion: [proj], 'att-gora': [uppg, true], chatt: [IH.chattOlasta ? IH.chattOlasta() : 0, true] };
   }
 
@@ -372,7 +372,7 @@
       '<span><b>' + IH.e(jag.namn) + '</b><small class="anv__status">' + (IH.narvaro ? IH.e(IH.narvaro(jag.id).namn) + ' · ' : '') + IH.e(String(jag.titel || '').split(' · ')[0]) + '</small></span><span class="anv__chevron" aria-hidden="true">' + IH.i('chevron') + '</span></button>' +
       '<div class="sido__smalt"><a href="../index.html" data-g="lamna" title="Till hemsidan">' + IH.i('hem') + 'Hemsidan</a>' +
       '<button type="button" data-g="logga-ut" title="Logga ut">' + IH.i('utloggning') + 'Logga ut</button>' +
-      '<button type="button" class="sido__aterstall" data-g="sido-aterstall" title="Återställ exempeldatan" aria-label="Återställ exempeldatan">' + IH.i('aterstall') + '</button></div></div>';
+      (jag.roll === 'admin' ? '<button type="button" class="sido__aterstall" data-g="sido-aterstall" title="Återställ exempeldatan" aria-label="Återställ exempeldatan">' + IH.i('aterstall') + '</button>' : '') + '</div></div>';
   }
 
   function mobilmeny() {
@@ -533,7 +533,7 @@
   function rita() {
     var adr = lasAdress();
     var vyfn = IH.vyer[adr.vy] || IH.vyer.oversikt;
-    if (!IH.vyer[adr.vy]) adr.vy = 'oversikt';
+    if (!IH.vyer[adr.vy]) { adr.vy = 'oversikt'; if (location.hash && location.hash !== '#/' && location.hash !== '#') history.replaceState(null, '', '#/'); }
     IH.nuvarande = adr;
     if (adr.del[0] && /^(kunder|salj|forfragningar|offerter)$/.test(adr.vy)) minnsSenaste('#/' + adr.vy + '/' + adr.del[0]);
     var yta = $('#vy');
@@ -641,7 +641,7 @@
   var MAC = /Mac|iPhone|iPad/.test(navigator.platform || '');
   var SIDOR = [['oversikt', 'Översikt', 'hem'], ['forfragningar', 'Förfrågningar', 'inkorg'], ['salj', 'Säljtavla', 'tavla'],
     ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote'],
-    ['produktion', 'Projekt', 'produktion'], ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']];
+    ['produktion', 'Projekt', 'produktion'], ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['chatt', 'Meddelanden', 'meddelande'], ['profil', 'Min profil', 'kunder'], ['chef', 'Försäljningsledning', 'graf'], ['installningar', 'Inställningar', 'installning']];
   var ATGARDER = [['ny-kund', 'Ny kund', 'kunder', 'Privatperson eller företag'], ['ny-affar', 'Ny affär', 'tavla', 'Direkt på säljtavlan'],
     ['ny-forfragan', 'Ny förfrågan', 'inkorg', 'Någon ringde eller mejlade'], ['ny-uppgift', 'Ny uppgift', 'uppgift', 'Något att göra'],
     ['starta-mote', 'Starta kundmöte', 'mote', 'Presentationen i helskärm']];
@@ -692,7 +692,7 @@
     if (!q) {
       html += grupp('Senaste', senaste().map(senasteRad).filter(Boolean).slice(0, 5));
       html += grupp('Snabbåtgärder', ATGARDER.map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
-      html += grupp('Gå till', SIDOR.filter(function (x) { return x[0] !== IH.nuvarande.vy; }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
+      html += grupp('Gå till', SIDOR.filter(function (x) { return x[0] !== IH.nuvarande.vy && (x[0] !== 'chef' || IH.jag().chef); }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
     } else {
       var db = IH.db;
       var kunder = db.kunder.filter(function (k) { return traff(k.namn + ' ' + k.ort + ' ' + k.epost + ' ' + k.telefon, q, k.namn); }).slice(0, 5);
@@ -708,7 +708,7 @@
       html += grupp('Förfrågningar', forfragningar.map(function (f) { return rad('ga:#/forfragningar/' + f.id, IH.i('inkorg'), f.namn, f.hustyp + ' · ' + f.ort, 'Förfrågan'); }));
       html += grupp('Offerter', offerter.map(function (o) { var a = IH.affar(o.affar), k = a && IH.kund(a.kund); return rad('ga:#/offerter/' + o.id, IH.i('offert'), o.nummer, k ? k.namn : '', 'Offert'); }));
       html += grupp('Åtgärder', ATGARDER.filter(function (x) { return traff(x[1] + ' ' + x[3], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
-      html += grupp('Gå till', SIDOR.filter(function (x) { return traff(x[1], q, x[1]); }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
+      html += grupp('Gå till', SIDOR.filter(function (x) { return (x[0] !== 'chef' || IH.jag().chef) && traff(x[1], q, x[1]); }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
       if (!html) html = '<p class="palett__tom">Inga träffar för ”' + IH.e(q) + '”</p>';
     }
     return html;
@@ -872,7 +872,7 @@
     if (nav) nav.scrollBy({ top: nav.clientHeight * 0.7, behavior: 'smooth' });
   };
   IH.G.mer = function () {
-    var poster = [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote'], ['chatt', 'Meddelanden', 'meddelande'],
+    var poster = [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote'], ['chatt', 'Meddelanden', 'meddelande'],
       ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']];
     IH.oppnaArk({
       titel: 'Mer', ikon: 'meny',

@@ -22,7 +22,7 @@
   document.addEventListener('securitypolicyviolation', function (ev) { felLista.push('Stoppat av innehållspolicyn: ' + ev.violatedDirective + ' ' + (ev.blockedURI || 'inbyggd kod')); if (IH.sakLogg) IH.sakLogg('intrang', 'Innehållspolicyn stoppade ' + (ev.blockedURI || 'inbyggd kod') + ' (' + ev.violatedDirective + ').'); });
   // Försök att öppna adminsidor utan att vara admin loggas (kontrollen Intrång)
   addEventListener('hashchange', function () {
-    if (/^#\/(admin|sakerhet|kontroll)/.test(location.hash) && !arAdmin() && IH.sakLogg) IH.sakLogg('atkomst', IH.jag().namn + ' försökte öppna ' + location.hash.slice(2) + ' utan behörighet.');
+    if (/^#\/(admin|sakerhet|kontroll)/.test(location.hash) && !arAdmin() && !(IH.visarSom && IH.visarSom()) && IH.sakLogg) IH.sakLogg('atkomst', IH.jag().namn + ' försökte öppna ' + location.hash.slice(2) + ' utan behörighet.');
   });
 
   var ALLVAR = { hog: { namn: 'Hög', minus: 25 }, medel: { namn: 'Medel', minus: 10 }, lag: { namn: 'Låg', minus: 3 }, info: { namn: 'Info', minus: 0 } };
@@ -202,7 +202,7 @@
     skriv('Startar ' + (valda.length === KONTROLLER.length ? 'full skanning – sju kontroller' : valda.map(function (k) { return k.namn.toLowerCase(); }).join(', ')), 'start');
     var S = hub();
     for (var n = 0; n < valda.length; n++) {
-      var k = valda[n]; skan.nu = k.id; IH.rita();
+      var k = valda[n]; skan.nu = k.id; if (/^#\/sakerhet/.test(location.hash)) IH.rita();
       skriv(k.namn + ' …', 'rubrik');
       var steg = 0, kort = document.querySelector('[data-sh-kontroll="' + k.id + '"]');
       var stegLogg = function (text, ton) { steg++; skriv(text, ton); var andel = Math.min(0.95, steg / (k.steg.length + 1)); skan.pct = Math.round(((n + andel) / valda.length) * 100); var el = document.querySelector('[data-sh-pct]'); if (el) el.textContent = skan.pct + ' %'; var kk = document.querySelector('[data-sh-kontroll="' + k.id + '"]'); if (kk) kk.style.setProperty('--forlopp', andel); };
@@ -217,7 +217,7 @@
     if (IH.sakLogg) IH.sakLogg('skanning', (valda.length === KONTROLLER.length ? 'Full skanning' : 'Skanning') + ': ' + p + ' av 100.'); else IH.spara();
     skriv('Klart. Säkerhetspoäng ' + p + ' av 100.', p >= 90 ? 'ok' : p >= 70 ? 'medel' : 'hog');
     skan.kor = false; skan.nu = null; skan.pct = 0;
-    IH.spara(); IH.rita();
+    IH.spara(); if (/^#\/(sakerhet|kontroll)/.test(location.hash)) IH.rita();
     IH.toast('Skanningen är klar', p + ' av 100', 'system');
   }
 

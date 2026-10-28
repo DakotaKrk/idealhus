@@ -460,3 +460,6 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; 
 .chf-ikon[data-i-docka] .emo-ik { width: 18px; height: 18px; }
 .chf-ikon[data-i-docka] .ch-olast { top: -5px; right: -7px; }
 .chf-dock__led { width: 1.5px; margin-left: -.75px; }
+
+/* Mobil: bubblan ligger ovanför bottenmenyn så att Mer går att nå */
+@media (max-width: 720px) { .chf-ikon:not([data-i-docka]) { bottom: 92px !important; right: 14px !important; } }
