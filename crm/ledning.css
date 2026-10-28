@@ -153,90 +153,110 @@
 @media (prefers-reduced-motion: reduce) { .lp-staplar i, .lp-mal__spar i, .lp-pipe__stapel { animation: none; } }
 .lp-skriv { margin-top: 12px; }
 
-/* Kontomenyn (ledning.js): täcker sidomenyn exakt på dator, annars i ett ark */
-.km-panel { position: fixed; z-index: 950; display: flex; flex-direction: column; gap: 12px; padding: 16px 14px 14px; border-radius: 28px; overflow: hidden auto;
+
+/* Kontomenyn (ledning.js) som i Uperformance: täcker sidomenyn exakt på dator (annars ett ark). Överst du – bilden med
+   ring, rollerna och statusknappen – sedan snabbstatus, alla konton med status och senast aktiv, och tre rutor i foten. */
+.km-panel { position: fixed; z-index: 950; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; padding: 14px 12px; border-radius: 28px; overflow: hidden;
   background: linear-gradient(180deg, #fffdf9, #fbf4e8); box-shadow: 0 30px 70px -30px rgba(60, 40, 15, .55), inset 0 0 0 1px rgba(240, 181, 110, .45);
-  animation: km-in .32s var(--mjuk) both; transform-origin: bottom left; }
-.km-panel[data-stanger] { animation: km-ut .2s ease-in both; }
-@keyframes km-in { from { opacity: 0; transform: translateY(14px) scale(.97); } }
-@keyframes km-ut { to { opacity: 0; transform: translateY(10px) scale(.98); } }
+  animation: km-in .5s cubic-bezier(.22, 1, .36, 1) both; transform-origin: 50% 100%; }
+.km-panel::before { content: ""; position: absolute; left: 22%; right: 22%; top: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--virke), transparent); }
+.km-panel[data-stanger] { animation: km-ut .22s ease-in both; }
+@keyframes km-in { from { opacity: 0; transform: perspective(900px) rotateX(-16deg) translateY(48px) scale(.97); } }
+@keyframes km-ut { to { opacity: 0; transform: perspective(900px) rotateX(-8deg) translateY(24px) scale(.98); } }
+.km-panel > * { animation: km-rad-in .5s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(80ms + var(--i, 0) * 45ms); }
+.km-panel > :nth-child(2) { --i: 1; } .km-panel > :nth-child(3) { --i: 2; } .km-panel > :nth-child(n+4) { --i: 3; }
+.km-lista > [role="listitem"] { animation: km-rad-in .5s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(160ms + var(--i, 0) * 55ms); }
+@keyframes km-rad-in { from { opacity: 0; transform: translateY(12px); } }
 html[data-konto-oppen] .anv { opacity: 0; pointer-events: none; }
-.km-huvud { display: flex; align-items: center; gap: 12px; }
-.km-huvud > div { flex: 1; display: grid; min-width: 0; }
-.km-huvud b { font: 700 1.05rem/1.2 var(--rubrik); }
-.km-huvud small { font-size: .78rem; color: var(--text-3); }
-.km-huvud .lp-status { margin-top: 3px; font-size: .78rem; color: var(--text-2); }
-.km-huvud .avatar--stor { width: 52px; height: 52px; font-size: 1.05rem; }
-.km-tal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.km-tal a { display: grid; gap: 2px; padding: 10px 8px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); color: inherit; text-decoration: none; text-align: center; transition: box-shadow .2s, transform .15s; }
-.km-tal a:hover { box-shadow: inset 0 0 0 1.5px var(--virke); }
-.km-tal a:active { transform: scale(.96); }
-.km-tal b { font: 700 1.25rem/1 var(--rubrik); }
-.km-tal small { font-size: .68rem; color: var(--text-3); }
-.km-del { display: grid; gap: 8px; }
-.km-rubrik { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 2px; font: 600 .68rem/1 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
-.km-rubrik small { font: 500 .7rem/1 var(--sans); letter-spacing: 0; text-transform: none; }
-.km-del .km-status__val { display: flex; flex-wrap: wrap; gap: 5px; }
-.km-del .km-status__val button { min-height: 30px; padding: 5px 10px; font-size: .74rem; border-radius: 999px; white-space: nowrap; }
-.km-lankar { gap: 2px; }
-.km-lank { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; color: inherit; text-decoration: none; transition: background-color .2s; }
-.km-lank:hover { background: #fff; }
-.km-lank > .emo-ik { width: 17px; height: 17px; padding: 7px; flex: none; border-radius: 11px; background: var(--virke-ljus); box-sizing: content-box; }
-.km-lank span { flex: 1; display: grid; min-width: 0; }
-.km-lank b { font: 600 .86rem/1.2 var(--rubrik); }
-.km-lank small { font-size: .74rem; color: var(--text-3); }
-.km-lank > .i { width: 14px; height: 14px; color: var(--text-3); }
-.km-kontolista { display: grid; gap: 2px; }
-.km-konto { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 8px; border: 0; border-radius: 14px; background: none; text-align: left; font: inherit; cursor: pointer; transition: background-color .2s; }
-.km-konto:hover { background: #fff; }
-.km-konto.vald { background: #fff; box-shadow: inset 0 0 0 1.5px rgba(240, 181, 110, .6); cursor: default; }
-.km-konto .avatar { width: 34px; height: 34px; font-size: .75rem; flex: none; }
-.km-konto span { flex: 1; display: grid; min-width: 0; }
-.km-konto b { font: 600 .84rem/1.2 var(--rubrik); }
-.km-konto small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .72rem; color: var(--text-3); }
-.km-konto em { padding: 3px 8px; border-radius: 999px; background: var(--virke-ljus); font: 600 .66rem/1 var(--rubrik); font-style: normal; color: var(--virke-djup); }
-.km-ny { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 38px; border: 1.5px dashed rgba(143, 84, 36, .35); border-radius: 14px; background: none; font: 600 .82rem/1 var(--rubrik); color: var(--virke-djup); cursor: pointer; transition: background-color .2s, border-color .2s; }
-.km-ny:hover { background: #fff; border-color: var(--virke); }
-.km-ny .emo-ik { width: 16px; height: 16px; }
-.km-fot { display: flex; gap: 8px; margin-top: auto; padding-top: 6px; }
-.km-fot .knapp { flex: 1; justify-content: center; }
-.km-panel[data-tat] { gap: 9px; padding: 12px 12px; }
-.km-panel[data-tat] .km-tal a { padding: 7px 6px; }
-.km-panel[data-tat] .km-lank small, .km-panel[data-tat] .km-konto small { display: none; }
+
+.km-topp { position: relative; display: grid; justify-items: center; gap: 10px; flex: none; padding: 22px 12px 12px; border-radius: 20px; text-align: center;
+  background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--n) 16%, #fff), #fff 70%); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); }
+.km-stang { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: rgba(27, 25, 21, .05); color: var(--text-3); cursor: pointer; transition: background-color .2s, color .2s, transform .25s var(--studs); }
+.km-stang:hover { background: rgba(27, 25, 21, .1); color: var(--kol); transform: rotate(90deg); }
+.km-stang .i { width: 13px; height: 13px; }
+.km-bild { position: relative; display: grid; place-items: center; width: 72px; height: 72px; }
+.km-bild .avatar { width: 62px; height: 62px; font-size: 1.15rem; box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--n), 0 16px 30px -12px var(--n); }
+.km-ring { position: absolute; inset: -7px; border-radius: 50%; border: 1.5px dashed color-mix(in srgb, var(--n) 55%, transparent); animation: km-ring 18s linear infinite; }
+@keyframes km-ring { to { transform: rotate(360deg); } }
+.km-du { display: grid; justify-items: center; gap: 4px; min-width: 0; max-width: 100%; }
+.km-du small { font: 700 .56rem/1 var(--rubrik); letter-spacing: .16em; text-transform: uppercase; color: var(--text-3); }
+.km-du strong { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 1.02rem/1.2 var(--rubrik); }
+.km-roller { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.km-roller .ap-roll { padding: 3px 8px; font-size: .64rem; }
+.km-statusknapp { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 40px; margin-top: 4px; padding: 0 12px; border: 0; border-radius: 12px; background: #fbf7f0;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .08); font: 600 .8rem/1.2 var(--sans); color: var(--kol); text-align: left; cursor: pointer; transition: box-shadow .2s; }
+.km-statusknapp:hover, .km-statusknapp[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--n) 60%, transparent); }
+.km-statusknapp > i { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--n); box-shadow: 0 0 0 3px color-mix(in srgb, var(--n) 22%, transparent); }
+.km-statusknapp > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.km-statusknapp .emo-ik { width: 14px; height: 14px; opacity: .55; }
+
+.km-snabb { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; flex: none; }
+.km-snabbval { display: grid; place-items: center; height: 40px; padding: 0; border: 0; border-radius: 12px; background: color-mix(in srgb, var(--n) 12%, #fff); color: color-mix(in srgb, var(--n) 75%, #000); cursor: pointer;
+  transition: transform .2s var(--studs), background-color .2s, box-shadow .2s; }
+.km-snabbval .emo-ik { width: 16px; height: 16px; }
+.km-snabbval:hover { transform: translateY(-2px); background: color-mix(in srgb, var(--n) 22%, #fff); }
+.km-snabbval[aria-pressed="true"] { background: var(--n); color: #fff; box-shadow: 0 8px 18px -8px var(--n); }
+.km-statusval { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; flex: none; padding: 6px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); }
+.km-statusval button { display: flex; align-items: center; gap: 7px; min-width: 0; min-height: 32px; padding: 5px 8px; border: 0; border-radius: 10px; background: none; font: 600 .74rem/1.2 var(--rubrik); color: var(--text-2); text-align: left; cursor: pointer; }
+.km-statusval button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.km-statusval .emo-ik { width: 14px; height: 14px; flex: none; color: var(--n); }
+.km-statusval button:hover { background: var(--ben); }
+.km-statusval button[aria-pressed="true"] { background: color-mix(in srgb, var(--n) 15%, #fff); color: var(--kol); }
+
+.km-grupp { display: flex; flex-direction: column; gap: 10px; min-height: 0; flex: 0 1 auto; }
+.km-panel .km-rubrik, .km-ark .km-rubrik { display: grid; gap: 3px; margin: 2px 2px 0; flex: none; font: 700 .6rem/1 var(--rubrik); letter-spacing: .16em; text-transform: uppercase; color: var(--text-3); }
+.km-panel .km-rubrik small, .km-ark .km-rubrik small { font: 500 .68rem/1.25 var(--sans); letter-spacing: 0; text-transform: none; color: var(--text-3); opacity: .8; }
+.km-lista { display: grid; align-content: start; gap: 8px; min-height: 0; padding: 2px; margin: -2px; }
+.km-panel[data-rulla] .km-lista { overflow-y: auto; scrollbar-width: thin; }
+.km-rad { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; width: 100%; min-height: 62px; padding: 9px; border: 0; border-radius: 16px;
+  background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); color: inherit; font: inherit; text-align: left; transition: transform .25s var(--studs), box-shadow .25s; }
+button.km-rad { cursor: pointer; }
+button.km-rad:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--n) 55%, transparent), 0 14px 26px -18px rgba(90, 60, 25, .6); }
+button.km-rad:active { transform: scale(.98); }
+.km-rad--jag { background: var(--virke-ljus); box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .6); }
+.km-rad .avatar { width: 40px; height: 40px; font-size: .8rem; }
+.km-rad__text { display: grid; gap: 2px; min-width: 0; }
+.km-rad__text strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 .86rem/1.2 var(--rubrik); }
+.km-rad__roller { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .68rem; color: var(--text-3); }
+.km-rad__status { display: flex; align-items: center; gap: 5px; min-width: 0; overflow: hidden; white-space: nowrap; font-size: .68rem; color: var(--text-3); }
+.km-rad__status > i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--n); }
+.km-rad__status b { flex: none; font-weight: 600; color: var(--text-2); }
+.km-rad__status > span { overflow: hidden; text-overflow: ellipsis; }
+.km-rad__status .km-nu { color: #1d7a47; }
+.km-bock { position: absolute; left: 4px; top: 4px; z-index: 1; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--virke-djup); color: #fff; box-shadow: 0 0 0 3px #fff; }
+.km-bock .emo-ik { width: 11px; height: 11px; }
+
+.km-fot { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; flex: none; padding-top: 12px; border-top: 1px solid rgba(27, 25, 21, .08); }
+.km-lank { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-width: 0; min-height: 58px; padding: 6px 4px; border: 0; border-radius: 14px; background: none;
+  font: 600 .7rem/1.2 var(--rubrik); color: var(--text-2); text-decoration: none; cursor: pointer; transition: background-color .2s, color .2s, transform .2s var(--studs); }
+.km-lank > span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.km-lank:hover { background: var(--virke-ljus); color: var(--kol); transform: translateY(-2px); }
+.km-lank .emo-ik { width: 17px; height: 17px; color: var(--virke-djup); }
+
+/* Tätare i två steg när sidomenyn är låg */
+.km-panel[data-tat] { gap: 8px; padding: 12px; }
+.km-panel[data-tat] .km-grupp { gap: 8px; }
+.km-panel[data-tat] .km-lista { gap: 6px; }
+.km-panel[data-tat] .km-snabbval { height: 34px; }
+.km-panel[data-tat] .km-lank { min-height: 50px; }
+.km-panel[data-tat] .km-topp { gap: 6px; padding: 12px 12px 10px; }
+.km-panel[data-tat] .km-bild { width: 52px; height: 52px; }
+.km-panel[data-tat] .km-bild .avatar { width: 46px; height: 46px; font-size: .9rem; }
+.km-panel[data-tat] .km-du small, .km-panel[data-tat] .km-rubrik small, .km-panel[data-tat] .km-rad__roller { display: none; }
+.km-panel[data-tat] .km-statusknapp { min-height: 32px; }
+.km-panel[data-tat] .km-rad { min-height: 50px; padding: 7px 9px; }
+.km-panel[data-tat="2"] .km-snabbval { height: 28px; border-radius: 9px; }
+.km-panel[data-tat="2"] .km-lank { min-height: 38px; }
+.km-panel[data-tat="2"] .km-lank > span { display: none; }
+
+/* I arket (mobil och smal skärm) */
 .km-ark { display: grid; gap: 14px; }
+.km-ark .km-stang { display: none; }
 .km-form { display: grid; gap: 12px; }
 .km-kryss { display: flex; align-items: center; gap: 10px; font-size: .9rem; }
 .km-kryss input { width: 18px; height: 18px; accent-color: var(--virke-djup); }
-/* Chattikonen göms medan en panel eller kontomenyn är öppen (den låg annars över knappar i arkets fot) */
+/* Chattikonen göms medan en panel eller kontomenyn är öppen */
 body:has(.ark.syns) .chf-ikon, html[data-konto-oppen] .chf-ikon { opacity: 0; pointer-events: none; transform: scale(.8); }
-@media (prefers-reduced-motion: reduce) { .km-panel, .km-panel[data-stanger] { animation: none; } }
-
-/* Kontomenyn, modernare (2026-10-29): statuspillret fäller ut valen, genvägarna som rutor, kompakta konton */
-.km-panel { gap: 14px; padding: 18px 14px 14px; }
-.km-huvud { align-items: flex-start; }
-.km-statusknapp { display: inline-flex; align-items: center; gap: 7px; justify-self: start; margin-top: 6px; padding: 5px 10px 5px 9px; border: 0; border-radius: 999px; background: #fff;
-  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); font: 600 .76rem/1 var(--rubrik); color: var(--text); cursor: pointer; transition: box-shadow .2s; }
-.km-statusknapp:hover, .km-statusknapp[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px var(--n); }
-.km-statusknapp i { width: 8px; height: 8px; border-radius: 50%; background: var(--n); box-shadow: 0 0 0 3px color-mix(in srgb, var(--n) 22%, transparent); }
-.km-statusknapp .i { width: 12px; height: 12px; transform: rotate(90deg); transition: transform .25s var(--mjuk); color: var(--text-3); }
-.km-statusknapp[aria-expanded="true"] .i { transform: rotate(-90deg); }
-.km-statusval { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 6px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); animation: valj-in .25s var(--mjuk) both; }
-.km-statusval button { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 5px 9px; border: 0; border-radius: 10px; background: none; font: 600 .76rem/1.1 var(--rubrik); color: var(--text-2); text-align: left; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.km-statusval button i { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--n); }
-.km-statusval button:hover { background: var(--ben); color: var(--text); }
-.km-statusval button[aria-pressed="true"] { background: color-mix(in srgb, var(--n) 14%, #fff); color: var(--text); }
-.km-tal { gap: 6px; }
-.km-tal a { padding: 9px 6px 8px; border-radius: 14px; }
-.km-tal b { font-size: 1.15rem; }
-.km-tal small { font-size: .66rem; line-height: 1.2; }
-.km-lankar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-.km-lank { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 11px 10px 10px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); transition: box-shadow .2s, transform .2s var(--studs); }
-.km-lank:hover { background: #fff; box-shadow: inset 0 0 0 1.5px var(--virke); transform: translateY(-1px); }
-.km-lank > .emo-ik { width: 16px; height: 16px; padding: 6px; border-radius: 10px; }
-.km-lank b { font: 600 .8rem/1.2 var(--rubrik); }
-.km-rubrik { white-space: nowrap; }
-.km-kontolista { display: grid; gap: 2px; }
-.km-konto { padding: 6px 8px; }
-.km-konto .avatar { width: 30px; height: 30px; font-size: .7rem; }
-.km-konto small { font-size: .7rem; }
-.km-panel[data-tat] .km-lank { padding: 8px; }
+@media (prefers-reduced-motion: reduce) { .km-panel, .km-panel[data-stanger], .km-panel > *, .km-lista > [role="listitem"], .km-ring { animation: none; } }
+.km-bild .avatar { border-radius: 50%; }
+.km-bock { left: auto; right: 10px; top: 50%; margin-top: -9px; }

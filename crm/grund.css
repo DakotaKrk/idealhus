@@ -179,3 +179,20 @@ html.drar .aff__flytta { opacity: 0; }
     background: linear-gradient(180deg, transparent, rgba(143, 84, 36, .22) 18%, rgba(143, 84, 36, .22) 82%, transparent); opacity: 1; animation: none; transform: none; pointer-events: none; }
   html[data-sido-dold] body .sido-knapp { left: 26px; width: 32px; height: 32px; margin: -16px 0 0 -16px; border-radius: 50%; }
 }
+
+/* Sidorna slutar i höjd med menyn (2026-10-29): samma 12 px luft under sista kortet som under sidomenyn */
+@media (min-width: 1101px) {
+  .vy > :last-child, .vy > :last-child > .ao-band, .vy > :last-child > :last-child { margin-bottom: 0; }
+  .vy > .ao-tva:last-child > .ao-band { height: 100%; }
+}
+
+/* Sidomenyn tätare i steg (grund.js anpassaSido) så att alla val får plats utan Mer-knappen */
+html[data-sido-tat] .sido__lank { min-height: 35px; }
+html[data-sido-tat] .sido__lank .i { width: 29px; height: 29px; padding: 6px; }
+html[data-sido-tat] .sido__rubrik { margin-top: 7px; margin-bottom: 2px; }
+html[data-sido-tat] .sido__verktyg { margin-bottom: 8px; }
+html[data-sido-tat="2"] .sido__lank { min-height: 32px; }
+html[data-sido-tat="2"] .sido__rubrik { margin-top: 4px; margin-bottom: 1px; font-size: .58rem; }
+html[data-sido-tat="2"] .sido__logo { padding-top: 8px; padding-bottom: 8px; }
+html[data-sido-tat="3"] .sido__rubrik { display: none; }
+html[data-sido-tat="3"] .sido__lank { min-height: 30px; }

@@ -10403,7 +10403,7 @@ button.kal__rad:hover {
 
   /* Vyn: samma luft som runt menyn, och första kortet i jämnhöjd med menyn. */
   .vy {
-    padding: var(--ram) var(--ram) 40px;
+    padding: var(--ram);
   }
 
   .stegband {

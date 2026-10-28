@@ -64,7 +64,7 @@
       '<div class="ao-text"><p class="etikett"><i class="sh-live"></i>Administration · demoläget</p><h1>Kontrollrummet <em>för CRM:et.</em></h1>' +
         '<p class="ao-ingress">Konton och roller, behörigheter, data och system, loggen och säkerheten – och förslag på det som bör åtgärdas.</p>' +
         '<div class="sh-knappar"><button type="button" class="sh-knapp sh-knapp--accent" data-g="km-nytt-konto">' + ik('anvandare-plus') + '<span>Lägg till konto</span></button>' +
-          '<a class="sh-knapp" href="#/sakerhet">' + ik('radar') + '<span>Säkerhetshubben</span></a><a class="sh-knapp" href="#/kontroll">' + ik('server') + '<span>Kontrollcentralen</span></a>' +
+          '<a class="sh-knapp" href="#/sakerhet">' + ik('radar') + '<span>Säkerhetshubben</span></a>' +
           '<button type="button" class="sh-knapp" data-g="ad-exportera">' + ik('ladda-ner') + '<span>Exportera data</span></button></div></div>' +
       '<div class="ap-tal">' + [
         { ikon: 'anstallda', etikett: 'Konton', varde: aktiva.length, under: (alla.length - aktiva.length ? plural(alla.length - aktiva.length, 'inaktiverat', 'inaktiverade') + ' · ' : '') + nu + ' aktiva nu', ton: 'is' },

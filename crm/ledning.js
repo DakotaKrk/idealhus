@@ -56,35 +56,42 @@
     document.removeEventListener('pointerdown', utanforKm, true);
   }
   function utanforKm(ev) { if (km && !km.contains(ev.target) && !ev.target.closest('[data-g="konto-meny"]') && !ev.target.closest('.ark, .slojan')) stangKm(); }
+  var NARV_IKON = { online: 'bock', mote: 'mote', upptagen: 'minus-cirkel', strax: 'timglas', lunch: 'kaffe', ute: 'byggnad', semester: 'sol', sjuk: 'termometer', osynlig: 'oga-av' };
+  var SNABB = ['online', 'mote', 'upptagen', 'lunch', 'osynlig'];
+  var ROLLNAMN = { salj: 'Sälj', prod: 'Produktion', admin: 'Admin' };
+  var rollerFor = function (u) { return [ROLLNAMN[u.roll] || u.roll].concat(u.chef ? ['Chef'] : []); };
+  function senastFor(u) {
+    var n = narvaro(u.id);
+    if (['online', 'mote', 'upptagen', 'ute'].indexOf(n.id) >= 0) return { text: 'aktiv nu', nu: true };
+    var t = db().aktiviteter.filter(function (h) { return h.av === u.id; }).map(function (h) { return h.tid; }).sort().pop();
+    return { text: t ? IH.sedan(t) : '–', nu: false };
+  }
+  function kontoRad(u, jag) {
+    var n = narvaro(u.id), s = senastFor(u), tagg = jag ? 'div' : 'button';
+    return '<' + tagg + ' class="km-rad' + (jag ? ' km-rad--jag' : '') + '"' + (jag ? '' : ' type="button" data-g="valj-anvandare" data-id="' + u.id + '"') + ' style="--n:' + n.farg + '">' +
+      (jag ? '<span class="km-bock" aria-label="Inloggad">' + IH.emo('bock') + '</span>' : '') + avatar(u) +
+      '<span class="km-rad__text"><strong title="' + e(u.namn) + '">' + e(u.namn) + '</strong><small class="km-rad__roller">' + rollerFor(u).join(' · ') + '</small>' +
+      '<span class="km-rad__status"><i></i><b>' + e(n.namn) + '</b><span' + (s.nu ? ' class="km-nu"' : '') + '>· ' + e(s.text) + '</span></span></span></' + tagg + '>';
+  }
   function kmHtml() {
-    var jag = IH.jag(), nu = narvaro(jag.id), vald = lasNarvaro()[jag.id] || nu.id, d = db();
-    var idag = new Date(); idag.setHours(23, 59, 59, 999);
-    var mina = d.affarer.filter(function (a) { return a.ansvarig === jag.id && a.steg !== 'vunnen' && !a.forlorad; });
-    var uppg = d.uppgifter.filter(function (x) { return x.ansvarig === jag.id && !x.klar && new Date(x.forfaller) <= idag; }).length;
-    var olasta = IH.chattOlasta ? IH.chattOlasta() : 0;
-    var lank = function (href, ikon, text, under) { return '<a class="km-lank" href="' + href + '" title="' + e(under || text) + '">' + IH.emo(ikon) + '<b>' + text + '</b></a>'; };
-    return '<header class="km-huvud">' + avatar(jag, true) + '<div><b>' + e(jag.namn) + '</b><small>' + e(jag.titel) + '</small>' +
-        '<button type="button" class="km-statusknapp" data-g="km-status" aria-expanded="' + kmStatusOppen + '" style="--n:' + nu.farg + '"><i></i>' + e(nu.namn) + i('pil') + '</button></div>' +
-        '<button type="button" class="ch-ikonknapp" data-g="km-stang" aria-label="Stäng">' + i('stang') + '</button></header>' +
-      '<div class="km-tal">' +
-        (jag.roll === 'salj' ? '<a href="#/salj"><b class="tal">' + mina.length + '</b><small>Mina affärer</small></a>' : jag.roll === 'prod' ? '<a href="#/produktion"><b class="tal">' + d.projekt.filter(function (p) { return p.steg !== 'klart'; }).length + '</b><small>Projekt</small></a>' : '<a href="#/sakerhet"><b class="tal">' + (IH.sakTotal && IH.sakTotal() != null ? IH.sakTotal() : '–') + '</b><small>Säkerhet</small></a>') +
-        '<a href="#/att-gora"><b class="tal">' + uppg + '</b><small>Att göra i dag</small></a>' +
-        '<a href="#/chatt"><b class="tal">' + olasta + '</b><small>Olästa</small></a></div>' +
-      (kmStatusOppen ? '<section class="km-del km-statusval">' + NARVARO.map(function (n) {
-        return '<button type="button" data-g="satt-narvaro" data-s="' + n.id + '" aria-pressed="' + (vald === n.id) + '" style="--n:' + n.farg + '"><i></i>' + e(n.namn) + '</button>';
-      }).join('') + '</section>' : '') +
-      '<nav class="km-del km-lankar">' +
-        lank('#/profil', 'anstallda', 'Min profil', 'Nyckeltal, aktivitet och affärer') +
-        (jag.chef ? lank('#/chef', 'stapel', 'Försäljningsledning', 'Teamet, pipelinen och topplistan') : '') +
-        (jag.roll === 'admin' ? lank('#/kontroll', 'server', 'Kontrollcentralen', 'Systemhälsan och kontona') + lank('#/sakerhet', 'skold', 'Säkerhetshubben', 'Sju kontroller') : '') +
-        lank('#/chatt', 'prat', 'Meddelanden', olasta ? olasta + ' olästa' : 'Allt är läst') + lank('#/att-gora', 'todo', 'Att göra', 'Dina uppgifter') +
-      '</nav>' +
-      '<section class="km-del km-konton"><p class="km-rubrik">Byt konto</p><div class="km-kontolista">' + IH.ANVANDARE.filter(function (u) { return u.id !== jag.id && !u.inaktiv; }).map(function (u) {
-        return '<button type="button" class="km-konto" data-g="valj-anvandare" data-id="' + u.id + '" title="' + e(u.titel + ' · ' + narvaro(u.id).namn) + '">' + avatar(u) +
-          '<span><b>' + e(u.namn) + '</b><small>' + e(u.titel.split(' · ')[0]) + '</small></span></button>';
-      }).join('') + '</div>' +
-      (jag.roll === 'admin' || jag.chef ? '<button type="button" class="km-ny" data-g="km-nytt-konto">' + IH.emo('anvandare-plus') + 'Nytt konto</button>' : '') + '</section>' +
-      '<footer class="km-fot"><a class="knapp knapp--liten" href="../index.html" data-g="lamna">' + i('hem') + 'Hemsidan</a><button type="button" class="knapp knapp--liten" data-g="logga-ut">' + i('utloggning') + 'Logga ut</button></footer>';
+    var jag = IH.jag(), nu = narvaro(jag.id), vald = lasNarvaro()[jag.id] || nu.id;
+    var andra = IH.ANVANDARE.filter(function (u) { return u.id !== jag.id && !u.inaktiv; });
+    var lank = function (attr, ikon, text) { var a = attr.indexOf('href') === 0; return '<' + (a ? 'a' : 'button type="button"') + ' class="km-lank" ' + attr + ' title="' + text + '">' + IH.emo(ikon) + '<span>' + text + '</span></' + (a ? 'a' : 'button') + '>'; };
+    return '<header class="km-topp" style="--n:' + nu.farg + '">' +
+        '<button type="button" class="km-stang" data-g="km-stang" aria-label="Stäng" title="Stäng (Esc)">' + i('stang') + '</button>' +
+        '<span class="km-bild"><span class="km-ring" aria-hidden="true"></span><span class="avatar avatar--stor" style="--av:' + jag.farg + '">' + IH.initialer(jag.namn) + '</span></span>' +
+        '<div class="km-du"><small>Inloggad som</small><strong title="' + e(jag.namn) + '">' + e(jag.namn) + '</strong><span class="km-roller">' + rollerFor(jag).map(function (r) { return '<span class="ap-roll" data-roll="' + r + '">' + r + '</span>'; }).join('') + '</span></div>' +
+        '<button type="button" class="km-statusknapp" data-g="km-status" aria-expanded="' + kmStatusOppen + '"><i></i><span>' + e(nu.namn) + '</span>' + IH.emo('redigera') + '</button></header>' +
+      '<div class="km-snabb">' + SNABB.map(function (id) { var n = NARVARO.filter(function (x) { return x.id === id; })[0];
+        return '<button type="button" class="km-snabbval" data-g="satt-narvaro" data-s="' + id + '" style="--n:' + n.farg + '" title="' + n.namn + '" aria-label="Status: ' + n.namn + '" aria-pressed="' + (vald === id) + '">' + IH.emo(NARV_IKON[id]) + '</button>'; }).join('') + '</div>' +
+      (kmStatusOppen ? '<div class="km-statusval">' + NARVARO.map(function (n) {
+        return '<button type="button" data-g="satt-narvaro" data-s="' + n.id + '" aria-pressed="' + (vald === n.id) + '" style="--n:' + n.farg + '">' + IH.emo(NARV_IKON[n.id]) + '<span>' + e(n.namn) + '</span></button>';
+      }).join('') + '</div>' : '') +
+      '<div class="km-grupp"><p class="km-rubrik"><span>Byt konto</span><small>Demo: logga in som någon annan i teamet</small></p>' +
+        '<div class="km-lista" role="list">' + [jag].concat(andra).map(function (u, n) { return '<div role="listitem" style="--i:' + n + '">' + kontoRad(u, u.id === jag.id) + '</div>'; }).join('') + '</div></div>' +
+      '<footer class="km-fot">' + lank('href="#/profil"', 'anstallda', 'Min profil') +
+        (jag.roll === 'admin' || jag.chef ? lank('data-g="km-nytt-konto"', 'anvandare-plus', 'Nytt konto') : lank('href="#/chatt"', 'prat', 'Meddelanden')) +
+        lank('data-g="logga-ut"', 'logga-ut', 'Logga ut') + '</footer>';
   }
   IH.G['konto-meny'] = function () {
     if (km) { stangKm(); return; }
@@ -96,9 +103,9 @@
     km = document.createElement('aside');
     km.className = 'km-panel'; km.setAttribute('role', 'dialog'); km.setAttribute('aria-label', 'Ditt konto');
     km.style.left = r.left + 'px'; km.style.top = r.top + 'px'; km.style.width = r.width + 'px'; km.style.height = r.height + 'px';
-    km.toggleAttribute('data-tat', r.height < 760);
     km.innerHTML = kmHtml();
     document.body.appendChild(km);
+    anpassaKm();
     document.documentElement.setAttribute('data-konto-oppen', '');
     var f = km.querySelector('[aria-pressed="true"]'); if (f) f.focus({ preventScroll: true });
     setTimeout(function () { document.addEventListener('pointerdown', utanforKm, true); }, 0);
@@ -111,7 +118,15 @@
   addEventListener('hashchange', stangKm);
   addEventListener('resize', stangKm);
   // Byter man status eller konto ritas panelen om på plats
-  function ritaKm() { if (km) km.innerHTML = kmHtml(); }
+  function ritaKm() { if (km) { km.innerHTML = kmHtml(); anpassaKm(); } }
+  // Tätare i två steg tills allt får plats – först därefter rullar kontolistan (som i Uperformance)
+  function anpassaKm() {
+    if (!km) return;
+    km.removeAttribute('data-tat'); km.removeAttribute('data-rulla');
+    var over = function () { return km.scrollHeight > km.clientHeight + 1; };
+    ['1', '2'].forEach(function (steg) { if (over()) km.setAttribute('data-tat', steg); });
+    if (over()) km.setAttribute('data-rulla', '');
+  }
   IH.G['km-nytt-konto'] = function () {
     stangKm();
     IH.oppnaArk({ titel: 'Nytt konto', under: 'Kontot sparas i den här webbläsaren (demo).', ikon: 'kunder',

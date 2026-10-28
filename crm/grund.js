@@ -50,3 +50,27 @@
     });
   }, { passive: true });
 })();
+
+/* Sidomenyn tätare i steg tills allt får plats (som anpassaSido i Uperformance): först lägre rader, sedan mindre
+   rubriker, sist utan rubriker – menyn rullar bara om det ändå inte räcker. */
+(function () {
+  'use strict';
+  var IH = window.IH;
+  function anpassaSido() {
+    var nav = document.querySelector('.sido__nav'), html = document.documentElement;
+    if (!nav || !nav.getClientRects().length) return;
+    var fore = html.getAttribute('data-sido-tat');
+    html.removeAttribute('data-sido-tat');
+    var over = function () { return nav.scrollHeight > nav.clientHeight + 1; };
+    ['1', '2', '3'].forEach(function (steg) { if (over()) html.setAttribute('data-sido-tat', steg); });
+    nav.dispatchEvent(new Event('scroll'));
+    // Markören under valt menyval flyttas med när raderna blir lägre
+    if (html.getAttribute('data-sido-tat') !== fore) dispatchEvent(new Event('resize'));
+  }
+  var forra = IH.uppdateraMeny;
+  IH.uppdateraMeny = function () { var r = forra.apply(this, arguments); anpassaSido(); return r; };
+  var t = 0;
+  addEventListener('resize', function () { clearTimeout(t); t = setTimeout(anpassaSido, 120); });
+  try { document.fonts.ready.then(anpassaSido); } catch (x) { /* äldre webbläsare */ }
+  setTimeout(anpassaSido, 0);
+})();
