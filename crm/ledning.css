@@ -687,7 +687,8 @@ section.lp-mork .ao-text { position: relative; z-index: 1; }
 .lp-staplar { margin-top: 24px; }
 .lp-staplar__axel { display: flex; gap: 4px; margin-top: 6px; }
 .lp-staplar__axel span { flex: 1; min-width: 3px; font: 600 .58rem/1 var(--rubrik); color: var(--text-3); white-space: nowrap; overflow: visible; }
-.lp-staplar__axel span:last-child { display: flex; justify-content: flex-end; color: var(--virke-djup); }
+.lp-staplar__axel span:last-child { flex: 0 0 auto; color: var(--virke-djup); }
+.lp-staplar__axel span { overflow: hidden; line-height: 1.3; }
 
 /* Stjärnfallet, rätt riktat: huvudet först och svansen bakåt längs banan, snett nedåt åt vänster.
    Två fall med olika takt så det inte blir förutsägbart. Månens mörka del utan grå skiva. */
