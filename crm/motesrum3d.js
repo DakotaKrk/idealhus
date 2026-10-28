@@ -10,8 +10,6 @@ import { EffectComposer } from '../vendor/three/addons/postprocessing/EffectComp
 import { RenderPass } from '../vendor/three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from '../vendor/three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from '../vendor/three/addons/postprocessing/OutputPass.js';
-import { GLTFLoader } from '../vendor/three/addons/loaders/GLTFLoader.js';
-import { clone as kloneSkelett } from '../vendor/three/addons/utils/SkeletonUtils.js';
 
 const IH = window.IH;
 const LUGN = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -285,40 +283,13 @@ function bygg() {
   const fagelM = new THREE.MeshBasicMaterial({ color: '#3b3a3c', side: THREE.DoubleSide }), faglar = [];
   for (let n = 0; n < 4; n++) { const f = new THREE.Group(); [-1, 1].forEach((sd) => { const v = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.025), fagelM); v.geometry.translate(0.045 * sd, 0, 0); f.add(v); }); f.position.z = -4.16; scen.add(f); faglar.push({ f, fas: n * 0.7, y: 3.6 + (n % 2) * 0.25 }); }
   const granar = []; [[-0.6, 0.55], [0.15, 0.7], [1.6, 0.5], [3.3, 0.62], [4.9, 0.58], [5.5, 0.48]].forEach(([x, s2]) => { const gr = new THREE.Group(); gr.position.set(x, 1.6, -4.5); scen.add(gr); [[0.42, 0.9, 0.45], [0.32, 0.7, 0.95], [0.2, 0.5, 1.35]].forEach(([r, h, y]) => { const k = new THREE.Mesh(new THREE.ConeGeometry(r * s2, h * s2, 10), mat({ color: '#4f6b48', roughness: 0.9 })); k.position.y = y * s2; gr.add(k); }); granar.push(gr); });
-  // människorna: en riggad figur från Quaternius Universal Animation Library (CC0, modeller/figurer) med färdiga
-  // rörelser – presentatören vid whiteboarden pratar och visar, två kollegor sitter vid bordet och pratar
-  const figurer = { mixers: [], presentator: null };
-  new GLTFLoader().load('../modeller/figurer/mannekang.glb', (gltf) => {
-    const klipp = (namn) => gltf.animations.find((a) => a.name === namn);
-    const kladd = (rot, kropp, leder) => { rot.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; const m2 = (o.material.name || '').indexOf('Joint') >= 0 ? leder : kropp; o.material = m2; } }); };
-    const ny = (x, z, ry, kropp, leder, rorelse, skala = 1) => {
-      const f = kloneSkelett(gltf.scene); kladd(f, kropp, leder);
-      const box = new THREE.Box3().setFromObject(f), h = box.max.y - box.min.y || 1, sk = 3.0 / h * skala;
-      f.scale.setScalar(sk); f.position.set(x, 0, z); f.rotation.y = ry; scen.add(f);
-      const mix = new THREE.AnimationMixer(f), akt = {};
-      rorelse.forEach((n) => { const c = klipp(n); if (c) akt[n] = mix.clipAction(c); });
-      figurer.mixers.push(mix); return { f, mix, akt };
-    };
-    const kavaj = mat({ color: '#2f3b4c', roughness: 0.7 }), ledK = mat({ color: '#2a3442', roughness: 0.75 });
-    const p = ny(-4.5, -2.95, 1.0, kavaj, ledK, ['Idle_Talking_Loop', 'Interact', 'Idle_Loop']);
-    if (p.akt.Idle_Talking_Loop) p.akt.Idle_Talking_Loop.play();
-    if (p.akt.Interact) { p.akt.Interact.setLoop(THREE.LoopOnce, 1); p.akt.Interact.clampWhenFinished = true; }
-    p.mix.addEventListener('finished', () => { if (p.akt.Interact && p.akt.Idle_Talking_Loop) { p.akt.Idle_Talking_Loop.reset().play(); p.akt.Idle_Talking_Loop.crossFadeFrom(p.akt.Interact, 0.6, true); } });
-    figurer.presentator = p;
-    // två kollegor sitter på andra sidan bordet
-    [[-1.5, -2.25, 0.04, '#7a5c45', 'Sitting_Talking_Loop'], [1.5, -2.25, 0.04, '#5b7f9e', 'Sitting_Idle_Loop']].forEach(([x, z, ry, farg, rorelse], n) => {
-      const k = ny(x, z, ry, mat({ color: farg, roughness: 0.65 }), mat({ color: new THREE.Color(farg).multiplyScalar(0.85), roughness: 0.75 }), [rorelse]);
-      if (k.akt[rorelse]) { k.akt[rorelse].play(); k.akt[rorelse].time = n * 1.7; }
-    });
-    if (S) S.figurer = figurer;
-  });
   // laptopens staplar växer och krymper som om kalkylen räknas om
   const lapStaplar = []; for (let n = 0; n < 5; n++) { const st = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.2), new THREE.MeshBasicMaterial({ color: n === 3 ? '#e29a4a' : '#f2d4ab', toneMapped: false })); st.geometry.translate(0, 0.1, 0); st.position.set(-0.13 + n * 0.08, 0.08, 0.014); lock.add(st); lapStaplar.push(st); }
 
 
   const comp = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
   comp.addPass(new RenderPass(scen, kamera)); const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.42, 0.55, 0.9); comp.addPass(bloom); comp.addPass(new OutputPass());
-  S = { figurer, valdRing, pendlar, molnT, faglar, granar, lapStaplar, vaxter: [lov, vaxt2], renderer, scen, kamera, comp, bloom, stolar, snurr, anga, stralar, damm, dpos, dfas, ND, vTim, vMin, vSek, lampor, el: null, t: 0, ram: 0, synlig: false, mus: new THREE.Vector2(), musMal: new THREE.Vector2(), klocka: new THREE.Clock() };
+  S = { valdRing, pendlar, molnT, faglar, granar, lapStaplar, vaxter: [lov, vaxt2], renderer, scen, kamera, comp, bloom, stolar, snurr, anga, stralar, damm, dpos, dfas, ND, vTim, vMin, vSek, lampor, el: null, t: 0, ram: 0, synlig: false, mus: new THREE.Vector2(), musMal: new THREE.Vector2(), klocka: new THREE.Clock() };
   renderer.domElement.className = 'motesrum3d__duk';
   new IntersectionObserver((r) => { S.synlig = r[0].isIntersecting; if (S.synlig) starta(); }, { threshold: 0.05 }).observe(renderer.domElement);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) starta(); });
@@ -352,10 +323,6 @@ function ram() {
   S.faglar.forEach((x, n) => { const q = ((t * 0.07 + x.fas) % 1.6) - 0.2; x.f.position.set(-0.8 + q * 5.6, x.y + Math.sin(q * 6 + n) * 0.08, -4.16); const v = Math.sin(t * 12 + n) * 0.7; x.f.children[0].rotation.y = v; x.f.children[1].rotation.y = -v; x.f.visible = q > 0 && q < 1.25; });
   S.granar.forEach((g, n) => { g.rotation.z = Math.sin(t * 0.8 + n) * 0.03; });
   S.vaxter.forEach((v, n) => { v.rotation.z = Math.sin(t * 0.6 + n * 2) * 0.012; v.rotation.x = Math.cos(t * 0.5 + n) * 0.01; });
-  // figurerna: rörelserna spelas av mixern; presentatören visar på whiteboarden med jämna mellanrum
-  S.figurer.mixers.forEach((m) => m.update(dt));
-  const pr = S.figurer.presentator;
-  if (pr && pr.akt.Interact && !LUGN) { pr.nasta = (pr.nasta || 6) - dt; if (pr.nasta <= 0) { pr.nasta = 9 + Math.random() * 5; pr.akt.Interact.reset().play(); pr.akt.Interact.crossFadeFrom(pr.akt.Idle_Talking_Loop, 0.5, true); } }
   S.lapStaplar.forEach((st, n) => { st.scale.y = 0.4 + (Math.sin(t * 0.8 + n * 1.3) * 0.5 + 0.5) * 0.9; });
   S.anga.forEach((x) => { const q = (t * 0.35 + x.fas) % 1; x.m.position.set(x.k.position.x + Math.sin(t * 2 + x.fas * 9) * 0.03 * q, 1.75 + q * 0.5, x.k.position.z + Math.cos(t * 1.7 + x.fas * 7) * 0.03 * q); x.m.scale.setScalar(0.05 + q * 0.16); x.m.material.opacity = Math.sin(q * Math.PI) * 0.32; });
   S.stralar.forEach((s, n) => { s.material.opacity = 0.045 + Math.sin(t * 0.5 + n * 1.7) * 0.02; });
