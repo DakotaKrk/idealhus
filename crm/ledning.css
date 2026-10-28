@@ -343,3 +343,55 @@ html[data-vy-chef] .sido .sido__lank[data-vy="chef"] > .i { color: var(--virke-d
 @media (max-width: 900px) { .lp-narv { grid-template-columns: 90px repeat(7, minmax(0, 1fr)); } .lp-narv .lp-status { display: none; } .lp-kal__dag { min-height: 64px; } .lp-kal__h { font-size: 0; padding: 0; background: none; } }
 .lp-saljare__mal--tom { display: flex !important; align-items: center; gap: 6px; }
 .lp-saljare__mal--tom .lp-lank { font-size: inherit; }
+
+/* Teamets kalender, nu klickbar: personfilter med avatar, veckans läge och typfilter, dagar som knappar med
+   +-knapp, belastning som ton, försenat i rött, en daglista i arket och ett formulär för att lägga till */
+.lp-kal__person { display: inline-flex; align-items: center; gap: 7px; }
+.lp-kal__person .avatar { width: 22px; height: 22px; border-radius: 50%; font-size: .5rem; }
+.lp-kal__ny { margin-left: 6px; min-height: 36px; }
+.lp-kal__lage { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 0 0 14px; padding: 10px 14px; border-radius: 16px; background: linear-gradient(160deg, #fffaf2, #fbf3e6); box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .3); font-size: .8rem; color: var(--text-2); }
+.lp-kal__lage b { font: 700 1rem/1 var(--rubrik); color: var(--kol); margin-right: 2px; }
+.lp-kal__lage .i, .lp-kal__lage .emo-ik { width: 15px; height: 15px; }
+.lp-kal__sena { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: #fde6e1; font: 600 .76rem/1 var(--rubrik); color: #b23a2a; cursor: pointer; animation: lp-puls 2.4s ease-in-out infinite; }
+@keyframes lp-puls { 50% { box-shadow: 0 0 0 5px rgba(214, 69, 50, .12); } }
+.lp-kal__ok { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: #1d6b40; }
+.lp-kal__typer { display: flex; flex-wrap: wrap; gap: 4px; margin-left: auto; }
+.lp-kal__prick { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 3px; background: #f6f0e6; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .2); }
+.lp-kal__prick[data-typ="uppg"] { background: #fbefd2; box-shadow: inset 0 0 0 1px rgba(217, 154, 30, .5); }
+.lp-kal__prick[data-typ="vunnen"] { background: #e1f3e7; box-shadow: inset 0 0 0 1px rgba(34, 163, 90, .5); }
+.lp-kal__dag { position: relative; cursor: pointer; background: color-mix(in srgb, #f6c68d calc(var(--last, 0) * 22%), #fff); transition: transform .25s var(--mjuk), box-shadow .25s; }
+.lp-kal__dag:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1.5px rgba(226, 154, 74, .55), 0 12px 22px -16px rgba(60, 40, 15, .6); z-index: 1; }
+.lp-kal__dag:focus-visible { outline: 2px solid var(--virke); outline-offset: 2px; }
+.lp-kal__dag.helg { background: color-mix(in srgb, #f6c68d calc(var(--last, 0) * 22%), #fbf8f3); }
+.lp-kal__dag.sen { box-shadow: inset 0 0 0 1.5px rgba(214, 69, 50, .45); }
+.lp-kal__topp { display: flex; align-items: center; gap: 6px; }
+.lp-kal__topp em { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: rgba(27, 25, 21, .07); font: 600 .6rem/18px var(--rubrik); font-style: normal; text-align: center; color: var(--text-2); }
+.lp-kal__plus { margin-left: auto; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #1b1915; font: 600 .9rem/1 var(--rubrik); font-style: normal; color: #fbf4e8; opacity: 0; transform: scale(.7); transition: opacity .2s, transform .25s var(--studs); }
+.lp-kal__dag:hover .lp-kal__plus, .lp-kal__dag:focus-within .lp-kal__plus { opacity: 1; transform: none; }
+.lp-kal__h time { font-weight: 700; margin-right: 3px; color: var(--text-2); }
+.lp-kal__h[data-sen] { background: #fde6e1; color: #b23a2a; }
+.lp-kal__forkl [data-typ="sen"] i { background: #fde6e1; box-shadow: inset 0 0 0 1px rgba(214, 69, 50, .5); }
+.lp-kal__tips { margin-left: auto; color: var(--text-3); }
+/* dagens lista i arket */
+.lp-daglista { display: grid; gap: 8px; margin: 0 0 18px; padding: 0; list-style: none; }
+.lp-dagrad { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: #fff; box-shadow: inset 3px 0 0 var(--av), 0 0 0 1px rgba(27, 25, 21, .05); transition: opacity .35s, transform .35s var(--mjuk); }
+.lp-dagrad.klar { opacity: 0; transform: translateX(16px); }
+.lp-dagrad[data-sen] { background: #fff7f5; }
+.lp-dagrad .avatar { width: 32px; height: 32px; border-radius: 50%; font-size: .62rem; }
+.lp-dagrad__text { display: grid; gap: 3px; min-width: 0; }
+.lp-dagrad__text small { font: 600 .62rem/1.2 var(--rubrik); letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+.lp-dagrad[data-sen] .lp-dagrad__text small { color: #b23a2a; }
+.lp-dagrad__text b { font: 600 .9rem/1.35 var(--rubrik); color: var(--kol); }
+.lp-dagrad__text .lp-lank { justify-self: start; font-size: .76rem; }
+.lp-dagrad__knappar { display: flex; gap: 6px; }
+.lp-dagrad__knappar .i { width: 14px; height: 14px; }
+.lp-kalform__rubrik { margin: 4px 0 10px; font: 600 .7rem/1 var(--rubrik); letter-spacing: .14em; text-transform: uppercase; color: var(--virke-djup); }
+.lp-kalform__typ { display: flex; gap: 6px; margin-bottom: 12px; }
+.lp-kalform__typ label { flex: 1; cursor: pointer; }
+.lp-kalform__typ input { position: absolute; opacity: 0; pointer-events: none; }
+.lp-kalform__typ span { display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; border-radius: 12px; background: #f6f0e6; font: 600 .82rem/1 var(--rubrik); color: var(--text-2); transition: background-color .2s, color .2s, box-shadow .2s; }
+.lp-kalform__typ span .i { width: 16px; height: 16px; }
+.lp-kalform__typ input:checked + span { background: #1b1915; color: #fbf4e8; box-shadow: 0 8px 16px -10px rgba(27, 25, 21, .7); }
+.lp-kalform__typ input:focus-visible + span { outline: 2px solid var(--virke); outline-offset: 2px; }
+.lp-kalform__rad { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 900px) { .lp-kal__plus { opacity: 1; transform: none; width: 18px; height: 18px; } .lp-kal__tips { display: none; } }
