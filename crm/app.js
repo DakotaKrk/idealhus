@@ -316,7 +316,9 @@
     var jag = IH.jag();
     var b = brickor();
     var nav = MENY.map(function (grupp) {
-      return (grupp.rubrik ? '<p class="sido__rubrik">' + grupp.rubrik + '</p>' : '') + grupp.poster.map(function (p) {
+      // Försäljningsledningen syns bara för chefen (ledning.js)
+      var poster = grupp.rubrik === 'Sälj' && jag.chef ? grupp.poster.concat([['chef', 'Ledning', 'graf']]) : grupp.poster;
+      return (grupp.rubrik ? '<p class="sido__rubrik">' + grupp.rubrik + '</p>' : '') + poster.map(function (p) {
         var br = b[p[0]];
         var bricka = br && br[0] ? '<span class="sido__bricka' + (br[1] ? ' sido__bricka--varm' : '') + '">' + br[0] + '</span>' : '';
         return '<a class="sido__lank" href="#/' + p[0] + '" data-vy="' + p[0] + '">' + IH.i(p[2]) + '<span>' + p[1] + '</span>' + bricka + '</a>';
@@ -327,8 +329,9 @@
       '<button class="sido__ny" type="button" data-g="ny" aria-label="Ny" title="Ny  N">' + IH.i('plus') + '</button></div>' +
       '<nav class="sido__nav" aria-label="CRM"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
       '<div class="sido__fot"><button class="sido__mer" type="button" tabindex="-1" aria-hidden="true" data-g="sido-mer">Mer ' + IH.i('pil') + '</button>' +
-      '<button class="anv" type="button" data-g="byt-anvandare"><span class="avatar" style="--av:' + jag.farg + '">' + IH.initialer(jag.namn) + '</span>' +
-      '<span><b>' + IH.e(jag.namn) + '</b><small>' + jag.titel + ' · byt användare</small></span>' + IH.i('pil') + '</button>' +
+      '<button class="anv" type="button" data-g="konto-meny" aria-haspopup="dialog"><span class="avatar" style="--av:' + jag.farg + '">' + IH.initialer(jag.namn) +
+      (IH.narvaroPrick ? IH.narvaroPrick(jag.id) : '') + '</span>' +
+      '<span><b>' + IH.e(jag.namn) + '</b><small>' + (IH.narvaroText ? IH.narvaroText(jag.id) : jag.titel) + '</small></span>' + IH.i('pil') + '</button>' +
       '<div class="sido__smalt"><a href="../index.html" data-g="lamna" title="Till hemsidan">' + IH.i('hem') + 'Hemsidan</a>' +
       '<button type="button" data-g="logga-ut" title="Logga ut">' + IH.i('utloggning') + 'Logga ut</button></div></div>';
   }
@@ -824,7 +827,9 @@
       titel: 'Mer', ikon: 'meny',
       kropp: '<div class="lista kort">' + poster.map(function (p) {
         return '<a class="lista__rad" href="#/' + p[0] + '">' + IH.i(p[2]) + '<span class="lista__text"><b>' + p[1] + '</b></span>' + IH.i('pil') + '</a>';
-      }).join('') + '<button class="lista__rad" type="button" data-g="byt-anvandare">' + IH.i('kunder') +
+      }).join('') + (IH.jag().chef ? '<a class="lista__rad" href="#/chef">' + IH.i('graf') + '<span class="lista__text"><b>Försäljningsledning</b></span>' + IH.i('pil') + '</a>' : '') +
+        '<a class="lista__rad" href="#/profil">' + IH.i('kunder') + '<span class="lista__text"><b>Min profil</b></span>' + IH.i('pil') + '</a>' +
+        '<button class="lista__rad" type="button" data-g="byt-anvandare">' + IH.i('kunder') +
         '<span class="lista__text"><b>Byt användare</b><small>' + IH.e(IH.jag().namn) + '</small></span></button>' +
         '<button class="lista__rad" type="button" data-g="logga-ut">' + IH.i('utloggning') + '<span class="lista__text"><b>Logga ut</b></span></button></div>'
     });

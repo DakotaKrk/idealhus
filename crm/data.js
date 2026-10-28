@@ -11,7 +11,7 @@
   var IH = window.IH = window.IH || {};
 
   IH.NYCKEL = 'ih-crm-v1';
-  IH.VERSION = 1;
+  IH.VERSION = 2; // 2: teamet (fyra konton) och ansvarig säljare per affär
 
   /* --- Husen (samma som _modeller.py) ------------------------------ */
   IH.MODELLER = [
@@ -98,7 +98,9 @@
   };
 
   IH.ANVANDARE = [
-    { id: 'ml', namn: 'Maja Lind', roll: 'salj', titel: 'Sälj', farg: 'linear-gradient(135deg,#f0b56e,#8f5424)' },
+    { id: 'ml', namn: 'Maja Lind', roll: 'salj', titel: 'Sälj', farg: 'linear-gradient(135deg,#f0b56e,#8f5424)', mal: 900000 },
+    { id: 'ab', namn: 'Anders Berg', roll: 'salj', chef: true, titel: 'Sälj · Försäljningschef', farg: 'linear-gradient(135deg,#b8cde0,#4f6f8f)', mal: 1200000 },
+    { id: 'eb', namn: 'Elin Björk', roll: 'salj', titel: 'Sälj', farg: 'linear-gradient(135deg,#d7c2e0,#7b5c8f)', mal: 800000 },
     { id: 'je', namn: 'Jonas Ek', roll: 'prod', titel: 'Produktion', farg: 'linear-gradient(135deg,#7fe0a6,#3f6b50)' }
   ];
 
@@ -186,7 +188,7 @@
         id: nid('affar', 'a'), kund: k.id, titel: a[5], modell: a[1], varde: a[3],
         steg: a[2] === 'forlorad' ? 'offert' : a[2], forlorad: a[2] === 'forlorad' ? { orsak: 'Tomten passade inte', tid: dagar(a[4] + 6) } : null,
         skapad: dagar(a[4] - 6), andrad: dagar(a[4] + (a[2] === 'vunnen' ? 2 : 0)),
-        ansvarig: 'ml', vunnen: a[2] === 'vunnen' ? dagar(a[4] + 2) : null
+        ansvarig: ['ml', 'eb', 'ml', 'ab'][i % 4], vunnen: a[2] === 'vunnen' ? dagar(a[4] + 2) : null
       };
       db.affarer.push(aff);
       // Förfrågan som blev affären.
@@ -217,7 +219,8 @@
 
     // Aktiviteter och att göra.
     function akt(dag, typ, text, kund, affar) {
-      db.aktiviteter.push({ id: nid('aktivitet', 'h'), tid: dagar(dag, 11), typ: typ, text: text, kund: kund, affar: affar, av: 'ml' });
+      var af = db.affarer.filter(function (x) { return x.id === affar; })[0];
+      db.aktiviteter.push({ id: nid('aktivitet', 'h'), tid: dagar(dag, 11), typ: typ, text: text, kund: kund, affar: affar, av: af ? af.ansvarig : 'ml' });
     }
     akt(-2, 'samtal', 'Ringde och gick igenom strandskyddet. Skickar karta över tomten.', 'k4', 'a1');
     akt(-3, 'mote', 'Platsbesök bokat till nästa vecka.', 'k5', 'a2');
