@@ -228,7 +228,8 @@
       : p == null ? '<span class="sh-mitt__ikon">' + ik('skold') + '</span><small>Säkerhet</small><span>Redo att skanna</span>'
       : '<strong>' + p + '</strong><small>Säkerhetspoäng</small><span>' + e(status) + '</span>';
     var noder = ''; for (var q = 0; q < 12; q++) { var vv = q / 12 * Math.PI * 2; noder += '<i class="sh-nod" style="left:' + (50 + Math.cos(vv) * 49).toFixed(1) + '%;top:' + (50 + Math.sin(vv) * 49).toFixed(1) + '%;--n:' + q + '"></i>'; }
-    return '<div class="sh-karna" data-sh-tilt aria-hidden="true"><div class="sh-scen"><i class="sh-golv"></i><i class="sh-svep"></i><i class="sh-puls"></i><i class="sh-puls sh-puls--2"></i><i class="sh-puls sh-puls--3"></i>' + noder + '<i class="sh-orbit sh-o1"><b></b></i><i class="sh-orbit sh-o2"><b></b></i>' +
+    var blipp = ''; [[0.62, 0.3], [0.28, 0.4], [0.7, 0.68], [0.36, 0.74], [0.5, 0.2], [0.8, 0.46]].forEach(function (x, q) { var v = Math.atan2(x[1] - 0.5, x[0] - 0.5); blipp += '<i class="sh-blipp" style="left:' + (x[0] * 100) + '%;top:' + (x[1] * 100) + '%;--f:' + (((v * 180 / Math.PI) + 450) % 360 / 360).toFixed(3) + '"></i>'; });
+    return '<div class="sh-karna" data-sh-tilt aria-hidden="true"><div class="sh-scen"><i class="sh-golv"></i><i class="sh-svep"></i>' + blipp + '<i class="sh-puls"></i><i class="sh-puls sh-puls--2"></i><i class="sh-puls sh-puls--3"></i>' + noder + '<i class="sh-orbit sh-o1"><b></b></i><i class="sh-orbit sh-o2"><b></b></i>' +
       '<svg class="sh-ringar" viewBox="0 0 240 240"><path d="' + streck + '" class="sh-streck"/>' + ringar + '</svg><div class="sh-mitt">' + mitt + '</div></div></div>';
   }
 
@@ -249,8 +250,7 @@
     var knapp = function (ids, ikon, text, accent) { return '<button type="button" class="sh-knapp' + (accent ? ' sh-knapp--accent' : '') + '" data-g="sh-skanna" data-ids="' + ids + '"' + (skan.kor ? ' disabled' : '') + '>' + ik(ikon) + '<span>' + text + '</span></button>'; };
     var delar = '<ul class="sh-delar">' + KONTROLLER.map(function (k) { var r = S.senast[k.id]; return '<li data-lage="' + lageFor(r) + '" style="--d:' + FARG[k.id] + '"><i></i><span>' + KORT[k.id] + '</span><strong>' + (r ? poang(r.fynd) : '–') + '</strong></li>'; }).join('') +
       '<li class="sh-delar__total" data-ton="' + ton + '">' + ik(p == null ? 'radar' : p >= 90 ? 'skold' : 'skold-larm') + '<span>' + status + '</span><strong>' + (p == null ? '–' : p) + '</strong></li></ul>';
-    var regn = ''; for (var c = 0; c < 18; c++) { var rad = ''; for (var z = 0; z < 22; z++) rad += '0123456789ABCDEF'.charAt((c * 7 + z * 13 + (z * c) % 5) % 16) + (z % 4 === 3 ? ' ' : ''); regn += '<span style="--n:' + c + ';left:' + (c * 5.6 + 1).toFixed(1) + '%">' + rad + '</span>'; }
-    var hjalte = '<section class="sh-hjalte sh-mork kort kort--mork" data-ton="' + ton + '"' + (skan.kor ? ' data-skannar' : '') + '><div class="sh-regn" aria-hidden="true">' + regn + '</div><div class="sh-rutnat" aria-hidden="true"></div><i class="sh-skanlinje" aria-hidden="true"></i>' +
+    var hjalte = '<section class="sh-hjalte sh-mork kort kort--mork" data-ton="' + ton + '"' + (skan.kor ? ' data-skannar' : '') + '><div class="sh-rutnat" aria-hidden="true"></div><i class="sh-skanlinje" aria-hidden="true"></i>' +
       '<div class="sh-text"><p class="etikett"><i class="sh-live"></i>Säkerhetshubben · demoläget</p><h1>Säkerhet <em>i realtid.</em></h1>' +
         '<p class="sh-ingress">Kontrollerna körs i webbläsaren mot sidans kod och CRM:ets data – skadlig kod, uppdateringar, buggar, läckor, intrångsförsök, avvikande beteende och sådant som är trasigt.</p>' +
         '<div class="sh-knappar">' + knapp('', 'radar', 'Skanna allt', true) + knapp('uppdatering', 'uppgradera', 'Sök uppdateringar') + knapp('buggar', 'nyckelverktyg', 'Kontrollera buggar') + knapp('lacka', 'fingeravtryck', 'Läckkontroll') + knapp('intrang,beteende', 'skold-larm', 'Intrång och beteende') + '</div>' +
@@ -292,9 +292,22 @@
       ].map(function (x, n) { return '<div class="sh-drift__ruta" data-ton="' + x[4] + '" style="--n:' + n + '"><span>' + ik(x[0]) + '</span><small>' + x[1] + '</small><b>' + x[2] + '</b><em>' + e(x[3]) + '</em></div>'; }).join('') + '</div>' +
       '<div class="sh-drift__nedre"><div class="sh-vecka"><small>Händelser per dag</small><div>' + vecka.map(function (x, n) { return '<span style="--h:' + (x.n / vmax).toFixed(3) + ';--n:' + n + '" title="' + x.d.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' }) + ': ' + plural(x.n, 'händelse', 'händelser') + '"><i></i><b>' + 'SMTOTFL'.charAt(x.d.getDay()) + '</b></span>'; }).join('') + '</div></div>' +
         '<div class="sh-ticker" aria-label="Senaste händelserna"><small>Senaste händelserna</small><div class="sh-ticker__band"><div class="sh-ticker__rull' + (logg.length < 4 ? ' sh-ticker__rull--still' : '') + '">' + (logg.length ? (logg.length < 4 ? logg.slice(0, 3) : logg.slice(0, 8).concat(logg.slice(0, 8))).map(function (h) { return '<p><span class="sh-ticker__typ">' + e(h.typ) + '</span>' + e(String(h.text).slice(0, 90)) + '<time>' + IH.sedan(h.tid) + '</time></p>'; }).join('') : '<p>Inga händelser ännu – skanna, ladda upp en fil eller ändra ett konto så syns det här.</p>') + '</div></div></div></div></section>';
-    var html = hjalte + drift + '<section class="ad-band kort sh-kontrollband"><h2>' + ik('skold') + 'Sju kontroller<small class="sh-antal">Varje kontroll kan köras för sig. Fynd med åtgärd har en knapp.</small></h2><div class="sh-kontroller">' + kontroller + '</div></section>' +
+    var auto = !!S.auto, nastaAuto = senast ? Math.max(0, 24 - Math.floor((Date.now() - new Date(senast.tid)) / 36e5)) : 0;
+    var verktyg = '<section class="sh-verktyg kort" data-in><header><h2>' + ik('nyckelverktyg') + 'Verktyg</h2><small>Allt körs i den här webbläsaren</small></header><div class="sh-verktyg__rutnat">' +
+      '<button type="button" class="sh-vk" data-g="sh-rapport" style="--n:0"><span>' + ik('ladda-ner') + '</span><b>Säkerhetsrapport</b><small>Poäng, fynd per kontroll och loggen som textfil</small></button>' +
+      '<button type="button" class="sh-vk" data-g="sh-auto" aria-pressed="' + auto + '" style="--n:1"><span>' + ik('radar') + '</span><b>Automatisk skanning</b><small>' + (auto ? 'På – skannar när sidan öppnas om det gått ett dygn' + (senast ? ' (nästa om ' + nastaAuto + ' h)' : '') : 'Av – slå på för en skanning om dygnet') + '</small><i class="sh-vk__brytare"></i></button>' +
+      '<button type="button" class="sh-vk" data-g="sh-behorighet" style="--n:2"><span>' + ik('anvandare-plus') + '</span><b>Granska behörigheter</b><small>Vem har vilken roll, vem är admin och vilka konton är inaktiva</small></button>' +
+      '<button type="button" class="sh-vk" data-g="sh-kopiera" style="--n:3"><span>' + ik('skold') + '</span><b>Kopiera läget</b><small>En kort sammanfattning att klistra in i ett mejl eller chatten</small></button>' +
+      '</div></section>';
+    // ritas sidan om (under en skanning eller efter ett klick) spelas inte intoningarna och uppräkningen igen
+    var omritning = Date.now() - (ui.ritad || 0) < 4000 && location.hash.indexOf('sakerhet') >= 0 && !!document.querySelector('.sh-drift'); ui.ritad = Date.now();
+    if (omritning) { drift = drift.replace('class="sh-drift kort" data-in', 'class="sh-drift kort sh-stilla"'); verktyg = verktyg.replace('class="sh-verktyg kort" data-in', 'class="sh-verktyg kort sh-stilla"'); }
+    var html = hjalte + drift + verktyg + '<section class="ad-band kort sh-kontrollband"><h2>' + ik('skold') + 'Sju kontroller<small class="sh-antal">Varje kontroll kan köras för sig. Fynd med åtgärd har en knapp.</small></h2><div class="sh-kontroller">' + kontroller + '</div></section>' +
       '<div class="ad-tva">' + terminal + historik + '</div>';
-    return { titel: 'Säkerhet', html: html, efter: function (rot) { var t = rot.querySelector('[data-sh-terminal]'); if (t) t.scrollTop = t.scrollHeight; } };
+    return { titel: 'Säkerhet', html: html, efter: function (rot) { var t = rot.querySelector('[data-sh-terminal]'); if (t) t.scrollTop = t.scrollHeight;
+      if (S.auto && !skan.kor && (!senast || Date.now() - new Date(senast.tid) > 864e5)) setTimeout(function () { if (!skan.kor) { IH.toast('Automatisk skanning', 'Det har gått över ett dygn sedan senaste skanningen.', 'radar'); skanna(null); } }, 900);
+      if (!omritning) rot.querySelectorAll('.sh-drift__ruta b').forEach(function (el, n) { var mal = parseInt(el.textContent, 10); if (isNaN(mal) || lugn()) return; var t0 = performance.now() + n * 80; var steg = function (nu) { var q = Math.min(1, Math.max(0, (nu - t0) / 900)); el.textContent = Math.round(mal * (1 - Math.pow(1 - q, 3))); if (q < 1) requestAnimationFrame(steg); }; requestAnimationFrame(steg); });
+    } };
   };
   // Kontrollcentralen läser kontrollerna, felen och läget härifrån, och kan starta en skanning
   IH.sakHub = { kontroller: KONTROLLER, lageFor: lageFor, poang: poang, fel: felLista, hub: hub, skanna: skanna, total: total };
@@ -303,6 +316,25 @@
   IH.G['sh-skanna'] = function (el) { var ids = el.getAttribute('data-ids'); skanna(ids ? ids.split(',') : null); };
   IH.G['sh-visa'] = function (el) { var id = el.getAttribute('data-id'); ui.oppen = ui.oppen === id ? null : id; IH.rita(); };
   IH.G['sh-uppdatera'] = function () { location.reload(); };
+  IH.G['sh-auto'] = function () { var S = hub(); S.auto = !S.auto; IH.spara(); IH.rita(); IH.toast(S.auto ? 'Automatisk skanning på' : 'Automatisk skanning av', S.auto ? 'Sidan skannar själv när det gått ett dygn.' : '', 'radar'); };
+  var sammanfattning = function () {
+    var S = hub(), p = total(), senast = S.historik[0];
+    return ['Säkerhetsläget i Legohus CRM – ' + new Date().toLocaleString('sv-SE'), 'Poäng: ' + (p == null ? 'inte skannat' : p + ' av 100'), senast ? 'Senast skannat: ' + new Date(senast.tid).toLocaleString('sv-SE') : '',
+      KONTROLLER.map(function (k) { var r = S.senast[k.id]; return '– ' + k.namn + ': ' + (r ? poang(r.fynd) + ' av 100' + (r.fynd.filter(function (x) { return x.allvar !== 'info'; }).length ? ' (' + r.fynd.filter(function (x) { return x.allvar !== 'info'; }).map(function (x) { return x.text; }).join('; ') + ')' : '') : 'inte körd'); }).join('\n')].filter(Boolean).join('\n');
+  };
+  IH.G['sh-kopiera'] = function () { var t = sammanfattning(), ok = function () { IH.toast('Kopierat', 'Säkerhetsläget ligger i urklipp.', 'kopiera'); }; try { navigator.clipboard.writeText(t).then(ok, ok); } catch (x) { ok(); } };
+  IH.G['sh-rapport'] = function () {
+    var t = sammanfattning() + '\n\nSäkerhetsloggen (senaste 50):\n' + (db().sakerhet || []).slice(0, 50).map(function (h) { return new Date(h.tid).toLocaleString('sv-SE') + '  ' + h.typ + '  ' + h.text; }).join('\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'text/plain;charset=utf-8' })); a.download = 'sakerhetsrapport-' + IH.dagStr() + '.txt'; document.body.appendChild(a); a.click(); a.remove();
+    IH.toast('Rapporten är sparad', 'Textfilen ligger bland dina hämtade filer.', 'ladda-ner');
+  };
+  IH.G['sh-behorighet'] = function () {
+    var konton = IH.ANVANDARE.slice(), admins = konton.filter(function (u) { return u.roll === 'admin' && !u.inaktiv; }).length;
+    IH.oppnaArk({ titel: 'Behörigheter', ikon: 'anvandare-plus', under: plural(konton.length, 'konto', 'konton') + ' · ' + plural(admins, 'administratör', 'administratörer'),
+      kropp: '<ul class="sh-beh">' + konton.map(function (u) { var roll = u.roll === 'admin' ? 'Administratör' : u.chef ? 'Säljare och chef' : u.roll === 'prod' ? 'Produktion' : 'Säljare'; return '<li data-inaktiv="' + !!u.inaktiv + '"><span class="avatar" style="background:' + (u.farg || '#ccc') + '">' + e(IH.initialer(u.namn)) + '</span><span><b>' + e(u.namn) + '</b><small>' + roll + (u.inaktiv ? ' · inaktiverat' : '') + '</small></span><em data-roll="' + u.roll + '">' + (u.roll === 'admin' ? 'Full åtkomst' : u.chef ? 'Teamets data' : 'Egna affärer') + '</em></li>'; }).join('') + '</ul>' +
+        (admins > 1 ? '<p class="sh-beh__tips">' + admins + ' administratörer – se över om alla behöver full åtkomst.</p>' : '<p class="sh-beh__tips sh-beh__tips--ok">En administratör – bra.</p>'),
+      fot: '<a class="knapp" href="#/admin">' + ik('installningar') + 'Till adminpanelen</a><button class="knapp knapp--virke" type="button" data-g="stang-ark">Klar</button>' });
+  };
 
   // Kärnan lutar efter musen (som i Uperformance)
   document.addEventListener('mousemove', function (ev) {

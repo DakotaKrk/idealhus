@@ -209,3 +209,51 @@ section.sh-mork .sh-golv { background: radial-gradient(closest-side, rgba(143, 2
 section.sh-mork .sh-mitt span, section.sh-mork .sh-mitt small { color: rgba(243, 237, 228, .72); }
 section.sh-mork .sh-mitt strong { color: #fff; text-shadow: 0 0 24px rgba(143, 224, 200, .45); }
 .sh-ticker__rull--still { animation: none; }
+
+/* fler animeringar: blippar i radarn, kärnan som andas, rutor som lyser upp i tur och ordning */
+.sh-regn { display: none; }
+.sh-blipp { position: absolute; width: 7px; height: 7px; margin: -3.5px; border-radius: 50%; background: #c8ffef; box-shadow: 0 0 10px 2px rgba(143, 224, 200, .9); opacity: 0; animation: sh-blipp 4s linear infinite; animation-delay: calc(var(--f) * 4s - 4s); }
+section.sh-mork[data-skannar] .sh-blipp { animation-duration: 1.2s; animation-delay: calc(var(--f) * 1.2s - 1.2s); }
+@keyframes sh-blipp { 0% { opacity: 1; transform: scale(1.4); } 40% { opacity: .35; transform: scale(1); } 100% { opacity: 0; } }
+section.sh-mork .sh-mitt { animation: sh-mitt-andas 4s ease-in-out infinite; }
+@keyframes sh-mitt-andas { 50% { box-shadow: 0 0 0 1px rgba(143, 224, 200, .25), 0 0 40px rgba(143, 224, 200, .25); } }
+section.sh-mork .sh-delar li { animation: sh-chip 6s ease-in-out infinite; animation-delay: calc(var(--i, 0) * .3s); }
+section.sh-mork .sh-delar li:nth-child(1) { --i: 0; } section.sh-mork .sh-delar li:nth-child(2) { --i: 1; } section.sh-mork .sh-delar li:nth-child(3) { --i: 2; } section.sh-mork .sh-delar li:nth-child(4) { --i: 3; } section.sh-mork .sh-delar li:nth-child(5) { --i: 4; } section.sh-mork .sh-delar li:nth-child(6) { --i: 5; } section.sh-mork .sh-delar li:nth-child(7) { --i: 6; }
+@keyframes sh-chip { 0%, 80%, 100% { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); } 88% { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--d, #f6c68d) 70%, transparent), 0 0 16px color-mix(in srgb, var(--d, #f6c68d) 35%, transparent); } }
+.sh-drift__ruta > span { animation: sh-ikon-glod 3.6s ease-in-out infinite; animation-delay: calc(var(--n) * .5s); }
+@keyframes sh-ikon-glod { 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--t) 12%, transparent), 0 0 18px color-mix(in srgb, var(--t) 30%, transparent); } }
+/* verktygen */
+.sh-verktyg { padding: 20px 22px; margin-bottom: var(--ram); }
+.sh-verktyg header { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.sh-verktyg header h2 { display: flex; align-items: center; gap: 10px; margin: 0; font: 700 1.15rem/1.2 var(--rubrik); }
+.sh-verktyg header h2 .i, .sh-verktyg header h2 .emo-ik { width: 18px; height: 18px; color: var(--virke-djup); }
+.sh-verktyg header small { font-size: .76rem; color: var(--text-3); }
+.sh-verktyg__rutnat { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.sh-vk { position: relative; display: grid; align-content: start; gap: 6px; padding: 16px; border: 0; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); font: inherit; color: inherit; text-align: left; cursor: pointer; overflow: hidden; transition: transform .3s var(--mjuk), box-shadow .3s; animation: in-rad .6s var(--mjuk) backwards; animation-delay: calc(.15s + var(--n) * .07s); }
+.sh-vk::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(246, 198, 141, .25) 50%, transparent 70%); transform: translateX(-120%); transition: transform .8s var(--mjuk); }
+.sh-vk:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .5), 0 16px 30px -20px rgba(90, 60, 25, .6); }
+.sh-vk:hover::before { transform: translateX(120%); }
+.sh-vk > span { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #1b1915; color: #f6c68d; }
+.sh-vk > span .i, .sh-vk > span .emo-ik { width: 18px; height: 18px; }
+.sh-vk b { font: 600 .92rem/1.3 var(--rubrik); }
+.sh-vk small { font-size: .76rem; line-height: 1.45; color: var(--text-2); }
+.sh-vk__brytare { position: absolute; top: 18px; right: 16px; width: 40px; height: 22px; border-radius: 999px; background: rgba(27, 25, 21, .12); transition: background-color .3s; }
+.sh-vk__brytare::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, .25); transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); }
+.sh-vk[aria-pressed="true"] .sh-vk__brytare { background: #22a35a; }
+.sh-vk[aria-pressed="true"] .sh-vk__brytare::after { transform: translateX(18px); }
+.sh-beh { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.sh-beh li { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: #fbf8f3; }
+.sh-beh li[data-inaktiv="true"] { opacity: .55; }
+.sh-beh .avatar { width: 36px; height: 36px; border-radius: 50%; font-size: .66rem; }
+.sh-beh span { display: grid; gap: 2px; }
+.sh-beh b { font: 600 .9rem/1.2 var(--rubrik); } .sh-beh small { font-size: .74rem; color: var(--text-3); }
+.sh-beh em { padding: 4px 10px; border-radius: 999px; background: #f3ede3; font: 600 .7rem/1.2 var(--rubrik); font-style: normal; color: var(--text-2); }
+.sh-beh em[data-roll="admin"] { background: #1b1915; color: #f6c68d; }
+.sh-beh__tips { margin: 14px 0 0; padding: 10px 12px; border-radius: 12px; background: #fdecdf; font-size: .82rem; color: #8f5424; }
+.sh-beh__tips--ok { background: #e1f3e7; color: #1d6b40; }
+@media (max-width: 1000px) { .sh-verktyg__rutnat { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .sh-blipp, section.sh-mork .sh-mitt, section.sh-mork .sh-delar li, .sh-drift__ruta > span { animation: none; } }
+.sh-stilla, .sh-stilla * { animation-name: none !important; }
+.sh-stilla .sh-drift__ruta > span { animation-name: sh-ikon-glod !important; }
+.sh-stilla .sh-ticker__rull:not(.sh-ticker__rull--still) { animation-name: sh-ticker !important; }
+.sh-stilla .sh-drift__live i { animation-name: sh-live !important; }
