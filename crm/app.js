@@ -400,7 +400,19 @@
     rot.classList.toggle('sido-glider', !!animera);
     clearTimeout(sattSido.t);
     if (animera) sattSido.t = setTimeout(function () { rot.classList.remove('sido-glider'); }, 520);
+    // FLIP: mät innehållet före och efter växlingen och låt det glida med transform – en enda omräkning av
+    // layouten i stället för en per bildruta, så rörelsen blir mjuk även med 3D och diagram på sidan
+    var huvud = animera && datorBred.matches && !matchMedia('(prefers-reduced-motion: reduce)').matches ? $('.huvud') : null, fore = huvud ? huvud.getBoundingClientRect().left : 0;
     rot.toggleAttribute('data-sido-dold', dold);
+    if (huvud) {
+      var dx = fore - huvud.getBoundingClientRect().left;
+      if (Math.abs(dx) > 1) {
+        if (huvud.flip) huvud.flip.cancel();
+        huvud.style.willChange = 'transform';
+        huvud.flip = huvud.animate([{ transform: 'translate3d(' + dx + 'px,0,0)' }, { transform: 'translate3d(0,0,0)' }], { duration: 520, easing: 'cubic-bezier(.45,0,.2,1)' });
+        huvud.flip.onfinish = huvud.flip.oncancel = function () { huvud.style.willChange = ''; huvud.flip = null; };
+      }
+    }
     var k = $('[data-sido-knapp]'), text = dold ? 'Visa menyn' : 'Dölj menyn';
     if (k) { k.setAttribute('aria-expanded', String(!dold)); k.setAttribute('aria-label', text); k.title = text + '  ['; }
     var s = $('.sido'); if (s) s.inert = dold && datorBred.matches;

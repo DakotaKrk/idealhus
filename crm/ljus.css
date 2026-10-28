@@ -11223,7 +11223,7 @@ select,
   }
 
   .sido-glider .app {
-    transition: grid-template-columns var(--glid) var(--ease-drawer);
+    transition: none; /* innehållet glider med transform i app.js (FLIP) i stället för att spalten räknas om varje bildruta */
   }
 
   .sido-glider .sido {
