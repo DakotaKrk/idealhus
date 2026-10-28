@@ -196,3 +196,26 @@ html[data-sido-tat="2"] .sido__rubrik { margin-top: 4px; margin-bottom: 1px; fon
 html[data-sido-tat="2"] .sido__logo { padding-top: 8px; padding-bottom: 8px; }
 html[data-sido-tat="3"] .sido__rubrik { display: none; }
 html[data-sido-tat="3"] .sido__lank { min-height: 30px; }
+
+/* Lättare sidomeny (2026-10-29): ikonerna utan rutor, lugnare text, det valda som en mjuk platta med en tunn
+   kopparlinje, platta räknare och rubriker utan streck – mindre klumpigt, mer luft */
+html body .sido .sido__lank { min-height: 38px; gap: 11px; padding: 0 10px 0 12px; border-radius: 12px; font: 500 .9rem/1.2 var(--sans); color: var(--text-2); letter-spacing: -0.005em; }
+html body .sido .sido__lank > .i { width: 18px; height: 18px; padding: 0; border-radius: 0; background: none; box-shadow: none; color: var(--text-3); transition: color .25s, transform .35s var(--studs); }
+html body .sido .sido__lank:hover { background: rgba(255, 255, 255, .55); color: var(--kol); }
+html body .sido .sido__lank:hover > .i { color: var(--virke-djup); box-shadow: none; transform: translateX(1px); }
+html body .sido .sido__lank:hover > span { transform: none; }
+html body .sido .sido__lank.aktiv { font-weight: 600; color: var(--kol); background: none; }
+html body .sido .sido__lank.aktiv > .i { background: none; box-shadow: none; color: var(--virke-djup); }
+html body .sido .sido__markor { border-radius: 12px; background: #fff; box-shadow: 0 1px 0 rgba(27, 25, 21, .04), 0 8px 20px -14px rgba(143, 84, 36, .55); }
+html body .sido .sido__markor::before { content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px; height: auto; border-radius: 0 3px 3px 0; background: linear-gradient(180deg, var(--virke-2), var(--virke-djup)); opacity: 1; transform: none; }
+html body .sido .sido__rubrik { margin: 14px 12px 4px; font: 600 .6rem/1 var(--rubrik); letter-spacing: .14em; color: var(--text-3); opacity: .75; }
+html body .sido .sido__rubrik::before { display: none; }
+html body .sido .sido__bricka, html body .sido .sido__bricka--varm { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: rgba(27, 25, 21, .06); box-shadow: none; font: 600 .68rem/20px var(--rubrik); color: var(--text-2); animation: none; }
+html body .sido .sido__bricka--varm { background: var(--virke-ljus); color: var(--virke-djup); }
+html body .sido .sido__lank.aktiv .sido__bricka { background: var(--virke-ljus); color: var(--virke-djup); }
+html body .sido .sido__konto .avatar { width: 22px; height: 22px; font-size: .5rem; }
+html body .sido .sido__konto .avatar .narvaro-prick { width: 7px; height: 7px; }
+html[data-sido-tat] body .sido .sido__lank { min-height: 34px; }
+html[data-sido-tat="2"] body .sido .sido__lank { min-height: 31px; }
+html[data-sido-tat] body .sido .sido__rubrik { margin: 9px 12px 3px; }
+html[data-sido-tat="2"] body .sido .sido__rubrik { margin: 6px 12px 2px; }

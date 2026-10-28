@@ -48,16 +48,30 @@
     if (!u) { if (bandEl) { var b = bandEl; bandEl = null; b.setAttribute('data-ut', ''); setTimeout(function () { b.remove(); }, 300); } clearInterval(bandTimer); return; }
     if (!bandEl) { bandEl = document.createElement('div'); bandEl.className = 'stod-band'; bandEl.setAttribute('role', 'status'); document.body.appendChild(bandEl); }
     var andra = IH.ANVANDARE.filter(function (x) { return x.roll !== 'admin' && !x.inaktiv; });
-    bandEl.innerHTML = '<span class="stod-band__live" aria-hidden="true"></span>' +
-      '<span class="stod-band__text"><small>Supportläge · ' + e(u.namn) + ' märker inget</small><b>Du är i ' + e(u.namn) + 's konto</b></span>' +
+    var n = IH.narvaro ? IH.narvaro(u.id) : { namn: '', farg: '#ccc' };
+    bandEl.innerHTML = '<span class="stod-band__ikon" aria-hidden="true">' + IH.emo('oga-av') + '<i></i></span>' +
+      '<span class="stod-band__text"><small>Supportläge · ' + e(u.namn) + ' märker inget</small><b>Du ser CRM:et som ' + e(u.namn) + '</b></span>' +
       '<span class="stod-band__val" role="group" aria-label="Byt konto">' + andra.map(function (x) {
-        return '<button type="button" data-g="visa-som" data-id="' + x.id + '" aria-pressed="' + (x.id === u.id) + '" title="' + e(x.namn) + '"><span class="avatar" style="--av:' + x.farg + '">' + IH.initialer(x.namn) + '</span></button>';
+        return '<button type="button" data-g="visa-som" data-id="' + x.id + '" aria-pressed="' + (x.id === u.id) + '" title="Visa som ' + e(x.namn) + '"><span class="avatar" style="--av:' + x.farg + '">' + IH.initialer(x.namn) + '</span><span>' + e(x.namn) + '</span></button>';
       }).join('') + '</span>' +
-      '<span class="stod-band__tid" data-stod-tid>' + minuter() + ' min</span>' +
-      '<button type="button" class="stod-band__ut" data-g="visa-som-sluta">' + IH.emo('logga-ut') + 'Tillbaka till Admin</button>';
+      '<span class="stod-band__fakta"><span class="stod-band__status" style="--n:' + n.farg + '"><i></i>' + e(u.namn) + ' är ' + e(n.namn.toLowerCase()) + '</span><span data-stod-tid>' + IH.emo('klocka') + minuter() + ' min</span></span>' +
+      '<button type="button" class="stod-band__ut" data-g="visa-som-sluta" title="Tillbaka till Admin (Shift + Esc)">' + IH.emo('logga-ut') + '<span>Tillbaka till Admin</span></button>';
+    placeraBand();
     clearInterval(bandTimer);
-    bandTimer = setInterval(function () { var t = bandEl && bandEl.querySelector('[data-stod-tid]'); if (t) t.textContent = minuter() + ' min'; }, 30000);
+    bandTimer = setInterval(function () { var t = bandEl && bandEl.querySelector('[data-stod-tid]'); if (t) t.innerHTML = IH.emo('klocka') + minuter() + ' min'; }, 30000);
   }
+  // Bandet ligger över innehållets spalt (inte över menyn), i samma bredd som korten
+  function placeraBand() {
+    if (!bandEl) return;
+    var v = document.querySelector('.vy');
+    if (!v || innerWidth <= 720) { bandEl.style.left = bandEl.style.width = ''; return; }
+    var r = v.getBoundingClientRect(), cs = getComputedStyle(v);
+    var l = r.left + parseFloat(cs.paddingLeft), w = r.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    bandEl.style.left = l + 'px'; bandEl.style.width = w + 'px';
+  }
+  addEventListener('resize', placeraBand);
+  new MutationObserver(function () { setTimeout(placeraBand, 650); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sido-dold'] });
+  addEventListener('hashchange', function () { setTimeout(placeraBand, 0); });
   var forraMeny = IH.uppdateraMeny;
   IH.uppdateraMeny = function () { var r = forraMeny.apply(this, arguments); if (!!IH.visarSom() !== !!bandEl) band(); return r; };
   setTimeout(band, 0);

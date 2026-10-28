@@ -196,7 +196,7 @@
       '<form class="ch-skriv" data-ch-skriv data-kanal="' + k.id + '">' +
         '<button type="button" class="ch-ikonknapp" data-g="ch-emoji" aria-label="Emoji" aria-expanded="' + ui.emoji + '">' + ik('smiley') + '</button>' +
         '<label class="ch-ikonknapp" title="Bifoga fil eller bild">' + ik('gem') + '<input type="file" multiple data-ch-fil hidden></label>' +
-        '<textarea name="text" rows="1" placeholder="' + (andrar ? 'Ändra meddelandet' : 'Skriv till ' + e(k.typ === 'privat' ? fornamn(motpart(k)) : kanalNamn(k))) + '… (@kollega, #kund)" aria-label="Meddelande">' + e(andrar ? klartext(andrar.text) : ui.utkast[k.id] || '') + '</textarea>' +
+        '<textarea name="text" rows="1"' + (IH.visarSom && IH.visarSom() ? ' disabled' : '') + ' placeholder="' + (IH.visarSom && IH.visarSom() ? 'Skrivskyddat i supportläget – ' + e(IH.visarSom().namn) + ' märker inte att du läser' : andrar ? 'Ändra meddelandet' : 'Skriv till ' + e(k.typ === 'privat' ? fornamn(motpart(k)) : kanalNamn(k))) + '… (@kollega, #kund)" aria-label="Meddelande">' + e(andrar ? klartext(andrar.text) : ui.utkast[k.id] || '') + '</textarea>' +
         '<button class="ch-skicka" type="submit" aria-label="' + (andrar ? 'Spara' : 'Skicka') + '">' + ik(andrar ? 'bock' : 'skicka') + '</button>' +
         (ui.emoji ? '<div class="ch-emojipanel">' + EMOJI.map((g) => '<p>' + g[0] + '</p><div>' + g[1].split(' ').map((x) => '<button type="button" data-g="ch-emoji-in" data-emoji="' + x + '">' + x + '</button>').join('') + '</div>').join('') + '</div>' : '') +
         '<div class="ch-forslag" data-ch-forslag hidden></div>' +
@@ -279,7 +279,7 @@
       if (!ikon) { ikon = document.createElement('button'); ikon.type = 'button'; ikon.className = 'chf-ikon'; ikon.setAttribute('aria-label', 'Öppna chatten'); document.body.appendChild(ikon); kopplaIkon(ikon); }
       const n = olastaTotalt();
       ikon.innerHTML = ik('prat') + (n ? '<i class="ch-olast">' + n + '</i>' : '');
-      ikon.toggleAttribute('data-puls', !!n);
+      ikon.toggleAttribute('data-puls', !!n); ikon.toggleAttribute('data-tyst', !!pref().storEj);
       placeraIkon();
       return;
     }
@@ -328,6 +328,8 @@
     const kn = [...document.querySelectorAll('[data-sido-knapp], .sido-knapp')].filter((x) => x.getBoundingClientRect().width)[0];
     const fran = ikon.isConnected ? ikon.getBoundingClientRect() : null;
     ikon.style.right = ikon.style.bottom = ikon.style.left = ikon.style.top = '';
+    const sido = !rals && document.querySelector('.sido'), sr = sido && sido.getBoundingClientRect();
+    if (fl.ikonX != null && sr && sr.width && fl.ikonX < sr.right && fl.ikonY + 44 > sr.top && fl.ikonY < sr.bottom) { fl.ikonX = fl.ikonY = null; sparaFl(); }
     const iDocka = !!(rals && kn && fl.ikonX == null);
     if (fl.ikonX != null) { ikon.style.left = fl.ikonX + 'px'; ikon.style.top = fl.ikonY + 'px'; }
     else if (iDocka) { const r = kn.getBoundingClientRect(); ikon.style.left = (r.left + r.width / 2 - 22) + 'px'; ikon.style.top = (r.bottom + 20) + 'px'; }
@@ -362,12 +364,51 @@
     b.addEventListener('pointerdown', (ev) => {
       if (ev.button !== 0) return;
       const r = b.getBoundingClientRect();
-      dra(ev, (dx, dy) => { fl.ikonX = Math.max(6, Math.min(innerWidth - 50, r.left + dx)); fl.ikonY = Math.max(6, Math.min(innerHeight - 50, r.top + dy)); b.style.left = fl.ikonX + 'px'; b.style.top = fl.ikonY + 'px'; b.style.right = b.style.bottom = ''; if (dock) { b.removeAttribute('data-i-docka'); dockFor(null); varIDocka = false; } },
-        (rord) => { if (rord) { sparaFl(); b.dataset.dragen = '1'; setTimeout(() => { delete b.dataset.dragen; }, 50); } });
+      // Ett klick som rör sig några pixlar (magneten drar ikonen mot musen) ska inte räknas som en flytt
+      dra(ev, (dx, dy) => { if (!b.dataset.drar && Math.hypot(dx, dy) < 9) return; b.dataset.drar = '1'; fl.ikonX = Math.max(6, Math.min(innerWidth - 50, r.left + dx)); fl.ikonY = Math.max(6, Math.min(innerHeight - 50, r.top + dy)); b.style.left = fl.ikonX + 'px'; b.style.top = fl.ikonY + 'px'; b.style.right = b.style.bottom = ''; if (dock) { b.removeAttribute('data-i-docka'); dockFor(null); varIDocka = false; } },
+        () => {
+          if (!b.dataset.drar) return;
+          delete b.dataset.drar; b.dataset.dragen = '1'; setTimeout(() => { delete b.dataset.dragen; }, 50);
+          // Släppt nära rälsen när menyn är infälld: tillbaka in i dockan
+          if (document.documentElement.hasAttribute('data-sido-dold') && fl.ikonX < 110) { fl.ikonX = fl.ikonY = null; varIDocka = false; }
+          sparaFl(); placeraIkon();
+        });
     });
     b.addEventListener('click', () => { if (b.dataset.dragen) return; fl.min = false; sparaFl(); ritaFonster(); });
-    b.addEventListener('contextmenu', (ev) => { ev.preventDefault(); fl.ikonX = fl.ikonY = null; sparaFl(); placeraIkon(); IH.toast('Ikonen är tillbaka', 'Under menyknappen när menyn är infälld.', 'samtal'); });
+    b.addEventListener('contextmenu', (ev) => { ev.preventDefault(); ikonMeny(); });
+    b.setAttribute('aria-haspopup', 'menu'); b.title = 'Öppna chatten · högerklicka för fler val';
   }
+  /* Menyn på chattbubblan (som i Uperformance): olästa, Öppna chatten, Stör ej, Tillbaka till dockan och Stäng chatten */
+  let imeny = null;
+  function stangIkonMeny() { if (!imeny) return; const m = imeny; imeny = null; m.setAttribute('data-ut', ''); setTimeout(() => m.remove(), 200); document.removeEventListener('pointerdown', utanforIkonMeny, true); }
+  function utanforIkonMeny(ev) { if (imeny && !imeny.contains(ev.target)) stangIkonMeny(); }
+  function ikonMeny() {
+    if (!ikon) return; if (imeny) { stangIkonMeny(); return; }
+    const n = olastaTotalt(), tyst = !!pref().storEj, r = ikon.getBoundingClientRect();
+    imeny = document.createElement('div'); imeny.className = 'chf-meny'; imeny.setAttribute('role', 'menu');
+    imeny.innerHTML = '<header><b>Chatten</b><small>' + (n ? n + ' olästa' : 'Inga olästa') + '</small></header>' +
+      '<button type="button" role="menuitem" data-chm="oppna">' + ik('prat') + '<span>Öppna chatten</span></button>' +
+      '<button type="button" role="menuitemcheckbox" aria-checked="' + tyst + '" data-chm="tyst">' + ik(tyst ? 'mane' : 'bjallra') + '<span>Stör ej<small>' + (tyst ? 'På – inget ljud eller avisering' : 'Av') + '</small></span><i class="chf-meny__vaxel" aria-hidden="true"></i></button>' +
+      (fl.ikonX != null ? '<button type="button" role="menuitem" data-chm="docka">' + ik('retur') + '<span>Tillbaka till sin plats</span></button>' : '') +
+      '<button type="button" role="menuitem" data-chm="stang" class="chf-meny__stang">' + i('stang') + '<span>Stäng chatten</span></button>';
+    document.body.appendChild(imeny);
+    const mr = imeny.getBoundingClientRect();
+    const vanster = r.left < innerWidth / 2;
+    imeny.style.left = Math.max(8, Math.min(innerWidth - mr.width - 8, vanster ? r.right + 12 : r.left - mr.width - 12)) + 'px';
+    imeny.style.top = Math.max(8, Math.min(innerHeight - mr.height - 8, r.top + r.height / 2 - mr.height / 2)) + 'px';
+    imeny.style.transformOrigin = (vanster ? 'left' : 'right') + ' center';
+    imeny.addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-chm]'); if (!b) return;
+      const v = b.getAttribute('data-chm');
+      if (v === 'oppna') { stangIkonMeny(); fl.min = false; sparaFl(); ritaFonster(); }
+      if (v === 'tyst') { satPref('storEj', !pref().storEj); stangIkonMeny(); ritaFonster(); IH.toast(pref().storEj ? 'Stör ej är på' : 'Stör ej är av', pref().storEj ? 'Inget ljud och ingen avisering – olästa räknas ändå.' : null, pref().storEj ? 'mane' : 'bjallra'); }
+      if (v === 'docka') { fl.ikonX = fl.ikonY = null; sparaFl(); stangIkonMeny(); placeraIkon(); }
+      if (v === 'stang') { stangIkonMeny(); fl.oppen = false; fl.min = false; sparaFl(); ritaFonster(); }
+    });
+    setTimeout(() => document.addEventListener('pointerdown', utanforIkonMeny, true), 0);
+    const forsta = imeny.querySelector('button'); if (forsta) forsta.focus({ preventScroll: true });
+  }
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && imeny) { stangIkonMeny(); if (ikon) ikon.focus(); } });
   IH.chattOppna = (kid) => { fl.oppen = true; fl.min = false; if (kid) fl.kanal = kid; sparaFl(); ritaFonster(); };
   addEventListener('hashchange', () => setTimeout(ritaFonster, 0));
 

@@ -1,28 +1,42 @@
-/* Legohus CRM – supportläget (stod.js): bandet högst upp och teamraderna i administratörens meny. */
-.stod-band { position: fixed; top: 18px; left: 50%; z-index: 960; display: flex; align-items: center; gap: 12px; max-width: calc(100vw - 32px); padding: 7px 7px 7px 14px; border-radius: 999px;
-  background: linear-gradient(160deg, #2a2620, #1b1915); color: #fbf4e8; box-shadow: 0 22px 44px -18px rgba(27, 25, 21, .7), inset 0 0 0 1px rgba(240, 181, 110, .35);
-  transform: translateX(-50%); animation: stod-in .5s cubic-bezier(.22, 1, .36, 1) both; }
+/* Legohus CRM – supportläget (stod.js): bandet över innehållet och teamraderna i administratörens meny. */
+.stod-band { position: fixed; top: calc(var(--ram, 12px) + 10px); left: 50%; z-index: 960; display: flex; align-items: center; gap: 14px; box-sizing: border-box; width: min(1100px, calc(100vw - 32px));
+  min-height: 58px; padding: 8px 8px 8px 10px; border-radius: 20px; color: #fbf4e8;
+  background: radial-gradient(80% 140% at 0% 0%, rgba(240, 181, 110, .22), transparent 60%), linear-gradient(160deg, #2c2721, #1b1915);
+  box-shadow: 0 24px 48px -22px rgba(27, 25, 21, .75), inset 0 0 0 1px rgba(240, 181, 110, .3); animation: stod-in .55s cubic-bezier(.22, 1, .36, 1) both; }
+.stod-band[style*="left"] { transform: none; }
+.stod-band:not([style*="left"]) { transform: translateX(-50%); }
+.stod-band::after { content: ""; position: absolute; left: 18%; right: 18%; top: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(246, 198, 141, .8), transparent); }
 .stod-band[data-ut] { animation: stod-ut .3s ease-in both; }
-@keyframes stod-in { from { opacity: 0; transform: translate(-50%, -24px) scale(.96); } }
-@keyframes stod-ut { to { opacity: 0; transform: translate(-50%, -16px) scale(.97); } }
-.stod-band__live { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--virke); box-shadow: 0 0 0 0 rgba(240, 181, 110, .6); animation: stod-live 2s ease-out infinite; }
-@keyframes stod-live { to { box-shadow: 0 0 0 10px rgba(240, 181, 110, 0); } }
-.stod-band__text { display: grid; gap: 1px; min-width: 0; }
-.stod-band__text small { font: 600 .6rem/1.2 var(--rubrik); letter-spacing: .1em; text-transform: uppercase; color: rgba(251, 244, 232, .55); white-space: nowrap; }
-.stod-band__text b { font: 600 .86rem/1.2 var(--rubrik); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.stod-band__val { display: flex; gap: 4px; padding-left: 10px; border-left: 1px solid rgba(251, 244, 232, .14); }
-.stod-band__val button { display: grid; place-items: center; padding: 2px; border: 0; border-radius: 50%; background: none; cursor: pointer; transition: transform .2s var(--studs); }
-.stod-band__val button:hover { transform: translateY(-2px); }
-.stod-band__val .avatar { width: 30px; height: 30px; border-radius: 50%; font-size: .62rem; opacity: .55; transition: opacity .2s, box-shadow .2s; }
-.stod-band__val button[aria-pressed="true"] .avatar { opacity: 1; box-shadow: 0 0 0 2px #1b1915, 0 0 0 4px var(--virke); }
-.stod-band__tid { flex: none; font: 600 .7rem/1 var(--rubrik); color: rgba(251, 244, 232, .55); font-variant-numeric: tabular-nums; }
-.stod-band__ut { display: inline-flex; align-items: center; gap: 7px; flex: none; min-height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: linear-gradient(160deg, #f6c68d, #f0b56e);
-  font: 600 .78rem/1 var(--rubrik); color: #1b1915; cursor: pointer; transition: transform .2s var(--studs), box-shadow .2s; }
-.stod-band__ut:hover { transform: translateY(-1px); box-shadow: 0 10px 20px -10px rgba(240, 181, 110, .9); }
+@keyframes stod-in { from { opacity: 0; translate: 0 -22px; scale: .97; } }
+@keyframes stod-ut { to { opacity: 0; translate: 0 -14px; scale: .98; } }
+.stod-band__ikon { position: relative; display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 13px; background: rgba(240, 181, 110, .14); color: #f6c68d; }
+.stod-band__ikon .emo-ik { width: 19px; height: 19px; }
+.stod-band__ikon i { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: var(--virke); box-shadow: 0 0 0 2px #241f1a; animation: stod-live 2s ease-out infinite; }
+@keyframes stod-live { 0% { box-shadow: 0 0 0 2px #241f1a, 0 0 0 2px rgba(240, 181, 110, .6); } 100% { box-shadow: 0 0 0 2px #241f1a, 0 0 0 11px rgba(240, 181, 110, 0); } }
+.stod-band__text { display: grid; gap: 2px; min-width: 0; }
+.stod-band__text small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 .6rem/1.2 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: rgba(251, 244, 232, .55); }
+.stod-band__text b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 .95rem/1.2 var(--rubrik); }
+/* Växla konto: ett segment med namn, det valda lyser */
+.stod-band__val { display: flex; gap: 2px; margin-left: auto; padding: 3px; border-radius: 14px; background: rgba(255, 255, 255, .06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06); }
+.stod-band__val button { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 12px 0 4px; border: 0; border-radius: 11px; background: none; font: 600 .78rem/1 var(--rubrik); color: rgba(251, 244, 232, .65); cursor: pointer; transition: background-color .25s, color .25s; }
+.stod-band__val button:hover { color: #fff; background: rgba(255, 255, 255, .06); }
+.stod-band__val button[aria-pressed="true"] { background: rgba(240, 181, 110, .18); color: #fff; box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .45); }
+.stod-band__val .avatar { width: 28px; height: 28px; border-radius: 50%; font-size: .58rem; }
+.stod-band__fakta { display: grid; gap: 3px; flex: none; padding: 0 6px 0 14px; border-left: 1px solid rgba(251, 244, 232, .12); font-size: .72rem; color: rgba(251, 244, 232, .6); }
+.stod-band__fakta > span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.stod-band__fakta .emo-ik { width: 12px; height: 12px; opacity: .8; }
+.stod-band__status i { width: 7px; height: 7px; border-radius: 50%; background: var(--n); box-shadow: 0 0 6px var(--n); }
+.stod-band__ut { display: inline-flex; align-items: center; gap: 8px; flex: none; min-height: 42px; padding: 0 16px; border: 0; border-radius: 13px; background: linear-gradient(160deg, #f6c68d, #f0b56e);
+  font: 600 .8rem/1 var(--rubrik); color: #1b1915; cursor: pointer; transition: transform .25s var(--studs), box-shadow .25s; }
+.stod-band__ut:hover { transform: translateY(-1px); box-shadow: 0 12px 22px -12px rgba(240, 181, 110, .95); }
+.stod-band__ut:active { transform: scale(.97); }
 .stod-band__ut .emo-ik { width: 15px; height: 15px; }
 /* En tunn varm ram runt fönstret visar att man är i någon annans konto */
-html[data-support] body::after { content: ""; position: fixed; inset: 0; z-index: 959; pointer-events: none; box-shadow: inset 0 0 0 2px rgba(240, 181, 110, .75); border-radius: 0; }
-@media (max-width: 720px) { .stod-band { top: auto; bottom: 86px; } .stod-band__text small, .stod-band__tid { display: none; } }
+html[data-support] body::after { content: ""; position: fixed; inset: 0; z-index: 959; pointer-events: none; box-shadow: inset 0 0 0 2px rgba(240, 181, 110, .7); }
+@media (min-width: 721px) { html[data-support] body .vy { padding-top: calc(var(--ram, 12px) + 78px); } }
+@media (max-width: 1180px) { .stod-band__fakta { display: none; } }
+@media (max-width: 900px) { .stod-band__val button > span:last-child { display: none; } .stod-band__val button { padding: 0 4px; } }
+@media (max-width: 720px) { .stod-band { top: auto; bottom: 86px; } .stod-band__text small, .stod-band__ut span { display: none; } }
 
 /* Teamet i administratörens meny */
 .sido__konto { width: 100%; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
@@ -32,6 +46,28 @@ html[data-support] body::after { content: ""; position: fixed; inset: 0; z-index
 .sido__ga { flex: none; padding: 3px 9px; border-radius: 999px; background: var(--virke-ljus); font: 600 .66rem/1.2 var(--rubrik); color: var(--virke-djup); opacity: 0; transform: translateX(-4px); transition: opacity .2s, transform .25s var(--studs); }
 .sido__konto:hover .sido__ga, .sido__konto:focus-visible .sido__ga { opacity: 1; transform: none; }
 html[data-sido-tat] .sido__konto .avatar { width: 29px; height: 29px; }
-@media (prefers-reduced-motion: reduce) { .stod-band, .stod-band[data-ut], .stod-band__live { animation: none; } }
-/* Sidan börjar under bandet i supportläget */
-@media (min-width: 721px) { html[data-support] body .vy { padding-top: calc(var(--ram, 12px) + 62px); } }
+
+/* Menyn på chattbubblan (chatt.js ikonMeny) */
+.chf-meny { position: fixed; z-index: 1000; display: grid; gap: 2px; width: 244px; padding: 8px; border-radius: 18px; color: var(--kol);
+  background: linear-gradient(180deg, #fffdf9, #fbf4e8); box-shadow: 0 24px 50px -20px rgba(60, 40, 15, .55), inset 0 0 0 1px rgba(240, 181, 110, .45);
+  animation: chf-meny-in .3s cubic-bezier(.22, 1, .36, 1) both; }
+.chf-meny[data-ut] { animation: chf-meny-ut .18s ease-in both; }
+@keyframes chf-meny-in { from { opacity: 0; transform: scale(.94) translateY(6px); } }
+@keyframes chf-meny-ut { to { opacity: 0; transform: scale(.96); } }
+.chf-meny header { display: grid; gap: 2px; padding: 6px 10px 8px; margin-bottom: 2px; border-bottom: 1px solid rgba(27, 25, 21, .07); }
+.chf-meny header b { font: 700 .95rem/1.2 var(--rubrik); }
+.chf-meny header small { font-size: .74rem; color: var(--text-3); }
+.chf-meny button { display: flex; align-items: center; gap: 11px; width: 100%; min-height: 42px; padding: 6px 10px; border: 0; border-radius: 12px; background: none; font: 600 .86rem/1.2 var(--rubrik); color: var(--kol); text-align: left; cursor: pointer; transition: background-color .2s; }
+.chf-meny button:hover, .chf-meny button:focus-visible { background: #fff; outline: none; box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .5); }
+.chf-meny button > .emo-ik, .chf-meny button > .i { flex: none; width: 18px; height: 18px; color: var(--virke-djup); }
+.chf-meny button > span { flex: 1; display: grid; gap: 1px; min-width: 0; }
+.chf-meny button small { font: 500 .7rem/1.2 var(--sans); color: var(--text-3); }
+.chf-meny__vaxel { position: relative; flex: none; width: 38px; height: 22px; border-radius: 999px; background: rgba(27, 25, 21, .14); transition: background-color .25s; }
+.chf-meny__vaxel::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(0, 0, 0, .2); transition: transform .3s var(--studs); }
+.chf-meny [aria-checked="true"] .chf-meny__vaxel { background: var(--virke-djup); }
+.chf-meny [aria-checked="true"] .chf-meny__vaxel::after { transform: translateX(16px); }
+.chf-meny__stang > .i { color: var(--rod) !important; }
+.chf-meny__stang:hover { color: var(--rod); }
+/* Stör ej: en liten måne på bubblan */
+.chf-ikon[data-tyst]::before { content: ""; position: absolute; left: -2px; bottom: -2px; width: 16px; height: 16px; border-radius: 50%; background: #4f4a42 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 14.6A8.2 8.2 0 1 1 9.4 4a6.6 6.6 0 0 0 10.6 10.6z' fill='%23fbf4e8'/%3E%3C/svg%3E") center / 10px no-repeat; box-shadow: 0 0 0 2px #fff; }
+@media (prefers-reduced-motion: reduce) { .stod-band, .stod-band[data-ut], .stod-band__ikon i, .chf-meny, .chf-meny[data-ut] { animation: none; } }
