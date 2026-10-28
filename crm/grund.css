@@ -166,3 +166,16 @@ html.drar .aff__flytta { opacity: 0; }
 /* Huset i den smala sidokolumnen: faktan i två spalter och mindre bild */
 .af-sida .af-fakta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .af-sida .af-hus img { width: 96px; }
+
+/* Infälld meny som i Uperformance (2026-10-28): en egen räls 52 px till vänster – en mjuk list med en tunn linje,
+   knappen i mitten och den minimerade chatten under knappen. Innehållet börjar efter rälsen. Knappen och
+   chattikonen dras mjukt mot musen (grund.js). */
+@media (min-width: 1101px) {
+  html[data-sido-dold] body .vy { padding-left: calc(52px + var(--ram)); }
+  html[data-sido-dold] body .sido-kant::after { content: ""; display: block; position: absolute; left: 6px; top: 0; bottom: 0; height: auto; margin: 0; width: 40px; z-index: -1; border-radius: 20px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .7), rgba(255, 250, 242, .55)); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06), 0 20px 40px -30px rgba(90, 60, 25, .45);
+    opacity: 1; animation: none; transform: none; pointer-events: none; }
+  html[data-sido-dold] body .sido-kant::before { content: ""; display: block; position: absolute; left: 26px; top: 28px; bottom: 28px; height: auto; margin: 0; width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(143, 84, 36, .22) 18%, rgba(143, 84, 36, .22) 82%, transparent); opacity: 1; animation: none; transform: none; pointer-events: none; }
+  html[data-sido-dold] body .sido-knapp { left: 26px; width: 32px; height: 32px; margin: -16px 0 0 -16px; border-radius: 50%; }
+}

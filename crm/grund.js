@@ -31,3 +31,22 @@
   if (document.body) new MutationObserver(kor).observe(document.body, { childList: true, subtree: true });
   forberedAntal();
 })();
+
+/* Magneten (från Uperformance): menyknappen och den minimerade chatten dras mjukt mot musen när den är nära. */
+(() => {
+  'use strict';
+  if (matchMedia('(pointer: coarse)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const SEL = '.sido-knapp, .chf-ikon';
+  let ram = 0;
+  document.addEventListener('mousemove', (ev) => {
+    if (ram) return;
+    ram = requestAnimationFrame(() => {
+      ram = 0;
+      document.querySelectorAll(SEL).forEach((el) => {
+        const r = el.getBoundingClientRect(); if (!r.width) return;
+        const dx = ev.clientX - (r.left + r.width / 2), dy = ev.clientY - (r.top + r.height / 2), d = Math.hypot(dx, dy);
+        el.style.translate = d < 90 ? `${(dx / 90) * 6}px ${(dy / 90) * 6}px` : '';
+      });
+    });
+  }, { passive: true });
+})();
