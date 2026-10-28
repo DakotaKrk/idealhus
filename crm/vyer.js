@@ -4146,7 +4146,7 @@
       '<span class="agv__hoger">' + (grupper[0][1].length ? '<button type="button" class="ap-filter agv__flytta" data-g="ag-sena-idag">' + i('klocka') + 'Flytta ' + grupper[0][1].length + ' försenade till i dag</button>' : '') +
         '<button type="button" class="tv-ikon" data-g="ag-csv" title="Exportera uppgifterna som CSV">' + i('skrivut') + '</button></span></div>';
     var html = '<h1 class="dold">Att göra</h1>' +
-      topp + agKalender(u) + verktyg + '<form class="nyuppg kort" data-form="uppgift" data-in><span class="nyuppg__plus" aria-hidden="true">' + i('plus') + '</span><input name="text" placeholder="Ny uppgift – t.ex. Ring Karin om tomten" required autocomplete="off">' +
+      topp + agKalender(u) + verktyg + '<form class="nyuppg kort" data-form="uppgift" data-in><span class="nyuppg__plus" aria-hidden="true">' + i('plus') + '</span><input name="text" placeholder="Ny uppgift, t.ex. Ring Karin" title="Skriv som du pratar – t.ex. Ring Karin om tomten" required autocomplete="off">' +
       '<select name="kund" aria-label="Kund"><option value="">Ingen kund</option>' + db().kunder.map(function (k) { return '<option value="' + k.id + '">' + e(k.namn) + '</option>'; }).join('') + '</select>' +
       '<input type="date" name="datum" value="' + IH.dagStr() + '" aria-label="Datum"><button class="knapp knapp--mork knapp--liten" type="submit">Lägg till</button></form>' +
       '<p class="nyuppg__tips"><svg class="emo-ik" aria-hidden="true"><use href="#i-glodlampa"/></svg> Skriv som du pratar – "Ring …", "Skicka offert …" eller "Platsbesök …" får rätt ikon av sig själv.</p>' +

@@ -8550,3 +8550,4 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .ag-flytta { display: inline-flex; align-items: center; gap: 6px; margin-left: 6px; padding: 4px 8px; border-radius: 10px; background: var(--ben); font: 600 .72rem/1 var(--rubrik); color: var(--text-2); cursor: pointer; }
 .ag-flytta .i { width: 13px; height: 13px; }
 .ag-flytta input { width: 128px; padding: 2px 4px; border: 0; background: transparent; font: inherit; color: inherit; }
+@media (max-width: 560px) { form.nyuppg.kort input[name="text"] { font-size: .92rem; } }
