@@ -666,7 +666,7 @@
         var t = r.d.reduce(function (s, y) { return s + y.antal; }, 0), f2 = forra(r.x.akt), tr = f2 ? Math.round((t - f2) / f2 * 100) : null;
         return '<span class="lp-karta__namn">' + avatar(r.x.u) + e(r.x.u.namn.split(' ')[0]) + '</span>' + r.d.map(function (y) {
           return '<i style="--a:' + (y.antal / maxA).toFixed(3) + '" class="' + (y.antal ? 'pa' : '') + (y.dag.getTime() === idagT ? ' idag' : '') + (y.dag.getDay() === 1 ? ' mandag' : '') + '" title="' + e(r.x.u.namn) + ', ' + IH.datum(y.dag.toISOString()) + ': ' + plural(y.antal, 'händelse', 'händelser') + '">' + (y.antal || '') + '</i>';
-        }).join('') + '<b>' + t + (tr != null ? '<small class="lp-trend" data-upp="' + (tr >= 0) + '" title="Mot de 14 dagarna innan (' + f2 + ')">' + (tr >= 0 ? '↑' : '↓') + Math.abs(tr) + ' %</small>' : f2 === 0 && t ? '<small class="lp-trend" data-upp="true">ny</small>' : '') + '</b>';
+        }).join('') + '<b>' + t + (f2 || t ? '<small class="lp-trend" data-upp="' + (t >= f2) + '" title="' + t + ' de senaste 14 dagarna mot ' + f2 + ' de 14 dagarna innan">' + (t === f2 ? '± 0' : (t > f2 ? '↑ ' : '↓ ') + (f2 >= 5 ? Math.abs(tr) + ' %' : (t > f2 ? '+' : '−') + Math.abs(t - f2))) + '</small>' : '') + '</b>';
       }).join('') +
       '<span class="lp-karta__namn lp-karta__team">Teamet</span>' + dagar14.map(function (dd, k) { var n4 = rader.reduce(function (t, r) { return t + r.d[k].antal; }, 0); return '<i class="lp-karta__tot' + (n4 ? ' pa' : '') + '" style="--a:' + Math.min(1, n4 / (maxA * Math.max(1, rader.length) * 0.6)).toFixed(3) + '">' + (n4 || '') + '</i>'; }).join('') + '<b>' + rader.reduce(function (t, r) { return t + r.d.reduce(function (s2, y) { return s2 + y.antal; }, 0); }, 0) + '</b></div>';
     // 07 Topplistan 90 dagar

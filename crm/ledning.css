@@ -129,7 +129,7 @@
 .lp-teckenforklaring { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 12px 0 0; font-size: .8rem; color: var(--text-3); }
 .lp-teckenforklaring span { display: inline-flex; align-items: center; gap: 6px; }
 .lp-teckenforklaring i { width: 10px; height: 10px; border-radius: 3px; background: var(--f); }
-.lp-karta { display: grid; grid-template-columns: 70px repeat(var(--n), minmax(0, 1fr)) 52px; gap: 4px; align-items: center; overflow-x: auto; }
+.lp-karta { display: grid; grid-template-columns: 104px repeat(var(--n), minmax(0, 1fr)) 52px; gap: 4px; align-items: center; overflow-x: auto; }
 .lp-karta > small { text-align: center; font: 600 .68rem/1 var(--rubrik); color: var(--text-3); text-transform: uppercase; }
 .lp-karta > small.helg { opacity: .55; }
 .lp-karta__namn { font-weight: 600; font-size: .86rem; }
@@ -708,3 +708,8 @@ section.lp-mork .ao-text { position: relative; z-index: 1; }
 .lp-fall--2 { left: 205px; top: -14px; }
 .hero__fonster .lp-fall { left: 118px; top: 6px; width: 46px; }
 .hero__fonster .lp-fall--2 { display: none; }
+
+/* Statusprickens storlek följer profilbilden (container-enheter), så den aldrig blir för stor på små bilder */
+.avatar:has(> .narvaro-prick) { container-type: size; }
+.avatar > .narvaro-prick { width: clamp(6px, 28cqw, 16px); height: clamp(6px, 28cqw, 16px); right: -1px; bottom: -1px; box-shadow: 0 0 0 clamp(1.5px, 5cqw, 3px) #fff; }
+section.lp-mork .avatar > .narvaro-prick { box-shadow: 0 0 0 clamp(1.5px, 5cqw, 3px) #1f1a16; }
