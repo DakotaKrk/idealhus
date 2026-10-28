@@ -3110,6 +3110,7 @@
         '<p class="motescen__not">' + (redo.length ? redo.length + (redo.length === 1 ? ' affär väntar' : ' affärer väntar') + ' på ett första möte – klicka på en plats vid bordet.' : 'Inga affärer väntar på ett första möte.') + '</p>' +
       '</div>' +
       '<div class="motescen__rum">' +
+        '<div class="motesrum3d" data-motesrum3d aria-hidden="true"></div>' +
         '<div class="rum__scen" aria-hidden="true"><div class="bord"><i class="bord__skugga"></i><i class="bord__tjocklek"></i><i class="bord__skiva"></i><i class="bord__kant"></i><i class="bord__spot"></i>' + saker + '</div></div>' +
         platser +
       '</div>' +

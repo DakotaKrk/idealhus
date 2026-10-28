@@ -8193,3 +8193,18 @@ section.dk-hjalte.kort .dk-fack__alla { grid-column: 1 / -1; grid-auto-flow: col
 
 /* Modellnamnet i säljtavlans kort på en rad */
 .aff__modell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+
+/* Mötesrummet i 3D: rummet fyller högerdelen och glider ut i kanterna, stolsbrickorna ligger över stolarna */
+.motesrum3d { position: absolute; inset: -20px -24px -20px -40px; z-index: 0; border-radius: 24px; overflow: hidden;
+  -webkit-mask-image: radial-gradient(120% 110% at 60% 50%, #000 62%, transparent 92%); mask-image: radial-gradient(120% 110% at 60% 50%, #000 62%, transparent 92%); }
+.motesrum3d__duk { display: block; width: 100% !important; height: 100% !important; }
+.motescen__rum--3d .rum__scen { display: none; }
+.motescen__rum--3d .bord__plats { z-index: 2; transform: translate(-50%, -50%) scale(.9); }
+.motescen__rum--3d .bord__plats:hover { transform: translate(-50%, -50%) scale(1); }
+.motescen__rum--3d { min-height: 420px; }
+
+/* Snabbknapparna i översikten i husets ljusa toner: vit glasyta, kopparikon, mörk text */
+.hero__snabb button { background: rgba(255, 255, 255, .82); color: var(--kol); box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .28), 0 6px 14px -10px rgba(90, 60, 25, .45); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.hero__snabb button .i { background: #fbecd8; color: #8f5424; }
+.hero__snabb button:hover { background: #fff; box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .6), 0 12px 22px -14px rgba(90, 60, 25, .6); }
+.hero__snabb button:hover .i { background: linear-gradient(160deg, #f6c68d, #e29a4a); color: #1b1915; }
