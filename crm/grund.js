@@ -56,21 +56,80 @@
 (function () {
   'use strict';
   var IH = window.IH;
+  // Menyn får alltid plats utan att rulla: först luftigt men lite lägre rader, sedan flyttas de rader som
+  // inte ryms (nerifrån, aldrig den valda) in under "Mer" – en egen liten meny bredvid sidomenyn.
   function anpassaSido() {
     var nav = document.querySelector('.sido__nav'), html = document.documentElement;
     if (!nav || !nav.getClientRects().length) return;
-    var fore = html.getAttribute('data-sido-tat');
+    var fore = html.getAttribute('data-sido-tat') + '|' + nav.querySelectorAll('[data-sido-dold]').length;
     html.removeAttribute('data-sido-tat');
+    nav.querySelectorAll('[data-sido-dold]').forEach(function (el) { el.removeAttribute('data-sido-dold'); });
+    var gammal = nav.querySelector('.sido__merknapp'); if (gammal) gammal.remove();
     var over = function () { return nav.scrollHeight > nav.clientHeight + 1; };
-    ['1', '2', '3'].forEach(function (steg) { if (over()) html.setAttribute('data-sido-tat', steg); });
+    if (over()) html.setAttribute('data-sido-tat', '1');
+    if (over()) {
+      var mer = document.createElement('button');
+      mer.type = 'button'; mer.className = 'sido__lank sido__merknapp'; mer.setAttribute('aria-haspopup', 'menu'); mer.setAttribute('aria-expanded', 'false');
+      mer.innerHTML = IH.i('prickar') + '<span>Mer</span><b class="sido__merantal"></b>';
+      nav.appendChild(mer);
+      // det man använder minst flyttas först; okända rader (t.ex. Teamet) efter dem, nerifrån
+      var ORDNING = ['installningar', 'kolla-marken', 'mote', 'att-gora', 'offerter', 'produktion', 'chatt', 'chef', 'kunder', 'forfragningar', 'salj', 'oversikt'];
+      var vikt = function (el) { var i = ORDNING.indexOf(el.getAttribute('data-vy')); return i < 0 ? -1 : i; };
+      var rader = Array.prototype.slice.call(nav.querySelectorAll('.sido__lank:not(.sido__merknapp)')).map(function (el, i) { return { el: el, i: i }; });
+      rader.sort(function (a, b) { return vikt(a.el) - vikt(b.el) || b.i - a.i; });
+      for (var n = 0; n < rader.length && over(); n++) { if (!rader[n].el.classList.contains('aktiv')) rader[n].el.setAttribute('data-sido-dold', ''); }
+      // rubriker utan synliga rader döljs också
+      nav.querySelectorAll('.sido__rubrik').forEach(function (r) {
+        var el = r.nextElementSibling, syns = false;
+        while (el && !el.classList.contains('sido__rubrik')) { if (el.classList.contains('sido__lank') && !el.hasAttribute('data-sido-dold') && !el.classList.contains('sido__merknapp')) syns = true; el = el.nextElementSibling; }
+        if (!syns) r.setAttribute('data-sido-dold', '');
+      });
+      var dolda = nav.querySelectorAll('.sido__lank[data-sido-dold]');
+      var olast = Array.prototype.some.call(dolda, function (d) { return d.querySelector('.sido__bricka--varm'); });
+      mer.querySelector('.sido__merantal').textContent = dolda.length;
+      mer.classList.toggle('sido__merknapp--prick', olast);
+      mer.title = 'Fler: ' + Array.prototype.map.call(dolda, function (d) { return (d.querySelector('span') || d).textContent.trim(); }).join(', ');
+    }
     nav.dispatchEvent(new Event('scroll'));
-    // Markören under valt menyval flyttas med när raderna blir lägre
-    if (html.getAttribute('data-sido-tat') !== fore) dispatchEvent(new Event('resize'));
+    var efter = html.getAttribute('data-sido-tat') + '|' + nav.querySelectorAll('[data-sido-dold]').length;
+    if (efter !== fore) dispatchEvent(new Event('resize'));
   }
+  // Mer-menyn: kopior av de dolda raderna i ett litet kort som glider fram bredvid knappen
+  function stangMer() {
+    var p = document.querySelector('.sido__merpop'); if (!p) return;
+    var k = document.querySelector('.sido__merknapp'); if (k) k.setAttribute('aria-expanded', 'false');
+    p.classList.add('ut'); setTimeout(function () { p.remove(); }, 180);
+  }
+  function oppnaMer(knapp) {
+    if (document.querySelector('.sido__merpop')) { stangMer(); return; }
+    var nav = knapp.closest('.sido__nav'), pop = document.createElement('div');
+    pop.className = 'sido__merpop'; pop.setAttribute('role', 'menu');
+    var html = '', forraRubrik = '';
+    Array.prototype.forEach.call(nav.children, function (el) {
+      if (el.classList.contains('sido__rubrik')) { forraRubrik = el.textContent; return; }
+      if (!el.hasAttribute('data-sido-dold') || !el.classList.contains('sido__lank')) return;
+      if (forraRubrik) { html += '<p class="sido__merrubrik">' + IH.e(forraRubrik) + '</p>'; forraRubrik = ''; }
+      var k = el.cloneNode(true); k.removeAttribute('data-sido-dold'); k.classList.remove('aktiv'); k.setAttribute('role', 'menuitem');
+      html += k.outerHTML;
+    });
+    pop.innerHTML = html; document.body.appendChild(pop);
+    var r = knapp.getBoundingClientRect(), sido = document.querySelector('.sido').getBoundingClientRect();
+    pop.style.left = (sido.right + 10) + 'px';
+    pop.style.top = Math.max(12, Math.min(innerHeight - pop.offsetHeight - 12, r.bottom - pop.offsetHeight)) + 'px';
+    knapp.setAttribute('aria-expanded', 'true');
+    pop.addEventListener('click', function (ev) { if (ev.target.closest('a, button')) setTimeout(stangMer, 0); });
+  }
+  document.addEventListener('click', function (ev) {
+    var k = ev.target.closest && ev.target.closest('.sido__merknapp');
+    if (k) { ev.preventDefault(); oppnaMer(k); return; }
+    if (!(ev.target.closest && ev.target.closest('.sido__merpop'))) stangMer();
+  });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') stangMer(); });
+  addEventListener('hashchange', stangMer);
   var forra = IH.uppdateraMeny;
   IH.uppdateraMeny = function () { var r = forra.apply(this, arguments); anpassaSido(); return r; };
   var t = 0;
-  addEventListener('resize', function () { clearTimeout(t); t = setTimeout(anpassaSido, 120); });
+  addEventListener('resize', function () { stangMer(); clearTimeout(t); t = setTimeout(anpassaSido, 120); });
   try { document.fonts.ready.then(anpassaSido); } catch (x) { /* äldre webbläsare */ }
   setTimeout(anpassaSido, 0);
 })();
