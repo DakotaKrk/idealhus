@@ -31,12 +31,12 @@ function tex(w, h, rita, rep) {
   return t;
 }
 const panel = () => tex(256, 256, (g, w, h) => {
-  g.fillStyle = '#26221f'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#4a4038'; g.fillRect(0, 0, w, h);
   for (let x = 0; x < w; x += 16) { g.fillStyle = `rgba(255,240,220,${0.03 + Math.random() * 0.04})`; g.fillRect(x + 2, 0, 12, h); g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(x, 0, 2, h); }
 }, [3, 1]);
 const M = {
   fasad: () => new THREE.MeshStandardMaterial({ map: panel(), roughness: 0.82, metalness: 0.02 }),
-  tak: new THREE.MeshStandardMaterial({ color: '#1a1816', roughness: 0.6, metalness: 0.25 }),
+  tak: new THREE.MeshStandardMaterial({ color: '#3a322c', roughness: 0.7, metalness: 0.15 }),
   glas: () => new THREE.MeshStandardMaterial({ color: '#2b2f33', emissive: '#ffb05a', emissiveIntensity: 0.25, roughness: 0.15, metalness: 0.6 }),
   ram: new THREE.MeshStandardMaterial({ color: '#c79a62', roughness: 0.5 }),
   tra: new THREE.MeshStandardMaterial({ color: '#d9b083', roughness: 0.7 }),
@@ -90,12 +90,12 @@ function platta(farg, topp) {
   const g = new THREE.Group();
   const bas = lada(13.2, 1.2, 11.2, new THREE.MeshStandardMaterial({ color: '#e9dcc7', roughness: 0.9 }), 0.4); bas.position.y = -0.6; g.add(bas);
   const yta = lada(12.6, 0.12, 10.6, new THREE.MeshStandardMaterial({ color: farg, roughness: 0.95 }), 0.3); yta.position.y = 0.02; g.add(yta);
-  const kant = new THREE.Mesh(new THREE.TorusGeometry(1, 0.02, 6, 64), M.neon(topp, 3)); kant.rotation.x = Math.PI / 2; kant.scale.set(6.9, 5.9, 1); kant.position.y = -0.02; g.add(kant);
+  const kant = new THREE.Mesh(new THREE.TorusGeometry(1, 0.02, 6, 64), M.neon('#e9a25a', 1)); kant.rotation.x = Math.PI / 2; kant.scale.set(6.9, 5.9, 1); kant.position.y = -0.02; g.add(kant);
   g.userData.kant = kant;
   return g;
 }
 function trad(x, z, s = 1) {
-  const t = grupp(cyl(0.08 * s, 0.11 * s, 0.9 * s, M.tra, 8), new THREE.Mesh(new THREE.ConeGeometry(0.62 * s, 1.7 * s, 9), new THREE.MeshStandardMaterial({ color: '#4f7a4a', roughness: 0.9 })));
+  const t = grupp(cyl(0.08 * s, 0.11 * s, 0.9 * s, M.tra, 8), new THREE.Mesh(new THREE.ConeGeometry(0.62 * s, 1.7 * s, 9), new THREE.MeshStandardMaterial({ color: '#7f9a6c', roughness: 0.9 })));
   t.children[0].position.y = 0.45 * s; t.children[1].position.y = 1.55 * s; t.children[1].castShadow = true; t.position.set(x, 0, z); return t;
 }
 
@@ -187,7 +187,7 @@ function station2(modell) { // Tillverkning
   return g;
 }
 function station3() { // Grund & mark
-  const g = platta('#8a6f52', '#7fe0a6');
+  const g = platta('#c9b496', '#7fe0a6');
   const grop = lada(7.4, 0.2, 5, new THREE.MeshStandardMaterial({ color: '#6b5440', roughness: 1 }), 0.1); grop.position.set(0.6, 0.05, -0.6); g.add(grop);
   const form = new THREE.Group(); [[0, 2.4, 7, 0], [0, -2.4, 7, 0], [3.5, 0, 4.8, Math.PI / 2], [-3.5, 0, 4.8, Math.PI / 2]].forEach(([x, z, l, r]) => { const b = lada(l, 0.35, 0.08, M.tra, 0.01); b.position.set(x, 0.3, z); b.rotation.y = r; form.add(b); }); form.position.set(0.6, 0, -0.6); g.add(form);
   const platt = lada(6.8, 0.32, 4.6, M.betong, 0.05); platt.position.set(0.6, 0.27, -0.6); g.add(platt);
@@ -215,7 +215,7 @@ function station3() { // Grund & mark
   return g;
 }
 function station4(modell) { // Leverans & montage
-  const g = platta('#9fb07d', '#ffcf6b');
+  const g = platta('#cdd3b4', '#ffcf6b');
   const grund = lada(6.6, 0.4, 4.4, M.betong, 0.05); grund.position.set(-1.2, 0.2, -1.6); g.add(grund);
   const h = hus(modell); g.add(h);
   // lastbilen
@@ -259,42 +259,42 @@ function station4(modell) { // Leverans & montage
   return g;
 }
 function station5(modell) { // Slutbesiktning
-  const g = platta('#a7c591', '#9fe7ff');
+  const g = platta('#cbd5b2', '#9fe7ff');
   const h = hus(modell); h.position.set(0, 0.06, -0.8); g.add(h);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(1, 0.035, 8, 80), M.neon('#8ff3ff', 4)); ring.rotation.x = Math.PI / 2; ring.scale.set(h.userData.w * 0.75, h.userData.d * 0.95, 1); h.add(ring);
-  const ljusplan = new THREE.Mesh(new THREE.PlaneGeometry(h.userData.w * 1.5, h.userData.d * 1.9), new THREE.MeshBasicMaterial({ color: '#8ff3ff', transparent: true, opacity: 0.14, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending })); ljusplan.rotation.x = Math.PI / 2; h.add(ljusplan);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1, 0.035, 8, 80), M.neon('#9fe0e8', 1.4)); ring.rotation.x = Math.PI / 2; ring.scale.set(h.userData.w * 0.75, h.userData.d * 0.95, 1); h.add(ring);
+  const ljusplan = new THREE.Mesh(new THREE.PlaneGeometry(h.userData.w * 1.5, h.userData.d * 1.9), new THREE.MeshBasicMaterial({ color: '#8ff3ff', transparent: true, opacity: 0.08, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending })); ljusplan.rotation.x = Math.PI / 2; h.add(ljusplan);
   const bock = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'); x.fillStyle = '#22c46a'; x.beginPath(); x.arc(64, 64, 58, 0, 7); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 13; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(36, 66); x.lineTo(56, 86); x.lineTo(94, 44); x.stroke(); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
   const bockar = [[-2.5, 3.6, 1.6], [2.6, 3.4, 1.4], [-2.2, 2.4, -2.8], [2.8, 2.6, -2.6], [0, 4.6, 0]].map(([x, y, z]) => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: bock, transparent: true, depthWrite: false })); s.position.set(x, y, z); s.scale.setScalar(0.01); h.add(s); return s; });
   g.add(trad(-5, 3.6, 0.9), trad(5, 3.9, 1.1), trad(5.3, -3.9, 0.8));
   g.userData.tick = (t) => {
     const p = (t % 8) / 8, y = 0.2 + (0.5 - Math.cos(p * Math.PI * 4) / 2) * (h.userData.hojd + 0.4);
-    ring.position.y = ljusplan.position.y = y; ring.material.emissiveIntensity = 3 + Math.sin(t * 9) * 1.2;
+    ring.position.y = ljusplan.position.y = y; ring.material.emissiveIntensity = 1.3 + Math.sin(t * 9) * 0.3;
     bockar.forEach((s, n) => { const a = p > 0.12 + n * 0.14 ? ut((p - 0.12 - n * 0.14) / 0.08) : 0; s.scale.setScalar(0.01 + a * 0.75 * (1 + Math.sin(t * 3 + n) * 0.05)); s.material.opacity = p > 0.95 ? (1 - p) / 0.05 : 1; });
   };
   return g;
 }
 function station6(modell) { // Klart
-  const g = platta('#8fbf74', '#7fffb0');
-  const h = hus(modell); h.position.set(0, 0.06, -0.8); h.userData.glas.emissiveIntensity = 1.6; g.add(h);
-  const varmt = new THREE.PointLight('#ffb35c', 8, 9, 2); varmt.position.set(0, 1.6, 1.4); g.add(varmt);
+  const g = platta('#c4d1a8', '#7fffb0');
+  const h = hus(modell); h.position.set(0, 0.06, -0.8); h.userData.glas.emissiveIntensity = 0.9; g.add(h);
+  const varmt = new THREE.PointLight('#ffb35c', 4, 8, 2); varmt.position.set(0, 1.6, 1.4); g.add(varmt);
   for (let n = 0; n < 5; n++) { const s = lada(0.7, 0.06, 0.5, M.betong, 0.08); s.position.set(0.5 + Math.sin(n) * 0.2, 0.1, 1.7 + n * 0.75); g.add(s); }
   const flagga = grupp(cyl(0.04, 0.04, 3, M.vit, 8), lada(0.9, 0.55, 0.02, M.neon('#ffb35c', 1.4), 0.01)); flagga.children[1].position.set(0.47, 1.2, 0); flagga.position.set(-4.6, 1.5, 1.6); g.add(flagga);
   const nyckel = new THREE.Group(); nyckel.position.set(0, h.userData.hojd + 2, -0.8); g.add(nyckel);
-  const ogla = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.11, 14, 40), M.neon('#ffc46b', 2.2)); nyckel.add(ogla);
-  const skaft = lada(1.2, 0.16, 0.12, M.neon('#ffc46b', 2.2), 0.04); skaft.position.x = 1.02; nyckel.add(skaft);
-  [1.35, 1.6].forEach((x) => { const t2 = lada(0.12, 0.3, 0.12, M.neon('#ffc46b', 2.2), 0.03); t2.position.set(x, -0.18, 0); nyckel.add(t2); });
-  const glorie = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.25, 48), new THREE.MeshBasicMaterial({ color: '#ffcf7a', transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); nyckel.add(glorie);
+  const ogla = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.11, 14, 40), M.neon('#e9a25a', 0.9)); nyckel.add(ogla);
+  const skaft = lada(1.2, 0.16, 0.12, M.neon('#e9a25a', 0.9), 0.04); skaft.position.x = 1.02; nyckel.add(skaft);
+  [1.35, 1.6].forEach((x) => { const t2 = lada(0.12, 0.3, 0.12, M.neon('#e9a25a', 0.9), 0.03); t2.position.set(x, -0.18, 0); nyckel.add(t2); });
+  const glorie = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.25, 48), new THREE.MeshBasicMaterial({ color: '#ffcf7a', transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); nyckel.add(glorie);
   g.add(trad(-5, -3.6, 1.1), trad(4.8, -3.9, 0.9), trad(5.2, 3.6, 0.8), trad(-4.2, 3.8, 0.7));
   // konfetti
-  const N = 140, konf = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.12, 0.2), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, toneMapped: false }), N);
-  const FARG = ['#ffb35c', '#7fffb0', '#8fd0ff', '#ff7aa8', '#ffe27a'].map((f) => new THREE.Color(f));
+  const N = 60, konf = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.12, 0.2), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, toneMapped: false }), N);
+  const FARG = ['#e9a25a', '#c98a45', '#f3d9b0', '#a9bf8e', '#fff3e0'].map((f) => new THREE.Color(f));
   const bitar = []; for (let n = 0; n < N; n++) { bitar.push({ x: (Math.random() - 0.5) * 9, y: 6 + Math.random() * 8, z: (Math.random() - 0.5) * 7, v: 0.6 + Math.random() * 1.2, r: Math.random() * 6, s: (Math.random() - 0.5) * 6 }); konf.setColorAt(n, FARG[n % FARG.length]); }
   g.add(konf); const o = new THREE.Object3D();
   g.userData.tick = (t, dt) => {
     nyckel.rotation.y = t * 1.4; nyckel.position.y = h.userData.hojd + 2 + Math.sin(t * 2) * 0.25; glorie.lookAt(nyckel.position.x, nyckel.position.y, 100);
-    glorie.material.opacity = 0.2 + Math.sin(t * 3) * 0.1;
+    glorie.material.opacity = 0.1 + Math.sin(t * 3) * 0.05;
     flagga.children[1].rotation.y = Math.sin(t * 3) * 0.25;
-    varmt.intensity = 7 + Math.sin(t * 1.7) * 1.2;
+    varmt.intensity = 3.6 + Math.sin(t * 1.7) * 0.6;
     bitar.forEach((b, n) => { b.y -= b.v * dt; b.r += b.s * dt; if (b.y < 0.1) { b.y = 6 + Math.random() * 3; } o.position.set(b.x + Math.sin(t + n) * 0.3, b.y, b.z); o.rotation.set(b.r, b.r * 0.7, b.r * 0.3); o.updateMatrix(); konf.setMatrixAt(n, o.matrix); });
     konf.instanceMatrix.needsUpdate = true;
   };
@@ -307,29 +307,29 @@ function bygg(el) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.9; renderer.outputColorSpace = THREE.SRGBColorSpace;
-  const scen = new THREE.Scene(); scen.background = new THREE.Color('#f3e9da'); scen.fog = new THREE.Fog('#f3e9da', 46, 95);
-  const pmrem = new THREE.PMREMGenerator(renderer); scen.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scen.environmentIntensity = 0.3;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0; renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const scen = new THREE.Scene(); scen.background = new THREE.Color('#f6eee2'); scen.fog = new THREE.Fog('#f6eee2', 55, 110);
+  const pmrem = new THREE.PMREMGenerator(renderer); scen.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scen.environmentIntensity = 0.5;
   const kamera = new THREE.PerspectiveCamera(30, 2, 0.5, 200);
-  scen.add(new THREE.HemisphereLight('#fff3e0', '#6d5f4c', 0.5));
-  const sol = new THREE.DirectionalLight('#ffe2b8', 1.7); sol.castShadow = true; sol.shadow.mapSize.set(1536, 1536); sol.shadow.bias = -0.0004; sol.shadow.normalBias = 0.03;
-  Object.assign(sol.shadow.camera, { left: -12, right: 12, top: 12, bottom: -12, near: 1, far: 60 }); scen.add(sol, sol.target);
-  const mark = new THREE.Mesh(new THREE.PlaneGeometry(400, 120), new THREE.MeshStandardMaterial({ color: '#efe3cf', roughness: 1 })); mark.rotation.x = -Math.PI / 2; mark.position.y = -1.2; mark.receiveShadow = true; scen.add(mark);
+  scen.add(new THREE.HemisphereLight('#fff6ea', '#b8a68c', 0.9));
+  const sol = new THREE.DirectionalLight('#ffe9cc', 1.5); sol.castShadow = true; sol.shadow.mapSize.set(1536, 1536); sol.shadow.bias = -0.0004; sol.shadow.normalBias = 0.03;
+  Object.assign(sol.shadow.camera, { left: -26, right: 26, top: 20, bottom: -20, near: 1, far: 60 }); scen.add(sol, sol.target);
+  const mark = new THREE.Mesh(new THREE.PlaneGeometry(400, 120), new THREE.MeshStandardMaterial({ color: '#f2e8d8', roughness: 1 })); mark.rotation.x = -Math.PI / 2; mark.position.y = -1.2; mark.receiveShadow = true; scen.add(mark);
   // vägen och den lysande banan genom alla steg
-  const vag = lada(AVST * 5 + 30, 0.08, 2.4, new THREE.MeshStandardMaterial({ color: '#4a4541', roughness: 0.85 }), 0.04); vag.position.set(AVST * 2.5, 0.02, 7.2); scen.add(vag);
-  for (let x = -12; x < AVST * 5 + 14; x += 1.6) { const s = lada(0.8, 0.02, 0.1, new THREE.MeshBasicMaterial({ color: '#f6e7c8' }), 0); s.position.set(x, 0.07, 7.2); scen.add(s); }
+  const vag = lada(AVST * 5 + 30, 0.06, 1.6, new THREE.MeshStandardMaterial({ color: '#e3d2b8', roughness: 0.95 }), 0.03); vag.position.set(AVST * 2.5, -0.55, 7.4); scen.add(vag);
+  for (let x = -12; x < AVST * 5 + 14; x += 1.6) { const s = lada(0.5, 0.02, 0.08, new THREE.MeshStandardMaterial({ color: '#c9a77c', roughness: 0.9 }), 0); s.position.set(x, -0.5, 7.4); scen.add(s); }
   const banaPunkter = []; for (let n = 0; n <= 5; n++) banaPunkter.push(new THREE.Vector3(n * AVST, 0.2, 5.6));
-  const bana = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(banaPunkter), 200, 0.06, 8), M.neon('#ffb35c', 2.6)); scen.add(bana);
-  const pulser = []; for (let n = 0; n < 6; n++) { const p = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12), M.neon('#ffe2a8', 6)); scen.add(p); pulser.push(p); }
+  const bana = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(banaPunkter), 200, 0.04, 8), M.neon('#e9a25a', 1.2)); scen.add(bana);
+  const pulser = []; for (let n = 0; n < 6; n++) { const p = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 12), M.neon('#ffd9a0', 2.2)); scen.add(p); pulser.push(p); }
   const modeller = IH.MODELLER || [];
   const mod = (n) => modeller[n % Math.max(1, modeller.length)];
   const stationer = [station1(mod(1)), station2(mod(2)), station3(), station4(mod(0)), station5(mod(3)), station6(mod(4))];
   stationer.forEach((s, n) => { s.position.x = n * AVST; scen.add(s); });
   // efterbehandlingen: neonen och fönstren glöder
   const comp = new EffectComposer(renderer); comp.addPass(new RenderPass(scen, kamera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(512, 256), 0.9, 0.55, 1.35); comp.addPass(bloom); comp.addPass(new OutputPass());
+  const bloom = new UnrealBloomPass(new THREE.Vector2(512, 256), 0.35, 0.4, 1.6); comp.addPass(bloom); comp.addPass(new OutputPass());
   S = { renderer, scen, kamera, sol, comp, bloom, stationer, pulser, el: null, nu: 0, mal: new THREE.Vector3(), mot: new THREE.Vector3(), auto: !LUGN, paus: 0, t: 0, synlig: false, ram: 0, klocka: new THREE.Clock() };
-  S.mot.set(0, 1.2, 0); S.kamPos = new THREE.Vector3(-8, 13, 26);
+  S.mot.set(0, 1.2, 0); S.kamPos = new THREE.Vector3(-6, 17, 32);
   renderer.domElement.className = 'resa3d__duk';
   renderer.domElement.addEventListener('pointerdown', () => { S.auto = false; S.paus = 0; uppdateraUi(); });
   new IntersectionObserver((r) => { S.synlig = r[0].isIntersecting; if (S.synlig) starta(); }, { threshold: 0.05 }).observe(renderer.domElement);
@@ -340,7 +340,7 @@ function storlek() {
   if (!S || !S.el) return;
   const w = S.el.clientWidth, h = S.el.clientHeight; if (!w || !h) return;
   S.renderer.setSize(w, h, false); S.comp.setSize(w, h); S.bloom.resolution.set(w / 2, h / 2);
-  S.kamera.aspect = w / h; S.kamera.fov = w < 640 ? 42 : 30; S.kamera.updateProjectionMatrix();
+  S.kamera.aspect = w / h; S.kamera.fov = w < 640 ? 40 : 28; S.kamera.updateProjectionMatrix();
 }
 function ga(n) { S.nu = (n + 6) % 6; uppdateraUi(); }
 function uppdateraUi() {
@@ -380,13 +380,13 @@ function ram() {
   const dt = Math.min(0.05, S.klocka.getDelta()); S.t += LUGN ? dt * 0.35 : dt;
   if (S.auto) { S.paus += dt; if (S.paus > 7) { S.paus = 0; ga(S.nu + 1); } }
   // kameran glider mot steget och vaggar lite
-  const x = S.nu * AVST, sv = LUGN ? 0 : Math.sin(S.t * 0.25) * 2.2;
-  S.mal.set(x - 7 + sv, 14 + Math.sin(S.t * 0.3) * 0.6, 26.5);
+  const x = S.nu * AVST, sv = LUGN ? 0 : Math.sin(S.t * 0.25) * 1.4;
+  S.mal.set(x - 6 + sv, 17 + Math.sin(S.t * 0.3) * 0.5, 32);
   S.kamPos.lerp(S.mal, 1 - Math.pow(0.0015, dt));
-  S.mot.lerp(tmp.set(x - 1.2, 0.6, -0.2), 1 - Math.pow(0.002, dt));
+  S.mot.lerp(tmp.set(x - 1, 0.2, -2.2), 1 - Math.pow(0.002, dt));
   S.kamera.position.copy(S.kamPos); S.kamera.lookAt(S.mot);
-  S.sol.position.set(S.mot.x + 9, 18, 12); S.sol.target.position.copy(S.mot);
-  S.stationer.forEach((s, n) => { if (Math.abs(n * AVST - S.mot.x) < AVST * 1.6) s.userData.tick(S.t + n * 1.7, dt); s.userData.kant.material.emissiveIntensity = n === S.nu ? 3.4 + Math.sin(S.t * 4) * 0.8 : 0.6; });
+  S.sol.position.set(S.mot.x + 10, 22, 14); S.sol.target.position.copy(S.mot);
+  S.stationer.forEach((s, n) => { if (Math.abs(n * AVST - S.mot.x) < AVST * 1.6) s.userData.tick(S.t + n * 1.7, dt); s.userData.kant.material.emissiveIntensity = n === S.nu ? 1.4 + Math.sin(S.t * 3) * 0.3 : 0.15; });
   S.pulser.forEach((p, n) => { const a = ((S.t * 0.09 + n / 6) % 1); p.position.set(a * AVST * 5, 0.2, 5.6); p.scale.setScalar(0.7 + Math.sin(S.t * 6 + n) * 0.25); });
   S.comp.render(dt);
   placeraNalar();

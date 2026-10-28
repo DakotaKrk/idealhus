@@ -155,6 +155,7 @@
     graf: 'M4 19V5|M4 19h16|M7 15l4-4 3 3 5-6',
     trofe: 'M8 4h8v5a4 4 0 0 1-8 0z|M8 6H5a3 3 0 0 0 3 4|M16 6h3a3 3 0 0 1-3 4|M12 13v4|M8.5 20h7',
     anteckning: 'M5 4h14v11l-5 5H5z|M14 20v-5h5',
+    meddelande: 'M4 5.5A2.5 2.5 0 0 1 6.5 3h8A2.5 2.5 0 0 1 17 5.5v5a2.5 2.5 0 0 1-2.5 2.5H9l-4 3.5V13a2.5 2.5 0 0 1-1-2z|M17 8h.5A2.5 2.5 0 0 1 20 10.5V15a2.5 2.5 0 0 1-1 2v3l-3.5-3H11a2.5 2.5 0 0 1-2-1',
     samtal: 'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z',
     motesikon: 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z|M3 20c.6-3.6 3-5.5 6-5.5|M15 14.5h6v6h-6z',
     system: 'M12 3l7 4v10l-7 4-7-4V7z|M12 12l7-5|M12 12v9|M12 12 5 7',
@@ -314,13 +315,13 @@
       ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote']] },
     { rubrik: 'Produktion', poster: [['produktion', 'Projekt', 'produktion']] },
     { rubrik: 'Verktyg', poster: [['kolla-marken', 'Kolla marken', 'mark']] },
-    { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'samtal'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
+    { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
   ];
   // Administratörens meny (som i Uperformance): översikten, ledningen och det egna – säljarnas delar nås via supportläget
   var ADMIN_MENY = [
     { rubrik: null, poster: [['oversikt', 'Översikt', 'hem']] },
     { rubrik: 'Ledning', poster: [['kontroll', 'Kontrollcentral', 'graf'], ['admin', 'Adminpanel', 'installning'], ['sakerhet', 'Säkerhet', 'system']] },
-    { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'samtal'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
+    { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
   ];
 
   function brickor() {
@@ -848,7 +849,7 @@
     if (nav) nav.scrollBy({ top: nav.clientHeight * 0.7, behavior: 'smooth' });
   };
   IH.G.mer = function () {
-    var poster = [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote'], ['chatt', 'Meddelanden', 'samtal'],
+    var poster = [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote'], ['chatt', 'Meddelanden', 'meddelande'],
       ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']];
     IH.oppnaArk({
       titel: 'Mer', ikon: 'meny',
