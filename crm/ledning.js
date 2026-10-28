@@ -556,7 +556,16 @@
     var utan = db().affarer.filter(function (a) { return a.steg !== 'vunnen' && !a.forlorad && (!a.ansvarig || !IH.anvandare(a.ansvarig) || IH.anvandare(a.ansvarig).inaktiv); });
     var h = new Date().getHours(), hals = h < 10 ? 'God morgon' : h < 17 ? 'Hej' : 'God kväll';
     var tal = function (x) { return '<' + (x.href ? 'a href="' + x.href + '"' : 'div') + ' class="ao-tal" data-ton="' + (x.ton || 'is') + '"><span class="ao-tal__ikon">' + IH.emo(x.ikon) + '</span><span class="ao-tal__text"><small>' + x.etikett + '</small><strong>' + e(x.varde) + '</strong><em>' + e(x.under) + '</em>' + (x.andel != null ? '<span class="lp-glasmatare" style="--andel:' + x.andel.toFixed(3) + '"><i></i></span>' : '') + '</span></' + (x.href ? 'a' : 'div') + '>'; };
-    var hjalte = '<section class="ap-hjalte ao-hjalte kort lp-chefhjalte"><div class="sh-rutnat" aria-hidden="true"></div>' +
+    // kvartalsringen: vunnet mot teamets kvartalsmål, eller vinstgraden om inget mål är satt
+    var ringAndel = tot.mal ? Math.min(1, tot.vunnet / tot.mal) : vg || 0;
+    var veckorV = []; for (var w = 11; w >= 0; w--) { var vs = Date.now() - (w + 1) * 7 * 864e5, ve = Date.now() - w * 7 * 864e5; veckorV.push(team.reduce(function (t, x) { return t + x.aff.filter(function (a) { return a.steg === 'vunnen' && a.vunnen && new Date(a.vunnen) >= vs && new Date(a.vunnen) < ve; }).reduce(function (s2, a) { return s2 + (a.varde || 0); }, 0); }, 0)); }
+    var maxV = Math.max.apply(null, veckorV.concat([1]));
+    var ring = '<div class="lp-ring" style="--a:' + ringAndel.toFixed(3) + '"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="lp-ring-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd9a0"/><stop offset="1" stop-color="#e29a4a"/></linearGradient></defs>' +
+      '<circle cx="60" cy="60" r="50" class="lp-ring__spar"/><circle cx="60" cy="60" r="50" class="lp-ring__glod"/><circle cx="60" cy="60" r="50" class="lp-ring__bage"/></svg>' +
+      '<div class="lp-ring__mitt"><b>' + Math.round(ringAndel * 100) + ' %</b><small>' + (tot.mal ? 'av kvartalsmålet' : 'vinstgrad 90 d') + '</small>' + (tot.mal ? '<em>' + IH.kort(tot.vunnet) + ' / ' + IH.kort(tot.mal) + '</em>' : '<em>Sätt mål för att följa kvartalet</em>') + '</div></div>';
+    var lag = '<div class="lp-lag">' + team.map(function (x) { var n = narvaro(x.u.id); return '<a href="#/profil/' + x.u.id + '" title="' + e(x.u.namn) + ': ' + e(n.namn) + ' · ' + IH.kort(x.oppet) + ' öppet">' + avatar(x.u) + '</a>'; }).join('') + '<span>' + plural(aktivaNu, 'i tjänst', 'i tjänst') + '</span></div>';
+    var veckoStaplar = '<div class="lp-veckor"><small>Vunnet per vecka · 12 veckor</small><span class="lp-veckor__staplar">' + veckorV.map(function (v, n) { return '<i style="--h:' + (v / maxV).toFixed(3) + ';--n:' + n + '" class="' + (v ? 'pa' : '') + (n === 11 ? ' nu' : '') + '" title="' + (n === 11 ? 'Den här veckan' : (11 - n) + ' veckor sedan') + ': ' + (v ? IH.kr(v) : 'inget vunnet') + '"></i>'; }).join('') + '</span></div>';
+    var hjalte = '<section class="ap-hjalte ao-hjalte kort lp-chefhjalte lp-mork"><div class="sh-rutnat" aria-hidden="true"></div><i class="lp-mork__glod" aria-hidden="true"></i><i class="lp-mork__glod lp-mork__glod--2" aria-hidden="true"></i>' +
       '<div class="ao-text"><p class="etikett"><i class="sh-live"></i>Försäljningsledning · live ur CRM:et</p><h1>' + hals + ', ' + e(jag.namn.split(' ')[0]) + '. <em>Så går teamet.</em></h1>' +
         '<p class="ao-ingress">' + plural(team.length, 'säljare', 'säljare') + ' · ' + aktivaNu + ' i tjänst nu · ' + plural(oppnaN, 'öppen affär', 'öppna affärer') + (utan.length ? ' · <strong class="lp-varm">' + plural(utan.length, 'affär', 'affärer') + ' utan ansvarig</strong>' : '') + '</p>' +
         '<div class="sh-knappar"><button type="button" class="sh-knapp sh-knapp--accent" data-g="km-nytt-konto">' + IH.emo('anvandare-plus') + '<span>Lägg till säljare</span></button>' +
@@ -567,7 +576,7 @@
         { ikon: 'mal', etikett: 'Viktad prognos', varde: IH.kort(tot.viktat), under: 'värde × chansen att vinna', ton: 'is' },
         { ikon: 'medalj', etikett: 'Vunnet 90 dagar', varde: IH.kort(tot.vunnet), under: tot.mal ? pct(tot.vunnet / tot.mal) + ' av kvartalsmålet ' + IH.kort(tot.mal) : 'inget mål satt', ton: 'gron', andel: tot.mal ? Math.min(1, tot.vunnet / tot.mal) : null },
         { ikon: 'trend', etikett: 'Vinstgrad 90 d', varde: vg == null ? '–' : pct(vg), under: 'vunna av avgjorda affärer', ton: 'gul' }
-      ].map(tal).join('') + '</div></section>';
+      ].map(tal).join('') + '</div>' + '<div class="lp-mork__mitt">' + ring + lag + '</div>' + veckoStaplar + '</section>';
 
     // 01 Teamet just nu
     var vald = team.filter(function (x) { var s = narvaro(x.u.id).id; return chefUi.filter === 'alla' || (chefUi.filter === 'tillganglig' ? s === 'online' : chefUi.filter === 'upptagen' ? UPPTAGEN.indexOf(s) >= 0 : BORTA.indexOf(s) >= 0); });
@@ -666,7 +675,16 @@
         chefBand('05 · Pipeline', 'Pipeline', 'per säljare', pipe, { ingress: 'Öppet värde per steg – håll musen över en färg för beloppet.' }) + '</div>' +
       '<div class="ao-tva">' + chefBand('06 · Aktivitet', 'Aktivitet', '14 dagar', karta + senasteHandelser(team), { ingress: 'Loggade möten, samtal och mejl per dag. Pilen jämför med de 14 dagarna innan.' }) +
         chefBand('07 · Resultat', 'Topplistan', period === 'ar' ? 'i år' : period + ' dagar', topplista, { hoger: toppVal }) + '</div>';
-    return { titel: 'Försäljning', html: html };
+    var raknaUpp = Date.now() - (IH.vyer.chef.senast || 0) > 15000; IH.vyer.chef.senast = Date.now();
+    return { titel: 'Försäljning', html: html, efter: function (yta) {
+      if (!raknaUpp || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      yta.querySelectorAll('.lp-mork .ao-tal strong, .lp-ring__mitt b').forEach(function (el, n) {
+        var txt = el.textContent, m = txt.match(/^([\d\s]+(?:,\d+)?)(.*)$/); if (!m) return;
+        var mal = parseFloat(m[1].replace(/\s/g, '').replace(',', '.')), dec = (m[1].split(',')[1] || '').length, t0 = performance.now() + n * 90;
+        var steg = function (nu) { var p = Math.min(1, Math.max(0, (nu - t0) / 1100)), v = mal * (1 - Math.pow(1 - p, 3)); el.textContent = v.toLocaleString('sv-SE', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + m[2]; if (p < 1) requestAnimationFrame(steg); else el.textContent = txt; };
+        requestAnimationFrame(steg);
+      });
+    } };
   };
 
   /* Chefens verktyg ------------------------------------------------------------------------------ */

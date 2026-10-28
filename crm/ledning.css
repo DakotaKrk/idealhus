@@ -566,3 +566,59 @@ button.lp-nv__chip { cursor: pointer; }
 .lp-senaste__pil { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #f3ede3; transition: background-color .2s, transform .25s var(--mjuk); }
 .lp-senaste__pil .i { width: 15px; height: 15px; }
 .lp-senaste a:hover .lp-senaste__pil { background: #1b1915; color: #fbf4e8; transform: translateX(2px); }
+
+/* Säljchefens hjälte, mörk och mäktig: kopparglöd, kvartalsringen i mitten, laget, fyra glasrutor och vunnet per vecka */
+section.ao-hjalte.lp-chefhjalte.lp-mork { position: relative; display: grid; grid-template-columns: minmax(0, 1.15fr) auto minmax(0, 1fr); grid-template-areas: "text mitt tal" "veckor veckor veckor"; align-items: center; gap: 28px 36px; padding: 40px 44px 30px; overflow: hidden; isolation: isolate;
+  background: radial-gradient(120% 90% at 0% 0%, #3a2a1c 0%, transparent 55%), radial-gradient(90% 120% at 100% 100%, #2c2118 0%, transparent 60%), linear-gradient(160deg, #221d18, #15120f);
+  color: #fbf4e8; box-shadow: 0 40px 80px -40px rgba(27, 25, 21, .85), inset 0 0 0 1px rgba(240, 181, 110, .18); }
+section.lp-mork .sh-rutnat { opacity: .35; filter: invert(1); }
+.lp-mork__glod { position: absolute; z-index: -1; width: 520px; height: 520px; left: 34%; top: -55%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 170, 80, .32), transparent); filter: blur(10px); animation: lp-glod 9s ease-in-out infinite alternate; pointer-events: none; }
+.lp-mork__glod--2 { left: auto; right: -12%; top: auto; bottom: -70%; background: radial-gradient(closest-side, rgba(226, 154, 74, .22), transparent); animation-duration: 12s; }
+@keyframes lp-glod { to { transform: translate(40px, 30px) scale(1.12); } }
+section.lp-mork .ao-text { grid-area: text; }
+section.lp-mork .etikett { color: rgba(251, 244, 232, .62); }
+section.lp-mork h1 { color: #fbf4e8; }
+section.lp-mork h1 em { background: linear-gradient(100deg, #ffd9a0, #e29a4a 60%, #f6c68d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+section.lp-mork .ao-ingress { color: rgba(251, 244, 232, .7); }
+section.lp-mork .ao-ingress strong { color: #f6c68d; }
+section.lp-mork .sh-knapp { background: rgba(255, 255, 255, .06); color: #fbf4e8; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12); }
+section.lp-mork .sh-knapp:hover { background: rgba(255, 255, 255, .12); }
+section.lp-mork .sh-knapp--accent { background: linear-gradient(160deg, #f6c68d, #e29a4a); color: #1b1915; box-shadow: 0 14px 30px -14px rgba(226, 154, 74, .9); }
+section.lp-mork .ap-tal { grid-area: tal; }
+section.lp-mork .ao-tal { background: rgba(255, 255, 255, .05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); color: #fbf4e8; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: transform .3s var(--mjuk), background-color .3s; }
+section.lp-mork a.ao-tal:hover { transform: translateY(-3px); background: rgba(255, 255, 255, .09); }
+section.lp-mork .ao-tal small { color: rgba(251, 244, 232, .55); }
+section.lp-mork .ao-tal strong { color: #fff; font-variant-numeric: tabular-nums; }
+section.lp-mork .ao-tal em, section.lp-mork .ao-tal__text > span:last-child { color: rgba(251, 244, 232, .62); }
+section.lp-mork .ao-tal__ikon { background: rgba(246, 198, 141, .14); box-shadow: inset 0 0 0 1px rgba(246, 198, 141, .25); }
+/* kvartalsringen */
+.lp-mork__mitt { grid-area: mitt; display: grid; justify-items: center; gap: 14px; }
+.lp-ring { position: relative; width: 210px; height: 210px; }
+.lp-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.lp-ring circle { fill: none; stroke-width: 9; stroke-linecap: round; }
+.lp-ring__spar { stroke: rgba(255, 255, 255, .08); }
+.lp-ring__bage, .lp-ring__glod { stroke: url(#lp-ring-g); stroke-dasharray: 314.16; stroke-dashoffset: calc(314.16 * (1 - var(--a))); animation: lp-ring 1.6s cubic-bezier(.22, 1, .36, 1) both; }
+.lp-ring__glod { stroke-width: 18; opacity: .35; filter: blur(7px); }
+@keyframes lp-ring { from { stroke-dashoffset: 314.16; } }
+.lp-ring__mitt { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; gap: 2px; }
+.lp-ring__mitt b { font: 700 2.6rem/1 var(--rubrik); letter-spacing: -.03em; color: #fff; font-variant-numeric: tabular-nums; }
+.lp-ring__mitt small { font: 600 .66rem/1.2 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: rgba(251, 244, 232, .6); }
+.lp-ring__mitt em { max-width: 130px; margin-top: 4px; font-style: normal; font-size: .72rem; color: #f6c68d; }
+.lp-lag { display: flex; align-items: center; }
+.lp-lag a { margin-left: -8px; border-radius: 50%; box-shadow: 0 0 0 3px #1f1a16; transition: transform .25s var(--studs); }
+.lp-lag a:first-child { margin-left: 0; }
+.lp-lag a:hover { transform: translateY(-3px); z-index: 1; }
+.lp-lag .avatar { width: 34px; height: 34px; border-radius: 50%; font-size: .6rem; }
+.lp-lag span { margin-left: 10px; font-size: .74rem; color: rgba(251, 244, 232, .65); }
+/* vunnet per vecka */
+.lp-veckor { grid-area: veckor; display: grid; gap: 8px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, .08); }
+.lp-veckor small { font: 600 .62rem/1 var(--rubrik); letter-spacing: .14em; text-transform: uppercase; color: rgba(251, 244, 232, .5); }
+.lp-veckor__staplar { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: end; gap: 6px; height: 54px; }
+.lp-veckor__staplar i { height: calc(6px + var(--h) * 48px); border-radius: 6px 6px 3px 3px; background: rgba(255, 255, 255, .07); transform-origin: bottom; animation: lp-stapel .8s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--n) * 45ms + .3s); transition: filter .2s; }
+.lp-veckor__staplar i.pa { background: linear-gradient(180deg, #ffd9a0, #c98a45); box-shadow: 0 0 16px rgba(255, 170, 80, .25); }
+.lp-veckor__staplar i.nu { outline: 1.5px solid rgba(246, 198, 141, .7); outline-offset: 2px; }
+.lp-veckor__staplar i:hover { filter: brightness(1.25); }
+@keyframes lp-stapel { from { transform: scaleY(0); } }
+@media (max-width: 1250px) { section.ao-hjalte.lp-chefhjalte.lp-mork { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "text mitt" "tal tal" "veckor veckor"; } }
+@media (max-width: 760px) { section.ao-hjalte.lp-chefhjalte.lp-mork { grid-template-columns: 1fr; grid-template-areas: "text" "mitt" "tal" "veckor"; padding: 28px 22px; } }
+@media (prefers-reduced-motion: reduce) { .lp-mork__glod, .lp-ring__bage, .lp-ring__glod, .lp-veckor__staplar i { animation: none; } }
