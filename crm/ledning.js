@@ -285,7 +285,7 @@
   /* 05 Försäljningsledningen #/chef – samma upplägg som Uperformance visaChef: hjälten med verktygen och fyra tal, sedan
      01 Teamet just nu (filter), 02 Vem jobbar när, 03 Teamets kalender, 04 Att agera på (fördela, påminn), 05 Pipeline per
      säljare, 06 Aktivitet 14 dagar och 07 Topplistan 90 dagar. Allt räknas ur datan – inga påhittade siffror. */
-  var chefUi = { filter: 'alla', kalVem: 'alla', kalMan: 0, kalTyp: 'alla', kalVy: 'man', agera: 'alla', topp: 90 };
+  var chefUi = { filter: 'alla', kalVem: 'alla', kalMan: 0, kalTyp: 'alla', kalVy: 'man', agera: 'alla', topp: 90, narvVecka: 0 };
   var plural = function (n, en, flera) { return n + ' ' + (n === 1 ? en : flera); };
   var pct = function (x) { return Math.round(x * 100) + ' %'; };
   var inom = function (iso, d) { return iso && IH.dagarSedan(iso) < d; };
@@ -298,6 +298,88 @@
   // på, nya möten, samtal och uppgifter läggs till direkt, och försenade uppgifter syns tydligt.
   var KAL_TYP = { akt: 'Möten och samtal', uppg: 'Uppgifter', vunnen: 'Vunna affärer' };
   var AKT_NAMN = { mote: 'Möte', samtal: 'Samtal', mejl: 'Mejl', notis: 'Anteckning', system: 'System' };
+  var FRANVARO = { semester: ['Semester', 'flyg'], sjuk: ['Sjuk', 'termometer'], ledig: ['Ledig', 'kaffe'], utbildning: ['Utbildning', 'glodlampa'] };
+  var franvaroLista = function () { var d = db(); if (!d.franvaro) d.franvaro = []; return d.franvaro; };
+  var franvaroPa = function (uid, t) { return franvaroLista().find(function (f) { return f.u === uid && t >= dag0(f.fran).getTime() && t <= dag0(f.till).getTime(); }); };
+  var dagISO = function (d) { return IH.dagStr ? IH.dagStr(d) : d.toISOString().slice(0, 10); };
+  var veckonr = function (d) { var t = new Date(d); t.setHours(0, 0, 0, 0); t.setDate(t.getDate() + 3 - (t.getDay() + 6) % 7); var v1 = new Date(t.getFullYear(), 0, 4); return 1 + Math.round(((t - v1) / 864e5 - 3 + (v1.getDay() + 6) % 7) / 7); };
+  var kortDatum = function (d) { return d.getDate() + ' ' + d.toLocaleDateString('sv-SE', { month: 'short' }).replace('.', ''); };
+  var AKT_IKON = { samtal: 'samtal', mejl: 'post', mote: 'kunder', notis: 'anteckning', system: 'blixt' };
+  function senasteHandelser(team) {
+    var l = db().aktiviteter.filter(function (h) { return team.some(function (x) { return x.u.id === h.av; }); }).sort(function (a, b) { return new Date(b.tid) - new Date(a.tid); }).slice(0, 4);
+    if (!l.length) return '';
+    return '<div class="lp-karta__skala" aria-hidden="true">Färre<i style="--a:.15"></i><i style="--a:.35"></i><i style="--a:.6"></i><i style="--a:.85"></i><i style="--a:1"></i>Fler</div>' +
+      '<p class="lp-senaste__rubrik">Senaste händelserna</p><ul class="lp-senaste">' + l.map(function (h) {
+        var u = IH.anvandare(h.av) || { namn: '' }, k = h.kund && IH.kund(h.kund), dagar = IH.dagarSedan(h.tid);
+        return '<li><a href="' + (k ? '#/kunder/' + k.id : '#/') + '"><span class="lp-senaste__ikon" data-typ="' + (h.typ || 'notis') + '">' + i(AKT_IKON[h.typ] || 'anteckning') + '</span><span class="lp-senaste__text"><b>' + e(u.namn.split(' ')[0] + ': ' + h.text) + '</b><small>' + e((AKT_NAMN[h.typ] || 'Aktivitet') + (k ? ' · ' + k.namn : '') + ' · ' + (dagar < 7 ? IH.sedan(h.tid) : IH.datum(h.tid))) + '</small></span><span class="lp-senaste__pil">' + i('pil') + '</span></a></li>';
+      }).join('') + '</ul>';
+  }
+  function narvaroVy(team) {
+    var idag = dag0(new Date()), idagT = idag.getTime(), mandag = new Date(idag); mandag.setDate(idag.getDate() - (idag.getDay() + 6) % 7 + (chefUi.narvVecka - 2) * 7);
+    var veckor = []; for (var v = 0; v < 4; v++) { var m = new Date(mandag); m.setDate(mandag.getDate() + v * 7); var dd = []; for (var d = 0; d < 7; d++) { var x = new Date(m); x.setDate(m.getDate() + d); dd.push(x); } veckor.push(dd); }
+    var dagar = veckor.reduce(function (l, w) { return l.concat(w); }, []);
+    var IKON_AKT = function (n) { return n; };
+    var celler = function (x) {
+      var jobbat = 0, schema = 0, borta = 0;
+      var html = veckor.map(function (w) { return '<span class="lp-nv__vecka">' + w.map(function (d) {
+        var t = d.getTime(), helg = d.getDay() % 6 === 0, fr = franvaroPa(x.u.id, t), antal = x.akt.filter(function (h) { return dag0(h.tid).getTime() === t; }).length;
+        var iTjanst = t === idagT && BORTA.indexOf(narvaro(x.u.id).id) < 0, klass, inne = '', titel;
+        if (fr && !helg) { klass = 'f f-' + fr.typ; inne = IH.emo(FRANVARO[fr.typ][1]); titel = FRANVARO[fr.typ][0]; if (t <= idagT) borta++; }
+        else if (t > idagT) { klass = helg ? 'helg' : 'plan'; titel = helg ? 'Helg' : 'Planerad arbetsdag'; }
+        else if (antal || iTjanst) { klass = 'jobb' + (helg ? ' helg' : ''); inne = '<i></i>'; titel = antal ? plural(antal, 'händelse', 'händelser') + ' i CRM:et' : 'I tjänst'; if (!helg) jobbat++; }
+        else { klass = helg ? 'helg' : 'ingen'; titel = helg ? 'Helg' : 'Ingen aktivitet'; }
+        if (!helg && t <= idagT && !(fr)) schema++;
+        return '<button type="button" class="lp-nv__d ' + klass + (t === idagT ? ' idag' : '') + '" data-g="lp-franvaro" data-uid="' + x.u.id + '" data-dag="' + dagISO(d) + '"' + (fr ? ' data-fid="' + fr.id + '"' : '') + ' title="' + e(x.u.namn + ' · ' + d.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' }) + ' · ' + titel) + '">' + inne + '</button>';
+      }).join('') + '</span>'; }).join('');
+      return { html: html, jobbat: jobbat, schema: schema, borta: borta };
+    };
+    var huvud = '<span></span>' + veckor.map(function (w) {
+      var nu = w.some(function (d) { return d.getTime() === idagT; });
+      return '<span class="lp-nv__vecka lp-nv__rubrik' + (nu ? ' nu' : '') + '"><span class="lp-nv__v"><b>V ' + veckonr(w[0]) + '</b><small>' + kortDatum(w[0]) + '–' + kortDatum(w[6]) + '</small></span>' +
+        w.map(function (d) { return '<span class="lp-nv__dag' + (d.getDay() % 6 === 0 ? ' helg' : '') + (d.getTime() === idagT ? ' idag' : '') + '"><small>' + 'SMTOTFL'.charAt(d.getDay()) + '</small><b>' + d.getDate() + '</b></span>'; }).join('') + '</span>';
+    }).join('') + '<span class="lp-nv__summa">Jobbat</span>';
+    var rader = team.map(function (x) {
+      var c = celler(x), n = narvaro(x.u.id), kvot = c.schema ? c.jobbat / c.schema : 0;
+      var kommande = franvaroLista().filter(function (f) { return f.u === x.u.id && dag0(f.till).getTime() >= idagT; }).length;
+      return '<a class="lp-nv__vem" href="#/profil/' + x.u.id + '">' + avatar(x.u) + '<span><b>' + e(x.u.namn.split(' ')[0]) + '</b><small>Mån–fre · ' + e(n.namn.toLowerCase()) + '</small></span></a>' + c.html +
+        '<span class="lp-nv__jobbat"><b>' + c.jobbat + '<small>/' + c.schema + '</small></b><i style="--a:' + kvot.toFixed(3) + '"></i>' + (c.borta ? '<small>' + plural(c.borta, 'dag', 'dagar') + ' frånvaro</small>' : kommande ? '<small>frånvaro planerad</small>' : '') + '</span>';
+    }).join('');
+    // överst: läget i dag och kommande frånvaro
+    var bortaIdag = team.filter(function (x) { return franvaroPa(x.u.id, idagT) || BORTA.indexOf(narvaro(x.u.id).id) >= 0; });
+    var kommer = franvaroLista().filter(function (f) { return dag0(f.till).getTime() >= idagT && team.some(function (x) { return x.u.id === f.u; }); }).sort(function (a, b) { return new Date(a.fran) - new Date(b.fran); }).slice(0, 4);
+    var chips = (bortaIdag.length ? '<span class="lp-nv__chip varm">' + IH.emo('varning') + e(bortaIdag.map(function (x) { return x.u.namn.split(' ')[0]; }).join(', ')) + ' borta i dag</span>' : '<span class="lp-nv__chip ok">' + i('bock') + 'Alla i tjänst i dag</span>') +
+      kommer.map(function (f) { var u = IH.anvandare(f.u) || { namn: '' }; return '<button type="button" class="lp-nv__chip f-' + f.typ + '" data-g="lp-franvaro" data-fid="' + f.id + '" data-uid="' + f.u + '" data-dag="' + dagISO(new Date(f.fran)) + '">' + IH.emo(FRANVARO[f.typ][1]) + e(u.namn.split(' ')[0] + ' · ' + FRANVARO[f.typ][0].toLowerCase() + ' ' + kortDatum(new Date(f.fran)) + (f.till !== f.fran ? '–' + kortDatum(new Date(f.till)) : '')) + '</button>'; }).join('');
+    return '<div class="lp-nv__topp"><div class="lp-nv__chips">' + chips + '</div><div class="lp-nv__nav"><button type="button" class="ch-ruta" data-g="lp-narv-v" data-d="-1" aria-label="Veckan innan">' + i('pilv') + '</button><button type="button" class="ap-filter" data-g="lp-narv-v" data-d="0" aria-pressed="' + (chefUi.narvVecka === 0) + '">I dag</button><button type="button" class="ch-ruta" data-g="lp-narv-v" data-d="1" aria-label="Veckan efter">' + i('pil') + '</button>' +
+        '<button type="button" class="knapp knapp--liten" data-g="lp-franvaro">' + i('plus') + 'Frånvaro</button></div></div>' +
+      '<div class="lp-nv" style="--dagar:' + dagar.length + '">' + huvud + rader + '</div>' +
+      '<p class="lp-teckenforklaring lp-nv__forkl"><span class="jobb"><i></i>Jobbade</span><span class="plan"><i></i>Planerad</span><span class="ingen"><i></i>Ingen aktivitet</span>' + Object.keys(FRANVARO).map(function (k) { return '<span class="f-' + k + '"><i></i>' + FRANVARO[k][0] + '</span>'; }).join('') + '<span class="lp-kal__tips">Klicka på en dag för att lägga in frånvaro.</span></p>';
+  }
+  IH.G['lp-narv-v'] = function (el) { var d = +el.getAttribute('data-d'); chefUi.narvVecka = d ? chefUi.narvVecka + d : 0; IH.rita(); };
+  IH.G['lp-franvaro'] = function (el) {
+    var fid = el.getAttribute('data-fid'), f = fid && franvaroLista().find(function (x) { return x.id === fid; });
+    var uid = el.getAttribute('data-uid') || (f && f.u) || IH.jag().id, dag = el.getAttribute('data-dag') || dagISO(new Date());
+    var team = IH.ANVANDARE.filter(function (u) { return u.roll === 'salj' && !u.inaktiv; });
+    IH.oppnaArk({ titel: f ? 'Ändra frånvaro' : 'Lägg in frånvaro', ikon: 'kalender', under: f ? 'Ändra datum eller ta bort frånvaron.' : 'Syns i Vem jobbar när och räknas bort från arbetsdagarna.',
+      kropp: '<form id="lp-fv-form" data-lp-franvaro="' + (f ? f.id : '') + '" class="km-form lp-kalform">' +
+        '<div class="lp-kalform__typ lp-fv__typ" role="radiogroup" aria-label="Typ">' + Object.keys(FRANVARO).map(function (k, n) { return '<label><input type="radio" name="typ" value="' + k + '"' + ((f ? f.typ === k : n === 0) ? ' checked' : '') + '><span class="f-' + k + '">' + IH.emo(FRANVARO[k][1]) + FRANVARO[k][0] + '</span></label>'; }).join('') + '</div>' +
+        '<label class="falt"><span>Vem</span><select name="vem">' + team.map(function (u) { return '<option value="' + u.id + '"' + (u.id === uid ? ' selected' : '') + '>' + e(u.namn) + '</option>'; }).join('') + '</select></label>' +
+        '<div class="lp-kalform__rad"><label class="falt"><span>Från</span><input name="fran" type="date" required value="' + (f ? dagISO(new Date(f.fran)) : dag) + '"></label><label class="falt"><span>Till och med</span><input name="till" type="date" required value="' + (f ? dagISO(new Date(f.till)) : dag) + '"></label></div></form>',
+      fot: (f ? '<button class="knapp" type="button" data-g="lp-franvaro-bort" data-fid="' + f.id + '">' + i('stang') + 'Ta bort</button>' : '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button>') + '<button class="knapp knapp--virke" type="submit" form="lp-fv-form">' + i('bock') + 'Spara</button>' });
+  };
+  IH.G['lp-franvaro-bort'] = function (el) {
+    var l = franvaroLista(), n = l.findIndex(function (x) { return x.id === el.getAttribute('data-fid'); }); if (n < 0) return;
+    l.splice(n, 1); IH.spara(); IH.stangArk(); IH.rita(); IH.toast('Frånvaron är borttagen', '', 'kalender');
+  };
+  document.addEventListener('submit', function (ev) {
+    var t = ev.target; if (!t.matches || !t.matches('[data-lp-franvaro]')) return;
+    ev.preventDefault();
+    var fran = new Date(t.fran.value + 'T00:00:00'), till = new Date(t.till.value + 'T00:00:00'); if (till < fran) { var x = fran; fran = till; till = x; }
+    var id = t.getAttribute('data-lp-franvaro'), l = franvaroLista(), f = id && l.find(function (y) { return y.id === id; });
+    if (!f) { f = { id: 'fv' + Date.now().toString(36) }; l.push(f); }
+    f.u = t.vem.value; f.typ = t.typ.value; f.fran = fran.toISOString(); f.till = till.toISOString();
+    IH.spara(); IH.stangArk(); IH.rita();
+    var u = IH.anvandare(f.u); IH.toast('Frånvaro sparad', (u ? u.namn.split(' ')[0] : '') + ' · ' + FRANVARO[f.typ][0].toLowerCase() + ' ' + kortDatum(fran) + (till > fran ? '–' + kortDatum(till) : ''), 'kalender');
+  });
   function kalHandelser(team) {
     var vem = function (id) { return chefUi.kalVem === 'alla' ? team.some(function (x) { return x.u.id === id; }) : id === chefUi.kalVem; };
     var typ = function (t) { return chefUi.kalTyp === 'alla' || chefUi.kalTyp === t; };
@@ -516,19 +598,9 @@
     }).join('') || '<p class="lp-tom">Ingen i teamet har den statusen just nu.</p>';
     var filter = [['alla', 'Alla'], ['tillganglig', 'Tillgängliga'], ['upptagen', 'Upptagna'], ['borta', 'Borta']].map(function (f) { return '<button type="button" class="ap-filter" data-g="lp-chef-filter" data-f="' + f[0] + '" aria-pressed="' + (chefUi.filter === f[0]) + '">' + f[1] + '</button>'; }).join('');
 
-    // 02 Vem jobbar när: status nu och loggat arbete måndag–söndag den här veckan
-    var mandag = dag0(new Date()); mandag.setDate(mandag.getDate() - ((mandag.getDay() + 6) % 7));
-    var vecka = []; for (var d = 0; d < 7; d++) { var x0 = new Date(mandag); x0.setDate(mandag.getDate() + d); vecka.push(x0); }
-    var idag0 = dag0(new Date()).getTime();
-    var narv = '<div class="lp-narv"><span></span>' + vecka.map(function (v) { return '<small class="' + (v.getTime() === idag0 ? 'idag' : '') + (v.getDay() % 6 === 0 ? ' helg' : '') + '">' + VECKODAG[v.getDay()] + ' ' + v.getDate() + '</small>'; }).join('') + '<small>Nu</small>' +
-      team.map(function (x) {
-        var n = narvaro(x.u.id);
-        return '<a class="lp-narv__vem" href="#/profil/' + x.u.id + '">' + avatar(x.u) + e(x.u.namn.split(' ')[0]) + '</a>' + vecka.map(function (v) {
-          var nasta = new Date(v); nasta.setDate(v.getDate() + 1);
-          var antal = x.akt.filter(function (h) { var t = new Date(h.tid); return t >= v && t < nasta; }).length, framtid = v.getTime() > idag0;
-          return '<i class="' + (antal ? 'pa' : '') + (framtid ? ' framtid' : '') + (v.getTime() === idag0 ? ' idag' : '') + '" title="' + e(x.u.namn) + ', ' + IH.datum(v.toISOString()) + ': ' + (framtid ? 'kommande' : plural(antal, 'händelse', 'händelser')) + '">' + (antal || '') + '</i>';
-        }).join('') + '<span class="lp-status" style="--n:' + n.farg + '"><i></i>' + e(n.namn) + '</span>';
-      }).join('') + '</div>';
+    // 02 Vem jobbar när: två veckor bakåt, den här och nästa. Arbetsdag = mån–fre; jobbat = något loggat i CRM:et
+    // den dagen (i dag räknas den som är i tjänst); frånvaro läggs in här och visas med sin ikon.
+    var narv = narvaroVy(team);
 
     // 04 Att agera på – med Fördela och Påminn direkt i raden
     var lista = [];
@@ -588,11 +660,11 @@
 
     var html = hjalte +
       chefBand('01 · Teamet', 'Teamet', 'just nu', '<div class="lp-team">' + kort + '</div>', { ingress: 'Status, pipeline, kvartalsmålet och veckans aktivitet per säljare – klicka för profilen.', hoger: '<div class="ap-filterrad" role="group" aria-label="Visa">' + filter + '</div>' }) +
-      chefBand('02 · Närvaro', 'Vem jobbar', 'när', narv, { ingress: 'Statusen just nu och det som loggats i CRM:et varje dag den här veckan.' }) +
+      chefBand('02 · Närvaro', 'Vem jobbar', 'när', narv, { ingress: 'Arbetsdagar enligt schemat, dagar med aktivitet i CRM:et och frånvaro – klicka på en dag för att lägga in frånvaro.' }) +
       chefBand('03 · Kalender', 'Teamets', 'kalender', kalender(team), { ingress: 'Möten, samtal och mejl, uppgifter som förfaller och vunna affärer – för hela teamet eller en person.' }) +
       '<div class="ao-tva">' + chefBand('04 · Att agera på', 'Behöver din', 'uppmärksamhet', uppm, { hoger: lista.length ? '<span class="ao-band__tal">' + lista.length + '</span>' : '', ingress: lista.length ? 'Det viktigaste överst. Ta själv, fördela eller påminn direkt.' : '' }) +
         chefBand('05 · Pipeline', 'Pipeline', 'per säljare', pipe, { ingress: 'Öppet värde per steg – håll musen över en färg för beloppet.' }) + '</div>' +
-      '<div class="ao-tva">' + chefBand('06 · Aktivitet', 'Aktivitet', '14 dagar', karta, { ingress: 'Loggade möten, samtal och mejl per dag. Pilen jämför med de 14 dagarna innan.' }) +
+      '<div class="ao-tva">' + chefBand('06 · Aktivitet', 'Aktivitet', '14 dagar', karta + senasteHandelser(team), { ingress: 'Loggade möten, samtal och mejl per dag. Pilen jämför med de 14 dagarna innan.' }) +
         chefBand('07 · Resultat', 'Topplistan', period === 'ar' ? 'i år' : period + ' dagar', topplista, { hoger: toppVal }) + '</div>';
     return { titel: 'Försäljning', html: html };
   };

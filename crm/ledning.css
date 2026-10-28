@@ -486,3 +486,83 @@ html[data-vy-chef] .sido .sido__lank[data-vy="chef"] > .i { color: var(--virke-d
 .lp-topp__plats .emo-ik { width: 16px; height: 16px; }
 .lp-topp__summa { margin: 12px 4px 0; font-size: .8rem; color: var(--text-2); }
 .lp-topp__summa b { color: var(--kol); }
+
+/* 02 Vem jobbar när: fyra veckor, en ruta per dag – jobbat, planerat, ingen aktivitet och frånvaro med ikon */
+.lp-nv__topp { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+.lp-nv__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.lp-nv__chip { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 0 14px; border: 0; border-radius: 999px; background: #f3ede3; font: 600 .76rem/1 var(--rubrik); color: var(--text-2); cursor: default; }
+button.lp-nv__chip { cursor: pointer; }
+.lp-nv__chip .i, .lp-nv__chip .emo-ik { width: 15px; height: 15px; }
+.lp-nv__chip.ok { background: #e1f3e7; color: #1d6b40; box-shadow: inset 0 0 0 1px rgba(34, 163, 90, .3); }
+.lp-nv__chip.varm { background: #fdecdf; color: #8f5424; }
+.lp-nv__nav { display: flex; align-items: center; gap: 6px; }
+.lp-nv { display: grid; grid-template-columns: 170px repeat(4, minmax(0, 1fr)) 104px; align-items: center; gap: 8px 10px; }
+.lp-nv__vecka { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.lp-nv__rubrik { align-self: end; padding-top: 2px; }
+.lp-nv__v { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(27, 25, 21, .08); }
+.lp-nv__v b { font: 700 .74rem/1 var(--rubrik); color: var(--text-2); }
+.lp-nv__v small { font-size: .62rem; color: var(--text-3); white-space: nowrap; }
+.lp-nv__rubrik.nu .lp-nv__v { border-bottom: 2px solid var(--virke); }
+.lp-nv__rubrik.nu .lp-nv__v b { color: var(--virke-djup); }
+.lp-nv__dag { display: grid; justify-items: center; gap: 2px; }
+.lp-nv__dag small { font: 600 .58rem/1 var(--rubrik); color: var(--text-3); }
+.lp-nv__dag b { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font: 700 .76rem/1 var(--rubrik); color: var(--kol); }
+.lp-nv__dag.helg b, .lp-nv__dag.helg small { color: var(--text-3); opacity: .7; }
+.lp-nv__dag.idag b { background: linear-gradient(160deg, #f6c68d, #e29a4a); color: #1b1915; box-shadow: 0 0 0 3px rgba(226, 154, 74, .2), 0 0 14px rgba(255, 170, 80, .45); }
+.lp-nv__summa { align-self: end; padding-bottom: 8px; font: 600 .62rem/1 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; text-align: right; color: var(--text-3); }
+.lp-nv__vem { display: flex; align-items: center; gap: 10px; min-width: 0; color: inherit; text-decoration: none; }
+.lp-nv__vem .avatar { width: 34px; height: 34px; border-radius: 50%; font-size: .62rem; flex: none; }
+.lp-nv__vem span { display: grid; gap: 2px; min-width: 0; }
+.lp-nv__vem b { font: 600 .88rem/1.2 var(--rubrik); }
+.lp-nv__vem small { font-size: .68rem; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lp-nv__d { position: relative; display: grid; place-items: center; height: 40px; padding: 0; border: 0; border-radius: 10px; background: transparent; cursor: pointer; transition: transform .2s var(--studs), box-shadow .2s, filter .2s; }
+.lp-nv__d:hover { transform: translateY(-2px) scale(1.06); z-index: 1; }
+.lp-nv__d.jobb { background: linear-gradient(170deg, #f9d4a3, #eaa457); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 6px 12px -8px rgba(176, 106, 38, .7); }
+.lp-nv__d.jobb i { width: 5px; height: 5px; border-radius: 50%; background: rgba(27, 25, 21, .55); }
+.lp-nv__d.jobb.helg { background: linear-gradient(170deg, #d9b083, #b98450); }
+.lp-nv__d.plan { box-shadow: inset 0 0 0 1.5px rgba(201, 138, 69, .4); }
+.lp-nv__d.ingen { background: repeating-linear-gradient(135deg, #efe8dc 0 5px, #e3d9c9 5px 8px); }
+.lp-nv__d.helg:not(.jobb) { background: rgba(27, 25, 21, .025); }
+.lp-nv__d.idag::after { content: ""; position: absolute; bottom: -8px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--virke-djup); }
+.lp-nv__d.idag { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--virke); }
+.lp-nv__d .emo-ik { width: 17px; height: 17px; }
+.f-semester { --fv: #8fbbe8; } .f-sjuk { --fv: #ec9aa8; } .f-ledig { --fv: #c9c4bb; } .f-utbildning { --fv: #b8a6ea; }
+.lp-nv__d.f { background: var(--fv); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45); color: #1b1915; }
+.lp-nv__chip[class*="f-"] { background: color-mix(in srgb, var(--fv) 30%, #fff); color: var(--kol); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fv) 70%, transparent); }
+.lp-nv__jobbat { display: grid; justify-items: end; gap: 5px; }
+.lp-nv__jobbat b { font: 700 1.15rem/1 var(--rubrik); color: var(--kol); }
+.lp-nv__jobbat b small { font-size: .72rem; font-weight: 600; color: var(--text-3); }
+.lp-nv__jobbat i { display: block; width: 100%; height: 5px; border-radius: 5px; background: linear-gradient(90deg, #eaa457 calc(var(--a) * 100%), rgba(27, 25, 21, .08) 0); }
+.lp-nv__jobbat > small { font-size: .62rem; color: var(--text-3); white-space: nowrap; }
+.lp-nv__forkl { margin-top: 18px; }
+.lp-nv__forkl i { width: 14px !important; height: 14px !important; border-radius: 4px !important; }
+.lp-nv__forkl .jobb i { background: linear-gradient(170deg, #f9d4a3, #eaa457); }
+.lp-nv__forkl .plan i { background: none; box-shadow: inset 0 0 0 1.5px rgba(201, 138, 69, .5); }
+.lp-nv__forkl .ingen i { background: repeating-linear-gradient(135deg, #efe8dc 0 3px, #d9cdb9 3px 5px); }
+.lp-nv__forkl [class*="f-"] i { background: var(--fv); }
+.lp-fv__typ span { flex-direction: column; gap: 4px; min-height: 58px; }
+.lp-fv__typ span .emo-ik { width: 18px; height: 18px; }
+.lp-fv__typ input:checked + span[class*="f-"] { background: color-mix(in srgb, var(--fv) 55%, #fff); color: var(--kol); box-shadow: inset 0 0 0 1.5px var(--fv), 0 8px 16px -10px rgba(27, 25, 21, .4); }
+@media (max-width: 1200px) { .lp-nv { grid-template-columns: 130px repeat(4, minmax(0, 1fr)) 70px; } .lp-nv__v small { display: none; } }
+
+/* 06 Aktivitet: prickar som mörknar med antal, skala och de senaste händelserna */
+.lp-karta i { border-radius: 999px; }
+.lp-karta__skala { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin: 12px 0 18px; font-size: .7rem; color: var(--text-3); }
+.lp-karta__skala i { width: 16px; height: 16px; border-radius: 5px; background: color-mix(in srgb, #e29a4a calc(var(--a) * 100%), #f3ede3); }
+.lp-karta__skala i:first-of-type { margin-left: 4px; }
+.lp-karta__skala i:last-of-type { margin-right: 4px; }
+.lp-senaste__rubrik { margin: 0 0 10px; font: 600 .66rem/1 var(--rubrik); letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); }
+.lp-senaste { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.lp-senaste a { display: grid; grid-template-columns: 40px minmax(0, 1fr) 34px; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; background: #fff; color: inherit; text-decoration: none; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .05); transition: transform .25s var(--mjuk), box-shadow .25s; }
+.lp-senaste a:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .45), 0 12px 22px -16px rgba(90, 60, 25, .6); }
+.lp-senaste__ikon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #fbefdd; color: var(--virke-djup); }
+.lp-senaste__ikon[data-typ="samtal"] { background: #e3eef7; color: #3f6aa8; }
+.lp-senaste__ikon[data-typ="mote"] { background: #ece6f8; color: #6a55b8; }
+.lp-senaste__ikon[data-typ="mejl"] { background: #e1f3e7; color: #1d6b40; }
+.lp-senaste__ikon .i { width: 18px; height: 18px; }
+.lp-senaste__text { display: grid; gap: 4px; min-width: 0; }
+.lp-senaste__text b { font: 600 .86rem/1.35 var(--rubrik); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.lp-senaste__text small { font-size: .72rem; color: var(--text-3); }
+.lp-senaste__pil { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #f3ede3; transition: background-color .2s, transform .25s var(--mjuk); }
+.lp-senaste__pil .i { width: 15px; height: 15px; }
+.lp-senaste a:hover .lp-senaste__pil { background: #1b1915; color: #fbf4e8; transform: translateX(2px); }
