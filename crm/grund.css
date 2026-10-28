@@ -1,0 +1,20 @@
+/* Legohus CRM – detaljer flyttade från Uperformance CRM (2026-10-28), i Legohus färger.
+   Antalsfälten (grund.js): egna runda − och + i rutans högerkant i stället för webbläsarens små pilar. */
+.antal-falt { position: relative; display: block; }
+.antal-falt > input { padding-right: 88px !important; -moz-appearance: textfield; appearance: textfield; font-variant-numeric: tabular-nums; }
+.antal-falt > input::-webkit-inner-spin-button, .antal-falt > input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.antal-knapp { position: absolute; top: 50%; display: grid; place-items: center; width: 32px; height: 32px; margin-top: -16px; padding: 0; border: 0; border-radius: 50%;
+  background: #fff; color: var(--kol); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1), 0 4px 10px -6px rgba(27, 25, 21, .35); cursor: pointer;
+  transition: background-color .2s, color .2s, box-shadow .2s, transform .2s var(--mjuk); }
+.antal-knapp[data-antal-steg="-1"] { right: 46px; }
+.antal-knapp[data-antal-steg="1"] { right: 8px; }
+.antal-knapp svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.antal-knapp:hover { background: var(--virke-ljus); color: var(--virke-djup); box-shadow: inset 0 0 0 1px rgba(143, 84, 36, .25); }
+.antal-knapp:active { transform: scale(.9); }
+@media (pointer: coarse) {
+  .antal-falt > input { padding-right: 100px !important; }
+  .antal-knapp { width: 40px; height: 40px; margin-top: -20px; }
+  .antal-knapp[data-antal-steg="-1"] { right: 50px; }
+  .antal-knapp[data-antal-steg="1"] { right: 4px; }
+}
+@media (prefers-reduced-motion: reduce) { .antal-knapp { transition: none; } }

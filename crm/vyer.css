@@ -6258,7 +6258,8 @@ fieldset.falt {
   box-shadow: inset 0 0 0 1.5px var(--virke);
 }
 
-.offertlagg select {
+.offertlagg select,
+.offertlagg .valj-knapp {
   width: 100%;
   height: 44px;
   margin-top: 8px;
@@ -6819,7 +6820,8 @@ fieldset.falt {
 }
 
 .nyuppg select,
-.nyuppg input[type="date"] {
+.nyuppg input[type="date"],
+.nyuppg .valj-knapp {
   height: 40px;
   padding: 0 12px;
   border: 0;

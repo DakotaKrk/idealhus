@@ -83,7 +83,8 @@ a {
 button,
 input,
 select,
-textarea {
+textarea,
+.valj-knapp {
   font: inherit;
   color: inherit;
 }
@@ -941,7 +942,8 @@ svg.i {
 
 .falt input,
 .falt select,
-.falt textarea {
+.falt textarea,
+.falt .valj-knapp {
   width: 100%;
   min-height: 44px;
   padding: 10px 14px;
@@ -961,7 +963,9 @@ svg.i {
 
 .falt input:focus,
 .falt select:focus,
-.falt textarea:focus {
+.falt textarea:focus,
+.falt .valj-knapp:focus,
+.falt .valj-knapp[aria-expanded="true"] {
   background: var(--vit);
   box-shadow: inset 0 0 0 1.5px var(--virke), 0 0 0 4px rgba(240, 181, 110, 0.15);
 }
