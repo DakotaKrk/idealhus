@@ -473,3 +473,11 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; 
 @media (max-width: 720px) { .vy .ch .ch-fot { position: fixed; left: 10px; right: 10px; bottom: 78px; z-index: 40; border-radius: 18px; background: #fffdf9; box-shadow: 0 -6px 24px -12px rgba(60, 40, 15, .45); } .vy .ch .ch-trad { padding-bottom: 120px; } }
 /* Supportläget på mobil: skrivrutan hamnar ovanför bandet */
 @media (max-width: 720px) { html[data-support] .vy .ch .ch-fot { bottom: 150px; } html[data-support] .vy .ch .ch-trad { padding-bottom: 200px; } }
+/* Chattsidan på mobil: ingen synlig rullningslist under samtalsraden, ingen sidokant på valt samtal, runda bilder överallt */
+@media (max-width: 860px) {
+  .ch-lista nav { scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 2px; }
+  .ch-lista nav::-webkit-scrollbar { display: none; }
+  .ch-rad.vald::before { display: none; }
+  .ch-rad.vald { box-shadow: inset 0 0 0 1.5px rgba(240, 181, 110, .6), 0 6px 16px -12px rgba(90, 60, 25, .5); }
+}
+.ch-topp .avatar:not(.ch-gruppav) { border-radius: 50%; }
