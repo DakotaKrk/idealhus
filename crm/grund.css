@@ -277,10 +277,16 @@ html[data-konto-oppen] .sido .anv__chevron { transform: rotate(180deg); }
 
 .sido .anv .anv__chevron .i { width: 14px !important; height: 14px !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; color: inherit !important; transform: none !important; }
 
-/* Låga skärmar: kortet och ikonerna delar rad – då ingen pil, och ikonerna är runda knappar */
-@media (max-height: 740px) {
-  .sido .anv > span.anv__chevron { display: none; }
-  .sido .sido__smalt { gap: 2px; }
-  .sido .sido__smalt > a, .sido .sido__smalt > button { width: 34px; height: 34px; padding: 0 !important; display: grid; place-items: center; }
-  .sido .sido__aterstall { margin-left: 0; }
-}
+/* Kontokortet som Uperformance på alla skärmhöjder: kortet på egen rad, länkarna med text under, rund bild */
+.sido .sido__fot { grid-template-columns: minmax(0, 1fr) !important; gap: 6px; }
+.sido .anv { padding: 10px 10px 10px 10px !important; border-radius: 18px !important; }
+.sido .anv .avatar { width: 40px !important; height: 40px !important; border-radius: 50% !important; box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px rgba(201, 138, 69, .35); }
+.sido .anv .avatar .narvaro-prick { width: 12px; height: 12px; right: -1px; bottom: -1px; }
+.sido .anv b { font-size: .92rem !important; }
+.sido .anv small { font-size: .74rem !important; }
+.sido .anv > span.anv__chevron { display: grid !important; }
+.sido .sido__smalt > a, .sido .sido__smalt > button { width: auto !important; height: auto !important; padding: 8px 8px !important; gap: 7px !important; font-size: .82rem !important; display: inline-flex !important; align-items: center; }
+.sido .sido__smalt > .sido__aterstall { margin-left: auto; padding: 8px !important; }
+@media (max-height: 740px) { .sido .anv { padding: 7px 8px !important; } .sido .anv .avatar { width: 34px !important; height: 34px !important; } .sido .sido__smalt > a, .sido .sido__smalt > button { padding: 6px 8px !important; } }
+.sido .sido__smalt > a, .sido .sido__smalt > button { font-weight: 600 !important; color: var(--text-2) !important; }
+.sido .sido__smalt > a:hover, .sido .sido__smalt > button:hover { color: var(--text) !important; }
