@@ -8430,3 +8430,51 @@ form.nyuppg.kort > select.valj-dold { position: absolute !important; width: 1px;
 .dk__ikon--bild img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .dk-foto { margin: 0; border-radius: 16px; overflow: hidden; background: #f3ede3; }
 .dk-foto img { display: block; width: 100%; height: auto; max-height: 70vh; object-fit: contain; }
+
+/* Mallar som Uperformance: förslag just nu, grupper och kort med en riktig miniatyr av papperet */
+section.dk-hjalte[data-flik="mallar"] .dk-stats:not(.ml-stats), section.dk-hjalte[data-flik="mallar"] .dk-blick, section.dk-hjalte[data-flik="mallar"] .dk-verktyg { display: none; }
+section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); align-self: start; }
+.ml-forslag { padding: 20px 22px; margin-bottom: 18px; }
+.ml-forslag__lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.ml-forslag__rad { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: #fffaf2; box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .25); animation: in-rad .5s var(--mjuk) backwards; animation-delay: calc(var(--n) * 50ms); }
+.ml-forslag__rad > span:nth-child(2) { display: grid; min-width: 0; }
+.ml-forslag__rad b { font: 600 .88rem/1.3 var(--rubrik); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ml-forslag__rad small { font-size: .74rem; color: var(--text-3); }
+.ml-lugnt { display: flex; align-items: center; gap: 10px; margin: 12px 0 0; padding: 14px; border-radius: 14px; background: rgba(46, 140, 87, .07); font-size: .88rem; color: var(--text-2); }
+.ml-lugnt .emo-ik { width: 22px; height: 22px; }
+.ml-ikon { display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: 12px; background: var(--virke-ljus); color: var(--virke-djup); }
+.ml-ikon .i { width: 17px; height: 17px; }
+.ml-grupp { margin-bottom: 22px; }
+.ml-grupp__huvud { display: flex; align-items: baseline; gap: 12px; margin: 0 4px 12px; }
+.ml-grupp__huvud h2 { margin: 0; font: 700 1.25rem/1.1 var(--rubrik); letter-spacing: -0.02em; }
+.ml-grupp__huvud p { margin: 0; font-size: .82rem; color: var(--text-3); }
+.ml-rutnat { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
+.ml-kort { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 22px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07), 0 18px 34px -30px rgba(90, 60, 25, .5); transition: transform .35s var(--mjuk), box-shadow .3s; animation: in-rad .55s var(--mjuk) backwards; animation-delay: calc(var(--n) * 60ms); }
+.ml-kort:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .35), 0 24px 40px -28px rgba(90, 60, 25, .6); }
+.ml-mini { position: relative; display: block; height: 170px; padding: 0; border: 0; border-radius: 14px; background: linear-gradient(170deg, #f6efe3, #efe5d4); overflow: hidden; cursor: zoom-in; }
+.ml-mini__inre { position: absolute; left: 50%; top: 14px; width: 620px; transform: translateX(-50%) scale(.34); transform-origin: top center; pointer-events: none; }
+.ml-papper { display: block; padding: 34px 38px; border-radius: 6px; background: #fff; box-shadow: 0 10px 30px -10px rgba(60, 40, 15, .35); font: 15px/1.6 system-ui, sans-serif; color: #1b1915; text-align: left; }
+.ml-papper header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #c98a45; padding-bottom: 12px; margin-bottom: 22px; }
+.ml-papper h1 { font-size: 24px; margin: 2px 0 0; }
+.ml-papper small { color: #6b6257; }
+.ml-papper table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+.ml-papper th, .ml-papper td { text-align: left; padding: 8px; border-bottom: 1px solid #e6dccd; }
+.ml-papper .f { display: grid; grid-template-columns: 220px 1fr; gap: 12px; margin: 0 0 14px; }
+.ml-papper .f span { color: #6b6257; }
+.ml-papper .f i { border-bottom: 1px solid #b9ad9c; height: 20px; }
+.ml-papper .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 40px; }
+.ml-papper .sign i { display: block; border-bottom: 1px solid #1b1915; height: 30px; margin-bottom: 6px; }
+.ml-mini::after { content: ""; position: absolute; inset: auto 0 0 0; height: 60px; background: linear-gradient(transparent, rgba(239, 229, 212, .95)); }
+.ml-mini__etikett { position: absolute; z-index: 1; left: 50%; bottom: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: #1b1915; color: #f6c68d; font: 600 .72rem/1 var(--rubrik); transform: translate(-50%, 8px); opacity: 0; transition: opacity .25s, transform .3s var(--mjuk); }
+.ml-mini__etikett .i { width: 12px; height: 12px; }
+.ml-mini:hover .ml-mini__etikett, .ml-mini:focus-visible .ml-mini__etikett { opacity: 1; transform: translate(-50%, 0); }
+.ml-topp { display: flex; align-items: center; gap: 10px; }
+.ml-topp h3 { margin: 0; font: 600 .98rem/1.25 var(--rubrik); }
+.ml-topp p { margin: 2px 0 0; font-size: .74rem; color: var(--virke-djup); font-weight: 600; }
+.ml-text { margin: 0; font-size: .84rem; line-height: 1.45; color: var(--text-2); }
+.ml-format { display: flex; flex-wrap: wrap; gap: 5px; }
+.ml-format span { padding: 3px 8px; border-radius: 999px; background: var(--ben); font: 600 .66rem/1.2 var(--rubrik); color: var(--text-2); }
+.ml-knappar { display: flex; gap: 8px; margin-top: auto; }
+.ml-anvand { font-size: .72rem; color: var(--text-3); }
+.ml-exempel { padding: 16px; border-radius: 16px; background: linear-gradient(170deg, #f6efe3, #efe5d4); max-height: 66vh; overflow: auto; }
+@media (max-width: 900px) { .ml-forslag__lista { grid-template-columns: 1fr; } section.dk-hjalte .ml-stats { grid-template-columns: 1fr; } }

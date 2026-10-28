@@ -2570,12 +2570,16 @@
     } else if (dokUi.grupp === 'ingen' || dokUi.fack !== 'alla') grupper = lista.length ? [{ f: dokUi.fack !== 'alla' ? DOK_FACK.find(function (x) { return x.id === dokUi.fack; }) : { id: 'alla', namn: 'Alla dokument', ikon: 'mapp', ton: '#e8c98f' }, l: lista }] : [];
     else grupper = DOK_FACK.map(function (f) { return { f: f, l: lista.filter(function (p) { return p.fack === f.id; }) }; }).filter(function (g) { return g.l.length; });
     var html = '<h1 class="dold">Dokument</h1>' +
-      '<section class="dk-hjalte kort kort--mork" data-in data-uppladdning><i class="dk-hjalte__glod" aria-hidden="true"></i>' +
+      '<section class="dk-hjalte kort kort--mork" data-in data-uppladdning data-flik="' + dokUi.flik + '"><i class="dk-hjalte__glod" aria-hidden="true"></i>' +
         '<div class="dk-hjalte__text"><p class="etikett"><i class="sh-live"></i>Dokumentarkivet</p><h1>Dokument <em>&amp; avtal</em></h1>' +
           '<p class="dk-hjalte__ingress">Offerter, ordrar, underlag och filer – samlade, sorterade och sökbara på ett ställe. Välj en typ, ett läge eller sök – detaljerna öppnas med ett klick.</p>' +
           '<div class="dk-flikar" role="tablist">' + [['arkiv', 'Arkiv', 'mapp', iLage.length], ['mallar', 'Mallar', 'rutnat', DOK_MALLAR.length]].map(function (f) { return '<button type="button" role="tab" data-g="dok-flik" data-f="' + f[0] + '" aria-selected="' + (dokUi.flik === f[0]) + '">' + i(f[2]) + f[1] + '<b>' + f[3] + '</b></button>'; }).join('') + '</div>' +
           '<div class="dk-hjalte__knappar"><label class="knapp knapp--virke dk-ladda">' + i('plus') + 'Ladda upp<input type="file" multiple data-dok-fil hidden></label>' +
             '<button class="knapp" type="button" data-g="dok-csv">' + i('skrivut') + 'Exportera listan</button></div></div>' +
+        (dokUi.flik === 'mallar' ? (function () { var fl = mallForslag().length, anv = db().aktiviteter.filter(function (h) { return / skapad från mall\.$/.test(h.text); });
+          var t = function (ik, et, tal, und, ton) { return '<div class="dk-stat" data-ton="' + ton + '"><small><span class="dk-stat__ik">' + i(ik) + '</span>' + et + '</small><b>' + tal + '</b><em>' + und + '</em></div>'; };
+          return '<div class="dk-stats ml-stats">' + t('rutnat', 'Mallar', DOK_MALLAR.length, MALL_GRUPPER.length + ' grupper', 'gra') + t('blixt', 'Förslag just nu', fl, fl ? 'dokument som behövs' : 'inget saknas', fl ? 'gul' : 'gron') +
+            t('dokument', 'Skapade från mall', anv.length, anv.length ? 'senast ' + IH.sedan(anv.sort(function (x, y) { return new Date(y.tid) - new Date(x.tid); })[0].tid) : 'inga än', 'bla') + '</div>'; })() : '') +
         '<div class="dk-stats">' +
           stat('klocka', 'Väntar på svar', vantar.length, IH.kort(sum(vantar)) + ' i offerter', 'bla', 'vantar') +
           stat('trofe', 'Godkänt & signerat', godk.length, IH.kort(sum(godk)) + ' blev order', 'gron', 'klara') +
@@ -2621,16 +2625,87 @@
   // Mallarna: dokument som fylls i med kundens och husets uppgifter och skrivs ut eller sparas som PDF.
   // Bara struktur och fält ur CRM:et – inga påhittade villkor eller priser.
   var DOK_MALLAR = [
-    { id: 'foljebrev', namn: 'Följebrev till offert', ikon: 'post', text: 'Ett personligt brev som skickas med offerten.' },
-    { id: 'checklista', namn: 'Checklista inför montage', ikon: 'bock', text: 'Det kunden och vi ska ha klart innan lastbilen kommer.' },
-    { id: 'platsbesok', namn: 'Protokoll från platsbesök', ikon: 'plats', text: 'Tomten, marken, tillfart och det ni kom fram till.' },
-    { id: 'overlamning', namn: 'Överlämningsprotokoll', ikon: 'hus', text: 'Underskrifter när huset lämnas över till kunden.' }
+    { id: 'foljebrev', grupp: 'salj', namn: 'Följebrev till offert', ikon: 'post', nar: 'När offerten skickas', text: 'Ett personligt brev som skickas med offerten.' },
+    { id: 'platsbesok', grupp: 'salj', namn: 'Protokoll från platsbesök', ikon: 'plats', nar: 'Vid besöket på tomten', text: 'Tomten, marken, tillfart och det ni kom fram till.' },
+    { id: 'tack', grupp: 'salj', namn: 'Tack för ordern', ikon: 'trofe', nar: 'När affären är vunnen', text: 'Ett tack till kunden med vad som händer härnäst.' },
+    { id: 'checklista', grupp: 'bygge', namn: 'Checklista inför montage', ikon: 'bock', nar: 'Några veckor före montage', text: 'Det kunden och vi ska ha klart innan lastbilen kommer.' },
+    { id: 'leverans', grupp: 'bygge', namn: 'Leveransplan', ikon: 'kalender', nar: 'Veckan före leverans', text: 'Dag, tid, tillfart, kran och vem som tar emot på plats.' },
+    { id: 'egenkontroll', grupp: 'overlamning', namn: 'Egenkontroll efter montage', ikon: 'linjal', nar: 'Direkt efter montage', text: 'Punkterna montörerna går igenom innan överlämningen.' },
+    { id: 'overlamning', grupp: 'overlamning', namn: 'Överlämningsprotokoll', ikon: 'hus', nar: 'När huset lämnas över', text: 'Underskrifter när huset lämnas över till kunden.' }
   ];
-  function dokMallarHtml() {
-    return '<section class="kort dk-mallar" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('rutnat') + '</span>Mallar <em class="rakna">' + DOK_MALLAR.length + '</em></h2></header>' +
-      '<p class="dk-mallar__ingress">Välj en mall och en kund – uppgifterna fylls i från CRM:et, och du skriver ut eller sparar som PDF.</p><div class="dk-mallar__rutnat">' +
-      DOK_MALLAR.map(function (m, n) { return '<button type="button" class="dk-mall" data-g="dok-mall" data-id="' + m.id + '" style="--n:' + n + '"><span class="dk-mall__papper" aria-hidden="true"><i></i><i></i><i></i><i></i><b>' + i(m.ikon) + '</b></span><span class="dk-mall__text"><b>' + e(m.namn) + '</b><small>' + e(m.text) + '</small></span><span class="dk-mall__anvand">Använd' + i('pil') + '</span></button>'; }).join('') + '</div></section>';
+  var MALL_GRUPPER = [['salj', 'Sälj', 'Från första kontakten till vunnen affär'], ['bygge', 'Bygget', 'Inför leverans och montage'], ['overlamning', 'Överlämning', 'När huset står klart']];
+  // Hur ofta mallen använts (räknas ur loggen: "… skapad från mall.")
+  var mallAnvand = function (m) { return db().aktiviteter.filter(function (h) { return h.text === m.namn + ' skapad från mall.'; }); };
+  // Förslag just nu: dokument som behövs, räknat ur offerterna, uppgifterna och projekten
+  function mallForslag() {
+    var ut = [], idag0 = new Date(); idag0.setHours(0, 0, 0, 0);
+    var gjord = function (mid, kid) { var m = DOK_MALLAR.find(function (x) { return x.id === mid; }); return db().aktiviteter.some(function (h) { return h.kund === kid && h.text === m.namn + ' skapad från mall.'; }); };
+    db().offerter.forEach(function (o) { if (o.status === 'skickad' && !gjord('foljebrev', o.kund)) { var k = IH.kund(o.kund); if (k) ut.push({ mall: 'foljebrev', k: k, rubrik: 'Följebrev till offert ' + o.nummer, text: k.namn + ' · offerten är skickad' }); } });
+    db().uppgifter.forEach(function (x) { if (!x.klar && /platsbesök|besök/i.test(x.text) && x.kund && !gjord('platsbesok', x.kund)) { var k = IH.kund(x.kund); if (k) ut.push({ mall: 'platsbesok', k: k, rubrik: 'Protokoll: ' + x.text, text: k.namn + ' · ' + IH.datum(x.forfaller) }); } });
+    db().projekt.forEach(function (p) {
+      var k = IH.kund(p.kund); if (!k || !p.montage) return; var t = dagarTill(p.montage);
+      if (t >= 0 && t <= 21 && CHECK.some(function (c) { return !p.check[c[0]]; }) && !gjord('checklista', k.id)) ut.push({ mall: 'checklista', k: k, rubrik: 'Checklista inför montage', text: k.namn + ' · montage om ' + t + ' d, underlag saknas' });
+      else if (t >= 0 && t <= 10 && !gjord('leverans', k.id)) ut.push({ mall: 'leverans', k: k, rubrik: 'Leveransplan', text: k.namn + ' · leverans om ' + t + ' d' });
+      if (t < 0 && p.steg !== 'klart' && !gjord('overlamning', k.id)) ut.push({ mall: 'overlamning', k: k, rubrik: 'Överlämningsprotokoll', text: k.namn + ' · montage för ' + (-t) + ' d sedan' });
+    });
+    return ut.slice(0, 6);
   }
+  function dokMallarHtml() {
+    var forslag = mallForslag(), exK = db().kunder[0];
+    var kort = function (m, n) {
+      var anv = mallAnvand(m), senast = anv.slice().sort(function (x, y) { return new Date(y.tid) - new Date(x.tid); })[0];
+      return '<article class="ml-kort" style="--n:' + n + '">' +
+        '<button type="button" class="ml-mini" data-g="mall-exempel" data-id="' + m.id + '" aria-label="Visa exempel: ' + e(m.namn) + '"><span class="ml-mini__inre" aria-hidden="true">' + (exK ? mallPapper(m, exK) : '') + '</span><span class="ml-mini__etikett">' + i('helskarm') + 'Visa exempel</span></button>' +
+        '<div class="ml-topp"><span class="ml-ikon">' + i(m.ikon) + '</span><div><h3>' + e(m.namn) + '</h3><p>' + e(m.nar) + '</p></div></div>' +
+        '<p class="ml-text">' + e(m.text) + '</p><div class="ml-format"><span>Utskrift</span><span>PDF</span><span>Ifyllt från CRM:et</span></div>' +
+        '<div class="ml-knappar"><button type="button" class="knapp knapp--virke knapp--liten" data-g="dok-mall" data-id="' + m.id + '">' + i('plus') + 'Fyll i</button>' +
+          '<button type="button" class="knapp knapp--liten" data-g="mall-tom" data-id="' + m.id + '" title="Skriv ut en tom mall">' + i('skrivut') + 'Tom</button></div>' +
+        '<small class="ml-anvand">' + (anv.length ? 'Använd ' + anv.length + (anv.length === 1 ? ' gång' : ' gånger') + ' · senast ' + IH.sedan(senast.tid) : 'Inte använd än') + '</small></article>';
+    };
+    return '<section class="kort ml-forslag" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + IH.emo('glodlampa') + '</span>Förslag just nu <em class="rakna">' + forslag.length + '</em></h2></header>' +
+        (forslag.length ? '<div class="ml-forslag__lista">' + forslag.map(function (x, n) { var m = DOK_MALLAR.find(function (y) { return y.id === x.mall; });
+          return '<div class="ml-forslag__rad" style="--n:' + n + '"><span class="ml-ikon">' + i(m.ikon) + '</span><span><b>' + e(x.rubrik) + '</b><small>' + e(x.text) + '</small></span><button type="button" class="knapp knapp--virke knapp--liten" data-g="dok-mall" data-id="' + m.id + '" data-kund="' + x.k.id + '">' + i('plus') + 'Fyll i</button></div>'; }).join('') + '</div>'
+          : '<p class="ml-lugnt">' + IH.emo('klar') + '<span><b>Inget saknas just nu.</b> När en affär eller ett bygge behöver ett dokument föreslås det här.</span></p>') + '</section>' +
+      MALL_GRUPPER.map(function (g) { var l = DOK_MALLAR.filter(function (m) { return m.grupp === g[0]; });
+        return '<section class="ml-grupp" data-in><header class="ml-grupp__huvud"><h2>' + e(g[1]) + '</h2><p>' + e(g[2]) + '</p></header><div class="ml-rutnat">' + l.map(kort).join('') + '</div></section>'; }).join('');
+  }
+  // Mallens innehåll för en kund (samma till miniatyren, exemplet och utskriften)
+  function mallKropp(m, k) {
+    var x = kundInfo(k), a = x.oppen[0] || x.vunnen[0] || null, mod = a ? IH.modell(a.modell) : null, p2 = db().projekt.find(function (y) { return y.kund === k.id; });
+    var o = a ? db().offerter.find(function (y) { return y.affar === a.id && y.status !== 'ersatt'; }) : null, jag = IH.jag();
+    var falt = function (t, v) { return '<p class="f"><span>' + t + '</span>' + (v ? '<b>' + v + '</b>' : '<i></i>') + '</p>'; };
+    var hus = e(mod ? mod.kategori + ' ' + mod.namn : '…');
+    return {
+      foljebrev: '<p>Hej ' + e(forsta(k.namn)) + '!</p><p>Tack för att du är intresserad av ' + (mod ? 'vårt ' + e(mod.kategori.toLowerCase()) + ' <b>' + e(mod.namn) + '</b>' : 'våra hus') + '. Här kommer offerten' + (o ? ' <b>' + e(o.nummer) + '</b>' : '') + ' som vi pratade om.</p><p>' + (o ? 'Offerten gäller i ' + (o.giltig || 30) + ' dagar från ' + IH.datum(o.skapad, true) + '. ' : '') + 'Hör av dig om du har frågor – jag hjälper gärna till.</p><p>Vänliga hälsningar<br><b>' + e(jag.namn) + '</b><br>Legohus</p>',
+      platsbesok: falt('Datum') + falt('Kund', e(k.namn)) + falt('Ort', e(k.ort || '')) + falt('Marken och jordarten') + falt('Tillfart för lastbil och kran') + falt('El, vatten och avlopp') + falt('Det vi kom fram till') + falt('Nästa steg'),
+      tack: '<p>Hej ' + e(forsta(k.namn)) + '!</p><p>Stort tack för förtroendet' + (mod ? ' – nu börjar resan mot ditt <b>' + e(mod.namn) + '</b>' : '') + '.</p><p><b>Det här händer härnäst</b></p><ol><li>Vi går igenom ritningarna tillsammans.</li><li>Du ordnar bygglov eller anmälan och grunden – vi hjälper till med underlaget.</li><li>Vi bokar leverans och montage.</li></ol><p>Vänliga hälsningar<br><b>' + e(jag.namn) + '</b><br>Legohus</p>',
+      checklista: '<p>Hus: <b>' + hus + '</b>' + (p2 && p2.montage ? ' · montage ' + IH.datum(p2.montage, true) : '') + '</p><table><tr><th>Punkt</th><th>Vems</th><th>Klart</th></tr>' + CHECK.map(function (c) { return '<tr><td>' + e(c[1]) + '</td><td>' + (c[0] === 'ritning' ? 'Legohus' : 'Kunden') + '</td><td>' + (p2 && p2.check[c[0]] ? '✓' : '☐') + '</td></tr>'; }).join('') + '</table>',
+      leverans: '<p>Hus: <b>' + hus + '</b></p>' + falt('Leveransdag', p2 && p2.montage ? IH.datum(p2.montage, true) : '') + falt('Beräknad tid för lastbilen') + falt('Tillfart och var lastbilen ställer sig') + falt('Kran och lyft') + falt('Vem tar emot på plats') + falt('Telefon på plats', e(k.telefon || '')),
+      egenkontroll: '<p>Hus: <b>' + hus + '</b></p><table><tr><th>Kontrollpunkt</th><th>OK</th><th>Anmärkning</th></tr>' + ['Väggblock i lod och våg', 'Tak och takfot', 'Fönster och dörrar', 'Infästning mot grund', 'Tätning och plåt', 'Städat på tomten'].map(function (t) { return '<tr><td>' + t + '</td><td>☐</td><td></td></tr>'; }).join('') + '</table><div class="sign"><p><i></i>Montör</p><p><i></i>Datum</p></div>',
+      overlamning: '<p>Hus: <b>' + hus + '</b></p>' + falt('Datum för överlämning') + falt('Nycklar (antal)') + falt('Anmärkningar') + '<div class="sign"><p><i></i>Kund: ' + e(k.namn) + '</p><p><i></i>Legohus: ' + e(jag.namn) + '</p></div>'
+    }[m.id];
+  }
+  var MALL_STIL = 'body{font:15px/1.6 system-ui,sans-serif;color:#1b1915;max-width:720px;margin:48px auto;padding:0 24px}header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #c98a45;padding-bottom:12px;margin-bottom:28px}h1{font-size:24px;margin:2px 0 0}small{color:#6b6257}table{width:100%;border-collapse:collapse;margin:12px 0}th,td{text-align:left;padding:8px;border-bottom:1px solid #e6dccd}.f{display:grid;grid-template-columns:240px 1fr;gap:12px;margin:0 0 14px}.f span{color:#6b6257}.f i{border-bottom:1px solid #b9ad9c;height:20px}.sign{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:56px}.sign i{display:block;border-bottom:1px solid #1b1915;height:36px;margin-bottom:6px}';
+  function mallHuvud(m, k) { return '<header><div><small>Legohus</small><h1>' + e(m.namn) + '</h1></div><div style="text-align:right">' + (k ? '<b>' + e(k.namn) + '</b><br><small>' + e([k.ort, k.telefon, k.epost].filter(Boolean).join(' · ')) + '</small><br>' : '') + '<small>' + IH.datum(new Date().toISOString(), true) + '</small></div></header>'; }
+  // Miniatyren och exemplet: samma papper i en skalad ram
+  function mallPapper(m, k) { return '<span class="ml-papper">' + mallHuvud(m, k) + mallKropp(m, k) + '</span>'; }
+  function mallSkrivUt(m, k, html) {
+    var w = window.open('', '_blank'); if (!w) { IH.toast('Fönstret blockerades', 'Tillåt popup-fönster för att skriva ut mallen.', 'varning'); return false; }
+    w.document.write('<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>' + e(m.namn) + (k ? ' · ' + e(k.namn) : '') + '</title><style>' + MALL_STIL + '</style></head><body>' + mallHuvud(m, k) + html + '</body></html>');
+    w.document.close(); setTimeout(function () { try { w.focus(); w.print(); } catch (x) { /* utskrift blockerad */ } }, 300);
+    return true;
+  }
+  G['mall-exempel'] = function (el) {
+    var m = DOK_MALLAR.find(function (x) { return x.id === el.getAttribute('data-id'); }), k = db().kunder[0]; if (!m || !k) return;
+    IH.oppnaArk({ titel: m.namn, ikon: m.ikon, under: 'Exempel ifyllt för ' + e(k.namn) + ' (exempeldata)', kropp: '<div class="ml-exempel">' + mallPapper(m, k) + '</div>',
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Stäng</button><button class="knapp knapp--virke" type="button" data-g="dok-mall" data-id="' + m.id + '">' + i('plus') + 'Fyll i för en kund</button>' });
+  };
+  G['mall-tom'] = function (el) {
+    var m = DOK_MALLAR.find(function (x) { return x.id === el.getAttribute('data-id'); }); if (!m) return;
+    var f = function (t) { return '<p class="f"><span>' + t + '</span><i></i></p>'; };
+    mallSkrivUt(m, null, f('Kund') + f('Datum') + f('Hus') + f('Anteckningar') + f(' ') + f(' ') + '<div class="sign"><p><i></i>Kund</p><p><i></i>Legohus</p></div>');
+  };
+
   G['dok-fack'] = function (el) { var f = el.getAttribute('data-f'); dokUi.fack = dokUi.fack === f && f !== 'alla' ? 'alla' : f; dokUi.flik = 'arkiv'; IH.rita(); };
   G['dok-lage'] = function (el) { dokUi.lage = el.getAttribute('data-l'); dokUi.flik = 'arkiv'; IH.rita(); };
   G['dok-visa'] = function (el) { dokUi.visaAlla = el.getAttribute('data-f'); IH.rita(); };
@@ -2645,25 +2720,14 @@
   G['dok-mall'] = function (el) {
     var m = DOK_MALLAR.find(function (x) { return x.id === el.getAttribute('data-id'); }); if (!m) return;
     IH.oppnaArk({ titel: m.namn, ikon: m.ikon, under: e(m.text),
-      kropp: '<form class="formular" data-form="dok-mall" id="dok-mall-form"><input type="hidden" name="mall" value="' + m.id + '"><label class="falt"><span>Kund</span><select name="kund" required>' + db().kunder.map(function (k) { return '<option value="' + k.id + '">' + e(k.namn) + '</option>'; }).join('') + '</select></label><p class="kund-tom">Öppnas i ett nytt fönster att skriva ut eller spara som PDF.</p></form>',
+      kropp: '<form class="formular" data-form="dok-mall" id="dok-mall-form"><input type="hidden" name="mall" value="' + m.id + '"><label class="falt"><span>Kund</span><select name="kund" required>' + db().kunder.map(function (k) { return '<option value="' + k.id + '"' + (k.id === el.getAttribute('data-kund') ? ' selected' : '') + '>' + e(k.namn) + '</option>'; }).join('') + '</select></label><p class="kund-tom">Öppnas i ett nytt fönster att skriva ut eller spara som PDF.</p></form>',
       fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="dok-mall-form">' + i('skrivut') + 'Skapa</button>' });
   };
   FORM['dok-mall'] = function (f, d) {
     var m = DOK_MALLAR.find(function (x) { return x.id === d.get('mall'); }), k = IH.kund(d.get('kund')); if (!m || !k) return;
-    var x = kundInfo(k), a = x.oppen[0] || x.vunnen[0] || null, mod = a ? IH.modell(a.modell) : null, p2 = db().projekt.find(function (y) { return y.kund === k.id; });
-    var o = a ? db().offerter.find(function (y) { return y.affar === a.id && y.status !== 'ersatt'; }) : null, jag = IH.jag(), idag = IH.datum(new Date().toISOString(), true);
-    var falt = function (t) { return '<p class="f"><span>' + t + '</span><i></i></p>'; };
-    var kropp = {
-      foljebrev: '<p>Hej ' + e(forsta(k.namn)) + '!</p><p>Tack för att du är intresserad av ' + (mod ? 'vårt ' + e(mod.kategori.toLowerCase()) + ' <b>' + e(mod.namn) + '</b>' : 'våra hus') + '. Här kommer offerten' + (o ? ' <b>' + e(o.nummer) + '</b>' : '') + ' som vi pratade om.</p><p>' + (o ? 'Offerten gäller i ' + (o.giltig || 30) + ' dagar från ' + IH.datum(o.skapad, true) + '. ' : '') + 'Hör av dig om något är oklart, så går vi igenom den tillsammans.</p><p>Vänliga hälsningar<br>' + e(jag.namn) + '<br>Legohus Stockholm</p>',
-      checklista: '<p>Hus: <b>' + e(mod ? mod.kategori + ' ' + mod.namn : '…') + '</b>' + (p2 && p2.montage ? ' · montage ' + IH.datum(p2.montage, true) : '') + '</p><table><tr><th>Punkt</th><th>Vems</th><th>Klart</th></tr>' + CHECK.map(function (c) { return '<tr><td>' + e(c[1]) + '</td><td>' + (c[0] === 'ritning' ? 'Legohus' : 'Kunden') + '</td><td>' + (p2 && p2.check[c[0]] ? '✓' : '☐') + '</td></tr>'; }).join('') + '</table>',
-      platsbesok: falt('Datum') + falt('Adress till tomten') + falt('Marken och jordarten') + falt('Tillfart för lastbil och kran') + falt('El, vatten och avlopp') + falt('Det vi kom fram till') + falt('Nästa steg'),
-      overlamning: '<p>Hus: <b>' + e(mod ? mod.kategori + ' ' + mod.namn : '…') + '</b></p>' + falt('Datum för överlämning') + falt('Nycklar (antal)') + falt('Anmärkningar') + '<div class="sign"><p><i></i>Kund: ' + e(k.namn) + '</p><p><i></i>Legohus: ' + e(jag.namn) + '</p></div>'
-    }[m.id];
-    var w = window.open('', '_blank'); if (!w) { IH.toast('Fönstret blockerades', 'Tillåt popup-fönster för att skriva ut mallen.', 'varning'); return; }
-    w.document.write('<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>' + e(m.namn) + ' · ' + e(k.namn) + '</title><style>body{font:15px/1.6 system-ui,sans-serif;color:#1b1915;max-width:720px;margin:48px auto;padding:0 24px}header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #c98a45;padding-bottom:12px;margin-bottom:28px}h1{font-size:24px;margin:0}small{color:#7a7266}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid #e6ddd0}.f{display:grid;gap:4px;margin:0 0 22px}.f span{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#7a7266}.f i{display:block;border-bottom:1px solid #b9ad9b;height:26px}.sign{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:60px}.sign i{display:block;border-bottom:1px solid #1b1915;height:40px;margin-bottom:6px}@media print{body{margin:0}}</style></head><body>' +
-      '<header><div><small>Legohus Stockholm</small><h1>' + e(m.namn) + '</h1></div><div style="text-align:right"><b>' + e(k.namn) + '</b><br><small>' + e([k.ort, k.telefon, k.epost].filter(Boolean).join(' · ')) + '</small><br><small>' + idag + '</small></div></header>' + kropp + '</body></html>');
-    w.document.close(); setTimeout(function () { try { w.focus(); w.print(); } catch (x) { /* utskrift blockerad */ } }, 300);
-    IH.stangArk(true); IH.logga('system', m.namn + ' skapad från mall.', k.id, a ? a.id : null); IH.spara();
+    var x = kundInfo(k), a = x.oppen[0] || x.vunnen[0] || null;
+    if (!mallSkrivUt(m, k, mallKropp(m, k))) return;
+    IH.stangArk(true); IH.logga('system', m.namn + ' skapad från mall.', k.id, a ? a.id : null); IH.spara(); IH.rita();
   };
   // Detaljen för ett dokument: värde och ring överst, tidslinjen, fakta och knapparna
   G['dok-detalj'] = function (el) {
