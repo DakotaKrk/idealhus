@@ -208,3 +208,36 @@ a.ao-tal:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1.5px var(
 .ao-punkter em { grid-column: 2; grid-row: 2; font-size: .74rem; }
 .ao-punkter .ao-lampa { grid-column: 3; grid-row: 1 / 3; }
 .ao-konto__vem strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Kärnan som neon (2026-10-29): mättade färger, ett suddigt glödlager som andas, en komet som löper runt varje ring,
+   tickarna som skimrar och kärnan som pulserar – levande men lugnt */
+.ao-karna { --n-sak: #ff8a2a; --n-kon: #ffc23d; --n-dat: #1fe3a0; --n-dri: #8b7dff; }
+.ao-ring-bage[data-del="sakerhet"], .ao-komet[data-del="sakerhet"] { stroke: var(--n-sak); }
+.ao-ring-bage[data-del="konton"], .ao-komet[data-del="konton"] { stroke: var(--n-kon); }
+.ao-ring-bage[data-del="data"], .ao-komet[data-del="data"] { stroke: var(--n-dat); }
+.ao-ring-bage[data-del="drift"], .ao-komet[data-del="drift"] { stroke: var(--n-dri); }
+.ao-delar [data-del="sakerhet"] i { background: var(--n-sak, #ff8a2a); box-shadow: 0 0 8px #ff8a2a; }
+.ao-delar [data-del="konton"] i { background: #ffc23d; box-shadow: 0 0 8px #ffc23d; }
+.ao-delar [data-del="data"] i { background: #1fe3a0; box-shadow: 0 0 8px #1fe3a0; }
+.ao-delar [data-del="drift"] i { background: #8b7dff; box-shadow: 0 0 8px #8b7dff; }
+.ao-ring-bage { stroke-width: 8; }
+.ao-ring-spar { stroke: rgba(27, 25, 21, .06); stroke-width: 10; }
+.ao-glodlager .ao-ring-glod { stroke-width: 14; opacity: .75; animation: ao-ring 1.4s var(--mjuk) both, ao-andas 3.2s ease-in-out infinite; }
+@keyframes ao-andas { 50% { opacity: .35; } }
+.ao-komet { fill: none; stroke-width: 9; stroke-linecap: round; stroke-dashoffset: 0; filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 7px currentColor); opacity: .95;
+  mix-blend-mode: screen; animation: ao-komet var(--t, 6s) linear infinite; }
+.ao-komet[data-del="sakerhet"] { color: #ff8a2a; } .ao-komet[data-del="konton"] { color: #ffc23d; } .ao-komet[data-del="data"] { color: #1fe3a0; } .ao-komet[data-del="drift"] { color: #8b7dff; }
+.ao-komet:nth-of-type(even) { animation-direction: reverse; }
+@keyframes ao-komet { to { stroke-dashoffset: calc(var(--l) * -1px); } }
+.ao-streck { stroke: rgba(201, 138, 69, .45); animation: ao-skimmer 4s ease-in-out infinite; }
+@keyframes ao-skimmer { 50% { stroke: rgba(255, 170, 80, .85); } }
+.ao-ringar { overflow: visible; }
+.ao-mitt { box-shadow: 0 14px 30px -16px rgba(90, 60, 25, .7), inset 0 0 0 1px rgba(240, 181, 110, .6), 0 0 0 6px rgba(255, 194, 61, .08), 0 0 34px rgba(255, 170, 80, .35); animation: ao-mitt 3.2s ease-in-out infinite; }
+@keyframes ao-mitt { 50% { box-shadow: 0 14px 30px -16px rgba(90, 60, 25, .7), inset 0 0 0 1px rgba(240, 181, 110, .8), 0 0 0 10px rgba(255, 194, 61, .12), 0 0 52px rgba(255, 170, 80, .55); } }
+.ao-mitt strong { background: linear-gradient(160deg, #1b1915 30%, #8f5424); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ao-orbit { border-color: rgba(255, 160, 70, .35); }
+.ao-orbit b { box-shadow: 0 0 10px 4px rgba(255, 179, 92, .9), 0 0 24px 8px rgba(255, 140, 40, .45); }
+.ao-o2 b { background: #1fe3a0; box-shadow: 0 0 10px 4px rgba(31, 227, 160, .8), 0 0 24px 8px rgba(31, 227, 160, .35); }
+.ao-o3 b { background: #8b7dff; box-shadow: 0 0 10px 4px rgba(139, 125, 255, .8), 0 0 24px 8px rgba(139, 125, 255, .35); }
+.ao-karna:hover .ao-komet { animation-duration: 2.4s; }
+@media (prefers-reduced-motion: reduce) { .ao-komet, .ao-glodlager .ao-ring-glod, .ao-streck, .ao-mitt { animation: none; } }

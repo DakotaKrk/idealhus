@@ -73,7 +73,12 @@
       return '<circle cx="120" cy="120" r="' + r + '" class="ao-ring-spar"/><circle cx="120" cy="120" r="' + r + '" class="ao-ring-bage" data-del="' + x.id + '" style="animation-delay:' + (n * 0.1) + 's" stroke-dasharray="' + (l * p).toFixed(1) + ' ' + l.toFixed(1) + '"/>'; }).join('');
     for (var n = 0; n < 72; n++) { var v = (n / 72) * Math.PI * 2, r0 = n % 6 ? 114 : 110; streck += 'M' + (120 + Math.cos(v) * r0).toFixed(1) + ' ' + (120 + Math.sin(v) * r0).toFixed(1) + 'L' + (120 + Math.cos(v) * 118).toFixed(1) + ' ' + (120 + Math.sin(v) * 118).toFixed(1); }
     return '<div class="ao-karna" aria-hidden="true"><div class="ao-scen"><i class="ao-golv"></i><i class="ao-orbit ao-o1"><b></b></i><i class="ao-orbit ao-o2"><b></b></i><i class="ao-orbit ao-o3"><b></b></i>' +
-      '<svg class="ao-ringar" viewBox="0 0 240 240"><path d="' + streck + '" class="ao-streck"/>' + ringar + '</svg>' +
+      '<svg class="ao-ringar" viewBox="0 0 240 240"><defs><filter id="ao-glod" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4.5"/></filter></defs>' +
+        '<path d="' + streck + '" class="ao-streck"/>' +
+        // neonen: ett suddigt lager under som andas, de skarpa bågarna över och en komet som löper runt varje ring
+        '<g class="ao-glodlager" filter="url(#ao-glod)">' + delar.map(function (x, n) { var r = R[n], l = 2 * Math.PI * r, p = x.p == null ? 0 : x.p / 100; return '<circle cx="120" cy="120" r="' + r + '" class="ao-ring-bage ao-ring-glod" data-del="' + x.id + '" style="animation-delay:' + (n * 0.1) + 's,' + (n * 0.4) + 's" stroke-dasharray="' + (l * p).toFixed(1) + ' ' + l.toFixed(1) + '"/>'; }).join('') + '</g>' +
+        ringar +
+        delar.map(function (x, n) { var r = R[n], l = 2 * Math.PI * r; return '<circle cx="120" cy="120" r="' + r + '" class="ao-komet" data-del="' + x.id + '" style="--l:' + l.toFixed(1) + ';--t:' + (5 + n * 1.6) + 's" stroke-dasharray="10 ' + (l - 10).toFixed(1) + '"/>'; }).join('') + '</svg>' +
       '<div class="ao-mitt"><strong>' + (total == null ? '–' : total) + '</strong><small>Systemhälsa</small><span>' + (total == null ? 'Kör en skanning' : LAGE[total >= 85 ? 'bra' : total >= 60 ? 'se' : 'hjalp']) + '</span></div></div></div>';
   }
   function forslagLista(brott, dl, dr) {
