@@ -101,7 +101,8 @@
     { id: 'ml', namn: 'Maja Lind', roll: 'salj', titel: 'Sälj', farg: 'linear-gradient(135deg,#f0b56e,#8f5424)', mal: 900000 },
     { id: 'ab', namn: 'Anders Berg', roll: 'salj', chef: true, titel: 'Sälj · Försäljningschef', farg: 'linear-gradient(135deg,#b8cde0,#4f6f8f)', mal: 1200000 },
     { id: 'eb', namn: 'Elin Björk', roll: 'salj', titel: 'Sälj', farg: 'linear-gradient(135deg,#d7c2e0,#7b5c8f)', mal: 800000 },
-    { id: 'je', namn: 'Jonas Ek', roll: 'prod', titel: 'Produktion', farg: 'linear-gradient(135deg,#7fe0a6,#3f6b50)' }
+    { id: 'je', namn: 'Jonas Ek', roll: 'prod', titel: 'Produktion', farg: 'linear-gradient(135deg,#7fe0a6,#3f6b50)' },
+    { id: 'ad', namn: 'Admin', roll: 'admin', titel: 'Administratör', farg: 'linear-gradient(135deg,#c9c4bb,#4f4a42)' }
   ];
 
   /* --- Exempeldata --------------------------------------------------- */

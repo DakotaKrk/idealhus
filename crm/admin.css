@@ -1,0 +1,65 @@
+/* Legohus CRM – adminpanelen och säkerhetshubben (admin.js), efter Uperformance CRM, i Legohus färger. */
+.ad-hjalte { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 28px; align-items: center; padding: clamp(22px, 3vw, 34px); margin-bottom: 18px; }
+.ad-hjalte--panel { grid-template-columns: minmax(0, 1fr) auto; }
+.ad-hjalte h1 { margin: 8px 0 10px; font: 700 clamp(2rem, 1.2rem + 2.4vw, 3.2rem)/1 var(--rubrik); letter-spacing: -0.03em; }
+.ad-hjalte h1 small { font-size: .4em; font-weight: 600; color: var(--text-3); letter-spacing: 0; }
+.ad-hjalte p { margin: 0 0 16px; color: var(--text-2); max-width: 60ch; }
+.ad-hjalte--panel p { margin: 0; }
+.ad-ring { width: 220px; height: 220px; }
+.ad-ring circle { fill: none; stroke-width: 5.5; }
+.ad-ring__spar { stroke: rgba(27, 25, 21, .06); }
+.ad-ring__bage { stroke: var(--f); stroke-linecap: round; transform: rotate(-90deg); transform-origin: 100px 100px; animation: ad-ring 1.2s var(--mjuk) backwards; animation-delay: var(--d); }
+.ad-ring__bage.varn { stroke: #e8a456; }
+.ad-ring__bage.fel { stroke: var(--rod); }
+@keyframes ad-ring { from { stroke-dasharray: 0 999; } }
+.ad-kontroller { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.ad-kontroll { padding: 18px 20px; }
+.ad-kontroll header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.ad-kontroll header i { width: 12px; height: 12px; border-radius: 50%; background: var(--f); flex: none; }
+.ad-kontroll header b { flex: 1; font: 600 .98rem/1.2 var(--rubrik); }
+.ad-kontroll header span { padding: 4px 10px; border-radius: 999px; font: 600 .72rem/1 var(--rubrik); }
+.ad-kontroll.ok header span { background: rgba(34, 163, 90, .12); color: #1d6b3f; }
+.ad-kontroll.varn header span { background: rgba(232, 164, 86, .18); color: #8f5424; }
+.ad-kontroll.fel header span { background: rgba(217, 87, 63, .12); color: #a33d28; }
+.ad-kontroll p { margin: 0; color: var(--text-2); font-size: .9rem; line-height: 1.5; }
+.ad-kontroll ul { margin: 8px 0 0; padding-left: 18px; font-size: .84rem; color: var(--text-2); }
+.ad-kontroll--alla header .emo-ik { width: 18px; height: 18px; }
+.ad-kontroll--alla { background: linear-gradient(160deg, #fffdf8, #fdf3e3); }
+.ad-band { padding: 20px 22px; margin-bottom: 18px; overflow-x: auto; }
+.ad-band h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font: 600 1.1rem/1.2 var(--rubrik); }
+.ad-band h2 .emo-ik { width: 20px; height: 20px; padding: 7px; border-radius: 11px; background: var(--virke-ljus); box-sizing: content-box; }
+.ad-tva { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.ad-tabell { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.ad-tabell th { padding: 8px 10px; text-align: left; font: 600 .72rem/1.2 var(--rubrik); letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+.ad-tabell td { padding: 10px; border-top: 1px solid rgba(27, 25, 21, .06); }
+.ad-tabell--matris td:not(:first-child), .ad-tabell--matris th:not(:first-child) { text-align: center; }
+.ad-konto { display: flex; align-items: center; gap: 10px; }
+.ad-status { display: inline-flex; align-items: center; gap: 6px; }
+.ad-status i { width: 8px; height: 8px; border-radius: 50%; background: var(--n); }
+.ad-ja .emo-ik { color: var(--gron); }
+.ad-nej { color: var(--text-3); }
+.ad-not { margin: 10px 0 0; font-size: .82rem; color: var(--text-3); }
+.ad-etikett { margin: 4px 0 8px; font: 600 .76rem/1.2 var(--rubrik); color: var(--text-2); }
+.ad-etikett ~ .ad-etikett { margin-top: 20px; }
+.ad-val { display: inline-flex; padding: 4px; gap: 4px; border-radius: 999px; background: var(--ben); }
+.ad-val button { min-height: 34px; padding: 6px 14px; border: 0; border-radius: 999px; background: none; font: 600 .82rem/1 var(--rubrik); color: var(--text-2); cursor: pointer; }
+.ad-val button[aria-pressed="true"] { background: #fff; color: var(--text); box-shadow: 0 4px 12px -8px rgba(90, 60, 25, .6); }
+.ad-knappar { display: flex; flex-wrap: wrap; gap: 8px; }
+.ad-logg { margin: 0; padding: 0; list-style: none; }
+.ad-logg li { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 9px 0; border-top: 1px solid rgba(27, 25, 21, .06); font-size: .88rem; }
+.ad-logg__typ { justify-self: start; padding: 3px 9px; border-radius: 999px; background: var(--ben); font: 600 .7rem/1.2 var(--rubrik); text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); }
+.ad-logg small { color: var(--text-3); font-size: .78rem; }
+.ad-varning { position: fixed; z-index: 1200; right: 20px; bottom: 20px; display: flex; align-items: center; gap: 14px; max-width: 420px; padding: 14px 16px; border-radius: 20px;
+  background: rgba(255, 255, 255, .97); box-shadow: 0 30px 60px -24px rgba(90, 60, 25, .5), inset 0 0 0 1.5px rgba(232, 164, 86, .6); animation: valj-in .3s var(--mjuk) both; }
+.ad-varning > div { display: grid; flex: 1; }
+.ad-varning small { color: var(--text-2); }
+.ad-varning__ikon.emo-ik { width: 22px; height: 22px; padding: 9px; border-radius: 12px; background: var(--virke-ljus); box-sizing: content-box; }
+@media (max-width: 1100px) { .ad-tva { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 720px) {
+  .ad-hjalte, .ad-hjalte--panel { grid-template-columns: minmax(0, 1fr); }
+  .ad-ring { width: 170px; height: 170px; justify-self: center; }
+  .ad-logg li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+}
+@media (prefers-reduced-motion: reduce) { .ad-ring__bage { animation: none; } }
+.ad-kontroll--alla { grid-column: span 2; }
+@media (max-width: 720px) { .ad-kontroll--alla { grid-column: auto; } }

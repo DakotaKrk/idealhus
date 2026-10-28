@@ -318,6 +318,8 @@
     var nav = MENY.map(function (grupp) {
       // Försäljningsledningen syns bara för chefen (ledning.js)
       var poster = grupp.rubrik === 'Sälj' && jag.chef ? grupp.poster.concat([['chef', 'Ledning', 'graf']]) : grupp.poster;
+      // Admin och Säkerhet syns bara för adminkontot (admin.js)
+      if (grupp.rubrik === 'Mitt' && jag.roll === 'admin') poster = poster.concat([['admin', 'Admin', 'installning'], ['sakerhet', 'Säkerhet', 'system']]);
       return (grupp.rubrik ? '<p class="sido__rubrik">' + grupp.rubrik + '</p>' : '') + poster.map(function (p) {
         var br = b[p[0]];
         var bricka = br && br[0] ? '<span class="sido__bricka' + (br[1] ? ' sido__bricka--varm' : '') + '">' + br[0] + '</span>' : '';
@@ -829,6 +831,7 @@
         return '<a class="lista__rad" href="#/' + p[0] + '">' + IH.i(p[2]) + '<span class="lista__text"><b>' + p[1] + '</b></span>' + IH.i('pil') + '</a>';
       }).join('') + (IH.jag().chef ? '<a class="lista__rad" href="#/chef">' + IH.i('graf') + '<span class="lista__text"><b>Försäljningsledning</b></span>' + IH.i('pil') + '</a>' : '') +
         '<a class="lista__rad" href="#/profil">' + IH.i('kunder') + '<span class="lista__text"><b>Min profil</b></span>' + IH.i('pil') + '</a>' +
+        (IH.jag().roll === 'admin' ? '<a class="lista__rad" href="#/admin">' + IH.i('installning') + '<span class="lista__text"><b>Admin</b></span>' + IH.i('pil') + '</a><a class="lista__rad" href="#/sakerhet">' + IH.i('system') + '<span class="lista__text"><b>Säkerhet</b></span>' + IH.i('pil') + '</a>' : '') +
         '<button class="lista__rad" type="button" data-g="byt-anvandare">' + IH.i('kunder') +
         '<span class="lista__text"><b>Byt användare</b><small>' + IH.e(IH.jag().namn) + '</small></span></button>' +
         '<button class="lista__rad" type="button" data-g="logga-ut">' + IH.i('utloggning') + '<span class="lista__text"><b>Logga ut</b></span></button></div>'
