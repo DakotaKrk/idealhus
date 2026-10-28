@@ -47,7 +47,7 @@
 
   /* Kontomenyn (som kontoMeny i Uperformance): på dator täcker den sidomenyn exakt – samma kanter, hörn och höjd –
      annars ett ark. Dina siffror, snabbstatus, genvägarna, kontona, Nytt konto och Logga ut. */
-  var km = null;
+  var km = null, kmStatusOppen = false;
   function stangKm() {
     if (!km) return;
     var p = km; km = null; p.setAttribute('data-stanger', '');
@@ -62,26 +62,26 @@
     var mina = d.affarer.filter(function (a) { return a.ansvarig === jag.id && a.steg !== 'vunnen' && !a.forlorad; });
     var uppg = d.uppgifter.filter(function (x) { return x.ansvarig === jag.id && !x.klar && new Date(x.forfaller) <= idag; }).length;
     var olasta = IH.chattOlasta ? IH.chattOlasta() : 0;
-    var lank = function (href, ikon, text, under, extra) { return '<a class="km-lank" href="' + href + '">' + IH.emo(ikon) + '<span><b>' + text + '</b>' + (under ? '<small>' + under + '</small>' : '') + '</span>' + (extra || i('pil')) + '</a>'; };
+    var lank = function (href, ikon, text, under) { return '<a class="km-lank" href="' + href + '" title="' + e(under || text) + '">' + IH.emo(ikon) + '<b>' + text + '</b></a>'; };
     return '<header class="km-huvud">' + avatar(jag, true) + '<div><b>' + e(jag.namn) + '</b><small>' + e(jag.titel) + '</small>' +
-        '<span class="lp-status" style="--n:' + nu.farg + '"><i></i>' + e(nu.namn) + '</span></div>' +
+        '<button type="button" class="km-statusknapp" data-g="km-status" aria-expanded="' + kmStatusOppen + '" style="--n:' + nu.farg + '"><i></i>' + e(nu.namn) + i('pil') + '</button></div>' +
         '<button type="button" class="ch-ikonknapp" data-g="km-stang" aria-label="Stäng">' + i('stang') + '</button></header>' +
       '<div class="km-tal">' +
         (jag.roll === 'salj' ? '<a href="#/salj"><b class="tal">' + mina.length + '</b><small>Mina affärer</small></a>' : jag.roll === 'prod' ? '<a href="#/produktion"><b class="tal">' + d.projekt.filter(function (p) { return p.steg !== 'klart'; }).length + '</b><small>Projekt</small></a>' : '<a href="#/sakerhet"><b class="tal">' + (IH.sakTotal && IH.sakTotal() != null ? IH.sakTotal() : '–') + '</b><small>Säkerhet</small></a>') +
         '<a href="#/att-gora"><b class="tal">' + uppg + '</b><small>Att göra i dag</small></a>' +
         '<a href="#/chatt"><b class="tal">' + olasta + '</b><small>Olästa</small></a></div>' +
-      '<section class="km-del"><p class="km-rubrik">Din status</p><div class="km-status__val">' + NARVARO.map(function (n) {
+      (kmStatusOppen ? '<section class="km-del km-statusval">' + NARVARO.map(function (n) {
         return '<button type="button" data-g="satt-narvaro" data-s="' + n.id + '" aria-pressed="' + (vald === n.id) + '" style="--n:' + n.farg + '"><i></i>' + e(n.namn) + '</button>';
-      }).join('') + '</div></section>' +
+      }).join('') + '</section>' : '') +
       '<nav class="km-del km-lankar">' +
         lank('#/profil', 'anstallda', 'Min profil', 'Nyckeltal, aktivitet och affärer') +
         (jag.chef ? lank('#/chef', 'stapel', 'Försäljningsledning', 'Teamet, pipelinen och topplistan') : '') +
         (jag.roll === 'admin' ? lank('#/kontroll', 'server', 'Kontrollcentralen', 'Systemhälsan och kontona') + lank('#/sakerhet', 'skold', 'Säkerhetshubben', 'Sju kontroller') : '') +
-        lank('#/chatt', 'prat', 'Meddelanden', olasta ? olasta + ' olästa' : 'Allt är läst') +
+        lank('#/chatt', 'prat', 'Meddelanden', olasta ? olasta + ' olästa' : 'Allt är läst') + lank('#/att-gora', 'todo', 'Att göra', 'Dina uppgifter') +
       '</nav>' +
-      '<section class="km-del km-konton"><p class="km-rubrik">Byt konto<small>Demo – ingen inloggning</small></p><div class="km-kontolista">' + IH.ANVANDARE.map(function (u) {
-        return '<button type="button" class="km-konto' + (u.id === jag.id ? ' vald' : '') + '" data-g="valj-anvandare" data-id="' + u.id + '"' + (u.id === jag.id ? ' aria-current="true"' : '') + '>' + avatar(u) +
-          '<span><b>' + e(u.namn) + '</b><small>' + e(u.titel) + ' · ' + e(narvaro(u.id).namn) + '</small></span>' + (u.id === jag.id ? '<em>Du</em>' : '') + '</button>';
+      '<section class="km-del km-konton"><p class="km-rubrik">Byt konto</p><div class="km-kontolista">' + IH.ANVANDARE.filter(function (u) { return u.id !== jag.id; }).map(function (u) {
+        return '<button type="button" class="km-konto" data-g="valj-anvandare" data-id="' + u.id + '" title="' + e(u.titel + ' · ' + narvaro(u.id).namn) + '">' + avatar(u) +
+          '<span><b>' + e(u.namn) + '</b><small>' + e(u.titel.split(' · ')[0]) + '</small></span></button>';
       }).join('') + '</div>' +
       (jag.roll === 'admin' || jag.chef ? '<button type="button" class="km-ny" data-g="km-nytt-konto">' + IH.emo('anvandare-plus') + 'Nytt konto</button>' : '') + '</section>' +
       '<footer class="km-fot"><a class="knapp knapp--liten" href="../index.html" data-g="lamna">' + i('hem') + 'Hemsidan</a><button type="button" class="knapp knapp--liten" data-g="logga-ut">' + i('utloggning') + 'Logga ut</button></footer>';
@@ -105,6 +105,7 @@
   };
   var valjForra = IH.G['valj-anvandare'];
   IH.G['valj-anvandare'] = function (el) { stangKm(); valjForra(el); };
+  IH.G['km-status'] = function () { kmStatusOppen = !kmStatusOppen; if (km) ritaKm(); else { IH.stangArk(true); IH.G['konto-meny'](); } };
   IH.G['km-stang'] = function () { if (km) stangKm(); else IH.stangArk(); };
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && km) { stangKm(); var k = document.querySelector('[data-g="konto-meny"]'); if (k) k.focus(); } });
   addEventListener('hashchange', stangKm);
@@ -140,6 +141,7 @@
     var jag = IH.jag(), m = lasNarvaro();
     m[jag.id] = el.getAttribute('data-s');
     try { localStorage.setItem('ih-crm-narvaro', JSON.stringify(m)); } catch (x) { /* privat läge */ }
+    kmStatusOppen = false;
     if (km) ritaKm(); else IH.stangArk();
     IH.uppdateraMeny();
     if (/^#\/(chef|profil)/.test(location.hash)) IH.rita();

@@ -64,65 +64,6 @@
 .ad-kontroll--alla { grid-column: span 2; }
 @media (max-width: 720px) { .ad-kontroll--alla { grid-column: auto; } }
 
-/* Kontrollcentralen (kontroll.js): 3D-kärnan med fyra ringar runt systemhälsan */
-.kc-hjalte { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 32px; align-items: center; padding: clamp(22px, 3vw, 36px); margin-bottom: 18px; overflow: hidden; }
-.kc-karna { position: relative; width: 280px; height: 280px; justify-self: center; }
-.kc-scen { position: absolute; inset: 0; perspective: 900px; transform-style: preserve-3d; }
-.kc-ring { position: absolute; inset: calc(var(--n) * 22px); border-radius: 50%; transform-style: preserve-3d;
-  --x: calc(58deg + var(--n) * 6deg); --y: calc(var(--n) * 18deg - 24deg);
-  transform: rotateX(var(--x)) rotateY(var(--y)); animation: kc-snurr calc(26s + var(--n) * 7s) linear infinite; animation-direction: alternate; }
-.kc-ring i { position: absolute; inset: 0; border-radius: 50%;
-  background: conic-gradient(var(--f) calc(var(--p) * 1%), rgba(27, 25, 21, .09) 0);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--f) 45%, transparent)); }
-@keyframes kc-snurr { from { transform: rotateX(var(--x)) rotateY(var(--y)) rotateZ(0deg); } to { transform: rotateX(var(--x)) rotateY(var(--y)) rotateZ(360deg); } }
-.kc-mitt { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
-.kc-mitt b { font: 700 3.4rem/1 var(--rubrik); letter-spacing: -0.04em; }
-.kc-mitt small { font: 600 .72rem/1.2 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
-.kc-text h1 { margin: 8px 0 10px; font: 700 clamp(1.8rem, 1.1rem + 2vw, 2.8rem)/1.05 var(--rubrik); letter-spacing: -0.03em; }
-.kc-text > p { margin: 0 0 16px; color: var(--text-2); max-width: 58ch; }
-.kc-ringlista { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0 0 18px; padding: 0; list-style: none; }
-.kc-ringlista li { display: grid; gap: 4px; padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, .72); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); font: 600 .74rem/1.2 var(--rubrik); color: var(--text-3); }
-.kc-ringlista li i { width: 10px; height: 10px; border-radius: 50%; background: var(--f); }
-.kc-ringlista b { font: 700 1.3rem/1 var(--rubrik); color: var(--text); }
-.kc-knappar { display: flex; flex-wrap: wrap; gap: 8px; }
-.kc-remsa { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
-.kc-remsa div { display: grid; gap: 4px; padding: 16px; border-radius: 20px; background: #fff; box-shadow: var(--skugga), inset 0 0 0 1px var(--kant); }
-.kc-remsa small { font: 600 .72rem/1.2 var(--rubrik); color: var(--text-3); }
-.kc-remsa b { font: 700 1.5rem/1.1 var(--rubrik); letter-spacing: -0.02em; }
-.kc-remsa span { font-size: .78rem; color: var(--text-3); }
-.kc-konton { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
-.kc-konto { display: grid; gap: 10px; align-content: start; padding: 16px; border-radius: 20px; background: linear-gradient(170deg, #fffdf9, #fbf6ee); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); }
-.kc-konto header { display: flex; align-items: center; gap: 10px; }
-.kc-konto header div { flex: 1; display: grid; min-width: 0; }
-.kc-konto header small { font-size: .76rem; color: var(--text-3); }
-.kc-lage { padding: 4px 10px; border-radius: 999px; font: 600 .7rem/1.2 var(--rubrik); white-space: nowrap; }
-.kc-konto--bra .kc-lage { background: rgba(34, 163, 90, .12); color: #1d6b3f; }
-.kc-konto--ses .kc-lage { background: rgba(232, 164, 86, .2); color: #8f5424; }
-.kc-konto--hjalp .kc-lage { background: rgba(217, 87, 63, .12); color: #a33d28; }
-.kc-konto p { margin: 0; font-size: .84rem; color: var(--text-2); }
-.kc-konto .knapp { justify-self: start; }
-.kc-matare { display: block; height: 7px; border-radius: 7px; background: rgba(27, 25, 21, .08); overflow: hidden; }
-.kc-matare i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--virke), var(--gron)); transform: scaleX(var(--a)); transform-origin: left; animation: lp-fyll 1s var(--mjuk) backwards; }
-.kc-konto--hjalp .kc-matare i { background: linear-gradient(90deg, var(--rod), var(--virke)); }
-.kc-forslag { margin: 0; padding: 0; list-style: none; }
-.kc-forslag a { display: flex; align-items: center; gap: 12px; padding: 10px; margin: 0 -10px; border-radius: 14px; color: inherit; text-decoration: none; transition: background-color .2s; }
-.kc-forslag a:hover { background: var(--ben); }
-.kc-forslag__ikon.emo-ik { width: 18px; height: 18px; padding: 8px; flex: none; border-radius: 11px; background: var(--virke-ljus); box-sizing: content-box; }
-.kc-forslag span { flex: 1; display: grid; min-width: 0; }
-.kc-forslag small { font-size: .8rem; color: var(--text-3); }
-.kc-forslag a > .i { width: 15px; height: 15px; color: var(--text-3); }
-.kc-drift { display: grid; gap: 2px; margin: 0 0 14px; }
-.kc-drift div { display: grid; grid-template-columns: 120px minmax(0, 1fr); align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid rgba(27, 25, 21, .06); }
-.kc-drift dt { font: 600 .78rem/1.2 var(--rubrik); color: var(--text-3); }
-.kc-drift dd { margin: 0; display: flex; align-items: center; gap: 10px; font-size: .9rem; }
-.kc-drift dd .kc-matare { flex: 1; max-width: 200px; }
-@media (max-width: 1200px) { .kc-remsa { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 900px) { .kc-hjalte { grid-template-columns: minmax(0, 1fr); } .kc-ringlista { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .kc-remsa { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kc-karna { width: 230px; height: 230px; } .kc-ring { inset: calc(var(--n) * 18px); } }
-@media (prefers-reduced-motion: reduce) { .kc-ring { animation: none; } .kc-matare i { animation: none; } }
-
 /* Säkerhetshubben: ljuset löper runt ringen som kontrolleras, korten väntar på sin tur */
 .ad-ring__ljus { fill: none; stroke: var(--f); stroke-width: 6.5; stroke-linecap: round; stroke-dasharray: calc(var(--O) * .18) var(--O);
   transform-origin: 100px 100px; filter: drop-shadow(0 0 5px var(--f)); animation: ad-ljus .9s linear infinite; }

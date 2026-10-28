@@ -210,3 +210,33 @@ html[data-konto-oppen] .anv { opacity: 0; pointer-events: none; }
 /* Chattikonen göms medan en panel eller kontomenyn är öppen (den låg annars över knappar i arkets fot) */
 body:has(.ark.syns) .chf-ikon, html[data-konto-oppen] .chf-ikon { opacity: 0; pointer-events: none; transform: scale(.8); }
 @media (prefers-reduced-motion: reduce) { .km-panel, .km-panel[data-stanger] { animation: none; } }
+
+/* Kontomenyn, modernare (2026-10-29): statuspillret fäller ut valen, genvägarna som rutor, kompakta konton */
+.km-panel { gap: 14px; padding: 18px 14px 14px; }
+.km-huvud { align-items: flex-start; }
+.km-statusknapp { display: inline-flex; align-items: center; gap: 7px; justify-self: start; margin-top: 6px; padding: 5px 10px 5px 9px; border: 0; border-radius: 999px; background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); font: 600 .76rem/1 var(--rubrik); color: var(--text); cursor: pointer; transition: box-shadow .2s; }
+.km-statusknapp:hover, .km-statusknapp[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px var(--n); }
+.km-statusknapp i { width: 8px; height: 8px; border-radius: 50%; background: var(--n); box-shadow: 0 0 0 3px color-mix(in srgb, var(--n) 22%, transparent); }
+.km-statusknapp .i { width: 12px; height: 12px; transform: rotate(90deg); transition: transform .25s var(--mjuk); color: var(--text-3); }
+.km-statusknapp[aria-expanded="true"] .i { transform: rotate(-90deg); }
+.km-statusval { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 6px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); animation: valj-in .25s var(--mjuk) both; }
+.km-statusval button { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 5px 9px; border: 0; border-radius: 10px; background: none; font: 600 .76rem/1.1 var(--rubrik); color: var(--text-2); text-align: left; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.km-statusval button i { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--n); }
+.km-statusval button:hover { background: var(--ben); color: var(--text); }
+.km-statusval button[aria-pressed="true"] { background: color-mix(in srgb, var(--n) 14%, #fff); color: var(--text); }
+.km-tal { gap: 6px; }
+.km-tal a { padding: 9px 6px 8px; border-radius: 14px; }
+.km-tal b { font-size: 1.15rem; }
+.km-tal small { font-size: .66rem; line-height: 1.2; }
+.km-lankar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.km-lank { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 11px 10px 10px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); transition: box-shadow .2s, transform .2s var(--studs); }
+.km-lank:hover { background: #fff; box-shadow: inset 0 0 0 1.5px var(--virke); transform: translateY(-1px); }
+.km-lank > .emo-ik { width: 16px; height: 16px; padding: 6px; border-radius: 10px; }
+.km-lank b { font: 600 .8rem/1.2 var(--rubrik); }
+.km-rubrik { white-space: nowrap; }
+.km-kontolista { display: grid; gap: 2px; }
+.km-konto { padding: 6px 8px; }
+.km-konto .avatar { width: 30px; height: 30px; font-size: .7rem; }
+.km-konto small { font-size: .7rem; }
+.km-panel[data-tat] .km-lank { padding: 8px; }

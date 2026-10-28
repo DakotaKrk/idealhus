@@ -280,6 +280,10 @@
       '<div class="ad-tva">' + terminal + historik + '</div>';
     return { titel: 'Säkerhet', html: html, efter: function (rot) { var t = rot.querySelector('[data-sh-terminal]'); if (t) t.scrollTop = t.scrollHeight; } };
   };
+  // Kontrollcentralen läser kontrollerna, felen och läget härifrån, och kan starta en skanning
+  IH.sakHub = { kontroller: KONTROLLER, lageFor: lageFor, poang: poang, fel: felLista, hub: hub, skanna: skanna, total: total };
+  IH.G['sh-skanna-ga'] = function (el) { var ids = el.getAttribute('data-ids'); IH.ga('#/sakerhet'); setTimeout(function () { skanna(ids ? ids.split(',') : null); }, 350); };
+  IH.G['sh-rensa-fel'] = function () { felLista.length = 0; IH.rita(); IH.toast('Felloggen är rensad', null, 'aterstall'); };
   IH.G['sh-skanna'] = function (el) { var ids = el.getAttribute('data-ids'); skanna(ids ? ids.split(',') : null); };
   IH.G['sh-visa'] = function (el) { var id = el.getAttribute('data-id'); ui.oppen = ui.oppen === id ? null : id; IH.rita(); };
   IH.G['sh-uppdatera'] = function () { location.reload(); };
