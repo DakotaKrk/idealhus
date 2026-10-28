@@ -341,3 +341,10 @@ section.sh-mork .sh-delar li:nth-child(1) { --i: 0; } section.sh-mork .sh-delar 
 .sh-karna .sh-ringar { overflow: visible; }
 section.sh-mork .sh-scen::before { content: ""; position: absolute; inset: 6%; border-radius: 50%; background: radial-gradient(closest-side, transparent 62%, rgba(246, 198, 141, .14) 78%, transparent 92%); pointer-events: none; }
 section.sh-mork .sh-mitt { animation: none !important; box-shadow: none !important; }
+/* rutorna under knapparna: namnet kortas med … i stället för att krocka med siffran, siffran har egen plats */
+.sh-delar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.sh-delar li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; min-width: 0; }
+.sh-delar li span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: .8rem; }
+.sh-delar li strong { min-width: 2.2em; text-align: right; font-variant-numeric: tabular-nums; }
+.sh-delar__total .emo-ik { flex: none; }
+@media (max-width: 1250px) { .sh-delar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

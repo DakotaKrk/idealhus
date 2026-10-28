@@ -2556,8 +2556,8 @@
     }[m.id];
     var w = window.open('', '_blank'); if (!w) { IH.toast('Fönstret blockerades', 'Tillåt popup-fönster för att skriva ut mallen.', 'varning'); return; }
     w.document.write('<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>' + e(m.namn) + ' · ' + e(k.namn) + '</title><style>body{font:15px/1.6 system-ui,sans-serif;color:#1b1915;max-width:720px;margin:48px auto;padding:0 24px}header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #c98a45;padding-bottom:12px;margin-bottom:28px}h1{font-size:24px;margin:0}small{color:#7a7266}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid #e6ddd0}.f{display:grid;gap:4px;margin:0 0 22px}.f span{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#7a7266}.f i{display:block;border-bottom:1px solid #b9ad9b;height:26px}.sign{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:60px}.sign i{display:block;border-bottom:1px solid #1b1915;height:40px;margin-bottom:6px}@media print{body{margin:0}}</style></head><body>' +
-      '<header><div><small>Legohus Stockholm</small><h1>' + e(m.namn) + '</h1></div><div style="text-align:right"><b>' + e(k.namn) + '</b><br><small>' + e([k.ort, k.telefon, k.epost].filter(Boolean).join(' · ')) + '</small><br><small>' + idag + '</small></div></header>' + kropp + '<script>setTimeout(function(){print()},300)<\/script></body></html>');
-    w.document.close();
+      '<header><div><small>Legohus Stockholm</small><h1>' + e(m.namn) + '</h1></div><div style="text-align:right"><b>' + e(k.namn) + '</b><br><small>' + e([k.ort, k.telefon, k.epost].filter(Boolean).join(' · ')) + '</small><br><small>' + idag + '</small></div></header>' + kropp + '</body></html>');
+    w.document.close(); setTimeout(function () { try { w.focus(); w.print(); } catch (x) { /* utskrift blockerad */ } }, 300);
     IH.stangArk(true); IH.logga('system', m.namn + ' skapad från mall.', k.id, a ? a.id : null); IH.spara();
   };
   // Detaljen för ett dokument: värde och ring överst, tidslinjen, fakta och knapparna

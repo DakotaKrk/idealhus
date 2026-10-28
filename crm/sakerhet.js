@@ -18,6 +18,8 @@
   var felLista = [];
   addEventListener('error', function (ev) { felLista.push((ev.message || 'Fel') + (ev.filename ? ' (' + ev.filename.split('/').pop() + ')' : '')); }, true);
   addEventListener('unhandledrejection', function (ev) { var m = ev.reason && (ev.reason.message || String(ev.reason)); if (!/Transition was skipped/.test(m || '')) felLista.push('Ohanterat löfte: ' + m); });
+  // Innehållspolicyn stoppar främmande skript, ramar och anrop utåt – varje stopp loggas som ett intrångsförsök
+  document.addEventListener('securitypolicyviolation', function (ev) { felLista.push('Stoppat av innehållspolicyn: ' + ev.violatedDirective + ' ' + (ev.blockedURI || 'inbyggd kod')); if (IH.sakLogg) IH.sakLogg('intrang', 'Innehållspolicyn stoppade ' + (ev.blockedURI || 'inbyggd kod') + ' (' + ev.violatedDirective + ').'); });
   // Försök att öppna adminsidor utan att vara admin loggas (kontrollen Intrång)
   addEventListener('hashchange', function () {
     if (/^#\/(admin|sakerhet|kontroll)/.test(location.hash) && !arAdmin() && IH.sakLogg) IH.sakLogg('atkomst', IH.jag().namn + ' försökte öppna ' + location.hash.slice(2) + ' utan behörighet.');
@@ -26,7 +28,7 @@
   var ALLVAR = { hog: { namn: 'Hög', minus: 25 }, medel: { namn: 'Medel', minus: 10 }, lag: { namn: 'Låg', minus: 3 }, info: { namn: 'Info', minus: 0 } };
   var FARG = { kod: '#3f6b50', uppdatering: '#4f6f8f', buggar: '#7b5c8f', lacka: '#c4577e', intrang: '#3d8a96', beteende: '#e8a456', trasigt: '#8f5424' };
   var KORT = { kod: 'Skadlig kod', uppdatering: 'Uppdatering', buggar: 'Buggar', lacka: 'Läckor', intrang: 'Intrång', beteende: 'Beteende', trasigt: 'Trasigt' };
-  var KANDA = /^(data|app|mote|vyer|ledning|chatt|admin|kontroll|sakerhet|valj|kalender|overgang|grund)\.js$/;
+  var KANDA = /^(data|app|mote|vyer|ledning|chatt|admin|adminpanel|kontroll|sakerhet|stod|valj|kalender|overgang|grund|filregler|filskanner|resa3d|motesrum3d|three\.module\.min|[A-Za-z]+(Pass|Loader|Geometry|Environment|Composer|Utils|Shader))\.js$/;
   var FARLIGT = [[/<\s*script/i, 'Skripttagg'], [/javascript:/i, 'javascript:-länk'], [/\bon(error|load|click|mouseover)\s*=/i, 'Händelseattribut'], [/<\s*iframe/i, 'Inbäddad ram']];
   // Alla textfält i datan (kunder, affärer, aktiviteter, uppgifter, chatten)
   function strangar() {
@@ -54,7 +56,10 @@
         var jsl = document.querySelectorAll('a[href^="javascript:" i]').length; if (jsl) f.push({ allvar: 'hog', text: plural(jsl, 'javascript:-länk', 'javascript:-länkar') + ' i sidan' });
         await vila();
         var st = strangar(); logg('Söker efter farliga mönster i ' + st.length.toLocaleString('sv-SE') + ' textfält i datan');
-        st.forEach(function (s) { FARLIGT.forEach(function (p) { if (p[0].test(s.text)) f.push({ allvar: 'hog', text: p[1] + ' i lagrad text (' + SAML[s.samling] + ', ' + s.falt + ')' }); }); });
+        st.forEach(function (s) { FARLIGT.forEach(function (p) { if (p[0].test(s.text)) f.push({ allvar: 'hog', text: p[1] + ' i lagrad text (' + SAML[s.samling] + ', ' + s.falt + ')', atgard: { g: 'sh-rensa-text', text: 'Rensa' } }); }); });
+        var csp = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+        logg('Kontrollerar innehållspolicyn (CSP)');
+        if (!csp) f.push({ allvar: 'hog', text: 'Ingen innehållspolicy – främmande skript kan köras' }); else if (/unsafe-eval|script-src[^;]*\*/.test(csp.content)) f.push({ allvar: 'medel', text: 'Innehållspolicyn tillåter för mycket' }); else logg('Innehållspolicyn är på: bara egna skript, inga ramar, inga anrop utåt', 'ok');
         await vila();
         logg('Kontrollerar service workers och webbläsarens lagring');
         try { if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) { var r = await navigator.serviceWorker.getRegistrations(); if (r.length) f.push({ allvar: 'medel', text: plural(r.length, 'service worker', 'service workers') + ' registrerade – CRM:et använder inga' }); } } catch (x) { /* */ }
@@ -345,6 +350,14 @@
   IH.G['sh-skanna-ga'] = function (el) { var ids = el.getAttribute('data-ids'); IH.ga('#/sakerhet'); setTimeout(function () { skanna(ids ? ids.split(',') : null); }, 350); };
   IH.G['sh-rensa-fel'] = function () { felLista.length = 0; IH.rita(); IH.toast('Felloggen är rensad', null, 'aterstall'); };
   IH.G['sh-skanna'] = function (el) { var ids = el.getAttribute('data-ids'); skanna(ids ? ids.split(',') : null); };
+  // Rensar farliga mönster ur all lagrad text (skripttaggar, javascript:-länkar, händelseattribut, ramar)
+  IH.G['sh-rensa-text'] = function () {
+    var n = 0, d = db(), tvatta = function (t) { var u = String(t).replace(/<\s*\/?\s*(script|iframe|object|embed)[^>]*>/gi, '').replace(/javascript:/gi, '').replace(/\bon(error|load|click|mouseover)\s*=/gi, ''); if (u !== t) n++; return u; };
+    ['kunder', 'affarer', 'aktiviteter', 'uppgifter', 'forfragningar', 'offerter'].forEach(function (sm) { (d[sm] || []).forEach(function (x) { Object.keys(x).forEach(function (f) { if (typeof x[f] === 'string') x[f] = tvatta(x[f]); }); }); });
+    ((d.chatt || {}).meddelanden || []).forEach(function (m) { if (m.text) m.text = tvatta(m.text); });
+    if (IH.sakLogg) IH.sakLogg('skanning', 'Rensade farlig text i ' + plural(n, 'fält', 'fält') + '.'); IH.spara();
+    IH.toast(n ? 'Rensat' : 'Inget att rensa', n ? plural(n, 'fält', 'fält') + ' tvättades.' : 'Ingen farlig text hittades.', 'skold'); skanna(['kod']);
+  };
   IH.G['sh-loggtyp'] = function (el) { ui.typ = el.getAttribute('data-f'); ui.fler = false; IH.rita(); };
   IH.G['sh-loggfler'] = function () { ui.fler = !ui.fler; IH.rita(); };
   IH.G['sh-visa'] = function (el) { var id = el.getAttribute('data-id'); ui.oppen = ui.oppen === id ? null : id; IH.rita(); };
