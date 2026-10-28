@@ -1577,3 +1577,12 @@
     transform: none;
   }
 }
+/* Husen i 3D på smala skärmar: huset överst, fakta under – inget täcker huset */
+.husvisning { container-type: inline-size; container-name: husvis; }
+@container husvis (max-width: 600px) {
+  .husvisning__mv { inset: 0 0 auto 0; height: 58%; }
+  .husvisning__golv { bottom: 46%; height: 26%; }
+  .husvisning__fakta { left: 12px; right: 12px; bottom: 12px; max-width: none; padding: 14px 16px; }
+  .husvisning__fakta p { font-size: .82rem; }
+}
+@media (max-width: 600px) { .husvisning { height: min(52vh, 480px); } .mb--husen .mb__in { padding-bottom: 96px; } }
