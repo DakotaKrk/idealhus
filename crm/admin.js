@@ -55,7 +55,7 @@
   }, 5000);
 
   /* 03 Kontrollerna (säkerhetshubben) ------------------------------------------------------------- */
-  var KANDA = ['data.js', 'app.js', 'mote.js', 'vyer.js', 'ledning.js', 'chatt.js', 'admin.js', 'kontroll.js', 'valj.js', 'kalender.js', 'overgang.js', 'grund.js'];
+  var KANDA = ['data.js', 'app.js', 'mote.js', 'vyer.js', 'ledning.js', 'chatt.js', 'admin.js', 'kontroll.js', 'sakerhet.js', 'valj.js', 'kalender.js', 'overgang.js', 'grund.js'];
   function kopplingsBrott() {
     var d = db(), fel = [];
     var finns = function (lista, id) { return !id || lista.some(function (x) { return x.id === id; }); };

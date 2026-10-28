@@ -1,0 +1,294 @@
+/* Legohus CRM – säkerhetshubben (#/sakerhet), samma upplägg som Uperformance CRM:s sakerhet.js (visaSakerhet).
+   Sju kontroller körs på riktigt i webbläsaren mot sidans kod och CRM:ets data – skadlig kod, uppdateringar, buggar,
+   läckor, intrång, avvikande beteende och sådant som är trasigt. Varje kontroll ger fynd med allvarlighet (hög −25,
+   medel −10, låg −3, info 0) och poängen är 100 minus avdragen. Kärnan: en ring per kontroll i kontrollens färg (full =
+   inga fynd), under skanningen löper en komet runt ringen som kontrolleras och mitten visar förloppet; den lutar efter
+   musen. Skanningens logg skrivs live, poängen sparas över tid. Data: db.sakHub = { senast, historik }. */
+(function () {
+  'use strict';
+  var IH = window.IH;
+  var e = IH.e, i = IH.i, ik = function (n) { return IH.emo(n); };
+  var db = function () { return IH.db; };
+  var arAdmin = function () { return IH.jag().roll === 'admin'; };
+  var lugn = function () { return matchMedia('(prefers-reduced-motion: reduce)').matches; };
+  var vila = function () { return new Promise(function (r) { setTimeout(r, lugn() ? 20 : 180 + Math.random() * 220); }); };
+  var plural = function (n, en, flera) { return n + ' ' + (n === 1 ? en : flera); };
+
+  // Fel i sidan sedan den laddades (kontrollen Buggar)
+  var felLista = [];
+  addEventListener('error', function (ev) { felLista.push((ev.message || 'Fel') + (ev.filename ? ' (' + ev.filename.split('/').pop() + ')' : '')); }, true);
+  addEventListener('unhandledrejection', function (ev) { var m = ev.reason && (ev.reason.message || String(ev.reason)); if (!/Transition was skipped/.test(m || '')) felLista.push('Ohanterat löfte: ' + m); });
+  // Försök att öppna adminsidor utan att vara admin loggas (kontrollen Intrång)
+  addEventListener('hashchange', function () {
+    if (/^#\/(admin|sakerhet|kontroll)/.test(location.hash) && !arAdmin() && IH.sakLogg) IH.sakLogg('atkomst', IH.jag().namn + ' försökte öppna ' + location.hash.slice(2) + ' utan behörighet.');
+  });
+
+  var ALLVAR = { hog: { namn: 'Hög', minus: 25 }, medel: { namn: 'Medel', minus: 10 }, lag: { namn: 'Låg', minus: 3 }, info: { namn: 'Info', minus: 0 } };
+  var FARG = { kod: '#3f6b50', uppdatering: '#4f6f8f', buggar: '#7b5c8f', lacka: '#c4577e', intrang: '#3d8a96', beteende: '#e8a456', trasigt: '#8f5424' };
+  var KORT = { kod: 'Skadlig kod', uppdatering: 'Uppdatering', buggar: 'Buggar', lacka: 'Läckor', intrang: 'Intrång', beteende: 'Beteende', trasigt: 'Trasigt' };
+  var KANDA = /^(data|app|mote|vyer|ledning|chatt|admin|kontroll|sakerhet|valj|kalender|overgang|grund)\.js$/;
+  var FARLIGT = [[/<\s*script/i, 'Skripttagg'], [/javascript:/i, 'javascript:-länk'], [/\bon(error|load|click|mouseover)\s*=/i, 'Händelseattribut'], [/<\s*iframe/i, 'Inbäddad ram']];
+  // Alla textfält i datan (kunder, affärer, aktiviteter, uppgifter, chatten)
+  function strangar() {
+    var d = db(), ut = [];
+    ['kunder', 'affarer', 'aktiviteter', 'uppgifter', 'forfragningar', 'offerter'].forEach(function (s) { (d[s] || []).forEach(function (x) { Object.keys(x).forEach(function (f) { if (typeof x[f] === 'string' && x[f].length > 3) ut.push({ samling: s, id: x.id, falt: f, text: x[f] }); }); }); });
+    ((d.chatt || {}).meddelanden || []).forEach(function (m) { if (m.text) ut.push({ samling: 'chatt', id: m.id, falt: 'text', text: m.text }); });
+    return ut;
+  }
+  var luhn = function (s) { var t = 0; for (var n = 0; n < s.length; n++) { var x = +s[s.length - 1 - n]; if (n % 2) { x *= 2; if (x > 9) x -= 9; } t += x; } return t % 10 === 0; };
+  var SAML = { kunder: 'Kund', affarer: 'Affär', aktiviteter: 'Aktivitet', uppgifter: 'Uppgift', forfragningar: 'Förfrågan', offerter: 'Offert', chatt: 'Chatten' };
+
+  var KONTROLLER = [
+    { id: 'kod', namn: 'Skadlig kod', under: 'Okända skript, ramar och farlig kod i sidan och i lagrad data', ikon: 'bugg',
+      steg: ['Sidans skript och stilmallar', 'Ramar och händelseattribut', 'Lagrad data – farliga mönster', 'Service workers och lagring'],
+      kor: async function (logg) {
+        var f = [], skript = [].slice.call(document.scripts);
+        logg('Kontrollerar ' + skript.length + ' skript och ' + document.querySelectorAll('link[rel=stylesheet]').length + ' stilmallar');
+        skript.forEach(function (s) { if (!s.src) return; var u = new URL(s.src, location.href), fil = u.pathname.split('/').pop();
+          if (u.origin !== location.origin) f.push({ allvar: 'hog', text: 'Skript från en annan webbplats: ' + u.host + u.pathname }); else if (!KANDA.test(fil)) f.push({ allvar: 'medel', text: 'Okänt skript: ' + u.pathname }); });
+        await vila();
+        logg('Letar efter ramar, händelseattribut och javascript:-länkar');
+        var ramar = document.querySelectorAll('iframe, object, embed').length; if (ramar) f.push({ allvar: 'hog', text: plural(ramar, 'inbäddad ram', 'inbäddade ramar') + ' i sidan (förväntat: inga)' });
+        var attr = [].slice.call(document.querySelectorAll('body *')).filter(function (x) { return [].some.call(x.attributes, function (a) { return /^on/i.test(a.name); }); }).length;
+        if (attr) f.push({ allvar: 'hog', text: plural(attr, 'element', 'element') + ' med händelseattribut (on…=) – sidan använder inga' });
+        var jsl = document.querySelectorAll('a[href^="javascript:" i]').length; if (jsl) f.push({ allvar: 'hog', text: plural(jsl, 'javascript:-länk', 'javascript:-länkar') + ' i sidan' });
+        await vila();
+        var st = strangar(); logg('Söker efter farliga mönster i ' + st.length.toLocaleString('sv-SE') + ' textfält i datan');
+        st.forEach(function (s) { FARLIGT.forEach(function (p) { if (p[0].test(s.text)) f.push({ allvar: 'hog', text: p[1] + ' i lagrad text (' + SAML[s.samling] + ', ' + s.falt + ')' }); }); });
+        await vila();
+        logg('Kontrollerar service workers och webbläsarens lagring');
+        try { if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) { var r = await navigator.serviceWorker.getRegistrations(); if (r.length) f.push({ allvar: 'medel', text: plural(r.length, 'service worker', 'service workers') + ' registrerade – CRM:et använder inga' }); } } catch (x) { /* */ }
+        try { var okanda = []; for (var n = 0; n < localStorage.length; n++) { var k = localStorage.key(n); if (!/^ih-/.test(k)) okanda.push(k); } if (okanda.length) f.push({ allvar: 'info', text: plural(okanda.length, 'okänd nyckel', 'okända nycklar') + ' i webbläsarens lagring (från andra sidor på samma adress)' }); } catch (x) { /* */ }
+        return f;
+      } },
+    { id: 'uppdatering', namn: 'Uppdateringar', under: 'Versionerna på servern jämförs med det som är laddat', ikon: 'uppgradera',
+      steg: ['Hämtar senaste versionen', 'Jämför skript och stilmallar', 'Datamodellens version'],
+      kor: async function (logg) {
+        var f = [], html = '';
+        logg('Hämtar index.html från servern (utan cache)');
+        try { var r = await fetch('index.html?kontroll=' + Date.now(), { cache: 'no-store', credentials: 'same-origin' }); if (r.ok) html = await r.text(); else f.push({ allvar: 'lag', text: 'Servern svarade ' + r.status + ' – kunde inte kontrollera uppdateringar' }); } catch (x) { f.push({ allvar: 'lag', text: 'Servern gick inte att nå – kontrollen kunde inte köras' }); }
+        if (html) {
+          logg('Jämför versionerna (?v=) med de laddade filerna');
+          var pa = {}, m, re = /(?:src|href)="([\w./-]+\.(?:js|css))\?v=([\w]+)"/g; while ((m = re.exec(html))) pa[m[1].split('/').pop()] = m[2];
+          var laddat = {}; [].forEach.call(document.querySelectorAll('script[src], link[rel=stylesheet]'), function (x) { var t = String(x.getAttribute('src') || x.getAttribute('href') || '').match(/([\w.-]+\.(?:js|css))\?v=([\w]+)/); if (t) laddat[t[1]] = t[2]; });
+          var nya = Object.keys(pa).filter(function (fil) { return laddat[fil] && laddat[fil] !== pa[fil]; });
+          if (nya.length) f.push({ allvar: 'medel', text: 'Ny version finns på servern: ' + nya.slice(0, 4).join(', ') + (nya.length > 4 ? ' …' : ''), atgard: { g: 'sh-uppdatera', text: 'Uppdatera nu' } });
+          else logg('Alla ' + Object.keys(laddat).length + ' filer har senaste versionen', 'ok');
+        }
+        await vila();
+        logg('Kontrollerar datamodellens version');
+        if ((db().version || 0) < IH.VERSION) f.push({ allvar: 'lag', text: 'Datan har version ' + db().version + ' – senaste är ' + IH.VERSION });
+        return f;
+      } },
+    { id: 'buggar', namn: 'Buggar och fel', under: 'Fel sedan sidan laddades och trasiga kopplingar i datan', ikon: 'nyckelverktyg',
+      steg: ['Fel i skript och filer', 'Kopplingar mellan posterna', 'Dubbletter och ogiltiga värden', 'Lagringen går att skriva'],
+      kor: async function (logg) {
+        var f = [], d = db();
+        logg('Läser felen sedan sidan laddades');
+        felLista.slice(-6).forEach(function (t) { f.push({ allvar: 'medel', text: t }); });
+        if (felLista.length > 6) f.push({ allvar: 'lag', text: plural(felLista.length - 6, 'fel till', 'fel till') });
+        await vila();
+        logg('Kontrollerar kopplingarna mellan kunder, affärer, offerter, projekt och uppgifter');
+        (IH.sak && IH.sak.kopplingsBrott ? IH.sak.kopplingsBrott() : []).forEach(function (t) { f.push({ allvar: 'medel', text: t }); });
+        await vila();
+        logg('Letar efter dubbletter och ogiltiga värden');
+        var epost = {}; d.kunder.forEach(function (k) { if (k.epost) { var x = k.epost.toLowerCase(); if (epost[x]) f.push({ allvar: 'lag', text: 'Två kunder med samma e-post: ' + k.epost }); epost[x] = 1; } });
+        d.affarer.forEach(function (a) { if (!(a.varde >= 0) || isNaN(a.varde)) f.push({ allvar: 'medel', text: 'Affären "' + a.titel + '" har ett ogiltigt värde' }); if (!a.titel) f.push({ allvar: 'lag', text: 'En affär saknar titel' }); });
+        await vila();
+        logg('Provar att skriva till webbläsarens lagring');
+        try { localStorage.setItem('ih-crm-skrivprov', '1'); localStorage.removeItem('ih-crm-skrivprov'); } catch (x) { f.push({ allvar: 'hog', text: 'Lagringen går inte att skriva – ändringar sparas inte' }); }
+        return f;
+      } },
+    { id: 'lacka', namn: 'Läckor', under: 'Personnummer, kortnummer och lösenord i data och adresser', ikon: 'fingeravtryck',
+      steg: ['Personnummer i lagrad text', 'Kortnummer i lagrad text', 'Lösenord i klartext', 'Persondata i adressen'],
+      kor: async function (logg) {
+        var f = [], st = strangar();
+        logg('Söker efter personnummer (Luhn-kontroll) i ' + st.length.toLocaleString('sv-SE') + ' textfält');
+        st.forEach(function (s) { (s.text.match(/\b(?:19|20)?\d{6}[-+]?\d{4}\b/g) || []).forEach(function (x) { var d10 = x.replace(/\D/g, '').slice(-10); if (luhn(d10)) f.push({ allvar: 'hog', text: 'Möjligt personnummer i ' + SAML[s.samling].toLowerCase() + ' (' + s.falt + ')' }); }); });
+        await vila();
+        logg('Söker efter kortnummer');
+        st.forEach(function (s) { (s.text.match(/\b(?:\d[ -]?){13,19}\b/g) || []).forEach(function (x) { var y = x.replace(/\D/g, ''); if (y.length >= 13 && luhn(y)) f.push({ allvar: 'hog', text: 'Möjligt kortnummer i ' + SAML[s.samling].toLowerCase() }); }); });
+        await vila();
+        logg('Söker efter lösenord i klartext');
+        st.forEach(function (s) { if (/(lösenord|password|lösen)\s*[:=]\s*\S+/i.test(s.text)) f.push({ allvar: 'hog', text: 'Lösenord i klartext i ' + SAML[s.samling].toLowerCase() }); });
+        await vila();
+        logg('Kontrollerar att adressen inte bär persondata');
+        if (/@|\b\d{6}[-+]?\d{4}\b/.test(decodeURIComponent(location.search + location.hash))) f.push({ allvar: 'medel', text: 'Adressen innehåller e-post eller personnummer' });
+        return f;
+      } },
+    { id: 'intrang', namn: 'Intrångsförsök', under: 'Okända konton, behörighetsförsök och inloggningen', ikon: 'skold-larm',
+      steg: ['Okända konton i datan', 'Försök att nå adminsidor', 'Inloggningens tillstånd'],
+      kor: async function (logg) {
+        var f = [], d = db(), kanda = IH.ANVANDARE.map(function (u) { return u.id; });
+        logg('Kontrollerar att alla poster pekar på kända konton');
+        var okanda = {}; d.affarer.forEach(function (a) { if (a.ansvarig && kanda.indexOf(a.ansvarig) < 0) okanda[a.ansvarig] = 1; }); d.aktiviteter.forEach(function (h) { if (h.av && kanda.indexOf(h.av) < 0) okanda[h.av] = 1; });
+        if (Object.keys(okanda).length) f.push({ allvar: 'hog', text: 'Poster skapade av okända konton: ' + Object.keys(okanda).join(', ') });
+        await vila();
+        logg('Läser försök att öppna adminsidor utan behörighet (senaste dygnet)');
+        var forsok = (d.sakerhet || []).filter(function (h) { return h.typ === 'atkomst' && IH.dagarSedan(h.tid) < 1; });
+        if (forsok.length >= 3) f.push({ allvar: 'medel', text: plural(forsok.length, 'försök', 'försök') + ' att öppna adminsidor utan behörighet senaste dygnet' });
+        else if (forsok.length) f.push({ allvar: 'lag', text: plural(forsok.length, 'försök', 'försök') + ' att öppna en adminsida utan behörighet' });
+        await vila();
+        logg('Kontrollerar inloggningen');
+        var jag = null; try { jag = localStorage.getItem('ih-crm-jag'); } catch (x) { /* */ }
+        if (jag && kanda.indexOf(jag) < 0) f.push({ allvar: 'hog', text: 'Inloggad med ett konto som inte finns: ' + jag });
+        f.push({ allvar: 'info', text: 'Demoläget har ingen riktig inloggning – skarp drift behöver tvåstegsverifiering på servern' });
+        return f;
+      } },
+    { id: 'beteende', namn: 'Avvikande beteende', under: 'Ovanliga mängder, tider och massändringar', ikon: 'radar',
+      steg: ['Exporter och återställningar', 'Aktivitet på ovanliga tider', 'Många ändringar på kort tid'],
+      kor: async function (logg) {
+        var f = [], d = db(), sl = d.sakerhet || [];
+        logg('Räknar exporter och återställningar senaste dygnet');
+        var exp = sl.filter(function (h) { return (h.typ === 'export' || h.typ === 'aterstall') && IH.dagarSedan(h.tid) < 1; }).length;
+        if (exp >= 3) f.push({ allvar: 'medel', text: plural(exp, 'export eller återställning', 'exporter eller återställningar') + ' senaste dygnet' });
+        await vila();
+        logg('Letar efter aktivitet mitt i natten (00–05)');
+        var natt = d.aktiviteter.filter(function (h) { var t = new Date(h.tid).getHours(); return t < 5 && IH.dagarSedan(h.tid) < 14; }).length;
+        if (natt) f.push({ allvar: 'lag', text: plural(natt, 'aktivitet', 'aktiviteter') + ' loggade mellan 00 och 05 de senaste två veckorna' });
+        await vila();
+        logg('Letar efter massändringar (fler än 30 på en timme)');
+        var timme = d.aktiviteter.filter(function (h) { return Date.now() - new Date(h.tid) < 36e5; }).length;
+        if (timme > 30) f.push({ allvar: 'medel', text: plural(timme, 'ändring', 'ändringar') + ' den senaste timmen' });
+        return f;
+      } },
+    { id: 'trasigt', namn: 'Trasigt', under: 'Bilder, filer och lagring som inte fungerar', ikon: 'varning',
+      steg: ['Bilder på sidan', 'Husens bilder och modeller', 'Lagringens utrymme'],
+      kor: async function (logg) {
+        var f = [];
+        logg('Kontrollerar bilderna på sidan');
+        var trasiga = [].filter.call(document.images, function (b) { return b.complete && b.naturalWidth === 0 && b.getAttribute('src'); });
+        if (trasiga.length) f.push({ allvar: 'medel', text: plural(trasiga.length, 'bild', 'bilder') + ' laddas inte: ' + trasiga.slice(0, 3).map(function (b) { return b.getAttribute('src').split('/').pop(); }).join(', ') });
+        await vila();
+        logg('Kontrollerar husens bilder och 3D-modeller på servern');
+        var filer = []; (IH.MODELLER || []).forEach(function (m) { if (m.bild) filer.push(m.bild); if (m.glb) filer.push(m.glb); });
+        var svar = await Promise.all(filer.map(function (u) { return fetch(u, { method: 'HEAD', cache: 'no-store' }).then(function (r) { return r.ok ? null : u; }, function () { return u; }); }));
+        svar.filter(Boolean).forEach(function (u) { f.push({ allvar: 'medel', text: 'Filen saknas på servern: ' + u.split('/').pop() }); });
+        if (!svar.filter(Boolean).length) logg(filer.length + ' filer finns på servern', 'ok');
+        await vila();
+        logg('Mäter lagringen');
+        var b = 0; try { for (var n = 0; n < localStorage.length; n++) { var k = localStorage.key(n); if (/^ih-/.test(k)) b += (k.length + (localStorage.getItem(k) || '').length) * 2; } } catch (x) { /* */ }
+        if (b > 4e6) f.push({ allvar: 'medel', text: 'Lagringen är nästan full: ' + Math.round(b / 1024) + ' kB av cirka 5 MB' }); else if (b > 3e6) f.push({ allvar: 'lag', text: 'Lagringen fylls: ' + Math.round(b / 1024) + ' kB' });
+        return f;
+      } }
+  ];
+
+  /* 02 Läget ------------------------------------------------------------------------------------- */
+  function hub() { var d = db(); d.sakHub = d.sakHub || {}; d.sakHub.senast = d.sakHub.senast || {}; d.sakHub.historik = d.sakHub.historik || []; return d.sakHub; }
+  var poang = function (fynd) { return Math.max(0, 100 - fynd.reduce(function (t, x) { return t + (ALLVAR[x.allvar] || ALLVAR.info).minus; }, 0)); };
+  function total() { var S = hub(), alla = KONTROLLER.map(function (k) { return S.senast[k.id]; }).filter(Boolean); return alla.length ? poang(alla.reduce(function (t, x) { return t.concat(x.fynd); }, [])) : null; }
+  IH.sakTotal = total;
+  var lageFor = function (r) { return !r ? 'ny' : r.fynd.some(function (x) { return x.allvar === 'hog'; }) ? 'hog' : r.fynd.some(function (x) { return x.allvar === 'medel'; }) ? 'medel' : r.fynd.some(function (x) { return x.allvar === 'lag'; }) ? 'lag' : 'ok'; };
+  var skan = { kor: false, nu: null, logg: [], pct: 0 };
+  var ui = { oppen: null };
+
+  /* 03 Skanningen -------------------------------------------------------------------------------- */
+  async function skanna(ids) {
+    if (skan.kor) return;
+    var valda = ids && ids.length ? KONTROLLER.filter(function (k) { return ids.indexOf(k.id) >= 0; }) : KONTROLLER;
+    skan.kor = true; skan.logg = []; skan.pct = 0;
+    var skriv = function (text, ton) {
+      skan.logg.push({ text: text, ton: ton || '' });
+      var t = document.querySelector('[data-sh-terminal]');
+      if (t) { var p = document.createElement('p'); p.className = 'sh-rad' + (ton ? ' sh-rad--' + ton : ''); p.textContent = '› ' + text; t.appendChild(p); while (t.children.length > 70) t.firstElementChild.remove(); t.scrollTop = t.scrollHeight; }
+    };
+    skriv('Startar ' + (valda.length === KONTROLLER.length ? 'full skanning – sju kontroller' : valda.map(function (k) { return k.namn.toLowerCase(); }).join(', ')), 'start');
+    var S = hub();
+    for (var n = 0; n < valda.length; n++) {
+      var k = valda[n]; skan.nu = k.id; IH.rita();
+      skriv(k.namn + ' …', 'rubrik');
+      var steg = 0, kort = document.querySelector('[data-sh-kontroll="' + k.id + '"]');
+      var stegLogg = function (text, ton) { steg++; skriv(text, ton); var andel = Math.min(0.95, steg / (k.steg.length + 1)); skan.pct = Math.round(((n + andel) / valda.length) * 100); var el = document.querySelector('[data-sh-pct]'); if (el) el.textContent = skan.pct + ' %'; var kk = document.querySelector('[data-sh-kontroll="' + k.id + '"]'); if (kk) kk.style.setProperty('--forlopp', andel); };
+      var fynd; try { fynd = await k.kor(stegLogg); } catch (x) { fynd = [{ allvar: 'lag', text: 'Kontrollen avbröts: ' + (x.message || x) }]; }
+      S.senast[k.id] = { tid: new Date().toISOString(), fynd: fynd, av: IH.jag().id };
+      var viktiga = fynd.filter(function (x) { return x.allvar !== 'info'; });
+      skriv(k.namn + ': ' + (viktiga.length ? plural(viktiga.length, 'fynd', 'fynd') + ' – ' + poang(fynd) + ' av 100' : 'inga fynd'), viktiga.length ? (viktiga.some(function (x) { return x.allvar === 'hog'; }) ? 'hog' : 'medel') : 'ok');
+    }
+    var p = total();
+    S.historik.unshift({ tid: new Date().toISOString(), poang: p, vad: valda.length === KONTROLLER.length ? 'allt' : valda.map(function (k) { return k.id; }).join(','), av: IH.jag().id });
+    if (S.historik.length > 40) S.historik.length = 40;
+    if (IH.sakLogg) IH.sakLogg('skanning', (valda.length === KONTROLLER.length ? 'Full skanning' : 'Skanning') + ': ' + p + ' av 100.'); else IH.spara();
+    skriv('Klart. Säkerhetspoäng ' + p + ' av 100.', p >= 90 ? 'ok' : p >= 70 ? 'medel' : 'hog');
+    skan.kor = false; skan.nu = null; skan.pct = 0;
+    IH.spara(); IH.rita();
+    IH.toast('Skanningen är klar', p + ' av 100', 'system');
+  }
+
+  /* 04 Kärnan ------------------------------------------------------------------------------------ */
+  function karna(S, p, status) {
+    var R = [108, 98.5, 89, 79.5, 70, 60.5, 51], streck = '';
+    for (var n = 0; n < 72; n++) { var v = (n / 72) * Math.PI * 2, r0 = n % 6 ? 115 : 111; streck += 'M' + (120 + Math.cos(v) * r0).toFixed(1) + ' ' + (120 + Math.sin(v) * r0).toFixed(1) + 'L' + (120 + Math.cos(v) * 119).toFixed(1) + ' ' + (120 + Math.sin(v) * 119).toFixed(1); }
+    var ringar = KONTROLLER.map(function (k, j) {
+      var r = R[j], l = 2 * Math.PI * r, rk = S.senast[k.id], andel = rk ? poang(rk.fynd) / 100 : 1, d = FARG[k.id];
+      return '<g class="sh-ring' + (skan.nu === k.id ? ' skannas' : '') + '" data-lage="' + lageFor(rk) + '"><circle cx="120" cy="120" r="' + r + '" class="sh-ring__spar"/>' +
+        '<circle cx="120" cy="120" r="' + r + '" class="sh-ring__bage" style="--d:' + d + ';animation-delay:' + (j * 0.08).toFixed(2) + 's" stroke-dasharray="' + (l * andel).toFixed(1) + ' ' + l.toFixed(1) + '"/>' +
+        '<g class="sh-komet"><circle cx="120" cy="120" r="' + r + '" class="sh-komet__bage" style="--d:' + d + '" stroke-dasharray="' + (l * 0.18).toFixed(1) + ' ' + l.toFixed(1) + '"/></g></g>';
+    }).join('');
+    var mitt = skan.kor ? '<small>Skannar</small><strong data-sh-pct>' + skan.pct + ' %</strong><span>' + e(skan.nu ? KORT[skan.nu] : 'Sju kontroller') + '</span>'
+      : p == null ? '<span class="sh-mitt__ikon">' + ik('skold') + '</span><small>Säkerhet</small><span>Redo att skanna</span>'
+      : '<strong>' + p + '</strong><small>Säkerhetspoäng</small><span>' + e(status) + '</span>';
+    return '<div class="sh-karna" data-sh-tilt aria-hidden="true"><div class="sh-scen"><i class="sh-golv"></i><i class="sh-orbit sh-o1"><b></b></i><i class="sh-orbit sh-o2"><b></b></i>' +
+      '<svg class="sh-ringar" viewBox="0 0 240 240"><path d="' + streck + '" class="sh-streck"/>' + ringar + '</svg><div class="sh-mitt">' + mitt + '</div></div></div>';
+  }
+
+  /* 05 Vyn #/sakerhet ---------------------------------------------------------------------------- */
+  function sparkline(v, b, h) {
+    if (v.length < 2) return '';
+    var max = 100, min = Math.max(0, Math.min.apply(null, v) - 10), dx = b / (v.length - 1);
+    var pts = v.map(function (x, n) { return [n * dx, h - ((x - min) / (max - min || 1)) * (h - 8) - 4]; });
+    var d = pts.map(function (p, n) { return (n ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join('');
+    return '<svg viewBox="0 0 ' + b + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true"><path d="' + d + 'L' + b + ' ' + h + 'L0 ' + h + 'Z" class="sh-spark__yta"/><path d="' + d + '" class="sh-spark__linje"/>' +
+      pts.map(function (p) { return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3" class="sh-spark__prick"/>'; }).join('') + '</svg>';
+  }
+  IH.vyer.sakerhet = function () {
+    if (!arAdmin()) return { titel: 'Säkerhet', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + ik('las') + 'Bara för administratören</h2><p class="ad-not">Byt till kontot Admin i kontomenyn för att se säkerhetshubben.</p></section>' };
+    var S = hub(), p = total(), senast = S.historik[0];
+    var ton = p == null ? 'is' : p >= 90 ? 'gron' : p >= 70 ? 'gul' : 'rod';
+    var status = p == null ? 'Inte skannat ännu' : p >= 90 ? 'Skyddat' : p >= 70 ? 'Bör ses över' : 'Åtgärda nu';
+    var knapp = function (ids, ikon, text, accent) { return '<button type="button" class="sh-knapp' + (accent ? ' sh-knapp--accent' : '') + '" data-g="sh-skanna" data-ids="' + ids + '"' + (skan.kor ? ' disabled' : '') + '>' + ik(ikon) + '<span>' + text + '</span></button>'; };
+    var delar = '<ul class="sh-delar">' + KONTROLLER.map(function (k) { var r = S.senast[k.id]; return '<li data-lage="' + lageFor(r) + '" style="--d:' + FARG[k.id] + '"><i></i><span>' + KORT[k.id] + '</span><strong>' + (r ? poang(r.fynd) : '–') + '</strong></li>'; }).join('') +
+      '<li class="sh-delar__total" data-ton="' + ton + '">' + ik(p == null ? 'radar' : p >= 90 ? 'skold' : 'skold-larm') + '<span>' + status + '</span><strong>' + (p == null ? '–' : p) + '</strong></li></ul>';
+    var hjalte = '<section class="sh-hjalte kort" data-ton="' + ton + '"' + (skan.kor ? ' data-skannar' : '') + '><div class="sh-rutnat" aria-hidden="true"></div>' +
+      '<div class="sh-text"><p class="etikett"><i class="sh-live"></i>Säkerhetshubben · demoläget</p><h1>Säkerhet <em>i realtid.</em></h1>' +
+        '<p class="sh-ingress">Kontrollerna körs i webbläsaren mot sidans kod och CRM:ets data – skadlig kod, uppdateringar, buggar, läckor, intrångsförsök, avvikande beteende och sådant som är trasigt.</p>' +
+        '<div class="sh-knappar">' + knapp('', 'radar', 'Skanna allt', true) + knapp('uppdatering', 'uppgradera', 'Sök uppdateringar') + knapp('buggar', 'nyckelverktyg', 'Kontrollera buggar') + knapp('lacka', 'fingeravtryck', 'Läckkontroll') + knapp('intrang,beteende', 'skold-larm', 'Intrång och beteende') + '</div>' +
+        delar + '<p class="sh-senast">' + (senast ? 'Senast skannat ' + IH.sedan(senast.tid) + ' av ' + e((IH.anvandare(senast.av) || {}).namn || '') : 'Ingen skanning gjord ännu – kör en för att få säkerhetspoängen.') + '</p></div>' +
+      '<div class="sh-karnkol">' + karna(S, p, status) + '</div></section>';
+    var kontroller = KONTROLLER.map(function (k) {
+      var r = S.senast[k.id], f = r ? r.fynd : [], lage = lageFor(r), viktiga = f.filter(function (x) { return x.allvar !== 'info'; });
+      var text = !r ? 'Inte körd ännu' : viktiga.length ? plural(viktiga.length, 'fynd', 'fynd') : 'Inga fynd', oppen = ui.oppen === k.id;
+      return '<article class="sh-kontroll' + (skan.nu === k.id ? ' skannas' : '') + '" data-sh-kontroll="' + k.id + '" data-lage="' + lage + '" style="--d:' + FARG[k.id] + '">' +
+        '<span class="sh-forlopp" aria-hidden="true"><i></i></span>' +
+        '<header><span class="sh-kontroll__ikon">' + ik(k.ikon) + '</span><div><h3>' + k.namn + '</h3><p>' + k.under + '</p></div><span class="sh-lampa" title="' + text + '"></span></header>' +
+        '<div class="sh-kontroll__fot"><strong>' + (skan.nu === k.id ? 'Kontrolleras…' : text) + '</strong><small>' + (r ? IH.sedan(r.tid) : '') + '</small>' +
+          '<button type="button" class="knapp knapp--liten" data-g="sh-skanna" data-ids="' + k.id + '"' + (skan.kor ? ' disabled' : '') + '>' + ik('radar') + 'Kör</button>' +
+          (r ? '<button type="button" class="knapp knapp--liten sh-spok" data-g="sh-visa" data-id="' + k.id + '" aria-expanded="' + oppen + '">' + (oppen ? 'Dölj' : 'Detaljer') + '</button>' : '') + '</div>' +
+        (oppen && r ? '<ul class="sh-steg">' + k.steg.map(function (s) { return '<li>' + ik('bock') + s + '</li>'; }).join('') + '</ul>' +
+          (f.length ? '<ul class="sh-fynd">' + f.map(function (x) { return '<li data-allvar="' + x.allvar + '"><span class="sh-allvar">' + ALLVAR[x.allvar].namn + '</span><span>' + e(x.text) + '</span>' + (x.atgard ? '<button type="button" class="knapp knapp--liten" data-g="' + x.atgard.g + '">' + e(x.atgard.text) + '</button>' : '') + '</li>'; }).join('') + '</ul>' : '<p class="sh-inga">Inga fynd.</p>') : '') +
+        '</article>';
+    }).join('') +
+      '<article class="sh-kontroll sh-kontroll--total" data-lage="' + (p == null ? 'ny' : p >= 90 ? 'ok' : p >= 70 ? 'medel' : 'hog') + '"><header><span class="sh-kontroll__ikon">' + ik('skold') + '</span><div><h3>Hela skyddet</h3><p>Alla sju kontroller i en skanning – tar några sekunder.</p></div><span class="sh-lampa"></span></header>' +
+        '<div class="sh-kontroll__fot"><strong>' + (p == null ? 'Inte skannat' : p + ' av 100') + '</strong><small>' + (senast ? IH.sedan(senast.tid) : '') + '</small><button type="button" class="knapp knapp--virke knapp--liten" data-g="sh-skanna" data-ids=""' + (skan.kor ? ' disabled' : '') + '>' + ik('radar') + 'Skanna allt</button></div></article>';
+    var hist = S.historik.slice(0, 12).reverse();
+    var terminal = '<section class="ad-band kort sh-terminalkort"><h2>' + ik('server') + 'Skanningens logg</h2><div class="sh-terminal" data-sh-terminal role="log" aria-live="polite">' +
+      (skan.logg.length ? skan.logg : [{ text: senast ? 'Senaste skanningen: ' + senast.poang + ' av 100 (' + new Date(senast.tid).toLocaleString('sv-SE') + ')' : 'Redo. Tryck på Skanna allt.', ton: 'start' }]).map(function (x) { return '<p class="sh-rad' + (x.ton ? ' sh-rad--' + x.ton : '') + '">› ' + e(x.text) + '</p>'; }).join('') + '</div></section>';
+    var historik = '<section class="ad-band kort"><h2>' + ik('stapel') + 'Poängen över tid' + (S.historik.length ? '<small class="sh-antal">' + plural(S.historik.length, 'skanning', 'skanningar') + '</small>' : '') + '</h2>' +
+      (hist.length > 1 ? '<div class="sh-spark">' + sparkline(hist.map(function (x) { return x.poang || 0; }), 360, 70) + '</div>' : '') +
+      (S.historik.length ? '<ul class="sh-histlista">' + S.historik.slice(0, 5).map(function (x) { var t = x.poang >= 90 ? 'gron' : x.poang >= 70 ? 'gul' : 'rod'; return '<li><strong data-ton="' + t + '">' + x.poang + '</strong><span>' + (x.vad === 'allt' ? 'Full skanning' : x.vad.split(',').map(function (id) { return KORT[id] || id; }).join(', ')) + '<small>' + e((IH.anvandare(x.av) || {}).namn || '') + ' · ' + IH.sedan(x.tid) + '</small></span></li>'; }).join('') + '</ul>' : '<p class="ad-not">Ingen skanning gjord ännu.</p>') +
+      '<p class="ad-etikett">Säkerhetsloggen</p>' + ((db().sakerhet || []).length ? '<ol class="ad-logg">' + db().sakerhet.slice(0, 5).map(function (h) { var u = IH.anvandare(h.av); return '<li><span class="ad-logg__typ">' + e(h.typ) + '</span><span>' + e(String(h.text).slice(0, 96)) + '</span><small>' + IH.sedan(h.tid) + '</small></li>'; }).join('') + '</ol>' : '<p class="ad-not">Inga händelser ännu.</p>') + '</section>';
+    var html = hjalte + '<section class="ad-band kort sh-kontrollband"><h2>' + ik('skold') + 'Sju kontroller<small class="sh-antal">Varje kontroll kan köras för sig. Fynd med åtgärd har en knapp.</small></h2><div class="sh-kontroller">' + kontroller + '</div></section>' +
+      '<div class="ad-tva">' + terminal + historik + '</div>';
+    return { titel: 'Säkerhet', html: html, efter: function (rot) { var t = rot.querySelector('[data-sh-terminal]'); if (t) t.scrollTop = t.scrollHeight; } };
+  };
+  IH.G['sh-skanna'] = function (el) { var ids = el.getAttribute('data-ids'); skanna(ids ? ids.split(',') : null); };
+  IH.G['sh-visa'] = function (el) { var id = el.getAttribute('data-id'); ui.oppen = ui.oppen === id ? null : id; IH.rita(); };
+  IH.G['sh-uppdatera'] = function () { location.reload(); };
+
+  // Kärnan lutar efter musen (som i Uperformance)
+  document.addEventListener('mousemove', function (ev) {
+    var k = document.querySelector('[data-sh-tilt]'); if (!k || lugn()) return;
+    var r = k.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width - 0.5, y = (ev.clientY - r.top) / r.height - 0.5;
+    if (Math.abs(x) > 1.5 || Math.abs(y) > 1.5) { k.style.setProperty('--tx', '0deg'); k.style.setProperty('--ty', '0deg'); return; }
+    k.style.setProperty('--tx', (-y * 14).toFixed(2) + 'deg'); k.style.setProperty('--ty', (x * 18).toFixed(2) + 'deg');
+  }, { passive: true });
+})();

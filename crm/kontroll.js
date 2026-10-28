@@ -28,7 +28,9 @@
 
   IH.vyer.kontroll = function () {
     if (IH.jag().roll !== 'admin') return { titel: 'Kontrollcentral', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + IH.emo('las') + 'Bara för administratören</h2><p class="ad-not">Byt till kontot Admin i kontomenyn.</p></section>' };
-    var d = db(), S = IH.sak, k = S.kontroller(), sak = S.poang(k), inst = S.inst();
+    var d = db(), S = IH.sak, k = S.kontroller(), inst = S.inst();
+    // Säkerhetspoängen från säkerhetshubbens senaste skanning, annars snabbkontrollerna
+    var sak = IH.sakTotal && IH.sakTotal() != null ? IH.sakTotal() : S.poang(k);
     var brott = S.kopplingsBrott();
     var storlek = 0; try { storlek = (localStorage.getItem(IH.NYCKEL) || '').length * 2; } catch (x) { /* */ }
     var konton = IH.ANVANDARE.map(function (u) { return { u: u, h: kontoHalsa(u) }; });

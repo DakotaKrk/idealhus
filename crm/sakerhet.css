@@ -1,0 +1,127 @@
+/* Legohus CRM – säkerhetshubben (sakerhet.js): samma upplägg som Uperformance, i Legohus färger. */
+.sh-hjalte { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 400px); gap: 28px; align-items: center; padding: clamp(24px, 3vw, 38px); margin-bottom: 18px; overflow: hidden;
+  background: radial-gradient(60% 80% at 100% 0%, rgba(255, 210, 150, .45), transparent 60%), radial-gradient(50% 70% at 0% 100%, rgba(190, 220, 200, .35), transparent 65%), linear-gradient(165deg, #fffdf9, #fbf4e8); }
+.sh-rutnat { position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: linear-gradient(rgba(143, 84, 36, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(143, 84, 36, .07) 1px, transparent 1px); background-size: 32px 32px;
+  -webkit-mask: radial-gradient(70% 90% at 75% 50%, #000, transparent); mask: radial-gradient(70% 90% at 75% 50%, #000, transparent); }
+.sh-text { position: relative; min-width: 0; }
+.sh-text .etikett { display: inline-flex; align-items: center; gap: 8px; }
+.sh-live { width: 8px; height: 8px; border-radius: 50%; background: var(--gron); animation: sh-live 2s ease-out infinite; }
+@keyframes sh-live { from { box-shadow: 0 0 0 0 rgba(34, 163, 90, .5); } to { box-shadow: 0 0 0 10px rgba(34, 163, 90, 0); } }
+.sh-hjalte h1 { margin: 10px 0; font: 700 clamp(2.2rem, 1.2rem + 3vw, 3.6rem)/1 var(--rubrik); letter-spacing: -0.04em; }
+.sh-hjalte h1 em { font-style: normal; color: var(--virke-djup); }
+.sh-ingress { margin: 0 0 18px; max-width: 58ch; color: var(--text-2); line-height: 1.55; }
+.sh-knappar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.sh-knapp { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 14px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, .85);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); font: 600 .84rem/1 var(--rubrik); color: var(--text); cursor: pointer; transition: background-color .2s, transform .15s, box-shadow .2s; }
+.sh-knapp:hover:not(:disabled) { background: #fff; box-shadow: inset 0 0 0 1.5px var(--virke); }
+.sh-knapp:active:not(:disabled) { transform: scale(.96); }
+.sh-knapp:disabled { opacity: .5; cursor: default; }
+.sh-knapp .emo-ik { width: 16px; height: 16px; }
+.sh-knapp--accent { background: linear-gradient(160deg, var(--virke-2), var(--virke)); box-shadow: 0 10px 22px -12px rgba(143, 84, 36, .8); }
+.sh-knapp--accent .emo-ik { color: var(--kol); }
+.sh-delar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 0 0 12px; padding: 0; list-style: none; }
+.sh-delar li { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: rgba(255, 255, 255, .72); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); font: 600 .76rem/1.2 var(--rubrik); }
+.sh-delar li i { width: 10px; height: 10px; flex: none; border-radius: 50%; background: var(--d); }
+.sh-delar li span { flex: 1; min-width: 0; color: var(--text-2); }
+.sh-delar li strong { font-size: .92rem; }
+.sh-delar li[data-lage="hog"] strong { color: var(--rod); }
+.sh-delar li[data-lage="medel"] strong { color: #b06a26; }
+.sh-delar .sh-delar__total { background: #fff; box-shadow: inset 0 0 0 1.5px var(--virke); }
+.sh-delar__total .emo-ik { width: 15px; height: 15px; color: var(--virke-djup); }
+.sh-delar .sh-delar__total[data-ton="gron"] { box-shadow: inset 0 0 0 1.5px var(--gron); }
+.sh-delar .sh-delar__total[data-ton="rod"] { box-shadow: inset 0 0 0 1.5px var(--rod); }
+.sh-senast { margin: 0; font-size: .8rem; color: var(--text-3); }
+
+/* Kärnan: en ring per kontroll, kometen runt den som kontrolleras, lutar efter musen */
+.sh-karnkol { position: relative; display: grid; place-items: center; }
+.sh-karna { width: min(380px, 100%); aspect-ratio: 1; perspective: 1000px; --tx: 0deg; --ty: 0deg; }
+.sh-scen { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transform: rotateX(calc(14deg + var(--tx))) rotateY(var(--ty)); transition: transform .6s var(--mjuk); }
+.sh-golv { position: absolute; left: 8%; right: 8%; bottom: -4%; height: 16%; border-radius: 50%; background: radial-gradient(closest-side, rgba(90, 60, 25, .22), transparent); transform: translateZ(-40px); }
+.sh-orbit { position: absolute; inset: 3%; border-radius: 50%; border: 1px dashed rgba(143, 84, 36, .22); transform: rotateX(70deg); animation: sh-orbit 30s linear infinite; }
+.sh-o2 { inset: 12%; animation-duration: 22s; animation-direction: reverse; }
+.sh-orbit b { position: absolute; top: -4px; left: 50%; width: 8px; height: 8px; border-radius: 50%; background: var(--virke); box-shadow: 0 0 10px var(--virke); }
+@keyframes sh-orbit { from { transform: rotateX(70deg) rotateZ(0deg); } to { transform: rotateX(70deg) rotateZ(360deg); } }
+.sh-ringar { position: absolute; inset: 0; width: 100%; height: 100%; transform: translateZ(20px); overflow: visible; }
+.sh-streck { stroke: rgba(143, 84, 36, .28); stroke-width: 1.2; }
+.sh-ring circle { fill: none; stroke-width: 6.5; }
+.sh-ring__spar { stroke: rgba(27, 25, 21, .07); }
+.sh-ring__bage { stroke: var(--d); stroke-linecap: round; transform: rotate(-90deg); transform-origin: 120px 120px; animation: sh-in 1.2s var(--mjuk) backwards; }
+.sh-ring[data-lage="ny"] .sh-ring__bage { opacity: .28; }
+.sh-ring[data-lage="hog"] .sh-ring__bage { stroke: var(--rod); }
+.sh-ring[data-lage="medel"] .sh-ring__bage { stroke: #e8a456; }
+@keyframes sh-in { from { stroke-dasharray: 0 999; } }
+.sh-komet { display: none; transform-origin: 120px 120px; }
+.sh-komet__bage { fill: none; stroke: var(--d); stroke-width: 7.5; stroke-linecap: round; filter: drop-shadow(0 0 6px var(--d)); }
+.sh-ring.skannas .sh-komet { display: block; animation: sh-komet 1s linear infinite; }
+.sh-ring.skannas .sh-ring__bage { opacity: .2; }
+@keyframes sh-komet { from { transform: rotate(-90deg); } to { transform: rotate(270deg); } }
+.sh-mitt { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 2px; text-align: center; transform: translateZ(40px); pointer-events: none; }
+.sh-mitt strong { font: 700 3rem/1 var(--rubrik); letter-spacing: -0.04em; }
+.sh-mitt small { font: 600 .66rem/1.3 var(--rubrik); letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); }
+.sh-mitt span:last-child { font-size: .78rem; color: var(--text-2); }
+.sh-mitt__ikon .emo-ik { width: 34px; height: 34px; color: var(--virke-djup); }
+
+/* Kontrollerna */
+.sh-kontrollband h2 { flex-wrap: wrap; }
+.sh-antal { margin-left: auto; font: 500 .8rem/1.3 var(--sans); color: var(--text-3); }
+.sh-kontroller { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.sh-kontroll { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 20px; overflow: hidden; background: linear-gradient(170deg, #fffdf9, #fbf6ee);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); transition: transform .3s var(--mjuk), box-shadow .3s; --forlopp: 0; }
+.sh-kontroll.skannas { transform: translateY(-3px); box-shadow: inset 0 0 0 1.5px var(--d), 0 18px 34px -24px rgba(90, 60, 25, .6); }
+.sh-forlopp { position: absolute; left: 0; right: 0; top: 0; height: 3px; }
+.sh-forlopp i { display: block; height: 100%; background: var(--d); transform: scaleX(var(--forlopp)); transform-origin: left; transition: transform .3s; }
+.sh-kontroll header { display: flex; align-items: flex-start; gap: 10px; }
+.sh-kontroll header > div { flex: 1; min-width: 0; }
+.sh-kontroll h3 { margin: 0; font: 600 .95rem/1.25 var(--rubrik); }
+.sh-kontroll header p { margin: 3px 0 0; font-size: .78rem; line-height: 1.45; color: var(--text-3); }
+.sh-kontroll__ikon { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: 12px; background: color-mix(in srgb, var(--d, #f0b56e) 14%, #fff); color: var(--d, var(--virke-djup)); }
+.sh-kontroll__ikon .emo-ik { width: 18px; height: 18px; color: inherit; }
+.sh-lampa { width: 10px; height: 10px; flex: none; margin-top: 4px; border-radius: 50%; background: #c9c4bb; }
+.sh-kontroll[data-lage="ok"] .sh-lampa { background: var(--gron); box-shadow: 0 0 0 4px rgba(34, 163, 90, .14); }
+.sh-kontroll[data-lage="lag"] .sh-lampa { background: #e8c98f; }
+.sh-kontroll[data-lage="medel"] .sh-lampa { background: #e8a456; box-shadow: 0 0 0 4px rgba(232, 164, 86, .18); }
+.sh-kontroll[data-lage="hog"] .sh-lampa { background: var(--rod); box-shadow: 0 0 0 4px rgba(217, 87, 63, .16); }
+.sh-kontroll.skannas .sh-lampa { background: var(--d); animation: ad-puls .7s ease-in-out infinite alternate; }
+.sh-kontroll__fot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: auto; }
+.sh-kontroll__fot strong { font: 600 .86rem/1.2 var(--rubrik); }
+.sh-kontroll__fot small { flex: 1; font-size: .74rem; color: var(--text-3); }
+.sh-kontroll__fot .emo-ik { width: 14px; height: 14px; }
+.sh-kontroll .sh-spok { background: none; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .12); }
+.sh-kontroll--total { background: linear-gradient(160deg, #fff7ea, #fdeccf); box-shadow: inset 0 0 0 1.5px rgba(240, 181, 110, .6); }
+.sh-steg, .sh-fynd { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: .8rem; }
+.sh-steg li { display: flex; align-items: center; gap: 6px; color: var(--text-2); }
+.sh-steg .emo-ik { width: 12px; height: 12px; color: var(--gron); }
+.sh-fynd li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 8px; align-items: start; padding: 8px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); }
+.sh-fynd li .knapp { grid-column: 2; justify-self: start; }
+.sh-allvar { padding: 2px 7px; border-radius: 6px; font: 600 .66rem/1.4 var(--rubrik); text-transform: uppercase; letter-spacing: .06em; background: var(--ben); color: var(--text-3); }
+.sh-fynd [data-allvar="hog"] .sh-allvar { background: rgba(217, 87, 63, .14); color: #a33d28; }
+.sh-fynd [data-allvar="medel"] .sh-allvar { background: rgba(232, 164, 86, .2); color: #8f5424; }
+.sh-fynd [data-allvar="lag"] .sh-allvar { background: rgba(232, 201, 143, .3); color: #8f5424; }
+.sh-inga { margin: 0; font-size: .8rem; color: var(--text-3); }
+
+/* Loggen och historiken */
+.sh-terminal { height: 260px; overflow-y: auto; padding: 14px 16px; border-radius: 16px; background: #1f1c17; color: #e9e2d5; font: 500 .8rem/1.6 ui-monospace, Consolas, monospace; }
+.sh-rad { margin: 0; animation: sh-rad .25s ease both; }
+@keyframes sh-rad { from { opacity: 0; transform: translateX(-4px); } }
+.sh-rad--start { color: #f0b56e; }
+.sh-rad--rubrik { color: #fff; font-weight: 700; margin-top: 6px; }
+.sh-rad--ok { color: #7fe0a6; }
+.sh-rad--medel { color: #f6c68d; }
+.sh-rad--hog { color: #ff8a73; }
+.sh-spark svg { width: 100%; height: 80px; display: block; }
+.sh-spark__yta { fill: rgba(240, 181, 110, .18); }
+.sh-spark__linje { fill: none; stroke: var(--virke-djup); stroke-width: 2; }
+.sh-spark__prick { fill: #fff; stroke: var(--virke-djup); stroke-width: 1.5; }
+.sh-histlista { display: grid; gap: 6px; margin: 12px 0; padding: 0; list-style: none; }
+.sh-histlista li { display: flex; align-items: center; gap: 12px; }
+.sh-histlista strong { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; font: 700 .95rem/1 var(--rubrik); background: var(--ben); }
+.sh-histlista strong[data-ton="gron"] { background: rgba(34, 163, 90, .12); color: #1d6b3f; }
+.sh-histlista strong[data-ton="gul"] { background: rgba(232, 164, 86, .2); color: #8f5424; }
+.sh-histlista strong[data-ton="rod"] { background: rgba(217, 87, 63, .12); color: #a33d28; }
+.sh-histlista span { display: grid; font-size: .86rem; }
+.sh-histlista small { font-size: .76rem; color: var(--text-3); }
+@media (max-width: 1250px) { .sh-kontroller { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .sh-hjalte { grid-template-columns: minmax(0, 1fr); } .sh-karnkol { order: -1; } .sh-karna { width: min(300px, 100%); } .sh-delar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .sh-kontroller { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .sh-orbit, .sh-ring__bage, .sh-ring.skannas .sh-komet, .sh-live, .sh-rad { animation: none; } .sh-scen { transition: none; } }
