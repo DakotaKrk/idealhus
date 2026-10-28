@@ -325,3 +325,19 @@ section.sh-mork .sh-delar li:nth-child(1) { --i: 0; } section.sh-mork .sh-delar 
 .sh-diagram__forkl i { display: inline-block; width: 9px; height: 9px; margin: 0 4px 0 6px; border-radius: 3px; vertical-align: -1px; }
 .sh-diagram__forkl i.gron { background: #bfe6cc; } .sh-diagram__forkl i.gul { background: #f6dfa8; } .sh-diagram__forkl i.rod { background: #f6c3b8; }
 .sh-zon { opacity: .7; }
+
+/* skanningslinjen borttagen (gav gröna streck i hjälten) */
+.sh-skanlinje { display: none !important; }
+/* rättat: radarsvepet utan blandningsläge (gav en ljus fyrkant i 3D-scenen), konsolen fyller kortet utan tomt fält
+   under statusraden och statusraden bryts inte */
+.sh-svep { mix-blend-mode: normal; opacity: .85; }
+.sh-konsol .sh-terminal { flex: 1 1 0; min-height: 240px; max-height: none; overflow-y: auto; }
+.sh-konsol__status { flex-wrap: nowrap; white-space: nowrap; overflow: hidden; }
+.sh-konsol__status > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+@media (max-width: 1300px) { .sh-konsol__status > span:nth-child(1) { display: none; } }
+/* fyrkanten runt kärnan: filter på SVG-bågar i en 3D-lutad scen ritar ut sin ruta – inga filter där, glöden kommer
+   från en mjuk ring bakom i stället */
+.sh-karna .sh-ring__bage, .sh-karna .sh-komet__bage, section.sh-mork .sh-ring__bage { filter: none !important; }
+.sh-karna .sh-ringar { overflow: visible; }
+section.sh-mork .sh-scen::before { content: ""; position: absolute; inset: 6%; border-radius: 50%; background: radial-gradient(closest-side, transparent 62%, rgba(246, 198, 141, .14) 78%, transparent 92%); pointer-events: none; }
+section.sh-mork .sh-mitt { animation: none !important; box-shadow: none !important; }
