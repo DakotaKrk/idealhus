@@ -155,3 +155,14 @@ html.drar .aff__flytta { opacity: 0; }
   .af-nasta__knappar .knapp { flex: 1 1 100%; justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) { .af-ring__bage { transition: none; } }
+
+/* Jämna slut på affärssidan (balanseraAffar i vyer.js): kolumnerna sträcks och sista kortet växer */
+@media (min-width: 1101px) {
+  .af-rum[data-af-jamn] { align-items: stretch; }
+  .af-rum[data-af-jamn] .af-kol { display: flex; flex-direction: column; }
+  .af-rum[data-af-jamn] .af-sida { position: static; }
+  .af-rum[data-af-jamn] [data-af-sist] { flex: 1 1 auto; }
+}
+/* Huset i den smala sidokolumnen: faktan i två spalter och mindre bild */
+.af-sida .af-fakta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.af-sida .af-hus img { width: 96px; }

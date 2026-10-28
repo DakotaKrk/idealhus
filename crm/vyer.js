@@ -1737,21 +1737,69 @@
       ? '<a class="offertrad af-offert" href="#/offerter/' + o.id + '"><span><b>' + e(o.nummer) + '</b><small>' + o.rader.length + ' rader · ' + (o.status === 'godkand' ? 'godkänd' : o.status === 'skickad' ? 'skickad ' + IH.sedan(o.skapad) : 'utkast') + '</small></span><b class="tal">' + IH.kr(o.rader.reduce(function (t, x) { return t + (x.antal || 0) * (x.pris || 0); }, 0)) + '</b>' + i('pil') + '</a>'
       : '<p class="af-tom">Ingen offert än. ' + (a.steg === 'ny' || a.steg === 'kontakt' ? 'Den skapas oftast efter platsbesöket.' : '') + '</p>' + (last ? '' : '<button class="knapp knapp--liten" type="button" data-g="skapa-offert" data-id="' + a.id + '">' + i('plus') + 'Skapa offert</button>'));
     var hus = m ? kort('hus', 'hem', 'Huset', '<div class="af-hus"><img src="' + m.tumme + '" alt="" loading="lazy" decoding="async"><div><b>' + e(m.namn) + '</b><small>' + e(m.kategori) + (m.yta ? ' · ' + m.yta + ' m²' : '') + '</small><p>' + e(m.text) + '</p></div></div>' +
-      '<dl class="af-fakta"><div><dt>Yttermått</dt><dd>' + e(m.matt) + '</dd></div><div><dt>Tak</dt><dd>' + e(m.tak) + '</dd></div><div><dt>Rum</dt><dd>' + (m.rum || '–') + '</dd></div><div><dt>Bygglov</dt><dd>' + (m.lov ? 'Krävs' : m.kategori === 'Attefallshus' ? 'Behövs inte' : '–') + '</dd></div></dl>') : '';
+      '<dl class="af-fakta"><div><dt>Yttermått</dt><dd>' + e(m.matt) + '</dd></div><div><dt>Tak</dt><dd>' + e(m.tak) + '</dd></div><div><dt>Rum</dt><dd>' + (m.rum || '–') + '</dd></div><div><dt>Bygglov</dt><dd>' + (m.lov ? 'Krävs' : m.kategori === 'Attefallshus' ? 'Behövs inte' : '–') + '</dd></div></dl>', ' data-af-svang') : '';
     var historik = kort('historik', 'klocka', 'Historik', anteckningsForm(a.kund, a.id) + tidslinje(logg));
     var kund = k ? kort('kund', 'kunder', 'Kunden', '<a class="af-kund" href="#/kunder/' + k.id + '">' + kundAvatar(k) + '<span><b>' + e(k.namn) + '</b><small>' + (k.typ === 'foretag' ? 'Företag' : 'Privatperson') + (k.ort ? ' · ' + e(k.ort) : '') + '</small></span>' + i('pil') + '</a>' +
       '<div class="af-kontakt">' + (k.telefon ? '<a href="tel:' + e(k.telefon.replace(/\s/g, '')) + '">' + i('tel') + e(k.telefon) + '</a>' : '') + (k.epost ? '<a href="mailto:' + e(k.epost) + '">' + i('post') + e(k.epost) + '</a>' : '') + '</div>') : '';
     var uppgifter = kort('uppgifter', 'todo', 'Att göra', uppg.length ? '<ul class="af-uppg">' + uppg.map(function (u) {
       return '<li><button type="button" class="af-uppg__bock" data-g="uppgift-klar" data-id="' + u.id + '" aria-label="Klar: ' + e(u.text) + '"></button><span><b>' + e(u.text) + '</b><small>' + IH.datum(u.forfaller) + '</small></span></li>';
-    }).join('') + '</ul>' : '<p class="af-tom">Inga öppna uppgifter för affären.</p>', '');
+    }).join('') + '</ul>' : '<p class="af-tom">Inga öppna uppgifter för affären.</p>', ' data-af-svang');
     var atgarder = kort('atgarder', 'blixt', 'Åtgärder', '<div class="af-atgarder">' +
       '<button class="knapp" type="button" data-g="starta-mote" data-affar="' + a.id + '">' + i('mote') + 'Kundmöte</button>' +
       '<button class="knapp" type="button" data-g="ny-uppgift">' + i('plus') + 'Ny uppgift</button>' +
       (a.forlorad ? '' : a.steg !== 'vunnen' ? '<button class="knapp knapp--fara" type="button" data-g="aff-forlora" data-id="' + a.id + '">' + i('stang') + 'Markera som förlorad</button>' : '') + '</div>');
     var html = '<a class="tillbaka" href="#/salj">' + i('pilv') + 'Säljtavlan</a>' + hjalte + stegare +
       '<div class="af-rum"><div class="af-kol">' + nasta + offert + hus + historik + '</div><aside class="af-kol af-sida">' + kund + uppgifter + atgarder + '</aside></div>';
-    return { titel: a.titel, html: html };
+    return { titel: a.titel, html: html, efter: balanseraAffar };
   }
+
+  /* Jämna slut (som balanseraAffar i Uperformance): på dator provas alla placeringar av svängkorten (Huset och
+     Att göra) i de två kolumnerna, och den där kolumnerna blir jämnast vinner – det kostar lite att flytta ett kort
+     från sin hemkolumn. Sedan sträcks kolumnerna och sista kortet i den kortare växer in i det som blir över, så
+     att båda slutar i samma linje. Blir skillnaden ändå stor står sidokolumnen kvar och följer med (klistrad). */
+  var AF_FLYTT = 24, AF_FYLLER = 320;
+  function balanseraAffar(rot) {
+    var rum = $('.af-rum', rot);
+    if (!rum) return;
+    var kol = $$('.af-kol', rum), huvud = kol[0], sida = kol[1];
+    var svang = $$('[data-af-svang]', rum);
+    // Hemplatsen minns, så att en ny mätning (t.ex. annan fönsterbredd) börjar från samma läge
+    svang.forEach(function (k) { if (!k.dataset.afHem) k.dataset.afHem = k.parentNode === sida ? 'sida' : 'huvud'; });
+    rum.removeAttribute('data-af-jamn');
+    $$('[data-af-sist]', rum).forEach(function (k) { k.removeAttribute('data-af-sist'); });
+    var dator = window.matchMedia('(min-width: 1101px)').matches;
+    // Tillbaka till hemplatsen (i den ordning korten står i koden) innan mätningen
+    svang.forEach(function (k) {
+      var hem = k.dataset.afHem === 'sida' ? sida : huvud;
+      if (k.parentNode !== hem) hem.appendChild(k);
+    });
+    if (!dator) return;
+    var hojd = function (k) { return k.getBoundingClientRect().height; };
+    var gap = parseFloat(getComputedStyle(huvud).rowGap) || 18;
+    var summa = function (lista) { return lista.reduce(function (t, k) { return t + hojd(k); }, 0) + Math.max(0, lista.length - 1) * gap; };
+    var fastaH = $$(':scope > :not([data-af-svang])', huvud), fastaS = $$(':scope > :not([data-af-svang])', sida);
+    var basta = null;
+    for (var n = 0; n < (1 << svang.length); n++) {
+      var iH = fastaH.slice(), iS = fastaS.slice(), kostnad = 0;
+      svang.forEach(function (k, j) {
+        var tillSida = !!(n & (1 << j));
+        (tillSida ? iS : iH).push(k);
+        if ((tillSida ? 'sida' : 'huvud') !== k.dataset.afHem) kostnad += AF_FLYTT;
+      });
+      var diff = Math.abs(summa(iH) - summa(iS));
+      if (!basta || diff + kostnad < basta.varde) basta = { n: n, varde: diff + kostnad, diff: diff };
+    }
+    svang.forEach(function (k, j) { (basta.n & (1 << j) ? sida : huvud).appendChild(k); });
+    if (basta.diff <= AF_FYLLER) {
+      rum.setAttribute('data-af-jamn', '');
+      [huvud, sida].forEach(function (c) { var sist = c.lastElementChild; if (sist) sist.setAttribute('data-af-sist', ''); });
+    }
+  }
+  var afStorlek = 0;
+  window.addEventListener('resize', function () {
+    clearTimeout(afStorlek);
+    afStorlek = setTimeout(function () { var r = $('.af-rum'); if (r) balanseraAffar(r.parentNode); }, 150);
+  });
 
   function affArk(id) {
     var a = IH.affar(id);
