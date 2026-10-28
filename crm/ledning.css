@@ -1148,3 +1148,7 @@ section.lp-mork .sh-knapp:not(.sh-knapp--accent) .emo-ik, section.sh-mork .sh-kn
 .km-snabbval[aria-pressed="true"] .emo-ik, .km-snabbval[aria-pressed="true"] .i { color: #fff !important; filter: brightness(10); }
 @media (max-width: 700px) { .lp-mane, .lp-fall2 { transform: scale(.55); transform-origin: top right; opacity: .6; } }
 .lp-karta { grid-template-columns: 104px repeat(var(--n), minmax(30px, 1fr)) 52px; padding-bottom: 6px; }
+/* Profilkalendern i smala celler: jobbat-pricken i hörnet, inte över datumet */
+.pk-dag { container-type: inline-size; }
+@container (max-width: 70px) { .pk-dag .pk-jobb { position: absolute; top: auto; bottom: 5px; right: 5px; width: 6px; height: 6px; } .pk-dag .pk-dag__topp b { font-size: .85rem; } }
+@container (max-width: 70px) { .pk-dag.idag .pk-dag__topp b { width: 21px; height: 21px; margin: 0; font-size: .68rem; box-shadow: 0 0 0 2px rgba(246, 198, 141, .2); } .pk-dag { padding: 6px 3px; } }
