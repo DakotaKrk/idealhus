@@ -8572,3 +8572,14 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .anteckna { min-width: 0; max-width: 100%; box-sizing: border-box; }
 .anteckna { container-type: inline-size; }
 @container (max-width: 340px) { .anteckna__rad { flex-wrap: wrap; } .anteckna__rad input { flex-basis: 100%; } .anteckna__rad .knapp { width: 100%; justify-content: center; } }
+/* Dokumentraderna när listan är smal: namnet får plats, status och Klart på en egen rad under */
+.dk__lista { container-type: inline-size; }
+@container (max-width: 640px) {
+  .dk__rad { grid-template-columns: 40px minmax(0, 1fr) auto; row-gap: 6px; column-gap: 12px; }
+  .dk__rad > .dk__ikon { grid-row: 1 / span 2; align-self: start; }
+  .dk__rad > .dk__namn { grid-column: 2; grid-row: 1; }
+  .dk__rad > .dk__varde { grid-column: 3; grid-row: 1; text-align: right; }
+  .dk__rad > .dk__status { grid-column: 2 / -1; grid-row: 2; }
+  .dk__rad > .dk__kund, .dk__rad > .dk__datum { display: none; }
+}
+@container (max-width: 640px) { .dk__rad > .dk__varde:has(> .tid) { display: none; } }
