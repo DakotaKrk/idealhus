@@ -2319,14 +2319,38 @@
      Allt räknas ur datan; uppladdade filer sparas bara som namn, storlek och typ (prototyp).
      ================================================================ */
   var plural = function (n, en, flera) { return n + ' ' + (n === 1 ? en : flera); };
-  var dokUi = { fack: 'alla', lage: 'aktuella', sok: '', sort: 'senast', vem: 'alla', grupp: 'typ', flik: 'arkiv' };
+  var dokUi = { fack: 'alla', lage: 'aktuella', sok: '', sort: 'senast', vem: 'alla', grupp: 'typ', flik: 'arkiv', ar: 'alla' };
   var DOK_FACK = [
     { id: 'offert', namn: 'Offerter', ikon: 'offert', ton: '#f0b56e' },
     { id: 'order', namn: 'Ordrar', ikon: 'trofe', ton: '#7fe0a6' },
-    { id: 'underlag', namn: 'Underlag', ikon: 'linjal', ton: '#9fc2c9' },
-    { id: 'fil', namn: 'Filer', ikon: 'gem', ton: '#c9b4e0' }
+    { id: 'avtal', namn: 'Avtal', ikon: 'skriv', ton: '#e8c98f' },
+    { id: 'ritning', namn: 'Ritningar', ikon: 'linjal', ton: '#9cc3ea' },
+    { id: 'bygglov', namn: 'Bygglov', ikon: 'anteckning', ton: '#b8a6ea' },
+    { id: 'faktura', namn: 'Fakturor', ikon: 'kalkyl', ton: '#f2a39a' },
+    { id: 'underlag', namn: 'Checklistor', ikon: 'bock', ton: '#9fc2c9' },
+    { id: 'besiktning', namn: 'Besiktning', ikon: 'sok', ton: '#8fd1c1' },
+    { id: 'foto', namn: 'Foton', ikon: 'kamera', ton: '#f6c68d' },
+    { id: 'ovrigt', namn: 'Övrigt', ikon: 'gem', ton: '#c9c4bb' }
   ];
-  var DOK_LAGEN = [['aktuella', 'Aktuella'], ['vantar', 'Väntar på svar'], ['klara', 'Klara'], ['utgangna', 'Utgångna'], ['alla', 'Alla']];
+  // Kategorier man kan välja för en fil (offert och order skapas annars i CRM:et men kan också laddas upp)
+  var DOK_VALBARA = ['ritning', 'avtal', 'bygglov', 'faktura', 'besiktning', 'foto', 'offert', 'order', 'ovrigt'];
+  function gissaKat(namn, typ) {
+    var n = String(namn || '').toLowerCase();
+    if (/faktura|invoice|kvitto|betalning/.test(n)) return 'faktura';
+    if (/bygglov|anm[aä]lan|startbesked|kontrollplan|slutbesked/.test(n)) return 'bygglov';
+    if (/ritning|planritning|fasad|sektion|situationsplan|\.dwg$|\.dxf$/.test(n)) return 'ritning';
+    if (/avtal|kontrakt|villkor|fullmakt/.test(n)) return 'avtal';
+    if (/besikt|protokoll|egenkontroll/.test(n)) return 'besiktning';
+    if (/offert/.test(n)) return 'offert';
+    if (/order/.test(n)) return 'order';
+    if (/^image\//.test(typ || '') || /\.(jpe?g|png|heic|webp)$/.test(n)) return 'foto';
+    return 'ovrigt';
+  }
+  // Filerna själva sparas i webbläsarens databas (IndexedDB) så att de alltid finns kvar och kan öppnas igen
+  var dokDb = function () { return new Promise(function (ok, fel) { try { var r = indexedDB.open('ih-crm-filer', 1); r.onupgradeneeded = function () { r.result.createObjectStore('filer'); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { fel(r.error); }; } catch (x) { fel(x); } }); };
+  var dokSparaBlob = function (id, blob) { return dokDb().then(function (d) { return new Promise(function (ok, fel) { var t = d.transaction('filer', 'readwrite'); t.objectStore('filer').put(blob, id); t.oncomplete = ok; t.onerror = function () { fel(t.error); }; }); }); };
+  var dokHamtaBlob = function (id) { return dokDb().then(function (d) { return new Promise(function (ok, fel) { var r = d.transaction('filer').objectStore('filer').get(id); r.onsuccess = function () { ok(r.result || null); }; r.onerror = function () { fel(r.error); }; }); }); };
+  var DOK_LAGEN = [['aktuella', 'Aktuella'], ['vantar', 'Väntar på svar'], ['klara', 'Klara'], ['utgangna', 'Utgångna'], ['arkiv', 'Arkiverade'], ['alla', 'Alla']];
   var UNDERLAG_NAMN = { ritning: 'Ritningar', lov: 'Bygglov eller anmälan', grund: 'Grund och anslutningar', framkomlighet: 'Väg för lastbil och kran' };
   function dokPoster() {
     var ut = [];
@@ -2347,8 +2371,18 @@
       });
     });
     (db().dokument || []).forEach(function (d) {
-      ut.push({ ansv: d.av, id: d.id, fack: 'fil', namn: d.namn, under: (d.ext || 'fil').toUpperCase() + ' · ' + Math.max(1, Math.round(d.storlek / 1024)) + ' kB', ext: d.ext, k: d.kund ? IH.kund(d.kund) : null, varde: null, datum: d.tid,
-        datumUnder: (IH.anvandare(d.av) || { namn: '' }).namn.split(' ')[0], status: ['Uppladdad', 'gra', 'klar'], fil: d });
+      var kat = d.kat || gissaKat(d.namn, d.typ), pr = d.projekt ? db().projekt.find(function (x) { return x.id === d.projekt; }) : null, m = pr ? IH.modell(pr.modell) : null;
+      ut.push({ ansv: d.av, id: d.id, fack: kat, namn: d.namn, under: [(d.ext || 'fil').toUpperCase(), Math.max(1, Math.round(d.storlek / 1024)) + ' kB', m ? m.namn : ''].filter(Boolean).join(' · '), ext: d.ext, k: d.kund ? IH.kund(d.kund) : null, varde: null, datum: d.tid,
+        datumUnder: (IH.anvandare(d.av) || { namn: '' }).namn.split(' ')[0], status: d.arkiv ? ['Arkiverad', 'gra', 'arkiv'] : ['Uppladdad', 'gra', 'klar'], fil: d });
+    });
+    var c = db().chatt;
+    ((c && c.meddelanden) || []).forEach(function (msg) {
+      if (msg.borttagen || !msg.filer) return;
+      msg.filer.forEach(function (f, n) {
+        var kanal = (c.kanaler || []).find(function (x) { return x.id === msg.kanal; }), ext = (String(f.namn).split('.').pop() || '').toLowerCase();
+        ut.push({ ansv: msg.av, id: 'ch-' + msg.id + '-' + n, fack: gissaKat(f.namn, f.typ), namn: f.namn, under: ext.toUpperCase() + ' · från chatten' + (kanal && kanal.namn ? ' · ' + kanal.namn : ''), ext: ext, k: null, varde: null, datum: msg.tid,
+          datumUnder: (IH.anvandare(msg.av) || { namn: '' }).namn.split(' ')[0], status: ['I chatten', 'bla', 'klar'], chatt: f });
+      });
     });
     return ut;
   }
@@ -2357,11 +2391,14 @@
     if (fack !== 'alla' && p.fack !== fack) return false;
     if (dokUi.vem === 'mina' && p.ansv !== IH.jag().id) return false;
     var l = p.status[2];
-    if (lage === 'aktuella' && l === 'utgangen') return false;
+    if (lage === 'aktuella' && (l === 'utgangen' || l === 'arkiv')) return false;
+    if (lage === 'arkiv' && l !== 'arkiv') return false;
+    if (dokUi.ar !== 'alla' && (!p.datum || String(new Date(p.datum).getFullYear()) !== dokUi.ar)) return false;
     if (lage === 'vantar' && l !== 'vantar') return false;
     if (lage === 'klara' && l !== 'klar') return false;
     if (lage === 'utgangna' && l !== 'utgangen') return false;
-    if (sok) { var q = sok.toLowerCase(); if ((p.namn + ' ' + p.under + ' ' + (p.k ? p.k.namn + ' ' + p.k.ort : '') + ' ' + p.status[0]).toLowerCase().indexOf(q) < 0) return false; }
+    if (sok) { var ff = DOK_FACK.find(function (x) { return x.id === p.fack; }), hay = (p.namn + ' ' + p.under + ' ' + (p.k ? p.k.namn + ' ' + p.k.ort : '') + ' ' + p.status[0] + ' ' + (ff ? ff.namn : '') + ' ' + (p.datum ? IH.datum(p.datum, true) : '')).toLowerCase();
+      if (!sok.toLowerCase().split(/\s+/).filter(Boolean).every(function (q) { return hay.indexOf(q) >= 0; })) return false; }
     return true;
   }
   var dokSortera = function (l) {
@@ -2374,8 +2411,9 @@
   };
   function dokRad(p) {
     var f = DOK_FACK.find(function (x) { return x.id === p.fack; });
-    var ikon = p.fack === 'fil' ? '<span class="dk__ikon dk__ikon--fil" style="--t:' + f.ton + '">' + e((p.ext || 'fil').slice(0, 4).toUpperCase()) + '</span>' : '<span class="dk__ikon" style="--t:' + f.ton + '">' + i(f.ikon) + '</span>';
-    var attr = p.fack === 'fil' ? 'data-g="dok-fil" data-id="' + p.id + '"' : 'data-g="dok-detalj" data-id="' + p.id + '"';
+    var arFil = p.fil || p.chatt;
+    var ikon = arFil ? '<span class="dk__ikon dk__ikon--fil" style="--t:' + f.ton + '">' + e((p.ext || 'fil').slice(0, 4).toUpperCase()) + '</span>' : '<span class="dk__ikon" style="--t:' + f.ton + '">' + i(f.ikon) + '</span>';
+    var attr = arFil ? 'data-g="dok-fil" data-id="' + p.id + '"' : 'data-g="dok-detalj" data-id="' + p.id + '"';
     return '<li class="dk__rad" ' + attr + ' tabindex="0" role="button">' + ikon +
       '<span class="dk__namn"><b>' + e(p.namn) + '</b><small>' + e(p.under) + '</small></span>' +
       '<span class="dk__kund">' + (p.k ? kundAvatar(p.k, true) + '<span><b>' + e(p.k.namn) + '</b><small>' + e(p.k.ort || '') + '</small></span>' : '<span class="tid">–</span>') + '</span>' +
@@ -2412,7 +2450,7 @@
       if (f.id === 'offert') return [vantar.length + ' väntar', godk.length + ' godkända'].join(' · ');
       if (f.id === 'order') return l.length ? IH.kort(sum(l)) + ' i ordervärde' : 'Inga ännu';
       if (f.id === 'underlag') { var s = l.filter(function (p) { return p.status[2] !== 'klar'; }).length; return s ? s + ' saknas · ' + (l.length - s) + ' klara' : l.length ? 'Allt klart' : 'Inga projekt'; }
-      return l.length ? 'Senast ' + IH.sedan(l.sort(function (a, b) { return new Date(b.datum) - new Date(a.datum); })[0].datum) : 'Inga ännu';
+      return l.length ? plural(l.length, 'fil', 'filer') + ' · senast ' + IH.sedan(l.sort(function (a, b) { return new Date(b.datum) - new Date(a.datum); })[0].datum) : 'Inga ännu';
     };
     var grupper;
     if (dokUi.grupp === 'kund') {
@@ -2422,7 +2460,7 @@
     } else if (dokUi.grupp === 'ingen' || dokUi.fack !== 'alla') grupper = lista.length ? [{ f: dokUi.fack !== 'alla' ? DOK_FACK.find(function (x) { return x.id === dokUi.fack; }) : { id: 'alla', namn: 'Alla dokument', ikon: 'mapp', ton: '#e8c98f' }, l: lista }] : [];
     else grupper = DOK_FACK.map(function (f) { return { f: f, l: lista.filter(function (p) { return p.fack === f.id; }) }; }).filter(function (g) { return g.l.length; });
     var html = '<h1 class="dold">Dokument</h1>' +
-      '<section class="dk-hjalte kort kort--mork" data-in><i class="dk-hjalte__glod" aria-hidden="true"></i>' +
+      '<section class="dk-hjalte kort kort--mork" data-in data-uppladdning><i class="dk-hjalte__glod" aria-hidden="true"></i>' +
         '<div class="dk-hjalte__text"><p class="etikett"><i class="sh-live"></i>Dokumentarkivet</p><h1>Dokument <em>&amp; avtal</em></h1>' +
           '<p class="dk-hjalte__ingress">Offerter, ordrar, underlag och filer – samlade, sorterade och sökbara på ett ställe. Välj en typ, ett läge eller sök – detaljerna öppnas med ett klick.</p>' +
           '<div class="dk-flikar" role="tablist">' + [['arkiv', 'Arkiv', 'mapp', iLage.length], ['mallar', 'Mallar', 'rutnat', DOK_MALLAR.length]].map(function (f) { return '<button type="button" role="tab" data-g="dok-flik" data-f="' + f[0] + '" aria-selected="' + (dokUi.flik === f[0]) + '">' + i(f[2]) + f[1] + '<b>' + f[3] + '</b></button>'; }).join('') + '</div>' +
@@ -2441,6 +2479,7 @@
         }).join('') + '<button type="button" class="dk-fack__alla" data-g="dok-fack" data-f="alla" aria-pressed="' + (dokUi.fack === 'alla') + '">' + i('rutnat') + 'Alla<b>' + iLage.length + '</b></button></div></div>' +
         '<div class="dk-verktyg"><label class="sok sok--liten dk-sok">' + i('sok') + '<input type="search" placeholder="Sök nummer, kund, hus eller fil" value="' + e(dokUi.sok) + '" data-dok-sok aria-label="Sök bland dokumenten"></label>' +
           '<span class="dk-vem" role="group" aria-label="Vems">' + [['mina', 'Mina'], ['alla', 'Alla']].map(function (v2) { var n = dokPoster().filter(function (p) { return v2[0] === 'alla' || p.ansv === IH.jag().id; }).length; return '<button type="button" data-g="dok-vem" data-f="' + v2[0] + '" aria-pressed="' + (dokUi.vem === v2[0]) + '">' + v2[1] + '<b>' + n + '</b></button>'; }).join('') + '</span>' +
+          '<label class="kundsort">' + i('kalender') + '<select data-dok-ar aria-label="År">' + [['alla', 'Alla år']].concat(dokAr(alla).map(function (y) { return [y, y]; })).map(function (o) { return '<option value="' + o[0] + '"' + (dokUi.ar === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' +
           '<label class="kundsort">' + i('rutnat') + '<select data-dok-grupp aria-label="Gruppera">' + [['typ', 'Per typ'], ['kund', 'Per kund'], ['ingen', 'Ingen gruppering']].map(function (o) { return '<option value="' + o[0] + '"' + (dokUi.grupp === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' +
           '<label class="kundsort">' + i('lista') + '<select data-dok-sort aria-label="Sortera">' + [['senast', 'Senast först'], ['utgar', 'Går ut först'], ['varde', 'Störst värde'], ['kund', 'Kund A–Ö']].map(function (o) { return '<option value="' + o[0] + '"' + (dokUi.sort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' +
           '<div class="dk-lagen" role="group" aria-label="Läge">' + DOK_LAGEN.map(function (l) { var n = alla.filter(function (p) { return dokPassar(p, { lage: l[0], sok: '' }); }).length; return '<button type="button" class="dk-lage" data-g="dok-lage" data-l="' + l[0] + '" aria-pressed="' + (dokUi.lage === l[0]) + '"' + (l[0] === 'utgangna' && n ? ' data-varm' : '') + '>' + l[1] + '<b>' + n + '</b></button>'; }).join('') + '</div></div>' +
@@ -2460,7 +2499,12 @@
       if (s) s.addEventListener('input', function () { dokUi.sok = s.value; var pos = s.selectionStart; IH.rita(); var n = $('[data-dok-sok]'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } });
       var so = $('[data-dok-sort]', rot); if (so) so.addEventListener('change', function () { dokUi.sort = so.value; IH.rita(); });
       var gr = $('[data-dok-grupp]', rot); if (gr) gr.addEventListener('change', function () { dokUi.grupp = gr.value; IH.rita(); });
-      var fi = $('[data-dok-fil]', rot); if (fi) fi.addEventListener('change', function () { dokLaddaUpp(fi.files); });
+      var ar = $('[data-dok-ar]', rot); if (ar) ar.addEventListener('change', function () { dokUi.ar = ar.value; IH.rita(); });
+      // släpp filer var som helst på sidan
+      rot.addEventListener('dragover', function (ev) { if (ev.dataTransfer && [].indexOf.call(ev.dataTransfer.types || [], 'Files') >= 0) { ev.preventDefault(); rot.classList.add('dk-slapp'); } });
+      rot.addEventListener('dragleave', function (ev) { if (ev.target === rot || !rot.contains(ev.relatedTarget)) rot.classList.remove('dk-slapp'); });
+      rot.addEventListener('drop', function (ev) { rot.classList.remove('dk-slapp'); if (ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files.length) { ev.preventDefault(); dokLaddaUpp(ev.dataTransfer.files); } });
+      var fi = $('[data-dok-fil]', rot); if (fi) fi.addEventListener('change', function () { dokLaddaUpp(fi.files); fi.value = ''; });
       rot.addEventListener('keydown', function (ev) { var r = ev.target.closest && ev.target.closest('.dk__rad'); if (r && ev.target === r && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); r.click(); } });
     } };
   };
@@ -2541,33 +2585,61 @@
       fot: knappar.join('') });
   };
   G['dok-check-stang'] = function (el) { IH.stangArk(true); G['prod-check'](el); };
+  var dokVantar = [];
   function dokLaddaUpp(filer) {
-    var d = db(); if (!d.dokument) d.dokument = [];
-    var lagg = function (f) { d.dokument.push({ id: IH.nyttId('dokument', 'd'), namn: f.name, ext: (f.name.split('.').pop() || '').toLowerCase(), storlek: f.size, typ: f.type, tid: new Date().toISOString(), av: IH.jag().id, kund: null }); };
-    var l = Array.prototype.slice.call(filer || []); if (!l.length) return;
-    // filerna går genom virusskannern först när den finns
-    if (window.IHFilskanner && IHFilskanner.granska) { Promise.all(l.map(function (f) { return Promise.resolve(IHFilskanner.granska(f)).then(function (r) { if (!r || r.ok !== false) lagg(f); }, function () {}); })).then(klart); }
-    else { l.forEach(lagg); klart(); }
-    function klart() { IH.spara(); dokUi.fack = 'fil'; dokUi.lage = 'aktuella'; IH.rita(); IH.toast('Uppladdat', l.length + (l.length === 1 ? ' fil' : ' filer') + ' i arkivet.', 'gem'); }
+    dokVantar = Array.prototype.slice.call(filer || []); if (!dokVantar.length) return;
+    var k0 = dokUi.grupp === 'kund' ? '' : '';
+    IH.oppnaArk({ titel: dokVantar.length === 1 ? 'Spara filen' : 'Spara ' + dokVantar.length + ' filer', ikon: 'gem', under: 'Välj vad det är och vem det gäller – då hittar du det lätt igen.',
+      kropp: '<form class="formular dk-upp" data-form="dok-upp" id="dok-upp-form">' + dokVantar.map(function (f, n) {
+          var g = gissaKat(f.name, f.type);
+          return '<div class="dk-upp__rad"><span class="dk__ikon dk__ikon--fil" style="--t:' + DOK_FACK.find(function (x) { return x.id === g; }).ton + '">' + e((f.name.split('.').pop() || '').slice(0, 4).toUpperCase()) + '</span><span class="dk-upp__namn"><b>' + e(f.name) + '</b><small>' + Math.max(1, Math.round(f.size / 1024)) + ' kB</small></span>' +
+            '<select name="kat' + n + '" aria-label="Typ av dokument">' + DOK_VALBARA.map(function (id) { var ff = DOK_FACK.find(function (x) { return x.id === id; }); return '<option value="' + id + '"' + (id === g ? ' selected' : '') + '>' + ff.namn + '</option>'; }).join('') + '</select></div>';
+        }).join('') +
+        '<div class="falt-rad"><label class="falt"><span>Kund</span><select name="kund"><option value="">Ingen kund</option>' + db().kunder.slice().sort(function (a, b) { return a.namn.localeCompare(b.namn, 'sv'); }).map(function (k) { return '<option value="' + k.id + '">' + e(k.namn) + '</option>'; }).join('') + '</select></label>' +
+        '<label class="falt"><span>Projekt (valfritt)</span><select name="projekt"><option value="">Inget projekt</option>' + db().projekt.map(function (pr) { var k = IH.kund(pr.kund), m = IH.modell(pr.modell); return '<option value="' + pr.id + '">' + e((k ? k.namn : '') + ' · ' + (m ? m.namn : '')) + '</option>'; }).join('') + '</select></label></div>' +
+        '<p class="kund-tom">Filerna sparas i den här webbläsaren och finns kvar tills du själv arkiverar dem.</p></form>',
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="dok-upp-form">' + i('bock') + 'Spara i arkivet</button>' });
+    void k0;
   }
-  G['dok-fack'] = function (el) { var f = el.getAttribute('data-f'); dokUi.fack = dokUi.fack === f && f !== 'alla' ? 'alla' : f; IH.rita(); };
-  G['dok-lage'] = function (el) { dokUi.lage = el.getAttribute('data-l'); IH.rita(); };
-  G['dok-visa'] = function (el) { dokUi.visaAlla = el.getAttribute('data-f'); IH.rita(); };
-  G['dok-nollstall'] = function () { dokUi.fack = 'alla'; dokUi.lage = 'aktuella'; dokUi.sok = ''; IH.rita(); };
-  G['dok-ga'] = function (el) { IH.ga(el.getAttribute('data-href')); };
-  G['dok-forlang'] = function (el) {
-    var o = db().offerter.find(function (x) { return x.id === el.getAttribute('data-id'); }); if (!o) return;
-    o.giltig = (o.giltig || 30) + 14; IH.logga('system', 'Offert ' + o.nummer + ' förlängd 14 dagar.', o.kund, o.affar); IH.spara(); IH.rita();
-    IH.toast('Förlängd', 'Offert ' + o.nummer + ' gäller 14 dagar till.', 'kalender');
+  FORM['dok-upp'] = function (f, d) {
+    var dd = db(); if (!dd.dokument) dd.dokument = [];
+    var pr = d.get('projekt') ? dd.projekt.find(function (x) { return x.id === d.get('projekt'); }) : null, kund = d.get('kund') || (pr ? pr.kund : null);
+    var nya = dokVantar.map(function (fil, n) { return { fil: fil, rad: { id: IH.nyttId('dokument', 'd'), namn: fil.name, ext: (fil.name.split('.').pop() || '').toLowerCase(), storlek: fil.size, typ: fil.type, tid: new Date().toISOString(), av: IH.jag().id, kund: kund, projekt: pr ? pr.id : null, kat: d.get('kat' + n) || gissaKat(fil.name, fil.type) } }; });
+    Promise.all(nya.map(function (x) { return dokSparaBlob(x.rad.id, x.fil).then(function () { x.rad.sparad = true; }, function () { x.rad.sparad = false; }); })).then(function () {
+      nya.forEach(function (x) { dd.dokument.push(x.rad); if (kund) IH.logga('system', 'Dokument sparat: ' + x.rad.namn + ' (' + DOK_FACK.find(function (ff) { return ff.id === x.rad.kat; }).namn.toLowerCase() + ').', kund, null); });
+      dokVantar = []; IH.spara(); IH.stangArk(true);
+      var kat = nya.length && nya.every(function (x) { return x.rad.kat === nya[0].rad.kat; }) ? nya[0].rad.kat : 'alla';
+      dokUi.fack = kat; dokUi.lage = 'aktuella'; dokUi.flik = 'arkiv'; IH.rita();
+      IH.toast('Sparat i arkivet', plural(nya.length, 'fil', 'filer') + (kund ? ' hos ' + IH.kund(kund).namn : '') + '.', 'gem');
+    });
+  };
+  var dokOppnaBlob = function (blob, namn, ladda) {
+    var u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u;
+    if (ladda) a.download = namn; else a.target = '_blank';
+    a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 60000);
+  };
+  G['dok-fil-oppna'] = function (el) {
+    var id = el.getAttribute('data-id'), ladda = !!el.getAttribute('data-ladda'), p = dokPoster().find(function (x) { return x.id === id; }); if (!p) return;
+    if (p.chatt) { if (!p.chatt.data) { IH.toast('Filen finns inte kvar', 'Bara namnet sparades i chatten.', 'varning'); return; } fetch(p.chatt.data).then(function (r) { return r.blob(); }).then(function (b) { dokOppnaBlob(b, p.namn, ladda); }); return; }
+    dokHamtaBlob(p.fil.id).then(function (b) { if (b) dokOppnaBlob(b, p.namn, ladda); else IH.toast('Filen finns inte i den här webbläsaren', 'Den laddades upp på en annan dator eller innan arkivet sparade filer.', 'varning'); }, function () { IH.toast('Kunde inte öppna filen', '', 'varning'); });
   };
   G['dok-fil'] = function (el) {
-    var d = (db().dokument || []).find(function (x) { return x.id === el.getAttribute('data-id'); }); if (!d) return;
-    IH.oppnaArk({ titel: d.namn, ikon: 'gem', under: (d.ext || '').toUpperCase() + ' · ' + Math.max(1, Math.round(d.storlek / 1024)) + ' kB · uppladdad ' + IH.datum(d.tid),
-      kropp: '<form class="formular" data-form="dok-fil" id="dok-fil-form"><input type="hidden" name="id" value="' + d.id + '"><label class="falt"><span>Koppla till kund</span><select name="kund"><option value="">Ingen</option>' + db().kunder.map(function (k) { return '<option value="' + k.id + '"' + (d.kund === k.id ? ' selected' : '') + '>' + e(k.namn) + '</option>'; }).join('') + '</select></label>' +
-        '<p class="kund-tom">I prototypen sparas bara filens namn och storlek – själva filen laddas inte upp någonstans.</p></form>',
-      fot: '<button class="knapp" type="button" data-g="dok-fil-bort" data-id="' + d.id + '">' + i('stang') + 'Ta bort</button><button class="knapp knapp--virke" type="submit" form="dok-fil-form">' + i('bock') + 'Spara</button>' });
+    var p = dokPoster().find(function (x) { return x.id === el.getAttribute('data-id'); }); if (!p) return;
+    var d = p.fil, f = DOK_FACK.find(function (x) { return x.id === p.fack; }), u = IH.anvandare(p.ansv);
+    var fakta = [['Typ', e(f.namn)], ['Fil', e((p.ext || '').toUpperCase()) + ' · ' + (d ? Math.max(1, Math.round(d.storlek / 1024)) + ' kB' : 'från chatten')], ['Sparad', IH.datum(p.datum, true) + (u ? ' av ' + e(u.namn) : '')]];
+    if (p.k) fakta.push(['Kund', '<a href="#/kunder/' + p.k.id + '">' + e(p.k.namn) + '</a>']);
+    var redigera = d ? '<form class="formular" data-form="dok-fil" id="dok-fil-form"><input type="hidden" name="id" value="' + d.id + '"><div class="falt-rad">' +
+      '<label class="falt"><span>Typ</span><select name="kat">' + DOK_VALBARA.map(function (id) { return '<option value="' + id + '"' + (id === p.fack ? ' selected' : '') + '>' + DOK_FACK.find(function (x) { return x.id === id; }).namn + '</option>'; }).join('') + '</select></label>' +
+      '<label class="falt"><span>Kund</span><select name="kund"><option value="">Ingen</option>' + db().kunder.map(function (k) { return '<option value="' + k.id + '"' + (d.kund === k.id ? ' selected' : '') + '>' + e(k.namn) + '</option>'; }).join('') + '</select></label></div></form>' : '';
+    IH.oppnaArk({ titel: p.namn, ikon: f.ikon, under: e(f.namn) + ' · <span class="dk__chip" data-ton="' + p.status[1] + '"><i></i>' + e(p.status[0]) + '</span>',
+      kropp: '<div class="dkd"><dl class="dkd__fakta">' + fakta.map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + x[1] + '</dd>'; }).join('') + '</dl>' + redigera + '</div>',
+      fot: '<button class="knapp knapp--virke" type="button" data-g="dok-fil-oppna" data-id="' + p.id + '">' + i('helskarm') + 'Öppna</button><button class="knapp" type="button" data-g="dok-fil-oppna" data-ladda="1" data-id="' + p.id + '">' + i('skrivut') + 'Ladda ner</button>' +
+        (d ? '<button class="knapp" type="button" data-g="dok-fil-arkiv" data-id="' + d.id + '">' + i(d.arkiv ? 'aterstall' : 'mapp') + (d.arkiv ? 'Återställ' : 'Arkivera') + '</button><button class="knapp" type="submit" form="dok-fil-form">' + i('bock') + 'Spara</button>' : '') });
   };
-  FORM['dok-fil'] = function (f, d) { var x = (db().dokument || []).find(function (y) { return y.id === d.get('id'); }); if (x) x.kund = d.get('kund') || null; IH.spara(); IH.stangArk(true); IH.rita(); IH.toast('Sparat', x ? x.namn : '', 'gem'); };
+  FORM['dok-fil'] = function (f, d) { var x = (db().dokument || []).find(function (y) { return y.id === d.get('id'); }); if (x) { x.kund = d.get('kund') || null; x.kat = d.get('kat') || x.kat; } IH.spara(); IH.stangArk(true); IH.rita(); IH.toast('Sparat', x ? x.namn : '', 'gem'); };
+  // Ingenting raderas: arkiverade dokument göms från Aktuella men finns kvar under Arkiverade och Alla
+  G['dok-fil-arkiv'] = function (el) { var x = (db().dokument || []).find(function (y) { return y.id === el.getAttribute('data-id'); }); if (!x) return; x.arkiv = !x.arkiv; IH.spara(); IH.stangArk(true); IH.rita(); IH.toast(x.arkiv ? 'Arkiverat' : 'Återställt', x.namn + (x.arkiv ? ' finns kvar under Arkiverade.' : ''), 'mapp'); };
+  function dokAr(alla) { var y = {}; alla.forEach(function (p) { if (p.datum) y[new Date(p.datum).getFullYear()] = 1; }); return Object.keys(y).sort().reverse(); }
   G['dok-fil-bort'] = function (el) { var l = db().dokument || [], n = l.findIndex(function (x) { return x.id === el.getAttribute('data-id'); }); if (n >= 0) l.splice(n, 1); IH.spara(); IH.stangArk(true); IH.rita(); IH.toast('Borttagen', '', 'stang'); };
   G['dok-csv'] = function () {
     var l = dokSortera(dokPoster().filter(function (p) { return dokPassar(p); }));
