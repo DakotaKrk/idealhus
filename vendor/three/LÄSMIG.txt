@@ -2,3 +2,5 @@ three.js r170 (MIT-licens, se LICENSE), hämtat 2026-10-16 från https://cdn.jsd
 three.module.min.js = build/three.module.min.js. addons/ = examples/jsm/ (urval).
 Enda ändringen: importen "from 'three'" i addons/ är omskriven till en relativ sökväg till three.module.min.js
 (så att inget importkarta/byggsteg behövs). Används av 3D-scenerna i crm/ (scen3d.js m.fl.).
+
+laggt till 2026-10-28: addons/loaders/GLTFLoader.js, addons/utils/BufferGeometryUtils.js, addons/utils/SkeletonUtils.js (samma omskrivning av importen).

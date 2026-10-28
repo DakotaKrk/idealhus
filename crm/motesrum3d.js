@@ -10,6 +10,8 @@ import { EffectComposer } from '../vendor/three/addons/postprocessing/EffectComp
 import { RenderPass } from '../vendor/three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from '../vendor/three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from '../vendor/three/addons/postprocessing/OutputPass.js';
+import { GLTFLoader } from '../vendor/three/addons/loaders/GLTFLoader.js';
+import { clone as kloneSkelett } from '../vendor/three/addons/utils/SkeletonUtils.js';
 
 const IH = window.IH;
 const LUGN = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -163,7 +165,7 @@ function bygg() {
   const golv = new THREE.Mesh(new THREE.PlaneGeometry(16, 12), mat({ map: T.golv(), roughness: 0.55, metalness: 0.02 })); golv.rotation.x = -Math.PI / 2; golv.receiveShadow = true; scen.add(golv);
   const vaggM = mat({ map: T.vagg(), roughness: 0.95 });
   const bak = new THREE.Mesh(new THREE.PlaneGeometry(16, 6), vaggM); bak.position.set(0, 3, -4.2); bak.receiveShadow = true; scen.add(bak);
-  const vanster = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), vaggM); vanster.rotation.y = Math.PI / 2; vanster.position.set(-6.2, 3, 1.8); vanster.receiveShadow = true; scen.add(vanster);
+  const vanster = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), vaggM); vanster.rotation.y = Math.PI / 2; vanster.position.set(-6.2, 3, 1.8); vanster.receiveShadow = true; scen.add(vanster); const hoger = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), vaggM); hoger.rotation.y = -Math.PI / 2; hoger.position.set(7.6, 3, 1.8); hoger.receiveShadow = true; scen.add(hoger);
   const sockel = lada(16, 0.14, 0.04, M.vit, 0.01); sockel.position.set(0, 0.07, -4.18); scen.add(sockel);
   // fönstret: utsikt, karmar, glas med reflex
   const utsikt = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 3.2), new THREE.MeshBasicMaterial({ map: T.utsikt(), toneMapped: false })); utsikt.position.set(2.4, 2.75, -4.17); scen.add(utsikt);
@@ -283,96 +285,40 @@ function bygg() {
   const fagelM = new THREE.MeshBasicMaterial({ color: '#3b3a3c', side: THREE.DoubleSide }), faglar = [];
   for (let n = 0; n < 4; n++) { const f = new THREE.Group(); [-1, 1].forEach((sd) => { const v = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.025), fagelM); v.geometry.translate(0.045 * sd, 0, 0); f.add(v); }); f.position.z = -4.16; scen.add(f); faglar.push({ f, fas: n * 0.7, y: 3.6 + (n % 2) * 0.25 }); }
   const granar = []; [[-0.6, 0.55], [0.15, 0.7], [1.6, 0.5], [3.3, 0.62], [4.9, 0.58], [5.5, 0.48]].forEach(([x, s2]) => { const gr = new THREE.Group(); gr.position.set(x, 1.6, -4.5); scen.add(gr); [[0.42, 0.9, 0.45], [0.32, 0.7, 0.95], [0.2, 0.5, 1.35]].forEach(([r, h, y]) => { const k = new THREE.Mesh(new THREE.ConeGeometry(r * s2, h * s2, 10), mat({ color: '#4f6b48', roughness: 0.9 })); k.position.y = y * s2; gr.add(k); }); granar.push(gr); });
-  // arkitekten vid whiteboarden: en riktig människa i kavaj – ben med knän, midja, axlar, armar med armbågar,
-  // händer med pekfinger, hals och huvud med ansikte; pekar på husets resa och vänder sig mot kunderna
-  const ark = new THREE.Group(); ark.position.set(-4.55, 0, -2.95); ark.rotation.y = 1.0; ark.scale.setScalar(1.3); scen.add(ark);
-  const hud = mat({ color: '#d9a882', roughness: 0.55 }), kavajM = mat({ color: '#2f3b4c', roughness: 0.75, side: THREE.DoubleSide }), skjortaM = mat({ color: '#f5f2ec', roughness: 0.65 }), byxM = mat({ color: '#3a3836', roughness: 0.8 }), skoM = mat({ color: '#4a3020', roughness: 0.45, metalness: 0.1 });
-  const kropp = new THREE.Group(); kropp.position.y = 0.94; ark.add(kropp); kropp.name = 'kropp';
-  // benen
-  const ben = [-1, 1].map((sd) => {
-    const hoft = new THREE.Group(); hoft.position.set(sd * 0.095, 0, 0); kropp.add(hoft);
-    const lar = cyl(0.078, 0.066, 0.45, byxM, 18); lar.position.y = -0.225; hoft.add(lar);
-    const kna = new THREE.Group(); kna.position.y = -0.45; hoft.add(kna);
-    const smal = cyl(0.062, 0.05, 0.42, byxM, 18); smal.position.y = -0.21; kna.add(smal);
-    const sko = lada(0.11, 0.08, 0.27, skoM, 0.035); sko.position.set(0, -0.44, 0.05); kna.add(sko);
-    const sula = lada(0.115, 0.02, 0.28, mat({ color: '#e9e2d6' }), 0.008); sula.position.set(0, -0.48, 0.05); kna.add(sula);
-    return { hoft, kna };
+  // människorna: en riggad figur från Quaternius Universal Animation Library (CC0, modeller/figurer) med färdiga
+  // rörelser – presentatören vid whiteboarden pratar och visar, två kollegor sitter vid bordet och pratar
+  const figurer = { mixers: [], presentator: null };
+  new GLTFLoader().load('../modeller/figurer/mannekang.glb', (gltf) => {
+    const klipp = (namn) => gltf.animations.find((a) => a.name === namn);
+    const kladd = (rot, kropp, leder) => { rot.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; const m2 = (o.material.name || '').indexOf('Joint') >= 0 ? leder : kropp; o.material = m2; } }); };
+    const ny = (x, z, ry, kropp, leder, rorelse, skala = 1) => {
+      const f = kloneSkelett(gltf.scene); kladd(f, kropp, leder);
+      const box = new THREE.Box3().setFromObject(f), h = box.max.y - box.min.y || 1, sk = 3.0 / h * skala;
+      f.scale.setScalar(sk); f.position.set(x, 0, z); f.rotation.y = ry; scen.add(f);
+      const mix = new THREE.AnimationMixer(f), akt = {};
+      rorelse.forEach((n) => { const c = klipp(n); if (c) akt[n] = mix.clipAction(c); });
+      figurer.mixers.push(mix); return { f, mix, akt };
+    };
+    const kavaj = mat({ color: '#2f3b4c', roughness: 0.6 }), ledK = mat({ color: '#c98a45', roughness: 0.45, metalness: 0.2 });
+    const p = ny(-4.5, -2.95, 1.0, kavaj, ledK, ['Idle_Talking_Loop', 'Interact', 'Idle_Loop']);
+    if (p.akt.Idle_Talking_Loop) p.akt.Idle_Talking_Loop.play();
+    if (p.akt.Interact) { p.akt.Interact.setLoop(THREE.LoopOnce, 1); p.akt.Interact.clampWhenFinished = true; }
+    p.mix.addEventListener('finished', () => { if (p.akt.Interact && p.akt.Idle_Talking_Loop) { p.akt.Idle_Talking_Loop.reset().play(); p.akt.Idle_Talking_Loop.crossFadeFrom(p.akt.Interact, 0.6, true); } });
+    figurer.presentator = p;
+    // två kollegor sitter på andra sidan bordet
+    [[-1.5, -2.25, 0.04, '#7a5c45', 'Sitting_Talking_Loop'], [1.5, -2.25, 0.04, '#5b7f9e', 'Sitting_Idle_Loop']].forEach(([x, z, ry, farg, rorelse], n) => {
+      const k = ny(x, z, ry, mat({ color: farg, roughness: 0.65 }), mat({ color: '#e9dccb', roughness: 0.5 }), [rorelse]);
+      if (k.akt[rorelse]) { k.akt[rorelse].play(); k.akt[rorelse].time = n * 1.7; }
+    });
+    if (S) S.figurer = figurer;
   });
-  // bålen: skjorta och kavaj som svarvad form, platt fram och bak
-  const profil = (pts) => pts.map(([r, y]) => new THREE.Vector2(r, y));
-  const skjorta = new THREE.Mesh(new THREE.LatheGeometry(profil([[0.001, -0.02], [0.15, -0.02], [0.155, 0.12], [0.175, 0.3], [0.19, 0.44], [0.17, 0.52], [0.07, 0.58], [0.001, 0.58]]), 32), skjortaM);
-  skjorta.scale.z = 0.62; skjorta.castShadow = true; kropp.add(skjorta);
-  const kavaj = new THREE.Mesh(new THREE.LatheGeometry(profil([[0.158, -0.06], [0.162, 0.12], [0.183, 0.3], [0.2, 0.44], [0.185, 0.53], [0.09, 0.585]]), 40, Math.PI * 0.12, Math.PI * 1.76), kavajM);
-  kavaj.scale.z = 0.66; kavaj.castShadow = true; kropp.add(kavaj);
-  const slag = [-1, 1].map((sd) => { const l = new THREE.Mesh(new THREE.PlaneGeometry(0.07, 0.24), mat({ color: '#28323f', roughness: 0.7, side: THREE.DoubleSide })); l.position.set(sd * 0.055, 0.4, 0.118); l.rotation.set(-0.15, 0, sd * 0.32); kropp.add(l); return l; });
-  const slips = new THREE.Mesh(new THREE.PlaneGeometry(0.035, 0.26), mat({ color: '#c98a45', roughness: 0.5, side: THREE.DoubleSide })); slips.position.set(0, 0.38, 0.105); slips.rotation.x = -0.12; kropp.add(slips);
-  const knut = lada(0.04, 0.035, 0.02, mat({ color: '#b5783a' }), 0.008); knut.position.set(0, 0.52, 0.09); kropp.add(knut);
-  const balte = cyl(0.157, 0.157, 0.04, mat({ color: '#2a1e16', roughness: 0.5 }), 32); balte.scale.z = 0.64; balte.position.y = 0.0; kropp.add(balte);
-  const spanne = lada(0.045, 0.03, 0.01, M.krom, 0.004); spanne.position.set(0, 0, 0.1); kropp.add(spanne);
-  const ficka = lada(0.07, 0.012, 0.01, mat({ color: '#f5f2ec' }), 0.002); ficka.position.set(-0.11, 0.42, 0.112); ficka.rotation.y = -0.3; kropp.add(ficka);
-  const fpenna = cyl(0.005, 0.005, 0.08, mat({ color: '#e29a4a' }), 8); fpenna.position.set(-0.12, 0.45, 0.112); kropp.add(fpenna);
-  const bricka = lada(0.06, 0.08, 0.005, mat({ color: '#fbf6ee', roughness: 0.4 }), 0.006); bricka.position.set(0.1, 0.33, 0.12); bricka.rotation.y = 0.25; kropp.add(bricka);
-  const brickaLogga = lada(0.04, 0.01, 0.002, mat({ color: '#c98a45' }), 0); brickaLogga.position.set(0.1, 0.355, 0.124); brickaLogga.rotation.y = 0.25; kropp.add(brickaLogga);
-  // armarna: axel, överarm, armbåge, underarm, manschett och hand
-  const arm = (sd) => {
-    const axel = new THREE.Group(); axel.position.set(sd * 0.205, 0.5, 0); kropp.add(axel);
-    const kula = new THREE.Mesh(new THREE.SphereGeometry(0.068, 20, 14), kavajM); kula.castShadow = true; axel.add(kula);
-    const over = cyl(0.058, 0.05, 0.3, kavajM, 16); over.position.y = -0.15; axel.add(over);
-    const bage = new THREE.Group(); bage.position.y = -0.3; axel.add(bage);
-    const led = new THREE.Mesh(new THREE.SphereGeometry(0.05, 16, 12), kavajM); bage.add(led);
-    const under = cyl(0.05, 0.042, 0.27, kavajM, 16); under.position.y = -0.135; bage.add(under);
-    const manschett = cyl(0.04, 0.04, 0.03, skjortaM, 14); manschett.position.y = -0.275; bage.add(manschett);
-    const hand = new THREE.Group(); hand.position.y = -0.31; bage.add(hand);
-    const handflata = new THREE.Mesh(new THREE.SphereGeometry(0.042, 16, 12), hud); handflata.scale.set(0.75, 1.15, 0.5); handflata.position.y = -0.03; hand.add(handflata);
-    const tumme = cyl(0.012, 0.01, 0.045, hud, 8); tumme.position.set(-sd * 0.03, -0.02, 0.02); tumme.rotation.z = sd * 0.6; hand.add(tumme);
-    return { axel, bage, hand };
-  };
-  const hoger = arm(1), vansterArm = arm(-1);
-  const finger = cyl(0.01, 0.008, 0.07, hud, 8); finger.position.set(0, -0.09, 0); hoger.hand.add(finger);
-  const ur = cyl(0.026, 0.026, 0.012, M.krom, 16); ur.rotation.x = Math.PI / 2; ur.position.set(0, -0.25, 0.04); vansterArm.bage.add(ur);
-  const arkRulle = cyl(0.028, 0.028, 0.5, mat({ color: '#e9e4d8', roughness: 0.9 }), 14); arkRulle.rotation.set(0.25, 0, Math.PI / 2); arkRulle.position.set(0.04, -0.04, 0.03); vansterArm.hand.add(arkRulle);
-  // hals och huvud
-  const hals = cyl(0.05, 0.055, 0.1, hud, 16); hals.position.y = 0.62; kropp.add(hals);
-  const krage = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.016, 8, 24), skjortaM); krage.rotation.x = Math.PI / 2; krage.position.y = 0.58; kropp.add(krage);
-  const huvud = new THREE.Group(); huvud.position.y = 0.77; kropp.add(huvud);
-  const skalle = new THREE.Mesh(new THREE.SphereGeometry(0.11, 32, 24), hud); skalle.scale.set(0.9, 1.1, 1); skalle.castShadow = true; huvud.add(skalle);
-  const kak = new THREE.Mesh(new THREE.SphereGeometry(0.09, 24, 16), hud); kak.scale.set(0.85, 0.7, 0.9); kak.position.set(0, -0.055, 0.02); huvud.add(kak);
-  [-1, 1].forEach((sd) => {
-    const ora = new THREE.Mesh(new THREE.SphereGeometry(0.026, 12, 10), hud); ora.scale.set(0.45, 1, 0.8); ora.position.set(sd * 0.1, 0, 0); huvud.add(ora);
-    const vita = new THREE.Mesh(new THREE.SphereGeometry(0.014, 12, 10), mat({ color: '#fbf8f4', roughness: 0.3 })); vita.position.set(sd * 0.038, 0.013, 0.094); vita.name = 'oga'; huvud.add(vita);
-    const pupill = new THREE.Mesh(new THREE.SphereGeometry(0.008, 10, 8), mat({ color: '#2a1d14', roughness: 0.1 })); pupill.position.set(sd * 0.038, 0.013, 0.106); pupill.name = 'oga'; huvud.add(pupill);
-    const bryn = lada(0.04, 0.008, 0.01, mat({ color: '#3a2a20' }), 0.003); bryn.position.set(sd * 0.038, 0.04, 0.1); bryn.rotation.z = sd * -0.12; huvud.add(bryn);
-    const lins = new THREE.Mesh(new THREE.TorusGeometry(0.024, 0.0035, 8, 24), M.svart); lins.position.set(sd * 0.038, 0.013, 0.112); huvud.add(lins);
-    const skalm = lada(0.004, 0.004, 0.1, M.svart, 0); skalm.position.set(sd * 0.09, 0.018, 0.06); huvud.add(skalm);
-  });
-  const brygga = lada(0.018, 0.004, 0.004, M.svart, 0); brygga.position.set(0, 0.016, 0.114); huvud.add(brygga);
-  const nasa = new THREE.Mesh(new THREE.ConeGeometry(0.013, 0.038, 10), hud); nasa.rotation.x = Math.PI / 2 + 0.3; nasa.position.set(0, -0.012, 0.112); huvud.add(nasa);
-  const mun = lada(0.032, 0.005, 0.005, mat({ color: '#9b5a48' }), 0.002); mun.position.set(0, -0.05, 0.098); huvud.add(mun);
-  const harM = mat({ color: '#3a2a20', roughness: 0.85 });
-  const har = new THREE.Mesh(new THREE.SphereGeometry(0.116, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.55), harM); har.scale.set(0.95, 1.05, 1.02); har.position.set(0, 0.012, -0.008); har.rotation.x = -0.18; huvud.add(har);
-  const lugg = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 10), harM); lugg.scale.set(1.6, 0.5, 0.8); lugg.position.set(0.02, 0.08, 0.065); lugg.rotation.z = -0.3; huvud.add(lugg);
-  const skagg = new THREE.Mesh(new THREE.SphereGeometry(0.078, 20, 14, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5), mat({ color: '#4a3528', roughness: 1 })); skagg.scale.set(1.05, 0.8, 0.95); skagg.position.set(0, -0.03, 0.032); huvud.add(skagg);
-  ark.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-  const ogon = []; huvud.traverse((o) => { if (o.name === 'oga') ogon.push(o); });
-  const armH = hoger.axel, armV = vansterArm.axel, armHe = hoger.bage, armVe = vansterArm.bage;
-  const golvSkugga = new THREE.Mesh(new THREE.CircleGeometry(0.42, 32), new THREE.MeshBasicMaterial({ color: '#000', transparent: true, opacity: 0.18, depthWrite: false })); golvSkugga.rotation.x = -Math.PI / 2; golvSkugga.position.y = 0.012; ark.add(golvSkugga);
-  void ben;
-  const arkBen = ben;
-  // Arkitekten som en ren skalfigur, som i arkitektens egna modeller: en matt, mjuk form utan ansikte och små detaljer
-  // – det ser avsiktligt och elegant ut i stället för en halvverklig docka
-  const figurM = new THREE.MeshStandardMaterial({ color: '#efe5d8', roughness: 0.55, metalness: 0 });
-  huvud.children.forEach((o) => { o.visible = o === skalle || o === kak; });
-  [slips, knut, ficka, fpenna, bricka, brickaLogga, ur, kavaj, krage, balte, spanne].concat(slag).forEach((o) => { o.visible = false; });
-  ark.traverse((o) => { if (o.isMesh && o !== golvSkugga && o !== arkRulle) { o.material = figurM; if (o.geometry && o.geometry.type === 'RoundedBoxGeometry' && o.position.y < -0.47) o.visible = false; } });
-  arkRulle.material = mat({ color: '#c98a45', roughness: 0.5 });
-  kak.scale.set(0.9, 0.8, 0.95); skalle.scale.set(0.95, 1.12, 1);
   // laptopens staplar växer och krymper som om kalkylen räknas om
   const lapStaplar = []; for (let n = 0; n < 5; n++) { const st = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.2), new THREE.MeshBasicMaterial({ color: n === 3 ? '#e29a4a' : '#f2d4ab', toneMapped: false })); st.geometry.translate(0, 0.1, 0); st.position.set(-0.13 + n * 0.08, 0.08, 0.014); lock.add(st); lapStaplar.push(st); }
 
 
   const comp = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
   comp.addPass(new RenderPass(scen, kamera)); const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.42, 0.55, 0.9); comp.addPass(bloom); comp.addPass(new OutputPass());
-  S = { valdRing, ogon, armHe, armVe, arkBen, pendlar, molnT, faglar, granar, ark, armH, armV, huvud, lapStaplar, vaxter: [lov, vaxt2], renderer, scen, kamera, comp, bloom, stolar, snurr, anga, stralar, damm, dpos, dfas, ND, vTim, vMin, vSek, lampor, el: null, t: 0, ram: 0, synlig: false, mus: new THREE.Vector2(), musMal: new THREE.Vector2(), klocka: new THREE.Clock() };
+  S = { figurer, valdRing, pendlar, molnT, faglar, granar, lapStaplar, vaxter: [lov, vaxt2], renderer, scen, kamera, comp, bloom, stolar, snurr, anga, stralar, damm, dpos, dfas, ND, vTim, vMin, vSek, lampor, el: null, t: 0, ram: 0, synlig: false, mus: new THREE.Vector2(), musMal: new THREE.Vector2(), klocka: new THREE.Clock() };
   renderer.domElement.className = 'motesrum3d__duk';
   new IntersectionObserver((r) => { S.synlig = r[0].isIntersecting; if (S.synlig) starta(); }, { threshold: 0.05 }).observe(renderer.domElement);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) starta(); });
@@ -406,18 +352,10 @@ function ram() {
   S.faglar.forEach((x, n) => { const q = ((t * 0.07 + x.fas) % 1.6) - 0.2; x.f.position.set(-0.8 + q * 5.6, x.y + Math.sin(q * 6 + n) * 0.08, -4.16); const v = Math.sin(t * 12 + n) * 0.7; x.f.children[0].rotation.y = v; x.f.children[1].rotation.y = -v; x.f.visible = q > 0 && q < 1.25; });
   S.granar.forEach((g, n) => { g.rotation.z = Math.sin(t * 0.8 + n) * 0.03; });
   S.vaxter.forEach((v, n) => { v.rotation.z = Math.sin(t * 0.6 + n * 2) * 0.012; v.rotation.x = Math.cos(t * 0.5 + n) * 0.01; });
-  // arkitekten: pekar på stegen ett i taget, vänder huvudet mot bordet ibland, andas
-  const fas = (t * 0.16) % 2, pekar = fas < 1.15, mjukt = (x) => x * x * (3 - 2 * x);
-  const up = pekar ? mjukt(Math.min(1, fas / 0.25)) * mjukt(Math.min(1, (1.15 - fas) / 0.25)) : 0;
-  S.armH.rotation.z = 0.12 + up * (1.85 + Math.sin(t * 1.4) * 0.15); S.armH.rotation.x = -up * 0.25;
-  S.armHe.rotation.z = up * 0.25; S.armHe.rotation.x = -0.15 - (1 - up) * 0.1;
-  S.armV.rotation.z = -0.1; S.armV.rotation.x = -0.25 + Math.sin(t * 0.9) * 0.04; S.armVe.rotation.x = -1.35;
-  S.huvud.rotation.y += ((pekar ? 0.55 : -0.75) - S.huvud.rotation.y) * Math.min(1, dt * 2.5);
-  S.huvud.rotation.x = Math.sin(t * 0.7) * 0.04;
-  const kr = S.ark.getObjectByName('kropp'); kr.scale.set(1 + Math.sin(t * 1.6) * 0.008, 1 + Math.sin(t * 1.6) * 0.01, 1); kr.rotation.z = Math.sin(t * 0.35) * 0.025; kr.position.x = Math.sin(t * 0.35) * 0.015;
-  S.arkBen.forEach((x, n) => { x.hoft.rotation.z = -kr.rotation.z; x.kna.rotation.x = n ? Math.max(0, Math.sin(t * 0.35)) * 0.12 : Math.max(0, -Math.sin(t * 0.35)) * 0.12; });
-  const blink = (t % 4.2) < 0.12; S.ogon.forEach((o) => { o.scale.y = blink ? 0.1 : 1; });
-  S.ark.rotation.y = 1.0 + Math.sin(t * 0.2) * 0.06;
+  // figurerna: rörelserna spelas av mixern; presentatören visar på whiteboarden med jämna mellanrum
+  S.figurer.mixers.forEach((m) => m.update(dt));
+  const pr = S.figurer.presentator;
+  if (pr && pr.akt.Interact && !LUGN) { pr.nasta = (pr.nasta || 6) - dt; if (pr.nasta <= 0) { pr.nasta = 9 + Math.random() * 5; pr.akt.Interact.reset().play(); pr.akt.Interact.crossFadeFrom(pr.akt.Idle_Talking_Loop, 0.5, true); } }
   S.lapStaplar.forEach((st, n) => { st.scale.y = 0.4 + (Math.sin(t * 0.8 + n * 1.3) * 0.5 + 0.5) * 0.9; });
   S.anga.forEach((x) => { const q = (t * 0.35 + x.fas) % 1; x.m.position.set(x.k.position.x + Math.sin(t * 2 + x.fas * 9) * 0.03 * q, 1.75 + q * 0.5, x.k.position.z + Math.cos(t * 1.7 + x.fas * 7) * 0.03 * q); x.m.scale.setScalar(0.05 + q * 0.16); x.m.material.opacity = Math.sin(q * Math.PI) * 0.32; });
   S.stralar.forEach((s, n) => { s.material.opacity = 0.045 + Math.sin(t * 0.5 + n * 1.7) * 0.02; });
