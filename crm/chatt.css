@@ -284,3 +284,25 @@
 .chf .ch-intro { padding-top: 8px; }
 @media (max-width: 1250px) { .ch-topp__knappar .ch-ruta { width: 34px; height: 34px; } }
 @media (max-width: 860px) { .ch-team { display: none; } .ch-topp__knappar [data-g="chf-oppna"] { display: none; } }
+
+/* 10 Luftigare lista (2026-10-29, "inte så trångt"): bredare kolumn, rubriken får plats bredvid knapparna,
+   teamraden utan synlig rullist och korten i listans fot med lugnare text */
+.ch { grid-template-columns: minmax(320px, 380px) minmax(0, 1fr); }
+.ch.med-info { grid-template-columns: minmax(320px, 380px) minmax(0, 1fr) 290px; }
+.ch-lista { gap: 14px; padding: 20px 16px 16px; }
+.ch-lista > header { align-items: center; gap: 8px; padding: 0 2px 0 4px; }
+.ch-lista h2 { font-size: 1.35rem; white-space: nowrap; }
+.ch-lista > header .ch-ruta { width: 36px; height: 36px; }
+.ch-lista > header .ch-ny { width: 40px; height: 40px; }
+.ch-team { gap: 8px; padding: 2px; scrollbar-width: none; -webkit-mask: linear-gradient(90deg, #000 85%, transparent); mask: linear-gradient(90deg, #000 85%, transparent); }
+.ch-team::-webkit-scrollbar { display: none; }
+.ch-teamkort { width: 72px; padding: 10px 4px 8px; }
+.ch-teamkort:last-child { margin-right: 24px; }
+.ch-lista nav { gap: 4px; }
+.ch-kort { gap: 10px; padding-top: 14px; }
+.ch-vaxel { padding: 12px 14px; }
+.ch-vaxel__text b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ch-tipskort { padding: 14px; }
+.ch-tipskort p { font-size: .8rem; line-height: 1.55; }
+@media (max-height: 820px) { .ch-tipskort { display: none; } }
+@media (max-width: 1250px) { .ch, .ch.med-info { grid-template-columns: minmax(290px, 330px) minmax(0, 1fr); } }
