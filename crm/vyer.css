@@ -8425,3 +8425,8 @@ form.nyuppg.kort > select.valj-dold, form.nyuppg.kort > select:has(+ .valj-knapp
 form.nyuppg.kort input[name="text"] { padding-left: 4px; }
 
 form.nyuppg.kort > select.valj-dold { position: absolute !important; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+.dk__ikon--bild { padding: 0; overflow: hidden; background: #2b2722; }
+.dk__ikon--bild img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.dk-foto { margin: 0; border-radius: 16px; overflow: hidden; background: #f3ede3; }
+.dk-foto img { display: block; width: 100%; height: auto; max-height: 70vh; object-fit: contain; }

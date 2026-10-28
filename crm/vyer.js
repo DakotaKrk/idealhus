@@ -2454,6 +2454,9 @@
   var dokHamtaBlob = function (id) { return dokDb().then(function (d) { return new Promise(function (ok, fel) { var r = d.transaction('filer').objectStore('filer').get(id); r.onsuccess = function () { ok(r.result || null); }; r.onerror = function () { fel(r.error); }; }); }); };
   var DOK_LAGEN = [['aktuella', 'Aktuella'], ['vantar', 'Väntar på svar'], ['klara', 'Klara'], ['utgangna', 'Utgångna'], ['arkiv', 'Arkiverade'], ['alla', 'Alla']];
   var UNDERLAG_NAMN = { ritning: 'Ritningar', lov: 'Bygglov eller anmälan', grund: 'Grund och anslutningar', framkomlighet: 'Väg för lastbil och kran' };
+  // Legohus egna byggbilder (images/foto) – samlade under Foton så att de är lätta att hitta och skicka
+  var BILDBANK = [['dronare-bygget', 'Drönarbild över bygget'], ['dronare-kran', 'Kranlyft från ovan'], ['dronare-leverans', 'Leverans till tomten'], ['dronare-montage', 'Montage från ovan'], ['dronare-platta', 'Platta och grund från ovan'],
+    ['dronare-vaggblock', 'Väggblock på plats'], ['lyft-stommar', 'Stommar lyfts på plats'], ['montor-vaggelement', 'Montör med väggelement'], ['arbetare-vattenpass', 'Montör med vattenpass'], ['reglar', 'Reglar i fabriken'], ['stommar-stapel', 'Staplade stommar']];
   function dokPoster() {
     var ut = [];
     db().offerter.filter(function (o) { return o.status !== 'ersatt'; }).forEach(function (o) {
@@ -2468,7 +2471,7 @@
       CHECK.forEach(function (c) {
         var klar = !!p.check[c[0]];
         var pa = IH.affar(p.affar);
-        ut.push({ ansv: pa ? pa.ansvarig : null, id: p.id + '-' + c[0], fack: 'underlag', namn: UNDERLAG_NAMN[c[0]] || c[1], under: (m ? m.namn : 'Huset') + ' · ' + (c[0] === 'ritning' ? 'vår del' : 'kundens del'), k: k, varde: null, datum: p.andrad || p.start,
+        ut.push({ ansv: pa ? pa.ansvarig : null, id: p.id + '-' + c[0], fack: c[0] === 'ritning' ? 'ritning' : c[0] === 'lov' ? 'bygglov' : 'underlag', namn: UNDERLAG_NAMN[c[0]] || c[1], under: (m ? m.namn : 'Huset') + ' · ' + (c[0] === 'ritning' ? 'vår del' : 'kundens del'), k: k, varde: null, datum: p.andrad || p.start,
           datumUnder: t != null ? (t >= 0 ? 'montage om ' + t + ' d' : 'montage passerat') : '', status: klar ? ['Klart', 'gron', 'klar'] : t != null && t <= 21 ? ['Saknas · bråttom', 'rod', 'vantar'] : ['Saknas', 'gul', 'vantar'], g: 'proj-oppna', gid: p.id, check: c[0], pid: p.id });
       });
     });
@@ -2476,6 +2479,9 @@
       var kat = d.kat || gissaKat(d.namn, d.typ), pr = d.projekt ? db().projekt.find(function (x) { return x.id === d.projekt; }) : null, m = pr ? IH.modell(pr.modell) : null;
       ut.push({ ansv: d.av, id: d.id, fack: kat, namn: d.namn, under: [(d.ext || 'fil').toUpperCase(), Math.max(1, Math.round(d.storlek / 1024)) + ' kB', m ? m.namn : ''].filter(Boolean).join(' · '), ext: d.ext, k: d.kund ? IH.kund(d.kund) : null, varde: null, datum: d.tid,
         datumUnder: (IH.anvandare(d.av) || { namn: '' }).namn.split(' ')[0], status: d.arkiv ? ['Arkiverad', 'gra', 'arkiv'] : ['Uppladdad', 'gra', 'klar'], fil: d });
+    });
+    BILDBANK.forEach(function (x, n) {
+      ut.push({ ansv: null, id: 'foto-' + n, fack: 'foto', namn: x[1], under: 'Bildbanken · byggbild från Legohus', ext: 'webp', k: null, varde: null, datum: null, datumUnder: '', status: ['Bildbank', 'gra', 'klar'], foto: '../images/foto/' + x[0] + '.webp' });
     });
     var c = db().chatt;
     ((c && c.meddelanden) || []).forEach(function (msg) {
@@ -2514,8 +2520,8 @@
   function dokRad(p) {
     var f = DOK_FACK.find(function (x) { return x.id === p.fack; });
     var arFil = p.fil || p.chatt;
-    var ikon = arFil ? '<span class="dk__ikon dk__ikon--fil" style="--t:' + f.ton + '">' + e((p.ext || 'fil').slice(0, 4).toUpperCase()) + '</span>' : '<span class="dk__ikon" style="--t:' + f.ton + '">' + i(f.ikon) + '</span>';
-    var attr = arFil ? 'data-g="dok-fil" data-id="' + p.id + '"' : 'data-g="dok-detalj" data-id="' + p.id + '"';
+    var ikon = p.foto ? '<span class="dk__ikon dk__ikon--bild" style="--t:' + f.ton + '"><img src="' + e(p.foto) + '" alt="" loading="lazy"></span>' : arFil ? '<span class="dk__ikon dk__ikon--fil" style="--t:' + f.ton + '">' + e((p.ext || 'fil').slice(0, 4).toUpperCase()) + '</span>' : '<span class="dk__ikon" style="--t:' + f.ton + '">' + i(f.ikon) + '</span>';
+    var attr = p.foto ? 'data-g="dok-foto" data-src="' + e(p.foto) + '" data-namn="' + e(p.namn) + '"' : arFil ? 'data-g="dok-fil" data-id="' + p.id + '"' : 'data-g="dok-detalj" data-id="' + p.id + '"';
     return '<li class="dk__rad" ' + attr + ' tabindex="0" role="button">' + ikon +
       '<span class="dk__namn"><b>' + e(p.namn) + '</b><small>' + e(p.under) + '</small></span>' +
       '<span class="dk__kund">' + (p.k ? kundAvatar(p.k, true) + '<span><b>' + e(p.k.namn) + '</b><small>' + e(p.k.ort || '') + '</small></span>' : '<span class="tid">–</span>') + '</span>' +
@@ -2532,7 +2538,7 @@
         if (p.kvar <= 7) ut.push({ vikt: 0, ikon: 'klocka', ton: 'rod', rubrik: 'Offerten ' + p.o.nummer + ' går ut om ' + Math.max(0, p.kvar) + ' d', text: (p.k ? p.k.namn : '') + ' har inte svarat. Ring eller förläng giltigheten.', knappar: [['dok-forlang', 'Förläng 14 d', 'kalender', p.o.id], p.k && p.k.telefon ? ['kund-ring', 'Ring ' + forsta(p.k.namn), 'tel', p.k.telefon] : null] });
         else if (dagar >= 5) ut.push({ vikt: 1, ikon: 'samtal', ton: 'bla', rubrik: 'Inget svar på offerten ' + p.o.nummer, text: (p.k ? p.k.namn : '') + ' fick den för ' + dagar + ' dagar sedan.', knappar: [p.k && p.k.telefon ? ['kund-ring', 'Ring ' + forsta(p.k.namn), 'tel', p.k.telefon] : null] });
       }
-      if (p.fack === 'underlag' && p.status[1] === 'rod') ut.push({ vikt: 0, ikon: 'varning', ton: 'gul', rubrik: p.namn + ' saknas', text: (p.k ? p.k.namn : '') + ' · ' + p.under + ' · ' + p.datumUnder + '.', knappar: [['prod-check', 'Markera klart', 'bock', p.pid, p.check], ['proj-oppna', 'Öppna projektet', 'pil', p.pid]] });
+      if (p.check && p.status[1] === 'rod') ut.push({ vikt: 0, ikon: 'varning', ton: 'gul', rubrik: p.namn + ' saknas', text: (p.k ? p.k.namn : '') + ' · ' + p.under + ' · ' + p.datumUnder + '.', knappar: [['prod-check', 'Markera klart', 'bock', p.pid, p.check], ['proj-oppna', 'Öppna projektet', 'pil', p.pid]] });
     });
     return ut.sort(function (a, b) { return a.vikt - b.vikt; });
   }
@@ -2551,7 +2557,9 @@
       var l = alla.filter(function (p) { return p.fack === f.id; });
       if (f.id === 'offert') return [vantar.length + ' väntar', godk.length + ' godkända'].join(' · ');
       if (f.id === 'order') return l.length ? IH.kort(sum(l)) + ' i ordervärde' : 'Inga ännu';
-      if (f.id === 'underlag') { var s = l.filter(function (p) { return p.status[2] !== 'klar'; }).length; return s ? s + ' saknas · ' + (l.length - s) + ' klara' : l.length ? 'Allt klart' : 'Inga projekt'; }
+      if (f.id === 'underlag' || l.some(function (p) { return p.check; })) { var s = l.filter(function (p) { return p.check && p.status[2] !== 'klar'; }).length, filer = l.filter(function (p) { return !p.check; }).length; return (s ? s + ' saknas · ' : '') + l.filter(function (p) { return p.check && p.status[2] === 'klar'; }).length + ' klara' + (filer ? ' · ' + plural(filer, 'fil', 'filer') : ''); }
+      if (f.id === 'foto') { var bb = l.filter(function (p) { return p.foto; }).length; return (l.length - bb ? plural(l.length - bb, 'egen bild', 'egna bilder') + ' · ' : '') + bb + ' i bildbanken'; }
+      if (!l.length) return 'Inga ännu · släpp en fil här';
       return l.length ? plural(l.length, 'fil', 'filer') + ' · senast ' + IH.sedan(l.sort(function (a, b) { return new Date(b.datum) - new Date(a.datum); })[0].datum) : 'Inga ännu';
     };
     var grupper;
@@ -2623,6 +2631,15 @@
       '<p class="dk-mallar__ingress">Välj en mall och en kund – uppgifterna fylls i från CRM:et, och du skriver ut eller sparar som PDF.</p><div class="dk-mallar__rutnat">' +
       DOK_MALLAR.map(function (m, n) { return '<button type="button" class="dk-mall" data-g="dok-mall" data-id="' + m.id + '" style="--n:' + n + '"><span class="dk-mall__papper" aria-hidden="true"><i></i><i></i><i></i><i></i><b>' + i(m.ikon) + '</b></span><span class="dk-mall__text"><b>' + e(m.namn) + '</b><small>' + e(m.text) + '</small></span><span class="dk-mall__anvand">Använd' + i('pil') + '</span></button>'; }).join('') + '</div></section>';
   }
+  G['dok-fack'] = function (el) { var f = el.getAttribute('data-f'); dokUi.fack = dokUi.fack === f && f !== 'alla' ? 'alla' : f; dokUi.flik = 'arkiv'; IH.rita(); };
+  G['dok-lage'] = function (el) { dokUi.lage = el.getAttribute('data-l'); dokUi.flik = 'arkiv'; IH.rita(); };
+  G['dok-visa'] = function (el) { dokUi.visaAlla = el.getAttribute('data-f'); IH.rita(); };
+  G['dok-nollstall'] = function () { dokUi.fack = 'alla'; dokUi.lage = 'aktuella'; dokUi.sok = ''; dokUi.ar = 'alla'; IH.rita(); };
+  G['dok-forlang'] = function (el) {
+    var o = db().offerter.find(function (x) { return x.id === el.getAttribute('data-id'); }); if (!o) return;
+    o.giltig = (o.giltig || 30) + 14; IH.logga('system', 'Offert ' + o.nummer + ' förlängd 14 dagar.', o.kund, o.affar); IH.spara(); IH.stangArk(true); IH.rita();
+    IH.toast('Förlängd', 'Offert ' + o.nummer + ' gäller 14 dagar till.', 'kalender');
+  };
   G['dok-flik'] = function (el) { dokUi.flik = el.getAttribute('data-f'); IH.rita(); };
   G['dok-vem'] = function (el) { dokUi.vem = el.getAttribute('data-f'); IH.rita(); };
   G['dok-mall'] = function (el) {
@@ -2693,7 +2710,7 @@
     var k0 = dokUi.grupp === 'kund' ? '' : '';
     IH.oppnaArk({ titel: dokVantar.length === 1 ? 'Spara filen' : 'Spara ' + dokVantar.length + ' filer', ikon: 'gem', under: 'Välj vad det är och vem det gäller – då hittar du det lätt igen.',
       kropp: '<form class="formular dk-upp" data-form="dok-upp" id="dok-upp-form">' + dokVantar.map(function (f, n) {
-          var g = gissaKat(f.name, f.type);
+          var g = gissaKat(f.name, f.type); if (g === 'ovrigt' && DOK_VALBARA.indexOf(dokUi.fack) >= 0) g = dokUi.fack;
           return '<div class="dk-upp__rad"><span class="dk__ikon dk__ikon--fil" style="--t:' + DOK_FACK.find(function (x) { return x.id === g; }).ton + '">' + e((f.name.split('.').pop() || '').slice(0, 4).toUpperCase()) + '</span><span class="dk-upp__namn"><b>' + e(f.name) + '</b><small>' + Math.max(1, Math.round(f.size / 1024)) + ' kB</small></span>' +
             '<select name="kat' + n + '" aria-label="Typ av dokument">' + DOK_VALBARA.map(function (id) { var ff = DOK_FACK.find(function (x) { return x.id === id; }); return '<option value="' + id + '"' + (id === g ? ' selected' : '') + '>' + ff.namn + '</option>'; }).join('') + '</select></div>';
         }).join('') +
@@ -2724,6 +2741,11 @@
     var id = el.getAttribute('data-id'), ladda = !!el.getAttribute('data-ladda'), p = dokPoster().find(function (x) { return x.id === id; }); if (!p) return;
     if (p.chatt) { if (!p.chatt.data) { IH.toast('Filen finns inte kvar', 'Bara namnet sparades i chatten.', 'varning'); return; } fetch(p.chatt.data).then(function (r) { return r.blob(); }).then(function (b) { dokOppnaBlob(b, p.namn, ladda); }); return; }
     dokHamtaBlob(p.fil.id).then(function (b) { if (b) dokOppnaBlob(b, p.namn, ladda); else IH.toast('Filen finns inte i den här webbläsaren', 'Den laddades upp på en annan dator eller innan arkivet sparade filer.', 'varning'); }, function () { IH.toast('Kunde inte öppna filen', '', 'varning'); });
+  };
+  G['dok-foto'] = function (el) {
+    var src = el.getAttribute('data-src'), namn = el.getAttribute('data-namn') || 'Bild';
+    IH.oppnaArk({ titel: namn, under: 'Bildbanken · byggbild från Legohus', ikon: 'kamera', kropp: '<figure class="dk-foto"><img src="' + e(src) + '" alt="' + e(namn) + '"></figure>',
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Stäng</button><a class="knapp knapp--virke" href="' + e(src) + '" download>' + i('skrivut') + 'Ladda ner</a>' });
   };
   G['dok-fil'] = function (el) {
     var p = dokPoster().find(function (x) { return x.id === el.getAttribute('data-id'); }); if (!p) return;
