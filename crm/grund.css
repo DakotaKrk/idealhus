@@ -300,3 +300,5 @@ html[data-konto-oppen] .sido .anv__chevron { transform: rotate(180deg); }
 }
 
 .sido__merantal:empty { display: none; }
+/* Toppraden: nästan ogenomskinlig med mjuk oskärpa, så att kortkanter inte syns igenom när man rullar */
+html body .topp { background: rgba(250, 247, 241, .95); -webkit-backdrop-filter: saturate(1.2) blur(16px); backdrop-filter: saturate(1.2) blur(16px); border-bottom-color: rgba(27, 25, 21, .05); }
