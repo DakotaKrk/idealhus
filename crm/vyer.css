@@ -8583,3 +8583,8 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
   .dk__rad > .dk__kund, .dk__rad > .dk__datum { display: none; }
 }
 @container (max-width: 640px) { .dk__rad > .dk__varde:has(> .tid) { display: none; } }
+/* Logga mötet: raden blir aldrig bredare än kortet; smalt = fälten under varandra */
+.logga-mote form { container-type: inline-size; min-width: 0; }
+.logga-mote .falt-rad { grid-template-columns: minmax(0, 1fr) minmax(0, 168px) !important; }
+.logga-mote .antal-falt { min-width: 0; max-width: 100%; box-sizing: border-box; }
+@container (max-width: 420px) { .logga-mote .falt-rad { grid-template-columns: minmax(0, 1fr) !important; } .logga-mote .antal-falt { max-width: 200px; } }
