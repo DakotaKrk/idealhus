@@ -165,6 +165,9 @@
       d.split('|').map(function (p) { return '<path d="' + p + '"/>'; }).join('') + '</svg>';
   };
 
+  // Linjeikonerna ur ikonbladet i index.html (flyttat från Uperformance) – i stället för emoji.
+  IH.emo = function (namn, klass) { return '<svg class="emo-ik' + (klass ? ' ' + klass : '') + '" aria-hidden="true"><use href="#i-' + namn + '"/></svg>'; };
+
   /* --- Meddelanden och konfetti ------------------------------------- */
   // val: { lank, knapp, tid } ger en åtgärdsknapp och egen visningstid.
   IH.toast = function (rubrik, text, ikon, val) {
