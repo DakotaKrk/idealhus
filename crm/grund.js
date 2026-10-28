@@ -155,8 +155,10 @@
     if (el.hasAttribute('title')) { el.setAttribute('data-tips', text); el.removeAttribute('title'); }
     if (!tips) skapa();
     mal = el; clearTimeout(gomT);
+    // kortkommando sist i titeln (två mellanslag + tangent, t.ex. "Dölj menyn  [") visas som en tangent
+    var tangent = '', mt = text.match(/^(.*\S)\s{2,}(\S{1,12})$/); if (mt) { text = mt[1]; tangent = mt[2]; }
     var k = text.indexOf(': '), rubrik = k > 0 && k < 40 ? text.slice(0, k) : '', resten = rubrik ? text.slice(k + 2) : text;
-    tips.innerHTML = (rubrik ? '<b>' + IH.e(rubrik) + '</b>' : '') + '<span>' + IH.e(resten) + '</span>';
+    tips.innerHTML = (rubrik ? '<b>' + IH.e(rubrik) + '</b>' : '') + '<span>' + IH.e(resten) + (tangent ? '<kbd>' + IH.e(tangent) + '</kbd>' : '') + '</span>';
     placera();
     clearTimeout(visaT); visaT = setTimeout(function () { if (mal === el) tips.classList.add('syns'); }, tips.classList.contains('syns') ? 0 : 140);
   }

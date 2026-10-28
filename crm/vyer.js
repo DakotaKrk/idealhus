@@ -2961,6 +2961,16 @@
     return ut.sort(function (a, b) { return a.vikt - b.vikt; });
   }
 
+  var prodDel = 'alla';
+  G['prod-del'] = function (el) { prodDel = el.getAttribute('data-f'); IH.rita(); };
+  // bocka av eller ångra en punkt i checklistan direkt från översikten
+  G['prod-check'] = function (el) {
+    var p = db().projekt.find(function (x) { return x.id === el.getAttribute('data-id'); }), c = el.getAttribute('data-c'); if (!p) return;
+    p.check[c] = !p.check[c]; p.andrad = new Date().toISOString();
+    var k = IH.kund(p.kund); IH.logga('system', CHECK_KORT[c] + (p.check[c] ? ' är klart.' : ' är markerat som inte klart.'), p.kund, p.affar);
+    IH.spara(); IH.uppdateraMeny(); IH.rita();
+    IH.toast(p.check[c] ? 'Klart' : 'Ångrat', CHECK_KORT[c] + ' · ' + (k ? k.namn : ''), p.check[c] ? 'bock' : 'aterstall');
+  };
   function prodTopp(proj, aktiva, nyckel) {
     var nasta = aktiva.filter(function (p) { return p.montage && dagarTill(p.montage) >= 0; })
       .sort(function (a, b) { return a.montage < b.montage ? -1 : 1; })[0];
@@ -2974,21 +2984,22 @@
       var andel = Math.max(0.04, Math.min(1, (Date.now() - start.getTime()) / Math.max(1, slut - start)));
       mening = 'Nästa hus som monteras är <b>' + e(m ? m.namn : 'huset') + '</b> hos ' + e(k ? k.namn : 'kunden') + (k && k.ort ? ' i ' + e(k.ort) : '') +
         ', om <b>' + t + (t === 1 ? ' dag' : ' dagar') + '</b>. ' + (saknas.length ? saknas.length + (saknas.length === 1 ? ' sak' : ' saker') + ' måste bli klara innan dess.' : 'Allt är klart inför montaget.');
-      nedrakning = '<button class="nedrakning" type="button" data-g="proj-oppna" data-id="' + nasta.id + '" style="--a:' + andel.toFixed(3) + ';--p:' + Math.round((1 - Math.min(t, 70) / 70) * 100) + '">' +
-        '<span class="nedrakning__ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52"/><circle class="nedrakning__fyll" cx="60" cy="60" r="52" pathLength="100"/></svg>' +
+      nedrakning = '<div class="nedrakning" style="--a:' + andel.toFixed(3) + ';--p:' + Math.round((1 - Math.min(t, 70) / 70) * 100) + '">' +
+        '<span class="nedrakning__ring"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="nedr-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd9a0"/><stop offset="1" stop-color="#e29a4a"/></linearGradient></defs><circle cx="60" cy="60" r="52"/><circle class="nedrakning__fyll" cx="60" cy="60" r="52" pathLength="100"/></svg>' +
           '<b class="tal" data-rakna="' + t + '">' + t + '</b><small>' + (t === 1 ? 'dag kvar' : 'dagar kvar') + '</small></span>' +
         '<span class="nedrakning__info">' +
           '<b>' + e(m ? m.kategori + ' ' + m.namn : '') + '</b><em>' + e(k ? k.namn : '') + (k && k.ort ? ' · ' + e(k.ort) : '') + '</em>' +
-          '<span class="nedrakning__datum">' + i('kalender') + dagNamn(slut) + ' · v. ' + IH.vecka(slut) + '</span></span>' +
-        '<span class="nedrakning__lista"><small>Klart innan lastbilen kommer?</small>' + CHECK.map(function (c) {
+          '<span class="nedrakning__datum">' + i('kalender') + dagNamn(slut) + ' · v. ' + IH.vecka(slut) + '</span>' +
+          '<button type="button" class="nedrakning__oppna" data-g="proj-oppna" data-id="' + nasta.id + '">Öppna projektet' + i('pil') + '</button></span>' +
+        '<span class="nedrakning__lista"><small>Klart innan lastbilen kommer? <em>Klicka för att bocka av</em></small>' + CHECK.map(function (c) {
             var klar = !!nasta.check[c[0]];
-            return '<span class="' + (klar ? 'klar' : 'saknas') + '"><i aria-hidden="true">' + (klar ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-bock"/></svg>' : '<svg class="emo-ik" aria-hidden="true"><use href="#i-stang"/></svg>') + '</i>' + CHECK_KORT[c[0]] +
-              '<em>' + (c[0] === 'ritning' ? 'Vi' : 'Kunden') + '</em></span>';
+            return '<button type="button" class="' + (klar ? 'klar' : 'saknas') + '" data-g="prod-check" data-id="' + nasta.id + '" data-c="' + c[0] + '" aria-pressed="' + klar + '" title="' + e(CHECK_KORT[c[0]]) + ': ' + (klar ? 'klart – klicka för att ångra' : 'saknas – klicka när det är klart') + '"><i aria-hidden="true">' + (klar ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-bock"/></svg>' : '<svg class="emo-ik" aria-hidden="true"><use href="#i-stang"/></svg>') + '</i>' + CHECK_KORT[c[0]] +
+              '<em>' + (c[0] === 'ritning' ? 'Vi' : 'Kunden') + '</em></button>';
           }).join('') + '</span>' +
         '<span class="nedrakning__vag" aria-hidden="true"><span class="nedrakning__ande nedrakning__ande--start"><svg class="emo-ik" aria-hidden="true"><use href="#i-flagga"/></svg> Start ' + IH.datum(start.toISOString()) + '</span>' +
           '<span class="nedrakning__ande nedrakning__ande--slut">Montage ' + IH.datum(slut.toISOString()) + ' <svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg></span>' +
           '<i class="nedrakning__spar"></i><span class="nedrakning__bil"><svg class="emo-ik" aria-hidden="true"><use href="#i-lastbil"/></svg></span></span>' +
-      '</button>';
+      '</div>';
     } else {
       mening = aktiva.length ? 'Inga montage är inplanerade framåt ännu. Sätt montagedag i projekten.' : 'Inga hus i produktion just nu. När en affär vinns hamnar den här.';
       nedrakning = '<p class="prodblock__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-kalender"/></svg></span>Inget montage inplanerat.</p>';
@@ -3018,12 +3029,22 @@
       return '<div class="prodblock' + (klass ? ' ' + klass : '') + '"><div class="prodblock__huvud"><span class="prodblock__emoji" aria-hidden="true">' + emoji + '</span>' +
         '<span><h3>' + rubrik + '</h3><p>' + hjalp + '</p></span></div>' + inne + '</div>';
     };
-    var lista = varn.length ? '<ul class="prodvarn__lista" data-stagger>' + varn.slice(0, 4).map(function (v) {
-        return '<li><button type="button" class="prodvarn__rad' + (v.varm ? ' prodvarn__rad--varm' : '') + '" data-g="proj-oppna" data-id="' + v.id + '"><span class="prodvarn__emoji" aria-hidden="true">' + v.emoji + '</span>' +
-          '<span><b>' + e(v.text) + '</b><small>' + e(v.under) + '</small></span>' +
-          '<span class="prodvarn__meta"><em class="prodvarn__del' + (v.del === 'Vår del' ? ' prodvarn__del--var' : '') + '">' + e(v.del) + '</em>' + (v.nar ? '<small>Montage ' + e(v.nar) + '</small>' : '') + '</span></button></li>';
-      }).join('') + '</ul>' + (varn.length > 4 ? '<p class="prodvarn__fler">+' + (varn.length - 4) + ' till – öppna projekten för att se allt</p>' : '')
-      : '<p class="prodblock__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg></span>Inget saknas inför montagen.</p>';
+    var perProj = aktiva.map(function (p) {
+      var saknas = CHECK.filter(function (c) { return !p.check[c[0]] && (prodDel === 'alla' || (prodDel === 'var') === (c[0] === 'ritning')); });
+      return { p: p, k: IH.kund(p.kund), m: IH.modell(p.modell), t: p.montage ? dagarTill(p.montage) : null, saknas: saknas };
+    }).filter(function (x) { return x.saknas.length; }).sort(function (a, b) { return (a.t == null ? 999 : a.t) - (b.t == null ? 999 : b.t); });
+    var veckoKrock = varn.filter(function (v) { return v.del === 'Planering'; });
+    var antalDel = function (d) { return aktiva.reduce(function (t, p) { return t + CHECK.filter(function (c) { return !p.check[c[0]] && (d === 'alla' || (d === 'var') === (c[0] === 'ritning')); }).length; }, 0); };
+    var lista = '<div class="prodvarn__verktyg" role="group" aria-label="Visa">' + [['alla', 'Allt'], ['kund', 'Kundens del'], ['var', 'Vår del']].map(function (f) { return '<button type="button" class="ap-filter" data-g="prod-del" data-f="' + f[0] + '" aria-pressed="' + (prodDel === f[0]) + '">' + f[1] + ' <em>' + antalDel(f[0]) + '</em></button>'; }).join('') + '</div>' +
+      (veckoKrock.map(function (v) { return '<p class="prodvarn__krock">' + i('kalender') + e(v.text) + ' – ' + e(v.under) + '. Se över lastbil och montörer.</p>'; }).join('')) +
+      (perProj.length ? '<ul class="prodvarn__projlista" data-stagger>' + perProj.slice(0, 4).map(function (x) {
+        var brad = x.t != null && x.t <= 21, kundDel = x.saknas.filter(function (c) { return c[0] !== 'ritning'; });
+        return '<li class="prodvarn__proj' + (brad ? ' prodvarn__proj--varm' : '') + '"><header><button type="button" class="prodvarn__namn" data-g="proj-oppna" data-id="' + x.p.id + '">' + (x.m ? '<img src="' + x.m.tumme + '" alt="">' : '') + '<span><b>' + e(x.k ? x.k.namn : 'Kunden') + '</b><small>' + e(x.m ? x.m.namn : '') + '</small></span></button>' +
+          '<span class="prodvarn__nar' + (brad ? ' varm' : '') + '" title="Montage ' + (x.p.montage ? IH.datum(x.p.montage) : 'inte satt') + '">' + (x.t == null ? 'Inget datum' : x.t > 0 ? 'Montage om ' + x.t + ' d' : x.t === 0 ? 'Montage i dag' : 'Passerat') + '</span></header>' +
+          '<div class="prodvarn__punkter">' + x.saknas.map(function (c) { var sx = SAKNAS[c[0]]; return '<button type="button" data-g="prod-check" data-id="' + x.p.id + '" data-c="' + c[0] + '" title="' + e(sx[0]) + ' (' + e(sx[1].toLowerCase()) + ') – klicka när det är klart"><span>' + sx[2] + '</span>' + e(CHECK_KORT[c[0]]) + '<em>' + (c[0] === 'ritning' ? 'Vi' : 'Kunden') + '</em><i>' + i('bock') + '</i></button>'; }).join('') + '</div>' +
+          (kundDel.length && x.k && x.k.epost ? '<a class="prodvarn__pamin" href="mailto:' + e(x.k.epost) + '?subject=' + encodeURIComponent('Inför montaget av ditt ' + (x.m ? x.m.namn : 'hus')) + '&body=' + encodeURIComponent('Hej ' + forsta(x.k.namn) + '!\n\nInför montaget behöver följande vara klart på er sida:\n' + kundDel.map(function (c) { return '– ' + CHECK_KORT[c[0]]; }).join('\n') + '\n\nHör av dig om du har frågor.\n\nVänliga hälsningar\n' + IH.jag().namn + ', Legohus') + '">' + i('post') + 'Påminn ' + e(forsta(x.k.namn)) + ' om ' + (kundDel.length === 1 ? 'det' : 'de ' + kundDel.length) + '</a>' : '') + '</li>';
+      }).join('') + '</ul>' + (perProj.length > 4 ? '<p class="prodvarn__fler">+' + (perProj.length - 4) + ' projekt till – öppna dem under Projekt</p>' : '')
+      : '<p class="prodblock__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-gnista"/></svg></span>' + (prodDel === 'alla' ? 'Inget saknas inför montagen.' : 'Inget saknas här.') + '</p>');
     return '<section class="prodtopp kort kort--mork" data-in>' +
       '<div class="prodtopp__intro"><p class="etikett etikett--ljus">Läget just nu</p>' +
         '<h2 class="prodtopp__titel"><b class="tal" data-rakna="' + aktiva.length + '">' + aktiva.length + '</b> hus på väg <span class="prodtopp__emoji" aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-projekt"/></svg></span></h2>' +

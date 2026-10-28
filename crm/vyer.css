@@ -7825,3 +7825,48 @@ a.kh__chip:hover { background: #fff; color: var(--kol); }
 .kh { grid-template-columns: minmax(0, 1fr) auto minmax(180px, 210px); gap: 22px 26px; }
 .kh__tal > div { min-width: 0; }
 @media (prefers-reduced-motion: reduce) { .kh__halsa circle, .kh__aura { animation: none !important; } .kh__halsa circle.kh__komet { display: none; } }
+
+/* Produktionens topp (2026-10-31): punkterna i nedräkningen är knappar att bocka av, ringen utan fyrkant,
+   och Att åtgärda grupperat per projekt med filter och Påminn kunden */
+.nedrakning__ring svg { overflow: visible; }
+.nedrakning__ring .nedrakning__fyll { filter: none; stroke: url(#nedr-g); }
+.nedrakning__ring::before { content: ""; position: absolute; inset: 14px; border-radius: 50%; background: radial-gradient(closest-side, rgba(246, 198, 141, .55), transparent); filter: blur(10px); animation: nedr-andas 3.4s ease-in-out infinite; pointer-events: none; }
+@keyframes nedr-andas { 50% { transform: scale(1.12); opacity: .5; } }
+.nedrakning__lista > small em { margin-left: 6px; font: 500 .62rem/1 var(--sans); font-style: normal; letter-spacing: 0; text-transform: none; color: var(--text-3); }
+.nedrakning__lista > button { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 7px 9px 7px 7px; border: 0; border-radius: 12px; font: 600 .75rem/1.25 var(--rubrik); text-align: left; cursor: pointer; transition: transform .2s var(--studs), box-shadow .2s, background-color .25s; }
+.nedrakning__lista > button:hover { transform: translateY(-2px); }
+.nedrakning__lista > button.klar { background: rgba(76, 194, 127, .1); box-shadow: inset 0 0 0 1px rgba(47, 138, 82, .2); color: #1f5c38; }
+.nedrakning__lista > button.saknas { background: rgba(224, 118, 74, .1); box-shadow: inset 0 0 0 1px rgba(224, 118, 74, .3); color: #8f3f1f; }
+.nedrakning__lista > button.saknas:hover { box-shadow: inset 0 0 0 1.5px rgba(58, 170, 104, .6); }
+.nedrakning__oppna { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 0; border: 0; background: none; font: 600 .82rem/1 var(--rubrik); color: var(--virke-djup); cursor: pointer; }
+.nedrakning__oppna .i { width: 14px; height: 14px; transition: transform .25s var(--mjuk); }
+.nedrakning__oppna:hover .i { transform: translateX(3px); }
+.nedrakning:hover { transform: none; }
+.prodvarn__verktyg { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.prodvarn__verktyg .ap-filter em { margin-left: 4px; font-style: normal; opacity: .6; }
+.prodvarn__krock { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 10px 12px; border-radius: 12px; background: #fdecdf; font-size: .8rem; color: #8f5424; }
+.prodvarn__krock .i { width: 15px; height: 15px; flex: none; }
+.prodvarn__projlista { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.prodvarn__proj { padding: 12px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); transition: box-shadow .25s; }
+.prodvarn__proj--varm { background: linear-gradient(160deg, #fffaf6, #fdeee4); box-shadow: inset 0 0 0 1.5px rgba(224, 118, 74, .35); }
+.prodvarn__proj header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.prodvarn__namn { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.prodvarn__namn img { width: 44px; height: 32px; border-radius: 8px; object-fit: cover; flex: none; }
+.prodvarn__namn span { display: grid; gap: 2px; min-width: 0; }
+.prodvarn__namn b { font: 600 .9rem/1.2 var(--rubrik); }
+.prodvarn__namn small { font-size: .72rem; color: var(--text-3); }
+.prodvarn__namn:hover b { color: var(--virke-djup); }
+.prodvarn__nar { flex: none; padding: 4px 10px; border-radius: 999px; background: #f3ede3; font: 600 .7rem/1.2 var(--rubrik); color: var(--text-2); }
+.prodvarn__nar.varm { background: #fde1d2; color: #b23a2a; }
+.prodvarn__punkter { display: flex; flex-wrap: wrap; gap: 6px; }
+.prodvarn__punkter button { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 0 6px 0 10px; border: 0; border-radius: 999px; background: rgba(224, 118, 74, .1); box-shadow: inset 0 0 0 1px rgba(224, 118, 74, .3); font: 600 .74rem/1 var(--rubrik); color: #8f3f1f; cursor: pointer; transition: background-color .2s, box-shadow .2s, color .2s, transform .2s var(--studs); }
+.prodvarn__punkter button > span .emo-ik { width: 14px; height: 14px; }
+.prodvarn__punkter button em { font-style: normal; font-weight: 500; opacity: .7; }
+.prodvarn__punkter button i { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #fff; color: #3aaa68; box-shadow: inset 0 0 0 1px rgba(58, 170, 104, .35); transition: background-color .2s, color .2s; }
+.prodvarn__punkter button i .i { width: 12px; height: 12px; }
+.prodvarn__punkter button:hover { transform: translateY(-1px); background: rgba(76, 194, 127, .12); box-shadow: inset 0 0 0 1px rgba(47, 138, 82, .35); color: #1f5c38; }
+.prodvarn__punkter button:hover i { background: #3aaa68; color: #fff; }
+.prodvarn__pamin { display: inline-flex; align-items: center; gap: 7px; margin-top: 10px; font: 600 .8rem/1 var(--rubrik); color: var(--virke-djup); text-decoration: none; }
+.prodvarn__pamin .i { width: 15px; height: 15px; }
+.prodvarn__pamin:hover { text-decoration: underline; text-underline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .nedrakning__ring::before { animation: none; } }
