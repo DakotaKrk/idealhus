@@ -369,7 +369,7 @@
       '<div class="sido__fot"><button class="sido__mer" type="button" tabindex="-1" aria-hidden="true" data-g="sido-mer">Mer ' + IH.i('pil') + '</button>' +
       '<button class="anv" type="button" data-g="konto-meny" aria-haspopup="dialog"><span class="avatar" style="--av:' + jag.farg + '">' + IH.initialer(jag.namn) +
       (IH.narvaroPrick ? IH.narvaroPrick(jag.id) : '') + '</span>' +
-      '<span><b>' + IH.e(jag.namn) + '</b><small class="anv__status">' + (IH.narvaro ? '<i style="--n:' + IH.narvaro(jag.id).farg + '"></i>' + IH.e(IH.narvaro(jag.id).namn) + ' · ' : '') + IH.e(String(jag.titel || '').split(' · ')[0]) + '</small></span><span class="anv__chevron" aria-hidden="true">' + IH.i('chevron') + '</span></button>' +
+      '<span><b>' + IH.e(jag.namn) + '</b><small class="anv__status">' + (IH.narvaro ? IH.e(IH.narvaro(jag.id).namn) + ' · ' : '') + IH.e(String(jag.titel || '').split(' · ')[0]) + '</small></span><span class="anv__chevron" aria-hidden="true">' + IH.i('chevron') + '</span></button>' +
       '<div class="sido__smalt"><a href="../index.html" data-g="lamna" title="Till hemsidan">' + IH.i('hem') + 'Hemsidan</a>' +
       '<button type="button" data-g="logga-ut" title="Logga ut">' + IH.i('utloggning') + 'Logga ut</button>' +
       '<button type="button" class="sido__aterstall" data-g="sido-aterstall" title="Återställ exempeldatan" aria-label="Återställ exempeldatan">' + IH.i('aterstall') + '</button></div></div>';
