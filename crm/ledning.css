@@ -1094,3 +1094,8 @@ section.lp-mork .ao-tal__ikon, .lp-mk .lp-om-ikon { background: rgba(255, 220, 1
 .lp-mk .lp-senaste__ikon .i { stroke-width: 2.2; }
 .lp-mk .lp-om-ikon, section.lp-mork .ao-tal__ikon { background: rgba(246, 198, 141, .2); box-shadow: inset 0 0 0 1px rgba(246, 198, 141, .4); color: #ffd9a0; }
 .lp-mk .lp-om-ikon .emo-ik, section.lp-mork .ao-tal__ikon .emo-ik { filter: brightness(2.1) saturate(1.3); }
+
+.lp-mk .lp-om-skriv .i, .lp-mk .lp-om-chatta .i { color: #ffd9a0; }
+.lp-mk .lp-om-skriv > .i:first-child, .lp-mk .lp-om-chatta > .i:first-child { box-sizing: content-box; width: 17px; height: 17px; padding: 9px; border-radius: 11px; background: rgba(246, 198, 141, .2); box-shadow: inset 0 0 0 1px rgba(246, 198, 141, .4); }
+.lp-mk .lp-om-skriv:hover > .i:last-child, .lp-mk .lp-om-chatta:hover > .i:last-child { transform: translateX(3px); }
+.lp-mk .lp-om-skriv > .i:last-child, .lp-mk .lp-om-chatta > .i:last-child { transition: transform .3s var(--mjuk); }
