@@ -82,7 +82,9 @@
   };
   function bit(t) {
     return e(t).replace(/(^|\s)@([A-ZÅÄÖ][\wåäöÅÄÖ-]+)/g, (m, f, n) => f + '<span class="ch-omn' + (n.toLowerCase() === fornamn(IH.jag()).toLowerCase() ? ' ch-omn--mig' : '') + '">@' + n + '</span>')
-      .replace(/\[\[(kund|affar):([a-z0-9]+)\]\]/g, (m, typ, id) => { const o = objekt(typ, id); return o ? '<a class="ch-obj" href="' + o.href + '">' + ik(o.ikon) + '<span><b>' + e(o.namn) + '</b>' + (o.under ? '<small>' + e(o.under) + '</small>' : '') + '</span></a>' : ''; });
+      .replace(/\[\[(kund|affar):([a-z0-9]+)\]\]/g, (m, typ, id) => { const o = objekt(typ, id); return o ? '<a class="ch-obj" href="' + o.href + '">' + ik(o.ikon) + '<span><b>' + e(o.namn) + '</b>' + (o.under ? '<small>' + e(o.under) + '</small>' : '') + '</span></a>' : ''; })
+      // Ett ensamt skiljetecken direkt efter en länkad kund eller affär hamnar annars ensamt på en rad under kortet
+      .replace(/(<\/a>)[.,!?:;](?=\s|$)/g, '$1');
   }
   function formatera(text) {
     const r = String(text || ''); let ut = '', p = 0, m;
