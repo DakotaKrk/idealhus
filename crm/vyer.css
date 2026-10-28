@@ -8537,3 +8537,5 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
   .hero__fonster { transform: scale(.6); transform-origin: top right; opacity: .55; }
 }
 @media (hover: none) { .agk__plus { opacity: 1; transform: none; } .uppg__skjut { opacity: 1; } }
+
+@media (max-width: 560px) { .dk-stats:not(.ml-stats) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } .kundtopp__tal { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } .dk-stat small, .kundtopp__tal small { word-break: normal; hyphens: auto; } }

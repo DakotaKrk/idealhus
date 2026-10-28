@@ -58,7 +58,7 @@
   var filterKnapp = function (g, id, namn, vald) { return '<button type="button" class="ap-filter" data-g="' + g + '" data-f="' + id + '" aria-pressed="' + (vald === id) + '">' + namn + '</button>'; };
 
   IH.vyer.admin = function () {
-    if (IH.jag().roll !== 'admin') return { titel: 'Admin', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + ik('las') + 'Bara för administratören</h2><p class="ad-not">Byt till kontot Admin i kontomenyn för att se den här sidan.</p></section>' };
+    if (IH.jag().roll !== 'admin') return { titel: 'Admin', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + ik('las') + 'Bara för administratören</h2><p class="ad-not">' + (IH.visarSom && IH.visarSom() ? 'Du är i supportläget – tryck Tillbaka till Admin i bandet överst' : 'Byt till kontot Admin i kontomenyn') + ' för att se den här sidan.</p></section>' };
     var d = db(), alla = IH.ANVANDARE, aktiva = alla.filter(IH.arAktivt), mig = IH.jag();
     var nu = aktiva.filter(function (u) { return senastAktiv(u) === 'Aktiv nu'; }).length;
     var poster = SAML.reduce(function (t, s) { return t + (d[s[1]] || []).length; }, 0);

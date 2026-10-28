@@ -1410,16 +1410,19 @@
           '<span class="stegband__emoji" aria-hidden="true">' + SALJ_EMOJI[s.id] + '</span><span class="stegband__text"><b>' + e(s.namn) + '</b><small>' + l.length + ' st · ' + IH.kort(summa(l)) + '</small></span><i></i></button>';
       }).join('') + '</div>' +
       (function () {
-        var antal = function (f) { var g = tavlaUi.filter; tavlaUi.filter = f; var n = oppna.filter(tavlaPassar).length; tavlaUi.filter = g; return n; };
+        var antal = function (f) { var g = tavlaUi.filter; tavlaUi.filter = f; var n = oppna.concat(vunna90).filter(tavlaPassar).length; tavlaUi.filter = g; return n; };
+        var forl = db().affarer.filter(function (a) { return a.forlorad && (tavlaUi.vem !== 'mina' || a.ansvarig === IH.jag().id); }).length;
         return '<div class="tv-verktyg"><label class="sok sok--liten tv-sok">' + i('sok') + '<input type="search" placeholder="Sök affär, kund, ort eller hus…" value="' + e(tavlaUi.sok) + '" data-tv-sok aria-label="Sök på tavlan"></label>' +
           '<div class="tv-seg" role="group" aria-label="Vems">' + [['alla', 'Alla'], ['mina', 'Mina']].map(function (v) { return '<button type="button" data-g="tv-vem" data-f="' + v[0] + '" aria-pressed="' + (tavlaUi.vem === v[0]) + '">' + v[1] + '</button>'; }).join('') + '</div>' +
           '<div class="ap-filterrad" role="group" aria-label="Filter">' + [['alla', 'Allt'], ['still', 'Står still'], ['uppg', 'Har uppgift'], ['stora', 'Över 600 tkr']].map(function (f) { return '<button type="button" class="ap-filter" data-g="tv-filter" data-f="' + f[0] + '" aria-pressed="' + (tavlaUi.filter === f[0]) + '">' + f[1] + ' <em>' + antal(f[0]) + '</em></button>'; }).join('') + '</div>' +
           '<label class="kundsort">' + i('lista') + '<select data-tv-sort aria-label="Sortera korten">' + [['andrad', 'Senast ändrad'], ['varde', 'Störst värde'], ['chans', 'Viktat värde']].map(function (o) { return '<option value="' + o[0] + '"' + (tavlaUi.sort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' +
+          (forl ? '<button type="button" class="ap-filter" data-g="tv-forlorade" title="Förlorade affärer – öppna eller återuppta">' + i('stang') + 'Förlorade <b>' + forl + '</b></button>' : '') +
           '<button type="button" class="tv-ikon" data-g="tv-kompakt" aria-pressed="' + tavlaUi.kompakt + '" title="' + (tavlaUi.kompakt ? 'Visa hela korten' : 'Kompakta kort – fler syns på en gång') + '">' + i(tavlaUi.kompakt ? 'kub' : 'lista') + '</button></div>';
       })() +
       (function () {
         var poang = function (a) { var d = IH.dagarSedan(a.andrad), u = db().uppgifter.some(function (x) { return !x.klar && x.affar === a.id && new Date(x.forfaller) < new Date(); }); return (a.varde || 0) / 1e5 * sannolikhet(a) / 50 + Math.min(d, 30) * 0.6 + (u ? 12 : 0) + (a.steg === 'offert' && d > 4 ? 8 : 0); };
-        var topp = oppna.slice().sort(function (a, b) { return poang(b) - poang(a); }).slice(0, 3);
+        var passarVem = function (a) { var g = tavlaUi.filter; tavlaUi.filter = 'alla'; var r = tavlaPassar(a); tavlaUi.filter = g; return r; };
+        var topp = oppna.filter(passarVem).sort(function (a, b) { return poang(b) - poang(a); }).slice(0, 3);
         if (!topp.length) return '';
         return '<div class="tv-fokus"><p><span>' + i('blixt') + '</span>Fokus i dag<small>de affärer som tjänar mest på en kontakt nu</small></p>' + topp.map(function (a, n) {
           var k = IH.kund(a.kund), d = IH.dagarSedan(a.andrad), st = IH.steg(a.steg);
@@ -1953,7 +1956,16 @@
     vinn(a, r);
   };
   G['aff-forlora'] = function (el) { forloraArk(el.getAttribute('data-id')); };
+  G['tv-forlorade'] = function () {
+    var l = db().affarer.filter(function (a) { return a.forlorad && (tavlaUi.vem !== 'mina' || a.ansvarig === IH.jag().id); }).sort(function (a, b) { return a.forlorad.tid < b.forlorad.tid ? 1 : -1; });
+    IH.oppnaArk({ titel: 'Förlorade affärer', ikon: 'stang', under: l.length + (l.length === 1 ? ' affär' : ' affärer') + ' – öppna eller återuppta',
+      kropp: '<div class="lista kort">' + l.map(function (a) { var k = IH.kund(a.kund);
+        return '<div class="lista__rad"><a class="lista__text" href="#/salj/' + a.id + '" data-g="stang-ark"><b>' + e(a.titel) + '</b><small>' + e((k ? k.namn + ' · ' : '') + a.forlorad.orsak + ' · ' + IH.datum(a.forlorad.tid)) + '</small></a>' +
+          '<button type="button" class="knapp knapp--liten" data-g="aff-ateruppta" data-id="' + a.id + '">' + i('aterstall') + 'Återuppta</button></div>'; }).join('') + '</div>',
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Stäng</button>' });
+  };
   G['aff-ateruppta'] = function (el) {
+    IH.stangArk(true);
     var a = IH.affar(el.getAttribute('data-id'));
     a.forlorad = null;
     db().offerter.forEach(function (o) { if (o.affar === a.id && o.status === 'avbojd') { o.status = o.fore || 'skickad'; delete o.fore; } });
@@ -2086,9 +2098,9 @@
         (x.hus && x.hus.tumme ? '<span class="kundkort__hus" title="' + e(x.hus.namn) + '"><img src="' + x.hus.tumme + '" alt="" loading="lazy" decoding="async"></span>' : '') + '</span>' +
       (x.nyaF ? '<span class="kundkort__flagga"><i></i>' + x.nyaF + (x.nyaF === 1 ? ' ny förfrågan' : ' nya förfrågningar') + '</span>' :
         x.sena ? '<span class="kundkort__flagga kundkort__flagga--sen">' + i('varning') + (x.sena === 1 ? 'Försenad uppföljning' : x.sena + ' försenade uppföljningar') + '</span>' : '') +
-      '<span class="kundkort__resa" title="' + (x.steg < 0 ? 'Ingen kontakt än' : RESA_STEG[x.steg][1]) + '">' + RESA_STEG.map(function (st, n) {
+      '<span class="kundkort__resa" title="' + ((x.steg < 0 || x.utanKontakt) ? 'Ingen kontakt än' : RESA_STEG[x.steg][1]) + '">' + RESA_STEG.map(function (st, n) {
         return '<i class="' + (n < x.steg ? 'klar' : n === x.steg ? 'nu' : '') + '"></i>';
-      }).join('') + '<small>' + (x.steg < 0 ? 'Ingen kontakt' : RESA_EMOJI[x.steg] + ' ' + RESA_STEG[x.steg][1]) + '</small></span>' +
+      }).join('') + '<small>' + ((x.steg < 0 || x.utanKontakt) ? 'Ingen kontakt' : RESA_EMOJI[x.steg] + ' ' + RESA_STEG[x.steg][1]) + '</small></span>' +
       '<span class="kundkort__tal"><span' + (x.oppet ? '' : ' class="noll"') + '><small><svg class="emo-ik" aria-hidden="true"><use href="#i-portfolj"/></svg> Öppet</small><b class="tal">' + (x.oppet ? IH.kort(x.oppet) : '–') + '</b></span>' +
         '<span' + (x.vunnet ? ' class="vunnet"' : ' class="noll"') + '><small><svg class="emo-ik" aria-hidden="true"><use href="#i-medalj"/></svg> Vunnet</small><b class="tal">' + (x.vunnet ? IH.kort(x.vunnet) : '–') + '</b></span></span>' +
       '<span class="kundkort__fot"><span>' + (x.senast ? i('klocka') + IH.sedan(x.senast.tid) : 'Ingen aktivitet') + '</span>' +
@@ -2115,7 +2127,7 @@
       '<td class="kl__val"><button type="button" class="kl__kryss" role="checkbox" aria-checked="' + vald + '" data-g="kund-valj" data-id="' + k.id + '" aria-label="Välj ' + e(k.namn) + '">' + i('bock') + '</button></td>' +
       '<td><span class="tabell__kund">' + kundAvatar(k, true) + '<span><b>' + e(k.namn) + '</b><small>' + e(k.ort) + (k.typ === 'foretag' ? ' · <em class="kl__typ">Företag</em>' : '') + '</small></span></span></td>' +
       '<td>' + (x.hus && x.hus.tumme ? '<span class="tabell__hus"><img src="' + x.hus.tumme + '" alt="" loading="lazy"><span><b>' + e(x.hus.namn) + '</b><small>' + e(x.hus.kategori || '') + '</small></span></span>' : '<span class="tid">–</span>') + '</td>' +
-      '<td>' + (x.steg < 0 ? '<span class="tid">Ingen kontakt</span>' : '<span class="kl__resa" title="På resan: ' + RESA_STEG.map(function (st, n) { return (n < x.steg ? '✓ ' : n === x.steg ? '● ' : '') + st[1]; }).join(' → ') + '"><span class="kl__prickar" style="--s:' + RESA_FARG[x.steg] + '">' + RESA_STEG.map(function (st, n) { return '<i class="' + (n < x.steg ? 'klar' : n === x.steg ? 'nu' : '') + '"></i>'; }).join('') + '</span><b>' + RESA_STEG[x.steg][1] + '</b></span>') + '</td>' +
+      '<td>' + ((x.steg < 0 || x.utanKontakt) ? '<span class="tid">Ingen kontakt</span>' : '<span class="kl__resa" title="På resan: ' + RESA_STEG.map(function (st, n) { return (n < x.steg ? '✓ ' : n === x.steg ? '● ' : '') + st[1]; }).join(' → ') + '"><span class="kl__prickar" style="--s:' + RESA_FARG[x.steg] + '">' + RESA_STEG.map(function (st, n) { return '<i class="' + (n < x.steg ? 'klar' : n === x.steg ? 'nu' : '') + '"></i>'; }).join('') + '</span><b>' + RESA_STEG[x.steg][1] + '</b></span>') + '</td>' +
       '<td class="tal">' + (x.oppet ? IH.kr(x.oppet) : '<span class="tid">–</span>') + '</td><td class="tal kl__vunnet">' + (x.vunnet ? IH.kr(x.vunnet) : '<span class="tid">–</span>') + '</td>' +
       '<td><span class="kl__halsa" data-ton="' + ton + '" style="--a:' + (h / 100).toFixed(2) + '" title="Kundhälsa ' + h + ': ' + (h >= 75 ? 'varm relation' : h >= 50 ? 'håll kontakten' : 'behöver kontakt') + '"><i></i>' + h + '</span></td>' +
       '<td class="tid"><span class="kl__senast">' + (x.senast ? IH.sedan(x.senast.tid) : 'Ingen aktivitet') + (x.varm ? '<em title="' + e(varfor(x)) + '"><i class="prick"></i>' + e(varfor(x)) + '</em>' : '') + '</span></td>' +
@@ -2203,7 +2215,7 @@
         }).join('') + '</div>' +
         (kundSteg !== null ? '<button class="chip chip--rensa" type="button" data-g="kund-steg" data-n="' + kundSteg + '">' + RESA_STEG[kundSteg][1] + i('stang') + '</button>' : '') +
         '<div class="kundverktyg__hoger"><label class="kundsort">' + i('lista') + '<select data-kundsort aria-label="Sortera">' +
-          [['aktiv', 'Senast aktiv'], ['namn', 'Namn A–Ö'], ['varde', 'Störst värde'], ['halsa', 'Behöver kontakt först']].map(function (o) { return '<option value="' + o[0] + '"' + (kundSort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' +
+          [['aktiv', 'Senast aktiv'], ['namn', 'Namn A–Ö'], ['varde', 'Störst värde'], ['halsa', 'Behöver kontakt först']].concat(/^(aktiv|namn|varde|halsa)$/.test(kundSort) ? [] : [[kundSort, 'Sorterad på kolumn']]).map(function (o) { return '<option value="' + o[0] + '"' + (kundSort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' +
         '<div class="flikar flikar--vy" data-flikar2><button type="button" data-g="kund-vy" data-vy="kort" aria-pressed="' + (kundVy === 'kort') + '" title="Kort">' + i('kub') + '</button>' +
           '<button type="button" data-g="kund-vy" data-vy="lista" aria-pressed="' + (kundVy === 'lista') + '" title="Lista">' + i('lista') + '</button></div></div>' +
       '</div>' +
@@ -2397,6 +2409,11 @@
           '<section class="kort" data-in id="kund-historik"><header class="kort__huvud"><h2><span class="kort__ikon">' + i('klocka') + '</span>Historik <em class="rakna">' + logg.length + '</em></h2>' +
             (histTyp !== 'alla' ? '<button class="knapp knapp--liten" type="button" data-g="kund-hist" data-id="' + k.id + '" data-typ="alla">Visa allt' + i('stang') + '</button>' : '') + '</header><div class="kort__kropp">' +
             anteckningsForm(k.id, '') + tidslinje(loggVisa, histTyp === 'alla' ? null : 'Inga ' + (AKT_NAMN_K[histTyp] || '').toLowerCase() + ' loggade ännu.') + '</div></section>' +
+        (function () { var fl = (db().dokument || []).filter(function (d) { return d.kund === k.id; }).sort(function (x, y) { return x.tid < y.tid ? 1 : -1; });
+          return '<section class="kort" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('mapp') + '</span>Dokument <em class="rakna">' + fl.length + '</em></h2><a class="kortlank" href="#/dokument">Alla dokument' + i('pil') + '</a></header><div class="kort__kropp">' +
+            (fl.length ? '<ul class="dk__lista">' + fl.slice(0, 6).map(function (d) { var f = DOK_FACK.find(function (x) { return x.id === (d.kat || gissaKat(d.namn, d.typ)); }) || DOK_FACK[DOK_FACK.length - 1];
+              return '<li class="dk__rad" data-g="dok-fil" data-id="' + d.id + '" role="button" tabindex="0"><span class="dk__ikon dk__ikon--fil" style="--t:' + f.ton + '">' + e((d.ext || 'fil').slice(0, 4).toUpperCase()) + '</span><span class="dk__namn"><b>' + e(d.namn) + '</b><small>' + e(f.namn + ' · ' + IH.datum(d.tid)) + '</small></span></li>'; }).join('') + '</ul>'
+              : '<p class="kund-tom">Inga uppladdade filer för ' + e(k.namn) + ' än. Ladda upp på dokumentsidan och välj kunden.</p>') + '</div></section>'; })() +
         '</div>' +
       '</div>';
     return { titel: k.namn, html: html, efter: function (yta) {
@@ -2599,7 +2616,7 @@
             '<span class="dk-tidslinje"><span><i>' + i('offert') + '</i><b>Skickad</b><small>dag 0</small></span><span class="dk-tidslinje__mitt"><em></em></span><span><i>' + i('bock') + '</i><b>Godkänd</b><small>' + (median == null ? '–' : 'dag ' + median) + '</small></span></span></div>' +
         '</div>' +
         '<div class="dk-blick"><p class="etikett">Arkivet i en blick</p><div class="dk-fack">' + DOK_FACK.map(function (f, n) {
-          var l = alla.filter(function (p) { return p.fack === f.id; });
+          var l = iLage.filter(function (p) { return p.fack === f.id; });
           return '<button type="button" class="dk-fack__ruta" data-g="dok-fack" data-f="' + f.id + '" aria-pressed="' + (dokUi.fack === f.id) + '" style="--t:' + f.ton + ';--n:' + n + '"><small><i></i>' + f.namn + '</small><b>' + l.length + '</b><em>' + fackUnder(f) + '</em></button>';
         }).join('') + '<button type="button" class="dk-fack__alla" data-g="dok-fack" data-f="alla" aria-pressed="' + (dokUi.fack === 'alla') + '">' + i('rutnat') + 'Alla<b>' + iLage.length + '</b></button></div></div>' +
         '<div class="dk-verktyg"><label class="sok sok--liten dk-sok">' + i('sok') + '<input type="search" placeholder="Sök nummer, kund, hus eller fil" value="' + e(dokUi.sok) + '" data-dok-sok aria-label="Sök bland dokumenten"></label>' +
@@ -2713,8 +2730,8 @@
   };
   G['mall-tom'] = function (el) {
     var m = DOK_MALLAR.find(function (x) { return x.id === el.getAttribute('data-id'); }); if (!m) return;
-    var f = function (t) { return '<p class="f"><span>' + t + '</span><i></i></p>'; };
-    mallSkrivUt(m, null, f('Kund') + f('Datum') + f('Hus') + f('Anteckningar') + f(' ') + f(' ') + '<div class="sign"><p><i></i>Kund</p><p><i></i>Legohus</p></div>');
+    var tom = { id: '_tom', namn: '', ort: '', telefon: '', epost: '', typ: 'privat' };
+    mallSkrivUt(m, null, mallKropp(m, tom).replace(/Hej !/g, 'Hej ______!'));
   };
 
   G['dok-fack'] = function (el) { var f = el.getAttribute('data-f'); dokUi.fack = dokUi.fack === f && f !== 'alla' ? 'alla' : f; dokUi.flik = 'arkiv'; IH.rita(); };
@@ -3997,7 +4014,7 @@
     return '<li class="uppg' + (u.klar ? ' uppg--klar' : '') + (sen ? ' uppg--sen' : '') + '">' +
       '<button class="uppg__bock" type="button" data-g="uppgift-klar" data-id="' + u.id + '" aria-pressed="' + u.klar + '" aria-label="Markera klar">' + i('bock') + '</button>' +
       '<span class="uppg__typ" title="' + typ[2] + '" aria-hidden="true">' + typ[1] + '</span>' +
-      '<span class="uppg__text"><b>' + e(u.text) + '</b><small>' + (k ? '<a href="#/kunder/' + k.id + '">' + e(k.namn) + '</a> · ' : '') + typ[2] + '</small></span>' +
+      '<span class="uppg__text"><b>' + e(u.text) + '</b><small>' + (k ? '<a href="#/kunder/' + k.id + '">' + e(k.namn) + '</a> · ' : '') + typ[2] + (u.ansvarig && u.ansvarig !== IH.jag().id && IH.anvandare(u.ansvarig) ? ' · ' + e(IH.anvandare(u.ansvarig).namn) : '') + '</small></span>' +
       '<span class="uppg__nar' + (nar[0] ? ' uppg__nar--' + nar[0] : '') + '">' + nar[1] + '</span>' +
       (!u.klar ? '<button type="button" class="uppg__skjut" data-g="ag-skjut" data-id="' + u.id + '" title="Skjut upp en dag" aria-label="Skjut upp en dag">+1 d</button>' : '') +
       (k && !u.klar ? '<span class="uppg__snabb">' +
@@ -4050,7 +4067,7 @@
         '<i class="agk__last" aria-hidden="true"></i>' +
         '<div class="agk__lista">' + c.l.slice(0, visa).map(function (x) {
           var typ = uppgTyp(x.text), k = x.kund && IH.kund(x.kund);
-          return '<span class="agk__u' + (x.klar ? ' klar' : '') + (!x.klar && t < idag0.getTime() ? ' sen' : '') + '" draggable="' + !x.klar + '" data-ag-uppg="' + x.id + '" title="' + e(x.text + (k ? ' · ' + k.namn : '')) + '">' + typ[1] + '<span>' + e(x.text) + '</span></span>';
+          return '<span class="agk__u' + (x.klar ? ' klar' : '') + (!x.klar && t < idag0.getTime() ? ' sen' : '') + '" draggable="' + !x.klar + '" data-ag-uppg="' + x.id + '" data-g="ag-dag-visa" data-dag="' + ds + '" role="button" tabindex="0" title="' + e(x.text + (k ? ' · ' + k.namn : '')) + '">' + typ[1] + '<span>' + e(x.text) + '</span></span>';
         }).join('') + (c.l.length > visa ? '<button type="button" class="agk__fler" data-g="ag-dag-visa" data-dag="' + ds + '">+' + (c.l.length - visa) + ' till</button>' : '') +
         (!c.l.length && !ut ? '<span class="agk__fritt">' + (c.d.getDay() % 6 === 0 ? 'Helg' : 'Fritt') + '</span>' : '') + '</div></div>';
     }).join('');
@@ -4076,7 +4093,8 @@
       ['Kommande', u.filter(function (x) { return !x.klar && new Date(x.forfaller) > idag1; }), '<svg class="emo-ik" aria-hidden="true"><use href="#i-kalender"/></svg>', 'Det som väntar de närmaste dagarna.'],
       ['Klara', u.filter(function (x) { return x.klar; }), '<svg class="emo-ik" aria-hidden="true"><use href="#i-klar"/></svg>', 'Bra jobbat. Klicka på bocken för att ångra.']
     ];
-    var dagens = u.filter(function (x) { return new Date(x.forfaller) <= idag1 && (!x.klar || (x.klarTid && new Date(x.klarTid) >= idag0)); });
+    var uVem = allaU.filter(function (x) { return agUi.vem !== 'mina' || !x.ansvarig || x.ansvarig === IH.jag().id; });
+    var dagens = uVem.filter(function (x) { return new Date(x.forfaller) <= idag1 && (!x.klar || (x.klarTid && new Date(x.klarTid) >= idag0)); });
     var dagKlara = dagens.filter(function (x) { return x.klar; }).length;
     var andel = dagens.length ? dagKlara / dagens.length : 1;
     var kvarIdag = dagens.filter(function (x) { return !x.klar; });
@@ -4085,7 +4103,7 @@
     var perTyp = {};
     kvarIdag.forEach(function (x) { var t = uppgTyp(x.text); (perTyp[t[2]] = perTyp[t[2]] || [t[1], t[2], 0])[2] += 1; });
     var typLista = Object.keys(perTyp).map(function (k) { return perTyp[k]; }).sort(function (a, b) { return b[2] - a[2]; });
-    var imorgon = u.filter(function (x) { return !x.klar && dagarTill(x.forfaller) === 1; });
+    var imorgon = uVem.filter(function (x) { return !x.klar && dagarTill(x.forfaller) === 1; });
     var jag = IH.jag();
     var mening = kvarIdag.length
       ? 'Du har <b>' + kvarIdag.length + (kvarIdag.length === 1 ? ' uppgift' : ' uppgifter') + ' kvar i dag</b>' + (sena ? ', varav ' + sena + ' försenad' + (sena === 1 ? '' : 'e') : '') + '.' +
@@ -4152,14 +4170,14 @@
   G['ag-dag-visa'] = function (el) {
     var ds = el.getAttribute('data-dag'), d0 = new Date(ds + 'T00:00:00'), d1 = new Date(ds + 'T23:59:59');
     var l = db().uppgifter.filter(function (x) { var t = new Date(x.forfaller); return t >= d0 && t <= d1 && agFilter(x); });
-    IH.oppnaArk({ titel: dagNamn(d0), under: l.length + (l.length === 1 ? ' uppgift' : ' uppgifter'), ikon: 'kalender', kropp: '<ul class="uppglista">' + l.map(uppgiftRad).join('') + '</ul>',
+    IH.oppnaArk({ titel: dagNamn(d0), under: l.length + (l.length === 1 ? ' uppgift' : ' uppgifter'), ikon: 'kalender', kropp: '<ul class="uppglista" data-ag-dagark="' + ds + '">' + l.map(uppgiftRad).join('') + '</ul>',
       fot: '<button class="knapp" type="button" data-g="stang-ark">Stäng</button>' });
   };
   var flyttaTill = function (u, ds) { var t = new Date(u.forfaller), n = new Date(ds + 'T00:00:00'); n.setHours(t.getHours() || 9, t.getMinutes()); u.forfaller = n.toISOString(); };
   G['ag-skjut'] = function (el) {
     var u = db().uppgifter.filter(function (x) { return x.id === el.getAttribute('data-id'); })[0]; if (!u) return;
     var bas = new Date(Math.max(new Date(u.forfaller).getTime(), new Date().setHours(0, 0, 0, 0))); bas.setDate(bas.getDate() + 1);
-    flyttaTill(u, IH.dagStr(bas)); IH.spara(); IH.rita(); IH.uppdateraMeny();
+    var ark = $('[data-ag-dagark]'); flyttaTill(u, IH.dagStr(bas)); IH.spara(); IH.rita(); IH.uppdateraMeny(); if (ark) G['ag-dag-visa']({ getAttribute: function () { return ark.getAttribute('data-ag-dagark'); } });
     IH.toast('Uppskjuten', u.text + ' · ' + dagNamn(bas), 'klocka');
   };
   G['ag-sena-idag'] = function () {
@@ -4209,7 +4227,7 @@
       void r;
     }
     IH.uppdateraMeny();
-    clearTimeout(G['uppgift-klar'].t); G['uppgift-klar'].t = setTimeout(function () { var y = window.scrollY; IH.rita(); window.scrollTo(0, y); }, IH.lugn ? 0 : 650);
+    clearTimeout(G['uppgift-klar'].t); G['uppgift-klar'].t = setTimeout(function () { var y = window.scrollY, ark = $('[data-ag-dagark]'); IH.rita(); window.scrollTo(0, y); if (ark) G['ag-dag-visa']({ getAttribute: function () { return ark.getAttribute('data-ag-dagark'); } }); }, IH.lugn ? 0 : 650);
   };
   FORM.uppgift = function (f, d) {
     if (!String(d.get('text') || '').trim()) return;

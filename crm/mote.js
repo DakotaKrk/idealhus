@@ -473,6 +473,7 @@
           if (ev.key === 'Escape') { ev.preventDefault(); anteckna(false); }
           return;
         }
+        if (ev.key === ' ' && ev.target && ev.target.closest && ev.target.closest('button, label, [role="button"]')) return;
         if (ev.key === 'n' || ev.key === 'N') { anteckna(); return; }
         if (ev.key === 'ArrowRight' || ev.key === 'PageDown' || ev.key === ' ') { ev.preventDefault(); ga(s.nu + 1); }
         else if (ev.key === 'ArrowLeft' || ev.key === 'PageUp') { ev.preventDefault(); ga(s.nu - 1); }

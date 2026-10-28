@@ -170,7 +170,7 @@
     return { titel: 'Admin', html: html };
   };
   function spar(titel) {
-    return { titel: titel, html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + IH.emo('las') + 'Bara för administratören</h2><p class="ad-not">Byt till kontot Admin i kontomenyn för att se den här sidan.</p></section>' };
+    return { titel: titel, html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + IH.emo('las') + 'Bara för administratören</h2><p class="ad-not">' + (IH.visarSom && IH.visarSom() ? 'Du är i supportläget – tryck Tillbaka till Admin i bandet överst' : 'Byt till kontot Admin i kontomenyn') + ' för att se den här sidan.</p></section>' };
   }
   IH.G['ad-utlogg'] = function (el) {
     var v = +el.getAttribute('data-v');
@@ -199,7 +199,7 @@
   };
   IH.G['ad-aterstall'] = function (el) {
     if (IH.jag().roll !== 'admin') { IH.toast('Bara administratören kan återställa', null, 'las'); return; }
-    if (!el.dataset.saker) { el.dataset.saker = '1'; el.innerHTML = i('varning') + 'Klicka igen för att återställa'; setTimeout(function () { if (el.isConnected) { delete el.dataset.saker; el.innerHTML = i('aterstall') + 'Återställ exempeldata'; } }, 4000); return; }
+    if (!el.dataset.saker) { el.dataset.saker = '1'; el.dataset.fore = el.innerHTML; el.innerHTML = i('varning') + 'Klicka igen för att återställa'; setTimeout(function () { if (el.isConnected) { delete el.dataset.saker; el.innerHTML = el.dataset.fore || (i('aterstall') + 'Återställ exempeldata'); } }, 4000); return; }
     var gammal = (db().sakerhet || []).slice(), gammalHub = db().sakHub;
     IH.db = IH.skapaExempeldata();
     IH.db.sakerhet = gammal; if (gammalHub) IH.db.sakHub = gammalHub;

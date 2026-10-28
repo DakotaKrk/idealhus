@@ -1124,3 +1124,5 @@ section.lp-mork .sh-knapp:not(.sh-knapp--accent) .emo-ik, section.sh-mork .sh-kn
   .pk-dag .pk-h, .pk-dag .pk-led { display: block; height: 5px; padding: 0; font-size: 0; border-radius: 3px; }
   .pk-dag { gap: 3px; }
 }
+
+@media (max-width: 700px) { .lp-kal__plus { display: none !important; } .lp-agera__typer, .lp-agera .ap-filterrad { flex-wrap: wrap; } }

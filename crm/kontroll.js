@@ -99,7 +99,7 @@
   /* Vyn ---------------------------------------------------------------------------------------------- */
   var antalLageTal = function (l, konton) { return konton.filter(function (x) { return x.h.lage === l; }).length; };
   IH.vyer.kontroll = function () {
-    if (IH.jag().roll !== 'admin') return { titel: 'Kontrollcentral', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + ik('las') + 'Bara för administratören</h2><p class="ad-not">Byt till kontot Admin i kontomenyn.</p></section>' };
+    if (IH.jag().roll !== 'admin') return { titel: 'Kontrollcentral', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + ik('las') + 'Bara för administratören</h2><p class="ad-not">' + (IH.visarSom && IH.visarSom() ? 'Du är i supportläget – tryck Tillbaka till Admin i bandet överst' : 'Byt till kontot Admin i kontomenyn') + '.</p></section>' };
     var d = db(), u0 = IH.jag(), H = IH.sakHub, S = H ? H.hub() : { senast: {}, historik: [] };
     var brott = IH.sak ? IH.sak.kopplingsBrott() : [], dl = dataLage(brott), dr = driftLage();
     var konton = IH.ANVANDARE.filter(function (u) { return !u.inaktiv; }).map(function (u) { return { u: u, h: kontoHalsa(u, brott) }; });

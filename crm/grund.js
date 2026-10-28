@@ -86,7 +86,7 @@
       });
       var dolda = nav.querySelectorAll('.sido__lank[data-sido-dold]');
       var olast = Array.prototype.some.call(dolda, function (d) { return d.querySelector('.sido__bricka--varm'); });
-      mer.querySelector('.sido__merantal').textContent = dolda.length;
+      mer.querySelector('.sido__merantal').textContent = Array.prototype.filter.call(dolda, function (d) { return d.querySelector('.sido__bricka--varm'); }).length || '';
       mer.classList.toggle('sido__merknapp--prick', olast);
       mer.title = 'Fler: ' + Array.prototype.map.call(dolda, function (d) { return (d.querySelector('span') || d).textContent.trim(); }).join(', ');
     }
