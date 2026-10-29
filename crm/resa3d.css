@@ -18,14 +18,20 @@
 .resa3d__text em { font-style: normal; font-size: .8rem; line-height: 1.4; color: var(--text-2); }
 /* Kundernas hus som nålar ovanför sitt steg */
 .resa3d__nalar { position: absolute; inset: 0; z-index: 1; }
-.resa3d__nal { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border: 0; border-radius: 999px; background: rgba(255, 253, 249, .92);
-  box-shadow: 0 12px 24px -14px rgba(60, 40, 15, .7), 0 0 0 1px rgba(240, 181, 110, .55), 0 0 18px rgba(255, 179, 92, .35); cursor: pointer; white-space: nowrap; transition: opacity .35s, box-shadow .2s; will-change: transform; }
+.resa3d__nal { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 8px; padding: 4px 11px 4px 4px; border: 0; border-radius: 14px; background: #fffdf9;
+  box-shadow: 0 12px 24px -14px rgba(60, 40, 15, .7), 0 0 0 1px rgba(240, 181, 110, .55); cursor: pointer; white-space: nowrap; transition: opacity .35s, box-shadow .25s; will-change: transform;
+  animation: resa-nal-svav 3s ease-in-out infinite alternate; }
+/* nålarna svävar lite upp och ner (egen translate, så att JS:ens transform får vara ifred) – det visar att de går att klicka på */
+@keyframes resa-nal-svav { from { translate: 0 0; } to { translate: 0 -2px; } }
+.resa3d__nal:nth-child(2n) { animation-delay: -1.4s; }
+.resa3d__nal--nu { z-index: 1; box-shadow: 0 14px 26px -12px rgba(60, 40, 15, .75), 0 0 0 1.5px var(--virke), 0 0 22px rgba(255, 179, 92, .55); }
 .resa3d__nal::after { content: ""; position: absolute; left: 50%; bottom: -9px; width: 2px; height: 9px; margin-left: -1px; background: linear-gradient(180deg, rgba(240, 181, 110, .9), transparent); }
 .resa3d__nal:hover { box-shadow: 0 14px 26px -12px rgba(60, 40, 15, .8), 0 0 0 1.5px var(--virke), 0 0 26px rgba(255, 179, 92, .7); }
-.resa3d__nal img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+/* husbilden beskärs aldrig: hela bilden i en rundad ruta på krämvit platta */
+.resa3d__nal img { width: 40px; height: 28px; border-radius: 9px; object-fit: contain; background: #f3ece1; }
 .resa3d__nal span { display: grid; text-align: left; }
 .resa3d__nal b { font: 600 .74rem/1.15 var(--rubrik); color: var(--kol); }
-.resa3d__nal small { font-size: .62rem; color: var(--text-3); }
+.resa3d__nal small { font-size: .7rem; color: var(--text-2); }
 /* Reglagen nertill: pilar, stegprickar och spela/pausa */
 .resa3d__fot { position: absolute; z-index: 2; left: 50%; bottom: 14px; display: flex; align-items: center; gap: 6px; padding: 5px; border-radius: 999px; transform: translateX(-50%);
   background: rgba(255, 253, 249, .8); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 16px 30px -20px rgba(60, 40, 15, .7), inset 0 0 0 1px rgba(240, 181, 110, .4); max-width: calc(100% - 24px); }
@@ -39,7 +45,19 @@
 .resa3d__prickar button[aria-current="true"] { background: #1b1915; color: #fbf4e8; }
 .resa3d__prickar button[aria-current="true"] i { opacity: 1; background: #ffb35c; box-shadow: 0 0 0 3px rgba(255, 179, 92, .25), 0 0 10px #ffb35c; }
 .resa3d__auto { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: linear-gradient(160deg, #f6c68d, #f0b56e); font: 600 .72rem/1 var(--rubrik); color: #1b1915; cursor: pointer; }
-.resa3d__auto .emo-ik { width: 14px; height: 14px; }
+.resa3d__auto .emo-ik { width: 14px; height: 14px; transition: transform .2s var(--mjuk, ease); }
+.resa3d__auto:active .emo-ik { transform: scale(.85); }
+/* Hela resan: en ikon i stället för stegnumret, och duken går inte att dra (därför ingen grab-hand) */
+.resa3d__nr--hel .emo-ik { width: 18px; height: 18px; }
+.resa3d--hel .resa3d__duk { cursor: default; }
+/* reglagen: på bred skärm räcker ← Pausa → (steglistan under är huvudnavigeringen); prickarna visas bara på smal skärm */
+.resa3d__fot .resa3d__hel--fot { display: none; }
+@container resa (min-width: 561px) {
+  .resa3d__prickar { display: none; }
+  .resa3d__pil[data-resa-bak] { order: 0; }
+  .resa3d__auto { order: 1; }
+  .resa3d__pil[data-resa-fram] { order: 2; }
+}
 /* Stationen i listan under som kameran står vid */
 .fabrik__station { cursor: pointer; }
 /* Steglistan under scenen följer kameran: samma mörka markering som reglagen, kopparbandet fylls fram till steget */
@@ -73,6 +91,9 @@
 .resa3d__z:hover { background: rgba(27, 25, 21, .06); color: var(--kol); }
 .resa3d__duk:active { cursor: grabbing; }
 @media (max-width: 760px) { .resa3d__zoom { top: auto; bottom: 64px; right: 12px; } }
+/* mobil: resan går ut mot kortets kanter i stället för att ligga dubbelt inramad */
+@media (max-width: 700px) { .prodblock--fabrik .resa3d { margin-inline: -10px; border-radius: 18px; } }
+@media (prefers-reduced-motion: reduce) { .resa3d__nal { animation: none; } }
 
 /* Många hus i samma steg: bilderna läggs omlott med +N, och listan öppnas med ett klick */
 .resa3d__nal .resa3d__bilder { display: flex; align-items: center; }
@@ -97,7 +118,11 @@
 @container resa (max-width: 560px) {
   .resa3d__nal { gap: 0; padding: 3px; }
   .resa3d__nal span { display: none; }
-  .resa3d__nal img { width: 30px; height: 30px; }
+  .resa3d__nal img { width: 36px; height: 26px; }
+  /* smal: Hela resan ligger som en ikonknapp i fotraden i stället för en egen ruta över scenen */
+  .resa3d__zoom { display: none; }
+  .resa3d__fot .resa3d__hel--fot { display: grid; place-items: center; width: 34px; min-height: 30px; padding: 0; }
+  .resa3d__hel--fot .emo-ik { width: 15px; height: 15px; }
   .resa3d__fot { left: 10px; right: 10px; bottom: 10px; transform: none; justify-content: space-between; gap: 2px; max-width: none; }
   .resa3d__prickar { flex: 1; justify-content: center; min-width: 0; }
   .resa3d__prickar button { padding: 0 5px; }

@@ -74,7 +74,8 @@
       mer.innerHTML = IH.i('prickar') + '<span>Mer</span><b class="sido__merantal"></b>';
       nav.appendChild(mer);
       // det man använder minst flyttas först; okända rader (t.ex. Teamet) efter dem, nerifrån
-      var ORDNING = ['installningar', 'kolla-marken', 'dokument', 'mote', 'att-gora', 'offerter', 'produktion', 'chatt', 'chef', 'kunder', 'forfragningar', 'salj', 'oversikt'];
+      // Att göra används varje dag och har den varma brickan – den göms bland de sista
+      var ORDNING = ['installningar', 'kolla-marken', 'dokument', 'mote', 'offerter', 'produktion', 'chef', 'chatt', 'att-gora', 'kunder', 'forfragningar', 'salj', 'oversikt'];
       var vikt = function (el) { var i = ORDNING.indexOf(el.getAttribute('data-vy')); return i < 0 ? -1 : i; };
       var rader = Array.prototype.slice.call(nav.querySelectorAll('.sido__lank:not(.sido__merknapp)')).map(function (el, i) { return { el: el, i: i }; });
       rader.sort(function (a, b) { return vikt(a.el) - vikt(b.el) || b.i - a.i; });
@@ -87,7 +88,8 @@
       });
       var dolda = nav.querySelectorAll('.sido__lank[data-sido-dold]');
       var olast = Array.prototype.some.call(dolda, function (d) { return d.querySelector('.sido__bricka--varm'); });
-      mer.querySelector('.sido__merantal').textContent = Array.prototype.filter.call(dolda, function (d) { return d.querySelector('.sido__bricka--varm'); }).length || '';
+      // Brickan på Mer summerar de dolda brickornas tal (t.ex. 2 försenade uppgifter), inte antalet rader
+      mer.querySelector('.sido__merantal').textContent = Array.prototype.reduce.call(dolda, function (n, d) { var b = d.querySelector('.sido__bricka--varm'); return n + (b ? parseInt(b.textContent, 10) || 0 : 0); }, 0) || '';
       mer.classList.toggle('sido__merknapp--prick', olast);
       mer.title = 'Fler: ' + Array.prototype.map.call(dolda, function (d) { return (d.querySelector('span') || d).textContent.trim(); }).join(', ');
     }

@@ -288,3 +288,11 @@ section.ao-hjalte .ao-remsa { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .ao-band { container-type: inline-size; container-name: aoband; }
 /* Att agera på (chefsvyn) i smalt kort: Ta själv och Fördela hamnar under texten, inte utanför kortet */
 @container aoband (max-width: 480px) { .ao-upp li > .lp-agera__knappar { grid-column: 2; justify-content: flex-start; } }
+
+/* Designrunda: ikonplattor i bärnsten i stället för blått och lila – grönt, gult och rött bara för status */
+[data-ton="is"], [data-ton="lila"] { --ton: var(--virke-djup); --ton-bg: var(--virke-ljus); }
+/* Pekskärm: inga kvarhängande hovringslyft */
+@media (hover: none) {
+  a.ao-tal:hover, .ao-konto:hover, .ao-pil:hover, .ao-karta > i:hover, .ao-snabbknapp:hover { transform: none; }
+  a.ao-tal:active, .ao-konto:active, .ao-snabbknapp:active { transform: scale(.97); }
+}

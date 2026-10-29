@@ -614,3 +614,6 @@ html:has(.ihg) .ihg-knapp { opacity: 0; pointer-events: none; transform: transla
   .ihg-hal, .ihg-ring, .ihg-bubbla, .ihg-skylt, .ihg-meny, .ihg-hej, .ihg-knapp, .ihg-framsteg i { transition: none !important; }
 }
 @media print { .ihg, .ihg-knapp, .ihg-meny, .ihg-hej { display: none !important; } }
+/* Guiden döljs när sökpaletten eller ett ark är öppet */
+html[data-palett-oppen] .ihg-knapp, html[data-palett-oppen] .ihg-hej, html[data-ark-oppen] .ihg-knapp, html[data-ark-oppen] .ihg-hej { opacity: 0 !important; pointer-events: none !important; transition: opacity .2s; }
+.ihg-hej p b { display: inline; margin: 0; font: inherit; font-weight: 700; letter-spacing: 0; color: var(--ihg-mork, #1b1915); }

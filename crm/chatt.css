@@ -211,7 +211,7 @@
   background: linear-gradient(135deg, transparent 50%, rgba(143, 84, 36, .35) 50%, rgba(143, 84, 36, .35) 56%, transparent 56%, transparent 68%, rgba(143, 84, 36, .35) 68%, rgba(143, 84, 36, .35) 74%, transparent 74%); }
 .chf-ikon { position: fixed; z-index: 900; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; touch-action: none;
   background: linear-gradient(160deg, #fff, #fff1dc); color: var(--virke-djup); box-shadow: 0 0 0 4px #f8f4ed, 0 14px 28px -12px rgba(143, 84, 36, .7), inset 0 0 0 1px rgba(201, 138, 69, .5);
-  transition: transform .3s var(--studs), box-shadow .3s; animation: chf-in .35s var(--mjuk) both; }
+  transition: transform .3s var(--studs), box-shadow .3s, opacity .2s ease; animation: chf-in .35s var(--mjuk) both; }
 .chf-ikon:hover { transform: scale(1.08); }
 .chf-ikon .emo-ik { width: 20px; height: 20px; color: inherit; }
 .chf-ikon .ch-olast { position: absolute; top: -4px; right: -4px; box-shadow: 0 0 0 2.5px #fff; }
@@ -511,3 +511,13 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; 
 .ch-dag { position: static; }
 
 .ch-dagblock { display: flex; flex-direction: column; flex: none; }
+
+/* Chattikonen ligger inte ovanpå sökpaletten eller ett öppet ark */
+html[data-palett-oppen] .chf-ikon, html[data-ark-oppen] .chf-ikon { opacity: 0; pointer-events: none; }
+.ch-tipskort { position: relative; }
+.ch-tipskort__stang { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%;
+  background: rgba(255, 255, 255, .7); color: var(--text-3); cursor: pointer; transition: background-color .2s ease, color .2s ease, transform .16s var(--ease-out, ease); }
+.ch-tipskort__stang:hover { background: #fff; color: var(--text); }
+.ch-tipskort__stang:active { transform: scale(.92); }
+.ch-tipskort__stang .i { width: 13px; height: 13px; }
+.ch-tipskort > div { padding-right: 22px; }

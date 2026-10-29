@@ -350,3 +350,20 @@ section.sh-mork .sh-mitt { animation: none !important; box-shadow: none !importa
 @media (max-width: 1250px) { .sh-delar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 .sh-delar { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important; }
+
+/* Designrunda: varm stengrå i stället för svart, bärnstensplattor, kortare hjälte */
+.sh-knapp__pil { width: 13px !important; height: 13px !important; margin-left: -2px; opacity: .7; }
+.sh-delar li span { font-size: .74rem; }
+.sh-delar li strong { min-width: 1.4em; }
+.sh-vk > span { background: linear-gradient(160deg, #5f5851, #3d3833); color: #f6c68d; box-shadow: inset 0 0 0 1px rgba(255, 245, 230, .08); }
+.sh-kontroll__ikon { background: var(--virke-ljus); color: var(--virke-djup); }
+.sh-konsol { background: linear-gradient(160deg, #5f5851, #3d3833); box-shadow: 0 24px 50px -30px rgba(60, 40, 15, .7), inset 0 0 0 1px rgba(255, 245, 230, .08); }
+.sh-konsol__list { background: rgba(255, 245, 230, .05); border-bottom-color: rgba(255, 245, 230, .08); }
+.sh-konsol .sh-terminal { background: rgba(27, 25, 21, .28) !important; }
+/* Innan första skanningen: loggen och poängen tar inte en halv skärm tom yta */
+.sh-tva--tom .sh-konsol { min-height: 0; }
+.sh-tva--tom .sh-konsol .sh-terminal { min-height: 110px; max-height: 160px; flex: 0 0 auto; }
+.sh-tva--tom { align-items: start; }
+@media (hover: none) { .sh-vk:hover { transform: none; } .sh-vk:hover::before { transform: translateX(-120%); } .sh-vk:active { transform: scale(.97); } }
+@media (max-width: 600px) { .sh-delar { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } .sh-delar li { padding: 7px 9px; } }
+.sh-konsol__status { background: rgba(27, 25, 21, .22); border-top-color: rgba(255, 245, 230, .08); }

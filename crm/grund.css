@@ -300,3 +300,71 @@ html body .topp { background: rgba(250, 247, 241, .95); -webkit-backdrop-filter:
   html[data-sido-dold] body .topp { display: flex; position: relative; height: 64px; margin: var(--ram) var(--ram) 0 0; padding: 0 24px 0 calc(52px + var(--ram)); border-bottom: 0; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
   html[data-sido-dold] body .topp .proto { display: none; }
 }
+
+/* --- Skalet: designteamets rättelser 2026-10-29 -------------------------------------------------- */
+/* Sidbytet: den nya vyn tonar in kort efter att den gamla gått ut – ingen tom krämvit ruta däremellan */
+::view-transition-new(vy) { animation: vt-in .18s var(--ease-out, cubic-bezier(.23, 1, .32, 1)) .06s both; }
+@keyframes vt-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { ::view-transition-new(vy) { animation: none; } }
+
+/* 3D-lutningen syns också när kortet lyfts vid hovring (lyftet skrev tidigare över lutningen) */
+@media (hover: hover) and (pointer: fine) {
+  .kundkort[data-tilt]:hover, .kpi[data-tilt]:hover,
+  .hero .kpi[data-tilt]:hover, .puls .kpi[data-tilt]:hover {
+    transform: perspective(1100px) translateY(-3px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  }
+}
+
+/* Pekskärm: hovringslyften fastnar inte efter ett tryck – i stället en kort tryckkänsla */
+@media (hover: none) {
+  :is(.kpi, .kundkort, .kort[data-g], .dio, .kal__dag, .agk__dag, .lp-kal__dag, .aff, .knapp, .ikonknapp, .lista__rad, .nyval button, .tumme, .chf-ikon, .ch-ikonknapp, .toast__knapp):hover {
+    transform: none !important;
+  }
+  :is(.kpi, .kundkort, .kort[data-g], .dio, .aff, .knapp, .ikonknapp, .lista__rad, .nyval button, .chf-ikon):active {
+    transform: scale(.97) !important;
+    transition: transform .16s var(--ease-out, ease) !important;
+  }
+}
+
+/* Sökpaletten: rund stängknapp på pekskärmar i stället för esc och tangenthjälpen */
+.palett__stang { display: none; place-items: center; flex: none; width: 34px; height: 34px; margin-right: -6px; padding: 0; border: 0; border-radius: 50%;
+  background: rgba(27, 25, 21, .05); color: var(--text-2); cursor: pointer; transition: background-color .2s ease, transform .16s var(--ease-out, ease); }
+.palett__stang:active { transform: scale(.94); }
+.palett__stang .i { width: 16px; height: 16px; }
+@media (hover: none) {
+  .palett__sok > kbd, .palett__fot { display: none; }
+  .palett__stang { display: grid; }
+}
+
+/* Tomma lägen: balanserade rader och ord som inte delas vid bindestreck */
+.tom p { text-wrap: balance; max-width: 34ch; margin-inline: auto; }
+.tom .knapp .i { width: 17px; height: 17px; color: inherit; }
+/* Fälten i ark har samma höjd, så att t.ex. Ort och Typ ligger i linje */
+.ark .falt input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), .ark .falt .valj-knapp { height: 44px; box-sizing: border-box; }
+
+/* Mer-arket (mobil): kontoraden överst, sidorna som ikonrutor i grupper, sekundära länkar i en rad längst ned */
+.mer-konto { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 0; border-radius: 20px; background: #fff; text-align: left; cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--kant), 0 10px 24px -20px rgba(90, 60, 25, .5); font: inherit; color: var(--text); transition: transform .16s var(--ease-out, ease); }
+.mer-konto:active { transform: scale(.98); }
+.mer-konto .avatar { position: relative; flex: none; }
+.mer-konto__text { flex: 1 1 auto; min-width: 0; display: grid; gap: 2px; }
+.mer-konto__text b { font: 600 .95rem/1.2 var(--rubrik); }
+.mer-konto__text small { color: var(--text-3); font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mer-konto__byt { display: inline-flex; align-items: center; gap: 4px; flex: none; padding: 7px 10px; border-radius: 999px; background: var(--virke-ljus); color: var(--virke-djup); font: 600 .72rem/1 var(--rubrik); }
+.mer-konto__byt .i { width: 13px; height: 13px; transform: rotate(-90deg); }
+.mer-etikett { margin: 18px 4px 8px; }
+.mer-rutnat { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 10px; }
+.mer-ruta { position: relative; display: grid; justify-items: center; align-content: center; gap: 8px; min-height: 92px; padding: 12px 6px; border-radius: 20px; background: #fff; text-align: center;
+  color: var(--text); text-decoration: none; box-shadow: inset 0 0 0 1px var(--kant), 0 10px 24px -20px rgba(90, 60, 25, .45); transition: transform .16s var(--ease-out, ease), box-shadow .2s ease; }
+.mer-ruta:active { transform: scale(.96); }
+.mer-ruta__ikon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 13px; background: var(--virke-ljus); color: var(--virke-djup); }
+.mer-ruta__ikon .i { width: 20px; height: 20px; }
+.mer-ruta__namn { font: 600 .78rem/1.2 var(--rubrik); }
+.mer-ruta__bricka { position: absolute; top: 8px; right: 10px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--virke); color: #1b1915; font: 700 .62rem/18px var(--rubrik); font-style: normal; }
+.mer-ruta.aktiv { box-shadow: inset 0 0 0 1.5px rgba(226, 154, 74, .6), 0 10px 24px -18px rgba(143, 84, 36, .6); }
+.mer-ruta.aktiv .mer-ruta__ikon { background: var(--sten, #4a443e); color: #fbf4e8; }
+.mer-fot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 20px; }
+.mer-fot a, .mer-fot button { display: grid; justify-items: center; gap: 6px; padding: 10px 4px; border: 0; border-radius: 16px; background: rgba(27, 25, 21, .04); color: var(--text-2);
+  font: 600 .72rem/1.2 var(--rubrik); text-decoration: none; cursor: pointer; transition: transform .16s var(--ease-out, ease), background-color .2s ease; }
+.mer-fot a:active, .mer-fot button:active { transform: scale(.96); }
+.mer-fot .i { width: 18px; height: 18px; }

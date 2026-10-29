@@ -8626,3 +8626,116 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 }
 /* Pekskärm utan tangentbord: tangenttips (J/K i inkorgen, presentationens tangenter, Ctrl K i sökrutan) visas inte */
 @media (hover: none) and (pointer: coarse) { .inkorg__tips, .tangenter, .sok kbd, .sido__sok kbd { display: none; } }
+/* Mötesrummet under 1100 px: texten överst och rummet som eget block under – rummet ligger aldrig bakom rubriken eller knapparna,
+   och kanterna tonar ut så att varken tak eller golvkant syns som svarta fält */
+@media (max-width: 1100px) {
+  .vy .motescen--3d > .motesrum3d { inset: auto 0 0 0; height: 470px; border-radius: 0 0 22px 22px;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 88%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 88%, transparent 100%); -webkit-mask-composite: source-over; mask-composite: add; }
+  /* rummet saknar tak: överkanten tonar till krämvitt i stället för svart */
+  .vy .motescen--3d > .motesrum3d::after { background: linear-gradient(180deg, #faf4ea 0, #faf4ea 20%, rgba(250, 244, 234, 0) 32%, rgba(250, 244, 234, 0) 86%, #faf4ea 100%); }
+}
+@media (max-width: 560px) { .vy .motescen--3d > .motesrum3d { height: 384px; } }
+/* Husbilder beskärs aldrig: tumnaglarna (4:3 och 3:2 blandat) visas hela på en krämvit platta i stället för object-fit: cover */
+.vy .aff__bild img, .vy .kundkort__hus img, .vy .permodell__rad img, .vy .tabell__hus img, .vy .prodvarn__namn img, .vy .bana__hus img,
+.vy .tumme img, .vy img.tumme, .vy .modellknapp img, .vy .modellval img, .vy .fd__forslag img, .vy .khus img, .vy .af-hus img, .vy .fl__hus img, .vy .fabrik__hus img, .vy .fabrik__bilder img {
+  object-fit: contain !important; background: linear-gradient(#f7f1e7, #efe6d8); }
+/* Säljtavlan: verktygsraden i en höjd (40 px) och utan ensam knapp på en egen rad; mörka ytor i varm stengrå */
+.vy .tv-verktyg { gap: 8px; }
+.vy .tv-verktyg > * { flex-shrink: 0; }
+.vy .tv-verktyg .tv-sok { flex: 1 1 180px; min-width: 160px; }
+.vy .tv-verktyg .tv-sok, .vy .tv-verktyg .ap-filter, .vy .tv-verktyg .kundsort, .vy .tv-verktyg .valj-knapp { min-height: 40px; }
+.vy .tv-verktyg .tv-seg button { min-height: 34px; }
+.vy .tv-verktyg .ap-filter { display: inline-flex; align-items: center; gap: 4px; }
+.vy .tv-ikon { width: 40px; height: 40px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); margin-left: auto; transition: transform .2s var(--mjuk), box-shadow .2s; }
+.vy .tv-ikon:hover { box-shadow: inset 0 0 0 1.5px var(--virke); }
+.vy .tv-ikon:active { transform: scale(.96); }
+.vy .tv-ikon[aria-pressed="true"] { background: linear-gradient(160deg, #5f5851, #3d3833); color: #f6c68d; box-shadow: inset 0 0 0 1px rgba(255, 245, 230, .08); }
+.vy .tv-fokus > p { background: linear-gradient(160deg, #5f5851, #3d3833); box-shadow: inset 0 0 0 1px rgba(255, 245, 230, .08); }
+.vy .tavla-pil { background: linear-gradient(160deg, #5f5851, #3d3833); }
+.vy .tavla-pil--v, .vy .tavla-pil--h { width: 40px; height: 40px; }
+.vy .tavla__tips { display: flex; align-items: center; gap: 6px; margin: 10px 4px 12px; font-size: .78rem; color: #7a7266; }
+.vy .tavla__tips .emo-ik { width: 14px; height: 14px; flex: none; color: #e29a4a; }
+@media (hover: none), (max-width: 700px) { .vy .tavla__tips { display: none; } }
+/* Översikten på platta och mobil: det man ska göra nu kommer först – Fokus, Att göra, förfrågningar, intäkter, aktivitet */
+@media (max-width: 1100px) {
+  .vy .oversikt { display: flex; flex-direction: column; gap: 16px; }
+  .vy .oversikt__kol { display: contents; }
+  .vy .oversikt__kol > .kort { order: 6; min-width: 0; max-width: 100%; }
+  .vy .oversikt__kol > .kort:has(.fokus) { order: 1; }
+  .vy .oversikt__kol > .kort:has(a[href="#/att-gora"]) { order: 2; }
+  .vy .oversikt__kol > .kort:has(a[href="#/forfragningar"]) { order: 3; }
+  .vy .oversikt__kol > .kort:has(.graf__tal) { order: 4; }
+}
+/* Kundkortets huvud: Ändra är en rund pennknapp bredvid namnet – knapparna blir fyra och bryts jämnt */
+.kh__namnrad { display: flex; align-items: center; gap: 10px; min-width: 0; margin: 6px 0 10px; }
+.vy .kh__namnrad h1 { margin: 0; min-width: 0; }
+.kh__andra { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, .85); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); color: var(--text-2); cursor: pointer; transition: transform .2s var(--mjuk), box-shadow .2s, color .2s; }
+.kh__andra .i { width: 15px; height: 15px; }
+.kh__andra:hover { color: var(--virke-djup, #8f5424); box-shadow: inset 0 0 0 1.5px var(--virke); transform: translateY(-1px); }
+.kh__andra:active { transform: scale(.96); }
+.vy .kn__ikon { background: linear-gradient(160deg, #5f5851, #3d3833); box-shadow: inset 0 0 0 1px rgba(255, 245, 230, .08), 0 12px 22px -12px rgba(61, 56, 51, .7); }
+@media (max-width: 700px) {
+  .vy .kh__knappar { display: grid; grid-template-columns: 1fr 1fr; }
+  .vy .kh__knappar .knapp { justify-content: center; padding: 0 10px; }
+  .vy .kh { position: relative; }
+  .vy .kh__halsa { position: absolute; top: 22px; right: 22px; width: 92px; height: 92px; }
+  .vy .kh__halsa b { font-size: 1.5rem; }
+  .vy .kh__halsa small { font-size: .5rem; max-width: 64px; }
+  .vy .kh__tal { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .vy .kh__tal > div { grid-template-areas: "s" "b" "e"; grid-template-columns: 1fr; padding: 9px 10px; }
+  .vy .kh__tal b { font-size: 1.05rem; }
+  .vy .kh__tal small { font-size: .52rem; letter-spacing: .08em; }
+}
+/* Skapa ny: kundens egen rad överst när man står på en kund/affär, och Kundmöte som mörk stenplatta i full bredd sist */
+.nyval__for { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px 12px; margin-bottom: 12px; padding: 14px 16px; border-radius: 22px; background: linear-gradient(160deg, #fff7ec, #fbead5); box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .35); animation: in-upp .45s var(--mjuk) both; }
+.nyval__for > .avatar { width: 40px; height: 40px; border-radius: 13px; }
+.nyval__for small { display: block; font: 600 .62rem/1 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: var(--virke-djup, #8f5424); }
+.nyval__for b { font: 600 1.05rem/1.25 var(--rubrik); }
+.nyval__forknappar { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.nyval__forknappar .knapp { justify-content: center; background: #fff; }
+.vy .nyval__kort--mote, .nyval__kort--mote { grid-column: 1 / -1; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 14px; background: linear-gradient(160deg, #5f5851, #3d3833); box-shadow: inset 0 0 0 1px rgba(255, 245, 230, .08), 0 18px 30px -22px rgba(61, 56, 51, .8); color: #fbf4e8; }
+.nyval__kort--mote .kort__ikon { grid-row: span 2; background: rgba(246, 198, 141, .16) !important; color: #f6c68d !important; }
+.nyval__kort--mote small { color: rgba(251, 244, 232, .65); }
+.nyval__kort--mote:hover { box-shadow: inset 0 0 0 1.5px rgba(246, 198, 141, .55), 0 20px 36px -22px rgba(61, 56, 51, .9); }
+/* Förfrågningar på smal skärm: djuplänken rullar till detaljen, och en länk överst leder tillbaka till listan */
+.fd__tillbaka { display: none; }
+@media (max-width: 899px) {
+  .vy .inkorg__las, .vy .inkorg__lista { scroll-margin-top: 84px; }
+  .fd__tillbaka { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 12px; padding: 0; border: 0; background: none; font: 600 .85rem/1 var(--rubrik); color: var(--text-2); cursor: pointer; }
+  .fd__tillbaka .i { width: 15px; height: 15px; }
+}
+/* Projekt: listan direkt efter läget, Husets resa i ett eget kort under, kalendern sist */
+.vy .prodtopp--resa { margin-top: 16px; }
+.vy .tavla--prod { grid-auto-flow: column; grid-auto-columns: unset; }
+@media (max-width: 760px) { .vy .tavla--prod { --kf: 78vw; --kt: 44vw; } .vy .tavla--prod .spalt:has(.spalt__tom) .spalt__tom { padding-block: 22px; } }
+.vy .tavla--prod .spalt:has(.spalt__tom) .spalt__huvud small { display: none; }
+.vy .tavla--prod .spalt:has(.spalt__tom) .spalt__huvud b { white-space: normal; }
+/* Offerter och Kunder: flikarna och sorteringen på samma rad – flikarna rullar i sidled i stället för att sorteringen bryts ner */
+@media (min-width: 1100px) {
+  .vy .kundverktyg { flex-wrap: nowrap; }
+  .vy .kundverktyg > .flikar--filter { flex: 0 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+  .vy .kundverktyg > .flikar--filter::-webkit-scrollbar { display: none; }
+  .vy .kundverktyg > .flikar--filter > button { flex: none; }
+  .vy .kundverktyg__hoger { flex: none; }
+}
+/* Offertmätarna får samma ikonplatta som Översikt och Projekt */
+.vy .offtopp__tal small > i { display: grid; place-items: center; width: 30px; height: 30px; margin-bottom: 8px; border-radius: 10px; background: var(--virke-ljus, #fbead5); color: var(--virke-djup, #8f5424); }
+.vy .offtopp__tal small > i .emo-ik { width: 15px; height: 15px; }
+/* Vanligaste posterna: raderna står tätt överst i stället för utspridda över kortets höjd */
+.vy .poster__lista { align-content: start; }
+/* 3D-lutningen syns även på kort som har ett eget hovringslyft (kundkort, nyckeltal): lyft och lutning i samma transform */
+@media (hover: hover) and (pointer: fine) {
+  html body .vy .kundkort[data-tilt]:hover, html body .vy .kpi[data-tilt]:hover, html body .nyval__kort[data-tilt]:hover {
+    transform: perspective(1100px) translateY(-3px) rotateX(var(--rx)) rotateY(var(--ry)); }
+}
+/* Efter en släppt dragning: en mjuk bärnstensring på kortet i stället för att det landar en gång till */
+.aff--ring { animation: aff-ring .7s var(--ease-out, cubic-bezier(.23, 1, .32, 1)); }
+@keyframes aff-ring { 0% { box-shadow: 0 0 0 0 rgba(226, 154, 74, .55); } 100% { box-shadow: 0 0 0 10px rgba(226, 154, 74, 0); } }
+/* Kundsidans dokumentkort: "Alla →" är en liten pillerknapp som aldrig sticker ut ur kortet */
+.vy .kortlank { display: inline-flex; flex: none; align-items: center; gap: 4px; min-height: 32px; padding: 0 12px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); font: 600 .8rem/1 var(--rubrik); color: var(--text); white-space: nowrap; text-decoration: none; transition: box-shadow .2s, transform .2s var(--mjuk); }
+.vy .kortlank:hover { box-shadow: inset 0 0 0 1.5px var(--virke); transform: translateY(-1px); }
+.vy .kortlank .i { width: 14px; height: 14px; }
+@media (max-width: 480px) { .vy .kort__huvud:has(.kortlank) { flex-wrap: wrap; row-gap: 8px; } .vy .kort__huvud:has(.kortlank) h2 { min-width: 0; flex: 1 1 100%; } }
+/* Dokumenthjältens mätare i husets palett: bärnsten som standard, grönt och rött bara för status (blått och grått bort) */
+section.dk-hjalte.kort .dk-stat[data-ton="bla"], section.dk-hjalte.kort .dk-stat[data-ton="gra"] { --st: #f6c68d; }
+.vy .tv-tomt { margin: 10px 0 14px; }

@@ -105,7 +105,7 @@
         try { localStorage.setItem('ih-crm-skrivprov', '1'); localStorage.removeItem('ih-crm-skrivprov'); } catch (x) { f.push({ allvar: 'hog', text: 'Lagringen går inte att skriva – ändringar sparas inte' }); }
         return f;
       } },
-    { id: 'lacka', namn: 'Läckor', under: 'Personnummer, kortnummer och lösenord i data och adresser', ikon: 'fingeravtryck',
+    { id: 'lacka', namn: 'Läckor', under: 'Personnummer, kortnummer och lösenord i data och adresser', ikon: 'droppe',
       steg: ['Personnummer i lagrad text', 'Kortnummer i lagrad text', 'Lösenord i klartext', 'Persondata i adressen'],
       kor: async function (logg) {
         var f = [], st = strangar();
@@ -261,11 +261,11 @@
     var status = p == null ? 'Inte skannat ännu' : p >= 90 ? 'Skyddat' : p >= 70 ? 'Bör ses över' : 'Åtgärda nu';
     var knapp = function (ids, ikon, text, accent) { return '<button type="button" class="sh-knapp' + (accent ? ' sh-knapp--accent' : '') + '" data-g="sh-skanna" data-ids="' + ids + '"' + (skan.kor ? ' disabled' : '') + '>' + ik(ikon) + '<span>' + text + '</span></button>'; };
     var delar = '<ul class="sh-delar">' + KONTROLLER.map(function (k) { var r = S.senast[k.id]; return '<li data-lage="' + lageFor(r) + '" style="--d:' + FARG[k.id] + '"><i></i><span>' + KORT[k.id] + '</span><strong>' + (r ? poang(r.fynd) : '–') + '</strong></li>'; }).join('') +
-      '<li class="sh-delar__total" data-ton="' + ton + '">' + ik(p == null ? 'radar' : p >= 90 ? 'skold' : 'skold-larm') + '<span>' + status + '</span><strong>' + (p == null ? '–' : p) + '</strong></li></ul>';
+      '<li class="sh-delar__total" data-ton="' + ton + '">' + ik(p == null ? 'radar' : p >= 90 ? 'skold' : 'skold-larm') + '<span title="' + status + '">' + (p == null ? 'Ej skannat' : status) + '</span><strong>' + (p == null ? '–' : p) + '</strong></li></ul>';
     var hjalte = '<section class="sh-hjalte sh-mork kort kort--mork" data-ton="' + ton + '"' + (skan.kor ? ' data-skannar' : '') + '><div class="sh-rutnat" aria-hidden="true"></div><i class="sh-skanlinje" aria-hidden="true"></i>' +
       '<div class="sh-text"><p class="etikett"><i class="sh-live"></i>Säkerhetshubben · demoläget</p><h1>Säkerhet <em>i realtid.</em></h1>' +
         '<p class="sh-ingress">Kontrollerna körs i webbläsaren mot sidans kod och CRM:ets data – skadlig kod, uppdateringar, buggar, läckor, intrångsförsök, avvikande beteende och sådant som är trasigt.</p>' +
-        '<div class="sh-knappar">' + knapp('', 'radar', 'Skanna allt', true) + knapp('uppdatering', 'uppgradera', 'Sök uppdateringar') + knapp('buggar', 'nyckelverktyg', 'Kontrollera buggar') + knapp('lacka', 'fingeravtryck', 'Läckkontroll') + knapp('intrang,beteende', 'skold-larm', 'Intrång och beteende') + '</div>' +
+        '<div class="sh-knappar">' + knapp('', 'radar', 'Skanna allt', true) + knapp('uppdatering', 'uppgradera', 'Sök uppdateringar') + '<button type="button" class="sh-knapp" data-g="sh-till-kontroller">' + ik('skold') + '<span>Kör en kontroll</span>' + IH.emo('chevron', 'sh-knapp__pil') + '</button></div>' +
         delar + '<p class="sh-senast">' + (senast ? 'Senast skannat ' + IH.sedan(senast.tid) + ' av ' + e((IH.anvandare(senast.av) || {}).namn || '') : 'Ingen skanning gjord ännu – kör en för att få säkerhetspoängen.') + '</p></div>' +
       '<div class="sh-karnkol">' + karna(S, p, status) + '</div></section>';
     var kontroller = KONTROLLER.map(function (k) {
@@ -327,7 +327,7 @@
     var drift = '<section class="sh-drift kort" data-in><header><span class="sh-drift__live"><i></i>Live</span><h2>Driftläget <em>just nu</em></h2><small>Räknat ur säkerhetsloggen i den här webbläsaren</small></header>' +
       '<div class="sh-drift__tal">' + [
         ['skold', 'Säkerhetspoäng', p == null ? '–' : p, p == null ? 'kör en skanning' : status, ton],
-        ['fingeravtryck', 'Händelser 7 dagar', logg.filter(function (h) { return inom(h, 7); }).length, plural(logg.length, 'händelse', 'händelser') + ' totalt', 'is'],
+        ['puls', 'Händelser 7 dagar', logg.filter(function (h) { return inom(h, 7); }).length, plural(logg.length, 'händelse', 'händelser') + ' totalt', 'is'],
         ['skold-larm', 'Stoppade filer', stoppade, plural(granskade, 'fil granskad', 'filer granskade'), stoppade ? 'rod' : 'gron'],
         ['anvandare-plus', 'Konto och åtkomst', konton, 'ändringar 30 dagar', 'gul']
       ].map(function (x, n) { return '<div class="sh-drift__ruta" data-ton="' + x[4] + '" style="--n:' + n + '"><span>' + ik(x[0]) + '</span><small>' + x[1] + '</small><b>' + x[2] + '</b><em>' + e(x[3]) + '</em></div>'; }).join('') + '</div>' +
@@ -344,7 +344,7 @@
     var omritning = Date.now() - (ui.ritad || 0) < 4000 && location.hash.indexOf('sakerhet') >= 0 && !!document.querySelector('.sh-drift'); ui.ritad = Date.now();
     if (omritning) { drift = drift.replace('class="sh-drift kort" data-in', 'class="sh-drift kort sh-stilla"'); verktyg = verktyg.replace('class="sh-verktyg kort" data-in', 'class="sh-verktyg kort sh-stilla"'); }
     var html = hjalte + drift + verktyg + '<section class="ad-band kort sh-kontrollband"><h2>' + ik('skold') + 'Sju kontroller<small class="sh-antal">Varje kontroll kan köras för sig. Fynd med åtgärd har en knapp.</small></h2><div class="sh-kontroller">' + kontroller + '</div></section>' +
-      '<div class="ad-tva">' + terminal + historik + '</div>';
+      '<div class="ad-tva' + (!senast && !skan.kor && !skan.logg.length ? ' sh-tva--tom' : '') + '">' + terminal + historik + '</div>';
     return { titel: 'Säkerhet', html: html, efter: function (rot) { var t = rot.querySelector('[data-sh-terminal]'); if (t) t.scrollTop = t.scrollHeight;
       if (S.auto && !skan.kor && (!senast || Date.now() - new Date(senast.tid) > 864e5)) setTimeout(function () { if (!skan.kor) { IH.toast('Automatisk skanning', 'Det har gått över ett dygn sedan senaste skanningen.', 'radar'); skanna(null); } }, 900);
       if (!omritning) rot.querySelectorAll('.sh-drift__ruta b').forEach(function (el, n) { var mal = parseInt(el.textContent, 10); if (isNaN(mal) || lugn()) return; var t0 = performance.now() + n * 80; var steg = function (nu) { var q = Math.min(1, Math.max(0, (nu - t0) / 900)); el.textContent = Math.round(mal * (1 - Math.pow(1 - q, 3))); if (q < 1) requestAnimationFrame(steg); }; requestAnimationFrame(steg); });
@@ -354,6 +354,8 @@
   IH.sakHub = { kontroller: KONTROLLER, lageFor: lageFor, poang: poang, fel: felLista, hub: hub, skanna: skanna, total: total };
   IH.G['sh-skanna-ga'] = function (el) { var ids = el.getAttribute('data-ids'); IH.ga('#/sakerhet'); setTimeout(function () { skanna(ids ? ids.split(',') : null); }, 350); };
   IH.G['sh-rensa-fel'] = function () { felLista.length = 0; IH.rita(); IH.toast('Felloggen är rensad', null, 'aterstall'); };
+  // "Kör en kontroll" i hjälten: glid ner till de sju kontrollerna i stället för fem knappar i rad
+  IH.G['sh-till-kontroller'] = function () { var b = document.querySelector('.sh-kontrollband'); if (!b) return; b.scrollIntoView({ behavior: lugn() ? 'auto' : 'smooth', block: 'start' }); if (IH.lysUpp) IH.lysUpp('.sh-kontrollband'); };
   IH.G['sh-skanna'] = function (el) { var ids = el.getAttribute('data-ids'); skanna(ids ? ids.split(',') : null); };
   // Rensar farliga mönster ur all lagrad text (skripttaggar, javascript:-länkar, händelseattribut, ramar)
   // Maskerar läckor i lagrad text: personnummer och kortnummer (bara de som klarar Luhn) och lösenord i klartext

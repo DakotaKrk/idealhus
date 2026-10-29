@@ -14,6 +14,8 @@
   'use strict';
   const IH = window.IH;
   const e = IH.e, i = IH.i, ik = (n) => IH.emo(n);
+  // "Öppna i eget fönster": en ruta med pil ut (inte helskärmens inåtpekande hörn, som läses som förminska)
+  const popout = '<svg class="emo-ik" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8 8"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
   const db = () => IH.db;
   const jag = () => IH.jag().id;
   const anv = (id) => IH.anvandare(id) || { id, namn: 'Okänd', farg: '#ccc', titel: '' };
@@ -182,9 +184,10 @@
     const rad = (g, ikon, titel, under, pa) => '<button type="button" class="ch-vaxel" data-g="' + g + '" role="switch" aria-checked="' + pa + '">' +
       '<span class="ch-vaxel__ikon">' + ik(ikon) + '</span><span class="ch-vaxel__text"><b>' + titel + '</b><small>' + under + '</small></span><i class="ch-vaxel__reglage" aria-hidden="true"></i></button>';
     return '<div class="ch-kort">' + (kan ? rad('ch-avisera', 'bjallra', 'Avisering på skrivbordet', avis ? 'På – när fliken inte syns' : 'Av', avis) : '') +
-      '<div class="ch-tipskort"><span class="ch-vaxel__ikon">' + ik('glodlampa') + '</span><div><b>Tips</b><p>' + (pek()
+      (pref().tipsDolt ? '' : '<div class="ch-tipskort"><span class="ch-vaxel__ikon">' + ik('glodlampa') + '</span><div><b>Tips</b><p>' + (pek()
         ? 'Tryck på ett meddelande för att svara, reagera eller ändra ditt eget. Bifoga filer med gemet – de virusskannas först.'
-        : 'Dra in eller klistra in filer i ett samtal – de virusskannas först. Håll musen över ett meddelande för att svara, reagera eller ändra ditt eget. Knappen med minus gör chatten till en ikon som följer med dig.') + '</p></div></div></div>';
+        : 'Dra in eller klistra in filer i ett samtal – de virusskannas först. Håll musen över ett meddelande för att svara, reagera eller ändra ditt eget. Knappen med minus gör chatten till en ikon som följer med dig.') + '</p></div>' +
+        '<button type="button" class="ch-tipskort__stang" data-g="ch-tips-stang" aria-label="Dölj tipset" title="Dölj tipset">' + i('stang') + '</button></div>') + '</div>';
   }
   function skrivHtml(k) {
     const andrar = ui.andrar && C().meddelanden.filter((m) => m.id === ui.andrar)[0];
@@ -222,7 +225,7 @@
         (k.typ === 'grupp' ? '<button type="button" class="ch-ikonknapp ch-ruta" data-g="ch-bjud" data-kanal="' + k.id + '" title="Bjud in">' + ik('anvandare-plus') + '</button>' : '') +
         '<button type="button" class="ch-ikonknapp ch-ruta" data-g="ch-tyst" data-kanal="' + k.id + '" aria-pressed="' + tystad(k.id) + '" title="' + (tystad(k.id) ? 'Slå på ljud' : 'Tysta samtalet') + '">' + ik(tystad(k.id) ? 'ljud-av' : 'ljud') + '</button>' +
         '<button type="button" class="ch-ikonknapp ch-ruta" data-g="ch-info" aria-pressed="' + ui.info + '" title="Om samtalet">' + ik('info') + '</button>' +
-        '<button type="button" class="ch-ikonknapp ch-ruta" data-g="chf-oppna" data-kanal="' + k.id + '" title="Öppna i eget fönster">' + ik('helskarm-ut') + '</button>' +
+        '<button type="button" class="ch-ikonknapp ch-ruta" data-g="chf-oppna" data-kanal="' + k.id + '" title="Öppna i eget fönster" aria-label="Öppna i eget fönster">' + popout + '</button>' +
         '<button type="button" class="ch-ikonknapp ch-ruta" data-g="chf-min-sida" data-kanal="' + k.id + '" title="Minimera till en ikon">' + ik('minimera') + '</button></span>') + '</header>';
   }
 
@@ -424,6 +427,8 @@
     const n = l.indexOf(jag()); if (n >= 0) l.splice(n, 1); else l.push(jag());
     ui.verktyg = null; IH.spara(); ritaAllt();
   };
+  // Tipset i samtalslistan kan stängas – det kommer inte tillbaka
+  G['ch-tips-stang'] = () => { satPref('tipsDolt', true); IH.rita(); };
   G['ch-svara'] = (el) => { ui.svar = el.getAttribute('data-mid'); ui.andrar = null; ui.verktyg = null; const iF = !!el.closest('.chf'); ritaAllt(); fokusText(iF); };
   G['ch-kopiera'] = (el) => { const m = meddelande(el.getAttribute('data-mid')); if (!m) return; try { navigator.clipboard.writeText(klartext(m.text)); IH.toast('Kopierat', null, 'kopiera'); } catch (x) { /* */ } ui.verktyg = null; };
   G['ch-andra'] = (el) => { ui.andrar = el.getAttribute('data-mid'); ui.svar = null; ui.verktyg = null; const iF = !!el.closest('.chf'); ritaAllt(); fokusText(iF); };

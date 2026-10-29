@@ -14,8 +14,8 @@
   /* 01 Närvaro ---------------------------------------------------------------------------------- */
   var NARVARO = [
     { id: 'online', namn: 'Online', farg: '#22a35a' },
-    { id: 'mote', namn: 'I möte', farg: '#e8a456' },
-    { id: 'upptagen', namn: 'Upptagen', farg: '#d9573f' },
+    { id: 'mote', namn: 'I möte', kort: 'Möte', farg: '#e8a456' },
+    { id: 'upptagen', namn: 'Upptagen', kort: 'Stör ej', farg: '#d9573f' },
     { id: 'strax', namn: 'Strax tillbaka', farg: '#e8c98f' },
     { id: 'lunch', namn: 'Lunch', farg: '#9fc2c9' },
     { id: 'ute', namn: 'Ute på tomt', farg: '#a9c8a4' },
@@ -94,14 +94,14 @@
         '<div class="km-du"><small>Inloggad som</small><strong title="' + e(jag.namn) + '">' + e(jag.namn) + '</strong><span class="km-roller">' + rollerFor(jag).map(function (r) { return '<span class="ap-roll" data-roll="' + r + '">' + r + '</span>'; }).join('') + '</span></div>' +
         '<button type="button" class="km-statusknapp" data-g="km-status" aria-expanded="' + kmStatusOppen + '"><i></i><span>' + e(nu.namn) + '</span>' + IH.emo('redigera') + '</button></header>' +
       '<div class="km-snabb">' + SNABB.map(function (id) { var n = NARVARO.filter(function (x) { return x.id === id; })[0];
-        return '<button type="button" class="km-snabbval" data-g="satt-narvaro" data-s="' + id + '" style="--n:' + n.farg + '" title="' + n.namn + '" aria-label="Status: ' + n.namn + '" aria-pressed="' + (vald === id) + '">' + IH.emo(NARV_IKON[id]) + '</button>'; }).join('') + '</div>' +
+        return '<button type="button" class="km-snabbval" data-g="satt-narvaro" data-s="' + id + '" style="--n:' + n.farg + '" title="' + n.namn + '" aria-label="Status: ' + n.namn + '" aria-pressed="' + (vald === id) + '">' + IH.emo(NARV_IKON[id]) + '<small>' + e(n.kort || n.namn) + '</small></button>'; }).join('') + '</div>' +
       (kmStatusOppen ? '<div class="km-statusval">' + NARVARO.map(function (n) {
         return '<button type="button" data-g="satt-narvaro" data-s="' + n.id + '" aria-pressed="' + (vald === n.id) + '" style="--n:' + n.farg + '">' + IH.emo(NARV_IKON[n.id]) + '<span>' + e(n.namn) + '</span></button>';
       }).join('') + '</div>' : '') +
       '<div class="km-grupp"><p class="km-rubrik"><span>Byt konto</span><small>Demo: logga in som någon annan i teamet</small></p>' +
         '<div class="km-lista" role="list">' + [jag].concat(andra).map(function (u, n) { return '<div role="listitem" style="--i:' + n + '">' + kontoRad(u, u.id === jag.id) + '</div>'; }).join('') + '</div></div>' +
       '<footer class="km-fot">' + lank('href="#/profil"', 'anstallda', 'Min profil') +
-        (jag.roll === 'admin' || jag.chef ? lank('data-g="km-nytt-konto"', 'anvandare-plus', 'Nytt konto') : lank('href="#/chatt"', 'prat', 'Meddelanden')) +
+        lank('href="#/installningar"', 'installningar', 'Inställningar') +
         lank('data-g="logga-ut"', 'logga-ut', 'Logga ut') + '</footer>';
   }
   IH.G['konto-meny'] = function () {
@@ -295,7 +295,7 @@
     var nu30 = st.akt.filter(function (h) { return IH.dagarSedan(h.tid) < 30; }).length;
     var tal = salj ? [
         ['portfolj', 'Pipeline', IH.kort(st.oppet), plural(st.oppna.length, 'öppen affär', 'öppna affärer')],
-        ['mal', 'Viktad prognos', IH.kort(st.viktat), 'värde × chans'],
+        ['stapel', 'Viktad prognos', IH.kort(st.viktat), 'värde × chans'],
         ['medalj', 'Vunnet i år', IH.kort(st.vunnet), u.mal ? Math.round(st.vunnet / u.mal * 100) + ' % av ' + IH.kort(u.mal) : 'inget mål satt'],
         ['trend', 'Vinstgrad', st.vinstgrad == null ? '–' : Math.round(st.vinstgrad * 100) + ' %', 'vunna av avgjorda']]
       : u.roll === 'prod' ? [
@@ -368,7 +368,7 @@
         ruta('blixt', 'Senast aktiv', '<strong>' + e(senastFor(u).text) + '</strong><em>' + e(narvaro(u.id).namn) + '</em>')) +
       ruta('flyg', 'Arbetsdagar', '<span class="lp-vdagar">' + ['M', 'T', 'O', 'T', 'F', 'L', 'S'].map(function (d, k) { return '<i' + (k < 5 ? ' class="pa"' : '') + '>' + d + '</i>'; }).join('') + '</span>' + (nasta ? '<em><b class="lp-fvchip">' + e(FRANVARO[nasta.typ][0]) + '</b> ' + kortDatum(new Date(nasta.fran)) + (nasta.till !== nasta.fran ? '–' + kortDatum(new Date(nasta.till)) : '') + (kanFranvaro(u.id) ? ' · <button type="button" class="lp-textknapp" data-g="lp-franvaro" data-fid="' + nasta.id + '" data-uid="' + u.id + '" data-dag="' + nasta.fran.slice(0, 10) + '">Ändra</button>' : '') + '</em>' : '<em>Ingen frånvaro inlagd' + (kanFranvaro(u.id) ? ' · <button type="button" class="lp-textknapp" data-g="lp-franvaro" data-uid="' + u.id + '">Lägg in</button>' : '') + '</em>'));
     var senaste = db().aktiviteter.filter(function (h) { return h.av === u.id && new Date(h.tid) <= new Date(); }).sort(function (a, c) { return new Date(c.tid) - new Date(a.tid); }).slice(0, 7);
-    return '<section class="kort kort--mork lp-band2 lp-mk lp-omkort" data-in><header class="lp-band2__huvud"><div><p class="ao-ogon">Om</p><h2>Om <em>' + (ar ? 'dig' : e(fornamn)) + '</em></h2></div>' +
+    return '<section class="kort lp-band2 lp-omkort" data-in><header class="lp-band2__huvud"><div><p class="ao-ogon">Om</p><h2>Om <em>' + (ar ? 'dig' : e(fornamn)) + '</em></h2></div>' +
         (kanAndra ? '<button type="button" class="knapp knapp--liten" data-g="lp-andra-profil" data-id="' + u.id + '">' + i('skriv') + 'Ändra</button>' : '') + '</header>' +
       (u.om ? '<blockquote class="lp-om-citat"><span aria-hidden="true">”</span>' + e(u.om) + '</blockquote>' : ar ? '<button type="button" class="lp-om-skriv" data-g="lp-andra-profil" data-id="' + u.id + '" data-fokus="om">' + i('skriv') + '<span><strong>Berätta om dig</strong><small>Några rader om vad du jobbar med och hur man når dig bäst – syns för hela teamet.</small></span>' + i('pil') + '</button>' : '<p class="lp-om-ingen">' + e(fornamn) + ' har inte skrivit någon presentation än.</p>') +
       (kontakt ? '<div class="lp-om-kontakt">' + kontakt + '</div>' : '') +
@@ -395,7 +395,7 @@
     var idag0 = dag0(new Date()).getTime();
     var datumChip = function (x) { var d = dag0(x.forfaller).getTime(), n = Math.round((d - idag0) / 864e5); return '<span class="lp-arb-datum" data-lage="' + (n < 0 ? 'sen' : n === 0 ? 'idag' : 'snart') + '">' + (n < 0 ? plural(-n, 'dag', 'dagar') + ' sen' : n === 0 ? 'I dag' : n === 1 ? 'I morgon' : kortDatum(new Date(x.forfaller))) + '</span>'; };
     var uppg = st.uppg.slice().sort(function (a, c) { return a.forfaller < c.forfaller ? -1 : 1; });
-    return '<section class="kort kort--mork lp-band2 lp-mk lp-arbkort" data-in><header class="lp-band2__huvud"><div><p class="ao-ogon">Arbete</p><h2>Aktivitet <em>och arbete</em></h2></div><span class="lp-h2-chip">Senaste 30 dagarna</span></header>' +
+    return '<section class="kort lp-band2 lp-arbkort" data-in><header class="lp-band2__huvud"><div><p class="ao-ogon">Arbete</p><h2>Aktivitet <em>och arbete</em></h2></div><span class="lp-h2-chip">Senaste 30 dagarna</span></header>' +
       '<div class="lp-arb-trio">' +
         tal('stapel', 'Händelser', nu30, diff ? (diff > 0 ? '+' : '−') + Math.abs(diff) + ' mot förra 30 d' : 'som förra 30 d', diff > 0 ? 'bra' : diff < 0 ? 'gul' : '') +
         (u.roll === 'salj' ? tal('portfolj', 'Öppna affärer', st.oppna.length, IH.kort(st.oppet) + ' i pipeline') : tal('byggnad', 'Pågående projekt', proj.length, proj.length ? 'i produktion' : 'inga just nu')) +
@@ -523,7 +523,7 @@
   /* 05 Försäljningsledningen #/chef – samma upplägg som Uperformance visaChef: hjälten med verktygen och fyra tal, sedan
      01 Teamet just nu (filter), 02 Vem jobbar när, 03 Teamets kalender, 04 Att agera på (fördela, påminn), 05 Pipeline per
      säljare, 06 Aktivitet 14 dagar och 07 Topplistan 90 dagar. Allt räknas ur datan – inga påhittade siffror. */
-  var chefUi = { filter: 'alla', kalVem: 'alla', kalMan: 0, kalTyp: 'alla', kalVy: 'man', agera: 'alla', topp: 90, narvVecka: 0 };
+  var chefUi = { filter: 'alla', kalVem: 'alla', kalMan: 0, kalTyp: 'alla', kalVy: 'lista', agera: 'alla', topp: 90, narvVecka: 0 };
   var plural = function (n, en, flera) { return n + ' ' + (n === 1 ? en : flera); };
   var pct = function (x) { return Math.round(x * 100) + ' %'; };
   var inom = function (iso, d) { return iso && IH.dagarSedan(iso) < d; };
@@ -892,7 +892,7 @@
           '<button type="button" class="sh-knapp" data-g="lp-rapport">' + IH.emo('ladda-ner') + '<span>Exportera rapport</span></button></div></div>' +
       '<div class="ap-tal">' + [
         { ikon: 'portfolj', etikett: 'Teamets pipeline', varde: IH.kort(tot.pipeline), under: plural(oppnaN, 'affär', 'affärer') + ' öppna', href: '#/salj', ton: 'lila' },
-        { ikon: 'mal', etikett: 'Viktad prognos', varde: IH.kort(tot.viktat), under: 'värde × chansen att vinna', ton: 'is' },
+        { ikon: 'stapel', etikett: 'Viktad prognos', varde: IH.kort(tot.viktat), under: 'värde × chansen att vinna', ton: 'is' },
         { ikon: 'medalj', etikett: 'Vunnet 90 dagar', varde: IH.kort(tot.vunnet), under: plural(tot.ordrar, 'order', 'ordrar') + ' · ' + IH.kort(tot.vunnetKv) + ' hittills i kvartalet', ton: 'gron' },
         { ikon: 'trend', etikett: 'Vinstgrad 90 d', varde: vg == null ? '–' : pct(vg), under: 'vunna av avgjorda affärer', ton: 'gul' }
       ].map(tal).join('') + '</div>' + '<div class="lp-mork__mitt">' + ring + lag + '</div>' + veckoStaplar + '</section>';
@@ -992,14 +992,15 @@
       return '<li class="' + (n === 0 && r.summa ? 'forst' : '') + '" style="--a:' + (r.summa / ledare).toFixed(3) + '"><span class="lp-topp__plats">' + (n === 0 && r.summa ? IH.emo('medalj') : n + 1) + '</span>' + avatar(r.x.u) + '<span><a href="#/profil/' + r.x.u.id + '"><b>' + e(r.x.u.namn) + '</b></a><small>' + plural(r.v.length, 'order', 'ordrar') + (r.g ? ' · vinstgrad ' + pct(r.v.length / r.g) : '') + (n > 0 && toppRad[0].summa ? ' · ' + IH.kort(toppRad[0].summa - r.summa) + ' efter' : '') + '</small><span class="lp-topp__stapel"><i></i></span></span><b class="tal">' + IH.kort(r.summa) + '</b></li>';
     }).join('') + '</ol>' + '<p class="lp-topp__summa">Teamet: <b>' + IH.kort(toppRad.reduce(function (t, r) { return t + r.summa; }, 0)) + '</b> på ' + plural(toppRad.reduce(function (t, r) { return t + r.v.length; }, 0), 'order', 'ordrar') + '</p>';
 
+    // Det som kräver handling först, sedan teamet; högerspalten staplar pipeline och topplista så spalterna slutar lika
     var html = hjalte +
-      chefBand('01 · Teamet', 'Teamet', 'just nu', '<div class="lp-team">' + kort + '</div>', { ingress: 'Status, pipeline, kvartalsmålet och veckans aktivitet per säljare – klicka för profilen.', hoger: '<div class="ap-filterrad" role="group" aria-label="Visa">' + filter + '</div>' }) +
-      chefBand('02 · Närvaro', 'Vem jobbar', 'när', narv, { ingress: 'Arbetsdagar enligt schemat, dagar med aktivitet i CRM:et och frånvaro – klicka på en dag för att lägga in frånvaro.' }) +
-      chefBand('03 · Kalender', 'Teamets', 'kalender', kalender(team), { ingress: 'Möten, samtal och mejl, uppgifter som förfaller och vunna affärer – för hela teamet eller en person.' }) +
-      '<div class="ao-tva">' + chefBand('04 · Att agera på', 'Behöver din', 'uppmärksamhet', uppm, { hoger: lista.length ? '<span class="ao-band__tal">' + lista.length + '</span>' : '', ingress: lista.length ? 'Det viktigaste överst. Ta själv, fördela eller påminn direkt.' : '' }) +
-        chefBand('05 · Pipeline', 'Pipeline', 'per säljare', pipe, { ingress: 'Öppet värde per steg – håll musen över en färg för beloppet.' }) + '</div>' +
-      '<div class="ao-tva">' + chefBand('06 · Aktivitet', 'Aktivitet', '14 dagar', karta + senasteHandelser(team), { ingress: 'Loggade möten, samtal och mejl per dag. Pilen jämför med de 14 dagarna innan.' }) +
-        chefBand('07 · Resultat', 'Topplistan', period === 'ar' ? 'i år' : period + ' dagar', topplista, { hoger: toppVal }) + '</div>';
+      chefBand('01 · Att agera på', 'Behöver din', 'uppmärksamhet', uppm, { hoger: lista.length ? '<span class="ao-band__tal">' + lista.length + '</span>' : '', ingress: lista.length ? 'Det viktigaste överst. Ta själv, fördela eller påminn direkt.' : '' }) +
+      chefBand('02 · Teamet', 'Teamet', 'just nu', '<div class="lp-team">' + kort + '</div>', { ingress: 'Status, pipeline, kvartalsmålet och veckans aktivitet per säljare – klicka för profilen.', hoger: '<div class="ap-filterrad" role="group" aria-label="Visa">' + filter + '</div>' }) +
+      '<div class="ao-tva lp-tva">' + chefBand('03 · Aktivitet', 'Aktivitet', '14 dagar', karta + senasteHandelser(team), { ingress: 'Loggade möten, samtal och mejl per dag. Pilen jämför med de 14 dagarna innan.' }) +
+        '<div class="lp-stapel">' + chefBand('04 · Pipeline', 'Pipeline', 'per säljare', pipe, { ingress: 'Öppet värde per steg – håll musen över en färg för beloppet.' }) +
+        chefBand('05 · Resultat', 'Topplistan', period === 'ar' ? 'i år' : period + ' dagar', topplista, { hoger: toppVal }) + '</div></div>' +
+      chefBand('06 · Närvaro', 'Vem jobbar', 'när', narv, { ingress: 'Arbetsdagar enligt schemat, dagar med aktivitet i CRM:et och frånvaro – klicka på en dag för att lägga in frånvaro.' }) +
+      chefBand('07 · Kalender', 'Teamets', 'kalender', kalender(team), { ingress: 'Möten, samtal och mejl, uppgifter som förfaller och vunna affärer – för hela teamet eller en person.' });
     var raknaUpp = Date.now() - (IH.vyer.chef.senast || 0) > 15000; IH.vyer.chef.senast = Date.now();
     return { titel: 'Försäljning', html: html, efter: function (yta) {
       ['.lp-nv', '.lp-karta'].forEach(function (sel) {

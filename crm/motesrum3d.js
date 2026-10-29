@@ -225,15 +225,21 @@ let S = null;
 function bygg() {
   material();
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance', alpha: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
+  // skuggorna räknas om var tredje bildruta (lamporna vajar bara lite) i stället för i varje
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0; renderer.outputColorSpace = THREE.SRGBColorSpace;
-  const scen = new THREE.Scene();
+  // bortom rummet tonar allt till krämvitt i stället för att visa kortets mörka bakgrund
+  const scen = new THREE.Scene(); scen.background = new THREE.Color('#f6efe4'); scen.fog = new THREE.Fog('#f6efe4', 24, 52);
   const pm = new THREE.PMREMGenerator(renderer); scen.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scen.environmentIntensity = 0.45;
   const kamera = new THREE.PerspectiveCamera(34, 1.6, 0.1, 100);
 
   // rummet: golv, två väggar, tak-kant, fönsterväggen med utsikt
-  const golv = new THREE.Mesh(new THREE.PlaneGeometry(16, 12), mat({ map: T.golv(), roughness: 0.55, metalness: 0.02 })); golv.rotation.x = -Math.PI / 2; golv.receiveShadow = true; scen.add(golv);
+  // golvet räcker långt fram och åt sidorna, så att kameran aldrig ser förbi kanten (smala och höga skärmar)
+  const golvT = T.golv(); golvT.repeat.set(3 * 44 / 16, 3 * 30 / 12);
+  const golv = new THREE.Mesh(new THREE.PlaneGeometry(44, 30), mat({ map: golvT, roughness: 0.55, metalness: 0.02 })); golv.rotation.x = -Math.PI / 2; golv.position.set(0.7, 0, 10.8); golv.receiveShadow = true; scen.add(golv);
+  // taket över rummet, i varmt vitt
+  const tak = new THREE.Mesh(new THREE.PlaneGeometry(13.8, 12), mat({ color: '#f3ece1', roughness: 0.95 })); tak.rotation.x = Math.PI / 2; tak.position.set(0.7, 6, 1.8); scen.add(tak);
   const vaggM = mat({ map: T.vagg(), roughness: 0.95 });
   // bakväggen med ett hål för fönstret, så att utsikten bakom syns på djupet
   [[-8, -0.9, 0, 6], [5.7, 8, 0, 6], [-0.9, 5.7, 0, 1.1], [-0.9, 5.7, 4.4, 6]].forEach(([x1, x2, y1, y2]) => { const d = new THREE.Mesh(new THREE.PlaneGeometry(x2 - x1, y2 - y1), vaggM); d.position.set((x1 + x2) / 2, (y1 + y2) / 2, -4.2); d.receiveShadow = true; scen.add(d); });
@@ -312,7 +318,9 @@ function bygg() {
   const kopp2 = kopp('#c98a45'); kopp2.position.set(-0.45, Y, 0.95); scen.add(kopp2);
   const angaT = tex(64, 64, (g) => { const r = g.createRadialGradient(32, 32, 2, 32, 32, 30); r.addColorStop(0, 'rgba(255,255,255,.9)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0, 0, 64, 64); });
   const anga = []; [kopp1, kopp2].forEach((k) => { for (let n = 0; n < 7; n++) { const a2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: angaT, transparent: true, depthWrite: false, opacity: 0 })); scen.add(a2); anga.push({ m: a2, k, fas: n / 7 }); } });
-  const valdRing = new THREE.Mesh(new THREE.RingGeometry(0.42, 0.5, 48), new THREE.MeshBasicMaterial({ color: '#f6c68d', transparent: true, opacity: 0, depthWrite: false })); valdRing.rotation.x = -Math.PI / 2; valdRing.position.y = 0.02; scen.add(valdRing);
+  const valdRing = new THREE.Mesh(new THREE.RingGeometry(0.74, 0.9, 64), new THREE.MeshBasicMaterial({ color: '#f6c68d', transparent: true, opacity: 0, depthWrite: false, toneMapped: false })); valdRing.rotation.x = -Math.PI / 2; valdRing.position.y = 0.03; scen.add(valdRing);
+  // ett varmt spotljus över den valda kundens stol
+  const valdSpot = new THREE.SpotLight('#ffcf96', 0, 7, 0.42, 0.7, 1.4); valdSpot.position.set(0, 4.6, 0); scen.add(valdSpot, valdSpot.target);
   // bygghjälm, tumstock, penna, materialprover, block
   const h1 = hjalm(); h1.position.set(2.6, Y, -0.85); h1.rotation.y = 0.6; scen.add(h1);
   const tum = new THREE.Group(); tum.position.set(-0.1, Y + 0.008, 0.9); tum.rotation.y = 0.3; scen.add(tum);
@@ -375,38 +383,52 @@ function bygg() {
 
   const comp = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
   comp.addPass(new RenderPass(scen, kamera)); const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.42, 0.55, 0.9); comp.addPass(bloom); comp.addPass(new OutputPass());
-  S = { valdRing, pendlar, molnT, faglar, granar, lapStaplar, vaxter: [lov, vaxt2], renderer, scen, kamera, comp, bloom, stolar, bortre, snurr, anga, stralar, damm, dpos, dfas, ND, vTim, vMin, vSek, lampor, el: null, t: 0, ram: 0, synlig: false, mus: new THREE.Vector2(), musMal: new THREE.Vector2(), klocka: new THREE.Clock() };
+  S = { valdRing, valdSpot, pendlar, molnT, faglar, granar, lapStaplar, vaxter: [lov, vaxt2], renderer, scen, kamera, comp, bloom, stolar, bortre, snurr, anga, stralar, damm, dpos, dfas, ND, vTim, vMin, vSek, lampor, el: null, t: 0, ram: 0, synlig: false, mus: new THREE.Vector2(), musMal: new THREE.Vector2(), klocka: new THREE.Clock() };
   renderer.domElement.className = 'motesrum3d__duk';
   new IntersectionObserver((r) => { S.synlig = r[0].isIntersecting; if (S.synlig) starta(); }, { threshold: 0.05 }).observe(renderer.domElement);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) starta(); });
   addEventListener('resize', storlek);
+  new ResizeObserver(() => { S.lage = null; if (LUGN) starta(); }).observe(renderer.domElement);
 }
-function storlek() { if (!S || !S.el) return; const w = S.el.clientWidth, h = S.el.clientHeight; if (!w || !h) return; S.renderer.setSize(w, h, false); S.comp.setSize(w, h); S.kamera.aspect = w / h; const smal = w < 900; S.utzoom = w / h < 1 ? 1 + (1 - w / h) * 0.85 : 1; S.kamera.fov = smal ? (w / h < 1 ? 52 : 44) : 34; S.kamera.setViewOffset(w, h, smal ? 0 : -w * 0.2, smal ? (w < 600 && w / h < 1 ? -h * 0.08 : 0) : -h * 0.02, w, h); S.kamera.updateProjectionMatrix(); }
+function storlek() { if (!S || !S.el) return; const w = S.el.clientWidth, h = S.el.clientHeight; if (!w || !h) return; S.renderer.setSize(w, h, false); S.comp.setSize(w, h); S.kamera.aspect = w / h; const smal = w < 900; S.utzoom = w / h < 1 ? 1 + (1 - w / h) * 0.85 : smal && w / h > 1.3 ? 0.86 : 1; S.kamera.fov = smal ? (w / h < 1 ? 52 : 40) : 34; S.lage = null; S.kamera.setViewOffset(w, h, smal ? 0 : -w * 0.15, smal ? (w / h < 1 ? (w < 600 ? -h * 0.08 : 0) : h * 0.08) : -h * 0.02, w, h); S.kamera.updateProjectionMatrix(); starta(); }
 function starta() { if (S && !S.ram && S.synlig && !document.hidden && S.el && S.el.isConnected) { S.klocka.getDelta(); S.ram = requestAnimationFrame(ram); } }
 const tmp = new THREE.Vector3();
-// på en smal skärm sitter plats 5 och 6 på bordets bortre sida i stället för vid kortändarna, som hamnar utanför bilden
-function stolFor(n) { const smal = S.el && S.el.clientWidth < 600; return smal && n >= 4 ? S.bortre[n === 4 ? 2 : 0] : S.stolar[n]; }
-function placeraPlatser() {
-  const rum = S.el.parentElement && S.el.parentElement.querySelector('.motescen__rum'); if (!rum) return;
+// platserna sprids symmetriskt runt bordet: närmaste långsidan först, sedan mitt på bortre sidan
+// (s = närmaste sidan 0–3, kortändarna 4–5; b = bortre sidan 0–2)
+const MONSTER = [[], ['s1'], ['s1', 's2'], ['s1', 'b1', 's2'], ['s0', 's1', 's2', 's3'], ['s0', 's1', 'b1', 's2', 's3'], ['s0', 's1', 'b0', 'b2', 's2', 's3']];
+function stolFor(n) { const m = (S.lage && MONSTER[S.lage.knappar.length]) || MONSTER[6], k = m[n]; if (!k) return null; return k[0] === 'b' ? S.bortre[+k[1]] : S.stolar[+k[1]]; }
+// knapparna och rektanglarna mäts en gång (vid ny ritning och storleksändring), sedan skrivs bara translate i varje bildruta
+function matLage() {
+  const rum = S.el.parentElement && S.el.parentElement.querySelector('.motescen__rum'); if (!rum) return null;
   const rr = rum.getBoundingClientRect(), dr = S.el.getBoundingClientRect();
+  const knappar = [...rum.querySelectorAll('.bord__plats')];
+  knappar.forEach((b) => { b.style.left = '0px'; b.style.top = '0px'; });
+  return { rum, knappar, halv: knappar.map((b) => (b.offsetWidth || 44) / 2 + 6), dx: dr.left - rr.left, dy: dr.top - rr.top, dw: dr.width, dh: dr.height, rw: rr.width, sist: [] };
+}
+function placeraPlatser() {
+  if (!S.lage || !S.lage.rum.isConnected) S.lage = matLage(); const L = S.lage; if (!L) return;
   let ut = 0;
-  rum.querySelectorAll('.bord__plats').forEach((b, n) => {
+  L.knappar.forEach((b, n) => {
     const s = stolFor(n); if (!s) { b.style.display = 'none'; return; }
     tmp.set(s.position.x, 1.25, s.position.z + 0.15).project(S.kamera);
-    let x = (dr.left - rr.left) + (tmp.x + 1) / 2 * dr.width; const y = (dr.top - rr.top) + (1 - tmp.y) / 2 * dr.height;
-    // smal skärm: en plats utanför rummet gör att kameran backar lite tills alla får plats; till sist hålls den innanför kanten
-    const halv = (b.offsetWidth || 44) / 2 + 6;
-    if (x < halv || x > rr.width - halv) { ut = 1; x = Math.min(rr.width - halv, Math.max(halv, x)); }
-    b.style.left = (x / rr.width * 100).toFixed(2) + '%'; b.style.top = (y / rr.height * 100).toFixed(2) + '%';
+    let x = L.dx + (tmp.x + 1) / 2 * L.dw; const y = L.dy + (1 - tmp.y) / 2 * L.dh;
+    // en plats utanför rummet gör att kameran backar lite tills alla får plats; till sist hålls den innanför kanten
+    const halv = L.halv[n];
+    if (x < halv || x > L.rw - halv) { ut = 1; x = Math.min(L.rw - halv, Math.max(halv, x)); }
+    const f = L.sist[n]; if (f && Math.abs(f[0] - x) < 0.5 && Math.abs(f[1] - y) < 0.5) return;
+    L.sist[n] = [x, y]; b.style.translate = x.toFixed(1) + 'px ' + y.toFixed(1) + 'px';
+    const bort = S.bortre.includes(s); if (b._bort !== bort) { b._bort = bort; b.classList.toggle('bord__plats--bortre', bort); }
   });
   if (ut && (S.platsZoom || 1) < 1.15) S.platsZoom = (S.platsZoom || 1) * 1.02;
 }
 function ram() {
-  S.ram = 0; if (!S.el || !S.el.isConnected || !S.synlig || document.hidden) return;
-  const dt = Math.min(0.05, S.klocka.getDelta()); S.t += LUGN ? dt * 0.3 : dt; const t = S.t;
+  // S.ram är satt medan bildrutan ritas, så att starta() inifrån (storlek via vakten) inte startar en andra slinga
+  S.ram = -1; if (!S.el || !S.el.isConnected || !S.synlig || document.hidden) { S.ram = 0; return; }
+  const dt = Math.min(0.05, S.klocka.getDelta()); S.t += LUGN ? 0 : dt; const t = S.t;
+  vakt(dt);
   // kameran: en långsam glidning och lite följ-musen, aldrig ryckigt
   S.mus.lerp(S.musMal, 1 - Math.pow(0.02, dt));
-  const a = Math.sin(t * 0.08) * 0.12 + S.mus.x * 0.12, intro = LUGN ? 1 : 1 - Math.pow(1 - Math.min(1, t / 2.8), 3);
+  const a = (Math.sin(t * 0.08) - 1) * 0.07 + S.mus.x * 0.1, intro = LUGN ? 1 : 1 - Math.pow(1 - Math.min(1, t / 2.8), 3);
   const rad = (9.4 + (1 - intro) * 5) * (S.utzoom || 1) * (S.platsZoom || 1);
   S.kamera.position.set(Math.sin(a + (1 - intro) * 0.4) * rad + 1.2, 5.3 + (1 - intro) * 2.2 + Math.sin(t * 0.11) * 0.12 - S.mus.y * 0.3, Math.cos(a + (1 - intro) * 0.4) * rad + 2.4);
   S.kamera.lookAt(0.2, 1.35, -0.4);
@@ -431,18 +453,31 @@ function ram() {
   const nu = new Date(), sek = nu.getSeconds() + nu.getMilliseconds() / 1000, min = nu.getMinutes() + sek / 60, tim = (nu.getHours() % 12) + min / 60;
   S.vSek.rotation.z = -sek / 60 * Math.PI * 2; S.vMin.rotation.z = -min / 60 * Math.PI * 2; S.vTim.rotation.z = -tim / 12 * Math.PI * 2;
   // den valda kundens stol vrids lite mot bordet
-  const rumEl = S.el.parentElement && S.el.parentElement.querySelector('.motescen__rum'), vald = rumEl ? [...rumEl.querySelectorAll('.bord__plats')].findIndex((b) => b.classList.contains('vald')) : -1;
-  const vs = vald >= 0 ? stolFor(vald) : null; if (vs) { S.valdRing.position.x = vs.position.x; S.valdRing.position.z = vs.position.z; } S.valdRing.material.opacity += ((vs ? 0.55 + Math.sin(t * 3) * 0.2 : 0) - S.valdRing.material.opacity) * Math.min(1, dt * 4); S.valdRing.scale.setScalar(1 + Math.sin(t * 3) * 0.05);
+  if (!S.lage || !S.lage.rum.isConnected) S.lage = matLage();
+  const vald = S.lage ? S.lage.knappar.findIndex((b) => b.classList.contains('vald')) : -1;
+  const vs = vald >= 0 ? stolFor(vald) : null; if (vs) { S.valdRing.position.x = vs.position.x; S.valdRing.position.z = vs.position.z; S.valdSpot.position.set(vs.position.x, 4.6, vs.position.z * 0.6); S.valdSpot.target.position.set(vs.position.x, 0.6, vs.position.z); }
+  S.valdSpot.intensity += ((vs ? 8 : 0) - S.valdSpot.intensity) * (LUGN ? 1 : Math.min(1, dt * 4)); S.valdRing.material.opacity += ((vs ? 0.55 + Math.sin(t * 3) * 0.2 : 0) - S.valdRing.material.opacity) * Math.min(1, dt * 4); S.valdRing.scale.setScalar(1 + Math.sin(t * 3) * 0.05);
   S.stolar.concat(S.bortre).forEach((s) => { const mal = s === vs ? Math.sin(t * 1.5) * 0.15 : 0; s.children.forEach((c) => { if (c.position.y > 0.8) c.rotation.y += (mal - c.rotation.y) * Math.min(1, dt * 4); }); });
+  if (LUGN || ++S.n % 3 === 0) S.renderer.shadowMap.needsUpdate = true;
   S.comp.render(dt); placeraPlatser();
+  // minskad rörelse: en stillbild, som ritas om vid klick och storleksändring
+  if (LUGN) { S.ram = 0; return; }
   S.ram = requestAnimationFrame(ram);
+}
+// enkel bildrutevakt: går det trögt i två sekunder sänks upplösningen och glöden stängs av
+function vakt(dt) {
+  S.n = S.n || 0; if (S.sankt || LUGN) return; S.vt = (S.vt || 0) + dt; S.vn = (S.vn || 0) + 1;
+  if (S.vt < 2) return; const fps = S.vn / S.vt; S.vt = 0; S.vn = 0;
+  if (S.t > 3 && fps < 40) { S.sankt = true; S.renderer.setPixelRatio(1); S.bloom.enabled = false; storlek(); }
 }
 function montera(el) {
   if (!stod) { document.documentElement.classList.add('ingen-webgl'); el.remove(); return; }
   if (!S) bygg();
   S.el = el; el.appendChild(S.renderer.domElement);
   const sek = el.parentElement; if (sek) sek.classList.add('motescen--3d'); const rum = sek && sek.querySelector('.motescen__rum'); if (rum) { rum.classList.add('motescen__rum--3d'); sek.addEventListener('pointermove', (ev) => { const r = sek.getBoundingClientRect(); S.musMal.set((ev.clientX - r.left) / r.width * 2 - 1, (ev.clientY - r.top) / r.height * 2 - 1); }); sek.addEventListener('pointerleave', () => S.musMal.set(0, 0)); }
-  storlek(); starta();
+  S.lage = null; storlek(); starta();
+  // fotona på väggen laddas efter första bilden; med minskad rörelse ritas stillbilden om när de är klara
+  if (LUGN) [600, 1800].forEach((ms) => setTimeout(starta, ms));
   requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('klar')));
 }
 if (IH) {

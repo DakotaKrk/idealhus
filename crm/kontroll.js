@@ -229,7 +229,9 @@
     var flodeBand = band('05 · Händelser', 'Senast', 'i CRM:et', flode.length ? '<ul class="ao-flode">' + flode.map(function (x) { var u = IH.anvandare(x.av) || { namn: '?', farg: '#ccc' }, t = String(x.text || '');
         return '<li data-typ="' + x.typ + '"><span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span><span>' + e(t.slice(0, 96)) + (t.length > 96 ? '…' : '') + '<small>' + e(u.namn) + ' · ' + IH.sedan(x.tid) + (x.typ === 'sakerhet' ? ' · säkerhetsloggen' : '') + '</small></span></li>'; }).join('') + '</ul>' : '<p class="ad-not">Inga händelser än.</p>',
       { halv: true, hoger: '<a class="knapp knapp--liten" href="#/admin">Hela loggen</a>' });
-    // 06 Drift
+    // 06 Drift – med snabbåtgärderna och verktygen, så att spalten blir lika lång som förslagen bredvid
+    var SNABB = [['km-nytt-konto', 'anvandare-plus', 'Lägg till konto'], ['sh-skanna-ga', 'radar', 'Skanna nu'], ['ad-exportera', 'ladda-ner', 'Exportera data'], ['kc-csv', 'anstallda', 'Kontolista (CSV)'],
+      ['kc-rapport', 'dokument', 'Systemrapport'], ['kc-rensa-bilder', 'bild', 'Rensa chattfiler'], ['kc-rensa-logg', 'papperskorg', 'Rensa loggen'], ['ad-aterstall', 'aterstall', 'Återställ data']];
     var app = document.querySelector('script[src*="app.js"]'), version = ((app && app.getAttribute('src')) || '').split('?v=')[1] || '–';
     var driftBand = band('06 · Drift', 'System', 'och fel',
       lista([{ ikon: 'bugg', namn: 'Fel sedan sidan laddades', lage: dr.fel.length ? 'medel' : 'ok', text: dr.fel.length ? plural(dr.fel.length, 'fel', 'fel') : 'Inga' },
@@ -237,18 +239,16 @@
         { ikon: 'server', namn: 'Läge och version', lage: 'ok', text: 'Demo · v' + version + ' · data ' + (IH.VERSION || '–') },
         { ikon: 'lank', namn: 'Nätverket', lage: dr.online ? 'ok' : 'medel', text: dr.online ? 'Uppkopplad' : 'Ingen uppkoppling' }]) +
       (dr.fel.length ? '<ul class="ao-fel">' + dr.fel.slice(-3).reverse().map(function (t) { return '<li><code>' + e(t) + '</code></li>'; }).join('') + '</ul>' : '<p class="ao-lugnt">' + ik('bock') + 'Inga fel i skript eller filer sedan sidan laddades.</p>') +
+      '<p class="ao-ogon ao-ogon--liten">Snabbåtgärder och verktyg</p><div class="ao-snabb">' + SNABB.map(function (x) { return '<button type="button" class="ao-snabbknapp" data-g="' + x[0] + '">' + ik(x[1]) + '<span>' + x[2] + '</span></button>'; }).join('') + '</div>' +
       '<div class="ao-fot">' + (dr.fel.length ? '<button type="button" class="knapp knapp--liten" data-g="sh-rensa-fel">' + ik('aterstall') + 'Rensa felloggen</button>' : '') + '<button type="button" class="knapp knapp--liten" data-g="sh-skanna-ga" data-ids="trasigt,uppdatering">' + ik('uppgradera') + 'Sök uppdateringar</button></div>',
       { halv: true, hoger: chip(dr.poang, dr.poang + ' / 100') });
     // 07 Förslag, snabbåtgärder och verktyg
     var forslag = forslagLista(brott, dl, dr);
-    var SNABB = [['km-nytt-konto', 'anvandare-plus', 'Lägg till konto'], ['sh-skanna-ga', 'radar', 'Skanna nu'], ['ad-exportera', 'ladda-ner', 'Exportera data'], ['kc-csv', 'anstallda', 'Kontolista (CSV)'],
-      ['kc-rapport', 'dokument', 'Systemrapport'], ['kc-rensa-bilder', 'bild', 'Rensa chattfiler'], ['kc-rensa-logg', 'papperskorg', 'Rensa loggen'], ['ad-aterstall', 'aterstall', 'Återställ data']];
     var forslagBand = band('07 · Förslag', 'Bör', 'åtgärdas',
-      (forslag.length ? '<ul class="ao-upp">' + forslag.slice(0, ui.allaForslag ? forslag.length : 5).map(function (x) {
+      (forslag.length ? '<ul class="ao-upp">' + forslag.slice(0, ui.allaForslag ? forslag.length : 7).map(function (x) {
         return '<li><span class="ao-upp__ikon">' + ik(x.ikon) + '</span><span class="ao-upp__text"><strong>' + e(x.text) + '</strong><small>' + e(x.under || '') + '</small></span>' +
           (x.lank ? '<a class="knapp knapp--liten" href="' + x.lank + '">' + x.knapp + '</a>' : '<button type="button" class="knapp knapp--liten" data-g="' + x.g + '"' + (x.data ? ' data-ids="' + x.data + '"' : '') + '>' + x.knapp + '</button>') + '</li>';
-      }).join('') + '</ul>' + (forslag.length > 5 ? '<div class="ao-fot"><button type="button" class="knapp knapp--liten" data-g="kc-forslag-alla">' + (ui.allaForslag ? 'Visa färre' : 'Visa alla ' + forslag.length) + '</button></div>' : '') : '<div class="ao-lugnt ao-lugnt--stor">' + ik('skold') + '<div><strong>Inget att åtgärda</strong><small>Profiler, mål, ansvariga och säkerheten ser bra ut.</small></div></div>') +
-      '<p class="ao-ogon ao-ogon--liten">Snabbåtgärder och verktyg</p><div class="ao-snabb">' + SNABB.map(function (x) { return '<button type="button" class="ao-snabbknapp" data-g="' + x[0] + '">' + ik(x[1]) + '<span>' + x[2] + '</span></button>'; }).join('') + '</div>',
+      }).join('') + '</ul>' + (forslag.length > 7 ? '<div class="ao-fot"><button type="button" class="knapp knapp--liten" data-g="kc-forslag-alla">' + (ui.allaForslag ? 'Visa färre' : 'Visa alla ' + forslag.length) + '</button></div>' : '') : '<div class="ao-lugnt ao-lugnt--stor">' + ik('skold') + '<div><strong>Inget att åtgärda</strong><small>Profiler, mål, ansvariga och säkerheten ser bra ut.</small></div></div>'),
       { halv: true, hoger: forslag.length ? '<span class="ao-band__tal">' + forslag.length + '</span>' : '' });
     var html = hjalte + kontoBand + '<div class="ao-tva">' + sakBand + dataBand + '</div><div class="ao-tva">' + karta + flodeBand + '</div><div class="ao-tva">' + driftBand + forslagBand + '</div>';
     return { titel: 'Kontrollcentral', html: html };

@@ -839,14 +839,14 @@ function station6(modell) { // Klart
 let S = null;
 function bygg(el) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95; renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scen = new THREE.Scene(); scen.background = himmel(); scen.fog = new THREE.Fog(HORISONT, 70, 140);
   const pmrem = new THREE.PMREMGenerator(renderer); scen.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scen.environmentIntensity = 0.3;
   const kamera = new THREE.PerspectiveCamera(30, 2, 0.5, 200);
   scen.add(new THREE.HemisphereLight('#e4f0f6', '#a4b07f', 0.6));
-  const sol = new THREE.DirectionalLight('#fff0d8', 2.8); sol.castShadow = true; sol.shadow.mapSize.set(4096, 4096); sol.shadow.bias = -0.0003; sol.shadow.normalBias = 0.035;
+  const sol = new THREE.DirectionalLight('#fff0d8', 2.8); sol.castShadow = true; sol.shadow.mapSize.set(2048, 2048); sol.shadow.bias = -0.0003; sol.shadow.normalBias = 0.035;
   Object.assign(sol.shadow.camera, { left: -34, right: 34, top: 26, bottom: -26, near: 1, far: 110 }); scen.add(sol, sol.target);
   // vägen och den lysande banan genom alla steg
   const vag = lada(AVST * 5 + 90, 0.06, 3.6, new THREE.MeshStandardMaterial({ map: GRUS, roughness: 0.95 }), 0.03); vag.position.set(AVST * 2.5, -0.55, 7.5); scen.add(vag);
@@ -868,14 +868,18 @@ function bygg(el) {
   renderer.domElement.className = 'resa3d__duk';
   // dra för att panorera när man har zoomat in, nyp eller Ctrl + hjul för att zooma
   const duk = renderer.domElement;
-  duk.addEventListener('pointerdown', (ev) => { S.auto = false; S.paus = 0; S.drag = { x: ev.clientX, pan: S.pan }; duk.setPointerCapture(ev.pointerId); uppdateraUi(); });
-  duk.addEventListener('pointermove', (ev) => { if (!S.drag || S.hel) return; S.pan = S.drag.pan - (ev.clientX - S.drag.x) / duk.clientWidth * S.halvB * 2; });
+  duk.addEventListener('pointerdown', (ev) => { S.drag = { x: ev.clientX, pan: S.pan }; duk.setPointerCapture(ev.pointerId); });
+  duk.addEventListener('pointermove', (ev) => {
+    if (!S.drag || S.hel) return;
+    if (S.auto && Math.abs(ev.clientX - S.drag.x) > 5) { S.auto = false; S.paus = 0; uppdateraUi(); }
+    S.pan = S.drag.pan - (ev.clientX - S.drag.x) / duk.clientWidth * S.halvB * 2; starta();
+  });
   const stral = new THREE.Raycaster(), musp = new THREE.Vector2();
   duk.addEventListener('pointerup', (ev) => {
     const d = S.drag; S.drag = null; if (!d || Math.abs(ev.clientX - d.x) > 5) return;
     const rr = duk.getBoundingClientRect(); musp.set(((ev.clientX - rr.left) / rr.width) * 2 - 1, -((ev.clientY - rr.top) / rr.height) * 2 + 1);
     stral.setFromCamera(musp, S.kamera); const tr = stral.intersectObjects(S.stationer, true)[0]; if (!tr) return;
-    let o = tr.object; while (o && !S.stationer.includes(o)) o = o.parent; if (o) ga(S.stationer.indexOf(o), true);
+    let o = tr.object; while (o && !S.stationer.includes(o)) o = o.parent; if (o) { S.auto = false; ga(S.stationer.indexOf(o), true); }
   });
   duk.addEventListener('pointercancel', () => { S.drag = null; });
   duk.addEventListener('wheel', (ev) => { if (!ev.ctrlKey) return; ev.preventDefault(); zooma(ev.deltaY > 0 ? 1 : -1, 1 + Math.min(0.4, Math.abs(ev.deltaY) / 200)); }, { passive: false });
@@ -887,9 +891,18 @@ function storlek() {
   if (!S || !S.el) return;
   const w = S.el.clientWidth, h = S.el.clientHeight; if (!w || !h) return;
   S.renderer.setSize(w, h, false); S.comp.setSize(w, h); S.bloom.resolution.set(w / 2, h / 2);
-  S.kamera.aspect = w / h; S.kamera.fov = w < 640 ? 40 : 28; S.kamera.updateProjectionMatrix();
+  S.kamera.aspect = w / h; S.kamera.fov = w < 640 ? 40 : 28; S.kamera.updateProjectionMatrix(); starta();
 }
 function ga(n, narma) { S.nu = (n + 6) % 6; S.pan = 0; if (narma) { S.hel = false; S.zoom = 1; } uppdateraUi(); }
+// uppspelningen: hela resan en stund, sedan flyger kameran steg för steg och till sist tillbaka till hela resan
+// (smala skärmar hoppar över översikten, där blir stationerna för små)
+function spela(dt) {
+  S.paus += dt; if (S.paus < (S.hel ? 4 : 7)) return; S.paus = 0;
+  const smal = S.el && S.el.clientWidth < 640;
+  if (S.hel) { S.hel = false; S.zoom = 1.25; ga(0); }
+  else if (S.nu === 5 && !smal) { S.hel = true; S.zoom = 1; S.pan = 0; uppdateraUi(); }
+  else ga(S.nu + 1);
+}
 // ut (+1) eller in (-1); längst ut visas hela resan
 function zooma(rikt, steg = 1.35) {
   if (rikt > 0) { if (S.hel) return; S.zoom *= steg; if (BAS * S.zoom >= S.hela * 0.97) S.hel = true; }
@@ -899,11 +912,18 @@ function zooma(rikt, steg = 1.35) {
 function uppdateraUi() {
   if (!S || !S.el) return;
   const steg = IH.PROJSTEG[S.nu], ui = S.el.querySelector('[data-resa-text]');
-  if (ui) ui.innerHTML = '<span class="resa3d__nr">' + (S.nu + 1) + '</span><span><small>Steg ' + (S.nu + 1) + ' av 6</small><b>' + e(steg.namn) + '</b><em>' + e(steg.text) + '</em></span>';
-  if (ui) { ui.classList.remove('byter'); void ui.offsetWidth; ui.classList.add('byter'); }
-  const kn = S.el.querySelector('[data-resa-auto]'); if (kn) { kn.setAttribute('aria-pressed', String(S.auto)); kn.title = S.auto ? 'Pausa resan' : 'Spela resan'; kn.innerHTML = '<svg class="emo-ik" aria-hidden="true"><use href="#i-' + (S.auto ? 'minus-cirkel' : 'film') + '"/></svg>' + (S.auto ? 'Pausa' : 'Spela'); }
+  // texten byts bara när innehållet ändras, så att kortet inte blinkar vid varje klick
+  const pavag = (IH.db.projekt || []).filter((p) => IH.PROJSTEG.some((s, k) => s.id === p.steg && k < 5)).length;
+  const html = S.hel
+    ? '<span class="resa3d__nr resa3d__nr--hel">' + IKON.hel + '</span><span><small>Hela resan · 6 steg</small><b>Från ritning till nyckel</b><em>' + (pavag ? pavag + ' hus är på väg just nu. Klicka på ett steg för att flyga dit.' : 'Klicka på ett steg för att flyga dit.') + '</em></span>'
+    : '<span class="resa3d__nr">' + (S.nu + 1) + '</span><span><small>Steg ' + (S.nu + 1) + ' av 6</small><b>' + e(steg.namn) + '</b><em>' + e(steg.text) + '</em></span>';
+  if (ui && ui.dataset.html !== html) { ui.dataset.html = html; ui.innerHTML = html; ui.classList.remove('byter'); void ui.offsetWidth; ui.classList.add('byter'); }
+  const kn = S.el.querySelector('[data-resa-auto]'); if (kn) { kn.setAttribute('aria-pressed', String(S.auto)); kn.title = S.auto ? 'Pausa resan' : 'Spela resan'; kn.setAttribute('aria-label', kn.title); kn.innerHTML = (S.auto ? IKON.paus : IKON.spela) + '<span>' + (S.auto ? 'Pausa' : 'Spela') + '</span>'; }
+  S.el.querySelectorAll('[data-resa-hel]').forEach((hk) => hk.setAttribute('aria-pressed', String(S.hel)));
+  S.el.classList.toggle('resa3d--hel', S.hel);
+  S.el.querySelectorAll('.resa3d__nal').forEach((b) => b.classList.toggle('resa3d__nal--nu', !S.hel && +b.dataset.i === S.nu));
+  starta();
   S.el.querySelectorAll('[data-resa-prick]').forEach((p, k) => p.setAttribute('aria-current', String(k === S.nu)));
-  const hk = S.el.querySelector('[data-resa-hel]'); if (hk) hk.setAttribute('aria-pressed', String(S.hel));
   const blk = S.el.closest('.prodblock--fabrik'); if (blk) { blk.querySelectorAll('.fabrik__station').forEach((s, k) => { s.classList.toggle('resa-nu', k === S.nu); s.classList.toggle('resa-forbi', k < S.nu); }); const f = blk.querySelector('.fabrik'); if (f) f.style.setProperty('--nu', S.nu); }
 }
 function nalar() {
@@ -918,54 +938,67 @@ function nalar() {
   }).join('');
 }
 const tmp = new THREE.Vector3(), OFF = new THREE.Vector3(-5, 13, 42).normalize(), BAS = 44.6;
+// ikonerna i reglagen (paus = två rundade streck, spela = rundad triangel, hela resan = ramhörn)
+const IKON = {
+  paus: '<svg class="emo-ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6.5v11M15 6.5v11"/></svg>',
+  spela: '<svg class="emo-ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6.2v11.6a1 1 0 0 0 1.5.86l9-5.8a1 1 0 0 0 0-1.72l-9-5.8a1 1 0 0 0-1.5.86z" stroke-linejoin="round"/></svg>',
+  hel: '<svg class="emo-ik" aria-hidden="true"><use href="#i-helskarm"/></svg>'
+};
 function placeraNalar() {
   const w = S.el.clientWidth, h = S.el.clientHeight;
   S.el.querySelectorAll('.resa3d__nal').forEach((b) => {
     const i = +b.dataset.i;
     tmp.set(i * AVST - 1, 6.6, -2.5).project(S.kamera);
     const syns = tmp.z < 1 && Math.abs(tmp.x) < 1.15 && Math.abs(tmp.y) < 1.15;
-    b.style.transform = 'translate(' + ((tmp.x + 1) / 2 * w).toFixed(1) + 'px,' + ((1 - tmp.y) / 2 * h).toFixed(1) + 'px) translate(-50%,-100%)';
-    b.style.opacity = syns ? (i === S.nu ? 1 : 0.85) : 0; b.style.pointerEvents = syns ? '' : 'none';
+    b.style.transform = 'translate(' + ((tmp.x + 1) / 2 * w).toFixed(1) + 'px,' + ((1 - tmp.y) / 2 * h).toFixed(1) + 'px) translate(-50%,-100%)' + (!S.hel && i === S.nu ? ' scale(1.06)' : '');
+    b.style.opacity = syns ? 1 : 0; b.style.pointerEvents = syns ? '' : 'none';
   });
 }
 function starta() { if (S && !S.ram && S.synlig && !document.hidden && S.el && S.el.isConnected) { S.klocka.getDelta(); S.ram = requestAnimationFrame(ram); } }
 function ram() {
-  S.ram = 0;
-  if (!S.el || !S.el.isConnected || !S.synlig || document.hidden) return;
-  const dt = Math.min(0.05, S.klocka.getDelta()); S.t += LUGN ? dt * 0.35 : dt;
-  if (S.auto) { S.paus += dt; if (S.paus > 7) { S.paus = 0; ga(S.nu + 1); } }
+  // S.ram är satt medan bildrutan ritas, så att starta() inifrån (ga, storlek) inte startar en andra slinga
+  S.ram = -1;
+  if (!S.el || !S.el.isConnected || !S.synlig || document.hidden) { S.ram = 0; return; }
+  const dt = Math.min(0.05, S.klocka.getDelta()); S.t += LUGN ? 0 : dt;
+  if (S.auto && !LUGN) spela(dt);
   // kameran: hela resan på en gång, eller inzoomad på steget; den glider mjukt och vaggar lite
   const halv = Math.tan(Math.atan(Math.tan(THREE.MathUtils.degToRad(S.kamera.fov / 2)) * S.kamera.aspect));
   S.hela = (AVST * 5 + 13) / 2 / halv;
   const dist = S.hel ? S.hela : klamp(BAS * S.zoom, 20, S.hela), halvB = dist * halv * 0.92; S.halvB = halvB;
-  const lo = halvB - 7, hi = AVST * 5 + 7 - halvB;
+  // marken och vägen räcker en station till åt båda hållen, så att även första och sista steget kan hamna mitt i bild
+  const lo = halvB - 7 - AVST, hi = AVST * 5 + 7 + AVST - halvB;
   const x = S.hel || lo >= hi ? AVST * 2.5 : klamp(S.nu * AVST + S.pan, lo, hi); if (!S.hel && lo < hi) S.pan = x - S.nu * AVST;
   const sv = LUGN ? 0 : Math.sin(S.t * 0.25) * dist * 0.03;
   tmp.set(x - 0.5, 1.2 + dist * 0.035, -0.6); S.mal.copy(OFF).multiplyScalar(dist).add(tmp); S.mal.x += sv; S.mal.y += Math.sin(S.t * 0.3) * 0.5;
   const fart = S.drag ? 0.00001 : 0.0015;
-  S.kamPos.lerp(S.mal, 1 - Math.pow(fart, dt));
-  S.mot.lerp(tmp, 1 - Math.pow(fart, dt));
+  // minskad rörelse: kameran står direkt på målet
+  if (LUGN) { S.kamPos.copy(S.mal); S.mot.copy(tmp); } else { S.kamPos.lerp(S.mal, 1 - Math.pow(fart, dt)); S.mot.lerp(tmp, 1 - Math.pow(fart, dt)); }
   const nu = S.kamPos.distanceTo(S.mot); S.scen.fog.near = Math.max(nu * 1.6, 70); S.scen.fog.far = Math.max(nu * 3.6, 200);
   const sk = S.sol.shadow.camera, sb = halvB + 9; if (Math.abs(sk.right - sb) > 0.5) { sk.left = -sb; sk.right = sb; sk.top = sb * 0.7; sk.bottom = -sb * 0.7; sk.updateProjectionMatrix(); }
   S.kamera.position.copy(S.kamPos); S.kamera.lookAt(S.mot);
   S.sol.position.set(S.mot.x + 22, 34, S.mot.z - 12); S.sol.target.position.copy(S.mot);
-  S.stationer.forEach((s, n) => { if (Math.abs(n * AVST - S.mot.x) < halvB + AVST * 0.6) s.userData.tick(S.t + n * 1.7, dt); s.userData.kant.material.emissiveIntensity = n === S.nu ? 1.4 + Math.sin(S.t * 3) * 0.3 : 0.15; });
+  S.stationer.forEach((s, n) => { if (Math.abs(n * AVST - S.mot.x) < halvB + AVST * 0.6) s.userData.tick(S.t + n * 1.7, dt); s.userData.kant.material.emissiveIntensity = n === S.nu && !S.hel ? 2.2 + Math.sin(S.t * 3) * 0.3 : n === S.nu ? 1.4 : 0.15; });
   S.pulser.forEach((p, n) => { const a = ((S.t * 0.09 + n / 6) % 1); p.position.set(a * AVST * 5, 0.2, 5.6); p.scale.setScalar(0.7 + Math.sin(S.t * 6 + n) * 0.25); });
   S.omg(S.t, dt, S.mot.x); TRAD.forEach((t) => { t.rotation.z = Math.sin(S.t * 1.2 + t.userData.vaj) * 0.035; });
   S.comp.render(dt);
   placeraNalar();
+  // minskad rörelse: en stillbild som ritas om vid klick, dragning och storleksändring
+  if (LUGN) { S.ram = 0; return; }
   S.ram = requestAnimationFrame(ram);
 }
 function montera(el) {
   if (!stod) { el.remove(); return; }
   if (!S) bygg(el);
   S.el = el;
+  // smala skärmar börjar inzoomade på ett steg: hela resan blir bara en tunn remsa där
+  if (el.clientWidth && el.clientWidth < 640 && S.hel) { S.hel = false; S.zoom = 1; S.pan = 0; }
   el.innerHTML = '<div class="resa3d__lager"><div class="resa3d__text" data-resa-text aria-live="polite"></div>' +
     '<div class="resa3d__nalar" data-resa-nalar></div>' +
     '<div class="resa3d__fot"><button type="button" class="resa3d__pil" data-resa-bak aria-label="Föregående steg"><svg class="emo-ik" aria-hidden="true"><use href="#i-pil-v"/></svg></button>' +
       '<span class="resa3d__prickar">' + IH.PROJSTEG.map((s, n) => '<button type="button" data-resa-prick="' + n + '" title="' + e(s.namn) + '"><i></i><span>' + e(s.kort) + '</span></button>').join('') + '</span>' +
       '<button type="button" class="resa3d__pil" data-resa-fram aria-label="Nästa steg"><svg class="emo-ik" aria-hidden="true"><use href="#i-pil"/></svg></button>' +
-      '<button type="button" class="resa3d__auto" data-resa-auto></button></div>' +
+      '<button type="button" class="resa3d__auto" data-resa-auto></button>' +
+      '<button type="button" class="resa3d__hel resa3d__hel--fot" data-resa-hel aria-label="Hela resan">' + IKON.hel + '</button></div>' +
     '<div class="resa3d__zoom"><button type="button" class="resa3d__hel" data-resa-hel><svg class="emo-ik" aria-hidden="true"><use href="#i-helskarm"/></svg>Hela resan</button>' +
       '<button type="button" class="resa3d__z" data-resa-zoom="-1" aria-label="Zooma in">+</button><button type="button" class="resa3d__z" data-resa-zoom="1" aria-label="Zooma ut">\u2212</button></div></div>';
   el.prepend(S.renderer.domElement);
@@ -980,6 +1013,7 @@ function montera(el) {
   const blk = el.closest('.prodblock--fabrik');
   if (blk) blk.querySelectorAll('.fabrik__station').forEach((s, n) => s.addEventListener('click', (ev) => { if (ev.target.closest('button')) return; S.auto = false; ga(n, true); el.scrollIntoView({ block: 'nearest', behavior: LUGN ? 'auto' : 'smooth' }); }));
   nalar(); storlek(); uppdateraUi(); starta();
+  if (LUGN) [500, 1500].forEach((ms) => setTimeout(starta, ms));
 }
 if (IH) {
   const sok = () => { const el = document.querySelector('[data-resa3d]:not([data-monterad])'); if (el) { el.setAttribute('data-monterad', ''); montera(el); } };

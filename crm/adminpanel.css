@@ -135,3 +135,36 @@ a.sh-knapp { text-decoration: none; color: inherit; }
 }
 
 .ap-tal { container-type: inline-size; container-name: aptal; }
+
+/* Designrunda: "Visa som" med text i stället för en ensam logga-ut-pil */
+.ap-rad { grid-template-columns: minmax(200px, 1.6fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(90px, .7fr) 340px; }
+.ap-visasom { width: 104px; justify-content: center; }
+.ap-visasom .i { width: 15px; height: 15px; }
+.ap-plats:not(.ap-plats--bred) { width: 104px; }
+@media (max-width: 1100px) {
+  .ap-rad { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) 122px; }
+  .ap-visasom, .ap-plats:not(.ap-plats--bred) { width: 34px; padding: 0; }
+}
+@media (max-width: 600px) { .ap-rad { grid-template-columns: minmax(0, 1fr) 122px; } }
+
+/* Förslagen: två spalter så att rubrikerna får en rad, och länk till hela listan i Kontrollcentralen */
+.ap-upp { grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); }
+.ap-alla { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; font: 600 .82rem/1 var(--rubrik); color: var(--virke-djup); text-decoration: none; }
+.ap-alla .i { width: 15px; height: 15px; transition: transform .25s var(--mjuk); }
+.ap-alla:hover .i { transform: translateX(3px); }
+
+/* Behörigheter bredvid Inställningar + Loggen staplade – spalterna slutar på samma höjd */
+.ap-tva { align-items: stretch; }
+.ap-stapel-kol { display: flex; flex-direction: column; min-width: 0; }
+.ap-stapel-kol > .ao-band { margin-bottom: 18px; }
+.ap-stapel-kol > .ao-band:last-child { flex: 1 1 auto; }
+/* Data och system under behörigheterna: samlingarna i två spalter */
+.ap-stapel-kol .ap-data { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; row-gap: 10px; }
+.ap-stapel-kol .ap-data li { grid-template-columns: 92px minmax(0, 1fr) 30px; gap: 10px; }
+@media (max-width: 600px) { .ap-stapel-kol .ap-data { grid-template-columns: minmax(0, 1fr); } }
+
+/* Vald filterknapp i varm stengrå i stället för svart */
+.ap-filter[aria-pressed="true"] { background: linear-gradient(160deg, #5f5851, #3d3833); box-shadow: inset 0 0 0 1px rgba(255, 245, 230, .08); color: #fbf4e8; }
+.ap-roll[data-roll="Admin"] { background: linear-gradient(160deg, #5f5851, #3d3833); }
+@media (hover: none) { .ap-alla:hover .i { transform: none; } }
+@media (max-width: 600px) { .ap-snabb { justify-content: flex-start; } }

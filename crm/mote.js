@@ -102,7 +102,7 @@
             return '<button type="button" class="husval__kort' + (x.id === (m && m.glb ? m.id : 'r1') ? ' vald' : '') + '" data-m="' + x.id + '"><img src="' + x.tumme + '" alt=""><span><b>' + e(x.namn) + '</b><small>' + e(x.kategori) + ' · ' + x.yta + ' m²</small></span></button>';
           }).join('') + '</div></div>' +
           '<div class="husvisning" data-m-in><div class="husvisning__golv"></div><div class="husvisning__mv" data-mv></div>' +
-          '<div class="husvisning__fakta" data-husfakta></div><p class="husvisning__tips">Dra för att vrida huset</p></div></div></div>';
+          '<div class="husvisning__fakta" data-husfakta></div><p class="husvisning__tips">' + IH.emo('aterstall') + 'Dra för att vrida huset</p></div></div></div>';
       case 'regler':
         return '<div class="mb mb--regler"><div class="mb__in mb__in--delad"><div>' +
           '<p class="mb__etikett" data-m-in>Reglerna sedan 1 december 2025</p>' +
@@ -195,7 +195,7 @@
       '<div class="kvitto__summa"><span>Totalt</span><b class="tal" data-kvittosumma>' + IH.kr(s.forraSumma || sum) + '</b></div>' +
       '<p class="kvitto__not">Exempelpriser i prototypen. Grund, bygglov och anslutningar tillkommer.</p>' +
       '<div class="kvitto__knappar">' + (s.affar && s.las
-        ? '<span class="kvitto__tips">' + IH.i('las') + e(s.las) + '</span>'
+        ? '<span class="kvitto__tips">' + IH.emo('las') + e(s.las) + '</span>'
         : s.affar
         ? '<button class="knapp knapp--virke" type="button" data-mote="spara">' + IH.i('offert') + (s.sparad ? 'Uppdatera ' + e(s.sparad.nummer) : 'Spara som offert') + '</button>'
         : '<span class="kvitto__tips">' + IH.i('varning') + 'Välj en affär när mötet startar för att spara som offert.</span>') + '</div>';
@@ -223,12 +223,33 @@
     if (!mv || !m) return;
     s.husId = id;
     s.el.querySelectorAll('.husval__kort').forEach(function (b) { b.classList.toggle('vald', b.getAttribute('data-m') === id); });
-    mv.classList.remove('in');
-    setTimeout(function () {
-      mv.innerHTML = '<model-viewer src="' + m.glb + '" alt="' + e(m.namn) + ' i 3D" camera-controls auto-rotate auto-rotate-delay="0" rotation-per-second="14deg" ' +
-        'camera-orbit="32deg 74deg auto" interaction-prompt="none" shadow-intensity="1.1" shadow-softness="0.9" exposure="1.38" environment-image="neutral" tone-mapping="neutral" disable-zoom></model-viewer>';
-      mv.classList.add('in');
-    }, IH.lugn ? 0 : 220);
+    // Nya huset laddas bredvid det gamla och tonar in först när det är klart – ingen tom ram mellan husen
+    var vy = s.el.querySelector('.husvisning');
+    var forra = mv.querySelector('model-viewer');
+    var nyMv = document.createElement('div');
+    nyMv.innerHTML = '<model-viewer class="vantar" src="' + m.glb + '" alt="' + e(m.namn) + ' i 3D" camera-controls auto-rotate auto-rotate-delay="0" rotation-per-second="14deg" ' +
+      'camera-orbit="32deg 74deg auto" interaction-prompt="none" shadow-intensity="1.1" shadow-softness="0.9" exposure="1.38" environment-image="neutral" tone-mapping="neutral" disable-zoom></model-viewer>';
+    nyMv = nyMv.firstChild;
+    var klar = false;
+    function visa() {
+      if (klar || s.husId !== id) return;
+      klar = true;
+      if (vy) vy.classList.remove('laddar');
+      nyMv.classList.remove('vantar');
+      if (forra) { forra.classList.add('vantar'); setTimeout(function () { if (forra.parentNode) forra.remove(); }, IH.lugn ? 0 : 520); }
+    }
+    nyMv.addEventListener('load', visa);
+    nyMv.addEventListener('progress', function (ev) { if (vy && ev.detail) vy.style.setProperty('--p', ev.detail.totalProgress || 0); });
+    nyMv.addEventListener('pointerdown', function () { if (vy) vy.classList.add('vriden'); });
+    mv.querySelectorAll('model-viewer.vantar').forEach(function (x) { if (x !== forra) x.remove(); });
+    if (vy) { vy.style.setProperty('--p', 0); vy.classList.add('laddar'); }
+    mv.appendChild(nyMv);
+    setTimeout(visa, 1600); // utan WebGL kommer inget load – visa ändå
+    if (!forra) requestAnimationFrame(function () { mv.classList.add('in'); });
+    // Mobilens karusell: det valda huset centreras så man ser vilket som visas
+    var valt = s.el.querySelector('.husval__kort.vald');
+    var lista = valt && valt.parentNode;
+    if (lista && lista.scrollWidth > lista.clientWidth + 4) lista.scrollTo({ left: lista.scrollLeft + valt.getBoundingClientRect().left - lista.getBoundingClientRect().left - (lista.clientWidth - valt.offsetWidth) / 2, behavior: IH.lugn ? 'auto' : 'smooth' });
     fakta.innerHTML = '<small>' + e(m.kategori) + '</small><b>' + e(m.namn) + '</b><div class="husvisning__tal"><span><em>' + m.yta + '</em> m²</span><span><em>' + m.rum + '</em> rum</span><span><em>' + e(m.matt) + '</em></span></div>' +
       '<p>' + e(m.text) + '</p>';
     fakta.classList.remove('in');

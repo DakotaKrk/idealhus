@@ -185,14 +185,24 @@
     helskarm: 'M4 9V4h5|M20 9V4h-5|M4 15v5h5|M20 15v5h-5',
     mark: 'M3 9h18|M3 14h18|M3 19h18|M7 4l2 5|M14 4l-1 5'
   };
+  // Namn som bara finns i ikonbladet (index.html) hämtas därifrån – inte ett hus i stället.
+  var IKON_ALIAS = { fil: 'dokument' };
+  var ikonVarnad = {};
   IH.i = function (namn, klass) {
-    var d = IKONER[namn] || IKONER.hem;
-    return '<svg class="i' + (klass ? ' ' + klass : '') + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+    var d = IKONER[namn];
+    var attr = ' viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">';
+    if (!d) {
+      var sprite = IKON_ALIAS[namn] || namn;
+      if (document.getElementById('i-' + sprite)) return '<svg class="i' + (klass ? ' ' + klass : '') + '"' + attr + '<use href="#i-' + sprite + '"/></svg>';
+      if (namn && !ikonVarnad[namn] && window.console) { ikonVarnad[namn] = 1; console.warn('IH.i: okänd ikon', namn); }
+      d = IKONER.hem;
+    }
+    return '<svg class="i' + (klass ? ' ' + klass : '') + '"' + attr +
       d.split('|').map(function (p) { return '<path d="' + p + '"/>'; }).join('') + '</svg>';
   };
 
   // Linjeikonerna ur ikonbladet i index.html (flyttat från Uperformance) – i stället för emoji.
-  IH.emo = function (namn, klass) { return '<svg class="emo-ik' + (klass ? ' ' + klass : '') + '" aria-hidden="true"><use href="#i-' + namn + '"/></svg>'; };
+  IH.emo = function (namn, klass) { return '<svg class="emo-ik' + (klass ? ' ' + klass : '') + '" width="1em" height="1em" fill="none" stroke="currentColor" aria-hidden="true"><use href="#i-' + namn + '"/></svg>'; };
 
   /* --- Meddelanden och konfetti ------------------------------------- */
   // val: { lank, knapp, tid } ger en åtgärdsknapp och egen visningstid.
@@ -202,7 +212,9 @@
     if (!yta) return;
     var tid = val.tid || (val.lank ? 6500 : 3800);
     var t = document.createElement('div');
-    t.className = 'toast';
+    // Fel och varningar ser inte ut som bekräftelser (val.typ eller ikonen avgör)
+    var typ = val.typ || (/^(varning|stang|las|oga-av|papperskorg)$/.test(ikon || '') ? 'fel' : !ikon || ikon === 'bock' ? 'ok' : 'info');
+    t.className = 'toast toast--' + typ;
     t.setAttribute('role', 'status');
     t.style.setProperty('--tid', tid + 'ms');
     t.innerHTML = '<span class="toast__ikon">' + IH.i(ikon || 'bock') + '</span><span class="toast__text"><b>' + IH.e(rubrik) + '</b>' +
@@ -215,7 +227,14 @@
       if (borta) return;
       borta = true;
       t.classList.add('ut');
-      setTimeout(function () { t.remove(); }, 400);
+      // Höjden krymper innan noden tas bort, så att toasterna under glider på plats i stället för att hoppa
+      setTimeout(function () {
+        if (lugn || !t.animate) { t.remove(); return; }
+        var h = t.offsetHeight;
+        t.style.overflow = 'hidden';
+        t.animate([{ height: h + 'px', marginTop: '0px', paddingTop: getComputedStyle(t).paddingTop, paddingBottom: getComputedStyle(t).paddingBottom },
+          { height: '0px', marginTop: '-8px', paddingTop: '0px', paddingBottom: '0px' }], { duration: 200, easing: 'cubic-bezier(.23,1,.32,1)', fill: 'forwards' }).onfinish = function () { t.remove(); };
+      }, 280);
     };
     var timer = setTimeout(bort, tid);
     t.addEventListener('click', function () { clearTimeout(timer); bort(); });
@@ -265,10 +284,52 @@
 
   /* --- Panelen från höger ------------------------------------------- */
   var aktivtArk = null;
+  // På telefonen är arket ett bottenark: greppstrecket i huvudet drar ner det (stänger vid långt eller snabbt drag)
+  var mobilBred = matchMedia('(max-width: 900px)');
+  function dragNer(ark) {
+    var huvud = ark.querySelector('.ark__huvud');
+    if (!huvud) return;
+    var start = null;
+    huvud.addEventListener('pointerdown', function (e) {
+      if (!mobilBred.matches || e.button > 0 || e.target.closest('button, a, input, select, textarea')) return;
+      start = { y: e.clientY, t: performance.now(), dy: 0 };
+      try { huvud.setPointerCapture(e.pointerId); } catch (x) { /* */ }
+    });
+    huvud.addEventListener('pointermove', function (e) {
+      if (!start) return;
+      start.dy = Math.max(0, e.clientY - start.y);
+      if (start.dy > 3) { ark.style.transition = 'none'; ark.style.transform = 'translateY(' + start.dy + 'px)'; }
+    });
+    var slapp = function () {
+      if (!start) return;
+      var fart = start.dy / Math.max(1, performance.now() - start.t), dy = start.dy;
+      start = null;
+      ark.style.transition = '';
+      if (dy > 90 || (dy > 20 && fart > 0.5)) {
+        if (!arkAndrat() || fragaKasta('Dra ner igen för att stänga ändå.')) { ark.style.transform = ''; IH.stangArk(); return; }
+      }
+      ark.style.transform = '';
+    };
+    huvud.addEventListener('pointerup', slapp);
+    huvud.addEventListener('pointercancel', slapp);
+  }
   IH.oppnaArk = function (opt) {
-    IH.stangArk(true);
-    var slojan = document.createElement('div');
-    slojan.className = 'slojan';
+    // Öppnar ett ark ett annat behålls slöjan, och det gamla arket glider undan – sidan bakom blinkar inte
+    var slojan = null;
+    if (aktivtArk && !lugn) {
+      var gml = aktivtArk;
+      aktivtArk = null;
+      // samma slöja, men utan det gamla arkets klicklyssnare
+      slojan = gml.slojan.cloneNode(false);
+      gml.slojan.replaceWith(slojan);
+      gml.ark.inert = true;
+      gml.ark.classList.add('ut');
+      gml.ark.classList.remove('syns');
+      setTimeout(function () { gml.ark.remove(); }, 220);
+      if (gml.vidStang) gml.vidStang();
+    } else IH.stangArk(true);
+    var behallSloja = !!slojan;
+    if (!slojan) { slojan = document.createElement('div'); slojan.className = 'slojan'; }
     var ark = document.createElement('aside');
     ark.className = 'ark' + (opt.bred ? ' ark--bred' : '');
     ark.setAttribute('role', 'dialog');
@@ -278,9 +339,11 @@
       '<div><h2>' + IH.e(opt.titel) + '</h2>' + (opt.under ? '<p>' + opt.under + '</p>' : '') + '</div>' +
       '<button class="ikonknapp" type="button" data-g="stang-ark" aria-label="Stäng">' + IH.i('stang') + '</button></header>' +
       '<div class="ark__kropp">' + (opt.kropp || '') + '</div>' + (opt.fot ? '<footer class="ark__fot">' + opt.fot + '</footer>' : '');
-    Array.prototype.forEach.call(ark.querySelector('.ark__kropp').children, function (ch, k) { ch.style.setProperty('--k', Math.min(k, 10)); });
-    document.body.appendChild(slojan);
+    Array.prototype.forEach.call(ark.querySelector('.ark__kropp').children, function (ch, k) { ch.style.setProperty('--k', Math.min(k, 6)); });
+    if (!behallSloja) document.body.appendChild(slojan);
     document.body.appendChild(ark);
+    document.documentElement.setAttribute('data-ark-oppen', '');
+    dragNer(ark);
     slojan.addEventListener('click', function () { if (!arkAndrat() || fragaKasta('Klicka utanför igen för att stänga ändå.')) IH.stangArk(); });
     requestAnimationFrame(function () {
       requestAnimationFrame(function () { slojan.classList.add('syns'); ark.classList.add('syns'); });
@@ -300,7 +363,8 @@
     a.ark.classList.remove('syns');
     a.slojan.classList.remove('syns');
     var bort = function () { a.ark.remove(); a.slojan.remove(); };
-    if (direkt || lugn) bort(); else setTimeout(bort, 500);
+    if (!aktivtArk) document.documentElement.removeAttribute('data-ark-oppen');
+    if (direkt || lugn) bort(); else setTimeout(bort, 420);
     if (a.vidStang) a.vidStang();
     if (a.fokus && a.fokus.focus && !direkt) a.fokus.focus();
   };
@@ -324,16 +388,16 @@
     { rubrik: 'Sälj', poster: [['forfragningar', 'Förfrågningar', 'inkorg'], ['salj', 'Säljtavla', 'tavla'],
       ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote']] },
     { rubrik: 'Produktion', poster: [['produktion', 'Projekt', 'produktion']] },
-    { rubrik: 'Verktyg', poster: [['kolla-marken', 'Kolla marken', 'mark']] },
-    { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
+    { rubrik: 'Verktyg', poster: [['kolla-marken', 'Kolla marken', 'grodd']] },
+    { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'todo'], ['installningar', 'Inställningar', 'installning']] }
   ];
   // Produktionens meny: projekten, kunderna och offerterna – inte förfrågningar, säljtavlan eller kundmötet
   var PROD_MENY = [
     { rubrik: null, poster: [['oversikt', 'Översikt', 'hem']] },
     { rubrik: 'Produktion', poster: [['produktion', 'Projekt', 'produktion']] },
     { rubrik: 'Kunder', poster: [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp']] },
-    { rubrik: 'Verktyg', poster: [['kolla-marken', 'Kolla marken', 'mark']] },
-    { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
+    { rubrik: 'Verktyg', poster: [['kolla-marken', 'Kolla marken', 'grodd']] },
+    { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'todo'], ['installningar', 'Inställningar', 'installning']] }
   ];
   function menyFor(jag) { return jag.roll === 'admin' ? ADMIN_MENY : jag.roll === 'prod' ? PROD_MENY : MENY; }
   // Rollspärren i routern: administratören når säljarnas sidor genom supportläget, produktionen når inte försäljningen
@@ -342,8 +406,8 @@
   // Administratörens meny (som i Uperformance): översikten, ledningen och det egna – säljarnas delar nås via supportläget
   var ADMIN_MENY = [
     { rubrik: null, poster: [['oversikt', 'Översikt', 'hem']] },
-    { rubrik: 'Ledning', poster: [['kontroll', 'Kontrollcentral', 'graf'], ['admin', 'Adminpanel', 'installning'], ['sakerhet', 'Säkerhet', 'system']] },
-    { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']] }
+    { rubrik: 'Ledning', poster: [['kontroll', 'Kontrollcentral', 'matare'], ['admin', 'Adminpanel', 'nyckelverktyg'], ['sakerhet', 'Säkerhet', 'skold']] },
+    { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'todo'], ['installningar', 'Inställningar', 'installning']] }
   ];
 
   function brickor() {
@@ -359,9 +423,11 @@
   function sidomeny() {
     var jag = IH.jag();
     var b = brickor();
+    var vaxel = IH.vyVaxel ? IH.vyVaxel() : '';
     var nav = menyFor(jag).map(function (grupp) {
-      // Försäljningen (chefsvyn) syns bara för chefen, under Översikt som i Uperformance (ledning.js)
-      var poster = !grupp.rubrik && jag.chef && jag.roll === 'salj' ? grupp.poster.concat([['chef', 'Försäljning', 'graf']]) : grupp.poster;
+      // Försäljningen (chefsvyn) syns bara för chefen, under Översikt som i Uperformance (ledning.js) –
+      // men inte när växeln Säljvy/Chefsvy står överst: då finns bara en väg dit
+      var poster = !grupp.rubrik && jag.chef && jag.roll === 'salj' && !vaxel ? grupp.poster.concat([['chef', 'Försäljning', 'graf']]) : grupp.poster;
       return (grupp.rubrik ? '<p class="sido__rubrik">' + grupp.rubrik + '</p>' : '') + poster.map(function (p) {
         var br = b[p[0]];
         var bricka = br && br[0] ? '<span class="sido__bricka' + (br[1] ? ' sido__bricka--varm' : '') + '">' + br[0] + '</span>' : '';
@@ -376,7 +442,7 @@
     return '<a class="sido__logo" href="#/"><img src="../images/legohus_logo.svg" alt="Legohus Stockholm"><span class="sido__crm">CRM <small>· Prototyp</small></span></a>' +
       '<div class="sido__verktyg"><button class="sido__sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
       (jag.roll === 'admin' ? '' : '<button class="sido__ny" type="button" data-g="ny" aria-label="Ny" title="Ny  N">' + IH.i('plus') + '</button>') + '</div>' +
-      (IH.vyVaxel ? IH.vyVaxel() : '') +
+      vaxel +
       '<nav class="sido__nav" aria-label="CRM"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
       '<div class="sido__fot"><button class="sido__mer" type="button" tabindex="-1" aria-hidden="true" data-g="sido-mer">Mer ' + IH.i('pil') + '</button>' +
       '<button class="anv" type="button" data-g="konto-meny" aria-haspopup="dialog"><span class="avatar' + (jag.bild ? ' avatar--bild' : '') + '" style="--av:' + jag.farg + (jag.bild ? ';background-image:url(' + IH.e(jag.bild) + ');background-size:cover;color:transparent' : '') + '">' + IH.initialer(jag.namn) +
@@ -390,12 +456,12 @@
   function mobilmeny() {
     var b = brickor();
     var roll = IH.jag().roll;
-    var poster = roll === 'admin' ? [['oversikt', 'Översikt', 'hem'], ['kontroll', 'Kontroll', 'graf'], ['admin', 'Admin', 'installning'], ['sakerhet', 'Säkerhet', 'system']]
+    var poster = roll === 'admin' ? [['oversikt', 'Översikt', 'hem'], ['kontroll', 'Kontroll', 'matare'], ['admin', 'Admin', 'nyckelverktyg'], ['sakerhet', 'Säkerhet', 'skold']]
       : roll === 'prod' ? [['oversikt', 'Översikt', 'hem'], ['produktion', 'Projekt', 'produktion'], ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert']]
-      : [['oversikt', 'Översikt', 'hem'], ['forfragningar', 'Inkorg', 'inkorg', 'Förfrågningar'], ['salj', 'Säljtavla', 'tavla'], ['produktion', 'Projekt', 'produktion']];
+      : [['oversikt', 'Översikt', 'hem'], ['forfragningar', 'Förfrågn.', 'inkorg', 'Förfrågningar'], ['salj', 'Säljtavla', 'tavla'], ['kunder', 'Kunder', 'kunder']];
     return poster.map(function (p) {
       var br = b[p[0]];
-      // Förfrågningar får inte plats i bottenmenyn: där heter den Inkorg, med hela namnet för skärmläsare
+      // Förfrågningar får inte plats i bottenmenyn: där står kortformen, med hela namnet för skärmläsare
       return '<a href="#/' + p[0] + '" data-vy="' + p[0] + '"' + (p[3] ? ' aria-label="' + p[3] + '" title="' + p[3] + '"' : '') + '>' + IH.i(p[2]) + p[1] + (br && br[1] && br[0] ? '<i>' + br[0] + '</i>' : '') + '</a>';
     }).join('') + '<button type="button" data-g="mer" data-mer>' + IH.i('meny') + 'Mer</button>';
   }
@@ -403,19 +469,32 @@
   // Den infällda menyn på dator: sidorna som ikoner i rälsen till vänster (sök och Ny finns i toppen)
   function rals() {
     var jag = IH.jag(), b = brickor();
-    var poster = [].concat.apply([], menyFor(jag).map(function (g) { return g.poster; }));
-    if (jag.chef && jag.roll === 'salj') poster.splice(1, 0, ['chef', 'Försäljning', 'graf']);
-    return poster.map(function (p) {
+    // Alla sidor, grupperade som i sidomenyn med en tunn avdelare mellan grupperna. Knappen som fäller
+    // ut menyn sitter mitt på kanten – grupperna delas i en övre och en nedre halva runt den.
+    var grupper = menyFor(jag).map(function (g) { return !g.rubrik && jag.chef && jag.roll === 'salj' ? g.poster.concat([['chef', 'Försäljning', 'graf']]) : g.poster; });
+    var totalt = grupper.reduce(function (n, g) { return n + g.length; }, 0), halvor = [[], []], uppe = 0;
+    grupper.forEach(function (g) { var h = uppe && uppe + g.length / 2 > totalt / 2 ? 1 : 0; if (!h) uppe += g.length; halvor[h].push(g); });
+    if (!halvor[1].length && halvor[0].length > 1) halvor[1].push(halvor[0].pop());
+    var lank = function (p) {
       var br = b[p[0]];
       return '<a href="#/' + p[0] + '" data-vy="' + p[0] + '" title="' + p[1] + '" aria-label="' + p[1] + '">' + IH.i(p[2]) + (br && br[1] && br[0] ? '<i>' + br[0] + '</i>' : '') + '</a>';
-    }).join('');
+    };
+    return halvor.map(function (h, n) {
+      return '<div class="sido-rals__halva sido-rals__halva--' + (n ? 'ner' : 'upp') + '">' + h.map(function (g, k) {
+        return (k ? '<span class="sido-rals__delare" aria-hidden="true"></span>' : '') + g.map(lank).join('');
+      }).join('') + '</div>';
+    }).join('<span class="sido-rals__mitt" aria-hidden="true"></span>');
   }
   (function () {
     var s = document.createElement('style');
-    s.textContent = '.sido-rals{position:absolute;left:6px;top:14px;width:40px;max-height:calc(50% - 44px);overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:2px;z-index:1}' +
+    s.textContent = '.sido-rals{position:absolute;left:6px;top:14px;bottom:14px;width:40px;display:grid;grid-template-rows:minmax(0,1fr) 52px minmax(0,1fr);z-index:1}' +
+      '.sido-rals__halva{min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0 2px}' +
+      '.sido-rals__halva--upp>:first-child{margin-top:auto}.sido-rals__halva::-webkit-scrollbar{display:none}' +
+      '.sido-rals__delare{flex:none;width:18px;height:1px;margin:5px 0;background:rgba(95,88,81,.18)}' +
+      '@media (max-height:820px){.sido-rals a{width:30px;height:30px}.sido-rals .i{width:16px;height:16px}.sido-rals__delare{margin:3px 0}}' +
       '.sido-rals[hidden]{display:none}.sido-rals a{position:relative;flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;color:var(--text-2,#5b544a);transition:background .2s,color .2s}' +
       '.sido-rals a:hover,.sido-rals a:focus-visible{background:rgba(255,255,255,.95);color:var(--text,#1b1915)}.sido-rals a.aktiv{background:var(--virke-ljus,#fbead5);color:var(--virke-djup,#8f5424)}' +
-      '.sido-rals .i{width:18px;height:18px}.sido-rals i{position:absolute;top:1px;right:0;min-width:14px;height:14px;padding:0 3px;border-radius:7px;background:var(--virke,#e8a456);color:#fff;font:600 9px/14px var(--rubrik,sans-serif);font-style:normal;text-align:center}';
+      '.sido-rals .i{width:18px;height:18px}.sido-rals i{position:absolute;top:-2px;right:-3px;min-width:15px;height:15px;padding:0 4px;border-radius:8px;background:var(--virke,#e8a456);color:#fff;box-shadow:0 0 0 2px #fbf7f0;font:600 9px/15px var(--rubrik,sans-serif);font-style:normal;text-align:center}';
     document.head.appendChild(s);
   })();
   function skal() {
@@ -444,18 +523,23 @@
     var rot = document.documentElement;
     rot.classList.toggle('sido-glider', !!animera);
     clearTimeout(sattSido.t);
-    if (animera) sattSido.t = setTimeout(function () { rot.classList.remove('sido-glider'); }, 520);
+    if (animera) sattSido.t = setTimeout(function () { rot.classList.remove('sido-glider'); }, 500);
     // FLIP: mät innehållet före och efter växlingen och låt det glida med transform – en enda omräkning av
     // layouten i stället för en per bildruta, så rörelsen blir mjuk även med 3D och diagram på sidan
     var huvud = animera && datorBred.matches && !matchMedia('(prefers-reduced-motion: reduce)').matches ? $('.huvud') : null, fore = huvud ? huvud.getBoundingClientRect().left : 0;
     rot.toggleAttribute('data-sido-dold', dold);
+    // Kortrutnäten räknas om direkt i den nya bredden, så att de inte hoppar en gång till efter glidningen
+    [].forEach.call(document.querySelectorAll('.kundnat'), centreraGrid);
     if (huvud) {
       var dx = fore - huvud.getBoundingClientRect().left;
       if (Math.abs(dx) > 1) {
         if (huvud.flip) huvud.flip.cancel();
         huvud.style.willChange = 'transform';
-        huvud.flip = huvud.animate([{ transform: 'translate3d(' + dx + 'px,0,0)' }, { transform: 'translate3d(0,0,0)' }], { duration: 520, easing: 'cubic-bezier(.45,0,.2,1)' });
-        huvud.flip.onfinish = huvud.flip.oncancel = function () { huvud.style.willChange = ''; huvud.flip = null; };
+        // samma tid och lådkurva som menyn (--glid .48s, --ease-drawer), så att de rör sig i takt
+        huvud.flip = huvud.animate([{ transform: 'translate3d(' + dx + 'px,0,0)' }, { transform: 'translate3d(0,0,0)' }], { duration: 480, easing: 'cubic-bezier(0.32,0.72,0,1)' });
+        huvud.flip.onfinish = function () { huvud.style.willChange = ''; huvud.flip = null; window.dispatchEvent(new Event('resize')); };
+        huvud.flip.oncancel = function () { huvud.style.willChange = ''; huvud.flip = null; };
+        var flippar = true;
       }
     }
     var k = $('[data-sido-knapp]'), text = dold ? 'Visa menyn' : 'Dölj menyn';
@@ -463,7 +547,7 @@
     var s = $('.sido'); if (s) s.inert = dold && datorBred.matches;
     var r = $('.sido-rals'); if (r) r.hidden = !(dold && datorBred.matches);
     try { localStorage.setItem('ih-crm-sido-dold', dold ? '1' : '0'); } catch (e) { /* ingen lagring */ }
-    setTimeout(function () { window.dispatchEvent(new Event('resize')); }, animera ? 500 : 0);
+    if (!flippar) setTimeout(function () { window.dispatchEvent(new Event('resize')); }, animera ? 480 : 0);
   }
   document.addEventListener('click', function (ev) {
     if (ev.target.closest && ev.target.closest('[data-sido-knapp]')) sattSido(!sidoDold(), true);
@@ -570,6 +654,51 @@
   }
 
   var forraVy = null;
+  // Den sida man kom ifrån (adress och titel): "← Karin Holm" i stället för alltid "← Säljtavlan"
+  var vagen = [];
+  var FORRA_OK = /^#\/(?:(kunder|salj|offerter|forfragningar|produktion)\/[^/?]+|oversikt)?$/;
+  function tillbakaRatt(yta, titel) {
+    // vägen hit: tillbaka till föregående adress plockar bort den senaste, annars läggs sidan till
+    var h = location.hash || '#/', n = vagen.length;
+    if (n >= 2 && vagen[n - 2].adr === h) vagen.pop();
+    else if (!n || vagen[n - 1].adr !== h) vagen.push({ adr: h });
+    if (vagen.length > 20) vagen.shift();
+    vagen[vagen.length - 1].titel = titel || '';
+    IH.forra = vagen.length > 1 ? vagen[vagen.length - 2] : null;
+    var tb = yta.querySelector('a.tillbaka'), f = IH.forra;
+    if (!tb || !f || !f.adr || f.adr === location.hash || !FORRA_OK.test(f.adr) || tb.getAttribute('href') === f.adr) return;
+    var namn = f.adr === '#/' || f.adr === '#/oversikt' ? 'Översikt' : f.titel;
+    if (!namn) return;
+    tb.setAttribute('href', f.adr);
+    tb.innerHTML = IH.i('pilv') + IH.e(namn);
+  }
+  // Entréanimationen (.vy--in) gäller bara sidbytet. När den har spelats klart tas klassen bort,
+  // så att en omritning på plats (dra ett kort, välja filter, spara) inte tonar in hela sidan igen.
+  var IN_SEL = '[data-in], [data-stagger] > *, .ord > span, .rad-mask > span';
+  function stillaSnart(yta) {
+    clearTimeout(stillaSnart.t);
+    var kolla = function () {
+      if (!yta.classList.contains('vy--in')) return;
+      var pagar = yta.getAnimations ? yta.getAnimations({ subtree: true }).some(function (a) {
+        var m = a.effect && a.effect.target, t = a.effect && a.effect.getComputedTiming ? a.effect.getComputedTiming() : null;
+        return a.playState === 'running' && m && m.matches && m.matches(IN_SEL) && t && t.iterations !== Infinity;
+      }) : false;
+      if (pagar) stillaSnart.t = setTimeout(kolla, 250); else yta.classList.remove('vy--in');
+    };
+    stillaSnart.t = setTimeout(kolla, 900);
+  }
+  // Omritning på plats: alla nya entréanimationer hoppar direkt till slutläget, så att bara det som
+  // faktiskt ändrats rör sig (IH.lysUpp, aff--ny och liknande sätts efteråt och spelas som vanligt).
+  var BEHALL = /(bytt|lys|ny|vann|puls|andas|snurr|blink|vag)/;
+  function stillaNu(yta) {
+    if (!yta.getAnimations || !window.CSSAnimation) return;
+    yta.getAnimations({ subtree: true }).forEach(function (a) {
+      if (!(a instanceof CSSAnimation) || BEHALL.test(a.animationName || '')) return;
+      var t = a.effect && a.effect.getComputedTiming ? a.effect.getComputedTiming() : null;
+      if (!t || t.iterations === Infinity || t.endTime === Infinity) return;
+      try { a.finish(); } catch (e) { /* */ }
+    });
+  }
   function rita() {
     var adr = lasAdress();
     var vyfn = IH.vyer[adr.vy] || IH.vyer.oversikt;
@@ -582,12 +711,14 @@
     if (sparr) vyfn = sparrVy;
     // Vyerna kan läsa om det här är ett byte eller en omritning på plats
     // (då ska t.ex. husen inte resa sig igen).
-    IH.vyByte = forraVy === null || forraVy.split('/')[0] !== adr.vy;
-    var ut = vyfn(adr.del);
+    var vyByte = forraVy === null || forraVy.split('/')[0] !== adr.vy, ut;
     var nyckel = adr.vy + '/' + adr.del.join('/');
     // Samma vy med ny del (t.ex. en annan förfrågan) byter bara innehåll.
     var bytt = forraVy === null || forraVy.split('/')[0] !== adr.vy;
     var gor = function () {
+      // Vyn byggs här, så att ett sidbyte först hinner visa klicket i menyn
+      IH.vyByte = vyByte;
+      ut = vyfn(adr.del);
       yta.innerHTML = ut.html;
       document.title = (ut.titel ? ut.titel + ' · ' : '') + 'Legohus CRM';
       var tt = document.querySelector('[data-topp-titel]'); if (tt) tt.textContent = ut.titel || '';
@@ -596,18 +727,27 @@
         void yta.offsetWidth;
         yta.classList.add('vy--in');
         window.scrollTo(0, 0);
+        stillaSnart(yta);
       }
+      tillbakaRatt(yta, ut.titel);
       forraVy = nyckel;
       markera(false);
       delaRubriker(yta);
       IH.efterRitning(yta);
+      if (!bytt) stillaNu(yta);
       if (ut.efter) ut.efter(yta);
     };
     if (bytt && forraVy !== null && !lugn && document.startViewTransition) {
-      var vt = document.startViewTransition(gor);
-      // Ett snabbt nytt klick hoppar över övergången – det är inget fel.
-      if (vt) ['ready', 'finished', 'updateCallbackDone'].forEach(function (k) { if (vt[k]) vt[k].catch(function () {}); });
-    } else gor();
+      // Menyn markerar den nya sidan direkt (klicket känns levande), sedan byts vyn i nästa bildruta.
+      markera(false);
+      var vantar = ++rita.n;
+      requestAnimationFrame(function () {
+        if (vantar !== rita.n) return;
+        var vt = document.startViewTransition(gor);
+        // Ett snabbt nytt klick hoppar över övergången – det är inget fel.
+        if (vt) ['ready', 'finished', 'updateCallbackDone'].forEach(function (k) { if (vt[k]) vt[k].catch(function () {}); });
+      });
+    } else { rita.n++; gor(); }
   }
 
   // Sidan som visas i stället för en spärrad sida: administratören får gå in i ett säljkonto (supportläget) och hamna på samma adress
@@ -634,6 +774,7 @@
       }).join(' ');
     });
   }
+  rita.n = 0;
   IH.rita = rita;
   IH.ritaOm = function () {
     IH.uppdateraMeny();
@@ -653,25 +794,37 @@
         el.textContent = format === 'kort' ? IH.kort(v) : format === 'kr' ? IH.kr(v) : Math.round(v).toString();
       };
       if (lugn || !mal || IH.vyByte === false) { skriv(mal); return; }
+      // Kort räkning från 70 % av målet – klar ungefär när sidan har landat, och siffrorna ser aldrig fel ut länge
       var start = performance.now();
       (function steg(nu) {
-        var t = Math.min(1, (nu - start) / 1300);
-        skriv(mal * (1 - Math.pow(1 - t, 4)));
+        var t = Math.min(1, (nu - start) / 700);
+        skriv(mal * (0.7 + 0.3 * (1 - Math.pow(1 - t, 4))));
         if (t < 1) requestAnimationFrame(steg);
       })(start);
     });
     if (!lugn && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
       $$('[data-tilt]', rot).forEach(function (k) {
+        // Rektangeln mäts en gång när pekaren kommer in (den lutade rutan ändras annars och skakar vid kanterna),
+        // och värdena skrivs en gång per bildruta
+        var r = null, sist = null, ram = 0;
+        k.addEventListener('pointerenter', function () { r = k.getBoundingClientRect(); });
         k.addEventListener('pointermove', function (e) {
-          var r = k.getBoundingClientRect();
-          var x = (e.clientX - r.left) / r.width - 0.5;
-          var y = (e.clientY - r.top) / r.height - 0.5;
-          k.style.setProperty('--rx', (-y * 6).toFixed(2) + 'deg');
-          k.style.setProperty('--ry', (x * 8).toFixed(2) + 'deg');
-          k.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-          k.style.setProperty('--my', (e.clientY - r.top) + 'px');
+          if (!r) r = k.getBoundingClientRect();
+          sist = e;
+          if (ram) return;
+          ram = requestAnimationFrame(function () {
+            ram = 0;
+            if (!r || !sist) return;
+            var x = (sist.clientX - r.left) / r.width - 0.5;
+            var y = (sist.clientY - r.top) / r.height - 0.5;
+            k.style.setProperty('--rx', (-y * 6).toFixed(2) + 'deg');
+            k.style.setProperty('--ry', (x * 8).toFixed(2) + 'deg');
+            k.style.setProperty('--mx', (sist.clientX - r.left) + 'px');
+            k.style.setProperty('--my', (sist.clientY - r.top) + 'px');
+          });
         });
         k.addEventListener('pointerleave', function () {
+          r = null; sist = null;
           k.style.setProperty('--rx', '0deg');
           k.style.setProperty('--ry', '0deg');
         });
@@ -698,19 +851,19 @@
   // Sidorna med sökord, så att t.ex. "prislista" hittar Inställningar och "montage" Projekt
   var SIDOR = [['oversikt', 'Översikt', 'hem', 'start hem i dag'], ['forfragningar', 'Förfrågningar', 'inkorg', 'inkorg leads nya'], ['salj', 'Säljtavla', 'tavla', 'tavla pipeline affärer steg'],
     ['kunder', 'Kunder', 'kunder', 'kundlista kontakter'], ['offerter', 'Offerter', 'offert', 'offert anbud'], ['dokument', 'Dokument', 'mapp', 'filer underlag ritningar arkiv'], ['mote', 'Kundmöte', 'mote', 'presentation möte'],
-    ['produktion', 'Projekt', 'produktion', 'produktion montage bygge checklista'], ['kolla-marken', 'Kolla marken', 'mark', 'tomt mark karta detaljplan'], ['att-gora', 'Att göra', 'uppgift', 'uppgifter todo'],
-    ['chatt', 'Meddelanden', 'meddelande', 'chatt meddelande'], ['profil', 'Min profil', 'kunder', 'profil konto status'], ['chef', 'Försäljning', 'graf', 'försäljningsledning mål team frånvaro'],
-    ['installningar', 'Inställningar', 'installning', 'prislista priser pris tillval'], ['kontroll', 'Kontrollcentral', 'graf', 'hälsa systemhälsa'], ['admin', 'Adminpanel', 'installning', 'konton roller behörigheter import export logg'], ['sakerhet', 'Säkerhet', 'system', 'säkerhetshubben skanning']];
+    ['produktion', 'Projekt', 'produktion', 'produktion montage bygge checklista'], ['kolla-marken', 'Kolla marken', 'grodd', 'tomt mark karta detaljplan'], ['att-gora', 'Att göra', 'todo', 'uppgifter todo'],
+    ['chatt', 'Meddelanden', 'meddelande', 'chatt meddelande'], ['profil', 'Min profil', 'anstallda', 'profil konto status'], ['chef', 'Försäljning', 'graf', 'försäljningsledning mål team frånvaro'],
+    ['installningar', 'Inställningar', 'installning', 'prislista priser pris tillval'], ['kontroll', 'Kontrollcentral', 'matare', 'hälsa systemhälsa'], ['admin', 'Adminpanel', 'nyckelverktyg', 'konton roller behörigheter import export logg'], ['sakerhet', 'Säkerhet', 'skold', 'säkerhetshubben skanning']];
   var ADMIN_SIDOR = ['oversikt', 'kontroll', 'admin', 'sakerhet', 'chatt', 'att-gora', 'profil', 'installningar'];
   var sidaFor = function (x) { var j = IH.jag(); if (j.roll === 'admin') return ADMIN_SIDOR.indexOf(x[0]) >= 0; if (/^(kontroll|admin|sakerhet)$/.test(x[0]) || IH.sparrad(x[0])) return false; return x[0] !== 'chef' || j.chef; };
   // Kommandon i paletten: [G-namn, rubrik, ikon, förklaring, sökord, bara för admin]
   var KOMMANDON = [['logga-ut', 'Logga ut', 'utloggning', 'Till inloggningen', 'logga ut avsluta'], ['byt-anvandare', 'Byt användare', 'aterstall', 'Exempelkontona', 'byt konto användare'],
     ['vaxla-sido', 'Dölj eller visa menyn', 'meny', 'Kortkommando [', 'meny dölj visa fäll'], ['konto-meny', 'Ändra status', 'trend', 'Kontomenyn', 'status närvaro lunch möte'],
-    ['hjalp', 'Kortkommandon', 'blixt', 'Alla tangenter i CRM:et', 'hjälp kortkommandon tangenter'],
-    ['ad-exportera', 'Exportera all data', 'skrivut', 'JSON-fil', 'export säkerhetskopia', true], ['sh-skanna-ga', 'Skanna säkerheten', 'system', 'Alla sju kontroller', 'skanna säkerhet', true],
+    ['hjalp', 'Kortkommandon', 'nyckel', 'Alla tangenter i CRM:et', 'hjälp kortkommandon tangenter'],
+    ['ad-exportera', 'Exportera all data', 'skrivut', 'JSON-fil', 'export säkerhetskopia', true], ['sh-skanna-ga', 'Skanna säkerheten', 'radar', 'Alla sju kontroller', 'skanna säkerhet', true],
     ['km-nytt-konto', 'Nytt konto', 'kunder', 'Lägg till en användare', 'konto användare lägg till', true]];
   var ATGARDER = [['ny-kund', 'Ny kund', 'kunder', 'Privatperson eller företag'], ['ny-affar', 'Ny affär', 'tavla', 'Direkt på säljtavlan'],
-    ['ny-forfragan', 'Ny förfrågan', 'inkorg', 'Någon ringde eller mejlade'], ['ny-uppgift', 'Ny uppgift', 'uppgift', 'Något att göra'],
+    ['ny-forfragan', 'Ny förfrågan', 'inkorg', 'Någon ringde eller mejlade'], ['ny-uppgift', 'Ny uppgift', 'todo', 'Något att göra'],
     ['starta-mote', 'Starta kundmöte', 'mote', 'Presentationen i helskärm']];
   var palett = null;
 
@@ -762,7 +915,7 @@
     q = q.trim().toLowerCase();
     var html = '';
     if (!q) {
-      html += grupp('Senaste', senaste().map(senasteRad).filter(Boolean).slice(0, 5));
+      html += grupp('Senaste', senaste().filter(function (x) { return x !== location.hash; }).map(senasteRad).filter(Boolean).slice(0, 5));
       if (IH.jag().roll === 'salj') html += grupp('Snabbåtgärder', ATGARDER.map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
       html += grupp('Gå till', SIDOR.filter(function (x) { return x[0] !== IH.nuvarande.vy && sidaFor(x); }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
     } else {
@@ -785,9 +938,9 @@
       html += grupp('Förfrågningar', forfragningar.map(function (f) { return rad('ga:#/forfragningar/' + f.id, IH.i('inkorg'), f.namn, f.hustyp + ' · ' + f.ort, 'Förfrågan'); }));
       html += grupp('Offerter', offerter.map(function (o) { var a = IH.affar(o.affar), k = a && IH.kund(a.kund); return rad('ga:#/offerter/' + o.id, IH.i('offert'), o.nummer, k ? k.namn : '', 'Offert'); }));
       html += grupp('Projekt', projekt.map(function (p) { return rad('ga:#/produktion/' + p.id, IH.i('produktion'), projNamn(p), p.montage ? 'Montage ' + IH.datum(p.montage) : '', 'Projekt'); }));
-      html += grupp('Uppgifter', uppgifter.map(function (u) { return rad('ga:#/att-gora', IH.i('uppgift'), u.text, u.forfaller ? 'Förfaller ' + IH.datum(u.forfaller) : '', 'Uppgift'); }));
+      html += grupp('Uppgifter', uppgifter.map(function (u) { return rad('ga:#/att-gora', IH.i('todo'), u.text, u.forfaller ? 'Förfaller ' + IH.datum(u.forfaller) : '', 'Uppgift'); }));
       html += grupp('Konton', konton.map(function (u) { return rad('ga:#/profil/' + u.id, '<span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span>', u.namn, u.titel, 'Konto'); }));
-      html += grupp('Åtgärder', ATGARDER.filter(function (x) { return jag.roll !== 'admin' && !(jag.roll === 'prod' && /affar|forfragan|mote/.test(x[0])) && traff(x[1] + ' ' + x[3], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
+      html += grupp('Åtgärder', ATGARDER.filter(function (x) { return jag.roll !== 'admin' && !(jag.roll === 'prod' && /affar|forfragan|mote/.test(x[0])) && traff(x[1], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
       html += grupp('Kommandon', kommandon.map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
       html += grupp('Gå till', SIDOR.filter(function (x) { return sidaFor(x) && (x[1] + ' ' + x[3]).toLowerCase().indexOf(q) >= 0; }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
       if (!html) html = '<p class="palett__tom">Inga träffar för ”' + IH.e(q) + '”</p>';
@@ -829,12 +982,15 @@
     rot.setAttribute('role', 'dialog');
     rot.setAttribute('aria-modal', 'true');
     rot.setAttribute('aria-label', 'Sök och kommandon');
-    rot.innerHTML = '<label class="palett__sok">' + IH.i('sok') + '<input type="text" placeholder="Sök eller skriv ett kommando…" autocomplete="off" spellcheck="false" aria-label="Sök eller skriv ett kommando"><kbd>esc</kbd></label>' +
+    rot.innerHTML = '<label class="palett__sok">' + IH.i('sok') + '<input type="text" placeholder="Sök eller skriv ett kommando…" autocomplete="off" spellcheck="false" aria-label="Sök eller skriv ett kommando"><kbd>esc</kbd>' +
+      '<button class="palett__stang" type="button" aria-label="Stäng sökningen">' + IH.i('stang') + '</button></label>' +
       '<div class="palett__lista" role="listbox" data-palett-lista></div>' +
-      '<footer class="palett__fot"><span><kbd>↑</kbd><kbd>↓</kbd>välj</span><span><kbd>↵</kbd>öppna</span><span><kbd>esc</kbd>stäng</span><span class="palett__fot--hoger"><kbd>N</kbd>ny</span><span><kbd>/</kbd>sök</span></footer>';
+      '<footer class="palett__fot"><span><kbd>↑</kbd><kbd>↓</kbd>välj</span><span><kbd>↵</kbd>öppna</span><span><kbd>esc</kbd>stäng</span><span class="palett__fot--hoger"><kbd>' + (MAC ? '⌘' : 'Ctrl') + '</kbd><kbd>K</kbd>öppna och stäng</span></footer>';
     document.body.appendChild(slojan);
     document.body.appendChild(rot);
     palett = { rot: rot, slojan: slojan, fokus: document.activeElement };
+    document.documentElement.setAttribute('data-palett-oppen', '');
+    rot.querySelector('.palett__stang').addEventListener('click', function (e) { e.preventDefault(); IH.stangPalett(); });
     palettRita('');
     var inp = rot.querySelector('input');
     inp.addEventListener('input', function () { rot.classList.remove('ny'); palettRita(inp.value); });
@@ -858,6 +1014,7 @@
     if (!palett) return;
     var p = palett;
     palett = null;
+    document.documentElement.removeAttribute('data-palett-oppen');
     p.rot.classList.remove('syns');
     p.slojan.classList.remove('syns');
     var bort = function () { p.rot.remove(); p.slojan.remove(); };
@@ -891,6 +1048,13 @@
         if (aktivtArk) { if (!arkAndrat() || fragaKasta('Tryck Esc igen för att stänga ändå.')) IH.stangArk(); return; }
       }
       if (inmatning || e.metaKey || e.ctrlKey || e.altKey || moteOppet()) return;
+      // G och sedan en bokstav hoppar direkt till en sida (G Ö översikt, G I förfrågningar, G T tavlan …)
+      if (gVantar && Date.now() - gVantar < 1200) {
+        gVantar = 0;
+        var mal = G_SIDOR[e.key.toLowerCase()];
+        if (mal && !IH.sparrad(mal)) { e.preventDefault(); IH.ga('#/' + mal); return; }
+      }
+      if ((e.key === 'g' || e.key === 'G') && !e.shiftKey) { gVantar = Date.now(); return; }
       if (e.key === '/') { e.preventDefault(); IH.oppnaPalett(); }
       if (e.key === '?') { e.preventDefault(); IH.G.hjalp(); }
       if (e.key === 'n' || e.key === 'N') {
@@ -917,6 +1081,8 @@
     });
   }
 
+  var gVantar = 0;
+  var G_SIDOR = { 'ö': 'oversikt', o: 'offerter', i: 'forfragningar', t: 'salj', k: 'kunder', a: 'att-gora', p: 'produktion', m: 'chatt' };
   // Kundmötets presentation tar tangenterna själv
   function moteOppet() { return !!document.querySelector('.mote:not(.stanger), .mote-presentation, [data-mote-oppen]'); }
   // Har något fält i den öppna panelen ändrats? Då frågar Esc, N och klick utanför först.
@@ -954,7 +1120,7 @@
   };
   function lamna(url) {
     document.documentElement.setAttribute('data-lamnar', '');
-    setTimeout(function () { location.href = url; }, lugn ? 0 : 520);
+    setTimeout(function () { location.href = url; }, lugn ? 0 : 380);
   }
   IH.G['byt-anvandare'] = function () {
     var jag = IH.jag();
@@ -980,38 +1146,42 @@
     if (nav) nav.scrollBy({ top: nav.clientHeight * 0.7, behavior: 'smooth' });
   };
   IH.G.mer = function () {
-    var jag = IH.jag(), i = IH.i;
-    // Det som redan står i bottenmenyn visas inte en gång till
-    var poster = (jag.roll === 'admin' ? [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']]
-      : jag.roll === 'prod' ? [['dokument', 'Dokument', 'mapp'], ['chatt', 'Meddelanden', 'meddelande'], ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']]
-      : [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote'], ['chatt', 'Meddelanden', 'meddelande'],
-        ['kolla-marken', 'Kolla marken', 'mark'], ['att-gora', 'Att göra', 'uppgift'], ['installningar', 'Inställningar', 'installning']]);
-    if (jag.chef && jag.roll === 'salj') poster.splice(4, 0, ['chef', 'Försäljning', 'graf']);
-    var lank = function (href, ikon, namn, extra) { return '<a class="lista__rad" href="' + href + '"' + (extra || '') + '>' + i(ikon) + '<span class="lista__text"><b>' + namn + '</b></span>' + i('pil') + '</a>'; };
+    var jag = IH.jag(), i = IH.i, b = brickor(), vy = IH.nuvarande.vy;
+    // Det som redan står i bottenmenyn visas inte en gång till. Rutorna grupperas som i sidomenyn.
+    var mitt = ['Mitt', [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'todo'], ['installningar', 'Inställningar', 'installning'], ['profil', 'Min profil', 'anstallda']]];
+    var grupper = jag.roll === 'admin' ? [mitt]
+      : jag.roll === 'prod' ? [['Kunder', [['dokument', 'Dokument', 'mapp']]], ['Verktyg', [['kolla-marken', 'Kolla marken', 'grodd']]], mitt]
+      : [['Sälj', [['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote']].concat(jag.chef ? [['chef', 'Försäljning', 'graf']] : [])],
+        ['Produktion', [['produktion', 'Projekt', 'produktion'], ['kolla-marken', 'Kolla marken', 'grodd']]], mitt];
+    var ruta = function (p) {
+      var br = b[p[0]];
+      return '<a class="mer-ruta' + (p[0] === vy ? ' aktiv' : '') + '" href="#/' + p[0] + '"' + (p[0] === vy ? ' aria-current="page"' : '') + '><span class="mer-ruta__ikon">' + i(p[2]) + '</span><span class="mer-ruta__namn">' + p[1] + '</span>' +
+        (br && br[1] && br[0] ? '<em class="mer-ruta__bricka">' + br[0] + '</em>' : '') + '</a>';
+    };
     var team = jag.roll === 'admin' ? IH.ANVANDARE.filter(function (u) { return u.roll !== 'admin' && !u.inaktiv; }) : [];
+    var status = IH.narvaro ? IH.narvaro(jag.id).namn : '';
     IH.oppnaArk({
       titel: 'Mer', ikon: 'meny',
-      kropp: '<div class="lista kort">' + poster.map(function (p) {
-        var br = brickor()[p[0]];
-        return '<a class="lista__rad" href="#/' + p[0] + '">' + i(p[2]) + '<span class="lista__text"><b>' + p[1] + '</b></span>' + (br && br[1] && br[0] ? '<em class="chip">' + br[0] + '</em>' : '') + i('pil') + '</a>';
-      }).join('') + lank('#/profil', 'kunder', 'Min profil') + '</div>' +
-        (team.length ? '<p class="etikett">Teamet · supportläget</p><div class="lista kort">' + team.map(function (u) {
+      kropp: '<button class="mer-konto" type="button" data-g="konto-meny"><span class="avatar" style="--av:' + jag.farg + '">' + IH.initialer(jag.namn) + (IH.narvaroPrick ? IH.narvaroPrick(jag.id) : '') + '</span>' +
+        '<span class="mer-konto__text"><b>' + IH.e(jag.namn) + '</b><small>' + IH.e((status ? status + ' · ' : '') + String(jag.titel || '').split(' · ')[0]) + '</small></span><span class="mer-konto__byt">Ändra status' + i('chevron') + '</span></button>' +
+        grupper.map(function (g) { return '<p class="etikett mer-etikett">' + g[0] + '</p><div class="mer-rutnat" style="--n:' + (g[1].length === 4 ? 2 : Math.min(3, g[1].length)) + '">' + g[1].map(ruta).join('') + '</div>'; }).join('') +
+        (team.length ? '<p class="etikett mer-etikett">Teamet · supportläget</p><div class="lista kort">' + team.map(function (u) {
           return '<button class="lista__rad" type="button" data-g="visa-som" data-id="' + u.id + '"><span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span><span class="lista__text"><b>' + IH.e(u.namn) + '</b><small>Gå in i kontot</small></span>' + i('pil') + '</button>';
         }).join('') + '</div>' : '') +
-        '<div class="lista kort">' + lank('../index.html', 'hus', 'Hemsidan', ' data-g="lamna"') +
-        '<button class="lista__rad" type="button" data-g="byt-anvandare">' + i('aterstall') +
-        '<span class="lista__text"><b>Byt användare</b><small>' + IH.e(jag.namn) + '</small></span></button>' +
-        '<button class="lista__rad" type="button" data-g="logga-ut">' + i('utloggning') + '<span class="lista__text"><b>Logga ut</b></span></button></div>'
+        '<div class="mer-fot"><a href="../index.html" data-g="lamna">' + i('hus') + 'Hemsidan</a>' +
+        '<button type="button" data-g="byt-anvandare">' + i('aterstall') + 'Byt användare</button>' +
+        '<button type="button" data-g="logga-ut">' + i('utloggning') + 'Logga ut</button></div>'
     });
   };
   // Kortkommandona (? eller paletten)
   IH.G.hjalp = function () {
     var tangent = function (k, text) { return '<div class="lista__rad"><span class="lista__text"><b>' + text + '</b></span><kbd>' + k + '</kbd></div>'; };
     var admin = IH.riktigJag().roll === 'admin';
-    IH.oppnaArk({ titel: 'Kortkommandon', ikon: 'blixt', under: 'Fungerar när du inte skriver i ett fält.',
+    IH.oppnaArk({ titel: 'Kortkommandon', ikon: 'nyckel', under: 'Fungerar när du inte skriver i ett fält.',
       kropp: '<div class="lista kort">' + tangent((MAC ? '⌘' : 'Ctrl') + ' K', 'Sök eller kör ett kommando') + tangent('/', 'Sök') +
         (IH.jag().roll === 'admin' ? '' : tangent('N', 'Skapa ny')) + tangent('Esc', 'Stäng panelen (två gånger om du skrivit något)') +
-        tangent('[', 'Dölj eller visa menyn (dator)') + (admin ? tangent('Shift Esc', 'Lämna supportläget') : '') + tangent('?', 'Den här listan') + '</div>' });
+        tangent('[', 'Dölj eller visa menyn (dator)') +
+        (IH.jag().roll === 'admin' ? '' : tangent('G Ö · G I · G T', 'Gå till översikten, förfrågningarna, säljtavlan') + tangent('G K · G O · G A', 'Gå till kunderna, offerterna, att göra')) + (admin ? tangent('Shift Esc', 'Lämna supportläget') : '') + tangent('?', 'Den här listan') + '</div>' });
   };
 
   /* --- Start ------------------------------------------------------------- */

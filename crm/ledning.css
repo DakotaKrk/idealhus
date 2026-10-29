@@ -156,7 +156,7 @@
 
 /* Kontomenyn (ledning.js) som i Uperformance: täcker sidomenyn exakt på dator (annars ett ark). Överst du – bilden med
    ring, rollerna och statusknappen – sedan snabbstatus, alla konton med status och senast aktiv, och tre rutor i foten. */
-.km-panel { position: fixed; z-index: 950; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; padding: 14px 12px; border-radius: 28px; overflow: hidden;
+.km-panel { position: fixed; z-index: 950; display: flex; flex-direction: column; justify-content: flex-start; gap: 14px; padding: 14px 12px; border-radius: 28px; overflow: hidden;
   background: linear-gradient(180deg, #fffdf9, #fbf4e8); box-shadow: 0 30px 70px -30px rgba(60, 40, 15, .55), inset 0 0 0 1px rgba(240, 181, 110, .45);
   animation: km-in .5s cubic-bezier(.22, 1, .36, 1) both; transform-origin: 50% 100%; }
 .km-panel::before { content: ""; position: absolute; left: 22%; right: 22%; top: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--virke), transparent); }
@@ -191,9 +191,10 @@ html[data-konto-oppen] .anv { opacity: 0; pointer-events: none; }
 .km-statusknapp .emo-ik { width: 14px; height: 14px; opacity: .55; }
 
 .km-snabb { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; flex: none; }
-.km-snabbval { display: grid; place-items: center; height: 40px; padding: 0; border: 0; border-radius: 12px; background: color-mix(in srgb, var(--n) 12%, #fff); color: color-mix(in srgb, var(--n) 75%, #000); cursor: pointer;
+.km-snabbval { display: grid; place-items: center; align-content: center; gap: 4px; height: 52px; padding: 0 2px; border: 0; border-radius: 12px; background: color-mix(in srgb, var(--n) 12%, #fff); color: color-mix(in srgb, var(--n) 75%, #000); cursor: pointer;
   transition: transform .2s var(--studs), background-color .2s, box-shadow .2s; }
 .km-snabbval .emo-ik { width: 16px; height: 16px; }
+.km-snabbval small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 .56rem/1 var(--rubrik); letter-spacing: -.01em; color: inherit; }
 .km-snabbval:hover { transform: translateY(-2px); background: color-mix(in srgb, var(--n) 22%, #fff); }
 .km-snabbval[aria-pressed="true"] { background: var(--n); color: #fff; box-shadow: 0 8px 18px -8px var(--n); }
 .km-statusval { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; flex: none; padding: 6px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); }
@@ -226,7 +227,7 @@ button.km-rad:active { transform: scale(.98); }
 .km-bock { position: absolute; left: 4px; top: 4px; z-index: 1; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--virke-djup); color: #fff; box-shadow: 0 0 0 3px #fff; }
 .km-bock .emo-ik { width: 11px; height: 11px; color: #fff; stroke-width: 2.6; }
 
-.km-fot { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; flex: none; padding-top: 12px; border-top: 1px solid rgba(27, 25, 21, .08); }
+.km-fot { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; flex: none; margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(27, 25, 21, .08); }
 .km-lank { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-width: 0; min-height: 58px; padding: 6px 4px; border: 0; border-radius: 14px; background: none;
   font: 600 .7rem/1.2 var(--rubrik); color: var(--text-2); text-decoration: none; cursor: pointer; transition: background-color .2s, color .2s, transform .2s var(--studs); }
 .km-lank > span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -237,7 +238,7 @@ button.km-rad:active { transform: scale(.98); }
 .km-panel[data-tat] { gap: 8px; padding: 12px; }
 .km-panel[data-tat] .km-grupp { gap: 8px; }
 .km-panel[data-tat] .km-lista { gap: 6px; }
-.km-panel[data-tat] .km-snabbval { height: 34px; }
+.km-panel[data-tat] .km-snabbval { height: 46px; }
 .km-panel[data-tat] .km-lank { min-height: 50px; }
 .km-panel[data-tat] .km-topp { gap: 6px; padding: 12px 12px 10px; }
 .km-panel[data-tat] .km-bild { width: 52px; height: 52px; }
@@ -1184,3 +1185,22 @@ section.lp-mork .sh-knapp:not(.sh-knapp--accent) .emo-ik, section.sh-mork .sh-kn
 /* Teamkalendern: Ta bort frågar först – andra trycket syns som en röd knapp */
 .ch-ruta.lp-saker, .lp-saker, [data-g="lp-kal-bort"][data-saker] { background: #d9573f; color: #fff; box-shadow: 0 6px 14px -8px rgba(217, 87, 63, .8); }
 .lp-saker .i, .lp-saker .emo-ik, [data-g="lp-kal-bort"][data-saker] .i, [data-g="lp-kal-bort"][data-saker] .emo-ik { color: #fff; }
+
+/* Försäljning: högerspalten staplar Pipeline och Topplistan så att båda spalterna slutar på samma höjd */
+.lp-tva > .lp-stapel { display: flex; flex-direction: column; min-width: 0; }
+.lp-tva > .lp-stapel > .ao-band { margin-bottom: 18px; }
+.lp-tva > .lp-stapel > .ao-band:last-child { flex: 1 1 auto; }
+.lp-tva { align-items: stretch; }
+
+/* Designrunda: varm stengrå i stället för svart på små mörka ytor */
+.lp-h2-plus, .lp-kal__plus, .lp-kalform__typ input:checked + span, .lp-senaste a:hover .lp-senaste__pil, .lp-verktyg__k, .lp-om-mini:hover {
+  background: linear-gradient(160deg, #5f5851, #3d3833); box-shadow: inset 0 0 0 1px rgba(255, 245, 230, .08); }
+.vy-vaxel[data-lage="chef"] .vy-vaxel__puck { background: linear-gradient(160deg, #5f5851, #3d3833); }
+/* Profilens Om- och Arbetekort är ljusa nu (bara hjälten och kalendern är mörka) – mjuk bärnstenston i hörnet */
+section.lp-band2.lp-omkort, section.lp-band2.lp-arbkort { background: radial-gradient(120% 70% at 0% 0%, rgba(246, 198, 141, .14), transparent 60%), var(--vit); }
+
+/* Pekskärm: hovringslyft fastnar inte efter ett tryck – tryck ger i stället en kort inskalning */
+@media (hover: none) {
+  .km-snabbval:hover, button.km-rad:hover, .km-lank:hover, .lp-genvagar a:hover, .lp-h2-plus:hover, .lp-om-mini:hover { transform: none; }
+  .km-snabbval:active, button.km-rad:active, .km-lank:active, .lp-genvagar a:active { transform: scale(.97); }
+}

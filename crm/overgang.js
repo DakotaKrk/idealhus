@@ -5,7 +5,7 @@
 (() => {
   'use strict';
   const lugn = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const TID = 760; // samma längd som utgången på inloggningssidan
+  const TID = 380; // samma längd som overgang.css och lamna() i app.js
   let pagar = false;
 
   function lamna(url) {

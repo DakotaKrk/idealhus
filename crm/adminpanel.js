@@ -12,7 +12,7 @@
   var inst = function () { try { return JSON.parse(localStorage.getItem(INST)) || {}; } catch (x) { return {}; } };
   var sparaInst = function (k, v) { var o = inst(); o[k] = v; try { localStorage.setItem(INST, JSON.stringify(o)); } catch (x) { /* privat läge */ } };
   var logg = function (typ, text) { if (IH.sakLogg) IH.sakLogg(typ, text); };
-  var ui = { filter: 'alla', logg: 'alla', loggN: 10 };
+  var ui = { filter: 'alla', logg: 'alla', loggN: 7 };
 
   /* Kontoändringar (titel, mål, chef, inaktiverat) läggs ovanpå exempelkontona */
   function tillampa() {
@@ -68,7 +68,7 @@
       '<div class="ao-text"><p class="etikett"><i class="sh-live"></i>Administration · demoläget</p><h1>Kontrollrummet <em>för CRM:et.</em></h1>' +
         '<p class="ao-ingress">Konton och roller, behörigheter, data och system, loggen och säkerheten – och förslag på det som bör åtgärdas.</p>' +
         '<div class="sh-knappar"><button type="button" class="sh-knapp sh-knapp--accent" data-g="km-nytt-konto">' + ik('anvandare-plus') + '<span>Lägg till konto</span></button>' +
-          '<a class="sh-knapp" href="#/sakerhet">' + ik('radar') + '<span>Säkerhetshubben</span></a>' +
+          '<a class="sh-knapp" href="#/sakerhet">' + ik('skold') + '<span>Säkerhetshubben</span></a>' +
           '<button type="button" class="sh-knapp" data-g="ad-exportera">' + ik('ladda-ner') + '<span>Exportera data</span></button></div></div>' +
       '<div class="ap-tal">' + [
         { ikon: 'anstallda', etikett: 'Konton', varde: aktiva.length, under: (alla.length - aktiva.length ? plural(alla.length - aktiva.length, 'inaktiverat', 'inaktiverade') + ' · ' : '') + nu + ' aktiva nu', ton: 'is' },
@@ -88,7 +88,7 @@
         '<span role="cell"><span class="lp-status" style="--n:' + (u.inaktiv ? '#b9b2a6' : n.farg) + '"><i></i>' + e(u.inaktiv ? 'Inaktiverat' : n.namn) + '</span></span>' +
         '<span role="cell" class="ap-senast">' + e(senastAktiv(u)) + '</span>' +
         '<span role="cell" class="ap-atgarder"><button type="button" class="knapp knapp--liten" data-g="ap-andra" data-id="' + u.id + '" title="Ändra ' + e(u.namn) + '">' + ik('redigera') + '<span class="ap-knapptext">Ändra</span></button>' +
-          (u.id !== mig.id && !u.inaktiv && u.roll !== 'admin' ? '<button type="button" class="knapp knapp--liten ap-ikonknapp" data-g="valj-anvandare" data-id="' + u.id + '" title="Logga in som ' + e(u.namn) + '">' + ik('logga-ut') + '</button>' : '<span class="ap-plats"></span>') +
+          (u.id !== mig.id && !u.inaktiv && u.roll !== 'admin' ? '<button type="button" class="knapp knapp--liten ap-visasom" data-g="valj-anvandare" data-id="' + u.id + '" title="Visa CRM:et som ' + e(u.namn) + '" aria-label="Visa som ' + e(u.namn) + '">' + i('ogon') + '<span class="ap-knapptext">Visa som</span></button>' : '<span class="ap-plats"></span>') +
           (u.id !== mig.id ? '<button type="button" class="knapp knapp--liten" data-g="ap-aktiv" data-id="' + u.id + '"' + (sista ? ' disabled title="Det måste finnas minst en aktiv administratör"' : '') + '>' + ik(u.inaktiv ? 'bock' : 'las') + '<span class="ap-knapptext">' + (u.inaktiv ? 'Aktivera' : 'Inaktivera') + '</span></button>' : '<span class="ap-plats ap-plats--bred"></span>') +
         '</span></div>';
     }).join('');
@@ -103,10 +103,10 @@
     var forslag = IH.adminForslag ? IH.adminForslag() : [];
     var SNABB = [['km-nytt-konto', 'anvandare-plus', 'Lägg till konto'], ['sh-skanna-ga', 'radar', 'Skanna nu'], ['ad-exportera', 'ladda-ner', 'Exportera data'], ['kc-csv', 'anstallda', 'Kontolista (CSV)']];
     var forslagBand = band('02 · Förslag', 'Bör', 'åtgärdas',
-      forslag.length ? '<ul class="ao-upp ap-upp">' + forslag.map(function (x) {
+      forslag.length ? '<ul class="ao-upp ap-upp">' + forslag.slice(0, 4).map(function (x) {
         return '<li><span class="ao-upp__ikon">' + ik(x.ikon) + '</span><span class="ao-upp__text"><strong>' + e(x.text) + '</strong><small>' + e(x.under || '') + '</small></span>' +
           (x.lank ? '<a class="knapp knapp--liten" href="' + x.lank + '">' + x.knapp + '</a>' : '<button type="button" class="knapp knapp--liten" data-g="' + x.g + '"' + (x.data ? ' data-ids="' + x.data + '"' : '') + '>' + x.knapp + '</button>') + '</li>';
-      }).join('') + '</ul>' : '<div class="ao-lugnt ao-lugnt--stor">' + ik('skold') + '<div><strong>Inget att åtgärda</strong><small>Profiler, mål, ansvariga och säkerheten ser bra ut.</small></div></div>',
+      }).join('') + '</ul>' + (forslag.length > 4 ? '<a class="ap-alla" href="#/kontroll">Alla ' + forslag.length + ' förslag i Kontrollcentralen' + i('pil') + '</a>' : '') : '<div class="ao-lugnt ao-lugnt--stor">' + ik('skold') + '<div><strong>Inget att åtgärda</strong><small>Profiler, mål, ansvariga och säkerheten ser bra ut.</small></div></div>',
       { hoger: '<div class="ap-snabb">' + SNABB.map(function (x) { return '<button type="button" class="knapp knapp--liten" data-g="' + x[0] + '">' + ik(x[1]) + x[2] + '</button>'; }).join('') + '</div>' });
 
     // 03 Behörigheter (så som menyn, rollspärren i app.js och knapparna faktiskt fungerar). Admin når säljsidorna i supportläget.
@@ -151,13 +151,13 @@
       (alltLogg.length > ui.loggN ? '<div class="ao-fot"><button type="button" class="knapp knapp--liten" data-g="ap-logg-fler">Visa fler (' + (alltLogg.length - ui.loggN) + ' till)</button></div>' : ''),
       { klass: 'ap-halv', hoger: '<div class="ap-filterrad" role="group" aria-label="Visa">' + [['alla', 'Allt'], ['crm', 'CRM'], ['konto', 'Konton'], ['support', 'Support'], ['sakerhet', 'Säkerhet']].map(function (f) { return filterKnapp('ap-logg', f[0], f[1], ui.logg); }).join('') + '</div>' });
 
-    return { titel: 'Admin', html: hjalte + konton + forslagBand + '<div class="ao-tva">' + behorig + installningar + '</div><div class="ao-tva">' + system + loggBand + '</div>' };
+    return { titel: 'Admin', html: hjalte + konton + forslagBand + '<div class="ao-tva ap-tva"><div class="ap-stapel-kol">' + behorig + system + '</div><div class="ap-stapel-kol">' + installningar + loggBand + '</div></div>' };
   };
 
   /* Händelserna ---------------------------------------------------------------------------------- */
   var G = IH.G;
   G['ap-filter'] = function (el) { ui.filter = el.getAttribute('data-f'); IH.rita(); };
-  G['ap-logg'] = function (el) { ui.logg = el.getAttribute('data-f'); ui.loggN = 10; IH.rita(); };
+  G['ap-logg'] = function (el) { ui.logg = el.getAttribute('data-f'); ui.loggN = 7; IH.rita(); };
   G['ap-logg-fler'] = function () { ui.loggN += 15; IH.rita(); };
   G['ap-aktiv'] = function (el) {
     var u = IH.anvandare(el.getAttribute('data-id')); if (!u || u.id === IH.jag().id) return;

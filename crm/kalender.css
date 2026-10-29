@@ -18,10 +18,10 @@
   -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%);
   box-shadow: 0 1px 2px rgba(27, 25, 21, .05), 0 12px 24px -12px rgba(27, 25, 21, .18), 0 34px 70px -24px rgba(90, 60, 25, .38);
   font: 500 .92rem/1.3 var(--sans, 'Manrope', system-ui, sans-serif); transform-origin: top left; -webkit-user-select: none; user-select: none;
-  animation: kal-in .32s var(--mjuk, cubic-bezier(.22, 1, .36, 1)) both; }
+  animation: kal-panel-in .32s var(--mjuk, cubic-bezier(.22, 1, .36, 1)) both; }
 .kal-panel[data-uppat] { transform-origin: bottom left; animation-name: kal-in-upp; }
 .kal-panel[data-stanger] { animation: kal-ut .15s ease-in both; }
-@keyframes kal-in { from { opacity: 0; transform: translateY(-8px) scale(.97); } }
+@keyframes kal-panel-in { from { opacity: 0; transform: translateY(-8px) scale(.97); } }
 @keyframes kal-in-upp { from { opacity: 0; transform: translateY(8px) scale(.97); } }
 @keyframes kal-ut { to { opacity: 0; transform: scale(.98); } }
 
