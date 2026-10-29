@@ -1,19 +1,77 @@
 /* Legohus CRM – chatten (chatt.js): samma upplägg som Uperformance CRM:s chatt.css, i Legohus färger. */
 
 /* 01 Sidan: listan | tråden | om samtalet */
+/* Temafärger som bara den här filen har (tema-bytet 2026-10-29): dagens exakta värde i Original, temats token i övriga teman. */
+:root {
+  --o-faf5ec-sand: #faf5ec;
+  --o-fdf3e3-gradde-rgb: 253 243 227;
+  --o-fdeccf-gul-ljus: #fdeccf;
+  --o-f9dcae-ton: #f9dcae;
+  --o-fff7ea-accent-ljus-3: #fff7ea;
+  --o-fff1dc-ton: #fff1dc;
+  --o-fff9ee-yta-varm-2: #fff9ee;
+  --o-fdf0dc-ton: #fdf0dc;
+  --o-f4eee5-falt: #f4eee5;
+  --o-2b1d0e-txt: #2b1d0e;
+  --o-fbe9cf-ton: #fbe9cf;
+  --o-5c3412-txt: #5c3412;
+  --o-f7f2ea-sand: #f7f2ea;
+  --o-fff4e4-gradde: #fff4e4;
+  --o-fde6c6-ton: #fde6c6;
+  --o-fff7ec-gradde-rgb: 255 247 236;
+}
+:root[data-tema]:not([data-tema="original"]) {
+  --o-faf5ec-sand: var(--t-sand);
+  --o-fdf3e3-gradde-rgb: var(--t-gradde-rgb);
+  --o-fdeccf-gul-ljus: var(--t-gul-ljus);
+  --o-f9dcae-ton: color-mix(in srgb, rgb(236.1 144.9 0.3) 31.8%, var(--t-yta));
+  --o-fff7ea-accent-ljus-3: var(--t-accent-ljus-3);
+  --o-fff1dc-ton: color-mix(in srgb, rgb(255.0 153.6 1.4) 13.8%, var(--t-yta));
+  --o-fff9ee-yta-varm-2: var(--t-yta-varm-2);
+  --o-fdf0dc-ton: color-mix(in srgb, rgb(240.5 146.3 1.4) 13.8%, var(--t-yta));
+  --o-f4eee5-falt: var(--t-falt);
+  --o-2b1d0e-txt: var(--t-pa-accent);
+  --o-fbe9cf-ton: color-mix(in srgb, rgb(233.8 138.6 1.0) 18.9%, var(--t-yta));
+  --o-5c3412-txt: var(--t-pa-accent);
+  --o-f7f2ea-sand: var(--t-sand);
+  --o-fff4e4-gradde: var(--t-gradde);
+  --o-fde6c6-ton: color-mix(in srgb, rgb(246.1 143.4 0.5) 22.4%, var(--t-yta));
+  --o-fff7ec-gradde-rgb: var(--t-gradde-rgb);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema]) {
+    --o-faf5ec-sand: var(--t-sand);
+    --o-fdf3e3-gradde-rgb: var(--t-gradde-rgb);
+    --o-fdeccf-gul-ljus: var(--t-gul-ljus);
+    --o-f9dcae-ton: color-mix(in srgb, rgb(236.1 144.9 0.3) 31.8%, var(--t-yta));
+    --o-fff7ea-accent-ljus-3: var(--t-accent-ljus-3);
+    --o-fff1dc-ton: color-mix(in srgb, rgb(255.0 153.6 1.4) 13.8%, var(--t-yta));
+    --o-fff9ee-yta-varm-2: var(--t-yta-varm-2);
+    --o-fdf0dc-ton: color-mix(in srgb, rgb(240.5 146.3 1.4) 13.8%, var(--t-yta));
+    --o-f4eee5-falt: var(--t-falt);
+    --o-2b1d0e-txt: var(--t-pa-accent);
+    --o-fbe9cf-ton: color-mix(in srgb, rgb(233.8 138.6 1.0) 18.9%, var(--t-yta));
+    --o-5c3412-txt: var(--t-pa-accent);
+    --o-f7f2ea-sand: var(--t-sand);
+    --o-fff4e4-gradde: var(--t-gradde);
+    --o-fde6c6-ton: color-mix(in srgb, rgb(246.1 143.4 0.5) 22.4%, var(--t-yta));
+    --o-fff7ec-gradde-rgb: var(--t-gradde-rgb);
+  }
+}
+
 .ch { display: grid; grid-template-columns: minmax(250px, 310px) minmax(0, 1fr); height: calc(100vh - 2 * var(--ram, 12px)); min-height: 540px; overflow: hidden; }
 .ch.med-info { grid-template-columns: minmax(250px, 310px) minmax(0, 1fr) 290px; }
-.ch-lista { display: flex; flex-direction: column; gap: 10px; min-height: 0; padding: 18px 12px 12px; background: linear-gradient(180deg, #fffdf9, #faf5ec); box-shadow: inset -1px 0 0 rgba(27, 25, 21, .07); }
+.ch-lista { display: flex; flex-direction: column; gap: 10px; min-height: 0; padding: 18px 12px 12px; background: linear-gradient(180deg, var(--t-yta-varm), var(--o-faf5ec-sand)); box-shadow: inset -1px 0 0 rgb(var(--t-skugga-rgb) / .07); }
 .ch-lista > header { display: flex; align-items: center; justify-content: space-between; padding: 0 6px 0 8px; }
 .ch-lista h2 { margin: 0; font: 700 1.3rem/1.1 var(--rubrik); letter-spacing: -0.02em; }
-.ch-sok { display: flex; align-items: center; gap: 8px; padding: 0 12px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .08); }
-.ch-sok:focus-within { box-shadow: inset 0 0 0 1.5px var(--virke), 0 0 0 4px rgba(240, 181, 110, .16); }
+.ch-sok { display: flex; align-items: center; gap: 8px; padding: 0 12px; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); }
+.ch-sok:focus-within { box-shadow: inset 0 0 0 1.5px var(--virke), 0 0 0 4px rgb(var(--t-virke-rgb) / .16); }
 .ch-sok .emo-ik { color: var(--text-3); }
 .ch-sok input { flex: 1; min-width: 0; min-height: 40px; border: 0; background: none; font: inherit; outline: none; }
 .ch-lista nav { flex: 1; display: grid; align-content: start; gap: 2px; overflow-y: auto; min-height: 0; margin: 0 -4px; padding: 0 4px; }
-.ch-rad { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 16px; color: inherit; text-decoration: none; transition: background-color .2s, box-shadow .2s; }
-.ch-rad:hover { background: rgba(255, 255, 255, .85); }
-.ch-rad.vald { background: #fff; box-shadow: 0 8px 20px -14px rgba(90, 60, 25, .5), inset 0 0 0 1px rgba(240, 181, 110, .45); }
+.ch-rad { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: calc(16px * var(--t-radie-k, 1)); color: inherit; text-decoration: none; transition: background-color .2s, box-shadow .2s; }
+.ch-rad:hover { background: rgb(var(--t-glas-rgb) / .85); }
+.ch-rad.vald { background: var(--t-yta); box-shadow: 0 8px 20px -14px rgb(var(--t-skugga-varm-rgb) / .5), inset 0 0 0 1px rgb(var(--t-virke-rgb) / .45); }
 .ch-rad__text { flex: 1; display: grid; min-width: 0; }
 .ch-rad__text b { display: flex; align-items: center; gap: 6px; font: 600 .92rem/1.25 var(--rubrik); }
 .ch-rad__text b .emo-ik { width: 13px; height: 13px; color: var(--text-3); }
@@ -21,41 +79,41 @@
 .ch-rad.olast .ch-rad__text small { color: var(--text); font-weight: 600; }
 .ch-rad__hoger { display: grid; justify-items: end; gap: 4px; flex: none; }
 .ch-rad__hoger small { font-size: .72rem; color: var(--text-3); }
-.ch-olast, .ch-at { display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--virke); color: var(--kol); font: 700 .7rem/1 var(--rubrik); font-style: normal; }
-.ch-at { background: var(--virke-djup); color: #fff; }
+.ch-olast, .ch-at { display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: calc(10px * var(--t-radie-k, 1)); background: var(--virke); color: var(--t-pa-accent); font: 700 .7rem/1 var(--rubrik); font-style: normal; }
+.ch-at { background: var(--virke-djup); color: var(--t-pa-kol-vit); }
 .ch-inga { margin: 12px 8px; color: var(--text-3); font-size: .88rem; }
 .ch-gruppav { display: grid; place-items: center; background: var(--virke-ljus); color: var(--virke-djup); }
 .ch-gruppav .emo-ik { width: 18px; height: 18px; }
-.ch-installning { display: flex; gap: 6px; padding-top: 8px; box-shadow: inset 0 1px 0 rgba(27, 25, 21, .07); }
+.ch-installning { display: flex; gap: 6px; padding-top: 8px; box-shadow: inset 0 1px 0 rgb(var(--t-blaeck-rgb) / .07); }
 .ch-installning button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 0; border-radius: 999px; background: none; font: 600 .76rem/1 var(--rubrik); color: var(--text-3); cursor: pointer; }
-.ch-installning button[aria-pressed="true"] { background: #fff; color: var(--text); box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .5); }
+.ch-installning button[aria-pressed="true"] { background: var(--t-yta); color: var(--text); box-shadow: inset 0 0 0 1px rgb(var(--t-virke-rgb) / .5); }
 .ch-installning .emo-ik { width: 14px; height: 14px; }
-.ch-ikonknapp { display: grid; place-items: center; width: 36px; height: 36px; flex: none; padding: 0; border: 0; border-radius: 12px; background: none; color: var(--text-2); cursor: pointer; transition: background-color .2s, color .2s, transform .15s; }
+.ch-ikonknapp { display: grid; place-items: center; width: 36px; height: 36px; flex: none; padding: 0; border: 0; border-radius: calc(12px * var(--t-radie-k, 1)); background: none; color: var(--text-2); cursor: pointer; transition: background-color .2s, color .2s, transform .15s; }
 .ch-ikonknapp:hover, .ch-ikonknapp[aria-pressed="true"], .ch-ikonknapp[aria-expanded="true"] { background: var(--virke-ljus); color: var(--virke-djup); }
 .ch-ikonknapp:active { transform: scale(.92); }
 .ch-ikonknapp .emo-ik, .ch-ikonknapp .i { width: 18px; height: 18px; color: inherit; }
-.ch-ny { background: var(--virke); color: var(--kol); }
+.ch-ny { background: var(--virke); color: var(--t-pa-accent); }
 
 /* 02 Tråden */
 .ch-tradyta { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; min-height: 0; }
-.ch-tradyta[data-slapp]::after { content: "Släpp för att bifoga"; position: absolute; inset: 10px; z-index: 5; display: grid; place-items: center; border-radius: 22px; border: 2px dashed var(--virke);
-  background: rgba(253, 243, 227, .9); font: 600 1rem/1 var(--rubrik); color: var(--virke-djup); pointer-events: none; }
-.ch-topp { display: flex; align-items: center; gap: 12px; padding: 14px 18px; box-shadow: inset 0 -1px 0 rgba(27, 25, 21, .07); }
+.ch-tradyta[data-slapp]::after { content: "Släpp för att bifoga"; position: absolute; inset: 10px; z-index: 5; display: grid; place-items: center; border-radius: calc(22px * var(--t-radie-k, 1)); border: 2px dashed var(--virke);
+  background: rgb(var(--o-fdf3e3-gradde-rgb) / .9); font: 600 1rem/1 var(--rubrik); color: var(--virke-djup); pointer-events: none; }
+.ch-topp { display: flex; align-items: center; gap: 12px; padding: 14px 18px; box-shadow: inset 0 -1px 0 rgb(var(--t-blaeck-rgb) / .07); }
 .ch-topp__text { flex: 1; display: grid; min-width: 0; }
 .ch-topp b { font: 600 1.05rem/1.2 var(--rubrik); }
 .ch-topp small { font-size: .8rem; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ch-trad { overflow-y: auto; overscroll-behavior: contain; padding: 10px 18px 14px; display: flex; flex-direction: column; }
 .ch-dag { position: sticky; top: 0; z-index: 2; display: flex; justify-content: center; margin: 14px 0 6px; pointer-events: none; }
-.ch-dag span { padding: 5px 12px; border-radius: 999px; background: rgba(255, 255, 255, .94); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07), 0 6px 14px -10px rgba(90, 60, 25, .4); font: 600 .72rem/1 var(--rubrik); color: var(--text-3); }
+.ch-dag span { padding: 5px 12px; border-radius: 999px; background: rgb(var(--t-glas-rgb) / .94); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .07), 0 6px 14px -10px rgb(var(--t-skugga-varm-rgb) / .4); font: 600 .72rem/1 var(--rubrik); color: var(--text-3); }
 .ch-dag span::first-letter { text-transform: uppercase; }
 .ch-nya { display: flex; align-items: center; gap: 10px; margin: 10px 0; color: var(--rod); }
-.ch-nya::before, .ch-nya::after { content: ""; flex: 1; height: 1px; background: rgba(217, 87, 63, .35); }
+.ch-nya::before, .ch-nya::after { content: ""; flex: 1; height: 1px; background: rgb(var(--t-rod-rgb) / .35); }
 .ch-nya span { font: 600 .72rem/1 var(--rubrik); }
-.ch-system { align-self: center; margin: 8px 0; padding: 4px 12px; border-radius: 999px; background: rgba(27, 25, 21, .04); font-size: .78rem; color: var(--text-3); }
+.ch-system { align-self: center; margin: 8px 0; padding: 4px 12px; border-radius: 999px; background: rgb(var(--t-blaeck-rgb) / .04); font-size: .78rem; color: var(--text-3); }
 .ch-last { align-self: flex-end; display: inline-flex; align-items: center; gap: 4px; margin: 2px 4px 0; font-size: .72rem; color: var(--gron); }
 .ch-last .emo-ik { width: 12px; height: 12px; color: inherit; }
 .ch-tomt { margin: auto; display: grid; justify-items: center; gap: 6px; text-align: center; color: var(--text-2); }
-.ch-tomt > .emo-ik { width: 26px; height: 26px; padding: 14px; border-radius: 18px; background: var(--virke-ljus); box-sizing: content-box; margin-bottom: 6px; }
+.ch-tomt > .emo-ik { width: 26px; height: 26px; padding: 14px; border-radius: calc(18px * var(--t-radie-k, 1)); background: var(--virke-ljus); box-sizing: content-box; margin-bottom: 6px; }
 .ch-tomt b { font: 600 1.05rem/1.2 var(--rubrik); color: var(--text); }
 .ch-tomt p { margin: 0; }
 
@@ -70,48 +128,48 @@
 .ch-medd__namn { display: flex; align-items: baseline; gap: 8px; margin: 0 0 3px 4px; font: 600 .8rem/1.2 var(--rubrik); color: var(--virke-djup); }
 .ch-medd__namn small { font-family: var(--sans); font-weight: 500; font-size: .7rem; color: var(--text-3); }
 @keyframes ch-in { from { opacity: 0; transform: translateY(8px) scale(.98); } }
-.ch-bubbla { position: relative; padding: 9px 14px 7px; border-radius: 18px 18px 18px 6px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07), 0 6px 16px -14px rgba(90, 60, 25, .5); font-size: .95rem; line-height: 1.5; overflow-wrap: anywhere; }
-.ch-medd.fortsatt:not(.egen) .ch-bubbla { border-radius: 6px 18px 18px 6px; }
-.ch-medd.egen .ch-bubbla { border-radius: 18px 18px 6px 18px; background: linear-gradient(160deg, #fdeccf, #f9dcae); box-shadow: 0 6px 16px -12px rgba(143, 84, 36, .5); }
-.ch-medd.namner .ch-bubbla { box-shadow: inset 3px 0 0 var(--virke), inset 0 0 0 1px rgba(240, 181, 110, .5), 0 6px 16px -14px rgba(90, 60, 25, .5); }
-.ch-medd.andras .ch-bubbla { box-shadow: 0 0 0 2px var(--virke), 0 6px 16px -12px rgba(143, 84, 36, .5); }
+.ch-bubbla { position: relative; padding: 9px 14px 7px; border-radius: calc(18px * var(--t-radie-k, 1)) calc(18px * var(--t-radie-k, 1)) calc(18px * var(--t-radie-k, 1)) 6px; background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .07), 0 6px 16px -14px rgb(var(--t-skugga-varm-rgb) / .5); font-size: .95rem; line-height: 1.5; overflow-wrap: anywhere; }
+.ch-medd.fortsatt:not(.egen) .ch-bubbla { border-radius: 6px calc(18px * var(--t-radie-k, 1)) calc(18px * var(--t-radie-k, 1)) 6px; }
+.ch-medd.egen .ch-bubbla { border-radius: calc(18px * var(--t-radie-k, 1)) calc(18px * var(--t-radie-k, 1)) 6px calc(18px * var(--t-radie-k, 1)); background: linear-gradient(160deg, var(--o-fdeccf-gul-ljus), var(--o-f9dcae-ton)); box-shadow: 0 6px 16px -12px rgb(var(--t-accent-djup-rgb) / .5); }
+.ch-medd.namner .ch-bubbla { box-shadow: inset 3px 0 0 var(--virke), inset 0 0 0 1px rgb(var(--t-virke-rgb) / .5), 0 6px 16px -14px rgb(var(--t-skugga-varm-rgb) / .5); }
+.ch-medd.andras .ch-bubbla { box-shadow: 0 0 0 2px var(--virke), 0 6px 16px -12px rgb(var(--t-accent-djup-rgb) / .5); }
 .ch-medd.blixt .ch-bubbla { animation: ch-blixt 1.2s ease; }
-@keyframes ch-blixt { 30% { box-shadow: 0 0 0 4px rgba(240, 181, 110, .6); } }
+@keyframes ch-blixt { 30% { box-shadow: 0 0 0 4px rgb(var(--t-virke-rgb) / .6); } }
 .ch-bubbla.stor { padding: 2px 4px; background: none !important; box-shadow: none !important; font-size: 2.3rem; line-height: 1.15; }
-.ch-bubbla.borta { background: rgba(27, 25, 21, .04) !important; box-shadow: none !important; color: var(--text-3); }
+.ch-bubbla.borta { background: rgb(var(--t-blaeck-rgb) / .04) !important; box-shadow: none !important; color: var(--text-3); }
 .ch-bubbla a { color: var(--virke-djup); }
 .ch-tid { display: block; margin-top: 2px; text-align: right; font-size: .68rem; color: var(--text-3); }
 .ch-bubbla.stor .ch-tid { font-size: .68rem; }
-.ch-omn { padding: 0 3px; border-radius: 5px; background: rgba(240, 181, 110, .2); font-weight: 600; color: var(--virke-djup); }
-.ch-omn--mig { background: var(--virke); color: var(--kol); }
-.ch-obj { display: inline-flex; align-items: center; gap: 8px; margin: 3px 0; padding: 5px 12px 5px 6px; border-radius: 12px; background: rgba(255, 255, 255, .85);
-  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .55); color: var(--text) !important; text-decoration: none; vertical-align: middle; transition: background-color .2s; }
+.ch-omn { padding: 0 3px; border-radius: 5px; background: rgb(var(--t-virke-rgb) / .2); font-weight: 600; color: var(--virke-djup); }
+.ch-omn--mig { background: var(--virke); color: var(--t-pa-accent); }
+.ch-obj { display: inline-flex; align-items: center; gap: 8px; margin: 3px 0; padding: 5px 12px 5px 6px; border-radius: calc(12px * var(--t-radie-k, 1)); background: rgb(var(--t-glas-rgb) / .85);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-virke-rgb) / .55); color: var(--text) !important; text-decoration: none; vertical-align: middle; transition: background-color .2s; }
 .ch-obj:hover { background: var(--virke-ljus); }
 .ch-obj .emo-ik { width: 15px; height: 15px; padding: 5px; border-radius: 8px; background: var(--virke-ljus); box-sizing: content-box; }
 .ch-obj span { display: grid; line-height: 1.2; }
 .ch-obj b { font: 600 .84rem/1.2 var(--rubrik); }
 .ch-obj small { font-size: .72rem; color: var(--text-3); }
-.ch-citat { display: grid; width: 100%; margin: 2px 0 6px; padding: 6px 10px; border: 0; border-radius: 10px; background: rgba(27, 25, 21, .05); box-shadow: inset 3px 0 0 var(--virke); text-align: left; font: inherit; cursor: pointer; }
+.ch-citat { display: grid; width: 100%; margin: 2px 0 6px; padding: 6px 10px; border: 0; border-radius: calc(10px * var(--t-radie-k, 1)); background: rgb(var(--t-blaeck-rgb) / .05); box-shadow: inset 3px 0 0 var(--virke); text-align: left; font: inherit; cursor: pointer; }
 .ch-citat b { font: 600 .74rem/1.2 var(--rubrik); color: var(--virke-djup); }
 .ch-citat span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .82rem; color: var(--text-2); }
-.ch-bild { display: block; margin: 6px 0 2px; border-radius: 12px; overflow: hidden; max-width: 280px; }
+.ch-bild { display: block; margin: 6px 0 2px; border-radius: calc(12px * var(--t-radie-k, 1)); overflow: hidden; max-width: 280px; }
 .ch-bild img { display: block; width: 100%; height: auto; }
-.ch-fil { display: flex; align-items: center; gap: 10px; margin: 6px 0 2px; padding: 8px 12px; border-radius: 12px; background: rgba(255, 255, 255, .8); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .08); color: var(--text) !important; text-decoration: none; }
+.ch-fil { display: flex; align-items: center; gap: 10px; margin: 6px 0 2px; padding: 8px 12px; border-radius: calc(12px * var(--t-radie-k, 1)); background: rgb(var(--t-glas-rgb) / .8); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); color: var(--text) !important; text-decoration: none; }
 .ch-fil span { display: grid; }
 .ch-fil b { font-size: .84rem; }
 .ch-fil small { font-size: .72rem; color: var(--text-3); }
 .ch-reaktioner { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-.ch-reakt { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); font-size: .85rem; cursor: pointer; transition: transform .15s; }
+.ch-reakt { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border: 0; border-radius: 999px; background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .1); font-size: .85rem; cursor: pointer; transition: transform .15s; }
 .ch-reakt b { font: 600 .72rem/1 var(--rubrik); color: var(--text-2); }
 .ch-reakt.min { background: var(--virke-ljus); box-shadow: inset 0 0 0 1.5px var(--virke); }
 .ch-reakt:active { transform: scale(.92); }
 
 /* Verktygsraden: växer fram vid hovring (på pekskärm efter ett tryck) */
-.ch-verktyg { position: absolute; top: -18px; z-index: 3; display: flex; gap: 2px; padding: 3px; border-radius: 14px; background: #fff;
-  box-shadow: 0 10px 24px -12px rgba(90, 60, 25, .5), inset 0 0 0 1px rgba(27, 25, 21, .08); opacity: 0; pointer-events: none; transform: translateY(4px) scale(.96); transition: opacity .15s, transform .2s var(--mjuk); }
+.ch-verktyg { position: absolute; top: -18px; z-index: 3; display: flex; gap: 2px; padding: 3px; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--t-yta);
+  box-shadow: 0 10px 24px -12px rgb(var(--t-skugga-varm-rgb) / .5), inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); opacity: 0; pointer-events: none; transform: translateY(4px) scale(.96); transition: opacity .15s, transform .2s var(--mjuk); }
 .ch-medd:not(.egen) .ch-verktyg { left: 44px; transform-origin: left; }
 .ch-medd.egen .ch-verktyg { right: 0; transform-origin: right; }
-.ch-verktyg button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 10px; background: none; font-size: 1rem; cursor: pointer; color: var(--text-2); transition: background-color .15s, transform .15s; }
+.ch-verktyg button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: calc(10px * var(--t-radie-k, 1)); background: none; font-size: 1rem; cursor: pointer; color: var(--text-2); transition: background-color .15s, transform .15s; }
 .ch-verktyg button:hover { background: var(--virke-ljus); transform: scale(1.12); }
 .ch-verktyg .emo-ik, .ch-verktyg .i { width: 15px; height: 15px; }
 @media (hover: hover) and (pointer: fine) { .ch-medd:hover .ch-verktyg, .ch-medd:focus-within .ch-verktyg { opacity: 1; pointer-events: auto; transform: none; } }
@@ -120,50 +178,50 @@
 /* 04 Skrivrutan */
 .ch-fot { padding: 8px 18px 12px; }
 .ch-snabb { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-.ch-snabb button { padding: 6px 12px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .55); font: 600 .8rem/1.2 var(--rubrik); color: var(--text); cursor: pointer; transition: background-color .2s, transform .15s; }
+.ch-snabb button { padding: 6px 12px; border: 0; border-radius: 999px; background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-virke-rgb) / .55); font: 600 .8rem/1.2 var(--rubrik); color: var(--text); cursor: pointer; transition: background-color .2s, transform .15s; }
 .ch-snabb button:hover { background: var(--virke-ljus); }
 .ch-snabb button:active { transform: scale(.95); }
-.ch-skriv__lage { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 8px 10px 8px 14px; border-radius: 14px; background: var(--virke-ljus); }
+.ch-skriv__lage { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 8px 10px 8px 14px; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--virke-ljus); }
 .ch-skriv__lage > span { flex: 1; display: grid; min-width: 0; }
 .ch-skriv__lage b { font: 600 .8rem/1.2 var(--rubrik); color: var(--virke-djup); }
 .ch-skriv__lage small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .78rem; color: var(--text-2); }
-.ch-skriv__lage button { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: #fff; cursor: pointer; }
+.ch-skriv__lage button { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: var(--t-yta); cursor: pointer; }
 .ch-skriv__lage .i { width: 13px; height: 13px; }
 .ch-bilagor { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-.ch-bilaga { display: inline-flex; align-items: center; gap: 8px; max-width: 220px; padding: 4px 6px 4px 4px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); font-size: .8rem; }
+.ch-bilaga { display: inline-flex; align-items: center; gap: 8px; max-width: 220px; padding: 4px 6px 4px 4px; border-radius: calc(12px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .1); font-size: .8rem; }
 .ch-bilaga img { width: 36px; height: 36px; object-fit: cover; border-radius: 8px; }
 .ch-bilaga span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ch-bilaga button { display: grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: var(--ben); cursor: pointer; flex: none; }
 .ch-bilaga .i { width: 11px; height: 11px; }
-.ch-skriv { position: relative; display: flex; align-items: flex-end; gap: 4px; padding: 6px 6px 6px 8px; border-radius: 22px; background: #fff;
-  box-shadow: inset 0 0 0 1.5px rgba(27, 25, 21, .1), 0 10px 24px -18px rgba(90, 60, 25, .5); transition: box-shadow .2s; }
-.ch-skriv:focus-within { box-shadow: inset 0 0 0 1.5px var(--virke), 0 0 0 4px rgba(240, 181, 110, .18); }
+.ch-skriv { position: relative; display: flex; align-items: flex-end; gap: 4px; padding: 6px 6px 6px 8px; border-radius: calc(22px * var(--t-radie-k, 1)); background: var(--t-yta);
+  box-shadow: inset 0 0 0 1.5px rgb(var(--t-blaeck-rgb) / .1), 0 10px 24px -18px rgb(var(--t-skugga-varm-rgb) / .5); transition: box-shadow .2s; }
+.ch-skriv:focus-within { box-shadow: inset 0 0 0 1.5px var(--virke), 0 0 0 4px rgb(var(--t-virke-rgb) / .18); }
 .ch-skriv textarea { flex: 1; min-height: 24px; max-height: 160px; margin: 0 4px; padding: 8px 0; border: 0; background: none; resize: none; font: inherit; line-height: 1.5; outline: none; }
 .ch-skriv label.ch-ikonknapp { cursor: pointer; }
-.ch-skicka { display: grid; place-items: center; width: 40px; height: 40px; flex: none; padding: 0; border: 0; border-radius: 50%; background: linear-gradient(160deg, var(--virke-2), var(--virke)); color: var(--kol);
-  box-shadow: 0 8px 18px -10px rgba(143, 84, 36, .8); cursor: pointer; transition: transform .2s var(--studs); }
+.ch-skicka { display: grid; place-items: center; width: 40px; height: 40px; flex: none; padding: 0; border: 0; border-radius: 50%; background: linear-gradient(160deg, var(--virke-2), var(--virke)); color: var(--t-pa-accent);
+  box-shadow: 0 8px 18px -10px rgb(var(--t-accent-djup-rgb) / .8); cursor: pointer; transition: transform .2s var(--studs); }
 .ch-skicka:hover { transform: scale(1.06); }
 .ch-skicka:active { transform: scale(.92); }
 .ch-skicka .emo-ik { width: 18px; height: 18px; color: inherit; }
-.ch-emojipanel { position: absolute; left: 0; bottom: calc(100% + 8px); z-index: 6; width: min(340px, 100%); padding: 10px; border-radius: 18px; background: rgba(255, 255, 255, .98);
-  box-shadow: 0 24px 50px -24px rgba(90, 60, 25, .55), inset 0 0 0 1px rgba(27, 25, 21, .08); animation: valj-in .25s var(--mjuk) both; }
+.ch-emojipanel { position: absolute; left: 0; bottom: calc(100% + 8px); z-index: 6; width: min(340px, 100%); padding: 10px; border-radius: calc(18px * var(--t-radie-k, 1)); background: rgb(var(--t-glas-rgb) / .98);
+  box-shadow: 0 24px 50px -24px rgb(var(--t-skugga-varm-rgb) / .55), inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); animation: valj-in .25s var(--mjuk) both; }
 .ch-emojipanel p { margin: 4px 4px 6px; font: 600 .68rem/1 var(--rubrik); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
 .ch-emojipanel div { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; }
 .ch-emojipanel button { aspect-ratio: 1; padding: 0; border: 0; border-radius: 8px; background: none; font-size: 1.2rem; cursor: pointer; transition: background-color .15s, transform .15s; }
 .ch-emojipanel button:hover { background: var(--virke-ljus); transform: scale(1.15); }
-.ch-forslag { position: absolute; left: 44px; right: 50px; bottom: calc(100% + 8px); z-index: 6; display: grid; gap: 2px; padding: 6px; border-radius: 16px; background: rgba(255, 255, 255, .98);
-  box-shadow: 0 24px 50px -24px rgba(90, 60, 25, .55), inset 0 0 0 1px rgba(27, 25, 21, .08); max-height: 290px; overflow-y: auto; }
+.ch-forslag { position: absolute; left: 44px; right: 50px; bottom: calc(100% + 8px); z-index: 6; display: grid; gap: 2px; padding: 6px; border-radius: calc(16px * var(--t-radie-k, 1)); background: rgb(var(--t-glas-rgb) / .98);
+  box-shadow: 0 24px 50px -24px rgb(var(--t-skugga-varm-rgb) / .55), inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); max-height: 290px; overflow-y: auto; }
 .ch-forslag[hidden] { display: none; }
-.ch-forslag button { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border: 0; border-radius: 11px; background: none; text-align: left; font: inherit; cursor: pointer; }
+.ch-forslag button { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border: 0; border-radius: calc(11px * var(--t-radie-k, 1)); background: none; text-align: left; font: inherit; cursor: pointer; }
 .ch-forslag button.vald, .ch-forslag button:hover { background: var(--virke-ljus); }
 .ch-forslag button > span:last-child { display: grid; }
 .ch-forslag b { font: 600 .86rem/1.2 var(--rubrik); }
 .ch-forslag small { font-size: .74rem; color: var(--text-3); }
-.ch-forslag__ikon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: var(--ben); }
+.ch-forslag__ikon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: calc(10px * var(--t-radie-k, 1)); background: var(--ben); }
 .ch-tips { margin: 6px 4px 0; font-size: .72rem; color: var(--text-3); }
 
 /* 05 Om samtalet */
-.ch-info { display: flex; flex-direction: column; gap: 10px; padding: 16px; overflow-y: auto; box-shadow: inset 1px 0 0 rgba(27, 25, 21, .07); background: #fffdf9; }
+.ch-info { display: flex; flex-direction: column; gap: 10px; padding: 16px; overflow-y: auto; box-shadow: inset 1px 0 0 rgb(var(--t-skugga-rgb) / .07); background: var(--t-yta-varm); }
 .ch-info header { display: flex; align-items: center; justify-content: space-between; }
 .ch-info header b { font: 600 1rem/1.2 var(--rubrik); }
 .ch-info__rub { margin: 8px 0 0; font: 600 .7rem/1 var(--rubrik); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
@@ -175,27 +233,27 @@
 .ch-delade li { font-size: .84rem; }
 .ch-namnform { display: flex; align-items: flex-end; gap: 8px; }
 .ch-namnform label { flex: 1; display: grid; gap: 4px; font-size: .76rem; color: var(--text-3); }
-.ch-namnform input { min-height: 36px; padding: 6px 10px; border: 0; border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .12); font: inherit; }
+.ch-namnform input { min-height: 36px; padding: 6px 10px; border: 0; border-radius: calc(10px * var(--t-radie-k, 1)); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .12); font: inherit; }
 .ch-info__knappar { display: grid; gap: 8px; margin-top: auto; padding-top: 10px; }
 .ch-valj { display: grid; gap: 6px; margin-top: 12px; }
-.ch-valj label { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .08); cursor: pointer; }
-.ch-valj label:has(input:checked) { box-shadow: inset 0 0 0 1.5px var(--virke); background: #fffaf2; }
+.ch-valj label { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); cursor: pointer; }
+.ch-valj label:has(input:checked) { box-shadow: inset 0 0 0 1.5px var(--virke); background: var(--t-yta-varm-2); }
 .ch-valj input { width: 18px; height: 18px; accent-color: var(--virke-djup); }
 .ch-valj span { display: grid; }
 .ch-valj small { font-size: .78rem; color: var(--text-3); }
 
 /* 06 Ångra */
-.ch-angra { position: fixed; left: 50%; bottom: 24px; z-index: 1300; display: flex; align-items: center; gap: 14px; padding: 10px 10px 10px 18px; border-radius: 999px; background: var(--kol); color: #fff;
+.ch-angra { position: fixed; left: 50%; bottom: 24px; z-index: 1300; display: flex; align-items: center; gap: 14px; padding: 10px 10px 10px 18px; border-radius: 999px; background: var(--t-kol); color: var(--t-pa-kol-vit);
   box-shadow: 0 20px 40px -20px rgba(0, 0, 0, .6); transform: translateX(-50%); animation: ch-angra .3s var(--mjuk) both; font-size: .9rem; }
-.ch-angra button { padding: 7px 14px; border: 0; border-radius: 999px; background: var(--virke); color: var(--kol); font: 600 .82rem/1 var(--rubrik); cursor: pointer; }
+.ch-angra button { padding: 7px 14px; border: 0; border-radius: 999px; background: var(--virke); color: var(--t-pa-accent); font: 600 .82rem/1 var(--rubrik); cursor: pointer; }
 @keyframes ch-angra { from { opacity: 0; transform: translate(-50%, 12px); } }
 
 /* 07 Flytande fönstret och ikonen */
-.chf { position: fixed; z-index: var(--z-chatt, 55); display: grid; grid-template-rows: auto minmax(0, 1fr); border-radius: 24px; overflow: hidden; background: #fffdf9;
-  box-shadow: 0 40px 90px -40px rgba(60, 40, 15, .65), 0 0 0 1px rgba(27, 25, 21, .08); animation: chf-in .35s var(--mjuk) both; }
+.chf { position: fixed; z-index: var(--z-chatt, 55); display: grid; grid-template-rows: auto minmax(0, 1fr); border-radius: calc(24px * var(--t-radie-k, 1)); overflow: hidden; background: var(--t-yta-varm);
+  box-shadow: 0 40px 90px -40px rgb(var(--t-skugga-djup-rgb) / .65), 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); animation: chf-in .35s var(--mjuk) both; }
 @keyframes chf-in { from { opacity: 0; transform: translateY(14px) scale(.97); } }
-.chf[data-drar] { user-select: none; box-shadow: 0 50px 100px -40px rgba(60, 40, 15, .75), 0 0 0 1.5px var(--virke); }
-.chf-huvud { display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 16px; background: linear-gradient(160deg, #fff7ea, #fdeccf); cursor: grab; touch-action: none; }
+.chf[data-drar] { user-select: none; box-shadow: 0 50px 100px -40px rgb(var(--t-skugga-djup-rgb) / .75), 0 0 0 1.5px var(--virke); }
+.chf-huvud { display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 16px; background: linear-gradient(160deg, var(--o-fff7ea-accent-ljus-3), var(--o-fdeccf-gul-ljus)); cursor: grab; touch-action: none; }
 .chf[data-drar] .chf-huvud { cursor: grabbing; }
 .chf-huvud > .emo-ik { width: 18px; height: 18px; margin-right: 6px; }
 .chf-huvud b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 .95rem/1.2 var(--rubrik); }
@@ -208,23 +266,23 @@
 .chf .ch-medd { max-width: 92%; }
 .chf .ch-bild { max-width: 200px; }
 .chf-storlek { position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; cursor: nwse-resize; touch-action: none;
-  background: linear-gradient(135deg, transparent 50%, rgba(143, 84, 36, .35) 50%, rgba(143, 84, 36, .35) 56%, transparent 56%, transparent 68%, rgba(143, 84, 36, .35) 68%, rgba(143, 84, 36, .35) 74%, transparent 74%); }
+  background: linear-gradient(135deg, transparent 50%, rgb(var(--t-accent-djup-rgb) / .35) 50%, rgb(var(--t-accent-djup-rgb) / .35) 56%, transparent 56%, transparent 68%, rgb(var(--t-accent-djup-rgb) / .35) 68%, rgb(var(--t-accent-djup-rgb) / .35) 74%, transparent 74%); }
 .chf-ikon { position: fixed; z-index: var(--z-chatt, 55); display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; touch-action: none;
-  background: linear-gradient(160deg, #fff, #fff1dc); color: var(--virke-djup); box-shadow: 0 0 0 4px #f8f4ed, 0 14px 28px -12px rgba(143, 84, 36, .7), inset 0 0 0 1px rgba(201, 138, 69, .5);
+  background: linear-gradient(160deg, var(--t-yta), var(--o-fff1dc-ton)); color: var(--virke-djup); box-shadow: 0 0 0 4px var(--t-sand), 0 14px 28px -12px rgb(var(--t-accent-djup-rgb) / .7), inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .5);
   transition: transform .3s var(--mjuk), translate .35s var(--mjuk), width .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), height .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), box-shadow .3s, opacity .2s var(--ease-out, ease-out);
   animation: chf-in .35s var(--mjuk) both; }
 /* Bubblan som fönstret krymper in i tonar fram när fönstret nästan är där */
 .chf-ikon.chf-ikon[data-sen] { animation-delay: .16s; }
 .chf-ikon:hover { transform: scale(1.08); }
 .chf-ikon .emo-ik { width: 20px; height: 20px; color: inherit; }
-.chf-ikon .ch-olast { position: absolute; top: -4px; right: -4px; box-shadow: 0 0 0 2.5px #fff; }
+.chf-ikon .ch-olast { position: absolute; top: -4px; right: -4px; box-shadow: 0 0 0 2.5px var(--t-yta); }
 .chf-ikon[data-puls]::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; box-shadow: 0 0 0 2px var(--virke); animation: chf-puls 2.4s ease-out infinite; }
 @keyframes chf-puls { from { opacity: .8; transform: scale(1); } to { opacity: 0; transform: scale(1.5); } }
 
-@media (max-width: 1100px) { .ch.med-info { grid-template-columns: minmax(230px, 280px) minmax(0, 1fr); } .ch.med-info .ch-info { position: absolute; right: 0; top: 0; bottom: 0; width: 290px; z-index: 7; box-shadow: -20px 0 40px -30px rgba(60, 40, 15, .6); } .ch { position: relative; } }
+@media (max-width: 1100px) { .ch.med-info { grid-template-columns: minmax(230px, 280px) minmax(0, 1fr); } .ch.med-info .ch-info { position: absolute; right: 0; top: 0; bottom: 0; width: 290px; z-index: 7; box-shadow: -20px 0 40px -30px rgb(var(--t-skugga-djup-rgb) / .6); } .ch { position: relative; } }
 @media (max-width: 860px) {
   .ch, .ch.med-info { grid-template-columns: minmax(0, 1fr); height: auto; min-height: 0; }
-  .ch-lista { padding: 12px; box-shadow: inset 0 -1px 0 rgba(27, 25, 21, .07); }
+  .ch-lista { padding: 12px; box-shadow: inset 0 -1px 0 rgb(var(--t-blaeck-rgb) / .07); }
   .ch-lista nav { display: flex; overflow-x: auto; gap: 6px; }
   .ch-rad { flex: none; }
   .ch-rad__text small, .ch-rad__hoger small, .ch-installning { display: none; }
@@ -237,20 +295,20 @@
 @media (prefers-reduced-motion: reduce) { .ch-medd.ny, .chf, .chf-ikon, .ch-angra { animation: none; } .chf-ikon[data-puls]::after { animation: none; } }
 
 /* 08 Ljud, avisering och tips (korten med reglage, som i Uperformance) */
-.ch-kort { display: grid; gap: 8px; padding-top: 10px; box-shadow: inset 0 1px 0 rgba(27, 25, 21, .07); }
-.ch-vaxel { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 0; border-radius: 16px; background: #fff; text-align: left; font: inherit; cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .08); transition: box-shadow .25s, background-color .25s; }
-.ch-vaxel[aria-checked="true"] { box-shadow: inset 0 0 0 1.5px rgba(240, 181, 110, .7); background: #fffaf2; }
-.ch-vaxel__ikon { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: 12px; background: var(--virke-ljus); color: var(--virke-djup); }
+.ch-kort { display: grid; gap: 8px; padding-top: 10px; box-shadow: inset 0 1px 0 rgb(var(--t-blaeck-rgb) / .07); }
+.ch-vaxel { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 0; border-radius: calc(16px * var(--t-radie-k, 1)); background: var(--t-yta); text-align: left; font: inherit; cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); transition: box-shadow .25s, background-color .25s; }
+.ch-vaxel[aria-checked="true"] { box-shadow: inset 0 0 0 1.5px rgb(var(--t-virke-rgb) / .7); background: var(--t-yta-varm-2); }
+.ch-vaxel__ikon { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: calc(12px * var(--t-radie-k, 1)); background: var(--virke-ljus); color: var(--virke-djup); }
 .ch-vaxel__ikon .emo-ik { width: 18px; height: 18px; color: inherit; }
 .ch-vaxel__text { flex: 1; display: grid; min-width: 0; }
 .ch-vaxel__text b { font: 600 .86rem/1.25 var(--rubrik); }
 .ch-vaxel__text small { font-size: .76rem; color: var(--text-3); }
-.ch-vaxel__reglage { position: relative; width: 40px; height: 24px; flex: none; border-radius: 12px; background: rgba(27, 25, 21, .14); transition: background-color .3s; }
-.ch-vaxel__reglage::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(27, 25, 21, .25); transition: transform .35s var(--studs); }
+.ch-vaxel__reglage { position: relative; width: 40px; height: 24px; flex: none; border-radius: calc(12px * var(--t-radie-k, 1)); background: rgb(var(--t-blaeck-rgb) / .14); transition: background-color .3s; }
+.ch-vaxel__reglage::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--t-yta); box-shadow: 0 2px 6px rgb(var(--t-skugga-rgb) / .25); transition: transform .35s var(--studs); }
 .ch-vaxel[aria-checked="true"] .ch-vaxel__reglage { background: linear-gradient(90deg, var(--virke), var(--virke-djup)); }
 .ch-vaxel[aria-checked="true"] .ch-vaxel__reglage::after { transform: translateX(16px); }
-.ch-tipskort { display: flex; gap: 12px; padding: 12px; border-radius: 16px; background: linear-gradient(160deg, #fff9ee, #fdf0dc); box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .35); }
+.ch-tipskort { display: flex; gap: 12px; padding: 12px; border-radius: calc(16px * var(--t-radie-k, 1)); background: linear-gradient(160deg, var(--o-fff9ee-yta-varm-2), var(--o-fdf0dc-ton)); box-shadow: inset 0 0 0 1px rgb(var(--t-virke-rgb) / .35); }
 .ch-tipskort b { font: 600 .86rem/1.2 var(--rubrik); color: var(--virke-djup); }
 .ch-tipskort p { margin: 4px 0 0; font-size: .78rem; line-height: 1.5; color: var(--text-2); }
 .ch-snabb { align-items: center; }
@@ -263,15 +321,15 @@
 .ch-lista > header { align-items: flex-start; gap: 6px; padding: 0 2px 0 6px; }
 .ch-lista > header > div { flex: 1; display: grid; min-width: 0; }
 .ch-lista > header small { font-size: .82rem; color: var(--text-3); }
-.ch-ruta { width: 38px; height: 38px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); }
-.ch-ruta:hover, .ch-ruta[aria-pressed="true"] { background: #fff; box-shadow: inset 0 0 0 1.5px var(--virke); color: var(--virke-djup); }
-.ch-ny { width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(160deg, var(--virke-2), var(--virke)); color: var(--kol); box-shadow: 0 8px 18px -10px rgba(143, 84, 36, .8); }
-.ch-ny:hover { background: linear-gradient(160deg, var(--virke-2), var(--virke)); color: var(--kol); transform: scale(1.05); }
+.ch-ruta { width: 38px; height: 38px; border-radius: calc(12px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .1); }
+.ch-ruta:hover, .ch-ruta[aria-pressed="true"] { background: var(--t-yta); box-shadow: inset 0 0 0 1.5px var(--virke); color: var(--virke-djup); }
+.ch-ny { width: 42px; height: 42px; border-radius: calc(14px * var(--t-radie-k, 1)); background: linear-gradient(160deg, var(--virke-2), var(--virke)); color: var(--t-pa-accent); box-shadow: 0 8px 18px -10px rgb(var(--t-accent-djup-rgb) / .8); }
+.ch-ny:hover { background: linear-gradient(160deg, var(--virke-2), var(--virke)); color: var(--t-pa-accent); transform: scale(1.05); }
 .ch-team { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; margin: 0 -2px; scrollbar-width: thin; }
-.ch-teamkort { position: relative; display: grid; justify-items: center; gap: 2px; flex: none; width: 76px; padding: 10px 4px 8px; border-radius: 18px; background: #fff;
-  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .08); color: inherit; text-decoration: none; text-align: center; transition: box-shadow .2s, transform .2s var(--studs); }
-.ch-teamkort:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1.5px var(--virke), 0 10px 20px -14px rgba(90, 60, 25, .6); }
-.ch-teamkort.vald { box-shadow: inset 0 0 0 1.5px var(--virke); background: #fffaf2; }
+.ch-teamkort { position: relative; display: grid; justify-items: center; gap: 2px; flex: none; width: 76px; padding: 10px 4px 8px; border-radius: calc(18px * var(--t-radie-k, 1)); background: var(--t-yta);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); color: inherit; text-decoration: none; text-align: center; transition: box-shadow .2s, transform .2s var(--studs); }
+.ch-teamkort:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1.5px var(--virke), 0 10px 20px -14px rgb(var(--t-skugga-varm-rgb) / .6); }
+.ch-teamkort.vald { box-shadow: inset 0 0 0 1.5px var(--virke); background: var(--t-yta-varm-2); }
 .ch-teamkort .avatar { width: 42px; height: 42px; font-size: .85rem; margin-bottom: 4px; }
 .ch-teamkort b { font: 600 .8rem/1.2 var(--rubrik); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ch-teamkort small { font-size: .68rem; color: var(--text-3); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -282,7 +340,7 @@
 .ch-intro b { font: 600 1.05rem/1.2 var(--rubrik); }
 .ch-intro small { font-size: .82rem; color: var(--text-3); }
 .ch-intro .avatar { width: 46px; height: 46px; }
-.ch-tips kbd { display: inline-block; padding: 1px 6px; border-radius: 6px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .14), 0 1px 0 rgba(27, 25, 21, .1); font: 600 .68rem/1.5 var(--rubrik); color: var(--text-2); }
+.ch-tips kbd { display: inline-block; padding: 1px 6px; border-radius: 6px; background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .14), 0 1px 0 rgb(var(--t-blaeck-rgb) / .1); font: 600 .68rem/1.5 var(--rubrik); color: var(--text-2); }
 .ch-tips { line-height: 1.9; }
 .chf .ch-intro { padding-top: 8px; }
 @media (max-width: 1250px) { .ch-topp__knappar .ch-ruta { width: 34px; height: 34px; } }
@@ -314,38 +372,39 @@
    dagsskiljaren som en tunn linje, verktygen uppe till höger om bubblan (täcker inte namnet) och kortare rader */
 .ch-trad { padding: 8px 22px 16px; }
 .ch-dag { margin: 18px 0 8px; align-items: center; gap: 12px; }
-.ch-dag::before, .ch-dag::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(27, 25, 21, .1)); }
-.ch-dag::after { background: linear-gradient(90deg, rgba(27, 25, 21, .1), transparent); }
-.ch-dag span { padding: 4px 10px; background: #fbf8f3; box-shadow: none; font: 600 .68rem/1 var(--rubrik); letter-spacing: .04em; color: var(--text-3); }
+.ch-dag::before, .ch-dag::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgb(var(--t-blaeck-rgb) / .1)); }
+.ch-dag::after { background: linear-gradient(90deg, rgb(var(--t-blaeck-rgb) / .1), transparent); }
+.ch-dag span { padding: 4px 10px; background: var(--t-yta-varm-3); box-shadow: none; font: 600 .68rem/1 var(--rubrik); letter-spacing: .04em; color: var(--text-3); }
 .ch-medd { gap: 10px; max-width: min(600px, 82%); margin-top: 14px; }
 .ch-medd.fortsatt { margin-top: 2px; }
 .ch-medd .avatar--liten, .ch-medd__plats { width: 30px; height: 30px; border-radius: 50%; font-size: .66rem; }
 .ch-medd .avatar--liten { margin-top: 1px; }
-.ch-medd .avatar--liten .narvaro-prick { width: 9px; height: 9px; right: -1px; bottom: -1px; box-shadow: 0 0 0 2px #fbf8f3; }
-.ch-medd__namn { gap: 7px; margin: 0 0 4px 2px; font: 600 .78rem/1.2 var(--rubrik); color: var(--kol); }
+.ch-medd .avatar--liten .narvaro-prick { width: 9px; height: 9px; right: -1px; bottom: -1px; box-shadow: 0 0 0 2px var(--t-yta-varm-3); }
+.ch-medd__namn { gap: 7px; margin: 0 0 4px 2px; font: 600 .78rem/1.2 var(--rubrik); color: var(--t-text); }
 .ch-medd__namn small { font-size: .68rem; color: var(--text-3); opacity: .85; }
-.ch-bubbla { padding: 8px 13px; border-radius: 4px 16px 16px 16px; background: #f4eee5; box-shadow: none; font-size: .9rem; line-height: 1.5; color: var(--kol); }
-.ch-medd.fortsatt:not(.egen) .ch-bubbla { border-radius: 16px; }
-.ch-medd.egen .ch-bubbla { border-radius: 16px 4px 16px 16px; background: linear-gradient(160deg, #f6c68d, #f0b56e); box-shadow: 0 8px 18px -14px rgba(143, 84, 36, .7); color: #2b1d0e; }
-.ch-medd.egen.fortsatt .ch-bubbla { border-radius: 16px; }
-.ch-medd.namner .ch-bubbla { background: #fbe9cf; box-shadow: 0 0 0 1px rgba(240, 181, 110, .55); }
+.ch-bubbla { padding: 8px 13px; border-radius: 4px calc(16px * var(--t-radie-k, 1)) calc(16px * var(--t-radie-k, 1)) calc(16px * var(--t-radie-k, 1)); background: var(--o-f4eee5-falt); box-shadow: none; font-size: .9rem; line-height: 1.5; color: var(--t-text); }
+.ch-medd.fortsatt:not(.egen) .ch-bubbla { border-radius: calc(16px * var(--t-radie-k, 1)); }
+.ch-medd.egen .ch-bubbla { border-radius: calc(16px * var(--t-radie-k, 1)) 4px calc(16px * var(--t-radie-k, 1)) calc(16px * var(--t-radie-k, 1)); background: linear-gradient(160deg, var(--t-virke-2), var(--t-virke)); box-shadow: 0 8px 18px -14px rgb(var(--t-accent-djup-rgb) / .7); color: var(--o-2b1d0e-txt); }
+.ch-medd.egen.fortsatt .ch-bubbla { border-radius: calc(16px * var(--t-radie-k, 1)); }
+.ch-medd.namner .ch-bubbla { background: var(--o-fbe9cf-ton); box-shadow: 0 0 0 1px rgb(var(--t-virke-rgb) / .55); }
 .ch-medd.egen .ch-tid { color: rgba(43, 29, 14, .55); }
+:root[data-tema]:not([data-tema="original"]) .ch-medd.egen .ch-tid { color: color-mix(in srgb, var(--t-pa-accent) 60%, transparent); }
 .ch-tid { font-size: .64rem; }
 .ch-bubbla a:not(.ch-obj) { color: var(--virke-djup); text-underline-offset: 2px; }
-.ch-medd.egen .ch-bubbla a:not(.ch-obj) { color: #5c3412; }
+.ch-medd.egen .ch-bubbla a:not(.ch-obj) { color: var(--o-5c3412-txt); }
 /* Länkade kunder och affärer: ett eget litet kort under texten i stället för mitt i raden */
-.ch-obj { display: flex; width: fit-content; max-width: 100%; margin: 6px 0 2px; padding: 6px 12px 6px 6px; border-radius: 12px; background: #fff; box-shadow: 0 1px 0 rgba(27, 25, 21, .06), 0 6px 14px -12px rgba(90, 60, 25, .5); text-decoration: none; color: inherit; transition: transform .2s var(--studs), box-shadow .2s; }
-.ch-obj:hover { background: #fff; transform: translateY(-1px); box-shadow: inset 0 0 0 1.5px var(--virke), 0 10px 18px -12px rgba(90, 60, 25, .6); }
+.ch-obj { display: flex; width: fit-content; max-width: 100%; margin: 6px 0 2px; padding: 6px 12px 6px 6px; border-radius: calc(12px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: 0 1px 0 rgb(var(--t-blaeck-rgb) / .06), 0 6px 14px -12px rgb(var(--t-skugga-varm-rgb) / .5); text-decoration: none; color: inherit; transition: transform .2s var(--studs), box-shadow .2s; }
+.ch-obj:hover { background: var(--t-yta); transform: translateY(-1px); box-shadow: inset 0 0 0 1.5px var(--virke), 0 10px 18px -12px rgb(var(--t-skugga-varm-rgb) / .6); }
 .ch-obj .emo-ik { width: 14px; height: 14px; padding: 6px; border-radius: 9px; }
 .ch-obj b { font-size: .82rem; }
 .ch-obj small { font-size: .7rem; }
-.ch-medd.egen .ch-obj { background: rgba(255, 255, 255, .75); }
-.ch-citat { border-radius: 10px; background: rgba(255, 255, 255, .55); box-shadow: inset 2px 0 0 var(--virke-djup); }
+.ch-medd.egen .ch-obj { background: rgb(var(--t-glas-rgb) / .75); }
+.ch-citat { border-radius: calc(10px * var(--t-radie-k, 1)); background: rgb(var(--t-glas-rgb) / .55); box-shadow: inset 2px 0 0 var(--virke-djup); }
 .ch-reaktioner { margin: 4px 0 0 2px; }
-.ch-reakt { padding: 2px 8px 2px 6px; background: #fff; box-shadow: 0 0 0 1px rgba(27, 25, 21, .08); font-size: .8rem; }
+.ch-reakt { padding: 2px 8px 2px 6px; background: var(--t-yta); box-shadow: 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); font-size: .8rem; }
 .ch-reakt.min { background: var(--virke-ljus); box-shadow: 0 0 0 1.5px var(--virke); }
 /* Verktygen uppe till höger på bubblan, mindre och utan att täcka namnet */
-.ch-verktyg { top: -14px; gap: 0; padding: 2px; border-radius: 12px; box-shadow: 0 0 0 1px rgba(27, 25, 21, .08), 0 10px 22px -12px rgba(60, 40, 15, .45); }
+.ch-verktyg { top: -14px; gap: 0; padding: 2px; border-radius: calc(12px * var(--t-radie-k, 1)); box-shadow: 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08), 0 10px 22px -12px rgb(var(--t-skugga-djup-rgb) / .45); }
 .ch-medd:not(.egen) .ch-verktyg { left: auto; right: -14px; transform-origin: right; }
 .ch-medd.egen .ch-verktyg { right: auto; left: -14px; transform-origin: left; }
 .ch-verktyg button { width: 28px; height: 28px; border-radius: 9px; font-size: .9rem; }
@@ -357,117 +416,117 @@
 /* 12 Dockan (2026-10-29): menyknappen och den minimerade chatten i en gemensam kapsel på rälsen, med en ledning
    emellan där ett ljus vandrar. Kapseln växer fram nedåt från knappen, ikonen landar med en studs och ledningen
    lyser upp; oläst gör ljuset varmare och snabbare. */
-.chf-dock { position: fixed; z-index: 34; width: 56px; border-radius: 28px; pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 246, 232, .88)); box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .28), 0 18px 34px -22px rgba(143, 84, 36, .55);
+.chf-dock { position: fixed; z-index: 34; width: 56px; border-radius: calc(28px * var(--t-radie-k, 1)); pointer-events: none;
+  background: linear-gradient(180deg, rgb(var(--t-glas-rgb) / .92), rgba(255, 246, 232, .88)); box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .28), 0 18px 34px -22px rgb(var(--t-accent-djup-rgb) / .55);
   transform-origin: 50% 0; animation: chf-dock-in .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)) both;
   transition: left .22s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), top .22s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), height .22s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), opacity .2s var(--ease-out, ease-out), filter .2s var(--ease-out, ease-out); }
 /* Menyn fälls in: kapseln växer fram när knappen landar */
 .chf-dock[data-sen] { animation-duration: .36s; animation-delay: .2s; }
-.chf-dock::before { content: ""; position: absolute; inset: -5px; border-radius: 33px; border: 1px dashed rgba(201, 138, 69, .22); opacity: 0; transition: opacity .3s; }
+.chf-dock::before { content: ""; position: absolute; inset: -5px; border-radius: calc(33px * var(--t-radie-k, 1)); border: 1px dashed rgb(var(--t-koppar-rgb) / .22); opacity: 0; transition: opacity .3s; }
 .chf-dock[data-olast]::before { opacity: 1; animation: chf-dock-andas 2.6s ease-in-out infinite; }
 .chf-dock[data-ut] { animation: chf-dock-ut .2s var(--ease-out, ease-out) both; }
 @keyframes chf-dock-in { from { opacity: 0; transform: scaleY(.35); } }
 @keyframes chf-dock-ut { to { opacity: 0; transform: scaleY(.4); } }
 @keyframes chf-dock-andas { 50% { inset: -8px; opacity: .45; } }
 .chf-dock__led { position: absolute; left: 50%; top: var(--led-top, 44px); bottom: var(--led-botten, 55px); width: 2px; margin-left: -1px; border-radius: 2px; overflow: hidden;
-  background: linear-gradient(180deg, rgba(201, 138, 69, .15), rgba(201, 138, 69, .45), rgba(201, 138, 69, .15)); }
+  background: linear-gradient(180deg, rgb(var(--t-koppar-rgb) / .15), rgb(var(--t-koppar-rgb) / .45), rgb(var(--t-koppar-rgb) / .15)); }
 .chf-dock__led b { position: absolute; left: 0; right: 0; height: 8px; border-radius: 2px; background: linear-gradient(180deg, transparent, var(--virke-djup), transparent); animation: chf-led 2.4s ease-in-out infinite; }
 .chf-dock[data-olast] .chf-dock__led b { background: linear-gradient(180deg, transparent, #e8762c, transparent); animation-duration: 1.1s; }
 @keyframes chf-led { from { top: -10px; } to { top: 100%; } }
 .chf-dock[data-landar] .chf-dock__led { animation: chf-led-tand .8s ease-out; }
-@keyframes chf-led-tand { 0% { background: rgba(201, 138, 69, .15); } 35% { background: var(--virke); box-shadow: 0 0 8px var(--virke); } }
+@keyframes chf-led-tand { 0% { background: rgb(var(--t-koppar-rgb) / .15); } 35% { background: var(--virke); box-shadow: 0 0 8px var(--virke); } }
 /* Ikonen i dockan: ingen egen halo (kapseln är ramen) och lite mindre så de två hör ihop */
-.chf-ikon[data-i-docka] { width: 44px; height: 44px; box-shadow: 0 10px 22px -12px rgba(143, 84, 36, .7), inset 0 0 0 1px rgba(201, 138, 69, .5); }
-.chf-ikon[data-i-docka]:hover { box-shadow: 0 14px 26px -12px rgba(143, 84, 36, .8), inset 0 0 0 1.5px var(--virke); }
+.chf-ikon[data-i-docka] { width: 44px; height: 44px; box-shadow: 0 10px 22px -12px rgb(var(--t-accent-djup-rgb) / .7), inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .5); }
+.chf-ikon[data-i-docka]:hover { box-shadow: 0 14px 26px -12px rgb(var(--t-accent-djup-rgb) / .8), inset 0 0 0 1.5px var(--virke); }
 .chf-ikon[data-i-docka] .emo-ik { transition: transform .35s var(--studs); }
 .chf-ikon[data-i-docka]:hover .emo-ik { transform: rotate(-8deg) scale(1.08); }
-html[data-sido-dold] body:has(.chf-dock) .sido-knapp { box-shadow: 0 8px 18px -10px rgba(143, 84, 36, .6); }
+html[data-sido-dold] body:has(.chf-dock) .sido-knapp { box-shadow: 0 8px 18px -10px rgb(var(--t-accent-djup-rgb) / .6); }
 @media (prefers-reduced-motion: reduce) { .chf-dock, .chf-dock[data-ut], .chf-dock::before, .chf-dock__led, .chf-dock__led b { animation: none !important; } }
 
 /* 13 Modernare chatt (2026-10-29): lättare knappar utan ramar, kollegorna som en rad runda avatarer, listans valda
    rad som en mjuk platta, dagsrubrikerna klistras som glaspiller (överlappar inte bubblorna), en luftig skrivruta med
    mjuk ram och tangenttipsen bara när rutan har fokus */
 .ch-ruta, .ch-topp__knappar .ch-ruta { width: 36px; height: 36px; border-radius: 50%; background: transparent; box-shadow: none; color: var(--text-2); transition: background-color .2s, color .2s, transform .25s var(--studs); }
-.ch-ruta:hover, .ch-topp__knappar .ch-ruta:hover { background: rgba(27, 25, 21, .05); color: var(--kol); box-shadow: none; }
+.ch-ruta:hover, .ch-topp__knappar .ch-ruta:hover { background: rgb(var(--t-blaeck-rgb) / .05); color: var(--t-text); box-shadow: none; }
 .ch-ruta[aria-pressed="true"] { background: var(--virke-ljus); color: var(--virke-djup); box-shadow: none; }
 .ch-ruta .emo-ik { width: 18px; height: 18px; }
-.ch-lista > header .ch-ny { width: 36px; height: 36px; border-radius: 12px; box-shadow: 0 8px 16px -10px rgba(143, 84, 36, .8); }
+.ch-lista > header .ch-ny { width: 36px; height: 36px; border-radius: calc(12px * var(--t-radie-k, 1)); box-shadow: 0 8px 16px -10px rgb(var(--t-accent-djup-rgb) / .8); }
 .ch-lista h2 { font-size: 1.25rem; }
 /* Kollegorna: runda avatarer med namnet under, utan kort runt */
 .ch-team { gap: 4px; padding: 2px 0 4px; }
-.ch-teamkort { width: 64px; padding: 6px 2px; border-radius: 14px; background: none; box-shadow: none; }
-.ch-teamkort:hover { background: rgba(255, 255, 255, .7); box-shadow: none; transform: translateY(-1px); }
-.ch-teamkort.vald { background: #fff; box-shadow: 0 6px 16px -12px rgba(90, 60, 25, .6); }
-.ch-teamkort .avatar { width: 44px; height: 44px; border-radius: 50%; margin-bottom: 4px; box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px rgba(240, 181, 110, .5); }
+.ch-teamkort { width: 64px; padding: 6px 2px; border-radius: calc(14px * var(--t-radie-k, 1)); background: none; box-shadow: none; }
+.ch-teamkort:hover { background: rgb(var(--t-glas-rgb) / .7); box-shadow: none; transform: translateY(-1px); }
+.ch-teamkort.vald { background: var(--t-yta); box-shadow: 0 6px 16px -12px rgb(var(--t-skugga-varm-rgb) / .6); }
+.ch-teamkort .avatar { width: 44px; height: 44px; border-radius: 50%; margin-bottom: 4px; box-shadow: 0 0 0 2px var(--t-yta), 0 0 0 3.5px rgb(var(--t-virke-rgb) / .5); }
 .ch-teamkort b { font-size: .76rem; }
 .ch-teamkort small { font-size: .64rem; }
 /* Samtalslistan */
-.ch-rad { gap: 11px; padding: 9px 10px; border-radius: 14px; }
+.ch-rad { gap: 11px; padding: 9px 10px; border-radius: calc(14px * var(--t-radie-k, 1)); }
 .ch-rad .avatar, .ch-rad .ch-kanalikon { border-radius: 50%; }
-.ch-rad:hover { background: rgba(255, 255, 255, .7); }
-.ch-rad.vald { background: #fff; box-shadow: 0 6px 18px -14px rgba(90, 60, 25, .55); }
+.ch-rad:hover { background: rgb(var(--t-glas-rgb) / .7); }
+.ch-rad.vald { background: var(--t-yta); box-shadow: 0 6px 18px -14px rgb(var(--t-skugga-varm-rgb) / .55); }
 .ch-rad.vald::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 0 3px 3px 0; background: linear-gradient(180deg, var(--virke-2), var(--virke-djup)); }
 .ch-rad { position: relative; }
 /* Huvudet i tråden */
-.ch-topp { padding: 10px 14px 10px 18px; background: rgba(255, 253, 249, .8); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.ch-topp { padding: 10px 14px 10px 18px; background: rgb(var(--t-yta-varm-rgb) / .8); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 .ch-topp__knappar { gap: 2px; }
 /* Dagsrubrikerna: klistrade glaspiller utan linjer, så de aldrig ligger över en bubbla med streck */
 .ch-dag { margin: 16px 0 6px; }
 .ch-dag::before, .ch-dag::after { display: none; }
-.ch-dag span { padding: 5px 12px; border-radius: 999px; background: rgba(255, 255, 255, .82); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: 0 0 0 1px rgba(27, 25, 21, .06), 0 6px 14px -10px rgba(90, 60, 25, .4); font-size: .66rem; }
+.ch-dag span { padding: 5px 12px; border-radius: 999px; background: rgb(var(--t-glas-rgb) / .82); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: 0 0 0 1px rgb(var(--t-blaeck-rgb) / .06), 0 6px 14px -10px rgb(var(--t-skugga-varm-rgb) / .4); font-size: .66rem; }
 /* Skrivrutan */
 .ch-fot { padding: 6px 18px 14px; }
 .ch-snabb { gap: 6px; margin-bottom: 8px; }
-.ch-snabb button { padding: 5px 11px; background: rgba(255, 255, 255, .7); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .1); font-size: .76rem; transition: background-color .2s, box-shadow .2s, transform .2s var(--studs); }
-.ch-snabb button:hover { background: #fff; box-shadow: inset 0 0 0 1px var(--virke); transform: translateY(-1px); }
+.ch-snabb button { padding: 5px 11px; background: rgb(var(--t-glas-rgb) / .7); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .1); font-size: .76rem; transition: background-color .2s, box-shadow .2s, transform .2s var(--studs); }
+.ch-snabb button:hover { background: var(--t-yta); box-shadow: inset 0 0 0 1px var(--virke); transform: translateY(-1px); }
 .ch-snabb__etikett { font-size: .6rem; }
-.ch-skriv { padding: 6px 6px 6px 8px; border-radius: 18px; background: #fff; box-shadow: 0 0 0 1px rgba(27, 25, 21, .08), 0 10px 24px -18px rgba(90, 60, 25, .6); }
-.ch-skriv:focus-within { box-shadow: 0 0 0 1.5px var(--virke), 0 0 0 5px rgba(240, 181, 110, .16), 0 12px 28px -18px rgba(90, 60, 25, .6); }
+.ch-skriv { padding: 6px 6px 6px 8px; border-radius: calc(18px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08), 0 10px 24px -18px rgb(var(--t-skugga-varm-rgb) / .6); }
+.ch-skriv:focus-within { box-shadow: 0 0 0 1.5px var(--virke), 0 0 0 5px rgb(var(--t-virke-rgb) / .16), 0 12px 28px -18px rgb(var(--t-skugga-varm-rgb) / .6); }
 .ch-skriv textarea { font-size: .92rem; }
 .ch-skriv textarea:disabled { cursor: not-allowed; color: var(--text-3); }
-.ch-skriv:has(textarea:disabled) { background: #f7f2ea; box-shadow: 0 0 0 1px rgba(27, 25, 21, .06); }
-.ch-skicka { width: 38px; height: 38px; border-radius: 13px; }
+.ch-skriv:has(textarea:disabled) { background: var(--o-f7f2ea-sand); box-shadow: 0 0 0 1px rgb(var(--t-blaeck-rgb) / .06); }
+.ch-skicka { width: 38px; height: 38px; border-radius: calc(13px * var(--t-radie-k, 1)); }
 .ch-tips { max-height: 0; margin: 0 4px; overflow: hidden; opacity: 0; transition: max-height .3s var(--mjuk), opacity .25s, margin .3s; font-size: .68rem; }
 .ch-fot:focus-within .ch-tips { max-height: 60px; margin-top: 7px; opacity: 1; }
 /* Inställningarna nertill i listan: en kompakt rad */
 .ch-kort { gap: 6px; padding-top: 10px; }
-.ch-vaxel { padding: 8px 10px; border-radius: 14px; background: rgba(255, 255, 255, .6); }
+.ch-vaxel { padding: 8px 10px; border-radius: calc(14px * var(--t-radie-k, 1)); background: rgb(var(--t-glas-rgb) / .6); }
 .ch-vaxel__ikon { width: 30px; height: 30px; }
 .ch-tipskort { padding: 10px 12px; }
 
 /* Chattbubblan, mjukare: tunn kant i stället för den tjocka ringen, en mjuk glöd som andas och olästa meddelanden
    som sprids i två lugna vågor; siffran studsar in */
-.chf-ikon { box-shadow: 0 12px 26px -12px rgba(143, 84, 36, .6), inset 0 0 0 1px rgba(201, 138, 69, .45), 0 0 0 1px rgba(255, 255, 255, .9); }
-.chf-ikon[data-i-docka] { box-shadow: 0 10px 22px -12px rgba(143, 84, 36, .6), inset 0 0 0 1px rgba(201, 138, 69, .45); }
+.chf-ikon { box-shadow: 0 12px 26px -12px rgb(var(--t-accent-djup-rgb) / .6), inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .45), 0 0 0 1px rgb(var(--t-glas-rgb) / .9); }
+.chf-ikon[data-i-docka] { box-shadow: 0 10px 22px -12px rgb(var(--t-accent-djup-rgb) / .6), inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .45); }
 .chf-ikon[data-puls]::after { inset: 0; box-shadow: none; border-radius: 50%; animation: chf-vag 2.8s cubic-bezier(.2, .7, .3, 1) infinite; transform: none; opacity: 1; }
 @keyframes chf-vag {
-  0% { box-shadow: 0 0 0 0 rgba(226, 154, 74, .42), 0 0 0 0 rgba(226, 154, 74, .28); }
-  70% { box-shadow: 0 0 0 11px rgba(226, 154, 74, 0), 0 0 0 20px rgba(226, 154, 74, 0); }
-  100% { box-shadow: 0 0 0 11px rgba(226, 154, 74, 0), 0 0 0 20px rgba(226, 154, 74, 0); }
+  0% { box-shadow: 0 0 0 0 rgb(var(--t-accent-rgb) / .42), 0 0 0 0 rgb(var(--t-accent-rgb) / .28); }
+  70% { box-shadow: 0 0 0 11px rgb(var(--t-accent-rgb) / 0), 0 0 0 20px rgb(var(--t-accent-rgb) / 0); }
+  100% { box-shadow: 0 0 0 11px rgb(var(--t-accent-rgb) / 0), 0 0 0 20px rgb(var(--t-accent-rgb) / 0); }
 }
-.chf-ikon[data-puls] { background: radial-gradient(circle at 35% 30%, #fff, #fff4e4 60%, #fde6c6); animation: chf-in .35s var(--mjuk) both, chf-andas 2.8s ease-in-out .4s infinite; }
-@keyframes chf-andas { 50% { box-shadow: 0 14px 30px -12px rgba(226, 154, 74, .75), inset 0 0 0 1px rgba(226, 154, 74, .7), 0 0 18px rgba(255, 190, 110, .45); } }
+.chf-ikon[data-puls] { background: radial-gradient(circle at 35% 30%, var(--t-yta), var(--o-fff4e4-gradde) 60%, var(--o-fde6c6-ton)); animation: chf-in .35s var(--mjuk) both, chf-andas 2.8s ease-in-out .4s infinite; }
+@keyframes chf-andas { 50% { box-shadow: 0 14px 30px -12px rgb(var(--t-accent-rgb) / .75), inset 0 0 0 1px rgb(var(--t-accent-rgb) / .7), 0 0 18px rgba(255, 190, 110, .45); } }
 .chf-ikon[data-puls] .emo-ik { animation: chf-vicka 2.8s ease-in-out infinite; }
 @keyframes chf-vicka { 0%, 70%, 100% { transform: none; } 78% { transform: rotate(-10deg); } 86% { transform: rotate(8deg); } 93% { transform: rotate(-4deg); } }
-.chf-ikon .ch-olast { min-width: 20px; height: 20px; font-size: .66rem; box-shadow: 0 0 0 2px #fff, 0 4px 10px -4px rgba(143, 84, 36, .7); animation: chf-siffra .5s cubic-bezier(.34, 1.56, .64, 1) both; }
+.chf-ikon .ch-olast { min-width: 20px; height: 20px; font-size: .66rem; box-shadow: 0 0 0 2px var(--t-yta), 0 4px 10px -4px rgb(var(--t-accent-djup-rgb) / .7); animation: chf-siffra .5s cubic-bezier(.34, 1.56, .64, 1) both; }
 @keyframes chf-siffra { from { transform: scale(0); } }
 @media (prefers-reduced-motion: reduce) { .chf-ikon[data-puls], .chf-ikon[data-puls] .emo-ik, .chf-ikon .ch-olast { animation: none; } }
 
 /* Dockan, renare: en enda glaskapsel – kantens linjer och pillret bakom menyknappen döljs när dockan finns, ingen
    streckad ram, mjuk glöd vid olästa; knapparna utan egna ringar och med samma storlek, ljuset vandrar i en tunn ledning */
-.chf-dock { z-index: 35; width: 58px; border-radius: 29px; background: linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(255, 247, 236, .94)); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-  box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .22), 0 1px 0 rgba(255, 255, 255, .9) inset, 0 20px 40px -24px rgba(143, 84, 36, .6); }
+.chf-dock { z-index: 35; width: 58px; border-radius: calc(29px * var(--t-radie-k, 1)); background: linear-gradient(180deg, rgb(var(--t-glas-rgb) / .96), rgb(var(--o-fff7ec-gradde-rgb) / .94)); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .22), 0 1px 0 rgb(var(--t-glans-rgb) / .9) inset, 0 20px 40px -24px rgb(var(--t-accent-djup-rgb) / .6); }
 .chf-dock::before { inset: -1px; border: 0; border-radius: inherit; box-shadow: 0 0 0 0 rgba(232, 118, 44, 0); }
 .chf-dock[data-olast]::before { opacity: 1; animation: chf-dock-glod 2.8s ease-in-out infinite; }
 @keyframes chf-dock-glod { 0%, 100% { box-shadow: 0 0 0 0 rgba(232, 154, 74, 0), 0 0 0 0 rgba(232, 154, 74, 0); } 50% { box-shadow: 0 0 0 4px rgba(232, 154, 74, .14), 0 0 22px rgba(232, 154, 74, .35); } }
 /* Knappens mått bestäms av menyn (samma med och utan docka, så att den aldrig hoppar när dockan kommer); här bara skuggan */
-html[data-chatt-dockad] .sido-knapp { z-index: 2; box-shadow: 0 6px 14px -8px rgba(143, 84, 36, .5); border-color: rgba(201, 138, 69, .35); }
+html[data-chatt-dockad] .sido-knapp { z-index: 2; box-shadow: 0 6px 14px -8px rgb(var(--t-accent-djup-rgb) / .5); border-color: rgb(var(--t-koppar-rgb) / .35); }
 /* Rälsens nedre ikoner börjar under dockan, så att ingen ikon hamnar bakom chattbubblan */
 @media (min-width: 1101px) {
   html[data-chatt-dockad] .sido-rals__halva--ner { padding-top: 62px; }
   .sido-glider .sido-rals__halva--ner { transition: padding-top .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)); }
 }
-.chf-ikon[data-i-docka] { width: 40px; height: 40px; box-shadow: 0 6px 14px -8px rgba(143, 84, 36, .5), inset 0 0 0 1px rgba(201, 138, 69, .35); }
+.chf-ikon[data-i-docka] { width: 40px; height: 40px; box-shadow: 0 6px 14px -8px rgb(var(--t-accent-djup-rgb) / .5), inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .35); }
 .chf-ikon[data-i-docka] .emo-ik { width: 18px; height: 18px; }
 .chf-ikon[data-i-docka] .ch-olast { top: -5px; right: -7px; }
 .chf-dock__led { width: 1.5px; margin-left: -.75px; }
@@ -479,9 +538,9 @@ html[data-chatt-dockad] .sido-knapp { z-index: 2; box-shadow: 0 6px 14px -8px rg
 
 @media (max-width: 860px) { .ch, .ch.med-info { grid-template-columns: minmax(0, 1fr) !important; } }
 
-@media (max-width: 900px) { .chf .chf-huvud { position: relative; padding-top: 14px; } .chf .chf-huvud::before { content: ""; position: absolute; left: 50%; top: 5px; width: 36px; height: 4px; margin-left: -18px; border-radius: 4px; background: rgba(143, 84, 36, .25); } .chf .ch-fot { padding: 6px 8px 10px !important; } .chf .ch-fot > * { margin-left: 0 !important; } }
+@media (max-width: 900px) { .chf .chf-huvud { position: relative; padding-top: 14px; } .chf .chf-huvud::before { content: ""; position: absolute; left: 50%; top: 5px; width: 36px; height: 4px; margin-left: -18px; border-radius: 4px; background: rgb(var(--t-accent-djup-rgb) / .25); } .chf .ch-fot { padding: 6px 8px 10px !important; } .chf .ch-fot > * { margin-left: 0 !important; } }
 /* Chattsidan på mobil: skrivrutan står kvar ovanför bottenmenyn */
-@media (max-width: 900px) { .vy .ch .ch-fot { position: fixed; left: 10px; right: 10px; bottom: 78px; z-index: 40; border-radius: 18px; background: #fffdf9; box-shadow: 0 -6px 24px -12px rgba(60, 40, 15, .45); } .vy .ch .ch-trad { padding-bottom: 120px; } }
+@media (max-width: 900px) { .vy .ch .ch-fot { position: fixed; left: 10px; right: 10px; bottom: 78px; z-index: 40; border-radius: calc(18px * var(--t-radie-k, 1)); background: var(--t-yta-varm); box-shadow: 0 -6px 24px -12px rgb(var(--t-skugga-djup-rgb) / .45); } .vy .ch .ch-trad { padding-bottom: 120px; } }
 /* Supportläget på mobil: skrivrutan hamnar ovanför bandet */
 @media (max-width: 900px) { html[data-support] .vy .ch .ch-fot { bottom: 150px; } html[data-support] .vy .ch .ch-trad { padding-bottom: 200px; } }
 /* Chattsidan på mobil: ingen synlig rullningslist under samtalsraden, ingen sidokant på valt samtal, runda bilder överallt */
@@ -489,7 +548,7 @@ html[data-chatt-dockad] .sido-knapp { z-index: 2; box-shadow: 0 6px 14px -8px rg
   .ch-lista nav { scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 2px; }
   .ch-lista nav::-webkit-scrollbar { display: none; }
   .ch-rad.vald::before { display: none; }
-  .ch-rad.vald { box-shadow: inset 0 0 0 1.5px rgba(240, 181, 110, .6), 0 6px 16px -12px rgba(90, 60, 25, .5); }
+  .ch-rad.vald { box-shadow: inset 0 0 0 1.5px rgb(var(--t-virke-rgb) / .6), 0 6px 16px -12px rgb(var(--t-skugga-varm-rgb) / .5); }
 }
 .ch-topp .avatar:not(.ch-gruppav) { border-radius: 50%; }
 @media (max-width: 900px) {
@@ -506,7 +565,7 @@ html[data-chatt-dockad] .sido-knapp { z-index: 2; box-shadow: 0 6px 14px -8px rg
   .vy .ch > .ch-lista { flex: none; }
   .vy .ch .ch-tradyta { flex: 1; min-height: 0; display: flex; flex-direction: column; }
   .vy .ch .ch-trad { flex: 1; min-height: 0; padding-bottom: 12px !important; }
-  .vy .ch .ch-fot, html[data-support] .vy .ch .ch-fot { position: static !important; left: auto; right: auto; bottom: auto !important; border-radius: 0; box-shadow: 0 -8px 18px -14px rgba(60, 40, 15, .4); }
+  .vy .ch .ch-fot, html[data-support] .vy .ch .ch-fot { position: static !important; left: auto; right: auto; bottom: auto !important; border-radius: 0; box-shadow: 0 -8px 18px -14px rgb(var(--t-skugga-djup-rgb) / .4); }
 }
 /* Platta 721–900 px: bottenmenyn syns här också, så skrivrutan, chattfönstret och bubblan lägger sig ovanför den */
 @media (min-width: 721px) and (max-width: 900px) {
@@ -531,8 +590,8 @@ html[data-palett-oppen] .chf, html[data-ark-oppen] .chf { pointer-events: none; 
 @media (prefers-reduced-motion: reduce) { .chf-ikon, .chf-dock, .sido-glider .sido-rals__halva--ner { transition: opacity .15s linear; } .chf-ikon[data-sen], .chf-dock[data-sen] { animation-delay: 0s; } }
 .ch-tipskort { position: relative; }
 .ch-tipskort__stang { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%;
-  background: rgba(255, 255, 255, .7); color: var(--text-3); cursor: pointer; transition: background-color .2s ease, color .2s ease, transform .16s var(--ease-out, ease); }
-.ch-tipskort__stang:hover { background: #fff; color: var(--text); }
+  background: rgb(var(--t-glas-rgb) / .7); color: var(--text-3); cursor: pointer; transition: background-color .2s ease, color .2s ease, transform .16s var(--ease-out, ease); }
+.ch-tipskort__stang:hover { background: var(--t-yta); color: var(--text); }
 .ch-tipskort__stang:active { transform: scale(.92); }
 .ch-tipskort__stang .i { width: 13px; height: 13px; }
 .ch-tipskort > div { padding-right: 22px; }
@@ -546,3 +605,9 @@ html[data-palett-oppen] .chf, html[data-ark-oppen] .chf { pointer-events: none; 
 ::view-transition-group(ih-chf), ::view-transition-group(ih-chf-ikon) { animation: none; }
 ::view-transition-old(ih-chf), ::view-transition-old(ih-chf-ikon) { display: none; }
 ::view-transition-new(ih-chf), ::view-transition-new(ih-chf-ikon) { animation: none; }
+
+/* Rättningsrunda tema (2026-10-29): bara teman utanför Original */
+/* @omnämnande i egen bubbla följer bubblans textfärg i stället för accenten (syntes inte i Mörk/Färgglad/Office) */
+:root[data-tema]:not([data-tema="original"]) .ch-medd.egen .ch-omn { color: inherit; background: color-mix(in srgb, currentColor 16%, transparent); font-weight: 700; }
+/* Office: vit text på skicka-knappen, ny-knappen och egna bubblor */
+:root[data-tema="office"] :is(.ch-skicka, .ch-ny, .ch-medd.egen .ch-bubbla) { --t-virke-2: var(--t-knapp-topp); --virke-2: var(--t-knapp-topp); }

@@ -100,6 +100,7 @@
       }).join('') + '</div>' : '') +
       '<div class="km-grupp"><p class="km-rubrik"><span>Byt konto</span><small>Demo: logga in som någon annan i teamet</small></p>' +
         '<div class="km-lista" role="list">' + [jag].concat(andra).map(function (u, n) { return '<div role="listitem" style="--i:' + n + '">' + kontoRad(u, u.id === jag.id) + '</div>'; }).join('') + '</div></div>' +
+      (IH.tema && IH.tema.valjare ? '<div class="km-tema"><p class="km-rubrik"><span>Tema</span><small data-tema-namn>' + e(IH.tema.beskrivning()) + '</small></p>' + IH.tema.valjare('liten') + '</div>' : '') +
       '<footer class="km-fot">' + lank('href="#/profil"', 'anstallda', 'Min profil') +
         lank('href="#/installningar"', 'installningar', 'Inställningar') +
         lank('data-g="logga-ut"', 'logga-ut', 'Logga ut') + '</footer>';
@@ -149,7 +150,7 @@
   };
   // Titeln efter roll – används för nya konton och när titeln töms i Ändra profil
   var standardTitel = function (u) { return u.roll === 'salj' ? 'Sälj' + (u.chef ? ' · Försäljningschef' : '') : u.roll === 'prod' ? 'Produktion' : 'Administratör'; };
-  var FARGER = ['linear-gradient(135deg,#e8c98f,#a6763a)', 'linear-gradient(135deg,#9fc2c9,#3d6a73)', 'linear-gradient(135deg,#a9c8a4,#3f6b50)', 'linear-gradient(135deg,#f0b0a0,#a8513e)'];
+  var FARGER = [['#e8c98f', '#a6763a'], ['#9fc2c9', '#3d6a73'], ['#a9c8a4', '#3f6b50'], ['#f0b0a0', '#a8513e']].map(function (p) { return 'linear-gradient(135deg,' + p[0] + ',color-mix(in srgb,' + p[1] + ',' + p[0] + ' var(--t-avatar-ljus,0%)))'; });
   document.addEventListener('submit', function (ev) {
     var t = ev.target; if (!t.matches || !t.matches('[data-km-ny]')) return;
     ev.preventDefault();
@@ -421,7 +422,7 @@
   // Kalendern på profilen (som Uperformance): månad med veckonummer eller hela året, dagens panel med det som är inbokat,
   // ledighet och sjukanmälan. Allt räknas ur datan för den här personen.
   var pk = { man: 0, vy: 'man', dag: null };
-  var PK_TYP = { mote: ['Möte', '#a98be0'], samtal: ['Samtal', '#6aa9e8'], mejl: ['Mejl', '#7fc6c9'], besok: ['Besök', '#8fcf9a'], notis: ['Anteckning', '#c9b48f'], system: ['Aktivitet', '#7fd1b0'], uppg: ['Uppgift', '#e8c25a'], sen: ['Försenad', '#e8806a'], vunnen: ['Vunnen', '#f6c68d'] };
+  var PK_TYP = { mote: ['Möte', 'var(--t-diagram-4)'], samtal: ['Samtal', 'var(--t-diagram-2)'], mejl: ['Mejl', 'var(--t-diagram-6)'], besok: ['Besök', 'var(--t-diagram-3)'], notis: ['Anteckning', '#c9b48f'], system: ['Aktivitet', '#7fd1b0'], uppg: ['Uppgift', 'var(--t-diagram-5)'], sen: ['Försenad', '#e8806a'], vunnen: ['Vunnen', 'var(--t-kol-accent)'] };
   function pkHandelser(u) {
     var idag = dag0(new Date()).getTime(), ut = [];
     db().aktiviteter.forEach(function (h) { if (h.av === u.id) ut.push({ id: h.id, dag: dag0(h.tid).getTime(), tid: h.tid, typ: PK_TYP[h.typ] ? h.typ : 'system', text: h.text, kund: h.kund, akt: true }); });
@@ -877,7 +878,7 @@
     var veckaStart = function (w) { var d = new Date(man0); d.setDate(man0.getDate() - w * 7); return d; };
     var veckorV = []; for (var w = 11; w >= 0; w--) { var vs = veckaStart(w), ve = veckaStart(w - 1); veckorV.push(allaS.reduce(function (t, x) { return t + x.aff.filter(function (a) { return a.steg === 'vunnen' && a.vunnen && new Date(a.vunnen) >= vs && new Date(a.vunnen) < ve; }).reduce(function (s2, a) { return s2 + (a.varde || 0); }, 0); }, 0)); }
     var maxV = Math.max.apply(null, veckorV.concat([1]));
-    var ring = '<div class="lp-ring" style="--a:' + ringAndel.toFixed(3) + '"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="lp-ring-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd9a0"/><stop offset="1" stop-color="#e29a4a"/></linearGradient></defs>' +
+    var ring = '<div class="lp-ring" style="--a:' + ringAndel.toFixed(3) + '"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="lp-ring-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--t-3d-lykta)"/><stop offset="1" style="stop-color:var(--t-accent)"/></linearGradient></defs>' +
       '<circle cx="60" cy="60" r="50" class="lp-ring__spar"/><circle cx="60" cy="60" r="50" class="lp-ring__glod"/><circle cx="60" cy="60" r="50" class="lp-ring__bage"/></svg>' +
       '<div class="lp-ring__mitt"><b>' + Math.round(ringPct * 100) + ' %</b><small>' + (tot.mal ? 'av kvartalsmålet' : 'vinstgrad 90 d') + '</small>' + (tot.mal ? '<em>' + IH.kort(tot.vunnetMal) + ' / ' + IH.kort(tot.mal) + (medMal < team.length ? ' · ' + medMal + ' av ' + team.length + ' med mål' : '') + '</em>' : '<em>Sätt mål för att följa kvartalet</em>') + '</div></div>';
     var lag = '<div class="lp-lag">' + team.map(function (x) { var n = narvaro(x.u.id); return '<a href="#/profil/' + x.u.id + '" title="' + e(x.u.namn) + ': ' + e(n.namn) + ' · ' + IH.kort(x.oppet) + ' öppet">' + avatar(x.u) + '</a>'; }).join('') + '<span>' + plural(aktivaNu, 'i tjänst', 'i tjänst') + '</span></div>';

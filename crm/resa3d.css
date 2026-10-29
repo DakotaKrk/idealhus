@@ -1,50 +1,72 @@
 /* Legohus CRM – husets resa i 3D (resa3d.js): duken, texten om steget, kundernas hus som nålar och reglagen. */
-.resa3d { position: relative; height: clamp(380px, 44vw, 560px); margin: 4px 0 18px; border-radius: 22px; overflow: hidden; isolation: isolate;
-  background: radial-gradient(80% 60% at 50% 0%, #fff6e8, #efe2cd); box-shadow: inset 0 0 0 1px rgba(240, 181, 110, .35), 0 24px 50px -30px rgba(90, 60, 25, .6); }
+/* Temafärger som bara den här filen har (tema-bytet 2026-10-29): dagens exakta värde i Original, temats token i övriga teman. */
+:root {
+  --o-efe2cd-ton: #efe2cd;
+  --o-f3ece1-falt: #f3ece1;
+  --o-fff8ee-yta-varm-2: #fff8ee;
+  --o-f6d9b3-ton: #f6d9b3;
+}
+:root[data-tema]:not([data-tema="original"]) {
+  --o-efe2cd-ton: color-mix(in srgb, rgb(173.8 107.8 1.2) 19.7%, var(--t-yta));
+  --o-f3ece1-falt: var(--t-falt);
+  --o-fff8ee-yta-varm-2: var(--t-yta-varm-2);
+  --o-f6d9b3-ton: color-mix(in srgb, rgb(224.9 127.9 0.8) 29.9%, var(--t-yta));
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema]) {
+    --o-efe2cd-ton: color-mix(in srgb, rgb(173.8 107.8 1.2) 19.7%, var(--t-yta));
+    --o-f3ece1-falt: var(--t-falt);
+    --o-fff8ee-yta-varm-2: var(--t-yta-varm-2);
+    --o-f6d9b3-ton: color-mix(in srgb, rgb(224.9 127.9 0.8) 29.9%, var(--t-yta));
+  }
+}
+
+.resa3d { position: relative; height: clamp(380px, 44vw, 560px); margin: 4px 0 18px; border-radius: calc(22px * var(--t-radie-k, 1)); overflow: hidden; isolation: isolate;
+  background: radial-gradient(80% 60% at 50% 0%, var(--t-accent-ljus-3), var(--o-efe2cd-ton)); box-shadow: inset 0 0 0 1px rgb(var(--t-virke-rgb) / .35), 0 24px 50px -30px rgb(var(--t-skugga-varm-rgb) / .6); }
 .resa3d__duk { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; cursor: grab; }
 .resa3d__lager { position: absolute; inset: 0; pointer-events: none; }
 .resa3d__lager button { pointer-events: auto; }
-.resa3d::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; background: linear-gradient(180deg, rgba(255, 250, 242, .3), transparent 16%, transparent 84%, rgba(255, 250, 242, .35)); }
+.resa3d::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; background: linear-gradient(180deg, rgb(var(--t-yta-varm-2-rgb) / .3), transparent 16%, transparent 84%, rgb(var(--t-yta-varm-2-rgb) / .35)); }
 /* Steget just nu, uppe till vänster */
-.resa3d__text { position: absolute; z-index: 2; top: 16px; left: 16px; display: flex; align-items: flex-start; gap: 12px; max-width: min(430px, calc(100% - 32px)); padding: 12px 16px 12px 12px; border-radius: 18px;
-  background: rgba(255, 253, 249, .78); -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%); box-shadow: 0 16px 34px -22px rgba(60, 40, 15, .6), inset 0 0 0 1px rgba(240, 181, 110, .4); }
+.resa3d__text { position: absolute; z-index: 2; top: 16px; left: 16px; display: flex; align-items: flex-start; gap: 12px; max-width: min(430px, calc(100% - 32px)); padding: 12px 16px 12px 12px; border-radius: calc(18px * var(--t-radie-k, 1));
+  background: rgb(var(--t-yta-varm-rgb) / .78); -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%); box-shadow: 0 16px 34px -22px rgb(var(--t-skugga-djup-rgb) / .6), inset 0 0 0 1px rgb(var(--t-virke-rgb) / .4); }
 .resa3d__text.byter { animation: resa-text .6s cubic-bezier(.22, 1, .36, 1) both; }
 @keyframes resa-text { from { opacity: 0; transform: translateY(-8px); filter: blur(4px); } }
-.resa3d__nr { display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(160deg, #f6c68d, #e29a4a); font: 700 1.05rem/1 var(--rubrik); color: #1b1915;
-  box-shadow: 0 0 0 4px rgba(240, 181, 110, .2), 0 0 22px rgba(255, 170, 80, .6); }
+.resa3d__nr { display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: calc(12px * var(--t-radie-k, 1)); background: linear-gradient(160deg, var(--t-virke-2), var(--t-accent)); font: 700 1.05rem/1 var(--rubrik); color: var(--t-pa-accent);
+  box-shadow: 0 0 0 4px rgb(var(--t-virke-rgb) / .2), 0 0 22px rgb(var(--t-signal-orange-rgb) / .6); }
 .resa3d__text > span:last-child { display: grid; gap: 2px; min-width: 0; }
 .resa3d__text small { font: 600 .6rem/1.2 var(--rubrik); letter-spacing: .14em; text-transform: uppercase; color: var(--virke-djup); }
-.resa3d__text b { font: 700 1.08rem/1.2 var(--rubrik); color: var(--kol); }
+.resa3d__text b { font: 700 1.08rem/1.2 var(--rubrik); color: var(--t-text); }
 .resa3d__text em { font-style: normal; font-size: .8rem; line-height: 1.4; color: var(--text-2); }
 /* Kundernas hus som nålar ovanför sitt steg */
 .resa3d__nalar { position: absolute; inset: 0; z-index: 1; }
-.resa3d__nal { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 8px; padding: 4px 11px 4px 4px; border: 0; border-radius: 14px; background: #fffdf9;
-  box-shadow: 0 12px 24px -14px rgba(60, 40, 15, .7), 0 0 0 1px rgba(240, 181, 110, .55); cursor: pointer; white-space: nowrap; transition: opacity .35s, box-shadow .25s; will-change: transform;
+.resa3d__nal { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 8px; padding: 4px 11px 4px 4px; border: 0; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--t-yta-varm);
+  box-shadow: 0 12px 24px -14px rgb(var(--t-skugga-djup-rgb) / .7), 0 0 0 1px rgb(var(--t-virke-rgb) / .55); cursor: pointer; white-space: nowrap; transition: opacity .35s, box-shadow .25s; will-change: transform;
   animation: resa-nal-svav 3s ease-in-out infinite alternate; }
 /* nålarna svävar lite upp och ner (egen translate, så att JS:ens transform får vara ifred) – det visar att de går att klicka på */
 @keyframes resa-nal-svav { from { translate: 0 0; } to { translate: 0 -2px; } }
 .resa3d__nal:nth-child(2n) { animation-delay: -1.4s; }
-.resa3d__nal--nu { z-index: 1; box-shadow: 0 14px 26px -12px rgba(60, 40, 15, .75), 0 0 0 1.5px var(--virke), 0 0 22px rgba(255, 179, 92, .55); }
-.resa3d__nal::after { content: ""; position: absolute; left: 50%; bottom: -9px; width: 2px; height: 9px; margin-left: -1px; background: linear-gradient(180deg, rgba(240, 181, 110, .9), transparent); }
-.resa3d__nal:hover { box-shadow: 0 14px 26px -12px rgba(60, 40, 15, .8), 0 0 0 1.5px var(--virke), 0 0 26px rgba(255, 179, 92, .7); }
+.resa3d__nal--nu { z-index: 1; box-shadow: 0 14px 26px -12px rgb(var(--t-skugga-djup-rgb) / .75), 0 0 0 1.5px var(--virke), 0 0 22px rgba(255, 179, 92, .55); }
+.resa3d__nal::after { content: ""; position: absolute; left: 50%; bottom: -9px; width: 2px; height: 9px; margin-left: -1px; background: linear-gradient(180deg, rgb(var(--t-virke-rgb) / .9), transparent); }
+.resa3d__nal:hover { box-shadow: 0 14px 26px -12px rgb(var(--t-skugga-djup-rgb) / .8), 0 0 0 1.5px var(--virke), 0 0 26px rgba(255, 179, 92, .7); }
 /* husbilden beskärs aldrig: hela bilden i en rundad ruta på krämvit platta */
-.resa3d__nal img { width: 40px; height: 28px; border-radius: 9px; object-fit: contain; background: #f3ece1; }
+.resa3d__nal img { width: 40px; height: 28px; border-radius: 9px; object-fit: contain; background: var(--o-f3ece1-falt); }
 .resa3d__nal span { display: grid; text-align: left; }
-.resa3d__nal b { font: 600 .74rem/1.15 var(--rubrik); color: var(--kol); }
+.resa3d__nal b { font: 600 .74rem/1.15 var(--rubrik); color: var(--t-text); }
 .resa3d__nal small { font-size: .7rem; color: var(--text-2); }
 /* Reglagen nertill: pilar, stegprickar och spela/pausa */
 .resa3d__fot { position: absolute; z-index: 2; left: 50%; bottom: 14px; display: flex; align-items: center; gap: 6px; padding: 5px; border-radius: 999px; transform: translateX(-50%);
-  background: rgba(255, 253, 249, .8); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 16px 30px -20px rgba(60, 40, 15, .7), inset 0 0 0 1px rgba(240, 181, 110, .4); max-width: calc(100% - 24px); }
+  background: rgb(var(--t-yta-varm-rgb) / .8); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 16px 30px -20px rgb(var(--t-skugga-djup-rgb) / .7), inset 0 0 0 1px rgb(var(--t-virke-rgb) / .4); max-width: calc(100% - 24px); }
 .resa3d__pil { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 50%; background: none; color: var(--text-2); cursor: pointer; transition: background-color .2s; }
-.resa3d__pil:hover { background: rgba(27, 25, 21, .06); color: var(--kol); }
+.resa3d__pil:hover { background: rgb(var(--t-blaeck-rgb) / .06); color: var(--t-text); }
 .resa3d__pil .emo-ik { width: 16px; height: 16px; }
 .resa3d__prickar { display: flex; gap: 2px; }
 .resa3d__prickar button { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 9px; border: 0; border-radius: 999px; background: none; font: 600 .7rem/1 var(--rubrik); color: var(--text-3); cursor: pointer; transition: background-color .25s, color .25s; }
 .resa3d__prickar i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .5; transition: box-shadow .3s, opacity .3s; }
-.resa3d__prickar button:hover { color: var(--kol); }
-.resa3d__prickar button[aria-current="true"] { background: #1b1915; color: #fbf4e8; }
+.resa3d__prickar button:hover { color: var(--t-text); }
+.resa3d__prickar button[aria-current="true"] { background: var(--t-kol); color: var(--t-pa-kol); }
 .resa3d__prickar button[aria-current="true"] i { opacity: 1; background: #ffb35c; box-shadow: 0 0 0 3px rgba(255, 179, 92, .25), 0 0 10px #ffb35c; }
-.resa3d__auto { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: linear-gradient(160deg, #f6c68d, #f0b56e); font: 600 .72rem/1 var(--rubrik); color: #1b1915; cursor: pointer; }
+.resa3d__auto { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: linear-gradient(160deg, var(--t-virke-2), var(--t-virke)); font: 600 .72rem/1 var(--rubrik); color: var(--t-pa-accent); cursor: pointer; }
 .resa3d__auto .emo-ik { width: 14px; height: 14px; transition: transform .2s var(--mjuk, ease); }
 .resa3d__auto:active .emo-ik { transform: scale(.85); }
 /* Hela resan: en ikon i stället för stegnumret, och duken går inte att dra (därför ingen grab-hand) */
@@ -65,14 +87,14 @@
 .prodblock--fabrik .fabrik { --nu: 0; padding-top: 14px; }
 .prodblock--fabrik .fabrik__band { top: 38px; left: calc(100% / 12); right: calc(100% / 12); }
 .prodblock--fabrik .fabrik__band::after { content: ""; position: absolute; inset: -1px auto -1px 0; width: calc(var(--nu) / 5 * 100%); border-radius: inherit;
-  background: linear-gradient(90deg, #f6c68d, #e29a4a); box-shadow: 0 0 12px rgba(226, 154, 74, .55); transition: width .8s cubic-bezier(.22, 1, .36, 1); }
+  background: linear-gradient(90deg, var(--t-virke-2), var(--t-accent)); box-shadow: 0 0 12px rgb(var(--t-accent-rgb) / .55); transition: width .8s cubic-bezier(.22, 1, .36, 1); }
 .fabrik__station .fabrik__emoji { transition: transform .4s var(--studs), background .4s, box-shadow .4s, color .4s; }
-.fabrik__station.resa-forbi .fabrik__emoji { filter: none; opacity: 1; background: radial-gradient(circle at 35% 30%, #fff8ee, #f6d9b3); box-shadow: inset 0 0 0 1.5px #e29a4a, 0 8px 16px -10px rgba(90, 60, 25, .55); }
-.fabrik__station.resa-nu .fabrik__emoji { filter: none; opacity: 1; transform: scale(1.1); background: #1b1915; color: #ffb35c;
-  box-shadow: 0 0 0 4px rgba(255, 179, 92, .25), 0 0 24px rgba(255, 170, 80, .55), 0 10px 18px -10px rgba(27, 25, 21, .8); }
-.fabrik__station.resa-nu .fabrik__emoji i { background: linear-gradient(160deg, #f6c68d, #e29a4a); color: #1b1915; box-shadow: none; }
-.fabrik__station.resa-nu b { color: var(--kol); }
-.fabrik__station.resa-nu b::after { content: ""; display: block; width: 18px; height: 3px; margin: 4px auto 0; border-radius: 3px; background: #e29a4a; animation: resa-streck .5s cubic-bezier(.22, 1, .36, 1) both; }
+.fabrik__station.resa-forbi .fabrik__emoji { filter: none; opacity: 1; background: radial-gradient(circle at 35% 30%, var(--o-fff8ee-yta-varm-2), var(--o-f6d9b3-ton)); box-shadow: inset 0 0 0 1.5px var(--t-accent), 0 8px 16px -10px rgb(var(--t-skugga-varm-rgb) / .55); }
+.fabrik__station.resa-nu .fabrik__emoji { filter: none; opacity: 1; transform: scale(1.1); background: var(--t-kol); color: #ffb35c;
+  box-shadow: 0 0 0 4px rgba(255, 179, 92, .25), 0 0 24px rgb(var(--t-signal-orange-rgb) / .55), 0 10px 18px -10px rgb(var(--t-skugga-rgb) / .8); }
+.fabrik__station.resa-nu .fabrik__emoji i { background: linear-gradient(160deg, var(--t-virke-2), var(--t-accent)); color: var(--t-pa-accent); box-shadow: none; }
+.fabrik__station.resa-nu b { color: var(--t-text); }
+.fabrik__station.resa-nu b::after { content: ""; display: block; width: 18px; height: 3px; margin: 4px auto 0; border-radius: 3px; background: var(--t-accent); animation: resa-streck .5s cubic-bezier(.22, 1, .36, 1) both; }
 @keyframes resa-streck { from { transform: scaleX(0); } }
 /* reglagen i scenen: bara prickar, namnen står i listan under */
 .resa3d__prickar span { display: none; }
@@ -82,36 +104,36 @@
 @media (prefers-reduced-motion: reduce) { .resa3d__text.byter { animation: none; } }
 /* Hela resan och zoom, uppe till höger */
 .resa3d__zoom { position: absolute; z-index: 2; top: 16px; right: 16px; display: flex; align-items: center; gap: 4px; padding: 5px; border-radius: 999px;
-  background: rgba(255, 253, 249, .8); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 16px 30px -20px rgba(60, 40, 15, .7), inset 0 0 0 1px rgba(240, 181, 110, .4); }
+  background: rgb(var(--t-yta-varm-rgb) / .8); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 16px 30px -20px rgb(var(--t-skugga-djup-rgb) / .7), inset 0 0 0 1px rgb(var(--t-virke-rgb) / .4); }
 .resa3d__hel { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: none; font: 600 .72rem/1 var(--rubrik); color: var(--text-2); cursor: pointer; transition: background-color .25s, color .25s; }
 .resa3d__hel .emo-ik { width: 14px; height: 14px; }
-.resa3d__hel:hover { color: var(--kol); }
-.resa3d__hel[aria-pressed="true"] { background: #1b1915; color: #fbf4e8; }
+.resa3d__hel:hover { color: var(--t-text); }
+.resa3d__hel[aria-pressed="true"] { background: var(--t-kol); color: var(--t-pa-kol); }
 .resa3d__z { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 50%; background: none; font: 500 1.05rem/1 var(--rubrik); color: var(--text-2); cursor: pointer; transition: background-color .2s; }
-.resa3d__z:hover { background: rgba(27, 25, 21, .06); color: var(--kol); }
+.resa3d__z:hover { background: rgb(var(--t-blaeck-rgb) / .06); color: var(--t-text); }
 .resa3d__duk:active { cursor: grabbing; }
 @media (max-width: 760px) { .resa3d__zoom { top: auto; bottom: 64px; right: 12px; } }
 /* mobil: resan går ut mot kortets kanter i stället för att ligga dubbelt inramad */
-@media (max-width: 700px) { .prodblock--fabrik .resa3d { margin-inline: -10px; border-radius: 18px; } }
+@media (max-width: 700px) { .prodblock--fabrik .resa3d { margin-inline: -10px; border-radius: calc(18px * var(--t-radie-k, 1)); } }
 @media (prefers-reduced-motion: reduce) { .resa3d__nal { animation: none; } }
 
 /* Många hus i samma steg: bilderna läggs omlott med +N, och listan öppnas med ett klick */
 .resa3d__nal .resa3d__bilder { display: flex; align-items: center; }
-.resa3d__bilder img { margin-left: -12px; box-shadow: 0 0 0 2px #fffdf9; }
+.resa3d__bilder img { margin-left: -12px; box-shadow: 0 0 0 2px var(--t-yta-varm); }
 .resa3d__bilder img:first-child { margin-left: 0; }
 .fabrik__stapel { display: grid; justify-items: center; gap: 3px; padding: 0; border: 0; background: none; cursor: pointer; }
 .fabrik__bilder { position: relative; display: flex; align-items: center; }
 .fabrik__bilder img { width: 46px; margin-left: -22px; transition: transform .35s var(--studs); }
 .fabrik__bilder img:first-child { margin-left: 0; }
 .fabrik__stapel:hover .fabrik__bilder img { transform: translateX(calc(var(--j) * 6px)); }
-.fabrik__bilder i { display: grid; place-items: center; min-width: 26px; height: 26px; margin-left: -10px; padding: 0 6px; border-radius: 999px; background: #1b1915; font: 700 .66rem/1 var(--rubrik); font-style: normal; color: #fbf4e8; box-shadow: 0 0 0 2px #fff; }
+.fabrik__bilder i { display: grid; place-items: center; min-width: 26px; height: 26px; margin-left: -10px; padding: 0 6px; border-radius: 999px; background: var(--t-kol); font: 700 .66rem/1 var(--rubrik); font-style: normal; color: var(--t-pa-kol); box-shadow: 0 0 0 2px var(--t-yta); }
 .fabrik__stapel > span:last-child { font: 600 .625rem/1 var(--rubrik); color: var(--text-2); }
 .fabrik__hus { min-height: 64px; }
 /* Huset i steget: bild, kund och modell med montagevecka; lyfts lätt vid hovring */
 .fabrik__hus button img { transition: transform .35s var(--studs), box-shadow .35s; }
-.fabrik__hus button:hover img { box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(226, 154, 74, .45), 0 12px 20px -10px rgba(27, 25, 21, .5); }
+.fabrik__hus button:hover img { box-shadow: 0 0 0 2px var(--t-yta), 0 0 0 4px rgb(var(--t-accent-rgb) / .45), 0 12px 20px -10px rgb(var(--t-skugga-rgb) / .5); }
 .fabrik__vecka { display: block; margin-top: -1px; font: 500 .58rem/1.2 var(--rubrik) !important; color: var(--text-3) !important; white-space: nowrap; }
-.fabrik__station.resa-nu .fabrik__hus img { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #e29a4a, 0 10px 18px -10px rgba(27, 25, 21, .55); }
+.fabrik__station.resa-nu .fabrik__hus img { box-shadow: 0 0 0 2px var(--t-yta), 0 0 0 4px var(--t-accent), 0 10px 18px -10px rgb(var(--t-skugga-rgb) / .55); }
 
 /* Smal resa (mobil, smala fönster): knappraden får plats och namnskyltarna blir runda bilder */
 .resa3d { container-type: inline-size; container-name: resa; }
@@ -131,3 +153,6 @@
   .resa3d__zoom { bottom: 62px !important; }
 }
 @container resa (max-width: 360px) { .resa3d__pil { display: none; } }
+
+/* Rättningsrunda tema (2026-10-29): Office – vit text på Pausa-knappen */
+:root[data-tema="office"] .resa3d__auto { --t-virke-2: var(--t-knapp-topp); }

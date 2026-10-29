@@ -65,6 +65,15 @@ const T = {
   }),
   // utsikten: målad i lager med luftperspektiv – himmel med solsken, fjärran berg, åsar med granskog som blir
   // mörkare och skarpare närmare, en äng i solljus med björkar, en grusväg och ett Legohus med varma fönster
+  // kvällshimlen (bara i mörka teman): mörkblå ton över himlen, stjärnor och en måne där solen står i dagsljus
+  natt: () => tex(1024, 512, (g, w, h) => {
+    let fro = 7; const r = () => { fro = (fro * 16807) % 2147483647; return (fro - 1) / 2147483646; };
+    g.clearRect(0, 0, w, h);
+    const hi = g.createLinearGradient(0, 0, 0, h * 0.6); hi.addColorStop(0, 'rgba(8,13,26,.85)'); hi.addColorStop(0.7, 'rgba(18,26,44,.55)'); hi.addColorStop(1, 'rgba(30,38,58,0)'); g.fillStyle = hi; g.fillRect(0, 0, w, h * 0.6);
+    for (let n = 0; n < 160; n++) { const x = r() * w, y = r() * h * 0.36, a = 0.35 + r() * 0.6; g.fillStyle = `rgba(235,240,255,${a})`; g.beginPath(); g.arc(x, y, 0.6 + r() * 1.1, 0, 7); g.fill(); }
+    const mx = w * 0.78, my = h * 0.18, sken = g.createRadialGradient(mx, my, 4, mx, my, 120); sken.addColorStop(0, 'rgba(220,228,255,.35)'); sken.addColorStop(1, 'rgba(220,228,255,0)'); g.fillStyle = sken; g.fillRect(mx - 120, my - 120, 240, 240);
+    g.fillStyle = '#eef0f6'; g.beginPath(); g.arc(mx, my, 20, 0, 7); g.fill(); g.fillStyle = 'rgba(190,196,214,.5)'; [[-6, -5, 5], [7, 4, 4], [-2, 9, 3]].forEach(([dx, dy, rr]) => { g.beginPath(); g.arc(mx + dx, my + dy, rr, 0, 7); g.fill(); });
+  }),
   utsikt: (lager) => tex(2048, 1024, (g, w, h) => {
     let fro = 11; const bak = lager !== 'fram'; const r = () => { fro = (fro * 16807) % 2147483647; return (fro - 1) / 2147483646; };
     const himmel = g.createLinearGradient(0, 0, 0, h * 0.62); himmel.addColorStop(0, '#7fb1d3'); himmel.addColorStop(0.55, '#bcd7e6'); himmel.addColorStop(1, '#f4e6cf'); g.fillStyle = himmel; g.fillRect(0, 0, w, h);
@@ -239,7 +248,7 @@ function bygg() {
   const golvT = T.golv(); golvT.repeat.set(3 * 44 / 16, 3 * 30 / 12);
   const golv = new THREE.Mesh(new THREE.PlaneGeometry(44, 30), mat({ map: golvT, roughness: 0.55, metalness: 0.02 })); golv.rotation.x = -Math.PI / 2; golv.position.set(0.7, 0, 10.8); golv.receiveShadow = true; scen.add(golv);
   // taket över rummet, i varmt vitt
-  const tak = new THREE.Mesh(new THREE.PlaneGeometry(13.8, 12), mat({ color: '#f3ece1', roughness: 0.95 })); tak.rotation.x = Math.PI / 2; tak.position.set(0.7, 6, 1.8); scen.add(tak);
+  const takM = mat({ color: '#f3ece1', roughness: 0.95 }), tak = new THREE.Mesh(new THREE.PlaneGeometry(13.8, 12), takM); tak.rotation.x = Math.PI / 2; tak.position.set(0.7, 6, 1.8); scen.add(tak);
   const vaggM = mat({ map: T.vagg(), roughness: 0.95 });
   // bakväggen med ett hål för fönstret, så att utsikten bakom syns på djupet
   [[-8, -0.9, 0, 6], [5.7, 8, 0, 6], [-0.9, 5.7, 0, 1.1], [-0.9, 5.7, 4.4, 6]].forEach(([x1, x2, y1, y2]) => { const d = new THREE.Mesh(new THREE.PlaneGeometry(x2 - x1, y2 - y1), vaggM); d.position.set((x1 + x2) / 2, (y1 + y2) / 2, -4.2); d.receiveShadow = true; scen.add(d); });
@@ -249,13 +258,14 @@ function bygg() {
   // fönstret: utsikt, karmar, glas med reflex
   const utsikt = new THREE.Mesh(new THREE.PlaneGeometry(13, 6.5), new THREE.MeshBasicMaterial({ map: T.utsikt('bak'), toneMapped: false })); utsikt.position.set(2.4, 1.75, -9.5); scen.add(utsikt);
   const utsiktFram = new THREE.Mesh(new THREE.PlaneGeometry(8.6, 4.3), new THREE.MeshBasicMaterial({ map: T.utsikt('fram'), toneMapped: false, transparent: true })); utsiktFram.position.set(2.4, 2.45, -5.4); scen.add(utsiktFram);
+  const nattM = new THREE.MeshBasicMaterial({ map: T.natt(), transparent: true, opacity: 0, depthWrite: false, toneMapped: false }), nattPlan = new THREE.Mesh(new THREE.PlaneGeometry(13, 6.5), nattM); nattPlan.position.set(2.4, 1.75, -9.45); nattPlan.visible = false; scen.add(nattPlan);
   const karm = M.svart; [[2.4, 4.4, 6.6, 0.12], [2.4, 1.1, 6.6, 0.12]].forEach(([x, y, w]) => { const k = lada(w, 0.12, 0.14, karm, 0.01); k.position.set(x, y, -4.12); scen.add(k); });
   [-0.9, 0.7, 2.4, 4.1, 5.7].forEach((x) => { const k = lada(0.1, 3.4, 0.14, karm, 0.01); k.position.set(x, 2.75, -4.12); scen.add(k); });
   const fbank = lada(6.8, 0.06, 0.4, M.vit, 0.02); fbank.position.set(2.4, 1.04, -3.98); scen.add(fbank);
   const glas = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 3.2), M.glas); glas.position.set(2.4, 2.75, -4.1); scen.add(glas);
 
   // ljuset: solen genom fönstret, himmelsljus, pendellamporna
-  scen.add(new THREE.HemisphereLight('#fff6ea', '#a4876a', 0.55));
+  const hemi = new THREE.HemisphereLight('#fff6ea', '#a4876a', 0.55); scen.add(hemi);
   const sol = new THREE.DirectionalLight('#ffe7c4', 2.6); sol.position.set(5, 7, -9); sol.target.position.set(-0.5, 0, 0.8); sol.castShadow = true; sol.shadow.mapSize.set(4096, 4096);
   Object.assign(sol.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 30 }); sol.shadow.bias = -0.0004; sol.shadow.normalBias = 0.03; sol.shadow.radius = 4; scen.add(sol, sol.target);
   const fyll = new THREE.PointLight('#ffd8a8', 6, 9, 2); fyll.position.set(-2.5, 3.2, 3); scen.add(fyll);
@@ -267,7 +277,7 @@ function bygg() {
   const damm = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(dpos, 3)), new THREE.PointsMaterial({ color: '#fff3d8', size: 0.025, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false })); scen.add(damm);
 
   // fler detaljer i rummet
-  const matta = lada(7.6, 0.012, 4.8, mat({ map: tex(256, 256, (g, w, h) => { g.fillStyle = '#b9ad9b'; g.fillRect(0, 0, w, h); for (let y = 0; y < h; y += 4) { g.fillStyle = y % 8 ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)'; g.fillRect(0, y, w, 2); } g.strokeStyle = 'rgba(80,60,40,.25)'; g.lineWidth = 6; g.strokeRect(10, 10, w - 20, h - 20); }, [3, 2]), roughness: 1 }), 0.006); matta.position.set(0, 0.006, 0.1); scen.add(matta);
+  const mattaM = mat({ map: tex(256, 256, (g, w, h) => { g.fillStyle = '#b9ad9b'; g.fillRect(0, 0, w, h); for (let y = 0; y < h; y += 4) { g.fillStyle = y % 8 ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)'; g.fillRect(0, y, w, 2); } g.strokeStyle = 'rgba(80,60,40,.25)'; g.lineWidth = 6; g.strokeRect(10, 10, w - 20, h - 20); }, [3, 2]), roughness: 1 }), matta = lada(7.6, 0.012, 4.8, mattaM, 0.006); matta.position.set(0, 0.006, 0.1); scen.add(matta);
   const panelM = mat({ map: tex(512, 256, (g, w, h) => { g.fillStyle = '#c9a77c'; g.fillRect(0, 0, w, h); for (let x = 0; x < w; x += 20) { g.fillStyle = `hsl(31, 40%, ${52 + Math.random() * 8}%)`; g.fillRect(x, 0, 18, h); g.fillStyle = 'rgba(60,35,15,.4)'; g.fillRect(x + 18, 0, 2, h); } }, [8, 1]), roughness: 0.6 });
   const panelB = lada(5.4, 1.1, 0.05, panelM, 0.01); panelB.position.set(-3.4, 0.55, -4.15); scen.add(panelB);
   const panelL = lada(0.05, 1.1, 12, panelM, 0.01); panelL.position.set(-6.15, 0.55, 1.8); scen.add(panelL);
@@ -352,11 +362,11 @@ function bygg() {
   const visare = (l, b2, m2) => { const g = new THREE.Group(); const v = lada(b2, l, 0.01, m2, 0); v.position.y = l / 2 - 0.03; g.add(v); g.position.z = 0.04; klocka.add(g); return g; };
   const vTim = visare(0.18, 0.025, M.svart), vMin = visare(0.27, 0.018, M.svart), vSek = visare(0.3, 0.007, mat({ color: '#c9542f' }));
   // pendellamporna över bordet
-  const lampor = [], pendlar = []; [-1.7, 0, 1.7].forEach((x) => {
+  const lampor = [], pendlar = [], insidor = []; [-1.7, 0, 1.7].forEach((x) => {
     const p = new THREE.Group(); p.position.set(x, 5.3, 0); scen.add(p); pendlar.push(p);
     const sladd = cyl(0.006, 0.006, 1.4, M.svart, 6); sladd.position.y = -0.7; p.add(sladd);
     const skarm2 = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.32, 32, 1, true), mat({ color: '#1f1d1b', roughness: 0.4, metalness: 0.6, side: THREE.DoubleSide })); skarm2.position.y = -1.55; skarm2.castShadow = true; p.add(skarm2);
-    const insida = new THREE.Mesh(new THREE.ConeGeometry(0.29, 0.31, 32, 1, true), mat({ color: '#f3e6d2', roughness: 0.6, side: THREE.BackSide, emissive: '#ffcf8f', emissiveIntensity: 0.6 })); insida.position.y = -1.55; p.add(insida);
+    const insida = new THREE.Mesh(new THREE.ConeGeometry(0.29, 0.31, 32, 1, true), mat({ color: '#f3e6d2', roughness: 0.6, side: THREE.BackSide, emissive: '#ffcf8f', emissiveIntensity: 0.6 })); insida.position.y = -1.55; p.add(insida); insidor.push(insida.material);
     const glod = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 12), M.lampa); glod.position.y = -1.68; p.add(glod);
     const l = new THREE.SpotLight('#ffcf8f', 9, 6, 0.75, 0.6, 1.6); l.position.y = -1.7; p.add(l); l.target.position.set(x, 1.5, 0); scen.add(l.target); lampor.push(l);
   });
@@ -383,12 +393,70 @@ function bygg() {
 
   const comp = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
   comp.addPass(new RenderPass(scen, kamera)); const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.42, 0.55, 0.9); comp.addPass(bloom); comp.addPass(new OutputPass());
-  S = { valdRing, valdSpot, pendlar, molnT, faglar, granar, lapStaplar, vaxter: [lov, vaxt2], renderer, scen, kamera, comp, bloom, stolar, bortre, snurr, anga, stralar, damm, dpos, dfas, ND, vTim, vMin, vSek, lampor, el: null, t: 0, ram: 0, synlig: false, mus: new THREE.Vector2(), musMal: new THREE.Vector2(), klocka: new THREE.Clock() };
+  S = { temaObj: { hemi, sol, fyll, takM, vaggM, nisch, mattaM, insidor, utsikt: [utsikt.material, utsiktFram.material, molnPlan.material], nattM, nattPlan, molnM: molnPlan.material }, valdRing, valdSpot, pendlar, molnT, faglar, granar, lapStaplar, vaxter: [lov, vaxt2], renderer, scen, kamera, comp, bloom, stolar, bortre, snurr, anga, stralar, damm, dpos, dfas, ND, vTim, vMin, vSek, lampor, el: null, t: 0, ram: 0, synlig: false, mus: new THREE.Vector2(), musMal: new THREE.Vector2(), klocka: new THREE.Clock() };
   renderer.domElement.className = 'motesrum3d__duk';
+  temaStart();
   new IntersectionObserver((r) => { S.synlig = r[0].isIntersecting; if (S.synlig) starta(); }, { threshold: 0.05 }).observe(renderer.domElement);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) starta(); });
   addEventListener('resize', storlek);
   new ResizeObserver(() => { S.lage = null; if (LUGN) starta(); }).observe(renderer.domElement);
+}
+/* Temat ------------------------------------------------------------------------------------------- */
+// Rummet följer CRM:ets tema (--t-3d-rum-… i CSS): väggarna, taket, nischen, mattan, ljuset, lamporna och
+// markeringen av vald kund. Med svagt solljus (Mörk) blir det kväll: utsikten mörknar, strålarna och dammet tonar
+// bort och pendellamporna tar över. Scenen byggs i Original och ställs sedan om; vid temabyte tonas allt över.
+// Saknas en variabel gäller Original-värdet, så Original ritas exakt som förut.
+const TV = { ljus: 1 };
+const TEMA0 = { rum: '#f6efe4', 'rum-tak': '#f3ece1', 'rum-vagg': '#efe8dd', 'rum-nisch': '#e6ddcf', 'rum-hemi-upp': '#fff6ea', 'rum-hemi-ned': '#a4876a', 'rum-sol': '#ffe7c4', 'rum-fyll': '#ffd8a8', 'rum-lampa': '#ffcf8f', vald: '#f6c68d', matta: '#b9ad9b', 'rum-sol-styrka': 2.6, 'rum-lampa-styrka': 9, 'rum-exponering': 1 };
+const TEMA_MS = 650, KVALL = new THREE.Color('#3e4c6c');
+function temaLas() {
+  const cs = getComputedStyle(document.documentElement), u = {};
+  for (const k in TEMA0) {
+    const v = cs.getPropertyValue('--t-3d-' + k).trim();
+    u[k] = typeof TEMA0[k] === 'number' ? (Number.isFinite(parseFloat(v)) ? parseFloat(v) : TEMA0[k]) : (/^(#[0-9a-f]{3,8}|rgba?\(|hsla?\()/i.test(v) ? v : TEMA0[k]);
+  }
+  return u;
+}
+// väggen och mattan är målade texturer: de tonas med materialfärgen (målfärg delat med texturens grundfärg),
+// så att mönstret och bruset ligger kvar; i Original blir kvoten exakt 1
+const kvot = (mal, bas) => { const m = new THREE.Color(mal), b = new THREE.Color(bas); return new THREE.Color(m.r / b.r, m.g / b.g, m.b / b.b); };
+function temaMal(u) {
+  const natt = Math.min(1, Math.max(0, 1 - u['rum-sol-styrka'] / 2.6)), C = (x) => new THREE.Color(x), ls = u['rum-lampa-styrka'] / 9;
+  return {
+    f: { rum: C(u.rum), tak: C(u['rum-tak']), vagg: kvot(u['rum-vagg'], '#efe8dd'), nisch: C(u['rum-nisch']), hu: C(u['rum-hemi-upp']), hn: C(u['rum-hemi-ned']), sol: C(u['rum-sol']), fyll: C(u['rum-fyll']), lampa: C(u['rum-lampa']), vald: C(u.vald), matta: kvot(u.matta, '#b9ad9b'), utsikt: new THREE.Color(1, 1, 1).lerp(KVALL, Math.min(1, natt * 1.3)) },
+    n: { sol: u['rum-sol-styrka'], lampa: u['rum-lampa-styrka'], insida: 0.6 * ls, glod: 2.4 * ls, exp: u['rum-exponering'], hemi: 0.55 * (1 - natt * 0.35), bloom: 0.42 + natt * 0.2, env: 0.45 * (1 - natt * 0.5), ljus: 1 - natt * 0.85, natt: Math.min(1, natt * 1.3) }
+  };
+}
+function temaBlanda(a, b, p) {
+  const f = {}, n = {}; for (const k in a.f) f[k] = a.f[k].clone().lerp(b.f[k], p); for (const k in a.n) n[k] = a.n[k] + (b.n[k] - a.n[k]) * p;
+  return { f, n };
+}
+function temaSatt(v) {
+  const T = S.temaObj, f = v.f, n = v.n;
+  S.scen.background.copy(f.rum); S.scen.fog.color.copy(f.rum);
+  T.takM.color.copy(f.tak); T.vaggM.color.copy(f.vagg); T.nisch.color.copy(f.nisch); T.mattaM.color.copy(f.matta);
+  T.hemi.color.copy(f.hu); T.hemi.groundColor.copy(f.hn); T.hemi.intensity = n.hemi;
+  T.sol.color.copy(f.sol); T.sol.intensity = n.sol; T.fyll.color.copy(f.fyll);
+  S.lampor.forEach((l) => { l.color.copy(f.lampa); l.intensity = n.lampa; });
+  T.insidor.forEach((m) => { m.emissive.copy(f.lampa); m.emissiveIntensity = n.insida; }); M.lampa.emissiveIntensity = n.glod;
+  S.valdRing.material.color.copy(f.vald);
+  T.utsikt.forEach((m) => m.color.copy(f.utsikt)); T.nattM.opacity = n.natt; T.nattPlan.visible = n.natt > 0.001; T.molnM.opacity = 1 - n.natt * 0.75;
+  S.renderer.toneMappingExposure = n.exp; S.bloom.strength = n.bloom; S.scen.environmentIntensity = n.env; TV.ljus = n.ljus;
+  S.renderer.shadowMap.needsUpdate = true;
+  S.temaNu = v;
+}
+function temaStart() { const u = temaLas(); S.temaNyckel = JSON.stringify(u); temaSatt(temaMal(u)); }
+function temaByt() {
+  if (!S || !S.temaNu) return;
+  const u = temaLas(), nyckel = JSON.stringify(u); if (nyckel === S.temaNyckel) return; S.temaNyckel = nyckel;
+  const till = temaMal(u);
+  // syns inte scenen (eller minskad rörelse): direkt till målet, annars en mjuk övertoning i bildrutorna
+  if (LUGN || !S.ram || !S.synlig || document.hidden) { S.temaAnim = null; temaSatt(till); starta(); return; }
+  S.temaAnim = { fran: S.temaNu, till, t0: performance.now() };
+}
+function temaSteg() {
+  const A = S.temaAnim, x = Math.min(1, Math.max(0, (performance.now() - A.t0) / TEMA_MS)), p = x * x * (3 - 2 * x);
+  if (x >= 1) { S.temaAnim = null; temaSatt(A.till); } else temaSatt(temaBlanda(A.fran, A.till, p));
 }
 function storlek() { if (!S || !S.el) return; const w = S.el.clientWidth, h = S.el.clientHeight; if (!w || !h) return; S.renderer.setSize(w, h, false); S.comp.setSize(w, h); S.kamera.aspect = w / h; const smal = w < 900; S.utzoom = w / h < 1 ? 1 + (1 - w / h) * 0.85 : smal && w / h > 1.3 ? 0.86 : 1; S.kamera.fov = smal ? (w / h < 1 ? 52 : 40) : 34; S.lage = null; S.kamera.setViewOffset(w, h, smal ? 0 : -w * 0.15, smal ? (w / h < 1 ? (w < 600 ? -h * 0.08 : 0) : h * 0.08) : -h * 0.02, w, h); S.kamera.updateProjectionMatrix(); starta(); }
 function starta() { if (S && !S.ram && S.synlig && !document.hidden && S.el && S.el.isConnected) { S.klocka.getDelta(); S.ram = requestAnimationFrame(ram); } }
@@ -447,9 +515,9 @@ function ram() {
   S.vaxter.forEach((v, n) => { v.rotation.z = Math.sin(t * 0.6 + n * 2) * 0.012; v.rotation.x = Math.cos(t * 0.5 + n) * 0.01; });
   S.lapStaplar.forEach((st, n) => { st.scale.y = 0.4 + (Math.sin(t * 0.8 + n * 1.3) * 0.5 + 0.5) * 0.9; });
   S.anga.forEach((x) => { const q = (t * 0.35 + x.fas) % 1; x.m.position.set(x.k.position.x + Math.sin(t * 2 + x.fas * 9) * 0.03 * q, 1.75 + q * 0.5, x.k.position.z + Math.cos(t * 1.7 + x.fas * 7) * 0.03 * q); x.m.scale.setScalar(0.05 + q * 0.16); x.m.material.opacity = Math.sin(q * Math.PI) * 0.32; });
-  S.stralar.forEach((s, n) => { s.material.opacity = 0.045 + Math.sin(t * 0.5 + n * 1.7) * 0.02; });
+  S.stralar.forEach((s, n) => { s.material.opacity = (0.045 + Math.sin(t * 0.5 + n * 1.7) * 0.02) * TV.ljus; });
   for (let n = 0; n < S.ND; n++) { S.dpos[n * 3 + 1] += Math.sin(t * 0.4 + S.dfas[n]) * 0.0009; S.dpos[n * 3] += Math.cos(t * 0.3 + S.dfas[n]) * 0.0007; }
-  S.damm.geometry.attributes.position.needsUpdate = true; S.damm.material.opacity = 0.55 + Math.sin(t * 0.7) * 0.15;
+  S.damm.geometry.attributes.position.needsUpdate = true; S.damm.material.opacity = (0.55 + Math.sin(t * 0.7) * 0.15) * TV.ljus;
   const nu = new Date(), sek = nu.getSeconds() + nu.getMilliseconds() / 1000, min = nu.getMinutes() + sek / 60, tim = (nu.getHours() % 12) + min / 60;
   S.vSek.rotation.z = -sek / 60 * Math.PI * 2; S.vMin.rotation.z = -min / 60 * Math.PI * 2; S.vTim.rotation.z = -tim / 12 * Math.PI * 2;
   // den valda kundens stol vrids lite mot bordet
@@ -458,6 +526,7 @@ function ram() {
   const vs = vald >= 0 ? stolFor(vald) : null; if (vs) { S.valdRing.position.x = vs.position.x; S.valdRing.position.z = vs.position.z; S.valdSpot.position.set(vs.position.x, 4.6, vs.position.z * 0.6); S.valdSpot.target.position.set(vs.position.x, 0.6, vs.position.z); }
   S.valdSpot.intensity += ((vs ? 8 : 0) - S.valdSpot.intensity) * (LUGN ? 1 : Math.min(1, dt * 4)); S.valdRing.material.opacity += ((vs ? 0.55 + Math.sin(t * 3) * 0.2 : 0) - S.valdRing.material.opacity) * Math.min(1, dt * 4); S.valdRing.scale.setScalar(1 + Math.sin(t * 3) * 0.05);
   S.stolar.concat(S.bortre).forEach((s) => { const mal = s === vs ? Math.sin(t * 1.5) * 0.15 : 0; s.children.forEach((c) => { if (c.position.y > 0.8) c.rotation.y += (mal - c.rotation.y) * Math.min(1, dt * 4); }); });
+  if (S.temaAnim) temaSteg();
   if (LUGN || ++S.n % 3 === 0) S.renderer.shadowMap.needsUpdate = true;
   S.comp.render(dt); placeraPlatser();
   // minskad rörelse: en stillbild, som ritas om vid klick och storleksändring
@@ -483,4 +552,9 @@ function montera(el) {
 if (IH) {
   const sok = () => { const el = document.querySelector('[data-motesrum3d]:not([data-monterad])'); if (el) { el.setAttribute('data-monterad', ''); montera(el); } };
   new MutationObserver(sok).observe(document.body, { childList: true, subtree: true }); sok();
+  // temabytet: attributet data-tema, temamotorns händelser och systemets mörka läge (när man följer systemet)
+  const temaLyss = () => queueMicrotask(temaByt);
+  new MutationObserver(temaLyss).observe(document.documentElement, { attributes: true, attributeFilter: ['data-tema'] });
+  ['ih:tema', 'tema-byte'].forEach((n) => { addEventListener(n, temaLyss); document.addEventListener(n, temaLyss); });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', temaLyss);
 }

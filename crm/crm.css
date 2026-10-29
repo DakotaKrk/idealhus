@@ -12,31 +12,7 @@
 @font-face { font-family: "Manrope"; src: url("../fonts/manrope.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
 
 :root {
-  --kol: #1b1915;
-  --kol-2: #24211c;
-  --kol-3: #312d27;
-  --krita: #f7f5f0;
-  --ben: #f5f2ec;
-  --ben-2: #ece7de;
-  --vit: #ffffff;
-  --text: #1b1915;
-  --text-2: #4f4a42;
-  --text-3: #7a7266;
-  --ljus-2: rgba(247, 245, 240, 0.72);
-  --ljus-3: rgba(247, 245, 240, 0.5);
-  --virke: #f0b56e;
-  --virke-2: #f6c68d;
-  --virke-djup: #8f5424;
-  --virke-ljus: #fbead5;
-  --skog: #3f6b50;
-  --mint: #7fe0a6;
-  --gron: #22a35a;
-  --rod: #d9573f;
-  --himmel: #b8cde0;
-  --kant: rgba(27, 25, 21, 0.09);
-  --kant-ljus: rgba(247, 245, 240, 0.1);
-  --skugga: 0 1px 2px rgba(27, 25, 21, 0.05), 0 18px 40px -28px rgba(27, 25, 21, 0.45);
-  --skugga-stor: 0 40px 90px -50px rgba(27, 25, 21, 0.7);
+  /* Färgerna kommer från teman.css (--t-*) och aliasen där (--kol, --krita, --virke …). */
   --mjuk: cubic-bezier(0.22, 1, 0.36, 1);
   --studs: cubic-bezier(0.34, 1.56, 0.64, 1);
   /* Gemensamma tider och rörelser (designteamet 2026-10-29) */
@@ -48,11 +24,374 @@
   --t-ark: 0.38s;
   --tryck: scale(0.97);
   --lyft: translateY(-2px);
-  /* Mörka ytor i varm stengrå – aldrig svart */
-  --sten: linear-gradient(160deg, #5f5851, #3d3833);
   --rubrik: "Poppins", ui-sans-serif, system-ui, sans-serif;
   --sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --sido: 264px;
+}
+
+/* Exakta Original-nyanser (temabytet 2026-10-29). Färger som ligger en hårsmån från en token
+   ritas med sitt gamla värde i Original och följer token i övriga teman. */
+:root, [data-tema-prov] {
+  --vx-141310: var(--t-natt-2);
+  --vx-15120f: var(--t-natt-2);
+  --vx-15130f: var(--t-natt-2);
+  --vx-1e1b16-rgb: var(--t-skugga-rgb);
+  --vx-1f1c17: var(--t-kol);
+  --vx-1f9f58: var(--t-gron);
+  --vx-221d18: var(--t-kol-2);
+  --vx-221e18: var(--t-kol-2);
+  --vx-221f1a: var(--t-kol-2);
+  --vx-241f1a: var(--t-kol-2);
+  --vx-28221c-rgb: var(--t-skugga-rgb);
+  --vx-2a261f: var(--t-natt-1);
+  --vx-46403a: color-mix(in srgb, var(--t-markerad-2), #fff 7%);
+  --vx-47413b: var(--t-sten-mitt);
+  --vx-544d46: var(--t-sten-mitt);
+  --vx-6a625a: color-mix(in srgb, var(--t-markerad-1), #fff 8%);
+  --vx-c9c4bb: var(--t-kant-stark);
+  --vx-e3f3e8: var(--t-gron-ljus);
+  --vx-e8f0f7: var(--t-bla-ljus);
+  --vx-f6efe3: var(--t-falt);
+  --vx-f7f1e7: var(--t-falt);
+  --vx-f7f1e8: var(--t-falt);
+  --vx-faf4ea: var(--t-gradde);
+  --vx-faf4ea-rgb: var(--t-gradde-rgb);
+  --vx-faf7f2: var(--t-yta-varm-3);
+  --vx-fbecd8: var(--t-accent-ljus);
+  --vx-fbf1e1: var(--t-gradde);
+  --vx-fbf3e6: var(--t-gradde);
+  --vx-fbf7f0: var(--t-sand);
+  --vx-fbf7f0-rgb: var(--t-sand-rgb);
+  --vx-fdf3e3: var(--t-accent-ljus-3);
+  --vx-fff3e2: var(--t-accent-ljus-3);
+  --vx-fff4e6-rgb: var(--t-pa-sten-rgb);
+  --vx-fff6e6: var(--t-accent-ljus-3);
+  --vx-fff7ea: var(--t-accent-ljus-3);
+  --vx-fff7ec: var(--t-gradde);
+  --vx-fff8ec: var(--t-gradde);
+  --vx-fffaf6: var(--t-yta-varm-3);
+  --vx-fffcf6-rgb: var(--t-yta-varm-rgb);
+  --vx-fffdf8: var(--t-yta-varm);
+  --vx-kal-vald: var(--t-accent);
+  --vx-kal-vald-text: var(--t-pa-accent);
+  --vx-stod-text: var(--t-pa-sten-ljus);
+  --vx-stod-vald: var(--t-pa-sten-ljus);
+  --vx-stod-hover-rgb: var(--t-pa-sten-rgb);
+  --vx-stod-ikonfilter: var(--t-sten-ikon-filter);
+  --vx-0c5c49: color-mix(in srgb, var(--t-accent) 85%, var(--t-text));
+  --vx-1f5c38: var(--t-gron-text);
+  --vx-262119: var(--t-natt-1);
+  --vx-2a2017: var(--t-natt-2);
+  --vx-2b2722: var(--t-natt-1);
+  --vx-2f7a4d: var(--t-gron-text);
+  --vx-3a2a1c: var(--t-natt-1);
+  --vx-3f6aa8: var(--t-bla);
+  --vx-3f9a63: var(--t-gron-djup);
+  --vx-4f6f8f: var(--t-bla);
+  --vx-4f7fb0: var(--t-bla);
+  --vx-5a3a1c: var(--t-accent-text-djup);
+  --vx-6a4320: var(--t-accent-text-djup);
+  --vx-8a3a22: var(--t-rost-text);
+  --vx-8a8378: var(--t-text-3);
+  --vx-8f3f1f: var(--t-rost-text);
+  --vx-9fc2c9: var(--t-kat-kontakt);
+  --vx-b5532a: var(--t-rost-text);
+  --vx-b5541f: var(--t-rost-text);
+  --vx-b5642a: var(--t-accent-text);
+  --vx-body-himmel: color-mix(in srgb, var(--t-himmel) 20%, transparent);
+  --vx-d08a2e: var(--t-gul);
+  --vx-d8d1c4: var(--t-kant-stark);
+  --vx-d9733a: var(--t-rost);
+  --vx-d9952b: var(--t-gul);
+  --vx-e2be7f: var(--t-kat-offert);
+  --vx-e6eef2: var(--t-bla-ljus);
+  --vx-e6f0ea: var(--t-gron-ljus);
+  --vx-e8894a: var(--t-rost);
+  --vx-e9eef2: var(--t-bla-ljus);
+  --vx-efe6d8: var(--t-falt);
+  --vx-f6d9b3: var(--t-accent-ljus-2);
+  --vx-f6dcb8: var(--t-accent-ljus-2);
+  --vx-f8d09b: var(--t-knapp-topp);
+  --vx-f8d29f: color-mix(in srgb, var(--t-knapp-topp), #fff 18%);
+  --vx-fbeee4: color-mix(in srgb, var(--t-rost) 13%, var(--t-yta));
+  --vx-fde1d2: color-mix(in srgb, var(--t-rost) 18%, var(--t-yta));
+  --vx-fde6d6: color-mix(in srgb, var(--t-rost) 20%, var(--t-yta));
+  --vx-fde9df: color-mix(in srgb, var(--t-rost) 13%, var(--t-yta));
+  --vx-fdecdf: color-mix(in srgb, var(--t-rost) 13%, var(--t-yta));
+  --vx-fdeee4: color-mix(in srgb, var(--t-rost) 13%, var(--t-yta));
+  --vx-fdeee6: color-mix(in srgb, var(--t-rost) 13%, var(--t-yta));
+  --vx-fff3dc: var(--t-accent-ljus-3);
+  --vx-fff4ec: color-mix(in srgb, var(--t-rost) 13%, var(--t-yta));
+  --vx-forlopp-ej: color-mix(in srgb, var(--t-text-4) 20%, transparent);
+  --vx-gd-06: color-mix(in srgb, var(--t-gron-djup) 6%, transparent);
+  --vx-gd-07: color-mix(in srgb, var(--t-gron-djup) 7%, transparent);
+  --vx-gd-12: color-mix(in srgb, var(--t-gron-djup) 12%, transparent);
+  --vx-gd-50: color-mix(in srgb, var(--t-gron-djup) 50%, transparent);
+  --vx-gron-10: color-mix(in srgb, var(--t-gron) 10%, transparent);
+  --vx-gron-12: color-mix(in srgb, var(--t-gron) 12%, transparent);
+  --vx-gron-kant-20: color-mix(in srgb, var(--t-gron-djup) 20%, transparent);
+  --vx-gron-kant-35: color-mix(in srgb, var(--t-gron-djup) 35%, transparent);
+  --vx-kn-varm: color-mix(in srgb, var(--t-rost) 40%, transparent);
+  --vx-nbs-brad: color-mix(in srgb, var(--t-rost) 55%, transparent);
+  --vx-rals-delare: rgb(var(--t-blaeck-rgb) / .14);
+  --vx-rod-20: color-mix(in srgb, var(--t-rod-klar) 20%, transparent);
+  --vx-sla-kant: color-mix(in srgb, var(--t-rost) 25%, transparent);
+  --vx-spalt: color-mix(in srgb, var(--t-ben-2) 60%, transparent);
+  --vx-topp-86: color-mix(in srgb, var(--t-ben) 86%, transparent);
+  --vx-topp-95: color-mix(in srgb, var(--t-sand) 95%, transparent);
+  --vx-kort-mork-mitt: color-mix(in srgb, var(--t-natt-1) 45%, var(--t-natt));
+  --vx-avatar-bg: linear-gradient(135deg, var(--t-virke-2), color-mix(in srgb, var(--t-virke) 55%, var(--t-virke-2)));
+  --vx-avatar-text: var(--t-pa-accent);
+  --vx-avatar-skugga: 0 0 4px rgb(255 255 255 / .6);
+  --vx-virke-text: var(--t-accent-text);
+  --vx-fara-text: var(--t-rod-text);
+  --vx-forbi-op: 1;
+  --vx-dk-amin: .8;
+  --vx-hjalte-em: linear-gradient(100deg, color-mix(in srgb, var(--t-sten-accent), #fff 40%), var(--t-sten-accent) 55%, var(--t-sten-accent-2));
+  --vx-sido-rubrik-op: 1;
+}
+/* Tema-specifika undantag för vx-token (rättningsrundan 2026-10-29) */
+:root[data-tema="office"], [data-tema-prov="office"] { --vx-avatar-text: var(--t-text); }
+:root[data-tema="ljus"], [data-tema-prov="ljus"] { --vx-hjalte-em: linear-gradient(100deg, var(--t-accent-text-djup), var(--t-sten-accent) 55%, var(--t-accent-text)); }
+:root[data-tema="original"], [data-tema-prov="original"] {
+  --vx-141310: #141310;
+  --vx-15120f: #15120f;
+  --vx-15130f: #15130f;
+  --vx-1e1b16-rgb: 30 27 22;
+  --vx-1f1c17: #1f1c17;
+  --vx-1f9f58: #1f9f58;
+  --vx-221d18: #221d18;
+  --vx-221e18: #221e18;
+  --vx-221f1a: #221f1a;
+  --vx-241f1a: #241f1a;
+  --vx-28221c-rgb: 40 34 28;
+  --vx-2a261f: #2a261f;
+  --vx-46403a: #46403a;
+  --vx-47413b: #47413b;
+  --vx-544d46: #544d46;
+  --vx-6a625a: #6a625a;
+  --vx-c9c4bb: #c9c4bb;
+  --vx-e3f3e8: #e3f3e8;
+  --vx-e8f0f7: #e8f0f7;
+  --vx-f6efe3: #f6efe3;
+  --vx-f7f1e7: #f7f1e7;
+  --vx-f7f1e8: #f7f1e8;
+  --vx-faf4ea: #faf4ea;
+  --vx-faf4ea-rgb: 250 244 234;
+  --vx-faf7f2: #faf7f2;
+  --vx-fbecd8: #fbecd8;
+  --vx-fbf1e1: #fbf1e1;
+  --vx-fbf3e6: #fbf3e6;
+  --vx-fbf7f0: #fbf7f0;
+  --vx-fbf7f0-rgb: 251 247 240;
+  --vx-fdf3e3: #fdf3e3;
+  --vx-fff3e2: #fff3e2;
+  --vx-fff4e6-rgb: 255 244 230;
+  --vx-fff6e6: #fff6e6;
+  --vx-fff7ea: #fff7ea;
+  --vx-fff7ec: #fff7ec;
+  --vx-fff8ec: #fff8ec;
+  --vx-fffaf6: #fffaf6;
+  --vx-fffcf6-rgb: 255 252 246;
+  --vx-fffdf8: #fffdf8;
+  --vx-kal-vald: var(--t-accent-djup);
+  --vx-kal-vald-text: var(--t-pa-kol-vit);
+  --vx-stod-text: var(--t-pa-kol);
+  --vx-stod-vald: var(--t-pa-kol-vit);
+  --vx-stod-hover-rgb: 255 255 255;
+  --vx-stod-ikonfilter: brightness(2.1) saturate(1.2);
+  --vx-0c5c49: #0c5c49;
+  --vx-1f5c38: #1f5c38;
+  --vx-262119: #262119;
+  --vx-2a2017: #2a2017;
+  --vx-2b2722: #2b2722;
+  --vx-2f7a4d: #2f7a4d;
+  --vx-3a2a1c: #3a2a1c;
+  --vx-3f6aa8: #3f6aa8;
+  --vx-3f9a63: #3f9a63;
+  --vx-4f6f8f: #4f6f8f;
+  --vx-4f7fb0: #4f7fb0;
+  --vx-5a3a1c: #5a3a1c;
+  --vx-6a4320: #6a4320;
+  --vx-8a3a22: #8a3a22;
+  --vx-8a8378: #8a8378;
+  --vx-8f3f1f: #8f3f1f;
+  --vx-9fc2c9: #9fc2c9;
+  --vx-b5532a: #b5532a;
+  --vx-b5541f: #b5541f;
+  --vx-b5642a: #b5642a;
+  --vx-body-himmel: rgba(184, 205, 224, 0.2);
+  --vx-d08a2e: #d08a2e;
+  --vx-d8d1c4: #d8d1c4;
+  --vx-d9733a: #d9733a;
+  --vx-d9952b: #d9952b;
+  --vx-e2be7f: #e2be7f;
+  --vx-e6eef2: #e6eef2;
+  --vx-e6f0ea: #e6f0ea;
+  --vx-e8894a: #e8894a;
+  --vx-e9eef2: #e9eef2;
+  --vx-efe6d8: #efe6d8;
+  --vx-f6d9b3: #f6d9b3;
+  --vx-f6dcb8: #f6dcb8;
+  --vx-f8d09b: #f8d09b;
+  --vx-f8d29f: #f8d29f;
+  --vx-fbeee4: #fbeee4;
+  --vx-fde1d2: #fde1d2;
+  --vx-fde6d6: #fde6d6;
+  --vx-fde9df: #fde9df;
+  --vx-fdecdf: #fdecdf;
+  --vx-fdeee4: #fdeee4;
+  --vx-fdeee6: #fdeee6;
+  --vx-fff3dc: #fff3dc;
+  --vx-fff4ec: #fff4ec;
+  --vx-forlopp-ej: rgba(163, 155, 142, 0.2);
+  --vx-gd-06: rgba(46, 140, 87, .06);
+  --vx-gd-07: rgba(46, 140, 87, .07);
+  --vx-gd-12: rgba(46, 140, 87, .12);
+  --vx-gd-50: rgba(46, 140, 87, .5);
+  --vx-gron-10: rgba(76, 194, 127, .1);
+  --vx-gron-12: rgba(76, 194, 127, .12);
+  --vx-gron-kant-20: rgba(47, 138, 82, .2);
+  --vx-gron-kant-35: rgba(47, 138, 82, .35);
+  --vx-kn-varm: rgba(214, 101, 69, .4);
+  --vx-nbs-brad: rgba(217, 115, 58, 0.55);
+  --vx-rals-delare: rgba(95, 88, 81, .18);
+  --vx-rod-20: rgba(214, 69, 58, .2);
+  --vx-sla-kant: rgba(196, 98, 45, 0.25);
+  --vx-spalt: rgba(236, 231, 222, 0.6);
+  --vx-topp-86: rgba(245, 242, 236, 0.86);
+  --vx-topp-95: rgba(250, 247, 241, .95);
+  --vx-kort-mork-mitt: #1b1915;
+  --vx-avatar-bg: linear-gradient(135deg, var(--t-virke), var(--t-accent-djup));
+  --vx-avatar-text: var(--t-pa-accent);
+  --vx-avatar-skugga: none;
+  --vx-virke-text: var(--virke);
+  --vx-fara-text: var(--rod);
+  --vx-forbi-op: .6;
+  --vx-dk-amin: 0;
+  --vx-hjalte-em: linear-gradient(100deg, #ffd9a0, var(--t-accent) 60%, var(--t-virke-2));
+  --vx-sido-rubrik-op: .75;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema]) {
+    --vx-141310: #141310;
+    --vx-15120f: #15120f;
+    --vx-15130f: #15130f;
+    --vx-1e1b16-rgb: 30 27 22;
+    --vx-1f1c17: #1f1c17;
+    --vx-1f9f58: #1f9f58;
+    --vx-221d18: #221d18;
+    --vx-221e18: #221e18;
+    --vx-221f1a: #221f1a;
+    --vx-241f1a: #241f1a;
+    --vx-28221c-rgb: 40 34 28;
+    --vx-2a261f: #2a261f;
+    --vx-46403a: #46403a;
+    --vx-47413b: #47413b;
+    --vx-544d46: #544d46;
+    --vx-6a625a: #6a625a;
+    --vx-c9c4bb: #c9c4bb;
+    --vx-e3f3e8: #e3f3e8;
+    --vx-e8f0f7: #e8f0f7;
+    --vx-f6efe3: #f6efe3;
+    --vx-f7f1e7: #f7f1e7;
+    --vx-f7f1e8: #f7f1e8;
+    --vx-faf4ea: #faf4ea;
+    --vx-faf4ea-rgb: 250 244 234;
+    --vx-faf7f2: #faf7f2;
+    --vx-fbecd8: #fbecd8;
+    --vx-fbf1e1: #fbf1e1;
+    --vx-fbf3e6: #fbf3e6;
+    --vx-fbf7f0: #fbf7f0;
+    --vx-fbf7f0-rgb: 251 247 240;
+    --vx-fdf3e3: #fdf3e3;
+    --vx-fff3e2: #fff3e2;
+    --vx-fff4e6-rgb: 255 244 230;
+    --vx-fff6e6: #fff6e6;
+    --vx-fff7ea: #fff7ea;
+    --vx-fff7ec: #fff7ec;
+    --vx-fff8ec: #fff8ec;
+    --vx-fffaf6: #fffaf6;
+    --vx-fffcf6-rgb: 255 252 246;
+    --vx-fffdf8: #fffdf8;
+    --vx-kal-vald: var(--t-accent-djup);
+    --vx-kal-vald-text: var(--t-pa-kol-vit);
+    --vx-stod-text: var(--t-pa-kol);
+    --vx-stod-vald: var(--t-pa-kol-vit);
+    --vx-stod-hover-rgb: 255 255 255;
+    --vx-stod-ikonfilter: brightness(2.1) saturate(1.2);
+    --vx-0c5c49: #0c5c49;
+    --vx-1f5c38: #1f5c38;
+    --vx-262119: #262119;
+    --vx-2a2017: #2a2017;
+    --vx-2b2722: #2b2722;
+    --vx-2f7a4d: #2f7a4d;
+    --vx-3a2a1c: #3a2a1c;
+    --vx-3f6aa8: #3f6aa8;
+    --vx-3f9a63: #3f9a63;
+    --vx-4f6f8f: #4f6f8f;
+    --vx-4f7fb0: #4f7fb0;
+    --vx-5a3a1c: #5a3a1c;
+    --vx-6a4320: #6a4320;
+    --vx-8a3a22: #8a3a22;
+    --vx-8a8378: #8a8378;
+    --vx-8f3f1f: #8f3f1f;
+    --vx-9fc2c9: #9fc2c9;
+    --vx-b5532a: #b5532a;
+    --vx-b5541f: #b5541f;
+    --vx-b5642a: #b5642a;
+    --vx-body-himmel: rgba(184, 205, 224, 0.2);
+    --vx-d08a2e: #d08a2e;
+    --vx-d8d1c4: #d8d1c4;
+    --vx-d9733a: #d9733a;
+    --vx-d9952b: #d9952b;
+    --vx-e2be7f: #e2be7f;
+    --vx-e6eef2: #e6eef2;
+    --vx-e6f0ea: #e6f0ea;
+    --vx-e8894a: #e8894a;
+    --vx-e9eef2: #e9eef2;
+    --vx-efe6d8: #efe6d8;
+    --vx-f6d9b3: #f6d9b3;
+    --vx-f6dcb8: #f6dcb8;
+    --vx-f8d09b: #f8d09b;
+    --vx-f8d29f: #f8d29f;
+    --vx-fbeee4: #fbeee4;
+    --vx-fde1d2: #fde1d2;
+    --vx-fde6d6: #fde6d6;
+    --vx-fde9df: #fde9df;
+    --vx-fdecdf: #fdecdf;
+    --vx-fdeee4: #fdeee4;
+    --vx-fdeee6: #fdeee6;
+    --vx-fff3dc: #fff3dc;
+    --vx-fff4ec: #fff4ec;
+    --vx-forlopp-ej: rgba(163, 155, 142, 0.2);
+    --vx-gd-06: rgba(46, 140, 87, .06);
+    --vx-gd-07: rgba(46, 140, 87, .07);
+    --vx-gd-12: rgba(46, 140, 87, .12);
+    --vx-gd-50: rgba(46, 140, 87, .5);
+    --vx-gron-10: rgba(76, 194, 127, .1);
+    --vx-gron-12: rgba(76, 194, 127, .12);
+    --vx-gron-kant-20: rgba(47, 138, 82, .2);
+    --vx-gron-kant-35: rgba(47, 138, 82, .35);
+    --vx-kn-varm: rgba(214, 101, 69, .4);
+    --vx-nbs-brad: rgba(217, 115, 58, 0.55);
+    --vx-rals-delare: rgba(95, 88, 81, .18);
+    --vx-rod-20: rgba(214, 69, 58, .2);
+    --vx-sla-kant: rgba(196, 98, 45, 0.25);
+    --vx-spalt: rgba(236, 231, 222, 0.6);
+    --vx-topp-86: rgba(245, 242, 236, 0.86);
+    --vx-topp-95: rgba(250, 247, 241, .95);
+    --vx-kort-mork-mitt: #1b1915;
+    --vx-avatar-bg: linear-gradient(135deg, var(--t-virke), var(--t-accent-djup));
+    --vx-avatar-text: var(--t-pa-accent);
+    --vx-avatar-skugga: none;
+    --vx-virke-text: var(--virke);
+  --vx-fara-text: var(--rod);
+  --vx-forbi-op: .6;
+  --vx-dk-amin: 0;
+    --vx-hjalte-em: linear-gradient(100deg, #ffd9a0, var(--t-accent) 60%, var(--t-virke-2));
+    --vx-sido-rubrik-op: .75;
+  }
 }
 
 *,
@@ -70,8 +409,8 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(50% 40% at 100% 0%, rgba(240, 181, 110, 0.12), transparent 70%),
-    radial-gradient(40% 40% at 30% 100%, rgba(184, 205, 224, 0.2), transparent 70%),
+    radial-gradient(50% 40% at 100% 0%, rgb(var(--t-virke-rgb) / 0.12), transparent 70%),
+    radial-gradient(40% 40% at 30% 100%, var(--vx-body-himmel), transparent 70%),
     var(--ben);
   background-attachment: fixed;
   color: var(--text);
@@ -130,7 +469,7 @@ svg.i {
 }
 
 ::selection {
-  background: rgba(240, 181, 110, 0.35);
+  background: rgb(var(--t-virke-rgb) / 0.35);
 }
 
 /* --- Skalet ------------------------------------------------------ */
@@ -151,9 +490,9 @@ svg.i {
   overflow: hidden;
   color: var(--krita);
   background:
-    radial-gradient(80% 30% at 0% 0%, rgba(240, 181, 110, 0.16), transparent 70%),
-    radial-gradient(70% 30% at 100% 100%, rgba(63, 107, 80, 0.28), transparent 70%),
-    linear-gradient(180deg, #221f1a 0%, var(--kol) 60%, #141310 100%);
+    radial-gradient(80% 30% at 0% 0%, rgb(var(--t-virke-rgb) / 0.16), transparent 70%),
+    radial-gradient(70% 30% at 100% 100%, rgb(var(--t-skog-rgb) / 0.28), transparent 70%),
+    linear-gradient(180deg, var(--vx-221f1a) 0%, var(--t-kol) 60%, var(--vx-141310) 100%);
 }
 
 .sido::after {
@@ -162,8 +501,8 @@ svg.i {
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(247, 245, 240, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(247, 245, 240, 0.035) 1px, transparent 1px);
+    linear-gradient(rgb(var(--t-pa-mork-rgb) / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--t-pa-mork-rgb) / 0.035) 1px, transparent 1px);
   background-size: 28px 28px;
   -webkit-mask-image: linear-gradient(180deg, #000, transparent 45%);
   mask-image: linear-gradient(180deg, #000, transparent 45%);
@@ -223,8 +562,8 @@ svg.i {
   z-index: -1;
   height: 44px;
   border-radius: 14px;
-  background: linear-gradient(90deg, rgba(240, 181, 110, 0.16), rgba(247, 245, 240, 0.05));
-  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.22), 0 10px 24px -14px rgba(0, 0, 0, 0.8);
+  background: linear-gradient(90deg, rgb(var(--t-virke-rgb) / 0.16), rgb(var(--t-pa-mork-rgb) / 0.05));
+  box-shadow: inset 0 0 0 1px rgb(var(--t-virke-rgb) / 0.22), 0 10px 24px -14px rgba(0, 0, 0, 0.8);
   transition: transform 0.55s var(--mjuk), height 0.55s var(--mjuk), opacity 0.3s ease;
 }
 
@@ -245,7 +584,7 @@ svg.i {
   font: 700 0.625rem/1 var(--rubrik);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(247, 245, 240, 0.4);
+  color: rgb(var(--t-pa-mork-rgb) / 0.4);
 }
 
 .sido__lank {
@@ -255,7 +594,7 @@ svg.i {
   min-height: 44px;
   padding: 0 12px;
   border-radius: 14px;
-  color: rgba(247, 245, 240, 0.74);
+  color: rgb(var(--t-pa-mork-rgb) / 0.74);
   font: 500 0.9375rem/1 var(--rubrik);
   letter-spacing: -0.01em;
   text-decoration: none;
@@ -264,7 +603,7 @@ svg.i {
 
 .sido__lank:hover {
   color: var(--krita);
-  background: rgba(247, 245, 240, 0.04);
+  background: rgb(var(--t-pa-mork-rgb) / 0.04);
 }
 
 .sido__lank.aktiv {
@@ -280,16 +619,16 @@ svg.i {
   min-width: 22px;
   padding: 3px 7px;
   border-radius: 999px;
-  background: rgba(247, 245, 240, 0.1);
+  background: rgb(var(--t-pa-mork-rgb) / 0.1);
   font: 600 0.6875rem/1 var(--rubrik);
   text-align: center;
-  color: rgba(247, 245, 240, 0.8);
+  color: rgb(var(--t-pa-mork-rgb) / 0.8);
 }
 
 .sido__bricka--varm {
   background: var(--virke);
-  color: var(--kol);
-  box-shadow: 0 0 0 4px rgba(240, 181, 110, 0.14);
+  color: var(--t-pa-accent);
+  box-shadow: 0 0 0 4px rgb(var(--t-virke-rgb) / 0.14);
 }
 
 .sido__fot {
@@ -311,14 +650,14 @@ svg.i {
   padding: 10px;
   border: 0;
   border-radius: 16px;
-  background: rgba(247, 245, 240, 0.05);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+  background: rgb(var(--t-pa-mork-rgb) / 0.05);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.08);
   color: var(--krita);
   text-align: left;
 }
 
 .anv:hover {
-  background: rgba(247, 245, 240, 0.08);
+  background: rgb(var(--t-pa-mork-rgb) / 0.08);
 }
 
 .anv b {
@@ -366,11 +705,17 @@ svg.i {
   width: 36px;
   height: 36px;
   border-radius: 12px;
-  background: var(--av, linear-gradient(135deg, #f0b56e, #8f5424));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  background: var(--av, var(--vx-avatar-bg));
+  box-shadow: inset 0 0 0 1px rgb(var(--t-glas-rgb) / 0.18);
   font: 700 0.75rem/1 var(--rubrik);
   letter-spacing: 0.02em;
-  color: var(--kol);
+  color: var(--vx-avatar-text);
+  text-shadow: var(--vx-avatar-skugga);
+}
+
+/* Mötesbordets platser sätter färg på alla span – avataren behåller sin egen textfärg (temabytet) */
+.bord__plats .avatar {
+  color: var(--vx-avatar-text);
 }
 
 .avatar--liten {
@@ -405,7 +750,7 @@ svg.i {
 .sido__smalt a:hover,
 .sido__smalt button:hover {
   color: var(--krita);
-  background: rgba(247, 245, 240, 0.05);
+  background: rgb(var(--t-pa-mork-rgb) / 0.05);
 }
 
 .sido__smalt .i {
@@ -427,7 +772,7 @@ svg.i {
   gap: 14px;
   height: 70px;
   padding: 0 36px;
-  background: rgba(245, 242, 236, 0.86);
+  background: var(--vx-topp-86);
   border-bottom: 1px solid var(--kant);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   backdrop-filter: blur(14px) saturate(140%);
@@ -446,14 +791,14 @@ svg.i {
   border: 0;
   border-radius: 14px;
   background: var(--vit);
-  box-shadow: inset 0 0 0 1px var(--kant), 0 8px 20px -18px rgba(27, 25, 21, 0.5);
+  box-shadow: inset 0 0 0 1px var(--kant), 0 8px 20px -18px rgb(var(--t-skugga-rgb) / 0.5);
   font-size: 0.9375rem;
   outline: none;
   transition: box-shadow 0.3s ease;
 }
 
 .sok input:focus {
-  box-shadow: inset 0 0 0 1.5px var(--virke), 0 12px 28px -16px rgba(143, 84, 36, 0.45);
+  box-shadow: inset 0 0 0 1.5px var(--virke), 0 12px 28px -16px rgb(var(--t-accent-djup-rgb) / 0.45);
 }
 
 .sok > .i {
@@ -530,7 +875,7 @@ svg.i {
   padding: 7px 12px;
   border-radius: 999px;
   background: var(--virke-ljus);
-  box-shadow: inset 0 0 0 1px rgba(143, 84, 36, 0.18);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-accent-djup-rgb) / 0.18);
   font: 600 0.75rem/1 var(--rubrik);
   color: var(--virke-djup);
   white-space: nowrap;
@@ -556,7 +901,7 @@ svg.i {
   border: 0;
   border-radius: 999px;
   background: var(--vit);
-  box-shadow: inset 0 0 0 1px var(--kant), 0 8px 18px -14px rgba(27, 25, 21, 0.45);
+  box-shadow: inset 0 0 0 1px var(--kant), 0 8px 18px -14px rgb(var(--t-skugga-rgb) / 0.45);
   color: var(--text);
   font: 600 0.875rem/1 var(--rubrik);
   letter-spacing: -0.01em;
@@ -568,7 +913,7 @@ svg.i {
 
 .knapp:hover {
   transform: translateY(-1px);
-  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.14), 0 14px 26px -16px rgba(27, 25, 21, 0.55);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / 0.14), 0 14px 26px -16px rgb(var(--t-skugga-rgb) / 0.55);
 }
 
 .knapp:active {
@@ -587,14 +932,14 @@ svg.i {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
+  background: linear-gradient(105deg, transparent 30%, rgb(var(--t-pa-kol-vit-rgb) / 0.4) 50%, transparent 70%);
   transform: translateX(-130%);
   transition: transform 0.9s var(--mjuk);
   pointer-events: none;
 }
 
 .knapp--mork::after {
-  background: linear-gradient(105deg, transparent 30%, rgba(240, 181, 110, 0.28) 50%, transparent 70%);
+  background: linear-gradient(105deg, transparent 30%, rgb(var(--t-virke-rgb) / 0.28) 50%, transparent 70%);
 }
 
 .knapp--virke:hover::after,
@@ -604,52 +949,52 @@ svg.i {
 
 .knapp--virke {
   background: var(--virke);
-  box-shadow: 0 12px 26px -12px rgba(240, 181, 110, 0.75);
-  color: var(--kol);
+  box-shadow: 0 12px 26px -12px rgb(var(--t-virke-rgb) / 0.75);
+  color: var(--t-pa-accent);
 }
 
 .knapp--virke:hover {
   background: var(--virke-2);
-  box-shadow: 0 16px 32px -12px rgba(240, 181, 110, 0.85);
+  box-shadow: 0 16px 32px -12px rgb(var(--t-virke-rgb) / 0.85);
 }
 
 .knapp--mork {
-  background: var(--sten);
-  box-shadow: inset 0 0 0 1px rgba(255, 245, 230, 0.08), 0 12px 26px -14px rgba(61, 56, 51, 0.8);
+  background: var(--t-markerad);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-sten-rgb) / 0.08), 0 12px 26px -14px rgb(var(--t-sten-2-rgb) / 0.8);
   color: var(--krita);
 }
 
 .knapp--mork:hover {
-  background: linear-gradient(160deg, #6a625a, #46403a);
-  box-shadow: inset 0 0 0 1px rgba(255, 245, 230, 0.1), 0 16px 30px -14px rgba(61, 56, 51, 0.9);
+  background: linear-gradient(160deg, var(--vx-6a625a), var(--vx-46403a));
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-sten-rgb) / 0.1), 0 16px 30px -14px rgb(var(--t-sten-2-rgb) / 0.9);
 }
 
 /* I ark och dialoger är huvudknappen alltid bärnsten – samma som i sidhuvudena */
 .ark .knapp--mork,
 .ark .knapp--virke {
-  background: linear-gradient(160deg, #f6c68d, #e29a4a);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 14px 28px -14px rgba(201, 128, 52, 0.75);
-  color: #1b1915;
+  background: linear-gradient(160deg, var(--t-virke-2), var(--t-accent));
+  box-shadow: inset 0 1px 0 rgb(var(--t-pa-kol-vit-rgb) / 0.45), 0 14px 28px -14px rgb(var(--t-glod-rgb) / 0.75);
+  color: var(--t-pa-accent);
 }
 
 .ark .knapp--mork:hover,
 .ark .knapp--virke:hover {
-  background: linear-gradient(160deg, #f8d29f, #e8a456);
+  background: linear-gradient(160deg, var(--vx-f8d29f), var(--t-accent-mellan));
 }
 
 .ark .knapp--mork::after {
-  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
+  background: linear-gradient(105deg, transparent 30%, rgb(var(--t-pa-kol-vit-rgb) / 0.5) 50%, transparent 70%);
 }
 
 .knapp--glas {
-  background: rgba(247, 245, 240, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.16);
+  background: rgb(var(--t-pa-mork-rgb) / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.16);
   color: var(--krita);
 }
 
 .knapp--glas:hover {
-  background: rgba(247, 245, 240, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.24);
+  background: rgb(var(--t-pa-mork-rgb) / 0.14);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.24);
 }
 
 .knapp--liten {
@@ -659,7 +1004,7 @@ svg.i {
 }
 
 .knapp--fara {
-  color: var(--rod);
+  color: var(--vx-fara-text, var(--rod));
 }
 
 .knapp .i {
@@ -685,7 +1030,7 @@ svg.i {
 }
 
 .ikonknapp:hover {
-  background: rgba(27, 25, 21, 0.05);
+  background: rgb(var(--t-blaeck-rgb) / 0.05);
   color: var(--text);
 }
 
@@ -754,7 +1099,7 @@ svg.i {
 /* --- Kort -------------------------------------------------------- */
 .kort {
   position: relative;
-  border-radius: 26px;
+  border-radius: calc(26px * var(--t-radie-k, 1));
   background: var(--vit);
   box-shadow: var(--skugga), inset 0 0 0 1px var(--kant);
 }
@@ -781,7 +1126,7 @@ svg.i {
   place-items: center;
   width: 34px;
   height: 34px;
-  border-radius: 11px;
+  border-radius: calc(11px * var(--t-radie-k, 1));
   background: var(--virke-ljus);
   color: var(--virke-djup);
 }
@@ -794,10 +1139,10 @@ svg.i {
   overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(60% 70% at 100% 0%, rgba(240, 181, 110, 0.2), transparent 60%),
-    radial-gradient(60% 70% at 0% 100%, rgba(63, 107, 80, 0.32), transparent 65%),
-    linear-gradient(160deg, #2a261f 0%, var(--kol) 55%, #12100d 100%);
-  box-shadow: var(--skugga-stor), inset 0 0 0 1px rgba(247, 245, 240, 0.06);
+    radial-gradient(60% 70% at 100% 0%, rgb(var(--t-virke-rgb) / 0.2), transparent 60%),
+    radial-gradient(60% 70% at 0% 100%, rgb(var(--t-skog-rgb) / 0.32), transparent 65%),
+    linear-gradient(160deg, var(--vx-2a261f) 0%, var(--vx-kort-mork-mitt) 55%, var(--t-natt) 100%);
+  box-shadow: var(--skugga-stor), inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.06);
   color: var(--krita);
 }
 
@@ -807,15 +1152,15 @@ svg.i {
   inset: 0;
   z-index: -1;
   background-image:
-    linear-gradient(rgba(247, 245, 240, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(247, 245, 240, 0.04) 1px, transparent 1px);
+    linear-gradient(rgb(var(--t-pa-mork-rgb) / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--t-pa-mork-rgb) / 0.04) 1px, transparent 1px);
   background-size: 40px 40px;
   -webkit-mask-image: radial-gradient(ellipse 70% 80% at 70% 40%, #000 10%, transparent 75%);
   mask-image: radial-gradient(ellipse 70% 80% at 70% 40%, #000 10%, transparent 75%);
 }
 
 .kort--mork .kort__ikon {
-  background: rgba(240, 181, 110, 0.14);
+  background: rgb(var(--t-virke-rgb) / 0.14);
   color: var(--virke);
 }
 
@@ -851,8 +1196,8 @@ svg.i {
 }
 
 .chip--mork {
-  background: rgba(247, 245, 240, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  background: rgb(var(--t-pa-mork-rgb) / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.14);
   color: var(--ljus-2);
 }
 
@@ -862,9 +1207,9 @@ svg.i {
   gap: 7px;
   padding: 5px 11px 5px 9px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--s, #a39b8e) 18%, transparent);
+  background: color-mix(in srgb, var(--s, var(--t-text-4)) 18%, transparent);
   font: 600 0.75rem/1 var(--rubrik);
-  color: color-mix(in srgb, var(--s, #a39b8e) 60%, #1b1915);
+  color: color-mix(in srgb, var(--s, var(--t-text-4)) 60%, var(--t-text));
   white-space: nowrap;
 }
 
@@ -873,8 +1218,8 @@ svg.i {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--s, #a39b8e);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--s, #a39b8e) 25%, transparent);
+  background: var(--s, var(--t-text-4));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--s, var(--t-text-4)) 25%, transparent);
 }
 
 .tid {
@@ -943,20 +1288,20 @@ svg.i {
   left: 0;
   height: calc(100% - 8px);
   border-radius: 999px;
-  background: var(--kol);
-  box-shadow: 0 8px 18px -10px rgba(27, 25, 21, 0.8);
+  background: var(--t-kol);
+  box-shadow: 0 8px 18px -10px rgb(var(--t-skugga-rgb) / 0.8);
   transition: transform 0.5s var(--mjuk), width 0.5s var(--mjuk);
 }
 
 .flikar b {
   padding: 2px 6px;
   border-radius: 999px;
-  background: rgba(27, 25, 21, 0.07);
+  background: rgb(var(--t-blaeck-rgb) / 0.07);
   font-size: 0.6875rem;
 }
 
 .flikar button[aria-pressed="true"] b {
-  background: rgba(247, 245, 240, 0.16);
+  background: rgb(var(--t-pa-mork-rgb) / 0.16);
 }
 
 /* --- Fält --------------------------------------------------------- */
@@ -997,7 +1342,7 @@ svg.i {
 .falt .valj-knapp:focus,
 .falt .valj-knapp[aria-expanded="true"] {
   background: var(--vit);
-  box-shadow: inset 0 0 0 1.5px var(--virke), 0 0 0 4px rgba(240, 181, 110, 0.15);
+  box-shadow: inset 0 0 0 1.5px var(--virke), 0 0 0 4px rgb(var(--t-virke-rgb) / 0.15);
 }
 
 .falt-rad {
@@ -1031,7 +1376,7 @@ svg.i {
   max-height: calc(100vh - 24px);
   max-height: calc(100dvh - 24px);
   overflow: hidden;
-  border-radius: 28px;
+  border-radius: calc(28px * var(--t-radie-k, 1));
   background: var(--ben);
   box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.55), inset 0 0 0 1px var(--kant);
   opacity: 0;
@@ -1129,9 +1474,9 @@ svg.i {
   padding: 12px 16px 12px 12px;
   border-radius: 18px;
   background:
-    radial-gradient(90% 90% at 100% 0%, rgba(246, 198, 141, 0.18), transparent 60%),
-    var(--sten);
-  box-shadow: 0 24px 50px -20px rgba(61, 56, 51, 0.7), inset 0 0 0 1px rgba(255, 245, 230, 0.08);
+    radial-gradient(90% 90% at 100% 0%, rgb(var(--t-virke-2-rgb) / 0.18), transparent 60%),
+    var(--t-markerad);
+  box-shadow: 0 24px 50px -20px rgb(var(--t-sten-2-rgb) / 0.7), inset 0 0 0 1px rgb(var(--t-pa-sten-rgb) / 0.08);
   color: var(--krita);
   font-size: 0.875rem;
   pointer-events: auto;
@@ -1144,12 +1489,12 @@ svg.i {
 
 /* Bekräftelse: grön bock. Fel och varningar: varm röd platta och tidslinje. */
 .toast--ok .toast__ikon {
-  background: rgba(127, 224, 166, 0.16);
-  color: #7fe0a6;
+  background: rgb(var(--t-mint-rgb) / 0.16);
+  color: var(--t-mint);
 }
 
 .toast--fel .toast__ikon {
-  background: rgba(217, 87, 63, 0.2);
+  background: rgb(var(--t-rod-rgb) / 0.2);
   color: #f3a28f;
 }
 
@@ -1164,7 +1509,7 @@ svg.i {
   width: 34px;
   height: 34px;
   border-radius: 11px;
-  background: rgba(240, 181, 110, 0.16);
+  background: rgb(var(--t-virke-rgb) / 0.16);
   color: var(--virke);
 }
 
@@ -1211,7 +1556,7 @@ svg.i {
 
 a.lista__rad:hover,
 button.lista__rad:hover {
-  background: rgba(240, 181, 110, 0.07);
+  background: rgb(var(--t-virke-rgb) / 0.07);
 }
 
 button.lista__rad {
@@ -1287,7 +1632,7 @@ button.lista__rad {
 }
 
 .tabell tr[data-g]:hover {
-  background: rgba(240, 181, 110, 0.07);
+  background: rgb(var(--t-virke-rgb) / 0.07);
 }
 
 .tal {
@@ -1345,8 +1690,8 @@ button.lista__rad {
     grid-template-columns: repeat(5, 1fr);
     padding: 6px;
     border-radius: 24px;
-    background: rgba(27, 25, 21, 0.94);
-    box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(247, 245, 240, 0.08);
+    background: rgb(var(--t-blaeck-rgb) / 0.94);
+    box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.08);
   }
 
   .mobilmeny a,
@@ -1359,13 +1704,13 @@ button.lista__rad {
     border: 0;
     border-radius: 18px;
     background: transparent;
-    color: rgba(247, 245, 240, 0.6);
+    color: rgb(var(--t-pa-mork-rgb) / 0.6);
     font: 600 0.625rem/1 var(--rubrik);
     text-decoration: none;
   }
 
   .mobilmeny .aktiv {
-    background: rgba(240, 181, 110, 0.14);
+    background: rgb(var(--t-virke-rgb) / 0.14);
     color: var(--virke);
   }
 
@@ -1379,7 +1724,7 @@ button.lista__rad {
     background: var(--virke);
     font: 700 0.5625rem/1.2 var(--rubrik);
     font-style: normal;
-    color: var(--kol);
+    color: var(--t-pa-accent);
   }
 
   .ark {
@@ -1421,7 +1766,7 @@ button.lista__rad {
     height: 5px;
     margin-left: -20px;
     border-radius: 3px;
-    background: rgba(27, 25, 21, 0.18);
+    background: rgb(var(--t-blaeck-rgb) / 0.18);
   }
 
   .ark--bred {
@@ -1457,7 +1802,7 @@ button.lista__rad {
   }
 
   body {
-    background: #fff;
+    background: var(--t-yta);
   }
 }
 
@@ -1475,7 +1820,7 @@ button.lista__rad {
   border: 0;
   border-radius: 14px;
   background: var(--vit);
-  box-shadow: inset 0 0 0 1px var(--kant), 0 8px 20px -18px rgba(27, 25, 21, 0.5);
+  box-shadow: inset 0 0 0 1px var(--kant), 0 8px 20px -18px rgb(var(--t-skugga-rgb) / 0.5);
   color: var(--text-3);
   font: 400 0.9375rem/1 var(--sans);
   text-align: left;
@@ -1485,7 +1830,7 @@ button.lista__rad {
 
 .sok:hover,
 .sok:focus-visible {
-  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.16), 0 12px 28px -18px rgba(27, 25, 21, 0.5);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / 0.16), 0 12px 28px -18px rgb(var(--t-skugga-rgb) / 0.5);
   color: var(--text-2);
   outline: none;
 }
@@ -1518,7 +1863,7 @@ button.lista__rad {
   width: min(640px, 100% - 24px);
   max-height: min(70vh, 640px);
   overflow: hidden;
-  border-radius: 22px;
+  border-radius: calc(22px * var(--t-radie-k, 1));
   background: var(--vit);
   box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px var(--kant);
   opacity: 0;
@@ -1749,7 +2094,7 @@ a.kort:not([data-tilt]):hover,
 button.kort:not([data-tilt]):hover,
 .kort[data-g]:not([data-tilt]):hover {
   transform: translateY(-2px);
-  box-shadow: 0 1px 2px rgba(27, 25, 21, 0.05), 0 22px 44px -26px rgba(27, 25, 21, 0.5), inset 0 0 0 1px rgba(27, 25, 21, 0.14);
+  box-shadow: 0 1px 2px rgb(var(--t-skugga-rgb) / 0.05), 0 22px 44px -26px rgb(var(--t-skugga-rgb) / 0.5), inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / 0.14);
 }
 
 /* Det som just ändrades. */
@@ -1814,7 +2159,7 @@ tr.bytt > td {
   position: absolute;
   inset: -3px;
   border-radius: inherit;
-  box-shadow: 0 0 0 3px var(--virke), 0 0 40px rgba(240, 181, 110, 0.6);
+  box-shadow: 0 0 0 3px var(--virke), 0 0 40px rgb(var(--t-virke-rgb) / 0.6);
   opacity: 0;
   pointer-events: none;
   animation: ring-ut 1.4s ease-out 0.1s;
@@ -1843,7 +2188,7 @@ tr.bytt > td {
   padding: 8px 13px;
   border-radius: 999px;
   background: var(--virke);
-  color: var(--kol);
+  color: var(--t-pa-accent);
   font: 600 0.75rem/1 var(--rubrik);
   text-decoration: none;
   transition: transform 0.2s ease, background-color 0.2s ease;
@@ -1851,7 +2196,7 @@ tr.bytt > td {
 
 .toast__knapp:hover {
   transform: translateY(-1px);
-  background: #f6c68d;
+  background: var(--t-virke-2);
 }
 
 .toast__tid {
@@ -1860,7 +2205,7 @@ tr.bytt > td {
   bottom: 0;
   left: 0;
   height: 2px;
-  background: rgba(246, 198, 141, 0.6);
+  background: rgb(var(--t-virke-2-rgb) / 0.6);
   transform-origin: 0 50%;
   animation: toast-tid var(--tid, 3800ms) linear forwards;
 }
@@ -1910,8 +2255,8 @@ tr.bytt > td {
   z-index: 5;
   padding: 6px 9px;
   border-radius: 8px;
-  background: #1b1915;
-  color: #f7f5f0;
+  background: var(--t-kol);
+  color: var(--t-pa-mork);
   font: 600 0.6875rem/1.2 var(--rubrik);
   white-space: nowrap;
   opacity: 0;

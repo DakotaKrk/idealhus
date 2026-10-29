@@ -303,8 +303,10 @@ function dekor(st) {
 }
 /* Naturen runt resan: mark till horisonten, kullar, berg, skog, sjö med båt, åkrar, stenar, gräs och vindkraftverk */
 const HORISONT = '#f1ece0';
+// himlen ritas om i samma duk när temat byts (topp, mitt och horisont kommer från --t-3d-…)
+function ritaHimmel(g, w, h, topp, mitt, hor) { const l = g.createLinearGradient(0, 0, 0, h); l.addColorStop(0, topp); l.addColorStop(0.45, mitt); l.addColorStop(0.75, hor); l.addColorStop(1, hor); g.fillStyle = l; g.fillRect(0, 0, w, h); }
 function himmel() {
-  return tex(16, 512, (g, w, h) => { const l = g.createLinearGradient(0, 0, 0, h); l.addColorStop(0, '#b7d3e0'); l.addColorStop(0.45, '#dfe9e6'); l.addColorStop(0.75, HORISONT); l.addColorStop(1, HORISONT); g.fillStyle = l; g.fillRect(0, 0, w, h); });
+  return tex(16, 512, (g, w, h) => ritaHimmel(g, w, h, '#b7d3e0', '#dfe9e6', HORISONT));
 }
 function slump(fro) { let s = fro; return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
 const fNabb0 = () => new THREE.MeshStandardMaterial({ color: '#e9a25a', roughness: 0.5 });
@@ -312,7 +314,7 @@ function natur(scen) {
   const r = slump(7), SLUT = AVST * 5;
   const fri = (x, z) => z > -7.5 && z < 9.5 && x > -8 && x < SLUT + 8; // stationerna och gången
   // marken: mjukt gräs med fläckar som tonar bort i diset
-  const mark = new THREE.Mesh(new THREE.PlaneGeometry(1400, 1400), new THREE.MeshStandardMaterial({ color: '#c3cf9d', roughness: 1 })); mark.rotation.x = -Math.PI / 2; mark.position.set(SLUT / 2, -0.62, 0); mark.receiveShadow = true; scen.add(mark);
+  const mark = new THREE.Mesh(new THREE.PlaneGeometry(1400, 1400), new THREE.MeshStandardMaterial({ color: '#c3cf9d', roughness: 1 })); mark.rotation.x = -Math.PI / 2; mark.position.set(SLUT / 2, -0.62, 0); mark.receiveShadow = true; mark.name = 'mark'; scen.add(mark);
   const gron = ['#9fb487', '#8ea877', '#b1c095', '#a3b98c'].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 1 }));
   // kullar bakom och berg längst bort
   for (let n = 0; n < 16; n++) { const k = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 5), gron[n % 4]); const rad = 14 + r() * 18; k.scale.set(rad * 1.8, rad * 0.2, rad); k.position.set(-60 + n * 15 + r() * 8, -0.6, -78 - r() * 30); k.receiveShadow = true; scen.add(k); }
@@ -606,7 +608,7 @@ function omgivning(scen) {
   const fp = new THREE.Vector3(), fp2 = new THREE.Vector3(), fram3 = new THREE.Vector3(), upp3 = new THREE.Vector3(0, 1, 0);
   // Legohus skåpbil i det närmre körfältet
   const bil = skapbil(); bil.position.set(-12, -0.52, 6.4); scen.add(bil);
-  return (t, dt, fokusX) => {
+  const tick = (t, dt, fokusX) => {
     nat(t, dt);
     moln.forEach((c) => { c.position.x += dt * 0.5; if (c.position.x > AVST * 5 + 40) c.position.x = -40; const kant = mjuk(Math.min(c.position.x + 40, AVST * 5 + 40 - c.position.x) / 18); c.scale.setScalar((c.userData.bas || (c.userData.bas = c.scale.x)) * Math.max(0.001, kant)); });
     flockBana(t, fp); flockBana(t + 0.5, fp2); fram3.subVectors(fp2, fp).normalize(); const kurs = Math.atan2(fram3.x, fram3.z);
@@ -620,8 +622,9 @@ function omgivning(scen) {
     });
     const fart = 3.4; bil.position.x += dt * fart; if (bil.position.x > AVST * 5 + 40) bil.position.x = -40;
     bil.position.y = -0.52 + Math.abs(Math.sin(t * 9)) * 0.01; bil.userData.hjul.forEach((h) => { h.rotation.z -= (dt * fart) / bil.userData.r; });
-    lMat.emissiveIntensity = 1 + Math.sin(t * 1.5) * 0.15;
+    lMat.emissiveIntensity = (1 + Math.sin(t * 1.5) * 0.15) * TV.lykta / 1.1;
   };
+  tick.molnMat = molnMat; return tick;
 }
 
 function station1(modell) { // Ritning & lov
@@ -845,7 +848,7 @@ function bygg(el) {
   const scen = new THREE.Scene(); scen.background = himmel(); scen.fog = new THREE.Fog(HORISONT, 70, 140);
   const pmrem = new THREE.PMREMGenerator(renderer); scen.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scen.environmentIntensity = 0.3;
   const kamera = new THREE.PerspectiveCamera(30, 2, 0.5, 200);
-  scen.add(new THREE.HemisphereLight('#e4f0f6', '#a4b07f', 0.6));
+  const hemi = new THREE.HemisphereLight('#e4f0f6', '#a4b07f', 0.6); scen.add(hemi);
   const sol = new THREE.DirectionalLight('#fff0d8', 2.8); sol.castShadow = true; sol.shadow.mapSize.set(2048, 2048); sol.shadow.bias = -0.0003; sol.shadow.normalBias = 0.035;
   Object.assign(sol.shadow.camera, { left: -34, right: 34, top: 26, bottom: -26, near: 1, far: 110 }); scen.add(sol, sol.target);
   // vägen och den lysande banan genom alla steg
@@ -863,8 +866,9 @@ function bygg(el) {
   const mal = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
   const comp = new EffectComposer(renderer, mal); comp.addPass(new RenderPass(scen, kamera));
   const bloom = new UnrealBloomPass(new THREE.Vector2(512, 256), 0.35, 0.4, 1.6); comp.addPass(bloom); comp.addPass(new OutputPass());
-  S = { omg, renderer, scen, kamera, sol, comp, bloom, stationer, pulser, el: null, nu: 0, mal: new THREE.Vector3(), mot: new THREE.Vector3(), auto: !LUGN, hel: true, zoom: 1, pan: 0, drag: null, paus: 0, t: 0, synlig: false, ram: 0, klocka: new THREE.Clock() };
+  S = { omg, hemi, renderer, scen, kamera, sol, comp, bloom, stationer, pulser, el: null, nu: 0, mal: new THREE.Vector3(), mot: new THREE.Vector3(), auto: !LUGN, hel: true, zoom: 1, pan: 0, drag: null, paus: 0, t: 0, synlig: false, ram: 0, klocka: new THREE.Clock() };
   S.mot.set(0, 1.2, 0); S.kamPos = new THREE.Vector3(30, 60, 110);
+  temaStart();
   renderer.domElement.className = 'resa3d__duk';
   // dra för att panorera när man har zoomat in, nyp eller Ctrl + hjul för att zooma
   const duk = renderer.domElement;
@@ -886,6 +890,69 @@ function bygg(el) {
   new IntersectionObserver((r) => { S.synlig = r[0].isIntersecting; if (S.synlig) starta(); }, { threshold: 0.05 }).observe(renderer.domElement);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) starta(); });
   addEventListener('resize', storlek);
+}
+/* Temat ------------------------------------------------------------------------------------------- */
+// Himlen, dimman, marken, ljuset, neonen, lyktorna och molnen följer CRM:ets tema (--t-3d-… i CSS). Scenen byggs
+// alltid i Original och ställs sedan om; vid temabyte tonas färgerna och ljuset över på drygt en halv sekund.
+// Saknas en variabel (eller temat) gäller Original-värdet, så Original ritas exakt som förut.
+const TV = { lykta: 1.1 };
+const TEMA0 = { 'himmel-topp': '#b7d3e0', 'himmel-mitt': '#dfe9e6', horisont: HORISONT, mark: '#c3cf9d', 'hemi-upp': '#e4f0f6', 'hemi-ned': '#a4b07f', sol: '#fff0d8', neon: '#e9a25a', lykta: '#ffd9a0', moln: '#ffffff', 'sol-styrka': 2.8, 'hemi-styrka': 0.6, exponering: 0.95, 'lykta-styrka': 1.1 };
+const TEMA_MS = 650, GLAS0 = new THREE.Color('#ffb05a'), MANSKEN = new THREE.Color('#7d8aa6');
+function temaLas() {
+  const cs = getComputedStyle(document.documentElement), u = {};
+  for (const k in TEMA0) {
+    const v = cs.getPropertyValue('--t-3d-' + k).trim();
+    u[k] = typeof TEMA0[k] === 'number' ? (Number.isFinite(parseFloat(v)) ? parseFloat(v) : TEMA0[k]) : (/^(#[0-9a-f]{3,8}|rgba?\(|hsla?\()/i.test(v) ? v : TEMA0[k]);
+  }
+  return u;
+}
+// målet: färger som THREE.Color, tal, och himlens strängar (så att slutbilden ritas med exakt samma värden)
+function temaMal(u) {
+  const natt = klamp(1 - u['sol-styrka'] / 2.8, 0, 1), C = (x) => new THREE.Color(x);
+  return {
+    f: { hor: C(u.horisont), mark: C(u.mark), hu: C(u['hemi-upp']), hn: C(u['hemi-ned']), sol: C(u.sol), neon: C(u.neon), lykta: C(u.lykta), moln: C(u.moln), topp: C(u['himmel-topp']), mitt: C(u['himmel-mitt']) },
+    n: { sol: u['sol-styrka'], hemi: u['hemi-styrka'], exp: u.exponering, lykta: u['lykta-styrka'], bloom: 0.35 + natt * 0.25, env: 0.3 * (1 - natt * 0.6), glas: 1 + natt * 4, molnGlod: natt * 0.5 },
+    s: [u['himmel-topp'], u['himmel-mitt'], u.horisont]
+  };
+}
+function temaBlanda(a, b, p) {
+  const f = {}, n = {}; for (const k in a.f) f[k] = a.f[k].clone().lerp(b.f[k], p); for (const k in a.n) n[k] = lerp(a.n[k], b.n[k], p);
+  return { f, n, s: null };
+}
+function temaSatt(v) {
+  const T = S.temaObj, f = v.f, n = v.n;
+  S.hemi.color.copy(f.hu); S.hemi.groundColor.copy(f.hn); S.hemi.intensity = n.hemi;
+  S.sol.color.copy(f.sol); S.sol.intensity = n.sol;
+  S.scen.fog.color.copy(f.hor); if (T.mark) T.mark.color.copy(f.mark); if (T.moln) { T.moln.color.copy(f.moln); T.moln.emissive.copy(MANSKEN).multiplyScalar(n.molnGlod); }
+  // på kvällen lyser fönstren starkare (glasets glöd gånger n.glas; i dagsljus exakt som förut)
+  T.glas.forEach((m) => m.emissive.copy(GLAS0).multiplyScalar(n.glas));
+  T.neon.forEach((m) => { m.color.copy(f.neon); m.emissive.copy(f.neon); });
+  T.lykta.forEach((m) => { m.color.copy(f.lykta); m.emissive.copy(f.lykta); });
+  S.renderer.toneMappingExposure = n.exp; TV.lykta = n.lykta; S.bloom.strength = n.bloom; S.scen.environmentIntensity = n.env;
+  const s = v.s || [f.topp.getStyle(), f.mitt.getStyle(), f.hor.getStyle()], nyckel = s.join();
+  if (nyckel !== S.himmelNu) { S.himmelNu = nyckel; const bg = S.scen.background, c = bg.image; ritaHimmel(c.getContext('2d'), c.width, c.height, s[0], s[1], s[2]); bg.needsUpdate = true; }
+  S.temaNu = v;
+}
+function temaStart() {
+  // materialen som byter färg letas upp på sina Original-färger: neonen, lyktorna och pulserna
+  const neon = new Set(), lykta = new Set(), glas = new Set();
+  S.scen.traverse((o) => { const m = o.material; if (!m || !m.emissive || !m.color) return; const c = m.color.getHexString(), em = m.emissive.getHexString(); if (c === 'e9a25a' && em === 'e9a25a') neon.add(m); else if (c === 'ffd9a0' && em === 'ffd9a0') lykta.add(m); else if (em === 'ffb05a' && c === '40525c') glas.add(m); });
+  const mark = S.scen.getObjectByName('mark');
+  S.temaObj = { neon: [...neon], lykta: [...lykta], glas: [...glas], mark: mark && mark.material, moln: S.omg.molnMat };
+  S.himmelNu = ['#b7d3e0', '#dfe9e6', HORISONT].join();
+  const u = temaLas(); S.temaNyckel = JSON.stringify(u); temaSatt(temaMal(u));
+}
+function temaByt() {
+  if (!S || !S.temaObj) return;
+  const u = temaLas(), nyckel = JSON.stringify(u); if (nyckel === S.temaNyckel) return; S.temaNyckel = nyckel;
+  const till = temaMal(u);
+  // syns inte scenen (eller minskad rörelse): direkt till målet, annars en mjuk övertoning i bildrutorna
+  if (LUGN || !S.ram || !S.synlig || document.hidden) { S.temaAnim = null; temaSatt(till); starta(); return; }
+  S.temaAnim = { fran: S.temaNu, till, t0: performance.now() };
+}
+function temaSteg() {
+  const A = S.temaAnim, p = mjuk((performance.now() - A.t0) / TEMA_MS);
+  if (p >= 1) { S.temaAnim = null; temaSatt(A.till); } else temaSatt(temaBlanda(A.fran, A.till, p));
 }
 function storlek() {
   if (!S || !S.el) return;
@@ -980,6 +1047,7 @@ function ram() {
   S.stationer.forEach((s, n) => { if (Math.abs(n * AVST - S.mot.x) < halvB + AVST * 0.6) s.userData.tick(S.t + n * 1.7, dt); s.userData.kant.material.emissiveIntensity = n === S.nu && !S.hel ? 2.2 + Math.sin(S.t * 3) * 0.3 : n === S.nu ? 1.4 : 0.15; });
   S.pulser.forEach((p, n) => { const a = ((S.t * 0.09 + n / 6) % 1); p.position.set(a * AVST * 5, 0.2, 5.6); p.scale.setScalar(0.7 + Math.sin(S.t * 6 + n) * 0.25); });
   S.omg(S.t, dt, S.mot.x); TRAD.forEach((t) => { t.rotation.z = Math.sin(S.t * 1.2 + t.userData.vaj) * 0.035; });
+  if (S.temaAnim) temaSteg();
   S.comp.render(dt);
   placeraNalar();
   // minskad rörelse: en stillbild som ritas om vid klick, dragning och storleksändring
@@ -1019,4 +1087,9 @@ if (IH) {
   const sok = () => { const el = document.querySelector('[data-resa3d]:not([data-monterad])'); if (el) { el.setAttribute('data-monterad', ''); montera(el); } };
   new MutationObserver(sok).observe(document.body, { childList: true, subtree: true });
   sok();
+  // temabytet: attributet data-tema, temamotorns händelser och systemets mörka läge (när man följer systemet)
+  const temaLyss = () => queueMicrotask(temaByt);
+  new MutationObserver(temaLyss).observe(document.documentElement, { attributes: true, attributeFilter: ['data-tema'] });
+  ['ih:tema', 'tema-byte'].forEach((n) => { addEventListener(n, temaLyss); document.addEventListener(n, temaLyss); });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', temaLyss);
 }

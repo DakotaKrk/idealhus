@@ -966,6 +966,13 @@
       '<span class="palett__ikon">' + ikon + '</span><span class="palett__text"><b>' + IH.e(rubrik) + '</b>' + (under ? '<small>' + IH.e(under) + '</small>' : '') + '</span>' +
       (typ ? '<span class="palett__typ">' + typ + '</span>' : '') + '</button>';
   }
+  // Ett tema i paletten ("Tema: Mörk"): färgprovet som ikon, bock på det valda
+  function temaRad(t) {
+    var val = IH.tema.val(), vald = val === t.id;
+    return '<button type="button" class="palett__rad" role="option" data-g="palett-val" data-mal="g:tema-val" data-tema-id="' + t.id + '">' +
+      '<span class="palett__ikon">' + (IH.tema.ruta || IH.tema.prick)(t.id) + '</span><span class="palett__text"><b>Tema: ' + IH.e(t.namn) + '</b><small>' + IH.e(t.kort) + '</small></span>' +
+      '<span class="palett__typ">' + (vald ? 'Valt' : 'Tema') + '</span></button>';
+  }
   function grupp(namn, rader) {
     return rader.length ? '<p class="palett__grupp">' + namn + '</p>' + rader.join('') : '';
   }
@@ -1016,6 +1023,8 @@
       html += grupp('Uppgifter', uppgifter.map(function (u) { return rad('ga:#/att-gora', IH.i('todo'), u.text, u.forfaller ? 'Förfaller ' + IH.datum(u.forfaller) : '', 'Uppgift'); }));
       html += grupp('Konton', konton.map(function (u) { return rad('ga:#/profil/' + u.id, '<span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span>', u.namn, u.titel, 'Konto'); }));
       html += grupp('Åtgärder', ATGARDER.filter(function (x) { return jag.roll !== 'admin' && !(jag.roll === 'prod' && /affar|forfragan|mote/.test(x[0])) && traff(x[1], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
+      var teman = !IH.tema || !IH.tema.lista || q.length < 2 ? [] : IH.tema.lista.filter(function (t) { var txt = ('tema ' + t.namn + ' ' + t.sok + ' utseende färg färger').toLowerCase(); return q.replace(/:/g, ' ').split(/\s+/).filter(Boolean).every(function (w) { return txt.indexOf(w) >= 0; }); });
+      html += grupp('Tema', teman.map(temaRad));
       html += grupp('Kommandon', kommandon.map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
       html += grupp('Gå till', SIDOR.filter(function (x) { return sidaFor(x) && (x[1] + ' ' + x[3]).toLowerCase().indexOf(q) >= 0; }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
       if (!html) html = '<p class="palett__tom">Inga träffar för ”' + IH.e(q) + '”</p>';
@@ -1209,6 +1218,7 @@
   };
   IH.G['valj-anvandare'] = function (el) {
     try { localStorage.setItem('ih-crm-jag', el.getAttribute('data-id')); } catch (e) { /* */ }
+    if (IH.tema && IH.tema.lasOm) IH.tema.lasOm(); // varje konto har sitt eget tema
     IH.stangArk();
     var u = IH.jag();
     IH.uppdateraMeny();

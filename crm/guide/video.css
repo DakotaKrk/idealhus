@@ -1,20 +1,36 @@
+@import url("../tema.css?v=20261108a");
 /* Legohus CRM – videosidan (guide/video.html). */
 @font-face { font-family: "Poppins"; src: url("../../fonts/poppins-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 @font-face { font-family: "Poppins"; src: url("../../fonts/poppins-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
 @font-face { font-family: "Poppins"; src: url("../../fonts/poppins-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "Manrope"; src: url("../../fonts/manrope.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
+/* Temafärger som bara den här filen har (tema-bytet 2026-10-29): dagens exakta värde i Original, temats token i övriga teman. */
 :root {
-  --kol: #1b1915; --krita: #f8f4ed; --vit: #fffdf9; --barn: #e29a4a; --barn-ljus: #f6c68d; --virke-djup: #8f5424;
-  --mjuk-text: rgba(27, 25, 21, 0.66); --kant: rgba(27, 25, 21, 0.09);
+  --o-2a1a0b-pa-accent: #2a1a0b;
+}
+:root[data-tema]:not([data-tema="original"]) {
+  --o-2a1a0b-pa-accent: var(--t-pa-accent);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema]) {
+    --o-2a1a0b-pa-accent: var(--t-pa-accent);
+  }
+}
+
+:root[data-tema]:not([data-tema="original"]) { --pa-kol: var(--t-pa-kol); }
+:root, :root[data-tema] {
+  /* färgerna kommer från ../tema.css (samma specificitet som aliasen där, och laddas efter) */
+  --kol: var(--t-kol); --krita: var(--t-sand); --pa-kol: var(--t-sand); --vit: var(--t-yta-varm); --barn: var(--t-accent); --barn-ljus: var(--t-virke-2); --virke-djup: var(--t-accent-djup);
+  --mjuk-text: rgb(var(--t-blaeck-rgb) / 0.66); --kant: rgb(var(--t-blaeck-rgb) / 0.09);
   --rubrik: "Poppins", ui-sans-serif, system-ui, sans-serif; --sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --mjuk: cubic-bezier(0.22, 1, 0.36, 1);
 }
 * { box-sizing: border-box; }
 body {
   margin: 0;
-  background: radial-gradient(1100px 600px at 100% -10%, rgba(246, 198, 141, 0.42), transparent 60%), radial-gradient(800px 600px at -10% 100%, rgba(226, 154, 74, 0.14), transparent 60%), var(--krita);
+  background: radial-gradient(1100px 600px at 100% -10%, rgb(var(--t-virke-2-rgb) / 0.42), transparent 60%), radial-gradient(800px 600px at -10% 100%, rgb(var(--t-accent-rgb) / 0.14), transparent 60%), var(--krita);
   background-attachment: fixed;
-  color: var(--kol);
+  color: var(--t-text);
   font: 400 1rem/1.55 var(--sans);
   -webkit-font-smoothing: antialiased;
 }
@@ -22,10 +38,10 @@ a { color: inherit; }
 .topp { display: flex; align-items: center; gap: 18px; height: 72px; padding: 0 clamp(16px, 3vw, 40px); }
 .topp__logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
 .topp__logo img { width: 116px; }
-.topp__logo span { padding: 5px 10px; border-radius: 999px; background: rgba(226, 154, 74, 0.16); color: var(--virke-djup); font: 700 0.6875rem/1 var(--rubrik); letter-spacing: 0.1em; text-transform: uppercase; }
+.topp__logo span { padding: 5px 10px; border-radius: 999px; background: rgb(var(--t-accent-rgb) / 0.16); color: var(--virke-djup); font: 700 0.6875rem/1 var(--rubrik); letter-spacing: 0.1em; text-transform: uppercase; }
 .topp__lankar { display: flex; gap: 6px; margin-left: auto; }
 .topp__lankar a { padding: 9px 14px; border-radius: 999px; font: 600 0.8125rem/1 var(--rubrik); text-decoration: none; }
-.topp__lankar a:hover { background: rgba(27, 25, 21, 0.06); }
+.topp__lankar a:hover { background: rgb(var(--t-blaeck-rgb) / 0.06); }
 
 .sida { width: min(1440px, 100%); margin: 0 auto; padding: 8px clamp(16px, 3vw, 40px) 64px; }
 .intro { max-width: 860px; margin: 18px 0 30px; }
@@ -36,38 +52,38 @@ h1 em { font-style: normal; background: linear-gradient(90deg, #c87a2e, var(--ba
 .ingress { margin: 0; color: var(--mjuk-text); font-size: 1.08rem; }
 
 .spelare { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 22px; align-items: start; }
-.spelare__yta { position: relative; padding: 10px; border-radius: 26px; background: var(--vit); box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.06), 0 50px 100px -50px rgba(27, 25, 21, 0.6); }
-video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; border-radius: 18px; background: var(--kol); }
+.spelare__yta { position: relative; padding: 10px; border-radius: calc(26px * var(--t-radie-k, 1)); background: var(--vit); box-shadow: 0 0 0 1px rgb(var(--t-blaeck-rgb) / 0.06), 0 50px 100px -50px rgb(var(--t-skugga-rgb) / 0.6); }
+video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; border-radius: calc(18px * var(--t-radie-k, 1)); background: var(--t-kol); }
 .kapitelband { display: flex; gap: 3px; height: 8px; margin: 12px 4px 0; }
-.kapitelband button { position: relative; flex: var(--l, 1); height: 100%; padding: 0; border: 0; border-radius: 99px; background: rgba(27, 25, 21, 0.08); cursor: pointer; overflow: hidden; }
+.kapitelband button { position: relative; flex: var(--l, 1); height: 100%; padding: 0; border: 0; border-radius: calc(99px * var(--t-radie-k, 1)); background: rgb(var(--t-blaeck-rgb) / 0.08); cursor: pointer; overflow: hidden; }
 .kapitelband button i { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, var(--barn-ljus), var(--barn)); transform-origin: left; transform: scaleX(var(--a, 0)); }
-.kapitelband button:hover { background: rgba(27, 25, 21, 0.16); }
+.kapitelband button:hover { background: rgb(var(--t-blaeck-rgb) / 0.16); }
 .nu { display: flex; align-items: center; gap: 10px; margin: 12px 6px 4px; font: 600 0.9rem/1.2 var(--rubrik); }
-.nu__prick { width: 8px; height: 8px; border-radius: 50%; background: var(--barn); box-shadow: 0 0 0 4px rgba(226, 154, 74, 0.2); }
+.nu__prick { width: 8px; height: 8px; border-radius: 50%; background: var(--barn); box-shadow: 0 0 0 4px rgb(var(--t-accent-rgb) / 0.2); }
 .nu span:nth-child(2) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nu__prova { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 999px; background: linear-gradient(135deg, var(--barn-ljus), var(--barn)); color: #2a1a0b; font: 600 0.85rem/1 var(--rubrik); text-decoration: none; box-shadow: 0 12px 24px -14px rgba(143, 84, 36, 0.9); transition: transform 0.3s var(--mjuk); }
+.nu__prova { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 999px; background: linear-gradient(135deg, var(--barn-ljus), var(--barn)); color: var(--o-2a1a0b-pa-accent); font: 600 0.85rem/1 var(--rubrik); text-decoration: none; box-shadow: 0 12px 24px -14px rgb(var(--t-accent-djup-rgb) / 0.9); transition: transform 0.3s var(--mjuk); }
 .nu__prova:hover { transform: translateY(-2px); }
 .nu__prova[hidden] { display: none; }
 
-.kapitel { position: sticky; top: 16px; display: flex; flex-direction: column; max-height: calc(100vh - 32px); border-radius: 26px; background: var(--vit); box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.06), 0 40px 80px -50px rgba(27, 25, 21, 0.6); overflow: hidden; }
+.kapitel { position: sticky; top: 16px; display: flex; flex-direction: column; max-height: calc(100vh - 32px); border-radius: calc(26px * var(--t-radie-k, 1)); background: var(--vit); box-shadow: 0 0 0 1px rgb(var(--t-blaeck-rgb) / 0.06), 0 40px 80px -50px rgb(var(--t-skugga-rgb) / 0.6); overflow: hidden; }
 .kapitel__topp { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px 12px; font: 600 1rem/1 var(--rubrik); }
 .kapitel__topp span { color: var(--mjuk-text); font-size: 0.8125rem; font-variant-numeric: tabular-nums; }
 .kapitel__lista { flex: 1; margin: 0; padding: 0 10px 12px; overflow: auto; list-style: none; }
-.kapitel__lista li { position: relative; border-radius: 18px; transition: background 0.25s; }
-.kapitel__lista li.nu-k { background: rgba(226, 154, 74, 0.12); }
+.kapitel__lista li { position: relative; border-radius: calc(18px * var(--t-radie-k, 1)); transition: background 0.25s; }
+.kapitel__lista li.nu-k { background: rgb(var(--t-accent-rgb) / 0.12); }
 .kapitel__lista li.nu-k::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 3px; background: var(--barn); }
 .kapitel__hopp { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; width: 100%; padding: 12px 12px 6px; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
-.kapitel__hopp:focus-visible { outline: 2px solid var(--barn); outline-offset: -2px; border-radius: 16px; }
-.kapitel__tid { grid-row: span 2; display: grid; place-items: center; min-width: 52px; height: 30px; padding: 0 8px; border-radius: 10px; background: var(--krita); box-shadow: inset 0 0 0 1px var(--kant); font: 600 0.75rem/1 var(--rubrik); font-variant-numeric: tabular-nums; }
-li.nu-k .kapitel__tid { background: var(--kol); color: var(--krita); box-shadow: none; }
+.kapitel__hopp:focus-visible { outline: 2px solid var(--barn); outline-offset: -2px; border-radius: calc(16px * var(--t-radie-k, 1)); }
+.kapitel__tid { grid-row: span 2; display: grid; place-items: center; min-width: 52px; height: 30px; padding: 0 8px; border-radius: calc(10px * var(--t-radie-k, 1)); background: var(--krita); box-shadow: inset 0 0 0 1px var(--kant); font: 600 0.75rem/1 var(--rubrik); font-variant-numeric: tabular-nums; }
+li.nu-k .kapitel__tid { background: var(--t-kol); color: var(--pa-kol); box-shadow: none; }
 .kapitel__hopp b { font: 600 0.92rem/1.3 var(--rubrik); }
 .kapitel__hopp small { color: var(--mjuk-text); font-size: 0.78rem; line-height: 1.4; }
-.kapitel__prova { display: inline-flex; align-items: center; gap: 6px; margin: 2px 0 10px 76px; padding: 6px 12px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(143, 84, 36, 0.3); color: var(--virke-djup); font: 600 0.75rem/1 var(--rubrik); text-decoration: none; }
-.kapitel__prova:hover { background: rgba(226, 154, 74, 0.14); }
+.kapitel__prova { display: inline-flex; align-items: center; gap: 6px; margin: 2px 0 10px 76px; padding: 6px 12px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgb(var(--t-accent-djup-rgb) / 0.3); color: var(--virke-djup); font: 600 0.75rem/1 var(--rubrik); text-decoration: none; }
+.kapitel__prova:hover { background: rgb(var(--t-accent-rgb) / 0.14); }
 .kapitel__prova svg, .nu__prova svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
 .mer { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 34px; }
-.mer__kort { display: grid; gap: 6px; padding: 20px 22px; border-radius: 22px; background: var(--vit); box-shadow: inset 0 0 0 1px var(--kant); text-decoration: none; transition: transform 0.3s var(--mjuk), box-shadow 0.3s; }
+.mer__kort { display: grid; gap: 6px; padding: 20px 22px; border-radius: calc(22px * var(--t-radie-k, 1)); background: var(--vit); box-shadow: inset 0 0 0 1px var(--kant); text-decoration: none; transition: transform 0.3s var(--mjuk), box-shadow 0.3s; }
 .mer__kort:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1.5px var(--barn); }
 .mer__kort b { font: 600 1.05rem/1.2 var(--rubrik); }
 .mer__kort span { color: var(--mjuk-text); font-size: 0.875rem; }
@@ -79,8 +95,12 @@ li.nu-k .kapitel__tid { background: var(--kol); color: var(--krita); box-shadow:
 }
 @media (max-width: 560px) {
   .topp__lankar { display: none; }
-  .spelare__yta { padding: 6px; border-radius: 20px; }
-  video { border-radius: 14px; }
+  .spelare__yta { padding: 6px; border-radius: calc(20px * var(--t-radie-k, 1)); }
+  video { border-radius: calc(14px * var(--t-radie-k, 1)); }
   .nu { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Rättningsrunda tema (2026-10-29): bara teman utanför Original */
+:root[data-tema]:not([data-tema="original"]) h1 em { background: linear-gradient(90deg, var(--t-accent-text), color-mix(in srgb, var(--t-accent-text) 70%, var(--t-accent)) 55%, var(--t-accent-text)); -webkit-background-clip: text; background-clip: text; }
+:root[data-tema="office"] .nu__prova { --barn-ljus: var(--t-knapp-topp); }

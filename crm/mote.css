@@ -10,9 +10,9 @@
   z-index: 150;
   overflow: hidden;
   background:
-    radial-gradient(50% 60% at 0% 0%, rgba(240, 181, 110, 0.14), transparent 70%),
-    radial-gradient(50% 60% at 100% 100%, rgba(63, 107, 80, 0.3), transparent 70%),
-    #12100d;
+    radial-gradient(50% 60% at 0% 0%, rgb(var(--t-virke-rgb) / 0.14), transparent 70%),
+    radial-gradient(50% 60% at 100% 100%, rgb(var(--t-skog-rgb) / 0.3), transparent 70%),
+    var(--t-natt);
   color: var(--krita);
   opacity: 0;
   transform: scale(1.03);
@@ -123,8 +123,8 @@
 .mote__kund {
   padding: 7px 13px;
   border-radius: 999px;
-  background: rgba(247, 245, 240, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  background: rgb(var(--t-pa-mork-rgb) / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.14);
   font: 600 0.75rem/1 var(--rubrik);
   color: var(--ljus-2);
 }
@@ -136,8 +136,8 @@
   height: 42px;
   border: 0;
   border-radius: 50%;
-  background: rgba(247, 245, 240, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  background: rgb(var(--t-pa-mork-rgb) / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.14);
   color: var(--krita);
   transition: background-color 0.3s ease;
 }
@@ -150,8 +150,8 @@
   padding: 0 14px;
   height: 42px;
   border-radius: 999px;
-  background: rgba(247, 245, 240, 0.06);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+  background: rgb(var(--t-pa-mork-rgb) / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.12);
   font: 600 0.8125rem/1 var(--rubrik);
   font-variant-numeric: tabular-nums;
   color: var(--ljus-2);
@@ -165,7 +165,7 @@
 
 .mote__ikon[aria-pressed="true"] {
   background: var(--virke);
-  color: var(--kol);
+  color: var(--t-pa-accent);
 }
 
 /* Med anteckningarna öppna krymper bilden till ett kort till vänster. */
@@ -177,7 +177,7 @@
 .mote--anteckning .mote__scen {
   overflow: hidden;
   border-radius: 34px;
-  box-shadow: 0 0 0 1px rgba(247, 245, 240, 0.12), 0 50px 100px -40px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.12), 0 50px 100px -40px rgba(0, 0, 0, 0.9);
   transform: translateX(20px) scale(0.72);
 }
 
@@ -198,8 +198,8 @@
   width: min(360px, 100% - 40px);
   padding: 18px;
   border-radius: 26px;
-  background: rgba(30, 27, 22, 0.86);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12), 0 40px 80px -30px rgba(0, 0, 0, 0.8);
+  background: rgb(var(--vx-1e1b16-rgb) / 0.86);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.12), 0 40px 80px -30px rgba(0, 0, 0, 0.8);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   opacity: 0;
@@ -243,8 +243,8 @@
   padding: 14px;
   border: 0;
   border-radius: 16px;
-  background: rgba(247, 245, 240, 0.06);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+  background: rgb(var(--t-pa-mork-rgb) / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.12);
   color: var(--krita);
   font: 400 0.9375rem/1.6 var(--sans);
   resize: none;
@@ -268,7 +268,7 @@
 }
 
 .mote__ikon:hover {
-  background: rgba(247, 245, 240, 0.16);
+  background: rgb(var(--t-pa-mork-rgb) / 0.16);
 }
 
 .mote__botten {
@@ -282,8 +282,8 @@
   gap: 16px;
   padding: 10px 10px 10px 22px;
   border-radius: 999px;
-  background: rgba(18, 16, 13, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1), 0 20px 40px -20px rgba(0, 0, 0, 0.7);
+  background: rgb(var(--t-natt-rgb) / 0.72);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.1), 0 20px 40px -20px rgba(0, 0, 0, 0.7);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
@@ -314,7 +314,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(247, 245, 240, 0.3);
+  background: rgb(var(--t-pa-mork-rgb) / 0.3);
   transition: width 0.4s var(--mjuk), background-color 0.3s ease;
 }
 
@@ -336,14 +336,14 @@
   height: 44px;
   border: 0;
   border-radius: 50%;
-  background: rgba(247, 245, 240, 0.1);
+  background: rgb(var(--t-pa-mork-rgb) / 0.1);
   color: var(--krita);
   transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.3s var(--mjuk);
 }
 
 .mote__pil--fram {
   background: var(--virke);
-  color: var(--kol);
+  color: var(--t-pa-accent);
 }
 
 .mote__pil:hover:not(:disabled) {
@@ -402,11 +402,11 @@
 .mb__slojan {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(18, 16, 13, 0.88) 0%, rgba(18, 16, 13, 0.55) 45%, rgba(18, 16, 13, 0.1) 100%);
+  background: linear-gradient(90deg, rgb(var(--t-natt-rgb) / 0.88) 0%, rgb(var(--t-natt-rgb) / 0.55) 45%, rgb(var(--t-natt-rgb) / 0.1) 100%);
 }
 
 .mb__slojan--vanster {
-  background: linear-gradient(90deg, rgba(18, 16, 13, 0.92) 0%, rgba(18, 16, 13, 0.6) 55%, rgba(18, 16, 13, 0.3) 100%);
+  background: linear-gradient(90deg, rgb(var(--t-natt-rgb) / 0.92) 0%, rgb(var(--t-natt-rgb) / 0.6) 55%, rgb(var(--t-natt-rgb) / 0.3) 100%);
 }
 
 .mb__in {
@@ -455,7 +455,7 @@
 
 .mb__titel em {
   font-style: normal;
-  background: linear-gradient(100deg, #d9974f 0%, #f0b56e 30%, #ffe2b8 50%, #f0b56e 70%, #d9974f 100%);
+  background: linear-gradient(100deg, #d9974f 0%, var(--t-virke) 30%, #ffe2b8 50%, var(--t-virke) 70%, #d9974f 100%);
   background-size: 220% 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -486,8 +486,8 @@
 .mb__chips span {
   padding: 10px 16px;
   border-radius: 999px;
-  background: rgba(247, 245, 240, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.16);
+  background: rgb(var(--t-pa-mork-rgb) / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.16);
   font: 600 0.875rem/1 var(--rubrik);
 }
 
@@ -496,7 +496,7 @@
   margin: 0;
   overflow: hidden;
   border-radius: 30px;
-  box-shadow: 0 60px 100px -40px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(247, 245, 240, 0.08);
+  box-shadow: 0 60px 100px -40px rgba(0, 0, 0, 0.85), 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.08);
 }
 
 .mote__bild.nu .mb__foto {
@@ -524,9 +524,9 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(50% 60% at 85% 20%, rgba(240, 181, 110, 0.16), transparent 70%),
-    linear-gradient(rgba(247, 245, 240, 0.035) 1px, transparent 1px) 0 0 / 44px 44px,
-    linear-gradient(90deg, rgba(247, 245, 240, 0.035) 1px, transparent 1px) 0 0 / 44px 44px;
+    radial-gradient(50% 60% at 85% 20%, rgb(var(--t-virke-rgb) / 0.16), transparent 70%),
+    linear-gradient(rgb(var(--t-pa-mork-rgb) / 0.035) 1px, transparent 1px) 0 0 / 44px 44px,
+    linear-gradient(90deg, rgb(var(--t-pa-mork-rgb) / 0.035) 1px, transparent 1px) 0 0 / 44px 44px;
 }
 
 /* Husen i 3D */
@@ -543,8 +543,8 @@
   padding: 8px 14px 8px 8px;
   border: 0;
   border-radius: 18px;
-  background: rgba(247, 245, 240, 0.05);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+  background: rgb(var(--t-pa-mork-rgb) / 0.05);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.1);
   color: var(--krita);
   text-align: left;
   transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.4s var(--mjuk);
@@ -555,7 +555,7 @@
 }
 
 .husval__kort.vald {
-  background: rgba(240, 181, 110, 0.14);
+  background: rgb(var(--t-virke-rgb) / 0.14);
   box-shadow: inset 0 0 0 1.5px var(--virke);
 }
 
@@ -581,9 +581,9 @@
   height: min(62vh, 600px);
   border-radius: 34px;
   background:
-    radial-gradient(60% 55% at 50% 50%, rgba(247, 245, 240, 0.18), transparent 70%),
-    linear-gradient(180deg, rgba(247, 245, 240, 0.06), rgba(247, 245, 240, 0.02));
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+    radial-gradient(60% 55% at 50% 50%, rgb(var(--t-pa-mork-rgb) / 0.18), transparent 70%),
+    linear-gradient(180deg, rgb(var(--t-pa-mork-rgb) / 0.06), rgb(var(--t-pa-mork-rgb) / 0.02));
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.1);
   perspective: 900px;
 }
 
@@ -595,8 +595,8 @@
   height: 40%;
   border-radius: 50%;
   background:
-    linear-gradient(rgba(240, 181, 110, 0.14) 1px, transparent 1px) 0 0 / 26px 26px,
-    linear-gradient(90deg, rgba(240, 181, 110, 0.14) 1px, transparent 1px) 0 0 / 26px 26px;
+    linear-gradient(rgb(var(--t-virke-rgb) / 0.14) 1px, transparent 1px) 0 0 / 26px 26px,
+    linear-gradient(90deg, rgb(var(--t-virke-rgb) / 0.14) 1px, transparent 1px) 0 0 / 26px 26px;
   -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent);
   mask-image: radial-gradient(closest-side, #000 30%, transparent);
   transform: rotateX(72deg);
@@ -630,8 +630,8 @@
   max-width: 340px;
   padding: 16px 18px;
   border-radius: 20px;
-  background: rgba(18, 16, 13, 0.78);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+  background: rgb(var(--t-natt-rgb) / 0.78);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.12);
 }
 
 .husvisning__fakta.in {
@@ -687,8 +687,8 @@
   margin-top: 26px;
   padding: 5px;
   border-radius: 999px;
-  background: rgba(247, 245, 240, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  background: rgb(var(--t-pa-mork-rgb) / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.14);
 }
 
 .regelvaxel button {
@@ -704,7 +704,7 @@
 }
 
 .regelvaxel button[aria-pressed="true"] {
-  color: var(--kol);
+  color: var(--t-text);
 }
 
 .regelvaxel__pill {
@@ -714,7 +714,7 @@
   height: calc(100% - 10px);
   border-radius: 999px;
   background: var(--virke);
-  box-shadow: 0 10px 24px -10px rgba(240, 181, 110, 0.8);
+  box-shadow: 0 10px 24px -10px rgb(var(--t-virke-rgb) / 0.8);
   transition: transform 0.6s var(--mjuk), width 0.6s var(--mjuk);
 }
 
@@ -732,8 +732,8 @@
   gap: 4px 8px;
   padding: 22px;
   border-radius: 26px;
-  background: rgba(247, 245, 240, 0.05);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+  background: rgb(var(--t-pa-mork-rgb) / 0.05);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.1);
 }
 
 .regeltal__ruta small {
@@ -759,14 +759,14 @@
   margin-top: 12px;
   overflow: hidden;
   border-radius: 6px;
-  background: rgba(247, 245, 240, 0.1);
+  background: rgb(var(--t-pa-mork-rgb) / 0.1);
 }
 
 .regeltal__ruta em {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #c98a45, #f6c68d);
+  background: linear-gradient(90deg, var(--t-koppar), var(--t-virke-2));
   transform: scaleX(var(--a));
   transform-origin: left;
   transition: transform 0.9s var(--mjuk);
@@ -795,7 +795,7 @@
   right: 7%;
   left: 7%;
   height: 2px;
-  background: linear-gradient(90deg, var(--virke), rgba(127, 224, 166, 0.8));
+  background: linear-gradient(90deg, var(--virke), rgb(var(--t-mint-rgb) / 0.8));
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.4s ease;
@@ -812,8 +812,8 @@
 }
 
 @keyframes nr-tand {
-  0% { box-shadow: 0 0 0 6px #12100d, inset 0 0 0 1.5px rgba(247, 245, 240, 0.2); color: var(--ljus-3); transform: scale(0.8); }
-  60% { box-shadow: 0 0 0 6px #12100d, inset 0 0 0 1.5px var(--virke), 0 0 0 14px rgba(240, 181, 110, 0.18); transform: scale(1.08); }
+  0% { box-shadow: 0 0 0 6px var(--t-natt), inset 0 0 0 1.5px rgb(var(--t-pa-mork-rgb) / 0.2); color: var(--ljus-3); transform: scale(0.8); }
+  60% { box-shadow: 0 0 0 6px var(--t-natt), inset 0 0 0 1.5px var(--virke), 0 0 0 14px rgb(var(--t-virke-rgb) / 0.18); transform: scale(1.08); }
 }
 
 .resa7__steg {
@@ -834,10 +834,10 @@
   width: 54px;
   height: 54px;
   border-radius: 50%;
-  background: #1f1c17;
-  box-shadow: 0 0 0 6px #12100d, inset 0 0 0 1.5px var(--virke);
+  background: var(--vx-1f1c17);
+  box-shadow: 0 0 0 6px var(--t-natt), inset 0 0 0 1.5px var(--virke);
   font: 600 1.25rem/1 var(--rubrik);
-  color: var(--virke);
+  color: var(--t-kol-accent);
 }
 
 .resa7__steg b {
@@ -865,8 +865,8 @@
   padding: 6px 6px 10px;
   border: 0;
   border-radius: 16px;
-  background: rgba(247, 245, 240, 0.05);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+  background: rgb(var(--t-pa-mork-rgb) / 0.05);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.1);
   color: var(--krita);
   transition: box-shadow 0.3s ease, transform 0.4s var(--mjuk), background-color 0.3s ease;
 }
@@ -889,7 +889,7 @@
 }
 
 .kalkyl__modell.vald {
-  background: rgba(240, 181, 110, 0.14);
+  background: rgb(var(--t-virke-rgb) / 0.14);
   box-shadow: inset 0 0 0 2px var(--virke);
   transform: translateY(-3px);
 }
@@ -908,8 +908,8 @@
   padding: 10px 14px;
   border: 0;
   border-radius: 999px;
-  background: rgba(247, 245, 240, 0.06);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  background: rgb(var(--t-pa-mork-rgb) / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.14);
   color: var(--ljus-2);
   font: 600 0.8125rem/1 var(--rubrik);
   transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
@@ -925,7 +925,7 @@
 .kalkyl__chip.vald {
   background: var(--virke);
   box-shadow: none;
-  color: var(--kol);
+  color: var(--t-pa-accent);
 }
 
 .kalkyl__chip.vald .i {
@@ -939,7 +939,7 @@
   border-radius: 28px;
   background: var(--krita);
   box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 0.8);
-  color: var(--kol);
+  color: var(--t-text);
   transform: perspective(1400px) rotateY(-6deg) rotateX(3deg);
   transition: transform 0.8s var(--mjuk);
 }
@@ -959,7 +959,7 @@
   width: 168px;
   overflow: hidden;
   border-radius: 16px;
-  box-shadow: 0 14px 28px -18px rgba(27, 25, 21, 0.7);
+  box-shadow: 0 14px 28px -18px rgb(var(--t-skugga-rgb) / 0.7);
 }
 
 .kvitto__bild img {
@@ -1002,7 +1002,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 9px 4px;
-  border-bottom: 1px dashed rgba(27, 25, 21, 0.14);
+  border-bottom: 1px dashed rgb(var(--t-blaeck-rgb) / 0.14);
   font-size: 0.9375rem;
   animation: in-upp .45s var(--mjuk) both;
   animation-delay: calc(var(--n) * 0.04s);
@@ -1015,7 +1015,7 @@
   margin-top: 14px;
   padding: 16px 18px;
   border-radius: 18px;
-  background: var(--kol);
+  background: var(--t-kol);
   color: var(--krita);
 }
 
@@ -1033,7 +1033,7 @@
 }
 
 @keyframes blink {
-  30% { text-shadow: 0 0 24px rgba(240, 181, 110, 0.9); }
+  30% { text-shadow: 0 0 24px rgb(var(--t-virke-rgb) / 0.9); }
 }
 
 .kvitto__not {
@@ -1072,8 +1072,8 @@
   gap: 6px;
   padding: 20px;
   border-radius: 24px;
-  background: rgba(18, 16, 13, 0.6);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+  background: rgb(var(--t-natt-rgb) / 0.6);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.12);
 }
 
 .nasta3 span {
@@ -1116,8 +1116,8 @@
   margin: 26px 0 0;
   padding: 22px 24px 20px 58px;
   border-radius: 24px;
-  background: rgba(240, 181, 110, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.22);
+  background: rgb(var(--t-virke-rgb) / 0.1);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-virke-rgb) / 0.22);
 }
 
 .er__citat::before {
@@ -1153,8 +1153,8 @@
 .er__svar div {
   padding: 10px 16px;
   border-radius: 16px;
-  background: rgba(247, 245, 240, 0.06);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.12);
+  background: rgb(var(--t-pa-mork-rgb) / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.12);
 }
 
 .er__svar dt {
@@ -1184,8 +1184,8 @@
   width: min(390px, 86%);
   padding: 12px 18px 12px 12px;
   border-radius: 22px;
-  background: rgba(30, 27, 22, 0.9);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14), 0 30px 60px -24px rgba(0, 0, 0, 0.85);
+  background: rgb(var(--vx-1e1b16-rgb) / 0.9);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.14), 0 30px 60px -24px rgba(0, 0, 0, 0.85);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
 }
@@ -1247,10 +1247,10 @@
   padding: 18px 10px 4px;
   border-radius: 30px;
   background:
-    radial-gradient(60% 70% at 50% 100%, rgba(240, 181, 110, 0.12), transparent 70%),
-    linear-gradient(rgba(247, 245, 240, 0.035) 1px, transparent 1px) 0 0 / 26px 26px,
-    linear-gradient(90deg, rgba(247, 245, 240, 0.035) 1px, transparent 1px) 0 0 / 26px 26px;
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.1);
+    radial-gradient(60% 70% at 50% 100%, rgb(var(--t-virke-rgb) / 0.12), transparent 70%),
+    linear-gradient(rgb(var(--t-pa-mork-rgb) / 0.035) 1px, transparent 1px) 0 0 / 26px 26px,
+    linear-gradient(90deg, rgb(var(--t-pa-mork-rgb) / 0.035) 1px, transparent 1px) 0 0 / 26px 26px;
+  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.1);
 }
 
 .hussil svg {
@@ -1261,7 +1261,7 @@
 }
 
 .hussil__mark {
-  stroke: rgba(247, 245, 240, 0.35);
+  stroke: rgb(var(--t-pa-mork-rgb) / 0.35);
   stroke-width: 2;
 }
 
@@ -1296,7 +1296,7 @@
 
 .hussil__spok {
   fill: none;
-  stroke: rgba(247, 245, 240, 0.3);
+  stroke: rgb(var(--t-pa-mork-rgb) / 0.3);
   stroke-width: 1.5;
   stroke-dasharray: 5 6;
   opacity: 0;
@@ -1319,13 +1319,13 @@
 
 .hussil__fonster {
   fill: rgba(159, 194, 201, 0.22);
-  stroke: rgba(247, 245, 240, 0.35);
+  stroke: rgb(var(--t-pa-mork-rgb) / 0.35);
   stroke-width: 1.5;
 }
 
 .hussil__dorr {
-  fill: rgba(18, 16, 13, 0.7);
-  stroke: rgba(247, 245, 240, 0.35);
+  fill: rgb(var(--t-natt-rgb) / 0.7);
+  stroke: rgb(var(--t-pa-mork-rgb) / 0.35);
   stroke-width: 1.5;
 }
 
@@ -1362,7 +1362,7 @@
 
 .hussil__lapp text {
   font: 700 13px var(--rubrik);
-  fill: var(--kol);
+  fill: var(--t-text);
 }
 
 .hussil__bredd {
@@ -1436,8 +1436,8 @@
 }
 
 .vem--vi {
-  background: rgba(240, 181, 110, 0.16);
-  color: #f6c68d;
+  background: rgb(var(--t-virke-rgb) / 0.16);
+  color: var(--t-kol-accent);
 }
 
 .vem--ni {
@@ -1446,7 +1446,7 @@
 }
 
 .vem--tillsammans {
-  background: rgba(127, 224, 166, 0.14);
+  background: rgb(var(--t-mint-rgb) / 0.14);
   color: #a8ebc3;
 }
 
@@ -1521,7 +1521,7 @@
     right: 0;
     left: 0;
     padding: 12px 12px 22px 16px;
-    background: linear-gradient(#12100d 62%, rgba(18, 16, 13, 0));
+    background: linear-gradient(var(--t-natt) 62%, rgb(var(--t-natt-rgb) / 0));
   }
 
   .er__bild {
@@ -1595,25 +1595,28 @@
 /* Husen i 3D: huset och faktarutan får var sin yta – rutan täcker aldrig huset (husbilder beskärs aldrig) */
 .husvisning__mv model-viewer { position: absolute; inset: 0; transition: opacity .5s ease; }
 .husvisning__mv model-viewer.vantar { opacity: 0; pointer-events: none; }
-.mote .husvisning__fakta { background: rgba(255, 253, 249, .96); }
+.mote .husvisning__fakta { background: rgb(var(--t-yta-varm-rgb) / .96); }
 @container husvis (min-width: 601px) {
   .husvisning__mv { inset: 0 0 128px 0; }
   .husvisning__golv { bottom: calc(128px + 6%); height: 30%; }
   .husvisning__fakta { left: 16px; right: 16px; bottom: 16px; max-width: none; grid-template-columns: auto minmax(0, 1fr); column-gap: 26px; align-items: center; padding: 16px 22px; }
   .husvisning__fakta > small, .husvisning__fakta > b, .husvisning__tal { grid-column: 1; }
-  .husvisning__fakta p { grid-column: 2; grid-row: 1 / span 3; align-self: center; margin: 0; padding-left: 24px; border-left: 1px solid rgba(27, 25, 21, .08); font-size: .875rem; }
+  .husvisning__fakta p { grid-column: 2; grid-row: 1 / span 3; align-self: center; margin: 0; padding-left: 24px; border-left: 1px solid rgb(var(--t-blaeck-rgb) / .08); font-size: .875rem; }
   .husvisning__tips { top: auto; bottom: 142px; }
 }
 /* Tipset: en liten chip centrerad över huset, försvinner när man har vridit */
-.husvisning__tips { left: 50%; right: auto; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(255, 253, 249, .9); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07), 0 8px 18px -12px rgba(90, 60, 25, .5); font: 600 .75rem/1 var(--rubrik); color: var(--text-2, #5f5851); white-space: nowrap; transform: translateX(-50%); transition: opacity .4s ease, transform .4s var(--mjuk); z-index: 2; pointer-events: none; }
-.husvisning__tips .emo-ik { width: 14px; height: 14px; color: var(--virke-djup, #8f5424); }
+.husvisning__tips { left: 50%; right: auto; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgb(var(--t-yta-varm-rgb) / .9); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .07), 0 8px 18px -12px rgb(var(--t-skugga-varm-rgb) / .5); font: 600 .75rem/1 var(--rubrik); color: var(--text-2, #5f5851); white-space: nowrap; transform: translateX(-50%); transition: opacity .4s ease, transform .4s var(--mjuk); z-index: 2; pointer-events: none; }
+.husvisning__tips .emo-ik { width: 14px; height: 14px; color: var(--virke-djup, var(--t-accent-djup)); }
 .husvisning.vriden .husvisning__tips { opacity: 0; transform: translateX(-50%) translateY(6px); }
 /* Laddlinje medan ett hus laddas */
-.husvisning::after { content: ""; position: absolute; left: 24px; right: 24px; top: 0; height: 3px; border-radius: 3px; background: linear-gradient(90deg, #f6c68d, #e29a4a); transform: scaleX(var(--p, 0)); transform-origin: left; opacity: 0; transition: opacity .3s ease, transform .3s ease; pointer-events: none; }
+.husvisning::after { content: ""; position: absolute; left: 24px; right: 24px; top: 0; height: 3px; border-radius: 3px; background: linear-gradient(90deg, var(--t-virke-2), var(--t-accent)); transform: scaleX(var(--p, 0)); transform-origin: left; opacity: 0; transition: opacity .3s ease, transform .3s ease; pointer-events: none; }
 .husvisning.laddar::after { opacity: 1; }
 /* Husvalet: hela husbilden syns, aldrig beskuren */
-.husval__kort img { object-fit: contain; background: linear-gradient(#f7f1e7, #efe6d8); padding: 2px; box-sizing: border-box; }
+.husval__kort img { object-fit: contain; background: linear-gradient(var(--vx-f7f1e7), var(--vx-efe6d8)); padding: 2px; box-sizing: border-box; }
 @media (max-width: 900px) {
   .husval__lista { scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 24px), transparent); padding-inline: 8px; }
   .husval__kort { scroll-snap-align: center; }
 }
+
+/* Rättningsrunda (temabytet): Byggs gula accent som gradienttext på ljust blir oläslig – mörk ockra i stället */
+:root[data-tema="bygg"] .mb__titel em { background-image: linear-gradient(100deg, var(--t-accent-text-djup) 0%, var(--t-accent-text) 30%, color-mix(in srgb, var(--t-accent-text) 78%, #fff) 50%, var(--t-accent-text) 70%, var(--t-accent-text-djup) 100%); }
