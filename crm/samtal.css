@@ -322,7 +322,7 @@
 .vm-knapp__pil:hover { opacity: 1; background: rgba(255, 255, 255, .1); }
 .vm-knapp__pil .vm-ik { width: 14px; height: 14px; transform: rotate(180deg); }
 .vm-delad > .vm-knapp:first-child { border-radius: 999px 0 0 999px; width: calc(var(--vm-knapp) - 4px); }
-.vm-knapp--lamna { width: auto; min-width: var(--vm-knapp); padding: 0 18px; gap: 8px; display: inline-flex; align-items: center; background: var(--vm-rod); color: #fff; font: 600 .86rem/1 var(--vm-rubrik); }
+.vm-knapp--lamna { width: auto; min-width: var(--vm-knapp); padding: 0 18px; gap: 8px; display: inline-flex; align-items: center; justify-content: center; background: var(--vm-rod); color: #fff; font: 600 .86rem/1 var(--vm-rubrik); }
 .vm-knapp--lamna:hover { background: color-mix(in oklab, var(--vm-rod) 86%, white); }
 .vm-knapp--lamna .vm-knapp__text { position: static; width: auto; height: auto; clip: auto; overflow: visible; }
 .vm-delad--lamna { background: var(--vm-rod); }
@@ -333,7 +333,7 @@
 /* ---------- Scenen ---------- */
 .vm-scen {
   position: fixed; inset: 0; z-index: 2;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   background:
     radial-gradient(90% 70% at 50% 0%, rgb(var(--t-glod-rgb, 201 128 52) / .1), transparent 60%),
     linear-gradient(180deg, var(--vm-scen-2), var(--vm-scen));
@@ -341,6 +341,11 @@
   overflow: hidden;
 }
 .vm[data-panel] .vm-scen { right: 384px; }
+/* Scenen är en container – verktygsraden anpassar sig efter scenens bredd (panel öppen eller inte), inte fönstrets */
+.vm-scen { container: vm-scen / inline-size; }
+.vm-scen:focus { outline: none; }
+/* Ingen springa mot CRM:et bredvid panelen */
+.vm[data-fas="mote"]:not([data-mini]) { background: var(--vm-scen); }
 .vm-scen--in .vm-yta { animation: vm-upp 260ms var(--vm-kurva) both; }
 .vm-scen--in .vm-kontroller { animation: vm-upp 260ms 60ms var(--vm-kurva) both; }
 
@@ -384,8 +389,13 @@
 .vm-natverk[data-niva="dalig"] { color: #ff8f7a; }
 .vm-natverk[data-niva="dalig"] i:nth-child(n+3) { opacity: .3; }
 
+/* Banderollen har en egen rad under toppen (tom rad = 0 px) – den lägger sig aldrig över video, remsa eller innehåll */
+.vm-topp { grid-row: 1; }
+.vm-delar { grid-row: 2; }
+.vm-yta { grid-row: 3; }
+.vm-kontroller { grid-row: 4; }
 .vm-delar {
-  position: absolute; top: 56px; left: 50%; z-index: 4; transform: translateX(-50%);
+  position: relative; z-index: 4; justify-self: center; max-width: calc(100% - 24px); margin: 0 12px 8px;
   display: inline-flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; border-radius: 999px;
   background: var(--vm-glas); box-shadow: inset 0 0 0 1px var(--vm-glas-kant); color: var(--vm-pa-scen);
   font: 600 .82rem/1.2 var(--vm-rubrik); white-space: nowrap;
@@ -393,6 +403,8 @@
   animation: vm-in 200ms var(--vm-kurva) both;
 }
 .vm-delar:not(:has(button)) { padding-right: 14px; }
+.vm-delar > span:not(.vm-delar__prick) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.vm-delar__prick, .vm-delar__knapp { flex: none; }
 .vm-delar__prick { width: 8px; height: 8px; border-radius: 50%; background: #ff8f7a; box-shadow: 0 0 0 4px rgba(255, 143, 122, .2); }
 .vm-delar__knapp { min-height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--vm-rod); color: #fff !important; font: 600 .78rem/1 var(--vm-rubrik); cursor: pointer; }
 
@@ -497,8 +509,8 @@
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1), 0 20px 40px -16px rgba(0, 0, 0, .85);
   animation: vm-in 220ms var(--vm-kurva) both;
 }
-.vm-egen[data-horn="nh"] { right: 22px; bottom: 96px; }
-.vm-egen[data-horn="nv"] { left: 22px; bottom: 96px; }
+.vm-egen[data-horn="nh"] { right: 22px; bottom: calc(var(--vm-kontroll-h, 86px) + 12px); }
+.vm-egen[data-horn="nv"] { left: 22px; bottom: calc(var(--vm-kontroll-h, 86px) + 12px); }
 .vm-egen[data-horn="oh"] { right: 22px; top: 60px; }
 .vm-egen[data-horn="ov"] { left: 22px; top: 60px; }
 .vm-egen .vm-ruta__namn { left: 6px; bottom: 6px; padding: 3px 8px; font-size: .7rem; }
@@ -511,6 +523,30 @@
 .vm-egen__flytta .vm-ik { width: 14px; height: 14px; }
 .vm-egen:hover .vm-egen__flytta, .vm-egen:focus-within .vm-egen__flytta { opacity: 1; }
 @media (hover: none) { .vm-egen__flytta { opacity: 1; } }
+
+/* Delat innehåll (presentation, kalkyl, 3D … – samtal-dela.js ritar .vmd-yta): innehållet stort, alla rutor och egen bild i remsan */
+.vm[data-layout="innehall"] .vm-yta {
+  display: grid; grid-template-columns: minmax(0, 1fr) clamp(180px, 19cqw, 240px); grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "innehall remsa"; gap: 12px;
+}
+.vm[data-layout="innehall"] .vm-rutnat, .vm[data-layout="innehall"] .vm-scenyta { display: none !important; }
+.vm[data-layout="innehall"] .vmd-yta { grid-area: innehall; min-width: 0; min-height: 0; }
+.vm[data-layout="innehall"] .vm-remsa {
+  grid-area: remsa; display: flex; flex-direction: column; justify-content: center; gap: 10px; min-height: 0;
+  overflow-y: auto; scrollbar-width: none; overscroll-behavior: contain;
+}
+.vm[data-layout="innehall"] .vm-yta:has(> .vm-remsa[data-antal="0"]) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "innehall"; }
+@container vm-scen (max-width: 899px) {
+  .vm[data-layout="innehall"] .vm-yta { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "remsa" "innehall"; gap: 8px; }
+  .vm[data-layout="innehall"] .vm-yta:has(> .vm-remsa[data-antal="0"]) { grid-template-rows: minmax(0, 1fr); }
+  .vm[data-layout="innehall"] .vm-remsa { flex-direction: row; justify-content: center; overflow-x: auto; overflow-y: hidden; }
+  .vm[data-layout="innehall"] .vm-remsa > .vm-ruta, .vm[data-layout="innehall"] .vm-remsa > .vm-egen { width: clamp(104px, 22cqw, 160px); }
+}
+.vm-delar__prick--innehall { background: var(--t-sten-accent, #f6c68d); box-shadow: 0 0 0 4px rgba(246, 198, 141, .2); }
+
+/* I talar- och delningsläget ligger egen bild i remsan i stället för ovanpå innehållet */
+.vm .vm-remsa > .vm-egen { position: relative; inset: auto; z-index: auto; width: 100%; flex: none; aspect-ratio: 16 / 9; animation: none; }
+.vm-remsa > .vm-egen .vm-egen__flytta { display: none; }
 
 /* Reaktioner flyter upp */
 .vm-reaktioner { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; }
@@ -558,7 +594,7 @@
 
 /* Kontrollraden */
 .vm-kontroller {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(max-content, 1fr); align-items: center; gap: 12px;
   padding: 10px 18px 18px; transition: opacity 240ms linear, transform 240ms var(--vm-kurva);
 }
 .vm[data-kontroller="dolda"] .vm-kontroller { opacity: 0; transform: translateY(10px); pointer-events: none; }
@@ -572,6 +608,7 @@
   -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
 }
 .vm-kontroller__vanster { grid-column: 1; }
+.vm-kontroller > .vm-kontroller__vanster:empty { display: none; }
 .vm-kontroller__mitt { grid-column: 2; }
 .vm-kontroller__hoger { grid-column: 3; justify-self: end; }
 .vm-kontroller__mitt > .vm-knapp, .vm-kontroller__hoger > .vm-knapp { background: transparent; }
@@ -579,35 +616,45 @@
 .vm-kontroller__mitt > .vm-knapp--pa, .vm-kontroller__hoger > .vm-knapp[aria-pressed="true"] { background: var(--vm-accent); color: var(--vm-pa-accent); }
 .vm-kontroller__hoger > .vm-knapp[aria-pressed="true"] .vm-bricka { box-shadow: 0 0 0 2px var(--vm-accent); background: var(--vm-scen); color: var(--vm-pa-scen); }
 .vm-kontroller__mitt > .vm-delad--lamna { margin-left: 6px; }
+.vm-kontroller__mitt, .vm-kontroller__hoger { flex-wrap: nowrap; white-space: nowrap; }
+/* Vakten (samtal-ui.js passaKontroller) sätter data-trang när raden inte ryms:
+   1 = inga etiketter, 2 = Chatt/Personer/Info flyttas till Mer, 3 = även Dela/Räck upp/Reagera, 4 = bara ikoner utan pilar */
+.vm-kontroller[data-trang="2"], .vm-kontroller[data-trang="3"], .vm-kontroller[data-trang="4"] { display: flex; justify-content: center; }
+.vm-kontroller[data-trang="2"] .vm-kontroller__hoger, .vm-kontroller[data-trang="3"] .vm-kontroller__hoger, .vm-kontroller[data-trang="4"] .vm-kontroller__hoger,
+.vm-kontroller[data-trang="3"] .vm-k-extra, .vm-kontroller[data-trang="4"] .vm-k-extra, .vm-kontroller[data-trang="4"] .vm-knapp__pil { display: none !important; }
+.vm-kontroller[data-trang="4"] .vm-delad > .vm-knapp:first-child { border-radius: 999px; width: var(--vm-knapp); }
+.vm-kontroller[data-trang="4"] .vm-knapp--lamna .vm-knapp__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.vm-kontroller[data-trang="4"] .vm-delad.vm-delad--lamna > .vm-knapp.vm-knapp--lamna { padding: 0; width: calc(var(--vm-knapp) + 12px); }
 
-/* Full (förval): etikett under ikonen på breda skärmar, som i Teams */
-@media (min-width: 1100px) {
-  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller .vm-knapp:not(.vm-knapp--lamna) {
+/* Full (förval): etikett under ikonen när scenen är bred, som i Teams (vakten tar bort dem när raden inte ryms) */
+@container vm-scen (min-width: 900px) {
+  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller:not([data-trang]) .vm-knapp:not(.vm-knapp--lamna) {
     width: auto; min-width: 58px; height: 56px; padding: 6px 8px 5px; border-radius: 16px; gap: 3px; align-content: center;
   }
-  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller .vm-knapp:not(.vm-knapp--lamna) .vm-knapp__text {
+  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller:not([data-trang]) .vm-knapp:not(.vm-knapp--lamna) .vm-knapp__text {
     position: static; width: auto; height: auto; clip: auto; overflow: visible; font: 600 .66rem/1 var(--vm-rubrik); letter-spacing: .01em; opacity: .85;
   }
-  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller .vm-delad { border-radius: 16px; }
-  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller .vm-delad > .vm-knapp:first-child { border-radius: 16px 0 0 16px; }
-  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller .vm-knapp__pil { border-radius: 0 16px 16px 0; }
-  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller__mitt, html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller__hoger { border-radius: 22px; }
-  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller .vm-knapp--lamna { height: 56px; border-radius: 16px; }
-  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller .vm-delad--lamna { border-radius: 16px; }
-  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller .vm-delad--lamna > .vm-knapp--lamna:not(:only-child) { border-radius: 16px 0 0 16px; }
-  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller .vm-bricka { top: 4px; right: 8px; }
+  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller:not([data-trang]) .vm-delad { border-radius: 16px; }
+  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller:not([data-trang]) .vm-delad > .vm-knapp:first-child { border-radius: 16px 0 0 16px; }
+  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller:not([data-trang]) .vm-knapp__pil { border-radius: 0 16px 16px 0; }
+  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller:not([data-trang]) .vm-kontroller__mitt, html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller:not([data-trang]) .vm-kontroller__hoger { border-radius: 22px; }
+  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller:not([data-trang]) .vm-knapp--lamna { height: 56px; border-radius: 16px; }
+  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller:not([data-trang]) .vm-delad--lamna { border-radius: 16px; }
+  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller:not([data-trang]) .vm-delad--lamna > .vm-knapp--lamna:not(:only-child) { border-radius: 16px 0 0 16px; }
+  html:not([data-layout="minimal"]):not([data-layout="normal"]) .vm-kontroller:not([data-trang]) .vm-bricka { top: 4px; right: 8px; }
 }
 /* Normal och Minimal: 44 px-knappar, bara ikoner */
 html[data-layout="normal"] .vm, html[data-layout="minimal"] .vm { --vm-knapp: var(--l-knapp, 44px); }
 html[data-layout="minimal"] .vm-kontroller__vanster, html[data-layout="minimal"] .vm-topp__meta { display: none; }
-html[data-layout="minimal"] .vm-knapp--lamna .vm-knapp__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-html[data-layout="minimal"] .vm-knapp--lamna { padding: 0 14px; }
+html[data-layout="minimal"] .vm-kontroller .vm-knapp--lamna .vm-knapp__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+html[data-layout="minimal"] .vm-kontroller .vm-knapp--lamna { padding: 0 14px; }
 html[data-layout="minimal"] .vm-egen { width: clamp(130px, 12vw, 190px); }
+html[data-layout="minimal"] .vm { --vm-egen-b: clamp(130px, 12vw, 190px); }
 html[data-layout="minimal"] .vm-yta { padding-inline: 12px; }
 
 /* Menyer (popover) – alltid mörka, som scenen */
 .vm-meny {
-  position: fixed; z-index: 30; min-width: 250px; max-width: min(340px, calc(100vw - 16px)); max-height: min(70vh, 520px); overflow-y: auto;
+  position: fixed; z-index: 30; min-width: 250px; max-width: min(340px, calc(100vw - 16px)); max-height: min(calc(100dvh - 110px), 600px); overflow-y: auto; overscroll-behavior: contain;
   padding: 6px; border-radius: calc(18px * var(--t-radie-k, 1));
   background: rgba(34, 30, 25, .97); color: var(--vm-pa-scen);
   box-shadow: inset 0 0 0 1px var(--vm-glas-kant), 0 30px 60px -20px rgba(0, 0, 0, .85);
@@ -639,6 +686,17 @@ html[data-layout="minimal"] .vm-yta { padding-inline: 12px; }
 .vm-reakt-knapp--hjarta { color: #ff8f7a; }
 .vm-reakt-knapp--applad { color: var(--vm-gul); }
 .vm-meny__mobil { display: none; }
+/* Dela-facket: bredare, rubrik överst, "Från affären" fylls av samtal-dela.js */
+.vm-meny--dela { width: min(520px, calc(100vw - 16px)); max-width: none; padding: 8px; }
+.vm-dela__huvud { display: flex; align-items: center; gap: 8px; padding: 6px 4px 6px 10px; }
+.vm-dela__huvud b { flex: 1; font: 600 .98rem/1.2 var(--vm-rubrik); letter-spacing: -.01em; }
+.vm-dela__stang { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .06); color: var(--vm-pa-scen-2); cursor: pointer; }
+.vm-dela__stang:hover { background: rgba(255, 255, 255, .12); color: var(--vm-pa-scen); }
+.vm-dela__stang .vm-ik { width: 15px; height: 15px; }
+.vm-dela__affar:empty { display: none; }
+.vm-dela__rader { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+.vm-meny--dela.vm-meny--ark { width: auto; }
+@media (max-width: 479px) { .vm-dela__rader { grid-template-columns: minmax(0, 1fr); } }
 .vm-meny--ark { left: 8px !important; right: 8px; top: auto !important; bottom: 8px; max-width: none; min-width: 0; max-height: 78dvh; border-radius: 22px; transform-origin: 50% 100%; animation-name: vm-ark-in; }
 
 /* ---------- Paneler ---------- */
@@ -826,10 +884,21 @@ html[data-layout="minimal"] .vm-yta { padding-inline: 12px; }
 .vm-mini__namn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--vm-pa-scen); font: 600 .82rem/1.2 var(--vm-rubrik); }
 .vm-mini__tid { margin-left: auto; font-variant-numeric: tabular-nums; }
 .vm-mini__vantar { padding: 2px 7px; border-radius: 999px; background: var(--vm-accent); color: var(--vm-pa-accent); font-weight: 700; }
-.vm-mini__knappar { position: absolute; left: 0; right: 0; bottom: 10px; z-index: 3; display: flex; justify-content: center; gap: 6px; }
+.vm-mini__knappar { position: absolute; left: 0; right: 0; bottom: 10px; z-index: 3; display: flex; align-items: center; justify-content: center; gap: 8px; }
+/* Lämna står för sig, efter en tunn avdelare */
+.vm-mini__skilj { width: 1px; height: 22px; margin: 0 2px; background: rgba(255, 255, 255, .28); flex: none; }
+.vm-mini__info { padding-right: 34px; }
+.vm-mini__flytta {
+  position: absolute; top: 6px; right: 6px; z-index: 5; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0;
+  border-radius: 50%; background: rgba(14, 12, 10, .62); color: var(--vm-pa-scen); cursor: pointer; opacity: 0; transition: opacity 140ms linear;
+}
+.vm-mini__flytta .vm-ik { width: 14px; height: 14px; }
+.vm-mini:hover .vm-mini__flytta, .vm-mini:focus-within .vm-mini__flytta { opacity: 1; }
+@media (hover: none) { .vm-mini__flytta { opacity: 1; } }
+.vm-mini__delat { position: absolute; left: 10px; bottom: 54px; z-index: 3; max-width: calc(100% - 20px); padding: 3px 8px; border-radius: 999px; background: rgba(14, 12, 10, .62); color: var(--vm-pa-scen); font: 600 .7rem/1.2 var(--vm-rubrik); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vm-mini__knappar .vm-knapp { background: rgba(14, 12, 10, .6); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 .vm-mini__knappar .vm-knapp--av, .vm-mini__knappar .vm-knapp--lamna { background: var(--vm-rod); }
-.vm-mini__knappar .vm-knapp--lamna { padding: 0; width: 36px; min-width: 36px; }
+.vm-mini__knappar .vm-knapp--lamna { padding: 0; width: 36px; min-width: 36px; justify-content: center; }
 .vm-mini__knappar .vm-knapp--tillbaka { background: var(--vm-accent); color: var(--vm-pa-accent); }
 
 /* ---------- Slutskärmen ---------- */
@@ -876,20 +945,39 @@ html[data-layout="minimal"] .vm-yta { padding-inline: 12px; }
 }
 
 /* ---------- Mellanstora skärmar ---------- */
-@media (max-width: 1099px) {
+@media (max-width: 899px) {
   .vm[data-panel] .vm-scen { right: 0; }
   .vm[data-panel] .vm-forhand { padding-right: 24px; }
   .vm[data-panel] .vm-avisering-yta { right: 16px; }
-  .vm-kontroller__vanster { display: none; }
-  .vm-kontroller { grid-template-columns: auto auto; justify-content: center; }
-  .vm-kontroller__mitt, .vm-kontroller__hoger { grid-column: auto; }
-  .vm-kontroller__hoger { justify-self: start; }
+}
+/* 640–899 px: panelen ligger över scenen men aldrig över toppens knappar eller verktygsraden */
+@media (min-width: 640px) and (max-width: 899px) {
+  .vm[data-fas="mote"] .vm-panel { top: 60px; bottom: calc(var(--vm-kontroll-h, 84px) + 6px); }
 }
 @media (max-width: 899px) {
+  .vm .vm-remsa > .vm-egen { width: 150px; }
   .vm-forhand__kort { grid-template-columns: minmax(0, 1fr); gap: 18px; padding: 16px; }
   .vm[data-layout="talare"] .vm-yta, .vm[data-layout="delning"] .vm-yta { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
   .vm[data-layout="talare"] .vm-remsa, .vm[data-layout="delning"] .vm-remsa { flex-direction: row; justify-content: flex-start; overflow-x: auto; overflow-y: hidden; }
   .vm-remsa > .vm-ruta { width: 150px; }
+}
+
+/* ---------- Smal scen (mobil, eller smal scen bredvid panelen) ---------- */
+@container vm-scen (max-width: 639px) {
+  .vm-kontroller { display: flex; justify-content: center; padding: 8px 8px calc(12px + env(safe-area-inset-bottom)); }
+  .vm-kontroller__hoger, .vm-kontroller .vm-k-extra, .vm-kontroller .vm-knapp__pil { display: none !important; }
+  .vm-kontroller .vm-delad > .vm-knapp:first-child { border-radius: 999px; width: var(--vm-knapp); }
+  .vm-kontroller__mitt { gap: 8px; padding: 6px; }
+  .vm-kontroller .vm-knapp--lamna .vm-knapp__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .vm-kontroller .vm-delad.vm-delad--lamna > .vm-knapp.vm-knapp--lamna, .vm-kontroller .vm-knapp--lamna { padding: 0; width: calc(var(--vm-knapp) + 12px); }
+  /* En motpart i stående läge fyller ytan, som i Meet och Teams */
+  .vm[data-layout="galleri"] .vm-rutnat[data-antal="1"] > .vm-ruta { width: 100%; height: 100%; aspect-ratio: auto; }
+}
+/* Egen bild får en egen remsa i hörnet i stället för att ligga över motpartens video */
+.vm { --vm-egen-b: clamp(150px, 15vw, 236px); }
+@container vm-scen (min-width: 640px) {
+  .vm[data-layout="galleri"][data-egen$="h"] .vm-yta { padding-right: calc(var(--vm-egen-b) + 34px); }
+  .vm[data-layout="galleri"][data-egen$="v"] .vm-yta { padding-left: calc(var(--vm-egen-b) + 34px); }
 }
 
 /* ---------- Mobil ---------- */
@@ -908,12 +996,6 @@ html[data-layout="minimal"] .vm-yta { padding-inline: 12px; }
   .vm-topp__meta { display: none; }
   .vm-yta { padding: 0 8px 6px; }
   .vm-rutnat { gap: 8px; }
-  .vm-kontroller { display: flex; justify-content: center; padding: 8px 8px calc(12px + env(safe-area-inset-bottom)); }
-  .vm-kontroller__hoger, .vm-kontroller .vm-k-extra, .vm-kontroller .vm-knapp__pil { display: none !important; }
-  .vm-kontroller .vm-delad > .vm-knapp:first-child { border-radius: 999px; width: var(--vm-knapp); }
-  .vm-kontroller__mitt { gap: 8px; padding: 6px; }
-  .vm-knapp--lamna .vm-knapp__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  .vm-delad.vm-delad--lamna > .vm-knapp.vm-knapp--lamna, .vm-knapp--lamna { padding: 0; width: calc(var(--vm-knapp) + 12px); justify-content: center; }
   .vm-egen { width: 104px; aspect-ratio: 3 / 4; }
   .vm-egen[data-horn="nh"], .vm-egen[data-horn="nv"] { bottom: 84px; }
   .vm-egen[data-horn="nh"], .vm-egen[data-horn="oh"] { right: 12px; }
@@ -924,19 +1006,23 @@ html[data-layout="minimal"] .vm-yta { padding-inline: 12px; }
   .vm-panel__kropp { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
   .vm-avisering-yta { top: 10px; right: 10px; left: 10px; width: auto; }
   .vm[data-fas="mote"] .vm-avisering-yta { top: 50px; }
-  .vm-mini { width: 168px; border-radius: 14px; }
+  /* Minirutan på mobil: 44 px tryckytor (mikrofon, kamera, tillbaka, lämna) */
+  .vm-mini { width: min(236px, calc(100vw - 32px)); aspect-ratio: auto; height: 140px; border-radius: 16px; }
   .vm-mini[data-horn="nh"], .vm-mini[data-horn="nv"] { bottom: 86px; }
-  .vm-mini__info { top: 6px; left: 8px; right: 8px; }
+  .vm-mini__info { top: 8px; left: 10px; right: 10px; }
   .vm-mini__tid, .vm-mini__vantar { display: none; }
-  .vm-mini__knappar { bottom: 6px; gap: 4px; }
-  .vm-mini__knappar .vm-knapp { --vm-knapp: 30px; }
-  .vm-mini__knappar [data-vm="flytta-mini"], .vm-mini__knappar [data-vm="kam"] { display: none; }
-  .vm-mini__knappar .vm-knapp--lamna { width: 30px; min-width: 30px; }
+  .vm-mini__knappar { bottom: 8px; gap: 6px; }
+  .vm-mini__knappar .vm-knapp { --vm-knapp: 44px; }
+  .vm-mini__skilj { height: 22px; margin: 0; }
+  .vm-mini__delat { bottom: 58px; }
+  .vm-mini__knappar .vm-knapp--lamna { width: 44px; min-width: 44px; }
+  .vm-mini__flytta { width: 40px; height: 40px; top: 4px; right: 4px; }
+  .vm-mini__info { padding-right: 44px; }
   .vm-slut__uppgift { grid-template-columns: minmax(0, 1fr); margin-left: 0; }
   .vm-knapprad--slut { justify-content: stretch; }
   .vm-knapprad--slut > * { flex: 1 1 auto; }
   .vm-bg__rutnat { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .vm-delar { top: 48px; max-width: calc(100% - 24px); }
+  .vm-delar { margin-bottom: 6px; font-size: .76rem; }
 }
 @media (max-height: 560px) and (min-width: 640px) {
   .vm-forhand { place-items: start center; }
@@ -954,5 +1040,17 @@ html[data-layout="minimal"] .vm-yta { padding-inline: 12px; }
   .vm-reaktioner { display: none; }
 }
 
+/* CRM:ets chattbubbla och docka göms medan mötet är öppet (inte minimerat) */
+html[data-vm-oppen] .chf-ikon, html[data-vm-oppen] .chf-dock { visibility: hidden; }
+
 /* Utskrift: lagret skrivs aldrig ut */
+/* Pekskärm: tryckytor på minst 44 px för pilarna och minirutan */
+@media (pointer: coarse) {
+  .vm-knapp__pil { width: 40px; padding: 0 6px 0 0; }
+  .vm-mini__knappar .vm-knapp { --vm-knapp: 44px; }
+  .vm-mini__knappar .vm-knapp--lamna { width: 44px; min-width: 44px; }
+  .vm-mini__delat { bottom: 60px; }
+  .vm-mini__flytta { width: 40px; height: 40px; }
+  .vm-mini__info { padding-right: 44px; }
+}
 @media print { .vm { display: none !important; } }

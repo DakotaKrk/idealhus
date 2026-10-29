@@ -3679,6 +3679,8 @@
   // upplägget med tid per bild, en checklista räknad ur datan och de
   // möten som redan hållits.
   var moteAffar = '', moteBilder = null;
+  // Förbered mötets val (affär och bilder i ordning) – videomötets presentation (samtal-dela.js) visar samma bilder
+  IH.moteForberett = function () { return { affar: moteAffar || null, bilder: (moteBilder || IH.MOTE_BILDER.map(function (b) { return b.id; })).slice() }; };
   var MOTE_MIN = { titel: 2, er: 3, hantverk: 3, husen: 8, regler: 5, resan: 4, kalkyl: 10, nasta: 3 };
   var MOTE_LAGEN = {
     fullt: ['Fullt möte', IH.MOTE_BILDER.map(function (b) { return b.id; })],
@@ -4008,6 +4010,11 @@
     if (!affar && kund) {
       var a = oppnaAffarer().filter(function (x) { return x.kund === kund; })[0];
       affar = a ? a.id : null;
+    }
+    // Pågår ett videomöte visas presentationen där (kunden ser bilden, du ser anteckningarna) i stället för i helskärm
+    if (IH.samtalDela && IH.samtalDela.kanVisa()) {
+      IH.samtalDela.visa(el.getAttribute('data-start') === 'kalkyl' ? 'kalkyl' : 'presentation', { affar: affar, kund: kund || null, bilder: bilder ? bilder.split(',') : null, start: el.getAttribute('data-start') || null });
+      return;
     }
     IH.Mote.starta({ affar: affar, kund: kund || null, start: el.getAttribute('data-start') || null, bilder: bilder ? bilder.split(',') : null });
   };

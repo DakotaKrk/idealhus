@@ -172,14 +172,37 @@
     if (!s.affar) return null;
     return IH.db.uppgifter.filter(function (u) { return !u.klar && /bes[öo]k/i.test(u.text) && (u.affar === s.affar.id || (!u.affar && u.kund === s.affar.kund)); })[0] || null;
   }
-  function kalkylRader() {
+  // Raderna för en kalkyl {modell, antal, tillval} – samma i kundmötet och i videomötets delade kalkyl
+  function kalkylRader(k) {
+    k = k || s.kalkyl;
     var pl = IH.db.prislista;
-    var m = IH.modell(s.kalkyl.modell);
-    var rader = [{ text: m.kategori + ' ' + m.namn + ', ' + m.yta + ' m²', antal: s.kalkyl.antal || 1, pris: pl.modeller[m.id] || 0 }];
+    var m = IH.modell(k.modell);
+    var rader = [{ text: m.kategori + ' ' + m.namn + ', ' + m.yta + ' m²', antal: k.antal || 1, pris: pl.modeller[m.id] || 0 }];
     pl.poster.forEach(function (p) {
-      if (p.id === 'frakt' || p.id === 'montage' || s.kalkyl.tillval[p.id]) rader.push({ text: p.text, antal: 1, pris: p.pris });
+      if (p.id === 'frakt' || p.id === 'montage' || (k.tillval && k.tillval[p.id])) rader.push({ text: p.text, antal: 1, pris: p.pris });
     });
     return rader;
+  }
+  function tillvalLista() {
+    return IH.db.prislista.poster.filter(function (p) { return TILLVAL.indexOf(p.id) >= 0; }).map(function (p) { return { id: p.id, text: p.text, pris: p.pris }; });
+  }
+  // Sparar kalkylen som offert på affären. c = {affar, las, sparad}; en andra sparning uppdaterar samma utkast.
+  // Offerten får det valda huset. Affärens modell (och värde) följer bara med när ingen skickad offert väntar på svar.
+  function sparaOffert(c, k) {
+    if (!c || !c.affar || c.las) return null;
+    var vantade = IH.db.offerter.some(function (x) { return x.affar === c.affar.id && x.status === 'skickad'; });
+    if (!vantade) c.affar.modell = k.modell;
+    var o = c.sparad && c.sparad.status === 'utkast' && IH.db.offerter.indexOf(c.sparad) >= 0 ? c.sparad : null;
+    if (o) {
+      o.rader = kalkylRader(k);
+      IH.logga('system', 'Offert ' + o.nummer + ' uppdaterad i ' + (c.kalla || 'kundmötet') + '.', c.affar.kund, c.affar.id);
+    } else o = IH.nyOffert(c.affar, kalkylRader(k));
+    o.modell = k.modell;
+    if (IH.vardeFranOffert) IH.vardeFranOffert(o);
+    c.sparad = o;
+    c.affar.andrad = new Date().toISOString();
+    IH.spara();
+    return { offert: o, vantar: IH.db.offerter.some(function (x) { return x.affar === c.affar.id && x.status === 'skickad'; }) };
   }
   function ritaKvitto(animera) {
     var yta = s.el.querySelector('[data-kvitto]');
@@ -413,8 +436,8 @@
     window.location.href = 'mailto:' + encodeURIComponent(k.epost) + '?subject=' + encodeURIComponent('Sammanfattning av vårt möte') + '&body=' + encodeURIComponent(rader.join('\n'));
   }
 
-  IH.Mote = {
-    starta: function (opt) {
+  // Mötets underlag: kund, förfrågan, förslag, kalkylens start och låsning. Delas med videomötets presentation (samtal-dela.js).
+  function kontext(opt) {
       opt = opt || {};
       var affar = opt.affar ? IH.affar(opt.affar) : null;
       // Utan affär kan mötet ändå höra till en kund (Kundmöte från kundsidan) – då sparas anteckningen där
@@ -447,10 +470,78 @@
       var las = affar && affar.steg === 'vunnen' ? 'Affären är vunnen – kalkylen visas men sparas inte som offert.'
         : affar && affar.forlorad ? 'Affären är förlorad – återuppta den för att spara en offert.'
         : IH.jag().roll === 'admin' ? 'Administratören sparar inte offerter.' : '';
-      s = {
+      return {
         affar: affar, kund: kund, modell: affar ? affar.modell : 'r1', forfragan: forfragan, forslag: forslag,
-        bilder: bilder, nu: -1, husId: null, forraSumma: 0, start: Date.now(), las: las, sparad: null,
-        kalkyl: { modell: kmodell, tillval: tillval, antal: antal }
+        bilder: bilder, las: las, sparad: null, kalkyl: { modell: kmodell, tillval: tillval, antal: antal }
+      };
+  }
+
+  // Bilderna som ren data (rubriker, texter, bild-URL:er) – videomötet skickar dem till kunden och ritar dem där.
+  // Ingen HTML: mottagaren escapar allt. Samma innehåll som bildHtml.
+  function bildData(id, c) {
+    var k = c.kund, m = IH.modell(c.modell), forn = k ? String(k.namn).split(' ')[0] : '';
+    var namn = (IH.MOTE_BILDER.filter(function (b) { return b.id === id; })[0] || {}).namn || '';
+    var d = { id: id, namn: namn };
+    switch (id) {
+      case 'titel':
+        d.etikett = 'Legohus Stockholm' + (k ? ' · för ' + k.namn : '');
+        d.titel = forn && k.typ !== 'foretag' ? ['Välkommen,', forn + '.'] : ['Hus formade', 'för platsen.'];
+        d.text = 'Attefallshus och fritidshus, byggda under tak i Sverige och monterade på tomten på några dagar.';
+        d.bild = m && m.glb ? m.bild : '../images/hus-r1.webp';
+        break;
+      case 'er':
+        var f = c.forfragan; if (!f) return null;
+        var typ = /^(Attefallshus|Fritidshus)$/.test(f.hustyp) ? f.hustyp.toLowerCase() : 'hus';
+        d.etikett = 'Er förfrågan · ' + IH.datum(f.skapad);
+        d.titel = ['Ert ' + typ + ',', String(f.miljo || 'på er tomt').toLowerCase() + '.'];
+        d.citat = String(f.beskrivning || ''); d.kalla = f.namn + ' · ' + f.ort;
+        d.fakta = [['Användning', f.anvandning], ['Ort', f.ort], ['Kom via', f.kalla]].map(function (x) { return [x[0], String(x[1] || '–')]; });
+        d.bild = IH.MILJO[f.miljo] || '../images/hus-r2.webp';
+        if (c.forslag) d.forslag = { namn: c.forslag.m.namn + (c.forslag.m.yta ? ' · ' + c.forslag.m.yta + ' m²' : ''), varfor: String(c.forslag.varfor || ''), bild: c.forslag.m.tumme };
+        break;
+      case 'hantverk':
+        d.etikett = 'Hantverket'; d.titel = ['Byggt under tak.', 'Monterat på dagar.'];
+        d.text = 'Väggar, golv och tak byggs inomhus i jämn temperatur och fuktnivå. På tomten återstår att lyfta, koppla samman och täta.';
+        d.chips = ['Svensk tillverkning', 'En kontakt hela vägen', 'Offert post för post'];
+        d.bild = '../images/hero-video-poster.webp';
+        break;
+      case 'husen':
+        d.etikett = 'Husen i 3D'; d.titel = ['Fem hus.', 'Ett formspråk.'];
+        d.hus = IH.MODELLER.filter(function (x) { return x.glb; }).map(function (x) { return { id: x.id, namn: x.namn, kategori: x.kategori, yta: x.yta, bild: x.tumme }; });
+        d.vald = m && m.glb ? m.id : 'r1';
+        break;
+      case 'regler':
+        d.etikett = 'Reglerna sedan 1 december 2025'; d.titel = ['Vad får ni', 'bygga?'];
+        d.tal = [['Per byggnad', '30', '50', 'm²'], ['Sammanlagt på tomten', '45', '65', 'm²'], ['Nockhöjd', '4,0', '4,5', 'm']];
+        d.text = 'Varken bygglov eller anmälan för själva byggnaden. Kök, badrum och eldstad anmäls ändå – för installationerna. Minst 4,5 m till tomtgräns utan grannens medgivande.';
+        break;
+      case 'resan':
+        d.etikett = 'Så går det till'; d.titel = ['Sju steg.', 'En kontakt.'];
+        d.steg = RESAN.map(function (r) { return [r[0], r[1], VEM[r[2]][1]]; });
+        break;
+      case 'kalkyl':
+        d.etikett = 'Räkna på ert hus'; d.titel = ['Ert hus,', 'post för post.'];
+        break;
+      case 'nasta':
+        d.etikett = 'Nästa steg'; d.titel = ['Vi börjar', 'med platsen.'];
+        d.steg = [['Platsbesök', 'Vi tittar på tomten, marken och vägen fram.'], ['Offert', 'Post för post – vad som ingår och vad som tillkommer.'], ['Beslut', 'Ni bestämmer i lugn och ro. Sedan planerar vi tillverkningen.']];
+        d.text = 'kontakt@legohusstockholm.se · Stockholm, Sverige';
+        break;
+      default: return null;
+    }
+    return d;
+  }
+
+  IH.Mote = {
+    kontext: kontext, bildData: bildData, kalkylRader: kalkylRader, tillvalLista: tillvalLista, sparaOffert: sparaOffert,
+    starta: function (opt) {
+      opt = opt || {};
+      var c = kontext(opt);
+      var affar = c.affar, kund = c.kund, forfragan = c.forfragan, forslag = c.forslag, bilder = c.bilder;
+      s = {
+        affar: affar, kund: kund, modell: c.modell, forfragan: forfragan, forslag: forslag,
+        bilder: bilder, nu: -1, husId: null, forraSumma: 0, start: Date.now(), las: c.las, sparad: null,
+        kalkyl: c.kalkyl
       };
       var el = document.createElement('div');
       el.className = 'mote';
@@ -527,25 +618,13 @@
           if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
           else if (el.requestFullscreen) el.requestFullscreen().catch(function () {});
         } else if (g === 'spara' && s.affar && !s.las) {
-          // Offerten får det valda huset. Affärens modell (och värde) följer bara med när ingen skickad offert väntar på svar.
-          // En andra sparning i samma möte uppdaterar samma utkast.
-          var vantade = IH.db.offerter.some(function (x) { return x.affar === s.affar.id && x.status === 'skickad'; });
-          if (!vantade) s.affar.modell = s.kalkyl.modell;
-          var o = s.sparad && s.sparad.status === 'utkast' && IH.db.offerter.indexOf(s.sparad) >= 0 ? s.sparad : null;
-          if (o) {
-            o.rader = kalkylRader();
-            IH.logga('system', 'Offert ' + o.nummer + ' uppdaterad i kundmötet.', s.affar.kund, s.affar.id);
-          } else o = IH.nyOffert(s.affar, kalkylRader());
-          o.modell = s.kalkyl.modell;
-          if (IH.vardeFranOffert) IH.vardeFranOffert(o);
-          s.sparad = o;
-          s.affar.andrad = new Date().toISOString();
-          IH.spara();
+          var sv = sparaOffert(s, s.kalkyl);
+          if (!sv) return;
+          var o = sv.offert, vantar = sv.vantar;
           var r = b.getBoundingClientRect();
           IH.konfetti(r.left + r.width / 2, r.top);
           b.innerHTML = IH.i('bock') + 'Sparad som ' + e(o.nummer);
           b.disabled = true;
-          var vantar = IH.db.offerter.some(function (x) { return x.affar === s.affar.id && x.status === 'skickad'; });
           IH.toast('Offerten är sparad', o.nummer + ' · ' + IH.kr(IH.summaOffert(o)) + (vantar ? ' · utkast – den skickade offerten gäller tills du skickar den nya.' : ''), 'offert');
         }
       });
