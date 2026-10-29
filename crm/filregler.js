@@ -12,6 +12,11 @@
   const FARLIG = /\.(exe|com|bat|cmd|scr|pif|msi|msp|msix|appx|dll|sys|cpl|ocx|jar|jse?|vbe?|vbs|wsf|wsh|ps1|psm1|psd1|hta|lnk|url|reg|inf|scf|iso|img|vhdx?|apk|dmg|pkg|sh|bash|command|run|bin|elf|deb|rpm|appimage|gadget|chm|xll|wll|xlam|ppam)$/i;
   const MAKRO = /\.(docm|dotm|xlsm|xltm|xlsb|pptm|potm|ppsm|sldm)$/i;
   const TEXT = /\.(txt|csv|json|md|xml|html?|svg|ics|vcf|rtf|log)$/i;
+  // Filtyper som webbläsaren kan köra som en sida (aktivt innehåll): alltid en varning, blockeras med kod i
+  const AKTIV = /\.(html?|xhtml?|xht|shtml?|svgz?|xml|xsl|xslt|mht|mhtml)$/i;
+  // Kod och inbäddningar i markup: skript, händelseattribut (även <svg/onload=…>), srcdoc, ramar, objekt, omdirigering
+  const AKTIV_KOD = /<script\b|javascript\s*:|vbscript\s*:|[\s\/"'](?:on[a-z]+)\s*=|\bsrcdoc\s*=|<iframe\b|<frame\b|<object\b|<embed\b|<applet\b|<meta\b[^>]*http-equiv|<foreignObject\b|<base\b|<form\b[^>]*action\s*=|<!ENTITY\b|<xsl:|(?:href|src|action|formaction|data)\s*=\s*["']?\s*(?:[a-z]*&#|[a-z]*&[a-z]+;|[a-z]*script\s*:|data\s*:(?!\s*image\/(?:png|jpe?g|gif|webp)[;,]))/i;
+  const MARKUP = /^\s*(?:\ufeff|\xef\xbb\xbf)?\s*<(?:!doctype|html|svg|\?xml|xsl|head|body|iframe|script)\b/i;
   const RIKTNING = /[‪-‮⁦-⁩‎‏]/;
   const tecken = (b, fran, n) => { let s = ''; for (let i = fran; i < Math.min(b.length, fran + n); i++) s += String.fromCharCode(b[i]); return s; };
   // Byten som text (en byte = ett tecken) – för mönster i innehållet
@@ -40,6 +45,8 @@
   function namnFynd(namn, storl) {
     const f = fynd(); const n = String(namn || 'fil');
     if (RIKTNING.test(n)) f.blockera('Filnamnet har dolda riktningstecken som kan gömma den riktiga filändelsen');
+    // Dubbel filändelse till en webbsida (faktura.pdf.html): filen låtsas vara ett dokument men öppnas som en sida
+    if (AKTIV.test(n)) { const d = n.toLowerCase().split('.'); const fore = d.length > 2 ? d[d.length - 2] : ''; if (/^(pdf|docx?|xlsx?|pptx?|jpe?g|png|gif|txt|csv|zip)$/.test(fore)) f.blockera(`Dubbel filändelse – filen låtsas vara en .${fore} men är en .${d[d.length - 1]} (öppnas som en webbsida)`); }
     if (FARLIG.test(n)) {
       const d = n.toLowerCase().split('.'); const fore = d.length > 2 ? d[d.length - 2] : '';
       f.blockera(/^(pdf|docx?|xlsx?|pptx?|jpe?g|png|gif|txt|csv|zip)$/.test(fore) ? `Dubbel filändelse – filen låtsas vara en .${fore} men är en .${d[d.length - 1]} (kan köra program)` : `Filtypen .${d[d.length - 1]} kan köra program och tas inte emot`);
@@ -97,7 +104,10 @@
   function innehallFynd(namn, text, typ) {
     const f = fynd(); const n = String(namn || ''); const t = String(text || '');
     if (t.includes(EICAR)) f.blockera('Testviruset EICAR hittades (standardfilen för att prova antivirusskydd)');
-    if (/\.(html?|svg|xml)$/i.test(n) || /^\s*<(?:!doctype|html|svg)/i.test(t.slice(0, 300))) { if (/<script\b|javascript:|\son[a-z]+\s*=/i.test(t)) f.blockera('Filen innehåller skript (HTML/SVG med kod)'); }
+    if (AKTIV.test(n) || MARKUP.test(t.slice(0, 300))) {
+      if (AKTIV_KOD.test(t)) f.blockera('Filen innehåller skript eller inbäddat innehåll (HTML/SVG/XML med kod)');
+      else if (AKTIV.test(n)) f.varna('Filen är en webbsida, SVG eller XML och kan öppnas som en sida – öppna den bara om du litar på avsändaren');
+    }
     if (t.startsWith('%PDF-')) {
       if (/\/Launch\b/.test(t)) f.blockera('PDF:en försöker starta ett program (/Launch)');
       if (/\/(JavaScript|JS)\b/.test(t)) f.varna('PDF:en innehåller JavaScript');
@@ -152,12 +162,13 @@
   function granska({ namn, typ = '', bytes }) {
     const b = bytes || new Uint8Array(0);
     const huvud = b.subarray(0, 4096);
-    const text = latin1(b.subarray(0, Math.min(b.length, 8 * 1024 * 1024)));
+    const helt = AKTIV.test(String(namn || '')) || TEXT.test(String(namn || '')) || MARKUP.test(tecken(huvud, 0, 300));
+    const text = latin1(b.subarray(0, helt ? b.length : Math.min(b.length, 8 * 1024 * 1024)));
     const alla = [...namnFynd(namn, b.length), ...typFynd(typ, namn, huvud), ...signaturFynd(namn, huvud, b.length),
       ...kodFynd(namn, huvud, huvud[0] === 0x50 && huvud[1] === 0x4b ? text : ''), ...innehallFynd(namn, text, typ)];
     const sedda = new Set(); const fl = alla.filter((x) => { const k = x.allvar + x.text; if (sedda.has(k)) return false; sedda.add(k); return true; }).map(({ allvar, text: t }) => ({ allvar, text: t }));
     return { fynd: fl, status: status(fl) };
   }
 
-  return { MAX, FARLIG, MAKRO, TEXT, SIGNATUR, EICAR, latin1, storlek, namnFynd, signaturFynd, kodFynd, innehallFynd, csvFynd, innehallsTyp, typFynd, granska, status };
+  return { MAX, FARLIG, MAKRO, TEXT, AKTIV, AKTIV_KOD, MARKUP, SIGNATUR, EICAR, latin1, storlek, namnFynd, signaturFynd, kodFynd, innehallFynd, csvFynd, innehallsTyp, typFynd, granska, status };
 });

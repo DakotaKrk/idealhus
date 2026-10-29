@@ -1595,7 +1595,7 @@
 
   G['ik-period'] = function (el) { intaktPeriod = +el.getAttribute('data-f'); IH.rita(); };
   G['ik-csv'] = function () {
-    var esc = function (v) { v = String(v == null ? '' : v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var esc = function (v) { if (typeof v === 'number') return String(v); v = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[";\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
     var rader = [['Vunnen', 'Affär', 'Kund', 'Hus', 'Värde (kr)', 'Säljare']].concat(db().affarer.filter(function (a) { return a.steg === 'vunnen' && a.vunnen; }).sort(function (a, b) { return a.vunnen < b.vunnen ? 1 : -1; }).map(function (a) { var k = IH.kund(a.kund), m = IH.modell(a.modell), u = IH.anvandare(a.ansvarig); return [IH.datum(a.vunnen, true), a.titel, k ? k.namn : '', m ? m.namn : '', a.varde, u ? u.namn : '']; }));
     var l = document.createElement('a'); l.href = URL.createObjectURL(new Blob(['\ufeff' + rader.map(function (r) { return r.map(esc).join(';'); }).join('\r\n')], { type: 'text/csv' })); l.download = 'vunna-affarer-' + IH.dagStr() + '.csv'; document.body.appendChild(l); l.click(); l.remove();
     IH.toast('Exporterat', (rader.length - 1) + (rader.length - 1 === 1 ? ' vunnen affär' : ' vunna affärer') + ' till CSV.', 'skrivut');
@@ -2482,7 +2482,7 @@
     location.href = 'mailto:?bcc=' + l.map(function (k) { return encodeURIComponent(k.epost); }).join(',');
   };
   G['kund-bulk-csv'] = function () {
-    var esc = function (v) { v = String(v == null ? '' : v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var esc = function (v) { if (typeof v === 'number') return String(v); v = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[";\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
     var rader = [['Namn', 'Typ', 'Ort', 'Telefon', 'E-post', 'På resan', 'Öppet (kr)', 'Vunnet (kr)', 'Senaste kontakt']].concat(valdaKunder().map(function (k) { var x = kundInfo(k); return [k.namn, k.typ === 'foretag' ? 'Företag' : 'Privat', k.ort, k.telefon, k.epost, x.steg < 0 || x.utanKontakt ? 'Ingen kontakt' : RESA_STEG[x.steg][1], x.oppet, x.vunnet, x.senast ? IH.dagStr(x.senast.tid) : '']; }));
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + rader.map(function (r) { return r.map(esc).join(';'); }).join('\r\n')], { type: 'text/csv' }));
     a.download = 'kunder-' + IH.dagStr() + '.csv'; document.body.appendChild(a); a.click(); a.remove();
@@ -3131,8 +3131,11 @@
     });
   };
   var dokOppnaBlob = function (blob, namn, ladda) {
+    // visa bara säkra typer i webbläsaren; HTML, SVG, XML och okända typer laddas ner (annars renderas de på CRM:ets origin)
+    var typ = String(blob.type || '').split(';')[0].trim().toLowerCase(), saker = /^(application\/pdf|image\/(png|jpeg|webp|gif)|text\/plain)$/.test(typ);
+    if (!saker) ladda = true;
     var u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u;
-    if (ladda) a.download = namn; else a.target = '_blank';
+    if (ladda) a.download = namn || 'fil'; else a.target = '_blank';
     a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 60000);
   };
   G['dok-fil-oppna'] = function (el) {
@@ -3173,7 +3176,7 @@
   G['dok-fil-bort'] = function (el) { var l = db().dokument || [], n = l.findIndex(function (x) { return x.id === el.getAttribute('data-id'); }); if (n >= 0) l.splice(n, 1); IH.spara(); IH.stangArk(true); IH.rita(); IH.toast('Borttagen', '', 'stang'); };
   G['dok-csv'] = function () {
     var l = dokSortera(dokPoster().filter(function (p) { return dokPassar(p); }));
-    var esc = function (v) { v = String(v == null ? '' : v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var esc = function (v) { if (typeof v === 'number') return String(v); v = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[";\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
     var rader = [['Typ', 'Dokument', 'Detalj', 'Kund', 'Status', 'Värde (kr)', 'Datum']].concat(l.map(function (p) { return [DOK_FACK.find(function (f) { return f.id === p.fack; }).namn, p.namn, p.under, p.k ? p.k.namn : '', p.status[0], p.varde || '', p.datum ? IH.datum(p.datum) : '']; }));
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rader.map(function (r) { return r.map(esc).join(';'); }).join('\r\n')], { type: 'text/csv' }));
     a.download = 'dokument-' + IH.dagStr() + '.csv'; document.body.appendChild(a); a.click(); a.remove();
@@ -3455,7 +3458,7 @@
       '<div><small>Datum</small><b>' + IH.datum(o.skapad, true) + '</b><span>Giltig i ' + o.giltig + ' dagar</span></div></div>' +
       '<table class="dok__rader"><thead><tr><th>Beskrivning</th><th>Antal</th><th>À-pris</th><th>Summa</th></tr></thead><tbody data-stagger>' +
       o.rader.map(function (r) {
-        return '<tr><td>' + e(r.text) + '</td><td>' + (r.antal || 0) + '</td><td>' + IH.kr(r.pris) + '</td><td>' + IH.kr((r.pris || 0) * (r.antal || 0)) + '</td></tr>';
+        return '<tr><td>' + e(r.text) + '</td><td>' + (Number(r.antal) || 0) + '</td><td>' + IH.kr(r.pris) + '</td><td>' + IH.kr((r.pris || 0) * (r.antal || 0)) + '</td></tr>';
       }).join('') + '</tbody></table>' +
       '<div class="dok__summa"><span>Att betala</span><b class="tal" data-dok-summa>' + IH.kr(sum) + '</b><small>Priserna är exempel i prototypen</small></div>' +
       '<footer class="dok__fot">Huset byggs under tak i Sverige och monteras på tomten. Bygglov, grund och anslutningar ingår inte om inget annat står ovan.</footer>' +
@@ -3497,12 +3500,12 @@
           }).join('') + '</div>' +
           '<div class="offertrader" data-rader>' + o.rader.map(function (r, n) {
             return '<div class="offertrader__rad" data-n="' + n + '"><span class="offertrader__emoji" aria-hidden="true">' + (n === 0 ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-hem"/></svg>' : postEmoji(r.text)) + '</span><input value="' + e(r.text) + '" data-f="text" aria-label="Beskrivning"' + (las ? ' disabled' : '') + '>' +
-              '<input type="number" min="0" value="' + r.antal + '" data-f="antal" aria-label="Antal"' + (las ? ' disabled' : '') + '>' +
-              '<input type="number" min="0" step="500" value="' + r.pris + '" data-f="pris" aria-label="Pris"' + (las ? ' disabled' : '') + '>' +
+              '<input type="number" min="0" value="' + (Number(r.antal) || 0) + '" data-f="antal" aria-label="Antal"' + (las ? ' disabled' : '') + '>' +
+              '<input type="number" min="0" step="500" value="' + (Number(r.pris) || 0) + '" data-f="pris" aria-label="Pris"' + (las ? ' disabled' : '') + '>' +
               (las ? '' : '<button class="ikonknapp" type="button" data-g="offert-bort" data-id="' + o.id + '" data-n="' + n + '" aria-label="Ta bort">' + i('stang') + '</button>') + '</div>';
           }).join('') + '</div>' +
           (las ? '' : '<div class="offertlagg"><select data-lagg aria-label="Lägg till rad"><option value="">+ Lägg till ur prislistan…</option>' + IH.db.prislista.poster.map(function (p) {
-            return '<option value="' + p.id + '">' + e(p.text) + ' · ' + IH.kr(p.pris) + '</option>';
+            return '<option value="' + e(p.id) + '">' + e(p.text) + ' · ' + IH.kr(p.pris) + '</option>';
           }).join('') + '<option value="egen">Egen rad…</option></select></div>') +
           '<div class="offertsumma"><span><small><svg class="emo-ik" aria-hidden="true"><use href="#i-pengar"/></svg> Summa</small>' + o.rader.length + (o.rader.length === 1 ? ' rad' : ' rader') + ' · sparas direkt i offerten</span><b class="tal" data-summa>' + IH.kr(IH.summaOffert(o)) + '</b></div>' +
           '</div></section>' +
@@ -3701,7 +3704,7 @@
   }
 
   // Samtalsstöd för vald affär: det kunden nämnt (med färdiga svar) och frågorna som återstår – bockas av under mötet
-  var moteFragor = {};
+  var moteFragor = Object.create(null);
   // Platsbesök för just den här affären (eller kundens besök utan affär)
   function besokFor(a, oppna) {
     return db().uppgifter.filter(function (u) { return (!oppna || !u.klar) && /bes[öo]k/i.test(u.text) && (u.affar === a.id || (!u.affar && u.kund === a.kund)); })[0] || null;
@@ -4595,7 +4598,7 @@
     IH.toast('Flyttade till i dag', l.length + (l.length === 1 ? ' uppgift' : ' uppgifter') + ' ligger nu på i dag.', 'kalender');
   };
   G['ag-csv'] = function () {
-    var esc = function (v) { v = String(v == null ? '' : v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var esc = function (v) { if (typeof v === 'number') return String(v); v = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return /[";\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
     var rader = [['Datum', 'Uppgift', 'Typ', 'Kund', 'Ansvarig', 'Klar']].concat(db().uppgifter.filter(agFilter).sort(function (a, b) { return a.forfaller < b.forfaller ? -1 : 1; }).map(function (x) {
       var k = x.kund && IH.kund(x.kund), a = x.ansvarig && IH.anvandare(x.ansvarig); return [IH.dagStr(new Date(x.forfaller)), x.text, uppgTyp(x.text)[2], k ? k.namn : '', a ? a.namn : '', x.klar ? 'Ja' : 'Nej']; }));
     var l = document.createElement('a'); l.href = URL.createObjectURL(new Blob(['\ufeff' + rader.map(function (r) { return r.map(esc).join(';'); }).join('\r\n')], { type: 'text/csv' })); l.download = 'att-gora-' + IH.dagStr() + '.csv'; document.body.appendChild(l); l.click(); l.remove();

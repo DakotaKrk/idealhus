@@ -22,6 +22,7 @@
   const fornamn = (u) => String(u.namn || '').split(' ')[0];
   const lugn = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pek = () => matchMedia('(hover: none), (pointer: coarse)').matches;
+  const DATAURL = /^data:[a-z0-9.+\/-]+;base64,[A-Za-z0-9+\/=]*$/i;
   const nyId = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
   const PREF = 'ih-crm-chatt';
   const pref = () => { try { return JSON.parse(localStorage.getItem(PREF)) || {}; } catch (x) { return {}; } };
@@ -30,9 +31,9 @@
   /* 01 Data ------------------------------------------------------------------------------------- */
   function C() {
     const d = db();
-    if (!d.chatt) d.chatt = {};
+    if (!d.chatt || typeof d.chatt !== 'object' || Array.isArray(d.chatt)) d.chatt = {};
     const c = d.chatt;
-    c.kanaler = c.kanaler || []; c.meddelanden = c.meddelanden || []; c.last = c.last || {}; c.tyst = c.tyst || {};
+    if (!Array.isArray(c.kanaler)) c.kanaler = []; if (!Array.isArray(c.meddelanden)) c.meddelanden = []; c.last = c.last || {}; c.tyst = c.tyst || {};
     if (!c.exempel) {
       c.exempel = true;
       const t = (dagar, h, m) => { const x = new Date(); x.setDate(x.getDate() + dagar); x.setHours(h, m, 0, 0); return x.toISOString(); };
@@ -138,10 +139,12 @@
     const bara = !m.borttagen && m.text && BARA_EMOJI.test(m.text) && [...m.text.trim()].length <= 8;
     const orig = m.svar && meddelande(m.svar.mid), bort = m.svar && (!orig || orig.borttagen);
     const svar = m.svar ? '<button type="button" class="ch-citat" data-ch-hoppa="' + m.svar.mid + '"><b>' + e(fornamn(anv(m.svar.av))) + '</b><span>' + (bort ? '<i>Meddelandet togs bort</i>' : e(m.svar.text)) + '</span></button>' : '';
-    const filer = (m.filer || []).map((f) => (f.typ && f.typ.indexOf('image/') === 0 && f.data
-      ? '<a class="ch-bild" href="' + f.data + '" download="' + e(f.namn) + '"><img src="' + f.data + '" alt="' + e(f.namn) + '" loading="lazy">' + skannad(f) + '</a>'
-      : '<a class="ch-fil"' + (f.data ? ' href="' + f.data + '" download="' + e(f.namn) + '"' : '') + '>' + ik('gem') + '<span><b>' + e(f.namn) + '</b><small>' + storlek(f.storlek || 0) + '</small></span>' + skannad(f) + '</a>')).join('');
-    const reakt = m.reakt ? Object.keys(m.reakt).filter((x) => m.reakt[x].length).map((x) => '<button type="button" class="ch-reakt' + (m.reakt[x].indexOf(jag()) >= 0 ? ' min' : '') + '" data-g="ch-reagera" data-mid="' + m.id + '" data-emoji="' + x + '" title="' + e(m.reakt[x].map((id) => fornamn(anv(id))).join(', ')) + '">' + x + ' <b>' + m.reakt[x].length + '</b></button>').join('') : '';
+    // Bilagor visas bara som data-URL (FileReader/canvas); allt annat ritas utan länk
+    const url = (f) => (typeof f.data === 'string' && DATAURL.test(f.data) ? e(f.data) : '');
+    const filer = (m.filer || []).map((f) => (f.typ && String(f.typ).indexOf('image/') === 0 && url(f)
+      ? '<a class="ch-bild" href="' + url(f) + '" download="' + e(f.namn) + '"><img src="' + url(f) + '" alt="' + e(f.namn) + '" loading="lazy">' + skannad(f) + '</a>'
+      : '<a class="ch-fil"' + (url(f) ? ' href="' + url(f) + '" download="' + e(f.namn) + '"' : '') + '>' + ik('gem') + '<span><b>' + e(f.namn) + '</b><small>' + storlek(f.storlek || 0) + '</small></span>' + skannad(f) + '</a>')).join('');
+    const reakt = m.reakt ? Object.keys(m.reakt).filter((x) => m.reakt[x].length).map((x) => '<button type="button" class="ch-reakt' + (m.reakt[x].indexOf(jag()) >= 0 ? ' min' : '') + '" data-g="ch-reagera" data-mid="' + e(m.id) + '" data-emoji="' + e(x) + '" title="' + e(m.reakt[x].map((id) => fornamn(anv(id))).join(', ')) + '">' + e(x) + ' <b>' + m.reakt[x].length + '</b></button>').join('') : '';
     const verktyg = m.borttagen ? '' : '<span class="ch-verktyg" role="toolbar" aria-label="Åtgärder">' + SNABB.map((x) => '<button type="button" data-g="ch-reagera" data-mid="' + m.id + '" data-emoji="' + x + '" aria-label="Reagera ' + x + '">' + x + '</button>').join('') +
       '<button type="button" data-g="ch-svara" data-mid="' + m.id + '" title="Svara">' + ik('retur') + '</button><button type="button" data-g="ch-kopiera" data-mid="' + m.id + '" title="Kopiera">' + i('kopiera') + '</button>' +
       (egen ? '<button type="button" data-g="ch-andra" data-mid="' + m.id + '" title="Ändra">' + ik('redigera') + '</button><button type="button" data-g="ch-ta-bort" data-mid="' + m.id + '" title="Ta bort">' + ik('papperskorg') + '</button>' : '') + '</span>';
@@ -785,7 +788,7 @@
 
   /* 10 Filer: välj, dra in, klistra in – bilder skalas till JPEG ---------------------------------- */
   const TAK = 2.5 * 1048576;
-  const FARLIG = /\.(exe|bat|cmd|com|js|vbs|ps1|msi|scr|jar|html?|svg|hta|lnk)$/i;
+  const FARLIG = /\.(exe|bat|cmd|com|js|vbs|ps1|msi|scr|jar|html?|xhtml?|xht|shtml?|svgz?|xml|xsl|xslt|mht|mhtml|hta|lnk)$/i;
   function lasFil(fil) {
     return new Promise((klar) => {
       const r = new FileReader();

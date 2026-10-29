@@ -106,7 +106,7 @@
     if (!hist) ut.push({ ikon: 'radar', text: 'Ingen säkerhetsskanning gjord', under: 'Kör alla sju kontroller – tar några sekunder', g: 'sh-skanna-ga', knapp: 'Skanna nu' });
     else if (IH.dagarSedan(hist.tid) > 7) ut.push({ ikon: 'radar', text: 'Senaste skanningen är ' + IH.dagarSedan(hist.tid) + ' dagar gammal', under: 'Skanna minst en gång i veckan', g: 'sh-skanna-ga', knapp: 'Skanna' });
     if (H) H.kontroller.forEach(function (k) { var r = H.hub().senast[k.id], hog = r ? r.fynd.filter(function (x) { return x.allvar === 'hog'; }) : []; if (hog.length) ut.push({ ikon: 'skold-larm', text: k.namn + ': fynd med hög allvarlighet', under: hog[0].text, lank: '#/sakerhet', knapp: 'Visa' }); });
-    if (!(+inst.utlogg)) ut.push({ ikon: 'klocka', text: 'Utloggning vid inaktivitet är av', under: 'Datorer som lämnas olåsta loggas ut av sig själva', lank: '#/admin', knapp: 'Slå på' });
+    if (!IH.sak.utloggMin()) ut.push({ ikon: 'klocka', text: 'Utloggning vid inaktivitet är av', under: 'Datorer som lämnas olåsta loggas ut av sig själva', lank: '#/admin', knapp: 'Slå på' });
     if (!inst.kopia || IH.dagarSedan(inst.kopia) > 7) ut.push({ ikon: 'ladda-ner', text: inst.kopia ? 'Säkerhetskopian är ' + IH.dagarSedan(inst.kopia) + ' dagar gammal' : 'Ingen säkerhetskopia', under: 'Exportera all data som JSON', g: 'ad-exportera', knapp: 'Exportera data' });
     if (dl.brott) ut.push({ ikon: 'nyckelverktyg', text: plural(dl.brott, 'trasig koppling', 'trasiga kopplingar'), under: brott[0], g: 'sh-skanna-ga', data: 'buggar', knapp: 'Kontrollera' });
     if (dr.fel.length) ut.push({ ikon: 'bugg', text: plural(dr.fel.length, 'fel', 'fel') + ' sedan sidan laddades', under: 'Skript eller filer som inte fungerade', g: 'sh-skanna-ga', data: 'buggar', knapp: 'Kontrollera' });
@@ -266,7 +266,9 @@
     return false;
   };
   G['kc-csv'] = function () {
-    var d = db(), q = function (x) { return '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"'; };
+    if (!IH.kravAdmin()) return;
+    // Text som börjar med = + - @ tolkas som formel i Excel – den får en apostrof först
+    var d = db(), q = function (x) { var s = String(x == null ? '' : x); if (typeof x !== 'number' && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
     var rader = [['Namn', 'Roll', 'Status', 'Öppna affärer', 'Vunnet värde', 'Händelser 30 d'].map(q).join(';')].concat(IH.ANVANDARE.map(function (u) {
       var aff = d.affarer.filter(function (a) { return a.ansvarig === u.id; });
       return [u.namn, u.titel, IH.narvaro ? IH.narvaro(u.id).namn : '', aff.filter(function (a) { return a.steg !== 'vunnen' && !a.forlorad; }).length,
@@ -277,16 +279,18 @@
     IH.toast('Kontolistan är nedladdad', IH.ANVANDARE.length + ' konton', 'ladda-ner');
   };
   G['kc-rapport'] = function () {
+    if (!IH.kravAdmin()) return;
     var d = db(), t = IH.sakTotal ? IH.sakTotal() : null, inst = IH.sak ? IH.sak.inst() : {};
     var text = ['Legohus CRM – systemrapport ' + new Date().toLocaleString('sv-SE'), '', 'Konton: ' + IH.ANVANDARE.map(function (u) { return u.namn + ' (' + u.titel + ')'; }).join(', '),
       'Kunder: ' + d.kunder.length + ' · Affärer: ' + d.affarer.length + ' · Offerter: ' + d.offerter.length + ' · Projekt: ' + d.projekt.length,
       'Säkerhetspoäng: ' + (t == null ? 'inte skannat' : t + ' av 100'), 'Trasiga kopplingar: ' + (IH.sak ? IH.sak.kopplingsBrott().length : '–'),
-      'Utloggning vid inaktivitet: ' + (+inst.utlogg ? inst.utlogg + ' min' : 'av'), 'Senaste export: ' + (inst.kopia ? new Date(inst.kopia).toLocaleString('sv-SE') : 'ingen')].join('\n');
+      'Utloggning vid inaktivitet: ' + (IH.sak.utloggMin() ? IH.sak.utloggMin() + ' min' : 'av'), 'Senaste export: ' + (inst.kopia ? new Date(inst.kopia).toLocaleString('sv-SE') : 'ingen')].join('\n');
     var klart = function () { IH.toast('Systemrapporten är kopierad', 'Klistra in den i ett mejl eller dokument.', 'dokument'); };
     if (navigator.clipboard) navigator.clipboard.writeText(text).then(klart, function () { ladda('legohus-systemrapport.txt', text, 'text/plain;charset=utf-8'); });
     else ladda('legohus-systemrapport.txt', text, 'text/plain;charset=utf-8');
   };
   G['kc-rensa-bilder'] = function (el) {
+    if (!IH.kravAdmin()) return;
     if (!bekrafta(el)) return;
     var n = 0, fore = (localStorage.getItem(IH.NYCKEL) || '').length;
     (((db().chatt || {}).meddelanden) || []).forEach(function (m) { (m.filer || []).forEach(function (f) { if (f.data) { delete f.data; f.rensad = true; n++; } }); });
@@ -296,6 +300,7 @@
     IH.rita(); IH.toast(n ? 'Filerna är rensade' : 'Inga filer att rensa', n ? plural(n, 'fil', 'filer') + ' · ' + Math.round(sparat / 1024) + ' kB frigjort' : null, 'papperskorg');
   };
   G['kc-rensa-logg'] = function (el) {
+    if (!IH.kravAdmin()) return;
     if (!bekrafta(el)) return;
     var d = db(), fore = (d.sakerhet || []).length;
     // De tio senaste raderna och allt från supportläget finns kvar – spåret efter arbete i andras konton får inte försvinna
@@ -322,6 +327,7 @@
     return ut;
   }
   G['kc-fordela'] = function (el) {
+    if (!IH.kravAdmin()) return;
     var ids = el.getAttribute('data-ids') || '', p = fordelaPoster(ids), t = arbeteText(p);
     if (!t) { IH.toast('Inget att fördela', 'Allt har redan en säljare.', 'bock'); IH.rita(); return; }
     var salj = IH.ANVANDARE.filter(function (u) { return u.roll === 'salj' && !u.inaktiv && u.id !== p.fran; });
@@ -335,6 +341,7 @@
       fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button>' });
   };
   G['kc-fordela-till'] = function (el) {
+    if (!IH.kravAdmin()) return;
     var till = IH.anvandare(el.getAttribute('data-till')); if (!till) return;
     var p = fordelaPoster(el.getAttribute('data-ids') || ''), t = arbeteText(p), nu = new Date().toISOString();
     p.affarer.forEach(function (a) { a.ansvarig = till.id; a.andrad = nu; });

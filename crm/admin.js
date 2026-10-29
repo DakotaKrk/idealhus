@@ -9,6 +9,14 @@
   var i = IH.i;
   var db = function () { return IH.db; };
   var arAdmin = function () { return IH.jag().roll === 'admin'; };
+  // Vakt för adminåtgärder: knapparna ritas bara på adminsidorna, men dispatchern kör vilken IH.G-funktion som helst
+  // som ett data-g pekar på. Prototyp – i skarp drift måste servern kontrollera rollen vid varje anrop.
+  IH.kravAdmin = function () {
+    if (arAdmin()) return true;
+    IH.toast('Bara administratören kan göra det', IH.visarSom && IH.visarSom() ? 'Lämna supportläget först.' : null, 'las');
+    if (IH.sakLogg) IH.sakLogg('atkomst', IH.jag().namn + ' försökte köra en adminåtgärd utan behörighet.');
+    return false;
+  };
 
   /* 01 Säkerhetsloggen ---------------------------------------------------------------------------- */
   function logg(typ, text) {
@@ -32,12 +40,20 @@
   var INST = 'ih-crm-admin';
   function inst() { try { return JSON.parse(localStorage.getItem(INST)) || {}; } catch (x) { return {}; } }
   function sparaInst(nyckel, varde) { var o = inst(); o[nyckel] = varde; try { localStorage.setItem(INST, JSON.stringify(o)); } catch (x) { /* privat läge */ } }
-  var senast = Date.now(), varnad = null, varnTimer = 0;
-  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (t) { document.addEventListener(t, function () { senast = Date.now(); if (varnad) stangVarning(); }, { passive: true, capture: true }); });
+  // Standard 30 minuter tills administratören har valt något (0 = aldrig)
+  function utloggMin() { var v = inst().utlogg; return v == null ? 30 : (+v || 0); }
+  // Senaste aktivitet delas mellan flikarna, så att en orörd flik inte loggar ut en flik som används
+  var SENAST = 'ih-crm-senast';
+  var senast = Date.now(), varnad = null, varnTimer = 0, delad = 0;
+  var delaSenast = function () { if (senast - delad < 10000) return; delad = senast; try { localStorage.setItem(SENAST, String(senast)); } catch (x) { /* privat läge */ } };
+  var hamtaSenast = function () { try { var v = +localStorage.getItem(SENAST); if (v > senast && v <= Date.now() + 60000) senast = v; } catch (x) { /* privat läge */ } };
+  delaSenast();
+  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (t) { document.addEventListener(t, function () { senast = Date.now(); delaSenast(); if (varnad) stangVarning(); }, { passive: true, capture: true }); });
   function stangVarning() { if (varnad) { varnad.remove(); varnad = null; clearInterval(varnTimer); } }
   setInterval(function () {
-    var min = +inst().utlogg || 0;
+    var min = utloggMin();
     if (!min || !localStorage.getItem('ih-crm-inloggad')) return;
+    hamtaSenast();
     var kvar = min * 60000 - (Date.now() - senast);
     if (kvar <= 0) {
       stangVarning();
@@ -49,7 +65,7 @@
       varnad = document.createElement('div');
       varnad.className = 'ad-varning'; varnad.setAttribute('role', 'alertdialog');
       varnad.innerHTML = IH.emo('klocka', 'ad-varning__ikon') + '<div><b>Du loggas snart ut</b><small>Ingen aktivitet på en stund. <span data-ad-kvar>60</span> s kvar.</small></div><button class="knapp knapp--virke knapp--liten" type="button">Fortsätt</button>';
-      varnad.querySelector('button').addEventListener('click', function () { senast = Date.now(); stangVarning(); });
+      varnad.querySelector('button').addEventListener('click', function () { senast = Date.now(); delad = 0; delaSenast(); stangVarning(); });
       document.body.appendChild(varnad);
       varnTimer = setInterval(function () { var s = varnad && varnad.querySelector('[data-ad-kvar]'); if (s) s.textContent = Math.max(0, Math.ceil((min * 60000 - (Date.now() - senast)) / 1000)); }, 500);
     }
@@ -66,10 +82,11 @@
     d.uppgifter.forEach(function (u) { if (!finns(d.kunder, u.kund) || !finns(d.affarer, u.affar)) fel.push('Uppgiften ”' + u.text + '” pekar på något som saknas.'); });
     return fel;
   }
-  IH.sak = { inst: inst, kopplingsBrott: kopplingsBrott, logg: logg };
+  IH.sak = { inst: inst, kopplingsBrott: kopplingsBrott, logg: logg, utloggMin: utloggMin };
 
   /* 04 Export och återställning ------------------------------------------------------------------- */
   IH.G['ad-exportera'] = function () {
+    if (!IH.kravAdmin()) return;
     var blob = new Blob([JSON.stringify(db(), null, 2)], { type: 'application/json' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);

@@ -53,7 +53,14 @@
   /* Egna konton (Nytt konto): sparas i webbläsaren och läggs till exempelkontona */
   var EGNA = 'ih-crm-konton';
   function egnaKonton() { try { return JSON.parse(localStorage.getItem(EGNA)) || []; } catch (x) { return []; } }
-  egnaKonton().forEach(function (u) { if (!IH.anvandare(u.id)) IH.ANVANDARE.push(u); });
+  // Lagrade konton godtas bara med ofarligt id, färg och bild – värdena hamnar i attribut och i style="…"
+  var OK_ID = /^[A-Za-z0-9_-]{1,64}$/, OK_FARG = /^(#[0-9a-f]{3,8}|linear-gradient\([#0-9a-z,%(). -]+\))$/i, OK_BILD = /^data:image\/(jpeg|png|webp|gif);base64,[A-Za-z0-9+\/=]+$/;
+  egnaKonton().forEach(function (u) {
+    if (!u || typeof u.id !== 'string' || !OK_ID.test(u.id) || typeof u.namn !== 'string' || IH.anvandare(u.id)) return;
+    if (typeof u.farg !== 'string' || !OK_FARG.test(u.farg)) u.farg = '#cfc6b8';
+    if (u.bild && (typeof u.bild !== 'string' || !OK_BILD.test(u.bild))) delete u.bild;
+    IH.ANVANDARE.push(u);
+  });
 
   /* Kontomenyn (som kontoMeny i Uperformance): på dator täcker den sidomenyn exakt – samma kanter, hörn och höjd –
      annars ett ark. Dina siffror, snabbstatus, genvägarna, kontona, Nytt konto och Logga ut. */
@@ -86,7 +93,7 @@
   }
   function kmHtml() {
     var jag = IH.jag(), nu = narvaro(jag.id), vald = lasNarvaro()[jag.id] || nu.id;
-    var andra = IH.ANVANDARE.filter(function (u) { return u.id !== jag.id && !u.inaktiv; });
+    var andra = IH.ANVANDARE.filter(function (u) { return u.id !== jag.id && !u.inaktiv && (!IH.fartByta || IH.fartByta(u.id)); });
     var lank = function (attr, ikon, text) { var a = attr.indexOf('href') === 0; return '<' + (a ? 'a' : 'button type="button"') + ' class="km-lank" ' + attr + ' title="' + text + '">' + IH.emo(ikon) + '<span>' + text + '</span></' + (a ? 'a' : 'button') + '>'; };
     return '<header class="km-topp" style="--n:' + nu.farg + '">' +
         '<button type="button" class="km-stang" data-g="km-stang" aria-label="Stäng" title="Stäng (Esc)">' + i('stang') + '</button>' +
@@ -110,7 +117,7 @@
     if (km) { stangKm(); return; }
     var sido = document.querySelector('.sido'), r = sido && sido.getBoundingClientRect();
     if (!r || r.width < 200 || !matchMedia('(min-width: 1101px)').matches || document.documentElement.hasAttribute('data-sido-dold')) {
-      IH.oppnaArk({ titel: IH.jag().namn, under: IH.jag().titel, ikon: 'kunder', kropp: '<div class="km-ark">' + kmHtml() + '</div>' });
+      IH.oppnaArk({ titel: IH.jag().namn, under: e(IH.jag().titel), ikon: 'kunder', kropp: '<div class="km-ark">' + kmHtml() + '</div>' });
       return;
     }
     km = document.createElement('aside');
@@ -150,6 +157,8 @@
       fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="km-ny-form">' + i('plus') + 'Spara konto</button>' });
   };
   // Titeln efter roll – används för nya konton och när titeln töms i Ändra profil
+  // RFC 5545: rader längre än 75 oktetter viks med CRLF och ett blanksteg
+  IH.icsVik = function (rad) { var ut = '', n = 0; Array.from(String(rad)).forEach(function (t) { var b = unescape(encodeURIComponent(t)).length; if (n + b > 75) { ut += '\r\n '; n = 1; } ut += t; n += b; }); return ut; };
   var standardTitel = function (u) { return u.roll === 'salj' ? 'Sälj' + (u.chef ? ' · Försäljningschef' : '') : u.roll === 'prod' ? 'Produktion' : 'Administratör'; };
   var FARGER = [['#e8c98f', '#a6763a'], ['#9fc2c9', '#3d6a73'], ['#a9c8a4', '#3f6b50'], ['#f0b0a0', '#a8513e']].map(function (p) { return 'linear-gradient(135deg,' + p[0] + ',color-mix(in srgb,' + p[1] + ',' + p[0] + ' var(--t-avatar-ljus,0%)))'; });
   document.addEventListener('submit', function (ev) {
@@ -512,12 +521,12 @@
     var h = pkHandelser(u).filter(function (x) { return x.dag >= fran.getTime() && x.dag < till.getTime(); });
     franvaroLista().forEach(function (f) { if (f.u === u.id && dag0(f.till).getTime() >= fran.getTime() && dag0(f.fran).getTime() < till.getTime()) h.push({ id: f.id, tid: f.fran, slut: f.till, heldag: true, typ: 'franvaro', text: FRANVARO[f.typ][0] }); });
     var p2 = function (v) { return String(v).padStart(2, '0'); }, f = function (d) { return d.getUTCFullYear() + p2(d.getUTCMonth() + 1) + p2(d.getUTCDate()) + 'T' + p2(d.getUTCHours()) + p2(d.getUTCMinutes()) + '00Z'; };
-    var esc = function (t) { return String(t || '').replace(/[\\;,]/g, function (c) { return '\\' + c; }).replace(/\n/g, ' '); };
+    var esc = function (t) { return String(t || '').replace(/[\\;,]/g, function (c) { return '\\' + c; }).replace(/\r\n|\r|\n/g, ' '); };
     var rader = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Legohus//CRM//SV'];
     var dagF = function (d) { return dagISO(d).replace(/-/g, ''); };
-    h.forEach(function (x) { var s2 = new Date(x.tid), k = x.kund && IH.kund(x.kund); var slut2 = x.heldag ? new Date(dag0(x.slut).getTime() + 864e5) : null; rader.push('BEGIN:VEVENT', 'UID:' + x.id + '@legohus-crm', 'DTSTAMP:' + f(new Date()), x.heldag ? 'DTSTART;VALUE=DATE:' + dagF(s2) : 'DTSTART:' + f(s2), x.heldag ? 'DTEND;VALUE=DATE:' + dagF(slut2) : 'DTEND:' + f(new Date(s2.getTime() + 36e5)), 'SUMMARY:' + esc(x.typ === 'vunnen' || x.typ === 'franvaro' ? x.text : PK_TYP[x.typ][0] + ': ' + x.text), 'DESCRIPTION:' + esc(k ? k.namn : ''), 'END:VEVENT'); });
+    h.forEach(function (x) { var s2 = new Date(x.tid), k = x.kund && IH.kund(x.kund); var slut2 = x.heldag ? new Date(dag0(x.slut).getTime() + 864e5) : null; rader.push('BEGIN:VEVENT', 'UID:' + String(x.id).replace(/[^A-Za-z0-9_-]/g, '') + '@legohus-crm', 'DTSTAMP:' + f(new Date()), x.heldag ? 'DTSTART;VALUE=DATE:' + dagF(s2) : 'DTSTART:' + f(s2), x.heldag ? 'DTEND;VALUE=DATE:' + dagF(slut2) : 'DTEND:' + f(new Date(s2.getTime() + 36e5)), 'SUMMARY:' + esc(x.typ === 'vunnen' || x.typ === 'franvaro' ? x.text : PK_TYP[x.typ][0] + ': ' + x.text), 'DESCRIPTION:' + esc(k ? k.namn : ''), 'END:VEVENT'); });
     rader.push('END:VCALENDAR');
-    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rader.join('\r\n')], { type: 'text/calendar' }));
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rader.map(IH.icsVik).join('\r\n')], { type: 'text/calendar' }));
     a.download = 'kalender-' + u.namn.split(' ')[0].toLowerCase() + '-' + (pk.vy === 'ar' ? fran.getFullYear() : dagISO(fran).slice(0, 7)) + '.ics'; document.body.appendChild(a); a.click(); a.remove();
     IH.toast('Kalenderfilen är klar', plural(h.length, 'händelse', 'händelser') + ' – öppna filen i din kalender.', 'kalender');
   };
@@ -802,12 +811,12 @@
     var vemFv = function (uid) { return chefUi.kalVem === 'alla' ? kalTeam().some(function (x) { return x.u.id === uid; }) : uid === chefUi.kalVem; };
     franvaroLista().forEach(function (fv) { if (vemFv(fv.u) && dag0(fv.till).getTime() >= forsta.getTime() && dag0(fv.fran).getTime() < sista.getTime()) h.push({ id: fv.id, tid: fv.fran, slut: fv.till, heldag: true, u: fv.u, text: ((IH.anvandare(fv.u) || {}).namn || '') + ': ' + FRANVARO[fv.typ][0], slag: 'franvaro' }); });
     var p2 = function (v) { return String(v).padStart(2, '0'); }, f = function (d) { return d.getUTCFullYear() + p2(d.getUTCMonth() + 1) + p2(d.getUTCDate()) + 'T' + p2(d.getUTCHours()) + p2(d.getUTCMinutes()) + '00Z'; };
-    var esc = function (t) { return String(t || '').replace(/[\\;,]/g, function (c) { return '\\' + c; }).replace(/\n/g, ' '); };
+    var esc = function (t) { return String(t || '').replace(/[\\;,]/g, function (c) { return '\\' + c; }).replace(/\r\n|\r|\n/g, ' '); };
     var dagF = function (d) { return dagISO(d).replace(/-/g, ''); };
     var rader = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Legohus//CRM//SV'];
-    h.forEach(function (x) { var s = new Date(x.tid), u = IH.anvandare(x.u); rader.push('BEGIN:VEVENT', 'UID:' + x.id + '@legohus-crm', 'DTSTAMP:' + f(new Date()), x.heldag ? 'DTSTART;VALUE=DATE:' + dagF(s) : 'DTSTART:' + f(s), x.heldag ? 'DTEND;VALUE=DATE:' + dagF(new Date(dag0(x.slut).getTime() + 864e5 + 3e6)) : 'DTEND:' + f(new Date(s.getTime() + 36e5)), 'SUMMARY:' + esc(x.text), 'DESCRIPTION:' + esc((u ? u.namn : '') + ' · ' + (x.heldag ? 'Frånvaro' : KAL_TYP[x.slag] || '')), 'END:VEVENT'); });
+    h.forEach(function (x) { var s = new Date(x.tid), u = IH.anvandare(x.u); rader.push('BEGIN:VEVENT', 'UID:' + String(x.id).replace(/[^A-Za-z0-9_-]/g, '') + '@legohus-crm', 'DTSTAMP:' + f(new Date()), x.heldag ? 'DTSTART;VALUE=DATE:' + dagF(s) : 'DTSTART:' + f(s), x.heldag ? 'DTEND;VALUE=DATE:' + dagF(new Date(dag0(x.slut).getTime() + 864e5 + 3e6)) : 'DTEND:' + f(new Date(s.getTime() + 36e5)), 'SUMMARY:' + esc(x.text), 'DESCRIPTION:' + esc((u ? u.namn : '') + ' · ' + (x.heldag ? 'Frånvaro' : KAL_TYP[x.slag] || '')), 'END:VEVENT'); });
     rader.push('END:VCALENDAR');
-    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rader.join('\r\n')], { type: 'text/calendar' }));
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rader.map(IH.icsVik).join('\r\n')], { type: 'text/calendar' }));
     a.download = 'teamets-kalender-' + dagISO(forsta).slice(0, 7) + '.ics'; document.body.appendChild(a); a.click(); a.remove();
     IH.toast('Kalenderfilen är klar', plural(h.length, 'händelse', 'händelser') + ' – öppna filen i din kalender.', 'kalender');
   };
@@ -1044,7 +1053,10 @@
     tilldela(a, f, jag, upg); IH.spara(); IH.uppdateraMeny(); IH.rita(); IH.toast('Nu är den din', (a ? a.titel : f ? f.namn : upg ? upg.text : '') + ' ligger hos dig.', 'kunder');
   };
   // jämn fördelning: varje ny post går till den som har minst öppet (affärer plus tilldelade förfrågningar) just då
+  // Chefsåtgärder: bara chef eller admin (klientspärr – den riktiga kontrollen hör till servern)
+  function kravChef() { var j = IH.jag(); if (j && (j.chef || j.roll === 'admin')) return true; IH.toast('Bara för chefen', 'Den här åtgärden kan bara försäljningschefen göra.', 'varning'); return false; }
   G['lp-fordela-smart'] = function () {
+    if (!kravChef()) return;
     var folk = saljare().filter(function (u) { return !u.inaktiv; }); if (!folk.length) return;
     var last = {}; folk.forEach(function (u) { last[u.id] = db().affarer.filter(function (a) { return a.ansvarig === u.id && a.steg !== 'vunnen' && !a.forlorad; }).length + db().forfragningar.filter(function (f) { return f.tilldelad === u.id && f.status === 'ny'; }).length; });
     var poster = db().forfragningar.filter(function (f) { return f.status === 'ny' && !f.tilldelad; }).map(function (f) { return { f: f }; })
@@ -1062,6 +1074,7 @@
   G['lp-kal-vem'] = function (el) { chefUi.kalVem = el.getAttribute('data-f'); IH.rita(); };
   G['lp-kal-man'] = function (el) { var d = +el.getAttribute('data-d'); chefUi.kalMan = d ? chefUi.kalMan + d : 0; IH.rita(); };
   G['lp-mal'] = function (el) {
+    if (!kravChef()) return;
     var id = el.getAttribute('data-id');
     var lista = saljare().filter(function (u) { return !u.inaktiv && (!id || u.id === id); });
     IH.oppnaArk({ titel: 'Säljmål', under: 'Årsmål per säljare – kvartalsmålet är en fjärdedel.', ikon: 'mal',
@@ -1073,6 +1086,7 @@
   var sparaKonto = function (u, falt) { if (IH.andraKonto) IH.andraKonto(u.id, falt); else Object.assign(u, falt); };
   G['lp-andra-profil'] = function (el) {
     var u = IH.anvandare(el.getAttribute('data-id')); if (!u) return;
+    if (u.id !== IH.jag().id && !kravChef()) return;
     var ar = u.id === IH.jag().id;
     IH.oppnaArk({ titel: ar ? 'Ändra din profil' : 'Ändra ' + u.namn, under: 'Titel, kontaktuppgifter, startdatum och presentation.', ikon: 'redigera',
       kropp: '<form id="lp-profil-form" data-lp-profil="' + u.id + '" class="km-form">' +
@@ -1140,6 +1154,7 @@
       fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="lp-uppg-form">' + i('plus') + 'Ge uppgiften</button>' });
   };
   G['lp-fordela'] = function (el) {
+    if (!kravChef()) return;
     var aid = el.getAttribute('data-affar'), fid = el.getAttribute('data-forfragan'), uid = el.getAttribute('data-uppgift');
     var a = aid && IH.affar(aid), f = fid && IH.forfragan(fid), upg = uppgiften(uid);
     IH.oppnaArk({ titel: 'Fördela', under: e(a ? a.titel + ' – öppna uppgifter på affären följer med' : f ? f.namn : upg ? upg.text : ''), ikon: 'kunder',
@@ -1153,7 +1168,8 @@
     else IH.toast('Kunde inte skicka', 'Chatten är skrivskyddad i supportläget.', 'varning');
   };
   G['lp-rapport'] = function () {
-    var q = function (x) { return '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"'; };
+    // Text som börjar med = + - @ tolkas som formel i Excel – den får en apostrof först
+    var q = function (x) { var s = String(x == null ? '' : x); if (typeof x !== 'number' && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
     var rader = [['Säljare', 'Öppna affärer', 'Öppet värde', 'Viktat', 'Vunnet 90 d', 'Vunna affärer 90 d', 'Årsmål', 'Händelser 14 d', 'Försenade uppgifter'].map(q).join(';')].concat(saljare().filter(function (u) { return !u.inaktiv; }).map(function (u) {
       var x = stat(u), v90 = x.aff.filter(function (a) { return a.steg === 'vunnen' && inom(a.vunnen, 90); });
       return [u.namn, x.oppna.length, Math.round(x.oppet), Math.round(x.viktat), v90.reduce(function (t, a) { return t + a.varde; }, 0), v90.length, u.mal || '', x.akt.filter(function (h) { return IH.dagarSedan(h.tid) < 14 && new Date(h.tid) <= new Date(); }).length, x.sena.length].map(q).join(';');
@@ -1166,12 +1182,14 @@
     var t = ev.target; if (!t.matches) return;
     if (t.matches('[data-lp-mal]')) {
       ev.preventDefault();
+      if (!kravChef()) return;
       [].slice.call(t.elements).forEach(function (f) { if (!f.name) return; var u = IH.anvandare(f.name), v = Math.max(0, Math.round(+f.value || 0)); if (u && IH.andraKonto) IH.andraKonto(u.id, { mal: v }); else if (u) u.mal = v || undefined; });
       IH.stangArk(); IH.rita(); IH.toast('Målen är sparade', 'Kvartalsmålet är en fjärdedel av årsmålet.', 'mal');
     }
     if (t.matches('[data-lp-profil]')) {
       ev.preventDefault();
       var pu = IH.anvandare(t.getAttribute('data-lp-profil')); if (!pu) return;
+      if (pu.id !== IH.jag().id && !kravChef()) return;
       var falt = { titel: t.titel.value.trim() || standardTitel(pu), epost: t.epost.value.trim(), tel: t.tel.value.trim(), start: t.start.value, om: t.om.value.trim() };
       if (t.utanBild && t.utanBild.checked) falt.bild = '';
       sparaKonto(pu, falt); IH.spara(); IH.stangArk(); IH.rita(); if (IH.uppdateraMeny) IH.uppdateraMeny();

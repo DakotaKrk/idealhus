@@ -24,6 +24,7 @@
       if ('mal' in x) u.mal = x.mal || undefined;
       if ('chef' in x) u.chef = x.chef || undefined;
       ['epost', 'tel', 'om', 'bild', 'start'].forEach(function (f) { if (f in x) u[f] = x[f] || undefined; });
+      if (u.bild && !/^data:image\/(jpeg|png|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(u.bild)) u.bild = undefined;
       u.inaktiv = !!x.inaktiv;
     });
   }
@@ -120,7 +121,7 @@
       '<p class="ad-not">Alla säljare ser och ändrar teamets affärer och kunder – det finns inga egna, låsta affärer. I prototypen styr rollerna menyn och sidorna i webbläsaren. I skarp drift ska servern kontrollera varje ändring.</p>', { klass: 'ap-halv ap-halv--matris' });
 
     // 04 Inställningar
-    var utlogg = +inst().utlogg || 0, kopia = inst().kopia;
+    var utlogg = IH.sak.utloggMin(), kopia = inst().kopia;
     var installningar = band('04 · Inställningar', 'För den här', 'webbläsaren',
       '<div class="ap-inst"><div><strong>Logga ut vid inaktivitet</strong><small>Utloggning efter så här lång tid utan klick eller tangenttryck. En minut före visas en nedräkning.</small></div>' +
         '<select class="ap-select" data-ap-inst="utlogg" aria-label="Logga ut vid inaktivitet">' + [[0, 'Aldrig'], [15, '15 minuter'], [30, '30 minuter'], [60, '60 minuter']].map(function (o) { return '<option value="' + o[0] + '"' + (utlogg === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div>' +
@@ -160,6 +161,7 @@
   G['ap-logg'] = function (el) { ui.logg = el.getAttribute('data-f'); ui.loggN = 7; IH.rita(); };
   G['ap-logg-fler'] = function () { ui.loggN += 15; IH.rita(); };
   G['ap-aktiv'] = function (el) {
+    if (!IH.kravAdmin()) return;
     var u = IH.anvandare(el.getAttribute('data-id')); if (!u || u.id === IH.jag().id) return;
     var av = !u.inaktiv;
     if (av && u.roll === 'admin' && IH.ANVANDARE.filter(function (x) { return x.roll === 'admin' && !x.inaktiv; }).length <= 1) return;
@@ -169,6 +171,7 @@
     IH.toast(av ? 'Kontot för ' + u.namn + ' är inaktiverat' : 'Kontot för ' + u.namn + ' är aktivt igen', av ? 'Det går inte att logga in på kontot förrän det har aktiverats igen.' : null, av ? 'las' : 'bock');
   };
   G['ap-andra'] = function (el) {
+    if (!IH.kravAdmin()) return;
     var u = IH.anvandare(el.getAttribute('data-id')); if (!u) return;
     IH.oppnaArk({ titel: 'Ändra ' + u.namn, under: 'Sparas i den här webbläsaren (prototyp).', ikon: 'redigera',
       kropp: '<form id="ap-andra-form" data-ap-andra="' + u.id + '" class="km-form"><label class="falt"><span>Titel</span><input name="titel" required maxlength="60" value="' + e(u.titel) + '"></label>' +
@@ -179,6 +182,7 @@
   document.addEventListener('submit', function (ev) {
     var t = ev.target; if (!t.matches || !t.matches('[data-ap-andra]')) return;
     ev.preventDefault();
+    if (!IH.kravAdmin()) { IH.stangArk(); return; }
     var u = IH.anvandare(t.getAttribute('data-ap-andra')); if (!u) return;
     var falt = { titel: t.titel.value.trim() || u.titel }, vad = [];
     if (t.chef) {
@@ -203,6 +207,7 @@
   });
   document.addEventListener('change', function (ev) {
     var t = ev.target; if (!t.matches) return;
+    if ((t.matches('[data-ap-inst="utlogg"]') || t.matches('[data-ap-import]')) && !IH.kravAdmin()) { t.value = ''; return; }
     if (t.matches('[data-ap-inst="utlogg"]')) {
       var v = +t.value; sparaInst('utlogg', v);
       logg('installning', 'Utloggning vid inaktivitet: ' + (v ? v + ' min' : 'av') + '.');
@@ -240,6 +245,53 @@
     if (ny.kunder.some(function (k) { return typeof k.namn !== 'string' || !k.namn.trim(); })) return 'Det finns kunder utan namn i filen.';
     if (ny.affarer.some(function (a) { return typeof a.varde !== 'number' || !isFinite(a.varde); })) return 'Det finns affärer utan giltigt värde i filen.';
     if (ny.prislista && (typeof ny.prislista !== 'object' || typeof ny.prislista.modeller !== 'object' || !Array.isArray(ny.prislista.poster))) return 'Prislistan i filen är trasig.';
+    return granskaDjupt(ny);
+  }
+  // Id:n och hänvisningar sätts in i länkar och attribut på många ställen – de får bara vara korta och ofarliga.
+  // Fälten som sidorna räknar med kontrolleras också, så att en trasig fil inte låser CRM:et.
+  var ID = /^[A-Za-z0-9_-]{1,64}$/;
+  var REF = ['kund', 'affar', 'projekt', 'offert', 'ansvarig', 'tilldelad', 'av', 'u', 'kanal'];
+  var TEXT = ['namn', 'titel', 'text', 'steg', 'modell', 'status', 'typ', 'nummer', 'ort', 'epost', 'telefon', 'beskrivning'];
+  var DATAURL = /^data:[a-z0-9.+\/-]+;base64,[A-Za-z0-9+\/=]*$/i;
+  var arObj = function (x) { return !!x && typeof x === 'object' && !Array.isArray(x); };
+  var tomt = function (v) { return v == null || v === ''; };
+  var FARLIGA_ID = { __proto__: null, constructor: 1, prototype: 1 }; FARLIGA_ID['__proto__'] = 1;
+  function postFel(x, extra) {
+    if (!arObj(x) || typeof x.id !== 'string' || !ID.test(x.id) || FARLIGA_ID[x.id]) return 'id';
+    for (var n = 0; n < REF.length; n++) { var v = x[REF[n]]; if (!tomt(v) && (typeof v !== 'string' || !ID.test(v) || FARLIGA_ID[v])) return REF[n]; }
+    for (var m = 0; m < TEXT.length; m++) { var t = x[TEXT[m]]; if (t != null && typeof t !== 'string' && typeof t !== 'number') return TEXT[m]; }
+    return extra ? extra(x) : null;
+  }
+  function granskaDjupt(ny) {
+    var lista = function (k) { return ny[k] == null ? [] : ny[k]; };
+    var samlingar = KRAV.concat(['dokument', 'franvaro']);
+    for (var s = 0; s < samlingar.length; s++) {
+      var k = samlingar[s];
+      if (!Array.isArray(lista(k))) return 'Delen ' + namnFor(k) + ' i filen är inte en lista.';
+      var fel = null;
+      lista(k).some(function (x) { fel = postFel(x, k === 'offerter' ? function (o) { return o.rader != null && (!Array.isArray(o.rader) || o.rader.some(function (r) { return !arObj(r) || (r.antal != null && (typeof r.antal !== 'number' || !isFinite(r.antal))) || (r.pris != null && (typeof r.pris !== 'number' || !isFinite(r.pris))); })) ? 'rader' : null; } : null); return fel; });
+      if (fel) return 'Ogiltigt värde (' + fel + ') i ' + namnFor(k) + ' – filen kan inte importeras.';
+    }
+    // Prislistan: samma krav på id som övriga poster och priser som riktiga tal (id:t sätts in i option-värden och fältnamn)
+    if (ny.prislista != null) {
+      if (!arObj(ny.prislista) || (ny.prislista.poster != null && !Array.isArray(ny.prislista.poster))) return 'Prislistan i filen är trasig.';
+      var pf = null; (ny.prislista.poster || []).some(function (p) { pf = postFel(p, function (x) { return x.pris != null && (typeof x.pris !== 'number' || !isFinite(x.pris)) ? 'pris' : null; }); return pf; });
+      if (pf) return 'Ogiltigt värde (' + pf + ') i prislistan – filen kan inte importeras.';
+      if (ny.prislista.modeller != null && (!arObj(ny.prislista.modeller) || Object.keys(ny.prislista.modeller).some(function (k) { return !ID.test(k) || FARLIGA_ID[k]; }))) return 'Prislistans hus i filen är trasiga.';
+    }
+    if (ny.lopnr != null && !arObj(ny.lopnr)) return 'Löpnumren i filen är trasiga.';
+    if (ny.chatt != null) {
+      var c = ny.chatt;
+      if (!arObj(c) || (c.kanaler != null && !Array.isArray(c.kanaler)) || (c.meddelanden != null && !Array.isArray(c.meddelanden)) || (c.last != null && !arObj(c.last)) || (c.tyst != null && !arObj(c.tyst))) return 'Meddelandena i filen är trasiga.';
+      var kanalFel = (c.kanaler || []).some(function (x) { return postFel(x) || (x.medlemmar != null && (!Array.isArray(x.medlemmar) || x.medlemmar.some(function (id) { return typeof id !== 'string' || !ID.test(id); }))); });
+      var meddFel = (c.meddelanden || []).some(function (m) {
+        if (postFel(m)) return true;
+        if (m.filer != null && (!Array.isArray(m.filer) || m.filer.some(function (f) { return !arObj(f) || (f.data != null && (typeof f.data !== 'string' || !DATAURL.test(f.data))); }))) return true;
+        if (m.reakt != null && (!arObj(m.reakt) || Object.keys(m.reakt).some(function (r) { return r.length > 16 || /[<>"'&\s]/.test(r) || !Array.isArray(m.reakt[r]) || m.reakt[r].some(function (id) { return typeof id !== 'string' || !ID.test(id); }); }))) return true;
+        return m.svar != null && (!arObj(m.svar) || !ID.test(String(m.svar.mid)));
+      });
+      if (kanalFel || meddFel) return 'Meddelandena i filen innehåller ogiltiga värden – filen kan inte importeras.';
+    }
     return null;
   }
   // Fyller det som saknas så att datan inte byts ut mot exempeldatan vid nästa laddning (app.js jämför versionen)
@@ -247,7 +299,7 @@
     ny.version = IH.VERSION;
     if (!ny.prislista) ny.prislista = JSON.parse(JSON.stringify(IH.PRISLISTA_START));
     var lopnr = ny.lopnr && typeof ny.lopnr === 'object' ? ny.lopnr : {};
-    var hogst = function (lista) { return (lista || []).reduce(function (m, x) { var n = parseInt(String(x.id).replace(/^\D+/, ''), 10); return isFinite(n) && n > m ? n : m; }, 0); };
+    var hogst = function (lista) { return (Array.isArray(lista) ? lista : []).reduce(function (m, x) { var n = parseInt(String(x.id).replace(/^\D+/, ''), 10); return isFinite(n) && n > m ? n : m; }, 0); };
     [['kund', 'kunder'], ['affar', 'affarer'], ['forfragan', 'forfragningar'], ['aktivitet', 'aktiviteter'], ['uppgift', 'uppgifter'], ['projekt', 'projekt'], ['offert', 'offerter'], ['dokument', 'dokument']].forEach(function (t) {
       lopnr[t[0]] = Math.max(+lopnr[t[0]] || 0, hogst(ny[t[1]]));
     });
@@ -256,9 +308,19 @@
   }
   G['ap-import-ok'] = function () {
     if (!vantar) return;
-    var logg0 = (db().sakerhet || []).slice(), hub0 = db().sakHub, fran = vantar.version;
+    if (!IH.kravAdmin()) { vantar = null; IH.stangArk(); return; }
+    var gammal = db(), logg0 = (gammal.sakerhet || []).slice(), hub0 = gammal.sakHub, fran = vantar.version;
     IH.db = uppgradera(vantar); IH.db.sakerhet = logg0; if (hub0) IH.db.sakHub = hub0; vantar = null;
-    IH.spara();
+    // Provladdning: menyn och sidan ritas en gång innan något sparas – kastar något läggs den gamla datan tillbaka
+    try { IH.uppdateraMeny(); IH.rita(); } catch (x) {
+      IH.db = gammal; IH.stangArk(); IH.uppdateraMeny(); IH.rita();
+      logg('import', 'Importen avbröts – filen gick inte att visa (' + String(x && x.message || x).slice(0, 80) + ').');
+      IH.toast('Kunde inte importera filen', 'Datan i filen gick inte att visa. Inget har ändrats.', 'varning'); return;
+    }
+    if (IH.spara() === false) {
+      IH.db = gammal; IH.stangArk(); IH.uppdateraMeny(); IH.rita();
+      IH.toast('Kunde inte importera filen', 'Datan gick inte att spara i webbläsaren (lagringen är full). Inget har ändrats.', 'varning'); return;
+    }
     logg('import', 'Data importerad: ' + IH.db.kunder.length + ' kunder, ' + IH.db.affarer.length + ' affärer' + (fran !== IH.VERSION ? ' (uppgraderad från dataversion ' + fran + ')' : '') + '.');
     IH.stangArk(); IH.uppdateraMeny(); IH.rita();
     IH.toast('Datan är importerad', null, 'uppladdning');

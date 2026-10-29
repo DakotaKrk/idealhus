@@ -14,11 +14,22 @@
   var $$ = IH.$$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
   /* --- Lagring ------------------------------------------------------ */
-  function ladda() {
-    var db = null;
-    try { db = JSON.parse(localStorage.getItem(IH.NYCKEL)); } catch (e) { db = null; }
+  function ladda(franFlik) {
+    var db = null, ra = null;
+    try { ra = localStorage.getItem(IH.NYCKEL); } catch (e) { ra = null; }
+    try { db = JSON.parse(ra); } catch (e) { db = null; }
     if (!db || db.version !== IH.VERSION) {
-      db = IH.skapaExempeldata();
+      // En annan flik skrev något som inte går att läsa (eller en annan version): behåll det som finns i minnet
+      if (franFlik) return null;
+      if (ra) {
+        // Sparad data som inte går att läsa eller har en annan version skrivs inte över utan en kopia,
+        // och data från en nyare version rörs inte alls (exempeldatan används då bara i minnet)
+        var kopia = false, nyare = !!db && +db.version > IH.VERSION;
+        try { localStorage.setItem(IH.NYCKEL + '-trasig', ra); localStorage.setItem(IH.NYCKEL + '-trasig-tid', new Date().toISOString()); kopia = true; } catch (e) { kopia = false; }
+        IH.dataVarning = nyare ? 'Den är från en nyare version och lämnas orörd.' : kopia ? 'En kopia av den finns i ' + IH.NYCKEL + '-trasig.' : 'Kopian gick inte att spara, så den gamla datan lämnas orörd.';
+        db = IH.skapaExempeldata();
+        if (nyare || !kopia) { IH.dataSkrivsInte = true; return db; }
+      } else db = IH.skapaExempeldata();
       try { localStorage.setItem(IH.NYCKEL, JSON.stringify(db)); } catch (e) { /* privat läge */ }
     }
     // Namnbytet till Legohus: sparade offertnummer börjar på LH i stället för IH.
@@ -26,21 +37,39 @@
     return db;
   }
   IH.db = ladda();
+  var fullVarnad = 0;
   IH.spara = function () {
     IH.db.andrad = new Date().toISOString();
-    try { localStorage.setItem(IH.NYCKEL, JSON.stringify(IH.db)); } catch (e) { /* fullt eller privat */ }
+    // Nyare eller oläslig data ligger sparad (se ladda) och skrivs inte över
+    if (IH.dataSkrivsInte) return false;
+    try { localStorage.setItem(IH.NYCKEL, JSON.stringify(IH.db)); return true; } catch (e) {
+      // Lagringen är full: säg det i stället för att låta det se sparat ut och tappa allt vid nästa laddning
+      var full = e && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.code === 22 || e.code === 1014);
+      if (full && IH.toast && Date.now() - fullVarnad > 4000) {
+        fullVarnad = Date.now();
+        IH.toast('Lagringen är full – ändringen sparades inte', 'Exportera datan och ta bort stora bilagor. Det som inte sparats försvinner när sidan laddas om.', 'varning', { tid: 9000 });
+      }
+      return false;
+    }
   };
   // En annan flik ändrade – läs om och rita om.
   window.addEventListener('storage', function (e) {
-    if (e.key === IH.NYCKEL) { IH.db = ladda(); rita(); }
+    if (e.key === IH.NYCKEL) { var ny = ladda(true); if (ny) { IH.db = ny; rita(); } }
     if (e.key === 'ih-crm-inloggad' && !e.newValue) location.replace('logga-in.html');
+    // Kontobyte eller supportläge i en annan flik: ladda om, så att alla flikar visar samma konto och roll
+    if ((e.key === 'ih-crm-jag' || e.key === 'ih-crm-visa-som') && e.newValue !== e.oldValue) location.reload();
   });
 
   IH.riktigJag = function () {
     var id = null;
     try { id = localStorage.getItem('ih-crm-jag'); } catch (e) { id = null; }
-    return IH.ANVANDARE.filter(function (u) { return u.id === id; })[0] || IH.ANVANDARE[0];
+    return IH.ANVANDARE.filter(function (u) { return u.id === id; })[0] || OKANT;
   };
+  // Okänt eller ändrat konto-id: ingen roll alls (IH.starta loggar ut), aldrig ett riktigt konto som reserv
+  var OKANT = { id: '', namn: 'Okänt konto', titel: '', roll: 'okand', farg: '#8a8f98' };
+  IH.kantKonto = function () { return IH.riktigJag() !== OKANT; };
+  // Profilbilder sätts i style=url(...): bara en ren data-URL för en bild godtas
+  IH.sakerBild = function (b) { return typeof b === 'string' && /^data:image\/(jpeg|png|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(b) ? b : ''; };
   // Supportläget (stod.js): administratören ser och arbetar i någon annans konto – IH.jag() är då det kontot
   var visaSomId = null;
   try { visaSomId = localStorage.getItem('ih-crm-visa-som'); } catch (e) { visaSomId = null; }
@@ -477,7 +506,7 @@
       vaxel +
       '<nav class="sido__nav" aria-label="Huvudmeny"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
       '<div class="sido__fot"><button class="sido__mer" type="button" tabindex="-1" aria-hidden="true" data-g="sido-mer">Mer ' + IH.i('pil') + '</button>' +
-      '<button class="anv" type="button" data-g="konto-meny" aria-haspopup="dialog"><span class="avatar' + (jag.bild ? ' avatar--bild' : '') + '" style="--av:' + jag.farg + (jag.bild ? ';background-image:url(' + IH.e(jag.bild) + ');background-size:cover;color:transparent' : '') + '">' + IH.initialer(jag.namn) +
+      '<button class="anv" type="button" data-g="konto-meny" aria-haspopup="dialog"><span class="avatar' + (IH.sakerBild(jag.bild) ? ' avatar--bild' : '') + '" style="--av:' + jag.farg + (IH.sakerBild(jag.bild) ? ';background-image:url(' + IH.sakerBild(jag.bild) + ');background-size:cover;color:transparent' : '') + '">' + IH.initialer(jag.namn) +
       (IH.narvaroPrick ? IH.narvaroPrick(jag.id) : '') + '</span>' +
       '<span><b>' + IH.e(jag.namn) + '</b><small class="anv__status">' + (IH.narvaro ? IH.e(IH.narvaro(jag.id).namn) + ' · ' : '') + IH.e(String(jag.titel || '').split(' · ')[0]) + '</small></span><span class="anv__chevron" aria-hidden="true">' + IH.i('chevron') + '</span></button>' +
       '<div class="sido__smalt"><a href="../index.html" data-g="lamna" title="Till hemsidan">' + IH.i('hem') + 'Hemsidan</a>' +
@@ -521,7 +550,7 @@
   // Kontot i toppraden när menyn är infälld: avatar med närvaroprick (kontokortet i sidomenyn syns inte då)
   function toppKonto() {
     var jag = IH.jag();
-    return '<span class="avatar' + (jag.bild ? ' avatar--bild' : '') + '" style="--av:' + jag.farg + (jag.bild ? ';background-image:url(' + IH.e(jag.bild) + ');background-size:cover;color:transparent' : '') + '">' +
+    return '<span class="avatar' + (IH.sakerBild(jag.bild) ? ' avatar--bild' : '') + '" style="--av:' + jag.farg + (IH.sakerBild(jag.bild) ? ';background-image:url(' + IH.sakerBild(jag.bild) + ');background-size:cover;color:transparent' : '') + '">' +
       IH.initialer(jag.namn) + (IH.narvaroPrick ? IH.narvaroPrick(jag.id) : '') + '</span>';
   }
   function skal() {
@@ -1125,6 +1154,12 @@
       var el = e.target.closest('[data-g]');
       if (!el) return;
       var namn = el.getAttribute('data-g');
+      // Spärren går före omslagen i andra filer (som annars loggar ett byte som aldrig sker)
+      if (namn === 'valj-anvandare' && !IH.fartByta(el.getAttribute('data-id'))) {
+        e.preventDefault();
+        IH.toast('Bara administratören kan byta till det kontot', 'Logga ut och logga in som administratör.', 'las');
+        return;
+      }
       if (IH.G[namn]) {
         if (el.tagName === 'A' && namn !== 'lamna' && !(namn === 'stang-ark' && el.getAttribute('href'))) e.preventDefault();
         IH.G[namn](el, e);
@@ -1199,13 +1234,13 @@
   }
 
   function inloggad() {
-    try { return !!localStorage.getItem('ih-crm-inloggad'); } catch (e) { return true; }
+    try { return !!localStorage.getItem('ih-crm-inloggad'); } catch (e) { return false; }
   }
 
   /* --- Gemensamma åtgärder --------------------------------------------- */
   IH.G['stang-ark'] = function () { IH.stangArk(); };
   IH.G['logga-ut'] = function () {
-    try { localStorage.removeItem('ih-crm-inloggad'); } catch (e) { /* */ }
+    try { localStorage.removeItem('ih-crm-inloggad'); localStorage.removeItem('ih-crm-visa-som'); } catch (e) { /* */ }
     lamna('logga-in.html');
   };
   IH.G.lamna = function (el, e) {
@@ -1220,14 +1255,20 @@
     var jag = IH.jag();
     IH.oppnaArk({
       titel: 'Byt användare', under: 'Exempelanvändare i prototypen.', ikon: 'kunder',
-      kropp: '<div class="lista kort">' + IH.ANVANDARE.filter(function (u) { return !u.inaktiv; }).map(function (u) {
-        return '<button class="lista__rad" type="button" data-g="valj-anvandare" data-id="' + u.id + '"><span class="avatar" style="--av:' + u.farg + '">' +
-          IH.initialer(u.namn) + '</span><span class="lista__text"><b>' + IH.e(u.namn) + '</b><small>' + u.titel + '</small></span>' +
+      kropp: '<div class="lista kort">' + IH.ANVANDARE.filter(function (u) { return !u.inaktiv && IH.fartByta(u.id); }).map(function (u) {
+        return '<button class="lista__rad" type="button" data-g="valj-anvandare" data-id="' + u.id + '"><span class="avatar" style="--av:' + IH.e(u.farg) + '">' +
+          IH.initialer(u.namn) + '</span><span class="lista__text"><b>' + IH.e(u.namn) + '</b><small>' + IH.e(u.titel) + '</small></span>' +
           (u.id === jag.id ? '<span class="status" style="--s:#7fe0a6">Inloggad</span>' : IH.i('pil')) + '</button>';
       }).join('') + '</div>'
     });
   };
+  // Bara administratören får byta till administratörskontot, och okända konton godtas inte
+  IH.fartByta = function (id) {
+    var mal = IH.anvandare(id);
+    return !!mal && (mal.roll !== 'admin' || IH.riktigJag().roll === 'admin');
+  };
   IH.G['valj-anvandare'] = function (el) {
+    if (!IH.fartByta(el.getAttribute('data-id'))) return;
     try { localStorage.setItem('ih-crm-jag', el.getAttribute('data-id')); } catch (e) { /* */ }
     if (IH.tema && IH.tema.lasOm) IH.tema.lasOm(); // varje konto har sitt eget tema
     if (IH.layout && IH.layout.lasOm) IH.layout.lasOm({ direkt: true }); // … och sin egen layout
@@ -1283,6 +1324,8 @@
   /* --- Start ------------------------------------------------------------- */
   IH.starta = function () {
     if (!inloggad()) { location.replace('logga-in.html'); return; }
+    // Okänt eller ändrat konto-id: logga ut i stället för att falla tillbaka på ett riktigt konto
+    if (!IH.kantKonto()) { try { localStorage.removeItem('ih-crm-inloggad'); } catch (e) { /* */ } location.replace('logga-in.html'); return; }
     skal();
     sattSido(sidoDold(), false);
     new MutationObserver(centreraAlla).observe($('#vy'), { childList: true, subtree: true });
@@ -1291,5 +1334,6 @@
     requestAnimationFrame(function () { flyttaMarkor(true); });
     if (document.fonts) document.fonts.ready.then(function () { flyttaMarkor(true); });
     document.documentElement.classList.add('redo');
+    if (IH.dataVarning) IH.toast('Den sparade datan gick inte att läsa', IH.dataVarning + ' Exempeldatan visas i stället.', 'varning', { tid: 12000 });
   };
 })();

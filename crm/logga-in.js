@@ -72,7 +72,7 @@
   var igen = document.querySelector('[data-igen]');
   // Utloggad för att kontot inaktiverades (adminpanel.js skickar hit med ?inaktiv=1): förklara direkt, ingen Fortsätt som
   if (/[?&]inaktiv=1\b/.test(location.search) || (forra && arInaktiv(forra))) visaInaktiv(ROLLER[forra] ? ROLLER[forra].forsta : '', igen);
-  if (igen && ROLLER[forra] && !arInaktiv(forra)) {
+  if (igen && ROLLER[forra] && !arInaktiv(forra) && forra !== 'ad') {
     var r = ROLLER[forra];
     var a = igen.querySelector('[data-igen-avatar]');
     a.textContent = initialer(r.namn);

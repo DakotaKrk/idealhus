@@ -45,7 +45,8 @@
     await paus();
     vidSteg(3, STEG[3]);
     let innehall = '';
-    try { innehall = R ? R.latin1(new Uint8Array(await fil.slice(0, Math.min(fil.size, 3 * 1024 * 1024)).arrayBuffer())) : ''; } catch (err) { /* hanterat */ }
+    const helt = R && R.AKTIV && (R.AKTIV.test(namn) || R.TEXT.test(namn) || R.MARKUP.test(R.latin1(huvud.subarray(0, 300))));
+    try { innehall = R ? R.latin1(new Uint8Array(await fil.slice(0, helt ? Math.min(fil.size, MAX) : Math.min(fil.size, 3 * 1024 * 1024)).arrayBuffer())) : ''; } catch (err) { /* hanterat */ }
     if (R) fynd.push(...R.innehallFynd(namn, innehall, String(fil.type || '').split(';')[0].trim().toLowerCase()));
     await paus();
     vidSteg(4, STEG[4]);

@@ -26,6 +26,7 @@
   };
   addEventListener('hashchange', kollaAtkomst); setTimeout(kollaAtkomst, 0);
 
+  var sl0 = function (d) { return Array.isArray(d.sakerhet) ? d.sakerhet : []; };
   var ALLVAR = { hog: { namn: 'Hög', minus: 25 }, medel: { namn: 'Medel', minus: 10 }, lag: { namn: 'Låg', minus: 3 }, info: { namn: 'Info', minus: 0 } };
   var FARG = { kod: '#3f6b50', uppdatering: '#4f6f8f', buggar: '#7b5c8f', lacka: '#c4577e', intrang: '#3d8a96', beteende: '#e8a456', trasigt: '#8f5424' };
   var KORT = { kod: 'Skadlig kod', uppdatering: 'Uppdateringar', buggar: 'Buggar', lacka: 'Läckor', intrang: 'Intrångsförsök', beteende: 'Beteende', trasigt: 'Trasigt' };
@@ -140,7 +141,10 @@
         logg('Kontrollerar inloggningen');
         var jag = null; try { jag = localStorage.getItem('ih-crm-jag'); } catch (x) { /* */ }
         if (jag && kanda.indexOf(jag) < 0) f.push({ allvar: 'hog', text: 'Inloggad med ett konto som inte finns: ' + jag });
-        f.push({ allvar: 'info', text: 'Prototypen har ingen riktig inloggning – skarp drift behöver tvåstegsverifiering på servern' });
+        // Byte till administratörskontot från ett annat konto (Byt användare kräver inget lösenord i prototypen)
+        var upp = sl0(d).filter(function (h) { var t = h.typ === 'konto' && /^Kontobyte: (.+) → (.+)\.$/.exec(h.text || ''); if (!t || IH.dagarSedan(h.tid) >= 1) return false; var fran = IH.ANVANDARE.filter(function (u) { return u.namn === t[1]; })[0], till = IH.ANVANDARE.filter(function (u) { return u.namn === t[2]; })[0]; return till && till.roll === 'admin' && fran && fran.roll !== 'admin'; });
+        if (upp.length) f.push({ allvar: 'medel', text: plural(upp.length, 'byte', 'byten') + ' till administratörskontot från ett annat konto senaste dygnet' });
+        f.push({ allvar: 'medel', text: 'Prototypen har ingen riktig inloggning eller behörighet på servern – vem som helst kan välja administratörskontot. Skarp drift behöver inloggning med tvåstegsverifiering och rollkontroll på servern' });
         return f;
       } },
     { id: 'beteende', namn: 'Avvikande beteende', under: 'Ovanliga mängder, tider och massändringar', ikon: 'radar',
