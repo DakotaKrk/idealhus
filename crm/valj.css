@@ -80,3 +80,8 @@
    .valj-knapp bredvid select); webbläsarlistans pil i bakgrunden ersätts av knappens egen. */
 .valj-knapp { background-image: none !important; text-align: left; }
 .valj-knapp.valj-overlay { position: absolute !important; }
+/* Skalet 2026-10-29: bakgrunden tonar ut med bottenarket i stället för att slockna, och inne i ett ark mörknar sidan inte dubbelt */
+.valj-panel[data-ark][data-stanger]::backdrop { animation: valj-fon-ut .26s ease-in both; }
+@keyframes valj-fon-ut { to { opacity: 0; } }
+html[data-ark-oppen] .valj-panel[data-ark]::backdrop { background: rgba(27, 25, 21, .18); }
+@media (prefers-reduced-motion: reduce) { .valj-panel[data-ark][data-stanger]::backdrop { animation: none; } }

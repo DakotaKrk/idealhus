@@ -184,6 +184,8 @@
     aktiv = { tur: tur, n: -1, ctx: {}, auto: !!opt.auto, takt: opt.takt || 1, vidSlut: opt.vidSlut || null, stegId: 0, forraVanta: [] };
     try { skrivJson('ih-guide-pagar', { id: tur.id, tid: Date.now() }); } catch (x) { /* */ }
     if (typeof tur.fore === 'function') { try { tur.fore(aktiv.ctx); } catch (x) { console.warn(x); } }
+    // Chattfönstret ställs åt sidan under turen, så att inget det pekar på hamnar under fönstret
+    if (IH.chattUndan) IH.chattUndan(true);
     byggLager();
     document.addEventListener('keydown', tangent, true);
     document.addEventListener('click', klickFangst, true);
@@ -204,6 +206,7 @@
     window.removeEventListener('resize', schemalagg);
     try { localStorage.removeItem('ih-guide-pagar'); } catch (x) { /* */ }
     rivLager();
+    if (IH.chattUndan) IH.chattUndan(false);
     if (!tyst) sand('slut', a);
     if (a.vidSlut) { try { a.vidSlut(a); } catch (x) { /* */ } }
   };
@@ -732,8 +735,11 @@
   }
 
   // ? öppnar guidemenyn (utom i fält och i presentationen).
+  // Esc i fångstfasen: stänger bara guidemenyn, inte ett ark eller kundmötet bakom den
+  window.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && menyEl) { ev.preventDefault(); ev.stopPropagation(); G.stangMeny(); if (knappEl) knappEl.focus({ preventScroll: true }); }
+  }, true);
   document.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Escape' && menyEl) { G.stangMeny(); if (knappEl) knappEl.focus(); return; }
     if (ev.key !== '?' || aktiv || ev.ctrlKey || ev.metaKey || ev.altKey) return;
     if (ev.target.closest && ev.target.closest('input, textarea, select, [contenteditable="true"], .mote')) return;
     ev.preventDefault(); G.vaxlaMeny();

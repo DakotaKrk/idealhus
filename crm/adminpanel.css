@@ -76,7 +76,7 @@
 .ap-data li { display: grid; grid-template-columns: 110px minmax(0, 1fr) 44px; align-items: center; gap: 12px; font-size: .84rem; }
 .ap-data strong { font: 700 .86rem/1 var(--rubrik); text-align: right; }
 .ap-stapel { height: 8px; border-radius: 8px; background: #f3ece1; overflow: hidden; }
-.ap-stapel i { display: block; width: calc(var(--andel) * 100%); height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--virke-2), var(--virke-djup)); transform-origin: left; animation: ap-stapel .9s var(--mjuk) both; }
+.ap-stapel i { display: block; width: calc(var(--andel) * 100%); height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--virke-2), var(--virke-djup)); transform-origin: left; animation: ap-stapel .7s var(--mjuk) both; }
 @keyframes ap-stapel { from { transform: scaleX(0); } }
 .ap-fakta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 16px 0 0; }
 .ap-fakta > div { padding: 10px 12px; border-radius: 14px; background: #fbf7f0; min-width: 0; }

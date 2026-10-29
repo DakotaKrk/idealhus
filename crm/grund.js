@@ -33,23 +33,37 @@
   forberedAntal();
 })();
 
-/* Magneten (från Uperformance): menyknappen och den minimerade chatten dras mjukt mot musen när den är nära. */
+/* Magneten (från Uperformance): menyknappen och den minimerade chatten dras mjukt mot musen när den är nära.
+   Vilar medan menyn glider och strax efter ett klick (knappen ska landa rakt), mäter utan sin egen förskjutning
+   och glider tillbaka mjukt när musen går därifrån i stället för att hoppa 6 px. */
 (() => {
   'use strict';
   if (matchMedia('(pointer: coarse)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const SEL = '.sido-knapp, .chf-ikon';
-  let ram = 0;
+  let ram = 0, vilaTill = 0;
+  const tillbaka = (el) => {
+    const fore = el.style.translate; if (!fore) return;
+    el.style.translate = '';
+    if (el.animate) el.animate([{ translate: fore }, { translate: '0px 0px' }], { duration: 280, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+  };
+  const vila = () => { vilaTill = performance.now() + 650; document.querySelectorAll(SEL).forEach((el) => { el.style.translate = ''; }); };
+  document.addEventListener('pointerdown', (ev) => { if (ev.target.closest && ev.target.closest(SEL)) vila(); }, true);
+  addEventListener('ih:sido', vila);
   document.addEventListener('mousemove', (ev) => {
     if (ram) return;
     ram = requestAnimationFrame(() => {
       ram = 0;
+      if (performance.now() < vilaTill || document.documentElement.classList.contains('sido-glider')) return;
       document.querySelectorAll(SEL).forEach((el) => {
         const r = el.getBoundingClientRect(); if (!r.width) return;
-        const dx = ev.clientX - (r.left + r.width / 2), dy = ev.clientY - (r.top + r.height / 2), d = Math.hypot(dx, dy);
-        el.style.translate = d < 90 ? `${(dx / 90) * 6}px ${(dy / 90) * 6}px` : '';
+        const [tx = 0, ty = 0] = (el.style.translate || '').split(' ').map((v) => parseFloat(v) || 0);
+        const dx = ev.clientX - (r.left - tx + r.width / 2), dy = ev.clientY - (r.top - ty + r.height / 2), d = Math.hypot(dx, dy);
+        if (d < 90) el.style.translate = `${((dx / 90) * 6).toFixed(2)}px ${((dy / 90) * 6).toFixed(2)}px`;
+        else tillbaka(el);
       });
     });
   }, { passive: true });
+  document.addEventListener('mouseleave', () => document.querySelectorAll(SEL).forEach(tillbaka));
 })();
 
 /* Sidomenyn tätare i steg tills allt får plats (som anpassaSido i Uperformance): först lägre rader, sedan mindre
@@ -98,10 +112,11 @@
     if (efter !== fore) dispatchEvent(new Event('resize'));
   }
   // Mer-menyn: kopior av de dolda raderna i ett litet kort som glider fram bredvid knappen
-  function stangMer() {
-    var p = document.querySelector('.sido__merpop'); if (!p) return;
+  function stangMer(fokus) {
+    var p = document.querySelector('.sido__merpop'); if (!p || p.classList.contains('ut')) return;
     var k = document.querySelector('.sido__merknapp'); if (k) k.setAttribute('aria-expanded', 'false');
     p.classList.add('ut'); setTimeout(function () { p.remove(); }, 180);
+    if (fokus && k) k.focus({ preventScroll: true });
   }
   function oppnaMer(knapp) {
     if (document.querySelector('.sido__merpop')) { stangMer(); return; }
@@ -117,22 +132,34 @@
     });
     pop.innerHTML = html; document.body.appendChild(pop);
     var r = knapp.getBoundingClientRect(), sido = document.querySelector('.sido').getBoundingClientRect();
-    pop.style.left = (sido.right + 10) + 'px';
+    // till höger om menyknappen som sitter i mellanrummet – den ska inte hamna halvt under kortet
+    var kn = document.querySelector('.sido-knapp'), knr = kn ? kn.getBoundingClientRect() : null;
+    pop.style.left = Math.max(sido.right + 10, knr && knr.width ? knr.right + 10 : 0) + 'px';
     pop.style.top = Math.max(12, Math.min(innerHeight - pop.offsetHeight - 12, r.bottom - pop.offsetHeight)) + 'px';
     knapp.setAttribute('aria-expanded', 'true');
     pop.addEventListener('click', function (ev) { if (ev.target.closest('a, button')) setTimeout(stangMer, 0); });
+    var poster = function () { return Array.prototype.slice.call(pop.querySelectorAll('[role="menuitem"]')); };
+    pop.addEventListener('keydown', function (ev) {
+      var p = poster(), n = p.indexOf(document.activeElement);
+      if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { ev.preventDefault(); p[(n + (ev.key === 'ArrowDown' ? 1 : -1) + p.length) % p.length].focus(); }
+      else if (ev.key === 'Home' || ev.key === 'End') { ev.preventDefault(); p[ev.key === 'Home' ? 0 : p.length - 1].focus(); }
+      else if (ev.key === 'Tab') stangMer();
+    });
+    var forsta = poster()[0]; if (forsta) forsta.focus({ preventScroll: true });
   }
   document.addEventListener('click', function (ev) {
     var k = ev.target.closest && ev.target.closest('.sido__merknapp');
     if (k) { ev.preventDefault(); oppnaMer(k); return; }
     if (!(ev.target.closest && ev.target.closest('.sido__merpop'))) stangMer();
   });
-  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') stangMer(); });
-  addEventListener('hashchange', function () { stangMer(); setTimeout(anpassaSido, 30); });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && document.querySelector('.sido__merpop')) { stangMer(true); ev.stopPropagation(); } }, true);
+  // Vid sidbyte räknas menyn bara om när den valda raden ligger under Mer (den får aldrig döljas)
+  addEventListener('hashchange', function () { stangMer(); setTimeout(function () { if (document.querySelector('.sido__nav .sido__lank.aktiv[data-sido-dold]')) anpassaSido(); }, 30); });
   var forra = IH.uppdateraMeny;
   IH.uppdateraMeny = function () { var r = forra.apply(this, arguments); anpassaSido(); return r; };
   var t = 0;
-  addEventListener('resize', function () { stangMer(); clearTimeout(t); t = setTimeout(anpassaSido, 120); });
+  // Menyns egen växling (IH.sidoResize) ändrar inte höjden – då behöver inget räknas om
+  addEventListener('resize', function () { stangMer(); if (IH.sidoResize) return; clearTimeout(t); t = setTimeout(anpassaSido, 120); });
   try { document.fonts.ready.then(anpassaSido); } catch (x) { /* äldre webbläsare */ }
   setTimeout(anpassaSido, 0);
 })();

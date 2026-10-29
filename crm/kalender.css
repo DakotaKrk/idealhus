@@ -105,3 +105,8 @@
   .kal-panel, .kal-panel[data-ark], .kal-dagar .kal-rad { animation: none; }
   .kal-dag, .kal-steg, .kal-knapp { transition: none; }
 }
+/* Skalet 2026-10-29: bakgrunden tonar ut med bottenarket i stället för att slockna, och inne i ett ark mörknar sidan inte dubbelt */
+.kal-panel[data-ark][data-stanger]::backdrop { animation: kal-fon-ut .26s ease-in both; }
+@keyframes kal-fon-ut { to { opacity: 0; } }
+html[data-ark-oppen] .kal-panel[data-ark]::backdrop { background: rgba(27, 25, 21, .18); }
+@media (prefers-reduced-motion: reduce) { .kal-panel[data-ark][data-stanger]::backdrop { animation: none; } }

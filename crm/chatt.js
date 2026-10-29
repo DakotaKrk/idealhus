@@ -266,91 +266,226 @@
   }
 
   /* 07 Flytande fönstret ------------------------------------------------------------------------- */
+  /* Rörelserna här går i samma takt och kurva som menyns låda (--glid .48s, --ease-drawer), så att menyn, knappen,
+     dockan och bubblan rör sig som en enda sak. Fönstret krymper in i bubblan när det minimeras och växer ut ur den
+     när det öppnas. Allt hoppas över med reducerad rörelse. */
   const FL = 'ih-crm-chattfonster';
   const fl = (() => { try { return JSON.parse(localStorage.getItem(FL)) || {}; } catch (x) { return {}; } })();
   const sparaFl = () => { try { localStorage.setItem(FL, JSON.stringify(fl)); } catch (x) { /* */ } };
-  let fonster = null, ikon = null;
+  const GLID = 480, KURVA = 'cubic-bezier(.32, .72, 0, 1)', UT = 'cubic-bezier(.4, 0, 1, 1)';
+  const fart = () => !!document.body.animate && !lugn() && !IH.lugn;
+  const html = document.documentElement;
+  let fonster = null, ikon = null, fokusFore = null;
+  // Rektangeln utan magnetens förskjutning (grund.js sätter style.translate när musen är nära)
+  function rekt(el) {
+    const r = el.getBoundingClientRect(), t = String(el.style.translate || '').split(' '), tx = parseFloat(t[0]) || 0, ty = parseFloat(t[1]) || 0;
+    return { left: r.left - tx, top: r.top - ty, width: r.width, height: r.height, right: r.right - tx, bottom: r.bottom - ty };
+  }
   function klam() {
     const w = Math.min(fl.w || 380, innerWidth - 24), h = Math.min(fl.h || 540, innerHeight - 24);
     fl.w = w; fl.h = h;
     fl.x = Math.max(120 - w, Math.min(innerWidth - 120, fl.x == null ? innerWidth - w - 24 : fl.x));
     fl.y = Math.max(12, Math.min(innerHeight - 60, fl.y == null ? innerHeight - h - 24 : fl.y));
   }
-  function ritaFonster() {
-    const paSidan = /^#\/chatt/.test(location.hash);
-    if (!fl.oppen || paSidan) { if (fonster) { fonster.remove(); fonster = null; } if (ikon) { ikon.remove(); ikon = null; } placeraIkon(); return; }
-    if (fl.min) {
-      if (fonster) { fonster.remove(); fonster = null; }
-      if (!ikon) { ikon = document.createElement('button'); ikon.type = 'button'; ikon.className = 'chf-ikon'; ikon.setAttribute('aria-label', 'Öppna chatten'); document.body.appendChild(ikon); kopplaIkon(ikon); }
-      const n = olastaTotalt();
-      ikon.innerHTML = ik('prat') + (n ? '<i class="ch-olast">' + n + '</i>' : '');
-      ikon.toggleAttribute('data-puls', !!n); ikon.toggleAttribute('data-tyst', !!pref().storEj);
-      placeraIkon();
-      return;
-    }
-    if (ikon) { ikon.remove(); ikon = null; placeraIkon(); }
-    if (!fonster) { fonster = document.createElement('section'); fonster.className = 'chf'; fonster.setAttribute('aria-label', 'Chatten'); document.body.appendChild(fonster); kopplaFonster(fonster); }
+  function placeraFonster() {
+    if (!fonster) return;
     klam();
     Object.assign(fonster.style, { left: fl.x + 'px', top: fl.y + 'px', width: fl.w + 'px', height: fl.h + 'px' });
+  }
+  // Fönstret går undan: in i bubblan (mal) eller tonar och sjunker lite (stängt)
+  function fonsterUndan(mal) {
+    const f = fonster; fonster = null; if (!f) return;
+    const hadeFokus = f.contains(document.activeElement);
+    f.inert = true; f.setAttribute('data-undan', '');
+    if (!fart() || !f.animate) { f.remove(); }
+    else {
+      const r = f.getBoundingClientRect();
+      const slut = mal ? 'translate(' + (mal.left + mal.width / 2 - (r.left + r.width / 2)) + 'px,' + (mal.top + mal.height / 2 - (r.top + r.height / 2)) + 'px) scale(.18)' : 'translateY(10px) scale(.96)';
+      const a = f.animate(mal ? [{ transform: 'none', opacity: 1 }, { opacity: 1, offset: .25 }, { transform: slut, opacity: 0 }] : [{ transform: 'none', opacity: 1 }, { transform: slut, opacity: 0 }],
+        { duration: mal ? 300 : 180, easing: mal ? KURVA : UT, fill: 'forwards' });
+      a.onfinish = () => f.remove();
+    }
+    if (hadeFokus) {
+      if (mal && ikon) ikon.focus({ preventScroll: true });
+      else { const m = aterFokus(); if (m) m.focus({ preventScroll: true }); }
+    }
+    if (!mal) fokusFore = null;
+  }
+  // Var fokus ska tillbaka när fönstret stängs: samma element, eller samma länk/knapp om menyn har ritats om under tiden
+  function aterFokus() {
+    const f = fokusFore; if (!f) return null;
+    if (f.isConnected) return f;
+    const nyckel = ['href', 'data-g', 'data-vy'].filter((a) => f.getAttribute && f.getAttribute(a))[0];
+    if (!nyckel) return null;
+    const v = f.getAttribute(nyckel);
+    return [...document.querySelectorAll('[' + nyckel + ']')].filter((x) => x.getAttribute(nyckel) === v && x.getClientRects().length && !x.closest('[inert]'))[0] || null;
+  }
+  // Bubblan tonar bort på sin plats (i dockan eller i hörnet) – i stället för att försvinna eller flyga över sidan
+  function tonaBort(el, ms) {
+    if (!el) return;
+    el.inert = true; el.style.pointerEvents = 'none'; el.setAttribute('data-undan', '');
+    if (!fart() || !el.animate) { el.remove(); return; }
+    el.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.6)' }], { duration: ms || 160, easing: UT, fill: 'forwards' }).onfinish = () => el.remove();
+  }
+  function uppdateraIkon() {
+    if (!ikon) return;
+    const n = olastaTotalt();
+    // innerHTML bara när antalet ändras – annars studsar siffran in igen vid varje omritning
+    if (ikon.dataset.n !== String(n)) { ikon.dataset.n = String(n); ikon.innerHTML = ik('prat') + (n ? '<i class="ch-olast">' + n + '</i>' : ''); }
+    ikon.toggleAttribute('data-puls', !!n); ikon.toggleAttribute('data-tyst', !!pref().storEj);
+  }
+  function ritaFonster(fokusera) {
+    const paSidan = /^#\/chatt/.test(location.hash);
+    if (!fl.oppen || paSidan) {
+      fonsterUndan(null);
+      if (ikon) { const b = ikon; ikon = null; tonaBort(b); }
+      placeraIkon(); return;
+    }
+    if (fl.min) {
+      if (!ikon) {
+        ikon = document.createElement('button'); ikon.type = 'button'; ikon.className = 'chf-ikon'; ikon.setAttribute('aria-label', 'Öppna chatten');
+        // När fönstret krymper in i bubblan tonar bubblan fram först när fönstret nästan är där
+        if (fonster && fart()) ikon.setAttribute('data-sen', '');
+        document.body.appendChild(ikon); kopplaIkon(ikon);
+      }
+      uppdateraIkon();
+      placeraIkon();
+      if (fonster) fonsterUndan(rekt(ikon));
+      return;
+    }
+    let fran = null;
+    if (ikon) { fran = rekt(ikon); const b = ikon; ikon = null; b.remove(); placeraIkon(); }
+    const nytt = !fonster;
+    if (nytt) {
+      if (!fokusFore) fokusFore = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
+      fonster = document.createElement('section'); fonster.className = 'chf'; fonster.setAttribute('aria-label', 'Chatten'); fonster.setAttribute('role', 'dialog');
+      document.body.appendChild(fonster); kopplaFonster(fonster);
+    }
+    placeraFonster();
     const k = fl.kanal && kanal(fl.kanal);
     const fokus = document.activeElement && fonster.contains(document.activeElement) && document.activeElement.tagName === 'TEXTAREA';
+    const trad0 = fonster.querySelector('[data-ch-trad]'), vidBotten = !trad0 || trad0.scrollHeight - trad0.scrollTop - trad0.clientHeight < 40, rull = trad0 ? trad0.scrollTop : 0, samma = fonster.dataset.kanal === String(k ? k.id : '');
+    fonster.dataset.kanal = k ? k.id : '';
     fonster.innerHTML = '<header class="chf-huvud" data-chf-dra>' + ik('prat') + '<b>' + (k ? e(kanalNamn(k)) : 'Meddelanden') + '</b>' +
       '<button type="button" class="ch-ikonknapp" data-g="chf-storej" aria-pressed="' + !!pref().storEj + '" title="Stör ej">' + ik(pref().storEj ? 'bjallra-av' : 'bjallra') + '</button>' +
       '<a class="ch-ikonknapp" href="#/chatt' + (k ? '/' + k.id : '') + '" title="Helsida">' + ik('helskarm') + '</a>' +
-      '<button type="button" class="ch-ikonknapp" data-g="chf-min" title="Minimera">' + ik('minimera') + '</button>' +
+      '<button type="button" class="ch-ikonknapp" data-g="chf-min" title="Minimera (Esc)">' + ik('minimera') + '</button>' +
       '<button type="button" class="ch-ikonknapp" data-g="chf-stang" title="Stäng">' + i('stang') + '</button></header>' +
       (k ? '<div class="chf-kropp ch-tradyta" data-ch-yta="fonster">' + toppHtml(k, true) + '<div class="ch-trad" data-ch-trad>' + tradHtml(k) + '</div><div class="ch-fot">' + skrivHtml(k) + '</div></div>'
         : '<nav class="chf-kropp chf-lista" aria-label="Samtal" data-ch-listan>' + listaHtml(null) + '</nav>') +
       '<span class="chf-storlek" data-chf-storlek aria-hidden="true"></span>';
     if (k) {
-      const t = fonster.querySelector('[data-ch-trad]'); t.scrollTop = t.scrollHeight; markeraLast(k.id); ui.nya.clear();
+      // Tråden står kvar där man läste om man rullat upp i samma samtal; annars längst ner
+      const t = fonster.querySelector('[data-ch-trad]'); t.scrollTop = !nytt && samma && !vidBotten ? rull : t.scrollHeight; markeraLast(k.id); ui.nya.clear();
       const r = fonster.querySelector('textarea'); if (r) { vaxa(r); if (fokus) r.focus({ preventScroll: true }); }
+    }
+    if (nytt) {
+      if (fart()) {
+        fonster.style.animation = 'none';
+        if (fran) {
+          const r = fonster.getBoundingClientRect(), dx = fran.left + fran.width / 2 - (r.left + r.width / 2), dy = fran.top + fran.height / 2 - (r.top + r.height / 2);
+          fonster.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.18)', opacity: 0 }, { opacity: 1, offset: .45 }, { transform: 'none', opacity: 1 }], { duration: 380, easing: KURVA });
+        } else fonster.animate([{ transform: 'translateY(14px) scale(.97)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 320, easing: KURVA });
+      }
+      if (fokusera) requestAnimationFrame(() => { if (!fonster) return; const m = fonster.querySelector('[data-ch-skriv] textarea') || fonster.querySelector('[data-ch-kanal], .chf-lista a, .chf-lista button'); if (m) m.focus({ preventScroll: true }); });
     }
   }
   /* Dockan: när menyn är infälld sitter chattikonen under menyknappen i en gemensam kapsel, med en ledning emellan där
-     ett ljus vandrar (snabbare och varmare när något är oläst). Ikonen flyger i en båge till dockan när menyn fälls in
-     och tillbaka till hörnet när den fälls ut. */
-  let dock = null, varIDocka = null;
-  function dockFor(kn) {
-    if (!kn) { if (dock) { const d = dock; dock = null; d.setAttribute('data-ut', ''); setTimeout(() => d.remove(), 320); } return; }
-    if (!dock) { dock = document.createElement('div'); dock.className = 'chf-dock'; dock.setAttribute('aria-hidden', 'true'); dock.innerHTML = '<i class="chf-dock__led"><b></b></i>'; document.body.appendChild(dock); }
-    const r = kn.getBoundingClientRect(), t = r.top - (parseFloat(kn.style.translate.split(' ')[1]) || 0) - 9, botten = parseFloat(ikon.style.top) + 40 + 9;
-    Object.assign(dock.style, { left: (r.left + r.width / 2 - 29) + 'px', top: t + 'px', height: (botten - t) + 'px' });
-    dock.style.setProperty('--led-top', (r.height + 11) + 'px'); dock.style.setProperty('--led-botten', (40 + 11) + 'px');
+     ett ljus vandrar (snabbare och varmare när något är oläst). När menyn fälls in glider bubblan till dockan samtidigt
+     som menyn, med samma tid och kurva; när menyn fälls ut tonar den bort ur dockan och fram i hörnet. */
+  let dock = null, varIDocka = null, sattTimer = 0;
+  // Knappens rektangel när menyns pågående glidning är klar: spolar dess övergångar (och kantens) till slutet, mäter
+  // och spolar tillbaka – så att målet blir rätt vilka mått CSS:en än ger knappen
+  function knappSlut(kn) {
+    const spolade = [];
+    try {
+      for (let n = kn; n && n !== html; n = n.parentElement) {
+        getComputedStyle(n).transform; // startar övergångarna innan de spolas
+        (n.getAnimations ? n.getAnimations() : []).forEach((a) => {
+          const t = a.effect && a.effect.getComputedTiming && a.effect.getComputedTiming();
+          if (a.playState === 'running' && t && isFinite(t.endTime) && t.endTime > 0) { spolade.push([a, a.currentTime]); a.currentTime = t.endTime - 0.01; }
+        });
+      }
+      return rekt(kn);
+    } finally { spolade.forEach((x) => { x[0].currentTime = x[1]; }); }
+  }
+  function dockFor(kr, sen) {
+    if (!kr) {
+      html.removeAttribute('data-chatt-dockad');
+      if (dock) { const d = dock; dock = null; d.setAttribute('data-ut', ''); setTimeout(() => d.remove(), fart() ? 220 : 0); }
+      return;
+    }
+    html.setAttribute('data-chatt-dockad', '');
+    if (!dock) {
+      dock = document.createElement('div'); dock.className = 'chf-dock'; dock.setAttribute('aria-hidden', 'true'); dock.innerHTML = '<i class="chf-dock__led"><b></b></i>';
+      if (sen) dock.setAttribute('data-sen', '');
+      document.body.appendChild(dock);
+    }
+    const t = kr.top - 9, botten = parseFloat(ikon.style.top) + 40 + 9;
+    Object.assign(dock.style, { left: (kr.left + kr.width / 2 - 29) + 'px', top: t + 'px', height: (botten - t) + 'px' });
+    dock.style.setProperty('--led-top', (kr.height + 11) + 'px'); dock.style.setProperty('--led-botten', (40 + 11) + 'px');
     dock.toggleAttribute('data-olast', ikon.hasAttribute('data-puls'));
   }
-  function flyg(fran) {
-    const till = ikon.getBoundingClientRect(), dx = fran.left - till.left, dy = fran.top - till.top;
-    if (!ikon.animate || IH.lugn || Math.hypot(dx, dy) < 4) return;
-    ikon.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.85)', opacity: .6 },
-      { transform: 'translate(' + (dx * 0.45) + 'px,' + (dy * 0.62 - 70) + 'px) scale(1.15)', opacity: 1, offset: 0.55 },
-      { transform: 'none', opacity: 1 }], { duration: 760, easing: 'cubic-bezier(.22, 1, .36, 1)' });
-    if (dock) { dock.removeAttribute('data-landar'); void dock.offsetWidth; dock.setAttribute('data-landar', ''); }
-  }
-  function placeraIkon() {
+  // vaxlar: menyn har just fällts in eller ut (anropas direkt från attributbytet, inte efter glidningen)
+  function placeraIkon(vaxlar) {
     if (!ikon) { dockFor(null); varIDocka = null; return; }
-    const rals = document.documentElement.hasAttribute('data-sido-dold') && matchMedia('(min-width: 1101px)').matches;
+    const rals = html.hasAttribute('data-sido-dold') && matchMedia('(min-width: 1101px)').matches;
     const kn = [...document.querySelectorAll('[data-sido-knapp], .sido-knapp')].filter((x) => x.getBoundingClientRect().width)[0];
-    const fran = ikon.isConnected ? ikon.getBoundingClientRect() : null;
-    ikon.style.right = ikon.style.bottom = ikon.style.left = ikon.style.top = '';
+    const fran = ikon.isConnected && varIDocka !== null ? rekt(ikon) : null;
     const sido = !rals && document.querySelector('.sido'), sr = sido && sido.getBoundingClientRect();
     if (fl.ikonX != null && sr && sr.width && fl.ikonX < sr.right && fl.ikonY + 44 > sr.top && fl.ikonY < sr.bottom) { fl.ikonX = fl.ikonY = null; sparaFl(); }
     const iDocka = !!(rals && kn && fl.ikonX == null);
+    const bytt = varIDocka !== null && varIDocka !== iDocka;
+    // Ut ur dockan: en kopia tonar bort i dockan och bubblan tonar fram i hörnet (i stället för att flyga tvärs över sidan)
+    if (bytt && !iDocka && fart() && fran && fran.width) {
+      const kopia = ikon.cloneNode(true); kopia.removeAttribute('id'); kopia.setAttribute('aria-hidden', 'true');
+      Object.assign(kopia.style, { left: fran.left + 'px', top: fran.top + 'px', right: 'auto', bottom: 'auto', translate: 'none', animation: 'none' });
+      document.body.appendChild(kopia); tonaBort(kopia, 150);
+    }
+    ikon.style.translate = '';
+    ikon.style.right = ikon.style.bottom = ikon.style.left = ikon.style.top = '';
+    let kr = null;
     if (fl.ikonX != null) { ikon.style.left = fl.ikonX + 'px'; ikon.style.top = fl.ikonY + 'px'; }
-    else if (iDocka) { const r = kn.getBoundingClientRect(); ikon.style.left = (r.left + r.width / 2 - 20) + 'px'; ikon.style.top = (r.bottom + 14) + 'px'; }
-    else { ikon.style.right = '22px'; ikon.style.bottom = '22px'; }
+    else if (iDocka) {
+      kr = vaxlar ? knappSlut(kn) : rekt(kn);
+      ikon.style.left = (kr.left + kr.width / 2 - 20) + 'px'; ikon.style.top = (kr.top + kr.height / 2 + 20 + 14) + 'px';
+    } else { ikon.style.right = '22px'; ikon.style.bottom = '22px'; }
     ikon.toggleAttribute('data-i-docka', iDocka);
-    dockFor(iDocka ? kn : null);
-    if (varIDocka !== null && varIDocka !== iDocka && fran && fran.width) flyg(fran);
+    dockFor(iDocka ? kr : null, bytt && fart());
+    if (bytt && fran && fran.width && fart()) {
+      if (iDocka) {
+        // In i dockan: samma glidning som menyn
+        const till = rekt(ikon), dx = fran.left - till.left, dy = fran.top - till.top;
+        if (Math.hypot(dx, dy) > 3) ikon.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: GLID, easing: KURVA });
+        if (dock) { dock.removeAttribute('data-landar'); void dock.offsetWidth; dock.setAttribute('data-landar', ''); }
+      } else ikon.animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'none' }], { duration: 300, delay: 160, easing: KURVA, fill: 'backwards' });
+    } else if (!bytt && fran && fran.width && fart()) {
+      // Samma läge men en annan plats (t.ex. efter glidningen eller ett annat fönstermått): glid kort dit
+      const till = rekt(ikon), dx = fran.left - till.left, dy = fran.top - till.top;
+      if (Math.hypot(dx, dy) > 1 && Math.hypot(dx, dy) < 400) ikon.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: 220, easing: KURVA });
+    }
     varIDocka = iDocka;
+    // En kontroll när glidningen är klar: rättar mjukt om menyns mått blev andra än väntat
+    clearTimeout(sattTimer);
+    if (vaxlar && iDocka) sattTimer = setTimeout(() => placeraIkon(), GLID + 60);
   }
-  addEventListener('resize', () => { if (fonster) ritaFonster(); placeraIkon(); });
-  new MutationObserver(() => { clearTimeout(placeraIkon.t); placeraIkon.t = setTimeout(placeraIkon, 620); setTimeout(placeraIkon, 1100); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sido-dold'] });
+  IH.placeraChatt = () => placeraIkon(true);
+  addEventListener('resize', () => { placeraFonster(); placeraIkon(); });
+  // Menyn fälls in eller ut: placera direkt (observern körs i samma ögonblick som attributet byts, före första bildrutan)
+  new MutationObserver((lista) => {
+    if (lista.some((m) => m.attributeName === 'data-sido-dold')) placeraIkon(true);
+    if (html.hasAttribute('data-ark-oppen') || html.hasAttribute('data-palett-oppen')) stangIkonMeny();
+  }).observe(html, { attributes: true, attributeFilter: ['data-sido-dold', 'data-ark-oppen', 'data-palett-oppen'] });
   function dra(ev, flytt, klar) {
-    const x0 = ev.clientX, y0 = ev.clientY; let rord = false;
-    const flytta = (e2) => { const dx = e2.clientX - x0, dy = e2.clientY - y0; if (!rord && Math.hypot(dx, dy) < 4) return; rord = true; flytt(dx, dy); };
-    const slapp = () => { removeEventListener('pointermove', flytta); removeEventListener('pointerup', slapp); klar(rord); };
-    addEventListener('pointermove', flytta); addEventListener('pointerup', slapp);
+    const x0 = ev.clientX, y0 = ev.clientY, id = ev.pointerId, mal = ev.target; let rord = false;
+    try { mal.setPointerCapture(id); } catch (x) { /* */ }
+    const flytta = (e2) => { if (e2.pointerId !== id) return; const dx = e2.clientX - x0, dy = e2.clientY - y0; if (!rord && Math.hypot(dx, dy) < 4) return; rord = true; flytt(dx, dy); };
+    const slapp = (e2) => {
+      if (e2 && e2.pointerId != null && e2.pointerId !== id) return;
+      removeEventListener('pointermove', flytta); removeEventListener('pointerup', slapp); removeEventListener('pointercancel', slapp); mal.removeEventListener('lostpointercapture', slapp);
+      klar(rord);
+    };
+    addEventListener('pointermove', flytta); addEventListener('pointerup', slapp); addEventListener('pointercancel', slapp); mal.addEventListener('lostpointercapture', slapp);
   }
   function kopplaFonster(f) {
     f.addEventListener('pointerdown', (ev) => {
@@ -361,25 +496,27 @@
         dra(ev, (dx, dy) => { fl.x = x + dx; fl.y = y + dy; klam(); f.style.left = fl.x + 'px'; f.style.top = fl.y + 'px'; }, () => { f.removeAttribute('data-drar'); sparaFl(); });
       } else if (horn) {
         const w = fl.w, h = fl.h; ev.preventDefault();
-        dra(ev, (dx, dy) => { fl.w = Math.max(300, w + dx); fl.h = Math.max(360, h + dy); f.style.width = fl.w + 'px'; f.style.height = fl.h + 'px'; }, () => { klam(); sparaFl(); });
+        // Storleken hålls inom fönstret redan under dragningen, så att den inte hoppar när man släpper
+        dra(ev, (dx, dy) => { fl.w = Math.max(300, Math.min(innerWidth - fl.x - 12, w + dx)); fl.h = Math.max(360, Math.min(innerHeight - fl.y - 12, h + dy)); f.style.width = fl.w + 'px'; f.style.height = fl.h + 'px'; },
+          () => { placeraFonster(); sparaFl(); });
       }
     });
   }
   function kopplaIkon(b) {
     b.addEventListener('pointerdown', (ev) => {
       if (ev.button !== 0) return;
-      const r = b.getBoundingClientRect();
+      const r = rekt(b);
       // Ett klick som rör sig några pixlar (magneten drar ikonen mot musen) ska inte räknas som en flytt
-      dra(ev, (dx, dy) => { if (!b.dataset.drar && Math.hypot(dx, dy) < 9) return; b.dataset.drar = '1'; fl.ikonX = Math.max(6, Math.min(innerWidth - 50, r.left + dx)); fl.ikonY = Math.max(6, Math.min(innerHeight - 50, r.top + dy)); b.style.left = fl.ikonX + 'px'; b.style.top = fl.ikonY + 'px'; b.style.right = b.style.bottom = ''; if (dock) { b.removeAttribute('data-i-docka'); dockFor(null); varIDocka = false; } },
+      dra(ev, (dx, dy) => { if (!b.dataset.drar && Math.hypot(dx, dy) < 9) return; b.dataset.drar = '1'; b.style.translate = ''; fl.ikonX = Math.max(6, Math.min(innerWidth - 50, r.left + dx)); fl.ikonY = Math.max(6, Math.min(innerHeight - 50, r.top + dy)); b.style.left = fl.ikonX + 'px'; b.style.top = fl.ikonY + 'px'; b.style.right = b.style.bottom = ''; if (dock) { b.removeAttribute('data-i-docka'); dockFor(null); varIDocka = false; } },
         () => {
           if (!b.dataset.drar) return;
           delete b.dataset.drar; b.dataset.dragen = '1'; setTimeout(() => { delete b.dataset.dragen; }, 50);
           // Släppt nära rälsen när menyn är infälld: tillbaka in i dockan
-          if (document.documentElement.hasAttribute('data-sido-dold') && fl.ikonX < 110) { fl.ikonX = fl.ikonY = null; varIDocka = false; }
+          if (html.hasAttribute('data-sido-dold') && fl.ikonX < 110) { fl.ikonX = fl.ikonY = null; varIDocka = false; }
           sparaFl(); placeraIkon();
         });
     });
-    b.addEventListener('click', () => { if (b.dataset.dragen) return; fl.min = false; sparaFl(); ritaFonster(); });
+    b.addEventListener('click', () => { if (b.dataset.dragen) return; fl.min = false; sparaFl(); ritaFonster(true); });
     b.addEventListener('contextmenu', (ev) => { ev.preventDefault(); ikonMeny(); });
     b.setAttribute('aria-haspopup', 'menu'); b.title = 'Öppna chatten · högerklicka för fler val';
   }
@@ -390,7 +527,7 @@
   function ikonMeny() {
     if (!ikon) return; if (imeny) { stangIkonMeny(); return; }
     const n = olastaTotalt(), tyst = !!pref().storEj, r = ikon.getBoundingClientRect();
-    imeny = document.createElement('div'); imeny.className = 'chf-meny'; imeny.setAttribute('role', 'menu');
+    imeny = document.createElement('div'); imeny.className = 'chf-meny'; imeny.setAttribute('role', 'menu'); imeny.setAttribute('aria-label', 'Chatten');
     imeny.innerHTML = '<header><b>Chatten</b><small>' + (n ? n + ' olästa' : 'Inga olästa') + '</small></header>' +
       '<button type="button" role="menuitem" data-chm="oppna">' + ik('prat') + '<span>Öppna chatten</span></button>' +
       '<button type="button" role="menuitemcheckbox" aria-checked="' + tyst + '" data-chm="tyst">' + ik(tyst ? 'mane' : 'bjallra') + '<span>Stör ej<small>' + (tyst ? 'På – inget ljud eller avisering' : 'Av') + '</small></span><i class="chf-meny__vaxel" aria-hidden="true"></i></button>' +
@@ -405,17 +542,44 @@
     imeny.addEventListener('click', (ev) => {
       const b = ev.target.closest('[data-chm]'); if (!b) return;
       const v = b.getAttribute('data-chm');
-      if (v === 'oppna') { stangIkonMeny(); fl.min = false; sparaFl(); ritaFonster(); }
-      if (v === 'tyst') { satPref('storEj', !pref().storEj); stangIkonMeny(); ritaFonster(); IH.toast(pref().storEj ? 'Stör ej är på' : 'Stör ej är av', pref().storEj ? 'Inget ljud och ingen avisering – olästa räknas ändå.' : null, pref().storEj ? 'mane' : 'bjallra'); }
-      if (v === 'docka') { fl.ikonX = fl.ikonY = null; sparaFl(); stangIkonMeny(); placeraIkon(); }
+      if (v === 'oppna') { stangIkonMeny(); fl.min = false; sparaFl(); ritaFonster(true); }
+      if (v === 'tyst') { satPref('storEj', !pref().storEj); stangIkonMeny(); ritaFonster(); IH.toast(pref().storEj ? 'Stör ej är på' : 'Stör ej är av', pref().storEj ? 'Inget ljud och ingen avisering – olästa räknas ändå.' : null, pref().storEj ? 'mane' : 'bjallra'); if (ikon) ikon.focus({ preventScroll: true }); }
+      if (v === 'docka') { fl.ikonX = fl.ikonY = null; sparaFl(); stangIkonMeny(); placeraIkon(); if (ikon) ikon.focus({ preventScroll: true }); }
       if (v === 'stang') { stangIkonMeny(); fl.oppen = false; fl.min = false; sparaFl(); ritaFonster(); }
     });
     setTimeout(() => document.addEventListener('pointerdown', utanforIkonMeny, true), 0);
     const forsta = imeny.querySelector('button'); if (forsta) forsta.focus({ preventScroll: true });
   }
-  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && imeny) { stangIkonMeny(); if (ikon) ikon.focus(); } });
-  IH.chattOppna = (kid) => { fl.oppen = true; fl.min = false; if (kid) fl.kanal = kid; sparaFl(); ritaFonster(); };
-  addEventListener('hashchange', () => setTimeout(ritaFonster, 0));
+  // Esc i fångstfasen, så att bara det översta lagret stängs (inte ett ark eller kundmötet bakom)
+  addEventListener('keydown', (ev) => {
+    if (imeny) {
+      const knappar = [...imeny.querySelectorAll('[role^="menuitem"]')], n = knappar.indexOf(document.activeElement);
+      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); stangIkonMeny(); if (ikon) ikon.focus({ preventScroll: true }); return; }
+      if (ev.key === 'Tab') { stangIkonMeny(); return; }
+      const steg = { ArrowDown: 1, ArrowUp: -1 }[ev.key], ytter = { Home: 0, End: knappar.length - 1 }[ev.key];
+      if (steg || ytter != null) { ev.preventDefault(); (knappar[ytter != null ? ytter : (n + steg + knappar.length) % knappar.length] || knappar[0]).focus({ preventScroll: true }); }
+      return;
+    }
+    if (ev.key !== 'Escape' || !fonster || !(ev.target.closest && ev.target.closest('.chf'))) return;
+    ev.preventDefault(); ev.stopPropagation();
+    if (ui.forslag) { ui.forslag = null; const b = fonster.querySelector('[data-ch-forslag]'); if (b) b.hidden = true; return; }
+    if (ui.andrar || ui.svar || ui.emoji) { ui.andrar = ui.svar = null; ui.emoji = false; ritaAllt(); fokusText(true); return; }
+    fl.min = true; sparaFl(); ritaFonster();
+  }, true);
+  IH.chattOppna = (kid) => { fl.oppen = true; fl.min = false; if (kid) fl.kanal = kid; sparaFl(); ritaFonster(true); };
+  // Guiden ställer chatten åt sidan under en rundtur och tar fram den igen efteråt (sparas inte)
+  let undan = false;
+  IH.chattUndan = (pa) => {
+    if (pa) { if (fonster && fl.oppen && !fl.min) { undan = true; fl.min = true; ritaFonster(); } }
+    else if (undan) { undan = false; if (fl.oppen && fl.min) { fl.min = false; ritaFonster(); } }
+  };
+  // Sidbyte: fönstret står kvar som det är (ritas inte om); bara in/ut på chattsidan ändrar något
+  addEventListener('hashchange', () => setTimeout(() => {
+    const paSidan = /^#\/chatt/.test(location.hash);
+    if (fonster && fl.oppen && !fl.min && !paSidan) return;
+    if (ikon && fl.oppen && fl.min && !paSidan) { uppdateraIkon(); return; }
+    ritaFonster();
+  }, 0));
 
   /* 08 Åtgärder ---------------------------------------------------------------------------------- */
   const G = IH.G;

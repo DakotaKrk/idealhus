@@ -387,7 +387,7 @@
   letter-spacing: -0.01em;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06) inset, 0 16px 34px -16px rgba(27, 25, 21, 0.85);
   cursor: pointer;
-  transition: transform 0.35s var(--ihg-mjuk), box-shadow 0.3s, left 0.5s var(--ihg-mjuk), opacity 0.3s;
+  transition: transform 0.35s var(--ihg-mjuk), translate 0.48s var(--ease-drawer, cubic-bezier(0.32, 0.72, 0, 1)), box-shadow 0.3s, opacity 0.3s var(--ease-out, ease-out), background-color 0.2s;
 }
 .ihg-knapp:hover { transform: translateY(-2px); }
 .ihg-knapp:active { transform: scale(0.97); }
@@ -617,3 +617,47 @@ html:has(.ihg) .ihg-knapp { opacity: 0; pointer-events: none; transform: transla
 /* Guiden döljs när sökpaletten eller ett ark är öppet */
 html[data-palett-oppen] .ihg-knapp, html[data-palett-oppen] .ihg-hej, html[data-ark-oppen] .ihg-knapp, html[data-ark-oppen] .ihg-hej { opacity: 0 !important; pointer-events: none !important; transition: opacity .2s; }
 .ihg-hej p b { display: inline; margin: 0; font: inherit; font-weight: 700; letter-spacing: 0; color: var(--ihg-mork, #1b1915); }
+
+/* --- Knappen på menyns kant (2026-10-29) --------------------------------
+   På dator sitter guideknappen nere på samma kant som menyknappen: mitt på
+   kanten mellan menyn och sidan när menyn är utfälld, och längst ner i rälsen
+   när den är infälld. Den glider dit med menyns tid och kurva (translate, inte
+   left), så att den aldrig ligger över innehållet. Menyn och välkomstkortet
+   öppnas ur knappen. */
+@media (min-width: 1101px) {
+  body { --ihg-x: calc(var(--ram, 12px) * 1.5 + var(--sido, 264px)); --ihg-x-dold: calc(var(--ram, 12px) / 2 + 26px); }
+  .ihg-knapp, [data-sido-dold] .ihg-knapp {
+    left: calc(var(--ihg-x) - 18px); bottom: calc(var(--ram, 12px) + 16px);
+    width: 36px; height: 36px; padding: 0; gap: 0; justify-content: center;
+    background: linear-gradient(160deg, #fff, #fff4e4); color: #8f5424;
+    box-shadow: 0 0 0 1px rgba(201, 138, 69, 0.35), inset 0 1px 0 #fff, 0 10px 22px -12px rgba(143, 84, 36, 0.6);
+  }
+  .ihg-knapp__text { display: none; }
+  .ihg-knapp__ikon { width: 28px; height: 28px; font-size: 0.85rem; }
+  .ihg-knapp__ikon svg.ihg-knapp__ring { inset: -4px; width: 36px; height: 36px; }
+  .ihg-knapp:hover { transform: scale(1.06); }
+  .ihg-knapp:active { transform: scale(0.94); transition-duration: 0.12s; }
+  .ihg-knapp[aria-expanded="true"] { box-shadow: 0 0 0 2px rgba(226, 154, 74, 0.6), 0 10px 22px -12px rgba(143, 84, 36, 0.6); }
+  [data-sido-dold] .ihg-knapp, [data-sido-dold] .ihg-meny, [data-sido-dold] .ihg-hej { translate: calc(var(--ihg-x-dold) - var(--ihg-x)) 0; }
+  /* Menyn och välkomstkortet växer ut ur knappen, till höger om den */
+  .ihg-meny, [data-sido-dold] .ihg-meny, .ihg-hej, [data-sido-dold] .ihg-hej { left: calc(var(--ihg-x) + 30px); bottom: calc(var(--ram, 12px) + 4px); transform-origin: 0 100%; }
+  .ihg-meny, .ihg-hej { transition: opacity 0.24s var(--ease-out, ease-out), transform 0.36s var(--ihg-mjuk), translate 0.48s var(--ease-drawer, cubic-bezier(0.32, 0.72, 0, 1)); }
+  .ihg-hej { transform: translateY(8px) scale(0.96); }
+  /* Rälsens nedersta ikon hamnar aldrig under knappen */
+  body:has(.ihg-knapp) .sido-rals__halva--ner { padding-bottom: 46px; }
+}
+/* Mobil och platta: knappen ovanför bottenmenyn, och sidans slut hamnar ovanför knappen */
+@media (max-width: 1100px) {
+  body:has(.ihg-knapp) .vy:not(:has(.ch)) { padding-bottom: 156px; }
+  .ihg-hej { transform-origin: 20px 100%; transform: translateY(8px) scale(0.96); }
+}
+/* Undan när kontomenyn eller chattfönstret ligger i vägen */
+html[data-konto-oppen] .ihg-knapp, html[data-konto-oppen] .ihg-hej, body:has(.chf:not([data-undan])) .ihg-hej { opacity: 0; pointer-events: none; }
+@media (max-width: 1100px) { body:has(.chf:not([data-undan])) .ihg-knapp { opacity: 0; pointer-events: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .ihg-knapp, .ihg-meny, .ihg-hej { translate: none !important; transform: none !important; transition: opacity 0.15s linear !important; }
+}
+@media (prefers-reduced-motion: reduce) and (min-width: 1101px) {
+  [data-sido-dold] .ihg-knapp { left: calc(var(--ihg-x-dold) - 18px); }
+  [data-sido-dold] .ihg-meny, [data-sido-dold] .ihg-hej { left: calc(var(--ihg-x-dold) + 30px); }
+}

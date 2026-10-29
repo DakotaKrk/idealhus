@@ -209,6 +209,12 @@
   IH.toast = function (rubrik, text, ikon, val) {
     val = val || {};
     var yta = $('.toaster');
+    // Kundmötet i helskärm visar bara sig självt: då läggs meddelandet i en egen yta i helskärmen
+    var fs = document.fullscreenElement;
+    if (fs && !(yta && fs.contains(yta))) {
+      yta = fs.querySelector(':scope > .toaster');
+      if (!yta) { yta = document.createElement('div'); yta.className = 'toaster'; yta.setAttribute('aria-live', 'polite'); fs.appendChild(yta); }
+    }
     if (!yta) return;
     var tid = val.tid || (val.lank ? 6500 : 3800);
     var t = document.createElement('div');
@@ -226,15 +232,13 @@
     var bort = function () {
       if (borta) return;
       borta = true;
+      // Toasten tonar ut och höjden krymper samtidigt, så att toasterna intill glider på plats i stället för att hoppa
+      if (lugn || !t.animate) { t.classList.add('ut'); setTimeout(function () { t.remove(); }, lugn ? 160 : 0); return; }
+      var cs = getComputedStyle(t), h = t.offsetHeight;
       t.classList.add('ut');
-      // Höjden krymper innan noden tas bort, så att toasterna under glider på plats i stället för att hoppa
-      setTimeout(function () {
-        if (lugn || !t.animate) { t.remove(); return; }
-        var h = t.offsetHeight;
-        t.style.overflow = 'hidden';
-        t.animate([{ height: h + 'px', marginTop: '0px', paddingTop: getComputedStyle(t).paddingTop, paddingBottom: getComputedStyle(t).paddingBottom },
-          { height: '0px', marginTop: '-8px', paddingTop: '0px', paddingBottom: '0px' }], { duration: 200, easing: 'cubic-bezier(.23,1,.32,1)', fill: 'forwards' }).onfinish = function () { t.remove(); };
-      }, 280);
+      t.style.overflow = 'hidden';
+      t.animate([{ height: h + 'px', marginTop: '0px', paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom },
+        { height: '0px', marginTop: '-8px', paddingTop: '0px', paddingBottom: '0px' }], { duration: 240, delay: 70, easing: 'cubic-bezier(.23,1,.32,1)', fill: 'forwards' }).onfinish = function () { t.remove(); };
     };
     var timer = setTimeout(bort, tid);
     t.addEventListener('click', function () { clearTimeout(timer); bort(); });
@@ -297,14 +301,22 @@
     });
     huvud.addEventListener('pointermove', function (e) {
       if (!start) return;
-      start.dy = Math.max(0, e.clientY - start.y);
-      if (start.dy > 3) { ark.style.transition = 'none'; ark.style.transform = 'translateY(' + start.dy + 'px)'; }
+      start.dy = e.clientY - start.y;
+      // nedåt följer arket fingret, uppåt bara lite (motstånd); slöjan ljusnar i takt med dragningen
+      var dy = start.dy > 0 ? start.dy : Math.max(-24, start.dy * 0.2);
+      if (Math.abs(start.dy) > 3) {
+        ark.style.transition = 'none'; ark.style.transform = 'translateY(' + dy + 'px)';
+        var sl = aktivtArk && aktivtArk.ark === ark ? aktivtArk.slojan : null;
+        if (sl) { sl.style.transition = 'none'; sl.style.opacity = String(Math.max(0, 1 - Math.max(0, dy) / Math.max(1, ark.offsetHeight))); }
+      }
     });
     var slapp = function () {
       if (!start) return;
       var fart = start.dy / Math.max(1, performance.now() - start.t), dy = start.dy;
       start = null;
       ark.style.transition = '';
+      var sl = aktivtArk && aktivtArk.ark === ark ? aktivtArk.slojan : null;
+      if (sl) { sl.style.transition = ''; sl.style.opacity = ''; }
       if (dy > 90 || (dy > 20 && fart > 0.5)) {
         if (!arkAndrat() || fragaKasta('Dra ner igen för att stänga ändå.')) { ark.style.transform = ''; IH.stangArk(); return; }
       }
@@ -315,7 +327,7 @@
   }
   IH.oppnaArk = function (opt) {
     // Öppnar ett ark ett annat behålls slöjan, och det gamla arket glider undan – sidan bakom blinkar inte
-    var slojan = null;
+    var slojan = null, arvtFokus = aktivtArk ? aktivtArk.fokus : null;
     if (aktivtArk && !lugn) {
       var gml = aktivtArk;
       aktivtArk = null;
@@ -331,7 +343,7 @@
     var behallSloja = !!slojan;
     if (!slojan) { slojan = document.createElement('div'); slojan.className = 'slojan'; }
     var ark = document.createElement('aside');
-    ark.className = 'ark' + (opt.bred ? ' ark--bred' : '');
+    ark.className = 'ark ark--ny' + (opt.bred ? ' ark--bred' : '');
     ark.setAttribute('role', 'dialog');
     ark.setAttribute('aria-modal', 'true');
     ark.setAttribute('aria-label', opt.titel || 'Panel');
@@ -348,15 +360,34 @@
     requestAnimationFrame(function () {
       requestAnimationFrame(function () { slojan.classList.add('syns'); ark.classList.add('syns'); });
     });
-    aktivtArk = { ark: ark, slojan: slojan, vidStang: opt.vidStang, fokus: document.activeElement };
+    // Raderna glider in bara när arket öppnas – inte varje gång kroppen skrivs om
+    setTimeout(function () { ark.classList.remove('ark--ny'); }, 650);
+    // Ersätter arket ett annat ärvs fokus från det, så att det hamnar rätt när kedjan stängs
+    var fore = arvtFokus && arvtFokus.isConnected ? arvtFokus : document.activeElement;
+    aktivtArk = { ark: ark, slojan: slojan, vidStang: opt.vidStang, fokus: fore && fore !== document.body && !ark.contains(fore) ? fore : arvtFokus };
+    bakgrundInert(true);
     setTimeout(function () {
       var f = ark.querySelector('[autofocus]') || ark.querySelector('.ark__huvud .ikonknapp');
-      if (f) f.focus();
+      if (f && aktivtArk && aktivtArk.ark === ark) f.focus({ preventScroll: true });
     }, 60);
     if (opt.efter) opt.efter(ark);
     return ark;
   };
-  IH.stangArk = function (direkt) {
+  // Bakom ett öppet ark går det inte att tabba eller klicka in i menyn och sidan (aria-modal på riktigt)
+  var INERT_SEL = ['.sido', '.sido-kant', '.huvud', '.mobilmeny'];
+  function bakgrundInert(pa) {
+    INERT_SEL.forEach(function (sel) {
+      var el = $(sel); if (!el) return;
+      if (pa) { if (!el.inert) { el.inert = true; el.setAttribute('data-ark-inert', ''); } }
+      else if (el.hasAttribute('data-ark-inert')) {
+        el.removeAttribute('data-ark-inert');
+        // sidomenyn är fortfarande inert när den är infälld på dator
+        el.inert = sel === '.sido' ? sidoDold() && datorBred.matches : false;
+      }
+    });
+  }
+  // utanFokus: vid sidbyte ska fokus inte tillbaka till en knapp på sidan man lämnar
+  IH.stangArk = function (direkt, utanFokus) {
     if (!aktivtArk) return;
     var a = aktivtArk;
     aktivtArk = null;
@@ -364,9 +395,10 @@
     a.slojan.classList.remove('syns');
     var bort = function () { a.ark.remove(); a.slojan.remove(); };
     if (!aktivtArk) document.documentElement.removeAttribute('data-ark-oppen');
-    if (direkt || lugn) bort(); else setTimeout(bort, 420);
+    bakgrundInert(false);
+    if (direkt || lugn) bort(); else setTimeout(bort, 340);
     if (a.vidStang) a.vidStang();
-    if (a.fokus && a.fokus.focus && !direkt) a.fokus.focus();
+    if (!direkt && !utanFokus && a.fokus && a.fokus.isConnected && a.fokus.focus) a.fokus.focus({ preventScroll: true });
   };
 
   /* --- Navigering --------------------------------------------------- */
@@ -485,29 +517,25 @@
       }).join('') + '</div>';
     }).join('<span class="sido-rals__mitt" aria-hidden="true"></span>');
   }
-  (function () {
-    var s = document.createElement('style');
-    s.textContent = '.sido-rals{position:absolute;left:6px;top:14px;bottom:14px;width:40px;display:grid;grid-template-rows:minmax(0,1fr) 52px minmax(0,1fr);z-index:1}' +
-      '.sido-rals__halva{min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0 2px}' +
-      '.sido-rals__halva--upp>:first-child{margin-top:auto}.sido-rals__halva::-webkit-scrollbar{display:none}' +
-      '.sido-rals__delare{flex:none;width:18px;height:1px;margin:5px 0;background:rgba(95,88,81,.18)}' +
-      '@media (max-height:820px){.sido-rals a{width:30px;height:30px}.sido-rals .i{width:16px;height:16px}.sido-rals__delare{margin:3px 0}}' +
-      '.sido-rals[hidden]{display:none}.sido-rals a{position:relative;flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;color:var(--text-2,#5b544a);transition:background .2s,color .2s}' +
-      '.sido-rals a:hover,.sido-rals a:focus-visible{background:rgba(255,255,255,.95);color:var(--text,#1b1915)}.sido-rals a.aktiv{background:var(--virke-ljus,#fbead5);color:var(--virke-djup,#8f5424)}' +
-      '.sido-rals .i{width:18px;height:18px}.sido-rals i{position:absolute;top:-2px;right:-3px;min-width:15px;height:15px;padding:0 4px;border-radius:8px;background:var(--virke,#e8a456);color:#fff;box-shadow:0 0 0 2px #fbf7f0;font:600 9px/15px var(--rubrik,sans-serif);font-style:normal;text-align:center}';
-    document.head.appendChild(s);
-  })();
+  // Rälsens stil ligger i grund.css ("Sidomenyn – låda, knapp, räls, docka")
+  // Kontot i toppraden när menyn är infälld: avatar med närvaroprick (kontokortet i sidomenyn syns inte då)
+  function toppKonto() {
+    var jag = IH.jag();
+    return '<span class="avatar' + (jag.bild ? ' avatar--bild' : '') + '" style="--av:' + jag.farg + (jag.bild ? ';background-image:url(' + IH.e(jag.bild) + ');background-size:cover;color:transparent' : '') + '">' +
+      IH.initialer(jag.namn) + (IH.narvaroPrick ? IH.narvaroPrick(jag.id) : '') + '</span>';
+  }
   function skal() {
     var app = $('#app');
     app.innerHTML = '<aside class="sido" id="sidomeny">' + sidomeny() + '</aside>' +
       '<div class="sido-kant"><button class="sido-knapp" type="button" data-sido-knapp aria-controls="sidomeny" aria-expanded="true" aria-label="Dölj menyn" title="Dölj menyn  [">' +
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 9 12l5.5 5.5"/></svg></button>' +
-      '<nav class="sido-rals" aria-label="Meny" hidden>' + rals() + '</nav></div>' +
+      '<nav class="sido-rals" aria-label="Meny" inert>' + rals() + '</nav></div>' +
       '<div class="huvud"><header class="topp">' +
       '<button class="sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök eller skriv ett kommando…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
       '<span class="topp__titel" data-topp-titel></span>' +
       '<span class="proto">Prototyp · exempeldata</span>' +
       (IH.jag().roll === 'admin' ? '' : '<button class="knapp knapp--virke" type="button" data-g="ny">' + IH.i('plus') + 'Ny</button>') +
+      '<button class="topp__konto" type="button" data-g="konto-meny" aria-haspopup="dialog" aria-label="Konto och status">' + toppKonto() + '</button>' +
       '</header><main class="vy" id="vy" tabindex="-1"></main></div>' +
       '<nav class="mobilmeny" aria-label="Meny">' + mobilmeny() + '</nav>' +
       '<div class="toaster" aria-live="polite"></div>';
@@ -517,47 +545,83 @@
   // och vyn glider efter (FLIP – en layoutändring, sedan bara transform). Valet sparas.
   var datorBred = matchMedia('(min-width: 1101px)');
   function sidoDold() { return document.documentElement.hasAttribute('data-sido-dold'); }
+  // Knappens slutläge direkt efter växlingen (utan att vänta på glidningen): en osynlig kopia av kanten
+  // utan övergångar mäts. chatt.js kan placera chattikonen där samtidigt som menyn glider (händelsen ih:sido).
+  function sidoKnappSlut() {
+    var kant = $('.sido-kant'), kn = kant && $('.sido-knapp', kant);
+    if (!kant || !kn || !datorBred.matches) return null;
+    var k = kant.cloneNode(false), kk = kn.cloneNode(false);
+    k.style.cssText = 'transition:none!important;animation:none!important;visibility:hidden!important;pointer-events:none!important';
+    kk.style.cssText = 'transition:none!important;animation:none!important;translate:none!important';
+    k.removeAttribute('id'); k.appendChild(kk); kant.parentNode.appendChild(k);
+    var r = kk.getBoundingClientRect(); k.remove();
+    return { left: r.left, top: r.top, width: r.width, height: r.height, right: r.right, bottom: r.bottom };
+  }
+  IH.sidoKnappSlut = sidoKnappSlut;
+  // När glidningen landat: de som beror på bredden (3D, diagram, kortrutnät) får en resize. IH.sidoResize
+  // säger att den kommer från menyn, så att t.ex. chatten och menyerna kan låta bli att bygga om sig.
+  function sidoKlar(dold) {
+    IH.sidoResize = true;
+    try { window.dispatchEvent(new Event('resize')); } finally { IH.sidoResize = false; }
+    window.dispatchEvent(new CustomEvent('ih:sido-klar', { detail: { dold: dold } }));
+  }
   function sattSido(dold, animera) {
-    // Glidningen sköts i CSS: menyns spalt växer och krymper mjukt och vyn
-    // följer med (ljus.css, "Menyn glider"). [ växlar utan rörelse.
+    // Glidningen sköts i CSS (grund.css, "Sidomenyn – låda, knapp, räls, docka") och innehållet glider med
+    // FLIP: en layoutändring, sedan bara transform. Både sidled (menyn) och höjdled (toppraden som kommer
+    // och går) – innehållet hoppar aldrig.
     var rot = document.documentElement;
+    var flip = !!animera && datorBred.matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var vy = flip ? $('#vy') : null, ankare = vy && (vy.firstElementChild || vy), fore = null;
+    // Mät före – med en pågående glidning inräknad – och avbryt den sedan, så att ett snabbt andra klick fortsätter därifrån
+    if (ankare) fore = ankare.getBoundingClientRect();
+    if (vy && vy.flip) vy.flip.cancel();
+    // Magnetens förskjutning ska inte följa med knappen eller chattikonen till det nya läget
+    $$('.sido-knapp, .chf-ikon').forEach(function (el) { el.style.translate = ''; });
     rot.classList.toggle('sido-glider', !!animera);
     clearTimeout(sattSido.t);
-    if (animera) sattSido.t = setTimeout(function () { rot.classList.remove('sido-glider'); }, 500);
-    // FLIP: mät innehållet före och efter växlingen och låt det glida med transform – en enda omräkning av
-    // layouten i stället för en per bildruta, så rörelsen blir mjuk även med 3D och diagram på sidan
-    var huvud = animera && datorBred.matches && !matchMedia('(prefers-reduced-motion: reduce)').matches ? $('.huvud') : null, fore = huvud ? huvud.getBoundingClientRect().left : 0;
+    if (animera) sattSido.t = setTimeout(function () { rot.classList.remove('sido-glider'); }, 520);
     rot.toggleAttribute('data-sido-dold', dold);
+    var s = $('.sido'); if (s) s.inert = dold && datorBred.matches;
+    var r = $('.sido-rals'); if (r) r.inert = !(dold && datorBred.matches);
     // Kortrutnäten räknas om direkt i den nya bredden, så att de inte hoppar en gång till efter glidningen
-    [].forEach.call(document.querySelectorAll('.kundnat'), centreraGrid);
-    if (huvud) {
-      var dx = fore - huvud.getBoundingClientRect().left;
-      if (Math.abs(dx) > 1) {
-        if (huvud.flip) huvud.flip.cancel();
-        huvud.style.willChange = 'transform';
+    $$('.kundnat').forEach(centreraGrid);
+    var flippar = false;
+    if (ankare) {
+      var efter = ankare.getBoundingClientRect(), dx = fore.left - efter.left, dy = fore.top - efter.top;
+      // Rullad sida: toppraden som kommer eller går tas upp av rullningen, så att innehållet står still i höjdled
+      if (Math.abs(dy) > 1 && window.scrollY > 0) {
+        window.scrollTo(0, Math.max(0, window.scrollY - dy));
+        efter = ankare.getBoundingClientRect(); dy = fore.top - efter.top;
+      }
+      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+        vy.style.willChange = 'transform';
         // samma tid och lådkurva som menyn (--glid .48s, --ease-drawer), så att de rör sig i takt
-        huvud.flip = huvud.animate([{ transform: 'translate3d(' + dx + 'px,0,0)' }, { transform: 'translate3d(0,0,0)' }], { duration: 480, easing: 'cubic-bezier(0.32,0.72,0,1)' });
-        huvud.flip.onfinish = function () { huvud.style.willChange = ''; huvud.flip = null; window.dispatchEvent(new Event('resize')); };
-        huvud.flip.oncancel = function () { huvud.style.willChange = ''; huvud.flip = null; };
-        var flippar = true;
+        var anim = vy.animate([{ transform: 'translate3d(' + dx + 'px,' + dy + 'px,0)' }, { transform: 'translate3d(0,0,0)' }], { duration: 480, easing: 'cubic-bezier(0.32,0.72,0,1)' });
+        vy.flip = anim;
+        anim.onfinish = function () { if (vy.flip === anim) { vy.style.willChange = ''; vy.flip = null; } sidoKlar(dold); };
+        anim.oncancel = function () { if (vy.flip === anim) { vy.style.willChange = ''; vy.flip = null; } };
+        flippar = true;
       }
     }
     var k = $('[data-sido-knapp]'), text = dold ? 'Visa menyn' : 'Dölj menyn';
     if (k) { k.setAttribute('aria-expanded', String(!dold)); k.setAttribute('aria-label', text); k.title = text + '  ['; }
-    var s = $('.sido'); if (s) s.inert = dold && datorBred.matches;
-    var r = $('.sido-rals'); if (r) r.hidden = !(dold && datorBred.matches);
     try { localStorage.setItem('ih-crm-sido-dold', dold ? '1' : '0'); } catch (e) { /* ingen lagring */ }
-    if (!flippar) setTimeout(function () { window.dispatchEvent(new Event('resize')); }, animera ? 480 : 0);
+    // Direkt vid växlingen: knappens slutläge, tid och kurva – så att chattikonen kan flyga i takt med menyn
+    window.dispatchEvent(new CustomEvent('ih:sido', { detail: { dold: dold, animera: flip, tid: flip ? 480 : 0, kurva: 'cubic-bezier(0.32,0.72,0,1)', knapp: sidoKnappSlut() } }));
+    if (!flippar) setTimeout(function () { sidoKlar(dold); }, animera ? 480 : 0);
   }
   document.addEventListener('click', function (ev) {
     if (ev.target.closest && ev.target.closest('[data-sido-knapp]')) sattSido(!sidoDold(), true);
   });
   document.addEventListener('keydown', function (ev) {
-    if (ev.key !== '[' || ev.ctrlKey || ev.metaKey || ev.altKey || !datorBred.matches || document.querySelector('.mote')) return;
+    // AltGr (svensk [ = AltGr+8) ger ctrlKey och altKey i Windows – den räknas inte som Ctrl/Alt
+    var altGr = ev.getModifierState && ev.getModifierState('AltGraph');
+    if (ev.key !== '[' || ev.metaKey || ((ev.ctrlKey || ev.altKey) && !altGr) || !datorBred.matches || document.querySelector('.mote')) return;
     if (ev.target.closest && ev.target.closest('input, textarea, select, [contenteditable], dialog')) return;
-    ev.preventDefault(); sattSido(!sidoDold(), false);
+    if (document.documentElement.hasAttribute('data-ark-oppen') || document.documentElement.hasAttribute('data-palett-oppen')) return;
+    ev.preventDefault(); sattSido(!sidoDold(), true);
   });
-  datorBred.addEventListener('change', function () { var s = $('.sido'), r = $('.sido-rals'); if (s) s.inert = sidoDold() && datorBred.matches; if (r) r.hidden = !(sidoDold() && datorBred.matches); });
+  datorBred.addEventListener('change', function () { var s = $('.sido'), r = $('.sido-rals'); if (s) s.inert = sidoDold() && datorBred.matches; if (r) r.inert = !(sidoDold() && datorBred.matches); });
   IH.sattSido = sattSido;
   IH.G['vaxla-sido'] = function () { if (datorBred.matches) sattSido(!sidoDold(), true); };
 
@@ -635,6 +699,8 @@
     if (mm) { mm.innerHTML = mobilmeny(); markera(true); }
     var rl = $('.sido-rals');
     if (rl) { rl.innerHTML = rals(); markera(true); }
+    var tk = $('.topp__konto');
+    if (tk) tk.innerHTML = toppKonto();
   };
 
   function markera(direkt) {
@@ -653,7 +719,8 @@
     flyttaMarkor(direkt);
   }
 
-  var forraVy = null;
+  var forraVy = null, rullMinne = {};
+  var DETALJ_VY = /^(kunder|salj|offerter|produktion)$/;
   // Den sida man kom ifrån (adress och titel): "← Karin Holm" i stället för alltid "← Säljtavlan"
   var vagen = [];
   var FORRA_OK = /^#\/(?:(kunder|salj|offerter|forfragningar|produktion)\/[^/?]+|oversikt)?$/;
@@ -711,10 +778,17 @@
     if (sparr) vyfn = sparrVy;
     // Vyerna kan läsa om det här är ett byte eller en omritning på plats
     // (då ska t.ex. husen inte resa sig igen).
-    var vyByte = forraVy === null || forraVy.split('/')[0] !== adr.vy, ut;
-    var nyckel = adr.vy + '/' + adr.del.join('/');
-    // Samma vy med ny del (t.ex. en annan förfrågan) byter bara innehåll.
-    var bytt = forraVy === null || forraVy.split('/')[0] !== adr.vy;
+    var nyckel = adr.vy + '/' + adr.del.join('/'), forraDel = forraVy === null ? null : forraVy.split('/'), ut;
+    // Samma vy med ny del (t.ex. en annan förfrågan i inkorgen) byter bara innehåll. Listorna med egna
+    // detaljsidor (kund, affär, offert, projekt) räknar lista -> detalj och tillbaka som ett sidbyte.
+    var bytt = forraDel === null || forraDel[0] !== adr.vy || (DETALJ_VY.test(adr.vy) && (forraDel[1] || '') !== (adr.del[0] || ''));
+    var vyByte = bytt;
+    var rullaTill = 0;
+    if (bytt && forraVy !== null) {
+      rullMinne[forraVy] = window.scrollY;
+      // tillbaka från en detaljsida till samma lista: samma ställe i listan
+      if (forraDel[0] === adr.vy && forraDel[1] && !adr.del[0]) rullaTill = rullMinne[nyckel] || 0;
+    }
     var gor = function () {
       // Vyn byggs här, så att ett sidbyte först hinner visa klicket i menyn
       IH.vyByte = vyByte;
@@ -726,12 +800,12 @@
         yta.classList.remove('vy--in');
         void yta.offsetWidth;
         yta.classList.add('vy--in');
-        window.scrollTo(0, 0);
+        window.scrollTo(0, rullaTill);
         stillaSnart(yta);
       }
       tillbakaRatt(yta, ut.titel);
       forraVy = nyckel;
-      markera(false);
+      if (!gor.markerad) markera(false);
       delaRubriker(yta);
       IH.efterRitning(yta);
       if (!bytt) stillaNu(yta);
@@ -740,6 +814,7 @@
     if (bytt && forraVy !== null && !lugn && document.startViewTransition) {
       // Menyn markerar den nya sidan direkt (klicket känns levande), sedan byts vyn i nästa bildruta.
       markera(false);
+      gor.markerad = true;
       var vantar = ++rita.n;
       requestAnimationFrame(function () {
         if (vantar !== rita.n) return;
@@ -967,7 +1042,7 @@
   }
   function palettKor(el) {
     var mal = el.getAttribute('data-mal') || '';
-    IH.stangPalett(true);
+    IH.stangPalett(false, true);
     if (mal.indexOf('ga:') === 0) IH.ga(mal.slice(3));
     else if (mal.indexOf('g:') === 0 && IH.G[mal.slice(2)]) IH.G[mal.slice(2)](el);
   }
@@ -1010,7 +1085,7 @@
       requestAnimationFrame(function () { slojan.classList.add('syns'); rot.classList.add('syns'); inp.focus(); });
     });
   };
-  IH.stangPalett = function (direkt) {
+  IH.stangPalett = function (direkt, utanFokus) {
     if (!palett) return;
     var p = palett;
     palett = null;
@@ -1019,7 +1094,7 @@
     p.slojan.classList.remove('syns');
     var bort = function () { p.rot.remove(); p.slojan.remove(); };
     if (direkt || lugn) bort(); else setTimeout(bort, 260);
-    if (p.fokus && p.fokus.focus && !direkt) p.fokus.focus();
+    if (!direkt && !utanFokus && p.fokus && p.fokus.isConnected && p.fokus.focus) p.fokus.focus({ preventScroll: true });
   };
   IH.G.palett = function () { IH.oppnaPalett(); };
   IH.G['palett-val'] = function (el) { palettKor(el); };
@@ -1071,11 +1146,10 @@
       if (IH.FORM && IH.FORM[namn]) IH.FORM[namn](f, new FormData(f));
     });
     window.addEventListener('hashchange', function () {
-      IH.stangArk(true);
-      IH.stangPalett(true);
+      IH.stangArk(false, true);
+      IH.stangPalett(false, true);
       rita();
     });
-    window.addEventListener('resize', function () { flyttaMarkor(true); });
     window.addEventListener('pageshow', function (e) {
       if (e.persisted && !inloggad()) location.replace('logga-in.html');
     });

@@ -32,7 +32,7 @@
 .lp-status, .lp-saljare header small { display: inline-flex; align-items: center; gap: 6px; }
 .lp-status i, .lp-saljare header small i { width: 8px; height: 8px; border-radius: 50%; background: var(--n); }
 .lp-mal__spar { display: block; height: 8px; border-radius: 8px; background: rgba(27, 25, 21, .08); overflow: hidden; }
-.lp-mal__spar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--virke), var(--gron)); transform: scaleX(var(--a)); transform-origin: left; animation: lp-fyll 1s var(--mjuk) backwards; }
+.lp-mal__spar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--virke), var(--gron)); transform: scaleX(var(--a)); transform-origin: left; animation: lp-fyll .7s var(--mjuk) backwards; }
 @keyframes lp-fyll { from { transform: scaleX(0); } }
 
 /* 04 Profilen */
@@ -122,7 +122,7 @@
 .lp-pipe li { display: grid; grid-template-columns: 130px minmax(0, 1fr) 80px; grid-template-rows: auto auto; align-items: center; gap: 2px 14px; padding: 8px 0; }
 .lp-pipe__namn { display: flex; align-items: center; gap: 10px; font-weight: 600; grid-row: span 2; }
 .lp-pipe__namn .avatar { width: 32px; height: 32px; font-size: .75rem; }
-.lp-pipe__stapel { display: flex; gap: 2px; height: 16px; width: calc(var(--a) * 100%); min-width: 6px; border-radius: 8px; overflow: hidden; grid-row: span 2; animation: lp-fyll 1s var(--mjuk) backwards; transform-origin: left; }
+.lp-pipe__stapel { display: flex; gap: 2px; height: 16px; width: calc(var(--a) * 100%); min-width: 6px; border-radius: 8px; overflow: hidden; grid-row: span 2; animation: lp-fyll .7s var(--mjuk) backwards; transform-origin: left; }
 .lp-pipe__stapel i { background: var(--f); }
 .lp-pipe li > b { text-align: right; }
 .lp-pipe li > small { grid-column: 3; text-align: right; font-size: .76rem; color: var(--text-3); }
@@ -158,15 +158,16 @@
    ring, rollerna och statusknappen – sedan snabbstatus, alla konton med status och senast aktiv, och tre rutor i foten. */
 .km-panel { position: fixed; z-index: 950; display: flex; flex-direction: column; justify-content: flex-start; gap: 14px; padding: 14px 12px; border-radius: 28px; overflow: hidden;
   background: linear-gradient(180deg, #fffdf9, #fbf4e8); box-shadow: 0 30px 70px -30px rgba(60, 40, 15, .55), inset 0 0 0 1px rgba(240, 181, 110, .45);
-  animation: km-in .5s cubic-bezier(.22, 1, .36, 1) both; transform-origin: 50% 100%; }
+  animation: km-in .28s var(--mjuk) both; transform-origin: 50% 100%; }
 .km-panel::before { content: ""; position: absolute; left: 22%; right: 22%; top: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--virke), transparent); }
 .km-panel[data-stanger] { animation: km-ut .22s ease-in both; }
-@keyframes km-in { from { opacity: 0; transform: perspective(900px) rotateX(-16deg) translateY(48px) scale(.97); } }
-@keyframes km-ut { to { opacity: 0; transform: perspective(900px) rotateX(-8deg) translateY(24px) scale(.98); } }
-.km-panel > * { animation: km-rad-in .5s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(80ms + var(--i, 0) * 45ms); }
+@keyframes km-in { from { opacity: 0; transform: translateY(10px) scale(.98); } }
+@keyframes km-ut { to { opacity: 0; transform: translateY(8px) scale(.98); } }
+.km-panel > * { animation: km-rad-in .28s var(--mjuk) both; animation-delay: calc(30ms + var(--i, 0) * 30ms); }
 .km-panel > :nth-child(2) { --i: 1; } .km-panel > :nth-child(3) { --i: 2; } .km-panel > :nth-child(n+4) { --i: 3; }
-.km-lista > [role="listitem"] { animation: km-rad-in .5s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(160ms + var(--i, 0) * 55ms); }
-@keyframes km-rad-in { from { opacity: 0; transform: translateY(12px); } }
+.km-lista > [role="listitem"] { animation: km-rad-in .28s var(--mjuk) both; animation-delay: calc(60ms + min(var(--i, 0), 6) * 20ms); }
+@keyframes km-rad-in { from { opacity: 0; transform: translateY(6px); } }
+.sido .anv { transition: opacity .18s var(--ease-out, ease-out), transform .16s var(--ease-out, ease-out), background-color .2s ease, box-shadow .2s ease; }
 html[data-konto-oppen] .anv { opacity: 0; pointer-events: none; }
 
 .km-topp { position: relative; display: grid; justify-items: center; gap: 10px; flex: none; padding: 22px 12px 12px; border-radius: 20px; text-align: center;
@@ -257,7 +258,10 @@ button.km-rad:active { transform: scale(.98); }
 .km-kryss { display: flex; align-items: center; gap: 10px; font-size: .9rem; }
 .km-kryss input { width: 18px; height: 18px; accent-color: var(--virke-djup); }
 /* Chattikonen göms medan en panel eller kontomenyn är öppen */
-body:has(.ark.syns) .chf-ikon, html[data-konto-oppen] .chf-ikon { opacity: 0; pointer-events: none; transform: scale(.8); }
+/* Bara toning (ingen skalning) så att ikonen inte studsar tillbaka när arket stängs, och dockan följer med som en enhet */
+body:has(.ark.syns) .chf-ikon, html[data-konto-oppen] .chf-ikon { opacity: 0; pointer-events: none; }
+.chf-dock { transition: filter .2s var(--ease-out, ease-out); }
+body:has(.ark.syns) .chf-dock, html[data-konto-oppen] .chf-dock, html[data-ark-oppen] .chf-dock, html[data-palett-oppen] .chf-dock { filter: opacity(0); }
 @media (prefers-reduced-motion: reduce) { .km-panel, .km-panel[data-stanger], .km-panel > *, .km-lista > [role="listitem"], .km-ring { animation: none; } }
 .km-bild .avatar { border-radius: 50%; }
 .km-bock { left: auto; right: 10px; top: 50%; margin-top: -9px; }
@@ -279,10 +283,10 @@ body:has(.ark.syns) .chf-ikon, html[data-konto-oppen] .chf-ikon { opacity: 0; po
 html[data-sido-tat] .vy-vaxel { margin-bottom: 6px; }
 html[data-sido-tat] .vy-vaxel button { min-height: 28px; }
 /* Sidbytet: glider in från det håll man byter till */
-.vy[data-vy-byte="till-chef"] > * { animation: vy-till-chef .55s cubic-bezier(.22, 1, .36, 1) both; }
-.vy[data-vy-byte="till-salj"] > * { animation: vy-till-salj .55s cubic-bezier(.22, 1, .36, 1) both; }
-@keyframes vy-till-chef { from { opacity: 0; transform: translateX(28px); } }
-@keyframes vy-till-salj { from { opacity: 0; transform: translateX(-28px); } }
+.vy[data-vy-byte="till-chef"] > * { animation: vy-till-chef .38s var(--ease-out, cubic-bezier(.23, 1, .32, 1)) both; }
+.vy[data-vy-byte="till-salj"] > * { animation: vy-till-salj .38s var(--ease-out, cubic-bezier(.23, 1, .32, 1)) both; }
+@keyframes vy-till-chef { from { opacity: 0; transform: translateX(16px); } }
+@keyframes vy-till-salj { from { opacity: 0; transform: translateX(-16px); } }
 /* I chefsvyn lyser Försäljning i menyn och rubriken Översikt har en varm prick */
 html[data-vy-chef] .sido .sido__lank[data-vy="chef"] > .i { color: var(--virke-djup); }
 @media (prefers-reduced-motion: reduce) { .vy-vaxel__puck { transition: none; } .vy[data-vy-byte] > * { animation: none; } }
@@ -292,7 +296,7 @@ html[data-vy-chef] .sido .sido__lank[data-vy="chef"] > .i { color: var(--virke-d
 .lp-chefhjalte .ap-tal .ao-tal { align-items: flex-start; }
 .lp-varm { color: var(--virke-djup); }
 .lp-glasmatare { display: block; height: 4px; margin-top: 6px; border-radius: 4px; background: rgba(27, 25, 21, .08); overflow: hidden; }
-.lp-glasmatare i { display: block; width: calc(var(--andel) * 100%); height: 100%; border-radius: inherit; background: linear-gradient(90deg, #7fd3a2, #22a35a); transform-origin: left; animation: ap-stapel .9s var(--mjuk) both; }
+.lp-glasmatare i { display: block; width: calc(var(--andel) * 100%); height: 100%; border-radius: inherit; background: linear-gradient(90deg, #7fd3a2, #22a35a); transform-origin: left; animation: ap-stapel .7s var(--mjuk) both; }
 .lp-saljare__mal--tom { color: var(--text-3); }
 .lp-lank { padding: 0; border: 0; background: none; font: 600 inherit/inherit var(--rubrik); color: var(--virke-djup); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .lp-saljare footer { flex-wrap: wrap; }
@@ -415,7 +419,7 @@ html[data-vy-chef] .sido .sido__lank[data-vy="chef"] > .i { color: var(--virke-d
 .lp-kal__ledig:hover { transform: translateY(-1px); }
 .lp-kal__ledig .i { width: 14px; height: 14px; }
 .lp-agenda { display: grid; gap: 10px; }
-.lp-agenda__dag { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; padding: 12px; border-radius: 18px; background: #fbf8f3; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .04); animation: in-rad .5s var(--mjuk) backwards; }
+.lp-agenda__dag { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; padding: 12px; border-radius: 18px; background: #fbf8f3; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .04); animation: in-rad .4s var(--ease-out, var(--mjuk)) backwards; }
 .lp-agenda__dag.idag { background: #fff6ea; box-shadow: inset 0 0 0 1.5px rgba(226, 154, 74, .55); }
 .lp-agenda__dag.sen { background: #fff7f5; }
 .lp-agenda__dag header { display: flex; align-items: flex-start; gap: 10px; }
@@ -482,7 +486,7 @@ html[data-vy-chef] .sido .sido__lank[data-vy="chef"] > .i { color: var(--virke-d
 
 /* 07 topplistan: period, stapel mot ledaren och medalj */
 .lp-topp__stapel { display: block; height: 4px; margin-top: 6px; border-radius: 4px; background: rgba(27, 25, 21, .06); overflow: hidden; }
-.lp-topp__stapel i { display: block; width: calc(var(--a) * 100%); height: 100%; border-radius: inherit; background: linear-gradient(90deg, #f6c68d, #e29a4a); transform-origin: left; animation: ap-stapel .9s var(--mjuk) both; }
+.lp-topp__stapel i { display: block; width: calc(var(--a) * 100%); height: 100%; border-radius: inherit; background: linear-gradient(90deg, #f6c68d, #e29a4a); transform-origin: left; animation: ap-stapel .7s var(--mjuk) both; }
 .lp-topp li.forst .lp-topp__plats { background: linear-gradient(160deg, #ffe2a8, #f0b56e); }
 .lp-topp__plats .emo-ik { width: 16px; height: 16px; }
 .lp-topp__summa { margin: 12px 4px 0; font-size: .8rem; color: var(--text-2); }
@@ -598,7 +602,7 @@ section.lp-mork .ao-tal__ikon { background: rgba(246, 198, 141, .14); box-shadow
 .lp-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
 .lp-ring circle { fill: none; stroke-width: 9; stroke-linecap: round; }
 .lp-ring__spar { stroke: rgba(255, 255, 255, .08); }
-.lp-ring__bage, .lp-ring__glod { stroke: url(#lp-ring-g); stroke-dasharray: 314.16; stroke-dashoffset: calc(314.16 * (1 - var(--a))); animation: lp-ring 1.6s cubic-bezier(.22, 1, .36, 1) both; }
+.lp-ring__bage, .lp-ring__glod { stroke: url(#lp-ring-g); stroke-dasharray: 314.16; stroke-dashoffset: calc(314.16 * (1 - var(--a))); animation: lp-ring 1s cubic-bezier(.22, 1, .36, 1) both; }
 .lp-ring__glod { stroke-width: 18; opacity: .35; filter: blur(7px); }
 @keyframes lp-ring { from { stroke-dashoffset: 314.16; } }
 .lp-ring__mitt { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; gap: 2px; }
@@ -615,7 +619,7 @@ section.lp-mork .ao-tal__ikon { background: rgba(246, 198, 141, .14); box-shadow
 .lp-veckor { grid-area: veckor; display: grid; gap: 8px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, .08); }
 .lp-veckor small { font: 600 .62rem/1 var(--rubrik); letter-spacing: .14em; text-transform: uppercase; color: rgba(251, 244, 232, .5); }
 .lp-veckor__staplar { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: end; gap: 6px; height: 54px; }
-.lp-veckor__staplar i { height: calc(6px + var(--h) * 48px); border-radius: 6px 6px 3px 3px; background: rgba(255, 255, 255, .07); transform-origin: bottom; animation: lp-stapel .8s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--n) * 45ms + .3s); transition: filter .2s; }
+.lp-veckor__staplar i { height: calc(6px + var(--h) * 48px); border-radius: 6px 6px 3px 3px; background: rgba(255, 255, 255, .07); transform-origin: bottom; animation: lp-stapel .52s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--n) * 45ms + .3s); transition: filter .2s; }
 .lp-veckor__staplar i.pa { background: linear-gradient(180deg, #ffd9a0, #c98a45); box-shadow: 0 0 16px rgba(255, 170, 80, .25); }
 .lp-veckor__staplar i.nu { outline: 1.5px solid rgba(246, 198, 141, .7); outline-offset: 2px; }
 .lp-veckor__staplar i:hover { filter: brightness(1.25); }
@@ -723,11 +727,11 @@ section.lp-mork .avatar > .narvaro-prick { box-shadow: 0 0 0 clamp(1.5px, 5cqw, 
 .km-rad .avatar > .narvaro-prick { display: none !important; }
 
 /* Profilen: tal med förklaring, läget, snabbverktyg, aktivitetens insikter, affärernas chans och bocka av uppgifter */
-.lp-tal div { position: relative; overflow: hidden; animation: in-rad .6s var(--mjuk) backwards; animation-delay: calc(.12s + var(--n, 0) * .07s); transition: transform .35s var(--mjuk), box-shadow .35s; }
+.lp-tal div { position: relative; overflow: hidden; animation: in-rad .4s var(--ease-out, var(--mjuk)) backwards; animation-delay: calc(.12s + var(--n, 0) * .04s); transition: transform .35s var(--mjuk), box-shadow .35s; }
 .lp-tal div:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .3), 0 14px 26px -20px rgba(90, 60, 25, .55); }
 .lp-tal em { display: block; margin-top: 6px; font-style: normal; font-size: .72rem; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lp-lage { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; }
-.lp-lage span { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 7px; border-radius: 999px; background: rgba(255, 255, 255, .75); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); font: 600 .74rem/1 var(--rubrik); color: var(--text-2); animation: in-rad .5s var(--mjuk) backwards; animation-delay: calc(.25s + var(--n) * .06s); }
+.lp-lage span { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 7px; border-radius: 999px; background: rgba(255, 255, 255, .75); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); font: 600 .74rem/1 var(--rubrik); color: var(--text-2); animation: in-rad .4s var(--ease-out, var(--mjuk)) backwards; animation-delay: calc(.25s + var(--n) * .035s); }
 .lp-lage span .emo-ik { width: 14px; height: 14px; }
 .lp-lage span.varn { background: rgba(217, 87, 63, .08); color: #a8432f; box-shadow: inset 0 0 0 1px rgba(217, 87, 63, .18); }
 .lp-lage span.bra { background: rgba(46, 140, 87, .08); color: #1d6b40; box-shadow: inset 0 0 0 1px rgba(46, 140, 87, .18); }
@@ -753,7 +757,7 @@ section.lp-mork .avatar > .narvaro-prick { box-shadow: 0 0 0 clamp(1.5px, 5cqw, 
 .lp-akt-tal em[data-upp="false"] { color: var(--rod); }
 .lp-typer { margin-top: 14px; }
 .lp-typer__spar { display: flex; gap: 2px; height: 8px; }
-.lp-typer__spar i { border-radius: 4px; background: var(--f); transform-origin: left; animation: lp-vaxa .8s var(--mjuk) backwards .3s; }
+.lp-typer__spar i { border-radius: 4px; background: var(--f); transform-origin: left; animation: lp-vaxa .6s var(--mjuk) backwards .15s; }
 @keyframes lp-vaxa { from { transform: scaleX(0); } }
 .lp-typer__lista { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: .76rem; color: var(--text-2); }
 .lp-typer__lista span { display: inline-flex; align-items: center; gap: 5px; }
@@ -813,7 +817,7 @@ section.lp-phjalte.lp-mork { position: relative; display: grid; grid-template-co
 .lp-phjalte__knappar .sh-knapp:active { transform: scale(.97); }
 .lp-phjalte__knappar .i { width: 15px; height: 15px; }
 .lp-phjalte__tal { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.lp-ptal { display: grid; gap: 4px; padding: 16px 18px; border-radius: 20px; text-decoration: none; animation: in-rad .6s var(--mjuk) backwards; animation-delay: calc(.15s + var(--n) * .08s); }
+.lp-ptal { display: grid; gap: 4px; padding: 16px 18px; border-radius: 20px; text-decoration: none; animation: in-rad .4s var(--ease-out, var(--mjuk)) backwards; animation-delay: calc(.15s + var(--n) * .04s); }
 .lp-ptal .ao-tal__ikon { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 6px; border-radius: 11px; }
 .lp-ptal .ao-tal__ikon .emo-ik { width: 18px; height: 18px; }
 .lp-ptal small { font: 600 .74rem/1.2 var(--rubrik); }
@@ -851,7 +855,7 @@ section.lp-phjalte.lp-mork { position: relative; display: grid; grid-template-co
 .lp-om-ruta strong span { font-weight: 500; color: var(--text-3); font-size: .8rem; }
 .lp-om-ruta em { font-style: normal; font-size: .74rem; color: var(--text-2); }
 .lp-om-matare { display: block; height: 5px; border-radius: 5px; background: rgba(27, 25, 21, .08); overflow: hidden; }
-.lp-om-matare i { display: block; height: 100%; width: calc(var(--a) * 100%); border-radius: inherit; background: linear-gradient(90deg, #f6c68d, #c98a45); animation: lp-vaxa 1s var(--mjuk) backwards .3s; transform-origin: left; }
+.lp-om-matare i { display: block; height: 100%; width: calc(var(--a) * 100%); border-radius: inherit; background: linear-gradient(90deg, #f6c68d, #c98a45); animation: lp-vaxa .7s var(--mjuk) backwards .15s; transform-origin: left; }
 .lp-textknapp { padding: 0; border: 0; background: none; font: inherit; font-weight: 600; color: var(--virke-djup); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .lp-del { display: flex; align-items: center; gap: 8px; margin: 20px 0 8px; font: 700 .7rem/1 var(--rubrik); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
 .lp-del small { padding: 3px 7px; border-radius: 999px; background: var(--ben); letter-spacing: 0; color: var(--text-2); }
@@ -932,7 +936,7 @@ section.pk.kort--mork { position: relative; padding: 28px 30px 24px; margin-bott
 .pk-rutnat { display: grid; grid-template-columns: 28px repeat(7, minmax(0, 1fr)); gap: 6px; }
 .pk-vd, .pk-v--rubrik { padding-bottom: 4px; text-align: center; font: 700 .64rem/1 var(--rubrik); letter-spacing: .1em; text-transform: uppercase; color: rgba(251, 244, 232, .45); }
 .pk-v { display: grid; place-items: center; font: 600 .72rem/1 var(--rubrik); color: rgba(251, 244, 232, .4); }
-.pk-dag { position: relative; display: flex; flex-direction: column; gap: 4px; min-height: 104px; min-width: 0; padding: 9px 8px; border: 0; border-radius: 16px; background: rgba(255, 255, 255, .035); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07); color: #fbf4e8; font: inherit; text-align: left; cursor: pointer; overflow: hidden; transition: background-color .2s, box-shadow .2s, transform .3s var(--mjuk); animation: in-rad .5s var(--mjuk) backwards; animation-delay: calc(var(--n) * 8ms); }
+.pk-dag { position: relative; display: flex; flex-direction: column; gap: 4px; min-height: 104px; min-width: 0; padding: 9px 8px; border: 0; border-radius: 16px; background: rgba(255, 255, 255, .035); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07); color: #fbf4e8; font: inherit; text-align: left; cursor: pointer; overflow: hidden; transition: background-color .2s, box-shadow .2s, transform .3s var(--mjuk); animation: in-rad .4s var(--ease-out, var(--mjuk)) backwards; animation-delay: calc(var(--n) * 8ms); }
 .pk-dag:hover { background: rgba(255, 255, 255, .07); transform: translateY(-2px); }
 .pk-dag.ut { opacity: .35; }
 .pk-dag.helg { background: rgba(255, 255, 255, .02); }

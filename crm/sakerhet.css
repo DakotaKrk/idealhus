@@ -46,7 +46,7 @@
 .sh-streck { stroke: rgba(143, 84, 36, .28); stroke-width: 1.2; }
 .sh-ring circle { fill: none; stroke-width: 6.5; }
 .sh-ring__spar { stroke: rgba(27, 25, 21, .07); }
-.sh-ring__bage { stroke: var(--d); stroke-linecap: round; transform: rotate(-90deg); transform-origin: 120px 120px; animation: sh-in 1.2s var(--mjuk) backwards; }
+.sh-ring__bage { stroke: var(--d); stroke-linecap: round; transform: rotate(-90deg); transform-origin: 120px 120px; animation: sh-in .9s var(--mjuk) backwards; }
 .sh-ring[data-lage="ny"] .sh-ring__bage { opacity: .28; }
 .sh-ring[data-lage="hog"] .sh-ring__bage { stroke: var(--rod); }
 .sh-ring[data-lage="medel"] .sh-ring__bage { stroke: #e8a456; }
@@ -177,7 +177,7 @@ section.sh-mork .sh-golv { background: radial-gradient(closest-side, rgba(143, 2
 .sh-drift__live { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #e1f3e7; font: 700 .64rem/1 var(--rubrik); letter-spacing: .14em; text-transform: uppercase; color: #1d6b40; }
 .sh-drift__live i { width: 7px; height: 7px; border-radius: 50%; background: #22a35a; animation: sh-live 2s ease-out infinite; }
 .sh-drift__tal { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-.sh-drift__ruta { --t: #4f7fb0; position: relative; display: grid; grid-template-columns: 38px 1fr; grid-template-areas: "i s" "i b" "e e"; gap: 2px 12px; padding: 14px 16px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); overflow: hidden; animation: in-rad .6s var(--mjuk) backwards; animation-delay: calc(.1s + var(--n) * .07s); }
+.sh-drift__ruta { --t: #4f7fb0; position: relative; display: grid; grid-template-columns: 38px 1fr; grid-template-areas: "i s" "i b" "e e"; gap: 2px 12px; padding: 14px 16px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); overflow: hidden; animation: in-rad .4s var(--ease-out, var(--mjuk)) backwards; animation-delay: calc(.1s + var(--n) * .04s); }
 .sh-drift__ruta::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, var(--t), transparent); }
 .sh-drift__ruta[data-ton="gron"] { --t: #22a35a; } .sh-drift__ruta[data-ton="gul"] { --t: #e29a4a; } .sh-drift__ruta[data-ton="rod"] { --t: #d6453a; }
 .sh-drift__ruta > span { grid-area: i; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: color-mix(in srgb, var(--t) 12%, #fff); color: var(--t); }
@@ -190,7 +190,7 @@ section.sh-mork .sh-golv { background: radial-gradient(closest-side, rgba(143, 2
 .sh-vecka small, .sh-ticker small { display: block; margin-bottom: 10px; font: 600 .62rem/1 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
 .sh-vecka > div { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 84px; }
 .sh-vecka span { display: grid; grid-template-rows: 1fr auto; justify-items: center; align-items: end; height: 100%; gap: 5px; }
-.sh-vecka span i { width: 100%; max-width: 22px; height: calc(4px + var(--h) * 58px); border-radius: 6px 6px 3px 3px; background: linear-gradient(180deg, #8fe0c8, #3f8f7a); transform-origin: bottom; animation: lp-stapel .8s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(.2s + var(--n) * .05s); }
+.sh-vecka span i { width: 100%; max-width: 22px; height: calc(4px + var(--h) * 58px); border-radius: 6px 6px 3px 3px; background: linear-gradient(180deg, #8fe0c8, #3f8f7a); transform-origin: bottom; animation: lp-stapel .52s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(.2s + var(--n) * .035s); }
 .sh-vecka span b { font: 600 .6rem/1 var(--rubrik); color: var(--text-3); }
 .sh-ticker__band { position: relative; height: 84px; overflow: hidden; -webkit-mask: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent); mask: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent); }
 .sh-ticker__rull { animation: sh-ticker 26s linear infinite; }
@@ -229,7 +229,7 @@ section.sh-mork .sh-delar li:nth-child(1) { --i: 0; } section.sh-mork .sh-delar 
 .sh-verktyg header h2 .i, .sh-verktyg header h2 .emo-ik { width: 18px; height: 18px; color: var(--virke-djup); }
 .sh-verktyg header small { font-size: .76rem; color: var(--text-3); }
 .sh-verktyg__rutnat { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-.sh-vk { position: relative; display: grid; align-content: start; gap: 6px; padding: 16px; border: 0; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); font: inherit; color: inherit; text-align: left; cursor: pointer; overflow: hidden; transition: transform .3s var(--mjuk), box-shadow .3s; animation: in-rad .6s var(--mjuk) backwards; animation-delay: calc(.15s + var(--n) * .07s); }
+.sh-vk { position: relative; display: grid; align-content: start; gap: 6px; padding: 16px; border: 0; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06); font: inherit; color: inherit; text-align: left; cursor: pointer; overflow: hidden; transition: transform .3s var(--mjuk), box-shadow .3s; animation: in-rad .4s var(--ease-out, var(--mjuk)) backwards; animation-delay: calc(.15s + var(--n) * .04s); }
 .sh-vk::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(246, 198, 141, .25) 50%, transparent 70%); transform: translateX(-120%); transition: transform .8s var(--mjuk); }
 .sh-vk:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .5), 0 16px 30px -20px rgba(90, 60, 25, .6); }
 .sh-vk:hover::before { transform: translateX(120%); }
@@ -266,9 +266,9 @@ section.sh-mork .sh-delar li:nth-child(1) { --i: 0; } section.sh-mork .sh-delar 
 .sh-diagram__y { font: 600 9px var(--rubrik); text-anchor: end; fill: var(--text-3); }
 .sh-diagram__x { font: 600 9px var(--rubrik); text-anchor: middle; fill: var(--text-3); }
 .sh-diagram__yta { fill: url(#sh-yta); fill: rgba(226, 154, 74, .12); }
-.sh-diagram__linje { fill: none; stroke: #c98a45; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: sh-rita 1.2s cubic-bezier(.22, 1, .36, 1) .2s forwards; }
+.sh-diagram__linje { fill: none; stroke: #c98a45; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: sh-rita .9s cubic-bezier(.22, 1, .36, 1) .1s forwards; }
 @keyframes sh-rita { to { stroke-dashoffset: 0; } }
-.sh-diagram__punkt circle { fill: #fff; stroke-width: 3; stroke: var(--pt, #c98a45); transform-box: fill-box; transform-origin: center; animation: sh-punkt .5s cubic-bezier(.34, 1.56, .64, 1) backwards; animation-delay: calc(.3s + var(--n) * .08s); }
+.sh-diagram__punkt circle { fill: #fff; stroke-width: 3; stroke: var(--pt, #c98a45); transform-box: fill-box; transform-origin: center; animation: sh-punkt .45s cubic-bezier(.34, 1.56, .64, 1) backwards; animation-delay: calc(.3s + var(--n) * .04s); }
 .sh-diagram__punkt[data-ton="gron"] { --pt: #22a35a; } .sh-diagram__punkt[data-ton="gul"] { --pt: #d08a2e; } .sh-diagram__punkt[data-ton="rod"] { --pt: #d6453a; }
 .sh-diagram__punkt:hover circle { r: 7; }
 @keyframes sh-punkt { from { transform: scale(0); } }

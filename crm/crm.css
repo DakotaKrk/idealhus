@@ -1054,7 +1054,8 @@ svg.i {
   pointer-events: none;
 }
 
-.ark.syns .ark__kropp > * {
+/* Raderna glider in bara när arket öppnas (.ark--ny tas bort efter 650 ms i app.js) – inte när kroppen skrivs om */
+.ark--ny.syns .ark__kropp > * {
   animation: ark-rad 0.3s var(--ease-out) backwards;
   animation-delay: calc(0.04s + var(--k, 0) * 25ms);
 }
@@ -1113,7 +1114,7 @@ svg.i {
   position: fixed;
   right: 24px;
   bottom: 24px;
-  z-index: 90;
+  z-index: var(--z-toast, 1100);
   display: grid;
   gap: 8px;
   pointer-events: none;
@@ -1134,11 +1135,11 @@ svg.i {
   color: var(--krita);
   font-size: 0.875rem;
   pointer-events: auto;
-  animation: toast-in 0.55s var(--studs) both;
+  animation: toast-in 0.32s var(--ease-out) both;
 }
 
 .toast.ut {
-  animation: toast-ut 0.28s var(--ease-out) forwards;
+  animation: toast-ut 0.22s var(--ease-out) forwards;
 }
 
 /* Bekräftelse: grön bock. Fel och varningar: varm röd platta och tidslinje. */
@@ -1177,11 +1178,15 @@ svg.i {
 }
 
 @keyframes toast-in {
-  from { opacity: 0; transform: translateY(18px) scale(0.94); }
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+}
+
+@keyframes toast-in-topp {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
 }
 
 @keyframes toast-ut {
-  to { opacity: 0; transform: translateX(30px); }
+  to { opacity: 0; transform: translateX(24px); }
 }
 
 /* --- Listor ------------------------------------------------------- */
@@ -1949,6 +1954,83 @@ tr.bytt > td {
     top: calc(12px + env(safe-area-inset-top, 0px));
     bottom: auto;
   }
+
+  /* överst glider meddelandet ned i stället för upp */
+  body:has(.ark.syns) .toaster .toast:not(.ut) {
+    animation-name: toast-in-topp;
+  }
+}
+
+/* --- Skalet 2026-10-29: ark, slöja och meddelanden ---------------- */
+/* Arket stänger med en egen, kortare rörelse: det glider ut först och tonar sist (inte ett blink på 120 ms) */
+@media (min-width: 901px) {
+  .ark:not(.syns):not(.ut) {
+    transition: transform 0.26s var(--ease-out), opacity 0.2s var(--ease-out) 0.06s;
+  }
+
+  /* Ett öppet ark täcker högerkanten där meddelandena annars ligger (och arkets Spara) – de läggs nere till vänster */
+  html[data-ark-oppen] .toaster {
+    right: auto;
+    left: 24px;
+  }
+}
+
+@media (max-width: 900px) {
+  .ark:not(.syns):not(.ut) {
+    transition: transform 0.32s var(--ease-drawer);
+  }
+
+  /* Bottenarket: sidan bakom rullar inte och slöjan tar inga gester */
+  html[data-ark-oppen] {
+    overflow: hidden;
+  }
+
+  html[data-ark-oppen] body {
+    overscroll-behavior: contain;
+  }
+}
+
+.slojan {
+  touch-action: none;
+  overscroll-behavior: contain;
+}
+
+/* Supportlägets band ligger överst: arket börjar under det */
+@media (min-width: 901px) {
+  html[data-support] .ark {
+    top: calc(var(--ram, 12px) + 70px);
+    max-height: calc(100dvh - var(--ram, 12px) - 82px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast.ut,
+  body:has(.ark.syns) .toaster .toast:not(.ut) {
+    animation-name: toast-tona;
+    animation-duration: 0.16s;
+  }
+
+  .toast.ut {
+    animation-direction: reverse;
+  }
+
+  .ark,
+  .ark.syns,
+  .ark.ut,
+  .ark:not(.syns):not(.ut) {
+    transform: none;
+    transition: opacity 0.18s linear;
+  }
+
+  .ark:not(.syns),
+  .ark.ut {
+    opacity: 0;
+  }
+}
+
+@keyframes toast-tona {
+  from { opacity: 0; }
 }
 
 /* Sidans namn i toppraden på mobil och platta (app.js skriver det i .topp__titel vid varje sidbyte) */

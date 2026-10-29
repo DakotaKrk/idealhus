@@ -191,7 +191,7 @@
 @keyframes ch-angra { from { opacity: 0; transform: translate(-50%, 12px); } }
 
 /* 07 Flytande fönstret och ikonen */
-.chf { position: fixed; z-index: 900; display: grid; grid-template-rows: auto minmax(0, 1fr); border-radius: 24px; overflow: hidden; background: #fffdf9;
+.chf { position: fixed; z-index: var(--z-chatt, 55); display: grid; grid-template-rows: auto minmax(0, 1fr); border-radius: 24px; overflow: hidden; background: #fffdf9;
   box-shadow: 0 40px 90px -40px rgba(60, 40, 15, .65), 0 0 0 1px rgba(27, 25, 21, .08); animation: chf-in .35s var(--mjuk) both; }
 @keyframes chf-in { from { opacity: 0; transform: translateY(14px) scale(.97); } }
 .chf[data-drar] { user-select: none; box-shadow: 0 50px 100px -40px rgba(60, 40, 15, .75), 0 0 0 1.5px var(--virke); }
@@ -209,9 +209,12 @@
 .chf .ch-bild { max-width: 200px; }
 .chf-storlek { position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; cursor: nwse-resize; touch-action: none;
   background: linear-gradient(135deg, transparent 50%, rgba(143, 84, 36, .35) 50%, rgba(143, 84, 36, .35) 56%, transparent 56%, transparent 68%, rgba(143, 84, 36, .35) 68%, rgba(143, 84, 36, .35) 74%, transparent 74%); }
-.chf-ikon { position: fixed; z-index: 900; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; touch-action: none;
+.chf-ikon { position: fixed; z-index: var(--z-chatt, 55); display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; touch-action: none;
   background: linear-gradient(160deg, #fff, #fff1dc); color: var(--virke-djup); box-shadow: 0 0 0 4px #f8f4ed, 0 14px 28px -12px rgba(143, 84, 36, .7), inset 0 0 0 1px rgba(201, 138, 69, .5);
-  transition: transform .3s var(--studs), box-shadow .3s, opacity .2s ease; animation: chf-in .35s var(--mjuk) both; }
+  transition: transform .3s var(--mjuk), translate .35s var(--mjuk), width .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), height .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), box-shadow .3s, opacity .2s var(--ease-out, ease-out);
+  animation: chf-in .35s var(--mjuk) both; }
+/* Bubblan som fönstret krymper in i tonar fram när fönstret nästan är där */
+.chf-ikon.chf-ikon[data-sen] { animation-delay: .16s; }
 .chf-ikon:hover { transform: scale(1.08); }
 .chf-ikon .emo-ik { width: 20px; height: 20px; color: inherit; }
 .chf-ikon .ch-olast { position: absolute; top: -4px; right: -4px; box-shadow: 0 0 0 2.5px #fff; }
@@ -356,10 +359,13 @@
    lyser upp; oläst gör ljuset varmare och snabbare. */
 .chf-dock { position: fixed; z-index: 34; width: 56px; border-radius: 28px; pointer-events: none;
   background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 246, 232, .88)); box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .28), 0 18px 34px -22px rgba(143, 84, 36, .55);
-  transform-origin: 50% 0; animation: chf-dock-in .55s cubic-bezier(.22, 1, .36, 1) both; }
+  transform-origin: 50% 0; animation: chf-dock-in .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)) both;
+  transition: left .22s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), top .22s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), height .22s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), opacity .2s var(--ease-out, ease-out), filter .2s var(--ease-out, ease-out); }
+/* Menyn fälls in: kapseln växer fram när knappen landar */
+.chf-dock[data-sen] { animation-duration: .36s; animation-delay: .2s; }
 .chf-dock::before { content: ""; position: absolute; inset: -5px; border-radius: 33px; border: 1px dashed rgba(201, 138, 69, .22); opacity: 0; transition: opacity .3s; }
 .chf-dock[data-olast]::before { opacity: 1; animation: chf-dock-andas 2.6s ease-in-out infinite; }
-.chf-dock[data-ut] { animation: chf-dock-ut .3s ease-in both; }
+.chf-dock[data-ut] { animation: chf-dock-ut .2s var(--ease-out, ease-out) both; }
 @keyframes chf-dock-in { from { opacity: 0; transform: scaleY(.35); } }
 @keyframes chf-dock-ut { to { opacity: 0; transform: scaleY(.4); } }
 @keyframes chf-dock-andas { 50% { inset: -8px; opacity: .45; } }
@@ -449,13 +455,18 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { box-shadow: 0 8px 18px -1
 
 /* Dockan, renare: en enda glaskapsel – kantens linjer och pillret bakom menyknappen döljs när dockan finns, ingen
    streckad ram, mjuk glöd vid olästa; knapparna utan egna ringar och med samma storlek, ljuset vandrar i en tunn ledning */
-html[data-sido-dold] body:has(.chf-dock) .sido-kant::before, html[data-sido-dold] body:has(.chf-dock) .sido-kant::after { opacity: 0 !important; transition: opacity .25s; }
 .chf-dock { z-index: 35; width: 58px; border-radius: 29px; background: linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(255, 247, 236, .94)); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .22), 0 1px 0 rgba(255, 255, 255, .9) inset, 0 20px 40px -24px rgba(143, 84, 36, .6); }
 .chf-dock::before { inset: -1px; border: 0; border-radius: inherit; box-shadow: 0 0 0 0 rgba(232, 118, 44, 0); }
 .chf-dock[data-olast]::before { opacity: 1; animation: chf-dock-glod 2.8s ease-in-out infinite; }
 @keyframes chf-dock-glod { 0%, 100% { box-shadow: 0 0 0 0 rgba(232, 154, 74, 0), 0 0 0 0 rgba(232, 154, 74, 0); } 50% { box-shadow: 0 0 0 4px rgba(232, 154, 74, .14), 0 0 22px rgba(232, 154, 74, .35); } }
-html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; height: 40px; margin: -20px 0 0 -20px; box-shadow: 0 6px 14px -8px rgba(143, 84, 36, .5); border-color: rgba(201, 138, 69, .35); }
+/* Knappens mått bestäms av menyn (samma med och utan docka, så att den aldrig hoppar när dockan kommer); här bara skuggan */
+html[data-chatt-dockad] .sido-knapp { z-index: 2; box-shadow: 0 6px 14px -8px rgba(143, 84, 36, .5); border-color: rgba(201, 138, 69, .35); }
+/* Rälsens nedre ikoner börjar under dockan, så att ingen ikon hamnar bakom chattbubblan */
+@media (min-width: 1101px) {
+  html[data-chatt-dockad] .sido-rals__halva--ner { padding-top: 62px; }
+  .sido-glider .sido-rals__halva--ner { transition: padding-top .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)); }
+}
 .chf-ikon[data-i-docka] { width: 40px; height: 40px; box-shadow: 0 6px 14px -8px rgba(143, 84, 36, .5), inset 0 0 0 1px rgba(201, 138, 69, .35); }
 .chf-ikon[data-i-docka] .emo-ik { width: 18px; height: 18px; }
 .chf-ikon[data-i-docka] .ch-olast { top: -5px; right: -7px; }
@@ -468,7 +479,7 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; 
 
 @media (max-width: 860px) { .ch, .ch.med-info { grid-template-columns: minmax(0, 1fr) !important; } }
 
-@media (max-width: 900px) { .chf .chf-huvud > b { visibility: hidden; } .chf .ch-fot { padding: 6px 8px 10px !important; } .chf .ch-fot > * { margin-left: 0 !important; } }
+@media (max-width: 900px) { .chf .chf-huvud { position: relative; padding-top: 14px; } .chf .chf-huvud::before { content: ""; position: absolute; left: 50%; top: 5px; width: 36px; height: 4px; margin-left: -18px; border-radius: 4px; background: rgba(143, 84, 36, .25); } .chf .ch-fot { padding: 6px 8px 10px !important; } .chf .ch-fot > * { margin-left: 0 !important; } }
 /* Chattsidan på mobil: skrivrutan står kvar ovanför bottenmenyn */
 @media (max-width: 900px) { .vy .ch .ch-fot { position: fixed; left: 10px; right: 10px; bottom: 78px; z-index: 40; border-radius: 18px; background: #fffdf9; box-shadow: 0 -6px 24px -12px rgba(60, 40, 15, .45); } .vy .ch .ch-trad { padding-bottom: 120px; } }
 /* Supportläget på mobil: skrivrutan hamnar ovanför bandet */
@@ -513,7 +524,11 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; 
 .ch-dagblock { display: flex; flex-direction: column; flex: none; }
 
 /* Chattikonen ligger inte ovanpå sökpaletten eller ett öppet ark */
-html[data-palett-oppen] .chf-ikon, html[data-ark-oppen] .chf-ikon { opacity: 0; pointer-events: none; }
+html[data-palett-oppen] .chf-ikon, html[data-ark-oppen] .chf-ikon, html[data-palett-oppen] .chf-dock, html[data-ark-oppen] .chf-dock { opacity: 0; pointer-events: none; }
+/* Under slöjan: fönstret dämpas med sidan och tar inga klick medan arket eller paletten är öppen */
+html[data-palett-oppen] .chf, html[data-ark-oppen] .chf { pointer-events: none; }
+.chf[data-undan] { pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .chf-ikon, .chf-dock, .sido-glider .sido-rals__halva--ner { transition: opacity .15s linear; } .chf-ikon[data-sen], .chf-dock[data-sen] { animation-delay: 0s; } }
 .ch-tipskort { position: relative; }
 .ch-tipskort__stang { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%;
   background: rgba(255, 255, 255, .7); color: var(--text-3); cursor: pointer; transition: background-color .2s ease, color .2s ease, transform .16s var(--ease-out, ease); }
@@ -521,3 +536,13 @@ html[data-palett-oppen] .chf-ikon, html[data-ark-oppen] .chf-ikon { opacity: 0; 
 .ch-tipskort__stang:active { transform: scale(.92); }
 .ch-tipskort__stang .i { width: 13px; height: 13px; }
 .ch-tipskort > div { padding-right: 22px; }
+
+/* Sidbyten (view transition): fönstret och bubblan får egna lager, så att de ligger kvar ovanpå sidan i stället
+   för att hamna under den nya vyn medan den tonar in. De visas som de är – ingen toning eller förflyttning av dem. Den
+   som är på väg bort (data-undan, kopian) får inget namn, så att två element aldrig delar namn. Dockan ligger kvar i
+   sidans lager under menyknappen. */
+.chf:not([data-undan]) { view-transition-name: ih-chf; }
+.chf-ikon:not([data-undan]):not([aria-hidden]) { view-transition-name: ih-chf-ikon; }
+::view-transition-group(ih-chf), ::view-transition-group(ih-chf-ikon) { animation: none; }
+::view-transition-old(ih-chf), ::view-transition-old(ih-chf-ikon) { display: none; }
+::view-transition-new(ih-chf), ::view-transition-new(ih-chf-ikon) { animation: none; }

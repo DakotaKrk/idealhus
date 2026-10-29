@@ -635,7 +635,7 @@
 }
 
 .husvisning__fakta.in {
-  animation: in-upp 0.7s var(--mjuk) 0.2s both;
+  animation: in-upp .45s var(--mjuk) .1s both;
 }
 
 .husvisning__fakta small {
@@ -807,7 +807,7 @@
 }
 
 .mote__bild.nu .resa7__nr {
-  animation: nr-tand 0.9s var(--mjuk) backwards;
+  animation: nr-tand .59s var(--mjuk) backwards;
   animation-delay: calc(0.6s + var(--n) * 0.22s);
 }
 
@@ -966,7 +966,7 @@
   display: block;
   width: 100%;
   aspect-ratio: 1600 / 1062;
-  animation: in-fade 0.6s ease both;
+  animation: in-fade .45s ease both;
 }
 
 .kvitto__huvud small {
@@ -1004,7 +1004,7 @@
   padding: 9px 4px;
   border-bottom: 1px dashed rgba(27, 25, 21, 0.14);
   font-size: 0.9375rem;
-  animation: in-upp 0.5s var(--mjuk) both;
+  animation: in-upp .45s var(--mjuk) both;
   animation-delay: calc(var(--n) * 0.04s);
 }
 

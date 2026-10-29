@@ -43,7 +43,7 @@
 }
 
 .vy--in [data-in] {
-  animation: in-upp 0.95s var(--mjuk) backwards;
+  animation: in-upp .62s var(--mjuk) backwards;
   animation-delay: calc(0.04s + var(--in, 0) * 70ms);
 }
 
@@ -52,7 +52,7 @@
 }
 
 .vy--in [data-stagger] > * {
-  animation: in-rad 0.75s var(--mjuk) backwards;
+  animation: in-rad .49s var(--mjuk) backwards;
   animation-delay: calc(0.16s + var(--in, 0) * 70ms + var(--k, 0) * 45ms);
 }
 
@@ -309,7 +309,7 @@ html[data-lamnar]::after {
   gap: 18px;
   min-height: 420px;
   perspective: 1500px;
-  animation: in-fade 1.2s ease 0.2s both;
+  animation: in-fade .78s ease .1s both;
 }
 
 .stad__plan {
@@ -1366,8 +1366,8 @@ html[data-lamnar]::after {
   color: var(--krita);
   text-decoration: none;
   transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.4s var(--mjuk);
-  animation: in-rad 0.7s var(--mjuk) backwards;
-  animation-delay: calc(0.5s + var(--n) * 0.06s);
+  animation: in-rad .45s var(--mjuk) backwards;
+  animation-delay: calc(0.25s + min(var(--n), 10) * 0.036s);
 }
 
 .pipe__nr {
@@ -1429,8 +1429,8 @@ html[data-lamnar]::after {
   background: var(--f);
   box-shadow: 0 0 8px var(--f);
   transform-origin: left;
-  animation: stapel-x 1.2s var(--mjuk) backwards;
-  animation-delay: calc(0.8s + var(--n) * 0.06s);
+  animation: stapel-x .78s var(--mjuk) backwards;
+  animation-delay: calc(0.4s + min(var(--n), 10) * 0.036s);
 }
 
 .pipe__rad:hover {
@@ -1454,8 +1454,8 @@ html[data-lamnar]::after {
   border-radius: 2px;
   background: rgba(240, 181, 110, 0.35);
   transform-origin: bottom;
-  animation: stapel 0.9s var(--mjuk) backwards;
-  animation-delay: calc(0.6s + var(--n) * 0.05s);
+  animation: stapel .59s var(--mjuk) backwards;
+  animation-delay: calc(0.3s + min(var(--n), 10) * 0.03s);
 }
 
 .kpi__dagar i.idag {
@@ -1986,7 +1986,7 @@ html[data-lamnar]::after {
   background: linear-gradient(90deg, var(--virke-djup), var(--virke));
   transform: scaleX(var(--a));
   transform-origin: left;
-  animation: stapel-x 1.4s var(--mjuk) 0.4s backwards;
+  animation: stapel-x .91s var(--mjuk) .2s backwards;
 }
 
 @keyframes stapel-x {
@@ -2037,7 +2037,7 @@ html[data-lamnar]::after {
   background: linear-gradient(90deg, #7fe0a6, var(--virke));
   transform: scaleX(var(--a));
   transform-origin: left;
-  animation: stapel-x 1.2s var(--mjuk) 0.3s backwards;
+  animation: stapel-x .78s var(--mjuk) .15s backwards;
 }
 
 .sla--over {
@@ -2388,8 +2388,8 @@ html[data-lamnar]::after {
   fill: url(#graf-stapel);
   transform-box: fill-box;
   transform-origin: bottom;
-  animation: stapel 1s var(--mjuk) backwards;
-  animation-delay: calc(0.3s + var(--i) * 0.08s);
+  animation: stapel .65s var(--mjuk) backwards;
+  animation-delay: calc(0.15s + min(var(--i), 10) * 0.048s);
   transition: opacity 0.3s ease;
 }
 
@@ -2404,8 +2404,8 @@ html[data-lamnar]::after {
 .graf__varde {
   font: 700 12px var(--rubrik);
   fill: var(--text);
-  animation: in-fade 0.5s ease backwards;
-  animation-delay: calc(0.9s + var(--i) * 0.08s);
+  animation: in-fade .45s ease backwards;
+  animation-delay: calc(0.45s + min(var(--i), 10) * 0.048s);
 }
 
 @keyframes in-fade {
@@ -2716,8 +2716,8 @@ html[data-lamnar]::after {
 .ipuls__staplar b {
   font: 600 0.625rem/1 var(--rubrik);
   color: var(--ljus-2);
-  animation: in-fade 0.5s ease backwards;
-  animation-delay: calc(0.9s + var(--n) * 0.06s);
+  animation: in-fade .45s ease backwards;
+  animation-delay: calc(0.45s + min(var(--n), 10) * 0.036s);
 }
 
 .ipuls__staplar i {
@@ -2728,8 +2728,8 @@ html[data-lamnar]::after {
   background: linear-gradient(180deg, rgba(240, 181, 110, 0.5), rgba(240, 181, 110, 0.14));
   box-shadow: inset 0 1px 0 rgba(255, 236, 205, 0.25);
   transform-origin: bottom;
-  animation: stapel 1s var(--mjuk) backwards;
-  animation-delay: calc(0.4s + var(--n) * 0.06s);
+  animation: stapel .65s var(--mjuk) backwards;
+  animation-delay: calc(0.2s + min(var(--n), 10) * 0.036s);
 }
 
 .ipuls__staplar .idag i {
@@ -2817,7 +2817,7 @@ html[data-lamnar]::after {
   background: linear-gradient(90deg, #3f9a63, #7fe0a6);
   transform: scaleX(var(--a));
   transform-origin: left;
-  animation: stapel-x 1.3s var(--mjuk) 0.6s backwards;
+  animation: stapel-x .85s var(--mjuk) .3s backwards;
 }
 
 .kallbar {
@@ -2830,8 +2830,8 @@ html[data-lamnar]::after {
   border-radius: 4px;
   background: var(--k);
   transform-origin: left;
-  animation: stapel-x 0.9s var(--mjuk) backwards;
-  animation-delay: calc(0.5s + var(--n) * 0.1s);
+  animation: stapel-x .59s var(--mjuk) backwards;
+  animation-delay: calc(0.25s + min(var(--n), 10) * 0.06s);
 }
 
 .kallbar__lista {
@@ -3536,7 +3536,7 @@ html[data-lamnar]::after {
   box-shadow: none;
   color: var(--krita);
   cursor: pointer;
-  animation: in-rad 0.5s var(--mjuk) backwards;
+  animation: in-rad .45s var(--mjuk) backwards;
 }
 
 .chip--rensa .i {
@@ -3571,7 +3571,7 @@ html[data-lamnar]::after {
   background: linear-gradient(90deg, var(--kol), var(--virke));
   transform: scaleX(calc(var(--nu) / 2));
   transform-origin: left;
-  animation: stapel-x 1.2s var(--mjuk) 0.35s backwards;
+  animation: stapel-x .78s var(--mjuk) .17s backwards;
 }
 
 .forlopp li {
@@ -3672,7 +3672,7 @@ html[data-lamnar]::after {
   background: linear-gradient(90deg, #7fe0a6, var(--virke));
   transform: scaleX(var(--a));
   transform-origin: left;
-  animation: stapel-x 1.2s var(--mjuk) 0.5s backwards;
+  animation: stapel-x .78s var(--mjuk) .25s backwards;
 }
 
 .fl__sla--over::after {
@@ -3712,7 +3712,7 @@ html[data-lamnar]::after {
   stroke: var(--pf);
   stroke-linecap: round;
   stroke-dasharray: var(--p) 100;
-  animation: poang-in 1.3s var(--mjuk) 0.3s backwards;
+  animation: poang-in .85s var(--mjuk) .15s backwards;
 }
 
 @keyframes poang-in {
@@ -3840,7 +3840,7 @@ kbd {
     linear-gradient(160deg, #262119, var(--kol));
   box-shadow: 0 24px 50px -30px rgba(27, 25, 21, 0.9), inset 0 0 0 1px rgba(247, 245, 240, 0.06);
   color: var(--krita);
-  animation: in-upp 0.9s var(--mjuk) 0.15s backwards;
+  animation: in-upp .59s var(--mjuk) .07s backwards;
 }
 
 .nbs::after {
@@ -3918,7 +3918,7 @@ kbd {
   background: linear-gradient(90deg, #7fe0a6, var(--virke));
   transform: scaleX(var(--a));
   transform-origin: left;
-  animation: stapel-x 1.4s var(--mjuk) 0.5s backwards;
+  animation: stapel-x .91s var(--mjuk) .25s backwards;
 }
 
 .nbs--brad .nbs__spar::after {
@@ -4049,7 +4049,7 @@ kbd {
   background: var(--ben);
   font-size: 0.75rem;
   color: var(--text-2);
-  animation: in-rad 0.6s var(--mjuk) backwards;
+  animation: in-rad .45s var(--mjuk) backwards;
 }
 
 .smart__skal li:nth-child(2) { animation-delay: 0.06s; }
@@ -4835,8 +4835,8 @@ kbd {
   inset: 0;
   transform-style: preserve-3d;
   transition: transform 0.6s var(--mjuk);
-  animation: lager-in 1.2s cubic-bezier(.22, 1.2, .36, 1) backwards;
-  animation-delay: calc(0.25s + var(--n) * 0.24s);
+  animation: lager-in .78s cubic-bezier(.22, 1.2, .36, 1) backwards;
+  animation-delay: calc(0.06s + min(var(--n), 10) * 0.084s);
 }
 
 @keyframes lager-in {
@@ -5062,8 +5062,8 @@ kbd {
   text-align: left;
   cursor: pointer;
   transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.4s var(--mjuk);
-  animation: in-rad 0.7s var(--mjuk) backwards;
-  animation-delay: calc(0.3s + var(--k) * 0.08s);
+  animation: in-rad .45s var(--mjuk) backwards;
+  animation-delay: calc(0.15s + min(var(--k), 10) * 0.048s);
 }
 
 .bygge__prick {
@@ -5105,8 +5105,8 @@ kbd {
   background: var(--f);
   box-shadow: 0 0 8px var(--f);
   transform-origin: left;
-  animation: stapel-x 1.2s var(--mjuk) backwards;
-  animation-delay: calc(0.6s + var(--k) * 0.08s);
+  animation: stapel-x .78s var(--mjuk) backwards;
+  animation-delay: calc(0.3s + min(var(--k), 10) * 0.048s);
 }
 
 .forslag {
@@ -5246,7 +5246,7 @@ kbd {
   background: var(--f);
   transform: scaleX(var(--a));
   transform-origin: left;
-  animation: band-in 1s var(--mjuk) 0.3s both;
+  animation: band-in .65s var(--mjuk) .15s both;
 }
 
 @keyframes band-in {
@@ -5968,8 +5968,8 @@ fieldset.falt {
   background: var(--vit);
   box-shadow: var(--skugga), inset 0 0 0 1px var(--kant);
   text-align: left;
-  animation: in-upp 0.6s var(--mjuk) both;
-  animation-delay: calc(0.05s + var(--n) * 0.06s);
+  animation: in-upp .45s var(--mjuk) both;
+  animation-delay: calc(0.025s + min(var(--n), 10) * 0.036s);
 }
 
 .nyval__kort b {
@@ -6235,7 +6235,7 @@ fieldset.falt {
 }
 
 .offertrader__rad.ny {
-  animation: in-upp 0.5s var(--studs);
+  animation: in-upp .45s var(--studs);
 }
 
 .offertrader__rad input {
@@ -6597,7 +6597,7 @@ fieldset.falt {
   align-content: start;
   gap: 8px;
   min-height: 150px;
-  animation: in-upp 0.7s var(--mjuk) both;
+  animation: in-upp .45s var(--mjuk) both;
   animation-delay: calc(0.2s + var(--n) * 0.04s);
 }
 
@@ -7223,6 +7223,51 @@ fieldset.falt {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Lugna toningar får vara kvar (ingen förflyttning): sidans block, ark, slöja,
+     toaster, kontomenyn och Mer-menyn tonar kort i stället för att blinka fram.
+     Specifikare !important vinner över stjärnregeln ovan. */
+  .vy--in [data-in],
+  .vy--in [data-stagger] > *,
+  .vy--in .ord > span,
+  .vy--in .rad-mask > span,
+  .vy[data-vy-byte] > * {
+    animation: lugn-in 0.2s ease-out backwards !important;
+  }
+
+  .toast,
+  .km-panel,
+  .sido__merpop {
+    animation: lugn-in 0.2s ease-out both !important;
+  }
+
+  .toast.ut,
+  .km-panel[data-stanger],
+  .sido__merpop.ut {
+    animation: lugn-ut 0.15s ease-out both !important;
+  }
+
+  .ark,
+  .ark.syns,
+  .ark.ut {
+    transform: none !important;
+    transition: opacity 0.2s ease-out !important;
+  }
+
+  .slojan,
+  .chf-ikon,
+  .chf-dock {
+    transition-duration: 0.2s !important;
+  }
+
+  @keyframes lugn-in {
+    from { opacity: 0; }
+  }
+
+  @keyframes lugn-ut {
+    to { opacity: 0; }
   }
 }
 
@@ -7356,7 +7401,7 @@ fieldset.falt {
 /* Resningen: husen, träden, lyktorna och kranen växer upp ur marken. */
 .hus3 {
   animation: hus-res 1.3s var(--studs) backwards;
-  animation-delay: calc(0.35s + var(--i, 0) * 0.13s);
+  animation-delay: calc(0.175s + min(var(--i, 0), 10) * 0.078s);
 }
 
 @keyframes hus-res {
@@ -7369,7 +7414,7 @@ fieldset.falt {
 .dio__buske,
 .dio__appel {
   animation: trad-res 1.2s var(--studs) backwards;
-  animation-delay: calc(0.3s + var(--n, 0) * 0.06s);
+  animation-delay: calc(0.15s + min(var(--n, 0), 10) * 0.036s);
 }
 
 @keyframes trad-res {
@@ -7380,7 +7425,7 @@ fieldset.falt {
 .kran,
 .vimpel {
   animation: rak-res 1.1s var(--mjuk) backwards;
-  animation-delay: calc(0.7s + var(--n, 0) * 0.12s);
+  animation-delay: calc(0.35s + min(var(--n, 0), 10) * 0.072s);
 }
 
 .kran {
@@ -7652,7 +7697,7 @@ fieldset.falt {
 .vy--in .hero[data-in],
 .vy--in .ipuls[data-in],
 .vy--in .puls[data-in] {
-  animation: in-upp-platt 0.95s var(--mjuk) backwards;
+  animation: in-upp-platt .62s var(--mjuk) backwards;
   animation-delay: calc(0.04s + var(--in, 0) * 70ms);
 }
 
@@ -7953,11 +7998,11 @@ section.dk-hjalte.kort { position: relative; display: grid; grid-template-column
 .dk-tidslinje i { width: 12px; height: 12px; border-radius: 50%; background: #f6c68d; box-shadow: 0 0 0 4px rgba(246, 198, 141, .2), 0 0 14px rgba(255, 170, 80, .6); }
 .dk-tidslinje b { font: 600 .6rem/1 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: rgba(251, 244, 232, .6); }
 .dk-tidslinje small { font: 600 .82rem/1 var(--rubrik); color: #fff; }
-.dk-tidslinje__mitt { height: 2px; margin-top: 5px; border-radius: 2px; background: linear-gradient(90deg, #f6c68d, #e29a4a); box-shadow: 0 0 10px rgba(255, 170, 80, .5); transform-origin: left; animation: lp-stapel 1.2s cubic-bezier(.22, 1, .36, 1) .3s both; }
+.dk-tidslinje__mitt { height: 2px; margin-top: 5px; border-radius: 2px; background: linear-gradient(90deg, #f6c68d, #e29a4a); box-shadow: 0 0 10px rgba(255, 170, 80, .5); transform-origin: left; animation: lp-stapel .78s cubic-bezier(.22, 1, .36, 1) .15s both; }
 .dk-blick { grid-area: blick; }
 .dk-blick .etikett { margin-bottom: 12px; color: rgba(251, 244, 232, .55); }
 .dk-fack { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 0; border-radius: 20px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); overflow: hidden; }
-.dk-fack__ruta { display: grid; gap: 6px; padding: 18px 20px; border: 0; border-right: 1px solid rgba(255, 255, 255, .08); background: rgba(255, 255, 255, .03); font: inherit; color: #fbf4e8; text-align: left; cursor: pointer; transition: background-color .25s; animation: in-rad .6s var(--mjuk) backwards; animation-delay: calc(.1s + var(--n) * .06s); }
+.dk-fack__ruta { display: grid; gap: 6px; padding: 18px 20px; border: 0; border-right: 1px solid rgba(255, 255, 255, .08); background: rgba(255, 255, 255, .03); font: inherit; color: #fbf4e8; text-align: left; cursor: pointer; transition: background-color .25s; animation: in-rad .45s var(--mjuk) backwards; animation-delay: calc(0.05s + min(var(--n), 10) * 0.036s); }
 .dk-fack__ruta:hover { background: rgba(255, 255, 255, .07); }
 .dk-fack__ruta[aria-pressed="true"] { background: rgba(246, 198, 141, .12); box-shadow: inset 0 -3px 0 var(--t); }
 .dk-fack__ruta small { display: flex; align-items: center; gap: 8px; font: 600 .62rem/1 var(--rubrik); letter-spacing: .14em; text-transform: uppercase; color: rgba(251, 244, 232, .7); }
@@ -8059,7 +8104,7 @@ section.dk-hjalte.kort .dk-verktyg .kundsort .i { color: rgba(251, 244, 232, .7)
 /* mallarna */
 .dk-mallar__ingress { margin: -4px 18px 14px; font-size: .86rem; color: var(--text-2); }
 .dk-mallar__rutnat { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; padding: 0 14px 14px; }
-.dk-mall { display: grid; gap: 12px; padding: 14px; border: 0; border-radius: 20px; background: #fbf8f3; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .05); font: inherit; color: inherit; text-align: left; cursor: pointer; transition: transform .3s var(--mjuk), box-shadow .3s; animation: in-rad .6s var(--mjuk) backwards; animation-delay: calc(.1s + var(--n) * .07s); }
+.dk-mall { display: grid; gap: 12px; padding: 14px; border: 0; border-radius: 20px; background: #fbf8f3; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .05); font: inherit; color: inherit; text-align: left; cursor: pointer; transition: transform .3s var(--mjuk), box-shadow .3s; animation: in-rad .45s var(--mjuk) backwards; animation-delay: calc(0.05s + min(var(--n), 10) * 0.042s); }
 .dk-mall:hover { transform: translateY(-4px); box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .45), 0 20px 34px -22px rgba(90, 60, 25, .6); }
 .dk-mall__papper { position: relative; display: grid; align-content: start; gap: 7px; height: 120px; padding: 18px 20px; border-radius: 12px; background: #fff; box-shadow: 0 10px 20px -14px rgba(60, 40, 15, .5), inset 0 3px 0 #e29a4a; overflow: hidden; transition: transform .35s var(--mjuk); }
 .dk-mall:hover .dk-mall__papper { transform: rotate(-1.5deg) scale(1.02); }
@@ -8177,7 +8222,7 @@ section.dk-hjalte.kort .dk-fack__alla { grid-column: 1 / -1; grid-auto-flow: col
 .hero__lage b { color: var(--kol); }
 .hero__lage.varm { background: #fde9df; color: #8f3f1f; }
 .hero__snabb { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 6px; }
-.hero__snabb button { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 13px 0 6px; border: 0; border-radius: 999px; background: #1b1915; font: 600 .78rem/1 var(--rubrik); color: #fbf4e8; cursor: pointer; transition: transform .25s var(--studs), box-shadow .25s, background-color .2s; animation: in-rad .5s var(--mjuk) backwards; animation-delay: calc(.35s + var(--n) * .05s); }
+.hero__snabb button { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 13px 0 6px; border: 0; border-radius: 999px; background: #1b1915; font: 600 .78rem/1 var(--rubrik); color: #fbf4e8; cursor: pointer; transition: transform .25s var(--studs), box-shadow .25s, background-color .2s; animation: in-rad .45s var(--mjuk) backwards; animation-delay: calc(0.175s + min(var(--n), 10) * 0.03s); }
 .hero__snabb button .i { width: 26px; height: 26px; padding: 6px; border-radius: 50%; background: linear-gradient(160deg, #f6c68d, #e29a4a); color: #1b1915; }
 .hero__snabb button::before { content: "+"; order: 2; margin-left: -2px; font-weight: 700; color: #f6c68d; }
 .hero__snabb button span { order: 3; }
@@ -8227,7 +8272,7 @@ html:not(.ingen-webgl) .motescen .bord__plats { opacity: 0; transition: opacity 
 html:not(.ingen-webgl) .motescen:has(> .motesrum3d.klar) .bord__plats { opacity: 1; }
 .motescen > .motesrum3d { opacity: 0; transition: opacity .9s ease .1s; }
 .motescen > .motesrum3d.klar { opacity: 1; }
-.motescen--3d .bord__plats { animation-delay: calc(.9s + var(--n) * .08s); }
+.motescen--3d .bord__plats { animation-delay: calc(0.45s + min(var(--n), 10) * 0.048s); }
 
 /* Säljtavlan smartare: verktygsrad (sök, Mina/Alla, filter med antal, sortering, kompakt), insikt per spalt och
    snabbknappar på korten (ring, logga, uppgift och nästa steg); stegbandet utan avklippta namn */
@@ -8265,7 +8310,7 @@ html:not(.ingen-webgl) .motescen:has(> .motesrum3d.klar) .bord__plats { opacity:
 .tv-fokus > p span { display: grid; place-items: center; width: 30px; height: 30px; margin-bottom: 4px; border-radius: 10px; background: linear-gradient(160deg, #f8d09b, #e29a4a); color: #1b1915; }
 .tv-fokus > p span .i { width: 15px; height: 15px; }
 .tv-fokus > p small { font: 500 .72rem/1.35 var(--brod, inherit); color: rgba(251, 244, 232, .65); }
-.tv-fokus__kort { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 14px; border: 0; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06), inset 4px 0 0 var(--f); font: inherit; color: inherit; text-align: left; cursor: pointer; transition: transform .3s var(--mjuk), box-shadow .3s; animation: in-rad .55s var(--mjuk) backwards; animation-delay: calc(.1s + var(--n) * .08s); }
+.tv-fokus__kort { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 14px; border: 0; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06), inset 4px 0 0 var(--f); font: inherit; color: inherit; text-align: left; cursor: pointer; transition: transform .3s var(--mjuk), box-shadow .3s; animation: in-rad .45s var(--mjuk) backwards; animation-delay: calc(.05s + min(var(--n), 8) * .04s); }
 .tv-fokus__kort:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .5), inset 4px 0 0 var(--f), 0 16px 30px -20px rgba(90, 60, 25, .6); }
 .tv-fokus__kort > b { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #f3ede3; font: 700 .8rem/1 var(--rubrik); }
 .tv-fokus__kort span { display: grid; gap: 2px; min-width: 0; }
@@ -8361,7 +8406,7 @@ html:not(.ingen-webgl) .motescen:has(> .motesrum3d.klar) .bord__plats { opacity:
 .agk__nav .agk__idag { background: #1b1915; color: #f6c68d; }
 .agk__rutnat { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
 .agk__vd { padding: 0 0 2px 8px; font: 700 .64rem/1 var(--rubrik); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
-.agk__dag { position: relative; display: flex; flex-direction: column; gap: 6px; min-width: 0; min-height: 190px; padding: 10px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); transition: box-shadow .2s, transform .3s var(--mjuk), background-color .2s; animation: in-rad .5s var(--mjuk) backwards; animation-delay: calc(var(--n) * 25ms); }
+.agk__dag { position: relative; display: flex; flex-direction: column; gap: 6px; min-width: 0; min-height: 190px; padding: 10px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07); transition: box-shadow .2s, transform .3s var(--mjuk), background-color .2s; animation: in-rad .45s var(--mjuk) backwards; animation-delay: calc(var(--n) * 25ms); }
 .agk__rutnat--tva .agk__dag { min-height: 150px; }
 .agk__rutnat--man .agk__dag { min-height: 112px; padding: 8px; border-radius: 14px; animation-delay: calc(var(--n) * 8ms); }
 .agk__dag:hover { box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .35), 0 14px 28px -22px rgba(90, 60, 25, .5); }
@@ -8436,7 +8481,7 @@ section.dk-hjalte[data-flik="mallar"] .dk-stats:not(.ml-stats), section.dk-hjalt
 section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); align-self: start; }
 .ml-forslag { padding: 20px 22px; margin-bottom: 18px; }
 .ml-forslag__lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
-.ml-forslag__rad { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: #fffaf2; box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .25); animation: in-rad .5s var(--mjuk) backwards; animation-delay: calc(var(--n) * 50ms); }
+.ml-forslag__rad { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: #fffaf2; box-shadow: inset 0 0 0 1px rgba(226, 154, 74, .25); animation: in-rad .45s var(--mjuk) backwards; animation-delay: calc(var(--n) * 50ms); }
 .ml-forslag__rad > span:nth-child(2) { display: grid; min-width: 0; }
 .ml-forslag__rad b { font: 600 .88rem/1.3 var(--rubrik); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .ml-forslag__rad small { font-size: .74rem; color: var(--text-3); }
@@ -8449,7 +8494,7 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .ml-grupp__huvud h2 { margin: 0; font: 700 1.25rem/1.1 var(--rubrik); letter-spacing: -0.02em; }
 .ml-grupp__huvud p { margin: 0; font-size: .82rem; color: var(--text-3); }
 .ml-rutnat { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
-.ml-kort { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 22px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07), 0 18px 34px -30px rgba(90, 60, 25, .5); transition: transform .35s var(--mjuk), box-shadow .3s; animation: in-rad .55s var(--mjuk) backwards; animation-delay: calc(var(--n) * 60ms); }
+.ml-kort { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 22px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .07), 0 18px 34px -30px rgba(90, 60, 25, .5); transition: transform .35s var(--mjuk), box-shadow .3s; animation: in-rad .45s var(--mjuk) backwards; animation-delay: calc(var(--n) * 60ms); }
 .ml-kort:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .35), 0 24px 40px -28px rgba(90, 60, 25, .6); }
 .ml-mini { position: relative; display: block; height: 170px; padding: 0; border: 0; border-radius: 14px; background: linear-gradient(170deg, #f6efe3, #efe5d4); overflow: hidden; cursor: zoom-in; }
 .ml-mini__inre { position: absolute; left: 50%; top: 14px; width: 620px; transform: translateX(-50%) scale(.34); transform-origin: top center; pointer-events: none; }
@@ -8590,7 +8635,7 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 @container (max-width: 420px) { .logga-mote .falt-rad { grid-template-columns: minmax(0, 1fr) !important; } .logga-mote .antal-falt { max-width: 200px; } }
 /* Prislistans tal: lugnare kort med ikonplatta, värde på en rad, liten spannstapel och status */
 .inst-tal { align-items: stretch; }
-.inst-tal > div { display: grid !important; grid-template-rows: auto auto auto 1fr; align-content: start; gap: 6px; padding: 18px 20px !important; animation: in-rad .55s var(--mjuk) backwards; animation-delay: calc(.1s + var(--n) * .07s); }
+.inst-tal > div { display: grid !important; grid-template-rows: auto auto auto 1fr; align-content: start; gap: 6px; padding: 18px 20px !important; animation: in-rad .45s var(--mjuk) backwards; animation-delay: calc(0.05s + min(var(--n), 10) * 0.042s); }
 .inst-tal__ikon { display: grid; place-items: center; width: 38px; height: 38px; margin-bottom: 6px; border-radius: 12px; background: var(--virke-ljus); color: var(--virke-djup); box-shadow: inset 0 0 0 1px rgba(201, 138, 69, .25); }
 .inst-tal__ikon .i { width: 18px; height: 18px; }
 .inst-tal b { font: 700 1.45rem/1.1 var(--rubrik) !important; letter-spacing: -0.02em; white-space: nowrap; }

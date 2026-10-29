@@ -172,12 +172,7 @@ html.drar .aff__flytta { opacity: 0; }
    chattikonen dras mjukt mot musen (grund.js). */
 @media (min-width: 1101px) {
   html[data-sido-dold] body .vy { padding-left: calc(52px + var(--ram)); }
-  html[data-sido-dold] body .sido-kant::after { content: ""; display: block; position: absolute; left: 6px; top: 0; bottom: 0; height: auto; margin: 0; width: 40px; z-index: -1; border-radius: 20px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, .7), rgba(255, 250, 242, .55)); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06), 0 20px 40px -30px rgba(90, 60, 25, .45);
-    opacity: 1; animation: none; transform: none; pointer-events: none; }
-  html[data-sido-dold] body .sido-kant::before { content: ""; display: block; position: absolute; left: 26px; top: 28px; bottom: 28px; height: auto; margin: 0; width: 1px;
-    background: linear-gradient(180deg, transparent, rgba(143, 84, 36, .22) 18%, rgba(143, 84, 36, .22) 82%, transparent); opacity: 1; animation: none; transform: none; pointer-events: none; }
-  html[data-sido-dold] body .sido-knapp { left: 26px; width: 32px; height: 32px; margin: -16px 0 0 -16px; border-radius: 50%; }
+  /* rälsens bakgrund, knappen och rälsen: se "Sidomenyn – låda, knapp, räls, docka" längst ned */
 }
 
 /* Sidorna slutar i höjd med menyn (2026-10-29): samma 12 px luft under sista kortet som under sidomenyn */
@@ -303,7 +298,7 @@ html body .topp { background: rgba(250, 247, 241, .95); -webkit-backdrop-filter:
 
 /* --- Skalet: designteamets rättelser 2026-10-29 -------------------------------------------------- */
 /* Sidbytet: den nya vyn tonar in kort efter att den gamla gått ut – ingen tom krämvit ruta däremellan */
-::view-transition-new(vy) { animation: vt-in .18s var(--ease-out, cubic-bezier(.23, 1, .32, 1)) .06s both; }
+::view-transition-new(vy) { animation: vt-in .16s var(--ease-out, cubic-bezier(.23, 1, .32, 1)) both; }
 @keyframes vt-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { ::view-transition-new(vy) { animation: none; } }
 
@@ -368,3 +363,99 @@ html body .topp { background: rgba(250, 247, 241, .95); -webkit-backdrop-filter:
   font: 600 .72rem/1.2 var(--rubrik); text-decoration: none; cursor: pointer; transition: transform .16s var(--ease-out, ease), background-color .2s ease; }
 .mer-fot a:active, .mer-fot button:active { transform: scale(.96); }
 .mer-fot .i { width: 18px; height: 18px; }
+
+/* =====================================================================
+   Sidomenyn – låda, knapp, räls, docka (skalet, 2026-10-29)
+   En tid (--glid .48s) och en kurva (--ease-drawer) för allt som rör sig när menyn fälls in och ut:
+   lådan, kanten med knappen, knappens storlek och innehållet (FLIP i app.js). Rälsen och dess bakgrund
+   tonar i takt med glidningen i stället för att slås av och på. Knappen har samma storlek med och utan
+   den dockade chatten, så att den aldrig hoppar när dockan dyker upp.
+   ===================================================================== */
+:root {
+  --z-dock: 35; --z-kant: 36; --z-slojan: 60; --z-ark: 61; --z-palett: 62; --z-mote: 150; --z-meny: 1000; --z-toast: 1100;
+}
+
+/* Rälsen (app.js rals()) – flyttad från app.js */
+.sido-rals { position: absolute; left: 6px; top: 14px; bottom: 14px; width: 40px; display: grid; grid-template-rows: minmax(0, 1fr) 52px minmax(0, 1fr); z-index: 1;
+  opacity: 0; visibility: hidden; pointer-events: none; transform: translateX(-4px); }
+.sido-rals__halva { min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0 2px; }
+.sido-rals__halva--upp > :first-child { margin-top: auto; }
+.sido-rals__halva::-webkit-scrollbar { display: none; }
+.sido-rals__delare { flex: none; width: 18px; height: 1px; margin: 5px 0; background: rgba(95, 88, 81, .18); }
+.sido-rals a { position: relative; flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: var(--text-2, #5b544a); -webkit-tap-highlight-color: transparent;
+  transition: background-color .2s ease, color .2s ease, transform .16s var(--ease-out, ease); }
+.sido-rals a:hover, .sido-rals a:focus-visible { background: rgba(255, 255, 255, .95); color: var(--text, #1b1915); }
+.sido-rals a:active { transform: scale(.92); }
+.sido-rals a.aktiv { background: var(--virke-ljus, #fbead5); color: var(--virke-djup, #8f5424); }
+.sido-rals .i { width: 18px; height: 18px; }
+.sido-rals i { position: absolute; top: -2px; right: -3px; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 8px; background: var(--virke, #e8a456); color: #fff;
+  box-shadow: 0 0 0 2px #fbf7f0; font: 600 9px/15px var(--rubrik, sans-serif); font-style: normal; text-align: center; }
+@media (max-height: 820px) { .sido-rals a { width: 30px; height: 30px; } .sido-rals .i { width: 16px; height: 16px; } .sido-rals__delare { margin: 3px 0; } }
+
+/* Kontot i toppraden (bara när menyn är infälld på dator) */
+.topp__konto { display: none; place-items: center; flex: none; width: 42px; height: 42px; margin-left: 4px; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer;
+  transition: transform .16s var(--ease-out, ease); }
+.topp__konto .avatar { position: relative; width: 34px; height: 34px; border-radius: 50%; font-size: .72rem; box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px rgba(201, 138, 69, .35); transition: box-shadow .2s ease; }
+.topp__konto .avatar .narvaro-prick { width: 10px; height: 10px; right: -1px; bottom: -1px; }
+.topp__konto:hover .avatar, .topp__konto:focus-visible .avatar { box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(226, 154, 74, .7); }
+.topp__konto:active { transform: scale(.94); }
+
+@media (min-width: 1101px) {
+  /* Rälsen syns när menyn är infälld – klickbar (kanten har pointer-events: none) */
+  html[data-sido-dold] .sido-rals { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }
+  .sido-glider .sido-rals:not([hidden]) { animation: none; }
+  /* in: efter att lådan hunnit undan; ut: genast, innan lådan glider in över kanten */
+  html.sido-glider[data-sido-dold] .sido-rals { transition: opacity .22s var(--ease-out) .18s, transform .28s var(--ease-out) .18s, visibility 0s linear .18s; }
+  html.sido-glider:not([data-sido-dold]) .sido-rals { transition: opacity .14s var(--ease-out), transform .14s var(--ease-out), visibility 0s linear .14s; }
+
+  /* Rälsens bakgrund: en mjuk list med en tunn linje – tonar i takt med rälsen */
+  html body .sido-kant::after { content: ""; display: block; position: absolute; left: 6px; top: 0; bottom: 0; height: auto; margin: 0; width: 40px; z-index: -1; border-radius: 20px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .7), rgba(255, 250, 242, .55)); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .06), 0 20px 40px -30px rgba(90, 60, 25, .45);
+    opacity: 0; animation: none; transform: none; pointer-events: none; }
+  html body .sido-kant::before { content: ""; display: block; position: absolute; left: 26px; top: 28px; bottom: 28px; height: auto; margin: 0; width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(143, 84, 36, .22) 18%, rgba(143, 84, 36, .22) 82%, transparent); opacity: 0; animation: none; transform: none; pointer-events: none; }
+  html[data-sido-dold] body .sido-kant::after, html[data-sido-dold] body .sido-kant::before { opacity: 1; }
+  html.sido-glider[data-sido-dold] body .sido-kant::after, html.sido-glider[data-sido-dold] body .sido-kant::before { transition: opacity .24s var(--ease-out) .14s; }
+  html.sido-glider:not([data-sido-dold]) body .sido-kant::after, html.sido-glider:not([data-sido-dold]) body .sido-kant::before { transition: opacity .14s var(--ease-out); }
+
+  /* Knappen infälld: alltid 40 × 40 mitt på listen – samma mått med och utan den dockade chatten */
+  html[data-sido-dold] body .sido-kant .sido-knapp { left: 26px; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; }
+  /* Under glidningen ändras läge och alla mått i takt (även höjden, som tidigare slog om direkt) */
+  html.sido-glider body .sido-knapp {
+    transition: left var(--glid) var(--ease-drawer), margin var(--glid) var(--ease-drawer), width var(--glid) var(--ease-drawer), height var(--glid) var(--ease-drawer),
+      border-radius var(--glid) var(--ease-drawer), transform .16s var(--ease-out), box-shadow .2s var(--ease-out), background-color .2s ease, color .2s ease, border-color .2s ease, translate .2s var(--ease-out);
+  }
+  html:not(.sido-glider) body .sido-knapp { transition: transform .16s var(--ease-out), box-shadow .25s var(--ease-out), background-color .2s ease, color .2s ease, border-color .2s ease, translate .2s var(--ease-out); }
+
+  /* Den dockade chatten tar plats under knappen: rälsens nedre halva börjar under dockan, så att ingen ikon
+     hamnar bakom den. Gäller redan när chattikonen finns, så att ikonerna inte flyttar sig när dockan landar. */
+  html[data-sido-dold] body:has(.chf-ikon, .chf-dock) .sido-rals__halva--ner { padding-top: 64px; }
+
+  /* Toppraden kommer fram mjukt när menyn fälls in (innehållet glider ned med FLIP i app.js) */
+  html.sido-glider[data-sido-dold] body .topp { animation: topp-in .34s var(--ease-out) .1s both; }
+  html[data-sido-dold] .topp__konto { display: grid; }
+}
+@keyframes topp-in { from { opacity: 0; transform: translateY(-6px); } }
+
+@media (min-width: 1101px) and (prefers-reduced-motion: reduce) {
+  .sido-rals, html .sido-rals { transform: none; }
+  html.sido-glider body .sido-knapp { transition: opacity .15s linear; }
+  html.sido-glider[data-sido-dold] body .topp { animation: topp-tona .15s linear both; }
+  html.sido-glider[data-sido-dold] .sido-rals, html.sido-glider:not([data-sido-dold]) .sido-rals { transition: opacity .15s linear, visibility 0s linear .15s; }
+}
+@keyframes topp-tona { from { opacity: 0; } }
+
+/* =====================================================================
+   Sidbyten (skalet, 2026-10-29): en mekanism i stället för två lager toning. Vyn tvärtonas kort
+   (utan oskärpa och utan att gruppen morfar höjd och läge), blocken gör en kort entré och sidan har
+   landat inom ungefär en halv sekund – ett CRM klickar man i hela dagen.
+   ===================================================================== */
+::view-transition-group(vy) { animation-duration: 0s; }
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(vy) { animation: vy-ut-kort .14s var(--ease-out) both; }
+  @keyframes vy-ut-kort { to { opacity: 0; transform: translateY(-4px); } }
+  html body .vy--in [data-in] { animation-duration: .36s; animation-delay: calc(min(var(--in, 0), 5) * 30ms); }
+  html body .vy--in [data-stagger] > * { animation-duration: .32s; animation-delay: calc(.03s + min(var(--in, 0), 4) * 30ms + min(var(--k, 0), 6) * 25ms); }
+  html body .vy--in .ord > span { animation-duration: .4s; animation-delay: calc(.02s + min(var(--o, 0), 5) * 30ms); }
+  html body .vy--in .rad-mask > span { animation-duration: .42s; animation-delay: calc(.04s + min(var(--o, 0), 5) * 40ms); }
+}
