@@ -199,7 +199,7 @@
       fas: S.fas, mote: S.mote ? kopia(S.mote) : null, jag: jagObj(), deltagare: deltagarLista(), vantande: vantandeLista(),
       last: S.last, vantrum: S.vantrum, delare: S.delare, vardNarvarande: vardIMotet(), talare: S.talare,
       ljudlage: S.ljudlage, borjade: S.borjade, natverk: S.natverkJag, signal: S.signal.namn,
-      innehall: innehallInfo(),
+      innehall: innehallInfo(), annanDelar: annanDelare(),
       layoutTips: S.delare || IN.aktiv ? 'delning' : (iMotet().length >= 2 ? 'galleri' : 'talare')
     };
   }
@@ -979,17 +979,28 @@
       skarmStrom: '', sett: nu(), pc: null, strommar: {}, kamera: null, skarm: null, talar: false, natverk: null, stats: null, hist: [],
       harStatus: false, pcTid: 0, omstartTid: 0 };
   }
+  // Förhandlingen följer "perfect negotiation" (W3C/MDN): erbjudanden skapas när webbläsaren ber om det
+  // (negotiationneeded, setLocalDescription() utan argument). Krockar två erbjudanden backar den artiga sidan
+  // (polite) och svarar, den icke-artiga ignorerar det andra. Allt som kommer från den andra sidan (sdp och ice)
+  // körs i tur och ordning i p.kedja, så att krocken bedöms mot det tillstånd beskrivningen faktiskt möter.
+  //
+  // Första förhandlingen på en ny anslutning görs alltid av den icke-artiga sidan. Krockar de två allra första
+  // erbjudandena backar Chromium den artiga sidans erbjudande mitt i ICE-insamlingen – har ingen kandidat hunnit
+  // komma samlar den sidan sedan aldrig några (iceGatheringState fastnar i 'gathering'), och båda blir kvar i
+  // 'new' tills vakten startar om efter 12 s. Den artiga sidan lägger därför till sina spår först när den tar
+  // emot första erbjudandet (före svaret, så att svaret bär båda hållen) – ingen krock, inga väntetimers.
   function oppnaPc(p) {
     if (p.pc || S.fas !== 'mote' || p.i !== 'mote') return;
     var pc = new RTCPeerConnection({ iceServers: iceLista() });
-    p.pc = pc; p.polite = S.jag.peer > p.peer; p.making = false; p.ignorera = false; p.pcTid = nu(); p.kedja = null; p.iceRest = []; p.sigTid = nu();
-    pc.onsignalingstatechange = function () { p.sigTid = nu(); };
+    p.pc = pc; p.polite = S.jag.peer > p.peer; p.making = false; p.ignorera = false; p.pcTid = nu(); p.kedja = null;
+    p.vantarForsta = p.polite;
     p.s = { mik: null, kam: null, skarm: null, skarmLjud: null };
     pc.onnegotiationneeded = function () {
       p.making = true;
       pc.setLocalDescription().then(function () {
-        p.offerTid = nu();
-        S.signal.skicka(p.peer, 'sdp', { sdp: { type: pc.localDescription.type, sdp: pc.localDescription.sdp } });
+        // Hann ett inkommande erbjudande före blev det här ett svar – det skickas redan av taEmotSdp
+        if (p.pc !== pc || !pc.localDescription || pc.localDescription.type !== 'offer') return;
+        S.signal.skicka(p.peer, 'sdp', { sdp: { type: 'offer', sdp: pc.localDescription.sdp } });
       }).catch(function (e) { if (window.console) console.warn('[samtal] förhandling', e); })
         .then(function () { p.making = false; });
     };
@@ -1011,42 +1022,18 @@
       p.pcTid = nu();
       if (pc.connectionState === 'failed' && pc.restartIce) pc.restartIce();
     };
-    // Bara en sida gör det första erbjudandet. Krockar två första erbjudanden (båda lägger till spår samtidigt)
-    // backar den artiga sidan – och då händer det i Chromium att den sidan aldrig samlar egna kandidater,
-    // så anslutningen blir kvar i 'new'. Den artiga sidan (och den som redan har ett erbjudande att svara på)
-    // väntar därför med sina spår tills första svaret är skickat, högst 1,5 s.
+    if (!p.polite) {
+      lagSparPaPc(p);
+      // Utan eget ljud eller egen bild: ta ändå emot – och se till att första erbjudandet alltid skickas
+      ['audio', 'video'].forEach(function (k) {
+        if (!pc.getTransceivers().some(function (t) { return t.receiver.track.kind === k; })) pc.addTransceiver(k, { direction: 'recvonly' });
+      });
+    }
+    // Erbjudande och kandidater som kom medan vi ännu inte var inne i mötet besvaras nu
     var vs = p.vantSdp, vi = p.vantIce || [];
     p.vantSdp = null; p.vantIce = [];
-    if (vs || p.polite) {
-      p.vantarErbj = true;
-      p.vantErbjTimer = setTimeout(function () { if (p.pc === pc) slappSpar(p); }, 1500);
-    } else lagSparPaPc(p);
-    // Erbjudande och kandidater som kom innan vi var inne (t.ex. värdens erbjudande precis när gästen släpps in)
-    // besvaras nu – annars väntar båda på varandra tills vakten startar om.
     if (vs) taEmotSdp(p, vs);
     vi.forEach(function (d) { taEmotIce(p, d); });
-  }
-  function slappSpar(p) {
-    if (!p.vantarErbj) return;
-    p.vantarErbj = false; clearTimeout(p.vantErbjTimer);
-    if (p.pc) lagSparPaPc(p);
-  }
-  // Ett erbjudande som inte besvarats på 3 s skickas igen (meddelanden kan ha tappats i en flik som låg i bakgrunden).
-  function kollaFastnat() {
-    if (S.fas !== 'mote') return;
-    var t = nu();
-    iMotet().forEach(function (p) {
-      var pc = p.pc;
-      if (!pc || p.making) return;
-      // Båda har beskrivningar men ICE har aldrig startat (t.ex. inga egna kandidater efter en krock):
-      // ny anslutning direkt i stället för att vänta på vakten (12 s)
-      if (!p.polite && pc.signalingState === 'stable' && pc.remoteDescription && pc.connectionState === 'new' &&
-          t - (p.sigTid || t) > 3500 && t - (p.omstartTid || 0) > 8000) { omstart(p, true); return; }
-      if (pc.signalingState !== 'have-local-offer' || !pc.localDescription) return;
-      if (t - (p.offerTid || t) < 3000) return;
-      p.offerTid = t;
-      S.signal.skicka(p.peer, 'sdp', { sdp: { type: pc.localDescription.type, sdp: pc.localDescription.sdp } });
-    });
   }
   // Vakt (körs med hjärtslaget): en deltagare i mötet utan fungerande anslutning får en ny.
   // Bara den icke-artiga sidan startar om och meddelar den andra med 'omstart', så att båda inte river samtidigt.
@@ -1069,9 +1056,8 @@
   }
   function stangPc(p) {
     if (!p.pc) return;
-    p.vantarErbj = false; clearTimeout(p.vantErbjTimer);
     try { p.pc.close(); } catch (e) { }
-    p.pc = null; p.strommar = {}; p.vantSdp = null; p.vantIce = []; p.iceRest = [];
+    p.pc = null; p.kedja = null; p.strommar = {}; p.vantSdp = null; p.vantIce = [];
     if (p.kamera) { p.kamera = null; sand('strom', { peer: p.peer, typ: 'kamera', strom: null }); }
     if (p.skarm) { p.skarm = null; sand('strom', { peer: p.peer, typ: 'skarm', strom: null }); }
     taBortAnalys(p.peer);
@@ -1089,7 +1075,7 @@
     if (p.skarm !== sk) { p.skarm = sk; sand('strom', { peer: p.peer, typ: 'skarm', strom: sk }); }
   }
   function lagSparPaPc(p) {
-    var pc = p.pc; if (!pc || p.vantarErbj) return;
+    var pc = p.pc; if (!pc || p.vantarForsta) return;
     var lokal = lokalStrom();
     // Mikrofon
     if (M.mik) { if (p.s.mik) { if (p.s.mik.track !== M.mik) p.s.mik.replaceTrack(M.mik).catch(function () { }); } else p.s.mik = pc.addTrack(M.mik, lokal); }
@@ -1165,35 +1151,33 @@
   function taEmotSdp(p, data) {
     var pc = p.pc; if (!pc || !data.sdp || typeof data.sdp.sdp !== 'string' || ['offer', 'answer'].indexOf(data.sdp.type) < 0) return;
     var desc = { type: data.sdp.type, sdp: data.sdp.sdp };
-    var kollision = desc.type === 'offer' && (p.making || pc.signalingState !== 'stable');
-    p.ignorera = !p.polite && kollision;
-    if (p.ignorera) return;
     p.kedja = (p.kedja || Promise.resolve()).then(function () {
-      if (pc.signalingState === 'closed') return;
+      if (p.pc !== pc || pc.signalingState === 'closed') return;
+      if (desc.type === 'answer' && pc.signalingState !== 'have-local-offer') return; // svar som redan hunnits ersättas
+      var krock = desc.type === 'offer' && (p.making || pc.signalingState !== 'stable');
+      p.ignorera = !p.polite && krock;
+      if (p.ignorera) return;
+      // Den artiga sidan backar sitt eget erbjudande automatiskt (implicit rollback) och svarar
       return pc.setRemoteDescription(desc).then(function () {
-        // Kandidater som inte gick att lägga till förut (kom före beskrivningen eller under en krock) prövas igen.
-        // Efter en krock skickar webbläsaren inte om kandidaterna – utan detta blir anslutningen kvar i 'new'.
-        var rest = p.iceRest || []; p.iceRest = [];
-        rest.forEach(function (c) { pc.addIceCandidate(c).catch(function () { }); });
-        if (desc.type === 'offer') return pc.setLocalDescription().then(function () {
-          S.signal.skicka(p.peer, 'sdp', { sdp: { type: pc.localDescription.type, sdp: pc.localDescription.sdp } });
-          // Första svaret skickat: nu kan våra egna spår läggas till (en omförhandling utan krock)
-          if (p.pc === pc) slappSpar(p);
+        if (desc.type !== 'offer') return;
+        // Artiga sidans första erbjudande: lägg till egna spår nu – de tar över erbjudandets mottagare och följer med i svaret
+        if (p.vantarForsta) { p.vantarForsta = false; lagSparPaPc(p); }
+        return pc.setLocalDescription().then(function () {
+          if (p.pc === pc) S.signal.skicka(p.peer, 'sdp', { sdp: { type: pc.localDescription.type, sdp: pc.localDescription.sdp } });
         });
       });
     }).catch(function (e) { if (window.console) console.warn('[samtal] sdp', e); });
   }
   function taEmotIce(p, data) {
-    if (!p.pc) return;
+    var pc = p.pc; if (!pc) return;
     var c = data.c;
-    if (c && (typeof c.candidate !== 'string')) return;
-    var pc = p.pc;
+    if (c && typeof c.candidate !== 'string') return;
     p.kedja = (p.kedja || Promise.resolve()).then(function () {
       if (p.pc !== pc || pc.signalingState === 'closed') return;
-      if (c && !pc.remoteDescription) { spara(); return; }
-      return pc.addIceCandidate(c || null).catch(function () { if (c) spara(); });
+      return pc.addIceCandidate(c || null).catch(function (e) {
+        if (!p.ignorera && window.console) console.warn('[samtal] ice', e); // kandidater till ett ignorerat erbjudande släpps
+      });
     }).catch(function () { });
-    function spara() { if (p.pc === pc && (p.iceRest = p.iceRest || []).length < 60) p.iceRest.push(c); }
   }
 
   /* ---------- statistik ---------- */
@@ -1380,7 +1364,7 @@
     sattFas('mote');
     S.signal.skicka('*', 'hej', minStatus());
     iMotet().forEach(function (p) { S.narvarande[p.peer] = { namn: p.namn, roll: p.roll }; oppnaPc(p); });
-    if (!S.statsTimer) S.statsTimer = setInterval(function () { kollaFastnat(); mataStats(); }, 2000);
+    if (!S.statsTimer) S.statsTimer = setInterval(mataStats, 2000);
     S.forraHarVard = vardIMotet();
     efterDeltagarAndring();
     sand('jag', jagObj());
@@ -1780,9 +1764,12 @@
   }
   function lika(a, b) { try { return JSON.stringify(a) === JSON.stringify(b); } catch (e) { return false; } }
   function annanDelare() {
-    if (IN.aktiv && !IN.aktiv.egen) return { peer: IN.aktiv.peer, namn: IN.aktiv.namn, innehall: true };
+    if (IN.aktiv && !IN.aktiv.egen) { var a = S.peers[IN.aktiv.peer]; return { peer: IN.aktiv.peer, namn: IN.aktiv.namn, roll: a ? a.roll : 'vard', innehall: true, typ: IN.aktiv.typ }; }
+    // Innehåll som samtal-dela.js visar (eget protokoll) – kunden ska få frågan i stället för att ta över direkt
+    var x = IN.externPeer && S.peers[IN.externPeer];
+    if (x && x.i === 'mote') return { peer: x.peer, namn: x.namn, roll: x.roll, innehall: true, typ: IN.externTyp || null };
     var p = iMotet().filter(function (x) { return x.delar; })[0];
-    return p ? { peer: p.peer, namn: p.namn, skarm: true } : null;
+    return p ? { peer: p.peer, namn: p.namn, roll: p.roll, skarm: true } : null;
   }
   function efterInnehall(andrat, peer, egen) {
     var info = innehallInfo() || { pa: false, typ: null, peer: peer || null, egen: !!egen };
@@ -1872,6 +1859,7 @@
     // så att kamerorna sänks medan det visas. Ritningen sköter samtal-dela.js själv.
     if (data.pa === undefined) {
       var visar = p.roll !== 'gast' && INNEHALL_TYPER.indexOf(data.typ) >= 0 ? p.peer : null;
+      if (visar) IN.externTyp = data.typ;
       if (visar && IN.externPeer !== visar) { IN.externPeer = visar; tillampaSandning(); }
       else if (!visar && IN.externPeer === p.peer && data.typ === null) { IN.externPeer = null; tillampaSandning(); }
       return;
@@ -2013,7 +2001,7 @@
     if (!md || !md.getDisplayMedia) return Promise.reject(fel('skarm-fel'));
     if (S.fas !== 'mote') return Promise.reject(fel('skarm-fel', 'Gå med i mötet först.'));
     var annan = annanDelare();
-    if (annan && !opt.taOver) { var f = fel('annan-delar', annan.namn + (annan.innehall ? ' visar redan något.' : ' delar redan.')); f.peer = annan.peer; f.namn = annan.namn; return Promise.reject(f); }
+    if (annan && !opt.taOver) { var f = fel('annan-delar', annan.namn + (annan.innehall ? ' visar redan något.' : ' delar redan.')); f.peer = annan.peer; f.namn = annan.namn; f.roll = annan.roll; f.innehall = !!annan.innehall; f.typ = annan.typ || null; return Promise.reject(f); }
     var text = opt.lage !== 'video';
     return md.getDisplayMedia({ video: { frameRate: { ideal: text ? 15 : 30 } }, audio: opt.ljud !== false, selfBrowserSurface: 'exclude', surfaceSwitching: 'include', systemAudio: 'include' })
       .then(function (s) {
@@ -2025,6 +2013,7 @@
         S.jag.delar = true; S.jag.delarTid = nu();
         if (IN.aktiv && IN.aktiv.egen) slutaInnehall();
         else if (IN.aktiv) { IN.aktiv = null; rensaMottagnaFiler(); efterInnehall(['typ']); } // tar över någon annans
+        IN.externPeer = null; // samtal-dela.js hos den som visade slutar när delningen börjar
         bytAllaSpar();
         ekoForDelning();
         efterDeltagarAndring();

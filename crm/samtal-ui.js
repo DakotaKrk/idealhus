@@ -779,6 +779,7 @@
   }
   function annanDelar() {
     var t = tillstand() || {}, j = t.jag || {};
+    if (t.annanDelar) return true; // skärm eller innehåll (presentation, kalkyl …) som någon annan visar
     if (t.delare != null) return !!t.delare && t.delare !== j.peer;
     return (t.deltagare || []).some(function (x) { return x.peer !== j.peer && (x.delar || x.skarm); });
   }
@@ -1580,7 +1581,11 @@
     korP('delaSkarm', { lage: lage, ljud: lage === 'video', taOver: taOver }).then(function () { if (S) { ritaKontroller(); live('Du delar din skärm.'); } }).catch(function (f) {
       if (!S) return;
       if (f && f.kod === 'annan-delar') {
-        avis({ nyckel: 'taover', ikon: 'vm-dela', text: '<b>' + e(fornamn(f.namn || 'Någon')) + ' delar redan.</b> Ta över?',
+        // Kunden ser "Säljaren visar presentationen – vill du ta över?"; kollegor ser förnamnet
+        var jagGast = (tillstand().jag || {}).roll === 'gast';
+        var vem = jagGast && f.roll && f.roll !== 'gast' ? 'Säljaren' : fornamn(f.namn || 'Någon');
+        var vad = f.innehall ? 'visar ' + ({ presentation: 'presentationen', kalkyl: 'kalkylen', '3d': 'huset i 3D', offert: 'offerten', dokument: 'ett dokument' }[f.typ] || 'något') : 'delar sin skärm';
+        avis({ nyckel: 'taover', ikon: 'vm-dela', text: '<b>' + e(vem) + ' ' + e(vad) + '</b> – vill du ta över?',
           knappar: '<button type="button" class="vm-primar vm-primar--liten" data-vm="ta-over" data-lage="' + lage + '">Ta över</button><button type="button" class="vm-sek vm-sek--liten vm-sek--scen" data-vm="stang-avis">Avbryt</button>' });
         var ta = S.el.querySelector('.vm-avisering-yta [data-nyckel="taover"]');
         var delare = f.peer || (tillstand().deltagare || []).filter(function (x) { return x.delar; }).map(function (x) { return x.peer; })[0];
