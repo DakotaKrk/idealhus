@@ -1,7 +1,7 @@
 /* Legohus CRM – detaljer flyttade från Uperformance CRM (2026-10-28).
    Antalsfälten: varje tal-ruta i ett formulärfält (.falt) får egna runda − och + i högerkanten i stället
    för webbläsarens små pilar. Knapparna ligger utanför tabbordningen och tar aldrig fokus – rutan är redan
-   en spinbutton (piltangenterna fungerar). data-nativ undantar. Körs vid start och av en observatör när
+   en spinbutton (piltangenterna fungerar). data-nativ undantar, data-steg ger knapparnas steg. Körs vid start och av en observatör när
    vyerna ritas om. Stil: grund.css. */
 (() => {
   'use strict';
@@ -20,7 +20,8 @@
   document.addEventListener('click', (ev) => {
     const b = ev.target.closest && ev.target.closest('[data-antal-steg]'); if (!b) return;
     const inp = b.parentElement.querySelector('input'); if (!inp || inp.disabled || inp.readOnly) return;
-    const steg = Number(inp.step) || 1; const min = inp.min !== '' ? Number(inp.min) : -Infinity; const max = inp.max !== '' ? Number(inp.max) : Infinity;
+    // data-steg: knapparnas steg när fältet själv tar vilket tal som helst (step="any")
+    const steg = Number(inp.dataset.steg) || Number(inp.step) || 1; const min = inp.min !== '' ? Number(inp.min) : -Infinity; const max = inp.max !== '' ? Number(inp.max) : Infinity;
     const nu = Number(inp.value) || 0; const ny = Math.min(max, Math.max(min, nu + steg * Number(b.dataset.antalSteg)));
     if (ny === nu && inp.value !== '') return;
     inp.value = String(ny); inp.removeAttribute('aria-invalid');

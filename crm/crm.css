@@ -749,6 +749,7 @@ svg.i {
 
 .kort__ikon {
   display: grid;
+  flex-shrink: 0;
   place-items: center;
   width: 34px;
   height: 34px;
@@ -1859,4 +1860,31 @@ tr.bytt > td {
 
 .sok--liten > .i {
   position: absolute;
+}
+
+/* Mobil och platta: när ett ark är öppet lägger sig meddelandet överst, inte över arkets knappar */
+@media (max-width: 900px) {
+  body:has(.ark.syns) .toaster {
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    bottom: auto;
+  }
+}
+
+/* Sidans namn i toppraden på mobil och platta (app.js skriver det i .topp__titel vid varje sidbyte) */
+.topp__titel {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .topp__titel {
+    display: block;
+    min-width: 0;
+    margin-left: auto;
+    overflow: hidden;
+    font: 600 1rem/1.2 var(--rubrik);
+    letter-spacing: -0.01em;
+    color: var(--text);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }

@@ -1586,3 +1586,9 @@
   .husvisning__fakta p { font-size: .82rem; }
 }
 @media (max-width: 600px) { .husvisning { height: min(52vh, 480px); } .mb--husen .mb__in { padding-bottom: 96px; } }
+/* Under 900 px är klockan dold: knapparna skjuts ändå ut till höger kant, och kundnamnet kortas av i stället för att trycka ihop dem */
+@media (max-width: 900px) {
+  .mote__topp .mote__tid + .mote__ikon { margin-left: auto; }
+  .mote__topp .mote__kund { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mote__topp .mote__ikon { flex: none; }
+}

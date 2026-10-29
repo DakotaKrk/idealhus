@@ -11422,3 +11422,10 @@ select,
     padding: 5px;
   }
 }
+
+/* Projektkalendern på mobil: månadsnamnet krymper så att högerpilen stannar i kortet */
+@media (max-width: 560px) {
+  .kal__nav { flex: 1 1 100%; min-width: 0; }
+  .kal__nav h2 { flex: 1; min-width: 0; font-size: 1.3rem; }
+  .kal__nav button { flex: none; }
+}

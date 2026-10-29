@@ -199,6 +199,8 @@
         rader.push({ text: 'Frakt till tomten', antal: 1, pris: 28000 });
         rader.push({ text: 'Montage på plats', antal: 1, pris: 45000 });
         if (i % 2) rader.push({ text: 'Altan i trä, 12 m²', antal: 1, pris: 38000 });
+        // Affärsvärdet är offertens summa, så att tavlan, offerterna och ordervärdet stämmer
+        aff.varde = rader.reduce(function (s, r) { return s + r.antal * r.pris; }, 0);
         db.lopnr.offert += 1;
         db.offerter.push({ id: 'o' + db.lopnr.offert, nummer: 'LH-' + new Date().getFullYear() + '-' + db.lopnr.offert,
           affar: aff.id, kund: k.id, modell: a[1], rader: rader,
@@ -222,13 +224,15 @@
       db.aktiviteter.push({ id: nid('aktivitet', 'h'), tid: dagar(dag, 11), typ: typ, text: text, kund: kund, affar: affar, av: af ? af.ansvarig : 'ah' });
     }
     akt(-2, 'samtal', 'Ringde och gick igenom strandskyddet. Skickar karta över tomten.', 'k4', 'a1');
-    akt(-3, 'mote', 'Platsbesök bokat till nästa vecka.', 'k5', 'a2');
+    akt(-3, 'system', 'Platsbesök bokat till nästa vecka.', 'k5', 'a2');
     akt(-5, 'mejl', 'Offert skickad för Kupa 50.', 'k7', 'a3');
     akt(-7, 'samtal', 'Vill förhandla om altanen. Återkommer med nytt förslag.', 'k8', 'a4');
     akt(-8, 'mote', 'Digitalt möte om husblock för tolv tomter.', 'k9', 'a5');
     akt(-26, 'system', 'Order signerad.', 'k14', 'a9');
     function uppg(dag, text, kund, affar, klar) {
-      db.uppgifter.push({ id: nid('uppgift', 'u'), text: text, forfaller: dagar(dag, 9), klar: !!klar, kund: kund, affar: affar, ansvarig: 'ah' });
+      // Uppgiften ligger hos affärens säljare (Ahmed när den inte hör till en affär)
+      var af = db.affarer.filter(function (x) { return x.id === affar; })[0];
+      db.uppgifter.push({ id: nid('uppgift', 'u'), text: text, forfaller: dagar(dag, 9), klar: !!klar, kund: kund, affar: affar, ansvarig: af ? af.ansvarig : 'ah' });
     }
     uppg(0, 'Ring Karin Holm om sjötomten', 'k1', null);
     uppg(0, 'Ring Henrik Dahl om ateljén', 'k13', null);

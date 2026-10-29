@@ -18,8 +18,9 @@
   function tillampa() {
     var a = inst().konton || {};
     IH.ANVANDARE.forEach(function (u) {
+      if (!u.grundTitel) u.grundTitel = u.titel || ROLLNAMN[u.roll] || '';
       var x = a[u.id]; if (!x) return;
-      if (x.titel) u.titel = x.titel;
+      if ('titel' in x) u.titel = x.titel || u.grundTitel;
       if ('mal' in x) u.mal = x.mal || undefined;
       if ('chef' in x) u.chef = x.chef || undefined;
       ['epost', 'tel', 'om', 'bild', 'start'].forEach(function (f) { if (f in x) u[f] = x[f] || undefined; });
@@ -27,6 +28,7 @@
     });
   }
   function andra(id, falt) { var a = inst().konton || {}; a[id] = Object.assign(a[id] || {}, falt); sparaInst('konton', a); tillampa(); }
+  var ROLLNAMN = { salj: 'Sälj', prod: 'Produktion', admin: 'Admin' };
   tillampa();
   // Ett inaktiverat konto loggas ut direkt (även om det loggades in innan det inaktiverades)
   if (IH.riktigJag().inaktiv) { try { localStorage.removeItem('ih-crm-inloggad'); } catch (x) { /* privat läge */ } location.replace('logga-in.html?inaktiv=1'); }
@@ -39,12 +41,10 @@
     valjForra(el);
   };
 
-  var ROLLNAMN = { salj: 'Sälj', prod: 'Produktion', admin: 'Admin' };
   var roller = function (u) { return [ROLLNAMN[u.roll] || u.roll].concat(u.chef ? ['Chef'] : []); };
   function senastAktiv(u) {
-    var n = IH.narvaro ? IH.narvaro(u.id) : null;
-    if (!u.inaktiv && n && ['online', 'mote', 'upptagen', 'ute'].indexOf(n.id) >= 0) return 'Aktiv nu';
-    var t = db().aktiviteter.filter(function (h) { return h.av === u.id; }).concat((db().sakerhet || []).filter(function (h) { return h.av === u.id; }))
+    if (!u.inaktiv && IH.aktivNu && IH.aktivNu(u.id)) return 'Aktiv nu';
+    var t = db().aktiviteter.filter(function (h) { return h.av === u.id && !h.stod && new Date(h.tid) <= new Date(); }).concat((db().sakerhet || []).filter(function (h) { return h.av === u.id; }))
       .map(function (h) { return h.tid; }).sort().pop();
     return t ? IH.sedan(t) : 'Aldrig';
   }
@@ -109,14 +109,15 @@
       }).join('') + '</ul>' : '<div class="ao-lugnt ao-lugnt--stor">' + ik('skold') + '<div><strong>Inget att åtgärda</strong><small>Profiler, mål, ansvariga och säkerheten ser bra ut.</small></div></div>',
       { hoger: '<div class="ap-snabb">' + SNABB.map(function (x) { return '<button type="button" class="knapp knapp--liten" data-g="' + x[0] + '">' + ik(x[1]) + x[2] + '</button>'; }).join('') + '</div>' });
 
-    // 03 Behörigheter (så som menyn och sidorna faktiskt fungerar)
-    var RATT = [['Förfrågningar och säljtavlan', ['ja', 'ja', 'nej', 'ja']], ['Kunder och offerter', ['ja', 'ja', 'ja', 'ja']], ['Projekt och montage', ['ja', 'ja', 'ja', 'ja']],
-      ['Meddelanden', ['ja', 'ja', 'ja', 'ja']], ['Försäljningsledning och mål', ['nej', 'ja', 'nej', 'nej']], ['Lägga till konton', ['nej', 'ja', 'nej', 'ja']],
-      ['Kontrollcentral, admin och säkerhet', ['nej', 'nej', 'nej', 'ja']], ['Exportera och återställa all data', ['nej', 'nej', 'nej', 'ja']]];
+    // 03 Behörigheter (så som menyn, rollspärren i app.js och knapparna faktiskt fungerar). Admin når säljsidorna i supportläget.
+    var RATT = [['Förfrågningar, säljtavlan och kundmötet', ['ja', 'ja', 'nej', 'nej']], ['Kunder, offerter och dokument', ['ja', 'ja', 'ja', 'nej']], ['Projekt och montage', ['ja', 'ja', 'ja', 'nej']],
+      ['Säljarnas sidor i supportläget', ['nej', 'nej', 'nej', 'ja']], ['Meddelanden och Att göra', ['ja', 'ja', 'ja', 'ja']], ['Försäljningsledningen', ['nej', 'ja', 'nej', 'nej']],
+      ['Sätta säljmål', ['nej', 'ja', 'nej', 'ja']], ['Lägga till konton', ['nej', 'ja', 'nej', 'ja']],
+      ['Kontrollcentral, admin och säkerhet', ['nej', 'nej', 'nej', 'ja']], ['Exportera, importera och återställa all data', ['nej', 'nej', 'nej', 'ja']]];
     var behorig = band('03 · Behörigheter', 'Vem får', 'göra vad',
       '<div class="ap-matris" role="table"><div class="ap-matris__rad ap-matris__huvud" role="row"><span></span>' + ['Sälj', 'Chef', 'Prod', 'Admin'].map(function (k) { return '<span role="columnheader">' + k + '</span>'; }).join('') + '</div>' +
         RATT.map(function (r) { return '<div class="ap-matris__rad" role="row"><span role="rowheader">' + e(r[0]) + '</span>' + r[1].map(function (x) { return '<span role="cell" data-ratt="' + x + '">' + (x === 'ja' ? ik('bock') : '<i>–</i>') + '</span>'; }).join('') + '</div>'; }).join('') + '</div>' +
-      '<p class="ad-not">Demoläget: rollerna styr menyn i webbläsaren. Skarpt ska servern kontrollera varje ändring.</p>', { klass: 'ap-halv' });
+      '<p class="ad-not">Alla säljare ser och ändrar teamets affärer och kunder – det finns inga egna, låsta affärer. Demoläget: rollerna styr menyn och sidorna i webbläsaren. Skarpt ska servern kontrollera varje ändring.</p>', { klass: 'ap-halv' });
 
     // 04 Inställningar
     var utlogg = +inst().utlogg || 0, kopia = inst().kopia;
@@ -139,16 +140,16 @@
         '<button type="button" class="knapp knapp--liten knapp--fara" data-g="ad-aterstall">' + i('aterstall') + 'Återställ exempeldata</button></div>', { klass: 'ap-halv' });
 
     // 06 Granskningsloggen
-    var typFor = function (t) { return t === 'konto' ? 'konto' : 'sakerhet'; };
+    var typFor = function (t) { return t === 'konto' || t === 'support' ? t : 'sakerhet'; };
     var alltLogg = d.aktiviteter.map(function (x) { return { tid: x.tid, av: x.av, text: x.text, typ: 'crm' }; })
       .concat((d.sakerhet || []).map(function (x) { return { tid: x.tid, av: x.av, text: x.text, typ: typFor(x.typ) }; }))
       .filter(function (x) { return x.tid && (ui.logg === 'alla' || x.typ === ui.logg); }).sort(function (a, b) { return a.tid < b.tid ? 1 : -1; });
-    var TYPNAMN = { crm: 'CRM', konto: 'Konto', sakerhet: 'Säkerhet' };
+    var TYPNAMN = { crm: 'CRM', konto: 'Konto', support: 'Support', sakerhet: 'Säkerhet' };
     var loggBand = band('06 · Logg', 'Granskning', 'och ändringar',
       (alltLogg.length ? '<ul class="ao-flode ap-logg">' + alltLogg.slice(0, ui.loggN).map(function (x) { var u = IH.anvandare(x.av) || { namn: '?', farg: '#ccc' }, t = String(x.text || '');
         return '<li data-typ="' + x.typ + '"><span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span><span>' + e(t.slice(0, 110)) + (t.length > 110 ? '…' : '') + '<small><b class="ap-typ" data-typ="' + x.typ + '">' + TYPNAMN[x.typ] + '</b>' + e(u.namn) + ' · ' + IH.sedan(x.tid) + '</small></span></li>'; }).join('') + '</ul>' : '<p class="ad-not">Inget i loggen med det filtret.</p>') +
       (alltLogg.length > ui.loggN ? '<div class="ao-fot"><button type="button" class="knapp knapp--liten" data-g="ap-logg-fler">Visa fler (' + (alltLogg.length - ui.loggN) + ' till)</button></div>' : ''),
-      { klass: 'ap-halv', hoger: '<div class="ap-filterrad" role="group" aria-label="Visa">' + [['alla', 'Allt'], ['crm', 'CRM'], ['konto', 'Konton'], ['sakerhet', 'Säkerhet']].map(function (f) { return filterKnapp('ap-logg', f[0], f[1], ui.logg); }).join('') + '</div>' });
+      { klass: 'ap-halv', hoger: '<div class="ap-filterrad" role="group" aria-label="Visa">' + [['alla', 'Allt'], ['crm', 'CRM'], ['konto', 'Konton'], ['support', 'Support'], ['sakerhet', 'Säkerhet']].map(function (f) { return filterKnapp('ap-logg', f[0], f[1], ui.logg); }).join('') + '</div>' });
 
     return { titel: 'Admin', html: hjalte + konton + forslagBand + '<div class="ao-tva">' + behorig + installningar + '</div><div class="ao-tva">' + system + loggBand + '</div>' };
   };
@@ -172,19 +173,27 @@
     IH.oppnaArk({ titel: 'Ändra ' + u.namn, under: 'Sparas i den här webbläsaren (demo).', ikon: 'redigera',
       kropp: '<form id="ap-andra-form" data-ap-andra="' + u.id + '" class="km-form"><label class="falt"><span>Titel</span><input name="titel" required maxlength="60" value="' + e(u.titel) + '"></label>' +
         (u.roll === 'salj' ? '<label class="km-kryss"><input type="checkbox" name="chef"' + (u.chef ? ' checked' : '') + '> Försäljningschef (ser försäljningsledningen)</label>' +
-          '<label class="falt"><span>Årets mål i kronor</span><input name="mal" type="number" min="0" step="50000" value="' + (u.mal || '') + '" placeholder="T.ex. 800000"></label>' : '') + '</form>',
+          '<label class="falt"><span>Årets mål i kronor</span><input name="mal" type="number" min="0" step="any" data-steg="50000" value="' + (u.mal || '') + '" placeholder="T.ex. 800000"></label>' : '') + '</form>',
       fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="ap-andra-form">' + i('bock') + 'Spara</button>' });
   };
   document.addEventListener('submit', function (ev) {
     var t = ev.target; if (!t.matches || !t.matches('[data-ap-andra]')) return;
     ev.preventDefault();
     var u = IH.anvandare(t.getAttribute('data-ap-andra')); if (!u) return;
-    var falt = { titel: t.titel.value.trim() || u.titel };
-    if (t.chef) falt.chef = t.chef.checked;
-    if (t.mal) falt.mal = Math.max(0, Math.round(+t.mal.value || 0)) || 0;
+    var falt = { titel: t.titel.value.trim() || u.titel }, vad = [];
+    if (t.chef) {
+      falt.chef = t.chef.checked;
+      // Grundtiteln (Sälj / Sälj · Försäljningschef) följer chefsrollen; en egen titel lämnas som den är
+      if (falt.chef !== !!u.chef && /^Sälj( · Försäljningschef)?$/.test(falt.titel)) falt.titel = falt.chef ? 'Sälj · Försäljningschef' : 'Sälj';
+      if (falt.chef !== !!u.chef) vad.push(falt.chef ? 'blev försäljningschef' : 'är inte längre försäljningschef');
+    }
+    if (t.mal) { falt.mal = Math.max(0, Math.round(+t.mal.value || 0)) || 0; if (falt.mal !== (u.mal || 0)) vad.push(falt.mal ? 'mål ' + IH.kort(falt.mal) : 'inget mål'); }
+    if (falt.titel !== u.titel) vad.unshift('titel ' + falt.titel);
+    IH.stangArk();
+    if (!vad.length) { IH.toast('Inget att spara', 'Inget var ändrat.', 'bock'); return; }
     andra(u.id, falt);
-    logg('konto', 'Ändrade ' + u.namn + ': ' + falt.titel + (falt.chef ? ', chef' : '') + (falt.mal ? ', mål ' + IH.kort(falt.mal) : '') + '.');
-    IH.stangArk(); IH.uppdateraMeny(); IH.rita();
+    logg('konto', 'Ändrade ' + u.namn + ': ' + vad.join(', ') + '.');
+    IH.uppdateraMeny(); IH.rita();
     IH.toast('Sparat', u.namn + ' · ' + u.titel, 'bock');
   });
   document.addEventListener('input', function (ev) {
@@ -204,23 +213,52 @@
       if (fil.size > 5 * 1048576) { IH.toast('Filen är för stor', 'Högst 5 MB.', 'varning'); return; }
       r.onload = function () {
         var ny; try { ny = JSON.parse(r.result); } catch (x) { ny = null; }
-        var krav = ['kunder', 'affarer', 'aktiviteter', 'uppgifter', 'projekt', 'offerter', 'forfragningar'];
-        if (!ny || typeof ny !== 'object' || krav.some(function (k) { return !Array.isArray(ny[k]); })) { IH.toast('Kunde inte läsa filen', 'Det ser inte ut som en export från Legohus CRM.', 'varning'); return; }
+        var fel = granskaImport(ny);
+        if (fel) { IH.toast('Kunde inte läsa filen', fel, 'varning'); return; }
+        var aldre = ny.version !== IH.VERSION;
         vantar = ny;
         IH.oppnaArk({ titel: 'Importera data', under: e(fil.name), ikon: 'uppladdning',
-          kropp: '<p class="ad-not">Filen innehåller ' + ny.kunder.length + ' kunder, ' + ny.affarer.length + ' affärer och ' + ny.projekt.length + ' projekt. All nuvarande data i den här webbläsaren ersätts – säkerhetsloggen behålls. Exportera först om du vill kunna gå tillbaka.</p>',
+          kropp: '<p class="ad-not">Filen innehåller ' + ny.kunder.length + ' kunder, ' + ny.affarer.length + ' affärer och ' + ny.projekt.length + ' projekt. All nuvarande data i den här webbläsaren ersätts – säkerhetsloggen och skanningarna behålls. Exportera först om du vill kunna gå tillbaka.</p>' +
+            (aldre ? '<p class="ad-not">Filen är från dataversion ' + e(String(ny.version)) + ' och uppgraderas till version ' + IH.VERSION + '. Det som saknas (prislistan och löpnumren) fylls i.</p>' : ''),
           fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="button" data-g="ap-import-ok">' + ik('uppladdning') + 'Ersätt datan</button>' });
       };
       r.readAsText(fil); t.value = '';
     }
   });
   var vantar = null;
+  // Kontrollerar att filen är en export från CRM:et som går att använda. Ger felet som text, eller null.
+  var KRAV = ['kunder', 'affarer', 'aktiviteter', 'uppgifter', 'projekt', 'offerter', 'forfragningar'];
+  function granskaImport(ny) {
+    if (!ny || typeof ny !== 'object' || Array.isArray(ny)) return 'Det ser inte ut som en export från Legohus CRM.';
+    var saknas = KRAV.filter(function (k) { return !Array.isArray(ny[k]); });
+    if (saknas.length) return 'Det ser inte ut som en export från Legohus CRM (saknar ' + saknas.join(', ') + ').';
+    if (typeof ny.version !== 'number' || ny.version < 1) return 'Filen saknar dataversion – den kommer inte från en export.';
+    if (ny.version > IH.VERSION) return 'Filen är från en nyare version (' + ny.version + ') av CRM:et än den här (' + IH.VERSION + ').';
+    var trasig = KRAV.filter(function (k) { return ny[k].some(function (x) { return !x || typeof x !== 'object' || typeof x.id !== 'string' || !x.id; }); });
+    if (trasig.length) return 'Poster utan id i ' + trasig.join(', ') + '.';
+    if (ny.kunder.some(function (k) { return typeof k.namn !== 'string' || !k.namn.trim(); })) return 'Det finns kunder utan namn i filen.';
+    if (ny.affarer.some(function (a) { return typeof a.varde !== 'number' || !isFinite(a.varde); })) return 'Det finns affärer utan giltigt värde i filen.';
+    if (ny.prislista && (typeof ny.prislista !== 'object' || typeof ny.prislista.modeller !== 'object' || !Array.isArray(ny.prislista.poster))) return 'Prislistan i filen är trasig.';
+    return null;
+  }
+  // Fyller det som saknas så att datan inte byts ut mot exempeldatan vid nästa laddning (app.js jämför versionen)
+  function uppgradera(ny) {
+    ny.version = IH.VERSION;
+    if (!ny.prislista) ny.prislista = JSON.parse(JSON.stringify(IH.PRISLISTA_START));
+    var lopnr = ny.lopnr && typeof ny.lopnr === 'object' ? ny.lopnr : {};
+    var hogst = function (lista) { return (lista || []).reduce(function (m, x) { var n = parseInt(String(x.id).replace(/^\D+/, ''), 10); return isFinite(n) && n > m ? n : m; }, 0); };
+    [['kund', 'kunder'], ['affar', 'affarer'], ['forfragan', 'forfragningar'], ['aktivitet', 'aktiviteter'], ['uppgift', 'uppgifter'], ['projekt', 'projekt'], ['offert', 'offerter'], ['dokument', 'dokument']].forEach(function (t) {
+      lopnr[t[0]] = Math.max(+lopnr[t[0]] || 0, hogst(ny[t[1]]));
+    });
+    ny.lopnr = lopnr;
+    return ny;
+  }
   G['ap-import-ok'] = function () {
     if (!vantar) return;
-    var logg0 = (db().sakerhet || []).slice();
-    IH.db = vantar; IH.db.sakerhet = logg0; vantar = null;
+    var logg0 = (db().sakerhet || []).slice(), hub0 = db().sakHub, fran = vantar.version;
+    IH.db = uppgradera(vantar); IH.db.sakerhet = logg0; if (hub0) IH.db.sakHub = hub0; vantar = null;
     IH.spara();
-    logg('import', 'Data importerad: ' + IH.db.kunder.length + ' kunder, ' + IH.db.affarer.length + ' affärer.');
+    logg('import', 'Data importerad: ' + IH.db.kunder.length + ' kunder, ' + IH.db.affarer.length + ' affärer' + (fran !== IH.VERSION ? ' (uppgraderad från dataversion ' + fran + ')' : '') + '.');
     IH.stangArk(); IH.uppdateraMeny(); IH.rita();
     IH.toast('Datan är importerad', null, 'uppladdning');
   };

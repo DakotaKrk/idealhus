@@ -28,12 +28,25 @@
     return (ord.length === 1 ? ord[0].slice(0, 2) : ord.map(function (d) { return d.charAt(0); }).join('')).toUpperCase();
   }
 
+  // Inaktiverade konton (adminpanelen sparar dem i webbläsaren)
+  function arInaktiv(roll) { try { return !!(((JSON.parse(localStorage.getItem('ih-crm-admin')) || {}).konton || {})[roll] || {}).inaktiv; } catch (x) { return false; } }
+  function visaInaktiv(namn, plats) {
+    var fel = document.querySelector('[data-inaktiv-fel]');
+    if (!fel) {
+      fel = document.createElement('p'); fel.setAttribute('data-inaktiv-fel', ''); fel.setAttribute('role', 'alert');
+      fel.style.cssText = 'margin:12px 0 0;padding:10px 14px;border-radius:12px;background:#fdecea;color:#a8432f;font-weight:600';
+      // Överst, där Fortsätt som annars står – så att beskedet syns utan att man rullar
+      var ankare = document.querySelector('[data-igen]');
+      if (ankare) ankare.insertAdjacentElement('afterend', fel); else (plats && plats.parentNode ? plats.parentNode : document.body).appendChild(fel);
+    }
+    fel.textContent = (namn ? namn + 's konto' : 'Kontot') + ' är inaktiverat. Kontakta administratören för att få det aktiverat igen.';
+  }
+
   // Välkommen-ögonblicket, sedan in i CRM:et.
   function logga(roll, knapp) {
     var r = ROLLER[roll];
     if (!r) return;
-    var inaktiv = false; try { inaktiv = !!(((JSON.parse(localStorage.getItem('ih-crm-admin')) || {}).konton || {})[roll] || {}).inaktiv; } catch (x) { inaktiv = false; }
-    if (inaktiv) { var fel = document.querySelector('[data-inaktiv-fel]'); if (!fel) { fel = document.createElement('p'); fel.setAttribute('data-inaktiv-fel', ''); fel.setAttribute('role', 'alert'); fel.style.cssText = 'margin:12px 0 0;padding:10px 14px;border-radius:12px;background:#fdecea;color:#a8432f;font-weight:600'; (knapp && knapp.parentNode ? knapp.parentNode : document.body).appendChild(fel); } fel.textContent = 'Kontot är inaktiverat. Kontakta administratören.'; return; }
+    if (arInaktiv(roll)) { visaInaktiv(r.forsta, knapp); return; }
     try {
       localStorage.setItem('ih-crm-inloggad', '1');
       localStorage.setItem('ih-crm-jag', roll);
@@ -57,7 +70,9 @@
   var forra = null;
   try { forra = localStorage.getItem('ih-crm-jag'); } catch (e) { forra = null; }
   var igen = document.querySelector('[data-igen]');
-  if (igen && ROLLER[forra]) {
+  // Utloggad för att kontot inaktiverades (adminpanel.js skickar hit med ?inaktiv=1): förklara direkt, ingen Fortsätt som
+  if (/[?&]inaktiv=1\b/.test(location.search) || (forra && arInaktiv(forra))) visaInaktiv(ROLLER[forra] ? ROLLER[forra].forsta : '', igen);
+  if (igen && ROLLER[forra] && !arInaktiv(forra)) {
     var r = ROLLER[forra];
     var a = igen.querySelector('[data-igen-avatar]');
     a.textContent = initialer(r.namn);

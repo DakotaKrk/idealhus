@@ -134,7 +134,8 @@
     if (m.system) return '<p class="ch-system">' + e(m.text) + '</p>';
     const fortsatt = foreg && !foreg.system && foreg.av === m.av && new Date(m.tid) - new Date(foreg.tid) < 5 * 60000 && dagNr(foreg.tid) === dagNr(m.tid);
     const bara = !m.borttagen && m.text && BARA_EMOJI.test(m.text) && [...m.text.trim()].length <= 8;
-    const svar = m.svar ? '<button type="button" class="ch-citat" data-ch-hoppa="' + m.svar.mid + '"><b>' + e(fornamn(anv(m.svar.av))) + '</b><span>' + e(m.svar.text) + '</span></button>' : '';
+    const orig = m.svar && meddelande(m.svar.mid), bort = m.svar && (!orig || orig.borttagen);
+    const svar = m.svar ? '<button type="button" class="ch-citat" data-ch-hoppa="' + m.svar.mid + '"><b>' + e(fornamn(anv(m.svar.av))) + '</b><span>' + (bort ? '<i>Meddelandet togs bort</i>' : e(m.svar.text)) + '</span></button>' : '';
     const filer = (m.filer || []).map((f) => (f.typ && f.typ.indexOf('image/') === 0 && f.data
       ? '<a class="ch-bild" href="' + f.data + '" download="' + e(f.namn) + '"><img src="' + f.data + '" alt="' + e(f.namn) + '" loading="lazy">' + skannad(f) + '</a>'
       : '<a class="ch-fil"' + (f.data ? ' href="' + f.data + '" download="' + e(f.namn) + '"' : '') + '>' + ik('gem') + '<span><b>' + e(f.namn) + '</b><small>' + storlek(f.storlek || 0) + '</small></span>' + skannad(f) + '</a>')).join('');
@@ -154,10 +155,11 @@
     let html = '<div class="ch-intro">' + kanalAvatar(k) + '<div><b>' + e(kanalNamn(k)) + '</b><small>' + (k.typ === 'privat' ? 'Början på ert samtal' : k.typ === 'team' ? 'Alla i teamet · ' + k.medlemmar.length + ' personer' : 'Gruppen · ' + k.medlemmar.length + ' personer') + '</small></div></div>', dag = '', ny = false, foreg = null;
     lista.forEach((m) => {
       const d = new Date(m.tid).toDateString();
-      if (d !== dag) { html += '<p class="ch-dag"><span>' + dagRubrik(m.tid) + '</span></p>'; dag = d; foreg = null; }
+      if (d !== dag) { html += (dag ? '</div>' : '') + '<div class="ch-dagblock" style="display:flex;flex-direction:column;flex:none"><p class="ch-dag"><span>' + dagRubrik(m.tid) + '</span></p>'; dag = d; foreg = null; }
       if (!ny && forra && m.tid > forra && m.av !== jag() && !m.system) { html += '<p class="ch-nya"><span>Nya meddelanden</span></p>'; ny = true; foreg = null; }
       html += meddHtml(m, foreg); foreg = m;
     });
+    if (dag) html += '</div>';
     // "Läst" under mitt senaste i ett privat samtal
     const sist = lista[lista.length - 1];
     if (k.typ === 'privat' && sist && sist.av === jag() && lastTill(k.id, motpart(k).id) >= sist.tid) html += '<p class="ch-last">' + ik('bock') + 'Läst</p>';

@@ -58,3 +58,9 @@
 .ch-fil .ch-skannad { margin-left: auto; }
 .ch-bilaga .ch-skannad { margin-left: 6px; }
 @media (prefers-reduced-motion: reduce) { .fs-kort, .fs-kort[data-stanger], .fs-kort::after, .fs-ring::before, .fs-ikon .emo-ik, .fs-stegrad li[data-nu]::after { animation: none !important; } }
+/* Mobil och platta: korten ligger ovanför bottenmenyn, och överst när ett ark är öppet så att arkets knappar går att nå */
+@media (max-width: 900px) {
+  .fs-panel { inset: auto 12px 96px 12px; width: auto; }
+  body:has(.ark.syns) .fs-panel { inset: calc(12px + env(safe-area-inset-top, 0px)) 12px auto 12px; }
+  .fs-kort { padding: 10px 10px 10px 12px; gap: 10px; }
+}

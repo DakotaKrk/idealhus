@@ -1,7 +1,7 @@
 /* Legohus CRM – säkerhetshubben (#/sakerhet), samma upplägg som Uperformance CRM:s sakerhet.js (visaSakerhet).
    Sju kontroller körs på riktigt i webbläsaren mot sidans kod och CRM:ets data – skadlig kod, uppdateringar, buggar,
    läckor, intrång, avvikande beteende och sådant som är trasigt. Varje kontroll ger fynd med allvarlighet (hög −25,
-   medel −10, låg −3, info 0) och poängen är 100 minus avdragen. Kärnan: en ring per kontroll i kontrollens färg (full =
+   medel −10, låg −3, info 0) och får 100 minus sina avdrag; säkerhetspoängen är medelvärdet av kontrollerna. Kärnan: en ring per kontroll i kontrollens färg (full =
    inga fynd), under skanningen löper en komet runt ringen som kontrolleras och mitten visar förloppet; den lutar efter
    musen. Skanningens logg skrivs live, poängen sparas över tid. Data: db.sakHub = { senast, historik }. */
 (function () {
@@ -169,9 +169,12 @@
         await vila();
         logg('Kontrollerar husens bilder och 3D-modeller på servern');
         var filer = []; (IH.MODELLER || []).forEach(function (m) { if (m.bild) filer.push(m.bild); if (m.glb) filer.push(m.glb); });
-        var svar = await Promise.all(filer.map(function (u) { return fetch(u, { method: 'HEAD', cache: 'no-store' }).then(function (r) { return r.ok ? null : u; }, function () { return u; }); }));
-        svar.filter(Boolean).forEach(function (u) { f.push({ allvar: 'medel', text: 'Filen saknas på servern: ' + u.split('/').pop() }); });
-        if (!svar.filter(Boolean).length) logg(filer.length + ' filer finns på servern', 'ok');
+        // Bara 404/410 betyder att filen saknas – nätverksfel och serverfel (t.ex. vid hög last) går inte att avgöra
+        var svar = await Promise.all(filer.map(function (u) { return fetch(u, { method: 'HEAD', cache: 'no-store' }).then(function (r) { return r.ok ? null : r.status === 404 || r.status === 410 ? { u: u, saknas: true } : { u: u }; }, function () { return { u: u }; }); }));
+        var saknas = svar.filter(function (x) { return x && x.saknas; }), oklart = svar.filter(function (x) { return x && !x.saknas; });
+        saknas.forEach(function (x) { f.push({ allvar: 'medel', text: 'Filen saknas på servern: ' + x.u.split('/').pop() }); });
+        if (oklart.length) f.push({ allvar: 'info', text: plural(oklart.length, 'fil', 'filer') + ' gick inte att kontrollera (nätverket eller servern svarade inte) – kör kontrollen igen' });
+        if (!saknas.length && !oklart.length) logg(filer.length + ' filer finns på servern', 'ok');
         await vila();
         logg('Mäter lagringen');
         var b = 0; try { for (var n = 0; n < localStorage.length; n++) { var k = localStorage.key(n); if (/^ih-/.test(k)) b += (k.length + (localStorage.getItem(k) || '').length) * 2; } } catch (x) { /* */ }
@@ -183,7 +186,7 @@
   /* 02 Läget ------------------------------------------------------------------------------------- */
   function hub() { var d = db(); d.sakHub = d.sakHub || {}; d.sakHub.senast = d.sakHub.senast || {}; d.sakHub.historik = d.sakHub.historik || []; return d.sakHub; }
   var poang = function (fynd) { return Math.max(0, 100 - fynd.reduce(function (t, x) { return t + (ALLVAR[x.allvar] || ALLVAR.info).minus; }, 0)); };
-  function total() { var S = hub(), alla = KONTROLLER.map(function (k) { return S.senast[k.id]; }).filter(Boolean); return alla.length ? poang(alla.reduce(function (t, x) { return t.concat(x.fynd); }, [])) : null; }
+  function total() { var S = hub(), alla = KONTROLLER.map(function (k) { return S.senast[k.id]; }).filter(Boolean); return alla.length ? Math.round(alla.reduce(function (t, x) { return t + poang(x.fynd); }, 0) / alla.length) : null; }
   IH.sakTotal = total;
   var lageFor = function (r) { return !r ? 'ny' : r.fynd.some(function (x) { return x.allvar === 'hog'; }) ? 'hog' : r.fynd.some(function (x) { return x.allvar === 'medel'; }) ? 'medel' : r.fynd.some(function (x) { return x.allvar === 'lag'; }) ? 'lag' : 'ok'; };
   var skan = { kor: false, nu: null, logg: [], pct: 0 };
@@ -395,7 +398,7 @@
   IH.G['sh-behorighet'] = function () {
     var konton = IH.ANVANDARE.slice(), admins = konton.filter(function (u) { return u.roll === 'admin' && !u.inaktiv; }).length;
     IH.oppnaArk({ titel: 'Behörigheter', ikon: 'anvandare-plus', under: plural(konton.length, 'konto', 'konton') + ' · ' + plural(admins, 'administratör', 'administratörer'),
-      kropp: '<ul class="sh-beh">' + konton.map(function (u) { var roll = u.roll === 'admin' ? 'Administratör' : u.chef ? 'Säljare och chef' : u.roll === 'prod' ? 'Produktion' : 'Säljare'; return '<li data-inaktiv="' + !!u.inaktiv + '"><span class="avatar" style="background:' + (u.farg || '#ccc') + '">' + e(IH.initialer(u.namn)) + '</span><span><b>' + e(u.namn) + '</b><small>' + roll + (u.inaktiv ? ' · inaktiverat' : '') + '</small></span><em data-roll="' + u.roll + '">' + (u.roll === 'admin' ? 'Full åtkomst' : u.chef ? 'Teamets data' : 'Egna affärer') + '</em></li>'; }).join('') + '</ul>' +
+      kropp: '<ul class="sh-beh">' + konton.map(function (u) { var roll = u.roll === 'admin' ? 'Administratör' : u.chef ? 'Säljare och chef' : u.roll === 'prod' ? 'Produktion' : 'Säljare'; return '<li data-inaktiv="' + !!u.inaktiv + '"><span class="avatar" style="background:' + (u.farg || '#ccc') + '">' + e(IH.initialer(u.namn)) + '</span><span><b>' + e(u.namn) + '</b><small>' + roll + (u.inaktiv ? ' · inaktiverat' : '') + '</small></span><em data-roll="' + u.roll + '">' + (u.roll === 'admin' ? 'Admin, säljsidor i supportläget' : u.roll === 'prod' ? 'Projekt, kunder och offerter' : u.chef ? 'Teamets data och ledningen' : 'Teamets affärer och kunder') + '</em></li>'; }).join('') + '</ul>' +
         (admins > 1 ? '<p class="sh-beh__tips">' + admins + ' administratörer – se över om alla behöver full åtkomst.</p>' : '<p class="sh-beh__tips sh-beh__tips--ok">En administratör – bra.</p>'),
       fot: '<a class="knapp" href="#/admin">' + ik('installningar') + 'Till adminpanelen</a><button class="knapp knapp--virke" type="button" data-g="stang-ark">Klar</button>' });
   };

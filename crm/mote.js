@@ -132,6 +132,9 @@
           '<div class="kalkyl__modeller" data-m-in>' + IH.MODELLER.filter(function (x) { return x.id !== 'element'; }).map(function (x) {
             return '<button type="button" class="kalkyl__modell' + (x.id === s.kalkyl.modell ? ' vald' : '') + '" data-km="' + x.id + '"><img src="' + x.tumme + '" alt=""><b>' + e(x.namn) + '</b><small>' + x.yta + ' m²</small></button>';
           }).join('') + '</div>' +
+          // Antal hus – affärer med flera hus (t.ex. fyra för uthyrning) räknas inte som ett
+          '<div class="kalkyl__tillval kalkyl__antal" data-m-in role="group" aria-label="Antal hus"><button type="button" class="kalkyl__chip" data-ka="-1" aria-label="Ett hus färre">−</button>' +
+            '<span class="kalkyl__chip vald" data-kantal aria-live="polite">' + antalText() + '</span><button type="button" class="kalkyl__chip" data-ka="1" aria-label="Ett hus till">+</button></div>' +
           '<div class="kalkyl__tillval" data-m-in>' + IH.db.prislista.poster.filter(function (p) { return TILLVAL.indexOf(p.id) >= 0; }).map(function (p) {
             return '<button type="button" class="kalkyl__chip' + (s.kalkyl.tillval[p.id] ? ' vald' : '') + '" data-kt="' + p.id + '" aria-pressed="' + !!s.kalkyl.tillval[p.id] + '">' + IH.i('bock') + e(p.text) + '</button>';
           }).join('') + '</div></div>' +
@@ -142,7 +145,8 @@
           '<ol class="nasta3">' + [['Platsbesök', 'Vi tittar på tomten, marken och vägen fram.'], ['Offert', 'Post för post – vad som ingår och vad som tillkommer.'], ['Beslut', 'Ni bestämmer i lugn och ro. Sedan planerar vi tillverkningen.']].map(function (x, n) {
             return '<li data-m-in><span>0' + (n + 1) + '</span><b>' + x[0] + '</b><p>' + x[1] + '</p></li>';
           }).join('') + '</ol><div class="nasta__knappar" data-m-in>' +
-          (s.affar ? '<button class="knapp knapp--virke knapp--stor" type="button" data-mote="boka">' + IH.i('kalender') + 'Boka platsbesök</button>' : '') +
+          (s.affar && !s.las ? (bokatBesok() ? '<button class="knapp knapp--virke knapp--stor" type="button" disabled>' + IH.i('bock') + 'Platsbesök bokat · ' + IH.datum(bokatBesok().forfaller) + '</button>'
+            : '<button class="knapp knapp--virke knapp--stor" type="button" data-mote="boka">' + IH.i('kalender') + 'Boka platsbesök</button>') : '') +
           (s.kund && s.kund.epost ? '<button class="knapp knapp--glas knapp--stor" type="button" data-mote="sammanfattning">' + IH.i('post') + 'Mejla en sammanfattning</button>' : '') +
           '</div><p class="mb__kontakt" data-m-in>kontakt@legohusstockholm.se · Stockholm, Sverige</p></div></div>';
     }
@@ -162,10 +166,16 @@
   }
 
   /* --- Kalkylen ------------------------------------------------------ */
+  function antalText() { return s.kalkyl.antal === 1 ? '1 hus' : s.kalkyl.antal + ' hus'; }
+  // Ett öppet platsbesök för affären (uppgift med "besök" i texten)
+  function bokatBesok() {
+    if (!s.affar) return null;
+    return IH.db.uppgifter.filter(function (u) { return !u.klar && /bes[öo]k/i.test(u.text) && (u.affar === s.affar.id || (!u.affar && u.kund === s.affar.kund)); })[0] || null;
+  }
   function kalkylRader() {
     var pl = IH.db.prislista;
     var m = IH.modell(s.kalkyl.modell);
-    var rader = [{ text: m.kategori + ' ' + m.namn + ', ' + m.yta + ' m²', antal: 1, pris: pl.modeller[m.id] || 0 }];
+    var rader = [{ text: m.kategori + ' ' + m.namn + ', ' + m.yta + ' m²', antal: s.kalkyl.antal || 1, pris: pl.modeller[m.id] || 0 }];
     pl.poster.forEach(function (p) {
       if (p.id === 'frakt' || p.id === 'montage' || s.kalkyl.tillval[p.id]) rader.push({ text: p.text, antal: 1, pris: p.pris });
     });
@@ -180,12 +190,14 @@
     yta.innerHTML = '<div class="kvitto__huvud"><span class="kvitto__bild"><img src="' + m.bild + '" alt=""></span>' +
       '<span><small>' + e(m.kategori) + '</small><b>' + e(m.namn) + '</b><em>' + m.yta + ' m² · ' + m.rum + ' rum · ' + e(m.matt) + '</em></span></div>' +
       '<ul class="kvitto__rader">' + rader.map(function (r, n) {
-        return '<li style="--n:' + n + '"><span>' + e(r.text) + '</span><b class="tal">' + IH.kr(r.pris) + '</b></li>';
+        return '<li style="--n:' + n + '"><span>' + (r.antal > 1 ? r.antal + ' × ' : '') + e(r.text) + '</span><b class="tal">' + IH.kr(r.pris * r.antal) + '</b></li>';
       }).join('') + '</ul>' +
       '<div class="kvitto__summa"><span>Totalt</span><b class="tal" data-kvittosumma>' + IH.kr(s.forraSumma || sum) + '</b></div>' +
       '<p class="kvitto__not">Exempelpriser i prototypen. Grund, bygglov och anslutningar tillkommer.</p>' +
-      '<div class="kvitto__knappar">' + (s.affar
-        ? '<button class="knapp knapp--virke" type="button" data-mote="spara">' + IH.i('offert') + 'Spara som offert</button>'
+      '<div class="kvitto__knappar">' + (s.affar && s.las
+        ? '<span class="kvitto__tips">' + IH.i('las') + e(s.las) + '</span>'
+        : s.affar
+        ? '<button class="knapp knapp--virke" type="button" data-mote="spara">' + IH.i('offert') + (s.sparad ? 'Uppdatera ' + e(s.sparad.nummer) : 'Spara som offert') + '</button>'
         : '<span class="kvitto__tips">' + IH.i('varning') + 'Välj en affär när mötet startar för att spara som offert.</span>') + '</div>';
     var el = yta.querySelector('[data-kvittosumma]');
     var fran = s.forraSumma || sum;
@@ -308,13 +320,21 @@
     var el = s.el;
     clearInterval(s.klocka);
     var not = el.querySelector('[data-manteckning]');
-    if (not && not.value.trim() && s.kund) {
+    if (not && not.value.trim() && s.kund && IH.jag().roll !== 'admin') {
       IH.logga('mote', 'Kundmöte (' + minuter() + ' min): ' + not.value.trim(), s.kund.id, s.affar ? s.affar.id : null);
+      // Ett möte är rörelse i affären – den står inte längre still
+      if (s.affar && !s.affar.forlorad && s.affar.steg !== 'vunnen') s.affar.andrad = new Date().toISOString();
       IH.spara();
       IH.toast('Anteckningen är sparad', 'I historiken för ' + s.kund.namn, 'anteckning');
       if (IH.ritaOm) IH.ritaOm();
+    } else if (not && not.value.trim()) {
+      // Utan kund finns inget kundkort att spara på – texten kopieras i stället för att försvinna
+      var text = not.value.trim();
+      try { navigator.clipboard.writeText(text).catch(function () {}); } catch (x) { /* utan urklipp */ }
+      IH.toast('Anteckningen sparades inte', 'Mötet hade ingen kund. Texten är kopierad – klistra in den på rätt kund.', 'anteckning', { tid: 7000 });
     }
     document.removeEventListener('keydown', s.tangent);
+    window.removeEventListener('keydown', s.fang, true);
     el.classList.add('stanger');
     setTimeout(function () { if (IH.ritaOm) IH.ritaOm(); }, IH.lugn ? 0 : 540);
     if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function () {});
@@ -337,12 +357,16 @@
   // Platsbesöket: en uppgift om en vecka och affären flyttas till besök.
   function bokaBesok(b) {
     var a = s.affar, k = s.kund;
+    if (s.las) return;
+    var finns = bokatBesok();
+    if (finns) { IH.toast('Platsbesöket är redan bokat', IH.datum(finns.forfaller) + ' · ' + finns.text, 'kalender'); b.disabled = true; return; }
     var d = new Date(); d.setDate(d.getDate() + 7); d.setHours(10, 0, 0, 0);
     IH.db.uppgifter.push({ id: IH.nyttId('uppgift', 'u'), text: 'Platsbesök hos ' + (k ? k.namn : a.titel), forfaller: d.toISOString(), klar: false,
       kund: a.kund, affar: a.id, ansvarig: IH.jag().id });
     var ord = IH.SALJSTEG.map(function (x) { return x.id; });
     if (ord.indexOf(a.steg) < ord.indexOf('besok')) { a.steg = 'besok'; a.andrad = new Date().toISOString(); }
-    IH.logga('mote', 'Platsbesök bokat i kundmötet, vecka ' + IH.vecka(d) + '.', a.kund, a.id);
+    // En bokning är inget hållet möte – den loggas som systemrad
+    IH.logga('system', 'Platsbesök bokat i kundmötet, vecka ' + IH.vecka(d) + '.', a.kund, a.id);
     IH.spara();
     var r = b.getBoundingClientRect();
     IH.konfetti(r.left + r.width / 2, r.top);
@@ -359,10 +383,12 @@
     if (s.forraSumma) {
       var m = IH.modell(s.kalkyl.modell);
       rader.push('Huset vi räknade på: ' + m.kategori + ' ' + m.namn + ', ' + m.yta + ' m²');
-      kalkylRader().forEach(function (r) { rader.push('– ' + r.text + ': ' + IH.kr(r.pris)); });
+      kalkylRader().forEach(function (r) { rader.push('– ' + (r.antal > 1 ? r.antal + ' × ' : '') + r.text + ': ' + IH.kr(r.pris * r.antal)); });
       rader.push('Totalt: ' + IH.kr(s.forraSumma), 'Grund, bygglov och anslutningar tillkommer.', '');
     }
     rader.push('Nästa steg är ett platsbesök där vi tittar på tomten, marken och vägen fram.', '', 'Vänliga hälsningar', IH.jag().namn, 'Legohus Stockholm · kontakt@legohusstockholm.se');
+    IH.logga('mejl', 'Sammanfattning av kundmötet öppnad i mejlprogrammet.', k.id, s.affar ? s.affar.id : null);
+    IH.spara();
     window.location.href = 'mailto:' + encodeURIComponent(k.epost) + '?subject=' + encodeURIComponent('Sammanfattning av vårt möte') + '&body=' + encodeURIComponent(rader.join('\n'));
   }
 
@@ -370,22 +396,40 @@
     starta: function (opt) {
       opt = opt || {};
       var affar = opt.affar ? IH.affar(opt.affar) : null;
-      var kund = affar ? IH.kund(affar.kund) : null;
+      // Utan affär kan mötet ändå höra till en kund (Kundmöte från kundsidan) – då sparas anteckningen där
+      var kund = affar ? IH.kund(affar.kund) : opt.kund ? IH.kund(opt.kund) : null;
       // Förfrågan bakom affären (eller kundens senaste) ger bilden "Er förfrågan".
       var forfragan = affar ? (IH.db.forfragningar.filter(function (f) { return f.affar === affar.id; })[0] ||
-        IH.db.forfragningar.filter(function (f) { return f.kund === affar.kund; })[0] || null) : null;
+        IH.db.forfragningar.filter(function (f) { return f.kund === affar.kund; })[0] || null)
+        : kund ? (IH.db.forfragningar.filter(function (f) { return f.kund === kund.id; }).slice(-1)[0] || null) : null;
       var forslag = null;
       if (forfragan) {
         forslag = IH.foreslaModell ? IH.foreslaModell(forfragan, kund) : null;
-        var am = affar.modell ? IH.modell(affar.modell) : null;
+        var am = affar && affar.modell ? IH.modell(affar.modell) : null;
         if (am && (!forslag || forslag.m.id !== am.id)) forslag = { m: am, varfor: am.text };
       }
       var bilder = (opt.bilder && opt.bilder.length ? opt.bilder : IH.MOTE_BILDER.map(function (b) { return b.id; }))
         .filter(function (id) { return id !== 'er' || forfragan; });
+      if (!bilder.length) bilder = ['titel'];
+      // Kalkylen börjar där affären står: antal hus och tillval ur den senaste offerten
+      var kmodell = affar && affar.modell !== 'element' ? affar.modell : 'r1', tillval = {}, antal = 1;
+      var forraOff = affar ? IH.offertFor(affar.id) : null;
+      if (forraOff) {
+        IH.db.prislista.poster.forEach(function (p) { if (p.id !== 'frakt' && p.id !== 'montage' && forraOff.rader.some(function (r) { return r.text === p.text; })) tillval[p.id] = true; });
+        var husrad = forraOff.rader.filter(function (r) { return IH.MODELLER.some(function (m) { return String(r.text || '').indexOf(m.kategori + ' ' + m.namn) === 0; }); })[0];
+        if (husrad && affar.modell !== 'element') antal = Math.max(1, husrad.antal || 1);
+      } else if (affar && affar.modell !== 'element' && IH.db.prislista.modeller[kmodell]) {
+        // Utan offert: hela hus som ryms i affärsvärdet (t.ex. fyra hus för uthyrning)
+        antal = Math.max(1, Math.floor((affar.varde || 0) / IH.db.prislista.modeller[kmodell]));
+      }
+      // Vunna och förlorade affärer ändras inte i mötet – presentationen visas, men inget sparas eller bokas
+      var las = affar && affar.steg === 'vunnen' ? 'Affären är vunnen – kalkylen visas men sparas inte som offert.'
+        : affar && affar.forlorad ? 'Affären är förlorad – återuppta den för att spara en offert.'
+        : IH.jag().roll === 'admin' ? 'Administratören sparar inte offerter.' : '';
       s = {
         affar: affar, kund: kund, modell: affar ? affar.modell : 'r1', forfragan: forfragan, forslag: forslag,
-        bilder: bilder, nu: -1, husId: null, forraSumma: 0, start: Date.now(),
-        kalkyl: { modell: affar && affar.modell !== 'element' ? affar.modell : 'r1', tillval: {} }
+        bilder: bilder, nu: -1, husId: null, forraSumma: 0, start: Date.now(), las: las, sparad: null,
+        kalkyl: { modell: kmodell, tillval: tillval, antal: antal }
       };
       var el = document.createElement('div');
       el.className = 'mote';
@@ -409,7 +453,7 @@
         '<button class="mote__pil mote__pil--fram" type="button" data-mote="fram" aria-label="Nästa">' + IH.i('pil') + '</button>' +
         '<span class="mote__framsteg"><i></i></span></footer>' +
         '<aside class="mote__anteckning" aria-label="Anteckningar"><header><b>' + IH.i('anteckning') + 'Anteckningar</b>' +
-        '<small>' + (s.kund ? 'Sparas i historiken för ' + e(s.kund.namn) + ' när mötet avslutas.' : 'Starta mötet från en affär för att spara anteckningen.') + '</small></header>' +
+        '<small>' + (s.kund ? 'Sparas i historiken för ' + e(s.kund.namn) + ' när mötet avslutas.' : 'Mötet har ingen kund – texten kopieras när mötet avslutas.') + '</small></header>' +
         '<textarea data-manteckning placeholder="Tomten, tidplanen, önskemål, frågor att återkomma om …"></textarea>' +
         '<p class="mote__anteckning-tips">Tryck N för att visa eller dölja</p></aside>';
       document.body.appendChild(el);
@@ -426,9 +470,15 @@
       if (!IH.lugn && el.requestFullscreen && opt.helskarm !== false) el.requestFullscreen().catch(function () {});
 
       el.addEventListener('click', function (ev) {
-        var b = ev.target.closest('[data-mote],[data-m],[data-km],[data-kt],[data-plan]');
+        var b = ev.target.closest('[data-mote],[data-m],[data-km],[data-kt],[data-plan],[data-ka]');
         if (!b) return;
         if (b.hasAttribute('data-m')) { visaHus(b.getAttribute('data-m')); return; }
+        if (b.hasAttribute('data-ka')) {
+          s.kalkyl.antal = Math.max(1, Math.min(50, (s.kalkyl.antal || 1) + Number(b.getAttribute('data-ka'))));
+          el.querySelectorAll('[data-kantal]').forEach(function (x) { x.textContent = antalText(); });
+          ritaKvitto(true);
+          return;
+        }
         if (b.hasAttribute('data-km')) {
           s.kalkyl.modell = b.getAttribute('data-km');
           el.querySelectorAll('.kalkyl__modell').forEach(function (x) { x.classList.toggle('vald', x === b); });
@@ -455,17 +505,27 @@
         else if (g === 'helskarm') {
           if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
           else if (el.requestFullscreen) el.requestFullscreen().catch(function () {});
-        } else if (g === 'spara' && s.affar) {
-          var o = IH.nyOffert(s.affar, kalkylRader());
-          s.affar.varde = IH.summaOffert(o);
-          s.affar.modell = s.kalkyl.modell;
+        } else if (g === 'spara' && s.affar && !s.las) {
+          // Offerten får det valda huset. Affärens modell (och värde) följer bara med när ingen skickad offert väntar på svar.
+          // En andra sparning i samma möte uppdaterar samma utkast.
+          var vantade = IH.db.offerter.some(function (x) { return x.affar === s.affar.id && x.status === 'skickad'; });
+          if (!vantade) s.affar.modell = s.kalkyl.modell;
+          var o = s.sparad && s.sparad.status === 'utkast' && IH.db.offerter.indexOf(s.sparad) >= 0 ? s.sparad : null;
+          if (o) {
+            o.rader = kalkylRader();
+            IH.logga('system', 'Offert ' + o.nummer + ' uppdaterad i kundmötet.', s.affar.kund, s.affar.id);
+          } else o = IH.nyOffert(s.affar, kalkylRader());
+          o.modell = s.kalkyl.modell;
+          if (IH.vardeFranOffert) IH.vardeFranOffert(o);
+          s.sparad = o;
           s.affar.andrad = new Date().toISOString();
           IH.spara();
           var r = b.getBoundingClientRect();
           IH.konfetti(r.left + r.width / 2, r.top);
           b.innerHTML = IH.i('bock') + 'Sparad som ' + e(o.nummer);
           b.disabled = true;
-          IH.toast('Offerten är sparad', o.nummer + ' · ' + IH.kr(IH.summaOffert(o)), 'offert');
+          var vantar = IH.db.offerter.some(function (x) { return x.affar === s.affar.id && x.status === 'skickad'; });
+          IH.toast('Offerten är sparad', o.nummer + ' · ' + IH.kr(IH.summaOffert(o)) + (vantar ? ' · utkast – den skickade offerten gäller tills du skickar den nya' : ''), 'offert');
         }
       });
 
@@ -484,6 +544,14 @@
         else if (ev.key === 'End') ga(s.bilder.length - 1);
       };
       document.addEventListener('keydown', s.tangent);
+      // Sökpaletten ("/" och Ctrl K) öppnas inte bakom presentationen
+      s.fang = function (ev) {
+        var pal = ev.key === '/' && !ev.ctrlKey && !ev.metaKey && !ev.altKey, ck = (ev.ctrlKey || ev.metaKey) && (ev.key === 'k' || ev.key === 'K');
+        if (!pal && !ck) return;
+        ev.stopPropagation();
+        if (ck || !(ev.target && ev.target.closest && ev.target.closest('textarea, input'))) ev.preventDefault();
+      };
+      window.addEventListener('keydown', s.fang, true);
 
       // Svep på pekskärm.
       var sx = null;

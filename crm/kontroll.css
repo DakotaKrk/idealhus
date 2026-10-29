@@ -286,3 +286,5 @@ section.ao-hjalte .ao-remsa { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .ao-band { min-width: 0; }
 
 .ao-band { container-type: inline-size; container-name: aoband; }
+/* Att agera på (chefsvyn) i smalt kort: Ta själv och Fördela hamnar under texten, inte utanför kortet */
+@container aoband (max-width: 480px) { .ao-upp li > .lp-agera__knappar { grid-column: 2; justify-content: flex-start; } }

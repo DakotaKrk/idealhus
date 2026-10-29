@@ -288,7 +288,7 @@ function bygg() {
   const b = bord(); scen.add(b);
   const stolar = [], STOLPOS = [[-2.2, 2.2, 0.05], [-0.75, 2.25, 0], [0.75, 2.25, 0], [2.2, 2.2, -0.05], [4.0, 0.5, 0], [-4.0, 0.5, 0]];
   STOLPOS.forEach(([x, z, r], n) => { const s = stol(n % 2 ? null : '#4a423b'); s.position.set(x, 0, z); s.rotation.y = Math.atan2(-x * (Math.abs(x) > 3 ? 1 : 0.25), -z) + r; scen.add(s); stolar.push(s); kskugga(x, 0.014, z, 1, 1); });
-  [[-1.5, -2.2], [0, -2.25], [1.5, -2.2]].forEach(([x, z]) => { const s = stol('#4a423b'); s.position.set(x, 0, z); s.rotation.y = Math.atan2(-x * 0.25, -z); scen.add(s); });
+  const bortre = []; [[-1.5, -2.2], [0, -2.25], [1.5, -2.2]].forEach(([x, z]) => { const s = stol('#4a423b'); s.position.set(x, 0, z); s.rotation.y = Math.atan2(-x * 0.25, -z); scen.add(s); bortre.push(s); });
 
   // på bordet
   const Y = 1.575;
@@ -375,24 +375,31 @@ function bygg() {
 
   const comp = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
   comp.addPass(new RenderPass(scen, kamera)); const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.42, 0.55, 0.9); comp.addPass(bloom); comp.addPass(new OutputPass());
-  S = { valdRing, pendlar, molnT, faglar, granar, lapStaplar, vaxter: [lov, vaxt2], renderer, scen, kamera, comp, bloom, stolar, snurr, anga, stralar, damm, dpos, dfas, ND, vTim, vMin, vSek, lampor, el: null, t: 0, ram: 0, synlig: false, mus: new THREE.Vector2(), musMal: new THREE.Vector2(), klocka: new THREE.Clock() };
+  S = { valdRing, pendlar, molnT, faglar, granar, lapStaplar, vaxter: [lov, vaxt2], renderer, scen, kamera, comp, bloom, stolar, bortre, snurr, anga, stralar, damm, dpos, dfas, ND, vTim, vMin, vSek, lampor, el: null, t: 0, ram: 0, synlig: false, mus: new THREE.Vector2(), musMal: new THREE.Vector2(), klocka: new THREE.Clock() };
   renderer.domElement.className = 'motesrum3d__duk';
   new IntersectionObserver((r) => { S.synlig = r[0].isIntersecting; if (S.synlig) starta(); }, { threshold: 0.05 }).observe(renderer.domElement);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) starta(); });
   addEventListener('resize', storlek);
 }
-function storlek() { if (!S || !S.el) return; const w = S.el.clientWidth, h = S.el.clientHeight; if (!w || !h) return; S.renderer.setSize(w, h, false); S.comp.setSize(w, h); S.kamera.aspect = w / h; const smal = w < 900; S.utzoom = w / h < 1 ? 1 + (1 - w / h) * 0.85 : 1; S.kamera.fov = smal ? (w / h < 1 ? 52 : 44) : 34; S.kamera.setViewOffset(w, h, smal ? 0 : -w * 0.2, smal ? 0 : -h * 0.02, w, h); S.kamera.updateProjectionMatrix(); }
+function storlek() { if (!S || !S.el) return; const w = S.el.clientWidth, h = S.el.clientHeight; if (!w || !h) return; S.renderer.setSize(w, h, false); S.comp.setSize(w, h); S.kamera.aspect = w / h; const smal = w < 900; S.utzoom = w / h < 1 ? 1 + (1 - w / h) * 0.85 : 1; S.kamera.fov = smal ? (w / h < 1 ? 52 : 44) : 34; S.kamera.setViewOffset(w, h, smal ? 0 : -w * 0.2, smal ? (w < 600 && w / h < 1 ? -h * 0.08 : 0) : -h * 0.02, w, h); S.kamera.updateProjectionMatrix(); }
 function starta() { if (S && !S.ram && S.synlig && !document.hidden && S.el && S.el.isConnected) { S.klocka.getDelta(); S.ram = requestAnimationFrame(ram); } }
 const tmp = new THREE.Vector3();
+// på en smal skärm sitter plats 5 och 6 på bordets bortre sida i stället för vid kortändarna, som hamnar utanför bilden
+function stolFor(n) { const smal = S.el && S.el.clientWidth < 600; return smal && n >= 4 ? S.bortre[n === 4 ? 2 : 0] : S.stolar[n]; }
 function placeraPlatser() {
   const rum = S.el.parentElement && S.el.parentElement.querySelector('.motescen__rum'); if (!rum) return;
   const rr = rum.getBoundingClientRect(), dr = S.el.getBoundingClientRect();
+  let ut = 0;
   rum.querySelectorAll('.bord__plats').forEach((b, n) => {
-    const s = S.stolar[n]; if (!s) { b.style.display = 'none'; return; }
+    const s = stolFor(n); if (!s) { b.style.display = 'none'; return; }
     tmp.set(s.position.x, 1.25, s.position.z + 0.15).project(S.kamera);
-    const x = (dr.left - rr.left) + (tmp.x + 1) / 2 * dr.width, y = (dr.top - rr.top) + (1 - tmp.y) / 2 * dr.height;
+    let x = (dr.left - rr.left) + (tmp.x + 1) / 2 * dr.width; const y = (dr.top - rr.top) + (1 - tmp.y) / 2 * dr.height;
+    // smal skärm: en plats utanför rummet gör att kameran backar lite tills alla får plats; till sist hålls den innanför kanten
+    const halv = (b.offsetWidth || 44) / 2 + 6;
+    if (x < halv || x > rr.width - halv) { ut = 1; x = Math.min(rr.width - halv, Math.max(halv, x)); }
     b.style.left = (x / rr.width * 100).toFixed(2) + '%'; b.style.top = (y / rr.height * 100).toFixed(2) + '%';
   });
+  if (ut && (S.platsZoom || 1) < 1.15) S.platsZoom = (S.platsZoom || 1) * 1.02;
 }
 function ram() {
   S.ram = 0; if (!S.el || !S.el.isConnected || !S.synlig || document.hidden) return;
@@ -400,7 +407,7 @@ function ram() {
   // kameran: en långsam glidning och lite följ-musen, aldrig ryckigt
   S.mus.lerp(S.musMal, 1 - Math.pow(0.02, dt));
   const a = Math.sin(t * 0.08) * 0.12 + S.mus.x * 0.12, intro = LUGN ? 1 : 1 - Math.pow(1 - Math.min(1, t / 2.8), 3);
-  const rad = (9.4 + (1 - intro) * 5) * (S.utzoom || 1);
+  const rad = (9.4 + (1 - intro) * 5) * (S.utzoom || 1) * (S.platsZoom || 1);
   S.kamera.position.set(Math.sin(a + (1 - intro) * 0.4) * rad + 1.2, 5.3 + (1 - intro) * 2.2 + Math.sin(t * 0.11) * 0.12 - S.mus.y * 0.3, Math.cos(a + (1 - intro) * 0.4) * rad + 2.4);
   S.kamera.lookAt(0.2, 1.35, -0.4);
   S.snurr.rotation.y = t * 0.25;
@@ -425,8 +432,8 @@ function ram() {
   S.vSek.rotation.z = -sek / 60 * Math.PI * 2; S.vMin.rotation.z = -min / 60 * Math.PI * 2; S.vTim.rotation.z = -tim / 12 * Math.PI * 2;
   // den valda kundens stol vrids lite mot bordet
   const rumEl = S.el.parentElement && S.el.parentElement.querySelector('.motescen__rum'), vald = rumEl ? [...rumEl.querySelectorAll('.bord__plats')].findIndex((b) => b.classList.contains('vald')) : -1;
-  const vs = vald >= 0 ? S.stolar[vald] : null; if (vs) { S.valdRing.position.x = vs.position.x; S.valdRing.position.z = vs.position.z; } S.valdRing.material.opacity += ((vs ? 0.55 + Math.sin(t * 3) * 0.2 : 0) - S.valdRing.material.opacity) * Math.min(1, dt * 4); S.valdRing.scale.setScalar(1 + Math.sin(t * 3) * 0.05);
-  S.stolar.forEach((s, n) => { const mal = n === vald ? Math.sin(t * 1.5) * 0.15 : 0; s.children.forEach((c) => { if (c.position.y > 0.8) c.rotation.y += (mal - c.rotation.y) * Math.min(1, dt * 4); }); });
+  const vs = vald >= 0 ? stolFor(vald) : null; if (vs) { S.valdRing.position.x = vs.position.x; S.valdRing.position.z = vs.position.z; } S.valdRing.material.opacity += ((vs ? 0.55 + Math.sin(t * 3) * 0.2 : 0) - S.valdRing.material.opacity) * Math.min(1, dt * 4); S.valdRing.scale.setScalar(1 + Math.sin(t * 3) * 0.05);
+  S.stolar.concat(S.bortre).forEach((s) => { const mal = s === vs ? Math.sin(t * 1.5) * 0.15 : 0; s.children.forEach((c) => { if (c.position.y > 0.8) c.rotation.y += (mal - c.rotation.y) * Math.min(1, dt * 4); }); });
   S.comp.render(dt); placeraPlatser();
   S.ram = requestAnimationFrame(ram);
 }

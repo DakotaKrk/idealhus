@@ -8606,3 +8606,23 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 .inst-tal .inst-tal__spann { width: auto !important; }
 /* Översikten: båda spalterna slutar på samma höjd – sista kortet i varje spalt växer så det fyller ut */
 @media (min-width: 1101px) { .vy .oversikt { align-items: stretch; } .vy .oversikt__kol { display: flex; flex-direction: column; } .vy .oversikt__kol > .kort:last-child { flex: 1 1 auto; } }
+/* Spara filer: typväljaren (valj.js döljer select och lägger en knapp efter) står i tredje kolumnen, inte på en egen rad */
+.dk-upp__rad { position: relative; }
+.dk-upp__rad > .valj-dold { position: absolute !important; }
+.dk-upp__rad > .valj-knapp { min-height: 38px; padding: 0 10px; border: 0; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, .12); font: 600 .8rem/1 var(--rubrik); color: var(--kol); }
+@media (max-width: 560px) { .dk-upp__rad { grid-template-columns: 36px minmax(0, 1fr); } .dk-upp__rad > .valj-knapp { grid-column: 1 / -1; } }
+/* Periodväljaren (6 mån / 12 mån): etiketten bryts aldrig, så siffran och mån står på samma rad */
+.tv-seg { flex: none; }
+.tv-seg button { white-space: nowrap; }
+/* Stegnamnen på smal skärm: hela namnet (Förhandling, Besiktning) i mindre stil, centrerat och utan … – det får gå ut en aning i luckan mellan stegen */
+@container (max-width: 420px) { .af-stegare button span { padding: 0; overflow: visible; text-overflow: clip; font-size: .58rem; letter-spacing: -.02em; text-align: center; } }
+@media (max-width: 480px) { .stegare button span { padding: 0; overflow: visible; text-overflow: clip; font-size: .58rem; letter-spacing: -.02em; text-align: center; } }
+/* Pekskärm: små knappar får en osynlig tryckyta på minst 40 px utan att utseendet ändras (Att göra, projektkalendern, Projekt) */
+@media (max-width: 900px), (pointer: coarse) {
+  .agk__plus, .uppg__bock, .uppg__skjut, .prodvarn__pamin, .resa3d__prickar button { position: relative; }
+  .agk__plus::after, .uppg__bock::after, .uppg__skjut::after, .prodvarn__pamin::after, .resa3d__prickar button::after {
+    content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 40px); height: max(100%, 40px); transform: translate(-50%, -50%); }
+  .uppg__text a { padding: 6px 0; }
+}
+/* Pekskärm utan tangentbord: tangenttips (J/K i inkorgen, presentationens tangenter, Ctrl K i sökrutan) visas inte */
+@media (hover: none) and (pointer: coarse) { .inkorg__tips, .tangenter, .sok kbd, .sido__sok kbd { display: none; } }

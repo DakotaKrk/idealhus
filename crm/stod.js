@@ -18,7 +18,7 @@
   };
   function minuter() { var t = 0; try { t = +localStorage.getItem(START) || 0; } catch (x) { /* */ } return t ? Math.max(1, Math.round((Date.now() - t) / 60000)) : 0; }
 
-  function borja(id) {
+  function borja(id, mal) {
     var u = IH.anvandare(id); if (!u || u.roll === 'admin' || u.inaktiv || IH.riktigJag().roll !== 'admin') return;
     var forra = IH.visarSom();
     if (forra && forra.id === id) return;
@@ -27,7 +27,8 @@
     IH.sattVisaSom(id);
     try { localStorage.setItem(START, String(Date.now())); } catch (x) { /* */ }
     IH.stangArk(true);
-    IH.uppdateraMeny(); IH.ga('#/'); IH.rita(); band();
+    // Samma startsida som kontot själv har (produktionen börjar på Projekt), eller sidan administratören var på väg till
+    IH.uppdateraMeny(); IH.ga(mal && mal.indexOf('#/') === 0 ? mal : u.roll === 'prod' ? '#/produktion' : '#/'); IH.rita(); band();
     IH.toast('Du är i ' + u.namn + 's konto', 'Supportläge – ' + u.namn + ' märker inget. Tillbaka med knappen högst upp.', 'oga-av');
   }
   function sluta(tyst) {
@@ -76,7 +77,7 @@
   IH.uppdateraMeny = function () { var r = forraMeny.apply(this, arguments); if (!!IH.visarSom() !== !!bandEl) band(); return r; };
   setTimeout(band, 0);
 
-  G['visa-som'] = function (el) { borja(el.getAttribute('data-id')); };
+  G['visa-som'] = function (el) { borja(el.getAttribute('data-id'), el.getAttribute('data-mal')); };
   G['visa-som-sluta'] = function () { sluta(false); };
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && ev.shiftKey && IH.visarSom()) sluta(false); });
 
@@ -97,6 +98,21 @@
   G['satt-narvaro'] = function (el) {
     if (IH.visarSom()) { IH.toast('Statusen ändras inte i supportläget', IH.visarSom().namn + ' styr sin egen status.', 'oga-av'); return; }
     narvaro(el);
+  };
+  // Sjukanmälan ändrar personens status – det gör inte administratören åt säljaren
+  var sjuk = G['pk-sjuk'];
+  if (sjuk) G['pk-sjuk'] = function (el) {
+    var u = IH.visarSom();
+    if (u && el.getAttribute('data-id') === u.id) { IH.toast('Statusen ändras inte i supportläget', u.namn + ' sjukanmäler sig själv.', 'oga-av'); return; }
+    sjuk(el);
+  };
+  // Allt som loggas i supportläget märks med vem som gjorde det och skrivs i säkerhetsloggen
+  var loggaForra = IH.logga;
+  IH.logga = function (typ, text, kund, affar) {
+    loggaForra.apply(this, arguments);
+    var u = IH.visarSom(); if (!u) return;
+    var h = IH.db.aktiviteter[IH.db.aktiviteter.length - 1]; if (h) h.stod = IH.riktigJag().id;
+    logg('Supportläget i ' + u.namn + 's konto: ' + String(text || typ).slice(0, 90));
   };
   var utloggning = G['logga-ut'];
   G['logga-ut'] = function (el) { if (IH.visarSom()) { sluta(false); return; } if (utloggning) utloggning(el); };

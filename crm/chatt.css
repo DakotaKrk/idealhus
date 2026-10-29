@@ -462,17 +462,17 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; 
 .chf-dock__led { width: 1.5px; margin-left: -.75px; }
 
 /* Mobil: bubblan ligger ovanför bottenmenyn så att Mer går att nå */
-@media (max-width: 720px) { .chf-ikon:not([data-i-docka]) { bottom: 92px !important; right: 14px !important; } }
+@media (max-width: 900px) { .chf-ikon:not([data-i-docka]) { bottom: 92px !important; right: 14px !important; } }
 
-@media (max-width: 720px) { .chf { bottom: 84px !important; height: min(72vh, calc(100vh - 110px)) !important; } }
+@media (max-width: 900px) { .chf { bottom: 84px !important; height: min(72vh, calc(100vh - 110px)) !important; } }
 
 @media (max-width: 860px) { .ch, .ch.med-info { grid-template-columns: minmax(0, 1fr) !important; } }
 
-@media (max-width: 720px) { .chf .chf-huvud > b { visibility: hidden; } .chf .ch-fot { padding: 6px 8px 10px !important; } .chf .ch-fot > * { margin-left: 0 !important; } }
+@media (max-width: 900px) { .chf .chf-huvud > b { visibility: hidden; } .chf .ch-fot { padding: 6px 8px 10px !important; } .chf .ch-fot > * { margin-left: 0 !important; } }
 /* Chattsidan på mobil: skrivrutan står kvar ovanför bottenmenyn */
-@media (max-width: 720px) { .vy .ch .ch-fot { position: fixed; left: 10px; right: 10px; bottom: 78px; z-index: 40; border-radius: 18px; background: #fffdf9; box-shadow: 0 -6px 24px -12px rgba(60, 40, 15, .45); } .vy .ch .ch-trad { padding-bottom: 120px; } }
+@media (max-width: 900px) { .vy .ch .ch-fot { position: fixed; left: 10px; right: 10px; bottom: 78px; z-index: 40; border-radius: 18px; background: #fffdf9; box-shadow: 0 -6px 24px -12px rgba(60, 40, 15, .45); } .vy .ch .ch-trad { padding-bottom: 120px; } }
 /* Supportläget på mobil: skrivrutan hamnar ovanför bandet */
-@media (max-width: 720px) { html[data-support] .vy .ch .ch-fot { bottom: 150px; } html[data-support] .vy .ch .ch-trad { padding-bottom: 200px; } }
+@media (max-width: 900px) { html[data-support] .vy .ch .ch-fot { bottom: 150px; } html[data-support] .vy .ch .ch-trad { padding-bottom: 200px; } }
 /* Chattsidan på mobil: ingen synlig rullningslist under samtalsraden, ingen sidokant på valt samtal, runda bilder överallt */
 @media (max-width: 860px) {
   .ch-lista nav { scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 2px; }
@@ -481,7 +481,7 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; 
   .ch-rad.vald { box-shadow: inset 0 0 0 1.5px rgba(240, 181, 110, .6), 0 6px 16px -12px rgba(90, 60, 25, .5); }
 }
 .ch-topp .avatar:not(.ch-gruppav) { border-radius: 50%; }
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .vy .ch .ch-fot .ch-snabb { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-bottom: 6px; }
   .vy .ch .ch-fot .ch-snabb::-webkit-scrollbar { display: none; }
   .vy .ch .ch-fot .ch-snabb > * { flex: none; }
@@ -489,7 +489,7 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; 
   html[data-support] .vy .ch .ch-trad { padding-bottom: 280px !important; }
 }
 /* Chattsidan på mobil (slutlig): chatten fyller skärmen ovanför menyn, tråden rullar och skrivrutan sitter längst ner */
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .vy .ch { display: flex !important; flex-direction: column; height: calc(100dvh - 168px); min-height: 420px; }
   html[data-support] .vy .ch { height: calc(100dvh - 238px); }
   .vy .ch > .ch-lista { flex: none; }
@@ -497,3 +497,17 @@ html[data-sido-dold] body:has(.chf-dock) .sido-knapp { z-index: 2; width: 40px; 
   .vy .ch .ch-trad { flex: 1; min-height: 0; padding-bottom: 12px !important; }
   .vy .ch .ch-fot, html[data-support] .vy .ch .ch-fot { position: static !important; left: auto; right: auto; bottom: auto !important; border-radius: 0; box-shadow: 0 -8px 18px -14px rgba(60, 40, 15, .4); }
 }
+/* Platta 721–900 px: bottenmenyn syns här också, så skrivrutan, chattfönstret och bubblan lägger sig ovanför den */
+@media (min-width: 721px) and (max-width: 900px) {
+  .chf-ikon:not([data-i-docka]) { bottom: 92px !important; right: 14px !important; }
+  .chf { bottom: 84px !important; height: min(72vh, calc(100vh - 110px)) !important; }
+  .vy .ch { display: flex !important; flex-direction: column; height: calc(100dvh - 168px); min-height: 420px; }
+  html[data-support] .vy .ch { height: calc(100dvh - 238px); }
+  .vy .ch > .ch-lista { flex: none; }
+  .vy .ch .ch-tradyta { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .vy .ch .ch-trad { flex: 1; min-height: 0; padding-bottom: 12px; }
+}
+/* Datumrubrikerna står i flödet: som syskon fastnade alla överst och lade sig ovanpå varandra */
+.ch-dag { position: static; }
+
+.ch-dagblock { display: flex; flex-direction: column; flex: none; }
