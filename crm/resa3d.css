@@ -156,3 +156,6 @@
 
 /* Rättningsrunda tema (2026-10-29): Office – vit text på Pausa-knappen */
 :root[data-tema="office"] .resa3d__auto { --t-virke-2: var(--t-knapp-topp); }
+
+/* Symmetri (2026-10-29): Auto och helskärmsknappen lika höga som pilarna i foten. */
+.resa3d__auto, .resa3d__fot .resa3d__hel--fot { min-height: 34px; }

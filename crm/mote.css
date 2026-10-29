@@ -1620,3 +1620,18 @@
 
 /* Rättningsrunda (temabytet): Byggs gula accent som gradienttext på ljust blir oläslig – mörk ockra i stället */
 :root[data-tema="bygg"] .mb__titel em { background-image: linear-gradient(100deg, var(--t-accent-text-djup) 0%, var(--t-accent-text) 30%, color-mix(in srgb, var(--t-accent-text) 78%, #fff) 50%, var(--t-accent-text) 70%, var(--t-accent-text-djup) 100%); }
+
+/* ---------------------------------------------------------------------
+   Symmetri (2026-10-29)
+   --------------------------------------------------------------------- */
+/* Husfotot zoomades i en ram med overflow: hidden och beskars – husbilder beskärs aldrig. */
+.mb__foto img { animation: none; }
+/* Pilknapparna förblir runda när bottenlisten blir trång. */
+.mote__pil { flex: none; }
+/* Räkna på ert hus: namn- och m²-raderna linjerar mellan modellkorten även när ett namn bryts. */
+.kalkyl__modeller { grid-auto-rows: auto; }
+.kalkyl__modell { grid-row: span 3; grid-template-rows: subgrid; row-gap: 4px; align-content: start; }
+.kalkyl__modell b { align-self: start; }
+/* Nästa steg: stegkorten fyller bildens bredd i stället för att sluta vid 900 px. */
+.nasta3 { max-width: none; }
+.nasta3 li { align-content: start; }

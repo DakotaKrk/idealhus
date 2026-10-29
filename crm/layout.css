@@ -225,3 +225,9 @@ html[data-layout="minimal"] .inst-layout { margin: var(--l-sektion) 0; }
 @media (prefers-reduced-motion: reduce) {
   .layout-kort, .layout-knapp, .layout-kort__bock { transition: none; }
 }
+
+/* Symmetri (2026-10-29) ----------------------------------------------------------------------------------
+   Toppraden på platta och mobil: Ny-knappen lika hög som sökfältet (44 px) i alla lägen. */
+@media (max-width: 1100px) {
+  html[data-layout] body .topp:has(.sok) > .knapp { height: 44px; min-height: 44px; }
+}

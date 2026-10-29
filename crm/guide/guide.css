@@ -845,3 +845,37 @@ html[data-konto-oppen] .ihg-knapp, html[data-konto-oppen] .ihg-hej, body:has(.ch
   html body .sido-rals:not(:has(.sido-rals__halva > a:nth-of-type(6))) .sido-rals__halva { gap: 10px; }
   html body .sido-rals:not(:has(.sido-rals__halva > a:nth-of-type(6))) .sido-rals__delare { margin: 2px 0; }
 }
+
+/* Symmetri (2026-10-29) ----------------------------------------------------------------------------------
+   1. Menyns fot med tre knappar (admin): Återställ är en rund 32 px-knapp som ?-knappen, och Hemsidan och
+      Logga ut delar resten lika – utan ikon, så att texten ryms hel.
+   2. Rälsen: menyknappen står lika långt från ikonerna ovanför och under som ikonerna från varandra
+      (mittraden = knappen + två mellanrum); den dockade chattens plats under knappen är oförändrad.
+   3. Platta med synlig sidomeny (901–1100 px): ?-knappen står rund i kontokortets rad i stället för över kortet,
+      och menyn och välkomstkortet öppnas till höger om sidomenyn.
+   4. Guidemenyns knapp har samma inre luft som raderna under, så ikonerna står i samma spalt.
+   5. Rundturens stängknapp ryms i rubrikraden. */
+@media (min-width: 1101px) {
+  html:not([data-sido-dold]) body .sido .sido__smalt > button.sido__aterstall { flex: 0 0 32px; width: 32px; min-width: 32px; padding: 0 !important; }
+  html:not([data-sido-dold]) body .sido .sido__smalt:has(> .sido__aterstall) { gap: 4px; padding-right: 44px; }
+  html:not([data-sido-dold]) body .sido .sido__smalt:has(> .sido__aterstall) > :not(.sido__aterstall) .i { display: none; }
+
+  html body .sido-rals { grid-template-rows: minmax(0, 1fr) 42px minmax(0, 1fr); }
+  html body .sido-rals:not(:has(.sido-rals__halva > a:nth-of-type(6))) { grid-template-rows: minmax(0, 1fr) 54px minmax(0, 1fr); }
+  html[data-sido-dold] body:has(.chf-ikon, .chf-dock) .sido-rals .sido-rals__halva--ner, html[data-chatt-dockad] body .sido-rals .sido-rals__halva--ner { padding-top: 46px; }
+  html[data-sido-dold] body:has(.chf-ikon, .chf-dock) .sido-rals:not(:has(.sido-rals__halva > a:nth-of-type(6))) .sido-rals__halva--ner,
+  html[data-chatt-dockad] body .sido-rals:not(:has(.sido-rals__halva > a:nth-of-type(6))) .sido-rals__halva--ner { padding-top: 40px; }
+}
+@media (min-width: 1101px) and (max-height: 760px) {
+  html body .sido-rals { grid-template-rows: minmax(0, 1fr) 38px minmax(0, 1fr); }
+  html[data-sido-dold] body:has(.chf-ikon, .chf-dock) .sido-rals .sido-rals__halva--ner, html[data-chatt-dockad] body .sido-rals .sido-rals__halva--ner { padding-top: 48px; }
+}
+@media (min-width: 901px) and (max-width: 1100px) {
+  body:has(.ihg-knapp) .sido .anv { width: calc(100% - 40px); }
+  .ihg-knapp, [data-sido-dold] .ihg-knapp { left: calc(var(--ram, 12px) + var(--sido, 264px) - 44px); bottom: calc(var(--ram, 12px) + 64px);
+    width: 32px; height: 32px; padding: 0; gap: 0; justify-content: center; background: none; box-shadow: none; }
+  .ihg-knapp__text { display: none; }
+  .ihg-meny, [data-sido-dold] .ihg-meny, .ihg-hej, [data-sido-dold] .ihg-hej { left: calc(var(--ram, 12px) + var(--sido, 264px) + 12px); bottom: var(--ram, 12px); }
+}
+.ihg-meny .ihg-har { padding-inline: 10px; }
+.ihg-bubbla__topp > .ihg-x { width: 28px; height: 28px; margin: 0; }

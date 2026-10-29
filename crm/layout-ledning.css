@@ -251,3 +251,13 @@ html[data-layout="normal"] .sh-text .sh-delar { grid-template-columns: repeat(4,
 }
 
 }
+
+/* ============ Symmetri (2026-10-29) ============ */
+/* Under 1100 px är innehållsytan 660–740 px: säkerhetshjälten (Normal) och adminens tvåspalt (Minimal) i en spalt,
+   så att textspalten och behörighetsmatrisen inte trycks ihop */
+@media screen and (max-width: 1100px) {
+  html[data-layout="normal"] .sh-hjalte { grid-template-columns: minmax(0, 1fr); }
+  html[data-layout="minimal"] .ap-tva { grid-template-columns: minmax(0, 1fr); }
+}
+/* Säkerhetens tvåspalt: gapet ger avståndet, korten utan egen nedermarginal så att de slutar på samma underkant */
+html:is([data-layout="minimal"], [data-layout="normal"]) .ad-tva > .ad-band { margin-bottom: 0; }

@@ -492,3 +492,28 @@ section.sh-mork .sh-mitt { animation: none !important; box-shadow: none !importa
 /* Ljus: hjältens gradientrubrik mörk nog för den ljusa stenytan */
 :root[data-tema="ljus"] section.sh-mork h1 em { background: linear-gradient(100deg, var(--t-accent-text), var(--t-accent-text-djup, var(--t-accent-djup))); -webkit-background-clip: text; background-clip: text; }
 :root[data-tema]:not([data-tema="original"]) section.sh-mork .sh-senast { color: rgb(var(--t-pa-sten-rgb) / .72); }
+
+/* ============ Symmetri (2026-10-29) ============ */
+/* Under 1100 px (innehållsytan 660–740 px): hjälten i en spalt, driftrutorna och verktygen två och två */
+@media (max-width: 1100px) {
+  .sh-hjalte { grid-template-columns: minmax(0, 1fr); }
+  .sh-drift__tal, .sh-verktyg__rutnat { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* Smal mobil: driftrutorna en per rad så att etiketterna aldrig kapas och värdena står på samma höjd */
+@media (max-width: 560px) { .sh-drift__tal { grid-template-columns: minmax(0, 1fr); } }
+.sh-drift__ruta { align-content: start; }
+.sh-drift__ruta small { min-width: 0; overflow-wrap: anywhere; }
+/* Verktygskorten: rubriken bryts i stället för att nå kanten */
+.sh-vk > b, .sh-vk > small { min-width: 0; overflow-wrap: break-word; hyphens: auto; }
+@media (max-width: 420px) { .sh-vk { padding: 14px; } .sh-vk > b { font-size: .86rem; } }
+/* Före första skanningen: loggen och poängkortet lika höga med samma underkant */
+.sh-tva--tom { align-items: stretch; }
+.sh-tva--tom > .sh-histkort { display: flex; flex-direction: column; }
+/* Korten under varandra: 18 px mellan alla kort (som hjälten och kontrollbandet). --ram finns bara över 900 px,
+   så under det stod Driftläget och Verktyg kant i kant */
+.sh-drift, .sh-verktyg { margin-bottom: 18px; }
+/* Tvåspalten: gapet ger avståndet, ingen egen nedermarginal – annars blev vänsterkortet 18 px kortare än grannen */
+.ad-tva > .ad-band { margin-bottom: 0; }
+/* Före första skanningen: "Inga händelser ännu" fyller resten av poängkortet som en tom ruta, så att den slutar
+   i linje med konsolen i stället för att lämna ett tomt fält under texten */
+.sh-tva--tom > .sh-histkort > .ad-not:last-child { flex: 1 1 auto; display: grid; place-items: center; min-height: 64px; margin: 0; padding: 14px; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .06); text-align: center; }

@@ -339,3 +339,22 @@ section.ao-hjalte .ao-remsa { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 
 /* Illustrationer behåller sina färger; i Mörk dämpas de något (tema.css: --t-illustration-filter, none i övriga teman). */
 .ao-karna { filter: var(--t-illustration-filter); }
+
+/* ============ Symmetri (2026-10-29) ============ */
+/* Under 1100 px är innehållsytan bara 660–740 px: hjälten och tvåspalterna går till en spalt
+   (förut 1000 px mot fönstret, vilket gav textspalter på 130–190 px och kort på 320 px) */
+@media (max-width: 1100px) { .ao-hjalte { grid-template-columns: minmax(0, 1fr); } .ao-tva { grid-template-columns: minmax(0, 1fr); } }
+/* Räknarbrickan i bandrubriken: rund med en siffra, piller med fler */
+.ao-band__tal { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 8px; box-sizing: border-box; line-height: 1; }
+/* Datan och kopplingarna: tre lika spalter (nio rutor ger tre hela rader); smalt två spalter där en ensam sista ruta tar hela raden */
+.ao-samlingar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ao-samlingar > li:last-child:nth-child(3n+1) { grid-column: 1 / -1; }
+.ao-samlingar > li:last-child:nth-child(3n+2) { grid-column: span 2; }
+@container aoband (max-width: 400px) {
+  .ao-samlingar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ao-samlingar > li:last-child:nth-child(3n+1), .ao-samlingar > li:last-child:nth-child(3n+2) { grid-column: auto; }
+  .ao-samlingar > li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+/* Snabbåtgärder: två spalter när bandet är smalt, så att knapptexten aldrig kapas */
+@container aoband (max-width: 460px) { .ao-snabb { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ao-snabbknapp > span { min-width: 0; max-width: 100%; overflow-wrap: anywhere; text-align: center; }

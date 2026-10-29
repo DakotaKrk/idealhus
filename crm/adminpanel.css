@@ -184,3 +184,31 @@ a.sh-knapp { text-decoration: none; color: inherit; }
 .ap-roll[data-roll="Admin"] { background: linear-gradient(160deg, var(--t-markerad-1), var(--t-markerad-2)); }
 @media (hover: none) { .ap-alla:hover .i { transform: none; } }
 @media (max-width: 600px) { .ap-snabb { justify-content: flex-start; } }
+
+/* ============ Symmetri (2026-10-29) ============ */
+/* Under 1100 px (innehållsytan 660–740 px): hjälten i en spalt och behörigheter/inställningar/loggen under varandra */
+@media (max-width: 1100px) { .ap-hjalte { grid-template-columns: minmax(0, 1fr); } .ao-tva.ap-tva { grid-template-columns: minmax(0, 1fr); } }
+/* Inställningarna i ett smalt band: texten får hela raden och väljaren eller knappen hamnar under, till höger */
+@container aoband (max-width: 520px) {
+  .ap-inst { flex-wrap: wrap; row-gap: 8px; }
+  .ap-inst > div { flex: 1 1 100%; }
+  .ap-inst > :not(div) { margin-left: auto; max-width: 100%; }
+}
+/* Loggen sträcks till vänsterspaltens höjd: raderna fördelar höjden och "Visa fler" står i botten, inget tomt fält */
+.ap-stapel-kol > .ao-band:last-child { display: flex; flex-direction: column; }
+.ap-stapel-kol > .ao-band:last-child > .ap-logg { flex: 1 1 auto; display: grid; grid-auto-rows: auto; align-content: space-between; }
+.ap-stapel-kol > .ao-band:last-child > .ao-fot { margin-top: 12px; }
+/* Ikonknapparna för konton (Ändra, Visa som, Inaktivera) på smal skärm: lika stora och runda/kvadratiska i alla lägen */
+@media (max-width: 1100px) {
+  html body .ap-atgarder .knapp { width: 34px; min-width: 34px; height: 34px; min-height: 34px; padding: 0; justify-content: center; box-sizing: border-box; }
+  html body .ap-atgarder .ap-plats { width: 34px; }
+  html[data-layout="minimal"] body .ap-atgarder .knapp { width: 32px; min-width: 32px; height: 32px; min-height: 32px; }
+  html[data-layout="minimal"] body .ap-atgarder .ap-plats { width: 32px; }
+}
+/* Behöver åtgärd: högst två per rad, så att fyra punkter blir 2 + 2 även med menyn infälld (förut 3 + 1);
+   en ensam sista punkt tar hela raden */
+.ap-upp { grid-template-columns: minmax(0, 1fr); }
+@container aoband (min-width: 860px) {
+  .ap-upp { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ap-upp > li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}

@@ -621,3 +621,18 @@ html[data-palett-oppen] .chf, html[data-ark-oppen] .chf { pointer-events: none; 
   .chf-ikon[data-i-docka]::before, .chf-ikon[data-i-docka]::after { display: none; }
   .chf-ikon[data-i-docka]:hover { box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .6), 0 8px 18px -10px rgb(var(--t-accent-djup-rgb) / .6); }
 }
+
+/* Symmetri (2026-10-29) */
+/* Trådytan: den enda kolumnen får inte bli bredare än ytan (utan spår blev den lika bred som toppradens innehåll och
+   kapades av kortet vid 1024 px – knapparna, bubblorna och skicka-knappen sköts ut) */
+.ch-tradyta { grid-template-columns: minmax(0, 1fr); }
+.ch-tradyta > * { min-width: 0; }
+/* Fönstret med samtalslistan: kortet slutar där listan slutar i stället för att lämna en tom yta under raderna. Rutan
+   behåller sitt läge och sin storlek (så att den inte hoppar till tråden och tillbaka), men det synliga kortet lägger sig
+   mot rutans nederkant – där fönstret står mot hörnet – och den tomma delen ovanför är genomskinlig och klickas igenom */
+.chf:has(> .chf-lista) { grid-template-rows: auto minmax(0, max-content); align-content: end; overflow: visible; background: none; box-shadow: none; pointer-events: none;
+  filter: drop-shadow(0 0 .6px rgb(var(--t-blaeck-rgb) / .22)) drop-shadow(0 26px 34px rgb(var(--t-skugga-djup-rgb) / .28)); }
+.chf:has(> .chf-lista) > * { pointer-events: auto; }
+.chf:has(> .chf-lista) > .chf-huvud { border-radius: calc(24px * var(--t-radie-k, 1)) calc(24px * var(--t-radie-k, 1)) 0 0; }
+.chf:has(> .chf-lista) > .chf-lista { padding-bottom: 14px; border-radius: 0 0 calc(24px * var(--t-radie-k, 1)) calc(24px * var(--t-radie-k, 1)); background: var(--t-yta-varm); }
+html[data-palett-oppen] .chf:has(> .chf-lista) > *, html[data-ark-oppen] .chf:has(> .chf-lista) > *, .chf[data-undan]:has(> .chf-lista) > * { pointer-events: none; }

@@ -2396,3 +2396,14 @@ tr.bytt > td {
     text-overflow: ellipsis;
   }
 }
+
+/* Symmetri (2026-10-29) ----------------------------------------------------------------------------------
+   Bottenmenyns räknare rund (lika bred som hög för en siffra), och sidhuvudets knappar på mobil fyller raden
+   i stället för att stå vänsterställda med olika bredd och tomt till höger. */
+@media (max-width: 900px) {
+  .mobilmeny i { box-sizing: border-box; min-width: 16px; height: 16px; padding: 0 4px; line-height: 16px; text-align: center; }
+}
+@media (max-width: 560px) {
+  .vyhuvud__knappar { width: 100%; }
+  .vyhuvud__knappar > .knapp { flex: 1 1 auto; justify-content: center; }
+}

@@ -8810,3 +8810,123 @@ section.dk-hjalte.kort .dk-stat[data-ton="bla"], section.dk-hjalte.kort .dk-stat
 .hero__fonster .hero__moln--2 { top: 26px; animation-duration: 32s; animation-delay: -14s; }
 @keyframes hf-moln-mjuk { 0% { left: -40px; opacity: 0; } 18% { opacity: .9; } 78% { opacity: .9; } 100% { left: 150px; opacity: 0; } }
 .hero__fonster .hero__moln--2 { --o: .6; }
+
+/* ---------------------------------------------------------------------
+   Symmetri (2026-10-29) – säljsidorna
+   --------------------------------------------------------------------- */
+/* Kundsidan: --ram finns bara över 901 px – utan reserv stod korten kant mot kant på mobil. */
+.kg, .kg__vanster, .kg__hoger { gap: var(--ram, 12px); }
+@media (max-width: 720px) { .kg .kkontakt__tal { padding: 0 14px 14px !important; } }
+/* Spalterna slutar i jämnhöjd: sista kortet i den kortare spalten tar resten. */
+@media (min-width: 1151px) {
+  .kg { align-items: stretch; }
+  .kg__vanster, .kg__hoger { display: flex; flex-direction: column; }
+  .kg__vanster > :last-child, .kg__hoger > :last-child { flex: 1 1 auto; }
+}
+/* Kortrubriken: rubriken till vänster, knapparna tillsammans till höger. */
+.kg .kort__huvud { justify-content: flex-start; flex-wrap: wrap; }
+.kg .kort__huvud > :first-child { margin-right: auto; }
+.kh__kopiera { width: 32px; height: 32px; }
+/* Anteckningstyperna: två och två på smalt i stället för en ensam Möte. */
+@media (max-width: 560px) {
+  .anteckna__typ { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .anteckna__typ span { justify-content: center; }
+}
+
+/* Säljtavlan: filterraden rullar inom raden på smalt (som i Normal) i stället för att göra sidan bredare. */
+@media (max-width: 700px) {
+  .vy .tv-verktyg > .ap-filterrad { flex: 1 1 100%; min-width: 0; max-width: 100%; display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  .vy .tv-verktyg .ap-filterrad::-webkit-scrollbar { display: none; }
+  .vy .tv-verktyg .ap-filterrad > * { flex: none; }
+}
+/* Affärskorten: spalten följer kortets bredd så att inget kapas till höger. */
+.aff { grid-template-columns: minmax(0, 1fr); }
+.aff > * { min-width: 0; }
+
+/* Förfrågan: stegens etiketter på samma linje, Ej aktuell lika hög som knapparna. */
+.forlopp li { align-content: start; }
+.nbs__ej { display: inline-flex; align-items: center; align-self: stretch; min-height: 36px; }
+.nbs__knappar > .knapp { flex: 1 1 auto; justify-content: center; }
+@media (max-width: 560px) {
+  .nbs__knappar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nbs__knappar > * { justify-content: center; margin-left: 0; }
+  .nbs__knappar > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+@media (max-width: 480px) {
+  .fd__mitt .fd__svar { grid-template-columns: minmax(0, 1fr); }
+  .fd__mitt .fd__svar div:nth-child(2) { border-top: 1px solid var(--kant); }
+  .fd__mitt .fd__svar b { overflow-wrap: break-word; }
+}
+
+/* Kundkorten: resa, tal och fot fästs i nederkanten så att de linjerar mellan korten i raden. */
+.kundkort { display: flex; flex-direction: column; }
+.kundkort > .kundkort__resa { margin-top: auto; }
+.vy .kundtopp .kt-export { width: 44px; height: 44px; }
+@media (max-width: 560px) { .anteckna__typ label { display: grid; } }
+/* Säljtavlans verktygsrad när den bryts: sorteringen fyller ut raden i stället för att lämna ett hål. */
+@media (max-width: 1200px) { html:not([data-layout="minimal"]) .vy .tv-verktyg > .kundsort { flex: 1 1 200px; } }
+.kundkort > .kundkort__fot { min-height: 33px; }
+.kundkort > .kundkort__resa { min-height: 12px; }
+/* Kunder och Offerter: filterflikarna kapas inte i onödan. Ryms inte allt på en rad bryts sortering + vyval
+   till raden under och fyller den (sorteringen växer), i stället för att flikarna maskas. */
+.vy .kundverktyg { flex-wrap: wrap; }
+.vy .kundverktyg > .kundverktyg__hoger { flex: 1 1 auto; }
+.vy .kundverktyg > .kundverktyg__hoger > .kundsort { flex: 1 1 auto; }
+.vy .kundverktyg > .flikar--filter { -webkit-mask-image: none; mask-image: none; }
+/* Projekttavlan (kolumnhuvuden, bredder, tomma kolumner) rättas i ljus.css. Projektkortens topp bryts hellre än kapas. */
+.aff--proj .aff__topp { flex-wrap: wrap; min-width: 0; }
+/* Att åtgärda: bockarna förblir runda, namn och modell kapas med … i stället för att sticka ut. */
+.prodvarn__punkter button i { flex: none; }
+.prodvarn__namn { flex: 1 1 auto; }
+.prodvarn__namn b, .prodvarn__namn small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* En offert: Innehåll följer med när man rullar förbi den långa förhandsvisningen (ingen tom spalt under). */
+@media (min-width: 1101px) { .offertyta > .offertred { position: sticky; top: var(--ram, 12px); align-self: start; } }
+/* Dokument, Att hantera: två jämna spalter (aldrig 3 + 1 ensam), en ensam sista rad tar hela bredden. */
+@media (min-width: 901px) {
+  .dk-att__lista { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dk-att__lista > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+.dk__varde > * { min-width: 0; }
+.dk__varde b { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+/* Mallar: korten fyller raden (auto-fit) och en ensam sista mall i två spalter tar hela raden. */
+.ml-grupp { container-type: inline-size; }
+.ml-rutnat { grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); }
+@container (min-width: 554px) and (max-width: 837px) { .ml-rutnat > :last-child:nth-child(odd) { grid-column: 1 / -1; } }
+.ml-forslag__lista > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+.ml-forslag { margin-top: 16px; }
+section.dk-hjalte .ml-stats { align-self: center; }
+@media (max-width: 900px) { section.dk-hjalte.kort .ml-stats { grid-template-columns: minmax(0, 1fr); } }
+/* Att göra, veckan: sju dagar i fyra eller två spalter – söndagen tar två rutor så att sista raden blir hel. */
+@media (max-width: 1100px) {
+  .agk__rutnat--vecka > :last-child { grid-column: span 2; }
+  html:not([data-layout="minimal"]) .agk__rutnat--vecka .agk__dag { min-height: 120px; }
+}
+/* Projektarket: Spara datum lika hög som datumfältet bredvid. */
+.projark__datum > .knapp { min-height: 44px; }
+
+/* Projekttavlans rubrik (2026-10-29): står inte i ett kort, så den får samma indrag som texten i korten och kommer
+   inte tätt intill menyn */
+.prodrubrik { padding-inline: 26px; }
+@media (max-width: 900px) { .prodrubrik { padding-inline: 16px; } }
+
+/* Dokument – Att hantera (2026-10-29): rubriken med en kort förklaring under, räknaren i accentfärg och luft
+   ner till korten så att de inte går upp i rubriken */
+.dk-att .dk-att__huvud { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; padding: 20px 22px 16px; }
+.dk-att__huvud .kort__ikon { width: 44px; height: 44px; margin: 0; }
+.dk-att__rubrik { display: grid; gap: 3px; min-width: 0; }
+.dk-att__rubrik h2 { display: flex; align-items: center; gap: 10px; margin: 0; }
+.dk-att__rubrik small { font-size: .8rem; color: var(--text-2); }
+.dk-att .dk-att__huvud .rakna { background: var(--t-accent-ljus, var(--virke-ljus)); color: var(--t-accent-djup, var(--virke-djup)); }
+.dk-att .dk-att__lista { padding: 4px 18px 18px; }
+@media (max-width: 900px) { .dk-att .dk-att__huvud { padding: 16px 16px 12px; } .dk-att .dk-att__lista { padding: 2px 12px 12px; } }
+/* Dokumentsidans kort låg kant i kant (0 px) så att varje kort gick upp i det ovanför – samma luft som på andra sidor */
+.vy > .dk-hjalte ~ .kort { margin-top: 18px; }
+@media (max-width: 900px) { .vy > .dk-hjalte ~ .kort { margin-top: 12px; } }
+
+/* ---------------------------------------------------------------------
+   Symmetri (2026-10-29) – runda 2
+   --------------------------------------------------------------------- */
+/* Anteckna: Spara lika hög som fältet bredvid i alla lägen. */
+.anteckna__rad > * { align-self: stretch; }
+/* Projektkorten: snabbknapparna krymper hellre än att kapas när kortet är smalt. */
+.aff--proj .aff__verktyg button { flex: 0 1 32px; min-width: 0; }

@@ -1557,3 +1557,20 @@ html.tema-vt::view-transition-old(root), html.tema-vt::view-transition-new(root)
 .km-panel .tema-valjare--liten .tema-knapp { padding: 4px 2px; }
 .km-panel .tema-valjare--liten .tema-knapp__namn { display: none; }
 .km-panel .tema-valjare--liten .tema-ruta { height: 22px; }
+
+/* Symmetri (2026-10-29) ----------------------------------------------------------------------------------
+   Inställningarnas temaväljare: sju kort utan ensam ruta. Brett: alla sju i en rad. Mellan: 4 + 3 med den
+   sista raden centrerad (åtta halvspalter, varje kort tar två). Smalt: 2 + 2 + 2 + 1 med det sista centrerat. */
+.inst-tema .kort__kropp { container-type: inline-size; }
+.tema-valjare--stor { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 12px; }
+.tema-valjare--stor > * { grid-column: span 2; }
+.tema-valjare--stor > :nth-child(5):nth-last-child(3) { grid-column: 2 / span 2; }
+@container (min-width: 940px) {
+  .tema-valjare--stor { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .tema-valjare--stor > *, .tema-valjare--stor > :nth-child(5):nth-last-child(3) { grid-column: auto; }
+}
+@container (max-width: 559px) {
+  .tema-valjare--stor { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .tema-valjare--stor > :nth-child(5):nth-last-child(3) { grid-column: span 2; }
+  .tema-valjare--stor > :last-child:nth-child(odd) { grid-column: 2 / span 2; }
+}

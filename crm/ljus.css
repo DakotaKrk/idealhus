@@ -11821,3 +11821,512 @@ html:not(.ingen-webgl) .motescen:has(> .motesrum3d.klar) .motescen__rum--3d:has(
     filter: brightness(0) invert(0.9);
   }
 }
+
+/* =====================================================================
+   Symmetri (2026-10-29)
+   Lika höga kort med samma underkant, inget som sticker ut eller kapas och
+   inga tomma ytor i korten. Varje del nedan är uppmätt i 1440, 1024 och 375.
+   ===================================================================== */
+
+/* Översikt: Senaste aktivitet fyller sin höjd – raderna delar på den lediga
+   ytan (tidslinjen följer med) i stället för en tom yta längst ner. */
+.oversikt .ov-akt > .kort__kropp {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.oversikt .ov-akt .logg {
+  flex: 1 1 auto;
+  align-content: stretch;
+}
+
+/* Uppgiftsraden: "+1 d" tar ingen plats när den är dold, så att chippen
+   (I dag, I morgon …) står mot radens högerkant i linje med knapparna i
+   Fokus i dag. Vid hovring byter chippen plats med åtgärderna. */
+@media (hover: hover) {
+  .uppg__skjut {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    z-index: 1;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .uppg:has(.uppg__snabb button) .uppg__skjut {
+    right: 54px;
+  }
+
+  .uppg:has(.uppg__snabb button + button) .uppg__skjut {
+    right: 92px;
+  }
+
+  .uppg:hover .uppg__skjut,
+  .uppg:focus-within .uppg__skjut {
+    pointer-events: auto;
+  }
+
+  .uppg__nar {
+    margin-left: auto;
+    transition: opacity 0.2s ease;
+  }
+
+  .uppg:not(.uppg--klar):hover .uppg__nar,
+  .uppg:not(.uppg--klar):focus-within .uppg__nar {
+    opacity: 0;
+  }
+}
+
+/* Kunder: värdena i nyckeltalsrutorna på samma linje (etiketterna får bryta)
+   och alla etikettikoner lika stora. */
+.kundtopp__tal > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.kundtopp__tal > div > b {
+  margin-top: auto;
+}
+
+.kundtopp__tal small i {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+}
+
+.kundtopp__tal small i svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Säljtavlan: stegbandets namn och belopp ryms i knapparna. Smalare band:
+   först utan emojirutan (stegets färg som prick i stället), sedan i tre spalter. */
+@media (min-width: 901px) and (max-width: 1459px) {
+  html:not([data-sido-dold]) .stegband button {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html:not([data-sido-dold]) .stegband__emoji {
+    display: none;
+  }
+
+  html:not([data-sido-dold]) .stegband b::before {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: var(--f);
+    vertical-align: 0.1em;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1299px) {
+  html:not([data-sido-dold]) .stegband {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  html:not([data-sido-dold]) .stegband button {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  html:not([data-sido-dold]) .stegband__emoji {
+    display: grid;
+  }
+
+  html:not([data-sido-dold]) .stegband b::before {
+    display: none;
+  }
+}
+
+@media (min-width: 1101px) and (max-width: 1259px) {
+  html[data-sido-dold] .stegband button {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-sido-dold] .stegband__emoji {
+    display: none;
+  }
+
+  html[data-sido-dold] .stegband b::before {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: var(--f);
+    vertical-align: 0.1em;
+  }
+}
+
+/* Kundmötet utan vald affär: "Så funkar det" ligger i full bredd under de två
+   spalterna, som då slutar i jämnhöjd (Logga mötet växer med anteckningsfältet).
+   Med vald affär är vänsterkortet långt och "Så funkar det" fyller högerspalten. */
+.logga-mote {
+  display: flex;
+  flex-direction: column;
+}
+
+.logga-mote > .formular {
+  flex: 1 1 auto;
+  grid-template-rows: auto 1fr auto auto;
+}
+
+.logga-mote .falt:has(> textarea) {
+  grid-template-rows: auto 1fr;
+}
+
+@media (min-width: 1101px) {
+  .rutnat--mote:not(:has(.forhand)) {
+    grid-template-rows: auto 1fr auto auto;
+    align-items: stretch;
+  }
+
+  html[data-layout="minimal"] .rutnat--mote:not(:has(.forhand)) {
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .rutnat--mote:not(:has(.forhand)) > .rutnat {
+    display: contents;
+  }
+
+  .rutnat--mote:not(:has(.forhand)) > .kort {
+    grid-column: 1;
+    grid-row: 1 / 4;
+  }
+
+  .rutnat--mote:not(:has(.forhand)) > .rutnat > .kort {
+    grid-column: 2;
+    align-self: stretch;
+  }
+
+  .rutnat--mote:not(:has(.forhand)) > .rutnat > .komm {
+    grid-row: 1;
+  }
+
+  .rutnat--mote:not(:has(.forhand)) > .rutnat > .logga-mote {
+    grid-row: 2;
+  }
+
+  .rutnat--mote:not(:has(.forhand)) > .rutnat > .kort:nth-child(3) {
+    grid-row: 3;
+  }
+
+  .rutnat--mote:not(:has(.forhand)) > .rutnat > .motekort {
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
+
+  .rutnat--mote:not(:has(.forhand)) .motekort > .kort__kropp {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 0 32px;
+  }
+
+  .rutnat--mote:not(:has(.forhand)) .motekort .tangenter {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  /* Med vald affär: "Så funkar det" (sist) tar den lediga höjden, i Minimal
+     (där det kortet är dolt) Logga mötet. */
+  .rutnat--mote:has(.forhand) > .rutnat {
+    grid-template-rows: auto auto auto 1fr;
+  }
+
+  .rutnat--mote:has(.forhand) > .rutnat > .motekort {
+    align-self: stretch;
+  }
+
+  html[data-layout="minimal"] .rutnat--mote:has(.forhand) > .rutnat {
+    grid-template-rows: auto 1fr auto;
+  }
+
+  html[data-layout="minimal"] .rutnat--mote:has(.forhand) > .rutnat > .logga-mote {
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 1100px) {
+  .rutnat--mote > .rutnat {
+    grid-template-rows: none;
+  }
+}
+
+/* Kortkommandona: lika höga rutor, och den sjunde (Esc) tar hela raden i
+   stället för att lämna ett hål bredvid sig. */
+.tangenter__lista {
+  grid-auto-rows: 1fr;
+}
+
+.tangenter__lista > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+/* Projekt, tavlan: alla kolumnhuvuden lika höga (subgrid), så att korten
+   börjar på samma linje. Emojirutan och antalet på en rad, namnet under i
+   hela bredden – inget sticker ut ur huvudet. Tomma kolumner är så breda att
+   namnet ryms, och "Inget här just nu" står mitt i kolumnen. Tavlan är lika
+   hög som sitt innehåll i stället för fasta 420 px. */
+@media (min-width: 761px) {
+  .vy .tavla--prod {
+    --kt: minmax(136px, 0.7fr);
+  }
+}
+
+.vy .tavla--prod {
+  grid-template-rows: auto 1fr;
+}
+
+.vy .tavla--prod > .spalt {
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  min-height: 0;
+}
+
+.vy .tavla--prod .spalt__huvud {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+  padding-inline: 10px;
+}
+
+.vy .tavla--prod .spalt__huvud > div {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.vy .tavla--prod .spalt__huvud b {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  font-size: 0.8125rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.vy .tavla--prod .spalt__huvud > div > span {
+  position: absolute;
+  top: 1px;
+  right: 0;
+  flex: none;
+  margin: 0;
+}
+
+.vy .tavla--prod .spalt__kort {
+  min-height: 0;
+}
+
+.vy .tavla--prod .spalt:has(.spalt__tom) .spalt__kort {
+  align-content: center;
+}
+
+/* Projekt: Nästa montage fördelar sitt innehåll över hela höjden (samma höjd
+   som Att åtgärda bredvid) – vägen till montaget står längst ner. */
+.prodblock--montage .nedrakning {
+  align-content: space-between;
+}
+
+/* Husets resa: stationernas namn och husbrickor håller sig inom stationen. */
+.fabrik__station {
+  min-width: 0;
+}
+
+.fabrik__station b,
+.fabrik__hus button span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.fabrik__hus,
+.fabrik__hus button {
+  max-width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .fabrik__station b {
+    font-size: 0.6875rem;
+  }
+
+  .fabrik__hus img {
+    width: min(54px, 100%);
+  }
+}
+
+@media (max-width: 520px) {
+  .fabrik__station b {
+    font-size: 0.625rem;
+  }
+}
+
+/* Offerter: tabellen blir kortrader när kortet är för smalt för sex kolumner
+   (i stället för att kapas). Offert och åtgärder överst, kund och summa, status
+   och giltighet – två jämna spalter. */
+.vy .kort:has(> .tabell--offert2) {
+  container-type: inline-size;
+}
+
+@container (max-width: 840px) {
+  .tabell--offert2 thead {
+    display: none;
+  }
+
+  .tabell--offert2 tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    align-items: center;
+    padding: 14px 16px;
+    border-top: 1px solid var(--kant);
+  }
+
+  .tabell--offert2 tbody tr:first-child {
+    border-top: 0;
+  }
+
+  .tabell--offert2 td,
+  .tabell--offert2 td:nth-child(n+5) {
+    display: block;
+    padding: 0;
+    border: 0;
+  }
+
+  .tabell--offert2 td:first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .tabell--offert2 td:nth-child(6) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .tabell--offert2 td:nth-child(2) {
+    grid-column: 1;
+    font-size: 0.8125rem;
+    color: var(--text-2);
+  }
+
+  .tabell--offert2 td:nth-child(3),
+  .tabell--offert2 td:nth-child(5) {
+    grid-column: 2;
+    padding-right: 0;
+    text-align: right;
+  }
+
+  .tabell--offert2 td:nth-child(4) {
+    grid-column: 1;
+    text-align: left;
+  }
+
+  .tabell--offert2 td:nth-child(5) .offgiltig {
+    justify-content: flex-end;
+  }
+}
+
+/* Offerter under 1100 px: sökrutan tar hela raden i toppkortet. */
+@media (max-width: 1100px) {
+  .offtopp > .offtopp__hoger > .toppverktyg {
+    justify-content: stretch;
+  }
+
+  .offtopp > .offtopp__hoger > .toppverktyg .sok--liten {
+    flex: 1 1 100%;
+    width: auto;
+  }
+}
+
+/* Offerter: "Vanligaste posterna" fyller sin spalt även under 1100 px. */
+@media (min-width: 701px) and (max-width: 1100px) {
+  .offinsikt .poster {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .offinsikt .poster__lista {
+    flex: 1;
+    align-content: space-evenly;
+  }
+}
+
+/* En offert: ta bort-knappen ryms i sin kolumn. */
+.offertrader__rad {
+  grid-template-columns: 34px minmax(0, 1fr) 64px 120px 40px;
+}
+
+@media (max-width: 900px) {
+  .offertrader__rad {
+    grid-template-columns: 30px minmax(0, 1fr) 50px 92px 40px;
+  }
+}
+
+@media (max-width: 700px) {
+  .offertrader__rad {
+    grid-template-columns: 30px minmax(0, 1fr) 56px 100px 40px;
+  }
+}
+
+.offertrader__rad .ikonknapp {
+  justify-self: end;
+}
+
+/* Inställningar, prislistan: namnet överst och prisfältet under när spalten är
+   smal (två prislistor bredvid varandra under 1180 px), så att husnamnen inte
+   kläms ihop bakom fältet. */
+@media (max-width: 1180px) {
+  .prisrad {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "bild namn" "falt falt" "diff diff";
+    row-gap: 8px;
+  }
+
+  .prisrad__falt {
+    justify-self: end;
+  }
+}
+
+/* Prislistorna bredvid varandra under 1100 px: husens rader växer så att de
+   fem husen fyller samma höjd som tillvalen bredvid (som över 1100 px). */
+@media (min-width: 701px) and (max-width: 1100px) {
+  .prisform > .kort__kropp {
+    justify-content: flex-start;
+  }
+
+  .prisform .prisrad {
+    flex: 1 1 auto;
+  }
+}
+
+/* Kundmötet 1101–1299 px med utfälld meny: högerspalten är smal och blir
+   längre än vänsterkortet – Tidigare möten läggs då i full bredd under. */
+@media (min-width: 1101px) and (max-width: 1299px) {
+  html:not([data-sido-dold]) .rutnat--mote:not(:has(.forhand)) > .kort {
+    grid-row: 1 / 3;
+  }
+
+  html:not([data-sido-dold]) .rutnat--mote:not(:has(.forhand)) > .rutnat > .kort:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Husets resa: husbrickans text (hus och vecka) bryts inom stationen. */
+.fabrik__hus button {
+  min-width: 0;
+}
+
+.fabrik__hus button small {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}

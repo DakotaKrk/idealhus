@@ -1528,3 +1528,22 @@
 /* Mörk: loggan (grå SVG) ljusas upp i stället för att mörkas */
 :root[data-tema="mork"] .li__topp .li__marke img { filter: brightness(0) invert(.88); }
 @media (prefers-color-scheme: dark) { :root:not([data-tema]) .li__topp .li__marke img { filter: brightness(0) invert(.88); } }
+
+/* Symmetri (2026-10-29) ----------------------------------------------------------------------------------
+   Vänsterspalten: toppen, innehållet, notisen och foten slutar i samma högerkant. Platta i liggande läge
+   (1001–1120 px): länken till sajten blir den runda pilknappen så att den inte bryts över CRM-märket, och
+   rollkorten står i en spalt så att texten och pilknappen ryms. Högerpanelen: fönstret och händelserna
+   står som en centrerad grupp, med händelserna mitt under fönstret. */
+.li__not { max-width: none; }
+@media (min-width: 1001px) {
+  .li__innehall { max-width: 640px; }
+  .li__topp, .li__fot { width: 100%; max-width: 640px; box-sizing: border-box; }
+  .forhand { top: max(4%, calc((100cqh - 60em) / 2)); }
+  .flode { top: calc(max(4%, (100cqh - 60em) / 2) + 44.5em); bottom: auto; left: 50%; margin-left: -12.5em; }
+}
+@media (min-width: 1001px) and (max-width: 1120px) {
+  .li__topp .li__tillbaka { flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; gap: 0; font-size: 0; }
+  .li__topp .li__tillbaka .i { width: 18px; height: 18px; }
+  .li__topp .li__marke { min-width: 0; }
+  .li__roller { grid-template-columns: minmax(0, 1fr); }
+}

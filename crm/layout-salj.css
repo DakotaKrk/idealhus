@@ -172,7 +172,7 @@ html[data-layout="normal"] .hero :is(.hero__by, .hero__fonster, .ljusfall) { dis
 html[data-layout="normal"] .hero { grid-template-columns: minmax(0, 1fr); min-height: 0; }
 html[data-layout="normal"] .hero__titel { display: flex; flex-wrap: wrap; column-gap: 0.28em; font-size: var(--l-h1, clamp(28px, 2.6vw, 40px)); }
 html[data-layout="normal"] .hero__kpi { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-html[data-layout="normal"] .ov-intakt .perhus { display: none; }
+/* (per hus visas även i Normal – se Symmetri längst ner) */
 @media (max-width: 1100px) {
   html[data-layout="normal"] .hero__kpi { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -347,7 +347,7 @@ html[data-layout="minimal"] .af-rum [data-af="hus"] { display: none; }
 }
 
 /* Normal: husbilden mindre. */
-html[data-layout="normal"] .afhero { grid-template-columns: minmax(0, 1fr) minmax(180px, 24%); }
+@media (min-width: 721px) { html[data-layout="normal"] .afhero { grid-template-columns: minmax(0, 1fr) minmax(180px, 24%); } }
 html[data-layout="normal"] .afhero__bild { max-height: 180px; }
 
 /* ---------------------------------------------------------------------
@@ -559,3 +559,32 @@ html[data-layout="normal"] .verktygtopp h2 { font-size: var(--l-h1, clamp(28px, 
 html[data-layout="normal"] .verktygtopp .instopp__tal > div { padding-block: 12px; }
 
 } /* @media screen */
+
+/* ---------------------------------------------------------------------
+   Symmetri (2026-10-29)
+   --------------------------------------------------------------------- */
+@media screen {
+/* Översikt, Normal: utan "per hus" sträcktes Intäkter till spaltens höjd med 160–240 px tomt under grafen.
+   Fördelningen per hus är data (inte dekor) och visas därför även i Normal (dölj-regeln i B.1 är borttagen). */
+/* Översikt, Minimal: Att göra sträcks till Fokus höjd – uppgifterna fördelas jämnt i stället för en tom yta under. */
+html[data-layout="minimal"] .oversikt .ov-uppg > .kort__kropp:has(> .uppglista) { flex: 1; display: flex; flex-direction: column; }
+html[data-layout="minimal"] .oversikt .ov-uppg .uppglista { flex: 1; align-content: space-evenly; }
+/* Inställningar, Minimal på mobil: prototyprutan i en spalt (texten kläms inte till ett ord per rad). */
+@media (max-width: 640px) {
+  html[data-layout="minimal"] .installning__proto { grid-template-columns: minmax(0, 1fr); }
+}
+/* Kundmötet, Minimal: varje rad fyller bredden – chippen till höger på första raden, knapparna till vänster
+   och texten till höger på den andra (i stället för två rader som slutar på olika ställen). */
+html[data-layout="minimal"] .motescen__chips { margin-left: auto; }
+html[data-layout="minimal"] .motescen__knappar { margin-left: 0; }
+html[data-layout="minimal"] .motescen__not { margin-left: auto; }
+/* Kundmötet, Minimal: bildvalets husbilder beskärs aldrig – en lägre bild i hela proportionen, mitt i kortet. */
+html[data-layout="minimal"] .agenda img { width: auto; max-width: 100%; height: 64px; aspect-ratio: 1600 / 1062; object-fit: contain; justify-self: center; }
+/* Projekttavlan, Minimal: spalterna lika breda som säljtavlans (176 px) så att korten ryms; tavlan rullar i sidled på smalt. */
+@media (min-width: 761px) {
+  html[data-layout="minimal"] .vy .tavla--prod { --kf: minmax(176px, 1fr); --kt: minmax(176px, 1fr); }
+}
+html[data-layout="minimal"] .aff--proj .aff__verktyg { gap: 4px; }
+/* Kunder: exportknappen lika hög som Ny kund i Normal och Minimal (Full är 44/44). */
+html:is([data-layout="normal"], [data-layout="minimal"]) .vy .kundtopp .kt-export { width: var(--l-knapp, 44px); height: var(--l-knapp, 44px); }
+}

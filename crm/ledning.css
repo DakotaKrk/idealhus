@@ -1487,3 +1487,83 @@ section.lp-band2.lp-omkort, section.lp-band2.lp-arbkort { background: radial-gra
 .lp-arb-graf .lp-staplar i { height: calc(4px + var(--h) * 86px); }
 .lp-staplar i.idag:not(.pa) { box-shadow: none; background: rgb(var(--t-accent-rgb) / .35); }
 .lp-staplar i.idag.pa { box-shadow: 0 0 0 2px var(--t-yta), 0 0 0 3.5px rgb(var(--t-accent-rgb) / .55); }
+
+/* ============ Symmetri (2026-10-29) ============ */
+/* Aktivitet 14 dagar: värmekartan får plats i kortet (smalare namn- och summakolumn, celler som krymper),
+   och namnkolumnen står kvar till vänster när kartan ändå måste rulla */
+.lp-karta { grid-template-columns: 92px repeat(var(--n), minmax(20px, 1fr)) 52px; column-gap: 3px; }
+.lp-karta > i { min-width: 0; }
+.lp-karta > span:first-child { background: transparent !important; }
+/* Under 1100 px står Aktivitet och Pipeline/Topplistan under varandra (kontroll.css höll kvar två smala spalter) */
+@media (max-width: 1100px) { .ao-tva.lp-tva { grid-template-columns: minmax(0, 1fr); } }
+/* Aktivitetskortet sträcks till grannspaltens höjd: händelserna fördelar höjden i stället för ett tomt fält under listan */
+.ao-tva > .ao-band--akt14 .lp-senaste { flex: 1 1 auto; grid-auto-rows: 1fr; align-content: stretch; }
+.ao-tva > .ao-band--akt14 .lp-senaste > li { display: grid; }
+/* Topplistan: raderna delar på höjden när kortet är högre än listan */
+.ao-band--topp { display: flex; flex-direction: column; }
+.ao-band--topp > .lp-topp { flex: 1 1 auto; display: grid; grid-auto-rows: 1fr; align-content: stretch; }
+
+/* Hjältens veckostaplar: kolumnen växer aldrig av värdeetiketten, staplarna står mitt under/över etiketterna */
+section.lp-mork .lp-veckor__staplar > span { grid-template-columns: minmax(0, 1fr); min-width: 0; }
+section.lp-mork .lp-veckor__staplar em { justify-self: center; width: max-content; max-width: none; white-space: nowrap; }
+@media (max-width: 560px) { section.lp-mork .lp-veckor__staplar em { font-size: .5rem; letter-spacing: -.02em; } }
+/* Lagets avatarer: länken lika stor som den runda bilden (spanregeln gav bilden 10 px vänstermarginal) */
+.lp-lag a .avatar { margin-left: 0; }
+
+/* Vem jobbar när: veckorna minst så breda att dagcirklarna (24 px) får plats */
+@media (max-width: 1200px) { .lp-nv { grid-template-columns: 150px repeat(4, minmax(196px, 1fr)) 90px; } }
+@media (max-width: 640px) { .lp-nv { grid-template-columns: 92px repeat(4, minmax(196px, 1fr)) 80px; } }
+.lp-nv__dag b { flex: none; aspect-ratio: 1; }
+/* Knappar i samma verktygsrad lika höga */
+html body .lp-nv__nav > :is(button, a, .knapp, .ch-ruta, .ap-filter) { height: 36px; min-height: 36px; box-sizing: border-box; }
+html[data-layout="minimal"] body .lp-nv__nav > :is(button, a, .knapp, .ch-ruta, .ap-filter) { height: 32px; min-height: 32px; }
+html[data-layout="minimal"] body .lp-nv__nav > .ch-ruta { width: 32px; }
+html body .lp-kal__man > :is(button, .knapp, .ap-filter) { height: 36px; min-height: 36px; box-sizing: border-box; }
+
+/* Teamets kalender, statusraden: chippen lika höga som filterknapparna, Exportera med luft mellan ikon och text
+   och i samma rad som typfiltren (statistiken på första raden, filtren och Exportera på den andra) */
+.lp-kal__ledig { min-height: 34px; }
+.lp-kal__lage > [data-g="lp-kal-ics"] { display: inline-flex; align-items: center; gap: 6px; }
+@media (min-width: 721px) {
+  html:not([data-layout="minimal"]) .lp-kal__lage > .lp-kal__typer { flex: 1 0 calc(100% - 140px); margin-left: 0; }
+  html:not([data-layout="minimal"]) .lp-kal__lage > [data-g="lp-kal-ics"] { margin-left: auto; }
+}
+/* Dagagendan: plusknappen förblir rund */
+.lp-agenda__dag header .ch-ruta { flex: none; }
+
+/* Korthuvuden: räknare, chip, filter och Ändra-knappen linjerar med rubrikraden (inte med ögonraden ovanför) */
+@media (min-width: 601px) {
+  :is(.ao-band__huvud, .lp-band2__huvud):has(> div:first-child > h2):has(> :nth-child(2):last-child) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 14px; row-gap: 0; align-items: start; }
+  :is(.ao-band__huvud, .lp-band2__huvud):has(> div:first-child > h2):has(> :nth-child(2):last-child) > div:first-child { display: contents; }
+  :is(.ao-band__huvud, .lp-band2__huvud):has(> div:first-child > h2):has(> :nth-child(2):last-child) > div:first-child > * { grid-column: 1; }
+  :is(.ao-band__huvud, .lp-band2__huvud):has(> div:first-child > h2):has(> :nth-child(2):last-child) > div:first-child > .ao-ogon { grid-row: 1; }
+  :is(.ao-band__huvud, .lp-band2__huvud):has(> div:first-child > h2):has(> :nth-child(2):last-child) > div:first-child > h2 { grid-row: 2; }
+  :is(.ao-band__huvud, .lp-band2__huvud):has(> div:first-child > h2):has(> :nth-child(2):last-child) > div:first-child > .ao-band__ingress { grid-row: 3; grid-column: 1 / -1; }
+  :is(.ao-band__huvud, .lp-band2__huvud):has(> div:first-child > h2):has(> :nth-child(2):last-child) > :nth-child(2) { grid-column: 2; grid-row: 2; align-self: center; justify-self: end; margin-block: -8px; margin-left: 0; }
+}
+/* Profilens korthuvuden: samma linjering även på mobil (de staplas inte där) */
+@media (max-width: 600px) {
+  .lp-band2__huvud:has(> div:first-child > h2):has(> :nth-child(2):last-child) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 14px; row-gap: 0; align-items: start; }
+  .lp-band2__huvud:has(> div:first-child > h2):has(> :nth-child(2):last-child) > div:first-child { display: contents; }
+  .lp-band2__huvud:has(> div:first-child > h2):has(> :nth-child(2):last-child) > div:first-child > * { grid-column: 1; }
+  .lp-band2__huvud:has(> div:first-child > h2):has(> :nth-child(2):last-child) > div:first-child > .ao-ogon { grid-row: 1; }
+  .lp-band2__huvud:has(> div:first-child > h2):has(> :nth-child(2):last-child) > div:first-child > h2 { grid-row: 2; }
+  .lp-band2__huvud:has(> div:first-child > h2):has(> :nth-child(2):last-child) > div:first-child > .ao-band__ingress { grid-row: 3; grid-column: 1 / -1; }
+  .lp-band2__huvud:has(> div:first-child > h2):has(> :nth-child(2):last-child) > :nth-child(2) { grid-column: 2; grid-row: 2; align-self: center; justify-self: end; margin-block: -8px; margin-left: 0; }
+}
+/* Min kalender, dagpanelen: knapparna i foten lika breda */
+.pk-panel__fot { justify-items: stretch; }
+.pk-panel__fot > .pk-knapp { justify-content: center; }
+/* Dagnumrets cirkel för i dag ligger inom dagrutan */
+.pk-dag.idag .pk-dag__topp b { margin: -4px 0; }
+/* Kontomenyn på dator: panelen har sidomenyns höjd – luften fördelas jämnt mellan grupperna i stället för ett tomt band ovanför foten */
+.km-panel:not([data-rulla]) { justify-content: space-between; }
+.km-panel:not([data-rulla]) > .km-fot { margin-top: 0; }
+/* Min kalender, smala dagrutor (rutan högst ca 86 px): prickarna på en rad under datumet. Frågan ligger på rutnätet,
+   eftersom en ruta inte kan fråga om sin egen bredd – @container-regeln för .pk-dag ovan nådde aldrig själva rutan,
+   så datumraden växte till hela höjden och prickarna kapades i nederkanten */
+.pk-rutnat { container: pkrut / inline-size; }
+@container pkrut (max-width: 672px) {
+  .pk-dag { flex-direction: row; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 3px; padding: 6px 4px; }
+  .pk-dag .pk-dag__topp { flex: 1 0 100%; justify-content: center; }
+}
