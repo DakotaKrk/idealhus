@@ -21,7 +21,7 @@
   var LAGEN = [
     { id: 'minimal', namn: 'Minimal', kort: 'Bara det du jobbar med – tätt och lugnt', sok: 'minimal kompakt tät tätt enkel fokus lugn' },
     { id: 'normal', namn: 'Normal', kort: 'Lagom – överblick utan dekor', sok: 'normal lagom mellan mellanläge' },
-    { id: 'full', namn: 'Full', kort: 'Allt, med hjältar och 3D (förval)', sok: 'full allt standard förval rik luftig' }
+    { id: 'full', namn: 'Full', kort: 'Allt, med stora bildytor och 3D (förval)', sok: 'full allt standard förval rik luftig' }
   ];
   var lugnMq = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
 
@@ -130,7 +130,7 @@
   function forstaGangen(id) {
     var k = TIPS + konto();
     try { if (localStorage.getItem(k)) return false; localStorage.setItem(k, '1'); } catch (e) { return false; }
-    if (IH.toast) IH.toast('Layout: ' + info(id).namn, 'Byt tillbaka i kontomenyn eller med Ctrl K → Layout', 'installning');
+    if (IH.toast) IH.toast('Layout: ' + info(id).namn, 'Byt tillbaka i kontomenyn eller sök på Layout med ' + (/Mac|iPhone|iPad/.test(navigator.platform || '') ? '⌘ K' : 'Ctrl K') + '.', 'installning');
     return true;
   }
   layout.satt = function (id, hur) {

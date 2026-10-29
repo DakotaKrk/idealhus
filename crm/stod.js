@@ -29,7 +29,7 @@
     IH.stangArk(true);
     // Samma startsida som kontot själv har (produktionen börjar på Projekt), eller sidan administratören var på väg till
     IH.uppdateraMeny(); IH.ga(mal && mal.indexOf('#/') === 0 ? mal : u.roll === 'prod' ? '#/produktion' : '#/'); IH.rita(); band();
-    IH.toast('Du är i ' + u.namn + 's konto', 'Supportläge – ' + u.namn + ' märker inget. Tillbaka med knappen högst upp.', 'oga-av');
+    IH.toast('Du är i ' + u.namn + 's konto', 'Supportläge – ' + u.namn + ' märker inget. Klicka på Tillbaka till Admin högst upp när du är klar.', 'oga-av');
   }
   function sluta(tyst) {
     var u = IH.visarSom(); if (!u) return;
@@ -37,7 +37,7 @@
     IH.sattVisaSom(null);
     try { localStorage.removeItem(START); } catch (x) { /* */ }
     IH.uppdateraMeny(); band();
-    if (!tyst) { IH.ga('#/kontroll'); IH.rita(); IH.toast('Tillbaka som Admin', u.namn + 's konto är stängt.', 'bock'); }
+    if (!tyst) { IH.ga('#/kontroll'); IH.rita(); IH.toast('Du är tillbaka som Admin', u.namn + 's konto är stängt.', 'bock'); }
   }
   IH.stod = { borja: borja, sluta: sluta };
 
@@ -55,7 +55,7 @@
       '<span class="stod-band__val" role="group" aria-label="Byt konto">' + andra.map(function (x) {
         return '<button type="button" data-g="visa-som" data-id="' + x.id + '" aria-pressed="' + (x.id === u.id) + '" title="Visa som ' + e(x.namn) + '"><span class="avatar" style="--av:' + x.farg + '">' + IH.initialer(x.namn) + '</span><span>' + e(x.namn) + '</span></button>';
       }).join('') + '</span>' +
-      '<span class="stod-band__fakta"><span class="stod-band__status" style="--n:' + n.farg + '"><i></i>' + e(u.namn) + ' är ' + e(n.namn.toLowerCase()) + '</span><span data-stod-tid>' + IH.emo('klocka') + minuter() + ' min</span></span>' +
+      '<span class="stod-band__fakta"><span class="stod-band__status" style="--n:' + n.farg + '"><i></i>' + 'Status: ' + e(n.namn) + '</span><span data-stod-tid>' + IH.emo('klocka') + minuter() + ' min</span></span>' +
       '<button type="button" class="stod-band__ut" data-g="visa-som-sluta" title="Tillbaka till Admin (Shift + Esc)">' + IH.emo('logga-ut') + '<span>Tillbaka till Admin</span></button>';
     placeraBand();
     clearInterval(bandTimer);

@@ -59,11 +59,11 @@
   function kopplingsBrott() {
     var d = db(), fel = [];
     var finns = function (lista, id) { return !id || lista.some(function (x) { return x.id === id; }); };
-    d.affarer.forEach(function (a) { if (!finns(d.kunder, a.kund)) fel.push('Affären "' + a.titel + '" pekar på en kund som saknas.'); });
-    d.affarer.forEach(function (a) { if (a.ansvarig && !IH.anvandare(a.ansvarig)) fel.push('Affären "' + a.titel + '" har en ansvarig som inte finns.'); });
+    d.affarer.forEach(function (a) { if (!finns(d.kunder, a.kund)) fel.push('Affären ”' + a.titel + '” pekar på en kund som saknas.'); });
+    d.affarer.forEach(function (a) { if (a.ansvarig && !IH.anvandare(a.ansvarig)) fel.push('Affären ”' + a.titel + '” har en ansvarig som inte finns.'); });
     d.offerter.forEach(function (o) { if (!finns(d.affarer, o.affar)) fel.push('Offert ' + o.nummer + ' pekar på en affär som saknas.'); });
     d.projekt.forEach(function (p) { if (!finns(d.affarer, p.affar)) fel.push('Ett projekt pekar på en affär som saknas.'); });
-    d.uppgifter.forEach(function (u) { if (!finns(d.kunder, u.kund) || !finns(d.affarer, u.affar)) fel.push('Uppgiften "' + u.text + '" pekar på något som saknas.'); });
+    d.uppgifter.forEach(function (u) { if (!finns(d.kunder, u.kund) || !finns(d.affarer, u.affar)) fel.push('Uppgiften ”' + u.text + '” pekar på något som saknas.'); });
     return fel;
   }
   IH.sak = { inst: inst, kopplingsBrott: kopplingsBrott, logg: logg };

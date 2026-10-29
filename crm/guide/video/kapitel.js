@@ -13,7 +13,7 @@ window.IH_VIDEO = {
   {
    "id": "rundtur",
    "titel": "Hitta i CRM:et",
-   "text": "Menyn, sökningen med Ctrl K, Ny-knappen, kontot och kortkommandona.",
+   "text": "Menyn, sökningen med Ctrl K, plusknappen, kontot och kortkommandona.",
    "tur": "valkommen",
    "sida": "/",
    "start": 9.6
@@ -21,7 +21,7 @@ window.IH_VIDEO = {
   {
    "id": "ny-kund",
    "titel": "Ny kund från start till slut",
-   "text": "En förfrågan kommer in. Vi tar den, ringer, markerar kontaktad och skapar affären.",
+   "text": "En förfrågan kommer in. Vi tar den, ringer, markerar den som kontaktad och skapar affären.",
    "tur": "flode-ny-kund",
    "sida": "/forfragningar",
    "start": 87.45
@@ -61,7 +61,7 @@ window.IH_VIDEO = {
   {
    "id": "slut",
    "titel": "Prova själv",
-   "text": "Knappen Guide i hörnet – eller ? – öppnar alla guider. Allt är exempeldata: öva så mycket du vill.",
+   "text": "Knappen ? vid menyn – eller tangenten ? – öppnar alla guider. Allt är exempeldata: öva så mycket du vill.",
    "tur": null,
    "sida": "/",
    "start": 509.51

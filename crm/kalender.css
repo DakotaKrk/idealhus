@@ -17,6 +17,9 @@
 :root[data-tema="bygg"] .kal-falt { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236f5200' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E"); }
 :root[data-tema="office"] .kal-falt { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d52ab' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E"); }
 @media (prefers-color-scheme: dark) { :root:not([data-tema]) .kal-falt { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f3bf82' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E"); } }
+/* Symbolen en gång till höger i alla teman – fältens egna background-genvägar (t.ex. i mörkt tema) nollställde annars
+   upprepningen så att kalendern ritades i rad över hela fältet */
+:root .kal-falt, :root[data-tema] .kal-falt { background-repeat: no-repeat !important; background-position: right 12px center !important; background-size: 17px 17px !important; }
 .kal-falt[data-kal-oppen] { border-color: var(--kol, var(--t-text)); box-shadow: 0 0 0 4px var(--virke-ljus, var(--t-accent-ljus)); }
 
 /* Kalendern */

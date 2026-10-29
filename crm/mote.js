@@ -29,7 +29,7 @@
     ['Bygglov eller anmälan', 'Vi tar fram underlaget, ni lämnar in till kommunen.', 'tillsammans'],
     ['Tillverkning', 'Huset byggs under tak i Sverige, i jämn temperatur.', 'vi'],
     ['Grund och mark', 'Grunden gjuts och el, vatten och avlopp dras fram.', 'ni'],
-    ['Leverans och montage', 'Huset kommer på lastbil och monteras på dagar.', 'vi'],
+    ['Leverans och montage', 'Huset kommer på lastbil och monteras på några dagar.', 'vi'],
     ['Slutbesiktning', 'Vi går igenom huset tillsammans, rum för rum.', 'tillsammans']
   ];
   var VEM = { vi: ['hus', 'Legohus'], ni: ['plats', 'Ni'], tillsammans: ['kunder', 'Tillsammans'] };
@@ -393,14 +393,14 @@
     IH.konfetti(r.left + r.width / 2, r.top);
     b.innerHTML = IH.i('bock') + 'Bokat · vecka ' + IH.vecka(d);
     b.disabled = true;
-    IH.toast('Platsbesöket är bokat', 'Uppgift ' + IH.datum(d.toISOString()) + ' · affären ligger nu i besök', 'kalender');
+    IH.toast('Platsbesöket är bokat', 'Uppgift ' + IH.datum(d.toISOString()) + ' · affären ligger nu i steget Tomt och platsbesök.', 'kalender');
   }
 
   // Öppnar e-postprogrammet med en kort sammanfattning (mailto).
   function sammanfattning() {
     var k = s.kund;
     if (!k || !k.epost) return;
-    var rader = ['Hej ' + String(k.namn).split(' ')[0] + ',', '', 'Tack för mötet i dag. Här är en kort sammanfattning.', ''];
+    var rader = [k.typ === 'foretag' ? 'Hej,' : 'Hej ' + String(k.namn).split(' ')[0] + ',', '', 'Tack för mötet i dag. Här är en kort sammanfattning.', ''];
     if (s.forraSumma) {
       var m = IH.modell(s.kalkyl.modell);
       rader.push('Huset vi räknade på: ' + m.kategori + ' ' + m.namn + ', ' + m.yta + ' m²');
@@ -475,7 +475,7 @@
         '<span class="mote__framsteg"><i></i></span></footer>' +
         '<aside class="mote__anteckning" aria-label="Anteckningar"><header><b>' + IH.i('anteckning') + 'Anteckningar</b>' +
         '<small>' + (s.kund ? 'Sparas i historiken för ' + e(s.kund.namn) + ' när mötet avslutas.' : 'Mötet har ingen kund – texten kopieras när mötet avslutas.') + '</small></header>' +
-        '<textarea data-manteckning placeholder="Tomten, tidplanen, önskemål, frågor att återkomma om …"></textarea>' +
+        '<textarea data-manteckning placeholder="Tomten, tidplanen, önskemål, frågor att återkomma om…"></textarea>' +
         '<p class="mote__anteckning-tips">Tryck N för att visa eller dölja</p></aside>';
       document.body.appendChild(el);
       el.querySelectorAll('.mote__bild').forEach(forbered);
@@ -546,7 +546,7 @@
           b.innerHTML = IH.i('bock') + 'Sparad som ' + e(o.nummer);
           b.disabled = true;
           var vantar = IH.db.offerter.some(function (x) { return x.affar === s.affar.id && x.status === 'skickad'; });
-          IH.toast('Offerten är sparad', o.nummer + ' · ' + IH.kr(IH.summaOffert(o)) + (vantar ? ' · utkast – den skickade offerten gäller tills du skickar den nya' : ''), 'offert');
+          IH.toast('Offerten är sparad', o.nummer + ' · ' + IH.kr(IH.summaOffert(o)) + (vantar ? ' · utkast – den skickade offerten gäller tills du skickar den nya.' : ''), 'offert');
         }
       });
 

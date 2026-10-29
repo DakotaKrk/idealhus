@@ -29,7 +29,7 @@ Senast genomgången: 2026-10-29 (app.js, vyer.js, ledning.js, kontroll.js, admin
 | `sa` | Sahand | `salj` | Säljmenyn |
 | `ad` | Admin | `admin` | Översikt, **Ledning** (Kontrollcentral, Adminpanel, Säkerhet), Mitt (Meddelanden, Att göra, Inställningar) och **Teamet** (gå in i säljarnas konton) |
 
-- Administratören skapar inte säljposter: `G.ny`, `ny-kund`, `ny-affar`, `ny-forfragan` visar en toast "Administratören skapar inte …" och hänvisar till supportläget.
+- Administratören skapar inte säljposter: `G.ny`, `ny-kund`, `ny-affar`, `ny-forfragan` visar en avisering "Administratören skapar inte …" och hänvisar till supportläget.
 - **Supportläget** (stod.js): admin klickar en säljare under *Teamet* i menyn (`.sido__konto`, `data-g="visa-som"`). CRM:et visas exakt som för säljaren (`IH.jag()` = säljaren, `IH.riktigJag()` = admin). Ett band högst upp (`.stod-band`) visar vems konto, tid och byt-knappar; **Tillbaka till Admin** = `.stod-band__ut` (`data-g="visa-som-sluta"`) eller **Shift+Esc**. Status kan inte ändras och inga chattmeddelanden kan skickas i säljarens namn. Start och slut loggas i säkerhetsloggen.
 - Närvaro (ledning.js): Online, I möte, Upptagen, Strax tillbaka, Lunch, Ute på tomt, Semester, Sjuk, Osynlig. Sätts i kontomenyn.
 
@@ -46,12 +46,12 @@ Senast genomgången: 2026-10-29 (app.js, vyer.js, ledning.js, kontroll.js, admin
 | Hemsidan / Logga ut | `.sido__smalt a`, `[data-g="logga-ut"]` | `lamna`, `logga-ut` |
 | Återställ exempeldata (admin) | `.sido__aterstall` | `sido-aterstall` |
 | Fäll in menyn | `[data-sido-knapp]` (kanten) | – (tangent `[`) |
-| Mobilmenyn (< 1101 px) | `nav.mobilmeny`: Översikt, Inkorg, Tavla, Projekt + **Mer** (`[data-mer]`, `data-g="mer"`) | `mer` |
+| Mobilmenyn (< 1101 px) | `nav.mobilmeny`: säljare Översikt, Förfrågn. (aria-label Förfrågningar), Säljtavla, Kunder · produktion Översikt, Projekt, Kunder, Offerter · admin Översikt, Kontroll, Admin, Säkerhet – + **Mer** (`[data-mer]`, `data-g="mer"`) | `mer` |
 | Vyns yta | `main#vy` | – |
 
 Menyn (säljare): Översikt (+ Försäljning för chefen) · **Sälj**: Förfrågningar, Säljtavla, Kunder, Offerter, Dokument, Kundmöte · **Produktion**: Projekt · **Verktyg**: Kolla marken · **Mitt**: Meddelanden, Att göra, Inställningar. Brickor: nya förfrågningar (varm), öppna affärer, antal kunder, aktiva projekt, uppgifter i dag (varm), olästa (varm).
 
-Kontomenyn (`.km-panel`): status (snabbval `data-g="satt-narvaro"` + alla via `km-status`), **Byt konto** (demo, `valj-anvandare`), Min profil, Nytt konto (chef/admin, `km-nytt-konto`) eller Meddelanden, Logga ut.
+Kontomenyn (`.km-panel`): status (snabbval `data-g="satt-narvaro"` + alla via `km-status`), **Byt konto** (exempelkontona, `valj-anvandare`), **Tema**, **Layout**, Min profil, Nytt konto (chef/admin, `km-nytt-konto`) eller Meddelanden, Logga ut.
 
 ### Kortkommandon
 
@@ -81,10 +81,10 @@ Kommandopaletten (`.palett`): Senaste (kund/affär/förfrågan/offert), **Snabb�
 
 ## 2. Datamodellen och stegen
 
-- **Säljsteg** (`IH.SALJSTEG`): `ny` Ny förfrågan 10 % · `kontakt` Kontakt tagen 20 % · `besok` Tomt & platsbesök 40 % · `offert` Offert skickad 60 % · `forhandling` Förhandling 75 % · `vunnen` Order signerad 100 %. Förlorad = `affar.forlorad = { orsak, kommentar, tid }`. Orsaker: Priset, Valde annan leverantör, Fick inte bygglov, Projektet skjuts upp, Tomten passade inte, Annat.
+- **Säljsteg** (`IH.SALJSTEG`): `ny` Ny förfrågan 10 % · `kontakt` Kontakt tagen 20 % · `besok` Tomt och platsbesök 40 % · `offert` Offert skickad 60 % · `forhandling` Förhandling 75 % · `vunnen` Order signerad 100 %. Förlorad = `affar.forlorad = { orsak, kommentar, tid }`. Orsaker: Priset, Valde annan leverantör, Fick inte bygglov, Projektet skjuts upp, Tomten passade inte, Annat.
 - **Förfrågans status** (`IH.FSTATUS`): `ny` Ny · `kontaktad` Kontaktad · `kvalificerad` Blev affär · `ej` Ej aktuell. Svarsmål (SVARSMAL) 24 timmar.
 - **Offertstatus**: `utkast` → `skickad` → `godkand`; `ersatt` (ny version), `avbojd` (affären förlorad). Giltig 30 dagar, förläng +14. Nummer `LH-ÅÅÅÅ-nnn`.
-- **Projektsteg** (`IH.PROJSTEG`): `underlag` Ritning & lov · `tillverkning` Tillverkning · `grund` Grund & mark · `montage` Leverans & montage · `besiktning` Slutbesiktning · `klart` Klart. Checklista: ritning (Legohus), lov, grund, framkomlighet (kunden).
+- **Projektsteg** (`IH.PROJSTEG`): `underlag` Ritning och lov · `tillverkning` Tillverkning · `grund` Grund och mark · `montage` Leverans och montage · `besiktning` Slutbesiktning · `klart` Klart. Checklista: ritning (Legohus), lov, grund, framkomlighet (kunden).
 - **Husen** (`IH.MODELLER`): Sadel 30 (Attefallshus 30 m², 1 rum), Sadel 30 Bred (2 rum), Pulpet 30, Kupa 40 (Fritidshus, bygglov), Kupa 50 (bygglov), Byggelement (Proffs). Exempelpriser 395–795 tkr; poster: Frakt 28 000, Montage 45 000, Kranbil 12 000, Ritningar 18 000, Altan 38 000, Kök och badrum 145 000, Braskamin 42 000 (ändras under Inställningar).
 - Exempeldatan: 14 kunder, 11 förfrågningar, 12 affärer (3 vunna, 1 förlorad), 6 offerter, 3 projekt, 5 uppgifter. Telefonnummer ur PTS fiktiva serie, e-post @example.com.
 
@@ -95,7 +95,7 @@ Kommandopaletten (`.palett`): Senaste (kund/affär/förfrågan/offert), **Snabb�
 För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 
 ### Översikt `#/` (vyer.js `IH.vyer.oversikt`)
-- `.hero` – hälsning (`.hero__ord`), läget i text, chips `.hero__lagen` (att göra i dag, möten, montage om N d), snabbknappar `.hero__snabb` (`ny-forfragan`, `ny-kund`, `ny-affar`, `ny-uppgift`, `starta-mote` – inte för admin), nyckeltal `.hero__kpi` (Nya förfrågningar, Öppen pipeline, Vunnet i år, I produktion), byggarbetsplatsen `.hero__by` (`.stad` + `.pipe`: varje steg ett hus – Utstakad tomt, Grunden gjuten, Stommen rest, Takstolar på, Taket i kranen, Nycklar klara).
+- `.hero` – hälsning (`.hero__ord`), läget i text, chips `.hero__lagen` (att göra i dag, möten, montage om N d), snabbknappar `.hero__snabb` (`ny-forfragan`, `ny-kund`, `ny-affar`, `ny-uppgift`, `starta-mote` – inte för admin), nyckeltal `.hero__kpi` (Nya förfrågningar, Öppna affärer, Vunnet i år, I produktion), byggarbetsplatsen `.hero__by` (`.stad` + `.pipe`: varje steg ett hus – Utstakad tomt, Grunden gjuten, Stommen rest, Takstolar på, Taket i kranen, Nycklar klara).
 - `.oversikt` två spalter med `.kort`: **Senaste förfrågningar**, **Intäkter** (`ik-period` 6/12 mån, `ik-csv` exportera vunna), **Fokus i dag**, **Att göra i dag** (`uppgift-klar`, `ag-skjut`, `kund-ring`, `kund-oppna`), **Senaste aktivitet**.
 
 ### Förfrågningar `#/forfragningar[/id]` (inkorgen)
@@ -103,15 +103,15 @@ För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 - `.dioramor` – fyra miljöer (`f-miljo`, data-m): Vid havet, I skogen, På fjället, I trädgården – filter.
 - `.inkorg__filter .flikar` – `f-filter`: Alla, Ny, Kontaktad, Blev affär, Ej aktuell.
 - `.inkorg__lista` – rader `a.fl` (`.fl--ny`, `.vald`), grupperade I dag/I går/Den här veckan/Tidigare. Tips: J/K, U.
-- `.inkorg__las` (läsrutan): `.fd__huvud` med status och **Ta den** (`f-tilldela`) · `.forlopp` · `.nbs` **Nästa bästa steg** (ny: Ring, Svarsutkast `f-utkast`, Kontaktad `f-status[data-status=kontaktad]`, Påminn om 2 h `f-paminn`, Ej aktuell; kontaktad: **Skapa affär** `f-skapa-affar`; blev affär: Öppna affären; ej aktuell: Öppna igen) · `.fd__mitt` (miljöbild + svaren) · `.fd__citat` · `.smart` (leadpoäng + skäl + ämnen ur texten) · `.guide` **Samtalsguiden** (`f-guide`, data-p: detaljplan, byggnader, grans, framkomlighet, grund, strand, anmalan, tidplan – konfetti när alla är klara) · `.fd__kontakt` · `.fd__forslag` (husförslag) · `.fd__logg` (historik + anteckningsformuläret när det finns en kund).
+- `.inkorg__las` (läsrutan): `.fd__huvud` med status och **Ta den** (`f-tilldela`) · `.forlopp` · `.nbs` **Nästa bästa steg** (ny: Ring, Svarsutkast `f-utkast`, Kontaktad `f-status[data-status=kontaktad]`, Påminn om 2 h `f-paminn`, Ej aktuell; kontaktad: **Skapa affär** `f-skapa-affar`; blev affär: Öppna affären; ej aktuell: Öppna igen) · `.fd__mitt` (miljöbild + svaren) · `.fd__citat` · `.smart` (poäng + skäl + ämnen ur texten) · `.guide` **Samtalsguiden** (`f-guide`, data-p: detaljplan, byggnader, grans, framkomlighet, grund, strand, anmalan, tidplan – konfetti när alla är klara) · `.fd__kontakt` · `.fd__forslag` (husförslag) · `.fd__logg` (historik + anteckningsformuläret när det finns en kund).
 - Kontaktad skapar kundkortet automatiskt (`kundFranForfragan`). Svarsutkastet (ark) har tonerna Personligt/Kort (`utkast-ton`), Kopiera (`utkast-kopiera`), Öppna i mejlen (`utkast-mejl`).
 
 ### Säljtavlan `#/salj` och affärssidan `#/salj/id`
-- `.puls` – byggets lager (`.bygge`), `.puls__kpi` (Öppen pipeline, Viktad prognos, Snitt per affär, Vunnet 90 d), `.forslag` **Smarta förslag** + `tavla-lage` (Tavla/Lista) + **Ny affär** (`ny-affar`).
+- `.puls` – byggets lager (`.bygge`), `.puls__kpi` (Öppna affärer, Viktad prognos, Snitt per affär, Vunnet 90 d), `.forslag` **Smarta förslag** + `tavla-lage` (Tavla/Lista) + **Ny affär** (`ny-affar`).
 - `.stegband` – sex knappar `till-spalt` (rullar till spalten).
 - `.tv-verktyg` – sök `[data-tv-sok]`, `tv-vem` Alla/Mina, `tv-filter` Allt/Står still (>10 d)/Har uppgift/Över 600 tkr, sortering `[data-tv-sort]` (Senast ändrad, Störst värde, Viktat värde), `tv-forlorade` (lista + **Återuppta** `aff-ateruppta`), `tv-kompakt`.
 - `.tv-fokus` – Fokus i dag, tre `.tv-fokus__kort` (`aff-oppna`).
-- `.tavla-ram` / `.tavla` – `section.spalt#spalt-<steg>` (summa, chans, viktat, snitt dagar, "står still"), kort `article.aff[data-aff]` (`.aff--farsk/lugn/still`, ring = sannolikhet), knappar på kortet: `aff-flyttmeny`, `kund-ring`, `aff-logga`, `aff-uppg`, `aff-vidare` (Vidare → nästa steg). `tavla-rulla` pilar. Dra och släpp; `.forlustdocka` = släpp för förlorad (orsaksformulär `forlora`).
+- `.tavla-ram` / `.tavla` – `section.spalt#spalt-<steg>` (summa, chans, viktat, snitt dagar, "står still"), kort `article.aff[data-aff]` (`.aff--farsk/lugn/still`, ring = chans), knappar på kortet: `aff-flyttmeny`, `kund-ring`, `aff-logga`, `aff-uppg`, `aff-vidare` (Vidare → nästa steg). `tavla-rulla` pilar. Dra och släpp; `.forlustdocka` = släpp för förlorad (orsaksformulär `forlora`).
 - Listläget: tabell, rad = `aff-oppna`.
 - Affärssidan: `a.tillbaka`, `.afhero` (värde, chans med stegets grund, dagar i steget, viktat), `.af-stegare` (`aff-steg`), `.af-rum` med `[data-af="nasta"]` (**Nästa bästa steg**: ny → Ring + Kontakt tagen; kontakt → Platsbesöket är bokat; besök → Skapa offert / Skicka offerten; offert → Vänta på svar / Följ upp + Kunden vill gå vidare / Till förhandling; förhandling → **Order signerad** `aff-vinn` + Kundmöte; vunnen → Öppna projektet; förlorad → Återuppta), `[data-af="offert"]` (`skapa-offert`), `[data-af="hus"]`, `[data-af="historik"]` (anteckningsformulär: Anteckning/Samtal/Mejl/Möte), `[data-af="kund"]`, `[data-af="uppgifter"]` (`uppgift-klar`), `[data-af="atgarder"]` (`starta-mote`, `ny-uppgift`, `aff-forlora`).
 
@@ -120,23 +120,23 @@ För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 - `.kundverktyg` – `kund-filter` (Alla, Mina, Affär pågår, Kunder, Företag, Behöver uppmärksamhet), sortering `[data-kundsort]`.
 - `.kundnat` – `article.kundkort` (`.kundkort--varm`), `.kundkort__snabb`: `kund-ring`, `kund-mejl`, `starta-mote[data-kund]`, `ny-affar-kund`. Listläget: `kund-sort-kol`, `kund-valj`, `kund-valj-alla`, massåtgärder `kund-bulk-mejl`, `kund-bulk-csv`, `kund-bulk-uppg`.
 - Ny kund (ark, formulär `ny-kund`: namn, telefon, e-post, ort, typ privat/företag) → `#/kunder/<id>`.
-- Kundsidan: `.kh` (`.kh__vem` med `kund-kopiera`, `ny-affar-kund`, `kund-logga`, `kund-uppgift`, `starta-mote`, `kund-ring`; `.kh__halsa` kundhälsa 0–100 (`kundHalsa`: dagar sedan senaste aktivitet ≤3 d 100, ≤7 85, ≤14 65, ≤30 45, annars 25, ingen 30; −15 per försenad uppföljning, +5 öppen affär, +10 vunnen; grön ≥ 75, gul ≥ 50, röd); `.kh__tal`), `.kundresa`, `.kn` (nästa steg), `.kg__vanster` (Huset `.khus`, Affärer, Offerter, Förfrågningar), `.kg__hoger` (`.kkontakt` Kontakt 90 dagar, Uppgifter, `#kund-historik` med `kund-hist` filter samtal/mejl/möte + anteckningsformulär, Dokument).
+- Kundsidan: `.kh` (`.kh__vem` med `kund-kopiera`, `ny-affar-kund`, `kund-logga`, `kund-uppgift`, `starta-mote`, `kund-ring`; `.kh__halsa` kundhälsa 0–100 (`kundHalsa`: dagar sedan senaste aktivitet ≤3 d 100, ≤7 85, ≤14 65, ≤30 45, annars 25, ingen 30; −15 per försenad uppföljning, +5 öppen affär, +10 vunnen; grön ≥ 75, gul ≥ 50, röd); `.kh__tal`), `.kundresa`, `.kn` (nästa steg), `.kg__vanster` (Huset `.khus`, Affärer, Offerter, Förfrågningar), `.kg__hoger` (`.kkontakt` Kontakter senaste 90 dagarna, Uppgifter, `#kund-historik` med `kund-hist` filter samtal/mejl/möte + anteckningsformulär, Dokument).
 
 ### Offerter `#/offerter` och offertsidan `#/offerter/id`
 - `.offtopp` – `.offtopp__ord` (väntar på svar, Träffsäkerhet, Tid till ja, Godkänt värde, staplar per vecka), `.offtopp__hoger`: sök `[data-offsok]`, `.snartut` **Går ut snart** (`offert-folj-upp`, `offert-forlang` +14 d), `.offinsikt` (Per hus, Vanligaste posterna).
-- `.kundverktyg` – `off-filter` (Alla, Väntar på svar, Går ut snart, Godkända, Utkast), sortering `[data-offsort]` (Senaste, Går ut först, Störst summa).
+- `.kundverktyg` – `off-filter` (Alla, Mina, Väntar på svar, Går ut snart, Godkända, Utkast, Avböjda), sortering `[data-offsort]` (Senaste först, Går ut först, Störst summa).
 - Tabellen `.tabell--offert` – rad `offert-oppna`, `offert-folj-upp`, `offert-ny-version`, `offert-forlang` (klocka när ≤ 10 d kvar).
 - Offertsidan: `.vyhuvud` (**Skriv ut / PDF** `skriv-ut`, **Markera som skickad** `offert-skicka` för utkast, **Kunden godkände** `aff-vinn` för skickad), `.ostatus` (Utkast → Skickad → Godkänd + giltighetsring), `.off-not` (skickad: "skapa en ny version" `offert-ny-version`), `.offertred` (modellrad `offert-modell`, rader `.offertrader` text/antal/pris + `offert-bort`, `.offertlagg` `[data-lagg]` ur prislistan eller Egen rad, `.offertsumma`), `.dokyta` (dokumentet `article.dok#dok`). Godkänd/ersatt/avböjd = låst. Summan blir affärens värde.
 
 ### Dokument `#/dokument` (arkiv och mallar)
 - `.dk-hjalte` – `.dk-hjalte__text` (rubrik, `.dk-flikar` `dok-flik` Arkiv/Mallar, `.dk-hjalte__knappar`: **Ladda upp** `.dk-ladda` (filfält, filskannern kontrollerar), exportera `dok-csv`), `.dk-stats` (`dok-lage`: väntar på svar, godkänt & signerat, går ut inom 7 dagar, svarstid), `.dk-blick` / `.dk-fack` (`dok-fack`: Offerter, Ordrar, Avtal, Ritningar, Bygglov, Checklistor, Foton …; släpp filer), `.dk-verktyg` (sök, `dok-vem` Mina/Alla, år, sortering, gruppering, `.dk-lagen`).
 - `.dk-att` **Att hantera** (`prod-check`, `proj-oppna`, `kund-ring`, förläng).
-- `.dk-grupp` per fack med `.dk__rad` (`dok-detalj` → ark `.dkd`: värde, ring, tidslinje, fakta; fot: Öppna offerten, **Förläng 14 d** `dok-forlang`, Mejla påminnelse, Ring, Till affären; checklistor: Markera klart `dok-check-stang`, Öppna projektet). Foton: `dok-foto` (bildbanken), `dok-visa`. Egna filer: `dok-fil` (typ, kund, Öppna, Ladda ner, **Arkivera** `dok-fil-arkiv`, Ta bort `dok-fil-bort`). Inget raderas av sig självt – arkiverat göms från Aktuella.
-- **Mallar** (`dok-flik[data-f=mallar]`): "Förslag just nu" + `.ml-grupp` Sälj (Följebrev till offert, Protokoll från platsbesök, Tack för ordern), Bygget (Checklista inför montage, Leveransplan), Överlämning (Egenkontroll efter montage, Överlämningsprotokoll). Knappar: **Fyll i** `dok-mall` (välj kund → skrivs ut, loggas på kunden), **Visa exempel** `mall-exempel` (ark `.ml-exempel`), **Skriv ut en tom mall** `mall-tom`.
+- `.dk-grupp` per fack med `.dk__rad` (`dok-detalj` → ark `.dkd`: värde, ring, tidslinje, fakta; fot: Öppna offerten, **Förläng 14 d** `dok-forlang`, Mejla påminnelse, Ring, Till affären; checklistor: Markera som klar `dok-check-stang`, Öppna projektet). Foton: `dok-foto` (bildbanken), `dok-visa`. Egna filer: `dok-fil` (typ, kund, Öppna, Ladda ner, **Arkivera** `dok-fil-arkiv`, Ta bort `dok-fil-bort`). Inget raderas av sig självt – arkiverat göms från Aktuella.
+- **Mallar** (`dok-flik[data-f=mallar]`): "Förslag just nu" + `.ml-grupp` Sälj (Följebrev till offert, Protokoll från platsbesök, Tack för ordern), Bygget (Checklista inför montage, Leveransplan), Överlämning (Egenkontroll efter montage, Överlämningsprotokoll). Knappar: **Fyll i** `dok-mall` (välj kund → skrivs ut, loggas på kunden), **Visa exempel** `mall-exempel` (ark `.ml-exempel`), **Tom mall** `mall-tom`.
 
 ### Kundmöte `#/mote` och presentationen (mote.js)
 - `.motescen` – 3D-mötesrummet (motesrum3d.js), `.motescen__ord` med **Starta presentation** (`starta-mote[data-bilder]`) och **Bara kalkylen** (`starta-mote[data-start=kalkyl]`).
-- `.rutnat--mote`: **Förbered mötet** (formulär `starta-mote`: `mote-valj` välj affär, `.upplagg` `mote-lage` Fullt möte 7 bilder/Kort möte 4/Bara kalkylen 3, bildval `name=bild`, frågor `mote-fraga`, tidsband) · `.komm` **Kommande möten** (`mote-forbered`, `mote-boka`) · `.logga-mote` **Logga mötet** (formulär `mote-logga`: kund, minuter, text, nästa steg → uppgift) · **Tidigare möten** · `.motekort` **Så funkar det**.
+- `.rutnat--mote`: **Förbered mötet** (formulär `starta-mote`: `mote-valj` välj affär, `.upplagg` `mote-lage` Fullt möte 7 bilder/Kort möte 4/Bara kalkylen 3, bildval `name=bild`, frågor `mote-fraga`, tidsband) · `.komm` **Kommande möten** (`mote-forbered`, `mote-boka`) · `.logga-mote` **Logga mötet** (formulär `mote-logga`: kund, minuter, text, nästa steg → uppgift) · **Tidigare möten** · `.motekort` **Så fungerar det**.
 - Presentationen `.mote` (helskärm, dialog): bilder `.mote__bild[data-id]` = titel (Välkommen), er (Er förfrågan, bara med förfrågan), hantverk (Byggt under tak), husen (Husen i 3D), regler (Vad får ni bygga?), resan (Så går det till), kalkyl (Räkna på ert hus), nasta (Nästa steg). Topp: kund, klocka `[data-mtid]`, `[data-mote="anteckna"]`, `[data-mote="helskarm"]`, `[data-mote="stang"]`. Botten `.mote__botten`: prickar `.mote__prick` (aria-label = bildens namn), `[data-mote="bak"]`, `[data-mote="fram"]`. Kalkylen: hus `[data-km]`, tillval `[data-kt]`, **Spara som offert** `[data-mote="spara"]` (skapar offert på affären). Nästa steg: **Boka platsbesök** `[data-mote="boka"]`, **Mejla en sammanfattning** `[data-mote="sammanfattning"]`. Anteckningar `.mote__anteckning` sparas i kundens historik när mötet stängs.
 
 ### Projekt `#/produktion[/projektId]`
@@ -149,24 +149,24 @@ För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 - `.dagtopp` (hälsning, typer, ring klara i dag), `.agk` veckokalender (`ag-vy` Vecka/2 veckor/Månad, `ag-off`, `ag-ny-dag`, `ag-dag-visa`), `.agv` (sök, `ag-vem` Mina/Alla, `ag-typ`, `ag-csv`), `form.nyuppg` (formulär `uppgift`: text, kund/affär, datum), `.uppgrupp` I dag / Kommande / `.uppgrupp--klara` (`uppgift-klar`, `ag-skjut`, `ag-sena-idag`, `kund-ring`, `kund-oppna`).
 
 ### Meddelanden `#/chatt[/id]` (chatt.js)
-- `.ch-lista` (sök, `.ch-team`, samtal, `ch-ny-grupp`, `.ch-kort` avisering `ch-avisera`), `.ch-tradyta`: `.ch-topp` (`ch-tyst`, `ch-info`, `chf-oppna` eget fönster, `chf-min-sida`), `.ch-trad` (`ch-reagera`, `ch-svara`, `ch-kopiera`, `ch-andra`, `ch-ta-bort`), `.ch-fot` skrivrutan (`ch-emoji`, bifoga, @ och #). `ch-pling` ljud. Flytande fönster `.chf`, minimerat `.chf-ikon`.
+- `.ch-lista` (sök, `.ch-team`, konversationer, `ch-ny-grupp`, `.ch-kort` avisering `ch-avisera`), `.ch-tradyta`: `.ch-topp` (`ch-tyst`, `ch-info`, `chf-oppna` eget fönster, `chf-min-sida`), `.ch-trad` (`ch-reagera`, `ch-svara`, `ch-kopiera`, `ch-andra`, `ch-ta-bort`), `.ch-fot` skrivrutan (`ch-emoji`, bifoga, @ och #). `ch-pling` ljud. Flytande fönster `.chf`, minimerat `.chf-ikon`.
 
 ### Min profil `#/profil[/id]` (ledning.js)
-- `.lp-phjalte` (id-kort `.lp-phjalte__vanster`, `lp-andra-profil`, status via `konto-meny`, tal `.lp-phjalte__tal`), `.lp-tvakol`: **Om dig** (`lp-om-skriv`, kontakt, genvägar) och **Aktivitet och arbete** (graf 30 d, affärer, uppgifter `lp-egen-uppg`, `lp-klar`, `lp-mal`), `.pk` **Min kalender** (`pk-man`, `pk-vy` Månad/År, `pk-ics` kalenderfil, `pk-dag`, `pk-ny`, `pk-sjuk` sjukanmäl, `lp-franvaro` ledighet).
+- `.lp-phjalte` (id-kort `.lp-phjalte__vanster`, `lp-andra-profil`, status via `konto-meny`, tal `.lp-phjalte__tal`), `.lp-tvakol`: **Om dig** (`lp-om-skriv`, kontakt, genvägar) och **Aktivitet och arbete** (graf 30 d, affärer, uppgifter `lp-egen-uppg`, `lp-klar`, `lp-mal`), `.pk` **Min kalender** (`pk-man`, `pk-vy` Månad/År, `pk-ics` kalenderfil, `pk-dag`, `pk-ny`, `pk-sjuk` Sjukanmäl i dag, `lp-franvaro` Lägg in frånvaro).
 
-### Försäljning (chefsvyn) `#/chef` – bara chefen
-- `.ap-hjalte`: `.ao-text` (`km-nytt-konto` Lägg till säljare, `lp-mal` Sätt mål, `lp-uppgift` Ge uppgift, `lp-rapport` Exportera rapport), `.lp-mork__mitt` (ring mot målet), `.ap-tal`, `.lp-veckor`.
-- `.ao-band`: **Teamet just nu** (`lp-chef-filter`, `ch-skriv-till`), **Vem jobbar när** (`lp-narv-v`, `lp-franvaro`), **Teamets kalender** (`lp-kal-vem`, `lp-kal-man`, `lp-kal-vy`, `lp-kal-typ`, `lp-kal-ny`, `lp-kal-dag`, `lp-kal-ics`), **Behöver din uppmärksamhet** (`lp-agera-f`, `lp-fordela-smart` fördelar jämnt, `lp-ta-sjalv`, `lp-fordela`), **Pipeline per säljare**, **Aktivitet 14 dagar**, **Topplistan** (`lp-topp-period` 30 d/90 d/I år).
+### Försäljningsledning (chefsvyn, i menyn Försäljning) `#/chef` – bara chefen
+- `.ap-hjalte`: `.ao-text` (`km-nytt-konto` Nytt konto, `lp-mal` Sätt mål, `lp-uppgift` Ge uppgift, `lp-rapport` Exportera rapport), `.lp-mork__mitt` (ring mot målet), `.ap-tal`, `.lp-veckor`.
+- `.ao-band`: **Teamet just nu** (`lp-chef-filter`, `ch-skriv-till`), **Vem jobbar när** (`lp-narv-v`, `lp-franvaro`), **Teamets kalender** (`lp-kal-vem`, `lp-kal-man`, `lp-kal-vy`, `lp-kal-typ`, `lp-kal-ny`, `lp-kal-dag`, `lp-kal-ics`), **Behöver din uppmärksamhet** (`lp-agera-f`, `lp-fordela-smart` **Fördela smart** fördelar jämnt, `lp-ta-sjalv` Ta själv, `lp-fordela` Fördela), **Öppna affärer per säljare**, **Aktivitet 14 dagar**, **Topplistan** (`lp-topp-period` 30 d/90 d/I år).
 
 ### Inställningar `#/installningar`
-- `.instopp` (prisspann, tillval, ändrad), `.prisrutnat` två `form.prisform[data-form=prislista]` (Husen, Tillval och poster), `.installning__proto` **Återställ exempeldata** (`aterstall`, kräver andra klick inom 4 s).
+- **Utseende** (sex teman + Följ systemet), **Layout** (Minimal, Normal, Full), `.instopp` (prisspann, tillval, ändrad), `.prisrutnat` två `form.prisform[data-form=prislista]` (Husen, Tillval och poster), `.installning__proto` **Återställ exempeldata** (`aterstall`, kräver andra klick inom 4 s).
 
 ### Kolla marken `#/kolla-marken`
 - `.verktygtopp` + `iframe.verktygram__ram` med hemsidans verktyg (`vad-far-jag-bygga.html?crm=1`): jordart, vatten och djup till berg från SGU, sök adress eller position. Översiktligt – ingen geoteknik.
 
 ### Admin
 - **Kontrollcentral** `#/kontroll`: `.ao-hjalte` (ringar säkerhet/konton/data/drift, `sh-skanna-ga`, `km-nytt-konto`, `ad-exportera`), banden Hur kontona mår, Skyddet just nu, Datan och kopplingarna, Vem gör vad och när, Senast i CRM:et, System och fel, Bör åtgärdas (`kc-csv`, `kc-rapport`, `kc-rensa-bilder`, `kc-rensa-logg`, `ad-aterstall`).
-- **Adminpanel** `#/admin`: `.ap-hjalte`, Konton och roller (`ap-filter`, `ap-andra`, `valj-anvandare` Logga in som, `ap-aktiv` Inaktivera, `km-nytt-konto`), Bör åtgärdas, Vem får göra vad, För den här webbläsaren (utloggning vid inaktivitet), Data och system (export, import, `ad-aterstall`), Granskning och ändringar (`ap-logg`).
+- **Adminpanel** `#/admin`: `.ap-hjalte`, Konton och roller (`ap-filter`, `ap-andra`, `valj-anvandare` Visa som, `ap-aktiv` Inaktivera, `km-nytt-konto` Nytt konto), Bör åtgärdas, Vem får göra vad, För den här webbläsaren (utloggning vid inaktivitet), Data och system (export, import, `ad-aterstall`), Granskning och ändringar (`ap-logg`).
 - **Säkerhet** `#/sakerhet`: `.sh-hjalte`, `.sh-drift`, `.sh-verktyg` (`sh-rapport`, `sh-auto`, `sh-behorighet`, `sh-kopiera`), Sju kontroller (`sh-skanna[data-ids]`: skadlig kod, uppdateringar, buggar, läckor, intrång, avvikande beteende, trasigt), Skanningens logg (`sh-loggtyp`), Poängen över tid. Poäng = 100 − avdrag (hög −25, medel −10, låg −3).
 
 ### Gemensamma detaljer
@@ -177,14 +177,14 @@ För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 
 ## 4. Flödena (standard inom försäljning)
 
-1. **Förfrågan** kommer in (hemsidan = Webbformulär/Verktyget, eller **Lägg in förfrågan** när någon ringer/mejlar). Den hamnar överst i inkorgen med leadpoäng och svarsmål.
+1. **Förfrågan** kommer in (hemsidan = Webbformulär/Verktyget, eller **Lägg in förfrågan** när någon ringer/mejlar). Den hamnar överst i inkorgen med poäng och svarsmål.
 2. **Ta den** → **Ring** (eller Svarsutkast) → gå igenom **samtalsguiden** → **Kontaktad**. Nu skapas **kunden** (kundkortet) och samtalet loggas.
 3. **Skapa affär** (från förfrågan, från kundkortet med Ny affär, med N → Affär, eller Ny affär på säljtavlan): välj hus, värdet hämtas ur prislistan, steg Kontakt tagen. Förfrågan blir "Blev affär".
-4. **Säljtavlan**: boka platsbesök → **Tomt & platsbesök** (Platsbesöket är bokat / Boka platsbesök i mötet lägger en uppgift om en vecka). Följ "Nästa bästa steg" och Fokus i dag.
+4. **Säljtavlan**: boka platsbesök → **Tomt och platsbesök** (Platsbesöket är bokat / Boka platsbesök i mötet lägger en uppgift om en vecka). Följ "Nästa bästa steg" och Fokus i dag.
 5. **Kundmöte**: välj affär och upplägg, **Starta presentation**, anteckna (N), räkna i **kalkylen** (K) och **Spara som offert**, avsluta med **Boka platsbesök** eller **Mejla en sammanfattning**. Anteckningen sparas när mötet stängs.
 6. **Offert**: Skapa offert (huset + frakt + montage ur prislistan) → justera rader och tillval → **Skriv ut / PDF** → **Markera som skickad** (affären → Offert skickad, giltig 30 d). Ändringar efter skickad: **Ny version** (gamla = ersatt). Följ upp eller **förläng +14 d** under Offerter/Går ut snart eller i Dokument.
 7. **Förhandling** → **Order signerad** (eller Kunden godkände på offerten): affären vunnen, offerten godkänd, konfetti, **projekt** skapas (montage om 12 veckor) och projektvyn öppnas.
-8. **Projekt**: checklistan Innan montaget (kundens och vår del), montagedag, stegen Ritning & lov → Tillverkning → Grund & mark → Leverans & montage → Slutbesiktning → **Klart** (överlämnat).
+8. **Projekt**: checklistan Innan montaget (kundens och vår del), montagedag, stegen Ritning och lov → Tillverkning → Grund och mark → Leverans och montage → Slutbesiktning → **Klart** (överlämnat).
 9. **Dokument och mallar** längs vägen: Följebrev till offert, Protokoll från platsbesök, Tack för ordern, Checklista inför montage, Leveransplan, Egenkontroll efter montage, Överlämningsprotokoll.
 10. Förlorad: dra till förlustdockan eller **Markera som förlorad** med orsak; **Återuppta** under Förlorade.
 
@@ -210,7 +210,7 @@ Dokumentsidan minns fliken Arkiv/Mallar i minnet – turerna använder `iArkiv(v
 | oversikt | Översikt | alla |
 | forfragningar, saljtavla, affar, kunder, kundsida, offerter, offert, dokument, kundmote, presentation, projekt | Sidorna | säljare (admin i supportläge) |
 | att-gora, chatt, profil, installningar | Sidorna | alla |
-| chef | Chefsvyn | chefen |
+| chef | Försäljningsledning | chefen |
 | kontroll, adminpanel, sakerhet, supportlage | Ledning och admin | admin |
 | flode-ny-kund, flode-offert, flode-mote, flode-dokument, flode-overlamning | Flödena 1–5 | säljare |
 

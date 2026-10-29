@@ -47,24 +47,24 @@
     punkter.push({ ikon: 'puls', namn: 'Aktivitet', ok: nu || (ds != null && ds <= 7) || u.roll === 'admin', text: nu ? 'Aktiv nu · ' + n.namn : ds == null ? 'Inget loggat' : 'Senast ' + IH.sedan(mina[0].tid) });
     var forf = d.uppgifter.filter(function (x) { return x.ansvarig === u.id && !x.klar && dag0(x.forfaller) < idag; });
     p -= Math.min(30, forf.length * 8);
-    punkter.push({ ikon: 'todo', namn: 'Uppgifter', ok: !forf.length, text: forf.length ? plural(forf.length, 'förfallen', 'förfallna') : 'Inga förfallna' });
+    punkter.push({ ikon: 'todo', namn: 'Uppgifter', ok: !forf.length, text: forf.length ? plural(forf.length, 'försenad', 'försenade') : 'Inga försenade' });
     if (u.roll === 'salj') {
       // Står still: samma gräns som affärssidan och chefsvyn (mer än 14 dagar)
       var oppna = d.affarer.filter(function (a) { return a.ansvarig === u.id && a.steg !== 'vunnen' && !a.forlorad; }), stilla = oppna.filter(function (a) { return IH.dagarSedan(a.andrad) > 14; });
       p -= Math.min(24, stilla.length * 6);
-      punkter.push({ ikon: 'portfolj', namn: 'Affärer', ok: !stilla.length, text: stilla.length ? stilla.length + ' stilla över 14 d' : plural(oppna.length, 'öppen', 'öppna') + ', ingen stilla' });
+      punkter.push({ ikon: 'portfolj', namn: 'Affärer', ok: !stilla.length, text: stilla.length ? stilla.length + ' står still över 14 dagar' : plural(oppna.length, 'öppen', 'öppna') + ', ingen står still' });
     } else if (u.roll === 'prod') {
       var pr = d.projekt.filter(function (x) { return x.steg !== 'klart'; }), st = pr.filter(function (x) { return IH.dagarSedan(x.andrad) >= 21; });
       p -= Math.min(24, st.length * 6);
-      punkter.push({ ikon: 'projekt', namn: 'Projekt', ok: !st.length, text: st.length ? st.length + ' står still 21+ d' : pr.length + ' pågående, inget stilla' });
+      punkter.push({ ikon: 'projekt', namn: 'Projekt', ok: !st.length, text: st.length ? st.length + ' står still i 21 dagar eller mer' : pr.length + ' pågående, inget står still' });
     } else {
       var hub = IH.sakHub && IH.sakHub.hub().historik[0], ok = !!hub && IH.dagarSedan(hub.tid) <= 7; if (!ok) p -= 10;
-      punkter.push({ ikon: 'radar', namn: 'Säkerhet', ok: ok, text: hub ? 'Skannat ' + IH.sedan(hub.tid) : 'Ingen skanning än' });
+      punkter.push({ ikon: 'radar', namn: 'Säkerhet', ok: ok, text: hub ? 'Skannat ' + IH.sedan(hub.tid) : 'Inte skannat' });
     }
     // Bara säljarens egna affärer som pekar på en kund som saknas
     var mitt = u.roll === 'salj' ? d.affarer.filter(function (a) { return a.ansvarig === u.id && a.kund && !IH.kund(a.kund); }).length : 0;
     p -= Math.min(30, mitt * 15);
-    punkter.push({ ikon: 'nyckelverktyg', namn: 'Data', ok: !mitt, text: mitt ? plural(mitt, 'trasig koppling', 'trasiga kopplingar') : 'Buggfritt' });
+    punkter.push({ ikon: 'nyckelverktyg', namn: 'Data', ok: !mitt, text: mitt ? plural(mitt, 'trasig koppling', 'trasiga kopplingar') : 'Alla kopplingar hela' });
     var saknas = u.roll === 'salj' && !u.mal ? ['årsmål'] : [];
     p -= saknas.length * 3;
     punkter.push({ ikon: 'anstallda', namn: 'Profil', ok: !saknas.length, text: saknas.length ? 'Saknar ' + saknas.join(', ') : 'Komplett' });
@@ -107,13 +107,13 @@
     else if (IH.dagarSedan(hist.tid) > 7) ut.push({ ikon: 'radar', text: 'Senaste skanningen är ' + IH.dagarSedan(hist.tid) + ' dagar gammal', under: 'Skanna minst en gång i veckan', g: 'sh-skanna-ga', knapp: 'Skanna' });
     if (H) H.kontroller.forEach(function (k) { var r = H.hub().senast[k.id], hog = r ? r.fynd.filter(function (x) { return x.allvar === 'hog'; }) : []; if (hog.length) ut.push({ ikon: 'skold-larm', text: k.namn + ': fynd med hög allvarlighet', under: hog[0].text, lank: '#/sakerhet', knapp: 'Visa' }); });
     if (!(+inst.utlogg)) ut.push({ ikon: 'klocka', text: 'Utloggning vid inaktivitet är av', under: 'Datorer som lämnas olåsta loggas ut av sig själva', lank: '#/admin', knapp: 'Slå på' });
-    if (!inst.kopia || IH.dagarSedan(inst.kopia) > 7) ut.push({ ikon: 'ladda-ner', text: inst.kopia ? 'Säkerhetskopian är ' + IH.dagarSedan(inst.kopia) + ' dagar gammal' : 'Ingen säkerhetskopia', under: 'Exportera all data som JSON', g: 'ad-exportera', knapp: 'Exportera' });
+    if (!inst.kopia || IH.dagarSedan(inst.kopia) > 7) ut.push({ ikon: 'ladda-ner', text: inst.kopia ? 'Säkerhetskopian är ' + IH.dagarSedan(inst.kopia) + ' dagar gammal' : 'Ingen säkerhetskopia', under: 'Exportera all data som JSON', g: 'ad-exportera', knapp: 'Exportera data' });
     if (dl.brott) ut.push({ ikon: 'nyckelverktyg', text: plural(dl.brott, 'trasig koppling', 'trasiga kopplingar'), under: brott[0], g: 'sh-skanna-ga', data: 'buggar', knapp: 'Kontrollera' });
     if (dr.fel.length) ut.push({ ikon: 'bugg', text: plural(dr.fel.length, 'fel', 'fel') + ' sedan sidan laddades', under: 'Skript eller filer som inte fungerade', g: 'sh-skanna-ga', data: 'buggar', knapp: 'Kontrollera' });
     IH.ANVANDARE.filter(function (u) { return u.roll === 'salj' && !u.mal && !u.inaktiv; }).forEach(function (u) { ut.push({ ikon: 'mal', text: u.namn + ' saknar årsmål', under: 'Försäljningsledningen räknar mot målet', g: 'lp-mal', knapp: 'Sätt mål' }); });
     IH.ANVANDARE.filter(function (u) { return u.inaktiv && u.roll !== 'admin'; }).forEach(function (u) {
       var a = oppetArbete(u.id), t = arbeteText(a);
-      if (t) ut.push({ ikon: 'anstallda', text: u.namn + ' är inaktiverat men har ' + t, under: 'Räknas inte i teamets summor förrän det fördelas', g: 'kc-fordela', data: 'fran:' + u.id, knapp: 'Fördela' });
+      if (t) ut.push({ ikon: 'anstallda', text: 'Kontot för ' + u.namn + ' är inaktiverat men har ' + t, under: 'Fördela det så att en aktiv säljare tar hand om det', g: 'kc-fordela', data: 'fran:' + u.id, knapp: 'Fördela' });
     });
     // En säljare måste äga affären: ingen ansvarig, en som inte finns eller administratören
     var utanSaljare = function (id) { var u = id && IH.anvandare(id); return !u || u.roll === 'admin'; };
@@ -128,7 +128,7 @@
   /* Vyn ---------------------------------------------------------------------------------------------- */
   var antalLageTal = function (l, konton) { return konton.filter(function (x) { return x.h.lage === l; }).length; };
   IH.vyer.kontroll = function () {
-    if (IH.jag().roll !== 'admin') return { titel: 'Kontrollcentral', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + ik('las') + 'Bara för administratören</h2><p class="ad-not">' + (IH.visarSom && IH.visarSom() ? 'Du är i supportläget – tryck Tillbaka till Admin i bandet överst' : 'Byt till kontot Admin i kontomenyn') + '.</p></section>' };
+    if (IH.jag().roll !== 'admin') return { titel: 'Kontrollcentral', html: '<a class="tillbaka" href="#/">' + i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + ik('las') + 'Bara för administratören</h2><p class="ad-not">' + (IH.visarSom && IH.visarSom() ? 'Du är i supportläget – klicka på Tillbaka till Admin i bandet överst' : 'Byt till kontot Admin i kontomenyn') + '.</p></section>' };
     var d = db(), u0 = IH.jag(), H = IH.sakHub, S = H ? H.hub() : { senast: {}, historik: [] };
     var brott = IH.sak ? IH.sak.kopplingsBrott() : [], dl = dataLage(brott), dr = driftLage();
     var konton = IH.ANVANDARE.filter(function (u) { return !u.inaktiv; }).map(function (u) { return { u: u, h: kontoHalsa(u, brott) }; });
@@ -140,7 +140,7 @@
     var fyndAlla = H ? H.kontroller.reduce(function (t, k) { var r = S.senast[k.id]; return r ? t.concat(r.fynd) : t; }, []) : [];
     var fyndN = function (a) { return fyndAlla.filter(function (x) { return x.allvar === a; }).length; };
     var h = new Date().getHours(), halsning = h < 5 ? 'God natt' : h < 10 ? 'God morgon' : h < 17 ? 'Hej' : 'God kväll';
-    var SAML = [['Kunder', 'kunder'], ['Förfrågningar', 'forfragningar'], ['Affärer', 'affarer'], ['Offerter', 'offerter'], ['Projekt', 'projekt'], ['Aktiviteter', 'aktiviteter'], ['Uppgifter', 'uppgifter'], ['Dokument', 'dokument'], ['Frånvaro', 'franvaro']];
+    var SAML = [['Kunder', 'kunder'], ['Förfrågningar', 'forfragningar'], ['Affärer', 'affarer'], ['Offerter', 'offerter'], ['Projekt', 'projekt'], ['Händelser', 'aktiviteter'], ['Uppgifter', 'uppgifter'], ['Dokument', 'dokument'], ['Frånvaro', 'franvaro']];
     var antal = function (s) { return (d[s] || []).length; };
     var poster = SAML.reduce(function (t, s) { return t + antal(s[1]); }, 0);
     var handelser7 = d.aktiviteter.filter(function (x) { return IH.dagarSedan(x.tid) < 7; }).length;
@@ -152,22 +152,22 @@
     var max7 = Math.max.apply(null, per7.concat([1]));
     var FARG = ['#e29a4a', '#6aa9e8', '#8fcf9a', '#a98be0', '#e8c25a', '#7fc6c9', '#d08a8a'];
     var remsa = [
-      { ikon: 'skold', etikett: 'Säkerhet', varde: sakP == null ? '–' : sakP + '/100', under: senast ? IH.sedan(senast.tid) + (sakDiff ? ' · ' + (sakDiff > 0 ? '↑ ' : '↓ ') + Math.abs(sakDiff) + ' mot förra' : '') : 'ej skannat', ton: tonFor(sakP), href: '#/sakerhet',
+      { ikon: 'skold', etikett: 'Säkerhet', varde: sakP == null ? '–' : sakP + '/100', under: senast ? IH.sedan(senast.tid) + (sakDiff ? ' · ' + (sakDiff > 0 ? '↑ ' : '↓ ') + Math.abs(sakDiff) + ' mot förra' : '') : 'inte skannat', ton: tonFor(sakP), href: '#/sakerhet',
         extra: '<span class="ao-x-mat" style="--a:' + ((sakP || 0) / 100).toFixed(2) + '"><i></i></span><span class="ao-x-knapp">' + (senast ? 'Visa' : 'Skanna') + i('pil') + '</span>' },
       { ikon: 'anstallda', etikett: 'I tjänst nu', varde: nuN + '/' + konton.length, under: konton.filter(function (x) { return x.h.lage === 'bra'; }).length + ' mår bra' + (antalLageTal('hjalp', konton) ? ' · ' + antalLageTal('hjalp', konton) + ' behöver hjälp' : ''), ton: 'is', href: '#/admin',
         extra: '<span class="ao-x-folk">' + iTjanst.slice(0, 4).map(function (u) { return '<span class="avatar" style="--av:' + u.farg + '" title="' + e(u.namn + ' · ' + IH.narvaro(u.id).namn) + '">' + IH.initialer(u.namn) + '</span>'; }).join('') + '</span>' },
-      { ikon: 'bugg', etikett: 'Fel i sidan', varde: String(dr.fel.length), under: dr.fel.length ? 'sedan laddning · senast ' + e(String(dr.fel[dr.fel.length - 1].text || dr.fel[dr.fel.length - 1]).slice(0, 30)) : 'buggfritt sedan laddning', ton: dr.fel.length ? 'gul' : 'gron', href: '#/sakerhet',
+      { ikon: 'bugg', etikett: 'Fel i sidan', varde: String(dr.fel.length), under: dr.fel.length ? 'sedan sidan laddades · senast ' + e(String(dr.fel[dr.fel.length - 1].text || dr.fel[dr.fel.length - 1]).slice(0, 30)) : 'inga fel sedan sidan laddades', ton: dr.fel.length ? 'gul' : 'gron', href: '#/sakerhet',
         extra: dr.fel.length ? '<span class="ao-x-knapp">Visa felen' + i('pil') + '</span>' : '<span class="ao-x-ok">' + i('bock') + '</span>' },
-      { ikon: 'nyckelverktyg', etikett: 'Kopplingar', varde: dl.brott ? dl.brott + ' fel' : 'OK', under: dl.brott ? 'trasiga – se listan i Säkerhet' : 'kunder, affärer och projekt hänger ihop', ton: dl.brott ? 'gul' : 'gron', href: dl.brott ? '#/sakerhet' : null,
+      { ikon: 'nyckelverktyg', etikett: 'Kopplingar', varde: dl.brott ? dl.brott + ' fel' : '0 fel', under: dl.brott ? 'trasiga – se listan i Säkerhet' : 'kunder, affärer och projekt hänger ihop', ton: dl.brott ? 'gul' : 'gron', href: dl.brott ? '#/sakerhet' : null,
         extra: dl.brott ? '<span class="ao-x-knapp">Visa' + i('pil') + '</span>' : '<span class="ao-x-ok">' + i('bock') + '</span>' },
-      { ikon: 'databas', etikett: 'Poster', varde: poster.toLocaleString('sv-SE'), under: kb(dr.bytes) + ' · ' + SAML.slice().sort(function (a, c) { return antal(c[1]) - antal(a[1]); })[0][0].toLowerCase() + ' flest', ton: 'lila', href: '#/admin',
+      { ikon: 'databas', etikett: 'Poster', varde: poster.toLocaleString('sv-SE'), under: kb(dr.bytes) + ' · flest ' + SAML.slice().sort(function (a, c) { return antal(c[1]) - antal(a[1]); })[0][0].toLowerCase(), ton: 'lila', href: '#/admin',
         extra: '<span class="ao-x-fordelning" title="' + e(SAML.map(function (x) { return x[0] + ' ' + antal(x[1]); }).join(' · ')) + '">' + SAML.map(function (x, n) { return antal(x[1]) ? '<i style="flex:' + antal(x[1]) + ';background:' + FARG[n] + '"></i>' : ''; }).join('') + '</span>' },
-      { ikon: 'puls', etikett: 'Händelser', varde: String(handelser7), under: 'senaste 7 d' + (fore7 ? ' · ' + (handelser7 >= fore7 ? '↑ ' : '↓ ') + Math.abs(Math.round((handelser7 - fore7) / fore7 * 100)) + ' % mot veckan före' : ''), ton: 'is',
+      { ikon: 'puls', etikett: 'Händelser', varde: String(handelser7), under: 'senaste 7 d' + (fore7 ? ' · ' + (handelser7 >= fore7 ? '↑ ' : '↓ ') + Math.abs(Math.round((handelser7 - fore7) / fore7 * 100)) + ' % mot veckan innan' : ''), ton: 'is',
         extra: '<span class="ao-x-staplar" aria-hidden="true">' + per7.map(function (v, n) { return '<i style="--h:' + (v / max7).toFixed(2) + '" class="' + (n === 6 ? 'idag' : '') + '" title="' + v + '"></i>'; }).join('') + '</span>' }
     ];
     var knapp = function (attr, ikon, text, accent) { var a = attr.indexOf('href') === 0; return '<' + (a ? 'a' : 'button type="button"') + ' class="sh-knapp' + (accent ? ' sh-knapp--accent' : '') + '" ' + attr + '>' + ik(ikon) + '<span>' + text + '</span></' + (a ? 'a' : 'button') + '>'; };
     var hjalte = '<section class="ao-hjalte kort" data-ton="' + tonFor(total) + '"><div class="sh-rutnat" aria-hidden="true"></div>' +
-      '<div class="ao-text"><p class="etikett"><i class="sh-live"></i>Kontrollcentralen · demoläget · ' + e(new Date().toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' })) + '</p>' +
+      '<div class="ao-text"><p class="etikett"><i class="sh-live"></i>Kontrollcentralen · prototyp · ' + e(new Date().toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' })) + '</p>' +
         '<h1>' + halsning + ', ' + e(u0.namn.split(' ')[0]) + '. <em>Hela CRM:et i en blick.</em></h1>' +
         '<p class="ao-ingress">Säkerheten, kontona, datan och driften – hur allt mår just nu, räknat ur CRM:ets data och säkerhetskontrollerna.</p>' +
         '<div class="sh-knappar">' + knapp('data-g="sh-skanna-ga"', 'radar', 'Skanna allt', true) + knapp('href="#/admin"', 'server', 'Adminpanelen') + knapp('href="#/sakerhet"', 'skold', 'Säkerhet') + knapp('data-g="km-nytt-konto"', 'anvandare-plus', 'Nytt konto') + '</div>' +
@@ -186,10 +186,10 @@
         '<span class="ao-matare" title="Hälsa ' + hl.poang + ' av 100"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" class="ao-matare__spar"/><circle cx="22" cy="22" r="18" class="ao-matare__bage" stroke-dasharray="' + ((hl.poang / 100) * l).toFixed(1) + ' ' + l.toFixed(1) + '"/></svg><b>' + hl.poang + '</b></span></header>' +
         '<div class="ao-konto__rad"><span class="lp-status" style="--n:' + n.farg + '"><i></i>' + e(n.namn) + '</span><span class="ao-lage">' + LAGE[hl.lage] + '</span></div>' +
         '<ul class="ao-punkter">' + hl.punkter.map(function (p) { return '<li data-ok="' + (p.ok ? 1 : 0) + '"><span class="ao-p__ikon">' + ik(p.ikon) + '</span><span class="ao-p__namn">' + p.namn + '</span><em title="' + e(p.text) + '">' + e(p.text) + '</em><i class="ao-lampa"></i></li>'; }).join('') + '</ul>' +
-        '<footer class="ao-konto__fot"><span class="ao-spark">' + sparkline(pd, 132, 28) + '</span><small>' + plural(pd.reduce(function (t, v) { return t + v; }, 0), 'händelse', 'händelser') + ' · 14 d</small><a class="ao-pil" href="#/profil/' + u.id + '" aria-label="Profilen för ' + e(u.namn) + '">' + i('pil') + '</a></footer></article>';
+        '<footer class="ao-konto__fot"><span class="ao-spark">' + sparkline(pd, 132, 28) + '</span><small>' + plural(pd.reduce(function (t, v) { return t + v; }, 0), 'händelse', 'händelser') + ' · 14 d</small><a class="ao-pil" href="#/profil/' + u.id + '" aria-label="Öppna profilen för ' + e(u.namn) + '">' + i('pil') + '</a></footer></article>';
     }).join('');
     var antalLage = function (l) { return konton.filter(function (x) { return x.h.lage === l; }).length; };
-    var kontoBand = band('01 · Konton', 'Hur kontona', 'mår', '<div class="ao-konton">' + kort + '</div>', { klass: 'ao-band--konton', ingress: 'Aktivitet, förfallna uppgifter, affärer eller projekt som står still, kopplingar och profilen – sammanvägt till en hälsa per konto.',
+    var kontoBand = band('01 · Konton', 'Hur kontona', 'mår', '<div class="ao-konton">' + kort + '</div>', { klass: 'ao-band--konton', ingress: 'Aktivitet, försenade uppgifter, affärer eller projekt som står still, kopplingar och profilen – sammanvägt till en hälsa per konto.',
       hoger: '<div class="ao-sammanfatt">' + [['bra', 'mår bra'], ['se', 'bör ses över'], ['hjalp', 'behöver hjälp']].map(function (x) { return '<span data-lage="' + x[0] + '"><b>' + antalLage(x[0]) + '</b>' + x[1] + '</span>'; }).join('') + '</div>' });
     // 02 Säkerhet
     var lista = function (rader) { return '<ul class="ao-lista">' + rader.map(function (x) { return '<li data-lage="' + x.lage + '"><span class="ao-l__ikon">' + ik(x.ikon) + '</span><span class="ao-l__namn">' + x.namn + '</span><em>' + e(x.text) + '</em><i class="ao-lampa"></i></li>'; }).join('') + '</ul>'; };
@@ -198,7 +198,7 @@
       '<div class="ao-allvar">' + [['hog', 'Hög'], ['medel', 'Medel'], ['lag', 'Låg']].map(function (x) { return '<span data-allvar="' + x[0] + '"><b>' + fyndN(x[0]) + '</b>' + x[1] + '</span>'; }).join('') + '</div>' +
       lista((H ? H.kontroller : []).map(function (k) { var r = S.senast[k.id], v = r ? r.fynd.filter(function (x) { return x.allvar !== 'info'; }).length : 0; return { lage: H.lageFor(r), ikon: k.ikon, namn: k.namn, text: !r ? 'Inte körd' : v ? plural(v, 'fynd', 'fynd') : 'Inga fynd' }; })) +
       '<div class="ao-fot"><button type="button" class="knapp knapp--virke knapp--liten" data-g="sh-skanna-ga">' + ik('radar') + 'Skanna allt</button><a class="knapp knapp--liten" href="#/sakerhet">' + ik('skold') + 'Säkerhetshubben</a></div>',
-      { halv: true, klass: 'ao-band--skydd', hoger: chip(sakP, sakP == null ? 'Ej skannat' : sakP + ' / 100') });
+      { halv: true, klass: 'ao-band--skydd', hoger: chip(sakP, sakP == null ? 'Inte skannat' : sakP + '/100') });
     // 03 Data
     var lacka = S.senast.lacka, lackaN = lacka ? lacka.fynd.filter(function (x) { return x.allvar === 'hog' || x.allvar === 'medel'; }).length : null;
     var maxS = Math.max.apply(null, SAML.map(function (s) { return antal(s[1]); }).concat([1]));
@@ -208,7 +208,7 @@
         { ikon: 'kalkyl', namn: 'Ogiltiga värden', lage: dl.ogiltiga ? 'medel' : 'ok', text: dl.ogiltiga ? plural(dl.ogiltiga, 'ogiltigt', 'ogiltiga') : 'Inga' },
         { ikon: 'fingeravtryck', namn: 'Persondata på fel ställe', lage: lackaN == null ? 'ny' : lackaN ? 'medel' : 'ok', text: lackaN == null ? 'Inte kontrollerat' : lackaN ? plural(lackaN, 'fynd', 'fynd') : 'Inga fynd' }]) +
       '<ul class="ao-samlingar">' + SAML.map(function (s) { return '<li><span>' + s[0] + '</span><strong>' + antal(s[1]).toLocaleString('sv-SE') + '</strong><i style="--andel:' + (antal(s[1]) / maxS).toFixed(3) + '"></i></li>'; }).join('') + '</ul>' +
-      '<div class="ao-fot"><button type="button" class="knapp knapp--liten" data-g="sh-skanna-ga" data-ids="buggar,lacka">' + ik('nyckelverktyg') + 'Kontrollera datan</button><button type="button" class="knapp knapp--liten" data-g="ad-exportera">' + ik('ladda-ner') + 'Exportera</button></div>',
+      '<div class="ao-fot"><button type="button" class="knapp knapp--liten" data-g="sh-skanna-ga" data-ids="buggar,lacka">' + ik('nyckelverktyg') + 'Kontrollera datan</button><button type="button" class="knapp knapp--liten" data-g="ad-exportera">' + ik('ladda-ner') + 'Exportera data</button></div>',
       { halv: true, klass: 'ao-band--data', hoger: chip(dl.poang, 'Kvalitet ' + dl.poang + ' %') });
     // 04 Aktivitet
     var aktivaK = IH.ANVANDARE.filter(function (u) { return !u.inaktiv; });
@@ -216,7 +216,7 @@
     var VD = ['Sö', 'Må', 'Ti', 'On', 'To', 'Fr', 'Lö'];
     var tot = aktivaK.map(function (u, r) { return { u: u, n: varden[r].reduce(function (t, v) { return t + v; }, 0) }; }), mest = tot.slice().sort(function (a, b) { return b.n - a.n; })[0], tysta = tot.filter(function (x) { return !x.n; });
     var karta = band('04 · Aktivitet', 'Vem gör', 'vad och när',
-      '<p class="lp-forklaring">Händelser i tidslinjerna per konto och dag – möten, samtal, mejl och anteckningar. Mörkare ruta = fler händelser.</p>' +
+      '<p class="lp-forklaring">Händelser i tidslinjerna per konto och dag – möten, samtal, mejl, anteckningar och ändringar. Mörkare ruta = fler händelser.</p>' +
       '<div class="ao-karta" style="--dagar:' + dagar.length + '"><span></span>' + dagar.map(function (dd, n) { return '<small class="' + (dd.getDay() % 6 === 0 ? 'helg' : '') + (n === dagar.length - 1 ? ' nu' : '') + '">' + VD[dd.getDay()] + '</small>'; }).join('') +
         aktivaK.map(function (u, r) { return '<a class="ao-karta__vem" href="#/profil/' + u.id + '"><span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span>' + e(u.namn.split(' ')[0]) + '</a>' + varden[r].map(function (v, c) { return '<i class="' + (dagar[c].getDay() % 6 === 0 ? 'helg' : '') + (c === dagar.length - 1 ? ' nu' : '') + '" style="--v:' + (v / maxV).toFixed(2) + '" title="' + e(u.namn) + ', ' + IH.datum(dagar[c].toISOString()) + ': ' + v + '"></i>'; }).join(''); }).join('') + '</div>' +
       '<div class="ao-skala"><span>Färre</span>' + [0.1, 0.35, 0.6, 0.85, 1].map(function (v) { return '<i style="--v:' + v + '"></i>'; }).join('') + '<span>Fler</span></div>' +
@@ -230,18 +230,18 @@
         return '<li data-typ="' + x.typ + '"><span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span><span>' + e(t.slice(0, 96)) + (t.length > 96 ? '…' : '') + '<small>' + e(u.namn) + ' · ' + IH.sedan(x.tid) + (x.typ === 'sakerhet' ? ' · säkerhetsloggen' : '') + '</small></span></li>'; }).join('') + '</ul>' : '<p class="ad-not">Inga händelser än.</p>',
       { halv: true, klass: 'ao-band--senast', hoger: '<a class="knapp knapp--liten" href="#/admin">Hela loggen</a>' });
     // 06 Drift – med snabbåtgärderna och verktygen, så att spalten blir lika lång som förslagen bredvid
-    var SNABB = [['km-nytt-konto', 'anvandare-plus', 'Lägg till konto'], ['sh-skanna-ga', 'radar', 'Skanna nu'], ['ad-exportera', 'ladda-ner', 'Exportera data'], ['kc-csv', 'anstallda', 'Kontolista (CSV)'],
-      ['kc-rapport', 'dokument', 'Systemrapport'], ['kc-rensa-bilder', 'bild', 'Rensa chattfiler'], ['kc-rensa-logg', 'papperskorg', 'Rensa loggen'], ['ad-aterstall', 'aterstall', 'Återställ data']];
+    var SNABB = [['km-nytt-konto', 'anvandare-plus', 'Nytt konto'], ['sh-skanna-ga', 'radar', 'Skanna nu'], ['ad-exportera', 'ladda-ner', 'Exportera data'], ['kc-csv', 'anstallda', 'Kontolista (CSV)'],
+      ['kc-rapport', 'dokument', 'Systemrapport'], ['kc-rensa-bilder', 'bild', 'Rensa chattfiler'], ['kc-rensa-logg', 'papperskorg', 'Rensa loggen'], ['ad-aterstall', 'aterstall', 'Återställ exempeldata']];
     var app = document.querySelector('script[src*="app.js"]'), version = ((app && app.getAttribute('src')) || '').split('?v=')[1] || '–';
     var driftBand = band('06 · Drift', 'System', 'och fel',
       lista([{ ikon: 'bugg', namn: 'Fel sedan sidan laddades', lage: dr.fel.length ? 'medel' : 'ok', text: dr.fel.length ? plural(dr.fel.length, 'fel', 'fel') : 'Inga' },
-        { ikon: 'databas', namn: 'Lagringen', lage: dr.skriv && !dr.full ? 'ok' : 'medel', text: !dr.skriv ? 'Går inte att skriva' : kb(dr.bytes) + ' av ca 5 MB' },
-        { ikon: 'server', namn: 'Läge och version', lage: 'ok', text: 'Demo · v' + version + ' · data ' + (IH.VERSION || '–') },
+        { ikon: 'databas', namn: 'Lagringen', lage: dr.skriv && !dr.full ? 'ok' : 'medel', text: !dr.skriv ? 'Går inte att skriva' : kb(dr.bytes) + ' av cirka 5 MB' },
+        { ikon: 'server', namn: 'Läge och version', lage: 'ok', text: 'Prototyp · v' + version + ' · data ' + (IH.VERSION || '–') },
         { ikon: 'lank', namn: 'Nätverket', lage: dr.online ? 'ok' : 'medel', text: dr.online ? 'Uppkopplad' : 'Ingen uppkoppling' }]) +
       (dr.fel.length ? '<ul class="ao-fel">' + dr.fel.slice(-3).reverse().map(function (t) { return '<li><code>' + e(t) + '</code></li>'; }).join('') + '</ul>' : '<p class="ao-lugnt">' + ik('bock') + 'Inga fel i skript eller filer sedan sidan laddades.</p>') +
       '<p class="ao-ogon ao-ogon--liten">Snabbåtgärder och verktyg</p><div class="ao-snabb">' + SNABB.map(function (x) { return '<button type="button" class="ao-snabbknapp" data-g="' + x[0] + '">' + ik(x[1]) + '<span>' + x[2] + '</span></button>'; }).join('') + '</div>' +
-      '<div class="ao-fot">' + (dr.fel.length ? '<button type="button" class="knapp knapp--liten" data-g="sh-rensa-fel">' + ik('aterstall') + 'Rensa felloggen</button>' : '') + '<button type="button" class="knapp knapp--liten" data-g="sh-skanna-ga" data-ids="trasigt,uppdatering">' + ik('uppgradera') + 'Sök uppdateringar</button></div>',
-      { halv: true, klass: 'ao-band--system', hoger: chip(dr.poang, dr.poang + ' / 100') });
+      '<div class="ao-fot">' + (dr.fel.length ? '<button type="button" class="knapp knapp--liten" data-g="sh-rensa-fel">' + ik('aterstall') + 'Rensa felloggen</button>' : '') + '<button type="button" class="knapp knapp--liten" data-g="sh-skanna-ga" data-ids="trasigt,uppdatering">' + ik('uppgradera') + 'Sök efter uppdateringar</button></div>',
+      { halv: true, klass: 'ao-band--system', hoger: chip(dr.poang, dr.poang + '/100') });
     // 07 Förslag, snabbåtgärder och verktyg
     var forslag = forslagLista(brott, dl, dr);
     var forslagBand = band('07 · Förslag', 'Bör', 'åtgärdas',
@@ -261,13 +261,13 @@
   var ladda = function (namn, text, typ) { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: typ })); a.download = namn; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800); };
   var bekrafta = function (el) {
     if (el.dataset.saker) return true;
-    el.dataset.saker = '1'; var s = el.querySelector('span') || el, gammal = s.textContent; s.textContent = 'Klicka igen';
+    el.dataset.saker = '1'; var s = el.querySelector('span') || el, gammal = s.textContent; s.textContent = 'Klicka igen för att bekräfta';
     setTimeout(function () { if (el.isConnected) { delete el.dataset.saker; s.textContent = gammal; } }, 4000);
     return false;
   };
   G['kc-csv'] = function () {
     var d = db(), q = function (x) { return '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"'; };
-    var rader = [['Namn', 'Roll', 'Status', 'Öppna affärer', 'Vunnet värde', 'Aktiviteter 30 d'].map(q).join(';')].concat(IH.ANVANDARE.map(function (u) {
+    var rader = [['Namn', 'Roll', 'Status', 'Öppna affärer', 'Vunnet värde', 'Händelser 30 d'].map(q).join(';')].concat(IH.ANVANDARE.map(function (u) {
       var aff = d.affarer.filter(function (a) { return a.ansvarig === u.id; });
       return [u.namn, u.titel, IH.narvaro ? IH.narvaro(u.id).namn : '', aff.filter(function (a) { return a.steg !== 'vunnen' && !a.forlorad; }).length,
         aff.filter(function (a) { return a.steg === 'vunnen'; }).reduce(function (t, a) { return t + a.varde; }, 0), d.aktiviteter.filter(function (h) { return h.av === u.id && IH.dagarSedan(h.tid) < 30; }).length].map(q).join(';');
@@ -292,8 +292,8 @@
     (((db().chatt || {}).meddelanden) || []).forEach(function (m) { (m.filer || []).forEach(function (f) { if (f.data) { delete f.data; f.rensad = true; n++; } }); });
     IH.spara();
     var sparat = Math.max(0, fore - (localStorage.getItem(IH.NYCKEL) || '').length) * 2;
-    if (IH.sak) IH.sak.logg('rensning', 'Chattens filer rensade: ' + n + ' st, ' + Math.round(sparat / 1024) + ' kB frigjort.');
-    IH.rita(); IH.toast(n ? 'Filerna är rensade' : 'Inga filer att rensa', n ? n + ' st · ' + Math.round(sparat / 1024) + ' kB frigjort' : null, 'papperskorg');
+    if (IH.sak) IH.sak.logg('rensning', 'Chattens filer rensade: ' + plural(n, 'fil', 'filer') + ', ' + Math.round(sparat / 1024) + ' kB frigjort.');
+    IH.rita(); IH.toast(n ? 'Filerna är rensade' : 'Inga filer att rensa', n ? plural(n, 'fil', 'filer') + ' · ' + Math.round(sparat / 1024) + ' kB frigjort' : null, 'papperskorg');
   };
   G['kc-rensa-logg'] = function (el) {
     if (!bekrafta(el)) return;
@@ -342,7 +342,7 @@
     p.forfragningar.forEach(function (f) { f.tilldelad = till.id; });
     IH.spara();
     if (IH.sak) IH.sak.logg('konto', 'Fördelade ' + t + (p.fran ? ' från ' + ((IH.anvandare(p.fran) || {}).namn || p.fran) : '') + ' till ' + till.namn + '.');
-    if (IH.chattSkickaTill) IH.chattSkickaTill(till.id, 'Jag har gett dig ' + t + ' – du hittar dem i inkorgen, på säljtavlan och under Att göra.');
+    if (IH.chattSkickaTill) IH.chattSkickaTill(till.id, 'Jag har gett dig ' + t + ' – du hittar dem under Förfrågningar, på säljtavlan och under Att göra.');
     IH.stangArk(); IH.uppdateraMeny(); IH.rita();
     IH.toast('Fördelat till ' + till.namn, t, 'bock');
   };

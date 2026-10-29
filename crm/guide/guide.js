@@ -308,7 +308,7 @@
     bubbla.className = 'ihg-bubbla ihg-bubbla--mitt syns';
     bubbla.innerHTML = '<div class="ihg-bubbla__inne"><div class="ihg-bubbla__topp"><span class="ihg-tur">' + esc(aktiv.tur.namn) + '</span><span class="ihg-raknare">' + (aktiv.n + 1) + ' / ' + aktiv.tur.steg.length + '</span>' +
       '<button type="button" class="ihg-x" data-ihg="stang" aria-label="Stäng guiden">' + SVG.stang + '</button></div>' +
-      '<h3 id="ihg-rubrik">' + varde(s.rubrik) + '</h3><p class="ihg-letar" id="ihg-text"><i></i>Öppnar rätt ställe i CRM:et …</p></div>';
+      '<h3 id="ihg-rubrik">' + varde(s.rubrik) + '</h3><p class="ihg-letar" id="ihg-text"><i></i>Öppnar rätt ställe i CRM:et…</p></div>';
     placeraMitt();
   }
 
@@ -319,7 +319,7 @@
     aktiv.visadId = aktiv.stegId;
     aktiv.vantaKlick = !!(s.vanta && x);
     var text = varde(s.text, aktiv.ctx) || '';
-    if (fallback) text = '<p>' + (varde(s.saknas, aktiv.ctx) || 'Den här delen syns inte just nu – den kan bero på ditt konto, fönstrets storlek eller datan. Gå vidare med Nästa.') + '</p>' + (text ? '<p style="opacity:.75">' + text + '</p>' : '');
+    if (fallback) text = '<p>' + (varde(s.saknas, aktiv.ctx) || 'Den här delen syns inte just nu. Det kan bero på ditt konto, fönstrets storlek eller datan. Gå vidare med Nästa.') + '</p>' + (text ? '<p style="opacity:.75">' + text + '</p>' : '');
     var mitt = !x;
     var framsteg = (n + 1) / tur.steg.length;
     bubbla.className = 'ihg-bubbla ihg-bubbla--ny' + (mitt ? ' ihg-bubbla--mitt' : '');
@@ -614,7 +614,7 @@
     bubbla.innerHTML = '<div class="ihg-bubbla__inne"><div class="ihg-bubbla__topp"><span class="ihg-tur">' + esc(tur.namn) + '</span><span class="ihg-raknare">' + gjorda + ' / ' + antal.length + ' guider</span>' +
       '<button type="button" class="ihg-x" data-ihg="stang" aria-label="Stäng">' + SVG.stang + '</button></div>' +
       '<span class="ihg-klar-ikon">' + SVG.trofe + '</span><h3 id="ihg-rubrik">' + esc(tur.klarRubrik || 'Snyggt – guiden är klar!') + '</h3>' +
-      '<div class="ihg-text" id="ihg-text"><p>' + (tur.klarText || 'Du hittar alla guider under knappen <b>Guide</b> nere i hörnet, eller med <kbd>?</kbd>.') + '</p></div>' +
+      '<div class="ihg-text" id="ihg-text"><p>' + (tur.klarText || 'Du hittar alla guider under knappen <b>?</b> vid menyn, eller med tangenten <kbd>?</kbd>.') + '</p></div>' +
       '<div class="ihg-framsteg"><i style="--a:1"></i></div><div class="ihg-knappar"><span class="ihg-tom"></span>' +
       '<button type="button" class="ihg-k ihg-k--kant" data-ihg="stang">Stäng</button>' +
       (nasta ? '<button type="button" class="ihg-k ihg-k--barn" data-ihg="tur" data-id="' + esc(nasta.id) + '">Nästa: ' + esc(nasta.namn) + SVG.pil + '</button>' : '') + '</div></div>';
@@ -636,7 +636,7 @@
     var a = antalFor(), andel = a.alla ? a.klara / a.alla : 0, omkrets = 2 * Math.PI * 18;
     var c = knappEl.querySelector('.ihg-knapp__ring circle:last-child');
     if (c) { c.setAttribute('stroke-dasharray', omkrets.toFixed(1)); c.setAttribute('stroke-dashoffset', (omkrets * (1 - andel)).toFixed(1)); }
-    knappEl.title = 'Guider – ' + a.klara + ' av ' + a.alla + ' klara (?)';
+    knappEl.title = 'Guider (tangent ?) – ' + a.klara + ' av ' + a.alla + ' klara';
   }
   function byggKnapp() {
     if (knappEl || !document.body) return;
@@ -676,7 +676,7 @@
       '<div class="ihg-meny__framsteg"><span><i style="--a:' + (a.alla ? a.klara / a.alla : 0).toFixed(3) + '"></i></span><b>' + a.klara + ' av ' + a.alla + ' klara</b></div></div>' +
       '<div class="ihg-meny__kropp">' + kropp + '</div>' +
       '<div class="ihg-meny__fot"><a href="guide/presentation.html">' + SVG.bild + 'Presentation</a><a href="guide/video.html">' + SVG.film + 'Video</a>' +
-      '<button type="button" class="ihg-hoger" data-ihg-m="nollstall" title="Börja om – alla guider markeras som ej gjorda">' + SVG.nollstall + 'Börja om</button></div>';
+      '<button type="button" class="ihg-hoger" data-ihg-m="nollstall" title="Börja om – alla guider markeras som inte gjorda">' + SVG.nollstall + 'Börja om</button></div>';
   }
   G.oppna = function () {
     if (aktiv) return;
@@ -714,7 +714,7 @@
   // Välkomstkortet första gången – en inbjudan, inget som tar över.
   function visaHej() {
     if (hejEl || aktiv || lasJson(LS_SETT, false) || !G.tur('valkommen') || document.querySelector('.mote')) return;
-    hejEl = el('div', 'ihg-hej', '<span class="ihg-hej__vink">' + SVG.vink + '</span><b>Ny i Legohus CRM?</b><p>Ta en rundtur på två minuter – en pekare visar var allt finns. Alla guider ligger under <b>Guide</b>.</p>' +
+    hejEl = el('div', 'ihg-hej', '<span class="ihg-hej__vink">' + SVG.vink + '</span><b>Ny i Legohus CRM?</b><p>Ta en rundtur på två minuter – en pekare visar var allt finns. Alla guider ligger under knappen <b>?</b> vid menyn.</p>' +
       '<div class="ihg-knappar"><button type="button" class="ihg-k ihg-k--svag" data-hej="nej">Inte nu</button><button type="button" class="ihg-k ihg-k--barn" data-hej="ja">Starta rundturen' + SVG.pil + '</button></div>');
     hejEl.setAttribute('role', 'dialog');
     hejEl.setAttribute('aria-label', 'Välkommen');

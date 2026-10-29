@@ -101,10 +101,10 @@
       return fram <= 0 ? 'i dag' : fram === 1 ? 'i morgon' : 'om ' + fram + ' dagar';
     }
     if (s < 60) return 'nyss';
-    if (s < 3600) return Math.floor(s / 60) + ' min sedan';
-    if (s < 86400) return Math.floor(s / 3600) + ' h sedan';
+    if (s < 3600) return 'för ' + Math.floor(s / 60) + ' min sedan';
+    if (s < 86400) return 'för ' + Math.floor(s / 3600) + ' h sedan';
     var d = Math.floor(s / 86400);
-    return d === 1 ? 'i går' : d < 30 ? d + ' dagar sedan' : IH.datum(iso, new Date(iso).getFullYear() !== new Date().getFullYear());
+    return d === 1 ? 'i går' : d < 30 ? 'för ' + d + ' dagar sedan' : IH.datum(iso, new Date(iso).getFullYear() !== new Date().getFullYear());
   };
   IH.initialer = function (namn) {
     var ord = String(namn || '?').trim().split(/\s+/);
@@ -114,7 +114,7 @@
   };
   IH.hej = function () {
     var h = new Date().getHours();
-    return h < 5 ? 'God natt' : h < 10 ? 'God morgon' : h < 14 ? 'Hej' : h < 18 ? 'God eftermiddag' : 'God kväll';
+    return h < 5 ? 'God kväll' : h < 10 ? 'God morgon' : h < 14 ? 'Hej' : h < 18 ? 'God eftermiddag' : 'God kväll';
   };
   IH.dagStr = function (d) {
     d = d ? new Date(d) : new Date();
@@ -459,7 +459,7 @@
     var nav = menyFor(jag).map(function (grupp) {
       // Försäljningen (chefsvyn) syns bara för chefen, under Översikt som i Uperformance (ledning.js) –
       // men inte när växeln Säljvy/Chefsvy står överst: då finns bara en väg dit
-      var poster = !grupp.rubrik && jag.chef && jag.roll === 'salj' && !vaxel ? grupp.poster.concat([['chef', 'Försäljning', 'graf']]) : grupp.poster;
+      var poster = !grupp.rubrik && jag.chef && jag.roll === 'salj' && !vaxel ? grupp.poster.concat([['chef', 'Försäljningsledning', 'graf']]) : grupp.poster;
       return (grupp.rubrik ? '<p class="sido__rubrik">' + grupp.rubrik + '</p>' : '') + poster.map(function (p) {
         var br = b[p[0]];
         var bricka = br && br[0] ? '<span class="sido__bricka' + (br[1] ? ' sido__bricka--varm' : '') + '">' + br[0] + '</span>' : '';
@@ -468,27 +468,27 @@
     }).join('');
     // Administratören går in i teamets konton härifrån (supportläget, stod.js)
     if (jag.roll === 'admin') nav += '<p class="sido__rubrik">Teamet</p>' + IH.ANVANDARE.filter(function (u) { return u.roll !== 'admin' && !u.inaktiv; }).map(function (u) {
-      return '<button class="sido__lank sido__konto" type="button" data-g="visa-som" data-id="' + u.id + '" title="Gå in i ' + IH.e(u.namn) + 's konto (supportläge)">' +
+      return '<button class="sido__lank sido__konto" type="button" data-g="visa-som" data-id="' + u.id + '" title="Visa som ' + IH.e(u.namn) + ' (supportläget)">' +
         '<span class="avatar" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + (IH.narvaroPrick ? IH.narvaroPrick(u.id) : '') + '</span><span>' + IH.e(u.namn) + '</span><span class="sido__ga">Gå in</span></button>';
     }).join('');
     return '<a class="sido__logo" href="#/"><img src="../images/legohus_logo.svg" alt="Legohus Stockholm"><span class="sido__crm">CRM <small>· Prototyp</small></span></a>' +
       '<div class="sido__verktyg"><button class="sido__sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
-      (jag.roll === 'admin' ? '' : '<button class="sido__ny" type="button" data-g="ny" aria-label="Ny" title="Ny  N">' + IH.i('plus') + '</button>') + '</div>' +
+      (jag.roll === 'admin' ? '' : '<button class="sido__ny" type="button" data-g="ny" aria-label="Skapa ny" title="Skapa ny  N">' + IH.i('plus') + '</button>') + '</div>' +
       vaxel +
-      '<nav class="sido__nav" aria-label="CRM"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
+      '<nav class="sido__nav" aria-label="Huvudmeny"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
       '<div class="sido__fot"><button class="sido__mer" type="button" tabindex="-1" aria-hidden="true" data-g="sido-mer">Mer ' + IH.i('pil') + '</button>' +
       '<button class="anv" type="button" data-g="konto-meny" aria-haspopup="dialog"><span class="avatar' + (jag.bild ? ' avatar--bild' : '') + '" style="--av:' + jag.farg + (jag.bild ? ';background-image:url(' + IH.e(jag.bild) + ');background-size:cover;color:transparent' : '') + '">' + IH.initialer(jag.namn) +
       (IH.narvaroPrick ? IH.narvaroPrick(jag.id) : '') + '</span>' +
       '<span><b>' + IH.e(jag.namn) + '</b><small class="anv__status">' + (IH.narvaro ? IH.e(IH.narvaro(jag.id).namn) + ' · ' : '') + IH.e(String(jag.titel || '').split(' · ')[0]) + '</small></span><span class="anv__chevron" aria-hidden="true">' + IH.i('chevron') + '</span></button>' +
       '<div class="sido__smalt"><a href="../index.html" data-g="lamna" title="Till hemsidan">' + IH.i('hem') + 'Hemsidan</a>' +
       '<button type="button" data-g="logga-ut" title="Logga ut">' + IH.i('utloggning') + 'Logga ut</button>' +
-      (jag.roll === 'admin' ? '<button type="button" class="sido__aterstall" data-g="sido-aterstall" title="Återställ exempeldatan" aria-label="Återställ exempeldatan">' + IH.i('aterstall') + '</button>' : '') + '</div></div>';
+      (jag.roll === 'admin' ? '<button type="button" class="sido__aterstall" data-g="sido-aterstall" title="Återställ exempeldata" aria-label="Återställ exempeldata">' + IH.i('aterstall') + '</button>' : '') + '</div></div>';
   }
 
   function mobilmeny() {
     var b = brickor();
     var roll = IH.jag().roll;
-    var poster = roll === 'admin' ? [['oversikt', 'Översikt', 'hem'], ['kontroll', 'Kontroll', 'matare'], ['admin', 'Admin', 'nyckelverktyg'], ['sakerhet', 'Säkerhet', 'skold']]
+    var poster = roll === 'admin' ? [['oversikt', 'Översikt', 'hem'], ['kontroll', 'Kontroll', 'matare'], ['admin', 'Adminpanel', 'nyckelverktyg'], ['sakerhet', 'Säkerhet', 'skold']]
       : roll === 'prod' ? [['oversikt', 'Översikt', 'hem'], ['produktion', 'Projekt', 'produktion'], ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert']]
       : [['oversikt', 'Översikt', 'hem'], ['forfragningar', 'Förfrågn.', 'inkorg', 'Förfrågningar'], ['salj', 'Säljtavla', 'tavla'], ['kunder', 'Kunder', 'kunder']];
     return poster.map(function (p) {
@@ -503,7 +503,7 @@
     var jag = IH.jag(), b = brickor();
     // Alla sidor, grupperade som i sidomenyn med en tunn avdelare mellan grupperna. Knappen som fäller
     // ut menyn sitter mitt på kanten – grupperna delas i en övre och en nedre halva runt den.
-    var grupper = menyFor(jag).map(function (g) { return !g.rubrik && jag.chef && jag.roll === 'salj' ? g.poster.concat([['chef', 'Försäljning', 'graf']]) : g.poster; });
+    var grupper = menyFor(jag).map(function (g) { return !g.rubrik && jag.chef && jag.roll === 'salj' ? g.poster.concat([['chef', 'Försäljningsledning', 'graf']]) : g.poster; });
     var totalt = grupper.reduce(function (n, g) { return n + g.length; }, 0), halvor = [[], []], uppe = 0;
     grupper.forEach(function (g) { var h = uppe && uppe + g.length / 2 > totalt / 2 ? 1 : 0; if (!h) uppe += g.length; halvor[h].push(g); });
     if (!halvor[1].length && halvor[0].length > 1) halvor[1].push(halvor[0].pop());
@@ -831,7 +831,7 @@
     if (jag.roll === 'admin') {
       var konton = IH.ANVANDARE.filter(function (u) { return u.roll !== 'admin' && !u.inaktiv && (IH.nuvarande.vy !== 'chef' || u.chef); });
       return { titel: namn, html: '<a class="tillbaka" href="#/">' + IH.i('pilv') + 'Översikt</a><section class="kort ad-band"><h2>' + IH.emo('las') + namn + ' öppnas i supportläget</h2>' +
-        '<p class="ad-not">Administratören skapar och ändrar inte säljarnas och produktionens poster direkt. Gå in i ett konto i supportläget – då öppnas samma sida som den säljaren ser, och det du gör loggas.</p>' +
+        '<p class="ad-not">Administratören skapar och ändrar inte säljarnas och produktionens poster direkt. Välj ett konto nedan – då öppnas samma sida som den personen ser, i supportläget, och allt du gör loggas.</p>' +
         '<div class="ad-knappar">' + konton.map(function (u) { return '<button class="knapp" type="button" data-g="visa-som" data-id="' + u.id + '" data-mal="' + IH.e(adr) + '"><span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span>Öppna som ' + IH.e(u.namn) + '</button>'; }).join('') + '</div></section>' };
     }
     return { titel: namn, html: '<a class="tillbaka" href="#/produktion">' + IH.i('pilv') + 'Projekt</a><section class="kort ad-band"><h2>' + IH.emo('las') + namn + ' är för säljarna</h2>' +
@@ -929,7 +929,7 @@
   var SIDOR = [['oversikt', 'Översikt', 'hem', 'start hem i dag'], ['forfragningar', 'Förfrågningar', 'inkorg', 'inkorg leads nya'], ['salj', 'Säljtavla', 'tavla', 'tavla pipeline affärer steg'],
     ['kunder', 'Kunder', 'kunder', 'kundlista kontakter'], ['offerter', 'Offerter', 'offert', 'offert anbud'], ['dokument', 'Dokument', 'mapp', 'filer underlag ritningar arkiv'], ['mote', 'Kundmöte', 'mote', 'presentation möte'],
     ['produktion', 'Projekt', 'produktion', 'produktion montage bygge checklista'], ['kolla-marken', 'Kolla marken', 'grodd', 'tomt mark karta detaljplan'], ['att-gora', 'Att göra', 'todo', 'uppgifter todo'],
-    ['chatt', 'Meddelanden', 'meddelande', 'chatt meddelande'], ['profil', 'Min profil', 'anstallda', 'profil konto status'], ['chef', 'Försäljning', 'graf', 'försäljningsledning mål team frånvaro'],
+    ['chatt', 'Meddelanden', 'meddelande', 'chatt meddelande'], ['profil', 'Min profil', 'anstallda', 'profil konto status'], ['chef', 'Försäljningsledning', 'graf', 'försäljning mål team frånvaro'],
     ['installningar', 'Inställningar', 'installning', 'prislista priser pris tillval'], ['kontroll', 'Kontrollcentral', 'matare', 'hälsa systemhälsa'], ['admin', 'Adminpanel', 'nyckelverktyg', 'konton roller behörigheter import export logg'], ['sakerhet', 'Säkerhet', 'skold', 'säkerhetshubben skanning']];
   var ADMIN_SIDOR = ['oversikt', 'kontroll', 'admin', 'sakerhet', 'chatt', 'att-gora', 'profil', 'installningar'];
   var sidaFor = function (x) { var j = IH.jag(); if (j.roll === 'admin') return ADMIN_SIDOR.indexOf(x[0]) >= 0; if (/^(kontroll|admin|sakerhet)$/.test(x[0]) || IH.sparrad(x[0])) return false; return x[0] !== 'chef' || j.chef; };
@@ -937,7 +937,7 @@
   var KOMMANDON = [['logga-ut', 'Logga ut', 'utloggning', 'Till inloggningen', 'logga ut avsluta'], ['byt-anvandare', 'Byt användare', 'aterstall', 'Exempelkontona', 'byt konto användare'],
     ['vaxla-sido', 'Dölj eller visa menyn', 'meny', 'Kortkommando [', 'meny dölj visa fäll'], ['konto-meny', 'Ändra status', 'trend', 'Kontomenyn', 'status närvaro lunch möte'],
     ['hjalp', 'Kortkommandon', 'nyckel', 'Alla tangenter i CRM:et', 'hjälp kortkommandon tangenter'],
-    ['ad-exportera', 'Exportera all data', 'skrivut', 'JSON-fil', 'export säkerhetskopia', true], ['sh-skanna-ga', 'Skanna säkerheten', 'radar', 'Alla sju kontroller', 'skanna säkerhet', true],
+    ['ad-exportera', 'Exportera data', 'skrivut', 'JSON-fil', 'export säkerhetskopia', true], ['sh-skanna-ga', 'Skanna säkerheten', 'radar', 'Alla sju kontroller', 'skanna säkerhet', true],
     ['km-nytt-konto', 'Nytt konto', 'kunder', 'Lägg till en användare', 'konto användare lägg till', true]];
   var ATGARDER = [['ny-kund', 'Ny kund', 'kunder', 'Privatperson eller företag'], ['ny-affar', 'Ny affär', 'tavla', 'Direkt på säljtavlan'],
     ['ny-forfragan', 'Ny förfrågan', 'inkorg', 'Någon ringde eller mejlade'], ['ny-uppgift', 'Ny uppgift', 'todo', 'Något att göra'],
@@ -1031,14 +1031,14 @@
       html += grupp('Projekt', projekt.map(function (p) { return rad('ga:#/produktion/' + p.id, IH.i('produktion'), projNamn(p), p.montage ? 'Montage ' + IH.datum(p.montage) : '', 'Projekt'); }));
       html += grupp('Uppgifter', uppgifter.map(function (u) { return rad('ga:#/att-gora', IH.i('todo'), u.text, u.forfaller ? 'Förfaller ' + IH.datum(u.forfaller) : '', 'Uppgift'); }));
       html += grupp('Konton', konton.map(function (u) { return rad('ga:#/profil/' + u.id, '<span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span>', u.namn, u.titel, 'Konto'); }));
-      html += grupp('Åtgärder', ATGARDER.filter(function (x) { return jag.roll !== 'admin' && !(jag.roll === 'prod' && /affar|forfragan|mote/.test(x[0])) && traff(x[1], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
+      html += grupp('Snabbåtgärder', ATGARDER.filter(function (x) { return jag.roll !== 'admin' && !(jag.roll === 'prod' && /affar|forfragan|mote/.test(x[0])) && traff(x[1], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
       var teman = !IH.tema || !IH.tema.lista || q.length < 2 ? [] : IH.tema.lista.filter(function (t) { var txt = ('tema ' + t.namn + ' ' + t.sok + ' utseende färg färger').toLowerCase(); return q.replace(/:/g, ' ').split(/\s+/).filter(Boolean).every(function (w) { return txt.indexOf(w) >= 0; }); });
       html += grupp('Tema', teman.map(temaRad));
       var lagen = !IH.layout || !IH.layout.lista || q.length < 2 ? [] : IH.layout.lista.filter(function (l) { var txt = ('layout läge lägen täthet ' + l.namn + ' ' + l.sok).toLowerCase(); return q.replace(/:/g, ' ').split(/\s+/).filter(Boolean).every(function (w) { return txt.indexOf(w) >= 0; }); });
       html += grupp('Layout', lagen.map(layoutRad));
       html += grupp('Kommandon', kommandon.map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
       html += grupp('Gå till', SIDOR.filter(function (x) { return sidaFor(x) && (x[1] + ' ' + x[3]).toLowerCase().indexOf(q) >= 0; }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
-      if (!html) html = '<p class="palett__tom">Inga träffar för ”' + IH.e(q) + '”</p>';
+      if (!html) html = '<p class="palett__tom">Inga träffar för ”' + IH.e(q) + '”. Prova ett kortare ord eller ett namn.</p>';
     }
     return html;
   }
@@ -1077,10 +1077,10 @@
     rot.setAttribute('role', 'dialog');
     rot.setAttribute('aria-modal', 'true');
     rot.setAttribute('aria-label', 'Sök och kommandon');
-    rot.innerHTML = '<label class="palett__sok">' + IH.i('sok') + '<input type="text" placeholder="Sök eller skriv ett kommando…" autocomplete="off" spellcheck="false" aria-label="Sök eller skriv ett kommando"><kbd>esc</kbd>' +
+    rot.innerHTML = '<label class="palett__sok">' + IH.i('sok') + '<input type="text" placeholder="Sök eller skriv ett kommando…" autocomplete="off" spellcheck="false" aria-label="Sök eller skriv ett kommando"><kbd>Esc</kbd>' +
       '<button class="palett__stang" type="button" aria-label="Stäng sökningen">' + IH.i('stang') + '</button></label>' +
       '<div class="palett__lista" role="listbox" data-palett-lista></div>' +
-      '<footer class="palett__fot"><span><kbd>↑</kbd><kbd>↓</kbd>välj</span><span><kbd>↵</kbd>öppna</span><span><kbd>esc</kbd>stäng</span><span class="palett__fot--hoger"><kbd>' + (MAC ? '⌘' : 'Ctrl') + '</kbd><kbd>K</kbd>öppna och stäng</span></footer>';
+      '<footer class="palett__fot"><span><kbd>↑</kbd><kbd>↓</kbd>välj</span><span><kbd>↵</kbd>öppna</span><span><kbd>Esc</kbd>stäng</span><span class="palett__fot--hoger"><kbd>' + (MAC ? '⌘' : 'Ctrl') + '</kbd><kbd>K</kbd>öppna och stäng</span></footer>';
     document.body.appendChild(slojan);
     document.body.appendChild(rot);
     palett = { rot: rot, slojan: slojan, fokus: document.activeElement };
@@ -1154,7 +1154,7 @@
       if (e.key === '?') { e.preventDefault(); IH.G.hjalp(); }
       if (e.key === 'n' || e.key === 'N') {
         e.preventDefault();
-        if (arkAndrat()) { IH.toast('Du har ett halvifyllt formulär', 'Spara det eller stäng det först (Esc två gånger).', 'varning'); return; }
+        if (arkAndrat()) { IH.toast('Du har ett formulär som inte är sparat', 'Spara eller stäng det först (tryck Esc två gånger).', 'varning'); return; }
         IH.G.ny();
       }
     });
@@ -1247,7 +1247,7 @@
     var mitt = ['Mitt', [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'todo'], ['installningar', 'Inställningar', 'installning'], ['profil', 'Min profil', 'anstallda']]];
     var grupper = jag.roll === 'admin' ? [mitt]
       : jag.roll === 'prod' ? [['Kunder', [['dokument', 'Dokument', 'mapp']]], ['Verktyg', [['kolla-marken', 'Kolla marken', 'grodd']]], mitt]
-      : [['Sälj', [['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote']].concat(jag.chef ? [['chef', 'Försäljning', 'graf']] : [])],
+      : [['Sälj', [['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote']].concat(jag.chef ? [['chef', 'Försäljningsledning', 'graf']] : [])],
         ['Produktion', [['produktion', 'Projekt', 'produktion'], ['kolla-marken', 'Kolla marken', 'grodd']]], mitt];
     var ruta = function (p) {
       var br = b[p[0]];
@@ -1262,7 +1262,7 @@
         '<span class="mer-konto__text"><b>' + IH.e(jag.namn) + '</b><small>' + IH.e((status ? status + ' · ' : '') + String(jag.titel || '').split(' · ')[0]) + '</small></span><span class="mer-konto__byt">Ändra status' + i('chevron') + '</span></button>' +
         grupper.map(function (g) { return '<p class="etikett mer-etikett">' + g[0] + '</p><div class="mer-rutnat" style="--n:' + (g[1].length === 4 ? 2 : Math.min(3, g[1].length)) + '">' + g[1].map(ruta).join('') + '</div>'; }).join('') +
         (team.length ? '<p class="etikett mer-etikett">Teamet · supportläget</p><div class="lista kort">' + team.map(function (u) {
-          return '<button class="lista__rad" type="button" data-g="visa-som" data-id="' + u.id + '"><span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span><span class="lista__text"><b>' + IH.e(u.namn) + '</b><small>Gå in i kontot</small></span>' + i('pil') + '</button>';
+          return '<button class="lista__rad" type="button" data-g="visa-som" data-id="' + u.id + '"><span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span><span class="lista__text"><b>' + IH.e(u.namn) + '</b><small>Visa som</small></span>' + i('pil') + '</button>';
         }).join('') + '</div>' : '') +
         '<div class="mer-fot"><a href="../index.html" data-g="lamna">' + i('hus') + 'Hemsidan</a>' +
         '<button type="button" data-g="byt-anvandare">' + i('aterstall') + 'Byt användare</button>' +
@@ -1275,9 +1275,9 @@
     var admin = IH.riktigJag().roll === 'admin';
     IH.oppnaArk({ titel: 'Kortkommandon', ikon: 'nyckel', under: 'Fungerar när du inte skriver i ett fält.',
       kropp: '<div class="lista kort">' + tangent((MAC ? '⌘' : 'Ctrl') + ' K', 'Sök eller kör ett kommando') + tangent('/', 'Sök') +
-        (IH.jag().roll === 'admin' ? '' : tangent('N', 'Skapa ny')) + tangent('Esc', 'Stäng panelen (två gånger om du skrivit något)') +
+        (IH.jag().roll === 'admin' ? '' : tangent('N', 'Skapa ny')) + tangent('Esc', 'Stäng panelen (tryck två gånger om du har skrivit något)') +
         tangent('[', 'Dölj eller visa menyn (dator)') +
-        (IH.jag().roll === 'admin' ? '' : tangent('G Ö · G I · G T', 'Gå till översikten, förfrågningarna, säljtavlan') + tangent('G K · G O · G A', 'Gå till kunderna, offerterna, att göra')) + (admin ? tangent('Shift Esc', 'Lämna supportläget') : '') + tangent('?', 'Den här listan') + '</div>' });
+        (IH.jag().roll === 'admin' ? '' : tangent('G Ö · G I · G T', 'Gå till översikten, förfrågningarna eller säljtavlan') + tangent('G K · G O · G A', 'Gå till kunderna, offerterna eller Att göra') + tangent('G P · G M', 'Gå till projekten eller meddelandena')) + (admin ? tangent('Shift Esc', 'Lämna supportläget') : '') + tangent('?', 'Den här listan') + '</div>' });
   };
 
   /* --- Start ------------------------------------------------------------- */

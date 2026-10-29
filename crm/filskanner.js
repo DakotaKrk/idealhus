@@ -68,7 +68,7 @@
     el.className = 'fs-kort'; el.setAttribute('data-lage', 'kor'); el.style.setProperty('--p', '0');
     el.innerHTML = `<span class="fs-ring" aria-hidden="true"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="fs-spar"/><circle cx="22" cy="22" r="19" class="fs-bage" pathLength="100"/></svg><span class="fs-ikon">${ikon('skanna')}</span></span>
       <div class="fs-text"><span class="fs-rubrik"><strong title="${esc(fil.name)}">${esc(fil.name)}</strong><small>${esc(storlek(fil.size))}</small></span>
-        <span class="fs-steg" data-fs-steg>Startar virusskanningen …</span>
+        <span class="fs-steg" data-fs-steg>Startar virusskanningen…</span>
         <ul class="fs-stegrad" aria-hidden="true">${STEG.map(() => '<li></li>').join('')}</ul>
         <ul class="fs-fynd" hidden></ul></div>
       <button type="button" class="fs-stang" aria-label="Stäng">${ikon('stang')}</button>`;
@@ -79,7 +79,7 @@
   function stang(el) { if (!el.isConnected || el.hasAttribute('data-stanger')) return; el.setAttribute('data-stanger', ''); setTimeout(() => { el.remove(); if (panel && !panel.children.length) { panel.remove(); panel = null; } }, 320); }
   function visaSteg(el, i, text) {
     el.style.setProperty('--p', String((i + 0.5) / STEG.length));
-    const s = el.querySelector('[data-fs-steg]'); if (s) s.textContent = `${text} …`;
+    const s = el.querySelector('[data-fs-steg]'); if (s) s.textContent = `${text}…`;
     el.querySelectorAll('.fs-stegrad li').forEach((li, j) => { li.toggleAttribute('data-klar', j < i); li.toggleAttribute('data-nu', j === i); });
   }
   function visaSvar(el, r) {

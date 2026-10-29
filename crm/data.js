@@ -43,7 +43,7 @@
   IH.SALJSTEG = [
     { id: 'ny', namn: 'Ny förfrågan', kort: 'Ny', sannolikhet: 10, farg: '#b8cde0' },
     { id: 'kontakt', namn: 'Kontakt tagen', kort: 'Kontakt', sannolikhet: 20, farg: '#9fc2c9' },
-    { id: 'besok', namn: 'Tomt & platsbesök', kort: 'Besök', sannolikhet: 40, farg: '#a9c8a4' },
+    { id: 'besok', namn: 'Tomt och platsbesök', kort: 'Besök', sannolikhet: 40, farg: '#a9c8a4' },
     { id: 'offert', namn: 'Offert skickad', kort: 'Offert', sannolikhet: 60, farg: '#e8c98f' },
     { id: 'forhandling', namn: 'Förhandling', kort: 'Förhandling', sannolikhet: 75, farg: '#f0b56e' },
     { id: 'vunnen', namn: 'Order signerad', kort: 'Vunnen', sannolikhet: 100, farg: '#7fe0a6' }
@@ -56,10 +56,10 @@
 
   /* --- Produktionsflödet (ur Så fungerar det, steg 3–7) -------------- */
   IH.PROJSTEG = [
-    { id: 'underlag', namn: 'Ritning & lov', kort: 'Underlag', farg: '#b8cde0', text: 'Ritningar och underlag. Kunden lämnar in bygglov eller anmälan.' },
+    { id: 'underlag', namn: 'Ritning och lov', kort: 'Underlag', farg: '#b8cde0', text: 'Ritningar och underlag. Kunden lämnar in bygglov eller anmälan.' },
     { id: 'tillverkning', namn: 'Tillverkning', kort: 'Fabrik', farg: '#e8c98f', text: 'Huset byggs under tak i Sverige.' },
-    { id: 'grund', namn: 'Grund & mark', kort: 'Grund', farg: '#a9c8a4', text: 'Kundens grund, el, vatten och avlopp ska vara klart.' },
-    { id: 'montage', namn: 'Leverans & montage', kort: 'Montage', farg: '#f0b56e', text: 'Lastbil och kran. Montaget tar dagar.' },
+    { id: 'grund', namn: 'Grund och mark', kort: 'Grund', farg: '#a9c8a4', text: 'Kundens grund, el, vatten och avlopp ska vara klara.' },
+    { id: 'montage', namn: 'Leverans och montage', kort: 'Montage', farg: '#f0b56e', text: 'Lastbil och kran. Montaget tar några dagar.' },
     { id: 'besiktning', namn: 'Slutbesiktning', kort: 'Besiktning', farg: '#9fc2c9', text: 'Genomgång av huset tillsammans, rum för rum.' },
     { id: 'klart', namn: 'Klart', kort: 'Klart', farg: '#7fe0a6', text: 'Överlämnat till kunden.' }
   ];
@@ -249,7 +249,7 @@
   };
   IH.kort = function (n) {
     n = n || 0;
-    if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace('.', ',') + ' Mkr';
+    if (Math.round(n / 1e3) >= 1e3) return (n / 1e6).toFixed(n >= 9.95e6 ? 0 : 1).replace('.', ',') + '\u00a0Mkr';
     if (n >= 1e3) return Math.round(n / 1e3) + ' tkr';
     return Math.round(n) + ' kr';
   };

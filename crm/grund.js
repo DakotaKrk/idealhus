@@ -105,7 +105,7 @@
       // Brickan på Mer summerar de dolda brickornas tal (t.ex. 2 försenade uppgifter), inte antalet rader
       mer.querySelector('.sido__merantal').textContent = Array.prototype.reduce.call(dolda, function (n, d) { var b = d.querySelector('.sido__bricka--varm'); return n + (b ? parseInt(b.textContent, 10) || 0 : 0); }, 0) || '';
       mer.classList.toggle('sido__merknapp--prick', olast);
-      mer.title = 'Fler: ' + Array.prototype.map.call(dolda, function (d) { return (d.querySelector('span') || d).textContent.trim(); }).join(', ');
+      mer.title = 'Fler sidor: ' + Array.prototype.map.call(dolda, function (d) { return (d.querySelector('span') || d).textContent.trim(); }).join(', ');
     }
     nav.dispatchEvent(new Event('scroll'));
     var efter = html.getAttribute('data-sido-tat') + '|' + nav.querySelectorAll('[data-sido-dold]').length;
