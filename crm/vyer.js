@@ -4137,10 +4137,14 @@
         var m = IH.modell(l[0].modell), k = IH.kund(l[0].kund);
         return '<span class="fabrik__hus"><button type="button" data-g="proj-oppna" data-id="' + l[0].id + '" style="--j:0" title="' + e(k ? k.namn : '') + ' · ' + e(m ? m.namn : '') + '"><img src="' + (m ? m.tumme : '') + '" alt="' + e(m ? m.namn : '') + '"><span>' + e(namn(l[0])) + '</span><small class="fabrik__vecka">' + e(m ? m.namn : '') + (l[0].montage ? ' · v. ' + IH.vecka(new Date(l[0].montage)) : '') + '</small></button></span>';
       }
-      var visa = l.slice(0, 3), mer = l.length - visa.length;
-      return '<span class="fabrik__hus"><button type="button" class="fabrik__stapel" data-g="steg-hus" data-steg="' + s.id + '" title="Visa alla ' + l.length + ' hus i ' + e(s.namn.toLowerCase()) + '">' +
-        '<span class="fabrik__bilder">' + visa.map(function (p, j) { var m = IH.modell(p.modell); return '<img src="' + (m ? m.tumme : '') + '" alt="" style="--j:' + j + '">'; }).join('') + (mer > 0 ? '<i>+' + mer + '</i>' : '') + '</span>' +
-        '<span>' + e(namn(l[0])) + ' +' + (l.length - 1) + '</span></button></span>';
+      // Flera hus: en kompakt lista (liten bild, namn, hus och vecka) – upp till fyra rader, sedan "+N fler" som öppnar alla
+      var max = l.length > 4 ? 3 : l.length, mer = l.length - max;
+      return '<span class="fabrik__hus fabrik__hus--lista">' + l.slice(0, max).map(function (p, j) {
+        var m = IH.modell(p.modell), k = IH.kund(p.kund);
+        return '<button type="button" class="fabrik__rad" data-g="proj-oppna" data-id="' + p.id + '" style="--j:' + j + '" title="' + e(k ? k.namn : '') + ' · ' + e(m ? m.namn : '') + '">' +
+          '<img src="' + (m ? IH.liten(m.tumme, 400) : '') + '" alt="">' +
+          '<span><b>' + e(namn(p)) + '</b><small>' + e(m ? m.namn : '') + (p.montage ? ' · v. ' + IH.vecka(new Date(p.montage)) : '') + '</small></span></button>';
+      }).join('') + (mer > 0 ? '<button type="button" class="fabrik__fler" data-g="steg-hus" data-steg="' + s.id + '">+' + mer + ' fler</button>' : '') + '</span>';
     };
     var fabrik = '<div class="fabrik" aria-label="Husen per steg"><i class="fabrik__band" aria-hidden="true"></i>' + steg.map(function (s, n) {
       var l = proj.filter(function (p) { return p.steg === s.id; });
@@ -4245,7 +4249,8 @@
         '<span><small>' + (t === 0 ? 'I dag' : t === 1 ? 'I morgon' : t === -1 ? 'I går' : (t > 0 ? 'Om ' + t + ' dagar' : 'För ' + (-t) + ' dagar sedan')) + ' · v. ' + IH.vecka(valdDag) + '</small><b>' + dagNamn(valdDag) + '</b></span></div>' +
       (valdaH.length ? '<div class="kal__lista" data-stagger>' + valdaH.map(function (h) { return rad(h, false); }).join('') + '</div>'
         : '<p class="kal__tom"><span aria-hidden="true">' + (valdDag.getDay() % 6 === 0 ? '<svg class="emo-ik" aria-hidden="true"><use href="#i-grodd"/></svg>' : '<svg class="emo-ik" aria-hidden="true"><use href="#i-sol"/></svg>') + '</span>Inget inplanerat den här dagen.</p>') +
-      '</div><div class="kal__sidadel"><p class="etikett etikett--ljus kal__snartrubrik">De närmaste två veckorna</p>' +
+      '</div><div class="kal__sidadel"><div class="kal__valdag kal__valdag--snart"><span class="kal__valdatum"><b>' + snart.length + '</b><small>st</small></span>' +
+        '<span><small>Framåt · v. ' + IH.vecka(new Date()) + '–' + IH.vecka(new Date(Date.now() + 14 * 864e5)) + '</small><b>De närmaste två veckorna</b></span></div>' +
       (snart.length ? '<div class="kal__lista kal__lista--snart">' + snart.slice(0, 6).map(function (h) { return rad(h, true); }).join('') + '</div>'
         : '<p class="kal__tom"><span aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-grodd"/></svg></span>Lugnt framåt.</p>') +
     '</div></aside>';

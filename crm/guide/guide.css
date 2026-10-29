@@ -664,7 +664,7 @@ html[data-palett-oppen] .ihg-knapp, html[data-palett-oppen] .ihg-hej, html[data-
   [data-sido-dold] .ihg-knapp, [data-sido-dold] .ihg-meny, [data-sido-dold] .ihg-hej { translate: calc(var(--ihg-x-dold) - var(--ihg-x)) 0; }
   /* Menyn och välkomstkortet växer ut ur knappen, till höger om den */
   .ihg-meny, [data-sido-dold] .ihg-meny, .ihg-hej, [data-sido-dold] .ihg-hej { left: calc(var(--ihg-x) + 30px); bottom: calc(var(--ram, 12px) + 4px); transform-origin: 0 100%; }
-  .ihg-meny, .ihg-hej { transition: opacity 0.24s var(--ease-out, ease-out), transform 0.36s var(--ihg-mjuk), translate 0.48s var(--ease-drawer, cubic-bezier(0.32, 0.72, 0, 1)); }
+  .ihg-meny, .ihg-hej { transition: opacity 0.24s var(--ease-out, ease-out), transform 0.36s var(--ihg-mjuk), translate var(--glid, .46s) var(--ease-drawer, cubic-bezier(0.32, 0.72, 0, 1)); }
   .ihg-hej { transform: translateY(8px) scale(0.96); }
   /* Rälsens nedersta ikon hamnar aldrig under knappen */
   body:has(.ihg-knapp) .sido-rals__halva--ner { padding-bottom: 46px; }
@@ -700,7 +700,7 @@ html[data-konto-oppen] .ihg-knapp, html[data-konto-oppen] .ihg-hej, body:has(.ch
 
 /* Rälsen, sista finslipningen (2026-10-29): menyknappen och chattknappen lika stora som rälsens ikoner (34 px) och
    i samma tunna stil som ?-knappen, lika luft (8 px) runt dem, och nedre halvan räknar med ?-knappen så att ingen
-   ikon hamnar under den. Ikonerna glider fram en i taget när menyn fälls in. */
+   ikon hamnar under den. Rälsen tonar in i takt med menyn (app.js sattSido). */
 @media (min-width: 1101px) {
   .sido-rals { grid-template-rows: minmax(0, 1fr) 50px minmax(0, 1fr); }
   html[data-sido-dold] body .sido-kant .sido-knapp { width: 34px; height: 34px; margin: -17px 0 0 -17px; }
@@ -717,16 +717,12 @@ html[data-konto-oppen] .ihg-knapp, html[data-konto-oppen] .ihg-hej, body:has(.ch
   html body:has(.ihg-knapp) .sido-rals .sido-rals__halva--ner { padding-bottom: 38px; }
   .sido-rals a:hover { transform: translateY(-1px); }
   .sido-rals a:active { transform: scale(.92); }
-  html.sido-glider[data-sido-dold] .sido-rals a { animation: rals-ikon-in .34s var(--ease-out, ease-out) both; animation-delay: calc(.16s + var(--rk, 0) * 22ms); }
-  .sido-rals__halva > :nth-child(2) { --rk: 1; } .sido-rals__halva > :nth-child(3) { --rk: 2; } .sido-rals__halva > :nth-child(4) { --rk: 3; }
-  .sido-rals__halva > :nth-child(5) { --rk: 4; } .sido-rals__halva > :nth-child(6) { --rk: 5; } .sido-rals__halva > :nth-child(n+7) { --rk: 6; }
 }
 @media (min-width: 1101px) and (max-height: 760px) {
   .sido-rals__halva { gap: 2px; }
   .sido-rals__delare { margin: 2px 0; }
 }
-@keyframes rals-ikon-in { from { opacity: 0; transform: translateX(-6px) scale(.9); } }
-@media (prefers-reduced-motion: reduce) { html.sido-glider[data-sido-dold] .sido-rals a { animation: none; } .sido-rals a:hover { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .sido-rals a:hover { transform: none; } }
 
 /* Toppraden när menyn är infälld (2026-10-29): sökfältet, Ny och kontot lika höga (44 px) och raden börjar i
    samma höjd som menylisten, så att listen och raden står i linje upptill */
@@ -753,17 +749,15 @@ html[data-konto-oppen] .ihg-knapp, html[data-konto-oppen] .ihg-hej, body:has(.ch
 }
 
 /* Kontot längst ner i menylisten när menyn är infälld (2026-10-29): samma runda 34 px-knapp som rälsens ikoner,
-   ?-knappen står ovanför, och toppraden tonar in utan rörelse (en rörelse skulle ta med kontoknappen) */
+   ?-knappen står ovanför, och toppraden och kontot kommer in i takt med menyn (app.js sattSido) */
 @media (min-width: 1101px) {
   html[data-sido-dold] body .topp__konto { position: fixed; z-index: 40; left: calc(var(--ram, 12px) / 2 + 9px); bottom: calc(var(--ram, 12px) + 16px); width: 34px; height: 34px; margin: 0; border-radius: 50%; }
   html[data-sido-dold] body .topp__konto .avatar { width: 28px; height: 28px; font-size: .6rem; box-shadow: 0 0 0 2px var(--t-yta), 0 0 0 3px rgb(var(--t-koppar-rgb) / .35); }
   html[data-sido-dold] body .topp__konto:hover .avatar, html[data-sido-dold] body .topp__konto:focus-visible .avatar { box-shadow: 0 0 0 2px var(--t-yta), 0 0 0 3.5px rgb(var(--t-accent-rgb) / .7); }
   html[data-sido-dold] body .topp__konto .avatar .narvaro-prick { width: 9px; height: 9px; right: -2px; bottom: -2px; }
-  html.sido-glider[data-sido-dold] body .topp { animation-name: topp-tona; }
   /* toppraden över listen (z 36), annars hamnar kontoknappen under listens glas; själva raden släpper igenom klick */
   html[data-sido-dold] body .topp { z-index: 37; pointer-events: none; }
   html[data-sido-dold] body .topp > * { pointer-events: auto; }
-  html.sido-glider[data-sido-dold] body .topp__konto { animation: rals-ikon-in .34s var(--ease-out, ease-out) .3s both; }
   html[data-sido-dold] .ihg-knapp { bottom: calc(var(--ram, 12px) + 16px + 44px); }
   html[data-sido-dold] body:has(.ihg-knapp) .sido-rals .sido-rals__halva--ner { padding-bottom: 82px; }
 }

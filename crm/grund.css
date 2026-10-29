@@ -366,10 +366,10 @@ html body .topp { background: var(--vx-topp-95); -webkit-backdrop-filter: satura
 
 /* =====================================================================
    Sidomenyn – låda, knapp, räls, docka (skalet, 2026-10-29)
-   En tid (--glid .48s) och en kurva (--ease-drawer) för allt som rör sig när menyn fälls in och ut:
-   lådan, kanten med knappen, knappens storlek och innehållet (FLIP i app.js). Rälsen och dess bakgrund
-   tonar i takt med glidningen i stället för att slås av och på. Knappen har samma storlek med och utan
-   den dockade chatten, så att den aldrig hoppar när dockan dyker upp.
+   Här står bara lägena (utfälld/infälld). Rörelsen mellan dem sköts helt av app.js (sattSido): en tid
+   (--glid .46s) och en kurva (--ease-drawer) för lådan, kanten med knappen, rälsen, ?-knappen, kontot,
+   toppraden och innehållet, och chatt.js för chattbubblan och dockan. Knappen har samma storlek med och
+   utan den dockade chatten, så att den aldrig hoppar när dockan dyker upp.
    ===================================================================== */
 :root {
   --z-dock: 35; --z-kant: 36; --z-slojan: 60; --z-ark: 61; --z-palett: 62; --z-mote: 150; --z-meny: 1000; --z-toast: 1100;
@@ -377,7 +377,7 @@ html body .topp { background: var(--vx-topp-95); -webkit-backdrop-filter: satura
 
 /* Rälsen (app.js rals()) – flyttad från app.js */
 .sido-rals { position: absolute; left: 6px; top: 14px; bottom: 14px; width: 40px; display: grid; grid-template-rows: minmax(0, 1fr) 52px minmax(0, 1fr); z-index: 1;
-  opacity: 0; visibility: hidden; pointer-events: none; transform: translateX(-4px); }
+  opacity: 0; visibility: hidden; pointer-events: none; }
 .sido-rals__halva { min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0 2px; }
 .sido-rals__halva--upp > :first-child { margin-top: auto; }
 .sido-rals__halva::-webkit-scrollbar { display: none; }
@@ -403,10 +403,6 @@ html body .topp { background: var(--vx-topp-95); -webkit-backdrop-filter: satura
 @media (min-width: 1101px) {
   /* Rälsen syns när menyn är infälld – klickbar (kanten har pointer-events: none) */
   html[data-sido-dold] .sido-rals { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }
-  .sido-glider .sido-rals:not([hidden]) { animation: none; }
-  /* in: efter att lådan hunnit undan; ut: genast, innan lådan glider in över kanten */
-  html.sido-glider[data-sido-dold] .sido-rals { transition: opacity .22s var(--ease-out) .18s, transform .28s var(--ease-out) .18s, visibility 0s linear .18s; }
-  html.sido-glider:not([data-sido-dold]) .sido-rals { transition: opacity .14s var(--ease-out), transform .14s var(--ease-out), visibility 0s linear .14s; }
 
   /* Rälsens bakgrund: en mjuk list med en tunn linje – tonar i takt med rälsen */
   html body .sido-kant::after { content: ""; display: block; position: absolute; left: 6px; top: 0; bottom: 0; height: auto; margin: 0; width: 40px; z-index: -1; border-radius: 20px;
@@ -415,35 +411,33 @@ html body .topp { background: var(--vx-topp-95); -webkit-backdrop-filter: satura
   html body .sido-kant::before { content: ""; display: block; position: absolute; left: 26px; top: 28px; bottom: 28px; height: auto; margin: 0; width: 1px;
     background: linear-gradient(180deg, transparent, rgb(var(--t-accent-djup-rgb) / .22) 18%, rgb(var(--t-accent-djup-rgb) / .22) 82%, transparent); opacity: 0; animation: none; transform: none; pointer-events: none; }
   html[data-sido-dold] body .sido-kant::after, html[data-sido-dold] body .sido-kant::before { opacity: 1; }
-  html.sido-glider[data-sido-dold] body .sido-kant::after, html.sido-glider[data-sido-dold] body .sido-kant::before { transition: opacity .24s var(--ease-out) .14s; }
-  html.sido-glider:not([data-sido-dold]) body .sido-kant::after, html.sido-glider:not([data-sido-dold]) body .sido-kant::before { transition: opacity .14s var(--ease-out); }
 
   /* Knappen infälld: alltid 40 × 40 mitt på listen – samma mått med och utan den dockade chatten */
   html[data-sido-dold] body .sido-kant .sido-knapp { left: 26px; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; }
-  /* Under glidningen ändras läge och alla mått i takt (även höjden, som tidigare slog om direkt) */
-  html.sido-glider body .sido-knapp {
-    transition: left var(--glid) var(--ease-drawer), margin var(--glid) var(--ease-drawer), width var(--glid) var(--ease-drawer), height var(--glid) var(--ease-drawer),
-      border-radius var(--glid) var(--ease-drawer), transform .16s var(--ease-out), box-shadow .2s var(--ease-out), background-color .2s ease, color .2s ease, border-color .2s ease, translate .2s var(--ease-out);
-  }
   html:not(.sido-glider) body .sido-knapp { transition: transform .16s var(--ease-out), box-shadow .25s var(--ease-out), background-color .2s ease, color .2s ease, border-color .2s ease, translate .2s var(--ease-out); }
 
   /* Den dockade chatten tar plats under knappen: rälsens nedre halva börjar under dockan, så att ingen ikon
      hamnar bakom den. Gäller redan när chattikonen finns, så att ikonerna inte flyttar sig när dockan landar. */
   html[data-sido-dold] body:has(.chf-ikon, .chf-dock) .sido-rals__halva--ner { padding-top: 64px; }
 
-  /* Toppraden kommer fram mjukt när menyn fälls in (innehållet glider ned med FLIP i app.js) */
-  html.sido-glider[data-sido-dold] body .topp { animation: topp-in .34s var(--ease-out) .1s both; }
   html[data-sido-dold] .topp__konto { display: grid; }
 }
-@keyframes topp-in { from { opacity: 0; transform: translateY(-6px); } }
-
-@media (min-width: 1101px) and (prefers-reduced-motion: reduce) {
-  .sido-rals, html .sido-rals { transform: none; }
-  html.sido-glider body .sido-knapp { transition: opacity .15s linear; }
-  html.sido-glider[data-sido-dold] body .topp { animation: topp-tona .15s linear both; }
-  html.sido-glider[data-sido-dold] .sido-rals, html.sido-glider:not([data-sido-dold]) .sido-rals { transition: opacity .15s linear, visibility 0s linear .15s; }
-}
 @keyframes topp-tona { from { opacity: 0; } }
+
+/* Sidomenyn – glidningen (2026-10-29): medan html har klassen sido-glider spelar app.js och chatt.js upp hela
+   rörelsen med Web Animations (transform och opacitet, plus knappens egna små mått). CSS-övergångarna på
+   samma delar stängs av så länge, annars drar de åt eget håll, med egen tid eller med fördröjning (och inga
+   CSS-animationer hänger på glidningen längre). Menyns glasoskärpa slås av under glidningen (bakom den finns bara sidans bakgrund) så att
+   lådan inte behöver suddas om i varje bildruta. Med reducerad rörelse sätts klassen aldrig – då tvärtonar
+   app.js kort i stället. */
+@media (min-width: 1101px) {
+  :root { --glid: .46s; }
+  html.sido-glider :is(.app, .huvud, .vy, .sido, .sido-kant, .sido-knapp, .sido-knapp svg, .sido-rals, .sido-rals__halva, .sido-rals a, .ihg-knapp, .topp, .topp > *, .topp__konto .avatar),
+  html.sido-glider .sido-kant::before, html.sido-glider .sido-kant::after, html.sido-glider .sido-knapp::before {
+    transition: none !important; }
+  html.sido-glider :is(.sido, .sido-kant, .vy) { will-change: transform; }
+  html.sido-glider body .sido { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+}
 
 /* =====================================================================
    Sidbyten (skalet, 2026-10-29): en mekanism i stället för två lager toning. Vyn tvärtonas kort

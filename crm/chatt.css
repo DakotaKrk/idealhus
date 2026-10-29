@@ -269,7 +269,7 @@
   background: linear-gradient(135deg, transparent 50%, rgb(var(--t-accent-djup-rgb) / .35) 50%, rgb(var(--t-accent-djup-rgb) / .35) 56%, transparent 56%, transparent 68%, rgb(var(--t-accent-djup-rgb) / .35) 68%, rgb(var(--t-accent-djup-rgb) / .35) 74%, transparent 74%); }
 .chf-ikon { position: fixed; z-index: var(--z-chatt, 55); display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; touch-action: none;
   background: linear-gradient(160deg, var(--t-yta), var(--o-fff1dc-ton)); color: var(--virke-djup); box-shadow: 0 0 0 4px var(--t-sand), 0 14px 28px -12px rgb(var(--t-accent-djup-rgb) / .7), inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .5);
-  transition: transform .3s var(--mjuk), translate .35s var(--mjuk), width .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), height .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), box-shadow .3s, opacity .2s var(--ease-out, ease-out);
+  transition: transform .3s var(--mjuk), translate .35s var(--mjuk), width var(--glid, .46s) var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), height var(--glid, .46s) var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), box-shadow .3s, opacity .2s var(--ease-out, ease-out);
   animation: chf-in .35s var(--mjuk) both; }
 /* Bubblan som fönstret krymper in i tonar fram när fönstret nästan är där */
 .chf-ikon.chf-ikon[data-sen] { animation-delay: .16s; }

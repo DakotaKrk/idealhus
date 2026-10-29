@@ -11555,59 +11555,13 @@ select,
     transition: none;
   }
 
-  .sido-glider .app {
-    transition: none; /* innehållet glider med transform i app.js (FLIP) i stället för att spalten räknas om varje bildruta */
-  }
-
-  .sido-glider .sido {
-    transition: transform var(--glid) var(--ease-drawer), opacity calc(var(--glid) * 0.6) var(--ease-out);
-  }
-
-  .sido-glider .sido-kant {
-    transition: transform var(--glid) var(--ease-drawer);
-  }
-
-  .sido-glider .sido-knapp {
-    transition:
-      left var(--glid) var(--ease-drawer),
-      top var(--glid) var(--ease-drawer),
-      margin var(--glid) var(--ease-drawer),
-      width var(--glid) var(--ease-drawer),
-      height var(--glid) var(--ease-drawer),
-      border-radius var(--glid) var(--ease-drawer),
-      translate var(--glid) var(--ease-drawer),
-      transform 0.16s var(--ease-out),
-      box-shadow 0.2s var(--ease-out),
-      background-color 0.2s ease,
-      color 0.2s ease;
-  }
-
-  .sido-glider .sido-knapp svg {
-    transition: transform var(--glid) var(--ease-drawer), translate 0.2s var(--ease-out);
-  }
-
-  /* Hovring och tryck på knappen ska alltid kännas, även utan glidning. */
+  /* Själva glidningen spelas upp av app.js (sattSido) – se grund.css, "Sidomenyn – glidningen". */
   html:not(.sido-glider) .sido-knapp {
     transition: transform 0.16s var(--ease-out), box-shadow 0.2s var(--ease-out), background-color 0.2s ease, color 0.2s ease;
   }
 
   html:not(.sido-glider) .sido-knapp svg {
     transition: translate 0.2s var(--ease-out);
-  }
-
-  /* Menyn tonar ut lite före den glidit klart och in lite efter att den börjat. */
-  html.sido-glider:not([data-sido-dold]) .sido {
-    transition: transform var(--glid) var(--ease-drawer), opacity calc(var(--glid) * 0.7) var(--ease-out) calc(var(--glid) * 0.1);
-  }
-}
-
-@media (min-width: 1101px) and (prefers-reduced-motion: reduce) {
-  .sido-glider .app,
-  .sido-glider .sido,
-  .sido-glider .sido-kant,
-  .sido-glider .sido-knapp,
-  .sido-glider .sido-knapp svg {
-    transition: opacity 0.15s linear;
   }
 }
 
@@ -11784,13 +11738,6 @@ select,
   box-shadow: inset 0 0 0 2px var(--t-accent), 0 0 0 3px rgb(var(--t-accent-rgb) / .9), 0 0 28px rgb(var(--t-signal-orange-rgb) / .55), 0 18px 30px -18px rgb(var(--t-skugga-varm-rgb) / .6); }
 html:not(.ingen-webgl) .motescen:has(> .motesrum3d.klar) .motescen__rum--3d:has(.bord__plats.vald) .bord__plats:not(.vald) { opacity: .7; }
 .motescen__rum--3d .bord__plats--bortre { scale: .85; }
-
-/* Den infällda rälsen tonar in när menyn har glidit undan, i stället för att synas direkt ovanpå lådan */
-@media (min-width: 1101px) {
-  html.sido-glider[data-sido-dold] .sido-rals:not([hidden]) { animation: rals-in 0.2s var(--ease-out) 0.2s both; }
-}
-@keyframes rals-in { from { opacity: 0; transform: translateX(-4px); } }
-@media (prefers-reduced-motion: reduce) { html.sido-glider[data-sido-dold] .sido-rals:not([hidden]) { animation: none; } }
 
 /* Rälsen (infälld meny): ikonerna går att klicka på trots att kanten släpper igenom musen,
    och de svarar på tryck. (Rälsens grundstil ligger i app.js/grund.css.) */

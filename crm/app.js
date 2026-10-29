@@ -595,12 +595,33 @@
     Object.keys(h).forEach(function (s) { var el = $(s, app); if (el) el.__ihMeny = h[s]; });
   }
 
-  // Sidomenyn kan fällas in på dator (knappen på kanten eller [): menyn glider ut åt vänster
-  // och vyn glider efter (FLIP – en layoutändring, sedan bara transform). Valet sparas.
+  // Sidomenyn kan fällas in på dator (knappen på kanten eller [). Allt som hör till menyn rör sig som EN rörelse:
+  // samma tid (GLID) och samma lådkurva, startar i samma bildruta och landar samtidigt. app.js mäter läget före och
+  // efter växlingen och spelar upp skillnaden med Web Animations (FLIP – en layoutändring, sedan bara transform och
+  // opacitet). CSS-övergångarna är avstängda under glidningen (grund.css, "Sidomenyn – glidningen").
+  //   menyn och kanten med knappen och rälsen   glider i sidled
+  //   knappen                                     byter form (pill ⇄ rund) och pilen roterar 180°
+  //   rälsen och listen                           följer kanten och tonar in/ut
+  //   ?-knappen och kontot                        följer med till/från rälsen
+  //   innehållet och toppraden                    glider som ett block
+  // Ett nytt klick mitt i glidningen fortsätter från där allt står just då, med kortare tid.
   var datorBred = matchMedia('(min-width: 1101px)');
+  var GLID = 460, KURVA = 'cubic-bezier(0.32,0.72,0,1)';
   function sidoDold() { return document.documentElement.hasAttribute('data-sido-dold'); }
+  // Lådkurvans förlopp vid en viss tid (för att korta tiden när man vänder mitt i)
+  function lada(x) {
+    if (x <= 0) return 0; if (x >= 1) return 1;
+    var t = x;
+    for (var i = 0; i < 10; i++) {
+      var fx = 0.96 * t * (1 - t) * (1 - t) + t * t * t - x;
+      var d = 0.96 * (1 - t) * (1 - t) - 1.92 * t * (1 - t) + 3 * t * t;
+      if (Math.abs(fx) < 1e-5 || Math.abs(d) < 1e-6) break;
+      t = Math.min(1, Math.max(0, t - fx / d));
+    }
+    return 2.16 * t * (1 - t) * (1 - t) + 3 * t * t * (1 - t) + t * t * t;
+  }
   // Knappens slutläge direkt efter växlingen (utan att vänta på glidningen): en osynlig kopia av kanten
-  // utan övergångar mäts. chatt.js kan placera chattikonen där samtidigt som menyn glider (händelsen ih:sido).
+  // utan övergångar mäts.
   function sidoKnappSlut() {
     var kant = $('.sido-kant'), kn = kant && $('.sido-knapp', kant);
     if (!kant || !kn || !datorBred.matches) return null;
@@ -619,50 +640,219 @@
     try { window.dispatchEvent(new Event('resize')); } finally { IH.sidoResize = false; }
     window.dispatchEvent(new CustomEvent('ih:sido-klar', { detail: { dold: dold } }));
   }
+
+  var glid = null; // pågående glidning: { start, tid, dold, anims, skuggor, frysta }
+  var KNAPP_MATT = ['left', 'width', 'height', 'marginTop', 'marginLeft', 'borderRadius'];
+  function sidoDelar() {
+    var e = { sido: $('.sido'), kant: $('.sido-kant'), knapp: $('.sido-knapp'), rals: $('.sido-rals'), ihg: $('.ihg-knapp'), topp: $('.topp'), konto: $('.topp__konto'), vy: $('#vy') };
+    e.svg = e.knapp && $('svg', e.knapp);
+    e.ankare = e.vy && (e.vy.firstElementChild || e.vy);
+    e.toppBarn = e.topp ? [].slice.call(e.topp.children).filter(function (b) { return b !== e.konto; }) : [];
+    return e;
+  }
+  function syns(el) { return !!el && el.getClientRects().length > 0; }
+  function ruta(el) { var r = el.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; }
+  function vinkel(el) {
+    var t = getComputedStyle(el).transform;
+    if (!t || t === 'none') return 0;
+    var m = new DOMMatrixReadOnly(t), a = Math.atan2(m.b, m.a) * 180 / Math.PI;
+    return a < -90 ? a + 360 : a;
+  }
+  function opac(el, pseudo) { var c = getComputedStyle(el, pseudo || null); return c.visibility === 'hidden' || c.display === 'none' ? 0 : +c.opacity; }
+  // Läget just nu – med en pågående glidning inräknad
+  function sidoMatt(e) {
+    var m = { sy: window.scrollY };
+    ['sido', 'kant', 'ihg', 'ankare'].forEach(function (k) { if (syns(e[k])) m[k] = ruta(e[k]); });
+    if (e.knapp && syns(e.knapp)) { var cs = getComputedStyle(e.knapp); m.knapp = {}; KNAPP_MATT.forEach(function (p) { m.knapp[p] = cs[p]; }); m.knappRuta = ruta(e.knapp); }
+    if (e.svg) m.vinkel = vinkel(e.svg);
+    if (e.rals) m.rals = opac(e.rals);
+    if (e.kant) { m.listen = opac(e.kant, '::after'); m.linjen = opac(e.kant, '::before'); }
+    var sk = glid && glid.skuggor;
+    m.topp = sk && sk.topp ? opac(sk.topp) : (e.toppBarn.filter(syns)[0] ? opac(e.toppBarn.filter(syns)[0]) : 0);
+    m.konto = sk && sk.konto ? opac(sk.konto) : (syns(e.konto) ? opac(e.konto) : 0);
+    return m;
+  }
+  // En skugga av det som försvinner direkt vid växlingen (toppraden och kontot finns bara med infälld meny): en kopia
+  // med beräknad stil på samma plats, som tonar bort i takt med resten
+  var SKUGG_STIL = ['display', 'box-sizing', 'width', 'height', 'min-width', 'min-height', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+    'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'border-top', 'border-right', 'border-bottom', 'border-left', 'border-radius', 'outline',
+    'background-color', 'background-image', 'background-size', 'background-position', 'background-repeat', 'box-shadow', 'opacity', 'visibility', 'overflow',
+    'color', 'font-family', 'font-size', 'font-weight', 'font-style', 'line-height', 'letter-spacing', 'text-align', 'text-transform', 'white-space', 'text-overflow',
+    'flex-direction', 'flex-wrap', 'flex', 'align-items', 'justify-content', 'gap', 'place-items', 'vertical-align', 'position', 'left', 'top', 'right', 'bottom',
+    'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'transform', 'mask', '-webkit-mask'];
+  function skugga(delar, z) {
+    var hylla = document.createElement('div');
+    hylla.className = 'sido-skugga'; hylla.setAttribute('aria-hidden', 'true'); hylla.inert = true;
+    hylla.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;margin:0;padding:0;pointer-events:none;z-index:' + z;
+    delar.forEach(function (el) {
+      if (!syns(el)) return;
+      var r = el.getBoundingClientRect(), k = el.cloneNode(true);
+      var kalla = [el].concat([].slice.call(el.querySelectorAll('*'))), mal = [k].concat([].slice.call(k.querySelectorAll('*')));
+      kalla.forEach(function (s, i) {
+        var cs = getComputedStyle(s), d = mal[i], txt = '';
+        for (var j = 0; j < SKUGG_STIL.length; j++) txt += SKUGG_STIL[j] + ':' + cs.getPropertyValue(SKUGG_STIL[j]) + ';';
+        d.style.cssText = txt; d.removeAttribute('id'); d.removeAttribute('data-g'); d.removeAttribute('data-sido-knapp');
+      });
+      k.style.position = 'absolute'; k.style.left = r.left + 'px'; k.style.top = r.top + 'px'; k.style.width = r.width + 'px'; k.style.height = r.height + 'px';
+      k.style.margin = '0'; k.style.boxSizing = 'border-box'; k.style.transform = 'none'; k.style.translate = 'none'; k.style.transition = 'none'; k.style.animation = 'none';
+      hylla.appendChild(k);
+    });
+    return hylla; // läggs in i sidan av sattSido, efter att allt annat är mätt
+  }
+  // Rälsens nedre halva får sin luft av regler som hänger på infälld meny och dockad chatt; medan rälsen tonar ut
+  // står den kvar som den var, så att ikonerna inte hoppar
+  var RALS_LUFT = ['paddingTop', 'paddingBottom', 'marginTop', 'marginBottom'];
+  function frysRals(e) {
+    if (!e.rals) return [];
+    return [].slice.call(e.rals.querySelectorAll('.sido-rals__halva')).map(function (h) {
+      var cs = getComputedStyle(h);
+      return [h, RALS_LUFT.map(function (p) { return cs[p]; })];
+    });
+  }
+  function stoppaGlid(slut) {
+    if (!glid) return;
+    var g = glid; glid = null;
+    g.anims.forEach(function (a) { a.cancel(); });
+    if (g.skuggor) Object.keys(g.skuggor).forEach(function (k) { if (g.skuggor[k]) g.skuggor[k].remove(); });
+    g.frysta.forEach(function (f) { RALS_LUFT.forEach(function (p) { f[0].style[p] = ''; }); });
+    if (slut) document.documentElement.classList.remove('sido-glider');
+  }
   function sattSido(dold, animera) {
-    // Glidningen sköts i CSS (grund.css, "Sidomenyn – låda, knapp, räls, docka") och innehållet glider med
-    // FLIP: en layoutändring, sedan bara transform. Både sidled (menyn) och höjdled (toppraden som kommer
-    // och går) – innehållet hoppar aldrig.
     var rot = document.documentElement;
-    var flip = !!animera && datorBred.matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var vy = flip ? $('#vy') : null, ankare = vy && (vy.firstElementChild || vy), fore = null;
-    // Mät före – med en pågående glidning inräknad – och avbryt den sedan, så att ett snabbt andra klick fortsätter därifrån
-    if (ankare) fore = ankare.getBoundingClientRect();
-    if (vy && vy.flip) vy.flip.cancel();
+    var lugnt = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var rora = !!animera && datorBred.matches && !lugnt && !!rot.animate;
+    if (rora && glid && glid.dold === dold && sidoDold() === dold) return; // redan på väg dit
+    var e = sidoDelar(), fore = null, tid = GLID, skuggor = null, frysta = [];
     // Magnetens förskjutning ska inte följa med knappen eller chattikonen till det nya läget
     $$('.sido-knapp, .chf-ikon').forEach(function (el) { el.style.translate = ''; });
-    rot.classList.toggle('sido-glider', !!animera);
-    clearTimeout(sattSido.t);
-    if (animera) sattSido.t = setTimeout(function () { rot.classList.remove('sido-glider'); }, 520);
+    if (rora) {
+      // Mät före – med en pågående glidning inräknad – och avbryt den sedan, så att ett snabbt andra klick fortsätter därifrån
+      fore = sidoMatt(e);
+      if (glid) tid = Math.round(GLID * (0.4 + 0.6 * lada(Math.min(1, (performance.now() - glid.start) / glid.tid))));
+      // Det som försvinner direkt när menyn fälls ut får en skugga som tonar bort (toppraden, kontot)
+      if (!dold) {
+        skuggor = {};
+        if (glid && glid.skuggor) { skuggor = glid.skuggor; glid.skuggor = null; }
+        else {
+          if (fore.topp > 0) skuggor.topp = skugga(e.toppBarn, 37);
+          if (fore.konto > 0) skuggor.konto = skugga([e.konto], 40);
+        }
+      }
+      if (!dold) frysta = frysRals(e);
+      stoppaGlid(false);
+      frysta.forEach(function (f) { RALS_LUFT.forEach(function (p, i) { f[0].style[p] = f[1][i]; }); });
+      if (skuggor) Object.keys(skuggor).forEach(function (n) { if (skuggor[n] && !skuggor[n].isConnected) document.body.appendChild(skuggor[n]); });
+      rot.classList.add('sido-glider');
+    } else {
+      stoppaGlid(true);
+    }
+    var ankY = !rora && animera && datorBred.matches && e.ankare && window.scrollY > 0 ? e.ankare.getBoundingClientRect().top : null;
     rot.toggleAttribute('data-sido-dold', dold);
     var s = $('.sido'); if (s) s.inert = dold && datorBred.matches;
     var r = $('.sido-rals'); if (r) r.inert = !(dold && datorBred.matches);
     // Kortrutnäten räknas om direkt i den nya bredden, så att de inte hoppar en gång till efter glidningen
     $$('.kundnat').forEach(centreraGrid);
-    var flippar = false;
-    if (ankare) {
-      var efter = ankare.getBoundingClientRect(), dx = fore.left - efter.left, dy = fore.top - efter.top;
-      // Rullad sida: toppraden som kommer eller går tas upp av rullningen, så att innehållet står still i höjdled
-      if (Math.abs(dy) > 1 && window.scrollY > 0) {
-        window.scrollTo(0, Math.max(0, window.scrollY - dy));
-        efter = ankare.getBoundingClientRect(); dy = fore.top - efter.top;
-      }
-      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-        vy.style.willChange = 'transform';
-        // samma tid och lådkurva som menyn (--glid .48s, --ease-drawer), så att de rör sig i takt
-        var anim = vy.animate([{ transform: 'translate3d(' + dx + 'px,' + dy + 'px,0)' }, { transform: 'translate3d(0,0,0)' }], { duration: 480, easing: 'cubic-bezier(0.32,0.72,0,1)' });
-        vy.flip = anim;
-        anim.onfinish = function () { if (vy.flip === anim) { vy.style.willChange = ''; vy.flip = null; } sidoKlar(dold); };
-        anim.oncancel = function () { if (vy.flip === anim) { vy.style.willChange = ''; vy.flip = null; } };
-        flippar = true;
-      }
-    }
     var k = $('[data-sido-knapp]'), text = dold ? 'Visa menyn' : 'Dölj menyn';
     if (k) { k.setAttribute('aria-expanded', String(!dold)); k.setAttribute('aria-label', text); k.title = text + '  ['; }
-    try { localStorage.setItem('ih-crm-sido-dold', dold ? '1' : '0'); } catch (e) { /* ingen lagring */ }
+    try { localStorage.setItem('ih-crm-sido-dold', dold ? '1' : '0'); } catch (x) { /* ingen lagring */ }
+
+    var anims = [], efter = null;
+    if (rora) {
+      efter = sidoMatt(e);
+      // Rullad sida: toppraden som kommer eller går tas upp av rullningen, så att innehållet står still i höjdled
+      if (fore.ankare && efter.ankare) {
+        var dy0 = fore.ankare.y - efter.ankare.y;
+        if (Math.abs(dy0) > 1 && window.scrollY > 0) { window.scrollTo(0, Math.max(0, window.scrollY - dy0)); efter.ankare = ruta(e.ankare); }
+      }
+      var spela = function (el, kf, o) {
+        if (!el) return null;
+        var opt = { duration: tid, easing: KURVA }; if (o) Object.keys(o).forEach(function (n) { opt[n] = o[n]; });
+        var a = el.animate(kf, opt); anims.push(a); return a;
+      };
+      // Tonar in (efter att kanten hunnit en bit) eller ut (under första halvan) – linjärt i tid
+      var tona = function (el, fran, till, o) {
+        if (fran === till && !o) return null;
+        var kf = till > fran ? [{ opacity: fran, offset: 0 }, { opacity: fran, offset: 0.12 }, { opacity: till, offset: 0.62 }, { opacity: till }]
+          : [{ opacity: fran }, { opacity: till, offset: 0.42 }, { opacity: till }];
+        var opt = { easing: 'linear' }; if (o) Object.keys(o).forEach(function (n) { opt[n] = o[n]; });
+        if (opt.synlig) { kf.forEach(function (f) { f.visibility = 'visible'; }); delete opt.synlig; }
+        return spela(el, kf, opt);
+      };
+      var tf = function (el) { var t = getComputedStyle(el).transform; return t && t !== 'none' ? t : ''; };
+      // Innehållet
+      var vdx = 0, vdy = 0;
+      if (fore.ankare && efter.ankare) {
+        vdx = fore.ankare.x - efter.ankare.x; vdy = fore.ankare.y - efter.ankare.y;
+        if (Math.abs(vdx) > 0.5 || Math.abs(vdy) > 0.5) spela(e.vy, [{ transform: 'translate3d(' + vdx + 'px,' + vdy + 'px,0)' }, { transform: 'none' }]);
+      }
+      // Menyn och kanten (med knappen och rälsen) glider i sidled
+      if (fore.sido && efter.sido) { var ts = tf(e.sido); spela(e.sido, [{ transform: 'translateX(' + (fore.sido.x - efter.sido.x) + 'px) ' + ts, opacity: 1 }, { transform: ts || 'none', opacity: 1 }]); }
+      var kdx = fore.kant && efter.kant ? fore.kant.x - efter.kant.x : 0;
+      if (kdx) { var tk = tf(e.kant); spela(e.kant, [{ transform: 'translateX(' + kdx + 'px) ' + tk }, { transform: tk || 'none' }]); }
+      // Knappen byter form och läge på kanten, pilen vänder
+      if (fore.knapp && efter.knapp) {
+        var k0 = {}, k1 = {};
+        KNAPP_MATT.forEach(function (p) { k0[p] = fore.knapp[p]; k1[p] = efter.knapp[p]; });
+        spela(e.knapp, [k0, k1]);
+      }
+      if (e.svg && fore.vinkel !== efter.vinkel) spela(e.svg, [{ transform: 'rotate(' + fore.vinkel + 'deg)' }, { transform: 'rotate(' + efter.vinkel + 'deg)' }]);
+      // Rälsen och listen bakom den följer kanten och tonar
+      tona(e.rals, fore.rals, efter.rals, { synlig: true });
+      if (e.kant) {
+        tona(e.kant, fore.listen, efter.listen, { pseudoElement: '::after' });
+        tona(e.kant, fore.linjen, efter.linjen, { pseudoElement: '::before' });
+      }
+      // ?-knappen flyttar mellan menyns fot och rälsen
+      if (fore.ihg && efter.ihg && (Math.abs(fore.ihg.x - efter.ihg.x) > 0.5 || Math.abs(fore.ihg.y - efter.ihg.y) > 0.5)) {
+        var cx = fore.ihg.x + fore.ihg.w / 2 - (efter.ihg.x + efter.ihg.w / 2), cy = fore.ihg.y + fore.ihg.h / 2 - (efter.ihg.y + efter.ihg.h / 2);
+        spela(e.ihg, [{ transform: 'translate(' + cx + 'px,' + cy + 'px) scale(' + (fore.ihg.w / efter.ihg.w) + ',' + (fore.ihg.h / efter.ihg.h) + ')' }, { transform: 'none' }]);
+      }
+      if (dold) {
+        // Toppraden kommer in tillsammans med innehållet, kontot följer kanten ner i rälsen
+        e.toppBarn.filter(syns).forEach(function (b) {
+          spela(b, [{ transform: 'translate(' + vdx + 'px,' + vdy + 'px)' }, { transform: 'none' }]);
+          tona(b, fore.topp, 1);
+        });
+        if (syns(e.konto)) {
+          spela(e.konto, [{ transform: 'translateX(' + kdx + 'px)' }, { transform: 'none' }]);
+          tona(e.konto, fore.konto, 1);
+        }
+        if (skuggor) Object.keys(skuggor).forEach(function (n) { if (skuggor[n]) skuggor[n].remove(); });
+        skuggor = null;
+      } else if (skuggor) {
+        // Skuggorna glider med innehållet respektive kanten och tonar bort
+        var ny = function (sk, dx, dy, op) {
+          if (!sk) return;
+          var t0 = getComputedStyle(sk).transform, m = t0 && t0 !== 'none' ? new DOMMatrixReadOnly(t0) : { e: 0, f: 0 };
+          spela(sk, [{ transform: 'translate(' + m.e + 'px,' + m.f + 'px)' }, { transform: 'translate(' + (m.e + dx) + 'px,' + (m.f + dy) + 'px)' }], { fill: 'forwards' });
+          tona(sk, op, 0, { fill: 'forwards' });
+        };
+        ny(skuggor.topp, -vdx, -vdy, fore.topp);
+        ny(skuggor.konto, -kdx, 0, fore.konto);
+      }
+      var denna = glid = { start: performance.now(), tid: tid, dold: dold, anims: anims, skuggor: skuggor, frysta: frysta };
+      Promise.all(anims.map(function (a) { return a.finished; })).then(function () {
+        if (glid !== denna) return;
+        stoppaGlid(true);
+        sidoKlar(dold);
+      }, function () { /* avbruten av ett nytt klick */ });
+    } else if (ankY != null) {
+      // Utan glidning: rullad sida står ändå still i höjdled
+      var dyR = ankY - e.ankare.getBoundingClientRect().top;
+      if (Math.abs(dyR) > 1) window.scrollTo(0, Math.max(0, window.scrollY - dyR));
+    }
+    if (!rora && animera && lugnt && datorBred.matches && rot.animate) {
+      // Reducerad rörelse: en kort tvärtoning i stället för glidning
+      [[$('.huvud'), 0.5], [e.kant, 0], [dold ? null : e.sido, 0], [e.ihg, 0]].forEach(function (p) { if (p[0]) p[0].animate([{ opacity: p[1] }, { opacity: 1 }], { duration: 160, easing: 'linear' }); });
+    }
     // Direkt vid växlingen: knappens slutläge, tid och kurva – så att chattikonen kan flyga i takt med menyn
-    window.dispatchEvent(new CustomEvent('ih:sido', { detail: { dold: dold, animera: flip, tid: flip ? 480 : 0, kurva: 'cubic-bezier(0.32,0.72,0,1)', knapp: sidoKnappSlut() } }));
-    if (!flippar) setTimeout(function () { sidoKlar(dold); }, animera ? 480 : 0);
+    window.dispatchEvent(new CustomEvent('ih:sido', { detail: { dold: dold, animera: rora, tid: rora ? tid : 0, kurva: KURVA, knapp: efter && efter.knappRuta ? { left: efter.knappRuta.x, top: efter.knappRuta.y, width: efter.knappRuta.w, height: efter.knappRuta.h, right: efter.knappRuta.x + efter.knappRuta.w, bottom: efter.knappRuta.y + efter.knappRuta.h } : sidoKnappSlut() } }));
+    // chatt.js läser det här i samma ögonblick (dess observer körs direkt efter växlingen) och låter dockan och
+    // bubblan följa knappen; efteråt gäller det inte längre
+    IH.sidoGlid = rora && fore.knappRuta && efter.knappRuta ? { tid: tid, kurva: KURVA, knappFran: { left: fore.knappRuta.x, top: fore.knappRuta.y, width: fore.knappRuta.w, height: fore.knappRuta.h },
+      knappTill: { left: efter.knappRuta.x, top: efter.knappRuta.y, width: efter.knappRuta.w, height: efter.knappRuta.h, right: efter.knappRuta.x + efter.knappRuta.w, bottom: efter.knappRuta.y + efter.knappRuta.h } } : null;
+    if (IH.sidoGlid) setTimeout(function () { IH.sidoGlid = null; }, 0);
+    if (!rora) setTimeout(function () { sidoKlar(dold); }, animera && lugnt ? 160 : 0);
   }
   document.addEventListener('click', function (ev) {
     if (ev.target.closest && ev.target.closest('[data-sido-knapp]')) sattSido(!sidoDold(), true);
@@ -729,7 +919,8 @@
     sido.classList.toggle('sido--rullad', nav.scrollTop > 4);
   }
   document.addEventListener('scroll', function (ev) { if (ev.target.classList && ev.target.classList.contains('sido__nav')) sidoMer(); }, true);
-  window.addEventListener('resize', function () { flyttaMarkor(true); });
+  // Menyns egen in-/utfällning ändrar inte menyns bredd – markören står kvar (sparar en tung bildruta när glidningen landar)
+  window.addEventListener('resize', function () { if (!IH.sidoResize) flyttaMarkor(true); });
 
   // Mjuk krusning där man trycker, i menyn och på mobilmenyn.
   document.addEventListener('pointerdown', function (ev) {

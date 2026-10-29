@@ -401,6 +401,19 @@
      ett ljus vandrar (snabbare och varmare när något är oläst). När menyn fälls in glider bubblan till dockan samtidigt
      som menyn, med samma tid och kurva; när menyn fälls ut tonar den bort ur dockan och fram i hörnet. */
   let dock = null, varIDocka = null, sattTimer = 0;
+  // Menyns pågående växling (app.js sattSido): tid, kurva och menyknappens läge före och efter. Finns bara i samma
+  // ögonblick som menyn växlar – dockan och bubblan följer då med knappen i samma takt.
+  const sidoGlid = () => (IH.sidoGlid && IH.sidoGlid.knappTill && fart() ? IH.sidoGlid : null);
+  // Följer med knappen och tonar: in efter att kanten hunnit en bit, ut under första halvan – som rälsen
+  function rid(el, fran, till, op0, op1, g, klar) {
+    const a = [el.animate([{ transform: fran }, { transform: till }], { duration: g.tid, easing: g.kurva, fill: 'both' }),
+      el.animate(op1 > op0 ? [{ opacity: op0, offset: 0 }, { opacity: op0, offset: 0.12 }, { opacity: op1, offset: 0.62 }, { opacity: op1 }]
+        : [{ opacity: op0 }, { opacity: op1, offset: 0.42 }, { opacity: op1 }], { duration: g.tid, easing: 'linear', fill: 'both' })];
+    a[1].onfinish = () => { if (klar) klar(); else { a.forEach((x) => x.cancel()); if (el.__glid === a) el.__glid = null; } };
+    return a;
+  }
+  const stoppa = (el) => { if (el && el.__glid) { el.__glid.forEach((a) => a.cancel()); el.__glid = null; } };
+  const flytt = (el) => { const t = getComputedStyle(el).transform; const m = t && t !== 'none' ? new DOMMatrixReadOnly(t) : { e: 0, f: 0 }; return [m.e, m.f]; };
   // Knappens rektangel när menyns pågående glidning är klar: spolar dess övergångar (och kantens) till slutet, mäter
   // och spolar tillbaka – så att målet blir rätt vilka mått CSS:en än ger knappen
   function knappSlut(kn) {
@@ -416,17 +429,31 @@
       return rekt(kn);
     } finally { spolade.forEach((x) => { x[0].currentTime = x[1]; }); }
   }
-  function dockFor(kr, sen) {
+  let dockUt = null;
+  function dockFor(kr, sen, g) {
     if (!kr) {
       html.removeAttribute('data-chatt-dockad');
-      if (dock) { const d = dock; dock = null; d.setAttribute('data-ut', ''); setTimeout(() => d.remove(), fart() ? 220 : 0); }
+      if (dock) {
+        const d = dock; dock = null;
+        if (g) {
+          // Menyn fälls ut: kapseln följer knappen ut och tonar bort
+          const [x, y] = flytt(d), op = +getComputedStyle(d).opacity; stoppa(d);
+          d.style.animation = 'none'; dockUt = d;
+          d.__glid = rid(d, 'translate(' + x + 'px,' + y + 'px)', 'translate(' + (x + g.knappTill.left - g.knappFran.left) + 'px,' + (y + g.knappTill.top - g.knappFran.top) + 'px)', op, 0, g, () => { d.remove(); if (dockUt === d) dockUt = null; });
+        } else { d.setAttribute('data-ut', ''); setTimeout(() => d.remove(), fart() ? 220 : 0); }
+      }
       return;
     }
     html.setAttribute('data-chatt-dockad', '');
     if (!dock) {
+      // En kapsel som just tonar ut (menyn vände mitt i) ersätts av den nya, som börjar från dess opacitet
+      let op0 = 0;
+      if (dockUt) { op0 = +getComputedStyle(dockUt).opacity; dockUt.remove(); dockUt = null; }
       dock = document.createElement('div'); dock.className = 'chf-dock'; dock.setAttribute('aria-hidden', 'true'); dock.innerHTML = '<i class="chf-dock__led"><b></b></i>';
-      if (sen) dock.setAttribute('data-sen', '');
+      if (sen && !g) dock.setAttribute('data-sen', '');
       document.body.appendChild(dock);
+      // Menyn fälls in: kapseln kommer med knappen från menyns kant och tonar fram i takt med rälsen
+      if (g) { dock.style.animation = 'none'; dock.__glid = rid(dock, 'translate(' + (g.knappFran.left - g.knappTill.left) + 'px,' + (g.knappFran.top - g.knappTill.top) + 'px)', 'none', op0, 1, g); }
     }
     const t = kr.top - 9, botten = parseFloat(ikon.style.top) + 40 + 9;
     Object.assign(dock.style, { left: (kr.left + kr.width / 2 - 29) + 'px', top: t + 'px', height: (botten - t) + 'px' });
@@ -435,10 +462,13 @@
   }
   // vaxlar: menyn har just fällts in eller ut (anropas direkt från attributbytet, inte efter glidningen)
   function placeraIkon(vaxlar) {
-    if (!ikon) { dockFor(null); varIDocka = null; return; }
+    const g = vaxlar ? sidoGlid() : null, tid = g ? g.tid : GLID;
+    if (!ikon) { dockFor(null, false, g); varIDocka = null; return; }
     const rals = html.hasAttribute('data-sido-dold') && matchMedia('(min-width: 1101px)').matches;
     const kn = [...document.querySelectorAll('[data-sido-knapp], .sido-knapp')].filter((x) => x.getBoundingClientRect().width)[0];
     const fran = ikon.isConnected && varIDocka !== null ? rekt(ikon) : null;
+    const franOp = fran ? +getComputedStyle(ikon).opacity : 1;
+    stoppa(ikon); // en pågående flygning avbryts – den nya börjar där bubblan står just nu
     const sido = !rals && document.querySelector('.sido'), sr = sido && sido.getBoundingClientRect();
     if (fl.ikonX != null && sr && sr.width && fl.ikonX < sr.right && fl.ikonY + 44 > sr.top && fl.ikonY < sr.bottom) { fl.ikonX = fl.ikonY = null; sparaFl(); }
     const iDocka = !!(rals && kn && fl.ikonX == null);
@@ -446,26 +476,38 @@
     // Ut ur dockan: en kopia tonar bort i dockan och bubblan tonar fram i hörnet (i stället för att flyga tvärs över sidan)
     if (bytt && !iDocka && fart() && fran && fran.width) {
       const kopia = ikon.cloneNode(true); kopia.removeAttribute('id'); kopia.setAttribute('aria-hidden', 'true');
-      Object.assign(kopia.style, { left: fran.left + 'px', top: fran.top + 'px', right: 'auto', bottom: 'auto', translate: 'none', animation: 'none' });
-      document.body.appendChild(kopia); tonaBort(kopia, 150);
+      Object.assign(kopia.style, { left: fran.left + 'px', top: fran.top + 'px', right: 'auto', bottom: 'auto', translate: 'none', animation: 'none', transition: 'none' });
+      document.body.appendChild(kopia);
+      // Menyn fälls ut: kopian följer knappen ut ur dockan och tonar bort, i takt med rälsen
+      if (g) { kopia.inert = true; kopia.style.pointerEvents = 'none'; kopia.setAttribute('data-undan', ''); rid(kopia, 'none', 'translate(' + (g.knappTill.left - g.knappFran.left) + 'px,' + (g.knappTill.top - g.knappFran.top) + 'px)', franOp, 0, g, () => kopia.remove()); }
+      else tonaBort(kopia, 150);
     }
     ikon.style.translate = '';
     ikon.style.right = ikon.style.bottom = ikon.style.left = ikon.style.top = '';
     let kr = null;
     if (fl.ikonX != null) { ikon.style.left = fl.ikonX + 'px'; ikon.style.top = fl.ikonY + 'px'; }
     else if (iDocka) {
-      kr = vaxlar ? knappSlut(kn) : rekt(kn);
+      kr = g ? g.knappTill : vaxlar ? knappSlut(kn) : rekt(kn);
       ikon.style.left = (kr.left + kr.width / 2 - 20) + 'px'; ikon.style.top = (kr.top + kr.height / 2 + 20 + 14) + 'px';
     } else { ikon.style.right = '22px'; ikon.style.bottom = '22px'; }
     ikon.toggleAttribute('data-i-docka', iDocka);
-    dockFor(iDocka ? kr : null, bytt && fart());
+    dockFor(iDocka ? kr : null, bytt && fart(), bytt ? g : null);
     if (bytt && fran && fran.width && fart()) {
-      if (iDocka) {
+      if (iDocka && g) {
+        // In i dockan när menyn fälls in: bubblan i hörnet tonar bort där den står, och i dockan kommer den med knappen
+        // från menyns kant och tonar fram i takt med rälsen – i stället för att flyga tvärs över sidan
+        const kopia = ikon.cloneNode(true); kopia.removeAttribute('id'); kopia.setAttribute('aria-hidden', 'true'); kopia.inert = true; kopia.removeAttribute('data-i-docka');
+        Object.assign(kopia.style, { left: fran.left + 'px', top: fran.top + 'px', width: fran.width + 'px', height: fran.height + 'px', right: 'auto', bottom: 'auto', translate: 'none', animation: 'none', transition: 'none', pointerEvents: 'none' });
+        document.body.appendChild(kopia);
+        kopia.animate([{ opacity: franOp, transform: 'none' }, { opacity: 0, transform: 'scale(.6)', offset: 0.42 }, { opacity: 0, transform: 'scale(.6)' }], { duration: tid, easing: 'linear', fill: 'forwards' }).onfinish = () => kopia.remove();
+        ikon.__glid = rid(ikon, 'translate(' + (g.knappFran.left - g.knappTill.left) + 'px,' + (g.knappFran.top - g.knappTill.top) + 'px)', 'none', 0, 1, g);
+        if (dock) { dock.removeAttribute('data-landar'); void dock.offsetWidth; dock.setAttribute('data-landar', ''); }
+      } else if (iDocka) {
         // In i dockan: samma glidning som menyn
         const till = rekt(ikon), dx = fran.left - till.left, dy = fran.top - till.top;
-        if (Math.hypot(dx, dy) > 3) ikon.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: GLID, easing: KURVA });
+        if (Math.hypot(dx, dy) > 3) ikon.__glid = [ikon.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)', opacity: franOp }, { transform: 'none', opacity: 1 }], { duration: tid, easing: KURVA })];
         if (dock) { dock.removeAttribute('data-landar'); void dock.offsetWidth; dock.setAttribute('data-landar', ''); }
-      } else ikon.animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'none' }], { duration: 300, delay: 160, easing: KURVA, fill: 'backwards' });
+      } else ikon.__glid = [ikon.animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'none' }], { duration: Math.round(tid * 0.65), delay: Math.round(tid * 0.35), easing: KURVA, fill: 'backwards' })];
     } else if (!bytt && fran && fran.width && fart()) {
       // Samma läge men en annan plats (t.ex. efter glidningen eller ett annat fönstermått): glid kort dit
       const till = rekt(ikon), dx = fran.left - till.left, dy = fran.top - till.top;
@@ -474,7 +516,7 @@
     varIDocka = iDocka;
     // En kontroll när glidningen är klar: rättar mjukt om menyns mått blev andra än väntat
     clearTimeout(sattTimer);
-    if (vaxlar && iDocka) sattTimer = setTimeout(() => placeraIkon(), GLID + 60);
+    if (vaxlar && iDocka) sattTimer = setTimeout(() => placeraIkon(), tid + 60);
   }
   IH.placeraChatt = () => placeraIkon(true);
   addEventListener('resize', () => { placeraFonster(); placeraIkon(); });
