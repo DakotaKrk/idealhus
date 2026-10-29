@@ -611,3 +611,13 @@ html[data-palett-oppen] .chf, html[data-ark-oppen] .chf { pointer-events: none; 
 :root[data-tema]:not([data-tema="original"]) .ch-medd.egen .ch-omn { color: inherit; background: color-mix(in srgb, currentColor 16%, transparent); font-weight: 700; }
 /* Office: vit text på skicka-knappen, ny-knappen och egna bubblor */
 :root[data-tema="office"] :is(.ch-skicka, .ch-ny, .ch-medd.egen .ch-bubbla) { --t-virke-2: var(--t-knapp-topp); --virke-2: var(--t-knapp-topp); }
+
+/* Dockan på rälsen (2026-10-29): ingen bredare kapsel som sticker ut ur listen – chattknappen står som en
+   egen rund knapp under menyknappen, i samma glasstil och storlek */
+@media (min-width: 1101px) {
+  .chf-dock { display: none; }
+  .chf-ikon[data-i-docka], .chf-ikon[data-i-docka]:hover { background: rgb(var(--t-glas-rgb) / .96); color: var(--t-accent-djup);
+    box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .3), 0 6px 14px -10px rgb(var(--t-accent-djup-rgb) / .55); }
+  .chf-ikon[data-i-docka]::before, .chf-ikon[data-i-docka]::after { display: none; }
+  .chf-ikon[data-i-docka]:hover { box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .6), 0 8px 18px -10px rgb(var(--t-accent-djup-rgb) / .6); }
+}

@@ -1549,3 +1549,11 @@ html.tema-vt::view-transition-old(root), html.tema-vt::view-transition-new(root)
 @media (prefers-reduced-motion: reduce) {
   .tema-kort, .tema-knapp, .tema-kort__bock, .tema-ruta { transition: none; }
 }
+
+/* Kontomenyn (2026-10-29): alla sju teman på en rad utan hål; i den smala panelen bara färgproverna (namnet på valt
+   tema står i rubriken), och den valda ringen ritas inuti så att den aldrig kapas */
+.tema-valjare--liten { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.tema-knapp[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--t-fokus), 0 4px 10px -6px rgb(var(--t-skugga-rgb) / 0.4); }
+.km-panel .tema-valjare--liten .tema-knapp { padding: 4px 2px; }
+.km-panel .tema-valjare--liten .tema-knapp__namn { display: none; }
+.km-panel .tema-valjare--liten .tema-ruta { height: 22px; }

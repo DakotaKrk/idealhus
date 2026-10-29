@@ -8794,3 +8794,19 @@ section.dk-hjalte.kort .dk-stat[data-ton="bla"], section.dk-hjalte.kort .dk-stat
 /* Mörk: hjältens fönster visar kvällshimmel i stället för bländande dagsljus */
 :root[data-tema="mork"] .hero__fonster:is([data-dygn="morgon"], [data-dygn="dag"]) { background: radial-gradient(circle at 70% 20%, #3a3350, #241f33 55%, #15121c); }
 :root[data-tema="mork"] .hero__moln { opacity: .28; }
+
+/* Solfönstret i översiktens hjälte (2026-10-29): rund urklippning som håller även när molnen animeras (overflow +
+   border-radius släppte igenom dem i kanten), solen mitt i fönstret – lite lägre på morgonen men alltid hel –
+   och strålarna lika långa runt om, så att de ryms inne i fönstret */
+.hero__fonster { clip-path: circle(50% at 50% 50%); isolation: isolate; }
+.hero__fonster :is(.lp-himmel--dag, .lp-himmel--morgon) { left: 0; top: 0; width: 100%; height: 100%; transform: none; }
+.hero__fonster .lp-himmel .lp-sol, .hero__fonster .lp-himmel--dag .lp-sol, .hero__fonster .lp-himmel--morgon .lp-sol { left: 50%; top: 50%; width: 50px; height: 50px; margin: -25px 0 0 -25px; }
+.hero__fonster .lp-himmel--morgon .lp-sol { margin-top: -17px; }
+.hero__fonster .lp-sol i { transform: rotate(var(--r)) translateY(-38px); }
+@media (max-width: 900px) { .hero__fonster :is(.lp-himmel--dag, .lp-himmel--morgon) { transform: none; left: 0; top: 0; } .hero__fonster .lp-sol { transform: scale(.72); } }
+/* Molnen tonar in och ut vid fönstrets kanter i stället för att kapas, och driver under och ovanför solen så att
+   de aldrig täcker den */
+.hero__fonster .hero__moln { top: 98px; animation: hf-moln-mjuk 24s linear infinite; }
+.hero__fonster .hero__moln--2 { top: 26px; animation-duration: 32s; animation-delay: -14s; }
+@keyframes hf-moln-mjuk { 0% { left: -40px; opacity: 0; } 18% { opacity: .9; } 78% { opacity: .9; } 100% { left: 150px; opacity: 0; } }
+.hero__fonster .hero__moln--2 { --o: .6; }

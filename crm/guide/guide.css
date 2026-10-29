@@ -687,3 +687,161 @@ html[data-konto-oppen] .ihg-knapp, html[data-konto-oppen] .ihg-hej, body:has(.ch
 
 /* Rättningsrunda tema (2026-10-29): Office – vit text på guidens accentknappar och märken */
 :root[data-tema="office"] :is(.ihg-k--barn, .ihg-knapp__ikon, .ihg-hej__vink, .ihg-klar-ikon, .ihg-har) { --ihg-barn-ljus: var(--t-knapp-topp); }
+
+/* Rälsen (2026-10-29): ?-knappen ser ut som rälsens övriga ikoner när menyn är infälld – ingen egen ring eller
+   platta, bara en tunn cirkel som fylls vid hovring, så att den hör till listen */
+@media (min-width: 1101px) {
+  [data-sido-dold] .ihg-knapp { margin-left: 1px; width: 34px; height: 34px; background: none; color: var(--text-2, var(--t-text-2));
+    box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .28); }
+  [data-sido-dold] .ihg-knapp:hover, [data-sido-dold] .ihg-knapp:focus-visible { transform: none; background: rgb(var(--t-glas-rgb) / .95); color: var(--t-accent-djup); }
+  [data-sido-dold] .ihg-knapp__ikon { width: 34px; height: 34px; background: none !important; box-shadow: none !important; color: inherit; font-size: .8rem; }
+  [data-sido-dold] .ihg-knapp__ikon::before, [data-sido-dold] .ihg-knapp__ikon::after, [data-sido-dold] .ihg-knapp__ring { display: none !important; }
+}
+
+/* Rälsen, sista finslipningen (2026-10-29): menyknappen och chattknappen lika stora som rälsens ikoner (34 px) och
+   i samma tunna stil som ?-knappen, lika luft (8 px) runt dem, och nedre halvan räknar med ?-knappen så att ingen
+   ikon hamnar under den. Ikonerna glider fram en i taget när menyn fälls in. */
+@media (min-width: 1101px) {
+  .sido-rals { grid-template-rows: minmax(0, 1fr) 50px minmax(0, 1fr); }
+  html[data-sido-dold] body .sido-kant .sido-knapp { width: 34px; height: 34px; margin: -17px 0 0 -17px; }
+  html[data-sido-dold] body .sido-kant .sido-knapp, .chf-ikon[data-i-docka], .chf-ikon[data-i-docka]:hover {
+    background: rgb(var(--t-glas-rgb) / .9); box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .28); }
+  html[data-sido-dold] body .sido-kant .sido-knapp:hover, .chf-ikon[data-i-docka]:hover { background: rgb(var(--t-glas-rgb)); box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .55); }
+  html[data-sido-dold] body .sido-kant .sido-knapp svg { width: 16px; height: 16px; }
+  .chf-ikon[data-i-docka] { width: 34px; height: 34px; margin: -9px 0 0 3px; }
+  .chf-ikon[data-i-docka] .emo-ik { width: 16px; height: 16px; }
+  .chf-ikon[data-i-docka] .ch-olast { top: -2px; right: -3px; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 8px; background: var(--virke, var(--t-accent-mellan)); color: var(--t-pa-kol-vit);
+    box-shadow: 0 0 0 2px var(--vx-fbf7f0); font: 600 9px/15px var(--rubrik, sans-serif); }
+  html body .sido-rals .sido-rals__halva--ner { padding-top: 0; padding-bottom: 0; }
+  html[data-sido-dold] body:has(.chf-ikon, .chf-dock) .sido-rals .sido-rals__halva--ner, html[data-chatt-dockad] body .sido-rals .sido-rals__halva--ner { padding-top: 42px; }
+  html body:has(.ihg-knapp) .sido-rals .sido-rals__halva--ner { padding-bottom: 38px; }
+  .sido-rals a:hover { transform: translateY(-1px); }
+  .sido-rals a:active { transform: scale(.92); }
+  html.sido-glider[data-sido-dold] .sido-rals a { animation: rals-ikon-in .34s var(--ease-out, ease-out) both; animation-delay: calc(.16s + var(--rk, 0) * 22ms); }
+  .sido-rals__halva > :nth-child(2) { --rk: 1; } .sido-rals__halva > :nth-child(3) { --rk: 2; } .sido-rals__halva > :nth-child(4) { --rk: 3; }
+  .sido-rals__halva > :nth-child(5) { --rk: 4; } .sido-rals__halva > :nth-child(6) { --rk: 5; } .sido-rals__halva > :nth-child(n+7) { --rk: 6; }
+}
+@media (min-width: 1101px) and (max-height: 760px) {
+  .sido-rals__halva { gap: 2px; }
+  .sido-rals__delare { margin: 2px 0; }
+}
+@keyframes rals-ikon-in { from { opacity: 0; transform: translateX(-6px) scale(.9); } }
+@media (prefers-reduced-motion: reduce) { html.sido-glider[data-sido-dold] .sido-rals a { animation: none; } .sido-rals a:hover { transform: none; } }
+
+/* Toppraden när menyn är infälld (2026-10-29): sökfältet, Ny och kontot lika höga (44 px) och raden börjar i
+   samma höjd som menylisten, så att listen och raden står i linje upptill */
+@media (min-width: 1101px) {
+  html[data-sido-dold] body .topp { height: 56px; margin-top: 0; align-items: flex-start; }
+  html[data-sido-dold] body .topp .sok, html[data-sido-dold] body .topp > .knapp { height: 44px; min-height: 44px; }
+  html[data-sido-dold] body .topp__konto { width: 44px; height: 44px; }
+  html[data-sido-dold] body .topp__konto .avatar { width: 37px; height: 37px; font-size: .74rem; }
+}
+/* Utfälld meny (2026-10-29): ?-knappen står inne i menyns fot, i rad med Hemsidan och Logga ut och i samma tunna
+   stil som i rälsen, i stället för att hänga över menyns kant */
+@media (min-width: 1101px) {
+  html:not([data-sido-dold]) .ihg-knapp { margin-left: calc(-1 * (var(--ram, 12px) / 2 + 37px)); width: 34px; height: 34px; background: none; color: var(--text-2, var(--t-text-2));
+    box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .28); }
+  html:not([data-sido-dold]) .ihg-knapp:hover, html:not([data-sido-dold]) .ihg-knapp:focus-visible { transform: none; background: rgb(var(--t-glas-rgb) / .95); color: var(--t-accent-djup); }
+  html:not([data-sido-dold]) .ihg-knapp__ikon { width: 34px; height: 34px; background: none !important; box-shadow: none !important; color: inherit; font-size: .8rem; }
+  html:not([data-sido-dold]) .ihg-knapp__ikon::before, html:not([data-sido-dold]) .ihg-knapp__ikon::after, html:not([data-sido-dold]) .ihg-knapp__ring { display: none !important; }
+  .ihg-knapp { transition: margin-left .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), bottom .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), translate .48s var(--ease-drawer, cubic-bezier(.32, .72, 0, 1)), background-color .2s ease, color .2s ease, box-shadow .2s ease, opacity .2s ease; }
+}
+@media (min-width: 1101px) {
+  /* Foten lämnar plats åt ?-knappen till höger; länkarna delar resten lika */
+  html:not([data-sido-dold]) body:has(.ihg-knapp) .sido .sido__smalt { padding-right: 42px; gap: 2px; }
+  html:not([data-sido-dold]) body:has(.ihg-knapp) .sido .sido__smalt > a, html:not([data-sido-dold]) body:has(.ihg-knapp) .sido .sido__smalt > button { flex: 1 1 0; min-width: 0; justify-content: center; padding: 8px 6px; white-space: nowrap; }
+}
+
+/* Kontot längst ner i menylisten när menyn är infälld (2026-10-29): samma runda 34 px-knapp som rälsens ikoner,
+   ?-knappen står ovanför, och toppraden tonar in utan rörelse (en rörelse skulle ta med kontoknappen) */
+@media (min-width: 1101px) {
+  html[data-sido-dold] body .topp__konto { position: fixed; z-index: 40; left: calc(var(--ram, 12px) / 2 + 9px); bottom: calc(var(--ram, 12px) + 16px); width: 34px; height: 34px; margin: 0; border-radius: 50%; }
+  html[data-sido-dold] body .topp__konto .avatar { width: 28px; height: 28px; font-size: .6rem; box-shadow: 0 0 0 2px var(--t-yta), 0 0 0 3px rgb(var(--t-koppar-rgb) / .35); }
+  html[data-sido-dold] body .topp__konto:hover .avatar, html[data-sido-dold] body .topp__konto:focus-visible .avatar { box-shadow: 0 0 0 2px var(--t-yta), 0 0 0 3.5px rgb(var(--t-accent-rgb) / .7); }
+  html[data-sido-dold] body .topp__konto .avatar .narvaro-prick { width: 9px; height: 9px; right: -2px; bottom: -2px; }
+  html.sido-glider[data-sido-dold] body .topp { animation-name: topp-tona; }
+  /* toppraden över listen (z 36), annars hamnar kontoknappen under listens glas; själva raden släpper igenom klick */
+  html[data-sido-dold] body .topp { z-index: 37; pointer-events: none; }
+  html[data-sido-dold] body .topp > * { pointer-events: auto; }
+  html.sido-glider[data-sido-dold] body .topp__konto { animation: rals-ikon-in .34s var(--ease-out, ease-out) .3s both; }
+  html[data-sido-dold] .ihg-knapp { bottom: calc(var(--ram, 12px) + 16px + 44px); }
+  html[data-sido-dold] body:has(.ihg-knapp) .sido-rals .sido-rals__halva--ner { padding-bottom: 82px; }
+}
+
+/* Utfälld meny (2026-10-29): ?-knappen som en lugn rund knapp i samma stil som kontokortets pilknapp (grå platta,
+   ingen ring), 32 px och mitt i höjd med Hemsidan och Logga ut */
+@media (min-width: 1101px) {
+  html:not([data-sido-dold]) .ihg-knapp { width: 32px; height: 32px; margin-bottom: -2px; background: rgb(var(--t-blaeck-rgb) / .05); box-shadow: none; color: var(--text-2, var(--t-text-2)); }
+  html:not([data-sido-dold]) .ihg-knapp__ikon { width: 32px; height: 32px; }
+  html:not([data-sido-dold]) .ihg-knapp:hover, html:not([data-sido-dold]) .ihg-knapp:focus-visible { background: var(--t-accent-ljus, rgb(var(--t-accent-rgb) / .18)); color: var(--t-accent-djup); box-shadow: none; }
+}
+
+/* Menyns fot (2026-10-29): Hemsidan, Logga ut och ?-knappen som en rad likadana knappar – samma höjd (34 px),
+   samma ljusa platta och samma hovring, med lika luft emellan */
+@media (min-width: 1101px) {
+  html:not([data-sido-dold]) body:has(.ihg-knapp) .sido .sido__smalt { padding: 0 48px 0 0; gap: 6px; }
+  html:not([data-sido-dold]) body .sido .sido__smalt > a, html:not([data-sido-dold]) body .sido .sido__smalt > button {
+    height: 32px; padding: 0 6px; border-radius: 16px; background: rgb(var(--t-blaeck-rgb) / .045); color: var(--text-2, var(--t-text-2)); gap: 5px;
+    transition: background-color .2s ease, color .2s ease, transform .16s var(--ease-out, ease); }
+  html:not([data-sido-dold]) body .sido .sido__smalt > a:hover, html:not([data-sido-dold]) body .sido .sido__smalt > button:hover,
+  html:not([data-sido-dold]) .ihg-knapp:hover, html:not([data-sido-dold]) .ihg-knapp:focus-visible { background: var(--t-accent-ljus, rgb(var(--t-accent-rgb) / .18)); color: var(--t-accent-djup); }
+  html:not([data-sido-dold]) body .sido .sido__smalt > a:active, html:not([data-sido-dold]) body .sido .sido__smalt > button:active, html:not([data-sido-dold]) .ihg-knapp:active { transform: scale(.96); }
+  html:not([data-sido-dold]) .ihg-knapp { width: 32px; height: 32px; margin-left: calc(-1 * (var(--ram, 12px) / 2 + 36px)); background: rgb(var(--t-blaeck-rgb) / .045); }
+  html:not([data-sido-dold]) .ihg-knapp__ikon { width: 32px; height: 32px; font-size: .78rem; }
+  html:not([data-sido-dold]) body .sido .sido__smalt > a, html:not([data-sido-dold]) body .sido .sido__smalt > button { font-size: .77rem !important; letter-spacing: -.01em; padding: 0 3px !important; gap: 4px !important; height: 32px !important; justify-content: center; color: var(--text-2, var(--t-text-2)) !important; }
+  html:not([data-sido-dold]) body .sido .sido__smalt .i { width: 14px; height: 14px; flex: none; }
+}
+@media (min-width: 1101px) { html:not([data-sido-dold]) body .sido .sido__smalt > a:hover, html:not([data-sido-dold]) body .sido .sido__smalt > button:hover { color: var(--t-accent-djup) !important; } }
+
+/* Kontokortet i samma familj som raden under (2026-10-29): samma ljusa platta utan skugga, 8 px inre luft så att
+   avataren och pilknappen står i linje med Hemsidan och ?-knappen, pilknappen lika stor (32 px) som ?-knappen */
+@media (min-width: 1101px) {
+  html:not([data-sido-dold]) body .sido .anv { padding: 8px !important; border-radius: 18px !important; border: 0; background: rgb(var(--t-blaeck-rgb) / .045); box-shadow: none;
+    transition: background-color .2s ease, transform .16s var(--ease-out, ease); }
+  html:not([data-sido-dold]) body .sido .anv:hover { background: var(--t-accent-ljus, rgb(var(--t-accent-rgb) / .18)); box-shadow: none; transform: none; }
+  html:not([data-sido-dold]) body .sido .anv:active { transform: scale(.98); }
+  html:not([data-sido-dold]) body .sido .anv .avatar { width: 36px !important; height: 36px !important; }
+  html:not([data-sido-dold]) body .sido .anv > span.anv__chevron { flex: 0 0 32px; width: 32px; height: 32px; background: var(--t-yta); box-shadow: none; color: var(--text-2, var(--t-text-2)); }
+  html:not([data-sido-dold]) body .sido .anv:hover > span.anv__chevron { background: var(--t-yta); color: var(--t-accent-djup); }
+  html:not([data-sido-dold]) body .sido .sido__smalt { margin-top: 2px; }
+}
+
+/* Rälsen (2026-10-29): ?-knappen precis som rälsens ikoner – ingen cirkel, samma färg och storlek som
+   linjeikonerna, rak och lugn glyf, och samma rundade hovring som de andra */
+@media (min-width: 1101px) {
+  html[data-sido-dold] .ihg-knapp, html[data-sido-dold] .ihg-knapp:hover, html[data-sido-dold] .ihg-knapp:focus-visible { background: transparent; box-shadow: none; transform: none; color: var(--text-2, var(--t-text-2)); animation: none; }
+  html[data-sido-dold] .ihg-knapp:hover, html[data-sido-dold] .ihg-knapp:focus-visible { background: rgb(var(--t-glas-rgb) / .95); color: var(--text, var(--t-text)); }
+  html[data-sido-dold] .ihg-knapp:active { transform: scale(.92); }
+  html[data-sido-dold] .ihg-knapp__ikon { font: 600 17px/1 var(--sans, sans-serif) !important; color: inherit !important; transform: none !important; animation: none !important; padding-top: 1px; }
+}
+
+/* ?-knappen på dator (2026-10-29): en linjeikon i samma tjocklek och storlek som menyns övriga ikoner i stället
+   för en fet bokstav – samma i rälsen och i den utfällda menyns fot. Rälsens nedre ikoner slutar ovanför
+   ?-knappen och kontot (marginal i stället för inre luft, så att en rullande lista aldrig hamnar under dem). */
+@media (min-width: 1101px) {
+  html body .ihg-knapp .ihg-knapp__ikon { font-size: 0 !important; color: inherit !important; }
+  html body .ihg-knapp .ihg-knapp__ikon::before { content: "" !important; display: block !important; position: static; width: 18px; height: 18px; inset: auto; border: 0; border-radius: 0; box-shadow: none; animation: none; opacity: 1;
+    background: currentColor !important; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath stroke-width='1.7' d='M9.1 9.3a3 3 0 1 1 4.4 2.6c-.95.5-1.5 1.2-1.5 2.3v.4'/%3E%3Cpath stroke-width='2.3' d='M12 18.2h.01'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath stroke-width='1.7' d='M9.1 9.3a3 3 0 1 1 4.4 2.6c-.95.5-1.5 1.2-1.5 2.3v.4'/%3E%3Cpath stroke-width='2.3' d='M12 18.2h.01'/%3E%3C/svg%3E") center / contain no-repeat; }
+  html:not([data-sido-dold]) body .ihg-knapp .ihg-knapp__ikon::before { width: 16px; height: 16px; }
+  html[data-sido-dold] body .sido-rals .sido-rals__halva--ner { padding-bottom: 0 !important; margin-bottom: 84px; }
+}
+
+/* Rälsen (2026-10-29): Översikt visas som Legohus husmärke högst upp i listen, större än de andra ikonerna, så att
+   listens tomma topp används; resten av den övre halvan står kvar nedtill mot menyknappen */
+@media (min-width: 1101px) {
+  html body .sido-rals .sido-rals__halva--upp { margin-top: 46px; }
+  html body .sido-rals .sido-rals__halva--upp > a[data-vy="oversikt"] { position: absolute; top: -10px; left: 50%; width: 42px; height: 42px; margin-left: -21px; }
+  html body .sido-rals .sido-rals__halva--upp > a[data-vy="oversikt"] + * { margin-top: auto; }
+  html body .sido-rals a[data-vy="oversikt"] .i { width: 26px; height: 26px; stroke: none; fill: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-6 -14 272 272'%3E%3Cpolygon points='0 112 145 0 260 103 260 129 145 27 0 138'/%3E%3Cpolygon points='30 100 60 100 60 252 30 252'/%3E%3Cpolygon points='95 80 125 80 125 252 95 252'/%3E%3Cpolygon points='95 222 260 222 260 252 95 252'/%3E%3Cpolygon points='170 138 192 138 192 160 170 160'/%3E%3Cpolygon points='198 138 220 138 220 160 198 160'/%3E%3Cpolygon points='170 166 192 166 192 188 170 188'/%3E%3Cpolygon points='198 166 220 166 220 188 198 188'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-6 -14 272 272'%3E%3Cpolygon points='0 112 145 0 260 103 260 129 145 27 0 138'/%3E%3Cpolygon points='30 100 60 100 60 252 30 252'/%3E%3Cpolygon points='95 80 125 80 125 252 95 252'/%3E%3Cpolygon points='95 222 260 222 260 252 95 252'/%3E%3Cpolygon points='170 138 192 138 192 160 170 160'/%3E%3Cpolygon points='198 138 220 138 220 160 198 160'/%3E%3Cpolygon points='170 166 192 166 192 188 170 188'/%3E%3Cpolygon points='198 166 220 166 220 188 198 188'/%3E%3C/svg%3E") center / contain no-repeat; background: currentColor; }
+  html body .sido-rals a[data-vy="oversikt"] .i > * { display: none; }
+  html body .sido-rals a[data-vy="oversikt"]:not(.aktiv) { color: var(--t-accent-djup, var(--virke-djup)); }
+}
+
+/* Rälsen med få sidor (t.ex. admin, 2026-10-29): avdelaren efter Översikt (som nu är loggan upptill) döljs så att
+   ingen ensam linje svävar, och halvor med få ikoner får mer luft mellan ikonerna så att listen inte ser tom ut */
+@media (min-width: 1101px) {
+  html body .sido-rals .sido-rals__halva--upp > a[data-vy="oversikt"] + .sido-rals__delare { display: none; }
+  html body .sido-rals .sido-rals__halva--upp > a[data-vy="oversikt"] + .sido-rals__delare + * { margin-top: auto; }
+  html body .sido-rals:not(:has(.sido-rals__halva > a:nth-of-type(6))) .sido-rals__halva { gap: 10px; }
+  html body .sido-rals:not(:has(.sido-rals__halva > a:nth-of-type(6))) .sido-rals__delare { margin: 2px 0; }
+}

@@ -276,6 +276,10 @@
   const fart = () => !!document.body.animate && !lugn() && !IH.lugn;
   const html = document.documentElement;
   let fonster = null, ikon = null, fokusFore = null;
+  // Minimal-läget: bubblan finns alltid nära (även när chatten är stängd), om man inte stängt den i bubblans meny.
+  // Visas igen nästa gång man byter till Minimal. Ändrar inget i Normal och Full.
+  const minimal = () => html.getAttribute('data-layout') === 'minimal';
+  const minBubbla = () => !fl.oppen && minimal() && !fl.dolMin;
   // Rektangeln utan magnetens förskjutning (grund.js sätter style.translate när musen är nära)
   function rekt(el) {
     const r = el.getBoundingClientRect(), t = String(el.style.translate || '').split(' '), tx = parseFloat(t[0]) || 0, ty = parseFloat(t[1]) || 0;
@@ -336,12 +340,12 @@
   }
   function ritaFonster(fokusera) {
     const paSidan = /^#\/chatt/.test(location.hash);
-    if (!fl.oppen || paSidan) {
+    if ((!fl.oppen && !minBubbla()) || paSidan) {
       fonsterUndan(null);
       if (ikon) { const b = ikon; ikon = null; tonaBort(b); }
       placeraIkon(); return;
     }
-    if (fl.min) {
+    if (fl.min || !fl.oppen) {
       if (!ikon) {
         ikon = document.createElement('button'); ikon.type = 'button'; ikon.className = 'chf-ikon'; ikon.setAttribute('aria-label', 'Öppna chatten');
         // När fönstret krymper in i bubblan tonar bubblan fram först när fönstret nästan är där
@@ -516,7 +520,7 @@
           sparaFl(); placeraIkon();
         });
     });
-    b.addEventListener('click', () => { if (b.dataset.dragen) return; fl.min = false; sparaFl(); ritaFonster(true); });
+    b.addEventListener('click', () => { if (b.dataset.dragen) return; fl.oppen = true; fl.min = false; sparaFl(); ritaFonster(true); });
     b.addEventListener('contextmenu', (ev) => { ev.preventDefault(); ikonMeny(); });
     b.setAttribute('aria-haspopup', 'menu'); b.title = 'Öppna chatten · högerklicka för fler val';
   }
@@ -542,10 +546,10 @@
     imeny.addEventListener('click', (ev) => {
       const b = ev.target.closest('[data-chm]'); if (!b) return;
       const v = b.getAttribute('data-chm');
-      if (v === 'oppna') { stangIkonMeny(); fl.min = false; sparaFl(); ritaFonster(true); }
+      if (v === 'oppna') { stangIkonMeny(); fl.oppen = true; fl.min = false; sparaFl(); ritaFonster(true); }
       if (v === 'tyst') { satPref('storEj', !pref().storEj); stangIkonMeny(); ritaFonster(); IH.toast(pref().storEj ? 'Stör ej är på' : 'Stör ej är av', pref().storEj ? 'Inget ljud och ingen avisering – olästa räknas ändå.' : null, pref().storEj ? 'mane' : 'bjallra'); if (ikon) ikon.focus({ preventScroll: true }); }
       if (v === 'docka') { fl.ikonX = fl.ikonY = null; sparaFl(); stangIkonMeny(); placeraIkon(); if (ikon) ikon.focus({ preventScroll: true }); }
-      if (v === 'stang') { stangIkonMeny(); fl.oppen = false; fl.min = false; sparaFl(); ritaFonster(); }
+      if (v === 'stang') { stangIkonMeny(); fl.oppen = false; fl.min = false; if (minimal()) fl.dolMin = true; sparaFl(); ritaFonster(); }
     });
     setTimeout(() => document.addEventListener('pointerdown', utanforIkonMeny, true), 0);
     const forsta = imeny.querySelector('button'); if (forsta) forsta.focus({ preventScroll: true });
@@ -566,6 +570,12 @@
     if (ui.andrar || ui.svar || ui.emoji) { ui.andrar = ui.svar = null; ui.emoji = false; ritaAllt(); fokusText(true); return; }
     fl.min = true; sparaFl(); ritaFonster();
   }, true);
+  // Layoutbytet (layout.js skickar ih:layout): till Minimal tar fram bubblan igen, från Minimal tar bort den om chatten är stängd
+  addEventListener('ih:layout', (ev) => {
+    const d = (ev && ev.detail) || {};
+    if (d.layout === 'minimal' && d.forra !== 'minimal' && fl.dolMin) { fl.dolMin = false; sparaFl(); }
+    ritaFonster();
+  });
   IH.chattOppna = (kid) => { fl.oppen = true; fl.min = false; if (kid) fl.kanal = kid; sparaFl(); ritaFonster(true); };
   // Guiden ställer chatten åt sidan under en rundtur och tar fram den igen efteråt (sparas inte)
   let undan = false;
@@ -577,7 +587,7 @@
   addEventListener('hashchange', () => setTimeout(() => {
     const paSidan = /^#\/chatt/.test(location.hash);
     if (fonster && fl.oppen && !fl.min && !paSidan) return;
-    if (ikon && fl.oppen && fl.min && !paSidan) { uppdateraIkon(); return; }
+    if (ikon && !paSidan && (fl.oppen ? fl.min : minBubbla())) { uppdateraIkon(); return; }
     ritaFonster();
   }, 0));
 

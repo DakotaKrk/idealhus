@@ -1,0 +1,561 @@
+/* =====================================================================
+   Layoutlägen – säljsidorna (Översikt, Förfrågningar, Säljtavla, Affär,
+   Kunder, Kundsida, Offerter, Offert, Dokument/Mallar, Kundmöte, Projekt,
+   Att göra, Inställningar och Kolla marken).
+
+   Full = ingen regel här. Varje regel börjar med html[data-layout="minimal"]
+   eller html[data-layout="normal"] och allt ligger inom @media screen, så
+   utskrifter (offert-PDF, mallar) är desamma i alla lägen.
+   Minimal: hjältarna krymper till en verktygsrad med bara det som bär en
+   handling, dekor och dubblerade nyckeltal döljs, rutnäten fylls jämnt.
+   Normal: samma struktur som Full men utan dekor och med lägre hjältar.
+   Densitetstokens (--l-*) kommer från layout.css; reserverna här är
+   samma värden så att filen fungerar för sig.
+   ===================================================================== */
+
+@media screen {
+
+/* ---------------------------------------------------------------------
+   Gemensamt: hjälte → verktygsrad (Minimal)
+   Samma yta som ett vanligt kort i alla teman, ingen mörk bakgrund.
+   --------------------------------------------------------------------- */
+html[data-layout="minimal"] :is(.ipuls, .puls, .kundtopp, .offtopp, .dk-hjalte, .motescen, .prodtopp:not(.prodtopp--resa), .afhero, .kh) {
+  min-height: 0;
+  padding: var(--l-hjalte-pad, 10px 14px);
+  border-radius: calc(14px * var(--t-radie-k, 1));
+  background: var(--vit);
+  box-shadow: var(--l-skugga, 0 1px 2px rgb(var(--t-blaeck-rgb) / .06)), inset 0 0 0 1px var(--kant);
+  color: var(--text);
+}
+html[data-layout="minimal"] :is(.ipuls, .puls, .kundtopp, .offtopp, .dk-hjalte, .motescen, .prodtopp:not(.prodtopp--resa), .afhero, .kh)::before,
+html[data-layout="minimal"] :is(.ipuls, .puls, .kundtopp, .offtopp, .dk-hjalte, .motescen, .prodtopp:not(.prodtopp--resa), .afhero, .kh)::after {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------
+   B.1 Översikt
+   --------------------------------------------------------------------- */
+/* Minimal: hjälten ersätts av Snabbt-raden (skrivs bara ut i Minimal). */
+html[data-layout="minimal"] .hero { display: none; }
+
+html[data-layout="minimal"] .ov-snabbt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "hej ny" "rad rad";
+  align-items: center;
+  gap: 10px 14px;
+  margin: 0 0 var(--l-sektion, 10px);
+  padding: 12px 14px;
+  border-radius: calc(14px * var(--t-radie-k, 1));
+  background: var(--vit);
+  box-shadow: var(--l-skugga, 0 1px 2px rgb(var(--t-blaeck-rgb) / .06)), inset 0 0 0 1px var(--kant);
+}
+html[data-layout="minimal"] .ov-snabbt__hej {
+  grid-area: hej;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  min-width: 0;
+  margin: 0;
+}
+html[data-layout="minimal"] .ov-snabbt__hej b {
+  font-family: var(--rubrik, inherit);
+  font-size: var(--l-h1, 20px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+html[data-layout="minimal"] .ov-snabbt__hej span {
+  font-size: 0.8125rem;
+  color: var(--text-2);
+}
+/* Talen i lika breda spalter (ingen ensam rest på en egen rad); texten får bryta på smalt. */
+html[data-layout="minimal"] .ov-snabbt__rad {
+  grid-area: rad;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 6px;
+}
+html[data-layout="minimal"] .ov-snabbt__tal,
+html[data-layout="minimal"] .ov-snabbt__ny button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: var(--l-knapp, 34px);
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(var(--t-blaeck-rgb) / 0.035);
+  box-shadow: inset 0 0 0 1px var(--kant);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.84375rem;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+html[data-layout="minimal"] .ov-snabbt__tal svg,
+html[data-layout="minimal"] .ov-snabbt__ny svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+html[data-layout="minimal"] .ov-snabbt__tal b { font-weight: 700; }
+html[data-layout="minimal"] .ov-snabbt__tal { min-width: 0; white-space: normal; line-height: 1.25; padding-block: 6px; }
+html[data-layout="minimal"] .ov-snabbt__tal.varm {
+  background: var(--t-accent-ljus-3);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / 0.3);
+  color: var(--t-accent-text);
+}
+html[data-layout="minimal"] .ov-snabbt__tal:hover,
+html[data-layout="minimal"] .ov-snabbt__ny button:hover {
+  box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / 0.45);
+}
+html[data-layout="minimal"] .ov-snabbt__ny {
+  grid-area: ny;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+html[data-layout="minimal"] .ov-snabbt__ny button { font-weight: 600; }
+
+/* Rutnätet: spalterna löses upp, Att göra · Fokus överst, förfrågningarna under i full bredd. */
+html[data-layout="minimal"] .oversikt {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: var(--l-gap, 10px);
+}
+html[data-layout="minimal"] .oversikt__kol { display: contents; }
+html[data-layout="minimal"] .oversikt :is(.ov-intakt, .ov-akt) { display: none; }
+html[data-layout="minimal"] .oversikt .ov-uppg { order: 1; }
+html[data-layout="minimal"] .oversikt .ov-fokus { order: 2; }
+html[data-layout="minimal"] .oversikt .ov-forfr { order: 3; grid-column: 1 / -1; }
+/* Att göra sträcks till Fokus höjd – ett tomt "Allt klart" hamnar mitt i kortet i stället för överst. */
+html[data-layout="minimal"] .oversikt .ov-uppg { display: flex; flex-direction: column; }
+html[data-layout="minimal"] .oversikt .ov-uppg > .kort__kropp:has(> .tom:only-child) { flex: 1; display: grid; place-items: center; }
+html[data-layout="minimal"] .oversikt:not(:has(.ov-fokus)) .ov-uppg { grid-column: 1 / -1; }
+html[data-layout="minimal"] .oversikt .kort { border-radius: calc(14px * var(--t-radie-k, 1)); }
+html[data-layout="minimal"] .oversikt .kort__huvud { padding: var(--l-kort-huvud, 12px 14px 0); }
+html[data-layout="minimal"] .oversikt .kort__huvud h2 { font-size: var(--l-h2, 0.9375rem); }
+html[data-layout="minimal"] .oversikt .kort__ikon { width: var(--l-ikon, 26px); height: var(--l-ikon, 26px); border-radius: 9px; }
+html[data-layout="minimal"] .oversikt .kort > .kort__kropp { padding: var(--l-kort-kropp, 10px 14px 14px); }
+html[data-layout="minimal"] .oversikt .tumme { width: 32px; height: 32px; }
+html[data-layout="minimal"] .oversikt .lista { padding: 4px 6px 8px; }
+html[data-layout="minimal"] .oversikt .lista__rad { min-height: var(--l-rad, 36px); padding-block: 6px; }
+html[data-layout="minimal"] .oversikt .fokus { padding: 6px 14px 14px; gap: 6px; }
+html[data-layout="minimal"] .oversikt .fokus__rad { padding-block: 8px; }
+
+@media (max-width: 1100px) {
+  html[data-layout="minimal"] .ov-snabbt { grid-template-columns: minmax(0, 1fr); grid-template-areas: "hej" "rad" "ny"; }
+  html[data-layout="minimal"] .ov-snabbt__ny { justify-content: flex-start; }
+  html[data-layout="minimal"] .ov-snabbt__tal { border-radius: 12px; }
+}
+@media (max-width: 900px) {
+  html[data-layout="minimal"] .oversikt { grid-template-columns: minmax(0, 1fr); }
+  html[data-layout="minimal"] .oversikt .ov-forfr { grid-column: auto; }
+}
+@media (max-width: 560px) {
+  /* Talen i två spalter, Skapa som ikonrad med texten under (träffytor 44 px). */
+  html[data-layout="minimal"] .ov-snabbt__rad { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html[data-layout="minimal"] .ov-snabbt__rad > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+  html[data-layout="minimal"] .ov-snabbt__tal { min-height: 44px; white-space: normal; line-height: 1.25; border-radius: 12px; }
+  html[data-layout="minimal"] .ov-snabbt__ny { display: grid; grid-template-columns: repeat(auto-fit, minmax(56px, 1fr)); }
+  html[data-layout="minimal"] .ov-snabbt__ny button { flex-direction: column; justify-content: center; gap: 3px; min-height: 52px; padding: 6px 4px; border-radius: 12px; font-size: 0.75rem; }
+}
+
+/* Normal: hjälten utan byn och himlen, en spalt, nyckeltalen fyra i rad. */
+html[data-layout="normal"] .hero :is(.hero__by, .hero__fonster, .ljusfall) { display: none; }
+html[data-layout="normal"] .hero { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+html[data-layout="normal"] .hero__titel { display: flex; flex-wrap: wrap; column-gap: 0.28em; font-size: var(--l-h1, clamp(28px, 2.6vw, 40px)); }
+html[data-layout="normal"] .hero__kpi { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+html[data-layout="normal"] .ov-intakt .perhus { display: none; }
+@media (max-width: 1100px) {
+  html[data-layout="normal"] .hero__kpi { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  html[data-layout="normal"] .hero__kpi { grid-template-columns: minmax(0, 1fr); }
+}
+
+
+/* ---------------------------------------------------------------------
+   B.2 Förfrågningar
+   --------------------------------------------------------------------- */
+/* Minimal: rad 1 = antal nya · Börja med · verktygen, rad 2 = miljöerna som filterchips. */
+html[data-layout="minimal"] .ipuls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+html[data-layout="minimal"] .ipuls :is(.ipuls__ord, .ipuls__miljo) { display: contents; }
+html[data-layout="minimal"] .ipuls :is(.ipuls__topp, .ipuls__vecka, .ipuls__tal, .ipuls__kalla, .ipuls__miljohuvud) { display: none; }
+html[data-layout="minimal"] .ipuls__stort { order: 1; display: flex; align-items: center; gap: 10px; margin: 0; color: var(--text); }
+html[data-layout="minimal"] .ipuls__stort b { font-size: var(--l-tal, 18px); line-height: 1; color: var(--text); -webkit-text-fill-color: currentColor; background: none; }
+html[data-layout="minimal"] .ipuls__stort span { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 8px; font-size: var(--l-h2, 0.9375rem); font-weight: 600; color: var(--text); }
+html[data-layout="minimal"] .ipuls__stort small { margin: 0; font-weight: 400; font-size: 0.8125rem; color: var(--text-2); }
+html[data-layout="minimal"] .ipuls__forst { order: 2; min-height: 0; padding: 5px 10px 5px 6px; gap: 8px; border-radius: 999px; }
+html[data-layout="minimal"] .ipuls__forst small { display: none; }
+html[data-layout="minimal"] .ipuls__forst > span:not(.avatar) { display: flex; align-items: baseline; gap: 8px; }
+html[data-layout="minimal"] .ipuls__forst .ipuls__pil { width: 24px; height: 24px; }
+html[data-layout="minimal"] .ipuls .toppverktyg { order: 3; margin: 0 0 0 auto; }
+html[data-layout="minimal"] .ipuls .dioramor {
+  order: 4;
+  flex: 1 0 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 0;
+}
+html[data-layout="minimal"] .ipuls .dio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--l-knapp, 34px);
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgb(var(--t-blaeck-rgb) / 0.035);
+  box-shadow: inset 0 0 0 1px var(--kant);
+  color: var(--text);
+  container-type: normal;
+  transform: none;
+  animation: none;
+  opacity: 1;
+}
+html[data-layout="minimal"] .ipuls .dio::before { display: none; }
+html[data-layout="minimal"] .ipuls .dio.vald { background: var(--t-accent-ljus-3); box-shadow: inset 0 0 0 1.5px var(--f); }
+html[data-layout="minimal"] .ipuls .dio :is(.dio__scen, .dio__fakta, .dio__folk) { display: none; }
+html[data-layout="minimal"] .ipuls .dio__text { display: flex; align-items: baseline; gap: 6px; padding: 0; margin: 0; }
+html[data-layout="minimal"] .ipuls .dio__text b { font-size: 0.84375rem; }
+html[data-layout="minimal"] .ipuls .dio__text small { font-size: 0.75rem; }
+html[data-layout="minimal"] .ipuls .dio__ny { position: static; order: 2; padding: 3px 7px; }
+
+/* Två spalter bara där Full också har två (över 1100 px) – på platta och mobil en spalt som i Full. */
+html[data-layout="minimal"] .inkorg { gap: var(--l-gap, 10px); margin-top: var(--l-sektion, 10px); }
+@media (min-width: 1101px) {
+  html[data-layout="minimal"] .inkorg { grid-template-columns: minmax(340px, 0.8fr) minmax(0, 1.2fr); }
+}
+html[data-layout="minimal"] :is(.inkorg__tips, .inkorg__las .forlopp, .fd__bild, .smart__skal, .smart__amnen) { display: none; }
+html[data-layout="minimal"] .fd__mitt { grid-template-columns: minmax(0, 1fr); margin: 10px 0; }
+html[data-layout="minimal"] .fd__svar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+html[data-layout="minimal"] .smart__poang .poang { width: 40px; height: 40px; }
+html[data-layout="minimal"] .fd__forslag { grid-template-columns: minmax(0, 1fr); }
+html[data-layout="minimal"] .fd__forslag img { display: none; }
+@media (max-width: 700px) {
+  html[data-layout="minimal"] .fd__svar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html[data-layout="minimal"] .ipuls .toppverktyg { margin-left: 0; }
+}
+
+/* Normal: utan källraden, lägre dioramor och veckostaplar. */
+html[data-layout="normal"] .ipuls__kalla { display: none; }
+html[data-layout="normal"] .ipuls .dio { grid-template-rows: minmax(126px, 1fr) auto auto auto; }
+html[data-layout="normal"] .ipuls .dio__scen { min-height: 126px; transform: scale(0.72); margin: -18px 0; }
+html[data-layout="normal"] .ipuls__staplar { height: 52px; }
+
+/* ---------------------------------------------------------------------
+   B.3 Säljtavla
+   --------------------------------------------------------------------- */
+/* Minimal: pulsen ritas inte (vyer.js) – Tavla/Lista först och Ny affär sist i sök-/filterraden.
+   Filtren rullar i sidled i stället för att radbrytas. */
+html[data-layout="minimal"] .puls { display: none; }
+html[data-layout="minimal"] :is(.stegband, .tv-fokus, .tavla__tips) { display: none; }
+/* Rad 1: Tavla/Lista · sök · Ny affär. Rad 2: Alla/Mina · filter · sortering · Förlorade. */
+html[data-layout="minimal"] .tv-verktyg { margin-top: 0; padding: 8px; }
+html[data-layout="minimal"] .tv-verktyg [data-g="tv-kompakt"] { display: none; }
+html[data-layout="minimal"] .tv-verktyg .tv-lage { order: 1; flex: none; margin: 0; }
+html[data-layout="minimal"] .vy .tv-verktyg .tv-sok { order: 2; flex: 1 1 200px; min-width: 150px; max-width: none; }
+html[data-layout="minimal"] .tv-verktyg > [data-g="ny-affar"] { order: 3; flex: none; }
+html[data-layout="minimal"] .tv-verktyg > :not(.tv-lage, .tv-sok, [data-g="ny-affar"]) { order: 4; }
+html[data-layout="minimal"] .tv-verktyg::after { content: ""; order: 3; flex: 1 0 100%; height: 0; }
+html[data-layout="minimal"] .vy .tv-verktyg > .ap-filterrad { flex: 0 1 auto; min-width: 0; display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+html[data-layout="minimal"] .tv-verktyg .ap-filterrad::-webkit-scrollbar { display: none; }
+html[data-layout="minimal"] .tv-verktyg .ap-filterrad > * { flex: none; }
+html[data-layout="minimal"] .tv-verktyg > .kundsort { margin-left: auto; }
+@media (max-width: 700px) {
+  /* Mobil: sök överst, sedan Tavla/Lista · Ny affär, sist Alla/Mina och filtren som rullar i sidled. */
+  html[data-layout="minimal"] .vy .tv-verktyg .tv-sok { order: 0; flex: 1 1 100%; }
+  html[data-layout="minimal"] .tv-verktyg > [data-g="ny-affar"] { margin-left: auto; }
+  html[data-layout="minimal"] .tv-verktyg > .kundsort { flex: 1 1 auto; min-width: 0; margin-left: 0; }
+  html[data-layout="minimal"] .vy .tv-verktyg > .ap-filterrad { flex: 1 1 190px; order: 5; }
+  html[data-layout="minimal"] .tv-verktyg > [data-g="tv-forlorade"] { order: 6; }
+}
+/* Alla sex spalter ryms från 1280 px; korten i den befintliga kompaktstilen. */
+html[data-layout="minimal"] .tavla:not(.tavla--prod) { grid-auto-columns: minmax(176px, 1fr); gap: var(--l-gap, 10px); }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) :is(.spalt__insikt, .spalt__viktat, .spalt__huvud small) { display: none; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .spalt__huvud { padding-bottom: 8px; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .spalt { min-width: 0; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .spalt__kort { grid-template-columns: minmax(0, 1fr); padding: 8px 6px 10px; gap: 8px; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .spalt__huvud { padding-inline: 12px; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .spalt__huvud b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .spalt__huvud span { flex: none; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .spalt__huvud .tal { margin-top: 4px; font-size: 1.125rem; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .aff { min-width: 0; padding: 10px; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .aff__topp { min-width: 0; }
+/* Kortet: kund, titel, värde och dagar. Modellnamnet bort (bilden visar huset), flytta-pilen syns alltid. */
+html[data-layout="minimal"] .tavla:not(.tavla--prod) :is(.aff__nasta, .aff__verktyg, .aff__modell) { display: none; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .aff { padding-bottom: 10px; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .aff__topp { justify-content: space-between; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .aff__topp > :is(.ring, .aff__vunnen, svg) { margin-left: auto; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .aff__bild { width: 40px; height: 28px; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .aff__kund { display: block; min-width: 0; margin: 2px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.78125rem; color: var(--text-2); }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .aff__kund .avatar { display: none; }
+html[data-layout="minimal"] .tavla:not(.tavla--prod) .aff__flytta { opacity: 1; transform: none; }
+html.drar[data-layout="minimal"] .tavla:not(.tavla--prod) .aff__flytta { opacity: 0; }
+
+/* Normal: utan illustrationen, nyckeltal och förslag i två spalter, lägre stegband. */
+html[data-layout="normal"] .puls .bygge { display: none; }
+html[data-layout="normal"] .puls { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+html[data-layout="normal"] .puls__kpi .tal { font-size: var(--l-tal, 28px); }
+html[data-layout="normal"] .stegband > button { min-height: 48px; padding-block: 6px; }
+html[data-layout="normal"] .tavla__tips { display: none; }
+@media (max-width: 900px) {
+  html[data-layout="normal"] .puls { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) {
+  /* Filtren rullar i sidled inom raden i stället för att göra sidan bredare. */
+  html[data-layout="normal"] .vy .tv-verktyg > .ap-filterrad { flex: 1 1 100%; min-width: 0; max-width: 100%; display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  html[data-layout="normal"] .tv-verktyg .ap-filterrad::-webkit-scrollbar { display: none; }
+  html[data-layout="normal"] .tv-verktyg .ap-filterrad > * { flex: none; }
+}
+
+/* ---------------------------------------------------------------------
+   B.4 Affär
+   --------------------------------------------------------------------- */
+/* Minimal: titel, kund och hus på en rad, nyckeltalen som fyra små värden. */
+html[data-layout="minimal"] .afhero { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+html[data-layout="minimal"] .afhero :is(.afhero__bild, .afhero__text > .etikett) { display: none; }
+html[data-layout="minimal"] .afhero__text { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; flex: 1 1 340px; min-width: 0; }
+html[data-layout="minimal"] .afhero__text h1 { margin: 0; font-size: var(--l-h1, 20px); line-height: 1.2; letter-spacing: -0.02em; }
+html[data-layout="minimal"] .afhero__rad { margin: 0; }
+html[data-layout="minimal"] .afhero__glas { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; flex: 0 1 auto; container-type: normal; }
+html[data-layout="minimal"] .af-glas { display: flex; flex-direction: column; gap: 0; min-height: 0; padding: 5px 12px; border-radius: calc(10px * var(--t-radie-k, 1)); }
+html[data-layout="minimal"] .af-glas > span,
+html[data-layout="minimal"] .af-glas__rad > :not(.tal) { display: none; }
+html[data-layout="minimal"] .af-glas small { font-size: 0.6875rem; }
+html[data-layout="minimal"] .af-glas .tal { font-size: var(--l-h2, 0.9375rem); line-height: 1.3; }
+html[data-layout="minimal"] .af-stegare { margin-block: var(--l-sektion, 10px); }
+html[data-layout="minimal"] .af-stegare > li { min-height: 30px; padding-block: 4px; }
+html[data-layout="minimal"] .af-rum { gap: var(--l-gap, 10px); }
+html[data-layout="minimal"] .af-kol { gap: var(--l-gap, 10px); }
+html[data-layout="minimal"] .af-rum [data-af="hus"] { display: none; }
+@media (max-width: 700px) {
+  /* Nyckeltalen fyller raden jämnt, två och två. */
+  html[data-layout="minimal"] .afhero__glas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); flex: 1 1 100%; }
+}
+
+/* Normal: husbilden mindre. */
+html[data-layout="normal"] .afhero { grid-template-columns: minmax(0, 1fr) minmax(180px, 24%); }
+html[data-layout="normal"] .afhero__bild { max-height: 180px; }
+
+/* ---------------------------------------------------------------------
+   B.5 Kunder
+   --------------------------------------------------------------------- */
+/* Minimal: toppen är bara verktygsraden (sök, Ny kund …), sökfältet växer. */
+html[data-layout="minimal"] .kundtopp { display: block; }
+html[data-layout="minimal"] .kundtopp__ord,
+html[data-layout="minimal"] .kundtopp__resa > :not(.toppverktyg) { display: none; }
+html[data-layout="minimal"] .kundtopp__resa { display: block; }
+html[data-layout="minimal"] .kundtopp .toppverktyg { margin: 0; }
+html[data-layout="minimal"] .kundtopp .toppverktyg { flex-wrap: nowrap; }
+html[data-layout="minimal"] .kundtopp .toppverktyg .sok { flex: 1 1 240px; min-width: 0; max-width: none; }
+html[data-layout="minimal"] .kundtopp .toppverktyg > :not(.sok) { flex: none; }
+html[data-layout="minimal"] .kundverktyg { margin-block: var(--l-sektion, 10px); }
+/* Korten: fler per rad (app.js centrerar sista raden utifrån dessa spalter). */
+html[data-layout="minimal"] .kundnat { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--l-gap, 10px); }
+html[data-layout="minimal"] .kundkort { gap: 10px; padding: 14px; border-radius: calc(14px * var(--t-radie-k, 1)); }
+html[data-layout="minimal"] .kundkort .kundkort__hus { display: none; }
+/* Kortet: vem, var på resan (bara texten) och senaste kontakt – Öppet/Vunnet finns i listvyn och på kundsidan. */
+html[data-layout="minimal"] .kundkort :is(.kundkort__tal, .kundkort__resa > i) { display: none; }
+html[data-layout="minimal"] .kundkort__resa { min-height: 0; gap: 0; }
+html[data-layout="minimal"] .kundkort__resa small { margin: 0; }
+html[data-layout="minimal"] .kl__tabell :is(td, th) { padding-block: 6px; }
+
+/* Normal: de varma kunderna kvar (två, vyer.js) så att spalterna slutar jämnt, lägre staplar i resan. */
+html[data-layout="normal"] .kundtopp .resakol__stapel { height: calc(var(--a) * 60px + 4px); }
+
+/* ---------------------------------------------------------------------
+   B.6 Kundsida
+   --------------------------------------------------------------------- */
+/* Minimal: vem + knappar till vänster, hälsan som tal och tre värden till höger. */
+html[data-layout="minimal"] .kh { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+html[data-layout="minimal"] .kh :is(i.kh__glod, .kh__vem .etikett, .kh__halsa svg, .kh__halsa .kh__aura, .kh__halsa small) { display: none; }
+html[data-layout="minimal"] .kh__vem { flex: 1 1 520px; min-width: 0; gap: 12px; align-items: flex-start; }
+html[data-layout="minimal"] .kh__vem > .avatar { flex: none; width: 40px; height: 40px; font-size: 0.875rem; }
+html[data-layout="minimal"] .kh__vem > div { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; min-width: 0; }
+html[data-layout="minimal"] .kh__namnrad h1 { font-size: var(--l-h1, 20px); line-height: 1.2; }
+html[data-layout="minimal"] .kh__kontakt, html[data-layout="minimal"] .kh__knappar { margin: 0; }
+html[data-layout="minimal"] .kh__knappar { flex-basis: 100%; }
+html[data-layout="minimal"] .kh__halsa { width: auto; height: auto; min-width: 0; padding: 4px 12px; border-radius: 999px; background: var(--t-accent-ljus-3); box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / 0.25); }
+html[data-layout="minimal"] .kh__halsa span { position: static; display: flex; align-items: baseline; gap: 4px; transform: none; }
+html[data-layout="minimal"] .kh__halsa span::before { content: "Hälsa"; font-size: 0.75rem; color: var(--text-2); }
+html[data-layout="minimal"] .kh__halsa b { font-size: var(--l-h2, 0.9375rem); }
+/* De tre värdena fyller sin rad jämnt (egen rad när de bryts under namnet). */
+html[data-layout="minimal"] .kh__tal { flex: 1 1 340px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+html[data-layout="minimal"] .kh__tal > div { display: flex; flex-direction: column; gap: 0; padding: 5px 12px; min-height: 0; border-radius: calc(10px * var(--t-radie-k, 1)); }
+html[data-layout="minimal"] .kh__tal em { display: none; }
+html[data-layout="minimal"] .kh__tal b { font-size: var(--l-h2, 0.9375rem); }
+html[data-layout="minimal"] :is(.kundresa, .kg .khus, .kg .kkontakt) { display: none; }
+html[data-layout="minimal"] .kn { margin-block: var(--l-sektion, 10px); padding: 12px 14px; }
+html[data-layout="minimal"] .kg, html[data-layout="minimal"] .kg > div { gap: var(--l-gap, 10px); }
+
+/* Normal: glöden bort, mindre hälsoring. */
+html[data-layout="normal"] .kh i.kh__glod { display: none; }
+html[data-layout="normal"] .kh__halsa { width: 110px; height: 110px; }
+
+/* ---------------------------------------------------------------------
+   B.7 Offerter
+   --------------------------------------------------------------------- */
+/* Minimal: väntar-värdet på en rad, verktygen till höger, Går ut snart under. */
+html[data-layout="minimal"] .offtopp { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+html[data-layout="minimal"] .offtopp :is(.offtopp__ord, .offtopp__hoger) { display: contents; }
+html[data-layout="minimal"] .offtopp :is(.offtopp__tal, .offtopp__vecka, .offinsikt, .offtopp__ord > .etikett) { display: none; }
+html[data-layout="minimal"] .offtopp__stort { order: 1; display: flex; align-items: center; gap: 10px; margin: 0; }
+html[data-layout="minimal"] .offtopp__stort b { font-size: var(--l-tal, 18px); line-height: 1; }
+html[data-layout="minimal"] .offtopp__stort span { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; font-size: var(--l-h2, 0.9375rem); font-weight: 600; }
+html[data-layout="minimal"] .offtopp__stort small { margin: 0; font-weight: 400; font-size: 0.8125rem; color: var(--text-2); }
+html[data-layout="minimal"] .offtopp .toppverktyg { order: 2; flex: 1 1 320px; margin: 0; justify-content: flex-end; }
+html[data-layout="minimal"] .offtopp .snartut { order: 3; flex: 1 0 100%; padding: 10px 12px; }
+html[data-layout="minimal"] .offtopp .snartut--tom { display: none; }
+html[data-layout="minimal"] .offtopp ~ .kundverktyg { margin-block: var(--l-sektion, 10px); }
+html[data-layout="minimal"] .tabell--offert :is(td, th) { padding-block: 7px; }
+
+/* Normal: lägre veckostaplar, posterna bort så att per hus får hela bredden (de fyra största),
+   så att vänster och höger spalt slutar i jämnhöjd. */
+html[data-layout="normal"] .offtopp__staplar { height: 48px; }
+html[data-layout="normal"] .offinsikt { grid-template-columns: minmax(0, 1fr); }
+html[data-layout="normal"] .offinsikt .poster { display: none; }
+html[data-layout="normal"] .offinsikt .permodell__rad:nth-child(n+5) { display: none; }
+
+/* ---------------------------------------------------------------------
+   B.8 Offert
+   --------------------------------------------------------------------- */
+html[data-layout="minimal"] .offertyta { gap: var(--l-gap, 10px); }
+html[data-layout="minimal"] .vyhuvud { margin-bottom: var(--l-sektion, 10px); }
+html[data-layout="minimal"] .vyhuvud h1 { font-size: var(--l-h1, 20px); letter-spacing: -0.02em; }
+html[data-layout="minimal"] .vyhuvud p { margin-top: 2px; }
+html[data-layout="minimal"] .ostatus { padding-block: 8px; margin-bottom: var(--l-sektion, 10px); }
+html[data-layout="minimal"] .off-not { margin-bottom: var(--l-sektion, 10px); }
+html[data-layout="minimal"] .modellrad--liten { margin-bottom: 10px; }
+html[data-layout="minimal"] .modellrad--liten img { height: 48px; object-fit: contain; }
+html[data-layout="minimal"] .dokyta .dok__bild { display: none; }
+
+/* ---------------------------------------------------------------------
+   B.9 Dokument och Mallar
+   --------------------------------------------------------------------- */
+/* Minimal: två rader – [Arkiv/Mallar · Ladda upp/Exportera] och sök/filter.
+   Hjälten behåller data-uppladdning, så filer kan släppas på raden. */
+html[data-layout="minimal"] section.dk-hjalte.kort {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "text" "verktyg";
+  gap: 10px;
+  padding: var(--l-hjalte-pad, 10px 14px);
+  color: var(--text);
+  /* Hjältens ljusa text-på-mörkt blir temats vanliga text på kortytan. */
+  --t-pa-kol: var(--text);
+  --t-pa-kol-rgb: var(--t-blaeck-rgb);
+}
+html[data-layout="minimal"] .dk-hjalte :is(.dk-hjalte__glod, .dk-stats, .dk-blick, .dk-hjalte__text > .etikett, .dk-hjalte__text > h1, .dk-hjalte__ingress) { display: none; }
+html[data-layout="minimal"] .dk-hjalte__text { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+html[data-layout="minimal"] .dk-hjalte__text > * { margin: 0; }
+html[data-layout="minimal"] .dk-hjalte .dk-hjalte__knappar .knapp:not(.knapp--virke) { background: var(--vit); color: var(--text); box-shadow: inset 0 0 0 1px var(--kant); }
+html[data-layout="minimal"] .dk-hjalte .dk-verktyg { margin: 0; padding: 0; border: 0; background: none; box-shadow: none; }
+html[data-layout="minimal"] .dk-att { margin-top: var(--l-sektion, 10px); }
+html[data-layout="minimal"] .dk-att__lista { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 900px) { html[data-layout="minimal"] .dk-att__lista { grid-template-columns: minmax(0, 1fr); } }
+html[data-layout="minimal"] .dk-att__rad { padding-block: 10px; }
+html[data-layout="minimal"] .dk-att__lista > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+html[data-layout="minimal"] .dk-grupp .dk__kolumner { display: none; }
+html[data-layout="minimal"] .dk__lista { gap: 4px; }
+html[data-layout="minimal"] .dk__lista > li { min-height: var(--l-rad, 36px); padding-block: 4px; }
+/* Mallar: utan förhandsbild – "Visa exempel" blir en vanlig knapp. */
+html[data-layout="minimal"] .ml-grupp__huvud p { display: none; }
+html[data-layout="minimal"] .ml-rutnat { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--l-gap, 10px); }
+html[data-layout="minimal"] .ml-kort { gap: 8px; padding: 12px; }
+html[data-layout="minimal"] .ml-kort :is(.ml-mini__inre, .ml-text, .ml-format) { display: none; }
+html[data-layout="minimal"] .ml-mini { order: 9; justify-self: start; width: auto; height: auto; min-height: 0; aspect-ratio: auto; padding: 0; background: none; box-shadow: none; overflow: visible; }
+html[data-layout="minimal"] .ml-mini::before, html[data-layout="minimal"] .ml-mini::after { display: none; }
+html[data-layout="minimal"] .ml-mini:is(:hover, :focus-visible) .ml-mini__etikett { transform: none; box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / 0.45); }
+html[data-layout="minimal"] .ml-mini__etikett { position: static; inset: auto; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px; border-radius: 999px; background: var(--vit); box-shadow: inset 0 0 0 1px var(--kant); color: var(--text); opacity: 1; transform: none; backdrop-filter: none; }
+
+/* Normal: glöd och ingress bort, lägre rubrik. */
+html[data-layout="normal"] .dk-hjalte :is(.dk-hjalte__glod, .dk-hjalte__ingress) { display: none; }
+html[data-layout="normal"] section.dk-hjalte.kort { gap: 18px 32px; padding: 28px 32px 24px; }
+html[data-layout="normal"] .dk-hjalte h1 { font-size: var(--l-h1, clamp(28px, 2.6vw, 40px)); }
+
+/* ---------------------------------------------------------------------
+   B.10 Kundmöte
+   --------------------------------------------------------------------- */
+html[data-layout="minimal"] .motescen { display: flex; min-height: 0; height: auto; }
+html[data-layout="minimal"] .motescen :is(.motesrum3d, .motescen__rum) { display: none; }
+html[data-layout="minimal"] .motescen__ord { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; width: 100%; padding: 0; }
+html[data-layout="minimal"] .motescen__ord > .etikett { display: none; }
+html[data-layout="minimal"] .motescen__rubrik { margin: 0; font-size: var(--l-h1, 20px); line-height: 1.2; }
+html[data-layout="minimal"] .motescen__chips { margin: 0; }
+html[data-layout="minimal"] .motescen__knappar { margin: 0 0 0 auto; }
+html[data-layout="minimal"] .rutnat--mote { margin-top: var(--l-sektion, 10px); gap: var(--l-gap, 10px); }
+html[data-layout="minimal"] .rutnat--mote .rutnat { gap: var(--l-gap, 10px); }
+html[data-layout="minimal"] .rutnat--mote .motekort { display: none; }
+html[data-layout="minimal"] .agenda img { height: 64px; object-fit: cover; }
+
+html[data-layout="normal"] .motescen { min-height: 380px; padding-block: 24px; }
+html[data-layout="normal"] .motescen--3d .motescen__rum--3d { height: 330px; min-height: 330px; }
+html[data-layout="normal"] .motescen__rubrik { font-size: var(--l-h1, clamp(28px, 2.6vw, 40px)); }
+
+/* ---------------------------------------------------------------------
+   B.11 Projekt
+   --------------------------------------------------------------------- */
+html[data-layout="minimal"] .prodtopp:not(.prodtopp--resa) { display: grid; gap: 10px; }
+html[data-layout="minimal"] .prodtopp :is(.prodtopp__intro p, .prodtopp__text, .prodblock--montage),
+html[data-layout="minimal"] .vy .prodtopp .nyckel.kort { display: none; }
+html[data-layout="minimal"] .prodtopp__titel { margin: 0; font-size: var(--l-h1, 20px); line-height: 1.2; }
+html[data-layout="minimal"] .prodtopp__rad { grid-template-columns: minmax(0, 1fr); }
+html[data-layout="minimal"] .prodtopp__rad .prodblock--varn { min-height: 0; }
+html[data-layout="minimal"] .prodrubrik { margin-block: var(--l-sektion, 10px) 8px; }
+html[data-layout="minimal"] .prodrubrik > :not(h2) { display: none; }
+html[data-layout="minimal"] .prodrubrik h2 { font-size: var(--l-h2, 0.9375rem); }
+html[data-layout="minimal"] .prodtopp--resa { display: none; }
+html[data-layout="minimal"] .kal { margin-top: var(--l-sektion, 10px); }
+/* Projekttavlan: sex lika breda spalter (tomma som fyllda). */
+@media (min-width: 761px) {
+  html[data-layout="minimal"] .vy .tavla--prod { --kf: minmax(150px, 1fr); --kt: minmax(150px, 1fr); }
+  html[data-layout="minimal"] .vy .tavla--prod .spalt__huvud b { white-space: normal; }
+}
+html[data-layout="minimal"] .projark__3d model-viewer { display: none; }
+
+html[data-layout="normal"] .nyckel .tal { font-size: var(--l-tal, 28px); }
+html[data-layout="normal"] .prodrubrik > p:not(.etikett) { display: none; }
+html[data-layout="normal"] .prodtopp--resa .resa3d { height: 400px; min-height: 0; }
+
+/* ---------------------------------------------------------------------
+   B.12 Att göra
+   --------------------------------------------------------------------- */
+/* Typerna i toppen är bara räknare (filtren finns i .agv), veckovyn finns i Normal/Full. */
+html[data-layout="minimal"] :is(.dagtopp, .agk, .nyuppg__tips) { display: none; }
+html[data-layout="minimal"] .agv { margin-bottom: var(--l-sektion, 10px); }
+html[data-layout="minimal"] .nyuppg { margin-bottom: var(--l-sektion, 10px); padding: 8px 10px; }
+html[data-layout="minimal"] .uppgrupp { margin-bottom: var(--l-sektion, 10px); }
+
+html[data-layout="normal"] .dagtopp h2 { font-size: var(--l-h1, clamp(28px, 2.6vw, 40px)); }
+html[data-layout="normal"] .dagtopp__ring { width: 100px; height: 100px; }
+html[data-layout="normal"] .agk__dag { min-height: 120px; }
+
+/* ---------------------------------------------------------------------
+   B.14 Inställningar och Kolla marken
+   --------------------------------------------------------------------- */
+html[data-layout="minimal"] .instopp { display: none; }
+html[data-layout="minimal"] .inst-tema .tema-valjare--stor .tema-bild { height: 64px; }
+html[data-layout="minimal"] .inst-tema .inst-tema__not { display: none; }
+html[data-layout="minimal"] .installning__proto { grid-template-columns: minmax(0, 1fr) auto; padding: 12px 14px; }
+html[data-layout="minimal"] .installning__proto .installning__emoji { display: none; }
+html[data-layout="minimal"] .verktygram { min-height: calc(100vh - var(--l-topp-h, 54px) - 32px); }
+
+html[data-layout="normal"] .instopp .inst-tal__spann { display: none; }
+/* Kolla marken i Normal: lägre topp (kartkorten i ramen görs kompaktare från vyer.js). */
+html[data-layout="normal"] .verktygtopp { padding-block: 22px; }
+html[data-layout="normal"] .verktygtopp h2 { font-size: var(--l-h1, clamp(28px, 2.6vw, 40px)); }
+html[data-layout="normal"] .verktygtopp .instopp__tal > div { padding-block: 12px; }
+
+} /* @media screen */

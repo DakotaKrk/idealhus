@@ -25,6 +25,11 @@
   var pil = function (d, namn) { return '<svg viewBox="0 0 24 24" width="11" height="11" role="img" aria-label="' + namn + '" style="fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round"><path d="' + d + '"/></svg>'; };
   var PV = pil('M19 12H5M11 6l-6 6 6 6', 'vänsterpil'), PH = pil('M5 12h14M13 6l6 6-6 6', 'högerpil'), PU = pil('M12 19V5M6 11l6-6 6 6', 'uppil');
   var CK = '<kbd>' + (MAC ? '⌘' : 'Ctrl') + '</kbd> <kbd>K</kbd>';
+  // Layoutläget (Minimal/Normal/Full, layout.js). Steg som pekar på något som döljs i ett läge har om: eller en reservlista.
+  var lage = function () { return IH.layout ? IH.layout() : 'full'; };
+  var inteMin = function () { return lage() !== 'minimal'; };
+  var baraMin = function () { return lage() === 'minimal'; };
+  var baraFull = function () { return lage() === 'full'; };
 
   // Länken i menyn (dator) eller i mobilmenyn.
   function meny(vy) { return ['.sido__lank[data-vy="' + vy + '"]', '.mobilmeny [data-vy="' + vy + '"]']; }
@@ -60,7 +65,9 @@
     return function () {
       var flik = document.querySelector('[data-g="dok-flik"][data-f="arkiv"]');
       var fack = document.querySelector('.dk-fack');
-      var syns = !!(fack && fack.getClientRects().length && getComputedStyle(fack).visibility !== 'hidden');
+      var fackSyns = !!(fack && fack.getClientRects().length && getComputedStyle(fack).visibility !== 'hidden');
+      // I Minimal är facken dolda (display:none) – då räcker det att arkivfliken är vald och verktygsraden ritad
+      var syns = fackSyns || !!(flik && flik.getAttribute('aria-selected') === 'true' && !(fack && fack.getClientRects().length) && document.querySelector('.dk-verktyg'));
       if (flik && !syns && Date.now() - arkivKlick > 1200) { arkivKlick = Date.now(); flik.click(); }
       return syns ? document.querySelector(sel) : null;
     };
@@ -90,6 +97,8 @@
         text: 'Du är både säljare och chef. Växla mellan ditt eget säljarbete och <b>Chefsvyn</b> (Försäljning) med teamets siffror.' },
       { mal: ['.anv', '.mobilmeny [data-mer]'], rubrik: 'Ditt konto', placering: 'hoger',
         text: 'Kortet längst ned öppnar kontomenyn: din <b>status</b> (Online, I möte, Ute på tomt …), <b>Min profil</b>, byta konto i demon och <b>Logga ut</b>.' },
+      { mal: ['.anv', '.topp__konto', '.mobilmeny [data-mer]'], rubrik: 'Layout: Minimal, Normal eller Full', placering: 'hoger',
+        text: '<p>Välj hur mycket du vill se. <b>Minimal</b> visar bara det du jobbar med – tätt och lugnt, med chatten alltid nära. <b>Normal</b> är lagom, <b>Full</b> har allt med hjältar och 3D.</p><p>Byt i kontomenyn, under <b>Inställningar</b> eller med ' + CK + ' och skriv <b>Layout</b>. Inget försvinner – det som döljs i Minimal finns i Normal och Full.</p>' },
       { mal: '[data-sido-knapp]', rubrik: 'Mer plats', placering: 'hoger', om: function () { return window.innerWidth > 1100; },
         text: 'Fäll in menyn med knappen på kanten eller med <kbd>[</kbd> när du vill ha mer plats för tavlan eller kalendern.' },
       { rubrik: 'Guiderna finns alltid här', text: '<p>Knappen <b>Guide</b> nere i hörnet (eller <kbd>?</kbd>) öppnar alla guider: en för varje sida och flödena från förfrågan till överlämning.</p><p>Nästa guide går igenom Översikten.</p>' }
@@ -102,16 +111,16 @@
   T.push({
     id: 'oversikt', grupp: 'sida', vy: 'oversikt', namn: 'Översikt', beskrivning: 'Dagens läge, nyckeltal och vad du ska göra först.', nasta: 'forfragningar',
     steg: [
-      { sida: '#/', mal: '.hero__ord', rubrik: 'Dagens läge', placering: 'hoger', text: 'Hälsningen sammanfattar dagen: nya förfrågningar som väntar på svar, hur stor pipelinen är och hur många hus som är i produktion.' },
-      { mal: '.hero__lagen', rubrik: 'I dag', text: 'Chipsen visar hur många uppgifter du har i dag, om du har fler möten och hur länge det är till nästa montage.' },
-      { mal: '.hero__snabb', rubrik: 'Snabbknappar', roller: ['salj'], text: 'Skapa en <b>förfrågan</b>, <b>kund</b>, <b>affär</b> eller <b>uppgift</b> – eller starta ett <b>kundmöte</b> – direkt härifrån.' },
-      { mal: '.hero__kpi', rubrik: 'Nyckeltalen', placering: 'hoger', text: 'Nya förfrågningar, öppen pipeline (med viktat värde), vunnet i år och antal hus i produktion. Klicka för att gå till sidan bakom talet.' },
-      { mal: '.hero__by', rubrik: 'Pipelinen som en byggarbetsplats', placering: 'vanster', text: 'Varje hus på tomten är ett säljsteg – från utstakad tomt (Ny) till nycklar klara (Vunnen). Rutorna under visar värde och antal per steg.' },
+      { sida: '#/', mal: ['.hero__ord', '.ov-snabbt'], rubrik: 'Dagens läge', placering: 'hoger', text: 'Hälsningen sammanfattar dagen: nya förfrågningar som väntar på svar, hur stor pipelinen är och hur många hus som är i produktion.' },
+      { mal: ['.hero__lagen', '.ov-snabbt__rad'], rubrik: 'I dag', text: 'Chipsen visar hur många uppgifter du har i dag, om du har fler möten och hur länge det är till nästa montage.' },
+      { mal: ['.hero__snabb', '.ov-snabbt__ny'], rubrik: 'Snabbknappar', roller: ['salj'], text: 'Skapa en <b>förfrågan</b>, <b>kund</b>, <b>affär</b> eller <b>uppgift</b> – eller starta ett <b>kundmöte</b> – direkt härifrån.' },
+      { mal: '.hero__kpi', om: inteMin, rubrik: 'Nyckeltalen', placering: 'hoger', text: 'Nya förfrågningar, öppen pipeline (med viktat värde), vunnet i år och antal hus i produktion. Klicka för att gå till sidan bakom talet.' },
+      { mal: '.hero__by', om: baraFull, rubrik: 'Pipelinen som en byggarbetsplats', placering: 'vanster', text: 'Varje hus på tomten är ett säljsteg – från utstakad tomt (Ny) till nycklar klara (Vunnen). Rutorna under visar värde och antal per steg.' },
       { mal: medRubrik('.oversikt .kort', 'Senaste förfrågningar'), rubrik: 'Senaste förfrågningar', text: 'De senaste som kommit in från hemsidan, telefon och mejl. <b>Alla</b> tar dig till inkorgen.' },
-      { mal: medRubrik('.oversikt .kort', 'Intäkter'), rubrik: 'Intäkter', text: 'Vunna affärer per månad. Växla mellan <b>6</b> och <b>12 månader</b> och exportera de vunna affärerna som CSV.' },
+      { mal: medRubrik('.oversikt .kort', 'Intäkter'), om: inteMin, rubrik: 'Intäkter', text: 'Vunna affärer per månad. Växla mellan <b>6</b> och <b>12 månader</b> och exportera de vunna affärerna som CSV.' },
       { mal: medRubrik('.oversikt .kort', 'Fokus i dag'), rubrik: 'Fokus i dag', placering: 'vanster', text: 'CRM:et föreslår vad du bör göra först: förfrågningar som väntar, offerter att följa upp och affärer som står still.' },
       { mal: medRubrik('.oversikt .kort', 'Att göra i dag'), rubrik: 'Att göra i dag', placering: 'vanster', text: 'Bocka av, skjut upp en dag, ring kunden eller öppna kundkortet direkt från listan.' },
-      { mal: medRubrik('.oversikt .kort', 'Senaste aktivitet'), rubrik: 'Senaste aktivitet', placering: 'vanster', text: 'Samtal, mejl, möten och ändringar i hela CRM:et – det senaste överst.' }
+      { mal: medRubrik('.oversikt .kort', 'Senaste aktivitet'), om: inteMin, rubrik: 'Senaste aktivitet', placering: 'vanster', text: 'Samtal, mejl, möten och ändringar i hela CRM:et – det senaste överst.' }
     ]
   });
 
@@ -138,14 +147,15 @@
     id: 'saljtavla', grupp: 'sida', vy: 'salj', roller: ['salj'], namn: 'Säljtavlan', beskrivning: 'Pipelinen, stegen, filter och korten.', nasta: 'affar',
     rollText: 'Gäller säljare – gå in i en säljares konto via supportläget.',
     steg: [
-      { sida: '#/salj', mal: '.puls', rubrik: 'Pipelinen', text: 'Huset till vänster byggs av pipelinen – grunden är Ny, taket är Förhandling. Bredvid: öppen pipeline, viktad prognos, snitt per affär och vunnet senaste 90 dagarna.' },
-      { mal: '.forslag', valfri: true, rubrik: 'Smarta förslag', placering: 'vanster', text: 'Förfrågningar att svara på, offerter att följa upp och affärer som står still. Här växlar du också mellan <b>Tavla</b> och <b>Lista</b> och skapar en <b>Ny affär</b>.' },
-      { mal: '.stegband', rubrik: 'Sex säljsteg', text: '<p>Ny förfrågan (10 %) → Kontakt tagen (20 %) → Tomt &amp; platsbesök (40 %) → Offert skickad (60 %) → Förhandling (75 %) → Order signerad.</p><p>Procenten är chansen att vinna. Klicka på ett steg för att hoppa till spalten.</p>' },
+      { sida: '#/salj', mal: ['.tv-verktyg .tv-lage', '.tv-verktyg', '.puls'], om: baraMin, rubrik: 'Tavla, lista och ny affär', text: 'Växla mellan <b>Tavla</b> och <b>Lista</b> och lägg till en <b>Ny affär</b>. Pipelinens nyckeltal och huset finns i layouten Normal och Full.' },
+      { sida: '#/salj', mal: '.puls', om: inteMin, rubrik: 'Pipelinen', text: 'Huset till vänster byggs av pipelinen – grunden är Ny, taket är Förhandling. Bredvid: öppen pipeline, viktad prognos, snitt per affär och vunnet senaste 90 dagarna.' },
+      { mal: '.forslag', valfri: true, om: inteMin, rubrik: 'Smarta förslag', placering: 'vanster', text: 'Förfrågningar att svara på, offerter att följa upp och affärer som står still. Här växlar du också mellan <b>Tavla</b> och <b>Lista</b> och skapar en <b>Ny affär</b>.' },
+      { mal: '.stegband', om: inteMin, rubrik: 'Sex säljsteg', text: '<p>Ny förfrågan (10 %) → Kontakt tagen (20 %) → Tomt &amp; platsbesök (40 %) → Offert skickad (60 %) → Förhandling (75 %) → Order signerad.</p><p>Procenten är chansen att vinna. Klicka på ett steg för att hoppa till spalten.</p>' },
       { mal: '.tv-verktyg', rubrik: 'Sök och filter', text: 'Sök på affär, kund, ort eller hus. Visa <b>Alla</b> eller <b>Mina</b>, filtrera på <b>Står still</b>, <b>Har uppgift</b> och <b>Över 600 tkr</b>, sortera och öppna de <b>Förlorade</b>.' },
-      { mal: '.tv-fokus', valfri: true, rubrik: 'Fokus i dag', text: 'De tre affärer som tjänar mest på en kontakt nu – med nästa steg på varje.' },
+      { mal: '.tv-fokus', valfri: true, om: inteMin, rubrik: 'Fokus i dag', text: 'De tre affärer som tjänar mest på en kontakt nu – med nästa steg på varje.' },
       { mal: '.tavla .spalt', rubrik: 'En spalt per steg', placering: 'hoger', text: 'Summan, chansen och det viktade värdet. <b>Snitt</b> är dagar sedan senaste ändringen och <b>står still</b> varnar för affärer utan ändring på över tio dagar.' },
       { mal: '.tavla .aff', rubrik: 'Affärskortet', placering: 'hoger', text: 'Huset, värdet och ringen med chansen. Dagarna i steget färgas: färsk, lugn eller står still. Knapparna på kortet: ring kunden, logga, ny uppgift och flytta till nästa steg.' },
-      { mal: '.tavla__tips', rubrik: 'Dra och släpp', text: 'Dra korten mellan stegen. Släpp längst ned för att markera som förlorad – då frågar CRM:et efter orsaken. Med tangentbordet: piltangenterna och Enter.' },
+      { mal: ['.tavla__tips', '.tavla .aff'], rubrik: 'Dra och släpp', text: 'Dra korten mellan stegen. Släpp längst ned för att markera som förlorad – då frågar CRM:et efter orsaken. Med tangentbordet: piltangenterna och Enter.' },
       { mal: '.tavla .aff', rubrik: 'Öppna en affär', vanta: true, efterKlick: 500, text: 'Klicka på kortet för att öppna affären.' },
       { sida: function () { return /^#\/salj\/./.test(location.hash) ? location.hash : '#/salj/' + valjAffar(['offert', 'besok', 'kontakt']); }, mal: '.afhero', rubrik: 'Affärssidan', text: 'Allt om affären på en sida. Nästa guide går igenom den.' }
     ]
@@ -164,7 +174,7 @@
       { mal: '[data-af="kund"]', rubrik: 'Kunden', placering: 'vanster', text: 'Kundkortet ett klick bort, med telefon och e-post.' },
       { mal: '[data-af="uppgifter"]', valfri: true, rubrik: 'Att göra', text: 'Öppna uppgifter för affären. Bocka av direkt här.' },
       { mal: '[data-af="atgarder"]', rubrik: 'Åtgärder', placering: 'vanster', text: 'Starta ett <b>kundmöte</b>, lägg till en <b>uppgift</b> eller <b>markera som förlorad</b> (med orsak – går att återuppta).' },
-      { mal: '[data-af="hus"]', rubrik: 'Huset', text: 'Fakta om modellen: yttermått, tak, rum och om det krävs bygglov.' }
+      { mal: '[data-af="hus"]', om: inteMin, rubrik: 'Huset', text: 'Fakta om modellen: yttermått, tak, rum och om det krävs bygglov.' }
     ]
   });
 
@@ -172,8 +182,9 @@
     id: 'kunder', grupp: 'sida', vy: 'kunder', roller: ['salj'], namn: 'Kunder', beskrivning: 'Kundregistret, kundresan, filter och kundkorten.', nasta: 'kundsida',
     rollText: 'Gäller säljare.',
     steg: [
-      { sida: '#/kunder', mal: '.kundtopp__ord', rubrik: 'Kunderna', placering: 'hoger', text: 'Antal kunder, hur många som har affärer, privat eller företag – och de <b>varma</b> kunderna som är värda ett samtal nu.' },
-      { mal: '.kundtopp__resa', valfri: true, rubrik: 'Kundresan', placering: 'vanster', text: 'Var kunderna befinner sig: förfrågan, affär, offert och vidare. Klicka på ett steg för att se vilka. Här finns också <b>Ny kund</b>, export och växeln Kort/Lista.' },
+      { sida: '#/kunder', mal: ['.kundtopp__resa .toppverktyg', '.kundtopp'], om: baraMin, rubrik: 'Kunderna', text: 'Sök bland kunderna och lägg till en <b>Ny kund</b>. Antalen och kundresan finns i layouten Normal och Full.' },
+      { sida: '#/kunder', mal: '.kundtopp__ord', om: inteMin, rubrik: 'Kunderna', placering: 'hoger', text: 'Antal kunder, hur många som har affärer, privat eller företag – och de <b>varma</b> kunderna som är värda ett samtal nu.' },
+      { mal: '.kundtopp__resa', valfri: true, om: inteMin, rubrik: 'Kundresan', placering: 'vanster', text: 'Var kunderna befinner sig: förfrågan, affär, offert och vidare. Klicka på ett steg för att se vilka. Här finns också <b>Ny kund</b>, export och växeln Kort/Lista.' },
       { mal: '.kundverktyg', rubrik: 'Filter och sortering', text: 'Alla, Mina, Affär pågår, Kunder, Företag och <b>Behöver uppmärksamhet</b> – och sortering.' },
       { mal: '.kundnat .kundkort', rubrik: 'Kundkortet', placering: 'hoger', text: 'Värdet, senaste kontakt och snabbknapparna: <b>Ring</b>, <b>Mejla</b>, <b>Kundmöte</b> och <b>Ny affär</b>. I listläget kan du markera flera och mejla, exportera eller ge dem en uppgift.' },
       { mal: '.kundnat .kundkort', rubrik: 'Öppna kunden', vanta: true, efterKlick: 500, klickaPa: '.kundnat .kundkort .kundkort__topp', text: 'Klicka på kortet för att öppna kundsidan.' },
@@ -189,10 +200,10 @@
       { sida: function (c) { return '#/kunder/' + c.kund; }, mal: '.kh__vem', rubrik: 'Kunden', text: 'Namn, ort och kontaktuppgifter – klicka för att kopiera telefon eller e-post. Härifrån skapar du en <b>Ny affär</b>, loggar ett samtal, lägger en <b>uppgift</b> eller startar ett <b>kundmöte</b>.' },
       { mal: '.kh__halsa', rubrik: 'Kundhälsan', text: 'Ett tal 0–100: hur nyligen ni hördes, minus försenade uppföljningar, plus för en öppen eller vunnen affär. Grönt (75+) är en varm relation, gult betyder håll kontakten och rött att kunden behöver höra av er.' },
       { mal: '.kh__tal', rubrik: 'Talen', placering: 'vanster', text: 'Öppet affärsvärde, vunnet och dagar sedan senaste kontakt.' },
-      { mal: '.kundresa', rubrik: 'Kundresan', text: 'Var kunden är på vägen från förfrågan till klart hus.' },
+      { mal: '.kundresa', om: inteMin, rubrik: 'Kundresan', text: 'Var kunden är på vägen från förfrågan till klart hus.' },
       { mal: '.kn', valfri: true, rubrik: 'Nästa steg', text: 'Det viktigaste att göra för kunden just nu – med knappen direkt.' },
       { mal: '.kg__vanster', rubrik: 'Huset, affärer, offerter och förfrågningar', placering: 'hoger', text: 'Allt som hör till kunden. Klicka för att öppna affären eller offerten.' },
-      { mal: '.kkontakt', rubrik: 'Kontakt 90 dagar', placering: 'vanster', text: 'Samtal, mejl och möten senaste 90 dagarna – syns det ett glapp är det dags att höra av sig.' },
+      { mal: '.kkontakt', om: inteMin, rubrik: 'Kontakt 90 dagar', placering: 'vanster', text: 'Samtal, mejl och möten senaste 90 dagarna – syns det ett glapp är det dags att höra av sig.' },
       { mal: '#kund-historik', rubrik: 'Historiken', placering: 'vanster', text: 'Logga med en rad och filtrera på samtal, mejl eller möten. Anteckningar från kundmöten hamnar också här.' }
     ]
   });
@@ -201,9 +212,9 @@
     id: 'offerter', grupp: 'sida', vy: 'offerter', roller: ['salj'], namn: 'Offerter', beskrivning: 'Läget, går ut snart, förläng, ny version och filter.', nasta: 'offert',
     rollText: 'Gäller säljare.',
     steg: [
-      { sida: '#/offerter', mal: '.offtopp__ord', rubrik: 'Offertläget', placering: 'hoger', text: 'Vad som väntar på svar, <b>träffsäkerheten</b> (andel godkända), <b>tid till ja</b> och godkänt värde. Staplarna visar offererat per vecka.' },
+      { sida: '#/offerter', mal: ['.offtopp__ord', '.offtopp'], rubrik: 'Offertläget', placering: 'hoger', text: 'Vad som väntar på svar, <b>träffsäkerheten</b> (andel godkända), <b>tid till ja</b> och godkänt värde. Staplarna visar offererat per vecka.' },
       { mal: '.snartut', rubrik: 'Går ut snart', placering: 'vanster', text: 'Skickade offerter med tio dagar eller mindre kvar. <b>Följ upp</b> öppnar affären, <b>+14 d</b> förlänger giltigheten.' },
-      { mal: '.offinsikt', rubrik: 'Per hus och vanligaste posterna', placering: 'vanster', text: 'Vilka hus som offereras mest och vilka tillval som brukar komma med.' },
+      { mal: '.offinsikt', om: inteMin, rubrik: 'Per hus och vanligaste posterna', placering: 'vanster', text: 'Vilka hus som offereras mest och vilka tillval som brukar komma med.' },
       { mal: '.kundverktyg', rubrik: 'Filter', text: 'Alla, Väntar på svar, Går ut snart, Godkända och Utkast. Sortera på senaste, går ut först eller störst summa. Sök på kund eller nummer.' },
       { mal: '.tabell--offert tbody tr', rubrik: 'En offert', text: 'Nummer, kund, summa, status och giltighet. <b>Följ upp i affären</b> och <b>Ny version</b> finns på raden.' },
       { mal: '.tabell--offert tbody tr', rubrik: 'Öppna offerten', vanta: true, efterKlick: 500, text: 'Klicka på raden för att öppna offerten.' },
@@ -230,8 +241,8 @@
     rollText: 'Gäller säljare.',
     steg: [
       { sida: '#/dokument', mal: iArkiv('.dk-hjalte__text'), rubrik: 'Dokument & avtal', placering: 'hoger', text: 'Alla offerter, ordrar, ritningar, bygglov, checklistor och foton på ett ställe. <b>Arkiv</b> och <b>Mallar</b> växlar du mellan här, och <b>Ladda upp</b> sparar egna filer.' },
-      { mal: iArkiv('.dk-stats'), rubrik: 'Läget', placering: 'vanster', text: 'Väntar på svar, godkänt och signerat, går ut inom sju dagar och svarstiden. Klicka för att filtrera.' },
-      { mal: iArkiv('.dk-fack'), rubrik: 'Facken', text: 'Ett fack per typ. Klicka för att bara visa den typen – eller släpp en fil på facket.' },
+      { mal: iArkiv('.dk-stats'), om: inteMin, rubrik: 'Läget', placering: 'vanster', text: 'Väntar på svar, godkänt och signerat, går ut inom sju dagar och svarstiden. Klicka för att filtrera.' },
+      { mal: iArkiv('.dk-fack'), om: inteMin, rubrik: 'Facken', text: 'Ett fack per typ. Klicka för att bara visa den typen – eller släpp en fil på facket.' },
       { mal: iArkiv('.dk-verktyg'), rubrik: 'Hitta rätt', text: 'Sök, visa Mina eller Alla, välj år, sortering och gruppering (typ eller kund). Exportera listan som CSV.' },
       { mal: iArkiv('.dk-att'), valfri: true, rubrik: 'Att hantera', text: 'Det som behöver göras: offerter utan svar, underlag som saknas inför montaget. Knapparna gör det direkt.' },
       { mal: iArkiv('[data-g="dok-detalj"]'), rubrik: 'Öppna ett dokument', vanta: true, efterKlick: 600, text: 'Klicka på raden för att se detaljerna.' },
@@ -252,7 +263,7 @@
       { mal: '.komm', valfri: true, rubrik: 'Kommande möten', placering: 'vanster', text: 'Affärer som är redo för ett möte. <b>Förbered</b> väljer affären åt dig.' },
       { mal: '.logga-mote', rubrik: 'Logga mötet', placering: 'vanster', text: 'Höll ni mötet utan presentationen? Skriv vad ni kom fram till och nästa steg – nästa steg blir en uppgift.' },
       { mal: medRubrik('.rutnat--mote .kort', 'Tidigare möten'), valfri: true, rubrik: 'Tidigare möten', placering: 'vanster', text: 'Hållna möten ur historiken med längd.' },
-      { mal: '.motekort', rubrik: 'Så funkar det', placering: 'vanster', text: 'Kortkommandona i presentationen: <kbd>' + PV + '</kbd> <kbd>' + PH + '</kbd> bläddra, <kbd>K</kbd> kalkylen, <kbd>N</kbd> anteckningar, <kbd>Esc</kbd> avsluta.' }
+      { mal: '.motekort', om: inteMin, rubrik: 'Så funkar det', placering: 'vanster', text: 'Kortkommandona i presentationen: <kbd>' + PV + '</kbd> <kbd>' + PH + '</kbd> bläddra, <kbd>K</kbd> kalkylen, <kbd>N</kbd> anteckningar, <kbd>Esc</kbd> avsluta.' }
     ]
   });
 
@@ -277,11 +288,11 @@
     id: 'projekt', grupp: 'sida', vy: 'produktion', roller: ['salj'], namn: 'Projekt och produktion', beskrivning: 'Nästa montage, husets resa, kalendern och projekttavlan.', nasta: 'att-gora',
     rollText: 'Gäller säljare.',
     steg: [
-      { sida: '#/produktion', mal: '.prodtopp__intro', rubrik: 'Husen på väg', text: 'Varje vunnen affär blir ett projekt här. Överst: hur många hus som är på väg.' },
-      { mal: '.nyckel', rubrik: 'Nyckeltalen', text: 'Aktiva projekt, nästa montage (vecka), andel klara punkter i checklistorna och värdet i produktion.' },
-      { mal: '.prodblock--montage', valfri: true, rubrik: 'Nästa montage', placering: 'hoger', text: 'Nedräkningen till nästa montage – lastbilen kör mot huset i takt med projektet.' },
+      { sida: '#/produktion', mal: ['.prodtopp__intro', '.prodtopp'], rubrik: 'Husen på väg', text: 'Varje vunnen affär blir ett projekt här. Överst: hur många hus som är på väg.' },
+      { mal: '.nyckel', om: inteMin, rubrik: 'Nyckeltalen', text: 'Aktiva projekt, nästa montage (vecka), andel klara punkter i checklistorna och värdet i produktion.' },
+      { mal: '.prodblock--montage', valfri: true, om: inteMin, rubrik: 'Nästa montage', placering: 'hoger', text: 'Nedräkningen till nästa montage – lastbilen kör mot huset i takt med projektet.' },
       { mal: '.prodblock--varn', valfri: true, rubrik: 'Att åtgärda', placering: 'vanster', text: 'Det som saknas innan montaget, uppdelat på <b>Kundens del</b> (bygglov, grund, framkomlighet) och <b>Vår del</b> (ritningar). Bocka av direkt.' },
-      { mal: '.resa3d', rubrik: 'Husets resa i 3D', text: 'Sex stationer från ritning till nyckel. Kundernas hus står som nålar på sitt steg – klicka för att öppna projektet.' },
+      { mal: '.resa3d', om: inteMin, rubrik: 'Husets resa i 3D', text: 'Sex stationer från ritning till nyckel. Kundernas hus står som nålar på sitt steg – klicka för att öppna projektet.' },
       { mal: '.kal', rubrik: 'Kalendern', text: 'Montage, projektstarter, uppgifter, möten och offerter som går ut. Filtrera per slag och klicka på en dag för detaljer.' },
       { mal: '.tavla--prod', rubrik: 'Projekttavlan', text: 'Ritning & lov → Tillverkning → Grund & mark → Leverans & montage → Slutbesiktning → Klart. Pilen på kortet flyttar projektet ett steg.' },
       { mal: '.tavla--prod .aff--proj', rubrik: 'Öppna ett projekt', vanta: true, efterKlick: 700, text: 'Klicka på ett projekt.' },
@@ -293,8 +304,9 @@
   T.push({
     id: 'att-gora', grupp: 'sida', vy: 'att-gora', namn: 'Att göra', beskrivning: 'Veckan, nya uppgifter, bocka av och skjuta upp.', nasta: 'chatt',
     steg: [
-      { sida: '#/att-gora', mal: '.dagtopp', rubrik: 'Dagen', text: 'Ringen visar hur mycket av dagens uppgifter som är klara.' },
-      { mal: '.agk', rubrik: 'Veckan', text: 'Vecka, två veckor eller månad. Plus på en dag lägger en uppgift den dagen; klicka på en uppgift för att se den.' },
+      { sida: '#/att-gora', mal: ['.uppgrupp', '.agv'], om: baraMin, rubrik: 'Dagens uppgifter', text: 'Dina uppgifter per dag – bocka av direkt. Veckovyn och dagens ring finns i layouten Normal och Full.' },
+      { sida: '#/att-gora', mal: '.dagtopp', om: inteMin, rubrik: 'Dagen', text: 'Ringen visar hur mycket av dagens uppgifter som är klara.' },
+      { mal: '.agk', om: inteMin, rubrik: 'Veckan', text: 'Vecka, två veckor eller månad. Plus på en dag lägger en uppgift den dagen; klicka på en uppgift för att se den.' },
       { mal: '.agv', rubrik: 'Filter', text: 'Sök, visa <b>Mina</b> eller <b>Alla</b>, filtrera på typ (offert, platsbesök, samtal …) och exportera som CSV.' },
       { mal: '.nyuppg', rubrik: 'Ny uppgift', fri: true, text: 'Skriv vad som ska göras, koppla till en kund eller affär, välj dag och tryck Lägg till.' },
       { mal: '.uppgrupp', valfri: true, rubrik: 'I dag', text: 'Bocka av med cirkeln. <b>Skjut upp en dag</b>, ring kunden eller öppna kundkortet direkt från raden.' },
@@ -316,7 +328,7 @@
     id: 'profil', grupp: 'sida', vy: 'profil', namn: 'Min profil och kalender', beskrivning: 'Id-kortet, status, aktiviteten och din kalender.', nasta: 'installningar',
     steg: [
       { sida: '#/profil', mal: '.lp-phjalte__vanster', rubrik: 'Ditt id-kort', placering: 'hoger', text: 'Namn, roll och status. <b>Ändra profil</b> och ändra status härifrån.' },
-      { mal: '.lp-phjalte__tal', rubrik: 'Dina nyckeltal', placering: 'vanster', text: 'Pipeline, viktad prognos (värde × chans), vunnet i år mot ditt mål och vinstgrad.' },
+      { mal: '.lp-phjalte__tal', om: inteMin, rubrik: 'Dina nyckeltal', placering: 'vanster', text: 'Pipeline, viktad prognos (värde × chans), vunnet i år mot ditt mål och vinstgrad.' },
       { mal: medRubrik('.lp-band2', 'Om dig'), rubrik: 'Om dig', placering: 'hoger', text: 'Berätta om dig, kontaktuppgifter och genvägar.' },
       { mal: medRubrik('.lp-band2', 'Aktivitet och arbete'), rubrik: 'Aktivitet och arbete', placering: 'vanster', text: 'Aktiviteten senaste 30 dagarna, dina affärer och dina uppgifter (lägg till med <b>Ny uppgift</b>).' },
       { mal: '.pk', rubrik: 'Min kalender', roller: ['salj'], text: 'Månad eller år. Lägg till på en dag, <b>ansök om ledighet</b>, <b>sjukanmäl</b> dig och ladda ner en <b>kalenderfil</b> (.ics) till din vanliga kalender.' }
@@ -326,7 +338,7 @@
   T.push({
     id: 'installningar', grupp: 'sida', vy: 'installningar', namn: 'Inställningar och prislistan', beskrivning: 'Priserna bakom varje offert och exempeldatan.', nasta: 'flode-ny-kund',
     steg: [
-      { sida: '#/installningar', mal: '.instopp', rubrik: 'Priserna bakom varje offert', text: 'Prisspannet på husen, antal tillval och om prislistan är ändrad. Priserna i prototypen är exempelpriser.' },
+      { sida: '#/installningar', mal: ['.instopp', '.prisform'], rubrik: 'Priserna bakom varje offert', text: 'Prisspannet på husen, antal tillval och om prislistan är ändrad. Priserna i prototypen är exempelpriser.' },
       { mal: '.prisform', rubrik: 'Husen', placering: 'hoger', text: 'Grundpriset per modell. Nya offerter och kalkylen i kundmötet räknar med det du sparar här.' },
       { mal: function () { var f = document.querySelectorAll('.prisform'); return f[1] || null; }, rubrik: 'Tillval och poster', placering: 'vanster', text: 'Frakt, montage, kranbil, ritningar, altan, kök och badrum, braskamin – posterna som läggs till i offerten.' },
       { mal: '.installning__proto', rubrik: 'Allt sparas i webbläsaren', text: 'Prototypen sparar i den här webbläsaren. <b>Återställ exempeldata</b> (två klick) tar tillbaka allt som från början.' }
@@ -342,8 +354,8 @@
     steg: [
       { sida: '#/chef', mal: '.vy-vaxel', valfri: true, rubrik: 'Säljvy och chefsvy', placering: 'hoger', text: 'Växla mellan ditt eget säljarbete och teamets siffror.' },
       { mal: '.ao-text', rubrik: 'Så går teamet', text: '<b>Lägg till säljare</b>, <b>sätt mål</b>, <b>ge uppgift</b> och <b>exportera rapport</b>.' },
-      { mal: '.lp-mork__mitt', rubrik: 'Mot målet', placering: 'vanster', text: 'Ringen visar teamets vinstgrad senaste 90 dagarna. Med ett mål satt följer du kvartalet här.' },
-      { mal: '.ap-tal', rubrik: 'Nyckeltalen', text: 'Teamets pipeline, viktad prognos, vunnet 90 dagar och vinstgrad. Staplarna under visar veckorna.' },
+      { mal: '.lp-mork__mitt', om: inteMin, rubrik: 'Mot målet', placering: 'vanster', text: 'Ringen visar teamets vinstgrad senaste 90 dagarna. Med ett mål satt följer du kvartalet här.' },
+      { mal: '.ap-tal', rubrik: 'Nyckeltalen', text: function () { return 'Teamets pipeline, viktad prognos, vunnet 90 dagar och vinstgrad.' + (inteMin() ? ' Staplarna under visar veckorna.' : ''); } },
       { mal: medRubrik('.ao-band', 'Teamet just nu'), rubrik: 'Teamet just nu', text: 'Varje säljare med status, pipeline och mål. Filtrera på tillgängliga eller upptagna, <b>skriv</b> till någon eller ge en uppgift.' },
       { mal: medRubrik('.ao-band', 'Vem jobbar när'), rubrik: 'Vem jobbar när', text: 'Närvaro och frånvaro vecka för vecka. Klicka på en dag för att lägga in frånvaro.' },
       { mal: medRubrik('.ao-band', 'Teamets kalender'), rubrik: 'Teamets kalender', text: 'Allas möten och uppgifter. Filtrera per säljare och typ, växla månad/lista och ladda ner som kalenderfil.' },
@@ -361,8 +373,8 @@
       { mal: medRubrik('.ao-band', 'Hur kontona mår'), rubrik: 'Kontona', text: 'En hälsa per konto ur aktivitet, förfallna uppgifter, affärer eller projekt som står still, kopplingar och profilen.' },
       { mal: medRubrik('.ao-band', 'Skyddet just nu'), rubrik: 'Skyddet', text: 'De sju kontrollerna och fynden (hög, medel, låg). <b>Skanna allt</b> kör dem.' },
       { mal: medRubrik('.ao-band', 'Datan och kopplingarna'), rubrik: 'Datan', text: 'Kvalitet, kopplingar mellan posterna, dubbletter och ogiltiga värden – och antal poster per typ. <b>Kontrollera datan</b> eller exportera.' },
-      { mal: medRubrik('.ao-band', 'Vem gör vad och när'), rubrik: 'Aktiviteten', text: 'Händelser per konto och dag senaste 14 dagarna – mörkare ruta betyder fler.' },
-      { mal: medRubrik('.ao-band', 'Senast i CRM:et'), rubrik: 'Senast i CRM:et', text: 'De senaste händelserna i hela CRM:et. <b>Hela loggen</b> öppnar granskningen.' },
+      { mal: medRubrik('.ao-band', 'Vem gör vad och när'), om: inteMin, rubrik: 'Aktiviteten', text: 'Händelser per konto och dag senaste 14 dagarna – mörkare ruta betyder fler.' },
+      { mal: medRubrik('.ao-band', 'Senast i CRM:et'), om: inteMin, rubrik: 'Senast i CRM:et', text: 'De senaste händelserna i hela CRM:et. <b>Hela loggen</b> öppnar granskningen.' },
       { mal: medRubrik('.ao-band', 'System och fel'), rubrik: 'System och fel', text: 'Fel sedan sidan laddades, lagringen, version och nätverket.' },
       { mal: medRubrik('.ao-band', 'Bör åtgärdas'), rubrik: 'Bör åtgärdas', text: 'Förslag med knappen direkt: skanna, slå på utloggning vid inaktivitet, exportera en säkerhetskopia, sätta mål. Längst ned: kontolista (CSV), systemrapport, rensa chattfiler, rensa loggen och återställ data.' }
     ]
@@ -375,7 +387,7 @@
       { sida: '#/admin', mal: '.ap-hjalte', rubrik: 'Kontrollrummet', text: 'Konton, poster i CRM:et, händelser senaste 7 dagarna och säkerhetspoängen. Knapparna: <b>Lägg till konto</b>, Säkerhetshubben och <b>Exportera data</b>.' },
       { mal: medRubrik('.ao-band', 'Konton och roller'), rubrik: 'Konton och roller', text: 'Filtrera på Alla, Sälj, Produktion, Ledning eller Inaktiverade. <b>Ändra</b>, <b>Logga in som</b> (demo) eller <b>Inaktivera</b> ett konto.' },
       { mal: medRubrik('.ao-band', 'Bör åtgärdas'), rubrik: 'Bör åtgärdas', text: 'Förslag med knappen direkt – samma som i Kontrollcentralen.' },
-      { mal: medRubrik('.ao-band', 'Vem får göra vad'), rubrik: 'Behörigheter', text: 'En tabell över vad Sälj, Chef, Produktion och Admin får göra.' },
+      { mal: medRubrik('.ao-band', 'Vem får göra vad'), om: inteMin, rubrik: 'Behörigheter', text: 'En tabell över vad Sälj, Chef, Produktion och Admin får göra.' },
       { mal: medRubrik('.ao-band', 'För den här webbläsaren'), rubrik: 'Inställningar', text: '<b>Logga ut vid inaktivitet</b> (Aldrig, 15 min, 30 min, en timme – en minut före visas en nedräkning), säkerhetskopia och systemrapport.' },
       { mal: medRubrik('.ao-band', 'Data och system'), rubrik: 'Data och system', text: 'Antal poster, läge, version och lagring. <b>Exportera (JSON)</b>, <b>Importera</b> och <b>Återställ exempeldata</b>.' },
       { mal: medRubrik('.ao-band', 'Granskning och ändringar'), rubrik: 'Granskningsloggen', text: 'Vem ändrade vad och när – filtrera på Allt, CRM, Konton, Support och Säkerhet.' }
@@ -386,7 +398,7 @@
     id: 'sakerhet', grupp: 'admin', vy: 'sakerhet', roller: ['admin'], namn: 'Säkerhet', beskrivning: 'Sju kontroller, skanningens logg och poängen över tid.',
     rollText: 'Gäller administratören.',
     steg: [
-      { sida: '#/sakerhet', mal: '.sh-hjalte', rubrik: 'Säkerhet i realtid', text: 'En ring per kontroll runt den samlade poängen (100 minus avdragen för fynd).' },
+      { sida: '#/sakerhet', mal: '.sh-hjalte', rubrik: 'Säkerhet i realtid', text: function () { return inteMin() ? 'En ring per kontroll runt den samlade poängen (100 minus avdragen för fynd).' : '<b>Skanna allt</b>, sök uppdateringar och de sju delarnas status i en rad. Ringen med poängen finns i layouten Normal och Full.'; } },
       { mal: '.sh-drift', rubrik: 'Driftläget', text: 'Säkerhetspoängen, händelser senaste 7 dagarna, stoppade filer, konto och åtkomst – och de senaste händelserna.' },
       { mal: '.sh-verktyg', rubrik: 'Verktyg', text: 'Säkerhetsrapport, automatisk skanning, granska behörigheter och kopiera läget.' },
       { mal: medRubrik('section, .kort, .ad-band', 'Sju kontroller'), rubrik: 'Sju kontroller', text: 'Skadlig kod, uppdateringar, buggar och fel, läckor, intrångsförsök, avvikande beteende och trasigt. Varje kontroll kan köras för sig.' },
@@ -464,7 +476,11 @@
     fore: function (c) { c.affar = valjAffar(['besok', 'kontakt', 'ny', 'offert']); },
     steg: [
       { sida: '#/mote', rubrik: 'Kundmötet', text: 'Ett bra möte har ett mål: ett beslut om nästa steg. Så här förbereder du, presenterar och följer upp.' },
-      { mal: '[data-g="mote-valj"]', rubrik: 'Välj kund', vanta: true, efterKlick: 600, text: 'Välj affären mötet gäller. Kunden, förfrågan och huset följer med in i presentationen.' },
+      { mal: '[data-g="mote-valj"]', om: inteMin, rubrik: 'Välj kund', vanta: true, efterKlick: 600, text: 'Välj affären mötet gäller. Kunden, förfrågan och huset följer med in i presentationen.' },
+      // Minimal: bordet med platserna är dolt – affären väljs i listan under Förbered mötet
+      { mal: ['label:has([data-moteaffar])', '[data-moteaffar]'], om: baraMin, rubrik: 'Välj kund', fri: true, efterKlick: 600,
+        fyll: function (c) { var s = document.querySelector('[data-moteaffar]'); if (!s) return {}; var v = [].slice.call(s.options).map(function (o) { return o.value; }).filter(Boolean); return { '[data-moteaffar]': v.indexOf(c.affar) >= 0 ? c.affar : (v[0] || '') }; },
+        text: 'Välj affären mötet gäller i listan <b>Affär</b>. Kunden, förfrågan och huset följer med in i presentationen.' },
       { mal: '.upplagg', rubrik: 'Upplägget', fri: true, text: '<b>Fullt möte</b> (alla bilder), <b>Kort möte</b> eller <b>Bara kalkylen</b>. Bocka i och ur bilder – tidsbandet visar längden.' },
       { mal: '.motescen [data-g="starta-mote"]', rubrik: 'Starta', vanta: true, efterKlick: 900, text: 'Klicka på <b>Starta presentation</b>.' },
       { mal: '.mote__botten', rubrik: 'Presentera', tangenter: true, text: 'Bläddra med <kbd>' + PV + '</kbd> <kbd>' + PH + '</kbd>. Bilderna: välkommen, er förfrågan, byggt under tak, husen i 3D, vad ni får bygga, så går det till, kalkylen och nästa steg.' },
@@ -485,7 +501,7 @@
     steg: [
       { sida: '#/dokument', mal: iArkiv('.dk-hjalte__text'), rubrik: 'Dokumenten', placering: 'hoger', text: 'Offerter, ordrar, ritningar, bygglov, checklistor och foton – allt som hör till en affär. Inget raderas: det du inte behöver arkiveras.' },
       { mal: iArkiv('.dk-att'), valfri: true, rubrik: 'Börja med det som brådskar', text: '<b>Att hantera</b> listar offerter utan svar och underlag som saknas. Knapparna gör det direkt.' },
-      { mal: iArkiv('.dk-fack'), rubrik: 'Facken', text: 'Klicka på ett fack för att bara se den typen.' },
+      { mal: iArkiv('.dk-fack'), om: inteMin, rubrik: 'Facken', text: 'Klicka på ett fack för att bara se den typen.' },
       { mal: '.dk-ladda', rubrik: 'Ladda upp', text: 'Ladda upp eller dra in filer. Varje fil kontrolleras först (filskannern), sedan väljer du typ, kund och projekt.' },
       { mal: iArkiv('[data-g="dok-detalj"]'), rubrik: 'Öppna en offert', vanta: true, efterKlick: 600, text: 'Klicka på den första offerten.' },
       { mal: '.ark .dkd', rubrik: 'Tidslinjen', behallArk: true, text: 'Skapad, godkänd eller går ut – och dagarna som är kvar.' },

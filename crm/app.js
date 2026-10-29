@@ -858,6 +858,7 @@
 
   // Gemensamt efter varje ritning: entréer, räkneverk och lutning.
   IH.efterRitning = function (rot) {
+    var minimal = !!(IH.layout && IH.layout() === 'minimal');
     $$('[data-in]', rot).forEach(function (el, n) { el.style.setProperty('--in', Math.min(n, 10)); });
     $$('[data-stagger]', rot).forEach(function (c) {
       Array.prototype.forEach.call(c.children, function (ch, k) { ch.style.setProperty('--k', Math.min(k, 14)); });
@@ -868,7 +869,8 @@
       var skriv = function (v) {
         el.textContent = format === 'kort' ? IH.kort(v) : format === 'kr' ? IH.kr(v) : Math.round(v).toString();
       };
-      if (lugn || !mal || IH.vyByte === false) { skriv(mal); return; }
+      // Minimal är lugnt: inga räkneverk
+      if (lugn || !mal || IH.vyByte === false || minimal) { skriv(mal); return; }
       // Kort räkning från 70 % av målet – klar ungefär när sidan har landat, och siffrorna ser aldrig fel ut länge
       var start = performance.now();
       (function steg(nu) {
@@ -877,7 +879,7 @@
         if (t < 1) requestAnimationFrame(steg);
       })(start);
     });
-    if (!lugn && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    if (!lugn && !minimal && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
       $$('[data-tilt]', rot).forEach(function (k) {
         // Rektangeln mäts en gång när pekaren kommer in (den lutade rutan ändras annars och skakar vid kanterna),
         // och värdena skrivs en gång per bildruta
@@ -973,6 +975,13 @@
       '<span class="palett__ikon">' + (IH.tema.ruta || IH.tema.prick)(t.id) + '</span><span class="palett__text"><b>Tema: ' + IH.e(t.namn) + '</b><small>' + IH.e(t.kort) + '</small></span>' +
       '<span class="palett__typ">' + (vald ? 'Valt' : 'Tema') + '</span></button>';
   }
+  // Ett layoutläge i paletten ("Layout: Minimal"): liten miniatyr som ikon, "Valt" på det aktiva
+  function layoutRad(l) {
+    var vald = IH.layout() === l.id;
+    return '<button type="button" class="palett__rad" role="option" data-g="palett-val" data-mal="g:layout-val" data-layout-id="' + l.id + '">' +
+      '<span class="palett__ikon">' + IH.layout.ikon(l.id) + '</span><span class="palett__text"><b>Layout: ' + IH.e(l.namn) + '</b><small>' + IH.e(l.kort) + '</small></span>' +
+      '<span class="palett__typ">' + (vald ? 'Valt' : 'Layout') + '</span></button>';
+  }
   function grupp(namn, rader) {
     return rader.length ? '<p class="palett__grupp">' + namn + '</p>' + rader.join('') : '';
   }
@@ -1025,6 +1034,8 @@
       html += grupp('Åtgärder', ATGARDER.filter(function (x) { return jag.roll !== 'admin' && !(jag.roll === 'prod' && /affar|forfragan|mote/.test(x[0])) && traff(x[1], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
       var teman = !IH.tema || !IH.tema.lista || q.length < 2 ? [] : IH.tema.lista.filter(function (t) { var txt = ('tema ' + t.namn + ' ' + t.sok + ' utseende färg färger').toLowerCase(); return q.replace(/:/g, ' ').split(/\s+/).filter(Boolean).every(function (w) { return txt.indexOf(w) >= 0; }); });
       html += grupp('Tema', teman.map(temaRad));
+      var lagen = !IH.layout || !IH.layout.lista || q.length < 2 ? [] : IH.layout.lista.filter(function (l) { var txt = ('layout läge lägen täthet ' + l.namn + ' ' + l.sok).toLowerCase(); return q.replace(/:/g, ' ').split(/\s+/).filter(Boolean).every(function (w) { return txt.indexOf(w) >= 0; }); });
+      html += grupp('Layout', lagen.map(layoutRad));
       html += grupp('Kommandon', kommandon.map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
       html += grupp('Gå till', SIDOR.filter(function (x) { return sidaFor(x) && (x[1] + ' ' + x[3]).toLowerCase().indexOf(q) >= 0; }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
       if (!html) html = '<p class="palett__tom">Inga träffar för ”' + IH.e(q) + '”</p>';
@@ -1219,6 +1230,7 @@
   IH.G['valj-anvandare'] = function (el) {
     try { localStorage.setItem('ih-crm-jag', el.getAttribute('data-id')); } catch (e) { /* */ }
     if (IH.tema && IH.tema.lasOm) IH.tema.lasOm(); // varje konto har sitt eget tema
+    if (IH.layout && IH.layout.lasOm) IH.layout.lasOm({ direkt: true }); // … och sin egen layout
     IH.stangArk();
     var u = IH.jag();
     IH.uppdateraMeny();

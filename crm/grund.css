@@ -464,3 +464,18 @@ html body .topp { background: var(--vx-topp-95); -webkit-backdrop-filter: satura
 :root[data-tema]:not([data-tema="original"]) .sido .sido__sok :is(span, kbd) { color: var(--t-text-3); }
 /* Halvgenomskinlig "ljus-3" (svart med alfa) blir för blek på mörkare bakgrunder (Bygg) – token i stället, utom i Original */
 :root[data-tema]:not([data-tema="original"]) :is(.kort--mork, .nbs, .mote) { --ljus-3: var(--t-text-3); }
+
+/* Rälsen renare (2026-10-29): bredare list (48 px) så att knapparna ryms med luft, ingen lodrät linje genom
+   ikonerna, lika avstånd ovanför och under menyknappen, och alla runda knappar i samma glasstil */
+@media (min-width: 1101px) {
+  html body .sido-kant::after { left: 2px; width: 48px; border-radius: calc(24px * var(--t-radie-k, 1)); }
+  html body .sido-kant::before, html[data-sido-dold] body .sido-kant::before { display: none; }
+  .sido-rals { grid-template-rows: minmax(0, 1fr) 64px minmax(0, 1fr); padding: 6px 0; }
+  .sido-rals__halva { gap: 4px; padding: 0; }
+  .sido-rals__delare { width: 16px; margin: 4px 0; border-radius: 1px; }
+  html[data-sido-dold] body:has(.chf-ikon, .chf-dock) .sido-rals__halva--ner, html[data-chatt-dockad] body .sido-rals__halva--ner { padding-top: 56px; }
+  html[data-sido-dold] body .sido-kant .sido-knapp { background: rgb(var(--t-glas-rgb) / .96); color: var(--t-accent-djup); border: 0;
+    box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .3), 0 6px 14px -10px rgb(var(--t-accent-djup-rgb) / .55); }
+  html[data-sido-dold] body .sido-kant .sido-knapp::before, html[data-sido-dold] body .sido-kant .sido-knapp::after { display: none; }
+  html[data-sido-dold] body .sido-kant .sido-knapp:hover { box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .6), 0 8px 18px -10px rgb(var(--t-accent-djup-rgb) / .6); }
+}

@@ -1,0 +1,253 @@
+/* Legohus CRM – layoutlägen (layout-ledning): Försäljning (chef), Profil, Kontrollcentral, Adminpanel och Säkerhet.
+   Alla regler ligger bakom html[data-layout="minimal"] eller html[data-layout="normal"] – Full har inga regler här
+   och ser ut exakt som förut. Bara skärm (utskrift orörd). Inga fasta färger: de mörka hjältarna blir ljusa i Minimal
+   genom att "text på mörkt"-tokens pekas om till temats text (samma teknik som temat Ljus), så alla sex teman fungerar.
+   Krokklasser i vyerna: ao-band--uppm/--team/--akt14/--pipe/--topp/--narvaro/--kal (chef),
+   ao-band--konton/--skydd/--data/--vemgor/--senast/--system/--atgarda (kontroll), ap-halv--matris/--data/--inst/--logg (admin). */
+@media screen {
+
+/* ============ 1. Gemensamt för sidorna ============ */
+
+/* Banden (ao-band, ad-band, sh-drift/verktyg) och tvåspalterna: tätare luft */
+html[data-layout="minimal"] { --ll-gap: var(--l-gap, 10px); }
+html[data-layout="normal"] { --ll-gap: var(--l-gap, 14px); }
+html:is([data-layout="minimal"], [data-layout="normal"]) :is(.ao-band, .ad-band.sh-kontrollband, .ad-tva > .ad-band, .sh-drift, .sh-verktyg) { margin-bottom: var(--ll-gap); }
+html:is([data-layout="minimal"], [data-layout="normal"]) :is(.ao-tva, .ad-tva, .lp-tvakol) { gap: var(--ll-gap); }
+html:is([data-layout="minimal"], [data-layout="normal"]) .ao-tva > .ao-band { margin-bottom: var(--ll-gap); height: calc(100% - var(--ll-gap)); }
+html:is([data-layout="minimal"], [data-layout="normal"]) :is(.lp-tva > .lp-stapel, .ap-stapel-kol) > .ao-band { margin-bottom: var(--ll-gap); }
+html:is([data-layout="minimal"], [data-layout="normal"]) .lp-tvakol { margin-bottom: var(--ll-gap); }
+html:is([data-layout="minimal"], [data-layout="normal"]) :is(.ao-hjalte, .sh-hjalte, section.lp-phjalte.lp-mork) { margin-bottom: var(--ll-gap); }
+html:is([data-layout="minimal"], [data-layout="normal"]) section.pk.kort--mork { margin-bottom: var(--ll-gap); }
+
+html[data-layout="normal"] .ao-band { padding: clamp(16px, 1.8vw, 22px); }
+html[data-layout="normal"] .ao-band__huvud { margin-bottom: 12px; }
+html[data-layout="normal"] .ao-band h2 { font-size: 1.2rem; }
+
+html[data-layout="minimal"] .ao-band { padding: 14px 16px; }
+html[data-layout="minimal"] .ao-band__huvud { align-items: center; margin-bottom: 10px; }
+html[data-layout="minimal"] .ao-band h2 { font-size: var(--l-h2, 1.0625rem); }
+html[data-layout="minimal"] :is(.ao-band .ao-ogon:not(.ao-ogon--liten), .ao-band__ingress, .lp-band2__huvud .ao-ogon) { display: none; }
+html[data-layout="minimal"] .ao-ogon--liten { margin: 12px 0 8px; }
+html[data-layout="minimal"] .ao-fot { margin-top: 10px; padding-top: 10px; }
+html[data-layout="minimal"] .lp-forklaring { display: none; }
+
+/* Dekor bort i både Normal och Minimal */
+html:is([data-layout="minimal"], [data-layout="normal"]) :is(.ao-hjalte, .sh-hjalte, .lp-phjalte) > :is(.sh-rutnat, .lp-mork__glod, .sh-skanlinje) { display: none; }
+html:is([data-layout="minimal"], [data-layout="normal"]) .lp-chefhjalte .lp-himmel { display: none; }
+
+/* Minimal: lugnt – inga entréer eller pulserande dekor på de här sidorna */
+html[data-layout="minimal"] :is(.ao-hjalte, .ao-band, .sh-hjalte, .sh-drift, .sh-verktyg, .ad-band, .lp-phjalte, .lp-band2, .pk, .ao-tal, .ao-tal *, .sh-delar li, .lp-veckor i, .ao-x-staplar i, .ao-x-fordelning i) { animation: none !important; }
+
+/* ---- Minimal: hjälte → verktygsrad (en rad med rubrik och knappar, tal som små värden under) ---- */
+html[data-layout="minimal"] :is(section.ao-hjalte, section.ao-hjalte.lp-chefhjalte.lp-mork, section.sh-hjalte.sh-mork, section.lp-phjalte.lp-mork) {
+  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: none; gap: 10px; align-items: center;
+  padding: var(--l-hjalte-pad, 12px 16px); min-height: 0; isolation: auto;
+  border-radius: calc(var(--l-kort-radie, 18px) * var(--t-radie-k, 1));
+}
+html[data-layout="minimal"] :is(section.ao-hjalte, section.ao-hjalte.lp-chefhjalte.lp-mork, section.sh-hjalte.sh-mork, section.lp-phjalte.lp-mork) > * { grid-area: auto; }
+html[data-layout="minimal"] :is(section.ao-hjalte, section.sh-hjalte, section.lp-phjalte)::before,
+html[data-layout="minimal"] :is(section.ao-hjalte, section.sh-hjalte, section.lp-phjalte)::after { display: none; }
+html[data-layout="minimal"] :is(.ao-text, .sh-text) { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+html[data-layout="minimal"] :is(.ao-text, .sh-text) > :is(.etikett, .ao-ingress, .sh-ingress, .sh-senast) { display: none; }
+html[data-layout="minimal"] :is(.ao-hjalte, .sh-hjalte) h1 { margin: 0; font-size: var(--l-h1, 1.25rem); line-height: 1.2; letter-spacing: -0.02em; }
+html[data-layout="minimal"] :is(section.ao-hjalte h1 em, section.ao-hjalte.lp-chefhjalte.lp-mork h1 em, section.sh-hjalte.sh-mork h1 em) { display: inline; }
+html[data-layout="minimal"] .sh-knappar { margin: 0; gap: 6px; }
+html[data-layout="minimal"] .sh-knapp { min-height: var(--l-knapp, 34px); padding: 6px 12px; font-size: .8rem; }
+html[data-layout="minimal"] :is(.ao-karnkol, .sh-karnkol, .lp-mork__mitt, .lp-veckor) { display: none; }
+
+/* Talen i hjältarna: små värden på en rad (förklaringen under talet bort) */
+html[data-layout="minimal"] :is(.ao-hjalte .ap-tal, section.ao-hjalte .ao-remsa) { gap: 8px; }
+html[data-layout="minimal"] :is(.ao-hjalte .ap-tal .ao-tal, section.lp-mork .ap-tal .ao-tal, .ao-remsa .ao-tal) { display: flex; align-items: center; gap: 10px; padding: 8px 10px; min-height: 0; border-radius: calc(12px * var(--t-radie-k, 1)); }
+html[data-layout="minimal"] :is(.ao-hjalte .ap-tal, .ao-remsa) .ao-tal__ikon { width: 28px; height: 28px; border-radius: calc(9px * var(--t-radie-k, 1)); }
+html[data-layout="minimal"] :is(.ao-hjalte .ap-tal, .ao-remsa) .ao-tal__ikon .emo-ik { width: 14px; height: 14px; }
+html[data-layout="minimal"] :is(.ao-hjalte .ap-tal, .ao-remsa) .ao-tal strong { font-size: var(--l-tal, 1.05rem) !important; line-height: 1.1; }
+html[data-layout="minimal"] :is(.ao-hjalte .ap-tal, .ao-remsa) .ao-tal small { font-size: .6rem; }
+html[data-layout="minimal"] :is(.ao-hjalte .ap-tal, .ao-remsa) .ao-tal em { display: none; }
+html[data-layout="minimal"] a.ao-tal:hover { transform: none; }
+
+/* ---- De mörka hjältarna och kalendern blir ljusa kort i Minimal ----
+   "Text på mörkt"-tokens pekas om till temats text inne i ytan; bakgrunden blir samma som .kort. */
+html[data-layout="minimal"] :is(section.ao-hjalte.lp-chefhjalte.lp-mork, section.lp-phjalte.lp-mork, section.sh-hjalte.sh-mork, section.pk.kort--mork) {
+  --o-fbf4e8-ps: var(--t-text); --o-fbf4e8-ps-rgb: var(--t-blaeck-rgb);
+  --o-ffffff-ps: var(--t-text); --o-ffffff-ps-rgb: var(--t-blaeck-rgb);
+  --o-fff5e6-ps-rgb: var(--t-blaeck-rgb); --o-fff0dc-ps-rgb: var(--t-blaeck-rgb); --o-fff4e6-ps-rgb: var(--t-blaeck-rgb); --o-ffecd2-ps-rgb: var(--t-blaeck-rgb);
+  --o-fff8ee-ps: var(--t-text); --o-f3ede4-ps: var(--t-text); --o-f3ede4-ps-rgb: var(--t-blaeck-rgb); --o-fbf6ee-ps: var(--t-text);
+  --o-1d1915-yta: var(--vit); --o-554e47-sten-mitt: var(--vit);
+  --t-pa-kol: var(--t-text); --t-pa-kol-rgb: var(--t-blaeck-rgb); --t-pa-kol-vit: var(--t-text); --t-pa-kol-vit-rgb: var(--t-blaeck-rgb);
+  --t-pa-mork: var(--t-text); --t-pa-mork-rgb: var(--t-blaeck-rgb); --t-glas-rgb: var(--t-blaeck-rgb);
+  --t-pa-sten-ljus: var(--t-text); --t-pa-sten-rgb: var(--t-blaeck-rgb);
+  --t-sten-accent: var(--virke-djup); --t-sten-ikon: var(--virke-djup);
+  --ljus: var(--t-text); --ljus-2: var(--t-text-2); --ljus-3: var(--t-text-3);
+  color: var(--t-text); background: var(--vit);
+  box-shadow: var(--l-skugga, var(--skugga)), inset 0 0 0 1px var(--kant);
+}
+html[data-layout="minimal"] :is(section.ao-hjalte.lp-chefhjalte.lp-mork h1 em, section.sh-hjalte.sh-mork h1 em, section.pk.kort--mork .pk-titel h2 em) { background: none; color: var(--virke-djup); -webkit-text-fill-color: currentColor; }
+html[data-layout="minimal"] :is(section.ao-hjalte.lp-chefhjalte.lp-mork, section.lp-phjalte.lp-mork, section.sh-hjalte.sh-mork) :is(.ao-tal, .sh-delar li) { -webkit-backdrop-filter: none; backdrop-filter: none; }
+html[data-layout="minimal"] section.lp-phjalte.lp-mork .lp-phjalte__fakta .nu { color: var(--t-gron-text); }
+
+/* ============ 2. Försäljning (chefsvyn) ============ */
+
+/* Minimal: rubrik + knappar, fyra små tal; ringen, laget, himlen och veckostaplarna bort */
+html[data-layout="minimal"] section.ao-hjalte.lp-chefhjalte.lp-mork { gap: 10px; }
+html[data-layout="minimal"] section.lp-mork .ap-tal { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+html[data-layout="minimal"] section.lp-mork .ao-tal small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Teamet: tal, mål, närmast att stänga och knapparna kvar; staplar per steg och veckan bort; korten fyller raden */
+html:is([data-layout="minimal"], [data-layout="normal"]) .lp-team { display: flex; flex-wrap: wrap; gap: var(--ll-gap); }
+html:is([data-layout="minimal"], [data-layout="normal"]) .lp-team > * { flex: 1 1 300px; min-width: 0; }
+html[data-layout="minimal"] .lp-saljare :is(.lp-perSteg, .lp-vecka) { display: none; }
+html[data-layout="minimal"] .lp-saljare { gap: 10px; }
+/* Aktivitet 14 dagar bort; Pipeline och Topplistan bredvid varandra i full bredd */
+html[data-layout="minimal"] .ao-band--akt14 { display: none; }
+html[data-layout="minimal"] .lp-tva { grid-template-columns: minmax(0, 1fr); }
+html[data-layout="minimal"] .lp-tva > .lp-stapel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ll-gap); align-items: stretch; }
+html[data-layout="minimal"] .lp-tva > .lp-stapel > .ao-band { margin-bottom: var(--ll-gap); }
+html[data-layout="minimal"] .ao-band--pipe .ao-statrad { display: none; }
+/* Kalenderns lägesrad: sammanfattningen bort, filtren, Försenat/Ledig dag och Exportera kvar */
+html[data-layout="minimal"] .ao-band--kal .lp-kal__lage { margin-bottom: 10px; padding: 0; background: none; box-shadow: none; }
+html[data-layout="minimal"] .ao-band--kal .lp-kal__lage > span:not(.lp-kal__typer) { display: none; }
+html[data-layout="minimal"] .ao-band--kal .lp-kal__tips { display: none; }
+html[data-layout="minimal"] .lp-agera li { padding-block: 6px; }
+
+/* Normal: dekor bort, lägre ring och staplar */
+html[data-layout="normal"] section.ao-hjalte.lp-chefhjalte.lp-mork { padding: 28px 32px 22px; gap: 20px 32px; }
+html[data-layout="normal"] section.lp-mork h1 { font-size: var(--l-h1, clamp(28px, 2.6vw, 40px)); }
+html[data-layout="normal"] .lp-chefhjalte .lp-ring { width: 150px; height: 150px; }
+html[data-layout="normal"] .lp-chefhjalte .lp-ring__mitt b { font-size: 1.7rem; }
+html[data-layout="normal"] .lp-chefhjalte .lp-ring__mitt em { display: none; }
+html[data-layout="normal"] section.lp-mork .lp-veckor__staplar { height: 58px; }
+html[data-layout="normal"] section.lp-mork .lp-veckor__staplar i { height: calc(3px + var(--h) * 30px); }
+
+/* ============ 3. Profil ============ */
+
+/* Minimal: bild, namn, roll och knappar på en rad; talen bort */
+html[data-layout="minimal"] .lp-phjalte__vanster { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; }
+html[data-layout="minimal"] .lp-phjalte__id { gap: 12px; }
+html[data-layout="minimal"] .lp-pbild { width: 52px; height: 52px; }
+html[data-layout="minimal"] .lp-pbild .avatar--stor { width: 46px; height: 46px; font-size: 1rem; border-radius: calc(14px * var(--t-radie-k, 1)); box-shadow: none; }
+html[data-layout="minimal"] .lp-pbild .avatar--stor .narvaro-prick { width: 13px; height: 13px; box-shadow: 0 0 0 2px var(--vit); }
+html[data-layout="minimal"] .lp-pbild__ring { border-radius: calc(17px * var(--t-radie-k, 1)); }
+html[data-layout="minimal"] .lp-phjalte .etikett { display: none; }
+html[data-layout="minimal"] .lp-phjalte h1 { margin: 0; font-size: var(--l-h1, 1.25rem); line-height: 1.15; letter-spacing: -0.02em; }
+html[data-layout="minimal"] .lp-phjalte__titel { font-size: .82rem; color: var(--t-text-2); }
+html[data-layout="minimal"] .lp-phjalte__chips { display: none; }
+html[data-layout="minimal"] .lp-phjalte__fakta { order: 3; flex-basis: 100%; gap: 4px 14px; font-size: .78rem; color: var(--t-text-3); }
+html[data-layout="minimal"] .lp-phjalte__knappar { gap: 6px; }
+html[data-layout="minimal"] .lp-phjalte__knappar .sh-knapp { padding: 8px 12px; font-size: .78rem; }
+html[data-layout="minimal"] .lp-phjalte__tal { display: none; }
+/* Om dig och Aktivitet: rutorna, genvägarna, siffrorna och grafen bort – kontakt, senast och listorna kvar */
+html[data-layout="minimal"] :is(.lp-om-rutor, .lp-genvagar, .lp-arb-trio, .lp-arb-graf) { display: none; }
+html[data-layout="minimal"] .lp-band2 { padding: 14px 16px; }
+html[data-layout="minimal"] .lp-band2__huvud { margin-bottom: 8px; }
+html[data-layout="minimal"] .lp-band2__huvud h2 { font-size: var(--l-h2, 1.0625rem); }
+/* Kalendern: ljust kort, lägre rutor */
+html[data-layout="minimal"] section.pk.kort--mork { padding: 14px 16px; }
+html[data-layout="minimal"] section.pk.kort--mork .pk-titel { margin-bottom: 8px; }
+html[data-layout="minimal"] section.pk.kort--mork .pk-titel .etikett { display: none; }
+html[data-layout="minimal"] section.pk.kort--mork .pk-titel h2 { font-size: var(--l-h2, 1.0625rem); }
+html[data-layout="minimal"] section.pk.kort--mork :is(.pk-dag, .pk-panel, .pk-arman, .pk-nav) { background-color: rgb(var(--t-blaeck-rgb) / .03); }
+html[data-layout="minimal"] section.pk.kort--mork .pk-dag { min-height: 72px; padding: 6px 7px; }
+html[data-layout="minimal"] section.pk.kort--mork .pk-dag.helg { background: rgb(var(--t-blaeck-rgb) / .015); }
+html[data-layout="minimal"] section.pk.kort--mork .pk-rutnat { gap: 4px; }
+html[data-layout="minimal"] section.pk.kort--mork .pk-kropp { gap: 14px; }
+
+/* Normal: dekor bort, lägre hjälte, talen fyra i rad */
+html[data-layout="normal"] section.lp-phjalte.lp-mork { padding: 26px 30px; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+html[data-layout="normal"] .lp-phjalte__id { gap: 16px; }
+html[data-layout="normal"] .lp-pbild { width: 84px; height: 84px; }
+html[data-layout="normal"] .lp-pbild .avatar--stor { width: 72px; height: 72px; font-size: 1.5rem; border-radius: calc(22px * var(--t-radie-k, 1)); }
+html[data-layout="normal"] .lp-pbild__ring { border-radius: calc(27px * var(--t-radie-k, 1)); }
+html[data-layout="normal"] .lp-phjalte h1 { font-size: var(--l-h1, clamp(28px, 2.6vw, 40px)); }
+html[data-layout="normal"] .lp-phjalte__tal { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+html[data-layout="normal"] section.lp-phjalte .lp-ptal.ao-tal { padding: 12px 14px; }
+html[data-layout="normal"] section.lp-phjalte .lp-ptal strong { font-size: 1.3rem; }
+html[data-layout="normal"] section.pk.kort--mork .pk-dag { min-height: 88px; }
+
+/* ============ 4. Kontrollcentralen ============ */
+
+/* Minimal: rubrik + knappar, sex tal (3 eller 6 i rad), kontona och banden täta; Vem gör vad + Senast bort (loggen finns i Adminpanelen) */
+html[data-layout="minimal"] section.ao-hjalte:not(.ap-hjalte) .ao-remsa { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+html[data-layout="minimal"] .ao-tva:has(> .ao-band--vemgor) { display: none; }
+/* Kontokorten fyller alltid raden (inga tomma spår, sista raden breddas) */
+html:is([data-layout="minimal"], [data-layout="normal"]) .ao-konton { display: flex; flex-wrap: wrap; gap: var(--ll-gap); }
+html:is([data-layout="minimal"], [data-layout="normal"]) .ao-konton > .ao-konto { flex: 1 1 240px; min-width: 0; }
+html[data-layout="minimal"] .ao-konton > .ao-konto { gap: 8px; padding: 12px; }
+html[data-layout="minimal"] .ao-punkter li { padding-block: 4px; }
+html[data-layout="minimal"] .ao-snabbknapp .emo-ik, html[data-layout="minimal"] .ao-snabbknapp .i { width: 18px; height: 18px; }
+html[data-layout="minimal"] .ao-snabbknapp { padding: 8px 6px; gap: 4px; }
+@media (min-width: 1360px) {
+  html[data-layout="minimal"] section.ao-hjalte:not(.ap-hjalte) .ao-remsa { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  html[data-layout="minimal"] section.ao-hjalte:not(.ap-hjalte) .ao-remsa { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Normal: lägre hjälte, mindre kärna */
+html[data-layout="normal"] .ao-hjalte { padding: 24px 28px; gap: 20px 28px; }
+html[data-layout="normal"] .ao-hjalte h1 { font-size: var(--l-h1, clamp(28px, 2.6vw, 40px)); }
+html[data-layout="normal"] .ao-hjalte .ao-ingress { margin-bottom: 14px; }
+html[data-layout="normal"] .ao-karna { width: 200px; }
+html[data-layout="normal"] .ao-mitt strong { font-size: 1.8rem; }
+
+/* ============ 5. Adminpanelen ============ */
+
+/* Minimal: rubrik + knappar + tre små tal; Vem får göra vad bort, Data | Webbläsaren och Granskning i full bredd */
+html[data-layout="minimal"] .ap-hjalte:not(.lp-chefhjalte) .ap-tal { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+html[data-layout="minimal"] .ap-hjalte:not(.lp-chefhjalte) .ap-tal:has(> :nth-child(4)) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+html[data-layout="minimal"] .ap-tva { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--ll-gap); row-gap: 0; align-items: stretch; }
+html[data-layout="minimal"] .ap-tva > .ap-stapel-kol { display: contents; }
+html[data-layout="minimal"] .ap-tva .ap-halv--matris { display: none; }
+html[data-layout="minimal"] .ap-tva .ap-halv--logg { grid-column: 1 / -1; }
+html[data-layout="minimal"] .ap-rad:not(.ap-rad--huvud) { min-height: 44px; padding-block: 6px; }
+
+/* Normal: lägre hjälte */
+html[data-layout="normal"] .ap-hjalte .ap-tal .ao-tal { padding: 10px 12px; }
+
+/* ============ 6. Säkerhet ============ */
+
+/* Minimal: rubrik + knappar, statuschipsen på en rad; kärnan, ingressen och veckan/tickern bort */
+html[data-layout="minimal"] .sh-text .sh-delar { order: 3; flex-basis: 100%; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 6px; margin: 0; }
+html[data-layout="minimal"] .sh-delar li { padding: 6px 10px; }
+@media (min-width: 1280px) { html[data-layout="minimal"] .sh-text .sh-delar { grid-template-columns: repeat(8, minmax(0, 1fr)) !important; } }
+html[data-layout="minimal"] .sh-drift__nedre { display: none; }
+html[data-layout="minimal"] .sh-drift { padding: 14px 16px; }
+html[data-layout="minimal"] .sh-drift > header, html[data-layout="minimal"] .sh-verktyg > header { margin-bottom: 10px; }
+html[data-layout="minimal"] .sh-drift__ruta { padding: 10px 12px; min-height: 0; }
+html[data-layout="minimal"] .sh-verktyg { padding: 14px 16px; }
+html[data-layout="minimal"] .ad-band.sh-kontrollband { padding: 14px 16px; }
+html[data-layout="minimal"] .sh-kontrollband > h2 { margin-bottom: 10px; }
+html[data-layout="minimal"] .sh-kontrollband > h2 .sh-antal { display: none; }
+html[data-layout="minimal"] .sh-kontroller { gap: 8px; }
+html[data-layout="minimal"] .sh-kontroll { padding: 12px; gap: 8px; }
+html[data-layout="minimal"] .sh-kontroll header p { display: none; }
+html[data-layout="minimal"] .ad-tva > .ad-band { padding: 14px 16px; }
+@media (max-width: 900px) { html[data-layout="minimal"] .sh-drift__tal { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Normal: mindre kärna, lägre hjälte */
+html[data-layout="normal"] .sh-hjalte { padding: 24px 28px; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); }
+html[data-layout="normal"] .sh-hjalte h1 { font-size: var(--l-h1, clamp(28px, 2.6vw, 40px)); }
+html[data-layout="normal"] .sh-karna { width: 280px; }
+/* 7 delar + totalen = 8 chips: alltid 4 i rad (2 på mobil), så inga halva rader */
+html[data-layout="normal"] .sh-text .sh-delar { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+
+/* ============ 7. Mobil ============ */
+@media (max-width: 1100px) {
+  html[data-layout="minimal"] .ap-hjalte:not(.lp-chefhjalte) .ap-tal:has(> :nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html[data-layout="minimal"] .lp-tva > .lp-stapel { grid-template-columns: minmax(0, 1fr); }
+  html[data-layout="minimal"] section.lp-mork .ap-tal { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  html[data-layout="minimal"] .ap-hjalte:not(.lp-chefhjalte) .ap-tal { grid-template-columns: minmax(0, 1fr); }
+  html[data-layout="minimal"] .ap-hjalte:not(.lp-chefhjalte) .ap-tal:has(> :nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html[data-layout="minimal"] .sh-text .sh-delar { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  html[data-layout="normal"] .sh-text .sh-delar { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  html[data-layout="minimal"] .ap-tva { grid-template-columns: minmax(0, 1fr); }
+  html[data-layout="minimal"] .sh-knapp { flex: 1 1 auto; justify-content: center; }
+  html[data-layout="minimal"] .lp-phjalte__knappar .sh-knapp { flex: 1 1 auto; justify-content: center; }
+  html[data-layout="normal"] .sh-hjalte { grid-template-columns: minmax(0, 1fr); }
+  html[data-layout="normal"] .lp-phjalte__tal { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (pointer: coarse) {
+  html[data-layout="minimal"] .sh-knapp, html[data-layout="minimal"] .lp-phjalte__knappar .sh-knapp { min-height: 44px; }
+}
+
+}

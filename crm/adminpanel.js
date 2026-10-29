@@ -117,7 +117,7 @@
     var behorig = band('03 · Behörigheter', 'Vem får', 'göra vad',
       '<div class="ap-matris" role="table"><div class="ap-matris__rad ap-matris__huvud" role="row"><span></span>' + ['Sälj', 'Chef', 'Prod', 'Admin'].map(function (k) { return '<span role="columnheader">' + k + '</span>'; }).join('') + '</div>' +
         RATT.map(function (r) { return '<div class="ap-matris__rad" role="row"><span role="rowheader">' + e(r[0]) + '</span>' + r[1].map(function (x) { return '<span role="cell" data-ratt="' + x + '">' + (x === 'ja' ? ik('bock') : '<i>–</i>') + '</span>'; }).join('') + '</div>'; }).join('') + '</div>' +
-      '<p class="ad-not">Alla säljare ser och ändrar teamets affärer och kunder – det finns inga egna, låsta affärer. Demoläget: rollerna styr menyn och sidorna i webbläsaren. Skarpt ska servern kontrollera varje ändring.</p>', { klass: 'ap-halv' });
+      '<p class="ad-not">Alla säljare ser och ändrar teamets affärer och kunder – det finns inga egna, låsta affärer. Demoläget: rollerna styr menyn och sidorna i webbläsaren. Skarpt ska servern kontrollera varje ändring.</p>', { klass: 'ap-halv ap-halv--matris' });
 
     // 04 Inställningar
     var utlogg = +inst().utlogg || 0, kopia = inst().kopia;
@@ -127,7 +127,7 @@
       '<div class="ap-inst"><div><strong>Säkerhetskopia</strong><small>' + (kopia ? 'Senast exporterad ' + IH.sedan(kopia) + '.' : 'Ingen export gjord än.') + ' Förslagen påminner när den är äldre än en vecka.</small></div>' +
         '<button type="button" class="knapp knapp--liten" data-g="ad-exportera">' + ik('ladda-ner') + 'Exportera nu</button></div>' +
       '<div class="ap-inst"><div><strong>Systemrapport</strong><small>Konton, poster, säkerhetspoäng och inställningar som text – kopieras för att klistra in i ett mejl.</small></div>' +
-        '<button type="button" class="knapp knapp--liten" data-g="kc-rapport">' + ik('dokument') + 'Kopiera</button></div>', { klass: 'ap-halv' });
+        '<button type="button" class="knapp knapp--liten" data-g="kc-rapport">' + ik('dokument') + 'Kopiera</button></div>', { klass: 'ap-halv ap-halv--inst' });
 
     // 05 Data och system
     var max = Math.max.apply(null, SAML.map(function (s) { return (d[s[1]] || []).length; }).concat([1]));
@@ -137,7 +137,7 @@
       '<dl class="ap-fakta"><div><dt>Läge</dt><dd>Demo – allt i den här webbläsaren</dd></div><div><dt>Version</dt><dd>v' + e(version) + ' · data ' + (IH.VERSION || '–') + '</dd></div><div><dt>Lagring</dt><dd>' + kb(lagring()) + ' av ca 5 MB</dd></div></dl>' +
       '<div class="ao-fot"><button type="button" class="knapp knapp--liten" data-g="ad-exportera">' + ik('ladda-ner') + 'Exportera (JSON)</button>' +
         '<label class="knapp knapp--liten">' + ik('uppladdning') + 'Importera<input type="file" accept="application/json,.json" data-ap-import hidden></label>' +
-        '<button type="button" class="knapp knapp--liten knapp--fara" data-g="ad-aterstall">' + i('aterstall') + 'Återställ exempeldata</button></div>', { klass: 'ap-halv' });
+        '<button type="button" class="knapp knapp--liten knapp--fara" data-g="ad-aterstall">' + i('aterstall') + 'Återställ exempeldata</button></div>', { klass: 'ap-halv ap-halv--data' });
 
     // 06 Granskningsloggen
     var typFor = function (t) { return t === 'konto' || t === 'support' ? t : 'sakerhet'; };
@@ -149,7 +149,7 @@
       (alltLogg.length ? '<ul class="ao-flode ap-logg">' + alltLogg.slice(0, ui.loggN).map(function (x) { var u = IH.anvandare(x.av) || { namn: '?', farg: '#ccc' }, t = String(x.text || '');
         return '<li data-typ="' + x.typ + '"><span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span><span>' + e(t.slice(0, 110)) + (t.length > 110 ? '…' : '') + '<small><b class="ap-typ" data-typ="' + x.typ + '">' + TYPNAMN[x.typ] + '</b>' + e(u.namn) + ' · ' + IH.sedan(x.tid) + '</small></span></li>'; }).join('') + '</ul>' : '<p class="ad-not">Inget i loggen med det filtret.</p>') +
       (alltLogg.length > ui.loggN ? '<div class="ao-fot"><button type="button" class="knapp knapp--liten" data-g="ap-logg-fler">Visa fler (' + (alltLogg.length - ui.loggN) + ' till)</button></div>' : ''),
-      { klass: 'ap-halv', hoger: '<div class="ap-filterrad" role="group" aria-label="Visa">' + [['alla', 'Allt'], ['crm', 'CRM'], ['konto', 'Konton'], ['support', 'Support'], ['sakerhet', 'Säkerhet']].map(function (f) { return filterKnapp('ap-logg', f[0], f[1], ui.logg); }).join('') + '</div>' });
+      { klass: 'ap-halv ap-halv--logg', hoger: '<div class="ap-filterrad" role="group" aria-label="Visa">' + [['alla', 'Allt'], ['crm', 'CRM'], ['konto', 'Konton'], ['support', 'Support'], ['sakerhet', 'Säkerhet']].map(function (f) { return filterKnapp('ap-logg', f[0], f[1], ui.logg); }).join('') + '</div>' });
 
     return { titel: 'Admin', html: hjalte + konton + forslagBand + '<div class="ao-tva ap-tva"><div class="ap-stapel-kol">' + behorig + system + '</div><div class="ap-stapel-kol">' + installningar + loggBand + '</div></div>' };
   };

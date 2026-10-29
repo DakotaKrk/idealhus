@@ -176,7 +176,7 @@
       '<div class="ao-remsa">' + remsa.map(function (x, n) { return '<' + (x.href ? 'a href="' + x.href + '"' : 'div') + ' class="ao-tal ao-tal--smart" data-ton="' + x.ton + '" style="--n:' + n + '"><span class="ao-tal__ikon">' + ik(x.ikon) + '</span><span class="ao-tal__text"><small>' + x.etikett + '</small><strong>' + e(x.varde) + '</strong><em title="' + x.under + '">' + x.under + '</em></span>' + (x.extra ? '<span class="ao-tal__extra">' + x.extra + '</span>' : '') + '</' + (x.href ? 'a' : 'div') + '>'; }).join('') + '</div></section>';
     var band = function (nr, rubrik, em, inne, opts) {
       opts = opts || {};
-      return '<section class="ao-band kort' + (opts.halv ? ' ao-band--halv' : '') + '"><header class="ao-band__huvud"><div><p class="ao-ogon">' + nr + '</p><h2>' + rubrik + ' <em>' + em + '</em></h2>' + (opts.ingress ? '<p class="ao-band__ingress">' + opts.ingress + '</p>' : '') + '</div>' + (opts.hoger || '') + '</header>' + inne + '</section>';
+      return '<section class="ao-band kort' + (opts.halv ? ' ao-band--halv' : '') + (opts.klass ? ' ' + opts.klass : '') + '"><header class="ao-band__huvud"><div><p class="ao-ogon">' + nr + '</p><h2>' + rubrik + ' <em>' + em + '</em></h2>' + (opts.ingress ? '<p class="ao-band__ingress">' + opts.ingress + '</p>' : '') + '</div>' + (opts.hoger || '') + '</header>' + inne + '</section>';
     };
     // 01 Konton
     var dagar = dagar14(), ordning = { hjalp: 0, se: 1, bra: 2 };
@@ -189,7 +189,7 @@
         '<footer class="ao-konto__fot"><span class="ao-spark">' + sparkline(pd, 132, 28) + '</span><small>' + plural(pd.reduce(function (t, v) { return t + v; }, 0), 'händelse', 'händelser') + ' · 14 d</small><a class="ao-pil" href="#/profil/' + u.id + '" aria-label="Profilen för ' + e(u.namn) + '">' + i('pil') + '</a></footer></article>';
     }).join('');
     var antalLage = function (l) { return konton.filter(function (x) { return x.h.lage === l; }).length; };
-    var kontoBand = band('01 · Konton', 'Hur kontona', 'mår', '<div class="ao-konton">' + kort + '</div>', { ingress: 'Aktivitet, förfallna uppgifter, affärer eller projekt som står still, kopplingar och profilen – sammanvägt till en hälsa per konto.',
+    var kontoBand = band('01 · Konton', 'Hur kontona', 'mår', '<div class="ao-konton">' + kort + '</div>', { klass: 'ao-band--konton', ingress: 'Aktivitet, förfallna uppgifter, affärer eller projekt som står still, kopplingar och profilen – sammanvägt till en hälsa per konto.',
       hoger: '<div class="ao-sammanfatt">' + [['bra', 'mår bra'], ['se', 'bör ses över'], ['hjalp', 'behöver hjälp']].map(function (x) { return '<span data-lage="' + x[0] + '"><b>' + antalLage(x[0]) + '</b>' + x[1] + '</span>'; }).join('') + '</div>' });
     // 02 Säkerhet
     var lista = function (rader) { return '<ul class="ao-lista">' + rader.map(function (x) { return '<li data-lage="' + x.lage + '"><span class="ao-l__ikon">' + ik(x.ikon) + '</span><span class="ao-l__namn">' + x.namn + '</span><em>' + e(x.text) + '</em><i class="ao-lampa"></i></li>'; }).join('') + '</ul>'; };
@@ -198,7 +198,7 @@
       '<div class="ao-allvar">' + [['hog', 'Hög'], ['medel', 'Medel'], ['lag', 'Låg']].map(function (x) { return '<span data-allvar="' + x[0] + '"><b>' + fyndN(x[0]) + '</b>' + x[1] + '</span>'; }).join('') + '</div>' +
       lista((H ? H.kontroller : []).map(function (k) { var r = S.senast[k.id], v = r ? r.fynd.filter(function (x) { return x.allvar !== 'info'; }).length : 0; return { lage: H.lageFor(r), ikon: k.ikon, namn: k.namn, text: !r ? 'Inte körd' : v ? plural(v, 'fynd', 'fynd') : 'Inga fynd' }; })) +
       '<div class="ao-fot"><button type="button" class="knapp knapp--virke knapp--liten" data-g="sh-skanna-ga">' + ik('radar') + 'Skanna allt</button><a class="knapp knapp--liten" href="#/sakerhet">' + ik('skold') + 'Säkerhetshubben</a></div>',
-      { halv: true, hoger: chip(sakP, sakP == null ? 'Ej skannat' : sakP + ' / 100') });
+      { halv: true, klass: 'ao-band--skydd', hoger: chip(sakP, sakP == null ? 'Ej skannat' : sakP + ' / 100') });
     // 03 Data
     var lacka = S.senast.lacka, lackaN = lacka ? lacka.fynd.filter(function (x) { return x.allvar === 'hog' || x.allvar === 'medel'; }).length : null;
     var maxS = Math.max.apply(null, SAML.map(function (s) { return antal(s[1]); }).concat([1]));
@@ -209,7 +209,7 @@
         { ikon: 'fingeravtryck', namn: 'Persondata på fel ställe', lage: lackaN == null ? 'ny' : lackaN ? 'medel' : 'ok', text: lackaN == null ? 'Inte kontrollerat' : lackaN ? plural(lackaN, 'fynd', 'fynd') : 'Inga fynd' }]) +
       '<ul class="ao-samlingar">' + SAML.map(function (s) { return '<li><span>' + s[0] + '</span><strong>' + antal(s[1]).toLocaleString('sv-SE') + '</strong><i style="--andel:' + (antal(s[1]) / maxS).toFixed(3) + '"></i></li>'; }).join('') + '</ul>' +
       '<div class="ao-fot"><button type="button" class="knapp knapp--liten" data-g="sh-skanna-ga" data-ids="buggar,lacka">' + ik('nyckelverktyg') + 'Kontrollera datan</button><button type="button" class="knapp knapp--liten" data-g="ad-exportera">' + ik('ladda-ner') + 'Exportera</button></div>',
-      { halv: true, hoger: chip(dl.poang, 'Kvalitet ' + dl.poang + ' %') });
+      { halv: true, klass: 'ao-band--data', hoger: chip(dl.poang, 'Kvalitet ' + dl.poang + ' %') });
     // 04 Aktivitet
     var aktivaK = IH.ANVANDARE.filter(function (u) { return !u.inaktiv; });
     var varden = aktivaK.map(function (u) { return perDag(u.id, dagar); }), maxV = Math.max.apply(null, [].concat.apply([1], varden));
@@ -222,13 +222,13 @@
       '<div class="ao-skala"><span>Färre</span>' + [0.1, 0.35, 0.6, 0.85, 1].map(function (v) { return '<i style="--v:' + v + '"></i>'; }).join('') + '<span>Fler</span></div>' +
       '<div class="ao-statrad"><div><small>Händelser 14 d</small><strong>' + tot.reduce(function (t, x) { return t + x.n; }, 0) + '</strong><em>i tidslinjerna</em></div><div><small>Mest aktiv</small><strong>' + (mest && mest.n ? e(mest.u.namn.split(' ')[0]) : '–') + '</strong><em>' + (mest && mest.n ? plural(mest.n, 'händelse', 'händelser') : 'ingen aktivitet') + '</em></div>' +
         '<div><small>Tysta 14 d</small><strong>' + tysta.length + '</strong><em>' + (tysta.length ? e(tysta.map(function (x) { return x.u.namn.split(' ')[0]; }).join(', ')) : 'alla har loggat något') + '</em></div></div>',
-      { halv: true, hoger: '<span class="ao-band__tal">14 dagar</span>' });
+      { halv: true, klass: 'ao-band--vemgor', hoger: '<span class="ao-band__tal">14 dagar</span>' });
     // 05 Händelser
     var flode = d.aktiviteter.map(function (x) { return { tid: x.tid, av: x.av, text: x.text, typ: 'crm' }; }).concat((d.sakerhet || []).map(function (x) { return { tid: x.tid, av: x.av, text: x.text, typ: 'sakerhet' }; }))
       .filter(function (x) { return x.tid; }).sort(function (a, b) { return a.tid < b.tid ? 1 : -1; }).slice(0, 7);
     var flodeBand = band('05 · Händelser', 'Senast', 'i CRM:et', flode.length ? '<ul class="ao-flode">' + flode.map(function (x) { var u = IH.anvandare(x.av) || { namn: '?', farg: '#ccc' }, t = String(x.text || '');
         return '<li data-typ="' + x.typ + '"><span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span><span>' + e(t.slice(0, 96)) + (t.length > 96 ? '…' : '') + '<small>' + e(u.namn) + ' · ' + IH.sedan(x.tid) + (x.typ === 'sakerhet' ? ' · säkerhetsloggen' : '') + '</small></span></li>'; }).join('') + '</ul>' : '<p class="ad-not">Inga händelser än.</p>',
-      { halv: true, hoger: '<a class="knapp knapp--liten" href="#/admin">Hela loggen</a>' });
+      { halv: true, klass: 'ao-band--senast', hoger: '<a class="knapp knapp--liten" href="#/admin">Hela loggen</a>' });
     // 06 Drift – med snabbåtgärderna och verktygen, så att spalten blir lika lång som förslagen bredvid
     var SNABB = [['km-nytt-konto', 'anvandare-plus', 'Lägg till konto'], ['sh-skanna-ga', 'radar', 'Skanna nu'], ['ad-exportera', 'ladda-ner', 'Exportera data'], ['kc-csv', 'anstallda', 'Kontolista (CSV)'],
       ['kc-rapport', 'dokument', 'Systemrapport'], ['kc-rensa-bilder', 'bild', 'Rensa chattfiler'], ['kc-rensa-logg', 'papperskorg', 'Rensa loggen'], ['ad-aterstall', 'aterstall', 'Återställ data']];
@@ -241,7 +241,7 @@
       (dr.fel.length ? '<ul class="ao-fel">' + dr.fel.slice(-3).reverse().map(function (t) { return '<li><code>' + e(t) + '</code></li>'; }).join('') + '</ul>' : '<p class="ao-lugnt">' + ik('bock') + 'Inga fel i skript eller filer sedan sidan laddades.</p>') +
       '<p class="ao-ogon ao-ogon--liten">Snabbåtgärder och verktyg</p><div class="ao-snabb">' + SNABB.map(function (x) { return '<button type="button" class="ao-snabbknapp" data-g="' + x[0] + '">' + ik(x[1]) + '<span>' + x[2] + '</span></button>'; }).join('') + '</div>' +
       '<div class="ao-fot">' + (dr.fel.length ? '<button type="button" class="knapp knapp--liten" data-g="sh-rensa-fel">' + ik('aterstall') + 'Rensa felloggen</button>' : '') + '<button type="button" class="knapp knapp--liten" data-g="sh-skanna-ga" data-ids="trasigt,uppdatering">' + ik('uppgradera') + 'Sök uppdateringar</button></div>',
-      { halv: true, hoger: chip(dr.poang, dr.poang + ' / 100') });
+      { halv: true, klass: 'ao-band--system', hoger: chip(dr.poang, dr.poang + ' / 100') });
     // 07 Förslag, snabbåtgärder och verktyg
     var forslag = forslagLista(brott, dl, dr);
     var forslagBand = band('07 · Förslag', 'Bör', 'åtgärdas',
@@ -249,7 +249,7 @@
         return '<li><span class="ao-upp__ikon">' + ik(x.ikon) + '</span><span class="ao-upp__text"><strong>' + e(x.text) + '</strong><small>' + e(x.under || '') + '</small></span>' +
           (x.lank ? '<a class="knapp knapp--liten" href="' + x.lank + '">' + x.knapp + '</a>' : '<button type="button" class="knapp knapp--liten" data-g="' + x.g + '"' + (x.data ? ' data-ids="' + x.data + '"' : '') + '>' + x.knapp + '</button>') + '</li>';
       }).join('') + '</ul>' + (forslag.length > 7 ? '<div class="ao-fot"><button type="button" class="knapp knapp--liten" data-g="kc-forslag-alla">' + (ui.allaForslag ? 'Visa färre' : 'Visa alla ' + forslag.length) + '</button></div>' : '') : '<div class="ao-lugnt ao-lugnt--stor">' + ik('skold') + '<div><strong>Inget att åtgärda</strong><small>Profiler, mål, ansvariga och säkerheten ser bra ut.</small></div></div>'),
-      { halv: true, hoger: forslag.length ? '<span class="ao-band__tal">' + forslag.length + '</span>' : '' });
+      { halv: true, klass: 'ao-band--atgarda', hoger: forslag.length ? '<span class="ao-band__tal">' + forslag.length + '</span>' : '' });
     var html = hjalte + kontoBand + '<div class="ao-tva">' + sakBand + dataBand + '</div><div class="ao-tva">' + karta + flodeBand + '</div><div class="ao-tva">' + driftBand + forslagBand + '</div>';
     return { titel: 'Kontrollcentral', html: html };
   };

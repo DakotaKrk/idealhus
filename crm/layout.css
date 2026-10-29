@@ -1,0 +1,227 @@
+/* ============================================================
+   Legohus CRM – layoutlägen: motorn, skalet och gemensamma regler (2026-10-29)
+   Full (förval) har INGA regler här: varje regel nedan står bakom html[data-layout="minimal"] eller
+   html[data-layout="normal"], och allt ligger inom @media screen så att utskrift (offert-PDF, mallar)
+   är densamma i alla lägen. Sidornas egna lägesregler: layout-salj.css, layout-ledning.css, layout-chatt.css.
+   Undantag: väljarnas egna klasser (.layout-*) som bara finns i Inställningar, kontomenyn och paletten.
+   ============================================================ */
+
+@media screen {
+
+/* --- 1. Densitetstokens ------------------------------------------------------------------------------
+   Bara mått – aldrig färger – så att de fungerar i alla sex teman. Rundning skalas med temat (--t-radie-k). */
+html[data-layout="normal"] {
+  --l-vy-pad: 12px;
+  --l-gap: 14px;
+  --l-sektion: 14px;
+  --l-kort-radie: calc(22px * var(--t-radie-k, 1));
+  --l-kort-huvud: 18px 20px 0;
+  --l-kort-kropp: 14px 20px 18px;
+  --l-ikon: 32px;
+  --l-h2: 1rem;
+  --l-h1: clamp(28px, 2.6vw, 40px);
+  --l-tal: 28px;
+  --l-rad: 44px;
+  --l-knapp: 40px;
+  --l-text: 15px;
+  --l-hjalte-pad: 24px 28px;
+  --l-topp-h: 60px;
+  --l-skugga: var(--skugga);
+}
+html[data-layout="minimal"] {
+  --l-vy-pad: 10px;
+  --l-gap: 10px;
+  --l-sektion: 10px;
+  --l-kort-radie: calc(16px * var(--t-radie-k, 1));
+  --l-kort-huvud: 12px 14px 0;
+  --l-kort-kropp: 10px 14px 14px;
+  --l-ikon: 28px;
+  --l-h2: .9375rem;
+  --l-h1: 20px;
+  --l-tal: 18px;
+  --l-rad: 36px;
+  --l-knapp: 36px;
+  --l-text: 14px;
+  --l-hjalte-pad: 10px 14px;
+  --l-topp-h: 54px;
+  --l-skugga: 0 1px 2px rgb(var(--t-blaeck-rgb) / .06);
+}
+@media (pointer: coarse) {
+  html[data-layout="normal"], html[data-layout="minimal"] { --l-knapp: 44px; --l-rad: 44px; }
+}
+
+/* --- 2. Lugnt i Minimal: inga entréer, stagger, räkneverk (app.js) eller lutning --------------------- */
+html[data-layout="minimal"] .vy--in [data-in],
+html[data-layout="minimal"] .vy--in [data-stagger] > *,
+html[data-layout="minimal"] .vy--in .ord > span,
+html[data-layout="minimal"] .vy--in .rad-mask > span { animation: none !important; opacity: 1 !important; transform: none !important; }
+html[data-layout="minimal"] [data-tilt] { transform: none !important; }
+
+/* --- 3. Gemensam dekor: bort i Normal och Minimal --------------------------------------------------- */
+html:is([data-layout="normal"], [data-layout="minimal"]) :is(.sh-rutnat, .lp-mork__glod, i.kh__glod, .dk-hjalte__glod, .ljusfall, .hero__fonster, .hero__moln, .lp-himmel) { display: none !important; }
+html:is([data-layout="normal"], [data-layout="minimal"]) .ao-karna .ao-scen::before { content: none; }
+
+/* --- 4. Hjälte → verktygsrad (Minimal) ---------------------------------------------------------------
+   Hjältesektionen ligger kvar (samma element, så guiden, uppladdningsytor och knappar fungerar) men blir en
+   ljus, tät rad med kortets yta. Vilka barn som syns bestämmer sidornas egna filer (B och C). */
+html[data-layout="minimal"] :is(.hero, .ipuls, .puls, .kundtopp, .offtopp, .dk-hjalte, .motescen, .prodtopp:not(.prodtopp--resa), .dagtopp, .instopp, .ap-hjalte, .ao-hjalte, .sh-hjalte, .lp-phjalte, .afhero, .kh) {
+  min-height: 0;
+  padding: var(--l-hjalte-pad);
+  border-radius: var(--l-kort-radie);
+  background: var(--vit);
+  background-image: none;
+  color: var(--t-text);
+  box-shadow: var(--l-skugga), inset 0 0 0 1px var(--kant);
+}
+html[data-layout="minimal"] :is(.hero, .ipuls, .puls, .kundtopp, .offtopp, .dk-hjalte, .motescen, .prodtopp:not(.prodtopp--resa), .dagtopp, .instopp, .ap-hjalte, .ao-hjalte, .sh-hjalte, .lp-phjalte, .afhero, .kh)::before,
+html[data-layout="minimal"] :is(.hero, .ipuls, .puls, .kundtopp, .offtopp, .dk-hjalte, .motescen, .prodtopp:not(.prodtopp--resa), .dagtopp, .instopp, .ap-hjalte, .ao-hjalte, .sh-hjalte, .lp-phjalte, .afhero, .kh)::after { content: none; }
+/* Text och knappar som var gjorda för en mörk hjälte blir läsbara på kortets yta i alla teman */
+html[data-layout="minimal"] :is(.hero, .ipuls, .puls, .kundtopp, .offtopp, .dk-hjalte, .motescen, .prodtopp, .dagtopp, .instopp, .ap-hjalte, .ao-hjalte, .sh-hjalte, .lp-phjalte, .afhero, .kh) .etikett--ljus { color: var(--t-text-2); }
+html[data-layout="minimal"] :is(.ap-hjalte, .ao-hjalte, .sh-hjalte, .lp-phjalte, .kh, .afhero) :is(h1, h2) { color: var(--t-text); }
+
+/* --- 5. Skalet -------------------------------------------------------------------------------------- */
+/* Sidan: lite mindre luft runt och mellan blocken */
+html[data-layout="minimal"] :where(.vy > :not(:last-child)) { margin-bottom: var(--l-sektion); }
+html[data-layout="normal"] :where(.vy > :not(:last-child)) { margin-bottom: var(--l-sektion); }
+@media (min-width: 1101px) {
+  html[data-layout="minimal"] body .vy { padding: var(--l-vy-pad); }
+  html[data-layout="minimal"][data-sido-dold] body .vy { padding-left: calc(52px + var(--ram)); }
+}
+@media (max-width: 1100px) {
+  /* mobilmenyns luft i botten behålls */
+  html[data-layout="minimal"] body .vy { padding-top: 12px; padding-left: 10px; padding-right: 10px; }
+}
+
+/* Normal behåller "· Prototyp" i logotypen – det är enda prototypmärkningen på bred skärm. */
+/* Sidomenyn: alla poster kvar (inget mål försvinner), bara lugnare och tätare. Bredden ändras inte –
+   infällningen, rälsen och [ räknar med den. */
+html[data-layout="minimal"] .sido .sido__crm small { display: none; }
+html[data-layout="minimal"] body .sido .sido__lank { min-height: 34px; font-size: .875rem; }
+html[data-layout="minimal"] body .sido .sido__rubrik { margin-top: 6px; margin-bottom: 2px; }
+/* Bara räknare som kräver något (nya förfrågningar, att göra, olästa) – inte storlekar som "14 kunder" */
+html[data-layout="minimal"] .sido .sido__bricka:not(.sido__bricka--varm) { display: none; }
+
+/* Toppraden (syns på platta och mobil): ingen prototypskylt i Minimal */
+html[data-layout="minimal"] .topp .proto { display: none; }
+@media (min-width: 1101px) {
+  html[data-layout="minimal"] body .topp { height: var(--l-topp-h); }
+  html[data-layout="normal"] body .topp { height: var(--l-topp-h); }
+}
+
+/* --- 6. Kort, listor och knappar ------------------------------------------------------------------- */
+html:is([data-layout="normal"], [data-layout="minimal"]) .kort { border-radius: var(--l-kort-radie); }
+html[data-layout="minimal"] .kort { box-shadow: var(--l-skugga), inset 0 0 0 1px var(--kant); }
+html:is([data-layout="normal"], [data-layout="minimal"]) .kort__huvud { padding: var(--l-kort-huvud); }
+html:is([data-layout="normal"], [data-layout="minimal"]) .kort__kropp { padding: var(--l-kort-kropp); }
+html:is([data-layout="normal"], [data-layout="minimal"]) .kort__ikon { width: var(--l-ikon); height: var(--l-ikon); }
+html:is([data-layout="normal"], [data-layout="minimal"]) .kort__huvud :is(h2, h3) { font-size: var(--l-h2); }
+html:is([data-layout="normal"], [data-layout="minimal"]) .knapp { min-height: var(--l-knapp); }
+html[data-layout="minimal"] .knapp { padding-left: 14px; padding-right: 14px; }
+html[data-layout="minimal"] .knapp--liten { min-height: 32px; }
+html[data-layout="minimal"] .lista__rad { padding-top: 8px; padding-bottom: 8px; padding-left: 14px; padding-right: 14px; }
+html[data-layout="normal"] .lista__rad { padding-top: 10px; padding-bottom: 10px; }
+html[data-layout="minimal"] .tabell :is(td, th) { padding-top: 8px; padding-bottom: 8px; }
+html[data-layout="minimal"] .flikar button { min-height: 34px; }
+html[data-layout="minimal"] .tom { padding-top: 12px; padding-bottom: 12px; }
+html[data-layout="minimal"] .tom > :is(.i, svg.emo-ik) { width: 28px; height: 28px; }
+@media (pointer: coarse) {
+  html[data-layout="minimal"] :is(.knapp, .knapp--liten, .flikar button) { min-height: 44px; }
+}
+
+} /* @media screen */
+
+/* ============================================================
+   Väljarna (layout.js) – nya klasser, finns bara i Inställningar, kontomenyn och sökpaletten
+   ============================================================ */
+
+/* Liten ikon: fyra staplar i lägets täthet */
+.layout-ikon { display: grid; align-content: center; gap: 2px; width: 22px; height: 18px; padding: 2px 3px; border-radius: calc(5px * var(--t-radie-k, 1));
+  background: var(--t-sand); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .16); }
+.layout-ikon i { display: block; height: 2px; border-radius: 2px; background: var(--t-text-3); }
+.layout-ikon i:first-child { background: var(--t-knapp); }
+.layout-ikon--full i { height: 4px; }
+.layout-ikon--full i:nth-child(n+3) { display: none; }
+.layout-ikon--normal i { height: 3px; }
+.layout-ikon--normal i:nth-child(4) { display: none; }
+.palett__ikon .layout-ikon { width: 28px; height: 20px; }
+
+/* Kontomenyn: tredelad segmentknapp */
+.km-layout { display: grid; gap: 8px; flex: none; }
+.layout-valjare--liten { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 3px; border-radius: 13px; background: rgb(var(--t-blaeck-rgb) / .04); }
+.layout-knapp { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; min-height: 32px; padding: 4px 6px; border: 0; border-radius: 10px; background: none;
+  color: var(--t-text-2); font: 600 .72rem/1.1 var(--sans); cursor: pointer;
+  transition: transform var(--t-tryck, .16s) var(--ease-out, ease), background-color var(--t-hovra, .2s) ease, box-shadow var(--t-hovra, .2s) ease, color var(--t-hovra, .2s) ease; }
+.layout-knapp > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.layout-knapp .layout-ikon { flex: none; width: 18px; height: 15px; padding: 2px; gap: 1px; }
+/* Smal kontomeny: bara namnen, så att de får plats utan att kapas */
+.km-panel .layout-knapp .layout-ikon { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .layout-knapp:hover { background: rgb(var(--t-blaeck-rgb) / .06); color: var(--t-text); }
+}
+.layout-knapp:active { transform: scale(.96); }
+.layout-knapp[aria-pressed="true"] { background: var(--t-yta); color: var(--t-text); box-shadow: 0 0 0 1.5px var(--t-fokus), 0 4px 10px -6px rgb(var(--t-skugga-rgb) / .4); }
+.layout-knapp:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: 2px; }
+/* Kontolistan får inte krympa in under Tema/Layout: då märker kontomenyns egen täthetsräkning (ledning.js anpassaKm)
+   att det inte får plats och går tätare i steg – och först i sista steget rullar listan */
+.km-panel:not([data-rulla]):has(.km-layout) .km-grupp { flex-shrink: 0; }
+.km-layout .km-rubrik small { display: none; }
+.km-panel[data-tat="2"] .km-layout .km-rubrik { display: none; }
+.km-panel[data-tat] .layout-knapp { min-height: 28px; }
+@media (pointer: coarse) { .layout-knapp { min-height: 44px; } }
+
+/* Inställningar: tre förhandsbilder (radioknappar) */
+.layout-valjare--stor { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+/* Fyller kortets bredd jämnt; på mycket bred skärm hålls förhandsbilderna lagom höga */
+@media (min-width: 1101px) { .layout-valjare--stor { gap: 16px; } .layout-valjare--stor .layout-bild { aspect-ratio: 16 / 7; } }
+.layout-kort { position: relative; display: grid; gap: 10px; align-content: start; padding: 8px 8px 12px; border: 0; border-radius: calc(18px * var(--t-radie-k, 1)); text-align: left;
+  background: var(--t-yta); color: var(--t-text); font: inherit; cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .1), 0 1px 2px rgb(var(--t-skugga-rgb) / .04);
+  transition: transform var(--t-hovra, .2s) var(--ease-out, ease), box-shadow var(--t-hovra, .2s) ease; }
+@media (hover: hover) and (pointer: fine) {
+  .layout-kort:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .16), 0 14px 28px -20px rgb(var(--t-skugga-rgb) / .55); }
+}
+.layout-kort:active { transform: scale(.98); }
+.layout-kort:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: 3px; }
+.layout-kort[aria-checked="true"] { box-shadow: inset 0 0 0 2px var(--t-fokus), 0 14px 28px -22px rgb(var(--t-skugga-rgb) / .5); }
+.layout-kort__text { display: grid; gap: 2px; padding: 0 4px; min-width: 0; }
+.layout-kort__text b { font: 600 .9rem/1.2 var(--rubrik); color: var(--t-text); }
+.layout-kort__text small { font: 500 .74rem/1.3 var(--sans); color: var(--t-text-2); }
+.layout-kort__bock { position: absolute; top: 14px; right: 14px; z-index: 1; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--t-fokus); color: var(--t-yta); box-shadow: 0 0 0 2px var(--t-yta); opacity: 0; transform: scale(.6); transition: opacity .18s ease, transform .22s var(--ease-out, ease); }
+.layout-kort__bock svg { width: 13px; height: 13px; }
+.layout-kort[aria-checked="true"] .layout-kort__bock { opacity: 1; transform: none; }
+/* Kortet ligger mellan Utseende och priserna – egen luft, så att de andra korten inte flyttar sig sinsemellan */
+.inst-layout { margin: 16px 0; }
+html[data-layout="minimal"] .inst-layout { margin: var(--l-sektion) 0; }
+.inst-layout .kort__huvud small { font: 600 .78rem/1.2 var(--sans); color: var(--t-text-2); }
+
+/* Miniatyren: sidomeny + topprad + block i lägets täthet, i aktuellt temas färger */
+.layout-bild { position: relative; display: grid; grid-template-columns: 22% 1fr; gap: 5%; aspect-ratio: 16 / 10; padding: 6%; overflow: hidden;
+  border-radius: calc(12px * var(--t-radie-k, 1)); background: var(--t-sand); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .1); }
+.layout-bild i, .layout-bild b { display: block; font-style: normal; }
+.lb-sido { display: grid; align-content: start; gap: 4px; padding: 7px 5px; border-radius: calc(6px * var(--t-radie-k, 1)); background: rgb(var(--t-glas-rgb) / .74); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .07); }
+.lb-sido b { height: 4px; border-radius: 3px; background: rgb(var(--t-blaeck-rgb) / .14); }
+.lb-sido b:first-child { background: var(--t-markerad); }
+.lb-yta { display: grid; grid-template-rows: auto 1fr; gap: 5px; min-width: 0; }
+.lb-topp { height: 6px; width: 46%; border-radius: 3px; background: rgb(var(--t-blaeck-rgb) / .16); }
+.lb-block { display: grid; gap: 5px; min-height: 0; }
+.lb-block > i { min-height: 0; border-radius: calc(5px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: 0 1px 2px rgb(var(--t-skugga-rgb) / .08), inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .06); }
+.lb-block > .lb-hjalte { grid-column: 1 / -1; background: var(--t-sten); box-shadow: none; }
+.lb-block > .lb-rad { grid-column: 1 / -1; background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .1), inset 3px 0 0 var(--t-knapp); }
+.layout-bild--full .lb-block { grid-template-columns: 1fr 1fr; grid-template-rows: 1.4fr 1fr 1fr; gap: 6px; }
+.layout-bild--normal .lb-block { grid-template-columns: repeat(3, 1fr); grid-template-rows: .8fr 1fr 1fr; gap: 4px; }
+.layout-bild--minimal .lb-block { grid-template-columns: repeat(3, 1fr); grid-template-rows: .45fr repeat(4, 1fr); gap: 3px; }
+.layout-bild--minimal .lb-block > i:not(.lb-rad) { border-radius: calc(3px * var(--t-radie-k, 1)); }
+.layout-bild--minimal .lb-sido { gap: 3px; }
+@media (max-width: 860px) {
+  .layout-valjare--stor { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .layout-valjare--stor { gap: 8px; }
+  .layout-kort { padding: 6px 6px 10px; gap: 8px; }
+  .layout-kort__text small { display: none; }
+  .layout-kort__bock { top: 10px; right: 10px; width: 18px; height: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .layout-kort, .layout-knapp, .layout-kort__bock { transition: none; }
+}

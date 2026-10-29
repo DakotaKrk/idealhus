@@ -101,6 +101,7 @@
       '<div class="km-grupp"><p class="km-rubrik"><span>Byt konto</span><small>Demo: logga in som någon annan i teamet</small></p>' +
         '<div class="km-lista" role="list">' + [jag].concat(andra).map(function (u, n) { return '<div role="listitem" style="--i:' + n + '">' + kontoRad(u, u.id === jag.id) + '</div>'; }).join('') + '</div></div>' +
       (IH.tema && IH.tema.valjare ? '<div class="km-tema"><p class="km-rubrik"><span>Tema</span><small data-tema-namn>' + e(IH.tema.beskrivning()) + '</small></p>' + IH.tema.valjare('liten') + '</div>' : '') +
+      (IH.layout && IH.layout.valjare ? '<div class="km-layout"><p class="km-rubrik"><span>Layout</span><small data-layout-namn>' + e(IH.layout.namn()) + '</small></p>' + IH.layout.valjare('liten') + '</div>' : '') +
       '<footer class="km-fot">' + lank('href="#/profil"', 'anstallda', 'Min profil') +
         lank('href="#/installningar"', 'installningar', 'Inställningar') +
         lank('data-g="logga-ut"', 'logga-ut', 'Logga ut') + '</footer>';
@@ -995,13 +996,13 @@
 
     // Det som kräver handling först, sedan teamet; högerspalten staplar pipeline och topplista så spalterna slutar lika
     var html = hjalte +
-      chefBand('01 · Att agera på', 'Behöver din', 'uppmärksamhet', uppm, { hoger: lista.length ? '<span class="ao-band__tal">' + lista.length + '</span>' : '', ingress: lista.length ? 'Det viktigaste överst. Ta själv, fördela eller påminn direkt.' : '' }) +
-      chefBand('02 · Teamet', 'Teamet', 'just nu', '<div class="lp-team">' + kort + '</div>', { ingress: 'Status, pipeline, kvartalsmålet och veckans aktivitet per säljare – klicka för profilen.', hoger: '<div class="ap-filterrad" role="group" aria-label="Visa">' + filter + '</div>' }) +
-      '<div class="ao-tva lp-tva">' + chefBand('03 · Aktivitet', 'Aktivitet', '14 dagar', karta + senasteHandelser(team), { ingress: 'Loggade möten, samtal och mejl per dag. Pilen jämför med de 14 dagarna innan.' }) +
-        '<div class="lp-stapel">' + chefBand('04 · Pipeline', 'Pipeline', 'per säljare', pipe, { ingress: 'Öppet värde per steg – håll musen över en färg för beloppet.' }) +
-        chefBand('05 · Resultat', 'Topplistan', period === 'ar' ? 'i år' : period + ' dagar', topplista, { hoger: toppVal }) + '</div></div>' +
-      chefBand('06 · Närvaro', 'Vem jobbar', 'när', narv, { ingress: 'Arbetsdagar enligt schemat, dagar med aktivitet i CRM:et och frånvaro – klicka på en dag för att lägga in frånvaro.' }) +
-      chefBand('07 · Kalender', 'Teamets', 'kalender', kalender(team), { ingress: 'Möten, samtal och mejl, uppgifter som förfaller och vunna affärer – för hela teamet eller en person.' });
+      chefBand('01 · Att agera på', 'Behöver din', 'uppmärksamhet', uppm, { klass: 'ao-band--uppm', hoger: lista.length ? '<span class="ao-band__tal">' + lista.length + '</span>' : '', ingress: lista.length ? 'Det viktigaste överst. Ta själv, fördela eller påminn direkt.' : '' }) +
+      chefBand('02 · Teamet', 'Teamet', 'just nu', '<div class="lp-team">' + kort + '</div>', { klass: 'ao-band--team', ingress: 'Status, pipeline, kvartalsmålet och veckans aktivitet per säljare – klicka för profilen.', hoger: '<div class="ap-filterrad" role="group" aria-label="Visa">' + filter + '</div>' }) +
+      '<div class="ao-tva lp-tva">' + chefBand('03 · Aktivitet', 'Aktivitet', '14 dagar', karta + senasteHandelser(team), { klass: 'ao-band--akt14', ingress: 'Loggade möten, samtal och mejl per dag. Pilen jämför med de 14 dagarna innan.' }) +
+        '<div class="lp-stapel">' + chefBand('04 · Pipeline', 'Pipeline', 'per säljare', pipe, { klass: 'ao-band--pipe', ingress: 'Öppet värde per steg – håll musen över en färg för beloppet.' }) +
+        chefBand('05 · Resultat', 'Topplistan', period === 'ar' ? 'i år' : period + ' dagar', topplista, { klass: 'ao-band--topp', hoger: toppVal }) + '</div></div>' +
+      chefBand('06 · Närvaro', 'Vem jobbar', 'när', narv, { klass: 'ao-band--narvaro', ingress: 'Arbetsdagar enligt schemat, dagar med aktivitet i CRM:et och frånvaro – klicka på en dag för att lägga in frånvaro.' }) +
+      chefBand('07 · Kalender', 'Teamets', 'kalender', kalender(team), { klass: 'ao-band--kal', ingress: 'Möten, samtal och mejl, uppgifter som förfaller och vunna affärer – för hela teamet eller en person.' });
     var raknaUpp = Date.now() - (IH.vyer.chef.senast || 0) > 15000; IH.vyer.chef.senast = Date.now();
     return { titel: 'Försäljning', html: html, efter: function (yta) {
       ['.lp-nv', '.lp-karta'].forEach(function (sel) {

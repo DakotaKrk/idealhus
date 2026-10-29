@@ -745,6 +745,36 @@
     ev.preventDefault(); G.vaxlaMeny();
   });
 
+  // Layoutläget byts (Minimal/Normal/Full, layout.js skickar ih:layout): turen fortsätter, men det aktuella steget
+  // letar om sitt mål – blocket kan ha dolts eller flyttats. Steg som inte gäller i det nya läget (om: …) hoppas över.
+  var layoutTimer = 0;
+  window.addEventListener('ih:layout', function () {
+    clearTimeout(layoutTimer);
+    // Efter omritningen (bytet ritar om vyn, ev. i en kort tvärtoning)
+    layoutTimer = setTimeout(letaOm, 120);
+  });
+  // Utan att köra stegets fore eller byta sida: hoppa vidare om steget inte gäller längre, annars leta upp målet
+  // igen om det doldes, byttes ut eller (från reservbubblan) nu syns.
+  function letaOm() {
+    if (!aktiv || aktiv.n < 0 || aktiv.klar || !rot) return;
+    var s = steg(); if (!s) return;
+    var hoppa = false;
+    try { hoppa = !!(s.om && !s.om(aktiv.ctx)); } catch (x) { hoppa = true; }
+    if (hoppa) { visa(aktiv.n + 1, 1); return; }
+    if (!s.mal || aktiv.visadId !== aktiv.stegId) return;
+    var forst = hitta(s.mal, aktiv.ctx);
+    if (forst && forst === aktiv.el) { schemalagg(); return; }
+    var id = aktiv.stegId, start = performance.now();
+    clearTimeout(aktiv.letTimer); clearTimeout(aktiv.autoTimer);
+    (function leta() {
+      if (!aktiv || aktiv.stegId !== id) return;
+      var x = hitta(s.mal, aktiv.ctx);
+      if (x) { visaSteg(x); return; }
+      if (performance.now() - start > 1500) { if (aktiv.el || !aktiv.fallback) { aktiv.fallback = true; visaSteg(null, true); } else if (aktiv.auto) autoSteg(s, null, true); return; }
+      aktiv.letTimer = setTimeout(leta, 120);
+    })();
+  }
+
   /* --- Start ------------------------------------------------------------------ */
   function redo(fn) {
     // Väntar tills CRM:et har ritat sin första vy.
