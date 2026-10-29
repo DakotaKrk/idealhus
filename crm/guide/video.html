@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#f8f4ed">
+    <title>Legohus CRM · Videogenomgång</title>
+    <link rel="icon" href="../../images/legohus.svg" type="image/svg+xml">
+    <link rel="preload" href="../../fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="video.css?v=20261029">
+  </head>
+  <body>
+    <header class="topp">
+      <a class="topp__logo" href="../index.html" title="Till CRM:et"><img src="../../images/legohus_logo.svg" alt="Legohus"><span>CRM · Video</span></a>
+      <nav class="topp__lankar" aria-label="Guider">
+        <a href="presentation.html">Presentationen</a>
+        <a href="../index.html">Öppna CRM:et</a>
+      </nav>
+    </header>
+
+    <main class="sida">
+      <section class="intro">
+        <p class="kicker">Videogenomgång</p>
+        <h1>Hela säljflödet <em>på några minuter.</em></h1>
+        <p class="ingress">Guiderna spelas upp av sig själva: muspekaren visar var du klickar. Hoppa till ett kapitel – och tryck <b>Prova själv</b> för att göra samma sak i CRM:et med guiden som pekar.</p>
+      </section>
+
+      <div class="spelare">
+        <div class="spelare__yta">
+          <video data-video controls preload="metadata" playsinline poster="video/affisch.jpg" width="1440" height="900">
+            <source src="video/genomgang.mp4" type="video/mp4">
+            <track kind="chapters" src="video/kapitel.vtt" srclang="sv" label="Kapitel" default>
+            Din webbläsare kan inte spela upp videon. <a href="video/genomgang.mp4">Ladda ner MP4-filen</a>.
+          </video>
+          <div class="kapitelband" data-band aria-hidden="true"></div>
+          <div class="nu" aria-live="polite"><span class="nu__prick"></span><span data-nu>Kapitel</span><a class="nu__prova" href="../index.html" data-nu-prova>Prova själv</a></div>
+        </div>
+
+        <aside class="kapitel" aria-label="Kapitel">
+          <div class="kapitel__topp"><b>Kapitel</b><span data-langd></span></div>
+          <ol class="kapitel__lista" data-kapitel></ol>
+        </aside>
+      </div>
+
+      <section class="mer">
+        <a class="mer__kort" href="presentation.html"><b>Presentationen</b><span>Bildspelet för nya säljare med skärmbilder – bläddra i din egen takt.</span></a>
+        <a class="mer__kort" href="../index.html?tur=valkommen#/"><b>Rundturen i CRM:et</b><span>Två minuter med guiden som pekar – börja här första dagen.</span></a>
+        <a class="mer__kort" href="../index.html"><b>Alla guider</b><span>Knappen Guide i hörnet av CRM:et, eller tryck ?</span></a>
+      </section>
+    </main>
+
+    <script src="video/kapitel.js?v=20261029"></script>
+    <script src="video.js?v=20261029"></script>
+  </body>
+</html>

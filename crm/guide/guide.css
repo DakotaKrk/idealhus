@@ -1,0 +1,616 @@
+/* ============================================================
+   Legohus CRM – guiderna (spotlight-turer), 2026-10-29.
+   Slöjan med urklippet, den pulserande ramen, pratbubblan,
+   guidemenyn och hjälpknappen. Prefix ihg- så att inget krockar
+   med CRM:ets egna klasser. Motorn: guide.js · turerna: turer.js.
+   ============================================================ */
+:root {
+  --ihg-barn: #e29a4a;
+  --ihg-barn-ljus: #f6c68d;
+  --ihg-mork: #1b1915;
+  --ihg-kram: #fffdf9;
+  --ihg-kram-2: #f8f4ed;
+  --ihg-mjuk: var(--mjuk, cubic-bezier(0.22, 1, 0.36, 1));
+  --ihg-rubrik: var(--rubrik, "Poppins", ui-sans-serif, system-ui, sans-serif);
+  --ihg-sans: var(--sans, "Manrope", ui-sans-serif, system-ui, sans-serif);
+  --ihg-z: 2147480000;
+}
+
+/* --- Lagret ------------------------------------------------------ */
+.ihg {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ihg-z);
+  pointer-events: none;
+  font-family: var(--ihg-sans);
+  color: var(--ihg-mork);
+  -webkit-font-smoothing: antialiased;
+}
+.ihg *, .ihg *::before, .ihg *::after { box-sizing: border-box; }
+
+/* Spärrarna runt hålet tar emot klick utanför (genomskinliga). */
+.ihg-sparr {
+  position: fixed;
+  pointer-events: auto;
+  background: transparent;
+}
+.ihg-sparr[hidden] { display: none; }
+
+/* Hålet: en enda ruta vars skugga mörkar allt runt omkring. */
+.ihg-hal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 18px;
+  box-shadow: 0 0 0 200vmax rgba(27, 25, 21, 0.58);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s var(--ihg-mjuk);
+}
+.ihg.syns .ihg-hal { opacity: 1; }
+.ihg--flytt .ihg-hal,
+.ihg--flytt .ihg-ring {
+  transition: left 0.55s var(--ihg-mjuk), top 0.55s var(--ihg-mjuk), width 0.55s var(--ihg-mjuk), height 0.55s var(--ihg-mjuk),
+    border-radius 0.55s var(--ihg-mjuk), opacity 0.45s var(--ihg-mjuk);
+}
+
+/* Ramen runt det man ska titta på eller klicka på. */
+.ihg-ring {
+  position: fixed;
+  border-radius: 18px;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 0 0 2px var(--ihg-barn), 0 0 0 7px rgba(246, 198, 141, 0.32), 0 0 34px 8px rgba(226, 154, 74, 0.32);
+}
+.ihg-ring.syns { opacity: 1; }
+.ihg-ring::before,
+.ihg-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  animation: ihg-puls 2.2s var(--ihg-mjuk) infinite;
+}
+.ihg-ring::after { animation-delay: 1.1s; }
+.ihg-ring--klicka { box-shadow: 0 0 0 2.5px var(--ihg-barn), 0 0 0 8px rgba(246, 198, 141, 0.42), 0 0 40px 12px rgba(226, 154, 74, 0.42); }
+.ihg-ring--klicka::before, .ihg-ring--klicka::after { animation-duration: 1.6s; }
+.ihg-ring--klicka::after { animation-delay: 0.8s; }
+@keyframes ihg-puls {
+  0% { box-shadow: 0 0 0 0 rgba(226, 154, 74, 0.6); }
+  70% { box-shadow: 0 0 0 18px rgba(226, 154, 74, 0); }
+  100% { box-shadow: 0 0 0 18px rgba(226, 154, 74, 0); }
+}
+
+/* "Klicka här" vid ramen. */
+.ihg-skylt {
+  position: fixed;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px 7px 9px;
+  border-radius: 999px;
+  background: var(--ihg-mork);
+  color: var(--ihg-kram);
+  font: 600 0.75rem/1 var(--ihg-rubrik);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px -10px rgba(27, 25, 21, 0.7);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px) scale(0.96);
+  transition: opacity 0.3s var(--ihg-mjuk), transform 0.3s var(--ihg-mjuk);
+}
+.ihg-skylt.syns { opacity: 1; transform: none; animation: ihg-gunga 1.6s ease-in-out infinite; }
+.ihg-skylt svg { width: 15px; height: 15px; fill: none; stroke: var(--ihg-barn-ljus); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+@keyframes ihg-gunga { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+/* --- Pratbubblan -------------------------------------------------- */
+.ihg-bubbla {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: min(372px, calc(100vw - 24px));
+  padding: 18px 18px 14px;
+  border-radius: 24px;
+  background: var(--ihg-kram);
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.07), 0 2px 4px rgba(27, 25, 21, 0.06), 0 30px 70px -28px rgba(27, 25, 21, 0.75);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transform-origin: var(--ihg-ox, 50%) var(--ihg-oy, 0%);
+  transition: opacity 0.35s var(--ihg-mjuk), transform 0.45s var(--ihg-mjuk);
+  outline: none;
+}
+.ihg-bubbla.syns { opacity: 1; transform: none; }
+.ihg--flytt .ihg-bubbla.syns { transition: opacity 0.35s var(--ihg-mjuk), transform 0.45s var(--ihg-mjuk), left 0.55s var(--ihg-mjuk), top 0.55s var(--ihg-mjuk); }
+.ihg-bubbla--mitt { width: min(460px, calc(100vw - 24px)); padding: 26px 24px 18px; }
+.ihg-bubbla--ny .ihg-bubbla__inne { animation: ihg-in 0.5s var(--ihg-mjuk) both; }
+@keyframes ihg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Pilen mot det markerade. */
+.ihg-pil {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: var(--ihg-kram);
+  border-radius: 3px;
+  transform: rotate(45deg);
+  box-shadow: -1px -1px 0 0 rgba(27, 25, 21, 0.06);
+}
+.ihg-pil[hidden] { display: none; }
+.ihg-pil[data-sida="under"] { top: -7px; }
+.ihg-pil[data-sida="over"] { bottom: -7px; box-shadow: 1px 1px 0 0 rgba(27, 25, 21, 0.06); }
+.ihg-pil[data-sida="hoger"] { left: -7px; box-shadow: -1px 1px 0 0 rgba(27, 25, 21, 0.06); }
+.ihg-pil[data-sida="vanster"] { right: -7px; box-shadow: 1px -1px 0 0 rgba(27, 25, 21, 0.06); }
+
+.ihg-bubbla__topp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ihg-tur {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: #8f5424;
+  font: 700 0.6875rem/1.2 var(--ihg-rubrik);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ihg-raknare {
+  flex: none;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(226, 154, 74, 0.14);
+  color: #8f5424;
+  font: 700 0.6875rem/1 var(--ihg-rubrik);
+  font-variant-numeric: tabular-nums;
+}
+.ihg-x {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin: -4px -6px -4px 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(27, 25, 21, 0.55);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.ihg-x:hover { background: rgba(27, 25, 21, 0.06); color: var(--ihg-mork); }
+.ihg-x svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+.ihg-bubbla h3 {
+  margin: 0 0 6px;
+  font: 600 1.125rem/1.25 var(--ihg-rubrik);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.ihg-bubbla--mitt h3 { font-size: 1.5rem; letter-spacing: -0.03em; }
+.ihg-text {
+  margin: 0;
+  color: rgba(27, 25, 21, 0.74);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.ihg-text b { color: var(--ihg-mork); font-weight: 700; }
+.ihg-text p { margin: 0 0 8px; }
+.ihg-text p:last-child { margin-bottom: 0; }
+.ihg-text ul { margin: 6px 0 0; padding-left: 18px; }
+.ihg-text li { margin: 3px 0; }
+.ihg kbd, .ihg-meny kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.14), 0 2px 0 rgba(27, 25, 21, 0.1);
+  color: var(--ihg-mork);
+  font: 700 0.6875rem/1 var(--ihg-rubrik);
+}
+
+/* Uppmaningen att klicka själv. */
+.ihg-gor {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(246, 198, 141, 0.32), rgba(226, 154, 74, 0.14));
+  color: #6f3f17;
+  font: 600 0.8125rem/1.35 var(--ihg-rubrik);
+}
+.ihg-gor[hidden] { display: none; }
+.ihg-gor svg { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.ihg-framsteg {
+  position: relative;
+  height: 4px;
+  margin: 14px 0 12px;
+  border-radius: 99px;
+  background: rgba(27, 25, 21, 0.07);
+  overflow: hidden;
+}
+.ihg-framsteg i {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--ihg-barn-ljus), var(--ihg-barn));
+  transform-origin: left;
+  transform: scaleX(var(--a, 0));
+  transition: transform 0.6s var(--ihg-mjuk);
+}
+
+.ihg-knappar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ihg-knappar .ihg-tom { flex: 1; }
+.ihg-k {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ihg-mork);
+  font: 600 0.8125rem/1 var(--ihg-rubrik);
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.25s var(--ihg-mjuk), box-shadow 0.2s;
+}
+.ihg-k:hover { background: rgba(27, 25, 21, 0.06); }
+.ihg-k:active { transform: scale(0.97); }
+.ihg-k:focus-visible { outline: 2px solid var(--ihg-barn); outline-offset: 2px; }
+.ihg-k[hidden] { display: none; }
+.ihg-k:disabled { opacity: 0.35; cursor: default; }
+.ihg-k--svag { padding: 0 10px; color: rgba(27, 25, 21, 0.55); font-weight: 500; }
+.ihg-k--kant { box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.14); }
+.ihg-k--mork {
+  background: var(--ihg-mork);
+  color: var(--ihg-kram);
+  box-shadow: 0 10px 22px -12px rgba(27, 25, 21, 0.8);
+}
+.ihg-k--mork:hover { background: #2c2822; }
+.ihg-k--barn {
+  background: linear-gradient(135deg, var(--ihg-barn-ljus), var(--ihg-barn));
+  color: #2a1a0b;
+  box-shadow: 0 10px 22px -12px rgba(143, 84, 36, 0.8);
+}
+.ihg-k--barn:hover { filter: brightness(1.04); background: linear-gradient(135deg, var(--ihg-barn-ljus), var(--ihg-barn)); }
+.ihg-k svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.ihg-tips {
+  margin: 10px 0 0;
+  color: rgba(27, 25, 21, 0.45);
+  font-size: 0.6875rem;
+  text-align: center;
+}
+.ihg-tips kbd { min-width: 18px; height: 18px; font-size: 0.625rem; border-radius: 5px; }
+
+/* Bubblan skakar till när man klickar utanför. */
+.ihg-bubbla.skaka { animation: ihg-skaka 0.42s ease; }
+@keyframes ihg-skaka { 20% { translate: -6px 0; } 40% { translate: 5px 0; } 60% { translate: -3px 0; } 80% { translate: 2px 0; } }
+
+/* Letar efter elementet. */
+.ihg-letar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(27, 25, 21, 0.6);
+  font-size: 0.8125rem;
+}
+.ihg-letar i {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(226, 154, 74, 0.25);
+  border-top-color: var(--ihg-barn);
+  animation: ihg-snurr 0.8s linear infinite;
+}
+@keyframes ihg-snurr { to { transform: rotate(360deg); } }
+
+/* Klart! */
+.ihg-klar-ikon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 0 14px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--ihg-barn-ljus), var(--ihg-barn));
+  box-shadow: 0 14px 30px -14px rgba(143, 84, 36, 0.9);
+}
+.ihg-klar-ikon svg { width: 28px; height: 28px; fill: none; stroke: #2a1a0b; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* --- Muspekaren i autospel (videon) ------------------------------------ */
+.ihg-mus {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
+}
+.ihg-mus.syns { opacity: 1; }
+.ihg-mus svg { width: 26px; height: 26px; }
+.ihg-mus::after {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: -14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 3px solid var(--ihg-barn);
+  opacity: 0;
+}
+.ihg-mus.tryck::after { animation: ihg-tryck 0.6s var(--ihg-mjuk); }
+@keyframes ihg-tryck { 0% { opacity: 0.9; transform: scale(0.3); } 100% { opacity: 0; transform: scale(1.6); } }
+
+/* --- Hjälpknappen ---------------------------------------------------- */
+.ihg-knapp {
+  position: fixed;
+  left: calc(var(--sido, 264px) + 40px);
+  bottom: 22px;
+  z-index: 95;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 16px 0 7px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ihg-mork);
+  color: var(--ihg-kram);
+  font: 600 0.8125rem/1 var(--ihg-rubrik);
+  letter-spacing: -0.01em;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06) inset, 0 16px 34px -16px rgba(27, 25, 21, 0.85);
+  cursor: pointer;
+  transition: transform 0.35s var(--ihg-mjuk), box-shadow 0.3s, left 0.5s var(--ihg-mjuk), opacity 0.3s;
+}
+.ihg-knapp:hover { transform: translateY(-2px); }
+.ihg-knapp:active { transform: scale(0.97); }
+.ihg-knapp:focus-visible { outline: 2px solid var(--ihg-barn); outline-offset: 3px; }
+.ihg-knapp__ikon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ihg-barn-ljus), var(--ihg-barn));
+  color: #2a1a0b;
+  font: 700 0.95rem/1 var(--ihg-rubrik);
+}
+.ihg-knapp__ikon svg.ihg-knapp__ring { position: absolute; inset: -4px; width: 40px; height: 40px; transform: rotate(-90deg); }
+.ihg-knapp__ring circle { fill: none; stroke-width: 2.5; }
+.ihg-knapp__ring circle:first-child { stroke: rgba(246, 198, 141, 0.18); }
+.ihg-knapp__ring circle:last-child { stroke: var(--ihg-barn-ljus); stroke-linecap: round; transition: stroke-dashoffset 0.8s var(--ihg-mjuk); }
+.ihg-knapp[aria-expanded="true"] { box-shadow: 0 0 0 3px rgba(226, 154, 74, 0.45), 0 16px 34px -16px rgba(27, 25, 21, 0.85); }
+[data-sido-dold] .ihg-knapp { left: 76px; }
+@media (max-width: 1100px) {
+  .ihg-knapp { left: 16px; bottom: 96px; }
+  [data-sido-dold] .ihg-knapp { left: 16px; }
+}
+@media (max-width: 640px) {
+  .ihg-knapp { height: 42px; padding: 0 7px; }
+  .ihg-knapp__text { display: none; }
+}
+/* Undan när presentationen, guiden eller en panel är öppen. */
+html:has(.mote) .ihg-knapp,
+html:has(.ihg) .ihg-knapp { opacity: 0; pointer-events: none; transform: translateY(12px); }
+@media (max-width: 1100px) { html:has(.ark) .ihg-knapp { opacity: 0; pointer-events: none; } }
+
+/* --- Guidemenyn ------------------------------------------------------- */
+.ihg-meny {
+  position: fixed;
+  left: calc(var(--sido, 264px) + 40px);
+  bottom: 80px;
+  z-index: 96;
+  display: flex;
+  flex-direction: column;
+  width: min(408px, calc(100vw - 32px));
+  max-height: min(720px, calc(100vh - 110px));
+  max-height: min(720px, calc(100dvh - 110px));
+  border-radius: 28px;
+  background: var(--ihg-kram-2);
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.08), 0 40px 90px -40px rgba(27, 25, 21, 0.8);
+  font-family: var(--ihg-sans);
+  color: var(--ihg-mork);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(14px) scale(0.97);
+  transform-origin: 30px 100%;
+  transition: opacity 0.3s var(--ihg-mjuk), transform 0.45s var(--ihg-mjuk);
+}
+.ihg-meny.syns { opacity: 1; transform: none; }
+[data-sido-dold] .ihg-meny { left: 76px; }
+@media (max-width: 1100px) {
+  .ihg-meny, [data-sido-dold] .ihg-meny { left: 16px; bottom: 150px; max-height: calc(100dvh - 180px); }
+}
+@media (max-width: 640px) {
+  .ihg-meny, [data-sido-dold] .ihg-meny { left: 8px; right: 8px; bottom: 8px; width: auto; max-height: calc(100dvh - 16px); border-radius: 26px; transform-origin: 50% 100%; }
+}
+.ihg-meny__topp {
+  position: relative;
+  padding: 22px 22px 18px;
+  background: radial-gradient(120% 140% at 100% 0%, rgba(226, 154, 74, 0.38), transparent 55%), var(--ihg-mork);
+  color: var(--ihg-kram);
+}
+.ihg-meny__topp small {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ihg-barn-ljus);
+  font: 700 0.6875rem/1 var(--ihg-rubrik);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ihg-meny__topp h2 { margin: 0; font: 600 1.375rem/1.2 var(--ihg-rubrik); letter-spacing: -0.03em; }
+.ihg-meny__topp p { margin: 6px 0 0; color: rgba(247, 245, 240, 0.68); font-size: 0.8125rem; line-height: 1.45; }
+.ihg-meny__topp .ihg-x { position: absolute; top: 16px; right: 16px; color: rgba(247, 245, 240, 0.7); }
+.ihg-meny__topp .ihg-x:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.ihg-meny__framsteg { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+.ihg-meny__framsteg span { flex: 1; height: 6px; border-radius: 99px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.ihg-meny__framsteg span i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--ihg-barn-ljus), var(--ihg-barn)); width: calc(var(--a, 0) * 100%); transition: width 0.8s var(--ihg-mjuk); }
+.ihg-meny__framsteg b { font: 600 0.75rem/1 var(--ihg-rubrik); color: rgba(247, 245, 240, 0.85); font-variant-numeric: tabular-nums; }
+
+.ihg-meny__kropp { flex: 1; min-height: 0; overflow: auto; padding: 14px 12px 16px; overscroll-behavior: contain; scrollbar-width: thin; }
+.ihg-har {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0 0 14px;
+  padding: 14px;
+  border: 0;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--ihg-barn-ljus), var(--ihg-barn));
+  color: #2a1a0b;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 14px 30px -18px rgba(143, 84, 36, 0.9);
+  transition: transform 0.3s var(--ihg-mjuk), filter 0.2s;
+}
+.ihg-har:hover { transform: translateY(-1px); filter: brightness(1.03); }
+.ihg-har__ikon { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 14px; background: rgba(27, 25, 21, 0.9); }
+.ihg-har__ikon svg { width: 20px; height: 20px; fill: none; stroke: var(--ihg-barn-ljus); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ihg-har span:not(.ihg-har__ikon) { flex: 1; min-width: 0; }
+.ihg-har b { display: block; font: 600 0.9375rem/1.25 var(--ihg-rubrik); }
+.ihg-har small { display: block; margin-top: 2px; font-size: 0.75rem; opacity: 0.75; }
+
+.ihg-grupp { margin: 6px 0 14px; }
+.ihg-grupp > p {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 8px 6px;
+  color: rgba(27, 25, 21, 0.5);
+  font: 700 0.6875rem/1 var(--ihg-rubrik);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.ihg-rad {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ihg-rad:hover, .ihg-rad:focus-visible { background: #fff; outline: none; box-shadow: 0 8px 20px -16px rgba(27, 25, 21, 0.6); }
+.ihg-rad:disabled { cursor: default; opacity: 0.55; }
+.ihg-rad:disabled:hover { background: transparent; box-shadow: none; }
+.ihg-rad__ikon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08);
+}
+.ihg-rad__ikon svg { width: 18px; height: 18px; fill: none; stroke: #8f5424; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.ihg-rad--klar .ihg-rad__ikon { background: linear-gradient(135deg, #a7ecc2, #6fd49a); box-shadow: none; }
+.ihg-rad--klar .ihg-rad__ikon svg { stroke: #134a2b; }
+.ihg-rad__text { flex: 1; min-width: 0; }
+.ihg-rad__text b { display: block; font: 600 0.875rem/1.25 var(--ihg-rubrik); letter-spacing: -0.01em; }
+.ihg-rad__text small { display: block; margin-top: 2px; color: rgba(27, 25, 21, 0.55); font-size: 0.75rem; line-height: 1.35; }
+.ihg-rad__tid { flex: none; color: rgba(27, 25, 21, 0.45); font: 600 0.6875rem/1 var(--ihg-rubrik); font-variant-numeric: tabular-nums; }
+.ihg-meny__fot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid rgba(27, 25, 21, 0.07);
+  background: var(--ihg-kram);
+}
+.ihg-meny__fot a, .ihg-meny__fot button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.12);
+  color: var(--ihg-mork);
+  font: 600 0.75rem/1 var(--ihg-rubrik);
+  text-decoration: none;
+  cursor: pointer;
+}
+.ihg-meny__fot a:hover, .ihg-meny__fot button:hover { background: #fff; }
+.ihg-meny__fot svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ihg-meny__fot .ihg-hoger { margin-left: auto; color: rgba(27, 25, 21, 0.55); box-shadow: none; }
+.ihg-meny__las { margin: 0 8px 12px; padding: 10px 12px; border-radius: 14px; background: rgba(226, 154, 74, 0.12); color: #6f3f17; font-size: 0.75rem; line-height: 1.45; }
+
+/* --- Välkomstkortet -------------------------------------------------- */
+.ihg-hej {
+  position: fixed;
+  left: calc(var(--sido, 264px) + 40px);
+  bottom: 80px;
+  z-index: 96;
+  width: min(330px, calc(100vw - 32px));
+  padding: 18px;
+  border-radius: 24px;
+  background: var(--ihg-kram);
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.07), 0 30px 70px -30px rgba(27, 25, 21, 0.75);
+  font-family: var(--ihg-sans);
+  color: var(--ihg-mork);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.4s var(--ihg-mjuk), transform 0.5s var(--ihg-mjuk);
+}
+.ihg-hej.syns { opacity: 1; transform: none; }
+.ihg-hej b { display: block; margin: 10px 0 4px; font: 600 1.0625rem/1.25 var(--ihg-rubrik); letter-spacing: -0.02em; }
+.ihg-hej p { margin: 0 0 14px; color: rgba(27, 25, 21, 0.7); font-size: 0.8125rem; line-height: 1.5; }
+.ihg-hej .ihg-knappar { justify-content: flex-end; }
+.ihg-hej__vink { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 14px; background: linear-gradient(135deg, var(--ihg-barn-ljus), var(--ihg-barn)); }
+.ihg-hej__vink svg { width: 20px; height: 20px; fill: none; stroke: #2a1a0b; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+[data-sido-dold] .ihg-hej { left: 76px; }
+@media (max-width: 1100px) { .ihg-hej, [data-sido-dold] .ihg-hej { left: 16px; bottom: 150px; } }
+
+/* --- Mobil: bubblan som ett kort i kanten ------------------------------- */
+@media (max-width: 640px) {
+  .ihg-bubbla, .ihg-bubbla--mitt { width: calc(100vw - 20px); padding: 16px 16px 12px; border-radius: 22px; }
+  .ihg-bubbla h3 { font-size: 1.0625rem; }
+  .ihg-bubbla--mitt h3 { font-size: 1.25rem; }
+  .ihg-text { font-size: 0.875rem; }
+  .ihg-tips { display: none; }
+  .ihg-k { min-height: 40px; }
+}
+
+/* --- Lugn rörelse ------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .ihg-ring::before, .ihg-ring::after, .ihg-skylt.syns, .ihg-bubbla--ny .ihg-bubbla__inne, .ihg-bubbla.skaka { animation: none; }
+  .ihg-hal, .ihg-ring, .ihg-bubbla, .ihg-skylt, .ihg-meny, .ihg-hej, .ihg-knapp, .ihg-framsteg i { transition: none !important; }
+}
+@media print { .ihg, .ihg-knapp, .ihg-meny, .ihg-hej { display: none !important; } }

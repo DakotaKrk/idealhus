@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#f8f4ed">
+    <title>Legohus CRM · Presentation för nya säljare</title>
+    <link rel="icon" href="../../images/legohus.svg" type="image/svg+xml">
+    <link rel="preload" href="../../fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../../fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="presentation.css?v=20261029">
+  </head>
+  <body>
+    <a class="hoppa" href="#bilder">Till bilderna</a>
+    <header class="topp">
+      <a class="topp__logo" href="../index.html" title="Till CRM:et"><img src="../../images/legohus_logo.svg" alt="Legohus"><span>CRM · Introduktion</span></a>
+      <nav class="topp__lankar" aria-label="Guider">
+        <a href="video.html">Videon</a>
+        <a href="../index.html">Öppna CRM:et</a>
+      </nav>
+      <button class="topp__oversikt" type="button" data-p="oversikt" aria-label="Alla bilder (O)" title="Alla bilder (O)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></button>
+    </header>
+
+    <main class="scen" id="bilder" aria-roledescription="bildspel" aria-label="Legohus CRM för nya säljare">
+
+      <!-- 1 -->
+      <section class="bild bild--titel" data-namn="Välkommen" aria-roledescription="bild">
+        <div class="bild__text">
+          <p class="kicker">Legohus CRM · för nya säljare</p>
+          <h1>Från första förfrågan <em>till nyckeln.</em></h1>
+          <p class="ingress">En genomgång av hela säljsystemet: var allt finns, hur du jobbar varje dag och hur en affär går från förfrågan till överlämning. Varje del har en guide du kan prova direkt i CRM:et.</p>
+          <div class="knappar">
+            <button class="knapp knapp--mork" type="button" data-p="nasta">Börja<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+            <a class="knapp" href="../index.html?tur=valkommen#/">Ta rundturen i CRM:et</a>
+          </div>
+          <p class="not">Bläddra med <kbd aria-label="vänsterpil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></kbd> <kbd aria-label="högerpil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></kbd>, <kbd>Mellanslag</kbd> eller svep. <kbd>O</kbd> visar alla bilder. Allt i bilderna är exempeldata.</p>
+        </div>
+        <figure class="ram ram--lutad"><img src="bilder/oversikt.webp" alt="Översikten i Legohus CRM: hälsning, nyckeltal och pipelinen som en byggarbetsplats" width="1440" height="900"></figure>
+      </section>
+
+      <!-- 2 -->
+      <section class="bild bild--flode" data-namn="Säljflödet">
+        <div class="bild__text bild__text--bred">
+          <p class="kicker">Det stora flödet</p>
+          <h2>Tio steg. <em>Ett system.</em></h2>
+          <p class="ingress">Så går en kund genom CRM:et. Klicka på ett steg för att hoppa dit.</p>
+          <ol class="flodet">
+            <li><button type="button" data-till="forfragningar"><b>1</b>Förfrågan<small>hemsidan, telefon, mejl</small></button></li>
+            <li><button type="button" data-till="las"><b>2</b>Kund<small>Kontaktad skapar kortet</small></button></li>
+            <li><button type="button" data-till="affar"><b>3</b>Affär<small>hus, värde, steg</small></button></li>
+            <li><button type="button" data-till="tavla"><b>4</b>Säljtavlan<small>sex steg, chans i %</small></button></li>
+            <li><button type="button" data-till="mote"><b>5</b>Kundmöte<small>presentation och kalkyl</small></button></li>
+            <li><button type="button" data-till="offert"><b>6</b>Offert<small>skicka, ny version, förläng</small></button></li>
+            <li><button type="button" data-till="vunnen"><b>7</b>Vunnen<small>order signerad</small></button></li>
+            <li><button type="button" data-till="projekt"><b>8</b>Projekt<small>checklistor, montage</small></button></li>
+            <li><button type="button" data-till="dokument"><b>9</b>Dokument<small>mallar längs vägen</small></button></li>
+            <li><button type="button" data-till="vunnen"><b>10</b>Överlämning<small>Klart – nyckeln</small></button></li>
+          </ol>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=flode-ny-kund#/forfragningar">Prova flöde 1 i CRM:et</a></div>
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section class="bild" data-namn="Hitta i CRM:et">
+        <div class="bild__text">
+          <p class="kicker">Grunderna</p>
+          <h2>Hitta rätt <em>på en sekund.</em></h2>
+          <ul class="punkter">
+            <li><b>Menyn</b> följer arbetet: Sälj, Produktion, Verktyg och Mitt. Brickorna visar vad som väntar.</li>
+            <li><kbd>Ctrl</kbd> <kbd>K</kbd> (⌘ K på Mac) eller <kbd>/</kbd> – sök kund, affär, förfrågan eller offert, eller skriv ett kommando.</li>
+            <li><kbd>N</kbd> skapar en förfrågan, affär, kund eller uppgift.</li>
+            <li><kbd>[</kbd> fäller in menyn. Kontokortet längst ned: status, profil och logga ut.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=valkommen#/">Prova i CRM:et</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/palett.webp" alt="Kommandopaletten med senaste, snabbåtgärder och gå till" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 4 -->
+      <section class="bild" data-namn="Översikt">
+        <div class="bild__text">
+          <p class="kicker">Varje morgon</p>
+          <h2>Översikten <em>säger var du börjar.</em></h2>
+          <ul class="punkter">
+            <li>Dagens läge i en mening: nya förfrågningar, pipelinen och husen i produktion.</li>
+            <li>Nyckeltal: nya förfrågningar, öppen pipeline, vunnet i år, i produktion.</li>
+            <li>Byggarbetsplatsen: varje hus är ett säljsteg.</li>
+            <li><b>Fokus i dag</b> och <b>Att göra i dag</b> – bocka av eller skjut upp.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=oversikt#/">Prova i CRM:et</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/oversikt.webp" alt="Översikten" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 5 -->
+      <section class="bild" data-namn="Förfrågningar" data-id="forfragningar">
+        <div class="bild__text">
+          <p class="kicker">Steg 1 · Förfrågan</p>
+          <h2>Inkorgen <em>med svarsmål.</em></h2>
+          <ul class="punkter">
+            <li>Förfrågningar från hemsidan, telefon och mejl – <b>Lägg in förfrågan</b> när någon ringer.</li>
+            <li>Filtrera på status och miljö: vid havet, i skogen, på fjället, i trädgården.</li>
+            <li>Svarsmålet är 24 timmar – inkorgen visar vem som väntat längst.</li>
+            <li><kbd>J</kbd> <kbd>K</kbd> bläddrar, <kbd>U</kbd> öppnar ett svarsutkast.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=forfragningar#/forfragningar">Prova i CRM:et</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/forfragningar.webp" alt="Förfrågningarnas inkorg" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 6 -->
+      <section class="bild" data-namn="Första kontakten" data-id="las">
+        <div class="bild__text">
+          <p class="kicker">Steg 2 · Kund</p>
+          <h2>Nästa bästa steg, <em>leadpoäng och samtalsguide.</em></h2>
+          <ul class="punkter">
+            <li><b>Ta den</b> – så ser teamet att förfrågan är din.</li>
+            <li><b>Ring</b>, skriv ett <b>svarsutkast</b> eller sätt <b>Påminn om 2 h</b>.</li>
+            <li>Samtalsguiden: detaljplan, byggnader, tomtgräns, framkomlighet, grund, tidplan.</li>
+            <li><b>Kontaktad</b> skapar kundkortet. <b>Skapa affär</b> tar nästa steg.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=flode-ny-kund#/forfragningar">Prova flödet</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/forfragan-las.webp" alt="Läsrutan med nästa bästa steg och leadpoäng" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 7 -->
+      <section class="bild" data-namn="Säljtavlan" data-id="tavla">
+        <div class="bild__text">
+          <p class="kicker">Steg 4 · Säljtavlan</p>
+          <h2>Sex steg. <em>Chansen i procent.</em></h2>
+          <ol class="steg6">
+            <li><b>10 %</b>Ny förfrågan</li><li><b>20 %</b>Kontakt tagen</li><li><b>40 %</b>Tomt &amp; platsbesök</li>
+            <li><b>60 %</b>Offert skickad</li><li><b>75 %</b>Förhandling</li><li><b>100 %</b>Order signerad</li>
+          </ol>
+          <p class="ingress ingress--liten">Öppen pipeline, viktad prognos och smarta förslag överst. Filter: Mina, Står still, Har uppgift, Över 600 tkr.</p>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=saljtavla#/salj">Prova i CRM:et</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/saljtavla.webp" alt="Säljtavlans pipeline och smarta förslag" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 8 -->
+      <section class="bild" data-namn="Korten">
+        <div class="bild__text">
+          <p class="kicker">Säljtavlan</p>
+          <h2>Dra korten <em>framåt.</em></h2>
+          <ul class="punkter">
+            <li>Dra ett kort till nästa steg – eller tryck <b>Vidare</b> på kortet.</li>
+            <li>Dagarna i steget färgas: färsk, lugn eller <b>står still</b> (över tio dagar).</li>
+            <li>Ring, logga och lägg en uppgift direkt på kortet.</li>
+            <li>Släpp längst ned för att markera som förlorad – med orsak. Går att återuppta.</li>
+          </ul>
+        </div>
+        <figure class="ram"><img src="bilder/saljtavla-tavla.webp" alt="Spalterna och affärskorten på säljtavlan" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 9 -->
+      <section class="bild" data-namn="Affären" data-id="affar">
+        <div class="bild__text">
+          <p class="kicker">Steg 3 · Affär</p>
+          <h2>Allt om affären <em>på en sida.</em></h2>
+          <ul class="punkter">
+            <li>Affärsvärde, chans att vinna, dagar i steget och viktat värde.</li>
+            <li><b>Nästa bästa steg</b> med knappen direkt: boka besök, skapa offert, följ upp, signera.</li>
+            <li>Historiken: logga anteckning, samtal, mejl eller möte med en rad.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=affar#/salj">Prova i CRM:et</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/affar.webp" alt="Affärssidan" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 10 -->
+      <section class="bild" data-namn="Kunder">
+        <div class="bild__text">
+          <p class="kicker">Kunderna</p>
+          <h2>Kundresan <em>och de varma kunderna.</em></h2>
+          <ul class="punkter">
+            <li>Alla kunder med värde och senaste kontakt – som kort eller lista.</li>
+            <li><b>Behöver uppmärksamhet</b> lyfter dem du bör ringa nu.</li>
+            <li>Snabbknappar: Ring, Mejla, Kundmöte, Ny affär.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=kunder#/kunder">Prova i CRM:et</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/kunder.webp" alt="Kundregistret" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 11 -->
+      <section class="bild" data-namn="Kundsidan">
+        <div class="bild__text">
+          <p class="kicker">Kunderna</p>
+          <h2>Kundhälsan <em>säger när du ska höra av dig.</em></h2>
+          <ul class="punkter">
+            <li>0–100: hur nyligen ni hördes, minus försenade uppföljningar, plus öppen eller vunnen affär.</li>
+            <li>Kundresan, nästa steg, affärer, offerter och förfrågningar.</li>
+            <li>Kontakt 90 dagar och hela historiken – även anteckningar från kundmöten.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=kundsida#/kunder">Prova i CRM:et</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/kundsida.webp" alt="Kundsidan med kundhälsan" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 12 -->
+      <section class="bild" data-namn="Kundmöte" data-id="mote">
+        <div class="bild__text">
+          <p class="kicker">Steg 5 · Kundmöte</p>
+          <h2>Förbered. <em>Presentera.</em></h2>
+          <ul class="punkter">
+            <li>Välj affär och upplägg: <b>Fullt möte</b>, <b>Kort möte</b> eller <b>Bara kalkylen</b>.</li>
+            <li>Kommande möten, logga ett möte i efterhand och tidigare möten.</li>
+            <li><b>Starta presentation</b> öppnar bildspelet i helskärm.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=flode-mote#/mote">Prova flödet</a><a class="knapp" href="../index.html?tur=kundmote#/mote">Sidans guide</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/kundmote.webp" alt="Kundmötet med 3D-mötesrummet" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 13 -->
+      <section class="bild" data-namn="Presentationen">
+        <div class="bild__text">
+          <p class="kicker">Kundmöte</p>
+          <h2>Husen i 3D <em>och kalkylen live.</em></h2>
+          <ul class="punkter">
+            <li>Välkommen, er förfrågan, byggt under tak, husen i 3D, vad ni får bygga, så går det till, kalkylen, nästa steg.</li>
+            <li><kbd>K</kbd> kalkylen, <kbd>N</kbd> anteckningar, <kbd>Esc</kbd> avsluta.</li>
+            <li><b>Spara som offert</b> direkt ur kalkylen. Avsluta med <b>Boka platsbesök</b>.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=presentation#/mote">Prova i CRM:et</a></div>
+        </div>
+        <figure class="ram ram--dubbel"><img src="bilder/presentation-husen.webp" alt="Presentationen: husen i 3D" width="1440" height="900" loading="lazy"><img src="bilder/presentation-kalkyl.webp" alt="Presentationen: kalkylen" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 14 -->
+      <section class="bild" data-namn="Offerten" data-id="offert">
+        <div class="bild__text">
+          <p class="kicker">Steg 6 · Offert</p>
+          <h2>Utkast, skickad, <em>godkänd.</em></h2>
+          <ul class="punkter">
+            <li><b>Skapa offert</b> på affären – huset, frakt och montage ur prislistan.</li>
+            <li>Ändra rader, lägg till tillval. Summan blir affärens värde.</li>
+            <li><b>Skriv ut / PDF</b> → <b>Markera som skickad</b>. Giltig i 30 dagar.</li>
+            <li>Ändring efter skickad? <b>Ny version</b>. Snart ute? <b>+14 d</b>.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=flode-offert#/salj">Prova flödet</a><a class="knapp" href="../index.html?tur=offert#/offerter">Offertsidan</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/offert.webp" alt="Offertsidan med rader och förhandsvisning" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 15 -->
+      <section class="bild" data-namn="Offertläget">
+        <div class="bild__text">
+          <p class="kicker">Offerter</p>
+          <h2>Följ upp <em>innan tiden går ut.</em></h2>
+          <ul class="punkter">
+            <li>Väntar på svar, träffsäkerhet, tid till ja och godkänt värde.</li>
+            <li><b>Går ut snart</b>: följ upp eller förläng.</li>
+            <li>Per hus och vanligaste posterna.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=offerter#/offerter">Prova i CRM:et</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/offerter.webp" alt="Offertläget" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 16 -->
+      <section class="bild" data-namn="Vunnen" data-id="vunnen">
+        <div class="bild__text">
+          <p class="kicker">Steg 7–8 · Vunnen och projekt</p>
+          <h2>Order signerad – <em>projektet börjar.</em></h2>
+          <ul class="punkter">
+            <li><b>Order signerad</b> (eller <b>Kunden godkände</b>): affären vunnen, offerten godkänd, konfetti.</li>
+            <li>Ett projekt skapas hos produktionen med montage om tolv veckor.</li>
+            <li>Ritning &amp; lov → Tillverkning → Grund &amp; mark → Leverans &amp; montage → Slutbesiktning → <b>Klart</b>.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=flode-overlamning#/salj">Prova flödet</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/projekt-panel.webp" alt="Projektpanelen med huset i 3D och checklistan" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 17 -->
+      <section class="bild" data-namn="Projekt" data-id="projekt">
+        <div class="bild__text">
+          <p class="kicker">Produktion</p>
+          <h2>Husets resa <em>från ritning till nyckel.</em></h2>
+          <ul class="punkter">
+            <li>Nästa montage, det som ska åtgärdas (kundens och vår del).</li>
+            <li>Husets resa i 3D – kundernas hus står på sitt steg.</li>
+            <li>Kalendern med montage, starter, uppgifter, möten och offerter som går ut.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=projekt#/produktion">Prova i CRM:et</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/projekt-resa.webp" alt="Husets resa i 3D" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 18 -->
+      <section class="bild" data-namn="Dokument" data-id="dokument">
+        <div class="bild__text">
+          <p class="kicker">Steg 9 · Dokument</p>
+          <h2>Arkivet <em>och sju mallar.</em></h2>
+          <ul class="punkter">
+            <li>Offerter, ordrar, ritningar, bygglov, checklistor och foton – sök, filtrera, exportera.</li>
+            <li><b>Att hantera</b>: offerter utan svar, underlag som saknas.</li>
+            <li>Mallar: följebrev, platsbesök, tack för ordern, checklista inför montage, leveransplan, egenkontroll, överlämningsprotokoll.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=flode-dokument#/dokument">Prova flödet</a></div>
+        </div>
+        <figure class="ram ram--dubbel"><img src="bilder/dokument.webp" alt="Dokument och avtal" width="1440" height="900" loading="lazy"><img src="bilder/mallar.webp" alt="Mallarna" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 19 -->
+      <section class="bild" data-namn="Att göra">
+        <div class="bild__text">
+          <p class="kicker">Mitt</p>
+          <h2>Att göra, <em>kalender och chatt.</em></h2>
+          <ul class="punkter">
+            <li><b>Att göra</b>: veckan, nya uppgifter kopplade till kund eller affär, bocka av, skjut upp.</li>
+            <li><b>Meddelanden</b>: teamchatten med @ och #, svar, reaktioner och filer.</li>
+            <li><b>Min profil</b>: status, nyckeltal och din kalender (ledighet, sjukanmälan, kalenderfil).</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=att-gora#/att-gora">Att göra</a><a class="knapp" href="../index.html?tur=chatt#/chatt">Meddelanden</a><a class="knapp" href="../index.html?tur=profil#/profil">Profil</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/att-gora.webp" alt="Att göra med veckan" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 20 -->
+      <section class="bild" data-namn="Chefsvyn">
+        <div class="bild__text">
+          <p class="kicker">För chefen</p>
+          <h2>Så går <em>teamet.</em></h2>
+          <ul class="punkter">
+            <li>Teamets pipeline, viktad prognos, vunnet 90 dagar och vinstgrad.</li>
+            <li>Teamet just nu, vem jobbar när och teamets kalender.</li>
+            <li>Fördela nya förfrågningar – eller fördela jämnt. Topplistan.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=chef#/chef">Prova (chefens konto)</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/chef.webp" alt="Chefsvyn" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 21 -->
+      <section class="bild" data-namn="Admin">
+        <div class="bild__text">
+          <p class="kicker">För administratören</p>
+          <h2>Kontroll, konton <em>och säkerhet.</em></h2>
+          <ul class="punkter">
+            <li><b>Kontrollcentral</b>: hela CRM:et i en blick.</li>
+            <li><b>Adminpanel</b>: konton, roller, behörigheter, data och granskningsloggen.</li>
+            <li><b>Säkerhet</b>: sju kontroller och poängen över tid.</li>
+            <li><b>Supportläget</b>: gå in i en säljares konto och hjälp till.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=kontroll#/kontroll">Prova (adminkontot)</a><a class="knapp" href="../index.html?tur=supportlage#/kontroll">Supportläget</a></div>
+        </div>
+        <figure class="ram"><img src="bilder/kontroll.webp" alt="Kontrollcentralen" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 22 -->
+      <section class="bild bild--tangenter" data-namn="Kortkommandon">
+        <div class="bild__text bild__text--bred">
+          <p class="kicker">Spara tid</p>
+          <h2>Kortkommandona.</h2>
+          <dl class="tangenter">
+            <div><dt><kbd>Ctrl</kbd> <kbd>K</kbd></dt><dd>Sök och kommandon (⌘ K på Mac)</dd></div>
+            <div><dt><kbd>/</kbd></dt><dd>Sök</dd></div>
+            <div><dt><kbd>N</kbd></dt><dd>Skapa ny</dd></div>
+            <div><dt><kbd>[</kbd></dt><dd>Fäll in menyn</dd></div>
+            <div><dt><kbd>?</kbd></dt><dd>Guiderna</dd></div>
+            <div><dt><kbd>J</kbd> <kbd>K</kbd></dt><dd>Bläddra i förfrågningarna</dd></div>
+            <div><dt><kbd>U</kbd></dt><dd>Svarsutkast</dd></div>
+            <div><dt><kbd aria-label="vänsterpil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></kbd> <kbd aria-label="högerpil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></kbd></dt><dd>Bläddra i presentationen</dd></div>
+            <div><dt><kbd>K</kbd></dt><dd>Kalkylen i presentationen</dd></div>
+            <div><dt><kbd>N</kbd></dt><dd>Anteckningar i presentationen</dd></div>
+            <div><dt><kbd>Enter</kbd></dt><dd>Skicka i chatten (<kbd>Shift</kbd> + <kbd>Enter</kbd> ny rad)</dd></div>
+            <div><dt><kbd>Esc</kbd></dt><dd>Stäng panel, palett eller presentation</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- 23 -->
+      <section class="bild" data-namn="Guiderna">
+        <div class="bild__text">
+          <p class="kicker">Hjälp när du behöver den</p>
+          <h2>Guiden pekar <em>var du ska klicka.</em></h2>
+          <ul class="punkter">
+            <li>Knappen <b>Guide</b> i hörnet (eller <kbd>?</kbd>) öppnar alla guider.</li>
+            <li><b>Guida mig på den här sidan</b> startar rätt guide direkt.</li>
+            <li>Vissa steg väntar på att du klickar själv – eller tryck <b>Gör det åt mig</b>.</li>
+            <li>Klara guider bockas av.</li>
+          </ul>
+          <div class="knappar"><a class="knapp knapp--barn" href="../index.html?tur=valkommen#/">Starta rundturen</a><a class="knapp" href="video.html">Se videon</a></div>
+        </div>
+        <figure class="ram ram--dubbel"><img src="bilder/guide-tur.webp" alt="En guide som pekar på ett affärskort" width="1440" height="900" loading="lazy"><img src="bilder/guide-meny.webp" alt="Guidemenyn" width="1440" height="900" loading="lazy"></figure>
+      </section>
+
+      <!-- 24 -->
+      <section class="bild bild--slut" data-namn="Din första dag">
+        <div class="bild__text bild__text--bred">
+          <p class="kicker">Din första dag</p>
+          <h2>Fem saker <em>att göra i dag.</em></h2>
+          <ol class="forsta">
+            <li><a href="../index.html?tur=valkommen#/"><b>Ta rundturen</b><small>Två minuter – hitta i CRM:et</small></a></li>
+            <li><a href="../index.html?tur=flode-ny-kund#/forfragningar"><b>Svara på en förfrågan</b><small>Flöde 1: från förfrågan till affär</small></a></li>
+            <li><a href="../index.html?tur=flode-offert#/salj"><b>Skicka en offert</b><small>Flöde 2: från affär till offert</small></a></li>
+            <li><a href="../index.html?tur=flode-mote#/mote"><b>Öva på kundmötet</b><small>Flöde 3: presentation och kalkyl</small></a></li>
+            <li><a href="../index.html?tur=flode-overlamning#/salj"><b>Vinn en affär</b><small>Flöde 5: från order till nyckel</small></a></li>
+          </ol>
+          <p class="not">Allt är exempeldata – öva så mycket du vill. Inställningar → <b>Återställ exempeldata</b> tar tillbaka allt.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="fot">
+      <button class="fot__pil" type="button" data-p="forra" aria-label="Föregående bild"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+      <div class="fot__prickar" role="tablist" aria-label="Bilder" data-prickar></div>
+      <span class="fot__raknare" aria-live="polite" data-raknare>1 / 24</span>
+      <button class="fot__pil fot__pil--fram" type="button" data-p="nasta" aria-label="Nästa bild"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <span class="fot__framsteg" aria-hidden="true"><i data-framsteg></i></span>
+    </footer>
+
+    <div class="rutnat" data-rutnat hidden role="dialog" aria-modal="true" aria-label="Alla bilder">
+      <div class="rutnat__topp"><b>Alla bilder</b><button type="button" data-p="stang-rutnat" aria-label="Stäng (Esc)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="rutnat__lista" data-rutnat-lista></div>
+    </div>
+    <div class="zoom" data-zoom hidden role="dialog" aria-modal="true" aria-label="Skärmbild"><img alt="" data-zoom-bild></div>
+
+    <script src="presentation.js?v=20261029"></script>
+  </body>
+</html>
