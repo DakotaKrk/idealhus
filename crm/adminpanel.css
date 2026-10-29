@@ -111,7 +111,6 @@
   .ap-rad > :nth-child(3), .ap-rad > :nth-child(4) { display: none; }
   .ap-knapptext { display: none; }
   .ap-atgarder [data-g="ap-aktiv"] { min-width: 34px; width: 34px; padding: 0; }
-  .ap-plats--bred { width: 34px; }
 }
 @media (max-width: 1000px) { .ap-hjalte { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 600px) {
@@ -127,8 +126,6 @@
 .ap-inst > div { flex: 1; }
 .ap-inst .ap-select { width: auto; min-width: 150px; flex: none; }
 a.sh-knapp { text-decoration: none; color: inherit; }
-@media (max-width: 1100px) { .ap-rad { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) 122px; } }
-@media (max-width: 600px) { .ap-rad { grid-template-columns: minmax(0, 1fr) 122px; } }
 .ap-atgarder [data-g="ap-aktiv"] { width: 116px; min-width: 116px; }
 .ap-plats--bred { width: 116px; }
 @media (max-width: 1100px) { .ap-atgarder [data-g="ap-aktiv"] { width: 34px; min-width: 34px; } .ap-plats--bred { width: 34px; } }

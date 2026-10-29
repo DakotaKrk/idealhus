@@ -118,8 +118,13 @@
   -webkit-mask: radial-gradient(70% 90% at 75% 50%, #000, transparent); mask: radial-gradient(70% 90% at 75% 50%, #000, transparent); }
 .sh-text { position: relative; min-width: 0; }
 .sh-text .etikett { display: inline-flex; align-items: center; gap: 8px; }
-.sh-live { width: 8px; height: 8px; border-radius: 50%; background: var(--gron); animation: sh-live 2s ease-out infinite; }
+.sh-live { position: relative; isolation: isolate; width: 8px; height: 8px; border-radius: 50%; background: var(--gron); }
 @keyframes sh-live { from { box-shadow: 0 0 0 0 rgb(var(--t-gron-rgb) / .5); } to { box-shadow: 0 0 0 10px rgb(var(--t-gron-rgb) / 0); } }
+/* Pulsen som ring i ::before (transform + opacity, ingen stilomräkning per bildruta) under en kopia av pricken i ::after.
+   Ringen ritas i full storlek (8 + 2 × 10 px) och skalas från prickens storlek, 8/28 */
+.sh-live::before { content: ""; position: absolute; border-radius: 50%; z-index: -1; inset: -10px; background: rgb(var(--t-gron-rgb) / .5); opacity: 0; animation: sh-live-ring8 2s ease-out infinite; }
+.sh-live::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: inherit; }
+@keyframes sh-live-ring8 { from { transform: scale(.285714); opacity: 1; } to { transform: none; opacity: 0; } }
 .sh-hjalte h1 { margin: 10px 0; font: 700 clamp(2.2rem, 1.2rem + 3vw, 3.6rem)/1 var(--rubrik); letter-spacing: -0.04em; }
 .sh-hjalte h1 em { font-style: normal; color: var(--virke-djup); }
 .sh-ingress { margin: 0 0 18px; max-width: 58ch; color: var(--text-2); line-height: 1.55; }
@@ -236,7 +241,7 @@
 @media (max-width: 1250px) { .sh-kontroller { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 900px) { .sh-hjalte { grid-template-columns: minmax(0, 1fr); } .sh-karnkol { order: -1; } .sh-karna { width: min(300px, 100%); } .sh-delar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .sh-kontroller { grid-template-columns: minmax(0, 1fr); } }
-@media (prefers-reduced-motion: reduce) { .sh-orbit, .sh-ring__bage, .sh-ring.skannas .sh-komet, .sh-live, .sh-rad { animation: none; } .sh-scen { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .sh-orbit, .sh-ring__bage, .sh-ring.skannas .sh-komet, .sh-live, .sh-live::before, .sh-rad { animation: none; } .sh-scen { transition: none; } }
 
 /* ==== Säkerhetshubben, påkostad (2026-11-01): mörk kontrollrumshjälte med kodregn, skanningslinje, radarsvep,
    pulserande vågor och noder runt kärnan; driftläget med live-tal, veckostaplar och en rullande händelserad ==== */
@@ -369,6 +374,8 @@ section.sh-mork .sh-delar li:nth-child(1) { --i: 0; } section.sh-mork .sh-delar 
 .sh-stilla .sh-drift__ruta > span { animation-name: sh-ikon-glod !important; }
 .sh-stilla .sh-ticker__rull:not(.sh-ticker__rull--still) { animation-name: sh-ticker !important; }
 .sh-stilla .sh-drift__live i { animation-name: sh-live !important; }
+/* .sh-live har pulsen i ::before, som .sh-stilla * inte når – den står still som förut */
+.sh-stilla .sh-live::before { animation-name: none !important; }
 
 /* Poängen över tid och säkerhetsloggen */
 .sh-diagram { width: 100%; height: auto; margin: 6px 0 14px; overflow: visible; }

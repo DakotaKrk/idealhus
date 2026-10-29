@@ -632,7 +632,10 @@ html[data-palett-oppen] .chf, html[data-ark-oppen] .chf { pointer-events: none; 
    mot rutans nederkant – där fönstret står mot hörnet – och den tomma delen ovanför är genomskinlig och klickas igenom */
 .chf:has(> .chf-lista) { grid-template-rows: auto minmax(0, max-content); align-content: end; overflow: visible; background: none; box-shadow: none; pointer-events: none;
   filter: drop-shadow(0 0 .6px rgb(var(--t-blaeck-rgb) / .22)) drop-shadow(0 26px 34px rgb(var(--t-skugga-djup-rgb) / .28)); }
-.chf:has(> .chf-lista) > * { pointer-events: auto; }
+/* Utan :has() med * längst till höger (den gjorde varje DOM-ändring på sidan dyr): huvudet står före listan, storlekshandtaget efter */
+.chf > .chf-lista, .chf > .chf-lista ~ *, .chf:has(> .chf-lista) > .chf-huvud { pointer-events: auto; }
 .chf:has(> .chf-lista) > .chf-huvud { border-radius: calc(24px * var(--t-radie-k, 1)) calc(24px * var(--t-radie-k, 1)) 0 0; }
 .chf:has(> .chf-lista) > .chf-lista { padding-bottom: 14px; border-radius: 0 0 calc(24px * var(--t-radie-k, 1)) calc(24px * var(--t-radie-k, 1)); background: var(--t-yta-varm); }
-html[data-palett-oppen] .chf:has(> .chf-lista) > *, html[data-ark-oppen] .chf:has(> .chf-lista) > *, .chf[data-undan]:has(> .chf-lista) > * { pointer-events: none; }
+html[data-palett-oppen] .chf > .chf-lista, html[data-palett-oppen] .chf > .chf-lista ~ *, html[data-palett-oppen] .chf:has(> .chf-lista) > .chf-huvud,
+html[data-ark-oppen] .chf > .chf-lista, html[data-ark-oppen] .chf > .chf-lista ~ *, html[data-ark-oppen] .chf:has(> .chf-lista) > .chf-huvud,
+.chf[data-undan] > .chf-lista, .chf[data-undan] > .chf-lista ~ *, .chf[data-undan]:has(> .chf-lista) > .chf-huvud { pointer-events: none; }

@@ -13,7 +13,9 @@ import { OutputPass } from '../vendor/three/addons/postprocessing/OutputPass.js'
 
 const IH = window.IH;
 const LUGN = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const stod = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (x) { return false; } })();
+// WebGL-provet görs först när en scen ska monteras, och provkontexten släpps direkt
+let stodV = null;
+const harWebgl = () => { if (stodV === null) { try { const c = document.createElement('canvas'), gl = c.getContext('webgl2') || c.getContext('webgl'); stodV = !!gl; const lx = gl && gl.getExtension('WEBGL_lose_context'); if (lx) lx.loseContext(); } catch (x) { stodV = false; } } return stodV; };
 
 /* Hjälpare ---------------------------------------------------------------------------------------- */
 function tex(w, h, rita, rep) {
@@ -233,7 +235,7 @@ function vaxt() {
 let S = null;
 function bygg() {
   material();
-  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance', alpha: true });
+  const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance', alpha: true }); // kantutjämningen sker i composer-målet (samples: 4)
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
   // skuggorna räknas om var tredje bildruta (lamporna vajar bara lite) i stället för i varje
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;
@@ -540,7 +542,7 @@ function vakt(dt) {
   if (S.t > 3 && fps < 40) { S.sankt = true; S.renderer.setPixelRatio(1); S.bloom.enabled = false; storlek(); }
 }
 function montera(el) {
-  if (!stod) { document.documentElement.classList.add('ingen-webgl'); el.remove(); return; }
+  if (!harWebgl()) { document.documentElement.classList.add('ingen-webgl'); el.remove(); return; }
   if (!S) bygg();
   S.el = el; el.appendChild(S.renderer.domElement);
   const sek = el.parentElement; if (sek) sek.classList.add('motescen--3d'); const rum = sek && sek.querySelector('.motescen__rum'); if (rum) { rum.classList.add('motescen__rum--3d'); sek.addEventListener('pointermove', (ev) => { const r = sek.getBoundingClientRect(); S.musMal.set((ev.clientX - r.left) / r.width * 2 - 1, (ev.clientY - r.top) / r.height * 2 - 1); }); sek.addEventListener('pointerleave', () => S.musMal.set(0, 0)); }

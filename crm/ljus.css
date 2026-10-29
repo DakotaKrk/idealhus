@@ -3598,10 +3598,6 @@ div.redo {
     transform: rotateZ(var(--a)) translateY(-140px) rotateZ(calc(-1 * var(--a))) rotateX(-62deg);
   }
 
-  .bord__deck {
-    transform: translateZ(110px);
-  }
-
   @keyframes deck-snurr {
     to { transform: translateZ(110px) rotateZ(360deg); }
   }
@@ -6271,10 +6267,6 @@ div.redo {
 
 .motetips {
   gap: 12px;
-}
-
-.motetips li {
-  align-items: flex-start;
 }
 
 .motetips .i {
@@ -11743,6 +11735,9 @@ select,
 
 .verktygram--klar .verktygram__laddar {
   opacity: 0;
+  /* När den tonat ut tas den bort helt, så att den osynliga snurran inte räknas om varje bildruta */
+  display: none;
+  transition: opacity 0.25s ease, display 0.25s allow-discrete;
 }
 
 @media (prefers-reduced-motion: reduce) {

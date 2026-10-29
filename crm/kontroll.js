@@ -167,7 +167,7 @@
     ];
     var knapp = function (attr, ikon, text, accent) { var a = attr.indexOf('href') === 0; return '<' + (a ? 'a' : 'button type="button"') + ' class="sh-knapp' + (accent ? ' sh-knapp--accent' : '') + '" ' + attr + '>' + ik(ikon) + '<span>' + text + '</span></' + (a ? 'a' : 'button') + '>'; };
     var hjalte = '<section class="ao-hjalte kort" data-ton="' + tonFor(total) + '"><div class="sh-rutnat" aria-hidden="true"></div>' +
-      '<div class="ao-text"><p class="etikett"><i class="sh-live"></i>Kontrollcentralen · prototyp · ' + e(new Date().toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' })) + '</p>' +
+      '<div class="ao-text"><p class="etikett"><i class="sh-live"></i>Kontrollcentralen · prototyp · ' + e(IH.lokal(new Date(), 'd', { weekday: 'long', day: 'numeric', month: 'long' })) + '</p>' +
         '<h1>' + halsning + ', ' + e(u0.namn.split(' ')[0]) + '. <em>Hela CRM:et i en blick.</em></h1>' +
         '<p class="ao-ingress">Säkerheten, kontona, datan och driften – hur allt mår just nu, räknat ur CRM:ets data och säkerhetskontrollerna.</p>' +
         '<div class="sh-knappar">' + knapp('data-g="sh-skanna-ga"', 'radar', 'Skanna allt', true) + knapp('href="#/admin"', 'server', 'Adminpanelen') + knapp('href="#/sakerhet"', 'skold', 'Säkerhet') + knapp('data-g="km-nytt-konto"', 'anvandare-plus', 'Nytt konto') + '</div>' +

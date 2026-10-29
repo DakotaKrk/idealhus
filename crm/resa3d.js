@@ -18,7 +18,9 @@ const IH = window.IH;
 const LUGN = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const AVST = 16; // mellan stationerna
 const e = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const stod = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (x) { return false; } })();
+// WebGL-provet görs först när en scen ska monteras, och provkontexten släpps direkt
+let stodV = null;
+const harWebgl = () => { if (stodV === null) { try { const c = document.createElement('canvas'), gl = c.getContext('webgl2') || c.getContext('webgl'); stodV = !!gl; const lx = gl && gl.getExtension('WEBGL_lose_context'); if (lx) lx.loseContext(); } catch (x) { stodV = false; } } return stodV; };
 const lerp = THREE.MathUtils.lerp, klamp = THREE.MathUtils.clamp;
 const mjuk = (x) => { x = klamp(x, 0, 1); return x * x * (3 - 2 * x); };
 const ut = (x) => 1 - Math.pow(1 - klamp(x, 0, 1), 3);
@@ -841,7 +843,7 @@ function station6(modell) { // Klart
 /* Scenen ------------------------------------------------------------------------------------------ */
 let S = null;
 function bygg(el) {
-  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' }); // kantutjämningen sker i composer-målet (samples: 4)
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95; renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -1055,7 +1057,7 @@ function ram() {
   S.ram = requestAnimationFrame(ram);
 }
 function montera(el) {
-  if (!stod) { el.remove(); return; }
+  if (!harWebgl()) { el.remove(); return; }
   if (!S) bygg(el);
   S.el = el;
   // smala skärmar börjar inzoomade på ett steg: hela resan blir bara en tunn remsa där

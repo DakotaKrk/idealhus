@@ -156,7 +156,7 @@
   // Vid sidbyte räknas menyn bara om när den valda raden ligger under Mer (den får aldrig döljas)
   addEventListener('hashchange', function () { stangMer(); setTimeout(function () { if (document.querySelector('.sido__nav .sido__lank.aktiv[data-sido-dold]')) anpassaSido(); }, 30); });
   var forra = IH.uppdateraMeny;
-  IH.uppdateraMeny = function () { var r = forra.apply(this, arguments); anpassaSido(); return r; };
+  IH.uppdateraMeny = function () { var r = forra.apply(this, arguments); if (r !== false) anpassaSido(); return r; };
   var t = 0;
   // Menyns egen växling (IH.sidoResize) ändrar inte höjden – då behöver inget räknas om
   addEventListener('resize', function () { stangMer(); if (IH.sidoResize) return; clearTimeout(t); t = setTimeout(anpassaSido, 120); });

@@ -104,10 +104,10 @@
   }
 
   /* 03 Tider ------------------------------------------------------------------------------------- */
-  const klocka = (iso) => new Date(iso).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+  const klocka = (iso) => IH.lokal(new Date(iso), 't', { hour: '2-digit', minute: '2-digit' });
   const dagNr = (iso) => { const a = new Date(iso), b = new Date(); a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0); return Math.round((b - a) / 864e5); };
-  const dagRubrik = (iso) => { const n = dagNr(iso); return n === 0 ? 'I dag' : n === 1 ? 'I går' : new Date(iso).toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^./, (c) => c.toUpperCase()); };
-  const listTid = (iso) => { const n = dagNr(iso); return n === 0 ? klocka(iso) : n === 1 ? 'I går' : n < 6 ? new Date(iso).toLocaleDateString('sv-SE', { weekday: 'short' }) : new Date(iso).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' }); };
+  const dagRubrik = (iso) => { const n = dagNr(iso); return n === 0 ? 'I dag' : n === 1 ? 'I går' : IH.lokal(new Date(iso), 'd', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^./, (c) => c.toUpperCase()); };
+  const listTid = (iso) => { const n = dagNr(iso); return n === 0 ? klocka(iso) : n === 1 ? 'I går' : n < 6 ? IH.lokal(new Date(iso), 'd', { weekday: 'short' }) : IH.lokal(new Date(iso), 'd', { day: 'numeric', month: 'short' }); };
   const storlek = (b) => (b >= 1048576 ? (b / 1048576).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' kB');
 
   /* 04 Läget i gränssnittet ---------------------------------------------------------------------- */
@@ -703,7 +703,10 @@
     if (ui.bilagor.length) m.filer = ui.bilagor.map((b) => ({ id: b.id, namn: b.namn, typ: b.typ, storlek: b.storlek, data: b.data, skanning: b.skanning }));
     const s = ui.svar && meddelande(ui.svar); if (s) m.svar = { mid: s.id, av: s.av, text: klartext(s.text).slice(0, 140) || (s.filer && s.filer[0] ? s.filer[0].namn : '') };
     C().meddelanden.push(m); kanda.add(m.id); ui.nya.add(m.id); ui.bilagor = []; ui.svar = null; ui.emoji = false; ui.utkast[kid] = '';
-    try { IH.spara(); } catch (x) { IH.toast('Meddelandet kunde inte sparas', 'Lagringen i webbläsaren är full – ta bort några bilder.', 'varning'); C().meddelanden.pop(); }
+    // Det egna meddelandet är läst direkt – sparas i samma skrivning som meddelandet (en skrivning, inte två)
+    const c = C(); c.last[jag()] = c.last[jag()] || {}; const forraLast = c.last[jag()][kid];
+    if (!forraLast || forraLast < m.tid) c.last[jag()][kid] = m.tid;
+    try { IH.spara(); } catch (x) { IH.toast('Meddelandet kunde inte sparas', 'Lagringen i webbläsaren är full – ta bort några bilder.', 'varning'); C().meddelanden.pop(); if (forraLast === undefined) delete c.last[jag()][kid]; else c.last[jag()][kid] = forraLast; }
     markeraLast(kid); ritaAllt(); fokusText(iF);
   }
   document.addEventListener('submit', (ev) => {

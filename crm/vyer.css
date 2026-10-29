@@ -2363,11 +2363,6 @@ html[data-lamnar]::after {
   overflow: visible;
 }
 
-.graf__rut {
-  stroke: var(--kant);
-  stroke-dasharray: 3 5;
-}
-
 .graf__ram {
   position: relative;
   margin-top: 6px;
@@ -8173,7 +8168,9 @@ section.dk-hjalte.kort .dk-tidslinje b { letter-spacing: .1em; }
 section.dk-hjalte.kort .dk-tidslinje small { font: 600 .74rem/1 var(--rubrik); text-transform: none; color: var(--t-sten-accent); }
 section.dk-hjalte.kort .dk-tidslinje__mitt { position: relative; align-self: start; height: 2px; margin-top: 16px; background: linear-gradient(90deg, rgb(var(--t-virke-2-rgb) / .9), rgb(var(--t-accent-rgb) / .9)); }
 .dk-tidslinje__mitt em { position: absolute; top: -4px; left: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--vx-fff3dc); box-shadow: 0 0 10px 3px rgba(255, 210, 150, .9); animation: dk-res 3.6s cubic-bezier(.45, 0, .2, 1) 1s infinite; }
-@keyframes dk-res { 0% { left: 0; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { left: calc(100% - 10px); opacity: 0; } }
+/* Pricken flyttas med translate mot linjens bredd (100cqw) i stället för left – ingen layout per bildruta */
+.dk-tidslinje__mitt { container-type: inline-size; }
+@keyframes dk-res { 0% { translate: 0 0; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { translate: calc(100cqw - 10px) 0; opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .dk-tidslinje__mitt em { animation: none; display: none; } }
 
 section.dk-hjalte.kort .dk-stat .dk-tidslinje b { margin: 0; font: 600 .6rem/1 var(--rubrik); letter-spacing: .12em; text-transform: uppercase; color: rgb(var(--t-pa-kol-rgb) / max(.65, var(--vx-dk-amin))); text-shadow: none; }
@@ -8802,13 +8799,14 @@ section.dk-hjalte.kort .dk-stat[data-ton="bla"], section.dk-hjalte.kort .dk-stat
 .hero__fonster :is(.lp-himmel--dag, .lp-himmel--morgon) { left: 0; top: 0; width: 100%; height: 100%; transform: none; }
 .hero__fonster .lp-himmel .lp-sol, .hero__fonster .lp-himmel--dag .lp-sol, .hero__fonster .lp-himmel--morgon .lp-sol { left: 50%; top: 50%; width: 50px; height: 50px; margin: -25px 0 0 -25px; }
 .hero__fonster .lp-himmel--morgon .lp-sol { margin-top: -17px; }
-.hero__fonster .lp-sol i { transform: rotate(var(--r)) translateY(-38px); }
+.hero__fonster .lp-sol i { --ls-d: -38px; transform: rotate(var(--r)) translateY(-38px); }
 @media (max-width: 900px) { .hero__fonster :is(.lp-himmel--dag, .lp-himmel--morgon) { transform: none; left: 0; top: 0; } .hero__fonster .lp-sol { transform: scale(.72); } }
 /* Molnen tonar in och ut vid fönstrets kanter i stället för att kapas, och driver under och ovanför solen så att
    de aldrig täcker den */
-.hero__fonster .hero__moln { top: 98px; animation: hf-moln-mjuk 24s linear infinite; }
+.hero__fonster .hero__moln { left: -40px; top: 98px; animation: hf-moln-mjuk 24s linear infinite; }
 .hero__fonster .hero__moln--2 { top: 26px; animation-duration: 32s; animation-delay: -14s; }
-@keyframes hf-moln-mjuk { 0% { left: -40px; opacity: 0; } 18% { opacity: .9; } 78% { opacity: .9; } 100% { left: 150px; opacity: 0; } }
+/* Förflyttningen med translate i stället för left (ingen layout per bildruta) – samma sträcka, -40 → 150 px */
+@keyframes hf-moln-mjuk { 0% { translate: 0 0; opacity: 0; } 18% { opacity: .9; } 78% { opacity: .9; } 100% { translate: 190px 0; opacity: 0; } }
 .hero__fonster .hero__moln--2 { --o: .6; }
 
 /* ---------------------------------------------------------------------
@@ -8930,3 +8928,46 @@ section.dk-hjalte .ml-stats { align-self: center; }
 .anteckna__rad > * { align-self: stretch; }
 /* Projektkorten: snabbknapparna krymper hellre än att kapas när kortet är smalt. */
 .aff--proj .aff__verktyg button { flex: 0 1 32px; min-width: 0; }
+
+/* Kundbasens nyckeltal (2026-10-29): fyra rutor på 100 px bröt etiketterna på tre rader. När spalten är smal står de
+   två och två, och etiketten står alltid på en rad med ikonen i en liten ton-bricka */
+.kundtopp__ord { container: kundord / inline-size; }
+@container kundord (max-width: 620px) {
+  .kundtopp__tal { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px; }
+}
+.kundtopp__tal > div { gap: 10px; min-width: 0; }
+.kundtopp .kundtopp__tal small { margin-bottom: 0; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: .74rem; }
+.kundtopp .kundtopp__tal small i { width: 26px; height: 26px; border-radius: 9px; background: var(--t-accent-ljus, var(--virke-ljus)); color: var(--t-accent-djup, var(--virke-djup)); }
+.kundtopp .kundtopp__tal small i svg { width: 14px; height: 14px; }
+.kundtopp__tal > div > b { font-size: 1.7rem; line-height: 1; }
+
+/* Intäktskortet: "Senast vunna" tar ingen egen höjd utan fyller bara ytan som blir över när kolumnen bredvid är
+   högre (flex-basis 0). Raderna bryts till en dold kolumn när de inte får plats hela, så ingen rad kapas på mitten. */
+.ov-intakt > .kort__kropp { flex: 1 1 auto; min-height: 0; }
+.senvunna { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; overflow: hidden; margin-top: 14px; }
+.senvunna:has(.senvunna__lista:empty) { display: none; }
+.senvunna .perhus__rubrik { flex: none; }
+.senvunna__lista { display: flex; flex-flow: column wrap; align-content: flex-start; flex: 1 1 0; min-height: 0; overflow: hidden; gap: 6px; }
+.senvunna__rad { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; padding: 8px 10px; border-radius: 14px; color: inherit; text-decoration: none;
+  background: rgb(var(--t-blaeck-rgb) / .03); transition: background-color .2s ease; }
+.senvunna__rad:hover { background: var(--t-accent-ljus, var(--virke-ljus)); }
+.senvunna__rad .tumme { width: 44px; height: 32px; border-radius: 9px; overflow: hidden; flex: none; }
+.senvunna__rad .tumme img { width: 100%; height: 100%; object-fit: contain; background: rgb(var(--t-blaeck-rgb) / .04); }
+.senvunna__namn { display: grid; min-width: 0; }
+.senvunna__namn b, .senvunna__namn small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.senvunna__namn b { font: 600 .86rem/1.25 var(--rubrik); }
+.senvunna__namn small { font-size: .74rem; color: var(--text-2); }
+.senvunna__summa { font: 600 .9rem/1 var(--rubrik); color: var(--t-text); }
+.senvunna__rad--vunnen .senvunna__summa { color: var(--t-gron-text, var(--t-text)); }
+html[data-layout="minimal"] .senvunna { display: none; }
+/* Ryms inte rubriken plus minst en hel rad visas ingenting (ingen ensam rubrik) */
+.senvunna { container: senvunna / size; }
+@container senvunna (max-height: 104px) { .senvunna > * { visibility: hidden; } }
+
+/* Kundmötets kortkommandon (2026-10-29): lika breda tangenter, texten på en rad, och rutorna kompakta så att
+   "Anteckningar" ryms; tangenten och texten centreras i höjd */
+.vy .tangenter .tangenter__lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.vy .tangenter .tangenter__lista > span { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 8px 10px; white-space: nowrap; font-size: .86rem; line-height: 1.2; }
+.vy .tangenter .tangenter__lista > span > kbd { flex: none; display: inline-grid; place-items: center; width: 58px; min-width: 58px; height: 30px; padding: 0 6px; box-sizing: border-box; font-size: .74rem; }
+.vy .tangenter .tangenter__lista > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+@container (max-width: 300px) { .vy .tangenter .tangenter__lista { grid-template-columns: minmax(0, 1fr); } }

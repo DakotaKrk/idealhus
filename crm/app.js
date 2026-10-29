@@ -10,6 +10,8 @@
   var IH = window.IH;
   var lugn = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   IH.lugn = lugn;
+  // Samma ?v= som app.js laddades med – 3D-modulerna importeras med den (och blir då samma modul som en <script type=module>)
+  var VER = (function () { var s = document.currentScript, m = s && /\?[^#]*/.exec(s.src || ''); return m ? m[0] : ''; })();
   var $ = IH.$ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = IH.$$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
@@ -116,6 +118,27 @@
     });
   };
   var MAN = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+  // Svenska datum, tider och tal med återanvända Intl-objekt: samma text som d.toLocaleDateString('sv-SE', opt)
+  // ('d'), toLocaleTimeString ('t'), toLocaleString ('a') och n.toLocaleString('sv-SE', opt) (IH.lokalTal) –
+  // utan att ett nytt formatobjekt byggs vid varje anrop. Standardfälten fylls i som webbläsaren gör.
+  var FORMAT = {}, DATUMFALT = ['weekday', 'year', 'month', 'day'], TIDFALT = ['dayPeriod', 'hour', 'minute', 'second', 'fractionalSecondDigits'];
+  function harFalt(o, f) { for (var i = 0; i < f.length; i++) if (o[f[i]] !== undefined) return true; return false; }
+  function formatFor(typ, opt) {
+    var nyckel = typ + JSON.stringify(opt || {}), f = FORMAT[nyckel];
+    if (f) return f;
+    var x = {}, k;
+    for (k in opt || {}) x[k] = opt[k];
+    if (typ === 'n') return (FORMAT[nyckel] = new Intl.NumberFormat('sv-SE', x));
+    var behov = !x.dateStyle && !x.timeStyle && !(typ !== 't' && harFalt(x, DATUMFALT)) && !(typ !== 'd' && harFalt(x, TIDFALT));
+    if (behov && typ !== 't') { x.year = 'numeric'; x.month = 'numeric'; x.day = 'numeric'; }
+    if (behov && typ !== 'd') { x.hour = 'numeric'; x.minute = 'numeric'; x.second = 'numeric'; }
+    return (FORMAT[nyckel] = new Intl.DateTimeFormat('sv-SE', x));
+  }
+  IH.lokal = function (d, typ, opt) {
+    var t = d instanceof Date ? d.getTime() : new Date(d).getTime();
+    return isNaN(t) ? 'Invalid Date' : formatFor(typ || 'd', opt).format(t);
+  };
+  IH.lokalTal = function (n, opt) { return formatFor('n', opt).format(n); };
   IH.datum = function (iso, medAr) {
     var d = new Date(iso);
     return d.getDate() + ' ' + MAN[d.getMonth()] + (medAr ? ' ' + d.getFullYear() : '');
@@ -554,20 +577,22 @@
       IH.initialer(jag.namn) + (IH.narvaroPrick ? IH.narvaroPrick(jag.id) : '') + '</span>';
   }
   function skal() {
-    var app = $('#app');
-    app.innerHTML = '<aside class="sido" id="sidomeny">' + sidomeny() + '</aside>' +
+    var app = $('#app'), h = { '.sido': sidomeny(), '.sido-rals': rals(), '.topp__konto': toppKonto(), '.mobilmeny': mobilmeny() };
+    app.innerHTML = '<aside class="sido" id="sidomeny">' + h['.sido'] + '</aside>' +
       '<div class="sido-kant"><button class="sido-knapp" type="button" data-sido-knapp aria-controls="sidomeny" aria-expanded="true" aria-label="Dölj menyn" title="Dölj menyn  [">' +
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 9 12l5.5 5.5"/></svg></button>' +
-      '<nav class="sido-rals" aria-label="Meny" inert>' + rals() + '</nav></div>' +
+      '<nav class="sido-rals" aria-label="Meny" inert>' + h['.sido-rals'] + '</nav></div>' +
       '<div class="huvud"><header class="topp">' +
       '<button class="sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök eller skriv ett kommando…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
       '<span class="topp__titel" data-topp-titel></span>' +
       '<span class="proto">Prototyp · exempeldata</span>' +
       (IH.jag().roll === 'admin' ? '' : '<button class="knapp knapp--virke" type="button" data-g="ny">' + IH.i('plus') + 'Ny</button>') +
-      '<button class="topp__konto" type="button" data-g="konto-meny" aria-haspopup="dialog" aria-label="Konto och status">' + toppKonto() + '</button>' +
+      '<button class="topp__konto" type="button" data-g="konto-meny" aria-haspopup="dialog" aria-label="Konto och status">' + h['.topp__konto'] + '</button>' +
       '</header><main class="vy" id="vy" tabindex="-1"></main></div>' +
-      '<nav class="mobilmeny" aria-label="Meny">' + mobilmeny() + '</nav>' +
+      '<nav class="mobilmeny" aria-label="Meny">' + h['.mobilmeny'] + '</nav>' +
       '<div class="toaster" aria-live="polite"></div>';
+    // det som just skrevs är menyernas nuvarande innehåll (IH.uppdateraMeny jämför mot det)
+    Object.keys(h).forEach(function (s) { var el = $(s, app); if (el) el.__ihMeny = h[s]; });
   }
 
   // Sidomenyn kan fällas in på dator (knappen på kanten eller [): menyn glider ut åt vänster
@@ -718,18 +743,21 @@
     setTimeout(function () { k.remove(); }, 750);
   });
 
+  // Menyerna byggs bara om när innehållet faktiskt ändrats (samma HTML som förra gången = samma DOM).
+  // Svaret säger om sidomenyn byggdes om – grund.js räknar då om vad som får plats.
+  function skrivMeny(el, html) {
+    if (el.__ihMeny === html) return false;
+    el.innerHTML = html; el.__ihMeny = html;
+    return true;
+  }
   IH.uppdateraMeny = function () {
-    var sido = $('.sido');
-    if (sido) {
-      sido.innerHTML = sidomeny();
-      markera(true);
-    }
-    var mm = $('.mobilmeny');
-    if (mm) { mm.innerHTML = mobilmeny(); markera(true); }
-    var rl = $('.sido-rals');
-    if (rl) { rl.innerHTML = rals(); markera(true); }
-    var tk = $('.topp__konto');
-    if (tk) tk.innerHTML = toppKonto();
+    var sido = $('.sido'), mm = $('.mobilmeny'), rl = $('.sido-rals'), tk = $('.topp__konto');
+    var sidoNy = !!sido && skrivMeny(sido, sidomeny());
+    var mmNy = !!mm && skrivMeny(mm, mobilmeny());
+    var rlNy = !!rl && skrivMeny(rl, rals());
+    if (sidoNy || mmNy || rlNy) markera(true);
+    if (tk) skrivMeny(tk, toppKonto());
+    return sidoNy;
   };
 
   function markera(direkt) {
@@ -805,6 +833,7 @@
     var yta = $('#vy');
     if (!yta) return;
     if (sparr) vyfn = sparrVy;
+    else if (TRE_VY[adr.vy] && !adr.del[0]) importera3d(TRE_VY[adr.vy]);
     // Vyerna kan läsa om det här är ett byte eller en omritning på plats
     // (då ska t.ex. husen inte resa sig igen).
     var nyckel = adr.vy + '/' + adr.del.join('/'), forraDel = forraVy === null ? null : forraVy.split('/'), ut;
@@ -888,6 +917,8 @@
   // Gemensamt efter varje ritning: entréer, räkneverk och lutning.
   IH.efterRitning = function (rot) {
     var minimal = !!(IH.layout && IH.layout() === 'minimal');
+    // Ändlösa animationer i stora block pausas när blocket inte syns (Projekt, Dokument, Profil, Kundmöte)
+    if (IH.pausaUtanfor) $$('.prodblock--fabrik, .kal, .nedrakning, .dk-hjalte, .lp-phjalte, .motescen', rot).forEach(IH.pausaUtanfor);
     $$('[data-in]', rot).forEach(function (el, n) { el.style.setProperty('--in', Math.min(n, 10)); });
     $$('[data-stagger]', rot).forEach(function (c) {
       Array.prototype.forEach.call(c.children, function (ch, k) { ch.style.setProperty('--k', Math.min(k, 14)); });
@@ -1321,6 +1352,29 @@
         (IH.jag().roll === 'admin' ? '' : tangent('G Ö · G I · G T', 'Gå till översikten, förfrågningarna eller säljtavlan') + tangent('G K · G O · G A', 'Gå till kunderna, offerterna eller Att göra') + tangent('G P · G M', 'Gå till projekten eller meddelandena')) + (admin ? tangent('Shift Esc', 'Lämna supportläget') : '') + tangent('?', 'Den här listan') + '</div>' });
   };
 
+  // 3D-scenerna (three.js) laddas först när en sida med en scen visas – modulerna monterar sig själva vid import.
+  // Hämtningen börjar redan när man pekar på länken eller när sidan börjar ritas (Projekt, Kundmöte).
+  var tre = {}, TRE_VY = { produktion: 'resa3d', mote: 'motesrum3d' };
+  function importera3d(namn) {
+    if (!tre[namn]) tre[namn] = import('./' + namn + '.js' + VER).catch(function () { tre[namn] = null; });
+  }
+  // Importen (och scenbygget) startar efter första målningen, så att sidans rubrik och innehåll syns först
+  function ladda3d() {
+    var vy = $('#vy');
+    if (!vy) return;
+    var namn = [];
+    if (!tre.resa3d && vy.querySelector('[data-resa3d]')) namn.push('resa3d');
+    if (!tre.motesrum3d && vy.querySelector('[data-motesrum3d]')) namn.push('motesrum3d');
+    if (namn.length) requestAnimationFrame(function () { setTimeout(function () { namn.forEach(importera3d); }, 0); });
+  }
+  ['pointerover', 'focusin', 'touchstart'].forEach(function (typ) {
+    document.addEventListener(typ, function (ev) {
+      var a = ev.target.closest && ev.target.closest('a[href^="#/produktion"], a[href^="#/mote"]');
+      var namn = a && TRE_VY[(a.getAttribute('href').split('/')[1] || '')];
+      if (namn && !tre[namn] && !IH.sparrad(a.getAttribute('href').split('/')[1])) importera3d(namn);
+    }, { passive: true });
+  });
+
   /* --- Start ------------------------------------------------------------- */
   IH.starta = function () {
     if (!inloggad()) { location.replace('logga-in.html'); return; }
@@ -1328,7 +1382,7 @@
     if (!IH.kantKonto()) { try { localStorage.removeItem('ih-crm-inloggad'); } catch (e) { /* */ } location.replace('logga-in.html'); return; }
     skal();
     sattSido(sidoDold(), false);
-    new MutationObserver(centreraAlla).observe($('#vy'), { childList: true, subtree: true });
+    new MutationObserver(function () { centreraAlla(); ladda3d(); }).observe($('#vy'), { childList: true, subtree: true });
     kopplaHandelser();
     rita();
     requestAnimationFrame(function () { flyttaMarkor(true); });

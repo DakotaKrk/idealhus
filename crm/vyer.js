@@ -62,7 +62,25 @@
     return 'linear-gradient(135deg,' + p[0] + ',color-mix(in srgb,' + p[1] + ',' + p[0] + ' var(--t-avatar-ljus,0%)))';
   }
   function kundAvatar(k, liten) { return avatar(k ? k.namn : '?', liten, kundfarg(k ? k.id : 0)); }
-  function tumme(src) { return '<span class="tumme"><img src="' + src + '" alt="" loading="lazy" decoding="async"></span>'; }
+  // Mindre kopior av husbilderna (samma proportioner) där bilden bara visas liten: tummar och mötesagendan (400 px,
+  // byggelementen 450 px) och kundkortets hus (800 px). Helskärm och stora bilder har originalen; okända bilder också.
+  IH.liten = function (src, w) {
+    var s = String(src || '');
+    if (/\/images\/hus-r[1-5]\.webp$/.test(s)) return s.replace(/\.webp$/, '-' + (w === 800 ? 800 : 400) + '.webp');
+    if (w !== 800 && /\/foto\/lyft-stommar\.webp$/.test(s)) return s.replace(/\.webp$/, '-450.webp');
+    return src;
+  };
+  function tumme(src) { return '<span class="tumme"><img src="' + IH.liten(src, 400) + '" alt="" loading="lazy" decoding="async"></span>'; }
+  // Mötet i helskärm visar originalen: de hämtas i förväg så fort man pekar på eller fokuserar Starta-knappen
+  var moteForladdat = false;
+  ['pointerover', 'focusin', 'pointerdown'].forEach(function (typ) {
+    document.addEventListener(typ, function (ev) {
+      if (moteForladdat || !(ev.target.closest && ev.target.closest('[data-g="starta-mote"]'))) return;
+      moteForladdat = true;
+      var sedda = {};
+      (IH.MOTE_BILDER || []).forEach(function (b) { if (!b.bild || sedda[b.bild]) return; sedda[b.bild] = 1; var im = new Image(); im.decoding = 'async'; im.src = b.bild; });
+    }, { passive: true });
+  });
   // Ett tomt läge säger vad som saknas och vad man kan göra åt det.
   // knapp: { text, g, id, attr, href, ikon }.
   function tomt(ikon, text, knapp) {
@@ -194,6 +212,32 @@
   // ovanför och den pågående månaden i full färg. Ett mått, en axel.
   // Affärerna per hus: vunnet mörkt och öppet ljust i samma stapel,
   // skalat mot huset med störst summa. Förlorade räknas inte.
+  // Senast vunna: fyller intäktskortet när kolumnen bredvid är högre. Listan har ingen egen höjd (flex-basis 0 i CSS),
+  // så den syns bara på yta som annars hade varit tom, och rader som inte får plats hela döljs.
+  // Rader som inte får plats bryts till en dold kolumn – de görs också onåbara (tabb, skärmläsare)
+  function kopplaSenvunna(rot) {
+    var lista = rot.querySelector('.senvunna__lista');
+    if (!lista || !window.IntersectionObserver) return;
+    var io = new IntersectionObserver(function (poster) {
+      poster.forEach(function (p) { var syns = p.intersectionRatio > 0.98; p.target.inert = !syns; p.target.style.visibility = syns ? '' : 'hidden'; });
+    }, { root: lista, threshold: [0, 0.98, 1] });
+    [].forEach.call(lista.children, function (r) { io.observe(r); });
+  }
+  function senastVunna() {
+    var aff = db().affarer.filter(function (a) { return !a.forlorad; });
+    var vunna = aff.filter(function (a) { return a.steg === 'vunnen' && a.vunnen; })
+      .sort(function (a, b) { return new Date(b.vunnen) - new Date(a.vunnen); }).slice(0, 4);
+    var oppna = aff.filter(function (a) { return a.steg !== 'vunnen'; })
+      .sort(function (a, b) { return (b.varde || 0) - (a.varde || 0); }).slice(0, 10 - vunna.length);
+    var v = vunna.concat(oppna);
+    if (!v.length) return '';
+    return '<div class="senvunna"><p class="perhus__rubrik"><small>Senast vunna och största öppna</small></p><div class="senvunna__lista">' + v.map(function (a) {
+      var k = IH.kund(a.kund), m = IH.modell(a.modell), st = IH.steg && IH.steg(a.steg), vann = a.steg === 'vunnen';
+      return '<a class="senvunna__rad' + (vann ? ' senvunna__rad--vunnen' : '') + '" href="#/salj/' + e(a.id) + '">' + (m && m.bild ? tumme(m.bild) : '') +
+        '<span class="senvunna__namn"><b>' + e(k ? k.namn : 'Kund') + '</b><small>' + e(m ? m.namn : '') + ' · ' + (vann ? 'vunnen ' + e(IH.datum(a.vunnen)) : e(st && st.namn ? st.namn : '')) + '</small></span>' +
+        '<b class="senvunna__summa">' + IH.kort(a.varde) + '</b></a>';
+    }).join('') + '</div></div>';
+  }
   function perHus() {
     var per = {};
     db().affarer.forEach(function (a) {
@@ -226,7 +270,7 @@
     var iMan = 0, fMan = 0, fSamma = 0;
     db().affarer.forEach(function (a) { if (a.steg !== 'vunnen' || !a.vunnen) return; var d = new Date(a.vunnen); if (d >= i0) iMan += a.varde || 0; else if (d >= f0) { fMan += a.varde || 0; if (d.getDate() <= nu.getDate()) fSamma += a.varde || 0; } });
     var nara = oppna.filter(function (a) { return a.steg === 'forhandling' || a.steg === 'offert'; }), naraV = nara.reduce(function (t, a) { return t + (a.varde || 0) * sannolikhet(a) / 100; }, 0);
-    var mn = nu.toLocaleDateString('sv-SE', { month: 'long' }), fmn = f0.toLocaleDateString('sv-SE', { month: 'long' });
+    var mn = IH.lokal(nu, 'd', { month: 'long' }), fmn = IH.lokal(f0, 'd', { month: 'long' });
     var jmf = fSamma ? Math.round((iMan - fSamma) / fSamma * 100) : null;
     return '<div class="ik-insikt">' +
       '<span><small>' + mn.charAt(0).toUpperCase() + mn.slice(1) + ' hittills</small><b>' + IH.kort(iMan) + '</b>' + (jmf != null ? '<em data-upp="' + (jmf >= 0) + '" title="Mot samma dagar i ' + fmn + '">' + (jmf >= 0 ? '↑ ' : '↓ ') + Math.abs(jmf) + ' % mot samma dagar i ' + fmn + '</em>' : '<em>Hela ' + fmn + ': ' + IH.kort(fMan) + '</em>') + '</span>' +
@@ -522,7 +566,7 @@
           '<header class="kort__huvud"><h2><span class="kort__ikon">' + i('graf') + '</span>Intäkter</h2><span class="ik-verktyg"><span class="tv-seg" role="group" aria-label="Period">' + [[6, '6 mån'], [12, '12 mån']].map(function (x) { return '<button type="button" data-g="ik-period" data-f="' + x[0] + '" aria-pressed="' + (intaktPeriod === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</span><button type="button" class="tv-ikon" data-g="ik-csv" title="Exportera vunna affärer som CSV">' + i('skrivut') + '</button></span></header>' +
           '<div class="kort__kropp"><div class="graf__tal"><div><small>Vunnet i år</small><b class="tal" data-rakna="' + Math.round(summa(vunnet)) + '" data-format="kr">' + IH.kr(summa(vunnet)) + '</b></div>' +
           '<div><small>Viktat värde</small><b class="tal" data-rakna="' + Math.round(viktat(oppna)) + '" data-format="kr">' + IH.kr(viktat(oppna)) + '</b></div>' +
-          '<div><small>Snittorder</small><b class="tal" data-rakna="' + Math.round(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '" data-format="kr">' + IH.kr(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '</b></div></div>' + intaktInsikt(oppna) + intaktsgraf() + perHus() + '</div>' +
+          '<div><small>Snittorder</small><b class="tal" data-rakna="' + Math.round(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '" data-format="kr">' + IH.kr(vunnet.length ? summa(vunnet) / vunnet.length : 0) + '</b></div></div>' + intaktInsikt(oppna) + intaktsgraf() + perHus() + senastVunna() + '</div>' +
         '</section>' +
       '</div><div class="oversikt__kol">' +
         (fokus.length ? '<section class="kort ov-fokus" data-in>' +
@@ -551,6 +595,7 @@
         lastbilsTurer(rot);
         IH.pausaUtanfor($('.hero', rot));
         kopplaGraf(rot);
+        kopplaSenvunna(rot);
         balanseraOversikt();
         setTimeout(balanseraOversikt, 700);
       }
@@ -699,16 +744,26 @@
           if (!dok || !dok.body) { kort.classList.add('verktygram--klar'); return; }
           verktygTema(dok);
           var omTema = function () {
-            if (!ram.isConnected) { window.removeEventListener('ih:tema', omTema); return; }
+            if (!ram.isConnected) { stada(); return; }
             var d2; try { d2 = ram.contentDocument; } catch (err) { d2 = null; }
             verktygTema(d2);
           };
           window.addEventListener('ih:tema', omTema);
           var sek = dok.getElementById('kolla-marken') || dok.body;
           verktygText(sek);
-          if (window.MutationObserver) new MutationObserver(function () { verktygText(sek); }).observe(sek, { childList: true, subtree: true, characterData: true });
+          var mo = window.MutationObserver ? new MutationObserver(function () { if (sek) verktygText(sek); }) : null;
+          if (mo) mo.observe(sek, { childList: true, subtree: true, characterData: true });
+          // När sidan lämnas släpps ramens dokument: lyssnare och observatörer kopplas bort
+          var stada = function () {
+            window.removeEventListener('ih:tema', omTema); window.removeEventListener('hashchange', senare);
+            if (ro) ro.disconnect(); if (mo) mo.disconnect();
+            sek = dok = null;
+          };
+          var senare = function () { setTimeout(function () { if (!ram.isConnected) stada(); }, 400); };
+          window.addEventListener('hashchange', senare);
           // Ramen följer innehållets höjd (sökningen fäller ut kartan och genomskärningen).
           var hojd = function () {
+            if (!sek) return;
             var h = Math.ceil(sek.getBoundingClientRect().height);
             if (!ram.isConnected) { if (ro) ro.disconnect(); return; }
             if (h && Math.abs(ram.offsetHeight - h) > 1) requestAnimationFrame(function () { ram.style.height = h + 'px'; });
@@ -2596,7 +2651,7 @@
       '<section class="kn kort" data-in data-varm="' + (nasta.varm ? 'ja' : 'nej') + '"><span class="kn__ikon">' + i(nasta.ikon) + '</span><div><small>Nästa steg</small><b>' + e(nasta.text) + '</b><em>' + e(nasta.under) + '</em></div>' + nastaKnapp + '</section>' +
       '<div class="kg">' +
         '<div class="kg__vanster">' +
-          (husNu ? '<section class="kort khus" data-in><img src="' + husNu.bild + '" alt="' + e(husNu.namn) + '" loading="lazy"><div><small>Huset ' + e(forsta(k.namn)) + ' tittar på</small><b>' + e(husNu.namn) + '</b><em>' + e([husNu.kategori, husNu.yta ? husNu.yta + ' m²' : '', husNu.matt].filter(Boolean).join(' · ')) + '</em></div></section>' : '') +
+          (husNu ? '<section class="kort khus" data-in><img src="' + IH.liten(husNu.bild, 800) + '" alt="' + e(husNu.namn) + '" loading="lazy"><div><small>Huset ' + e(forsta(k.namn)) + ' tittar på</small><b>' + e(husNu.namn) + '</b><em>' + e([husNu.kategori, husNu.yta ? husNu.yta + ' m²' : '', husNu.matt].filter(Boolean).join(' · ')) + '</em></div></section>' : '') +
           '<section class="kort" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('tavla') + '</span>Affärer <em class="rakna">' + aff.length + '</em></h2><button class="knapp knapp--liten" type="button" data-g="ny-affar-kund" data-id="' + k.id + '">' + i('plus') + 'Ny</button></header><div class="ka" data-stagger>' +
             (aff.length ? aff.map(function (a2) {
               var st = IH.steg(a2.steg), m = IH.modell(a2.modell), ix = stegIx(a2), max = IH.SALJSTEG.length - 1;
@@ -3626,7 +3681,7 @@
     // Bunten med presentationens bilder, bläddras på bordet.
     var bunt = valda.map(function (id, n) {
       var bb = IH.MOTE_BILDER.filter(function (x) { return x.id === id; })[0];
-      return '<i class="stack__kort" style="--n:' + n + '"><img src="' + bb.bild + '" alt="" loading="lazy" decoding="async"></i>';
+      return '<i class="stack__kort" style="--n:' + n + '"><img src="' + IH.liten(bb.bild, 400) + '" alt="" loading="lazy" decoding="async"></i>';
     }).join('');
     // Det som ligger på planeringsbordet: ritningar, kontrakt, pennor,
     // linjal, tumstock, måttband, kaffe, lampa, husmodellen och
@@ -3813,7 +3868,7 @@
           '<fieldset class="falt"><span>Bilder i presentationen – klicka för att ta bort eller lägga till</span><div class="agenda" data-agenda>' + IH.MOTE_BILDER.map(function (bb, n) {
             var med = valda.indexOf(bb.id) >= 0, kan = bb.id !== 'er' || !!f;
             return '<label class="agenda__kort' + (med ? ' med' : '') + (kan ? '' : ' agenda__kort--saknas') + '" style="--n:' + n + '"><input type="checkbox" name="bild" value="' + bb.id + '"' + (med ? ' checked' : '') + (kan ? '' : ' disabled') + '>' +
-              '<img src="' + bb.bild + '" alt="" loading="lazy" decoding="async"><span class="agenda__nr">' + (n + 1) + '</span><span class="agenda__text"><b>' + e(bb.namn) + '</b><small>' + (kan ? MOTE_MIN[bb.id] + ' min' : 'kräver förfrågan') + '</small></span><i class="agenda__bock">' + i('bock') + '</i></label>';
+              '<img src="' + IH.liten(bb.bild, 400) + '" alt="" loading="lazy" decoding="async"><span class="agenda__nr">' + (n + 1) + '</span><span class="agenda__text"><b>' + e(bb.namn) + '</b><small>' + (kan ? MOTE_MIN[bb.id] + ' min' : 'kräver förfrågan') + '</small></span><i class="agenda__bock">' + i('bock') + '</i></label>';
           }).join('') + '</div>' + tidsband(valda) + '<p class="agenda__summa">' + IH.emo('klocka') + ' Beräknad tid <b data-motetid>≈ ' + total + ' min</b> · <span data-moteantal>' + valda.length + (valda.length === 1 ? ' bild' : ' bilder') + '</span></p></fieldset>' +
 
           (a ? '<div class="motecheck"><p class="etikett">Inför mötet</p><ul>' + check.map(function (c) {
@@ -4448,7 +4503,7 @@
       var f = new Date(idag0.getFullYear(), idag0.getMonth() + agUi.off, 1);
       start = new Date(f); start.setDate(1 - ((f.getDay() + 6) % 7));
       dagar = Math.ceil((((f.getDay() + 6) % 7) + new Date(f.getFullYear(), f.getMonth() + 1, 0).getDate()) / 7) * 7;
-      rubrik = f.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' });
+      rubrik = IH.lokal(f, 'd', { month: 'long', year: 'numeric' });
     } else {
       var n = agUi.vy === 'tva' ? 14 : 7;
       start = new Date(idag0); start.setDate(idag0.getDate() - ((idag0.getDay() + 6) % 7) + agUi.off * n);
