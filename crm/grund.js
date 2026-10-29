@@ -38,7 +38,8 @@
    och glider tillbaka mjukt när musen går därifrån i stället för att hoppa 6 px. */
 (() => {
   'use strict';
-  if (matchMedia('(pointer: coarse)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // Avstängd 2026-10-29: inga effekter som följer musen (användarens önskan) – knapparna står still
+  return;
   const SEL = '.sido-knapp, .chf-ikon';
   let ram = 0, vilaTill = 0;
   const tillbaka = (el) => {
@@ -119,7 +120,9 @@
     if (fokus && k) k.focus({ preventScroll: true });
   }
   function oppnaMer(knapp) {
-    if (document.querySelector('.sido__merpop')) { stangMer(); return; }
+    if (document.querySelector('.sido__merpop:not(.ut)')) { stangMer(); return; }
+    // en meny som håller på att stänga tas bort direkt, så att ett snabbt nytt klick öppnar igen
+    Array.prototype.forEach.call(document.querySelectorAll('.sido__merpop.ut'), function (p) { p.remove(); });
     var nav = knapp.closest('.sido__nav'), pop = document.createElement('div');
     pop.className = 'sido__merpop'; pop.setAttribute('role', 'menu');
     var html = '', forraRubrik = '';

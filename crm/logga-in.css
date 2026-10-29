@@ -1547,3 +1547,19 @@
   .li__topp .li__marke { min-width: 0; }
   .li__roller { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* 2026-10-29: tillbaka-knappen som rund ikon – flex i stället för grid (textnoden blev en egen rad i rutnätet och
+   sköt pilen ur mitten), mjuk glasyta och pilen som glider åt vänster vid hovring. Sidan kan aldrig bli bredare än
+   fönstret (kort och rader krymper i stället för att gå ut över kanten). */
+.li__topp .li__tillbaka { transition: background-color .2s ease, box-shadow .2s ease, transform .16s cubic-bezier(.32, .72, 0, 1); }
+.li__topp .li__tillbaka .i { transition: transform .28s cubic-bezier(.32, .72, 0, 1); }
+.li__topp .li__tillbaka:hover .i { transform: translateX(-3px); }
+.li__topp .li__tillbaka:active { transform: scale(.94); }
+@media (max-width: 440px) {
+  .li__topp .li__tillbaka { display: inline-flex !important; align-items: center; justify-content: center; line-height: 0; border-radius: 50%;
+    background: rgb(var(--t-glas-rgb) / .9); box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .25), 0 6px 14px -10px rgb(var(--t-skugga-varm-rgb) / .6); }
+  .li__topp .li__tillbaka .i { flex: none; margin: 0 !important; }
+}
+html, body.li { max-width: 100%; overflow-x: clip; }
+.li__vanster, .li__innehall, .li__innehall > * { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.li__titel { overflow-wrap: anywhere; }

@@ -34,6 +34,11 @@
   // Ett inaktiverat konto loggas ut direkt (även om det loggades in innan det inaktiverades)
   if (IH.riktigJag().inaktiv) { try { localStorage.removeItem('ih-crm-inloggad'); } catch (x) { /* privat läge */ } location.replace('logga-in.html?inaktiv=1'); }
   IH.andraKonto = andra;
+  // Kontoändringar (mål, chefsroll, inaktiverat) från en annan flik läses in här också
+  window.addEventListener('storage', function (e) {
+    if (e.key !== INST) return;
+    tillampa(); if (IH.uppdateraMeny) IH.uppdateraMeny(); IH.rita();
+  });
   IH.arAktivt = function (u) { return !!u && !u.inaktiv; };
   var valjForra = IH.G['valj-anvandare'];
   IH.G['valj-anvandare'] = function (el) {
@@ -50,7 +55,7 @@
     return t ? IH.sedan(t) : 'Aldrig';
   }
   var lagring = function () { var b = 0; try { for (var n = 0; n < localStorage.length; n++) { var k = localStorage.key(n); if (/^ih-/.test(k)) b += (k.length + (localStorage.getItem(k) || '').length) * 2; } } catch (x) { /* */ } return b; };
-  var kb = function (b) { return b >= 1048576 ? (b / 1048576).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' MB' : Math.round(b / 1024) + ' kB'; };
+  var kb = function (b) { return b >= 1048576 ? (b / 1048576).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' kB'; };
   var SAML = [['Kunder', 'kunder'], ['Förfrågningar', 'forfragningar'], ['Affärer', 'affarer'], ['Offerter', 'offerter'], ['Projekt', 'projekt'], ['Händelser', 'aktiviteter'], ['Uppgifter', 'uppgifter'], ['Dokument', 'dokument'], ['Frånvaro', 'franvaro']];
   var band = function (nr, rubrik, em, inne, opts) {
     opts = opts || {};
@@ -262,6 +267,10 @@
     for (var m = 0; m < TEXT.length; m++) { var t = x[TEXT[m]]; if (t != null && typeof t !== 'string' && typeof t !== 'number') return TEXT[m]; }
     return extra ? extra(x) : null;
   }
+  // Frånvaron: typ måste vara en av FRANVARO i ledning.js och datumen läsbara – annars kraschar profilen och chefsvyn
+  var FV_TYPER = { semester: 1, sjuk: 1, ledig: 1, utbildning: 1 };
+  var datumOk = function (v) { return typeof v === 'string' && !isNaN(Date.parse(v)); };
+  var franvaroFel = function (f) { return !Object.prototype.hasOwnProperty.call(FV_TYPER, f.typ) ? 'typ' : !datumOk(f.fran) ? 'fran' : !datumOk(f.till) ? 'till' : null; };
   function granskaDjupt(ny) {
     var lista = function (k) { return ny[k] == null ? [] : ny[k]; };
     var samlingar = KRAV.concat(['dokument', 'franvaro']);
@@ -269,7 +278,7 @@
       var k = samlingar[s];
       if (!Array.isArray(lista(k))) return 'Delen ' + namnFor(k) + ' i filen är inte en lista.';
       var fel = null;
-      lista(k).some(function (x) { fel = postFel(x, k === 'offerter' ? function (o) { return o.rader != null && (!Array.isArray(o.rader) || o.rader.some(function (r) { return !arObj(r) || (r.antal != null && (typeof r.antal !== 'number' || !isFinite(r.antal))) || (r.pris != null && (typeof r.pris !== 'number' || !isFinite(r.pris))); })) ? 'rader' : null; } : null); return fel; });
+      lista(k).some(function (x) { fel = postFel(x, k === 'offerter' ? function (o) { return o.rader != null && (!Array.isArray(o.rader) || o.rader.some(function (r) { return !arObj(r) || (r.antal != null && (typeof r.antal !== 'number' || !isFinite(r.antal))) || (r.pris != null && (typeof r.pris !== 'number' || !isFinite(r.pris))); })) ? 'rader' : null; } : k === 'franvaro' ? franvaroFel : null); return fel; });
       if (fel) return 'Ogiltigt värde (' + fel + ') i ' + namnFor(k) + ' – filen kan inte importeras.';
     }
     // Prislistan: samma krav på id som övriga poster och priser som riktiga tal (id:t sätts in i option-värden och fältnamn)

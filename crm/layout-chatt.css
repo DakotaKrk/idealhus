@@ -67,7 +67,6 @@
   html[data-layout="minimal"] .ch-system { margin: 4px 0; }
   html[data-layout="minimal"] .ch-medd { gap: 8px; margin-top: 8px; }
   html[data-layout="minimal"] .ch-medd.fortsatt { margin-top: 2px; }
-  html[data-layout="minimal"] .ch-medd.ny { animation: none; }
   html[data-layout="minimal"] .ch-medd .avatar--liten,
   html[data-layout="minimal"] .ch-medd__plats { width: 24px; height: 24px; font-size: .58rem; }
   html[data-layout="minimal"] .ch-medd .avatar--liten .narvaro-prick { width: 7px; height: 7px; }
@@ -79,8 +78,6 @@
 
   /* --- Minimal: fönstret och bubblan ----------------------------------------------------------- */
   /* Bubblan andas och vickar inte (lugnt) – vågen vid olästa och siffran står kvar som signal */
-  @media (prefers-reduced-motion: no-preference) {
-    html[data-layout="minimal"] .chf-ikon[data-puls] { animation: chf-in .35s var(--mjuk) both; }
-  }
+  html[data-layout="minimal"] .chf-ikon[data-puls]::before { animation: none; opacity: 0; }
   html[data-layout="minimal"] .chf-ikon[data-puls] .emo-ik { animation: none; }
 }

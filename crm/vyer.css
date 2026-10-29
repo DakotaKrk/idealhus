@@ -161,8 +161,7 @@ html[data-lamnar]::after {
   letter-spacing: -0.045em;
 }
 
-.hero__titel em,
-.kundhero h1 em {
+.hero__titel em {
   font-style: normal;
   background: linear-gradient(100deg, #d9974f 0%, var(--t-virke) 30%, #ffe2b8 50%, var(--t-virke) 70%, #d9974f 100%);
   background-size: 220% 100%;
@@ -1993,66 +1992,6 @@ html[data-lamnar]::after {
   from { transform: scaleX(0); }
 }
 
-.sla {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(90px, 0.6fr);
-  gap: 12px;
-  align-items: center;
-  margin: 16px 0 2px;
-  padding: 11px 14px;
-  border-radius: 16px;
-  background: var(--ben);
-  box-shadow: inset 0 0 0 1px var(--kant);
-}
-
-.sla > .i {
-  width: 18px;
-  height: 18px;
-  color: var(--virke-djup);
-}
-
-.sla b {
-  display: block;
-  font: 600 0.8125rem/1.3 var(--rubrik);
-}
-
-.sla small {
-  font-size: 0.75rem;
-  color: var(--text-3);
-}
-
-.sla__spar {
-  position: relative;
-  display: block;
-  height: 6px;
-  overflow: hidden;
-  border-radius: 6px;
-  background: var(--kant);
-}
-
-.sla__spar i {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--t-mint), var(--virke));
-  transform: scaleX(var(--a));
-  transform-origin: left;
-  animation: stapel-x .78s var(--mjuk) .15s backwards;
-}
-
-.sla--over {
-  background: var(--vx-fbeee4);
-  box-shadow: inset 0 0 0 1px var(--vx-sla-kant);
-}
-
-.sla--over > .i {
-  color: var(--vx-b5541f);
-}
-
-.sla--over .sla__spar i {
-  background: linear-gradient(90deg, var(--virke), var(--vx-d9733a));
-}
-
 .flikar--filter {
   margin-bottom: 18px;
 }
@@ -2088,54 +2027,6 @@ html[data-lamnar]::after {
 .tid--varm {
   color: var(--vx-b5541f);
   font-weight: 600;
-}
-
-.dagring {
-  --p: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 18px 8px 8px;
-  border-radius: 999px;
-  background: var(--vit);
-  box-shadow: inset 0 0 0 1px var(--kant), 0 10px 24px -18px rgb(var(--t-skugga-rgb) / 0.5);
-}
-
-.dagring svg {
-  width: 48px;
-  height: 48px;
-  transform: rotate(-90deg);
-}
-
-.dagring circle {
-  fill: none;
-  stroke: var(--kant);
-  stroke-width: 5;
-}
-
-.dagring .dagring__fyll {
-  stroke: var(--virke);
-  stroke-linecap: round;
-  stroke-dasharray: var(--p) 100;
-  animation: dagring 1.4s var(--mjuk) 0.3s backwards;
-}
-
-@keyframes dagring {
-  from { stroke-dasharray: 0 100; }
-}
-
-.dagring--noll .dagring__fyll {
-  display: none;
-}
-
-.dagring b {
-  display: block;
-  font: 600 1rem/1.2 var(--rubrik);
-}
-
-.dagring small {
-  font-size: 0.75rem;
-  color: var(--text-3);
 }
 
 /* --- Översiktens kolumner ------------------------------------------- */
@@ -6086,87 +5977,6 @@ fieldset.falt {
   color: var(--text);
 }
 
-.kundhero {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 22px;
-  align-items: center;
-  margin-bottom: 16px;
-  padding: 28px;
-  border-radius: 30px;
-}
-
-.kundhero > .avatar {
-  width: 84px;
-  height: 84px;
-  border-radius: 26px;
-  font-size: 1.625rem;
-}
-
-.kundhero h1 {
-  font-size: clamp(1.8rem, 1.2rem + 1.8vw, 2.8rem);
-  letter-spacing: -0.04em;
-}
-
-.kundhero .etikett {
-  margin-bottom: 8px;
-}
-
-.kundhero__rad {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 18px;
-  margin: 10px 0 0;
-  font-size: 0.875rem;
-}
-
-.kundhero__rad > * {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--ljus-2);
-  text-decoration: none;
-}
-
-.kundhero__rad a:hover {
-  color: var(--virke);
-}
-
-.kundhero__rad .i {
-  width: 15px;
-  height: 15px;
-}
-
-.kundhero__tal {
-  display: flex;
-  gap: 8px;
-}
-
-.kundhero__tal div {
-  min-width: 96px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgb(var(--t-pa-mork-rgb) / 0.06);
-  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.1);
-}
-
-.kundhero__tal small {
-  display: block;
-  font-size: 0.6875rem;
-  color: var(--ljus-3);
-}
-
-.kundhero__tal b {
-  font-size: 1.25rem;
-}
-
-.kundhero__knappar {
-  grid-column: 2 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 /* --- Offerten ------------------------------------------------------- */
 .offertyta {
   display: grid;
@@ -6444,33 +6254,6 @@ fieldset.falt {
   gap: 18px;
 }
 
-.motestapel {
-  position: relative;
-  height: 272px;
-  perspective: 1200px;
-}
-
-.motestapel__kort {
-  position: absolute;
-  top: 18px;
-  left: 50%;
-  display: block;
-  width: min(340px, 78%);
-  aspect-ratio: 1600 / 1062;
-  overflow: hidden;
-  border-radius: 18px;
-  background:
-    radial-gradient(80% 90% at 100% 0%, rgb(var(--t-virke-rgb) / 0.25), transparent 60%),
-    linear-gradient(160deg, var(--vx-2a261f), var(--t-kol));
-  box-shadow: 0 30px 50px -30px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.08);
-  color: var(--krita);
-  transform: translateX(calc(-50% + var(--n) * 16px)) translateZ(calc(var(--n) * -40px)) rotateY(-18deg);
-  transition: transform 0.8s var(--mjuk);
-  animation: stapel-in 1s var(--studs) backwards, stapel-flyt 5s ease-in-out infinite alternate;
-  animation-delay: calc(var(--n) * 0.1s), calc(1s + var(--n) * 0.3s);
-  z-index: calc(10 - var(--n));
-}
-
 @keyframes stapel-in {
   from { opacity: 0; transform: translateX(-50%) translateY(40px) rotateY(-50deg); }
 }
@@ -6479,52 +6262,8 @@ fieldset.falt {
   to { translate: 0 -6px; }
 }
 
-.motestapel:hover .motestapel__kort {
-  transform: translateX(calc(-50% + (var(--n) - 2) * 26%)) translateZ(calc(var(--n) * -60px)) rotateY(-24deg);
-}
-
 /* Hela huset syns – bilden har samma format som kortet. Texten ligger
    upptill, skylten nere till vänster lämnas fri. */
-.motestapel__kort img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.motestapel__text {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  display: grid;
-  gap: 3px;
-  padding: 12px 14px 26px;
-  background: linear-gradient(rgb(var(--t-natt-rgb) / 0.82), transparent);
-}
-
-.motestapel__kort small {
-  font-size: 0.6875rem;
-  color: var(--ljus-2);
-}
-
-.motestapel__kort b {
-  font: 600 1rem/1.2 var(--rubrik);
-}
-
-@media (hover: none) {
-  .motestapel__tips {
-    display: none;
-  }
-}
-
-.motestapel__tips {
-  margin: 0 0 14px;
-  font-size: 0.75rem;
-  color: var(--text-3);
-  text-align: center;
-}
 
 .motetips {
   display: grid;
@@ -6546,108 +6285,9 @@ fieldset.falt {
 }
 
 /* --- Produktionen --------------------------------------------------- */
-.bana {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 2fr);
-  gap: 26px;
-  align-items: center;
-  margin-bottom: 16px;
-  padding: 26px;
-  border-radius: 30px;
-}
-
-.bana h2 {
-  font-size: 1.75rem;
-}
-
-.bana__ord p:last-child {
-  margin: 10px 0 0;
-  font-size: 0.875rem;
-  color: var(--ljus-2);
-}
-
-.bana__spar {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 4px;
-  padding: 18px 0 8px;
-  perspective: 900px;
-}
-
-.bana__spar::before {
-  content: "";
-  position: absolute;
-  top: 43px;
-  right: 0;
-  left: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--virke), rgb(var(--t-virke-rgb) / 0.15));
-}
-
-.bana__vecka {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  align-content: start;
-  gap: 8px;
-  min-height: 150px;
-  animation: in-upp .45s var(--mjuk) both;
-  animation-delay: calc(0.2s + var(--n) * 0.04s);
-}
-
-.bana__vecka small {
-  font: 600 0.6875rem/1 var(--rubrik);
-  color: var(--ljus-3);
-}
-
-.bana__vecka > i {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--kol-3);
-  box-shadow: 0 0 0 3px rgb(var(--t-pa-mork-rgb) / 0.1);
-}
-
-.bana__vecka.nu small {
-  color: var(--virke);
-}
-
-.bana__vecka.nu > i {
-  background: var(--virke);
-  box-shadow: 0 0 0 5px rgb(var(--t-virke-rgb) / 0.2), 0 0 18px var(--virke);
-}
-
-.bana__hus {
-  display: grid;
-  justify-items: center;
-  gap: 4px;
-  padding: 4px;
-  border: 0;
-  border-radius: 12px;
-  background: rgb(var(--t-pa-mork-rgb) / 0.08);
-  box-shadow: inset 0 0 0 1px rgb(var(--t-pa-mork-rgb) / 0.14);
-  color: var(--krita);
-  font: 600 0.625rem/1 var(--rubrik);
-  transform: rotateX(18deg);
-  transition: transform 0.4s var(--mjuk), background-color 0.3s ease;
-  animation: hus-flyt 4s ease-in-out infinite alternate;
-}
 
 @keyframes hus-flyt {
   to { translate: 0 -4px; }
-}
-
-.bana__hus:hover {
-  background: rgb(var(--t-virke-rgb) / 0.2);
-  transform: rotateX(0) scale(1.08);
-}
-
-.bana__hus img {
-  width: 54px;
-  height: 36px;
-  border-radius: 8px;
-  object-fit: cover;
 }
 
 .tavla--prod {
@@ -6989,22 +6629,6 @@ fieldset.falt {
   .dok {
     transform: none;
   }
-
-  .kundhero {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .kundhero__tal {
-    grid-column: 1 / -1;
-  }
-
-  .kundhero__knappar {
-    grid-column: 1 / -1;
-  }
-
-  .bana {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 @media (max-width: 900px) {
@@ -7130,20 +6754,6 @@ fieldset.falt {
   .valrutor,
   .bildval {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .bana__spar {
-    grid-template-columns: repeat(12, 64px);
-    overflow-x: auto;
-  }
-
-  .kundhero {
-    grid-template-columns: minmax(0, 1fr);
-    padding: 22px;
-  }
-
-  .kundhero__tal {
-    flex-wrap: wrap;
   }
 
   .sok--liten {
@@ -8097,23 +7707,6 @@ section.dk-hjalte.kort .dk-verktyg .kundsort .i { color: rgb(var(--t-pa-kol-rgb)
 .dk-vem button b { font-size: .66rem; opacity: .7; }
 .dk-vem button[aria-pressed="true"] { background: var(--t-gradde); color: var(--t-text); }
 /* mallarna */
-.dk-mallar__ingress { margin: -4px 18px 14px; font-size: .86rem; color: var(--text-2); }
-.dk-mallar__rutnat { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; padding: 0 14px 14px; }
-.dk-mall { display: grid; gap: 12px; padding: 14px; border: 0; border-radius: 20px; background: var(--t-yta-varm-3); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .05); font: inherit; color: inherit; text-align: left; cursor: pointer; transition: transform .3s var(--mjuk), box-shadow .3s; animation: in-rad .45s var(--mjuk) backwards; animation-delay: calc(0.05s + min(var(--n), 10) * 0.042s); }
-.dk-mall:hover { transform: translateY(-4px); box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .45), 0 20px 34px -22px rgb(var(--t-skugga-varm-rgb) / .6); }
-.dk-mall__papper { position: relative; display: grid; align-content: start; gap: 7px; height: 120px; padding: 18px 20px; border-radius: 12px; background: var(--t-yta); box-shadow: 0 10px 20px -14px rgb(var(--t-skugga-djup-rgb) / .5), inset 0 3px 0 var(--t-accent); overflow: hidden; transition: transform .35s var(--mjuk); }
-.dk-mall:hover .dk-mall__papper { transform: rotate(-1.5deg) scale(1.02); }
-.dk-mall__papper i { display: block; height: 5px; border-radius: 4px; background: #efe7da; }
-.dk-mall__papper i:nth-child(1) { width: 55%; height: 8px; background: #e7d6bd; }
-.dk-mall__papper i:nth-child(3) { width: 80%; } .dk-mall__papper i:nth-child(4) { width: 65%; }
-.dk-mall__papper b { position: absolute; right: 14px; bottom: 14px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 12px; background: var(--t-kol); color: var(--t-kol-accent); }
-.dk-mall__papper b .i { width: 17px; height: 17px; }
-.dk-mall__text { display: grid; gap: 4px; }
-.dk-mall__text b { font: 600 .95rem/1.3 var(--rubrik); }
-.dk-mall__text small { font-size: .78rem; color: var(--text-2); }
-.dk-mall__anvand { display: inline-flex; align-items: center; gap: 6px; font: 600 .8rem/1 var(--rubrik); color: var(--virke-djup); }
-.dk-mall__anvand .i { width: 14px; height: 14px; transition: transform .25s var(--mjuk); }
-.dk-mall:hover .dk-mall__anvand .i { transform: translateX(3px); }
 /* detaljarket */
 .dkd { display: grid; gap: 18px; }
 .dkd__topp { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; border-radius: 20px; background: linear-gradient(160deg, var(--t-yta-varm-2), var(--vx-fbf1e1)); box-shadow: inset 0 0 0 1px rgb(var(--t-virke-rgb) / .35); }
@@ -8678,7 +8271,7 @@ section.dk-hjalte .ml-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); 
 }
 @media (max-width: 560px) { .vy .motescen--3d > .motesrum3d { height: 384px; } }
 /* Husbilder beskärs aldrig: tumnaglarna (4:3 och 3:2 blandat) visas hela på en krämvit platta i stället för object-fit: cover */
-.vy .aff__bild img, .vy .kundkort__hus img, .vy .permodell__rad img, .vy .tabell__hus img, .vy .prodvarn__namn img, .vy .bana__hus img,
+.vy .aff__bild img, .vy .kundkort__hus img, .vy .permodell__rad img, .vy .tabell__hus img, .vy .prodvarn__namn img,
 .vy .tumme img, .vy img.tumme, .vy .modellknapp img, .vy .modellval img, .vy .fd__forslag img, .vy .khus img, .vy .af-hus img, .vy .fl__hus img, .vy .fabrik__hus img, .vy .fabrik__bilder img {
   object-fit: contain !important; background: linear-gradient(var(--vx-f7f1e7), var(--vx-efe6d8)); }
 /* Säljtavlan: verktygsraden i en höjd (40 px) och utan ensam knapp på en egen rad; mörka ytor i varm stengrå */
@@ -8995,3 +8588,28 @@ html[data-layout="minimal"] .senvunna { display: none; }
 .kal__valdag--snart .kal__valdatum { background: rgb(var(--t-blaeck-rgb) / .04); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .06); color: var(--t-text); }
 .kal__valdag--snart .kal__valdatum small { color: var(--text-2); }
 .kal__sida .kal__sidadel { align-content: start; }
+
+/* Kundmötets "Så fungerar det" (2026-10-29): två lika spalter med var sin rubrik på samma linje, tipsen som rader i
+   samma stil som kortkommandona, och tipsraderna delar höjden så att vänsterspalten inte slutar med en tom yta */
+.vy .motekort .kort__kropp:has(> .motetips__del) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
+.vy .motetips__del, .vy .motekort .kort__kropp > .tangenter { display: flex; flex-direction: column; gap: 10px; min-width: 0; margin: 0; }
+.vy .motetips__del > .etikett, .vy .motekort .tangenter > .etikett { margin: 0; }
+.vy .motetips__del .motetips { display: grid; grid-auto-rows: 1fr; gap: 8px; flex: 1; margin: 0; padding: 0; list-style: none; }
+.vy .motetips__del .motetips li { display: flex; align-items: center; gap: 12px; margin: 0; padding: 10px 14px; border-radius: 14px; background: rgb(var(--t-glas-rgb) / .7); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .06); font-size: .9rem; line-height: 1.45; }
+.vy .motetips__del .motetips__emoji { flex: none; }
+@media (max-width: 900px) { .vy .motekort .kort__kropp:has(> .motetips__del) { grid-template-columns: minmax(0, 1fr); } }
+
+/* Kundmötets bildval (2026-10-29): korten hoppar inte längre (studsande lyft vid hovring lämnade kort snett),
+   valda kort har en lugn tunn ram, titel överst och minuter nederst i alla kort; tidsbandet i en enda bärnstensfamilj
+   med jämn ton i stället för hård orange mot blek, och alla segment rundade lika */
+.vy .agenda__kort { transition: box-shadow .25s ease, opacity .25s ease, background-color .25s ease, transform .16s var(--ease-out, ease); }
+.vy .agenda__kort:hover { transform: none; box-shadow: inset 0 0 0 1.5px rgb(var(--t-accent-rgb) / .35), 0 10px 22px -16px rgb(var(--t-skugga-varm-rgb) / .6); }
+.vy .agenda__kort:active { transform: scale(.98); }
+.vy .agenda__kort.med { box-shadow: inset 0 0 0 1.5px rgb(var(--t-accent-rgb) / .7), 0 8px 18px -14px rgb(var(--t-accent-djup-rgb) / .45); }
+.vy .agenda__text { display: grid; grid-template-rows: auto 1fr auto; align-content: start; min-height: 56px; }
+.vy .agenda__text small { align-self: end; }
+.vy .tidsband span, .vy .tidsband span:nth-child(even) { background: color-mix(in srgb, var(--t-accent) 34%, var(--t-yta)); color: var(--t-accent-djup, var(--virke-djup)); box-shadow: inset 0 1px 0 rgb(var(--t-glans-rgb) / .5); border-radius: 9px; }
+.vy .tidsband span:nth-child(even) { background: color-mix(in srgb, var(--t-accent) 22%, var(--t-yta)); }
+.vy .tidsband span:hover { background: color-mix(in srgb, var(--t-accent) 55%, var(--t-yta)); }
+.vy .tidsband b { font-size: .78rem; }
+.vy .tidsband small { opacity: .75; }

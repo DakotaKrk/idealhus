@@ -166,7 +166,8 @@
   if (scen) {
     scen.querySelectorAll('[data-djup]').forEach(function (g) { g.style.setProperty('--d', g.getAttribute('data-djup')); });
   }
-  if (scen && !lugn && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  // Parallax efter musen avstängd (2026-10-29)
+  if (false) {
     var bokad = false, x = 0, y = 0;
     document.addEventListener('pointermove', function (e) {
       x = e.clientX / window.innerWidth - 0.5;

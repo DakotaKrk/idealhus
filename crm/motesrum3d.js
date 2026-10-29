@@ -545,7 +545,7 @@ function montera(el) {
   if (!harWebgl()) { document.documentElement.classList.add('ingen-webgl'); el.remove(); return; }
   if (!S) bygg();
   S.el = el; el.appendChild(S.renderer.domElement);
-  const sek = el.parentElement; if (sek) sek.classList.add('motescen--3d'); const rum = sek && sek.querySelector('.motescen__rum'); if (rum) { rum.classList.add('motescen__rum--3d'); sek.addEventListener('pointermove', (ev) => { const r = sek.getBoundingClientRect(); S.musMal.set((ev.clientX - r.left) / r.width * 2 - 1, (ev.clientY - r.top) / r.height * 2 - 1); }); sek.addEventListener('pointerleave', () => S.musMal.set(0, 0)); }
+  const sek = el.parentElement; if (sek) sek.classList.add('motescen--3d'); const rum = sek && sek.querySelector('.motescen__rum'); if (rum) { rum.classList.add('motescen__rum--3d'); if (false) sek.addEventListener('pointermove', (ev) => { const r = sek.getBoundingClientRect(); S.musMal.set((ev.clientX - r.left) / r.width * 2 - 1, (ev.clientY - r.top) / r.height * 2 - 1); }); sek.addEventListener('pointerleave', () => S.musMal.set(0, 0)); }
   S.lage = null; storlek(); starta();
   // fotona på väggen laddas efter första bilden; med minskad rörelse ritas stillbilden om när de är klara
   if (LUGN) [600, 1800].forEach((ms) => setTimeout(starta, ms));

@@ -81,7 +81,7 @@
   function senastFor(u) {
     // den inloggade är aktiv nu, liksom den som är online, i möte, upptagen eller ute på tomt
     if (u.id === IH.jag().id || IH.aktivNu(u.id)) return { text: 'aktiv nu', nu: true };
-    var t = db().aktiviteter.filter(function (h) { return h.av === u.id && new Date(h.tid) <= new Date(); }).map(function (h) { return h.tid; }).sort().pop();
+    var t = db().aktiviteter.filter(function (h) { return h.av === u.id && !h.stod && new Date(h.tid) <= new Date(); }).map(function (h) { return h.tid; }).sort().pop();
     return { text: t ? IH.sedan(t) : '–', nu: false };
   }
   function kontoRad(u, jag) {
@@ -263,7 +263,7 @@
     var forlorade = aff.filter(function (a) { return a.forlorad; });
     // bara det som har hänt räknas som arbete; kontakt = utan systemrader (flyttar, fördelningar …)
     var nuT = new Date();
-    var akt = db().aktiviteter.filter(function (h) { return h.av === u.id && new Date(h.tid) <= nuT; });
+    var akt = db().aktiviteter.filter(function (h) { return h.av === u.id && !h.stod && new Date(h.tid) <= nuT; });
     var kontakt = akt.filter(function (h) { return h.typ !== 'system'; });
     var uppg = db().uppgifter.filter(function (x) { return x.ansvarig === u.id && !x.klar; });
     var idag = dag0(new Date());
@@ -378,7 +378,7 @@
       (u.roll === 'salj' ? ruta('mal', 'Årsmål ' + new Date().getFullYear(), u.mal ? '<strong>' + IH.kort(st.vunnet) + ' <span>av ' + IH.kort(u.mal) + '</span></strong><span class="lp-om-matare" style="--a:' + andel.toFixed(3) + '"><i></i></span><em>' + Math.round(st.vunnet / u.mal * 100) + ' % av målet' + (IH.jag().chef ? ' · <button type="button" class="lp-textknapp" data-g="lp-mal">Ändra</button>' : '') + '</em>' : '<strong>Inget mål</strong>' + (IH.jag().chef ? '<em><button type="button" class="lp-textknapp" data-g="lp-mal">Sätt mål</button></em>' : '')) :
         ruta('blixt', 'Senast aktiv', '<strong>' + e(senastFor(u).text) + '</strong><em>' + e(narvaro(u.id).namn) + '</em>')) +
       ruta('flyg', 'Arbetsdagar', '<span class="lp-vdagar">' + ['M', 'T', 'O', 'T', 'F', 'L', 'S'].map(function (d, k) { return '<i' + (k < 5 ? ' class="pa"' : '') + '>' + d + '</i>'; }).join('') + '</span>' + (nasta ? '<em><b class="lp-fvchip">' + e(FRANVARO[nasta.typ][0]) + '</b> ' + kortDatum(new Date(nasta.fran)) + (nasta.till !== nasta.fran ? '–' + kortDatum(new Date(nasta.till)) : '') + (kanFranvaro(u.id) ? ' · <button type="button" class="lp-textknapp" data-g="lp-franvaro" data-fid="' + nasta.id + '" data-uid="' + u.id + '" data-dag="' + nasta.fran.slice(0, 10) + '">Ändra</button>' : '') + '</em>' : '<em>Ingen frånvaro inlagd' + (kanFranvaro(u.id) ? ' · <button type="button" class="lp-textknapp" data-g="lp-franvaro" data-uid="' + u.id + '">Lägg in</button>' : '') + '</em>'));
-    var senaste = db().aktiviteter.filter(function (h) { return h.av === u.id && new Date(h.tid) <= new Date(); }).sort(function (a, c) { return new Date(c.tid) - new Date(a.tid); }).slice(0, 7);
+    var senaste = db().aktiviteter.filter(function (h) { return h.av === u.id && !h.stod && new Date(h.tid) <= new Date(); }).sort(function (a, c) { return new Date(c.tid) - new Date(a.tid); }).slice(0, 7);
     return '<section class="kort lp-band2 lp-omkort" data-in><header class="lp-band2__huvud"><div><p class="ao-ogon">Om</p><h2>Om <em>' + (ar ? 'dig' : e(fornamn)) + '</em></h2></div>' +
         (kanAndra ? '<button type="button" class="knapp knapp--liten" data-g="lp-andra-profil" data-id="' + u.id + '">' + i('skriv') + 'Ändra</button>' : '') + '</header>' +
       (u.om ? '<blockquote class="lp-om-citat"><span aria-hidden="true">”</span>' + e(u.om) + '</blockquote>' : ar ? '<button type="button" class="lp-om-skriv" data-g="lp-andra-profil" data-id="' + u.id + '" data-fokus="om">' + i('skriv') + '<span><strong>Berätta om dig</strong><small>Några rader om vad du jobbar med och hur man når dig bäst – syns för hela teamet.</small></span>' + i('pil') + '</button>' : '<p class="lp-om-ingen">' + e(fornamn) + ' har inte skrivit någon presentation än.</p>') +
@@ -435,7 +435,7 @@
   var PK_TYP = { mote: ['Möte', 'var(--t-diagram-4)'], samtal: ['Samtal', 'var(--t-diagram-2)'], mejl: ['Mejl', 'var(--t-diagram-6)'], besok: ['Besök', 'var(--t-diagram-3)'], notis: ['Anteckning', '#c9b48f'], system: ['Aktivitet', '#7fd1b0'], uppg: ['Uppgift', 'var(--t-diagram-5)'], sen: ['Försenad', '#e8806a'], vunnen: ['Vunnen', 'var(--t-kol-accent)'] };
   function pkHandelser(u) {
     var idag = dag0(new Date()).getTime(), ut = [];
-    db().aktiviteter.forEach(function (h) { if (h.av === u.id) ut.push({ id: h.id, dag: dag0(h.tid).getTime(), tid: h.tid, typ: PK_TYP[h.typ] ? h.typ : 'system', text: h.text, kund: h.kund, akt: true }); });
+    db().aktiviteter.forEach(function (h) { if (h.av === u.id && !h.stod) ut.push({ id: h.id, dag: dag0(h.tid).getTime(), tid: h.tid, typ: PK_TYP[h.typ] ? h.typ : 'system', text: h.text, kund: h.kund, akt: true }); });
     db().uppgifter.forEach(function (x) { if (!x.klar && !x.kalAkt && x.ansvarig === u.id) { var d = dag0(x.forfaller).getTime(); ut.push({ id: x.id, dag: d, tid: x.forfaller, typ: d < idag ? 'sen' : 'uppg', text: x.text, kund: x.kund, uppg: true }); } });
     db().affarer.forEach(function (x) { if (x.steg === 'vunnen' && x.vunnen && x.ansvarig === u.id) ut.push({ id: x.id, dag: dag0(x.vunnen).getTime(), tid: x.vunnen, typ: 'vunnen', text: 'Vunnen: ' + x.titel, kund: x.kund, affar: x.id }); });
     return ut.sort(function (x, y) { return x.tid < y.tid ? -1 : 1; });
@@ -555,7 +555,7 @@
   var kortDatum = function (d) { return d.getDate() + ' ' + IH.lokal(d, 'd', { month: 'short' }).replace('.', ''); };
   var AKT_IKON = { samtal: 'samtal', mejl: 'post', mote: 'kunder', notis: 'anteckning', system: 'blixt' };
   function senasteHandelser(team) {
-    var nu = new Date(), l = db().aktiviteter.filter(function (h) { return new Date(h.tid) <= nu && team.some(function (x) { return x.u.id === h.av; }); }).sort(function (a, b) { return new Date(b.tid) - new Date(a.tid); }).slice(0, 4);
+    var nu = new Date(), l = db().aktiviteter.filter(function (h) { return new Date(h.tid) <= nu && !h.stod && team.some(function (x) { return x.u.id === h.av; }); }).sort(function (a, b) { return new Date(b.tid) - new Date(a.tid); }).slice(0, 4);
     if (!l.length) return '';
     return '<div class="lp-karta__skala" aria-hidden="true">Färre<i style="--a:.15"></i><i style="--a:.35"></i><i style="--a:.6"></i><i style="--a:.85"></i><i style="--a:1"></i>Fler</div>' +
       '<p class="lp-senaste__rubrik">Senaste händelserna</p><ul class="lp-senaste">' + l.map(function (h) {
@@ -605,6 +605,11 @@
   }
   // Egen frånvaro får alla lägga in; för en kollega krävs chef eller admin
   var kanFranvaro = function (uid) { var j = IH.jag(); return uid === j.id || !!j.chef || j.roll === 'admin'; };
+  // Supportläget: säljarens egen frånvaro (och därmed status) ändras inte, samma spärr som Sjukanmäl (stod.js)
+  var stodSparr = function (uid) {
+    var u = IH.visarSom && IH.visarSom(); if (!u || uid !== u.id) return false;
+    IH.toast('Statusen ändras inte i supportläget', u.namn + ' lägger in sin frånvaro själv.', 'oga-av'); return true;
+  };
   // En gammal status (Sjuk/Semester satt i närvaron) nollställs när frånvaron som gav den tas bort eller ändras
   var nollaStatus = function (f) {
     if (IH.visarSom && IH.visarSom()) return;
@@ -617,6 +622,7 @@
     var fid = el.getAttribute('data-fid'), f = fid && franvaroLista().find(function (x) { return x.id === fid; });
     var uid = el.getAttribute('data-uid') || (f && f.u) || IH.jag().id, dag = el.getAttribute('data-dag') || dagISO(new Date());
     if (!kanFranvaro(uid)) { IH.toast('Bara chefen eller administratören kan lägga in frånvaro för en kollega', 'Du kan lägga in din egen på din profil.', 'las'); return; }
+    if (stodSparr(uid)) return;
     var jag = IH.jag(), team = jag.chef || jag.roll === 'admin' ? IH.ANVANDARE.filter(function (u) { return u.roll !== 'admin' && !u.inaktiv; }) : [jag];
     if (!team.some(function (u) { return u.id === uid; }) && IH.anvandare(uid)) team.push(IH.anvandare(uid));
     IH.oppnaArk({ titel: f ? 'Ändra frånvaro' : 'Lägg in frånvaro', ikon: 'kalender', under: f ? 'Ändra datum eller ta bort frånvaron.' : 'Syns i Vem jobbar när och räknas bort från arbetsdagarna.',
@@ -628,7 +634,7 @@
   };
   IH.G['lp-franvaro-bort'] = function (el) {
     var l = franvaroLista(), n = l.findIndex(function (x) { return x.id === el.getAttribute('data-fid'); }); if (n < 0) return;
-    if (!kanFranvaro(l[n].u)) return;
+    if (!kanFranvaro(l[n].u) || stodSparr(l[n].u)) return;
     nollaStatus(l[n]); l.splice(n, 1); IH.spara(); IH.stangArk(); IH.rita(); IH.toast('Frånvaron är borttagen', '', 'kalender');
   };
   document.addEventListener('submit', function (ev) {
@@ -637,6 +643,7 @@
     var fran = new Date(t.fran.value + 'T00:00:00'), till = new Date(t.till.value + 'T00:00:00'); if (till < fran) { var x = fran; fran = till; till = x; }
     var id = t.getAttribute('data-lp-franvaro'), l = franvaroLista(), f = id && l.find(function (y) { return y.id === id; });
     if (!kanFranvaro(t.vem.value) || (f && !kanFranvaro(f.u))) { IH.toast('Bara chefen eller administratören kan lägga in frånvaro för en kollega', null, 'las'); return; }
+    if (stodSparr(t.vem.value) || (f && stodSparr(f.u))) return;
     // ingen dubbelbokning: en person kan inte ha två frånvaron samma dag
     var krock = l.find(function (y) { return y !== f && y.u === t.vem.value && dag0(y.fran) <= till && dag0(y.till) >= fran; });
     if (krock) { IH.toast('Krockar med en annan frånvaro', FRANVARO[krock.typ][0] + ' ' + kortDatum(new Date(krock.fran)) + (krock.till !== krock.fran ? '–' + kortDatum(new Date(krock.till)) : '') + ' – ändra den i stället.', 'varning'); return; }
@@ -649,7 +656,7 @@
     var vem = function (id) { return chefUi.kalVem === 'alla' ? team.some(function (x) { return x.u.id === id; }) : id === chefUi.kalVem; };
     var typ = function (t) { return chefUi.kalTyp === 'alla' || chefUi.kalTyp === t; };
     var idag = dag0(new Date()).getTime(), ut = [];
-    if (typ('akt')) db().aktiviteter.forEach(function (h) { if (h.typ !== 'system' && vem(h.av)) ut.push({ id: h.id, slag: 'akt', dag: dag0(h.tid).getTime(), tid: h.tid, u: h.av, text: h.text, typ: h.typ, kund: h.kund, affar: h.affar }); });
+    if (typ('akt')) db().aktiviteter.forEach(function (h) { if (h.typ !== 'system' && !h.stod && vem(h.av)) ut.push({ id: h.id, slag: 'akt', dag: dag0(h.tid).getTime(), tid: h.tid, u: h.av, text: h.text, typ: h.typ, kund: h.kund, affar: h.affar }); });
     if (typ('uppg')) db().uppgifter.forEach(function (x) { if (!x.klar && !x.kalAkt && vem(x.ansvarig)) { var d = dag0(x.forfaller).getTime(); ut.push({ id: x.id, slag: 'uppg', dag: d, tid: x.forfaller, u: x.ansvarig, text: x.text, kund: x.kund, affar: x.affar, sen: d < idag }); } });
     if (typ('vunnen')) db().affarer.forEach(function (a) { if (a.steg === 'vunnen' && a.vunnen && vem(a.ansvarig)) ut.push({ id: a.id, slag: 'vunnen', dag: dag0(a.vunnen).getTime(), tid: a.vunnen, u: a.ansvarig, text: 'Vunnen: ' + a.titel, kund: a.kund, affar: a.id }); });
     return ut.sort(function (a, b) { return new Date(a.tid) - new Date(b.tid); });
@@ -849,15 +856,29 @@
     IH.toast(typ === 'uppgift' ? 'Uppgiften är tillagd' : 'Inlagt i kalendern', text + ' · ' + IH.lokal(nar, 'd', { weekday: 'short', day: 'numeric', month: 'short' }).replace(/\./g, ''), 'kalender');
   });
 
-  // Himlen i hjälten efter tiden på dygnet: månskära med kratrar och tindrande stjärnor på kvällen och natten,
-  // en sol som går upp på morgonen och en sol med strålar på dagen
+  // Himlen i hjälten efter tiden på dygnet, fritt i kortet utan ram: en mjuk ljusglöd som tonar ut i kortets bakgrund,
+  // solen med andande halo och långsamt roterande strålar (morgon lägre och varmare, dag högre och ljusare),
+  // månskära med tindrande stjärnor och ett stjärnfall ibland på kvällen och natten, och mjuka moln i två lager.
+  // Samma himmel i översiktens hjälte och i chefhjälten. Faserna följer översiktens dygn().
+  function dygnFas(h) { return h < 5 || h >= 22 ? 'natt' : h < 10 ? 'morgon' : h < 18 ? 'dag' : 'kvall'; }
   function himlen(h) {
-    var natt = h >= 18 || h < 5, morgon = h >= 5 && h < 10;
-    var stjarnor = [[8, 18, 1.1, 0], [86, 10, .8, .7], [94, 62, 1, 1.4], [16, 78, .7, 2.1], [70, 88, .9, .4], [40, 4, .6, 1.8], [100, 30, .7, 2.6]];
-    if (natt) return '<span class="lp-himmel lp-himmel--natt" aria-hidden="true">' + stjarnor.map(function (st) { return '<i class="lp-stjarna" style="left:' + st[0] + '%;top:' + st[1] + '%;--s:' + st[2] + ';--d:' + st[3] + 's"></i>'; }).join('') +
-      '<i class="lp-fall"></i><i class="lp-fall lp-fall--2"></i><span class="lp-mane"><i class="lp-mane__ljus"></i><i class="lp-krater" style="left:24%;top:38%;--k:14%"></i><i class="lp-krater" style="left:16%;top:62%;--k:9%"></i><i class="lp-krater" style="left:34%;top:72%;--k:7%"></i><i class="lp-krater" style="left:30%;top:20%;--k:6%"></i></span></span>';
-    return '<span class="lp-himmel lp-himmel--' + (morgon ? 'morgon' : 'dag') + '" aria-hidden="true"><span class="lp-sol">' + [0, 1, 2, 3, 4, 5, 6, 7].map(function (n) { return '<i style="--r:' + n * 45 + 'deg"></i>'; }).join('') + '</span></span>';
+    var fas = dygnFas(h), molnet = function (lager) { return '<span class="hm-moln hm-moln--' + lager + '"><i></i></span>'; };
+    var inre;
+    if (fas === 'natt' || fas === 'kvall') {
+      // [vänster %, topp %, storlek px, takt s, fördröjning s, gnistra]
+      var stjarnor = [[12, 20, 3, 5.2, 0, 1], [30, 8, 2, 6.8, 1.4], [86, 14, 2.4, 4.6, 2.2], [94, 52, 2, 7.4, .6], [20, 62, 1.6, 6.2, 3.1], [72, 82, 1.8, 5.6, 1.9],
+        [46, 4, 1.6, 7.8, 2.7], [8, 44, 1.4, 6.4, 4.2], [78, 4, 3, 6, 3.6, 1], [58, 92, 1.4, 7, .3], [38, 30, 1.2, 8.4, 5], [98, 30, 1.6, 5.8, 4.6]];
+      if (fas === 'kvall') stjarnor = stjarnor.filter(function (st, n) { return n % 2 === 0; });
+      inre = '<span class="hm-stjarnor">' + stjarnor.map(function (st) {
+        return '<i class="hm-stjarna' + (st[5] ? ' hm-stjarna--gnista' : '') + '" style="left:' + st[0] + '%;top:' + st[1] + '%;--s:' + st[2] + 'px;--t:' + st[3] + 's;--f:-' + st[4] + 's"></i>';
+      }).join('') + '</span>' + (fas === 'natt' ? '<i class="hm-fall"></i>' : '') +
+        '<span class="hm-mane"><i class="hm-mane__halo"></i><span class="hm-mane__kropp"><i class="hm-mane__sken"></i><i class="hm-mane__skara"></i></span></span>';
+    } else {
+      inre = '<span class="hm-sol"><i class="hm-sol__stralar"></i><i class="hm-sol__halo"></i><i class="hm-sol__skiva"></i></span>';
+    }
+    return '<span class="lp-himmel hm hm--' + fas + '" data-fas="' + fas + '" aria-hidden="true"><i class="hm-ljus"></i>' + molnet('bak') + inre + molnet('fram') + '</span>';
   }
+  IH.dygnFas = dygnFas;
   IH.himlen = himlen;
   IH.vyer.chef = function () {
     var jag = IH.jag();

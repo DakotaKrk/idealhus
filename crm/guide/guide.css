@@ -700,9 +700,10 @@ html[data-konto-oppen] .ihg-knapp, html[data-konto-oppen] .ihg-hej, body:has(.ch
 
 /* Rälsen, sista finslipningen (2026-10-29): menyknappen och chattknappen lika stora som rälsens ikoner (34 px) och
    i samma tunna stil som ?-knappen, lika luft (8 px) runt dem, och nedre halvan räknar med ?-knappen så att ingen
-   ikon hamnar under den. Rälsen tonar in i takt med menyn (app.js sattSido). */
+   ikon hamnar under den. Rälsen tonar in i takt med menyn (app.js sattSido).
+   Obs: blocket skriver över grund.css ("Knappen infälld: alltid 40 × 40") – den infällda menyknappen är 34 px.
+   Rälsens radhöjder sätts längre ner (html body .sido-rals, 42/54 px). */
 @media (min-width: 1101px) {
-  .sido-rals { grid-template-rows: minmax(0, 1fr) 50px minmax(0, 1fr); }
   html[data-sido-dold] body .sido-kant .sido-knapp { width: 34px; height: 34px; margin: -17px 0 0 -17px; }
   html[data-sido-dold] body .sido-kant .sido-knapp, .chf-ikon[data-i-docka], .chf-ikon[data-i-docka]:hover {
     background: rgb(var(--t-glas-rgb) / .9); box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .28); }
@@ -873,3 +874,100 @@ html[data-konto-oppen] .ihg-knapp, html[data-konto-oppen] .ihg-hej, body:has(.ch
 }
 .ihg-meny .ihg-har { padding-inline: 10px; }
 .ihg-bubbla__topp > .ihg-x { width: 28px; height: 28px; margin: 0; }
+
+/* Infälld meny (2026-10-29): sök och Ny flyttar från toppraden in i listen som två runda ikoner under Legohus-märket
+   (förstoringsglas och plus). Toppraden blir då tom och tar ingen plats – sidan börjar högst upp, i linje med listen. */
+@media (min-width: 1101px) {
+  html[data-sido-dold] body .topp { height: 0; min-height: 0; margin: 0; padding: 0; overflow: visible; }
+  html[data-sido-dold] body .topp > :not(.sok):not(.knapp):not(.topp__konto) { display: none; }
+  html[data-sido-dold] body .topp .sok, html[data-sido-dold] body .topp > .knapp {
+    position: fixed; z-index: 40; left: calc(var(--ram, 12px) / 2 + 9px); width: 34px; min-width: 0; height: 34px; min-height: 0; margin: 0; padding: 0;
+    display: grid; place-items: center; gap: 0; border: 0; border-radius: 50%; font-size: 0; line-height: 0; cursor: pointer; }
+  html[data-sido-dold] body .topp .sok { top: calc(var(--ram, 12px) + 56px); background: rgb(var(--t-glas-rgb) / .9); color: var(--text-2, var(--t-text-2)); box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .28); }
+  html[data-sido-dold] body .topp > .knapp { top: calc(var(--ram, 12px) + 98px); box-shadow: 0 6px 14px -8px rgb(var(--t-accent-djup-rgb) / .55); }
+  html[data-sido-dold] body .topp .sok > :not(svg), html[data-sido-dold] body .topp > .knapp > :not(svg) { display: none; }
+  html[data-sido-dold] body .topp .sok svg, html[data-sido-dold] body .topp > .knapp svg { width: 17px; height: 17px; margin: 0; }
+  html[data-sido-dold] body .topp .sok:hover { background: rgb(var(--t-glas-rgb)); color: var(--t-accent-djup); box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .55); }
+  html[data-sido-dold] body .topp .sok:active, html[data-sido-dold] body .topp > .knapp:active { transform: scale(.92); }
+  /* Listens övre ikoner börjar under plus-knappen */
+  html body .sido-rals .sido-rals__halva--upp { margin-top: 128px; }
+}
+
+/* Sök och Ny i listen, finslipning: flex i stället för grid (textnoden "Ny" blev en egen rad i rutnätet och sköt ner
+   pluset), samma storlek och mjuka stil som listens andra runda knappar – Ny i bärnsten med en mjuk glans */
+@media (min-width: 1101px) {
+  html[data-sido-dold] body .topp .sok, html[data-sido-dold] body .topp > .knapp { display: flex; align-items: center; justify-content: center; letter-spacing: 0; text-indent: 0;
+    transition: background-color .2s ease, color .2s ease, box-shadow .2s ease, transform .16s var(--ease-out, ease); }
+  html[data-sido-dold] body .topp .sok svg, html[data-sido-dold] body .topp > .knapp svg { flex: none; margin: 0 !important; position: static; transform: none; }
+  html[data-sido-dold] body .topp .sok { background: rgb(var(--t-glas-rgb) / .9); box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .28); color: var(--text-2, var(--t-text-2)); }
+  html[data-sido-dold] body .topp .sok svg { width: 16px; height: 16px; }
+  html[data-sido-dold] body .topp > .knapp { background: linear-gradient(160deg, var(--t-virke-2, #f6c68d), var(--t-accent, #e29a4a)); color: var(--t-pa-accent, #2a1a0b);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / .45), inset 0 0 0 1px rgb(var(--t-accent-djup-rgb) / .18), 0 6px 14px -8px rgb(var(--t-accent-djup-rgb) / .6); }
+  html[data-sido-dold] body .topp > .knapp svg { width: 16px; height: 16px; stroke-width: 2.2; }
+  html[data-sido-dold] body .topp > .knapp:hover { filter: brightness(1.04); box-shadow: inset 0 1px 0 rgb(255 255 255 / .5), inset 0 0 0 1px rgb(var(--t-accent-djup-rgb) / .25), 0 8px 18px -8px rgb(var(--t-accent-djup-rgb) / .7); }
+}
+
+/* Listen som en helhet (2026-10-29): tre sorters knappar och inga fler –
+   1) sidikoner och sök: genomskinliga, glas vid hovring, ton när vald;
+   2) Ny: samma runda form med ljus bärnstenston (inte en hel orange platta);
+   3) menyknappen och chatten: glas med tunn ring.
+   Samma storlek (34 px), samma hovring (lyft 1 px) och samma tryck (krymper) på alla. Toppen tätare, och på låga
+   skärmar krymper ikonerna och avstånden så att inget hamnar under menyknappen. */
+@media (min-width: 1101px) {
+  html[data-sido-dold] body .topp .sok { background: transparent; box-shadow: none; color: var(--text-2, var(--t-text-2)); }
+  html[data-sido-dold] body .topp .sok:hover, html[data-sido-dold] body .topp .sok:focus-visible { background: rgb(var(--t-glas-rgb) / .95); color: var(--t-text); box-shadow: none; }
+  html[data-sido-dold] body .topp > .knapp { background: var(--t-accent-ljus, var(--virke-ljus)); color: var(--t-accent-djup, var(--virke-djup)); box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .35); filter: none; }
+  html[data-sido-dold] body .topp > .knapp:hover, html[data-sido-dold] body .topp > .knapp:focus-visible { background: var(--t-accent, #e29a4a); color: var(--t-pa-accent, #2a1a0b); box-shadow: 0 6px 14px -8px rgb(var(--t-accent-djup-rgb) / .6); filter: none; }
+  html[data-sido-dold] body .topp .sok, html[data-sido-dold] body .topp > .knapp, .sido-rals a, html[data-sido-dold] .ihg-knapp, html[data-sido-dold] body .topp__konto,
+  html[data-sido-dold] body .sido-kant .sido-knapp, .chf-ikon[data-i-docka] { transition: background-color .2s ease, color .2s ease, box-shadow .2s ease, transform .18s cubic-bezier(.32, .72, 0, 1); }
+  html[data-sido-dold] body .topp .sok:hover, html[data-sido-dold] body .topp > .knapp:hover, .sido-rals a:hover, html[data-sido-dold] .ihg-knapp:hover, html[data-sido-dold] body .topp__konto:hover { transform: translateY(-1px); }
+  html[data-sido-dold] body .topp .sok:active, html[data-sido-dold] body .topp > .knapp:active, .sido-rals a:active, html[data-sido-dold] .ihg-knapp:active, html[data-sido-dold] body .topp__konto:active { transform: scale(.92); }
+  /* Toppen: märket, sök och Ny tätare */
+  html body .sido-rals .sido-rals__halva--upp > a[data-vy="oversikt"] { top: -8px; width: 38px; height: 38px; margin-left: -19px; }
+  html body .sido-rals a[data-vy="oversikt"] .i { width: 24px; height: 24px; }
+  html[data-sido-dold] body .topp .sok { top: calc(var(--ram, 12px) + 50px); }
+  html[data-sido-dold] body .topp > .knapp { top: calc(var(--ram, 12px) + 88px); }
+  html body .sido-rals .sido-rals__halva--upp { margin-top: 116px; }
+}
+@media (min-width: 1101px) and (max-height: 820px) {
+  html[data-sido-dold] body .topp .sok, html[data-sido-dold] body .topp > .knapp { width: 30px; height: 30px; left: calc(var(--ram, 12px) / 2 + 11px); }
+  html[data-sido-dold] body .topp .sok { top: calc(var(--ram, 12px) + 46px); }
+  html[data-sido-dold] body .topp > .knapp { top: calc(var(--ram, 12px) + 80px); }
+  html body .sido-rals .sido-rals__halva--upp { margin-top: 104px; }
+  html body .sido-rals .sido-rals__halva { gap: 2px; }
+}
+@media (min-width: 1101px) and (max-height: 720px) {
+  .sido-rals a, html body .sido-rals .sido-rals__halva > a { width: 28px; height: 28px; }
+  .sido-rals .i { width: 15px; height: 15px; }
+  html body .sido-rals .sido-rals__halva { gap: 0; }
+  html body .sido-rals .sido-rals__delare { margin: 2px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-sido-dold] body .topp .sok:hover, html[data-sido-dold] body .topp > .knapp:hover, .sido-rals a:hover, html[data-sido-dold] .ihg-knapp:hover, html[data-sido-dold] body .topp__konto:hover { transform: none; }
+}
+
+/* Låga skärmar: den övre halvan har fler sidor än den nedre, så den får mer höjd (1,1 mot 0,9) och menyknappen
+   flyttar med till mitten av mellanraden (55 % av kanten). Ikonerna krymper stegvis i stället för att gömmas. */
+@media (min-width: 1101px) and (max-height: 760px) {
+  html body .sido-rals, html body .sido-rals:not(:has(.sido-rals__halva > a:nth-of-type(6))) { grid-template-rows: minmax(0, 1.1fr) 44px minmax(0, .9fr); }
+  html[data-sido-dold] body .sido-kant .sido-knapp { top: calc(55% - 4px); }
+  .sido-rals a, html body .sido-rals .sido-rals__halva > a { width: 26px; height: 26px; }
+  .sido-rals .i { width: 15px; height: 15px; }
+  html body .sido-rals .sido-rals__halva { gap: 0; }
+  html body .sido-rals .sido-rals__delare { margin: 2px 0; }
+  html[data-sido-dold] body .topp .sok, html[data-sido-dold] body .topp > .knapp { width: 28px; height: 28px; left: calc(var(--ram, 12px) / 2 + 12px); }
+  html[data-sido-dold] body .topp .sok { top: calc(var(--ram, 12px) + 42px); }
+  html[data-sido-dold] body .topp > .knapp { top: calc(var(--ram, 12px) + 74px); }
+  html body .sido-rals .sido-rals__halva--upp { margin-top: 94px; }
+  html body .sido-rals .sido-rals__halva--upp > a[data-vy="oversikt"] { width: 34px; height: 34px; margin-left: -17px; top: -10px; }
+  html body .sido-rals a[data-vy="oversikt"] .i { width: 22px; height: 22px; }
+}
+@media (min-width: 1101px) and (max-height: 700px) {
+  .sido-rals a, html body .sido-rals .sido-rals__halva > a { width: 24px; height: 24px; }
+  .sido-rals .i { width: 14px; height: 14px; }
+  html body .sido-rals .sido-rals__delare { margin: 1px 0; }
+  html[data-sido-dold] .ihg-knapp { width: 28px; height: 28px; margin-left: 4px; bottom: calc(var(--ram, 12px) + 16px + 36px); }
+  html[data-sido-dold] body .topp__konto { width: 30px; height: 30px; left: calc(var(--ram, 12px) / 2 + 11px); }
+  html[data-sido-dold] body .topp__konto .avatar { width: 26px; height: 26px; font-size: .55rem; }
+  html[data-sido-dold] body .sido-rals .sido-rals__halva--ner { margin-bottom: 72px; }
+}

@@ -1,0 +1,148 @@
+/* Himlen i hjältarna (2026-10-29): översiktens hjälte och chefhjälten (ledning.js himlen()).
+   Ingen ram eller cirkel – himlen ligger fritt i kortets övre del och tonar ut i bakgrunden.
+   Bara transform och opacity animeras; långsamt och lugnt. Stilla vid reducerad rörelse,
+   pausad när kortet inte syns (.pausad från IH.pausaUtanfor). Layout.css döljer den i Normal och Minimal. */
+
+.lp-himmel.hm {
+  --sx: 64%; --sy: 44%;
+  --moln: #fff; --moln-skugga: rgb(120 140 175 / .26); --moln-o: 1;
+  --ljus-1: rgb(255 222 150 / .34); --ljus-2: rgb(255 205 130 / .12);
+  position: absolute; z-index: 0; inset: auto; left: auto; right: auto; top: 0;
+  width: 280px; height: 180px; transform: none; opacity: 1; filter: none; pointer-events: none; contain: layout style;
+}
+.lp-himmel.hm * { position: absolute; display: block; }
+.lp-himmel.hm--morgon { --sx: 46%; --sy: 66%; --moln: #fff6ee; --moln-skugga: rgb(214 140 110 / .3); --ljus-1: rgb(255 184 120 / .36); --ljus-2: rgb(255 160 110 / .13); }
+.lp-himmel.hm--dag { --sx: 64%; --sy: 40%; }
+.lp-himmel.hm--kvall { --sx: 60%; --sy: 44%; --moln: #ffd9c8; --moln-skugga: rgb(150 80 90 / .3); --moln-o: .5; --ljus-1: rgb(255 168 120 / .3); --ljus-2: rgb(220 130 140 / .1); }
+.lp-himmel.hm--natt { --sx: 60%; --sy: 42%; --moln: #dfe4f6; --moln-skugga: rgb(20 24 50 / .4); --moln-o: .2; --ljus-1: rgb(214 224 255 / .2); --ljus-2: rgb(170 185 235 / .07); }
+
+/* Ljusglöden: stor och mjuk, utan kanter */
+.hm-ljus { left: var(--sx); top: var(--sy); width: 560px; height: 400px; margin: -200px 0 0 -280px; border-radius: 50%;
+  background: radial-gradient(closest-side, var(--ljus-1), var(--ljus-2) 48%, transparent 100%);
+  animation: hm-andas 12s ease-in-out infinite alternate; }
+
+/* Solen */
+.hm-sol { left: var(--sx); top: var(--sy); width: 0; height: 0; animation: hm-sval 16s ease-in-out infinite alternate; }
+.hm-sol > i { left: 0; top: 0; border-radius: 50%; }
+.hm-sol__skiva { width: 52px; height: 52px; margin: -26px;
+  background: radial-gradient(circle at 40% 36%, #fffef9 0%, #fff3cc 30%, var(--sol-2, #ffdb86) 66%, var(--sol-3, #ffc35c) 100%);
+  box-shadow: inset 0 0 0 1px rgb(255 248 225 / .5), 0 0 16px 3px rgb(255 214 120 / .55), 0 0 44px 10px rgb(255 190 90 / .26); }
+.hm-sol__halo { width: 180px; height: 180px; margin: -90px;
+  background: radial-gradient(closest-side, rgb(255 230 160 / .62), rgb(255 210 130 / .24) 42%, rgb(255 205 125 / 0) 100%);
+  animation: hm-halo 8s ease-in-out infinite alternate; }
+.hm-sol__stralar { width: 260px; height: 260px; margin: -130px; --str: 255 208 128;
+  background:
+    repeating-conic-gradient(from 0deg, rgb(var(--str) / 0) 0deg, rgb(var(--str) / .2) 5deg, rgb(var(--str) / 0) 11deg, rgb(var(--str) / 0) 30deg),
+    repeating-conic-gradient(from 17deg, rgb(var(--str) / 0) 0deg, rgb(var(--str) / .13) 7deg, rgb(var(--str) / 0) 15deg, rgb(var(--str) / 0) 45deg);
+  -webkit-mask: radial-gradient(closest-side, transparent 18%, #000 27%, rgb(0 0 0 / .35) 56%, transparent 88%);
+  mask: radial-gradient(closest-side, transparent 18%, #000 27%, rgb(0 0 0 / .35) 56%, transparent 88%);
+  animation: hm-snurra 160s linear infinite; }
+.hm--morgon .hm-sol__skiva { width: 56px; height: 56px; margin: -28px;
+  background: radial-gradient(circle at 42% 36%, #fffaf0 0%, #ffe6c2 28%, var(--sol-2, #ffbf86) 66%, var(--sol-3, #ff9a5c) 100%);
+  box-shadow: inset 0 0 0 1px rgb(255 240 220 / .5), 0 0 18px 4px rgb(255 160 100 / .5), 0 0 50px 12px rgb(255 130 80 / .24); }
+.hm--morgon .hm-sol__halo { background: radial-gradient(closest-side, rgb(255 196 140 / .62), rgb(255 160 110 / .24) 42%, rgb(255 150 100 / 0) 100%); }
+.hm--morgon .hm-sol__stralar { --str: 255 172 118; opacity: .8; }
+
+/* Månen: en riktig skära med svagt jordsken på den mörka delen */
+.hm-mane { left: var(--sx); top: var(--sy); width: 0; height: 0; animation: hm-sval 18s ease-in-out infinite alternate; }
+.hm-mane__halo { left: 0; top: 0; width: 170px; height: 170px; margin: -85px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 238 200 / .34), rgb(255 228 180 / .1) 50%, rgb(255 228 180 / 0) 100%);
+  animation: hm-halo 10s ease-in-out infinite alternate; }
+.hm-mane__kropp { left: 0; top: 0; width: 54px; height: 54px; margin: -27px; transform: rotate(-14deg);
+  filter: drop-shadow(0 0 5px rgb(var(--mane-sken, 255 238 200) / .7)) drop-shadow(0 0 16px rgb(var(--mane-sken, 255 220 160) / .32)); }
+.hm-mane__sken { inset: 0; border-radius: 50%; background: radial-gradient(circle at 60% 40%, rgb(255 244 220 / .1), rgb(255 244 220 / .04)); }
+.hm-mane__skara { inset: 0; border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 40%, #fffcf2 0%, var(--mane-2, #fcecc6) 52%, var(--mane-3, #efcf92) 100%);
+  -webkit-mask: radial-gradient(circle at 71% 31%, transparent 0 24px, #000 25.5px);
+  mask: radial-gradient(circle at 71% 31%, transparent 0 24px, #000 25.5px); }
+.hm--kvall .hm-mane__halo { background: radial-gradient(closest-side, rgb(255 214 170 / .36), rgb(255 190 150 / .1) 50%, rgb(255 190 150 / 0) 100%); }
+
+/* Stjärnorna tindrar i olika takt */
+.hm-stjarnor { inset: 0; }
+.hm-stjarna { width: var(--s); height: var(--s); margin: calc(var(--s) / -2); border-radius: 50%;
+  background: radial-gradient(circle, var(--st-k, #fffdf6) 0 34%, rgb(var(--st, 255 246 222) / .55) 56%, rgb(var(--st, 255 246 222) / 0) 74%);
+  box-shadow: 0 0 calc(var(--s) * 2) rgb(var(--st, 255 240 210) / .45);
+  animation: hm-tindra var(--t) ease-in-out var(--f) infinite alternate; }
+.hm-stjarna--gnista::before, .hm-stjarna--gnista::after { content: ""; position: absolute; left: 50%; top: 50%; width: calc(var(--s) * 4.5); height: 1px; margin: -.5px 0 0 calc(var(--s) * -2.25);
+  background: linear-gradient(90deg, rgb(var(--st, 255 248 230) / 0), rgb(var(--st, 255 248 230) / .85), rgb(var(--st, 255 248 230) / 0)); }
+.hm-stjarna--gnista::after { transform: rotate(90deg); }
+.hm--kvall .hm-stjarnor { opacity: .7; }
+
+/* Ett stjärnfall då och då: huvudet först, svansen bakåt, snett nedåt åt vänster */
+.hm-fall { left: 86%; top: 6%; width: 72px; height: 1.5px; border-radius: 2px; transform-origin: 0 50%; opacity: 0;
+  background: linear-gradient(90deg, rgb(255 252 240 / .95), rgb(255 240 210 / .35) 40%, rgb(255 240 210 / 0));
+  animation: hm-fall 19s cubic-bezier(.3, .1, .4, 1) 5s infinite; }
+
+/* Molnen: mjuka och fluffiga, två lager med olika fart, tonar in och ut */
+.hm-moln { left: 0; top: 0; opacity: 0; animation: hm-drift var(--t, 64s) linear var(--f, 0s) infinite; }
+.hm-moln i { width: 132px; height: 60px; left: 0; top: 0; transform: scale(var(--m, 1)); transform-origin: 0 0;
+  background:
+    radial-gradient(27px 25px at 50% 44%, var(--moln) 72%, transparent 100%),
+    radial-gradient(20px 18px at 31% 60%, var(--moln) 72%, transparent 100%),
+    radial-gradient(22px 20px at 69% 58%, var(--moln) 72%, transparent 100%),
+    radial-gradient(14px 13px at 86% 71%, var(--moln) 66%, transparent 100%),
+    radial-gradient(13px 12px at 15% 73%, var(--moln) 66%, transparent 100%),
+    radial-gradient(56px 12px at 50% 78%, var(--moln) 72%, transparent 100%);
+  filter: drop-shadow(0 5px 6px var(--moln-skugga)); }
+.hm-moln--bak i { filter: blur(.8px) drop-shadow(0 4px 5px var(--moln-skugga)); }
+.lp-himmel.hm--natt .hm-moln i, .lp-himmel.hm--kvall .hm-moln i { filter: blur(1.6px); }
+.hm-moln--bak { top: 8%; --t: 96s; --f: -40s; --m: .66; --o: .5; }
+.hm-moln--fram { top: 46%; --t: 62s; --f: -6s; --m: 1; --o: .95; }
+
+@keyframes hm-drift {
+  0% { transform: translate3d(-70px, 0, 0); opacity: 0; }
+  14% { opacity: calc(var(--o) * var(--moln-o)); }
+  80% { opacity: calc(var(--o) * var(--moln-o)); }
+  100% { transform: translate3d(230px, -6px, 0); opacity: 0; }
+}
+@keyframes hm-andas { from { opacity: .78; transform: scale(.96); } to { opacity: 1; transform: scale(1.04); } }
+@keyframes hm-halo { from { opacity: .7; transform: scale(.94); } to { opacity: 1; transform: scale(1.08); } }
+@keyframes hm-snurra { to { transform: rotate(360deg); } }
+@keyframes hm-sval { from { transform: translate3d(0, 2px, 0); } to { transform: translate3d(0, -3px, 0); } }
+@keyframes hm-tindra { 0%, 30% { opacity: 1; transform: scale(1); } 100% { opacity: .3; transform: scale(.72); } }
+@keyframes hm-fall {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(-28deg) scaleX(.3); }
+  1.5% { opacity: 1; transform: translate3d(-12px, 6px, 0) rotate(-28deg) scaleX(1); }
+  6% { opacity: .9; transform: translate3d(-96px, 51px, 0) rotate(-28deg) scaleX(1); }
+  8%, 100% { opacity: 0; transform: translate3d(-124px, 66px, 0) rotate(-28deg) scaleX(.4); }
+}
+
+/* Översiktens hjälte: övre högra hörnet, bakom byn. Den gamla ljusridån, svepet och de platta molnen ersätts av himlen. */
+.hero > .lp-himmel.hm { top: 0; right: 0; width: 300px; height: 190px; }
+.hero .ljusfall__stralar, .hero .ljusfall::after, .hero .ljusfall__damm, .hero .ljusfall .moln { display: none; }
+
+/* Chefhjälten: mellan texten och kvartalsringen */
+section.lp-chefhjalte > .lp-himmel.hm { top: 0; right: 290px; width: 260px; height: 180px; }
+
+/* Under 1250 px bryts rubriken och ringen står till höger: himlen flyttar upp i kortets övre högra hörn, ovanför ringen */
+@media (max-width: 1250px) {
+  section.lp-chefhjalte > .lp-himmel.hm { right: 0; transform: scale(.66); transform-origin: top right; }
+  section.lp-chefhjalte > .lp-himmel.hm .hm-moln--fram { top: 22%; }
+}
+@media (max-width: 900px) {
+  .hero > .lp-himmel.hm { width: 220px; height: 150px; }
+}
+/* Mobil: mindre, i hörnet och ovanför texten */
+@media (max-width: 760px) {
+  section.lp-chefhjalte > .lp-himmel.hm, .hero > .lp-himmel.hm { right: -26px; top: -26px; transform: scale(.52); width: 300px; height: 190px; transform-origin: top right; opacity: .9; --sx: 56%; --sy: 50%; }
+  .lp-himmel.hm .hm-moln--bak { display: none; }
+  .lp-himmel.hm .hm-moln--fram { top: 52%; }
+}
+
+/* Ljus botten: översiktens hjälte är ljus i alla teman utom Mörk, chefhjälten är ljus i temat Ljus.
+   Där blir stjärnorna guldfärgade och molnen vita med en lätt skugga, så att inget blir en grå fläck. */
+:root:not([data-tema="mork"]) .hero > .lp-himmel.hm, :root[data-tema="ljus"] section.lp-chefhjalte > .lp-himmel.hm { --st-k: #f3c56a; --st: 205 150 60; --sol-2: #ffcf6a; --sol-3: #ffaa3a; --mane-2: #f8dc9c; --mane-3: #e2a548; --mane-sken: 232 172 80; }
+:root:not([data-tema="mork"]) .hero > .lp-himmel.hm--morgon, :root[data-tema="ljus"] section.lp-chefhjalte > .lp-himmel.hm--morgon { --sol-2: #ffb47a; --sol-3: #ff8644; }
+:root:not([data-tema="mork"]) .hero > .lp-himmel.hm--natt, :root[data-tema="ljus"] section.lp-chefhjalte > .lp-himmel.hm--natt { --moln: #fff; --moln-skugga: rgb(110 120 170 / .16); --moln-o: .55; --ljus-1: rgb(255 240 210 / .4); --ljus-2: rgb(255 236 200 / .12); }
+:root:not([data-tema="mork"]) .hero > .lp-himmel.hm--kvall, :root[data-tema="ljus"] section.lp-chefhjalte > .lp-himmel.hm--kvall { --moln: #fff4ee; --moln-skugga: rgb(190 110 110 / .18); --moln-o: .7; }
+
+/* Teman: Mörk dämpar illustrationer lite; glöden hålls lägre på ljusa kort så texten aldrig tappar kontrast */
+:root[data-tema="mork"] .lp-himmel.hm { filter: brightness(.9) saturate(.92); }
+:root[data-tema="ljus"] .hm, :root[data-tema="office"] .hm { --ljus-1: rgb(255 214 140 / .26); --ljus-2: rgb(255 205 130 / .08); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-himmel.hm, .lp-himmel.hm *, .lp-himmel.hm *::before, .lp-himmel.hm *::after { animation: none !important; }
+  .hm-moln { opacity: calc(var(--o) * var(--moln-o)); transform: translate3d(70px, 0, 0); }
+  .hm-moln--bak { transform: translate3d(10px, 0, 0); }
+}

@@ -318,9 +318,9 @@
     id: 'chatt', grupp: 'sida', vy: 'chatt', namn: 'Meddelanden', beskrivning: 'Teamchatten, grupper, svar, reaktioner och filer.', nasta: 'profil',
     steg: [
       { sida: '#/chatt', mal: '.ch-lista', rubrik: 'Konversationerna', placering: 'hoger', text: 'Hela teamet, privata konversationer och grupper. Sök, starta en <b>Ny grupp</b> och se olästa och @-omnämnanden.' },
-      { mal: '.ch-topp', rubrik: 'Konversationen', text: 'Tysta konversationen, se <b>Om konversationen</b> (medlemmar, delade filer) eller öppna den i ett eget flytande fönster som följer med mellan sidorna.' },
-      { mal: '.ch-trad', rubrik: 'Meddelandena', placering: 'vanster', text: 'Håll muspekaren över ett meddelande för att reagera, <b>svara</b> med citat, kopiera, ändra eller ta bort ditt eget.' },
-      { mal: '.ch-fot', rubrik: 'Skriv', fri: true, text: '<b>@</b> nämner en kollega, <b>#</b> länkar en kund eller affär. Bifoga eller dra in filer. <kbd>Enter</kbd> skickar, <kbd>Shift</kbd>+<kbd>Enter</kbd> ny rad, <kbd>' + PU + '</kbd> ändrar ditt senaste.' }
+      { mal: '.ch-topp', rubrik: 'Konversationen', text: '<b>Sök</b> i konversationen (Ctrl+F), tysta den med bjällran, se <b>Om konversationen</b> (medlemmar, länkade kunder och affärer, delade filer, Simulera ett svar) eller öppna den i ett eget flytande fönster som följer med mellan sidorna.' },
+      { mal: '.ch-trad', rubrik: 'Meddelandena', placering: 'vanster', text: 'Håll muspekaren över ett meddelande för att reagera eller <b>svara</b> med citat. <b>Mer</b> (eller högerklick) skapar en uppgift, påminner dig, fäster överst, markerar som oläst, kopierar, ändrar eller tar bort ditt eget. Klicka på en länkad kund eller affär för ett kort med fakta.' },
+      { mal: '.ch-fot', rubrik: 'Skriv', fri: true, text: '<b>@</b> nämner en kollega, <b>#</b> länkar en kund eller affär, <b>/</b> först i rutan ger mallar. Bifoga eller dra in filer. <kbd>Enter</kbd> skickar, <kbd>Shift</kbd>+<kbd>Enter</kbd> ny rad, <kbd>' + PU + '</kbd> ändrar ditt senaste.' }
     ]
   });
 
@@ -476,9 +476,8 @@
     fore: function (c) { c.affar = valjAffar(['besok', 'kontakt', 'ny', 'offert']); },
     steg: [
       { sida: '#/mote', rubrik: 'Kundmötet', text: 'Ett bra möte har ett mål: ett beslut om nästa steg. Så här förbereder du, presenterar och följer upp.' },
-      { mal: '[data-g="mote-valj"]', om: inteMin, rubrik: 'Välj affär', vanta: true, efterKlick: 600, text: 'Välj affären mötet gäller. Kunden, förfrågan och huset följer med in i presentationen.' },
-      // Minimal: bordet med platserna är dolt – affären väljs i listan under Förbered mötet
-      { mal: ['label:has([data-moteaffar])', '[data-moteaffar]'], om: baraMin, rubrik: 'Välj affär', fri: true, efterKlick: 600,
+      // Affären väljs i listan under Förbered mötet (kunderna vid bordet är borttagna)
+      { mal: ['label:has([data-moteaffar])', '[data-moteaffar]'], rubrik: 'Välj affär', fri: true, efterKlick: 600,
         fyll: function (c) { var s = document.querySelector('[data-moteaffar]'); if (!s) return {}; var v = [].slice.call(s.options).map(function (o) { return o.value; }).filter(Boolean); return { '[data-moteaffar]': v.indexOf(c.affar) >= 0 ? c.affar : (v[0] || '') }; },
         text: 'Välj affären mötet gäller i listan <b>Affär</b>. Kunden, förfrågan och huset följer med in i presentationen.' },
       { mal: '.upplagg', rubrik: 'Upplägget', fri: true, text: '<b>Fullt möte</b> (alla bilder), <b>Kort möte</b> eller <b>Bara kalkylen</b>. Bocka i och ur bilder – tidsbandet visar längden.' },

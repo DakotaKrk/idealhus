@@ -34,7 +34,7 @@
     return '<svg viewBox="0 0 ' + b + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true"><path d="' + d + 'L' + b + ' ' + h + 'L0 ' + h + 'Z" class="ao-spark__yta"/><path d="' + d + '" class="ao-spark__linje"/></svg>';
   }
   function lagring() { var b = 0; try { for (var n = 0; n < localStorage.length; n++) { var k = localStorage.key(n); if (/^ih-/.test(k)) b += (k.length + (localStorage.getItem(k) || '').length) * 2; } } catch (x) { /* */ } return b; }
-  var kb = function (b) { return b >= 1048576 ? (b / 1048576).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' MB' : Math.round(b / 1024) + ' kB'; };
+  var kb = function (b) { return b >= 1048576 ? (b / 1048576).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' kB'; };
 
   /* Lägena ------------------------------------------------------------------------------------------- */
   function kontoHalsa(u, brott) {
@@ -100,9 +100,6 @@
   function forslagLista(brott, dl, dr) {
     var d = db(), inst = IH.sak ? IH.sak.inst() : {}, ut = [], H = IH.sakHub;
     var hist = H && H.hub().historik[0];
-    var inakt = IH.ANVANDARE.filter(function (u) { return u.inaktiv; }).map(function (u) { return u.id; });
-    var hosInakt = d.affarer.filter(function (a) { return a.steg !== 'vunnen' && !a.forlorad && inakt.indexOf(a.ansvarig) >= 0; }).length + d.uppgifter.filter(function (x) { return !x.klar && inakt.indexOf(x.ansvarig) >= 0; }).length;
-    if (hosInakt) ut.push({ ikon: 'kunder', text: hosInakt + (hosInakt === 1 ? ' post' : ' poster') + ' hos inaktiverade konton', under: 'Öppna affärer och uppgifter som ingen arbetar med – fördela dem', lank: '#/chef', knapp: 'Fördela' });
     if (!hist) ut.push({ ikon: 'radar', text: 'Ingen säkerhetsskanning gjord', under: 'Kör alla sju kontroller – tar några sekunder', g: 'sh-skanna-ga', knapp: 'Skanna nu' });
     else if (IH.dagarSedan(hist.tid) > 7) ut.push({ ikon: 'radar', text: 'Senaste skanningen är ' + IH.dagarSedan(hist.tid) + ' dagar gammal', under: 'Skanna minst en gång i veckan', g: 'sh-skanna-ga', knapp: 'Skanna' });
     if (H) H.kontroller.forEach(function (k) { var r = H.hub().senast[k.id], hog = r ? r.fynd.filter(function (x) { return x.allvar === 'hog'; }) : []; if (hog.length) ut.push({ ikon: 'skold-larm', text: k.namn + ': fynd med hög allvarlighet', under: hog[0].text, lank: '#/sakerhet', knapp: 'Visa' }); });

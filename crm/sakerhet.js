@@ -210,18 +210,18 @@
       if (t) { var p = document.createElement('p'); p.className = 'sh-rad' + (ton ? ' sh-rad--' + ton : ''); p.innerHTML = radHtml({ text: text, ton: ton, tid: tid }); t.appendChild(p); while (t.children.length > 70) t.firstElementChild.remove(); t.scrollTop = t.scrollHeight; }
     };
     skriv('Startar ' + (valda.length === KONTROLLER.length ? 'full skanning – sju kontroller' : valda.map(function (k) { return k.namn.toLowerCase(); }).join(', ')), 'start');
-    var S = hub();
+    // hub() hämtas på nytt där resultaten skrivs: IH.db kan bytas medan skanningen pågår (en annan flik sparar)
     for (var n = 0; n < valda.length; n++) {
       var k = valda[n]; skan.nu = k.id; if (/^#\/sakerhet/.test(location.hash)) IH.rita();
       skriv(k.namn + ' …', 'rubrik');
       var steg = 0, kort = document.querySelector('[data-sh-kontroll="' + k.id + '"]');
       var stegLogg = function (text, ton) { steg++; skriv(text, ton); var andel = Math.min(0.95, steg / (k.steg.length + 1)); skan.pct = Math.round(((n + andel) / valda.length) * 100); var el = document.querySelector('[data-sh-pct]'); if (el) el.textContent = skan.pct + ' %'; var kk = document.querySelector('[data-sh-kontroll="' + k.id + '"]'); if (kk) kk.style.setProperty('--forlopp', andel); };
       var fynd; try { fynd = await k.kor(stegLogg); } catch (x) { fynd = [{ allvar: 'lag', text: 'Kontrollen avbröts: ' + (x.message || x) }]; }
-      S.senast[k.id] = { tid: new Date().toISOString(), fynd: fynd, av: IH.jag().id };
+      hub().senast[k.id] = { tid: new Date().toISOString(), fynd: fynd, av: IH.jag().id };
       var viktiga = fynd.filter(function (x) { return x.allvar !== 'info'; });
       skriv(k.namn + ': ' + (viktiga.length ? plural(viktiga.length, 'fynd', 'fynd') + ' – ' + poang(fynd) + ' av 100' : 'inga fynd'), viktiga.length ? (viktiga.some(function (x) { return x.allvar === 'hog'; }) ? 'hog' : 'medel') : 'ok');
     }
-    var p = total();
+    var p = total(), S = hub();
     S.historik.unshift({ tid: new Date().toISOString(), poang: p, vad: valda.length === KONTROLLER.length ? 'allt' : valda.map(function (k) { return k.id; }).join(','), av: IH.jag().id });
     if (S.historik.length > 40) S.historik.length = 40;
     if (IH.sakLogg) IH.sakLogg('skanning', (valda.length === KONTROLLER.length ? 'Full skanning' : 'Skanning') + ': ' + p + ' av 100.'); else IH.spara();
@@ -299,7 +299,6 @@
       '<div class="sh-terminal" data-sh-terminal role="log" aria-live="polite">' + rader.map(function (x) { return '<p class="sh-rad' + (x.ton ? ' sh-rad--' + x.ton : '') + '">' + radHtml(x) + '</p>'; }).join('') + '</div>' +
       '<div class="sh-konsol__status"><span>' + plural(KONTROLLER.length, 'kontroll', 'kontroller') + '</span><span>' + (senast ? 'senast ' + IH.sedan(senast.tid) : 'aldrig skannat') + '</span><span>' + (p == null ? '–' : p + '/100') + '</span>' +
         '<button type="button" data-g="sh-skanna" data-ids=""' + (skan.kor ? ' disabled' : '') + '>' + ik('radar') + 'Kör igen</button><button type="button" data-g="sh-kopiera">' + ik('skold') + 'Kopiera</button></div></div></section>';
-      (skan.logg.length ? skan.logg : [{ text: senast ? 'Senaste skanningen: ' + senast.poang + ' av 100 (' + IH.lokal(new Date(senast.tid), 'a') + ')' : 'Redo. Tryck på Skanna allt.', ton: 'start' }]).map(function (x) { return '<p class="sh-rad' + (x.ton ? ' sh-rad--' + x.ton : '') + '">› ' + e(x.text) + '</p>'; }).join('') + '</div></section>';
     // Poängen över tid: diagram 0–100 med zonerna (åtgärda, bör ses över, skyddat), punkter med värde och datum,
     // trend mot förra skanningen; säkerhetsloggen med typfilter, ikon per typ och Visa fler
     var serie = S.historik.slice(0, 12).reverse(), BB = 520, HH = 160, PL = 34, PR = 14, PT = 22, PB = 26, IN = 26;
@@ -411,7 +410,8 @@
   };
 
   // Kärnan lutar efter musen (som i Uperformance)
-  document.addEventListener('mousemove', function (ev) {
+  // Avstängd 2026-10-29: inga effekter som följer musen
+  if (false) document.addEventListener('mousemove', function (ev) {
     var k = document.querySelector('[data-sh-tilt]'); if (!k || lugn()) return;
     var r = k.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width - 0.5, y = (ev.clientY - r.top) / r.height - 0.5;
     if (Math.abs(x) > 1.5 || Math.abs(y) > 1.5) { k.style.setProperty('--tx', '0deg'); k.style.setProperty('--ty', '0deg'); return; }

@@ -614,7 +614,7 @@
     bubbla.innerHTML = '<div class="ihg-bubbla__inne"><div class="ihg-bubbla__topp"><span class="ihg-tur">' + esc(tur.namn) + '</span><span class="ihg-raknare">' + gjorda + ' / ' + antal.length + ' guider</span>' +
       '<button type="button" class="ihg-x" data-ihg="stang" aria-label="Stäng">' + SVG.stang + '</button></div>' +
       '<span class="ihg-klar-ikon">' + SVG.trofe + '</span><h3 id="ihg-rubrik">' + esc(tur.klarRubrik || 'Snyggt – guiden är klar!') + '</h3>' +
-      '<div class="ihg-text" id="ihg-text"><p>' + (tur.klarText || 'Du hittar alla guider under knappen <b>?</b> vid menyn, eller med tangenten <kbd>?</kbd>.') + '</p></div>' +
+      '<div class="ihg-text" id="ihg-text"><p>' + (tur.klarText || 'Du hittar alla guider under knappen <b>?</b> vid menyn.') + '</p></div>' +
       '<div class="ihg-framsteg"><i style="--a:1"></i></div><div class="ihg-knappar"><span class="ihg-tom"></span>' +
       '<button type="button" class="ihg-k ihg-k--kant" data-ihg="stang">Stäng</button>' +
       (nasta ? '<button type="button" class="ihg-k ihg-k--barn" data-ihg="tur" data-id="' + esc(nasta.id) + '">Nästa: ' + esc(nasta.namn) + SVG.pil + '</button>' : '') + '</div></div>';
@@ -636,7 +636,7 @@
     var a = antalFor(), andel = a.alla ? a.klara / a.alla : 0, omkrets = 2 * Math.PI * 18;
     var c = knappEl.querySelector('.ihg-knapp__ring circle:last-child');
     if (c) { c.setAttribute('stroke-dasharray', omkrets.toFixed(1)); c.setAttribute('stroke-dashoffset', (omkrets * (1 - andel)).toFixed(1)); }
-    knappEl.title = 'Guider (tangent ?) – ' + a.klara + ' av ' + a.alla + ' klara';
+    knappEl.title = 'Guider – ' + a.klara + ' av ' + a.alla + ' klara';
   }
   function byggKnapp() {
     if (knappEl || !document.body) return;
@@ -741,6 +741,9 @@
   }, true);
   document.addEventListener('keydown', function (ev) {
     if (ev.key !== '?' || aktiv || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+    // I CRM:et äger app.js ? (Kortkommandon, IH.G.hjalp) – öppna inte guidemenyn ovanpå arket eller paletten
+    var rot = document.documentElement;
+    if (ev.defaultPrevented || (window.IH && IH.G && IH.G.hjalp) || rot.hasAttribute('data-ark-oppen') || rot.hasAttribute('data-palett-oppen')) return;
     if (ev.target.closest && ev.target.closest('input, textarea, select, [contenteditable="true"], .mote')) return;
     ev.preventDefault(); G.vaxlaMeny();
   });

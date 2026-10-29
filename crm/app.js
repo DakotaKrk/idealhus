@@ -16,10 +16,27 @@
   var $$ = IH.$$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
   /* --- Lagring ------------------------------------------------------ */
+  // Data från en äldre version (äldre sparad data eller en importerad fil) får det som saknas ifyllt: prislistan och löpnumren
+  IH.uppgraderaDb = function (ny) {
+    ny.version = IH.VERSION;
+    if (!ny.prislista) ny.prislista = JSON.parse(JSON.stringify(IH.PRISLISTA_START));
+    var lopnr = ny.lopnr && typeof ny.lopnr === 'object' ? ny.lopnr : {};
+    var hogst = function (lista) { return (Array.isArray(lista) ? lista : []).reduce(function (m, x) { var n = parseInt(String(x && x.id).replace(/^\D+/, ''), 10); return isFinite(n) && n > m ? n : m; }, 0); };
+    [['kund', 'kunder'], ['affar', 'affarer'], ['forfragan', 'forfragningar'], ['aktivitet', 'aktiviteter'], ['uppgift', 'uppgifter'], ['projekt', 'projekt'], ['offert', 'offerter'], ['dokument', 'dokument']].forEach(function (t) {
+      lopnr[t[0]] = Math.max(+lopnr[t[0]] || 0, hogst(ny[t[1]]));
+    });
+    ny.lopnr = lopnr;
+    return ny;
+  };
   function ladda(franFlik) {
     var db = null, ra = null;
     try { ra = localStorage.getItem(IH.NYCKEL); } catch (e) { ra = null; }
     try { db = JSON.parse(ra); } catch (e) { db = null; }
+    // Läsbar data från en äldre version uppgraderas i stället för att bytas mot exempeldatan
+    if (db && typeof db === 'object' && +db.version > 0 && +db.version < IH.VERSION && Array.isArray(db.kunder) && Array.isArray(db.affarer)) {
+      db = IH.uppgraderaDb(db);
+      try { localStorage.setItem(IH.NYCKEL, JSON.stringify(db)); } catch (e) { /* privat läge eller full lagring */ }
+    }
     if (!db || db.version !== IH.VERSION) {
       // En annan flik skrev något som inte går att läsa (eller en annan version): behåll det som finns i minnet
       if (franFlik) return null;
@@ -43,7 +60,13 @@
   IH.spara = function () {
     IH.db.andrad = new Date().toISOString();
     // Nyare eller oläslig data ligger sparad (se ladda) och skrivs inte över
-    if (IH.dataSkrivsInte) return false;
+    if (IH.dataSkrivsInte) {
+      if (IH.toast && Date.now() - fullVarnad > 4000) {
+        fullVarnad = Date.now();
+        IH.toast('Ändringen sparades inte', 'Den sparade datan lämnas orörd, så det du ändrar försvinner när sidan laddas om.', 'varning', { tid: 9000 });
+      }
+      return false;
+    }
     try { localStorage.setItem(IH.NYCKEL, JSON.stringify(IH.db)); return true; } catch (e) {
       // Lagringen är full: säg det i stället för att låta det se sparat ut och tappa allt vid nästa laddning
       var full = e && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.code === 22 || e.code === 1014);
@@ -426,7 +449,7 @@
     return ark;
   };
   // Bakom ett öppet ark går det inte att tabba eller klicka in i menyn och sidan (aria-modal på riktigt)
-  var INERT_SEL = ['.sido', '.sido-kant', '.huvud', '.mobilmeny'];
+  var INERT_SEL = ['.sido', '.sido-kant', '.huvud', '.mobilmeny', '.ihg-knapp', '.ihg-hej', '.ihg-meny'];
   function bakgrundInert(pa) {
     INERT_SEL.forEach(function (sel) {
       var el = $(sel); if (!el) return;
@@ -460,7 +483,8 @@
 
   function lasAdress() {
     var h = (location.hash || '#/').replace(/^#\/?/, '');
-    var delar = h.split('/').filter(Boolean).map(decodeURIComponent);
+    // En trasig %-kodning (t.ex. ett halvt kopierat %) behåller den råa delen i stället för att stoppa sidan
+    var delar = h.split('/').filter(Boolean).map(function (d) { try { return decodeURIComponent(d); } catch (e) { return d; } });
     return { vy: delar[0] || 'oversikt', del: delar.slice(1) };
   }
   IH.ga = function (adress) {
@@ -606,7 +630,12 @@
   //   innehållet och toppraden                    glider som ett block
   // Ett nytt klick mitt i glidningen fortsätter från där allt står just då, med kortare tid.
   var datorBred = matchMedia('(min-width: 1101px)');
+  // Tiden läses ur --glid (grund.css) så att CSS och JS inte kan glida isär. Kurvan hör ihop med lada() nedan.
   var GLID = 460, KURVA = 'cubic-bezier(0.32,0.72,0,1)';
+  function glidTid() {
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--glid').trim(), n = parseFloat(v);
+    return isFinite(n) && n > 0 ? Math.round(/ms$/.test(v) ? n : n * 1000) : GLID;
+  }
   function sidoDold() { return document.documentElement.hasAttribute('data-sido-dold'); }
   // Lådkurvans förlopp vid en viss tid (för att korta tiden när man vänder mitt i)
   function lada(x) {
@@ -722,13 +751,13 @@
     var lugnt = matchMedia('(prefers-reduced-motion: reduce)').matches;
     var rora = !!animera && datorBred.matches && !lugnt && !!rot.animate;
     if (rora && glid && glid.dold === dold && sidoDold() === dold) return; // redan på väg dit
-    var e = sidoDelar(), fore = null, tid = GLID, skuggor = null, frysta = [];
+    var e = sidoDelar(), fore = null, tid = glidTid(), skuggor = null, frysta = [];
     // Magnetens förskjutning ska inte följa med knappen eller chattikonen till det nya läget
     $$('.sido-knapp, .chf-ikon').forEach(function (el) { el.style.translate = ''; });
     if (rora) {
       // Mät före – med en pågående glidning inräknad – och avbryt den sedan, så att ett snabbt andra klick fortsätter därifrån
       fore = sidoMatt(e);
-      if (glid) tid = Math.round(GLID * (0.4 + 0.6 * lada(Math.min(1, (performance.now() - glid.start) / glid.tid))));
+      if (glid) tid = Math.round(tid * (0.4 + 0.6 * lada(Math.min(1, (performance.now() - glid.start) / glid.tid))));
       // Det som försvinner direkt när menyn fälls ut får en skugga som tonar bort (toppraden, kontot)
       if (!dold) {
         skuggor = {};
@@ -1109,7 +1138,7 @@
   IH.efterRitning = function (rot) {
     var minimal = !!(IH.layout && IH.layout() === 'minimal');
     // Ändlösa animationer i stora block pausas när blocket inte syns (Projekt, Dokument, Profil, Kundmöte)
-    if (IH.pausaUtanfor) $$('.prodblock--fabrik, .kal, .nedrakning, .dk-hjalte, .lp-phjalte, .motescen', rot).forEach(IH.pausaUtanfor);
+    if (IH.pausaUtanfor) $$('.prodblock--fabrik, .kal, .nedrakning, .dk-hjalte, .lp-phjalte, .motescen, .lp-chefhjalte', rot).forEach(IH.pausaUtanfor);
     $$('[data-in]', rot).forEach(function (el, n) { el.style.setProperty('--in', Math.min(n, 10)); });
     $$('[data-stagger]', rot).forEach(function (c) {
       Array.prototype.forEach.call(c.children, function (ch, k) { ch.style.setProperty('--k', Math.min(k, 14)); });
@@ -1130,7 +1159,8 @@
         if (t < 1) requestAnimationFrame(steg);
       })(start);
     });
-    if (!lugn && !minimal && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    // Lutningen efter musen är avstängd (2026-10-29) – korten står still
+    if (false) {
       $$('[data-tilt]', rot).forEach(function (k) {
         // Rektangeln mäts en gång när pekaren kommer in (den lutade rutan ändras annars och skakar vid kanterna),
         // och värdena skrivs en gång per bildruta
@@ -1298,17 +1328,24 @@
     var lista = palett.rot.querySelector('[data-palett-lista]');
     lista.innerHTML = palettInnehall(q);
     var rader = lista.querySelectorAll('.palett__rad');
-    Array.prototype.forEach.call(rader, function (r, k) { r.style.setProperty('--k', Math.min(k, 16)); });
-    if (rader[0]) rader[0].classList.add('vald');
+    Array.prototype.forEach.call(rader, function (r, k) { r.style.setProperty('--k', Math.min(k, 16)); r.id = 'palett-rad-' + k; r.setAttribute('aria-selected', 'false'); });
+    palettMarkera(rader[0] || null);
+  }
+  // Den valda raden: klassen vald plus aria-selected och aria-activedescendant, så att skärmläsaren hör pilvalet
+  function palettMarkera(ny) {
+    if (!palett) return;
+    $$('.palett__rad.vald', palett.rot).forEach(function (x) { x.classList.remove('vald'); x.setAttribute('aria-selected', 'false'); });
+    var inp = palett.rot.querySelector('input');
+    if (ny) { ny.classList.add('vald'); ny.setAttribute('aria-selected', 'true'); inp.setAttribute('aria-activedescendant', ny.id); }
+    else inp.removeAttribute('aria-activedescendant');
   }
   function palettVald() { return palett && palett.rot.querySelector('.palett__rad.vald'); }
   function palettFlytta(steg) {
     var rader = Array.prototype.slice.call(palett.rot.querySelectorAll('.palett__rad'));
     if (!rader.length) return;
     var n = rader.indexOf(palettVald());
-    rader.forEach(function (r) { r.classList.remove('vald'); });
     var ny = rader[(n + steg + rader.length) % rader.length];
-    ny.classList.add('vald');
+    palettMarkera(ny);
     ny.scrollIntoView({ block: 'nearest' });
   }
   function palettKor(el) {
@@ -1320,6 +1357,8 @@
 
   IH.oppnaPalett = function () {
     if (palett) { palett.rot.querySelector('input').focus(); return; }
+    // Ett ifyllt formulär stängs inte tyst – samma fråga som Esc
+    if (arkAndrat() && !fragaKasta('Öppna sökningen igen för att stänga formuläret ändå.')) return;
     IH.stangArk(true);
     var slojan = document.createElement('div');
     slojan.className = 'slojan slojan--palett';
@@ -1328,13 +1367,14 @@
     rot.setAttribute('role', 'dialog');
     rot.setAttribute('aria-modal', 'true');
     rot.setAttribute('aria-label', 'Sök och kommandon');
-    rot.innerHTML = '<label class="palett__sok">' + IH.i('sok') + '<input type="text" placeholder="Sök eller skriv ett kommando…" autocomplete="off" spellcheck="false" aria-label="Sök eller skriv ett kommando"><kbd>Esc</kbd>' +
+    rot.innerHTML = '<label class="palett__sok">' + IH.i('sok') + '<input type="text" placeholder="Sök eller skriv ett kommando…" autocomplete="off" spellcheck="false" aria-label="Sök eller skriv ett kommando" role="combobox" aria-expanded="true" aria-controls="palett-lista" aria-autocomplete="list"><kbd>Esc</kbd>' +
       '<button class="palett__stang" type="button" aria-label="Stäng sökningen">' + IH.i('stang') + '</button></label>' +
-      '<div class="palett__lista" role="listbox" data-palett-lista></div>' +
+      '<div class="palett__lista" id="palett-lista" role="listbox" aria-label="Träffar" data-palett-lista></div>' +
       '<footer class="palett__fot"><span><kbd>↑</kbd><kbd>↓</kbd>välj</span><span><kbd>↵</kbd>öppna</span><span><kbd>Esc</kbd>stäng</span><span class="palett__fot--hoger"><kbd>' + (MAC ? '⌘' : 'Ctrl') + '</kbd><kbd>K</kbd>öppna och stäng</span></footer>';
     document.body.appendChild(slojan);
     document.body.appendChild(rot);
     palett = { rot: rot, slojan: slojan, fokus: document.activeElement };
+    bakgrundInert(true);
     document.documentElement.setAttribute('data-palett-oppen', '');
     rot.querySelector('.palett__stang').addEventListener('click', function (e) { e.preventDefault(); IH.stangPalett(); });
     palettRita('');
@@ -1348,8 +1388,7 @@
     rot.addEventListener('mouseover', function (e) {
       var r = e.target.closest('.palett__rad');
       if (!r || r.classList.contains('vald')) return;
-      $$('.palett__rad.vald', rot).forEach(function (x) { x.classList.remove('vald'); });
-      r.classList.add('vald');
+      palettMarkera(r);
     });
     slojan.addEventListener('click', function () { IH.stangPalett(); });
     requestAnimationFrame(function () {
@@ -1361,6 +1400,7 @@
     var p = palett;
     palett = null;
     document.documentElement.removeAttribute('data-palett-oppen');
+    if (!aktivtArk) bakgrundInert(false);
     p.rot.classList.remove('syns');
     p.slojan.classList.remove('syns');
     var bort = function () { p.rot.remove(); p.slojan.remove(); };
@@ -1388,7 +1428,9 @@
       }
     });
     document.addEventListener('keydown', function (e) {
-      var inmatning = /INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable;
+      // Den egna väljaren (valj.js) är en knapp med role=combobox – där skriver man för att välja, som i en select
+      var inmatning = /INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable ||
+        !!(e.target.closest && e.target.closest('[role=combobox], [role=listbox], .valj-knapp'));
       if ((e.metaKey || e.ctrlKey) && !e.altKey && (e.key === 'k' || e.key === 'K')) {
         if (moteOppet() && !palett) return;
         e.preventDefault();
@@ -1404,11 +1446,19 @@
       if (gVantar && Date.now() - gVantar < 1200) {
         gVantar = 0;
         var mal = G_SIDOR[e.key.toLowerCase()];
-        if (mal && !IH.sparrad(mal)) { e.preventDefault(); IH.ga('#/' + mal); return; }
+        if (mal && !IH.sparrad(mal)) {
+          e.preventDefault();
+          if (arkAndrat()) { IH.toast('Du har ett formulär som inte är sparat', 'Spara eller stäng det först (tryck Esc två gånger).', 'varning'); return; }
+          IH.ga('#/' + mal); return;
+        }
       }
       if ((e.key === 'g' || e.key === 'G') && !e.shiftKey) { gVantar = Date.now(); return; }
       if (e.key === '/') { e.preventDefault(); IH.oppnaPalett(); }
-      if (e.key === '?') { e.preventDefault(); IH.G.hjalp(); }
+      if (e.key === '?') {
+        e.preventDefault();
+        if (arkAndrat()) { IH.toast('Du har ett formulär som inte är sparat', 'Spara eller stäng det först (tryck Esc två gånger).', 'varning'); return; }
+        IH.G.hjalp();
+      }
       if (e.key === 'n' || e.key === 'N') {
         e.preventDefault();
         if (arkAndrat()) { IH.toast('Du har ett formulär som inte är sparat', 'Spara eller stäng det först (tryck Esc två gånger).', 'varning'); return; }

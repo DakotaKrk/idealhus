@@ -33,7 +33,6 @@
     var fran = IH.jag().namn;
     valj(el);
     logg('konto', 'Kontobyte: ' + fran + ' → ' + IH.jag().namn + '.');
-    if (arAdmin()) IH.ga('#/kontroll');
   };
 
   /* 02 Inställningar och utloggning vid inaktivitet --------------------------------------------- */
@@ -61,6 +60,8 @@
       logg('inaktiv', 'Utloggad efter ' + min + ' minuter utan aktivitet.');
       IH.G['logga-ut'](); return;
     }
+    // Aktivitet i en annan flik flyttade fram senast: varningen här stängs
+    if (varnad && kvar > 60000) stangVarning();
     if (kvar <= 60000 && !varnad) {
       varnad = document.createElement('div');
       varnad.className = 'ad-varning'; varnad.setAttribute('role', 'alertdialog');

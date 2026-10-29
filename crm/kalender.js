@@ -13,21 +13,20 @@
   const lugn = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const somArk = () => matchMedia('(max-width: 640px)').matches;
   const harPopover = 'showPopover' in HTMLElement.prototype;
-  const e = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const e = IH.e; // app.js laddas före
   const VECKODAGAR = [['må', 'måndag'], ['ti', 'tisdag'], ['on', 'onsdag'], ['to', 'torsdag'], ['fr', 'fredag'], ['lö', 'lördag'], ['sö', 'söndag']];
   const PIL = (bakat) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${bakat ? 'm15 6-6 6 6 6' : 'm9 6 6 6-6 6'}"/></svg>`;
   let nr = 0;
   let oppen = null; // { i: rutan, k: ankaret, p: panelen, ark, ar, man, fokus: 'ÅÅÅÅ-MM-DD' }
 
   /* Datum utan tidszonsfel: lokala datum och ISO-text (ÅÅÅÅ-MM-DD, som rutans value) ---------------- */
-  const tva = (n) => String(n).padStart(2, '0');
-  const iso = (d) => `${d.getFullYear()}-${tva(d.getMonth() + 1)}-${tva(d.getDate())}`;
+  const iso = (d) => IH.dagStr(d);
   const tolka = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); if (!m) return null; const d = new Date(+m[1], +m[2] - 1, +m[3]); return isNaN(d) || d.getDate() !== +m[3] ? null : d; };
   const idag = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
   const plusDagar = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
   const plusManader = (d, n) => { const x = new Date(d.getFullYear(), d.getMonth() + n, 1); x.setDate(Math.min(d.getDate(), new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate())); return x; };
   // ISO-veckonummer (måndag första dag, vecka 1 = veckan med 4 januari)
-  const vecka = (d) => { const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const dag = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - dag); const ar = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - ar) / 864e5 + 1) / 7); };
+  const vecka = (d) => IH.vecka(d);
   const manadsNamn = (ar, man) => { const t = IH.lokal(new Date(ar, man, 1), 'd', { month: 'long', year: 'numeric' }); return t.charAt(0).toUpperCase() + t.slice(1); };
   const langt = (d) => IH.lokal(d, 'd', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const inom = (i, s) => !(i.min && s < i.min) && !(i.max && s > i.max); // ISO-text jämförs rätt som text

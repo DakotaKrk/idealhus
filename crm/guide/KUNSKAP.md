@@ -72,6 +72,9 @@ Kontomenyn (`.km-panel`): status (snabbval `data-g="satt-narvaro"` + alla via `k
 | **Home / End** | Presentationen | Första/sista bilden |
 | **Esc** | Presentationen | Avsluta (utanför helskärm) |
 | **Enter / Shift+Enter / ↑ / @ / #** | Chatten | Skicka / ny rad / ändra ditt senaste / nämn kollega / länka kund eller affär |
+| **/ · Tab** | Chatten (i rutan) | Mallar / nästa fält i mallen |
+| **Ctrl J / Ctrl F** | Chatten | Nästa olästa konversation / sök i konversationen |
+| **↑ ↓ · R · E · P · T · Enter** | Chatten (fokus i tråden) | Flytta / svara / ändra / fäst / uppgift / meny |
 | **Shift + Esc** | Supportläge | Tillbaka till Admin |
 | **?** | Guiden | Öppnar guidemenyn (guide.js) |
 
@@ -149,7 +152,8 @@ För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 - `.dagtopp` (hälsning, typer, ring klara i dag), `.agk` veckokalender (`ag-vy` Vecka/2 veckor/Månad, `ag-off`, `ag-ny-dag`, `ag-dag-visa`), `.agv` (sök, `ag-vem` Mina/Alla, `ag-typ`, `ag-csv`), `form.nyuppg` (formulär `uppgift`: text, kund/affär, datum), `.uppgrupp` I dag / Kommande / `.uppgrupp--klara` (`uppgift-klar`, `ag-skjut`, `ag-sena-idag`, `kund-ring`, `kund-oppna`).
 
 ### Meddelanden `#/chatt[/id]` (chatt.js)
-- `.ch-lista` (sök, `.ch-team`, konversationer, `ch-ny-grupp`, `.ch-kort` avisering `ch-avisera`), `.ch-tradyta`: `.ch-topp` (`ch-tyst`, `ch-info`, `chf-oppna` eget fönster, `chf-min-sida`), `.ch-trad` (`ch-reagera`, `ch-svara`, `ch-kopiera`, `ch-andra`, `ch-ta-bort`), `.ch-fot` skrivrutan (`ch-emoji`, bifoga, @ och #). `ch-pling` ljud. Flytande fönster `.chf`, minimerat `.chf-ikon`.
+- `.ch-lista` (sök med utdrag, `.ch-team`, konversationer med ”Utkast:”, `ch-ny-grupp`, `.ch-kort` avisering `ch-avisera`), `ch-pling` ljud för nya meddelanden. `.ch-tradyta`: `.ch-topp` (`ch-sok-tradoppna` sök i tråden/Ctrl+F → `.ch-sokrad`, `ch-tyst` bjällran tystar, `ch-info`, `chf-oppna` eget fönster, `chf-min-sida` minimera till senaste sidan), `.ch-trad-yta`: `.ch-fast` (fästa, högst 3, `ch-hoppa-fast`, `ch-fast`), `.ch-trad[role=log]` (`ch-reagera`, `ch-svara`, `ch-mer` → `.ch-meny`: `ch-uppgift`, `ch-paminn-meny`/`ch-paminn`, `ch-fast`, `ch-olast`, `ch-kopiera`, `ch-andra`, `ch-ta-bort`, `ch-simulera`; högerklick ger samma meny), `.ch-hopp` ”N nya meddelanden ↓”/”Till senaste ↓”, `.ch-skriver`; `.ch-obj` öppnar `.ch-objkort`; `.ch-fot` skrivrutan (`ch-emoji`, bifoga, @, #, `/` mallar `.ch-mallar`). Tom tråd: `.ch-tom`. Om konversationen: Länkat i konversationen, Delade filer, Prototyp + `ch-simulera` (exempelsvar). Pilar i tråden: ↑/↓, R svara, E ändra, P fäst, T uppgift, Enter meny. **Ctrl+J** nästa olästa. Flytande fönster `.chf` (trådläge `.chf-huvud.trad`, listläge `.chf-sok`), minimerat `.chf-ikon`.
+- Prototyp (kräver server, sägs i Om konversationen): notiser och pling till andra datorer (här bara mellan flikar + Simulera ett svar), läskvitton/”Sett av” och ”skriver …” mellan olika personer, påminnelser när fliken är stängd (påminnelsen ligger i Att göra och visas som toast om fliken är öppen), filer på server och riktig virusskanning, sökning i stor historik.
 
 ### Min profil `#/profil[/id]` (ledning.js)
 - `.lp-phjalte` (id-kort `.lp-phjalte__vanster`, `lp-andra-profil`, status via `konto-meny`, tal `.lp-phjalte__tal`), `.lp-tvakol`: **Om dig** (`lp-om-skriv`, kontakt, genvägar) och **Aktivitet och arbete** (graf 30 d, affärer, uppgifter `lp-egen-uppg`, `lp-klar`, `lp-mal`), `.pk` **Min kalender** (`pk-man`, `pk-vy` Månad/År, `pk-ics` kalenderfil, `pk-dag`, `pk-ny`, `pk-sjuk` Sjukanmäl i dag, `lp-franvaro` Lägg in frånvaro).
