@@ -183,6 +183,16 @@
   }
   // Märket från filskannern (filskanner.js): grön sköld när filen är ren, gul varning annars
   const skannad = (f) => (f.skanning ? '<span class="ch-skannad" data-status="' + e(f.skanning.status) + '" title="' + (f.skanning.status === 'ren' ? 'Virusskannad – inga hot hittades' : 'Släppt igenom med varning') + '">' + ik(f.skanning.status === 'ren' ? 'skold' : 'varning') + (f.skanning.status === 'ren' ? 'Skannad' : 'Varning') + '</span>' : '');
+  // Videomötet som startades i konversationen (videomote.js): "Videomöte · pågår" med Anslut, efteråt längden
+  function vmKort(m) {
+    if (!m.videomote || m.borttagen || typeof m.videomote !== 'string') return '';
+    const vm = IH.videomote, v = vm && vm.hamta(m.videomote), ikon = IH.vmIk ? IH.vmIk() : ik('kamera');
+    if (!v) return '<span class="ch-vmkort" data-lage="borta">' + ikon + '<span><b>Videomöte</b><small>Mötet finns inte längre</small></span></span>';
+    const l = vm.lage(v), n = (v.deltagare || []).length + 1;
+    const under = l === 'avslutat' ? (v.minuter ? v.minuter + ' min' : 'Avslutat') : l === 'pagar' ? 'pågår · ' + n + (n === 1 ? ' deltagare' : ' deltagare') : l === 'nu' ? 'börjar nu' : l === 'passerat' ? 'tiden har passerat' : vm.narText(v);
+    return '<span class="ch-vmkort" data-lage="' + l + '">' + ikon + '<span><b>Videomöte</b><small>' + e(under) + '</small></span>' +
+      (l === 'avslutat' || l === 'passerat' ? '' : '<button type="button" class="knapp knapp--liten knapp--virke" data-g="vm-anslut" data-id="' + e(v.id) + '" tabindex="-1">Anslut</button>') + '</span>';
+  }
   function meddHtml(m, foreg, sok) {
     const u = anv(m.av), egen = m.av === jag();
     if (m.system) return '<p class="ch-system">' + e(m.text) + '</p>';
@@ -213,7 +223,7 @@
       '" data-mid="' + e(m.id) + '" tabindex="' + (ui.markerad === m.id ? '0' : '-1') + '" aria-label="' + e((egen ? 'Du' : u.namn) + ', ' + klocka(m.tid) + (fast ? ', fäst' : '')) + '">' +
       (egen ? '' : fortsatt ? '<span class="ch-medd__plats"></span>' : avatar(u, true)) +
       '<div class="ch-medd__kropp">' + (egen || fortsatt ? '' : '<b class="ch-medd__namn">' + e(u.namn) + '<small>' + tidHtml(m.tid) + ex + '</small></b>') +
-        '<div class="ch-bubbla' + (bara ? ' stor' : '') + (m.borttagen ? ' borta' : '') + '">' + svar + text + filer +
+        '<div class="ch-bubbla' + (bara ? ' stor' : '') + (m.borttagen ? ' borta' : '') + '">' + svar + text + vmKort(m) + filer +
           (egen || fortsatt ? '<small class="ch-tid">' + tidHtml(m.tid) + (m.andrad ? ' · ändrad' : '') + ex + '</small>' : m.andrad ? '<small class="ch-tid">ändrad</small>' : '') + '</div>' +
         (reakt ? '<div class="ch-reaktioner">' + reakt + '</div>' : '') +
         (pam ? '<small class="ch-paminn">' + ik('klocka') + 'Påminner ' + e(narText(pam.tid)) + '</small>' : '') + '</div>' + verktyg + '</div>';
@@ -317,10 +327,11 @@
   const tystKnapp = (k) => '<button type="button" class="ch-ikonknapp ch-ruta" data-g="ch-tyst" data-kanal="' + k.id + '" aria-pressed="' + tystad(k.id) + '" title="' + (tystad(k.id) ? 'Slå på aviseringar' : 'Tysta konversationen') + '" aria-label="Tysta konversationen">' + ik(tystad(k.id) ? 'bjallra-av' : 'bjallra') + '</button>';
   const sokKnapp = (k) => '<button type="button" class="ch-ikonknapp ch-ruta" data-g="ch-sok-tradoppna" data-kanal="' + k.id + '" aria-pressed="' + !!(ui.sokTrad && ui.sokTrad.kanal === k.id) + '" title="Sök i konversationen (Ctrl+F)" aria-label="Sök i konversationen">' + ik('sok') + '</button>';
   const undertext = (k) => { const mot = motpart(k); return mot ? (IH.narvaro ? IH.narvaro(mot.id).namn + ' · ' : '') + mot.titel : k.medlemmar.map((id) => fornamn(anv(id))).join(', '); };
+  const vmKnapp = (k) => (IH.videomote ? '<button type="button" class="ch-ikonknapp ch-ruta ch-vmknapp" data-g="vm-chatt-starta" data-kanal="' + k.id + '" title="Starta videomöte" aria-label="Starta videomöte">' + (IH.vmIk ? IH.vmIk() : ik('kamera')) + '</button>' : '');
   function toppHtml(k) {
     return '<header class="ch-topp">' + kanalAvatar(k) +
       '<div class="ch-topp__text"><b>' + e(kanalNamn(k)) + '</b><small>' + e(undertext(k)) + '</small></div>' +
-      '<span class="ch-topp__knappar">' + sokKnapp(k) +
+      '<span class="ch-topp__knappar">' + vmKnapp(k) + sokKnapp(k) +
         (k.typ === 'grupp' ? '<button type="button" class="ch-ikonknapp ch-ruta" data-g="ch-bjud" data-kanal="' + k.id + '" title="Bjud in" aria-label="Bjud in">' + ik('anvandare-plus') + '</button>' : '') +
         tystKnapp(k) +
         '<button type="button" class="ch-ikonknapp ch-ruta" data-g="ch-info" aria-pressed="' + ui.info + '" title="Om konversationen" aria-label="Om konversationen">' + ik('info') + '</button>' +
@@ -867,6 +878,16 @@
     IH.toast('Chatten är skrivskyddad i supportläget', 'Meddelanden skickas inte i ' + IH.visarSom().namn + 's namn. Lämna supportläget och skriv från ditt eget konto.', 'oga-av');
     return true;
   }
+  IH.chattMedlemmar = (kid) => { const k = kanal(kid); return k ? k.medlemmar.filter((id) => id !== jag() && !(anv(id).inaktiv)) : []; };
+  IH.chattVideomote = (kid, vmId) => {
+    if (skrivskyddat() || !kanal(kid)) return;
+    const m = { id: nyId('m'), kanal: kid, av: jag(), tid: new Date().toISOString(), text: 'Startade ett videomöte', videomote: String(vmId) };
+    C().meddelanden.push(m); kanda.add(m.id); ui.nya.add(m.id);
+    const c = C(); c.last[jag()] = c.last[jag()] || {}; c.last[jag()][kid] = m.tid;
+    IH.spara(); ritaAllt();
+  };
+  // Mötet börjar eller slutar (samtal-ui.js): korten i tråden visar det nya läget
+  document.addEventListener('ih-videomote', () => { if (document.querySelector('.ch-vmkort')) ritaTraden(); });
   G['ch-reagera'] = (el) => {
     if (skrivskyddat()) return;
     const m = meddelande(el.getAttribute('data-mid')); if (!m || m.borttagen) return;

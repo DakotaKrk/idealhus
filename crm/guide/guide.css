@@ -971,3 +971,68 @@ html[data-konto-oppen] .ihg-knapp, html[data-konto-oppen] .ihg-hej, body:has(.ch
   html[data-sido-dold] body .topp__konto .avatar { width: 26px; height: 26px; font-size: .55rem; }
   html[data-sido-dold] body .sido-rals .sido-rals__halva--ner { margin-bottom: 72px; }
 }
+
+/* Menyknappen på kanten (2026-10-29): samma lugna glasstil i alla lägen – inga gamla orange glöd- och prickeffekter vid
+   hovring, fokus eller klick; pilen syns alltid och står still */
+@media (min-width: 1101px) {
+  html body .sido-kant .sido-knapp::before, html body .sido-kant .sido-knapp::after { display: none !important; content: none !important; }
+  html body .sido-kant .sido-knapp:hover, html body .sido-kant .sido-knapp:focus-visible, html body .sido-kant .sido-knapp:active {
+    background: rgb(var(--t-glas-rgb)) !important; color: var(--t-accent-djup) !important; filter: none !important;
+    box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .55), 0 6px 14px -10px rgb(var(--t-accent-djup-rgb) / .5) !important; }
+  html body .sido-kant .sido-knapp:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: 2px; }
+  html body .sido-kant .sido-knapp:active { transform: scale(.94); }
+  html body .sido-kant .sido-knapp svg { opacity: 1 !important; visibility: visible !important; width: 16px; height: 16px; animation: none !important; translate: none !important; }
+}
+
+/* Alla layoutlägen (2026-10-29): samma överkant som menyn – den tomma toppraden tar ingen höjd när menyn är infälld
+   (även i Normal och Minimal, där layout.css annars gav den en egen höjd), och innehållet börjar i menyns höjd */
+@media (min-width: 1101px) {
+  html[data-layout][data-sido-dold] body .topp { height: 0; min-height: 0; margin: 0; padding: 0; }
+  html[data-layout="minimal"] body main.vy#vy { padding-top: 12px; }
+}
+
+/* Runda ikonknappar (.ch-ruta) i hela CRM:et (2026-10-29): plus, pil, kryss och liknande – samma rena form överallt
+   i alla teman: mjuk ton i stället för tjock vit ring, en tunn kant, ikonen exakt i mitten (flex), lugn hovring och
+   tryck. Röda "ta bort"-knappar behåller sin färg. */
+html body .ch-ruta:not(.lp-saker):not([data-saker]) {
+  display: inline-flex !important; align-items: center; justify-content: center; flex: none;
+  width: 38px; height: 38px; min-width: 38px; padding: 0 !important; border: 0 !important; border-radius: 50% !important;
+  background: color-mix(in srgb, var(--t-text) 6%, transparent) !important; color: var(--text-2, var(--t-text-2)) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t-text) 11%, transparent) !important; outline: 0;
+  line-height: 0; font-size: 0; transition: background-color .2s ease, color .2s ease, box-shadow .2s ease, transform .16s cubic-bezier(.32, .72, 0, 1); }
+html body .ch-ruta:not(.lp-saker):not([data-saker]):hover, html body .ch-ruta:not(.lp-saker):not([data-saker])[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--t-accent) 18%, transparent) !important; color: var(--t-accent-text, var(--t-accent-djup)) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t-accent) 45%, transparent) !important; }
+html body .ch-ruta:not(.lp-saker):not([data-saker]):focus-visible { outline: 2px solid var(--t-fokus); outline-offset: 2px; }
+html body .ch-ruta:active { transform: scale(.94); }
+html body .ch-ruta > svg, html body .ch-ruta > .i, html body .ch-ruta > .emo-ik { flex: none; width: 17px !important; height: 17px !important; margin: 0 !important; position: static; translate: none; transform: none; }
+html[data-layout="minimal"] body .ch-ruta:not(.lp-saker):not([data-saker]) { width: 32px; height: 32px; min-width: 32px; }
+@media (max-width: 900px) { html body .ch-ruta:not(.lp-saker):not([data-saker]) { width: 36px; height: 36px; min-width: 36px; } }
+
+/* Infälld meny (2026-10-29): menyknappen flyttar upp direkt under Ny (pluset) i samma bärnstenston, med en lugn,
+   andande glöd; chattbubblan dockar under den. Listans sidor följer sedan uppifrån i en följd (ingen lucka i mitten). */
+@media (min-width: 1101px) {
+  html[data-sido-dold] body .sido-kant .sido-knapp, html[data-sido-dold] body .sido-kant .sido-knapp:hover, html[data-sido-dold] body .sido-kant .sido-knapp:focus-visible {
+    top: 145px !important; width: 34px; height: 34px; margin: -17px 0 0 -17px;
+    background: var(--t-accent-ljus, var(--virke-ljus)) !important; color: var(--t-accent-djup, var(--virke-djup)) !important;
+    box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .35), 0 0 0 0 rgb(var(--t-accent-rgb) / 0) !important;
+    animation: knapp-gloed 3.6s ease-in-out infinite; }
+  html[data-sido-dold] body .sido-kant .sido-knapp:hover, html[data-sido-dold] body .sido-kant .sido-knapp:focus-visible {
+    background: var(--t-accent, #e29a4a) !important; color: var(--t-pa-accent, #2a1a0b) !important; animation: none;
+    box-shadow: 0 0 0 4px rgb(var(--t-accent-rgb) / .14), 0 6px 16px -8px rgb(var(--t-accent-djup-rgb) / .6) !important; }
+  html.sido-glider body .sido-kant .sido-knapp { animation: none; }
+  /* Listan: övre delen börjar under knappen (och chatten när den är dockad), nedre delen följer direkt efter */
+  html[data-sido-dold] body .sido-rals, html[data-sido-dold] body .sido-rals:not(:has(.sido-rals__halva > a:nth-of-type(6))) { grid-template-rows: auto 6px minmax(0, 1fr) !important; }
+  html[data-sido-dold] body .sido-rals .sido-rals__halva--upp { margin-top: 152px !important; }
+  html[data-sido-dold] body:has(.chf-ikon) .sido-rals .sido-rals__halva--upp { margin-top: 194px !important; }
+  html[data-sido-dold] body .sido-rals .sido-rals__halva--upp > :first-child, html[data-sido-dold] body .sido-rals .sido-rals__halva--upp > a[data-vy="oversikt"] + * { margin-top: 0 !important; }
+  html[data-sido-dold] body .sido-rals .sido-rals__halva--ner, html[data-sido-dold] body:has(.chf-ikon, .chf-dock) .sido-rals .sido-rals__halva--ner { padding-top: 0 !important; }
+}
+@media (min-width: 1101px) and (max-height: 760px) {
+  html[data-sido-dold] body .sido-kant .sido-knapp, html[data-sido-dold] body .sido-kant .sido-knapp:hover, html[data-sido-dold] body .sido-kant .sido-knapp:focus-visible { top: 122px !important; width: 28px; height: 28px; margin: -14px 0 0 -14px; }
+  html[data-sido-dold] body .sido-rals .sido-rals__halva--upp { margin-top: 126px !important; }
+  html[data-sido-dold] body:has(.chf-ikon) .sido-rals .sido-rals__halva--upp { margin-top: 166px !important; }
+}
+@keyframes knapp-gloed { 0%, 100% { box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .35), 0 0 0 0 rgb(var(--t-accent-rgb) / 0); }
+  50% { box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .5), 0 0 0 4px rgb(var(--t-accent-rgb) / .1), 0 0 14px rgb(var(--t-accent-rgb) / .28); } }
+@media (prefers-reduced-motion: reduce) { html[data-sido-dold] body .sido-kant .sido-knapp { animation: none; } }

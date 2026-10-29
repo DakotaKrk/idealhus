@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="sv" data-vm-gast>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; media-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'none'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <meta name="theme-color" content="#f8f4ed">
+    <script src="tema-tidigt.js?v=20261108zf"></script>
+    <title>Videomöte · Legohus</title>
+    <link rel="icon" href="../images/legohus.svg" type="image/svg+xml">
+    <link rel="preload" href="../fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="tema.css?v=20261108zf">
+    <link rel="stylesheet" href="samtal.css?v=20261108zf">
+    <link rel="stylesheet" href="mote-gast.css?v=20261108zf">
+  </head>
+  <body class="gast">
+    <header class="gast-topp">
+      <img class="gast-topp__logo" src="../images/legohus_logo.svg" alt="Legohus Stockholm" width="142" height="36">
+      <span class="gast-topp__etikett">Videomöte</span>
+    </header>
+    <main class="gast-huvud" id="gast-huvud">
+      <noscript><p class="gast-meddelande">Videomötet behöver JavaScript. Slå på det i webbläsaren och ladda om sidan.</p></noscript>
+    </main>
+    <script src="samtal.js?v=20261108zf"></script>
+    <script src="samtal-ui.js?v=20261108zf"></script>
+    <script src="mote-gast.js?v=20261108zf"></script>
+  </body>
+</html>

@@ -1563,3 +1563,11 @@
 html, body.li { max-width: 100%; overflow-x: clip; }
 .li__vanster, .li__innehall, .li__innehall > * { min-width: 0; max-width: 100%; box-sizing: border-box; }
 .li__titel { overflow-wrap: anywhere; }
+
+/* Händelserna (2026-10-29): helt täckande kort (inget av instrumentpanelen lyser igenom), det sista tonar bara ut på
+   plats, och det nya glider in uppifrån utan studs – korten under glider med (FLIP i logga-in.js) */
+.handelse { background: linear-gradient(160deg, rgb(var(--t-glas-rgb) / .99), rgb(var(--t-glas-rgb) / .96)); animation: handelse-mjuk .46s cubic-bezier(.32, .72, 0, 1) .3s backwards;
+  transition: opacity .42s ease, scale .52s cubic-bezier(.32, .72, 0, 1); }
+.handelse.ut { opacity: 0; transform: none; scale: .9; }
+@keyframes handelse-mjuk { from { opacity: 0; translate: 0 -.9em; scale: .96; } }
+@media (prefers-reduced-motion: reduce) { .handelse { animation: none; transition: none; } }

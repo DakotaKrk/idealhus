@@ -142,14 +142,26 @@
         if (t) t.textContent = TIDER[k] || '';
       });
     };
+    // FLIP: korten som redan finns glider mjukt till sin nya plats när ett nytt kommer in eller det sista går,
+    // i stället för att hoppa en rad (det gav dubbla, överlappande kort mitt i bytet)
+    var glid = function (andra) {
+      var fore = [].map.call(flode.children, function (c) { return [c, c.getBoundingClientRect().top]; });
+      andra();
+      if (lugn) return;
+      fore.forEach(function (x) {
+        if (!x[0].parentNode || x[0].classList.contains('ut')) return;
+        var dy = x[1] - x[0].getBoundingClientRect().top;
+        if (Math.abs(dy) > 0.5 && x[0].animate) x[0].animate([{ translate: '0 ' + dy + 'px' }, { translate: '0 0' }], { duration: 520, easing: 'cubic-bezier(.32,.72,0,1)' });
+      });
+    };
     var ny = function () {
-      flode.insertBefore(kort(HANDELSER[nasta]), flode.firstChild);
+      glid(function () { flode.insertBefore(kort(HANDELSER[nasta]), flode.firstChild); });
       nasta = (nasta + 1) % HANDELSER.length;
       var kvar = flode.children;
       if (kvar.length > 3) {
         var sist = kvar[kvar.length - 1];
         sist.classList.add('ut');
-        setTimeout(function () { if (sist.parentNode) sist.parentNode.removeChild(sist); tider(); }, 600);
+        setTimeout(function () { glid(function () { if (sist.parentNode) sist.parentNode.removeChild(sist); }); tider(); }, lugn ? 0 : 420);
       }
       tider();
     };

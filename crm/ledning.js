@@ -433,9 +433,19 @@
   // ledighet och sjukanmälan. Allt räknas ur datan för den här personen.
   var pk = { man: 0, vy: 'man', dag: null };
   var PK_TYP = { mote: ['Möte', 'var(--t-diagram-4)'], samtal: ['Samtal', 'var(--t-diagram-2)'], mejl: ['Mejl', 'var(--t-diagram-6)'], besok: ['Besök', 'var(--t-diagram-3)'], notis: ['Anteckning', '#c9b48f'], system: ['Aktivitet', '#7fd1b0'], uppg: ['Uppgift', 'var(--t-diagram-5)'], sen: ['Försenad', '#e8806a'], vunnen: ['Vunnen', 'var(--t-kol-accent)'] };
+  // Videomöten (videomote.js): ikonen, Anslut och länken i kalenderfilen för aktiviteter med fältet video
+  var vmIk = function () { return IH.vmIk ? IH.vmIk() : i('kamera'); };
+  var vmAv = function (x) { return x && x.video && IH.videomote ? IH.videomote.hamta(x.video) : null; };
+  function vmKnappar(x, klass) {
+    var v = vmAv(x); if (!v) return '';
+    var l = IH.videomote.lage(v), oppen = l !== 'avslutat' && l !== 'passerat';
+    return (oppen ? '<button type="button" class="' + (klass || 'ap-filter') + (l === 'nu' || l === 'pagar' ? ' vm-nu' : '') + '" data-g="vm-anslut" data-id="' + e(v.id) + '">' + vmIk() + 'Anslut</button>' : '') +
+      '<button type="button" class="' + (klass || 'ap-filter') + '" data-g="vm-inbjudan" data-id="' + e(v.id) + '" title="Länk, mejl och kalenderfil">' + i('post') + 'Inbjudan</button>';
+  }
+  var vmIcs = function (x) { var v = vmAv(x); return v ? ['URL:' + IH.videomote.lank(v.id), 'LOCATION:Videomöte'] : []; };
   function pkHandelser(u) {
     var idag = dag0(new Date()).getTime(), ut = [];
-    db().aktiviteter.forEach(function (h) { if (h.av === u.id && !h.stod) ut.push({ id: h.id, dag: dag0(h.tid).getTime(), tid: h.tid, typ: PK_TYP[h.typ] ? h.typ : 'system', text: h.text, kund: h.kund, akt: true }); });
+    db().aktiviteter.forEach(function (h) { if (h.av === u.id && !h.stod) ut.push({ id: h.id, dag: dag0(h.tid).getTime(), tid: h.tid, typ: PK_TYP[h.typ] ? h.typ : 'system', text: h.text, kund: h.kund, akt: true, video: h.video || null }); });
     db().uppgifter.forEach(function (x) { if (!x.klar && !x.kalAkt && x.ansvarig === u.id) { var d = dag0(x.forfaller).getTime(); ut.push({ id: x.id, dag: d, tid: x.forfaller, typ: d < idag ? 'sen' : 'uppg', text: x.text, kund: x.kund, uppg: true }); } });
     db().affarer.forEach(function (x) { if (x.steg === 'vunnen' && x.vunnen && x.ansvarig === u.id) ut.push({ id: x.id, dag: dag0(x.vunnen).getTime(), tid: x.vunnen, typ: 'vunnen', text: 'Vunnen: ' + x.titel, kund: x.kund, affar: x.id }); });
     return ut.sort(function (x, y) { return x.tid < y.tid ? -1 : 1; });
@@ -483,7 +493,7 @@
       (ledV ? '<div class="pk-panel__led f-' + ledV.typ + '">' + IH.emo(FRANVARO[ledV.typ][1]) + '<span><b>' + e(FRANVARO[ledV.typ][0]) + '</b><small>' + kortDatum(new Date(ledV.fran)) + (ledV.till !== ledV.fran ? '–' + kortDatum(new Date(ledV.till)) : '') + '</small></span>' + (kanLeda ? '<button type="button" class="pk-mini" data-g="lp-franvaro" data-fid="' + ledV.id + '" data-uid="' + u.id + '" aria-label="Ändra frånvaron">' + i('skriv') + '</button>' : '') + '</div>' : '') +
       (hd.length ? '<ul class="pk-lista">' + hd.map(function (x, n) {
         var k = x.kund && IH.kund(x.kund), tid = new Date(x.tid), kl = x.akt ? IH.lokal(tid, 't', { hour: '2-digit', minute: '2-digit' }) : '';
-        return '<li style="--k:' + PK_TYP[x.typ][1] + ';--n:' + n + '"><span class="pk-lista__typ">' + e(PK_TYP[x.typ][0]) + (kl ? ' · ' + kl : '') + '</span><b>' + e(x.text) + '</b>' + (k ? '<a href="#/kunder/' + k.id + '">' + e(k.namn) + i('pil') + '</a>' : '') + '</li>';
+        return '<li style="--k:' + PK_TYP[x.typ][1] + ';--n:' + n + '"><span class="pk-lista__typ">' + (vmAv(x) ? vmIk() + 'Videomöte' : e(PK_TYP[x.typ][0])) + (kl ? ' · ' + kl : '') + '</span><b>' + e(x.text) + '</b>' + (k ? '<a href="#/kunder/' + k.id + '">' + e(k.namn) + i('pil') + '</a>' : '') + (vmAv(x) ? '<span class="pk-lista__vm">' + vmKnappar(x, 'pk-mini vm-pk') + '</span>' : '') + '</li>';
       }).join('') + '</ul>' : '<p class="pk-tom">' + i('kalender') + 'Inget inbokat den här dagen.</p>') +
       (kanLeda ? '<button type="button" class="pk-lagg" data-g="pk-ny" data-dag="' + dagISO(vd) + '" data-id="' + u.id + '">' + i('plus') + 'Lägg till den här dagen</button>' : '') +
       '<div class="pk-panel__fot">' + (kanLeda ? '<button type="button" class="pk-knapp pk-knapp--accent" data-g="lp-franvaro" data-uid="' + u.id + '" data-dag="' + dagISO(vd) + '">' + IH.emo('flyg') + 'Lägg in frånvaro</button>' +
@@ -524,7 +534,7 @@
     var esc = function (t) { return String(t || '').replace(/[\\;,]/g, function (c) { return '\\' + c; }).replace(/\r\n|\r|\n/g, ' '); };
     var rader = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Legohus//CRM//SV'];
     var dagF = function (d) { return dagISO(d).replace(/-/g, ''); };
-    h.forEach(function (x) { var s2 = new Date(x.tid), k = x.kund && IH.kund(x.kund); var slut2 = x.heldag ? new Date(dag0(x.slut).getTime() + 864e5) : null; rader.push('BEGIN:VEVENT', 'UID:' + String(x.id).replace(/[^A-Za-z0-9_-]/g, '') + '@legohus-crm', 'DTSTAMP:' + f(new Date()), x.heldag ? 'DTSTART;VALUE=DATE:' + dagF(s2) : 'DTSTART:' + f(s2), x.heldag ? 'DTEND;VALUE=DATE:' + dagF(slut2) : 'DTEND:' + f(new Date(s2.getTime() + 36e5)), 'SUMMARY:' + esc(x.typ === 'vunnen' || x.typ === 'franvaro' ? x.text : PK_TYP[x.typ][0] + ': ' + x.text), 'DESCRIPTION:' + esc(k ? k.namn : ''), 'END:VEVENT'); });
+    h.forEach(function (x) { var s2 = new Date(x.tid), k = x.kund && IH.kund(x.kund); var slut2 = x.heldag ? new Date(dag0(x.slut).getTime() + 864e5) : null; rader.push('BEGIN:VEVENT', 'UID:' + String(x.id).replace(/[^A-Za-z0-9_-]/g, '') + '@legohus-crm', 'DTSTAMP:' + f(new Date()), x.heldag ? 'DTSTART;VALUE=DATE:' + dagF(s2) : 'DTSTART:' + f(s2), x.heldag ? 'DTEND;VALUE=DATE:' + dagF(slut2) : 'DTEND:' + f(new Date(s2.getTime() + 36e5)), 'SUMMARY:' + esc(x.typ === 'vunnen' || x.typ === 'franvaro' ? x.text : (vmAv(x) ? 'Videomöte' : PK_TYP[x.typ][0]) + ': ' + x.text), 'DESCRIPTION:' + esc((k ? k.namn : '') + (vmAv(x) ? (k ? ' · ' : '') + 'Videomöte: ' + IH.videomote.lank(x.video) : '')), 'END:VEVENT'); var vx = vmIcs(x); if (vx.length) rader.splice.apply(rader, [rader.length - 1, 0].concat(vx)); });
     rader.push('END:VCALENDAR');
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rader.map(IH.icsVik).join('\r\n')], { type: 'text/calendar' }));
     a.download = 'kalender-' + u.namn.split(' ')[0].toLowerCase() + '-' + (pk.vy === 'ar' ? fran.getFullYear() : dagISO(fran).slice(0, 7)) + '.ics'; document.body.appendChild(a); a.click(); a.remove();
@@ -656,7 +666,7 @@
     var vem = function (id) { return chefUi.kalVem === 'alla' ? team.some(function (x) { return x.u.id === id; }) : id === chefUi.kalVem; };
     var typ = function (t) { return chefUi.kalTyp === 'alla' || chefUi.kalTyp === t; };
     var idag = dag0(new Date()).getTime(), ut = [];
-    if (typ('akt')) db().aktiviteter.forEach(function (h) { if (h.typ !== 'system' && !h.stod && vem(h.av)) ut.push({ id: h.id, slag: 'akt', dag: dag0(h.tid).getTime(), tid: h.tid, u: h.av, text: h.text, typ: h.typ, kund: h.kund, affar: h.affar }); });
+    if (typ('akt')) db().aktiviteter.forEach(function (h) { if (h.typ !== 'system' && !h.stod && vem(h.av)) ut.push({ id: h.id, slag: 'akt', dag: dag0(h.tid).getTime(), tid: h.tid, u: h.av, text: h.text, typ: h.typ, kund: h.kund, affar: h.affar, video: h.video || null }); });
     if (typ('uppg')) db().uppgifter.forEach(function (x) { if (!x.klar && !x.kalAkt && vem(x.ansvarig)) { var d = dag0(x.forfaller).getTime(); ut.push({ id: x.id, slag: 'uppg', dag: d, tid: x.forfaller, u: x.ansvarig, text: x.text, kund: x.kund, affar: x.affar, sen: d < idag }); } });
     if (typ('vunnen')) db().affarer.forEach(function (a) { if (a.steg === 'vunnen' && a.vunnen && vem(a.ansvarig)) ut.push({ id: a.id, slag: 'vunnen', dag: dag0(a.vunnen).getTime(), tid: a.vunnen, u: a.ansvarig, text: 'Vunnen: ' + a.titel, kund: a.kund, affar: a.id }); });
     return ut.sort(function (a, b) { return new Date(a.tid) - new Date(b.tid); });
@@ -718,11 +728,11 @@
   // en rad i dagens lista: vem, när, vad, och vad man kan göra med den
   function kalRad(x) {
     var u = IH.anvandare(x.u) || { farg: '#ccc', namn: '' }, k = x.kund && IH.kund(x.kund);
-    var etikett = x.slag === 'akt' ? (AKT_NAMN[x.typ] || 'Händelse') : x.slag === 'uppg' ? (x.sen ? 'Försenad uppgift' : 'Uppgift') : 'Vunnen affär';
-    return '<li class="lp-dagrad" data-typ="' + x.slag + '"' + (x.sen ? ' data-sen' : '') + ' style="--av:' + u.farg + '">' +
+    var etikett = x.slag === 'akt' ? (vmAv(x) ? 'Videomöte' : AKT_NAMN[x.typ] || 'Händelse') : x.slag === 'uppg' ? (x.sen ? 'Försenad uppgift' : 'Uppgift') : 'Vunnen affär';
+    return '<li class="lp-dagrad" data-typ="' + x.slag + '"' + (x.sen ? ' data-sen' : '') + (vmAv(x) ? ' data-video' : '') + ' style="--av:' + u.farg + '">' +
       '<span class="avatar" style="background:' + u.farg + '">' + e(IH.initialer(u.namn)) + '</span>' +
       '<span class="lp-dagrad__text"><small>' + e(etikett) + (klock(x.tid) ? ' · ' + klock(x.tid) : '') + ' · ' + e(u.namn) + '</small><b>' + e(x.text) + '</b>' + (k ? '<button type="button" class="lp-lank" data-g="kund-oppna" data-id="' + k.id + '">' + e(k.namn) + '</button>' : '') + '</span>' +
-      '<span class="lp-dagrad__knappar">' + (x.slag === 'akt' && (x.typ === 'mote' || x.typ === 'samtal') ? '<button type="button" class="ap-filter" data-g="lp-kal-andra" data-id="' + x.id + '">' + i('skriv') + 'Ändra</button><button type="button" class="ch-ruta" data-g="lp-kal-bort" data-id="' + x.id + '" title="Ta bort" aria-label="Ta bort">' + i('stang') + '</button>' : '') + (x.slag === 'uppg' ? '<button type="button" class="ap-filter" data-g="lp-kal-klar" data-id="' + x.id + '">' + i('bock') + 'Klar</button><button type="button" class="ch-ruta" data-g="lp-kal-flytta" data-id="' + x.id + '" title="Flytta en dag framåt" aria-label="Flytta en dag framåt">' + i('pil') + '</button>' : '') + '</span></li>';
+      '<span class="lp-dagrad__knappar">' + vmKnappar(x) + (x.slag === 'akt' && (x.typ === 'mote' || x.typ === 'samtal') ? '<button type="button" class="ap-filter" data-g="lp-kal-andra" data-id="' + x.id + '">' + i('skriv') + 'Ändra</button><button type="button" class="ch-ruta" data-g="lp-kal-bort" data-id="' + x.id + '" title="Ta bort" aria-label="Ta bort">' + i('stang') + '</button>' : '') + (x.slag === 'uppg' ? '<button type="button" class="ap-filter" data-g="lp-kal-klar" data-id="' + x.id + '">' + i('bock') + 'Klar</button><button type="button" class="ch-ruta" data-g="lp-kal-flytta" data-id="' + x.id + '" title="Flytta en dag framåt" aria-label="Flytta en dag framåt">' + i('pil') + '</button>' : '') + '</span></li>';
   }
   // h = ett befintligt möte eller samtal som ändras (då finns inte Uppgift som typ)
   function kalForm(ds, team, h) {
@@ -731,11 +741,18 @@
     return '<form id="lp-kal-form" data-lp-kal="' + (h ? h.id : '') + '" class="km-form lp-kalform">' +
       '<div class="lp-kalform__typ" role="radiogroup" aria-label="Typ">' + [['mote', 'Möte', 'motesikon'], ['samtal', 'Samtal', 'samtal'], ['uppgift', 'Uppgift', 'uppgift']].filter(function (t) { return !h || t[0] !== 'uppgift'; }).map(function (t, n) {
         return '<label><input type="radio" name="typ" value="' + t[0] + '"' + ((h ? h.typ === t[0] : n === 0) ? ' checked' : '') + '><span>' + i(t[2]) + t[1] + '</span></label>'; }).join('') + '</div>' +
+      (h && vmAv(h) ? '<p class="vm-kal-info">' + vmIk() + '<span><b>Videomöte</b><small>Ändrar du dag, tid eller kund följer videomötet med. Skicka gärna inbjudan igen.</small></span><button type="button" class="ap-filter" data-g="vm-inbjudan" data-id="' + e(h.video) + '">' + i('post') + 'Inbjudan</button></p>'
+        : !h && IH.videomote ? '<label class="vm-vaxel" data-vm-vaxel><input type="checkbox" name="video"><span>' + vmIk() + 'Videomöte</span><small>Skapar en länk och en inbjudan till kunden</small></label>' : '') +
       '<label class="falt"><span>Vad</span><input name="text" required maxlength="120" value="' + e(h ? h.text : '') + '" placeholder="T.ex. Platsbesök hos kunden"></label>' +
       '<div class="lp-kalform__rad"><label class="falt"><span>Dag</span><input name="datum" type="date" required value="' + (d ? dagISO(d) : ds) + '"></label><label class="falt"><span>Tid</span><input name="tid" type="time" value="' + (d ? String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') : '10:00') + '"></label></div>' +
       '<div class="lp-kalform__rad"><label class="falt"><span>Vem</span><select name="vem">' + team.map(function (x) { return '<option value="' + x.u.id + '"' + (x.u.id === vem ? ' selected' : '') + '>' + e(x.u.namn) + '</option>'; }).join('') + '</select></label>' +
       '<label class="falt"><span>Kund (valfritt)</span><select name="kund"><option value="">Ingen</option>' + db().kunder.map(function (k) { return '<option value="' + k.id + '"' + (h && h.kund === k.id ? ' selected' : '') + '>' + e(k.namn) + '</option>'; }).join('') + '</select></label></div></form>';
   }
+  document.addEventListener('change', function (ev) {
+    var t = ev.target; if (!t.matches || !t.matches('#lp-kal-form input[name=typ]')) return;
+    var v = t.form && t.form.querySelector('[data-vm-vaxel]'); if (!v) return;
+    v.hidden = t.value !== 'mote'; if (v.hidden) v.querySelector('input').checked = false;
+  });
   var kalTeam = function () { return IH.ANVANDARE.filter(function (u) { return u.roll === 'salj' && !u.inaktiv; }).map(function (u) { return { u: u }; }); };
   function kalDag(ds) {
     var team = kalTeam(), d = new Date(ds + 'T12:00:00'), dt = dag0(d).getTime();
@@ -763,9 +780,10 @@
     if (!el.hasAttribute('data-saker')) { el.setAttribute('data-saker', ''); el.setAttribute('aria-label', 'Klicka igen för att ta bort'); el.title = 'Klicka igen för att ta bort'; if (el.textContent.trim()) el.innerHTML = i('stang') + 'Klicka igen för att ta bort'; else el.classList.add('lp-saker'); return; }
     db().aktiviteter.splice(db().aktiviteter.indexOf(h), 1);
     db().uppgifter = db().uppgifter.filter(function (x) { return !(x.kalAkt === h.id && !x.klar); });
+    if (h.video && IH.videomote) IH.videomote.taBortForAktivitet(h);
     var lista = el.closest('.lp-daglista'), ds = lista && lista.getAttribute('data-dag');
     IH.stangArk(); omRita(); if (ds) kalDag(ds);
-    IH.toast((h.typ === 'samtal' ? 'Samtalet' : 'Mötet') + ' är borttaget', h.text, 'kalender');
+    IH.toast((h.typ === 'samtal' ? 'Samtalet' : h.video ? 'Videomötet' : 'Mötet') + ' är borttaget', h.text + (h.video ? ' – länken slutar fungera. Säg till gästerna.' : ''), 'kalender');
   };
   IH.G['lp-kal-typ'] = function (el) { chefUi.kalTyp = el.getAttribute('data-f'); IH.rita(); };
   IH.G['lp-kal-vy'] = function (el) { chefUi.kalVy = el.getAttribute('data-f'); IH.rita(); };
@@ -821,7 +839,7 @@
     var esc = function (t) { return String(t || '').replace(/[\\;,]/g, function (c) { return '\\' + c; }).replace(/\r\n|\r|\n/g, ' '); };
     var dagF = function (d) { return dagISO(d).replace(/-/g, ''); };
     var rader = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Legohus//CRM//SV'];
-    h.forEach(function (x) { var s = new Date(x.tid), u = IH.anvandare(x.u); rader.push('BEGIN:VEVENT', 'UID:' + String(x.id).replace(/[^A-Za-z0-9_-]/g, '') + '@legohus-crm', 'DTSTAMP:' + f(new Date()), x.heldag ? 'DTSTART;VALUE=DATE:' + dagF(s) : 'DTSTART:' + f(s), x.heldag ? 'DTEND;VALUE=DATE:' + dagF(new Date(dag0(x.slut).getTime() + 864e5 + 3e6)) : 'DTEND:' + f(new Date(s.getTime() + 36e5)), 'SUMMARY:' + esc(x.text), 'DESCRIPTION:' + esc((u ? u.namn : '') + ' · ' + (x.heldag ? 'Frånvaro' : KAL_TYP[x.slag] || '')), 'END:VEVENT'); });
+    h.forEach(function (x) { var s = new Date(x.tid), u = IH.anvandare(x.u); rader.push('BEGIN:VEVENT', 'UID:' + String(x.id).replace(/[^A-Za-z0-9_-]/g, '') + '@legohus-crm', 'DTSTAMP:' + f(new Date()), x.heldag ? 'DTSTART;VALUE=DATE:' + dagF(s) : 'DTSTART:' + f(s), x.heldag ? 'DTEND;VALUE=DATE:' + dagF(new Date(dag0(x.slut).getTime() + 864e5 + 3e6)) : 'DTEND:' + f(new Date(s.getTime() + 36e5)), 'SUMMARY:' + esc(x.text), 'DESCRIPTION:' + esc((u ? u.namn : '') + ' · ' + (x.heldag ? 'Frånvaro' : vmAv(x) ? 'Videomöte: ' + IH.videomote.lank(x.video) : KAL_TYP[x.slag] || '')), 'END:VEVENT'); var vx = vmIcs(x); if (vx.length) rader.splice.apply(rader, [rader.length - 1, 0].concat(vx)); });
     rader.push('END:VCALENDAR');
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rader.map(IH.icsVik).join('\r\n')], { type: 'text/calendar' }));
     a.download = 'teamets-kalender-' + dagISO(forsta).slice(0, 7) + '.ics'; document.body.appendChild(a); a.click(); a.remove();
@@ -836,11 +854,21 @@
     if (gammal) {
       // ändrat möte: aktiviteten och påminnelsen under Att göra följer med
       gammal.tid = nar.toISOString(); gammal.typ = typ; gammal.text = text; gammal.kund = kund; gammal.av = u.id;
+      if (gammal.video && IH.videomote) IH.videomote.foljAktivitet(gammal);
       db().uppgifter = db().uppgifter.filter(function (x) { return !(x.kalAkt === gammal.id && !x.klar); });
       if (nar > new Date()) db().uppgifter.push({ id: IH.nyttId('uppgift', 'u'), text: (typ === 'mote' ? 'Möte: ' : 'Samtal: ') + text, forfaller: nar.toISOString(), klar: false, kund: kund, affar: gammal.affar || null, ansvarig: u.id, av: IH.jag().id, kalAkt: gammal.id });
       var nu0 = new Date(); chefUi.kalMan = (nar.getFullYear() - nu0.getFullYear()) * 12 + nar.getMonth() - nu0.getMonth();
       IH.stangArk(); omRita();
       IH.toast('Ändrat i kalendern', text + ' · ' + IH.lokal(nar, 'd', { weekday: 'short', day: 'numeric', month: 'short' }).replace(/\./g, ''), 'kalender');
+      return;
+    }
+    if (typ === 'mote' && t.video && t.video.checked && IH.videomote) {
+      var kk = kund && IH.kund(kund);
+      var vm = IH.videomote.skapa({ titel: text, start: nar, langd: 45, kund: kund, vard: u.id, vantrum: true, direkt: 'foretag',
+        deltagare: kk ? [{ typ: 'gast', namn: kk.namn, epost: kk.epost || '', kund: kk.id }] : [] });
+      var nu1 = new Date(); chefUi.kalMan = (nar.getFullYear() - nu1.getFullYear()) * 12 + nar.getMonth() - nu1.getMonth();
+      IH.stangArk(true); omRita();
+      IH.videomote.inbjudanArk(vm.id, true);
       return;
     }
     if (typ === 'uppgift') db().uppgifter.push({ id: IH.nyttId('uppgift', 'u'), text: text, forfaller: nar.toISOString(), klar: false, kund: kund, affar: null, ansvarig: u.id, av: IH.jag().id });

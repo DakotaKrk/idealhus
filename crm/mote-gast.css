@@ -1,0 +1,45 @@
+/* Legohus CRM – gästsidan för videomöten (mote-gast.html). Ingen inloggning och inget CRM bakom:
+   lagret .vm fyller sidan, med Legohus-huvudet överst i förhandsvisningen och på slutskärmen. */
+@font-face { font-family: "Poppins"; src: url("../fonts/poppins-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Poppins"; src: url("../fonts/poppins-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Poppins"; src: url("../fonts/poppins-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Manrope"; src: url("../fonts/manrope.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
+
+html, body { margin: 0; min-height: 100%; }
+body.gast {
+  min-height: 100dvh;
+  background:
+    radial-gradient(70% 50% at 85% 0%, rgb(var(--t-glod-rgb, 201 128 52) / .12), transparent 70%),
+    var(--t-sand, #f8f4ed);
+  color: var(--t-text, #1b1915);
+  font: 500 15px/1.45 "Manrope", system-ui, sans-serif;
+}
+.gast-topp {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1;
+  display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 24px;
+}
+.gast-topp__logo { display: block; width: 142px; height: auto; }
+:root[data-tema="mork"] .gast-topp__logo { filter: brightness(0) invert(.9); }
+.gast-topp__etikett {
+  padding: 4px 10px; border-radius: 999px; background: rgb(var(--t-blaeck-rgb, 27 25 21) / .06);
+  color: var(--t-text-2, #4f4a42); font: 600 .74rem/1 "Poppins", sans-serif; letter-spacing: .04em;
+}
+.gast-meddelande { max-width: 520px; margin: 120px auto 0; padding: 0 24px; text-align: center; }
+.gast-fel {
+  display: grid; justify-items: center; gap: 10px; width: min(520px, calc(100% - 32px)); margin: 120px auto 0; padding: 32px 24px;
+  border-radius: calc(28px * var(--t-radie-k, 1)); background: var(--t-yta, #fff); text-align: center;
+  box-shadow: 0 30px 80px -40px rgba(0, 0, 0, .45);
+}
+.gast-fel h1 { margin: 0; font: 600 1.35rem/1.2 "Poppins", sans-serif; letter-spacing: -.02em; }
+.gast-fel p { margin: 0; color: var(--t-text-2, #4f4a42); }
+
+/* Lagret på gästsidan: ingen slöja, plats för huvudet i förhandsvisningen och på slutskärmen */
+.vm[data-gast-sida] .vm-forhand, .vm[data-gast-sida] .vm-slut { padding-top: 76px; }
+.vm[data-gast-sida] .vm-forhand__kort, .vm[data-gast-sida] .vm-slut__kort { box-shadow: 0 30px 80px -40px rgba(0, 0, 0, .45), inset 0 0 0 1px rgb(var(--t-blaeck-rgb, 27 25 21) / .06); }
+html[data-vm-oppen] body.gast { overflow: hidden; }
+
+@media (max-width: 639px) {
+  .gast-topp { height: 56px; padding: 0 16px; }
+  .gast-topp__logo { width: 118px; }
+  .vm[data-gast-sida] .vm-forhand, .vm[data-gast-sida] .vm-slut { padding-top: 62px; }
+}

@@ -1575,3 +1575,10 @@ html body .lp-kal__man > :is(button, .knapp, .ap-filter) { height: 36px; min-hei
   .pk-dag { flex-direction: row; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 3px; padding: 6px 4px; }
   .pk-dag .pk-dag__topp { flex: 1 0 100%; justify-content: center; }
 }
+
+/* Vem jobbar när (2026-10-29): ingen extra prick under dagens ruta (dagen syns redan i rubriken och med ramen), och
+   jobbade dagar i temats egen accentton – i Office m.fl. blev det annars bärnsten som tonade över i blått */
+.lp-nv__d.idag::after { content: none; display: none; }
+:root[data-tema]:not([data-tema="original"]) .lp-nv__d.jobb:not(.helg) { background: linear-gradient(170deg, color-mix(in srgb, var(--t-accent) 30%, var(--t-yta)), color-mix(in srgb, var(--t-accent) 70%, var(--t-yta))); }
+:root[data-tema]:not([data-tema="original"]) .lp-nv__d.jobb i { background: rgb(var(--t-blaeck-rgb) / .5); }
+.lp-nv__d.idag { box-shadow: 0 0 0 2px var(--t-yta), 0 0 0 3.5px var(--t-accent, var(--virke)); }

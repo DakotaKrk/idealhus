@@ -267,6 +267,27 @@
     ]
   });
 
+  // Videomöte med kund (videomote.js, samtal.js, samtal-ui.js): boka, bjud in, anslut, väntrummet och anteckningen.
+  // Stegen i själva mötet kräver kamera eller mikrofon i webbläsaren (om:). Mötet fungerar mellan flikar i samma webbläsare.
+  var harMedia = function () { return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia); };
+  T.push({
+    id: 'videomote', grupp: 'sida', vy: 'kunder', vyDel: true, roller: ['salj', 'chef'], namn: 'Videomöte med kund', beskrivning: 'Boka, bjud in med länk, väntrummet, kontrollerna och anteckningen.', nasta: 'presentation',
+    rollText: 'Gäller säljare.',
+    fore: function (c) { c.kund = /^#\/kunder\/./.test(location.hash) ? location.hash.split('/')[2] : kundMedAffar(); },
+    steg: [
+      { sida: function (c) { return '#/kunder/' + c.kund; }, mal: '.kh__knappar [data-g="vm-boka"]', rubrik: 'Boka ett videomöte', vanta: true, efterKlick: 500, text: 'Klicka på <b>Videomöte</b>. Samma knapp finns på affären, i kundlistan, under Kundmöte och som växel när du lägger till ett möte i kalendern.' },
+      { mal: '#vm-boka-form', rubrik: 'Dag, tid och gäster', behallArk: true, fri: true, fyll: { '#vm-boka-form input[name=tid]': '14:00' }, text: 'Kunden är redan inbjuden som gäst. Välj dag, tid och <b>längd</b>, lägg till fler gäster eller kollegor. Under <b>Mötesinställningar</b> bestämmer du om gäster väntar i väntrummet.' },
+      { mal: '.ark__fot button[form="vm-boka-form"]', rubrik: 'Boka och bjud in', behallArk: true, vanta: true, efterKlick: 600, text: 'Klicka på <b>Boka och bjud in</b>. Mötet hamnar i kalendern, under Att göra och i kundens historik.' },
+      { mal: '.ark .vm-inbjudan', rubrik: 'Inbjudan', behallArk: true, text: '<b>Kopiera länk</b> och skicka den som du vill, eller <b>Skicka inbjudan</b> – då öppnas ditt mejlprogram med en färdig text. <b>Ladda ner kalenderfil</b> ger en .ics till Outlook, Google eller Apple. Kunden behöver inget konto eller program.' },
+      { mal: '.ark__fot [data-g="vm-anslut"]', om: harMedia, rubrik: 'Anslut', behallArk: true, vanta: true, efterKlick: 900, text: 'Klicka på <b>Anslut nu</b>. Senare når du mötet med <b>Anslut</b> i kalendern, under Att göra, på översikten och på sidan Videomöten.' },
+      { mal: ['.vm-forhand', '.vm'], om: harMedia, rubrik: 'Förhandsvisningen', behallArk: true, text: 'Se dig själv innan du går in. Välj kamera, mikrofon och högtalare, prova ljudet och välj <b>bakgrund</b> – oskärpa eller en bild räknas fram här i datorn, inget skickas iväg.' },
+      { mal: ['.vm-kontroller', '.vm-forhand .vm-primar', '.vm'], om: harMedia, rubrik: 'Kontrollraden', behallArk: true, text: 'Mikrofon (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>), kamera (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>), <b>Dela skärm</b>, räck upp handen, reaktioner och <b>Mer</b> med inställningar för bild, ljud och kvalitet. Chatten och deltagarna finns till höger.' },
+      { mal: ['[data-vm="deltagare"]', '.vm'], om: harMedia, rubrik: 'Väntrummet', behallArk: true, text: 'När kunden öppnar länken och klickar på <b>Be att få gå med</b> får du en avisering. Klicka på <b>Släpp in</b> – eller öppna Deltagare och släpp in alla på en gång.' },
+      { mal: ['[data-vm="lamna"]', '.vm'], om: harMedia, rubrik: 'Lämna och anteckna', behallArk: true, text: '<b>Lämna</b> eller <b>Avsluta för alla</b>. Sedan skriver du vad ni kom fram till och nästa steg – anteckningen hamnar i kundens historik och nästa steg blir en uppgift.' },
+      { rubrik: 'Prova på riktigt', text: 'Öppna gästlänken i en ny flik i samma webbläsare så ser du båda sidorna av mötet. Mellan olika datorer går mötet direkt mellan dem – det kräver bara en liten signalväxel som kopplas in när CRM:et kommer ut på nätet.' }
+    ]
+  });
+
   T.push({
     id: 'presentation', grupp: 'sida', vy: 'mote-presentation', roller: ['salj'], namn: 'Presentationen', beskrivning: 'Bildspelet för kunden, kalkylen och anteckningarna.', nasta: 'projekt',
     rollText: 'Gäller säljare.',
@@ -319,6 +340,7 @@
     steg: [
       { sida: '#/chatt', mal: '.ch-lista', rubrik: 'Konversationerna', placering: 'hoger', text: 'Hela teamet, privata konversationer och grupper. Sök, starta en <b>Ny grupp</b> och se olästa och @-omnämnanden.' },
       { mal: '.ch-topp', rubrik: 'Konversationen', text: '<b>Sök</b> i konversationen (Ctrl+F), tysta den med bjällran, se <b>Om konversationen</b> (medlemmar, länkade kunder och affärer, delade filer, Simulera ett svar) eller öppna den i ett eget flytande fönster som följer med mellan sidorna.' },
+      { mal: '.ch-topp [data-g="vm-chatt-starta"]', valfri: true, rubrik: 'Starta videomöte', text: 'Kameran startar ett videomöte med alla i konversationen direkt. Ett kort med <b>Anslut</b> hamnar i tråden så att kollegorna kan gå med.' },
       { mal: '.ch-trad', rubrik: 'Meddelandena', placering: 'vanster', text: 'Håll muspekaren över ett meddelande för att reagera eller <b>svara</b> med citat. <b>Mer</b> (eller högerklick) skapar en uppgift, påminner dig, fäster överst, markerar som oläst, kopierar, ändrar eller tar bort ditt eget. Klicka på en länkad kund eller affär för ett kort med fakta.' },
       { mal: '.ch-fot', rubrik: 'Skriv', fri: true, text: '<b>@</b> nämner en kollega, <b>#</b> länkar en kund eller affär, <b>/</b> först i rutan ger mallar. Bifoga eller dra in filer. <kbd>Enter</kbd> skickar, <kbd>Shift</kbd>+<kbd>Enter</kbd> ny rad, <kbd>' + PU + '</kbd> ändrar ditt senaste.' }
     ]

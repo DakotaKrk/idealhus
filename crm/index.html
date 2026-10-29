@@ -2,7 +2,7 @@
 <html lang="sv">
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-KXYDMGB7V3k7eTalQlLvKheBSU0KdLl6IAgRAp/SFTk=' 'sha256-WPwioOxqCWwRtLEQBVdKMod2Qdpd3+5ZhmMYopWhvVM=' 'sha256-mvfJv4zHPS5gvWq/NW3B0eWnrccdca8ygQLdc94MYNY=' 'sha256-xCUDw0nzIX+gCKH+2LXVClz8NayJ6lJt6uschj7gZe8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; media-src 'self' data: blob:; object-src 'none'; frame-src 'self'; base-uri 'self'; form-action 'self'; worker-src 'none'" data-ih-csp>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-KXYDMGB7V3k7eTalQlLvKheBSU0KdLl6IAgRAp/SFTk=' 'sha256-WPwioOxqCWwRtLEQBVdKMod2Qdpd3+5ZhmMYopWhvVM=' 'sha256-mvfJv4zHPS5gvWq/NW3B0eWnrccdca8ygQLdc94MYNY=' 'sha256-xCUDw0nzIX+gCKH+2LXVClz8NayJ6lJt6uschj7gZe8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; media-src 'self' data: blob:; object-src 'none'; frame-src 'self'; base-uri 'self'; form-action 'self'; worker-src 'none'" data-ih-csp>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#f8f4ed">
@@ -29,8 +29,8 @@
     <link rel="stylesheet" href="kalender.css?v=20261108zb">
     <link rel="stylesheet" href="overgang.css?v=20261108zb">
     <link rel="stylesheet" href="grund.css?v=20261108zb">
-    <link rel="stylesheet" href="ledning.css?v=20261108zb">
-    <link rel="stylesheet" href="chatt.css?v=20261108zb">
+    <link rel="stylesheet" href="ledning.css?v=20261108ze">
+    <link rel="stylesheet" href="chatt.css?v=20261108zf">
     <link rel="stylesheet" href="filskanner.css?v=20261108zb">
     <link rel="stylesheet" href="admin.css?v=20261108zb">
     <link rel="stylesheet" href="sakerhet.css?v=20261108zb">
@@ -38,12 +38,13 @@
     <link rel="stylesheet" href="adminpanel.css?v=20261108zb">
     <link rel="stylesheet" href="stod.css?v=20261108zb">
     <link rel="stylesheet" href="resa3d.css?v=20261108zb">
-    <link rel="stylesheet" href="guide/guide.css?v=20261108zb">
+    <link rel="stylesheet" href="guide/guide.css?v=20261108zg">
     <link rel="stylesheet" href="layout.css?v=20261108zb">
     <link rel="stylesheet" href="layout-salj.css?v=20261108zb">
-    <link rel="stylesheet" href="layout-ledning.css?v=20261108zb">
+    <link rel="stylesheet" href="layout-ledning.css?v=20261108ze">
     <link rel="stylesheet" href="layout-chatt.css?v=20261108zb">
     <link rel="stylesheet" href="himmel.css?v=20261108zb">
+    <link rel="stylesheet" href="samtal.css?v=20261108zf">
   </head>
   <body>
     <!-- Linjeikonerna (flyttade från Uperformance CRM 2026-10-28; de sista egna för husen). Ritas med IH.emo / <svg class="emo-ik"><use href="#i-namn"/></svg> i stället för emoji. -->
@@ -179,11 +180,14 @@
     <script src="layout.js?v=20261108zb"></script>
     <script src="app.js?v=20261108zb"></script>
     <script src="mote.js?v=20261108zb"></script>
-    <script src="vyer.js?v=20261108zb"></script>
-    <script src="ledning.js?v=20261108zb"></script>
+    <script src="vyer.js?v=20261108zf"></script>
+    <script src="ledning.js?v=20261108zf"></script>
+    <script src="samtal.js?v=20261108zf"></script>
+    <script src="samtal-ui.js?v=20261108zf"></script>
+    <script src="videomote.js?v=20261108zf"></script>
     <script src="filregler.js?v=20261108zb"></script>
     <script src="filskanner.js?v=20261108zb"></script>
-    <script src="chatt.js?v=20261108zb"></script>
+    <script src="chatt.js?v=20261108zf"></script>
     <script src="admin.js?v=20261108zb"></script>
     <script src="kontroll.js?v=20261108zb"></script>
     <script src="sakerhet.js?v=20261108zb"></script>
@@ -194,7 +198,7 @@
     <script src="overgang.js?v=20261108zb"></script>
     <script src="grund.js?v=20261108zb"></script>
     <script src="guide/guide.js?v=20261108zb"></script>
-    <script src="guide/turer.js?v=20261108zb"></script>
+    <script src="guide/turer.js?v=20261108zf"></script>
     <script>
       (function () {
         var klar = false;

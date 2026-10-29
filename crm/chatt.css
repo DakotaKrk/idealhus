@@ -838,3 +838,149 @@ mark.ch-mark.aktiv { background: rgb(var(--t-accent-rgb) / .55); box-shadow: 0 0
    chattsidan på mobil och platta så att den inte ligger över emojiknappen i skrivrutan */
 .ch-tips { height: auto; max-height: 3.2em; white-space: normal; line-height: 1.5; }
 @media (max-width: 1100px) { html[data-chatt-sida] .ihg-knapp { display: none !important; } }
+
+/* ============================================================
+   2026-10-29: videomöten – knappar och kort som kopplar in videomötet i CRM:et (videomote.js, vyer.js,
+   ledning.js, chatt.js). Själva mötet (lagret .vm) ritas av samtal.css. Bara transform/opacity rör sig.
+   ============================================================ */
+.ch-vmknapp .i, .ch-ruta .i { width: 18px; height: 18px; }
+.ch-vmknapp { color: var(--virke-djup); }
+
+/* Kortet i chatten: "Videomöte · pågår" med Anslut */
+.ch-vmkort { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 8px 8px 8px 10px; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--t-yta); color: var(--t-text); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .1); min-width: min(260px, 100%); }
+.ch-vmkort > .i { flex: none; width: 34px; height: 34px; padding: 8px; border-radius: 50%; background: var(--virke-ljus); color: var(--virke-djup); }
+.ch-vmkort > span { display: grid; flex: 1; min-width: 0; line-height: 1.25; }
+.ch-vmkort b { font: 600 .84rem/1.25 var(--rubrik); }
+.ch-vmkort small { font-size: .74rem; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.ch-vmkort .knapp { flex: none; }
+.ch-vmkort[data-lage="pagar"] > .i, .ch-vmkort[data-lage="nu"] > .i { box-shadow: inset 0 0 0 1.5px var(--virke); }
+.ch-vmkort[data-lage="avslutat"], .ch-vmkort[data-lage="borta"], .ch-vmkort[data-lage="passerat"] { opacity: .78; }
+
+/* Boka-arket */
+.vm-boka__rub { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin: 14px 0 6px; font: 600 .8rem/1.3 var(--rubrik); color: var(--t-text); }
+.vm-boka__rub small { font-weight: 500; font-family: inherit; color: var(--text-3); }
+.vm-boka__langd { margin-bottom: 4px; }
+.vm-boka__gaster { display: grid; gap: 8px; }
+.vm-boka__gaster:empty { display: none; }
+.vm-boka__gast { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.2fr) auto; align-items: end; gap: 8px; padding: 8px 8px 8px 10px; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); }
+.vm-boka__gast .falt { margin: 0; }
+.vm-boka__med { display: grid; place-items: center; height: 40px; }
+.vm-boka__med input, .vm-vaxel input, .vm-boka__direkt input { width: 18px; height: 18px; accent-color: var(--virke-djup); }
+.vm-boka__bort { align-self: end; margin-bottom: 2px; }
+.vm-boka__ny { margin-top: 8px; }
+.vm-boka__kollegor { margin-top: 0; }
+.vm-boka__kollegor .avatar { width: 30px; height: 30px; font-size: .7rem; }
+.vm-boka__mer { margin-top: 14px; border-radius: calc(14px * var(--t-radie-k, 1)); background: rgb(var(--t-blaeck-rgb) / .03); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .07); }
+.vm-boka__mer summary { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; font: 600 .8rem/1 var(--rubrik); color: var(--text-2); cursor: pointer; list-style: none; }
+.vm-boka__mer summary::-webkit-details-marker { display: none; }
+.vm-boka__mer summary .i { width: 14px; height: 14px; transform: rotate(-90deg); transition: transform .2s cubic-bezier(.2, .8, .2, 1); }
+.vm-boka__mer[open] summary .i { transform: none; }
+.vm-boka__mer > :not(summary) { margin: 0 12px 12px; }
+.vm-boka__direkt { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 0; border: 0; }
+.vm-boka__direkt legend { width: 100%; margin-bottom: 6px; font: 600 .76rem/1.3 var(--rubrik); color: var(--text-2); }
+.vm-boka__direkt label { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; font-size: .82rem; cursor: pointer; }
+.vm-boka__fel { margin: 12px 0 0; padding: 8px 12px; border-radius: 12px; background: rgb(var(--t-blaeck-rgb) / .05); box-shadow: inset 3px 0 0 var(--t-rod, #b5492f); color: var(--t-text); font-size: .8rem; }
+@media (max-width: 560px) {
+  .vm-boka__gast { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .vm-boka__gast > .falt + .falt { grid-column: 2 / 3; }
+  .vm-boka__bort { grid-row: 1; grid-column: 3; }
+}
+
+/* Växeln Videomöte i kalenderns formulär (och väntrummet i boka-arket) */
+.vm-vaxel { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 10px; margin: 0 0 12px; padding: 10px 12px; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); cursor: pointer; transition: box-shadow .2s; }
+.vm-vaxel[hidden] { display: none; }
+.vm-vaxel > span { display: inline-flex; align-items: center; gap: 7px; font: 600 .84rem/1.2 var(--rubrik); color: var(--t-text); }
+.vm-vaxel > span .i { width: 16px; height: 16px; color: var(--virke-djup); }
+.vm-vaxel > small { grid-column: 2; font-size: .74rem; color: var(--text-3); }
+.vm-vaxel:focus-within { box-shadow: inset 0 0 0 1.5px var(--virke); }
+.vm-kal-info { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 10px 12px; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--virke-ljus); color: var(--t-text); }
+.vm-kal-info > .i { flex: none; width: 18px; height: 18px; color: var(--virke-djup); }
+.vm-kal-info > span { display: grid; flex: 1; }
+.vm-kal-info b { font: 600 .84rem/1.2 var(--rubrik); }
+.vm-kal-info small { font-size: .74rem; color: var(--text-2); }
+
+/* Inbjudan-arket (och mötessidan) */
+.vm-inbjudan { display: grid; gap: 14px; }
+.vm-inbjudan__lank { margin: 0; }
+.vm-inbjudan__rad { display: flex; gap: 8px; align-items: center; }
+.vm-inbjudan__rad input { flex: 1; min-width: 0; text-overflow: ellipsis; }
+.vm-inbjudan__lista { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.vm-inbjudan__lista li { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 10px; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); }
+.vm-inbjudan__lista .avatar { flex: none; width: 34px; height: 34px; font-size: .72rem; }
+.vm-inbjudan__lista .avatar:not([style]) { background: linear-gradient(135deg, var(--virke-ljus), var(--virke)); color: var(--virke-djup); }
+.vm-inbjudan__vem { display: grid; flex: 1; min-width: 0; line-height: 1.25; }
+.vm-inbjudan__vem b { font: 600 .84rem/1.25 var(--rubrik); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.vm-inbjudan__vem small { font-size: .74rem; color: var(--text-3); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.vm-inbjudan__knappar { display: flex; flex-wrap: wrap; gap: 8px; }
+.vm-inbjudan__tom { margin: 0; font-size: .82rem; color: var(--text-3); }
+.vm-arlig { display: flex; align-items: flex-start; gap: 7px; margin: 12px 0 0; font-size: .74rem; line-height: 1.4; color: var(--text-3); }
+.vm-arlig .i { flex: none; width: 14px; height: 14px; margin-top: 1px; }
+@media (max-width: 560px) {
+  .vm-inbjudan__rad { flex-wrap: wrap; }
+  .vm-inbjudan__rad .knapp { width: 100%; justify-content: center; }
+  .vm-inbjudan__lista li { flex-wrap: wrap; }
+  .vm-inbjudan__lista li .knapp { margin-left: 44px; }
+}
+
+/* Anslut och ikoner i listor: kundraden, Kommande möten, Att göra, kalendern, historiken, översikten */
+.kl__tabell .kl__snabb { width: 144px; }
+.kl__vm { display: inline-grid; place-items: center; width: 30px; height: 30px; margin-left: 2px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--text-2); cursor: pointer; vertical-align: middle; opacity: 0; transform: translateX(6px); transition: opacity .2s, transform .25s var(--mjuk, ease), background-color .2s; }
+.kl__vm .i { width: 15px; height: 15px; }
+.kl__vm:hover { background: var(--t-kol); color: var(--t-pa-kol); }
+.kl__tabell tbody tr:hover .kl__vm, .kl__tabell tbody tr:focus-within .kl__vm { opacity: 1; transform: none; }
+@media (max-width: 1000px), (hover: none) { .kl__vm { opacity: 1; transform: none; } }
+.komm .kort__huvud { flex-wrap: wrap; }
+.komm__vm { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.komm__knappar { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.uppg__vm { flex: none; }
+.lp-dagrad[data-video] .avatar { box-shadow: 0 0 0 2px var(--t-yta), 0 0 0 3.5px var(--virke); }
+.lp-dagrad__knappar .ap-filter .i, .pk-lista__vm .i { width: 14px; height: 14px; }
+.lp-dagrad__knappar .ap-filter { display: inline-flex; align-items: center; gap: 5px; }
+.lp-dagrad__knappar .vm-nu, .pk-lista__vm .vm-nu { background: var(--virke-ljus); color: var(--virke-djup); box-shadow: inset 0 0 0 1.5px var(--virke); }
+.pk-lista__typ .i { width: 12px; height: 12px; margin-right: 4px; vertical-align: -1px; }
+.pk-lista__vm { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.pk-lista__vm .vm-pk { display: inline-flex; align-items: center; gap: 5px; width: auto; padding: 0 10px; }
+.logg__rad--video .logg__ikon { background: var(--virke-ljus); color: var(--virke-djup); }
+.logg__vm { color: var(--virke-djup); font-weight: 600; text-decoration: none; }
+.logg__vm:hover { text-decoration: underline; }
+button.hero__lage { border: 0; font: inherit; font-size: .78rem; cursor: pointer; }
+
+/* Sidan #/videomote[/id] */
+.vm-sidhuvud { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.vm-sidhuvud h1 { margin: 2px 0 4px; }
+.vm-sidhuvud__under { margin: 0; color: var(--text-2); font-size: .88rem; }
+.vm-lista { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.vm-lista__rad { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .07); }
+.vm-lista__datum { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: rgb(var(--t-blaeck-rgb) / .05); line-height: 1; }
+.vm-lista__datum b { font: 700 1rem/1 var(--rubrik); }
+.vm-lista__datum small { font-size: .68rem; color: var(--text-3); }
+.vm-lista__rad[data-lage="nu"] .vm-lista__datum, .vm-lista__rad[data-lage="pagar"] .vm-lista__datum { background: var(--virke-ljus); color: var(--virke-djup); box-shadow: inset 0 0 0 1.5px var(--virke); }
+.vm-lista__rad[data-lage="nu"] .vm-lista__datum small, .vm-lista__rad[data-lage="pagar"] .vm-lista__datum small { color: inherit; }
+.vm-lista__text { display: grid; min-width: 0; color: inherit; text-decoration: none; }
+.vm-lista__text b { font: 600 .88rem/1.3 var(--rubrik); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.vm-lista__text small { font-size: .76rem; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.vm-lista__text:hover b { text-decoration: underline; }
+.vm-tomt { display: grid; justify-items: center; gap: 10px; padding: 28px 16px; text-align: center; color: var(--text-2); }
+.vm-tomt > .i { width: 36px; height: 36px; color: var(--virke-djup); }
+.vm-tomt p { margin: 0; }
+.vm-sida .kort__huvud { flex-wrap: wrap; gap: 8px; }
+.vm-sida__titel { display: flex; align-items: center; gap: 10px; margin: 0; font: 600 1.15rem/1.3 var(--rubrik); }
+.vm-sida__lage { margin-left: auto; }
+.vm-sida__lage[data-lage="nu"], .vm-sida__lage[data-lage="pagar"] { background: var(--virke-ljus); color: var(--virke-djup); box-shadow: inset 0 0 0 1.5px var(--virke); }
+.vm-fakta { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px 20px; margin: 0 0 16px; }
+.vm-fakta div { display: grid; gap: 2px; }
+.vm-fakta dt { font-size: .72rem; color: var(--text-3); }
+.vm-fakta dd { margin: 0; font-size: .88rem; color: var(--t-text); font-variant-numeric: tabular-nums; }
+.vm-fakta a { color: var(--virke-djup); }
+.vm-sida__knappar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.vm-sida__efter { margin-top: 16px; }
+.vm-sida__narv, .vm-sida__ant { margin: 0 0 10px; font-size: .88rem; }
+.vm-sida__ant { white-space: pre-wrap; }
+.vm-sida__chatt summary { display: flex; align-items: center; gap: 8px; cursor: pointer; font: 600 .82rem/1 var(--rubrik); color: var(--text-2); list-style: none; min-height: 36px; }
+.vm-sida__chatt summary::-webkit-details-marker { display: none; }
+.vm-sida__chatt summary .i { width: 14px; height: 14px; transform: rotate(-90deg); transition: transform .2s; }
+.vm-sida__chatt[open] summary .i { transform: none; }
+.vm-sida__chatt ol { margin: 6px 0 0; padding-left: 18px; font-size: .84rem; }
+@media (prefers-reduced-motion: reduce) {
+  .kl__vm, .vm-boka__mer summary .i, .vm-sida__chatt summary .i { transition: none; }
+}

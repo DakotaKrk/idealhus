@@ -115,13 +115,22 @@
     return { m: IH.modell('r1'), varfor: 'Två rum under sadeltak – det mest mångsidiga huset.' };
   }
 
+  // Videomöten (videomote.js): mötet bakom en kalenderaktivitet eller dess påminnelse under Att göra
+  function vmFor(aktId) { return aktId && IH.videomote ? IH.videomote.forAktivitet(aktId) : null; }
+  function vmIkon() { return (IH.vmIk ? IH.vmIk() : i('kamera')); }
+  function vmAnslutKnapp(v, klass) {
+    if (!v || !IH.videomote) return '';
+    var l = IH.videomote.lage(v); if (l === 'avslutat' || l === 'passerat') return '';
+    return '<button type="button" class="knapp knapp--liten' + (l === 'nu' || l === 'pagar' ? ' knapp--virke' : '') + (klass ? ' ' + klass : '') + '" data-g="vm-anslut" data-id="' + e(v.id) + '">' + vmIkon() + 'Anslut</button>';
+  }
   function aktIkon(typ) { return { samtal: 'samtal', mejl: 'post', mote: 'motesikon', notis: 'anteckning', system: 'blixt' }[typ] || 'anteckning'; }
   function tidslinje(lista, tomText) {
     if (!lista.length) return tomt('klocka', tomText || 'Ingen aktivitet än.');
     return '<ol class="logg" data-stagger>' + lista.slice().sort(function (a, b) { return b.tid < a.tid ? -1 : 1; }).map(function (h) {
       var av = IH.anvandare(h.av);
-      return '<li class="logg__rad logg__rad--' + h.typ + '"><span class="logg__ikon">' + i(aktIkon(h.typ)) + '</span>' +
-        '<div><p>' + e(h.text) + '</p><small>' + (av ? e(av.namn) + ' · ' : '') + IH.sedan(h.tid) + '</small></div></li>';
+      var vm = h.video && IH.videomote ? IH.videomote.hamta(h.video) : null;
+      return '<li class="logg__rad logg__rad--' + h.typ + (vm ? ' logg__rad--video' : '') + '"><span class="logg__ikon">' + (vm ? vmIkon() : i(aktIkon(h.typ))) + '</span>' +
+        '<div><p>' + e(h.text) + '</p><small>' + (av ? e(av.namn) + ' · ' : '') + IH.sedan(h.tid) + (vm ? ' · <a class="logg__vm" href="#/videomote/' + e(vm.id) + '">Visa mötet</a>' : '') + '</small></div></li>';
     }).join('') + '</ol>';
   }
   function anteckningsForm(kund, affar) {
@@ -479,7 +488,19 @@
     return '<div class="hero__lagen">' +
       bit('uppgift', uppg.length ? '<b>' + uppg.length + '</b> att göra i dag' + (sena ? ' · ' + sena + ' sena' : '') : 'Inget att göra i dag', '#/att-gora', sena > 0) +
       bit('kalender', moten.length ? '<b>' + moten.length + '</b> ' + (moten.length === 1 ? 'möte' : 'möten') + ' kvar i dag' : 'Inga fler möten i dag', IH.jag().chef ? '#/chef' : '#/att-gora') +
-      (nastaMontage ? bit('produktion', 'Montage om <b>' + Math.max(0, dagarTill(nastaMontage.montage)) + ' d</b>', '#/produktion') : '') + '</div>';
+      (nastaMontage ? bit('produktion', 'Montage om <b>' + Math.max(0, dagarTill(nastaMontage.montage)) + ' d</b>', '#/produktion') : '') + vmIdag(i1) + '</div>';
+  }
+  // Nästa videomöte i dag (mitt eller där jag är inbjuden): Anslut direkt från översikten, framträdande från 10 min före
+  function vmIdag(i1) {
+    if (!IH.videomote || !Array.isArray(db().videomoten)) return '';
+    var jagId = IH.jag().id;
+    var v = db().videomoten.filter(function (x) {
+      var l = IH.videomote.lage(x);
+      return (x.vard === jagId || (x.deltagare || []).some(function (d) { return d.typ === 'kollega' && d.id === jagId; })) && new Date(x.start) < i1 && (l === 'nu' || l === 'pagar' || l === 'kommande');
+    }).sort(function (a, b) { return a.start < b.start ? -1 : 1; })[0];
+    if (!v) return '';
+    var l = IH.videomote.lage(v), d = new Date(v.start);
+    return '<button type="button" class="hero__lage hero__lage--vm' + (l === 'nu' || l === 'pagar' ? ' varm' : '') + '" data-g="vm-anslut" data-id="' + e(v.id) + '" title="' + e(v.titel) + '">' + vmIkon() + '<span>' + (l === 'pagar' ? 'Videomöte <b>pågår</b>' : 'Videomöte <b>' + e(IH.lokal(d, 't', { hour: '2-digit', minute: '2-digit' }).replace(':', '.')) + '</b>') + ' · Anslut</span></button>';
   }
   // Layoutläget (Minimal/Normal/Full, layout.js). Utan motorn gäller Full.
   function lage() { return IH.layout ? IH.layout() : (document.documentElement.getAttribute('data-layout') || 'full'); }
@@ -2078,6 +2099,7 @@
     }).join('') + '</ul>' : '<p class="af-tom">Inga öppna uppgifter för affären.</p>', ' data-af-svang');
     var atgarder = kort('atgarder', 'blixt', 'Åtgärder', '<div class="af-atgarder">' +
       '<button class="knapp" type="button" data-g="starta-mote" data-affar="' + a.id + '">' + i('mote') + 'Kundmöte</button>' +
+      '<button class="knapp" type="button" data-g="vm-boka" data-affar="' + a.id + '">' + vmIkon() + 'Videomöte</button>' +
       '<button class="knapp" type="button" data-g="kund-uppgift" data-id="' + a.kund + '" data-affar="' + a.id + '">' + i('plus') + 'Ny uppgift</button>' +
       (a.forlorad ? '' : a.steg !== 'vunnen' ? '<button class="knapp knapp--fara" type="button" data-g="aff-forlora" data-id="' + a.id + '">' + i('stang') + 'Markera som förlorad</button>' : '') + '</div>');
     var html = '<a class="tillbaka" href="#/salj">' + i('pilv') + 'Säljtavlan</a>' + hjalte + stegare +
@@ -2162,6 +2184,7 @@
       ? '<button class="knapp" type="button" data-g="aff-ateruppta" data-id="' + a.id + '">' + i('aterstall') + 'Återuppta</button>'
       : (a.steg !== 'vunnen' ? '<button class="knapp knapp--fara" type="button" data-g="aff-forlora" data-id="' + a.id + '">Förlorad</button>' : '') +
         '<button class="knapp" type="button" data-g="starta-mote" data-affar="' + a.id + '">' + i('mote') + 'Kundmöte</button>' +
+        '<button class="knapp" type="button" data-g="vm-boka" data-affar="' + a.id + '">' + vmIkon() + 'Videomöte</button>' +
         (a.steg !== 'vunnen' ? '<button class="knapp knapp--virke" type="button" data-g="aff-vinn" data-id="' + a.id + '">' + i('trofe') + 'Vunnen</button>' : '');
     IH.oppnaArk({ titel: a.titel, under: e(k ? k.namn : '') + ' · skapad ' + IH.datum(a.skapad), ikon: 'tavla', kropp: kropp, fot: fot, bred: false,
       efter: function (ark) { IH.efterRitning(ark); } });
@@ -2382,7 +2405,7 @@
       '<td class="tal">' + (x.oppet ? IH.kr(x.oppet) : '<span class="tid">–</span>') + '</td><td class="tal kl__vunnet">' + (x.vunnet ? IH.kr(x.vunnet) : '<span class="tid">–</span>') + '</td>' +
       '<td><span class="kl__halsa" data-ton="' + ton + '" style="--a:' + (h / 100).toFixed(2) + '" title="Kundhälsa ' + h + ': ' + (h >= 75 ? 'varm relation' : h >= 50 ? 'håll kontakten' : 'behöver kontakt') + '"><i></i>' + h + '</span></td>' +
       '<td class="tid"><span class="kl__senast">' + (x.senast ? IH.sedan(x.senast.tid) : 'Ingen aktivitet') + (x.varm ? '<em title="' + e(varfor(x)) + '"><i class="prick"></i>' + e(varfor(x)) + '</em>' : '') + '</span></td>' +
-      '<td class="kl__snabb">' + (k.telefon ? '<a href="tel:' + e(k.telefon.replace(/\s/g, '')) + '" title="Ring ' + e(k.telefon) + '" aria-label="Ring">' + i('tel') + '</a>' : '') + (k.epost ? '<a href="mailto:' + e(k.epost) + '" title="Mejla ' + e(k.epost) + '" aria-label="Mejla">' + i('post') + '</a>' : '') + '<span class="kl__pil" aria-hidden="true">' + i('pil') + '</span></td></tr>';
+      '<td class="kl__snabb">' + (k.telefon ? '<a href="tel:' + e(k.telefon.replace(/\s/g, '')) + '" title="Ring ' + e(k.telefon) + '" aria-label="Ring">' + i('tel') + '</a>' : '') + (k.epost ? '<a href="mailto:' + e(k.epost) + '" title="Mejla ' + e(k.epost) + '" aria-label="Mejla">' + i('post') + '</a>' : '') + '<button type="button" class="kl__vm" data-g="vm-boka" data-kund="' + k.id + '" title="Boka videomöte med ' + e(k.namn) + '" aria-label="Boka videomöte med ' + e(k.namn) + '">' + vmIkon() + '</button><span class="kl__pil" aria-hidden="true">' + i('pil') + '</span></td></tr>';
   }
   var KL_KOL = [['namn', 'Kund'], [null, 'Hus'], ['steg', 'På resan'], ['oppet', 'Öppet'], ['vunnet', 'Vunnet'], ['halsa', 'Hälsa'], ['aktiv', 'Senast']];
   function kundTabell(lista) {
@@ -2626,6 +2649,7 @@
             '<button class="knapp" type="button" data-g="kund-logga" title="Logga ett samtal, mejl eller möte">' + i('samtal') + 'Logga kontakt</button>' +
             '<button class="knapp" type="button" data-g="kund-uppgift" data-id="' + k.id + '">' + i('uppgift') + 'Ny uppgift</button>' +
             '<button class="knapp" type="button" data-g="starta-mote" data-kund="' + k.id + '">' + i('mote') + 'Kundmöte</button>' +
+            '<button class="knapp" type="button" data-g="vm-boka" data-kund="' + k.id + '">' + vmIkon() + 'Videomöte</button>' +
             '</div>' +
         '</div></div>' +
         '<div class="kh__halsa" data-ton="' + halsaTon + '" style="--a:' + (halsa / 100).toFixed(2) + '" title="Kundhälsa: räknas ur senaste kontakten, öppna affärer, köp och försenade uppgifter">' +
@@ -3780,12 +3804,13 @@
   function kommandeMoten() {
     var idag0 = new Date(); idag0.setHours(0, 0, 0, 0);
     var l = db().uppgifter.filter(function (u) { return !u.klar && (!u.ansvarig || u.ansvarig === IH.jag().id) && /möte|träff|bes[öo]k|visning/i.test(u.text) && new Date(u.forfaller) >= idag0; }).sort(function (x, y) { return x.forfaller < y.forfaller ? -1 : 1; }).slice(0, 4);
-    return '<section class="kort komm" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('kalender') + '</span>Kommande möten</h2>' + (l.length ? '<span class="chip">' + l.length + '</span>' : '') + '</header><div class="kort__kropp">' +
+    return '<section class="kort komm" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('kalender') + '</span>Kommande möten</h2>' + (l.length ? '<span class="chip">' + l.length + '</span>' : '') +
+      (IH.videomote ? '<span class="komm__vm"><a class="knapp knapp--liten" href="#/videomote">Alla videomöten</a><button type="button" class="knapp knapp--liten knapp--virke" data-g="vm-boka">' + vmIkon() + 'Boka videomöte</button></span>' : '') + '</header><div class="kort__kropp">' +
       (l.length ? '<ul class="komm__lista">' + l.map(function (u) {
         var kk = u.kund ? IH.kund(u.kund) : null, d = new Date(u.forfaller), t = dagarTill(u.forfaller);
         var af = u.affar ? oppnaAffarer().filter(function (x) { return x.id === u.affar; })[0] : kk ? oppnaAffarer().filter(function (x) { return x.kund === kk.id; })[0] : null;
         return '<li><span class="komm__datum' + (t === 0 ? ' idag' : '') + '"><b>' + d.getDate() + '</b><small>' + MANAD[d.getMonth()].slice(0, 3) + '</small></span><span class="komm__text"><b>' + e(u.text) + '</b><small>' + (kk ? e(kk.namn) + ' · ' : '') + (t === 0 ? 'i dag' : t === 1 ? 'i morgon' : 'om ' + t + ' dagar') + '</small></span>' +
-          (af ? '<button type="button" class="knapp knapp--liten' + (af.id === moteAffar ? ' knapp--virke' : '') + '" data-g="mote-forbered" data-id="' + af.id + '">' + i(af.id === moteAffar ? 'bock' : 'mote') + (af.id === moteAffar ? 'Förberett' : 'Förbered') + '</button>' : '') + '</li>';
+          '<span class="komm__knappar">' + vmAnslutKnapp(vmFor(u.kalAkt)) + (af ? '<button type="button" class="knapp knapp--liten' + (af.id === moteAffar ? ' knapp--virke' : '') + '" data-g="mote-forbered" data-id="' + af.id + '">' + i(af.id === moteAffar ? 'bock' : 'mote') + (af.id === moteAffar ? 'Förberett' : 'Förbered') + '</button>' : '') + '</span></li>';
       }).join('') + '</ul>' : '<p class="forhand__tom">' + i('kalender') + 'Inga möten eller platsbesök inbokade. Lägg till dem under Att göra.</p>') + '</div></section>';
   }
   // Logga mötet efteråt: anteckning, längd och nästa steg – blir en aktivitet och en uppgift
@@ -4481,6 +4506,7 @@
       '<span class="uppg__typ" title="' + typ[2] + '" aria-hidden="true">' + typ[1] + '</span>' +
       '<span class="uppg__text"><b>' + e(u.text) + '</b><small>' + (k ? '<a href="#/kunder/' + k.id + '">' + e(k.namn) + '</a> · ' : '') + typ[2] + (u.ansvarig && u.ansvarig !== IH.jag().id && IH.anvandare(u.ansvarig) ? ' · ' + e(IH.anvandare(u.ansvarig).namn) : '') + '</small></span>' +
       '<span class="uppg__nar' + (nar[0] ? ' uppg__nar--' + nar[0] : '') + '">' + nar[1] + '</span>' +
+      (!u.klar && u.kalAkt ? vmAnslutKnapp(vmFor(u.kalAkt), 'uppg__vm') : '') +
       (!u.klar ? '<button type="button" class="uppg__skjut" data-g="ag-skjut" data-id="' + u.id + '" title="Skjut upp en dag" aria-label="Skjut upp en dag">+1 d</button>' : '') +
       (k && !u.klar ? '<span class="uppg__snabb">' +
         (k.telefon ? '<button type="button" data-g="kund-ring" data-tel="' + e(k.telefon) + '" title="Ring ' + e(forsta(k.namn)) + '" aria-label="Ring ' + e(forsta(k.namn)) + '">' + i('tel') + '</button>' : '') +
