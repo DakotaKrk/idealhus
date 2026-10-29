@@ -866,6 +866,9 @@
       var kk = kund && IH.kund(kund);
       var vm = IH.videomote.skapa({ titel: text, start: nar, langd: 45, kund: kund, vard: u.id, vantrum: true, direkt: 'foretag',
         deltagare: kk ? [{ typ: 'gast', namn: kk.namn, epost: kk.epost || '', kund: kk.id }] : [] });
+      // utan kund godtas mötet ändå – värden kopierar länken i inbjudan; historiken får samma rad som boka-arket ger
+      IH.logga('system', 'Videomöte bokat: ' + vm.titel + ' ' + IH.videomote.narText(vm), vm.kund, vm.affar || null);
+      IH.spara();
       var nu1 = new Date(); chefUi.kalMan = (nar.getFullYear() - nu1.getFullYear()) * 12 + nar.getMonth() - nu1.getMonth();
       IH.stangArk(true); omRita();
       IH.videomote.inbjudanArk(vm.id, true);

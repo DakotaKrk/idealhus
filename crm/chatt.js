@@ -188,8 +188,9 @@
     if (!m.videomote || m.borttagen || typeof m.videomote !== 'string') return '';
     const vm = IH.videomote, v = vm && vm.hamta(m.videomote), ikon = IH.vmIk ? IH.vmIk() : ik('kamera');
     if (!v) return '<span class="ch-vmkort" data-lage="borta">' + ikon + '<span><b>Videomöte</b><small>Mötet finns inte längre</small></span></span>';
-    const l = vm.lage(v), n = (v.deltagare || []).length + 1;
-    const under = l === 'avslutat' ? (v.minuter ? v.minuter + ' min' : 'Avslutat') : l === 'pagar' ? 'pågår · ' + n + (n === 1 ? ' deltagare' : ' deltagare') : l === 'nu' ? 'börjar nu' : l === 'passerat' ? 'tiden har passerat' : vm.narText(v);
+    const l = vm.lage(v), n = (v.deltagare || []).length;
+    // hur många som är inne vet bara mötet självt – kortet räknar de inbjudna (värden oräknad)
+    const under = l === 'avslutat' ? (v.minuter ? v.minuter + ' min' : 'Avslutat') : l === 'pagar' ? 'pågår' + (n ? ' · ' + n + (n === 1 ? ' inbjuden' : ' inbjudna') : '') : l === 'nu' ? 'börjar nu' : l === 'passerat' ? 'tiden har passerat' : vm.narText(v);
     return '<span class="ch-vmkort" data-lage="' + l + '">' + ikon + '<span><b>Videomöte</b><small>' + e(under) + '</small></span>' +
       (l === 'avslutat' || l === 'passerat' ? '' : '<button type="button" class="knapp knapp--liten knapp--virke" data-g="vm-anslut" data-id="' + e(v.id) + '" tabindex="-1">Anslut</button>') + '</span>';
   }

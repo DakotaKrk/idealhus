@@ -21,7 +21,7 @@
   var MAX_DELTAGARE = 4; // direktsamtal (mesh): varje deltagare skickar till alla andra
   var HJARTSLAG_MS = 5000, TYST_MS = 15000, KNACK_MS = 4000, KNACK_MAX_MS = 10 * 60 * 1000;
   var TYPER = ['hej', 'status', 'info-fraga', 'info', 'knackar', 'slapp-in', 'neka', 'sdp', 'ice', 'reaktion', 'chatt',
-    'lamnar', 'avsluta-alla', 'ta-bort', 'las', 'tysta', 'ny-vard', 'inspelning'];
+    'lamnar', 'avsluta-alla', 'ta-bort', 'las', 'tysta', 'ny-vard', 'inspelning', 'omstart'];
   var VARDKOMMANDON = ['slapp-in', 'neka', 'avsluta-alla', 'ta-bort', 'las', 'tysta', 'ny-vard'];
   var REAKTIONER = ['gilla', 'hjarta', 'applad', 'skratt', 'forvanad'];
   var UPPLOSNING = { 360: [640, 360], 720: [1280, 720], 1080: [1920, 1080] };
@@ -574,6 +574,7 @@
     if (p.canvas.width !== b) p.canvas.width = b;
     if (p.canvas.height !== h) p.canvas.height = h;
   }
+  document.addEventListener('visibilitychange', function () { if (M.pipe && !M.pipe.stopp && M.pipe.knuff) M.pipe.knuff(); });
   function byggPipeline() {
     if (!pipelineBehovs()) { rivPipeline(); return Promise.resolve(); }
     if (M.pipe && M.pipe.kalla === M.rakam) return Promise.resolve();
@@ -593,14 +594,18 @@
       if (p.stopp) return;
       storlekPipeline();
       ritaRam(p); // första bilden direkt så att spåret inte är svart
-      var loop = function () {
-        if (p.stopp) return;
-        ritaRam(p);
-        if (document.hidden) setTimeout(loop, 1000 / inst.fps); // bakgrundsflik: rVFC/rAF stryps
-        else if (video.requestVideoFrameCallback) video.requestVideoFrameCallback(loop);
-        else requestAnimationFrame(loop);
+      // Varje schemaläggning får ett nummer. Byter fliken synlighet knuffas loopen igång igen
+      // (en rVFC som väntar i en flik som just doldes kommer aldrig) och den gamla väntan ignoreras.
+      var gen = 0;
+      var schema = function () {
+        var g = ++gen;
+        var kor = function () { if (g !== gen || p.stopp) return; ritaRam(p); schema(); };
+        if (document.hidden) setTimeout(kor, 1000 / inst.fps); // bakgrundsflik: rVFC/rAF stryps
+        else if (video.requestVideoFrameCallback) video.requestVideoFrameCallback(kor);
+        else requestAnimationFrame(kor);
       };
-      loop();
+      p.knuff = schema;
+      schema();
     });
   }
   var LJUS = 'brightness(1.15) contrast(1.08) saturate(1.05)';
@@ -640,6 +645,7 @@
         return skapa('GPU').catch(function () { return skapa('CPU'); });
       });
     }).then(function (seg) {
+      tystaLoggning(seg);
       bg.modul = seg;
       registrera(mediapipeRitare(seg), { namn: 'MediaPipe selfie segmenter', lokal: true });
       bg.laddar = null;
@@ -650,6 +656,31 @@
       var f = fel('bakgrund-fel'); sand('fel', f); throw f;
     });
     return bg.laddar;
+  }
+  // MediaPipe Tasks skapar en loggare som var 60:e sekund skickar användningsdata till odml.pa.googleapis.com.
+  // CSP:n stoppar det ändå, men vi stänger av den så att inget försök görs (och inget CSP-fel hamnar i konsolen).
+  // Loggaren känns igen på formen (flush/close, kö i .i och avsändare med send), inte på ett minifierat namn.
+  function tystaLoggning(seg) {
+    var hittad = false;
+    try {
+      var sett = [];
+      var leta = function (o, djup) {
+        if (hittad || !o || typeof o !== 'object' || djup > 3 || sett.indexOf(o) >= 0) return;
+        sett.push(o);
+        if (typeof o.flush === 'function' && typeof o.close === 'function' && Array.isArray(o.i) && o.o && typeof o.o.send === 'function') {
+          o.o.send = function (t, klar) { if (typeof klar === 'function') klar(''); return Promise.resolve(); };
+          if (o.h !== undefined) { clearInterval(o.h); o.h = undefined; }
+          o.i = []; hittad = true;
+          return;
+        }
+        Object.keys(o).forEach(function (k) {
+          var v = o[k];
+          if (v && typeof v === 'object' && !(typeof Element !== 'undefined' && v instanceof Element) && !ArrayBuffer.isView(v) && !(v instanceof ArrayBuffer)) leta(v, djup + 1);
+        });
+      };
+      leta(seg, 0);
+    } catch (e) { }
+    return hittad;
   }
   // Ritar personen skarp ovanpå en suddad eller utbytt bakgrund. Segmenterar på en liten bild (256 px bred).
   function mediapipeRitare(seg) {
@@ -768,12 +799,13 @@
   }
   function nyPost(peer) {
     return { peer: peer, namn: 'Okänd', roll: 'gast', i: 'forhand', mik: false, kam: false, hand: false, handTid: 0, delar: false, delarTid: 0,
-      skarmStrom: '', sett: nu(), pc: null, strommar: {}, kamera: null, skarm: null, talar: false, natverk: null, stats: null, hist: [] };
+      skarmStrom: '', sett: nu(), pc: null, strommar: {}, kamera: null, skarm: null, talar: false, natverk: null, stats: null, hist: [],
+      harStatus: false, pcTid: 0, omstartTid: 0 };
   }
   function oppnaPc(p) {
     if (p.pc || S.fas !== 'mote' || p.i !== 'mote') return;
     var pc = new RTCPeerConnection({ iceServers: iceLista() });
-    p.pc = pc; p.polite = S.jag.peer > p.peer; p.making = false; p.ignorera = false;
+    p.pc = pc; p.polite = S.jag.peer > p.peer; p.making = false; p.ignorera = false; p.pcTid = nu(); p.kedja = null;
     p.s = { mik: null, kam: null, skarm: null, skarmLjud: null };
     pc.onnegotiationneeded = function () {
       p.making = true;
@@ -796,9 +828,30 @@
       tillampaTaEmot();
     };
     pc.onconnectionstatechange = function () {
+      if (p.pc !== pc) return;
+      p.pcTid = nu();
       if (pc.connectionState === 'failed' && pc.restartIce) pc.restartIce();
     };
     lagSparPaPc(p);
+  }
+  // Vakt (körs med hjärtslaget): en deltagare i mötet utan fungerande anslutning får en ny.
+  // Bara den icke-artiga sidan startar om och meddelar den andra med 'omstart', så att båda inte river samtidigt.
+  var VAKT_MS = 12000;
+  function vakt() {
+    if (S.fas !== 'mote') return;
+    var t = nu();
+    iMotet().forEach(function (p) {
+      if (!p.pc) { oppnaPc(p); return; }
+      var cs = p.pc.connectionState, haller = cs === 'new' || cs === 'connecting' || cs === 'disconnected';
+      // Utan spår åt något håll finns inget att ansluta (båda utan kamera och mikrofon) – då ingen omstart
+      if (p.polite || t - (p.omstartTid || 0) < VAKT_MS + 3000 || !p.pc.getTransceivers().length) return;
+      if (cs === 'failed' || (haller && t - p.pcTid > VAKT_MS)) omstart(p, true);
+    });
+  }
+  function omstart(p, meddela) {
+    p.omstartTid = nu();
+    if (meddela) S.signal.skicka(p.peer, 'omstart', {});
+    stangPc(p); oppnaPc(p);
   }
   function stangPc(p) {
     if (!p.pc) return;
@@ -984,6 +1037,10 @@
     S.signal.skicka(till || '*', 'status', minStatus());
   }
   function forbered(mote, jag) {
+    // Förbereds samma rum igen från förhandsvisningen (t.ex. nytt namn) behålls vad vi vet om de andra,
+    // så att "värden är inne" inte försvinner tills nästa hjärtslag.
+    var forraRum = S.mote && S.fas === 'forhand' ? S.mote.rum : null;
+    var kanda = S.peers;
     lamnaRum(true);
     S.mote = motesData(mote);
     if (!S.mote.rum) throw fel('okand', 'Mötet saknar rumskod.');
@@ -993,6 +1050,7 @@
     instNyckel = null; laddaInst();
     S.vantrum = S.mote.vantrum; S.last = false; S.delare = null; S.borjade = null; S.narvarande = {}; S.chatt = []; S.talare = null;
     S.peers = {}; S.vantande = {}; S.svag = false; S.autoSpara = false;
+    if (forraRum && forraRum === S.mote.rum) Object.keys(kanda).forEach(function (k) { if (kanda[k].i !== 'vantar') S.peers[k] = kanda[k]; });
     sattFas('forhand');
     S.avSignal = S.signal.lyssna(taEmot);
     S.signal.anslut(S.mote.rum, { peer: S.jag.peer, namn: S.jag.namn, roll: S.jag.roll }).then(function () {
@@ -1008,10 +1066,15 @@
     var t = nu(), andrat = false;
     Object.keys(S.peers).forEach(function (k) {
       var p = S.peers[k];
-      if (t - p.sett > TYST_MS) { var var_i = p.i === 'mote'; stangPc(p); delete S.peers[k]; if (var_i) andrat = true; }
+      if (t - p.sett > TYST_MS) {
+        var var_i = p.i === 'mote';
+        if (p.delar && var_i) sand('delning', { peer: p.peer, pa: false });
+        stangPc(p); delete S.peers[k]; if (var_i) andrat = true;
+      }
     });
     Object.keys(S.vantande).forEach(function (k) { if (t - S.vantande[k].sett > TYST_MS) { delete S.vantande[k]; sand('vantande', vantandeLista()); } });
     if (andrat) efterDeltagarAndring();
+    vakt();
   }
   function efterDeltagarAndring() {
     var lista = deltagarLista();
@@ -1086,7 +1149,10 @@
         Object.keys(falt).forEach(function (k) { if (p[k] !== falt[k]) { andrat.push(k); p[k] = falt[k]; } });
         if (p.roll === 'vard' && typeof data.last === 'boolean' && data.last !== S.last) { S.last = data.last; sand('jag', jagObj()); }
         if (p.roll === 'vard' && typeof data.vantrum === 'boolean' && data.vantrum !== S.vantrum) S.vantrum = data.vantrum;
-        if ((ny && m.typ === 'hej') || (andrat.indexOf('i') >= 0 && p.i === 'mote')) {
+        // Svara den som inte hört oss än – även om posten skapades av 'knackar' eller 'sdp' före första hej
+        var svara = (m.typ === 'hej' && (!p.harStatus || data.fraga === true)) || (andrat.indexOf('i') >= 0 && p.i === 'mote');
+        p.harStatus = true;
+        if (svara) {
           S.signal.skicka(m.fran, 'status', minStatus()); // svara den nya
           // Den som kommer in under en pågående inspelning får veta det direkt
           if (R.pa && R.egen && p.i === 'mote') S.signal.skicka(m.fran, 'inspelning', { pa: true, lage: R.lage });
@@ -1128,6 +1194,8 @@
           v = S.vantande[m.fran] = { peer: m.fran, namn: str(data.namn, 60) || 'Gäst', roll: data.roll === 'kollega' ? 'kollega' : 'gast', gast: data.roll !== 'kollega', sedan: nu(), sett: nu() };
           sand('knackar', { peer: v.peer, namn: v.namn, gast: v.gast });
           sand('vantande', vantandeLista());
+          // Svara direkt, så att den som väntar ser att värden redan är inne
+          if (S.jag && S.fas !== 'av') S.signal.skicka(m.fran, 'status', minStatus());
         }
         v.sett = nu();
         // Värd i mötet utan väntrum släpper in direkt
@@ -1143,10 +1211,18 @@
         if (S.vantande[data.peer]) { delete S.vantande[data.peer]; sand('vantande', vantandeLista()); }
         break;
       case 'sdp':
-        if (p && !p.pc && S.fas === 'mote') { p.i = 'mote'; oppnaPc(p); }
+        // Erbjudande från någon vi inte hört av än: skapa posten och be om status i stället för att tappa det
+        if (!p && S.fas === 'mote' && S.jag) {
+          p = S.peers[m.fran] = nyPost(m.fran); p.i = 'mote';
+          var fraga = minStatus(); fraga.fraga = true; S.signal.skicka(m.fran, 'hej', fraga);
+        }
+        if (p && !p.pc && S.fas === 'mote') { p.i = 'mote'; oppnaPc(p); efterDeltagarAndring(); }
         if (p) taEmotSdp(p, data);
         break;
       case 'ice': if (p) taEmotIce(p, data); break;
+      case 'omstart':
+        if (p && p.i === 'mote' && S.fas === 'mote') omstart(p, false);
+        break;
       case 'reaktion':
         if (p && p.i === 'mote' && REAKTIONER.indexOf(data.typ) >= 0 && S.fas === 'mote') sand('reaktion', { peer: p.peer, typ: data.typ });
         break;
@@ -1160,6 +1236,7 @@
       case 'lamnar':
         if (p) {
           var varInne = p.i === 'mote';
+          if (p.delar && varInne) sand('delning', { peer: p.peer, pa: false });
           stangPc(p); delete S.peers[m.fran];
           if (S.vantande[m.fran]) { delete S.vantande[m.fran]; sand('vantande', vantandeLista()); }
           if (varInne) efterDeltagarAndring();

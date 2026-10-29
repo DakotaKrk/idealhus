@@ -8613,3 +8613,10 @@ html[data-layout="minimal"] .senvunna { display: none; }
 .vy .tidsband span:hover { background: color-mix(in srgb, var(--t-accent) 55%, var(--t-yta)); }
 .vy .tidsband b { font-size: .78rem; }
 .vy .tidsband small { opacity: .75; }
+
+/* Kortkommandona (2026-10-29): rutorna fyller bredden med minst 190 px var – två spalter när det finns plats, annars
+   en – och texten kortas med … i stället för att gå in i grannrutan (gäller alla teman och smala spalter) */
+.vy .tangenter .tangenter__lista { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.vy .tangenter .tangenter__lista > span { overflow: hidden; }
+.vy .tangenter .tangenter__lista > span { text-overflow: ellipsis; }
+.vy .tangenter .etikett { white-space: normal; }

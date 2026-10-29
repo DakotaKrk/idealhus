@@ -80,6 +80,8 @@
     'vm-ladda-upp': '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
     'vm-flytta': '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>',
     'vm-ingen': '<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>',
+    'vm-rec': '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4" fill="currentColor"/>',
+    'vm-ladda-ner': '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
     'vm-oskarpa': '<circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="8" stroke-dasharray="1.5 3"/>',
     'vm-r-gilla': '<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>',
     'vm-r-hjarta': '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
@@ -140,7 +142,7 @@
       inTid: 0, sek: null, avbryt: [], media: 'ingen', mediaFel: null, faktiska: {}, enheter: { kameror: [], mikrofoner: [], hogtalare: [] },
       lamnaKlick: 0, avslutaKlick: 0, taBortKlick: null, doljEgen: false, sammanfattning: null, svag: 0, svagVisad: false,
       fokusFore: D.activeElement, testar: false, bgFel: null, bgLaddar: false, egenBild: null, kontrollerTimer: 0, ptt: false,
-      nivaRaf: 0, nivaer: null, sparat: false
+      nivaRaf: 0, nivaer: null, sparat: false, inspelning: { pa: false }
     };
   }
 
@@ -201,6 +203,7 @@
           '<span class="vm-topp__titel"></span>' +
           '<span class="vm-topp__meta"><time class="vm-topp__klocka"></time><span class="vm-topp__tid"></span></span>' +
           '<span class="vm-topp__las" hidden>' + ik('vm-las') + '<span>Låst</span></span>' +
+          '<span class="vm-topp__rec" hidden><i aria-hidden="true"></i><span class="vm-topp__rectext">Spelas in</span><button type="button" class="vm-topp__recstopp" data-vm="inspelning-stopp" hidden>Sluta spela in</button></span>' +
           '<span class="vm-natverk" data-niva="bra" title="Anslutningen är bra" aria-hidden="true"><i></i><i></i><i></i><i></i></span>' +
           '<span class="vm-topp__knappar">' +
             '<button type="button" class="vm-knapp vm-knapp--liten" data-vm="helskarm" aria-label="Helskärm">' + ik('vm-helskarm') + '</button>' +
@@ -416,11 +419,13 @@
     return korP('enheter').then(function (en) { if (S && en) S.enheter = en; }).catch(function () { /* */ });
   }
   function egenStrom() { return kor('forhandStrom') || null; }
-  function kopplaEgen() {
+  function kopplaEgen(tvinga) {
     if (!S) return;
     var s = egenStrom(), I = inst(), spegla = I.spegla !== false;
     S.el.querySelectorAll('video.vm-video--egen').forEach(function (v) {
       if (v.hasAttribute('data-test')) return;
+      v.setAttribute('data-vm-egen', '1');
+      if (tvinga === true && v.srcObject === s) v.srcObject = null;
       if (v.srcObject !== s) { v.srcObject = s; if (s) spela(v); }
       v.toggleAttribute('data-spegla', spegla);
     });
@@ -621,6 +626,7 @@
     if (k) { k.textContent = klock(nu); k.setAttribute('datetime', nu.toISOString()); }
     var tid = S.inTid ? langd((Date.now() - S.inTid) / 1000) : '';
     var tt = S.el.querySelector('.vm-topp__tid'); if (tt) tt.textContent = tid;
+    tickTidRec();
     var kt = S.el.querySelector('.vm-kontroller__tid'); if (kt) kt.textContent = tid;
     var mt = S.el.querySelector('.vm-mini__tid'); if (mt) mt.textContent = tid;
   }
@@ -628,6 +634,7 @@
     var t = tillstand();
     S.el.querySelector('.vm-topp__titel').textContent = S.mote.titel || 'Videomöte';
     S.el.querySelector('.vm-topp__las').hidden = !t.last;
+    ritaInspelning();
     var hel = !!D.fullscreenElement;
     var hk = S.el.querySelector('[data-vm="helskarm"]');
     if (hk) { hk.innerHTML = ik(hel ? 'vm-helskarm-ut' : 'vm-helskarm'); hk.setAttribute('aria-label', hel ? 'Lämna helskärm' : 'Helskärm'); }
@@ -697,6 +704,18 @@
     while (yta.children.length > 3) yta.firstChild.remove();
     if (opt.tid) setTimeout(function () { stangAvis(a); }, opt.tid);
     return a;
+  }
+  function annanDelar() {
+    var t = tillstand() || {}, j = t.jag || {};
+    if (t.delare != null) return !!t.delare && t.delare !== j.peer;
+    return (t.deltagare || []).some(function (x) { return x.peer !== j.peer && (x.delar || x.skarm); });
+  }
+  function stangTaOver(peer) {
+    if (!S) return;
+    var a = S.el.querySelector('.vm-avisering-yta [data-nyckel="taover"]');
+    if (!a) return;
+    var ap = a.getAttribute('data-peer');
+    if (!peer || !ap || ap === peer) { S.taOver = false; stangAvis(a); }
   }
   function stangAvis(a) {
     if (!a || !a.isConnected) return;
@@ -776,6 +795,7 @@
         '<div class="vm-meny__reakt">' + REAKT.map(function (r) { return '<button type="button" role="menuitem" class="vm-reakt-knapp vm-reakt-knapp--' + r[0] + '" data-vm="reaktion" data-typ="' + r[0] + '" aria-label="' + r[1] + '">' + ik('vm-r-' + r[0]) + '</button>'; }).join('') + '</div><hr></div>' +
         menyRad('oppna-install', 'vm-install', 'Inställningar') +
         menyRad('oppna-bakgrund', 'vm-bakgrund', 'Bakgrund och effekter') +
+        (S.roll !== 'gast' && inspelningKan() ? (S.inspelning.pa ? (S.inspelning.egen ? menyRad('inspelning-stopp', 'vm-rec', 'Sluta spela in', { klass: 'vm-meny__rad--fara', under: 'Filen sparas i den här webbläsaren' }) : menyRad('', 'vm-rec', (S.inspelning.av || 'Någon') + ' spelar in', { av: true })) : menyRad('meny-inspelning', 'vm-rec', 'Spela in', { under: 'Ljud, eller ljud och bild' })) : '') +
         '<hr><p class="vm-meny__rubrik">Layout</p>' +
         menyRad('layout', 'vm-galleri', 'Galleri', { check: S.layout === 'galleri' && !S.fast, data: 'data-layout="galleri"', under: 'Alla lika stora' }) +
         menyRad('layout', 'vm-talare', 'Talare', { check: S.layout === 'talare' || !!S.fast, data: 'data-layout="talare"', under: 'Den som pratar syns stort' }) +
@@ -786,6 +806,13 @@
         menyRad('panel', 'vm-info', 'Mötesinfo och anslutning', { data: 'data-panel="anslutning"' }) +
         menyRad('panel', 'vm-tangent', 'Kortkommandon', { data: 'data-panel="kortkommandon"', tangent: 'Shift+?' }) +
         (vard ? '<hr>' + menyRad('las', t.last ? 'vm-las-upp' : 'vm-las', t.last ? 'Lås upp mötet' : 'Lås mötet', { under: t.last ? 'Nya kan knacka igen' : 'Ingen ny kan gå med' }) : '');
+    } else if (typ === 'meny-inspelning') {
+      rubrik = 'Spela in mötet';
+      h += '<p class="vm-meny__rubrik">Spela in mötet</p>' +
+        '<p class="vm-meny__info">' + ik('vm-info') + '<span>Alla i mötet ser att det spelas in. Fråga kunden om det är okej innan du startar.</span></p>' +
+        menyRad('inspelning-start', 'vm-kam', 'Ljud och bild', { data: 'data-lage="bild"', under: 'Rutorna och den delade skärmen' }) +
+        menyRad('inspelning-start', 'vm-mik', 'Bara ljud', { data: 'data-lage="ljud"', under: 'Mindre fil' }) +
+        '<p class="vm-meny__fot">Prototyp – inspelningar sparas i den här webbläsaren.</p>';
     } else if (typ === 'meny-lamna') {
       rubrik = 'Lämna';
       h += menyRad('lamna-direkt', 'vm-lamna', 'Lämna mötet', { under: 'Mötet fortsätter för de andra' }) +
@@ -808,16 +835,20 @@
     m.setAttribute('aria-label', rubrik);
     m.setAttribute('data-typ', typ);
     m.hidden = false;
-    m.classList.toggle('vm-meny--ark', mobilMq.matches && (typ === 'mer' || typ === 'meny-mik' || typ === 'meny-kam'));
+    m.classList.toggle('vm-meny--ark', mobilMq.matches && (typ === 'mer' || typ === 'meny-mik' || typ === 'meny-kam' || typ === 'meny-lamna' || typ === 'meny-inspelning'));
     S.meny = { typ: typ, knapp: knappEl, data: data };
     if (knappEl) knappEl.setAttribute('aria-expanded', 'true');
     placeraMeny(m, knappEl);
-    m.classList.remove('vm-meny--syns');
-    requestAnimationFrame(function () { m.classList.add('vm-meny--syns'); });
     var forsta = m.querySelector('[role^="menuitem"]:not([disabled])');
     if (forsta) forsta.focus({ preventScroll: true });
   }
   function placeraMeny(m, knappEl) {
+    // Knappen kan ha ritats om (t.ex. "Klicka igen …") – leta upp den nya, annars hamnar menyn i hörnet
+    if (knappEl && !knappEl.isConnected) {
+      var vmNamn = knappEl.getAttribute('data-vm');
+      knappEl = vmNamn ? S.el.querySelector('.vm-kontroller [data-vm="' + vmNamn + '"], .vm-topp [data-vm="' + vmNamn + '"]') : null;
+      if (S.meny) S.meny.knapp = knappEl;
+    }
     if (m.classList.contains('vm-meny--ark') || !knappEl) { m.style.left = ''; m.style.top = ''; m.style.bottom = ''; return; }
     var r = knappEl.getBoundingClientRect(), vw = innerWidth, vh = innerHeight;
     m.style.left = '0px'; m.style.top = '0px'; m.style.bottom = '';
@@ -832,7 +863,7 @@
   function stangMeny(fokusTillbaka) {
     if (!S || !S.meny) return;
     var m = S.el.querySelector('.vm-meny'), k = S.meny.knapp;
-    m.hidden = true; m.innerHTML = ''; m.classList.remove('vm-meny--syns');
+    m.hidden = true; m.innerHTML = '';
     if (k && k.isConnected) { k.setAttribute('aria-expanded', 'false'); if (fokusTillbaka) k.focus({ preventScroll: true }); }
     S.meny = null;
   }
@@ -854,7 +885,6 @@
     if (S.fas === 'mote') ritaKontroller();
     var p = S.el.querySelector('.vm-panel');
     p.hidden = false;
-    if (!forra) { p.classList.remove('vm-panel--syns'); requestAnimationFrame(function () { p.classList.add('vm-panel--syns'); }); }
     setTimeout(function () {
       var f = namn === 'chatt' ? p.querySelector('.vm-chatt__falt textarea') : p.querySelector('.vm-panel__kropp button, .vm-panel__kropp input, .vm-panel__kropp select, .vm-panel__huvud button');
       if (f) f.focus({ preventScroll: true });
@@ -866,7 +896,7 @@
     S.panel = null;
     S.el.removeAttribute('data-panel');
     var p = S.el.querySelector('.vm-panel');
-    p.hidden = true; p.innerHTML = ''; p.classList.remove('vm-panel--syns');
+    p.hidden = true; p.innerHTML = '';
     if (S.fas === 'mote') ritaKontroller();
     var f = S.panelFokus; S.panelFokus = null;
     if (f && f.isConnected && S.el.contains(f)) f.focus({ preventScroll: true });
@@ -897,7 +927,8 @@
   }
   function panelChatt() {
     var lista = S.chatt.length ? S.chatt.map(function (m, i) {
-      var forra = S.chatt[i - 1], fort = forra && forra.peer === m.peer && (m.tid - forra.tid) < 120000;
+      if (m.system) return '<p class="vm-chatt__system">' + ik(m.ikon || 'vm-info') + '<span>' + e(m.text) + '</span><time>' + klock(new Date(m.tid)) + '</time></p>';
+      var forra = S.chatt[i - 1], fort = forra && !forra.system && forra.peer === m.peer && (m.tid - forra.tid) < 120000;
       return '<div class="vm-chatt__rad' + (m.egen ? ' vm-chatt__rad--egen' : '') + (fort ? ' vm-chatt__rad--fort' : '') + '">' +
         (fort ? '' : '<p class="vm-chatt__vem"><b>' + e(m.egen ? 'Du' : m.namn) + '</b><time>' + klock(new Date(m.tid)) + '</time></p>') +
         '<p class="vm-chatt__bubbla">' + e(m.text) + '</p></div>';
@@ -1062,7 +1093,7 @@
     var narv = (sm.narvarande || []).filter(function (x) { return x && x.namn && x.namn !== S.jag.namn; }).map(function (x) { return x.namn + (x.roll === 'gast' ? ' (gäst)' : ''); });
     var rubrik, text, h;
     if (S.fas === 'borttagen' || S.orsak === 'borttagen') { rubrik = 'Du har tagits bort från mötet'; text = 'Värden tog bort dig. Hör av dig om det blev fel.'; }
-    else if (S.orsak === 'fullt') { rubrik = 'Mötet är fullt i prototypen'; text = 'Prototypen klarar sex deltagare åt gången.'; }
+    else if (S.orsak === 'fullt') { var max = (M() && M().MAX) || 4; rubrik = 'Mötet är fullt'; text = 'Ett videomöte rymmer ' + (max === 4 ? 'fyra' : max) + ' deltagare åt gången. Försök igen när någon har lämnat.'; }
     else if (lamnat) { rubrik = 'Du har lämnat mötet'; text = 'Mötet fortsätter för de andra.'; }
     else if (S.orsak === 'avslutat-av-vard') { rubrik = 'Mötet är slut'; text = fornamn(m.vardNamn) + ' avslutade mötet.'; }
     else { rubrik = 'Mötet är slut'; text = ''; }
@@ -1113,6 +1144,7 @@
     S.fas = fas; S.orsak = orsak || null;
     S.el.setAttribute('data-fas', FAS_DOM[fas] || fas);
     if (fas !== 'mote') { stangMeny(false); }
+    if (fas !== forra) stangTaOver(null);
     if (fas === 'mote' && forra !== 'mote') {
       S.inTid = S.inTid || Date.now();
       if (S.roll === 'vard') S.varVard = true;
@@ -1177,7 +1209,7 @@
     });
     pa('strom', function (d) {
       var jj = tillstand().jag || {};
-      if (!d.peer || d.peer === 'jag' || d.peer === jj.peer) { if (S.fas === 'mote') { ritaEgen(); ritaDelar(); } return; }
+      if (!d.peer || d.peer === 'jag' || d.peer === jj.peer) { if ((d.typ || 'kamera') === 'kamera') kopplaEgen(true); if (S.fas === 'mote') { ritaEgen(); ritaDelar(); } return; }
       S.strom[d.peer] = S.strom[d.peer] || {};
       S.strom[d.peer][d.typ || 'kamera'] = d.strom || null;
       if (d.strom && d.strom.addEventListener) {
@@ -1224,6 +1256,21 @@
       if (!d.egen) live((d.namn || 'Någon') + ' skrev: ' + String(d.text || '').slice(0, 140));
     });
     pa('reaktion', function (d) { visaReaktion(d.peer, d.typ); });
+    pa('inspelning', function (d) {
+      var forra = !!S.inspelning.pa;
+      S.inspelning = { pa: !!d.pa, egen: !!d.egen, av: d.av || null, lage: d.lage || null, sedan: d.sedan || (d.pa ? Date.now() : null) };
+      if (d.pa && !forra) {
+        var vem = d.egen ? 'Du' : (d.av || 'Någon');
+        systemrad(vem + ' startade inspelningen' + (d.lage === 'ljud' ? ' (bara ljud).' : '.'), 'vm-rec');
+        live(d.egen ? 'Du spelar in mötet.' : 'Mötet spelas in av ' + (d.av || 'en deltagare') + '.');
+        if (!d.egen) avis({ nyckel: 'inspelning', ikon: 'vm-rec', typ: 'rec', text: '<b>Mötet spelas in</b> av ' + e(d.av || 'en deltagare') + '. Säg till om du inte vill det.', tid: 9000 });
+      } else if (!d.pa && forra) {
+        systemrad((d.egen ? 'Du' : (d.av || S.inspelning.av || 'Någon')) + ' slutade spela in.', 'vm-rec');
+        live('Inspelningen är avslutad.');
+        var a = S.el.querySelector('[data-nyckel="inspelning"]'); if (a) stangAvis(a);
+      }
+      if (S.fas === 'mote') ritaTopp();
+    });
     pa('talar', function (d) { S.talare = d.peer || null; if (S.fas === 'mote' && (S.el.getAttribute('data-layout') === 'talare' || S.mini)) ritaRutor(); });
     pa('nivaer', function (d) {
       S.nivaer = d;
@@ -1266,6 +1313,8 @@
     pa('delning', function (d) {
       var j = tillstand().jag || {};
       if (S.fas === 'mote') { ritaRutor(); ritaKontroller(); }
+      // Frågan "X delar redan. Ta över?" gäller bara så länge någon annan delar
+      if (!d.pa && d.peer !== j.peer) stangTaOver(d.peer);
       if (d.peer === j.peer && !d.pa) live('Skärmdelningen avslutades.');
       else if (d.peer !== j.peer) { var dd = S.deltagare.filter(function (x) { return x.peer === d.peer; })[0]; live((dd ? fornamn(dd.namn) : 'Någon') + (d.pa ? ' delar sin skärm.' : ' slutade dela.')); }
       startaKontrollTimer();
@@ -1447,6 +1496,9 @@
       if (f && f.kod === 'annan-delar') {
         avis({ nyckel: 'taover', ikon: 'vm-dela', text: '<b>' + e(fornamn(f.namn || 'Någon')) + ' delar redan.</b> Ta över?',
           knappar: '<button type="button" class="vm-primar vm-primar--liten" data-vm="ta-over" data-lage="' + lage + '">Ta över</button><button type="button" class="vm-sek vm-sek--liten vm-sek--scen" data-vm="stang-avis">Avbryt</button>' });
+        var ta = S.el.querySelector('.vm-avisering-yta [data-nyckel="taover"]');
+        var delare = f.peer || (tillstand().deltagare || []).filter(function (x) { return x.delar; }).map(function (x) { return x.peer; })[0];
+        if (ta && delare) ta.setAttribute('data-peer', delare);
         return;
       }
       if (f && (f.kod === 'skarm-nekad' || f.name === 'NotAllowedError')) return; // användaren valde Avbryt i webbläsarens ruta
@@ -1457,6 +1509,32 @@
     kor('lamna');
     // motorn sätter fasen; om den inte gör det inom kort visar vi ändå lämnat-skärmen
     setTimeout(function () { if (S && S.fas === 'mote') sattFas('lamnat'); }, 600);
+  }
+
+  /* ---------- Inspelning (motorn spelar in, här visas och sparas den) ---------- */
+  function inspelningKan() { var m = M(); return !!(m && m.inspelning && typeof m.inspelning.starta === 'function' && typeof MediaRecorder !== 'undefined'); }
+  function korInsp(namn, opt) {
+    var m = M();
+    if (!m || !m.inspelning || typeof m.inspelning[namn] !== 'function') return Promise.reject({ text: 'Inspelning finns inte i den här webbläsaren.' });
+    try { return Promise.resolve(m.inspelning[namn](opt)); } catch (err) { return Promise.reject(err); }
+  }
+  function systemrad(text, ikon) {
+    if (!S) return;
+    S.chatt.push({ system: true, text: text, ikon: ikon, tid: Date.now() });
+    if (S.panel === 'chatt') ritaPanel();
+  }
+  function ritaInspelning() {
+    if (!S || !S.el) return;
+    var b = S.el.querySelector('.vm-topp__rec'), ins = S.inspelning;
+    if (!b) return;
+    b.hidden = !ins.pa;
+    b.querySelector('.vm-topp__recstopp').hidden = !(ins.pa && ins.egen);
+    S.el.toggleAttribute('data-spelar-in', !!ins.pa);
+    tickTidRec();
+  }
+  function tickTidRec() {
+    var rt = S && S.el.querySelector('.vm-topp__rectext'), ins = S && S.inspelning;
+    if (rt && ins && ins.pa) rt.textContent = (ins.egen ? 'Du spelar in' : 'Spelas in') + (ins.sedan ? ' · ' + langd((Date.now() - ins.sedan) / 1000) : '');
   }
 
   /* ---------- Klick ---------- */
@@ -1484,6 +1562,13 @@
         live(j.kam ? 'Kameran är av.' : 'Kameran är på.');
         var sv = el.closest('.vm-avis'); if (sv) stangAvis(sv);
         break;
+      case 'meny-inspelning': oppnaMeny('meny-inspelning', S.meny && S.meny.knapp || el); break;
+      case 'inspelning-start':
+        stangMeny(true);
+        korInsp('starta', { lage: el.getAttribute('data-lage') === 'ljud' ? 'ljud' : 'bild' }).catch(function (f) { if (S) avis({ ikon: 'vm-info', typ: 'varning', text: e(f && f.text || 'Inspelningen kunde inte starta.'), tid: 6000 }); });
+        break;
+      case 'inspelning-stopp': stangMeny(false); korInsp('stoppa'); break;
+      case 'ladda-ner-inspelning': { var nk = el.getAttribute('data-nyckel'); inspelningar.laddaNer(nk, senasteFil[nk]); break; }
       case 'meny-mik': case 'meny-kam': case 'meny-lamna': case 'reakt': case 'mer':
         hamtaEnheter().then(function () { oppnaMeny(vm, el); }); break;
       case 'dela':
@@ -1491,7 +1576,7 @@
         oppnaMeny('dela', el); break;
       case 'dela-text': stangMeny(false); dela('text'); break;
       case 'dela-video': stangMeny(false); dela('video'); break;
-      case 'ta-over': S.taOver = true; stangAvis(el.closest('.vm-avis')); dela(el.getAttribute('data-lage') || 'text'); break;
+      case 'ta-over': if (!annanDelar()) { stangAvis(el.closest('.vm-avis')); live('Ingen delar längre.'); break; } S.taOver = true; stangAvis(el.closest('.vm-avis')); dela(el.getAttribute('data-lage') || 'text'); break;
       case 'sluta-dela': stangMeny(false); kor('slutaDela'); break;
       case 'hand': stangMeny(false); kor('hand', !j.hand); live(j.hand ? 'Handen är nere.' : 'Du räcker upp handen.'); break;
       case 'reaktion': kor('reaktion', el.getAttribute('data-typ')); stangMeny(true); break;
@@ -1613,8 +1698,11 @@
       ev.preventDefault();
       var ta = f.querySelector('textarea'), txt = ta.value.trim();
       if (!txt) return;
+      // Töm fältet först – kor('chatt') ritar om panelen och tar med fältets text som utkast
+      ta.value = ''; ta.style.height = 'auto';
       kor('chatt', txt.slice(0, 1000));
-      ta.value = ''; ta.style.height = 'auto'; ta.focus();
+      var nyTa = S && S.el.querySelector('.vm-chatt__falt textarea');
+      if (nyTa) { nyTa.value = ''; nyTa.style.height = 'auto'; nyTa.focus(); }
     } else if (f.matches('[data-vm-form="slut"]')) {
       ev.preventDefault();
       var fd = new FormData(f), sm = S.sammanfattning || {};
@@ -1625,8 +1713,7 @@
         sammanfattning: { borjade: sm.borjade || (S.inTid ? new Date(S.inTid).toISOString() : null), slutade: sm.slutade || new Date().toISOString(), minuter: sm.minuter != null ? sm.minuter : Math.max(1, Math.round((Date.now() - (S.inTid || Date.now())) / 60000)), narvarande: sm.narvarande || [], chatt: sm.chatt || [] }
       };
       try { IH.videomote.sparaAvslut(S.mote.id, d); S.sparat = true; } catch (err) { console.warn(err); avis({ ikon: 'vm-info', typ: 'varning', text: 'Anteckningen kunde inte sparas.', tid: 5000 }); return; }
-      if (IH.toast) { try { IH.toast('Mötet är sparat', d.uppgift ? 'Nästa steg: ' + d.uppgift.text : 'Anteckningen finns i historiken.', 'bock'); } catch (err) { /* */ } }
-      stang(true);
+      stang(true); // sparaAvslut visar själv toasten "Mötet är sparat"
     }
   }
 
@@ -1637,15 +1724,20 @@
     var k = (ev.key || '').toLowerCase(), c = ev.ctrlKey || ev.metaKey, sh = ev.shiftKey, alt = ev.altKey;
     var t = tillstand(), j = t.jag || {};
     // Esc: meny → panel → minimera (CRM) / avbryt förhandsvisningen
+    // CRM:ets egna kortkommandon (sökningen Ctrl K, guiden ?) skulle hamna bakom lagret – de väntar tills mötet är minimerat
+    var stopp = function () { ev.preventDefault(); ev.stopImmediatePropagation(); };
     if (k === 'escape' && !S.mini) {
-      if (S.meny) { ev.preventDefault(); stangMeny(true); return; }
-      if (S.panel) { ev.preventDefault(); stangPanel(); return; }
+      if (ev.target && ev.target.closest && ev.target.closest('.valj-panel')) return;
+      if (S.meny) { stopp(); stangMeny(true); return; }
+      if (S.panel) { stopp(); stangPanel(); return; }
       if (D.fullscreenElement) return;
-      if (S.fas === 'mote' && !GAST) { ev.preventDefault(); minimera(true); return; }
-      if (S.fas === 'forhand' && !GAST) { ev.preventDefault(); stang(); return; }
+      if (S.fas === 'mote' && !GAST) { stopp(); minimera(true); return; }
+      if (S.fas === 'forhand' && !GAST) { stopp(); stang(); return; }
+      ev.stopImmediatePropagation();
       return;
     }
     if (S.mini) return;
+    if ((c && !sh && !alt && k === 'k') || (k === '?' && !iText(ev.target) && S.fas !== 'mote')) { stopp(); return; }
     // menyn: piltangenter
     if (S.meny && (k === 'arrowdown' || k === 'arrowup' || k === 'arrowleft' || k === 'arrowright' || k === 'home' || k === 'end')) {
       var rader = Array.prototype.slice.call(S.el.querySelectorAll('.vm-meny [role^="menuitem"]:not([disabled])'));
@@ -1680,14 +1772,14 @@
     else if (c && sh && k === 'k' || c && alt && k === 'h') kor('hand', !j.hand);
     else if (c && sh && k === 'h') {
       if (S.lamnaKlick) { S.lamnaKlick = 0; lamna(); }
-      else { S.lamnaKlick = 1; ritaKontroller(); var lk = S.el.querySelector('[data-vm="lamna"]'); if (lk) lk.focus(); live('Tryck igen för att lämna mötet.'); setTimeout(function () { if (S && S.lamnaKlick) { S.lamnaKlick = 0; ritaKontroller(); } }, 4000); }
+      else { S.lamnaKlick = 1; ritaKontroller(); var lk = S.el.querySelector('[data-vm="lamna"]'); if (lk) lk.focus(); live('Tryck Ctrl+Shift+H igen för att lämna mötet.'); setTimeout(function () { if (S && S.lamnaKlick) { S.lamnaKlick = 0; ritaKontroller(); } }, 4000); }
     }
     else if (c && alt && k === 'c') oppnaPanel('chatt');
     else if (c && alt && k === 'p') oppnaPanel('deltagare');
     else if (!text && !c && !alt && (k === '?' || (sh && ev.code === 'Slash'))) oppnaPanel('kortkommandon');
     else if (!text && !c && !alt && !sh && k === ' ' && !ev.repeat && j.mik === false && !(ev.target.closest && ev.target.closest('button, a, [role="menuitem"], summary'))) { S.ptt = true; kor('sattMik', true); live('Mikrofonen är på medan du håller mellanslag.'); }
     else gjort = false;
-    if (gjort) { ev.preventDefault(); visaKontroller(); }
+    if (gjort) { stopp(); visaKontroller(); }
   }
   function tangentUpp(ev) {
     if (!S || !S.ptt) return;
@@ -1788,7 +1880,7 @@
     D.addEventListener('fullscreenchange', vidHelskarm);
     window.addEventListener('resize', vidStorlek);
     // stäng menyer vid klick utanför lagret (minimerat)
-    if (!M()) { S.media = 'ingen'; ritaForhand(); requestAnimationFrame(function () { el.classList.add('vm--syns'); }); return S; }
+    if (!M()) { S.media = 'ingen'; ritaForhand(); return S; }
     S.avbryt = [];
     lyssna();
     kor('forbered', S.mote, S.jag);
@@ -1808,7 +1900,7 @@
       else if (st[0] === 'denied' && st[1] === 'denied') { S.media = 'ingen'; S.mediaFel = { kod: 'nekad' }; ritaForhand(); }
       else fokusForhand();
     });
-    requestAnimationFrame(function () { el.classList.add('vm--syns'); fokusForhand(); });
+    setTimeout(fokusForhand, 30);
     return S;
   }
   function vidHelskarm() {
@@ -1845,10 +1937,84 @@
     S = null;
     if (GAST) { el.remove(); return true; }
     if (lugnMq.matches) el.remove();
-    else { el.classList.remove('vm--syns'); el.classList.add('vm--ut'); setTimeout(function () { el.remove(); }, 220); }
+    else { el.classList.add('vm--ut'); setTimeout(function () { el.remove(); }, 220); }
     if (f && f.isConnected && f.focus) f.focus({ preventScroll: true });
     return true;
   }
+
+  /* ---------- Inspelningarna sparas i IndexedDB (inte localStorage) ----------
+     Prototyp: filerna ligger bara i den här webbläsaren. Högst 500 MB per fil och 2 GB totalt;
+     större filer laddas bara ner. C kopplar dem till kundens historik via händelsen
+     'ih-videomote-inspelning' på document (detail: {nyckel, id, rum, titel, lage, sekunder, storlek, filnamn, typ, borjade, slutade})
+     eller IH.videomote.sparaInspelning(id, info) om den finns. */
+  var DB_NAMN = 'ih-crm-inspelningar', MAX_FIL = 500 * 1024 * 1024, MAX_TOTALT = 2 * 1024 * 1024 * 1024;
+  function oppnaDb() {
+    return new Promise(function (ok, nej) {
+      if (!window.indexedDB) { nej(new Error('IndexedDB saknas')); return; }
+      var q = indexedDB.open(DB_NAMN, 1);
+      q.onupgradeneeded = function () { var db = q.result; if (!db.objectStoreNames.contains('filer')) db.createObjectStore('filer', { keyPath: 'nyckel' }); };
+      q.onsuccess = function () { ok(q.result); };
+      q.onerror = function () { nej(q.error); };
+    });
+  }
+  function dbGor(lage, fn) {
+    return oppnaDb().then(function (db) {
+      return new Promise(function (ok, nej) {
+        var tx = db.transaction('filer', lage), st = tx.objectStore('filer'), ut;
+        var q = fn(st);
+        if (q) q.onsuccess = function () { ut = q.result; };
+        tx.oncomplete = function () { db.close(); ok(ut); };
+        tx.onerror = tx.onabort = function () { db.close(); nej(tx.error); };
+      });
+    });
+  }
+  function storlekText(b) { return b >= 1048576 ? (Math.round(b / 104857.6) / 10).toLocaleString('sv-SE') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' kB'; }
+  var inspelningar = {
+    lista: function () { return dbGor('readonly', function (st) { return st.getAll(); }).then(function (l) { return (l || []).map(function (x) { var y = {}; for (var k in x) if (k !== 'blob') y[k] = x[k]; return y; }); }); },
+    hamta: function (nyckel) { return dbGor('readonly', function (st) { return st.get(String(nyckel)); }); },
+    taBort: function (nyckel) { return dbGor('readwrite', function (st) { return st.delete(String(nyckel)); }); },
+    laddaNer: function (nyckel, post) {
+      var gor = function (x) {
+        if (!x || !x.blob) { toast('Inspelningen finns inte längre', 'Den kan ha tagits bort i den här webbläsaren.', 'varning'); return; }
+        var url = URL.createObjectURL(x.blob), a = D.createElement('a');
+        a.href = url; a.download = x.filnamn || 'inspelning.webm'; a.rel = 'noopener'; D.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+        toast('Inspelningen är nedladdad', x.filnamn || '');
+      };
+      if (post) { gor(post); return Promise.resolve(); }
+      return inspelningar.hamta(nyckel).then(gor, function () { gor(null); });
+    }
+  };
+  var senasteFil = {};
+  function sparaInspelning(ut) {
+    if (!ut || !ut.blob) return;
+    var mote = (S && S.mote) || senasteMote || {};
+    var nyckel = 'rec-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+    var post = { nyckel: nyckel, id: mote.id || null, rum: mote.rum || null, titel: mote.titel || 'Videomöte', lage: ut.lage, typ: ut.typ, filnamn: ut.filnamn || ('inspelning-' + nyckel + '.webm'),
+      sekunder: ut.sekunder || 0, storlek: ut.storlek || ut.blob.size, borjade: ut.borjade || null, slutade: ut.slutade || new Date().toISOString(), blob: ut.blob };
+    senasteFil[nyckel] = post;
+    var sek = Math.round(post.sekunder || 0), meta = (sek < 60 ? sek + ' s' : Math.round(sek / 60) + ' min') + ' · ' + storlekText(post.storlek);
+    var visa = function (sparad) {
+      var knapp = '<button type="button" class="vm-primar vm-primar--liten" data-vm="ladda-ner-inspelning" data-nyckel="' + e(nyckel) + '">' + ik('vm-ladda-ner') + '<span>Ladda ner</span></button>';
+      if (S && S.el) avis({ nyckel: 'rec-klar', ikon: 'vm-rec', typ: 'rec', text: '<b>' + (sparad ? 'Inspelningen är sparad' : 'Inspelningen är klar') + '</b> · ' + e(meta) + '<small>' + (sparad ? 'Prototyp – inspelningar sparas i den här webbläsaren.' : 'Den är för stor för att sparas här – ladda ner den nu.') + '</small>', knappar: knapp });
+      else toast(sparad ? 'Inspelningen är sparad' : 'Inspelningen är klar', meta + (sparad ? ' · i den här webbläsaren' : ' · ladda ner den från mötet'));
+      if (sparad) {
+        var info = {}; for (var k in post) if (k !== 'blob') info[k] = post[k];
+        try { if (IH.videomote && typeof IH.videomote.sparaInspelning === 'function' && post.id) IH.videomote.sparaInspelning(post.id, info); } catch (err) { console.warn(err); }
+        try { D.dispatchEvent(new CustomEvent('ih-videomote-inspelning', { detail: info })); } catch (err) { /* */ }
+      }
+    };
+    if (post.storlek > MAX_FIL) { visa(false); return; }
+    inspelningar.lista().then(function (l) {
+      var totalt = l.reduce(function (a, x) { return a + (x.storlek || 0); }, 0);
+      if (totalt + post.storlek > MAX_TOTALT) throw new Error('fullt');
+      return dbGor('readwrite', function (st) { return st.put(post); });
+    }).then(function () { visa(true); }, function (err) { console.warn('inspelningen kunde inte sparas', err); visa(false); });
+  }
+  // Lyssnar hela tiden – inspelningen blir klar först efter att man lämnat, även om lagret hunnit stängas
+  var senasteMote = null;
+  D.addEventListener('ih-videomote', function (ev) { if (S && S.mote) senasteMote = S.mote; void ev; });
+  (function () { var m = M(); if (m && typeof m.pa === 'function') { try { m.pa('inspelning-klar', sparaInspelning); } catch (err) { /* */ } } })();
 
   IH.samtalUi = {
     oppna: oppna,
@@ -1857,7 +2023,8 @@
     oppnaPanel: function (namn) { if (namn === 'installningar') oppnaPanel('installningar', S && S.flik || 'ljud'); else oppnaPanel(namn); },
     vidSlut: function (fn) { if (typeof fn === 'function' && vidSlutFn.indexOf(fn) < 0) vidSlutFn.push(fn); },
     // för gästsidan och testerna
-    tillstand: function () { return S ? { fas: S.fas, mini: S.mini, panel: S.panel, layout: S.el.getAttribute('data-layout'), media: S.media, roll: S.roll } : null; },
+    tillstand: function () { return S ? { fas: S.fas, mini: S.mini, panel: S.panel, layout: S.el.getAttribute('data-layout'), media: S.media, roll: S.roll, inspelning: S.inspelning } : null; },
+    inspelningar: inspelningar,
     ikon: ik
   };
 })();
