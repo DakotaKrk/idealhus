@@ -1,0 +1,105 @@
+/* Översikten: hjältens status, Nästa steg, nyckeltalen och listorna.
+   Laddas sist. Alla färger från temats tokens, så det gäller i alla teman. */
+
+/* Dagens läge: en lugn rad utan pillformer, så att Nästa steg blir tydligast */
+.hero .hero__lagen { gap: 6px 18px; margin: 16px 0 0; }
+.hero a.hero__lage { min-height: 24px; padding: 0; background: none; box-shadow: none; font-size: .8125rem; color: var(--text-2); }
+.hero a.hero__lage:hover { background: none; color: var(--t-text); transform: none; }
+.hero a.hero__lage .i { color: var(--text-3); }
+.hero a.hero__lage b { color: var(--t-text); }
+.hero__sena { margin-left: 3px; padding: 2px 8px; border-radius: 999px; background: rgb(var(--t-rost-rgb) / .16); font: 600 .75rem/1.2 var(--rubrik); color: var(--t-rost-text); }
+
+/* Nästa steg och skapa */
+.hero__handling { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 18px 0 20px; }
+.hero__nasta { display: inline-flex; align-items: center; gap: 9px; min-width: 0; max-width: 100%; min-height: 42px; padding: 0 16px 0 14px; border-radius: 999px; background: linear-gradient(160deg, var(--t-virke-2), var(--t-accent)); box-shadow: 0 10px 22px -12px rgb(var(--t-accent-rgb) / .8); font: 600 .875rem/1 var(--rubrik); color: var(--t-pa-accent); text-decoration: none; transition: transform .25s var(--mjuk), box-shadow .25s; }
+.hero__nasta span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.hero__nasta .i { flex: none; width: 16px; height: 16px; }
+.hero__nasta .i:last-child { transition: transform .25s var(--mjuk); }
+.hero__nasta:hover { transform: translateY(-1px); box-shadow: 0 14px 26px -12px rgb(var(--t-accent-rgb) / .95); }
+.hero__nasta:hover .i:last-child { transform: translateX(3px); }
+.hero .hero__snabb { align-items: center; gap: 4px; margin: 0; }
+.hero__snabb small { margin-right: 4px; font: 500 .75rem/1 var(--sans); color: var(--text-3); }
+.hero .hero__snabb button { position: relative; justify-content: center; width: 38px; min-height: 38px; padding: 0; border-radius: 50%; background: none; box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .1); animation: none; }
+.hero .hero__snabb button .i { width: 17px; height: 17px; padding: 0; border-radius: 0; background: none; color: var(--text-2); transition: color .2s; }
+.hero .hero__snabb button:hover { background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .55); transform: none; }
+.hero .hero__snabb button:hover .i { background: none; color: var(--t-accent-text); }
+.hero .hero__snabb button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Nyckeltalen: alla fyra kort har samma rader, grafiken står alltid längst ned */
+.hero .hero__kpi .kpi { grid-template-rows: auto auto auto minmax(18px, 1fr); align-content: start; gap: 5px; }
+.hero .kpi__etikett { min-height: 30px; }
+.hero .kpi__band, .hero .kpi__dagar { align-self: end; margin-top: 6px; }
+
+/* Korten på översikten: samma huvud och samma inre mått */
+html body .oversikt .kort__huvud { min-height: 0; padding: 18px 20px 10px; }
+html body .oversikt .kort__huvud h2 { gap: 10px; font-size: 1.0625rem; }
+html body .oversikt .kort__huvud .kort__ikon { width: 32px; height: 32px; border-radius: 10px; }
+
+/* Raderna i kortet är platta: ingen ruta i rutan, hovring är en mjuk yta */
+html body .oversikt .ov-forfr .lista { display: grid; gap: 2px; padding: 0 10px 10px; }
+html body .oversikt .ov-forfr .lista__rad { padding: 9px 10px; border: 0; border-radius: 14px; }
+html body .oversikt .ov-forfr .lista__rad:hover,
+html body .oversikt .fokus__rad:hover,
+html body .oversikt .ov-uppg .uppg:hover { background: rgb(var(--t-blaeck-rgb) / .045); box-shadow: none; transform: none; }
+html body .oversikt .fokus { gap: 2px; padding: 0 10px 10px; }
+html body .oversikt .fokus__rad { padding: 9px 10px; background: none; box-shadow: none; border-radius: 14px; }
+html body .oversikt .fokus__ikon { width: 34px; height: 34px; border-radius: 11px; }
+html body .oversikt .fokus__rad em { background: none; box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .12); color: var(--t-text); }
+html body .oversikt .fokus__rad:hover em { background: var(--t-accent); box-shadow: none; color: var(--t-pa-accent); }
+
+html body .oversikt .ov-uppg .kort__kropp { padding: 0 10px 10px; }
+html body .oversikt .ov-uppg .uppglista { display: grid; gap: 2px; }
+html body .oversikt .ov-uppg .uppg { gap: 10px; padding: 8px 10px; background: none; box-shadow: none; border-radius: 14px; }
+html body .oversikt .ov-uppg .uppg__typ { display: none; }
+html body .oversikt .ov-uppg .uppg__bock { width: 22px; height: 22px; border-radius: 7px; background: none; }
+html body .oversikt .ov-uppg .uppg__text { min-width: 0; }
+html body .oversikt .ov-uppg .uppg__text b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 720px) {
+  .hero__nasta { flex: 1 1 100%; justify-content: center; }
+}
+
+/* Kundmötet: Förbered mötet och kolumnen bredvid. Samma platta rader och lugna val som på översikten */
+.vy form > .forhand__tom { display: flex; align-items: flex-start; gap: 8px; margin: -6px 0 0; padding: 0; background: none; box-shadow: none; font-size: .8125rem; line-height: 1.4; color: var(--text-3); }
+.vy form > .forhand__tom .emo-ik, .vy form > .forhand__tom .i { width: 15px; height: 15px; margin-top: 1px; }
+.vy form > .forhand__tom > span { display: contents; }
+
+/* Upplägg: ett segmentreglage i stället för tre kort */
+.vy .upplagg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; padding: 4px; border-radius: 16px; background: rgb(var(--t-blaeck-rgb) / .05); }
+.vy .upplagg__val { display: grid; justify-items: center; gap: 3px; min-height: 0; padding: 9px 6px; border: 0; border-radius: 12px; background: none; box-shadow: none; text-align: center; transition: background-color .2s, color .2s; }
+.vy .upplagg__val:hover { background: rgb(var(--t-blaeck-rgb) / .04); box-shadow: none; }
+.vy .upplagg__val.vald { background: var(--t-yta); box-shadow: 0 2px 8px -3px rgb(var(--t-skugga-rgb) / .45); }
+.vy .upplagg__emoji { display: none; }
+.vy .upplagg__val b { font: 600 .875rem/1.2 var(--rubrik); color: var(--t-text); }
+.vy .upplagg__val small { font-size: .75rem; line-height: 1.2; color: var(--text-3); }
+.vy .upplagg__val.vald small { color: var(--text-2); }
+
+/* Bilderna: valda är klara och rena, ovalda tonas ned. Bocken bär valet, inte en ram runt varje kort */
+html body .vy .agenda__kort, html body .vy .agenda__kort.med { padding: 6px 6px 8px; border: 0; border-radius: 16px; background: rgb(var(--t-blaeck-rgb) / .03); box-shadow: none; }
+html body .vy .agenda__kort:hover { background: rgb(var(--t-blaeck-rgb) / .07); box-shadow: none; }
+html body .vy .agenda__kort:has(input:focus-visible) { outline: 2px solid var(--virke); outline-offset: 2px; }
+html body .vy .agenda__kort:not(.med):not(.agenda__kort--saknas) img { filter: saturate(.25) brightness(.8); opacity: .7; }
+html body .vy .agenda__kort:not(.med) .agenda__text b { color: var(--text-3); }
+html body .vy .agenda__text { grid-template-rows: auto auto; gap: 2px; min-height: 0; padding: 7px 4px 0; }
+html body .vy .agenda__text b { overflow: hidden; font-size: .8125rem; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+html body .vy .agenda__text small { align-self: start; font-size: .72rem; }
+html body .vy .agenda__nr { width: 22px; height: 22px; border-radius: 7px; font-size: .72rem; }
+html body .vy .agenda__bock { width: 22px; height: 22px; }
+
+/* Kommande möten: knapparna på samma rad som rubriken, raderna platta */
+.komm .kort__huvud { flex-wrap: nowrap; }
+.komm .kort__huvud h2 { min-width: 0; white-space: nowrap; }
+.komm__vm { flex: none; flex-wrap: nowrap; }
+.komm__lista { gap: 2px; margin: 0 -10px; }
+html body .komm__lista li { padding: 8px 10px; background: none; box-shadow: none; border-radius: 14px; transition: background-color .2s; }
+html body .komm__lista li:hover { background: rgb(var(--t-blaeck-rgb) / .045); }
+.komm__datum { height: 44px; border-radius: 12px; }
+html body .vy .agenda__text { align-content: start; height: auto; }
+html body .vy .agenda__text small { margin-top: 0; }
+html body .vy .agenda__text b { display: block; min-height: 0; }
+html body .avis-lista button.ch-ruta.avis__last:not(.lp-saker):not([data-saker]) { width: 28px; height: 28px; min-width: 28px; min-height: 28px; }
+@media (max-width: 520px) {
+  .vy .upplagg__val { padding: 8px 2px; }
+  .vy .upplagg__val b { font-size: .8125rem; white-space: nowrap; }
+  .vy .upplagg__val small { font-size: .6875rem; white-space: nowrap; }
+}

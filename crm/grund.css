@@ -517,28 +517,48 @@ html[data-layout="minimal"] .sido .ih-klocka { width: 40px; height: 40px; }
 @media (max-width: 900px) { .topp .ih-klocka { width: 40px; height: 40px; margin-left: 2px; } }
 @media print { .ih-klocka { display: none !important; } }
 
-.avis-panel { display: grid; gap: 14px; }
-.avis-val { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgb(var(--t-blaeck-rgb) / .035); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .06); }
-.avis-val__text { display: grid; gap: 2px; flex: 1; min-width: 0; }
-.avis-val__text b { font: 600 .875rem/1.3 var(--rubrik); color: var(--text); }
-.avis-val__text small { color: var(--text-2); font-size: .8rem; line-height: 1.4; }
-.avis-knappar { display: flex; flex-wrap: wrap; gap: 8px; }
-.avis-etikett { margin: 4px 0 -6px; }
-.avis-lista .lista__rad { gap: 12px; padding: 12px 14px 12px 18px; position: relative; }
-.avis-lista .avis__text b { font-weight: 600; color: var(--text); }
-.avis-lista .avis__text small { color: var(--text-2); }
-.avis-lista .avis--ny::before { content: ""; position: absolute; left: 7px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--virke); }
+.avis-panel { display: grid; gap: 18px; }
+.avis-del { display: grid; gap: 6px; }
+.avis-del > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 28px; padding: 0 10px; }
+.avis-del h3 { display: flex; align-items: center; gap: 7px; margin: 0; font: 600 .8125rem/1.2 var(--rubrik); color: var(--text-2); }
+.avis-del h3 span { min-width: 20px; padding: 0 6px; border-radius: 999px; background: rgb(var(--t-blaeck-rgb) / .06); font: 600 .6875rem/20px var(--rubrik); text-align: center; color: var(--text-2); }
+.avis-lank { padding: 4px 0; border: 0; background: none; font: 500 .8125rem/1.2 var(--sans); color: var(--t-accent-text); cursor: pointer; transition: opacity .2s; }
+.avis-lank:hover { opacity: .75; }
+.avis-lista { display: grid; gap: 2px; }
+.avis-lista .lista__rad { position: relative; gap: 12px; padding: 10px; border: 0; border-radius: 14px; transition: background-color .2s; }
+.avis-lista .lista__rad:hover, .avis-lista .lista__rad:focus-within { background: rgb(var(--t-blaeck-rgb) / .04); }
+.avis-lista .avis__text { min-width: 0; flex: 1; }
+.avis-lista .avis__text b { display: block; overflow: hidden; font: 600 .9375rem/1.3 var(--rubrik); color: var(--text); text-overflow: ellipsis; white-space: nowrap; }
+.avis-lista .avis__text small { display: block; overflow: hidden; margin-top: 2px; font-size: .8125rem; line-height: 1.35; color: var(--text-2); text-overflow: ellipsis; white-space: nowrap; }
 .avis-lista .lista__rad:not(.avis--ny) .avis__text b { font-weight: 500; color: var(--text-2); }
-.avis__ikon { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: var(--virke-ljus); color: var(--virke-djup); }
+.avis-lista .avis--ny .avis__ikon::after { content: ""; position: absolute; top: -2px; right: -2px; width: 9px; height: 9px; border-radius: 50%; background: var(--virke); box-shadow: 0 0 0 2px var(--t-yta); }
+.avis__ikon { position: relative; flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 12px; background: var(--virke-ljus); color: var(--virke-djup); }
 .avis__ikon .i, .avis__ikon .emo-ik { width: 17px; height: 17px; }
+.avis-lista .avis--paminnelse.avis--ny .avis__ikon { background: rgb(var(--t-rost-rgb) / .14); color: var(--t-rost-text); }
+.avis-lista .lista__rad:not(.avis--ny) .avis__ikon { background: rgb(var(--t-blaeck-rgb) / .05); color: var(--text-3); }
 .avis__antal { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 999px; background: rgb(var(--t-blaeck-rgb) / .07); font: 600 .7rem/18px var(--rubrik); text-align: center; color: var(--text-2); vertical-align: 1px; }
-.avis-lista .avis__last { flex: none; width: 34px; height: 34px; }
-.avis-lista .lista__rad:focus-visible, .avis-lista .avis__text:focus-visible { outline: 2px solid var(--virke); outline-offset: -2px; border-radius: 12px; }
+.avis__hoger { flex: none; display: grid; justify-items: end; gap: 4px; }
+.avis__nar { font-size: .75rem; line-height: 1.2; color: var(--text-3); white-space: nowrap; }
+.avis__knappar { display: flex; align-items: center; gap: 4px; }
+.avis__knapp { display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 0 10px; border: 0; border-radius: 999px; background: rgb(var(--t-blaeck-rgb) / .06); font: 600 .75rem/1 var(--rubrik); color: var(--text); cursor: pointer; transition: background-color .2s, color .2s; }
+.avis__knapp .i { width: 13px; height: 13px; }
+.avis__knapp:hover { background: rgb(var(--t-blaeck-rgb) / .11); }
+.avis__knapp--klar { background: rgb(var(--t-gron-rgb) / .16); color: var(--t-gron-text-2); }
+.avis__knapp--klar:hover { background: var(--t-gron); color: #fff; }
+html body .avis-lista .avis__last { flex: none; width: 28px; height: 28px; }
+.avis-lista .avis__last .i { width: 13px; height: 13px; }
+.avis-lista .lista__rad:focus-visible, .avis-lista .avis__text:focus-visible { outline: 2px solid var(--virke); outline-offset: 2px; border-radius: 8px; }
 .avis-tom { display: flex; gap: 14px; align-items: flex-start; padding: 18px; border-radius: 16px; background: rgb(var(--t-blaeck-rgb) / .03); }
 .avis-tom p { margin: 0; display: grid; gap: 4px; color: var(--text-2); font-size: .875rem; line-height: 1.45; }
 .avis-tom b { color: var(--text); font: 600 .9375rem/1.3 var(--rubrik); }
-.avis-not { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--text-3); font-size: .8rem; line-height: 1.4; }
-.avis-not .i { flex: none; width: 15px; height: 15px; }
+.avis-fot { display: flex; align-items: center; gap: 9px; padding: 12px 10px 0; border-top: 1px solid var(--kant); color: var(--text-3); font-size: .8125rem; line-height: 1.4; }
+.avis-fot p { flex: 1; min-width: 0; margin: 0; }
+.avis-fot > .i { flex: none; width: 15px; height: 15px; }
+@media (max-width: 520px) {
+  .avis-lista .lista__rad { flex-wrap: wrap; }
+  .avis-lista .avis__text { flex-basis: calc(100% - 48px); }
+  .avis__hoger { display: flex; flex: 1 1 100%; align-items: center; justify-content: space-between; padding-left: 48px; }
+}
 
 /* Toastens knappar: flera knappar (Klar, +1 h, Öppna) på en egen rad under texten; de andra är dämpade */
 button.toast__knapp { border: 0; cursor: pointer; font: 600 .75rem/1 var(--rubrik); }

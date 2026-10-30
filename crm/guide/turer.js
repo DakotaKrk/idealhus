@@ -135,10 +135,8 @@
       { sida: '#/', mal: KLOCKA, rubrik: 'Klockan', vanta: true, efterKlick: 600, placering: 'hoger', text: 'Siffran på klockan visar olästa aviseringar. Klicka på den.' },
       { mal: '.ark .avis-panel', rubrik: 'Det som rör dig', behallArk: true, placering: 'vanster',
         text: '<p>Här hamnar <b>påminnelser</b> för dina uppgifter när tiden har passerat, <b>dagens sammanfattning</b> (första gången du öppnar CRM:et en dag: uppgifter i dag och offerter som går ut inom 7 dagar) och annat som rör dig.</p><p>Klicka på en rad för att öppna det den gäller. <b>Markera alla som lästa</b> och <b>Ta bort lästa</b> städar listan.</p>' },
-      { mal: '.ark .avis-val', rubrik: 'Skrivbordsaviseringar', behallArk: true, placering: 'vanster',
-        text: '<b>Slå på</b> så syns påminnelser och chatt även när fliken inte är framme. Webbläsaren frågar om lov första gången.' },
-      { mal: '.ark .avis-not', rubrik: 'När CRM:et är öppet', behallArk: true, placering: 'vanster',
-        text: 'Aviseringarna visas när CRM:et är öppet i den här webbläsaren. Aviseringar till telefonen eller när datorn är avstängd kräver en server och kommer när CRM:et sätts upp mot nätet.' },
+      { mal: '.ark .avis-fot', rubrik: 'Skrivbordsaviseringar', behallArk: true, placering: 'vanster',
+        text: '<b>Slå på</b> så syns påminnelser och chatt även när fliken inte är framme. Webbläsaren frågar om lov första gången. Aviseringar till telefonen eller när datorn är avstängd kräver en server.' },
       { fore: function () { if (IH.stangArk) IH.stangArk(true); }, rubrik: 'Påminnelsen larmar', text: '<p>När en uppgift förfaller får du ett meddelande i CRM:et med <b>Klar</b>, <b>+1 h</b> och <b>Öppna</b>.</p><p>Påminnelser skapar du under <b>Att göra</b>, med <b>Påminn om 2 h</b> på en förfrågan eller med <b>Påminn mig</b> på ett chattmeddelande.</p>' }
     ]
   });

@@ -1894,32 +1894,43 @@
   }
   var AVIS_IKON = { paminnelse: 'klocka', sammanfattning: 'kalender', chatt: 'meddelande', fordelning: 'kunder', offert: 'offert', uppgift: 'uppgift', mote: 'kamera' };
   var avisArk = null;
+  // Uppgiften bakom en påminnelse, om den finns kvar och inte är klar
+  function avisUppgift(x) {
+    var m = /^uppgift:(.+)$/.exec(x.nyckel || '');
+    return m ? IH.db.uppgifter.filter(function (u) { return u.id === m[1] && !u.klar; })[0] || null : null;
+  }
   function avisRad(x) {
-    var lank = x.lank && /^#\//.test(x.lank) ? x.lank : null;
+    var lank = x.lank && /^#\//.test(x.lank) ? x.lank : null, u = avisUppgift(x);
+    var text = String(x.text || '').replace(/^Skulle vara klar /, 'Försenad sedan ');
     var inne = '<b>' + IH.e(x.rubrik || 'Avisering') + (x.antal > 1 ? ' <span class="avis__antal">' + x.antal + '</span>' : '') + '</b>' +
-      '<small>' + (x.text ? IH.e(x.text) + ' · ' : '') + '<time datetime="' + IH.e(x.tid) + '">' + IH.e(IH.sedan(x.tid)) + '</time></small>';
-    return '<div class="lista__rad avis' + (x.last ? '' : ' avis--ny') + '" data-rad>' +
+      (text ? '<small>' + IH.e(text) + '</small>' : '');
+    var nar = '<time class="avis__nar" datetime="' + IH.e(x.tid) + '">' + IH.e(IH.sedan(x.tid)) + '</time>';
+    var knappar = (u && !x.last ? '<button class="avis__knapp" type="button" data-g="avis-skjut" data-id="' + IH.e(x.id) + '" title="Skjut upp en dag">+1 d</button>' +
+      '<button class="avis__knapp avis__knapp--klar" type="button" data-g="avis-klar" data-id="' + IH.e(x.id) + '" title="Markera uppgiften som klar">' + IH.i('bock') + 'Klar</button>' : '') +
+      '<button class="ch-ruta avis__last" type="button" data-g="avis-last" data-id="' + IH.e(x.id) + '" aria-label="' + (x.last ? 'Markera som oläst' : 'Markera som läst') + '" title="' + (x.last ? 'Markera som oläst' : 'Markera som läst') + '">' +
+      IH.i(x.last ? 'post' : 'stang') + '</button>';
+    return '<div class="lista__rad avis avis--' + IH.e(x.typ || 'info') + (x.last ? '' : ' avis--ny') + '" data-rad>' +
       '<span class="avis__ikon" aria-hidden="true">' + IH.i(AVIS_IKON[x.typ] || 'bjallra') + '</span>' +
       (lank ? '<a class="lista__text avis__text" href="' + IH.e(lank) + '" data-g="avis-oppna" data-id="' + IH.e(x.id) + '" data-rad-oppna>' + inne + '</a>'
         : '<span class="lista__text avis__text">' + inne + '</span>') +
-      '<button class="ch-ruta avis__last" type="button" data-g="avis-last" data-id="' + IH.e(x.id) + '" aria-label="' + (x.last ? 'Markera som oläst' : 'Markera som läst') + '" title="' + (x.last ? 'Markera som oläst' : 'Markera som läst') + '">' +
-      IH.i(x.last ? 'post' : 'bock') + '</button></div>';
+      '<span class="avis__hoger">' + nar + '<span class="avis__knappar">' + knappar + '</span></span></div>';
+  }
+  function avisDel(rubrik, rader, knapp) {
+    return rader.length ? '<section class="avis-del"><header><h3>' + rubrik + ' <span>' + rader.length + '</span></h3>' + (knapp || '') + '</header>' +
+      '<div class="lista avis-lista" data-radlista>' + rader.map(avisRad).join('') + '</div></section>' : '';
   }
   function avisInnehall() {
     var lista = IH.avisera.lista(), nya = lista.filter(function (x) { return !x.last; }), lasta = lista.filter(function (x) { return x.last; });
+    var sena = nya.filter(function (x) { return x.typ === 'paminnelse' && avisUppgift(x); }), ovriga = nya.filter(function (x) { return sena.indexOf(x) < 0; });
     var stod = IH.avisera.skrivbordStod(), pa = IH.avisera.skrivbordPa(), nekad = stod && Notification.permission === 'denied';
-    var skrivbordRad = '<div class="avis-val"><span class="avis-val__text"><b>Skrivbordsaviseringar</b><small>' +
-      (!stod ? 'Webbläsaren kan inte visa skrivbordsaviseringar.' : nekad ? 'Blockerade för sidan. Tillåt aviseringar i webbläsarens inställningar för sidan.' :
-        pa ? 'På – påminnelser och chatt syns även när fliken inte är framme.' : 'Av – påminnelser syns här och som meddelande i CRM:et.') + '</small></span>' +
-      (stod && !nekad ? '<button class="knapp knapp--liten" type="button" data-g="avis-skrivbord" aria-pressed="' + pa + '">' + (pa ? 'Stäng av' : 'Slå på') + '</button>' : '') + '</div>';
-    var knappar = lista.length ? '<div class="avis-knappar">' +
-      '<button class="knapp knapp--liten" type="button" data-g="avis-alla-lasta"' + (nya.length ? '' : ' disabled') + '>' + IH.i('bock') + 'Markera alla som lästa</button>' +
-      '<button class="knapp knapp--liten" type="button" data-g="avis-rensa"' + (lasta.length ? '' : ' disabled') + '>' + IH.i('stang') + 'Ta bort lästa</button></div>' : '';
+    var fot = '<div class="avis-fot">' + IH.i('larm') + '<p>' +
+      (!stod ? 'Aviseringar visas här när CRM:et är öppet.' : nekad ? 'Skrivbordsaviseringar är blockerade. De kan tillåtas i webbläsarens inställningar för sidan.' :
+        pa ? 'Skrivbordsaviseringar är på när CRM:et är öppet i den här webbläsaren.' : 'Få påminnelser även när fliken inte är framme.') + '</p>' +
+      (stod && !nekad ? '<button class="avis__knapp" type="button" data-g="avis-skrivbord" aria-pressed="' + pa + '">' + (pa ? 'Stäng av' : 'Slå på') + '</button>' : '') + '</div>';
+    var allaLasta = nya.length > 1 ? '<button class="avis-lank" type="button" data-g="avis-alla-lasta">Markera alla som lästa</button>' : '';
+    var rensa = '<button class="avis-lank" type="button" data-g="avis-rensa">Ta bort lästa</button>';
     var tom = '<div class="avis-tom"><span class="avis__ikon" aria-hidden="true">' + IH.emo('bjallra') + '</span><p><b>Inga aviseringar</b>Påminnelser för uppgifter, dagens sammanfattning och annat som rör dig hamnar här.</p></div>';
-    return skrivbordRad + knappar +
-      (lista.length ? (nya.length ? '<p class="etikett avis-etikett">Nya · ' + nya.length + '</p><div class="lista kort avis-lista" data-radlista>' + nya.map(avisRad).join('') + '</div>' : '') +
-        (lasta.length ? '<p class="etikett avis-etikett">Tidigare</p><div class="lista kort avis-lista" data-radlista>' + lasta.slice(0, 60).map(avisRad).join('') + '</div>' : '') : tom) +
-      '<p class="avis-not">' + IH.i('larm') + 'Aviseringar visas när CRM:et är öppet i den här webbläsaren.</p>';
+    return (lista.length ? avisDel('Försenat', sena, allaLasta) + avisDel('Nytt', ovriga, sena.length ? '' : allaLasta) + avisDel('Tidigare', lasta.slice(0, 60), rensa) : tom) + fot;
   }
   function avisPanelRita() {
     if (!avisArk || !avisArk.isConnected) { avisArk = null; return; }
@@ -1931,7 +1942,7 @@
     if (g) { var ny = yta.querySelector('[data-g="' + g + '"]' + (id ? '[data-id="' + id + '"]' : '')) || yta.querySelector('[data-g="' + g + '"]'); if (ny && !ny.disabled) ny.focus({ preventScroll: true }); }
   }
   IH.G.aviseringar = function () {
-    avisArk = IH.oppnaArk({ titel: 'Aviseringar', ikon: 'larm', under: 'Påminnelser och det som rör dig',
+    avisArk = IH.oppnaArk({ titel: 'Aviseringar', ikon: 'larm', under: 'Det som väntar på dig, det viktigaste först',
       kropp: '<div class="avis-panel" data-avis>' + avisInnehall() + '</div>', vidStang: function () { avisArk = null; } });
   };
   function avisHitta(id) { return avisLista().filter(function (x) { return x.id === id; })[0] || null; }
@@ -1942,6 +1953,17 @@
     IH.stangArk(false, true);
     if (x.lank) IH.ga(x.lank);
   };
+  // Klar och +1 d på påminnelsen: uppgiften ändras direkt och raden räknas som läst
+  function avisUppgiftsval(el, handling) {
+    var x = avisHitta(el.getAttribute('data-id')), u = x && avisUppgift(x);
+    if (!u) return;
+    x.last = true;
+    var knapp = document.createElement('button'); knapp.setAttribute('data-id', u.id);
+    IH.G[handling](knapp);
+    IH.spara(); IH.uppdateraMeny(); avisPanelRita();
+  }
+  IH.G['avis-klar'] = function (el) { avisUppgiftsval(el, 'uppgift-klar'); };
+  IH.G['avis-skjut'] = function (el) { avisUppgiftsval(el, 'ag-skjut'); };
   IH.G['avis-last'] = function (el) {
     var x = avisHitta(el.getAttribute('data-id'));
     if (!x) return;
@@ -2014,7 +2036,7 @@
     nya.forEach(function (u) {
       u.larmat = tid;
       var plats = uppgiftPlats(u);
-      IH.avisera({ typ: 'paminnelse', rubrik: u.text, text: 'Skulle vara klar ' + IH.datum(u.forfaller) + ' kl. ' + IH.lokal(u.forfaller, 't', { hour: '2-digit', minute: '2-digit' }) + (plats ? ' · ' + plats : ''),
+      IH.avisera({ typ: 'paminnelse', rubrik: u.text, text: 'Försenad sedan ' + IH.datum(u.forfaller) + ' kl. ' + IH.lokal(u.forfaller, 't', { hour: '2-digit', minute: '2-digit' }) + (plats ? ' · ' + plats : ''),
         lank: '#/att-gora', nyckel: 'uppgift:' + u.id, spara: false });
     });
     IH.spara();
