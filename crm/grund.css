@@ -499,3 +499,51 @@ html:not([data-layout="minimal"]) .af-glas__rad { min-height: 46px; }
 .af-kort:has(> h2 + .af-tom:last-child) { display: flex; flex-direction: column; }
 .af-kort:has(> h2 + .af-tom:last-child) > .af-tom { margin: auto 0; padding-bottom: 14px; text-align: center; } /* 14 px = rubrikens marginal, så att texten står mitt i ytan under rubriken */
 
+
+/* Aviseringscentret (steg 11): klockan bredvid Sök i sidomenyn och före Ny i toppraden, räknaren för olästa,
+   panelen (ett vanligt ark) och toastens knappar (Ångra, Klar, +1 h). Bara tokens – fungerar i alla sex teman. */
+.ih-klocka { position: relative; flex: none; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 14px; background: rgb(var(--t-glas-rgb) / .85); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .07), 0 10px 20px -18px rgb(var(--t-skugga-varm-rgb) / .55); color: var(--text-2); cursor: pointer; transition: box-shadow .3s ease, background-color .3s ease, color .2s ease; }
+.ih-klocka:hover { background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-koppar-rgb) / .4), 0 12px 24px -18px rgb(var(--t-accent-djup-rgb) / .6); color: var(--text); }
+.ih-klocka:active { transform: scale(.94); }
+.ih-klocka .emo-ik { width: 18px; height: 18px; stroke-width: 1.9; }
+.ih-klocka__antal { position: absolute; top: -5px; right: -5px; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 999px; background: var(--virke); box-shadow: 0 0 0 2px var(--t-yta); color: var(--t-pa-accent); font: 700 .66rem/19px var(--rubrik); font-style: normal; text-align: center; pointer-events: none; }
+.sido__verktyg:has(.ih-klocka) { gap: 6px; }
+/* Smal meny: Ctrl K-tangenten får ge plats åt klockan (kortkommandot står i tipset och i hjälpen) */
+@media (max-width: 1600px) { .sido__verktyg:has(.ih-klocka) .sido__sok kbd { display: none; } }
+.topp__klocka { display: contents; }
+.topp .ih-klocka { width: 42px; height: 42px; border-radius: 50%; }
+html[data-layout="minimal"] .topp .ih-klocka { width: 38px; height: 38px; }
+html[data-layout="minimal"] .sido .ih-klocka { width: 40px; height: 40px; }
+@media (max-width: 900px) { .topp .ih-klocka { width: 40px; height: 40px; margin-left: 2px; } }
+@media print { .ih-klocka { display: none !important; } }
+
+.avis-panel { display: grid; gap: 14px; }
+.avis-val { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgb(var(--t-blaeck-rgb) / .035); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .06); }
+.avis-val__text { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.avis-val__text b { font: 600 .875rem/1.3 var(--rubrik); color: var(--text); }
+.avis-val__text small { color: var(--text-2); font-size: .8rem; line-height: 1.4; }
+.avis-knappar { display: flex; flex-wrap: wrap; gap: 8px; }
+.avis-etikett { margin: 4px 0 -6px; }
+.avis-lista .lista__rad { gap: 12px; padding: 12px 14px 12px 18px; position: relative; }
+.avis-lista .avis__text b { font-weight: 600; color: var(--text); }
+.avis-lista .avis__text small { color: var(--text-2); }
+.avis-lista .avis--ny::before { content: ""; position: absolute; left: 7px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--virke); }
+.avis-lista .lista__rad:not(.avis--ny) .avis__text b { font-weight: 500; color: var(--text-2); }
+.avis__ikon { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: var(--virke-ljus); color: var(--virke-djup); }
+.avis__ikon .i, .avis__ikon .emo-ik { width: 17px; height: 17px; }
+.avis__antal { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 999px; background: rgb(var(--t-blaeck-rgb) / .07); font: 600 .7rem/18px var(--rubrik); text-align: center; color: var(--text-2); vertical-align: 1px; }
+.avis-lista .avis__last { flex: none; width: 34px; height: 34px; }
+.avis-lista .lista__rad:focus-visible, .avis-lista .avis__text:focus-visible { outline: 2px solid var(--virke); outline-offset: -2px; border-radius: 12px; }
+.avis-tom { display: flex; gap: 14px; align-items: flex-start; padding: 18px; border-radius: 16px; background: rgb(var(--t-blaeck-rgb) / .03); }
+.avis-tom p { margin: 0; display: grid; gap: 4px; color: var(--text-2); font-size: .875rem; line-height: 1.45; }
+.avis-tom b { color: var(--text); font: 600 .9375rem/1.3 var(--rubrik); }
+.avis-not { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--text-3); font-size: .8rem; line-height: 1.4; }
+.avis-not .i { flex: none; width: 15px; height: 15px; }
+
+/* Toastens knappar: flera knappar (Klar, +1 h, Öppna) på en egen rad under texten; de andra är dämpade */
+button.toast__knapp { border: 0; cursor: pointer; font: 600 .75rem/1 var(--rubrik); }
+.toast--flera { flex-wrap: wrap; }
+.toast__knappar { display: flex; flex-wrap: wrap; gap: 6px; flex-basis: 100%; padding-left: 46px; }
+.toast__knapp--sek { background: rgb(var(--t-pa-sten-rgb) / .1); color: var(--krita); box-shadow: inset 0 0 0 1px rgb(var(--t-pa-sten-rgb) / .14); }
+.toast__knapp--sek:hover { background: rgb(var(--t-pa-sten-rgb) / .18); }
+.avis-lista a.avis__text { color: inherit; text-decoration: none; }

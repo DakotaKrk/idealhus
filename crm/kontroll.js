@@ -71,11 +71,31 @@
     p = Math.max(0, Math.min(100, Math.round(p)));
     return { poang: p, lage: p >= 85 ? 'bra' : p >= 60 ? 'se' : 'hjalp', punkter: punkter };
   }
+  // Samma person på flera kundkort: lika telefonnummer (bara siffrorna, +46/0046/0 räknas lika) eller lika e-post.
+  // Samma regler som kundDubblett i vyer.js. Ger grupper med minst två kunder.
+  var telKarna = function (t) { t = String(t || '').replace(/\D/g, '').replace(/^00/, ''); if (/^46\d{7,}$/.test(t)) t = t.slice(2); return t.replace(/^0/, ''); };
+  function dubblaPersoner() {
+    var kunder = db().kunder, foralder = {}, hitta = function (id) { while (foralder[id] !== id) id = foralder[id] = foralder[foralder[id]]; return id; };
+    kunder.forEach(function (k) { foralder[k.id] = k.id; });
+    var sett = {};
+    kunder.forEach(function (k) {
+      [['t', telKarna(k.telefon)], ['e', String(k.epost || '').trim().toLowerCase()]].forEach(function (n) {
+        if (!n[1] || (n[0] === 't' && n[1].length < 6)) return;
+        var nyckel = n[0] + n[1];
+        if (sett[nyckel]) foralder[hitta(k.id)] = hitta(sett[nyckel]); else sett[nyckel] = k.id;
+      });
+    });
+    var grupper = {};
+    kunder.forEach(function (k) { var r = hitta(k.id); (grupper[r] = grupper[r] || []).push(k); });
+    return Object.keys(grupper).map(function (r) { return grupper[r]; }).filter(function (g) { return g.length > 1; });
+  }
+  IH.dubblaPersoner = dubblaPersoner;
   function dataLage(brott) {
     var d = db(), dubb = 0;
     ['kunder', 'affarer', 'offerter', 'projekt', 'uppgifter', 'aktiviteter'].forEach(function (s) { var sett = {}; (d[s] || []).forEach(function (x) { if (sett[x.id]) dubb++; sett[x.id] = 1; }); });
     var ogiltiga = d.affarer.filter(function (a) { return !isFinite(a.varde) || a.varde < 0; }).length + d.uppgifter.filter(function (t) { return t.forfaller && isNaN(Date.parse(t.forfaller)); }).length;
-    return { brott: brott.length, dubb: dubb, ogiltiga: ogiltiga, poang: Math.max(0, 100 - brott.length * 8 - dubb * 10 - ogiltiga * 6) };
+    var personer = dubblaPersoner();
+    return { brott: brott.length, dubb: dubb, personer: personer, ogiltiga: ogiltiga, poang: Math.max(0, 100 - brott.length * 8 - dubb * 10 - personer.length * 4 - ogiltiga * 6) };
   }
   function driftLage() {
     var fel = IH.sakHub ? IH.sakHub.fel : [], skriv = true;
@@ -105,6 +125,7 @@
     if (H) H.kontroller.forEach(function (k) { var r = H.hub().senast[k.id], hog = r ? r.fynd.filter(function (x) { return x.allvar === 'hog'; }) : []; if (hog.length) ut.push({ ikon: 'skold-larm', text: k.namn + ': fynd med hög allvarlighet', under: hog[0].text, lank: '#/sakerhet', knapp: 'Visa' }); });
     if (!IH.sak.utloggMin()) ut.push({ ikon: 'klocka', text: 'Utloggning vid inaktivitet är av', under: 'Datorer som lämnas olåsta loggas ut av sig själva', lank: '#/admin', knapp: 'Slå på' });
     if (!inst.kopia || IH.dagarSedan(inst.kopia) > 7) ut.push({ ikon: 'ladda-ner', text: inst.kopia ? 'Säkerhetskopian är ' + IH.dagarSedan(inst.kopia) + ' dagar gammal' : 'Ingen säkerhetskopia', under: 'Exportera all data som JSON', g: 'ad-exportera', knapp: 'Exportera data' });
+    if (dl.personer && dl.personer.length) ut.push({ ikon: 'kunder', text: plural(dl.personer.length, 'person finns', 'personer finns') + ' på flera kundkort', under: dl.personer.slice(0, 3).map(function (g) { return g.map(function (k) { return k.namn; }).join(' = '); }).join(', ') + ' – samma telefon eller e-post', g: 'kc-dubbla', knapp: 'Visa' });
     if (dl.brott) ut.push({ ikon: 'nyckelverktyg', text: plural(dl.brott, 'trasig koppling', 'trasiga kopplingar'), under: brott[0], g: 'sh-skanna-ga', data: 'buggar', knapp: 'Kontrollera' });
     if (dr.fel.length) ut.push({ ikon: 'bugg', text: plural(dr.fel.length, 'fel', 'fel') + ' sedan sidan laddades', under: 'Skript eller filer som inte fungerade', g: 'sh-skanna-ga', data: 'buggar', knapp: 'Kontrollera' });
     IH.ANVANDARE.filter(function (u) { return u.roll === 'salj' && !u.mal && !u.inaktiv; }).forEach(function (u) { ut.push({ ikon: 'mal', text: u.namn + ' saknar årsmål', under: 'Försäljningsledningen räknar mot målet', g: 'lp-mal', knapp: 'Sätt mål' }); });
@@ -136,7 +157,7 @@
     var nuN = IH.ANVANDARE.filter(aktivNu).length;
     var fyndAlla = H ? H.kontroller.reduce(function (t, k) { var r = S.senast[k.id]; return r ? t.concat(r.fynd) : t; }, []) : [];
     var fyndN = function (a) { return fyndAlla.filter(function (x) { return x.allvar === a; }).length; };
-    var h = new Date().getHours(), halsning = h < 5 ? 'God natt' : h < 10 ? 'God morgon' : h < 17 ? 'Hej' : 'God kväll';
+    var halsning = IH.halsning ? IH.halsning() : IH.hej();
     var SAML = [['Kunder', 'kunder'], ['Förfrågningar', 'forfragningar'], ['Affärer', 'affarer'], ['Offerter', 'offerter'], ['Projekt', 'projekt'], ['Händelser', 'aktiviteter'], ['Uppgifter', 'uppgifter'], ['Dokument', 'dokument'], ['Frånvaro', 'franvaro']];
     var antal = function (s) { return (d[s] || []).length; };
     var poster = SAML.reduce(function (t, s) { return t + antal(s[1]); }, 0);
@@ -201,7 +222,8 @@
     var maxS = Math.max.apply(null, SAML.map(function (s) { return antal(s[1]); }).concat([1]));
     var dataBand = band('03 · Data', 'Datan', 'och kopplingarna',
       lista([{ ikon: 'lank', namn: 'Kopplingar mellan posterna', lage: dl.brott ? 'medel' : 'ok', text: dl.brott ? plural(dl.brott, 'trasig', 'trasiga') : 'Alla hänger ihop' },
-        { ikon: 'databas', namn: 'Dubbletter', lage: dl.dubb ? 'medel' : 'ok', text: dl.dubb ? plural(dl.dubb, 'dubblett', 'dubbletter') : 'Inga' },
+        { ikon: 'databas', namn: 'Dubbla id:n', lage: dl.dubb ? 'medel' : 'ok', text: dl.dubb ? plural(dl.dubb, 'dubblett', 'dubbletter') : 'Inga' },
+        { ikon: 'kunder', namn: 'Samma person på flera kundkort', lage: dl.personer.length ? 'medel' : 'ok', text: dl.personer.length ? plural(dl.personer.length, 'möjlig dubblett', 'möjliga dubbletter') : 'Inga' },
         { ikon: 'kalkyl', namn: 'Ogiltiga värden', lage: dl.ogiltiga ? 'medel' : 'ok', text: dl.ogiltiga ? plural(dl.ogiltiga, 'ogiltigt', 'ogiltiga') : 'Inga' },
         { ikon: 'fingeravtryck', namn: 'Persondata på fel ställe', lage: lackaN == null ? 'ny' : lackaN ? 'medel' : 'ok', text: lackaN == null ? 'Inte kontrollerat' : lackaN ? plural(lackaN, 'fynd', 'fynd') : 'Inga fynd' }]) +
       '<ul class="ao-samlingar">' + SAML.map(function (s) { return '<li><span>' + s[0] + '</span><strong>' + antal(s[1]).toLocaleString('sv-SE') + '</strong><i style="--andel:' + (antal(s[1]) / maxS).toFixed(3) + '"></i></li>'; }).join('') + '</ul>' +
@@ -261,6 +283,24 @@
     el.dataset.saker = '1'; var s = el.querySelector('span') || el, gammal = s.textContent; s.textContent = 'Klicka igen för att bekräfta';
     setTimeout(function () { if (el.isConnected) { delete el.dataset.saker; s.textContent = gammal; } }, 4000);
     return false;
+  };
+  // Möjliga dubbletter: samma telefon eller e-post på flera kundkort. Slå ihop görs på kundkortet (säljarens sida),
+  // så administratören öppnar kortet i supportläget hos den säljare som har kunden.
+  G['kc-dubbla'] = function () {
+    var grupper = dubblaPersoner(), mig = IH.jag();
+    var agare = function (k) { var a = db().affarer.filter(function (x) { return x.kund === k.id && x.ansvarig; }).map(function (x) { return IH.anvandare(x.ansvarig); }).filter(function (u) { return u && !u.inaktiv && u.roll === 'salj'; })[0];
+      return a || IH.ANVANDARE.filter(function (u) { return u.roll === 'salj' && !u.inaktiv; })[0]; };
+    var lank = function (k) {
+      if (mig.roll !== 'admin') return '<a class="knapp knapp--liten" href="#/kunder/' + k.id + '">Öppna' + i('pil') + '</a>';
+      var u = agare(k); return u ? '<button type="button" class="knapp knapp--liten" data-g="visa-som" data-id="' + u.id + '" data-mal="#/kunder/' + k.id + '" title="Öppnar kundkortet i ' + e(u.namn) + 's konto (supportläget)">Öppna hos ' + e(u.namn.split(' ')[0]) + '</button>' : '';
+    };
+    var lika = function (g, k) { var t = telKarna(k.telefon), m = String(k.epost || '').trim().toLowerCase(), v = [];
+      if (t && g.some(function (x) { return x !== k && telKarna(x.telefon) === t; })) v.push('telefon'); if (m && g.some(function (x) { return x !== k && String(x.epost || '').trim().toLowerCase() === m; })) v.push('e-post'); return v; };
+    IH.oppnaArk({ titel: 'Samma person på flera kundkort', ikon: 'kunder', under: grupper.length ? plural(grupper.length, 'möjlig dubblett', 'möjliga dubbletter') + ' – samma telefonnummer eller e-post.' : 'Inga möjliga dubbletter.',
+      kropp: grupper.length ? '<ul class="kc-dubbla">' + grupper.map(function (g) {
+        return '<li><ul>' + g.map(function (k) { return '<li><span><b>' + e(k.namn) + '</b><small>' + e([k.telefon, k.epost, k.ort].filter(Boolean).join(' · ')) + (lika(g, k).length ? ' · lika ' + lika(g, k).join(' och ') : '') + '</small></span>' + lank(k) + '</li>'; }).join('') + '</ul></li>';
+      }).join('') + '</ul><p class="ad-not">Öppna ett av korten och välj Slå ihop med… där. Det är inte säkert att det är samma person – kontrollera först.</p>' : '<p class="ad-not">Inga kunder delar telefonnummer eller e-post.</p>',
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Stäng</button>' });
   };
   G['kc-csv'] = function () {
     if (!IH.kravAdmin()) return;

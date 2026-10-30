@@ -83,6 +83,18 @@
     const c = C(), m = senast(id); if (!m || (IH.visarSom && IH.visarSom())) return; // supportläget: inget blir läst åt säljaren
     c.last[jag()] = c.last[jag()] || {};
     if (!c.last[jag()][id] || c.last[jag()][id] < m.tid) { c.last[jag()][id] = m.tid; IH.spara(); IH.uppdateraMeny(); satTitel(); }
+    avisLast(id);
+  }
+  // Aviseringscentret (IH.avisera i app.js): en rad per konversation som uppdateras i stället för en per meddelande,
+  // och raden blir läst samtidigt som konversationen – klockan räknar alltså inte chattens olästa en gång till
+  const avisNyckel = (kid) => 'chatt:' + kid;
+  function avisLast(kid) {
+    if (!IH.avisera || typeof IH.avisera.las !== 'function' || (IH.visarSom && IH.visarSom())) return;
+    try { IH.avisera.las(avisNyckel(kid), jag()); } catch (x) { /* aviseringscentret saknas */ }
+  }
+  function avisera(rad) {
+    if (typeof IH.avisera !== 'function' || (IH.visarSom && IH.visarSom())) return;
+    try { IH.avisera(Object.assign({ till: jag() }, rad)); } catch (x) { /* aviseringscentret saknas */ }
   }
   function systemMedd(kid, text) { C().meddelanden.push({ id: nyId('s'), kanal: kid, av: jag(), tid: new Date().toISOString(), text, system: true }); }
 
@@ -150,7 +162,10 @@
   const MALLAR = [['Bekräfta platsbesök', 'Bekräftar platsbesöket {datum} kl. {tid}.'], ['Offerten är skickad', 'Offerten på {affär} är skickad.'],
     ['Be någon ringa', 'Kan du ringa {kund}? De har frågor om {ämne}.'], ['Grunden är gjuten', 'Grunden är gjuten – montaget kan bokas.'],
     ['Ta över en kund', 'Jag tar över {kund} från och med {datum}.'], ['Ny förfrågan', 'Ny förfrågan från {kund} – vem tar den?']];
-  const FALT = /\{(datum|tid|kund|affär|ämne)\}/;
+  const allaMallar = () => MALLAR.concat((Array.isArray(db().mallar) ? db().mallar : [])
+    .filter((m) => m && m.kanal === 'chatt' && typeof m.text === 'string' && m.text.trim())
+    .map((m) => [String(m.namn || 'Mall').slice(0, 60), m.text.slice(0, 2000)]));
+  const FALT = /\{([a-zåäö_]{2,20})\}/i;
   // Utkasten överlever en omladdning (per konto och konversation)
   (function () { const u = (pref().utkast || {})[IH.jag().id]; if (u && typeof u === 'object') Object.keys(u).forEach((k) => { if (typeof u[k] === 'string') ui.utkast[k] = u[k]; }); })();
   let utkastTimer = 0;
@@ -380,6 +395,11 @@
       if (t && t.length) ui.sokTrad = { kanal: k.id, q, aktiv: t[t.length - 1].id };
     }
     sidKanal = k.id; satPref('senast', k.id);
+    if (del[1]) {
+      const mm = meddelande(del[1]);
+      if (mm && mm.kanal === k.id && !mm.borttagen) ui.hoppa = mm.id;
+      try { history.replaceState(null, '', '#/chatt/' + k.id); } catch (x) { /* */ }
+    }
     html.setAttribute('data-chatt-sida', '');
     const n = olastaTotalt();
     const out = '<h1 class="dold">Meddelanden</h1><div class="ch' + (ui.info ? ' med-info' : '') + ' kort" data-in>' +
@@ -426,6 +446,7 @@
     const behall = aktivt && aktivt !== document.body && rot.contains(aktivt) && !aktivt.matches('[data-ch-skriv] textarea');
     if (ruta) { vaxa(ruta); if (!pek() && !behall && !ui.markerad) { ruta.focus({ preventScroll: true }); const l = ruta.value.length; ruta.setSelectionRange(l, l); } }
     if (ui.markerad) { const m = rot.querySelector('.ch-medd[data-mid="' + ui.markerad + '"]'); if (m && !behall) m.focus({ preventScroll: true }); }
+    if (ui.hoppa && t) { const mid = ui.hoppa; ui.hoppa = null; requestAnimationFrame(() => hoppaTill(rot, mid)); }
   }
   function ritaAllt() {
     if (/^#\/chatt/.test(location.hash)) IH.rita();
@@ -1188,7 +1209,7 @@
     d.uppgifter.push({ id, text: 'Påminnelse: ' + (klartext(m.text).replace(/\s+/g, ' ').trim().slice(0, 100) || 'meddelande från ' + fornamn(anv(m.av))), forfaller: nar.toISOString(), klar: false, kund: ka.kund, affar: ka.affar, ansvarig: jag(), av: jag(), chatt: { kanal: m.kanal, mid: m.id } });
     m.paminn[jag()] = { tid: nar.toISOString(), uppg: id };
     IH.spara(); ritaAllt(); IH.uppdateraMeny(); planeraPaminnelser();
-    IH.toast('Påminner ' + narText(nar.toISOString()), 'Syns i Att göra. Prototyp: ingen avisering när fliken är stängd.', 'klocka', { lank: '#/att-gora', knapp: 'Att göra' });
+    IH.toast('Påminner ' + narText(nar.toISOString()), 'Syns i Att göra och i aviseringarna – när CRM:et är öppet i den här webbläsaren.', 'klocka', { lank: '#/att-gora', knapp: 'Att göra' });
   };
   let pamTimer = 0;
   function planeraPaminnelser() {
@@ -1197,7 +1218,18 @@
     C().meddelanden.forEach((m) => {
       const p = m.paminn && m.paminn[jag()]; if (!p || p.visad) return;
       const t = new Date(p.tid).getTime(); if (!isFinite(t)) return;
-      if (t <= nu) { p.visad = true; andrad = true; IH.toast('Påminnelse', klartext(m.text).slice(0, 90) || 'Ett meddelande i chatten', 'klocka', { lank: '#/chatt/' + m.kanal, knapp: 'Visa', tid: 9000 }); }
+      if (t <= nu) {
+        p.visad = true; andrad = true;
+        const u = p.uppg && (db().uppgifter || []).filter((x) => x.id === p.uppg)[0];
+        if (u && (u.klar || u.larmat)) return; // klar redan, eller redan larmad av Att göra
+        if (u) u.larmat = new Date().toISOString();
+        const txt = klartext(m.text).replace(/\s+/g, ' ').trim().slice(0, 90) || 'Ett meddelande i chatten', lank = '#/chatt/' + m.kanal + '/' + m.id;
+        IH.toast('Påminnelse', txt, 'klocka', { lank, knapp: 'Visa', tid: 9000 });
+        avisera({ typ: 'paminnelse', rubrik: 'Påminnelse från chatten', text: txt, lank });
+        if (pref().avisera && document.visibilityState === 'hidden' && 'Notification' in window && Notification.permission === 'granted') {
+          try { const n = new Notification('Påminnelse', { body: txt, tag: 'pam-' + m.id, silent: true }); n.onclick = () => { focus(); location.hash = lank; n.close(); }; } catch (x) { /* */ }
+        }
+      }
       else nasta = Math.min(nasta, t);
     });
     if (andrad) { IH.spara(); ritaAllt(); }
@@ -1429,7 +1461,7 @@
   function visaMallar(r) {
     const box = r.closest('form').querySelector('[data-ch-mallar]'); if (!box) return;
     const m = /^\/(\S*)$/.exec(r.value), q = m ? m[1].toLowerCase() : '';
-    const l = m && !ui.andrar ? MALLAR.map((x, n) => ({ n, namn: x[0], text: x[1] })).filter((x) => (x.namn + ' ' + x.text).toLowerCase().indexOf(q) >= 0) : [];
+    const l = m && !ui.andrar ? allaMallar().map((x, n) => ({ n, namn: x[0], text: x[1] })).filter((x) => (x.namn + ' ' + x.text).toLowerCase().indexOf(q) >= 0) : [];
     if (!l.length) { ui.mallar = null; box.hidden = true; return; }
     const vald = ui.mallar ? Math.min(ui.mallar.vald, l.length - 1) : 0;
     ui.mallar = { lista: l, vald };
@@ -1437,9 +1469,9 @@
     box.innerHTML = '<p class="ch-mallar__rub">Mallar · <kbd>Enter</kbd> väljer</p>' + l.map((x, j) => '<button type="button" class="ch-mallar__val' + (j === vald ? ' vald' : '') + '" role="option" aria-selected="' + (j === vald) + '" data-ch-mall="' + x.n + '" tabindex="-1"><b>' + e(x.namn) + '</b><small>' + e(x.text) + '</small></button>').join('');
   }
   function valjMall(r, n) {
-    const x = MALLAR[n], f = r.closest('form'); if (!x) return;
+    const x = allaMallar()[n], f = r.closest('form'); if (!x) return;
     ui.mallar = null; f.querySelector('[data-ch-mallar]').hidden = true;
-    r.value = x[1]; ui.mall = true; vaxa(r); r.focus();
+    r.value = x[1].replace(/\{säljare\}/gi, IH.jag().namn); ui.mall = true; vaxa(r); r.focus();
     if (!nastaFalt(r)) { const l = r.value.length; r.setSelectionRange(l, l); }
     sparaUtkast(f.getAttribute('data-kanal'), r.value); tomLage(f);
   }
@@ -1450,7 +1482,7 @@
     const m = efter ? { 0: efter[0], 1: efter[1], index: efter.index + fran } : FALT.exec(r.value);
     if (!m) { ui.mall = false; if (hint) hint.hidden = true; return false; }
     r.focus();
-    if (m[1] === 'kund' || m[1] === 'affär') { r.value = r.value.slice(0, m.index) + '#' + r.value.slice(m.index + m[0].length); r.setSelectionRange(m.index + 1, m.index + 1); visaForslag(r); }
+    if (/^(kund|affär)$/i.test(m[1])) { r.value = r.value.slice(0, m.index) + '#' + r.value.slice(m.index + m[0].length); r.setSelectionRange(m.index + 1, m.index + 1); visaForslag(r); }
     else r.setSelectionRange(m.index, m.index + m[0].length);
     if (hint) { hint.hidden = false; hint.innerHTML = 'Fyll i <b>' + e(m[1]) + '</b> · <kbd>Tab</kbd> nästa fält'; }
     return true;
@@ -1591,6 +1623,16 @@
     // Tystade konversationer hörs bara när någon nämner dig
     const tillMig = franAndra.filter((m) => !tystad(m.kanal) || namnerMig(m));
     if (!tillMig.length) return;
+    const synsKanal = (kid) => document.visibilityState === 'visible' && ((/^#\/chatt/.test(location.hash) && sidKanal === kid) || (fl.oppen && !fl.min && fl.kanal === kid));
+    const perKanal = {};
+    tillMig.forEach((x) => { (perKanal[x.kanal] = perKanal[x.kanal] || []).push(x); });
+    Object.keys(perKanal).forEach((kid) => {
+      if (synsKanal(kid)) return;
+      const l = perKanal[kid], x = l[l.length - 1], kk = kanal(kid), mig = l.some(namnerMig);
+      avisera({ typ: mig ? 'omnamnande' : 'chatt', nyckel: avisNyckel(kid), lank: '#/chatt/' + kid + '/' + x.id,
+        rubrik: fornamn(anv(x.av)) + (mig ? ' nämnde dig' : '') + (kk.typ === 'privat' ? '' : ' i ' + kanalNamn(kk)),
+        text: (klartext(x.text).replace(/\s+/g, ' ').trim() || 'Skickade en fil').slice(0, 140) });
+    });
     const m = tillMig[tillMig.length - 1], u = anv(m.av), k = kanal(m.kanal);
     pling();
     const syns = (/^#\/chatt/.test(location.hash) && sidKanal === m.kanal) || (fl.oppen && !fl.min && fl.kanal === m.kanal);
@@ -1628,4 +1670,28 @@
     ritaFonster(); satTitel(); planeraPaminnelser();
   };
   setTimeout(() => { ritaFonster(); satTitel(); planeraPaminnelser(); }, 0);
+
+  /* 13 Sökpaletten: meddelanden i konversationer jag är med i (IH.sok.lagg i app.js) ----------- */
+  function sokMeddelanden(q) {
+    q = String(q || '').trim().toLowerCase();
+    if (q.length < 2 || (IH.sparrad && IH.sparrad('chatt'))) return [];
+    const ut = [];
+    kanaler().forEach((k) => {
+      const kn = kanalNamn(k).toLowerCase();
+      iKanal(k.id).forEach((m) => {
+        if (m.system || m.borttagen) return;
+        const t = klartext(m.text).replace(/\s+/g, ' ').trim(), u = anv(m.av);
+        if ((t + ' ' + u.namn + ' ' + kn).toLowerCase().indexOf(q) < 0) return;
+        ut.push({ m, k, t, u });
+      });
+    });
+    return ut.sort((a, b) => (a.m.tid < b.m.tid ? 1 : -1)).slice(0, 5).map((x) => {
+      const n = x.t.toLowerCase().indexOf(q), fran = n > 30 ? n - 24 : 0;
+      return { mal: 'ga:#/chatt/' + x.k.id + '/' + x.m.id, ikon: avatar(x.u, true),
+        rubrik: ((fran ? '…' : '') + x.t.slice(fran, fran + 90)) || (x.m.filer && x.m.filer.length ? 'Fil' : 'Meddelande'),
+        under: x.u.namn + (x.k.typ === 'privat' ? '' : ' · ' + kanalNamn(x.k)) + ' · ' + listTid(x.m.tid), typ: 'Meddelande' };
+    });
+  }
+  IH.chattSok = sokMeddelanden;
+  if (IH.sok && typeof IH.sok.lagg === 'function') { try { IH.sok.lagg('Chatt', sokMeddelanden); } catch (x) { /* paletten saknas */ } }
 })();

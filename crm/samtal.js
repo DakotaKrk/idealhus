@@ -67,7 +67,17 @@
     });
   }
 
-  /* ---------- signal (utbytbar) ---------- */
+  /* ---------- signal (utbytbar) ----------
+   * Det enda som behöver bytas när servern finns. Byt med IH.samtal.sattSignal(impl); allt annat (WebRTC,
+   * väntrum, chatt, delning, inspelning) går oförändrat över samma meddelanden. En signal är ett objekt med:
+   *   namn                    – kort namn, t.ex. 'flikar' (prototypen) eller 'server'. Annat än 'flikar' slår på STUN (TURN: IH.samtal.iceServrar).
+   *   anslut(rum, jag)        – går med i rummet (rumskoden). jag = { peer, namn, roll }. Returnerar ett Promise;
+   *                             avvisa med { kod, text } om det inte gick. Servern bör här kontrollera rätten till rummet.
+   *   skicka(till, typ, data) – till = en peer eller '*' (alla i rummet). typ är en av TYPER nedan, data ett litet objekt.
+   *   lyssna(fn)              – fn({ fran, till, typ, data }) för varje meddelande från någon annan; returnerar en avregistrering.
+   *                             Signalen måste själv kasta meddelanden med okänd typ eller ogiltig data (se giltigData).
+   *   lamna()                 – lämnar rummet och slutar lyssna (= stäng).
+   * Med servern ska värdkommandona (VARDKOMMANDON) godkännas där – här litar flikarna på varandra. */
   // Kontrollerar att ett meddelande följer schemat: korta strängar, begränsat djup. sdp får vara längre.
   function giltigData(v, djup, nyckel) {
     if (djup > 6) return false;

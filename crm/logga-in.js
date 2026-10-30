@@ -16,7 +16,8 @@
 
   // Hälsning och datum.
   var nu = new Date(), h = nu.getHours();
-  var halsning = h < 5 ? 'God kväll' : h < 10 ? 'God morgon' : h < 14 ? 'Hej' : h < 18 ? 'God eftermiddag' : 'God kväll';
+  // Samma regel som i CRM:et (IH.halsning i tema.js)
+  var halsning = window.IH && IH.halsning ? IH.halsning(nu) : h < 5 ? 'God kväll' : h < 10 ? 'God morgon' : h < 14 ? 'Hej' : h < 18 ? 'God eftermiddag' : 'God kväll';
   document.body.classList.add(h < 5 || h >= 22 ? 'li--natt' : h >= 18 ? 'li--kvall' : 'li--dag');
   var hEl = document.querySelector('[data-halsning]');
   var dEl = document.querySelector('[data-datum]');

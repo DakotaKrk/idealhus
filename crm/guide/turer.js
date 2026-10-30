@@ -31,6 +31,8 @@
   var baraMin = function () { return lage() === 'minimal'; };
   var baraFull = function () { return lage() === 'full'; };
 
+  // Klockan (aviseringarna): i sidomenyn, i toppraden eller i den infällda listen.
+  var KLOCKA = ['.sido .ih-klocka', '.topp .ih-klocka', '.sido-rals__klocka'];
   // Länken i menyn (dator) eller i mobilmenyn.
   function meny(vy) { return ['.sido__lank[data-vy="' + vy + '"]', '.mobilmeny [data-vy="' + vy + '"]']; }
   // Kortet (eller sektionen) vars rubrik innehåller texten.
@@ -99,9 +101,45 @@
         text: 'Kortet längst ned öppnar kontomenyn: din <b>status</b> (Online, I möte, Ute på tomt…), <b>Min profil</b>, <b>Byt konto</b>, <b>Tema</b>, <b>Layout</b> och <b>Logga ut</b>.' },
       { mal: ['.anv', '.topp__konto', '.mobilmeny [data-mer]'], rubrik: 'Layout: Minimal, Normal eller Full', placering: 'hoger',
         text: '<p>Välj hur mycket du vill se. <b>Minimal</b> visar bara det du jobbar med – tätt och lugnt, med chatten alltid nära. <b>Normal</b> är lagom och <b>Full</b> visar allt, med stora bildytor och 3D.</p><p>Byt i kontomenyn, under <b>Inställningar</b> eller med ' + CK + ' och skriv <b>Layout</b>. Inget försvinner – det som döljs i Minimal finns i Normal och Full.</p>' },
+      { mal: KLOCKA, rubrik: 'Aviseringar', placering: 'hoger',
+        text: 'Klockan samlar påminnelser för dina uppgifter, dagens sammanfattning och annat som rör dig. Siffran visar hur många som är olästa.' },
       { mal: '[data-sido-knapp]', rubrik: 'Mer plats', placering: 'hoger', om: function () { return window.innerWidth > 1100; },
         text: 'Fäll in menyn med knappen på kanten eller med <kbd>[</kbd> när du vill ha mer plats för tavlan eller kalendern.' },
       { rubrik: 'Guiderna finns alltid här', text: '<p>Knappen <b>?</b> vid menyn (eller tangenten <kbd>?</kbd>) öppnar alla guider: en för varje sida och flödena från förfrågan till överlämning.</p><p>Nästa guide går igenom Översikten.</p>' }
+    ]
+  });
+
+  // Teman och layout (tema.js, layout.js): Inställningar, kontomenyn, sökningen och den infällda menyn.
+  T.push({
+    id: 'utseende', grupp: 'start', vy: 'installningar-utseende', namn: 'Teman och layout', beskrivning: 'Sex teman, Följ systemet, Minimal/Normal/Full och den infällda menyn.', nasta: 'aviseringar',
+    steg: [
+      { sida: '#/installningar', mal: '.inst-tema', rubrik: 'Sex teman', fri: true, placering: 'vanster',
+        text: '<p><b>Original</b> (varm kräm och bärnsten), <b>Ljus</b>, <b>Mörk</b>, <b>Färgglad</b>, <b>Bygg</b> (betong, stål och varselgult) och <b>Office</b> (stramt och neutralt). <b>Följ systemet</b> växlar mellan Original och Mörk efter datorns läge.</p><p>Klicka på ett – det byter direkt och sparas för ditt konto i den här webbläsaren.</p>' },
+      { mal: '.inst-layout', rubrik: 'Tre layouter', fri: true, placering: 'vanster',
+        text: '<p><b>Minimal</b> visar bara det du jobbar med – tätt och lugnt. <b>Normal</b> ger överblick utan dekor. <b>Full</b> visar allt, med stora bildytor och 3D (förval).</p><p>Inget försvinner – det som döljs i Minimal finns i Normal och Full. Guiderna anpassar sig efter läget.</p>' },
+      { mal: ['.anv', '.topp__konto', '.mobilmeny [data-mer]'], rubrik: 'Snabbare: kontomenyn', vanta: true, efterKlick: 600, placering: 'hoger', om: function () { return window.innerWidth > 1100; },
+        text: 'Tema och layout finns också i kontomenyn. Klicka på ditt konto.' },
+      { mal: ['.km-tema', '.km-layout'], rubrik: 'Tema och layout i kontomenyn', placering: 'hoger', om: function () { return window.innerWidth > 1100; },
+        text: 'Färgproverna byter tema och knapparna under byter layout – utan att du lämnar sidan du står på.' },
+      { mal: ['.sido__sok', '.topp .sok'], rubrik: 'Eller sök', placering: 'hoger',
+        text: 'Tryck ' + CK + ' och skriv <b>tema</b> eller <b>layout</b> (till exempel <b>mörk</b> eller <b>minimal</b>) för att byta direkt.' },
+      { mal: '[data-sido-knapp]', rubrik: 'Fäll in menyn', placering: 'hoger', om: function () { return window.innerWidth > 1100; },
+        text: '<p>Knappen på kanten (eller <kbd>[</kbd>) fäller in menyn till en smal list med sidorna som ikoner, avdelade i grupper. Klockan för aviseringarna ligger längst ned i listen.</p><p>Sök, <b>Ny</b> och ditt konto flyttar då upp i toppraden.</p>' }
+    ]
+  });
+
+  // Aviseringarna (app.js): klockan, påminnelser som larmar, dagens sammanfattning och skrivbordsaviseringar.
+  T.push({
+    id: 'aviseringar', grupp: 'start', vy: 'oversikt-aviseringar', namn: 'Aviseringar och påminnelser', beskrivning: 'Klockan, påminnelser som larmar, dagens sammanfattning och skrivbordsaviseringar.', nasta: 'oversikt',
+    steg: [
+      { sida: '#/', mal: KLOCKA, rubrik: 'Klockan', vanta: true, efterKlick: 600, placering: 'hoger', text: 'Siffran på klockan visar olästa aviseringar. Klicka på den.' },
+      { mal: '.ark .avis-panel', rubrik: 'Det som rör dig', behallArk: true, placering: 'vanster',
+        text: '<p>Här hamnar <b>påminnelser</b> för dina uppgifter när tiden har passerat, <b>dagens sammanfattning</b> (första gången du öppnar CRM:et en dag: uppgifter i dag och offerter som går ut inom 7 dagar) och annat som rör dig.</p><p>Klicka på en rad för att öppna det den gäller. <b>Markera alla som lästa</b> och <b>Ta bort lästa</b> städar listan.</p>' },
+      { mal: '.ark .avis-val', rubrik: 'Skrivbordsaviseringar', behallArk: true, placering: 'vanster',
+        text: '<b>Slå på</b> så syns påminnelser och chatt även när fliken inte är framme. Webbläsaren frågar om lov första gången.' },
+      { mal: '.ark .avis-not', rubrik: 'När CRM:et är öppet', behallArk: true, placering: 'vanster',
+        text: 'Aviseringarna visas när CRM:et är öppet i den här webbläsaren. Aviseringar till telefonen eller när datorn är avstängd kräver en server och kommer när CRM:et sätts upp mot nätet.' },
+      { fore: function () { if (IH.stangArk) IH.stangArk(true); }, rubrik: 'Påminnelsen larmar', text: '<p>När en uppgift förfaller får du ett meddelande i CRM:et med <b>Klar</b>, <b>+1 h</b> och <b>Öppna</b>.</p><p>Påminnelser skapar du under <b>Att göra</b>, med <b>Påminn om 2 h</b> på en förfrågan eller med <b>Påminn mig</b> på ett chattmeddelande.</p>' }
     ]
   });
 
@@ -213,10 +251,11 @@
     rollText: 'Gäller säljare.',
     steg: [
       { sida: '#/offerter', mal: ['.offtopp__ord', '.offtopp'], rubrik: 'Offertläget', placering: 'hoger', text: 'Vad som väntar på svar, <b>träffsäkerheten</b> (andel godkända), <b>tid till ja</b> och godkänt värde. Staplarna visar offererat per vecka.' },
-      { mal: '.snartut', rubrik: 'Går ut snart', placering: 'vanster', text: 'Skickade offerter med tio dagar eller mindre kvar. <b>Följ upp</b> öppnar affären, <b>+14 d</b> förlänger giltigheten.' },
+      { mal: '.snartut', valfri: true, rubrik: 'Går ut snart', placering: 'vanster', text: 'Skickade offerter med tio dagar eller mindre kvar. <b>Följ upp</b> öppnar ett ark med Ring, SMS, Mejl och en uppföljning till Att göra. <b>+14 d</b> förlänger giltigheten.' },
+      { mal: '[data-g="offert-ny"]', valfri: true, rubrik: 'Ny offert', text: '<b>Ny offert</b> låter dig välja affär – öppna affärer utan offert står först – och skapar offerten. Finns också i sökningen: ' + CK + ' och <b>Ny offert</b>.' },
       { mal: '.offinsikt', om: inteMin, rubrik: 'Per hus och vanligaste posterna', placering: 'vanster', text: 'Vilka hus som offereras mest och vilka tillval som brukar komma med.' },
       { mal: '.kundverktyg', rubrik: 'Filter', text: 'Alla, Mina, Väntar på svar, Går ut snart, Godkända, Utkast och Avböjda. Sortera på senaste först, går ut först eller störst summa. Sök på kund eller nummer.' },
-      { mal: '.tabell--offert tbody tr', rubrik: 'En offert', text: 'Nummer, kund, summa, status och giltighet. <b>Följ upp i affären</b> och <b>Ny version</b> finns på raden.' },
+      { mal: '.tabell--offert tbody tr', rubrik: 'En offert', text: 'Nummer, kund, summa, status och giltighet. <b>Följ upp</b> och <b>Ny version</b> finns på raden.' },
       { mal: '.tabell--offert tbody tr', rubrik: 'Öppna offerten', vanta: true, efterKlick: 500, text: 'Klicka på raden för att öppna offerten.' },
       { sida: function () { return /^#\/offerter\/./.test(location.hash) ? location.hash : '#/offerter/' + ((db().offerter || [])[0] || {}).id; }, mal: '.vyhuvud', rubrik: 'Offerten', text: 'Nästa guide går igenom offertsidan.' }
     ]
@@ -227,7 +266,8 @@
     rollText: 'Gäller säljare.',
     fore: function (c) { c.offert = /^#\/offerter\/./.test(location.hash) ? location.hash.split('/')[2] : ((db().offerter || []).filter(function (o) { return o.status === 'skickad'; })[0] || (db().offerter || [])[0] || {}).id; },
     steg: [
-      { sida: function (c) { return '#/offerter/' + c.offert; }, mal: '.vyhuvud', rubrik: 'Offerten', text: 'Offertnumret (LH-år-nummer) och affären. <b>Skriv ut / PDF</b> ger dokumentet att skicka. Ett utkast markerar du som skickat med <b>Markera som skickad</b>, och en skickad offert som godkänd med <b>Kunden godkände</b>.' },
+      { sida: function (c) { return '#/offerter/' + c.offert; }, mal: '.vyhuvud', rubrik: 'Offerten', text: 'Offertnumret (LH-år-nummer) med länkar till affären och kunden. <b>Skriv ut / PDF</b> ger dokumentet att skicka, <b>Mejl eller SMS</b> öppnar en mall med kundens uppgifter ifyllda. Ett utkast skickar du med <b>Skicka offerten</b>.' },
+      { mal: '.off-svar', valfri: true, rubrik: 'Vad sa kunden?', text: 'En skickad offert väntar på svar: <b>Kunden godkände</b> (affären blir vunnen), <b>Kunden avböjde</b> (affären markeras som förlorad med orsak), <b>Följ upp</b>, <b>Förläng 14 d</b> eller <b>Ny version</b>. Efteråt visas utfallet och datumet här.' },
       { mal: '.ostatus', rubrik: 'Status och giltighet', text: 'Utkast → Skickad → Godkänd. Ringen visar hur många av de 30 dagarna som är kvar.' },
       { mal: '.off-not', rubrik: 'Redan skickad?', om: function () { return !!document.querySelector('.off-not'); }, text: 'Ändrar du en skickad offert ser kunden inte ändringen – skapa en <b>Ny version</b> och skicka den i stället. Den gamla markeras som ersatt.' },
       { mal: '.offertred', rubrik: 'Innehållet', placering: 'hoger', text: 'Välj hus överst. Ändra text, antal och pris på raderna – summan och affärens värde följer med direkt. Godkända offerter är låsta.' },
@@ -288,6 +328,22 @@
     ]
   });
 
+  // Videomöten överallt: sidan Videomöten, Nytt videomöte, chatten, gästen och väntrummet.
+  T.push({
+    id: 'videomoten', grupp: 'sida', vy: 'videomote', roller: ['salj'], namn: 'Videomöten', beskrivning: 'Alla möten, Starta nu, från chatten, gästens väg in och efter mötet.', nasta: 'presentation',
+    rollText: 'Gäller säljare – administratörskontot har inga kund- eller kollegamöten.',
+    steg: [
+      { sida: '#/mote', mal: '.komm__vm', rubrik: 'Videomötena finns under Kundmöte', text: '<b>Alla videomöten</b> öppnar listan och <b>Boka videomöte</b> bokar ett nytt. Knappen <b>Videomöte</b> finns också på kundkortet, affären och i kundlistan.' },
+      { sida: '#/videomote', mal: ['.vm-sidhuvud [data-g="vm-nytt"]', '.vm-sidhuvud [data-g="vm-boka"]', '.vm-sidhuvud'], rubrik: 'Nytt videomöte', text: '<b>Nytt videomöte</b> öppnar arket där du väljer deltagare och tid – eller trycker på <b>Starta nu</b> och går rakt in. Samma sak finns i sökningen: ' + CK + ' och skriv <b>videomöte</b>.' },
+      { mal: ['.vm-lista', '.vm-tomt'], rubrik: 'Kommande och senaste', text: 'Kommande möten har <b>Anslut</b>. Klicka på ett möte för att se när, värd, kund, affär och vilka som är bjudna – efter mötet också anteckningen och chatten.' },
+      { mal: '.vm-arlig', rubrik: 'Prototyp', text: 'Just nu fungerar videomötet mellan flikar i samma webbläsare. Mellan olika datorer behövs en liten signalväxel när CRM:et kommer ut på nätet – resten är detsamma.' },
+      { sida: '#/chatt', mal: '.ch-topp [data-g="vm-chatt-starta"]', valfri: true, rubrik: 'Från chatten', text: 'Kameran i konversationen startar ett möte med alla i den direkt. Kortet <b>Videomöte · pågår</b> med <b>Anslut</b> hamnar i tråden.' },
+      { rubrik: 'Kundens väg in', text: '<p>Kunden öppnar länken i Chrome, Edge eller Safari – utan konto. Hen skriver sitt namn, provar kamera och mikrofon, väljer bakgrund och klickar på <b>Be att få gå med</b>.</p><p>Du får aviseringen <b>X väntar i väntrummet</b> med <b>Släpp in</b>. Under <b>Deltagare</b> finns Släpp in alla, Neka och Lås mötet.</p>' },
+      { rubrik: 'I mötet', text: '<p><b>Dela skärm</b> eller <b>Dela innehåll</b>: presentationen, kalkylen (kan sparas som offert), husen i 3D, offerten och bilder. <b>Minimera</b> gör mötet till en liten ruta medan du använder CRM:et.</p><p>Bakgrundsoskärpa och bakgrundsbild räknas fram i datorn – inget skickas iväg.</p>' },
+      { rubrik: 'Efter mötet', text: 'Skriv vad ni kom fram till och nästa steg. <b>Spara i kundens historik</b> loggar mötet med längd och länken <b>Visa mötet</b>, och nästa steg blir en uppgift.' }
+    ]
+  });
+
   T.push({
     id: 'presentation', grupp: 'sida', vy: 'mote-presentation', roller: ['salj'], namn: 'Presentationen', beskrivning: 'Bildspelet för kunden, kalkylen och anteckningarna.', nasta: 'projekt',
     rollText: 'Gäller säljare.',
@@ -336,13 +392,34 @@
   });
 
   T.push({
-    id: 'chatt', grupp: 'sida', vy: 'chatt', namn: 'Meddelanden', beskrivning: 'Teamchatten, grupper, svar, reaktioner och filer.', nasta: 'profil',
+    id: 'chatt', grupp: 'sida', vy: 'chatt', namn: 'Meddelanden', beskrivning: 'Teamchatten, grupper, svar, reaktioner och filer.', nasta: 'chatt-verktyg',
     steg: [
       { sida: '#/chatt', mal: '.ch-lista', rubrik: 'Konversationerna', placering: 'hoger', text: 'Hela teamet, privata konversationer och grupper. Sök, starta en <b>Ny grupp</b> och se olästa och @-omnämnanden.' },
       { mal: '.ch-topp', rubrik: 'Konversationen', text: '<b>Sök</b> i konversationen (Ctrl+F), tysta den med bjällran, se <b>Om konversationen</b> (medlemmar, länkade kunder och affärer, delade filer, Simulera ett svar) eller öppna den i ett eget flytande fönster som följer med mellan sidorna.' },
       { mal: '.ch-topp [data-g="vm-chatt-starta"]', valfri: true, rubrik: 'Starta videomöte', text: 'Kameran startar ett videomöte med alla i konversationen direkt. Ett kort med <b>Anslut</b> hamnar i tråden så att kollegorna kan gå med.' },
       { mal: '.ch-trad', rubrik: 'Meddelandena', placering: 'vanster', text: 'Håll muspekaren över ett meddelande för att reagera eller <b>svara</b> med citat. <b>Mer</b> (eller högerklick) skapar en uppgift, påminner dig, fäster överst, markerar som oläst, kopierar, ändrar eller tar bort ditt eget. Klicka på en länkad kund eller affär för ett kort med fakta.' },
       { mal: '.ch-fot', rubrik: 'Skriv', fri: true, text: '<b>@</b> nämner en kollega, <b>#</b> länkar en kund eller affär, <b>/</b> först i rutan ger mallar. Bifoga eller dra in filer. <kbd>Enter</kbd> skickar, <kbd>Shift</kbd>+<kbd>Enter</kbd> ny rad, <kbd>' + PU + '</kbd> ändrar ditt senaste.' }
+    ]
+  });
+
+  // Chattens verktyg (chatt.js): meddelandets meny, sök i tråden, fästa, mallar, eget fönster och tangenterna.
+  function sistaMer() {
+    var l = document.querySelectorAll('#vy .ch-trad [data-g="ch-mer"]');
+    for (var n = l.length - 1; n >= 0; n--) if (l[n].getClientRects().length) return l[n];
+    return null;
+  }
+  T.push({
+    id: 'chatt-verktyg', grupp: 'sida', vy: 'chatt', namn: 'Chattens verktyg', beskrivning: 'Gör om ett meddelande till uppgift eller påminnelse, fäst, sök, mallar och tangenter.', nasta: 'profil',
+    steg: [
+      { sida: '#/chatt', mal: sistaMer, rubrik: 'Mer på ett meddelande', vanta: true, efterKlick: 500, text: 'Varje meddelande har knappen <b>Mer</b> (syns när du håller muspekaren över meddelandet). Högerklick ger samma meny. Klicka på den.' },
+      { mal: '.ch-meny', rubrik: 'Gör något av meddelandet', placering: 'vanster',
+        text: '<ul><li><b>Svara</b> (<kbd>R</kbd>) med citat</li><li><b>Skapa uppgift</b> (<kbd>T</kbd>) – hamnar under Att göra</li><li><b>Påminn mig</b> om 1 timme, i morgon 08:00 eller nästa måndag 08:00</li><li><b>Fäst</b> (<kbd>P</kbd>) överst i konversationen</li><li><b>Markera som oläst</b> (andras meddelanden)</li><li><b>Kopiera</b>, och för dina egna <b>Ändra</b> (<kbd>E</kbd>) och <b>Ta bort</b></li></ul>' },
+      { mal: '.ch-topp [data-g="ch-sok-tradoppna"]', rubrik: 'Sök i konversationen', vanta: true, efterKlick: 400, text: 'Klicka på förstoringsglaset (eller tryck <kbd>Ctrl</kbd>+<kbd>F</kbd> i chatten).' },
+      { mal: '.ch-sokrad', rubrik: 'Hitta ett gammalt meddelande', fri: true, fyll: { '.ch-sokrad input': 'offert' }, text: 'Skriv ett ord – träffarna markeras i tråden och räknaren visar till exempel <b>1 av 3</b>. Pilarna hoppar mellan träffarna.' },
+      { mal: '.ch-fast', valfri: true, rubrik: 'Fästa meddelanden', text: 'Fästa meddelanden ligger överst – högst tre per konversation. Det senast fästa syns, <b>+N</b> fäller ut resten. Klicka på ett för att hoppa dit i tråden.' },
+      { mal: '.ch-fot', rubrik: 'Mallar', fri: true, text: 'Skriv <b>/</b> först i rutan för mallarna: Bekräfta platsbesök, Offerten är skickad, Be någon ringa, Grunden är gjuten, Ta över en kund och Ny förfrågan. <kbd>Tab</kbd> hoppar till nästa fält i mallen. Egna chattmallar läggs till under <b>Inställningar</b> → Mallar.' },
+      { mal: '.ch-topp [data-g="chf-oppna"]', valfri: true, rubrik: 'Eget fönster', text: 'Öppna konversationen i ett flytande fönster som följer med när du byter sida. Knappen bredvid minimerar den till en ikon.' },
+      { rubrik: 'Tangenterna', text: '<ul><li><kbd>Ctrl</kbd>+<kbd>J</kbd> – nästa olästa konversation</li><li><kbd>' + PU + '</kbd> <kbd>↓</kbd> i tråden – flytta mellan meddelandena; <kbd>R</kbd> svara, <kbd>E</kbd> ändra, <kbd>P</kbd> fäst, <kbd>T</kbd> uppgift, <kbd>Enter</kbd> menyn</li><li><b>N nya meddelanden</b> nere i tråden tar dig till det senaste</li></ul>' }
     ]
   });
 
@@ -361,9 +438,11 @@
     id: 'installningar', grupp: 'sida', vy: 'installningar', namn: 'Inställningar och prislistan', beskrivning: 'Utseende, layout, priserna bakom varje offert och exempeldatan.', nasta: 'flode-ny-kund',
     steg: [
       { sida: '#/installningar', mal: ['.instopp', '.prisform'], rubrik: 'Priserna bakom varje offert', text: 'Prisspannet på husen, antal tillval och om prislistan är ändrad. Priserna i prototypen är exempelpriser.' },
+      { mal: ['.inst-tema', '.inst-layout'], valfri: true, rubrik: 'Utseende och layout', text: 'Sex teman och tre layouter – guiden <b>Teman och layout</b> går igenom dem.' },
+      { mal: '.inst-mallar', valfri: true, rubrik: 'Mallar för mejl och SMS', text: 'Skriv texten en gång – <b>{förnamn}</b>, offertnummer, summa och andra fält fylls i för varje kund. Mallarna används av svarsutkastet, offerten och <b>Mejl eller SMS</b> på kundkortet. Mallar med kanalen chatt dyker upp under <b>/</b> i chatten. CRM:et skickar inget självt – mallen öppnas i ditt eget mejl- eller SMS-program.' },
       { mal: '.prisform', rubrik: 'Husen', placering: 'hoger', text: 'Grundpriset per modell. Nya offerter och kalkylen i kundmötet räknar med det du sparar här.' },
       { mal: function () { var f = document.querySelectorAll('.prisform'); return f[1] || null; }, rubrik: 'Tillval och poster', placering: 'vanster', text: 'Frakt, montage, kranbil, ritningar, altan, kök och badrum, braskamin – posterna som läggs till i offerten.' },
-      { mal: '.installning__proto', rubrik: 'Allt sparas i den här webbläsaren', text: 'Prototypen sparar i den här webbläsaren. <b>Återställ exempeldata</b> (två klick) tar tillbaka allt som från början.' }
+      { mal: '.installning__proto', rubrik: 'Allt sparas i den här webbläsaren', text: 'Prototypen sparar i den här webbläsaren. Kunderna, förfrågningarna och priserna är exempel. Administratören kan <b>Återställ exempeldata</b> (två klick) för att ta tillbaka allt som från början.' }
     ]
   });
 
@@ -411,8 +490,9 @@
       { mal: medRubrik('.ao-band', 'Bör åtgärdas'), rubrik: 'Bör åtgärdas', text: 'Förslag med knappen direkt – samma som i Kontrollcentralen.' },
       { mal: medRubrik('.ao-band', 'Vem får göra vad'), om: inteMin, rubrik: 'Behörigheter', text: 'En tabell över vad Sälj, Chef, Produktion och Admin får göra.' },
       { mal: medRubrik('.ao-band', 'För den här webbläsaren'), rubrik: 'För den här webbläsaren', text: '<b>Logga ut vid inaktivitet</b> (Aldrig, 15 min, 30 min, en timme – en minut före visas en nedräkning), säkerhetskopia och systemrapport.' },
-      { mal: medRubrik('.ao-band', 'Data och system'), rubrik: 'Data och system', text: 'Antal poster, läge, version och lagring. <b>Exportera data</b>, <b>Importera</b> och <b>Återställ exempeldata</b>.' },
-      { mal: medRubrik('.ao-band', 'Granskning och ändringar'), rubrik: 'Säkerhetsloggen', text: 'Vem ändrade vad och när – filtrera på Allt, CRM, Konton, Support och Säkerhet.' }
+      { mal: medRubrik('.ao-band', 'Data och system'), rubrik: 'Data och system', text: 'Antal poster, läge, version och lagring. <b>Exportera data</b>, <b>Importera</b> och <b>Återställ exempeldata</b>. <b>Börja med tom data</b> inför skarp drift: exportera först och skriv TÖM – konton, prislista, mallar och inställningar behålls.' },
+      { mal: medRubrik('.ao-band', 'Kundregistret'), valfri: true, rubrik: 'Kundregistret och gallring', text: '<b>Egna kundfält</b> som säljarna fyller i på kundkortet, <b>förlustorsakerna</b> som visas när en affär förloras, och <b>gallring</b>: kunder utan aktivitet på ett antal månader (av som standard – ni bestämmer själva tiden), med Registerutdrag och Radera.' },
+      { mal: function () { return medRubrik('.ao-band', 'Säkerhetsloggen')() || medRubrik('.ao-band', 'Granskning och ändringar')(); }, rubrik: 'Säkerhetsloggen', text: 'Vem ändrade vad och när – filtrera på Allt, CRM, Konton, Support och Säkerhet.' }
     ]
   });
 
@@ -483,11 +563,13 @@
       { mal: '.offertlagg', rubrik: 'Lägg till ur prislistan', fri: true, fyll: { '[data-lagg]': 'altan' }, text: 'Välj ett tillval, t.ex. <b>Altan i trä, 12 m²</b>. Eller <b>Egen rad</b> för något som inte finns i listan.' },
       { mal: '.offertsumma', rubrik: 'Summan', text: 'Summan räknas om direkt och blir affärens nya värde på säljtavlan.' },
       { mal: '.dokyta', rubrik: 'Dokumentet', placering: 'vanster', text: 'Så här ser kunden offerten. <b>Skriv ut / PDF</b> sparar den som PDF att skicka.' },
-      { mal: '[data-g="offert-skicka"]', rubrik: 'Markera som skickad', vanta: true, efterKlick: 600, text: 'Har du skickat PDF:en? Klicka på <b>Markera som skickad</b>. Affären flyttas till <b>Offert skickad</b> och mejlet loggas.' },
+      { mal: '.vyhuvud [data-g="offert-skicka"]', rubrik: 'Skicka offerten', vanta: true, efterKlick: 600, text: 'Klicka på <b>Skicka offerten</b>.' },
+      { mal: '.ark [data-offmejl]', rubrik: 'Mejlet till kunden', behallArk: true, fri: true, placering: 'vanster', text: '<p>Ämne och följebrev är ifyllda med offertnummer, summa och giltighet – ändra fritt. Tre steg: <b>Skriv ut / PDF</b>, <b>Öppna i mejlprogrammet</b> och bifoga PDF:en, sedan <b>Markera som skickad</b>.</p><p>CRM:et skickar inget självt.</p>' },
+      { mal: '.ark__fot [data-g="offert-markera"]', rubrik: 'Markera som skickad', behallArk: true, vanta: true, efterKlick: 700, text: 'När mejlet har gått iväg: klicka på <b>Markera som skickad</b>. Affären flyttas till <b>Offert skickad</b> och en kopia av offerten sparas i dokumentarkivet.' },
       { mal: '.ostatus', rubrik: 'Skickad', text: 'Nu räknas giltigheten ned. Ringen blir varm när det är sju dagar kvar.' },
       { mal: '.off-not', rubrik: 'Behöver något ändras?', text: 'En skickad offert ändras inte – kunden har redan sin. Klicka på <b>Ny version</b>: en kopia skapas som du ändrar och skickar, den gamla markeras som ersatt.' },
-      { mal: '.vyhuvud [data-g="aff-vinn"]', rubrik: 'När kunden säger ja', text: '<b>Kunden godkände</b> gör affären vunnen och skapar projektet. Det går vi igenom i flödet <b>Från vunnen affär till överlämning</b>.' },
-      { sida: '#/offerter', mal: '.snartut', rubrik: 'Följ upp och förläng', placering: 'vanster', text: 'Under Offerter samlas de som går ut snart. <b>Följ upp</b> öppnar affären, <b>+14 d</b> förlänger giltigheten.' }
+      { mal: '.off-svar', rubrik: 'När kunden svarar', text: '<b>Kunden godkände</b> gör affären vunnen och skapar projektet – det går vi igenom i flödet <b>Från vunnen affär till överlämning</b>. <b>Kunden avböjde</b> markerar affären som förlorad med orsak.' },
+      { sida: '#/offerter', mal: ['.snartut:not(.snartut--tom)', '.tabell--offert', '.offtopp'], rubrik: 'Följ upp och förläng', placering: 'vanster', text: 'Under Offerter samlas de som går ut snart. <b>Följ upp</b> öppnar ett ark med Ring, SMS och Mejl, där du också lägger till en uppföljning under Att göra (förvalt i morgon). <b>+14 d</b> förlänger giltigheten.' }
     ]
   });
 

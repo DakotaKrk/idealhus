@@ -11,7 +11,7 @@
   var IH = window.IH = window.IH || {};
 
   IH.NYCKEL = 'ih-crm-v1';
-  IH.VERSION = 3; // 2: teamet och ansvarig säljare per affär · 3: kontona Ahmed, Sahand och Admin
+  IH.VERSION = 4; // 2: teamet och ansvarig säljare per affär · 3: kontona Ahmed, Sahand och Admin · 4: aviseringar, mallar, taggar, egna fält, förväntat avslut, upprepade uppgifter
 
   /* --- Husen (samma som _modeller.py) ------------------------------ */
   IH.MODELLER = [
@@ -53,6 +53,47 @@
     return null;
   };
   IH.FORLUST = ['Priset', 'Valde annan leverantör', 'Fick inte bygglov', 'Projektet skjuts upp', 'Tomten passade inte', 'Annat'];
+
+  /* --- Mallar för mejl, SMS och chatt (exempel, ändras under Inställningar) ---
+     Fälten {förnamn}, {namn}, {offertnummer}, {summa}, {giltig_till} och {säljare} fylls i när mallen används.
+     syfte säger var mallen föreslås: forfragan, offert-skicka, offert-folj-upp, tack (tomt = bara i listan).
+     Texterna lovar inget och nämner inga priser – de är exempel som verksamheten skriver om. */
+  IH.MALLAR_START = [
+    { id: 'mall-svar-forfragan', namn: 'Svar på förfrågan (exempel)', kanal: 'mejl', syfte: 'forfragan', amne: 'Tack för din förfrågan',
+      text: 'Hej {förnamn}!\n\nTack för att du hörde av dig. Jag har läst din förfrågan och vill gärna höra mer om vad du har tänkt dig. När passar det att jag ringer?\n\nVänliga hälsningar\n{säljare}', exempel: true },
+    { id: 'mall-offert', namn: 'Offert (exempel)', kanal: 'mejl', syfte: 'offert-skicka', amne: 'Offert {offertnummer}',
+      text: 'Hej {förnamn}!\n\nHär kommer offert {offertnummer} på totalt {summa}. Offerten gäller till {giltig_till}.\n\nHör av dig om du har frågor eller vill ändra något.\n\nVänliga hälsningar\n{säljare}', exempel: true },
+    { id: 'mall-offert-folj', namn: 'Uppföljning av offert (exempel)', kanal: 'mejl', syfte: 'offert-folj-upp', amne: 'Offert {offertnummer}',
+      text: 'Hej {förnamn}!\n\nJag ville höra hur du tänker kring offert {offertnummer}. Den gäller till {giltig_till}. Har du frågor går det bra att svara på det här mejlet eller ringa mig.\n\nVänliga hälsningar\n{säljare}', exempel: true },
+    { id: 'mall-sms-folj', namn: 'Kort uppföljning per SMS (exempel)', kanal: 'sms', syfte: 'offert-folj-upp', amne: '',
+      text: 'Hej {förnamn}! Jag ville höra hur du tänker kring offert {offertnummer}. Hör gärna av dig. /{säljare}', exempel: true },
+    { id: 'mall-tack', namn: 'Tack för ordern (exempel)', kanal: 'mejl', syfte: 'tack', amne: 'Tack för din beställning',
+      text: 'Hej {förnamn}!\n\nTack för att du valde oss. Jag hör av mig om nästa steg.\n\nVänliga hälsningar\n{säljare}', exempel: true },
+    { id: 'mall-chatt-status', namn: 'Fråga om läget (exempel)', kanal: 'chatt', syfte: '', amne: '',
+      text: 'Hej! Hur går det med {namn}?', exempel: true }
+  ];
+
+  // Fälten som version 4 lade till. Körs på exempeldatan, på uppgraderad data och på importerad data –
+  // det som redan finns behålls, bara det som saknas fylls i.
+  IH.fyllStandard = function (db) {
+    var lista = function (n) { if (!Array.isArray(db[n])) db[n] = []; return db[n]; };
+    lista('kunder').forEach(function (k) {
+      if (!k || typeof k !== 'object') return;
+      if (!Array.isArray(k.taggar)) k.taggar = [];
+      if (!k.falt || typeof k.falt !== 'object' || Array.isArray(k.falt)) k.falt = {};
+    });
+    lista('affarer').forEach(function (a) { if (a && typeof a === 'object' && a.forvantat === undefined) a.forvantat = null; });
+    lista('uppgifter').forEach(function (u) { if (u && typeof u === 'object' && !/^(vecka|14d|manad)$/.test(u.upprepa || '')) u.upprepa = null; });
+    lista('aviseringar');
+    if (!Array.isArray(db.mallar)) db.mallar = JSON.parse(JSON.stringify(IH.MALLAR_START));
+    db.mallar.forEach(function (m) { if (m && typeof m === 'object' && typeof m.syfte !== 'string') m.syfte = ''; });
+    var inst = db.installningar && typeof db.installningar === 'object' && !Array.isArray(db.installningar) ? db.installningar : {};
+    if (!Array.isArray(inst.egnaFalt)) inst.egnaFalt = [];
+    if (inst.gallringManader === undefined || (inst.gallringManader !== null && !(+inst.gallringManader > 0))) inst.gallringManader = null;
+    if (!Array.isArray(inst.forlustorsaker) || !inst.forlustorsaker.length) inst.forlustorsaker = IH.FORLUST.slice();
+    db.installningar = inst;
+    return db;
+  };
 
   /* --- Produktionsflödet (ur Så fungerar det, steg 3–7) -------------- */
   IH.PROJSTEG = [
@@ -187,7 +228,9 @@
         id: nid('affar', 'a'), kund: k.id, titel: a[5], modell: a[1], varde: a[3],
         steg: a[2] === 'forlorad' ? 'offert' : a[2], forlorad: a[2] === 'forlorad' ? { orsak: 'Tomten passade inte', tid: dagar(a[4] + 6) } : null,
         skapad: dagar(a[4] - 6), andrad: dagar(a[4] + (a[2] === 'vunnen' ? 2 : 0)),
-        ansvarig: ['ah', 'sa'][i % 2], vunnen: a[2] === 'vunnen' ? dagar(a[4] + 2) : null
+        ansvarig: ['ah', 'sa'][i % 2], vunnen: a[2] === 'vunnen' ? dagar(a[4] + 2) : null,
+        // Förväntat avslut (exempel) på de öppna affärerna som kommit en bit
+        forvantat: /^(besok|offert|forhandling)$/.test(a[2]) ? dagar(14 + i * 9) : null
       };
       db.affarer.push(aff);
       // Förfrågan som blev affären.
@@ -239,7 +282,7 @@
     uppg(1, 'Skicka reviderad offert till Anna Forsberg', 'k8', 'a4');
     uppg(3, 'Platsbesök hos Johan Berg', 'k5', 'a2');
     uppg(-1, 'Boka montage med kranbil', 'k14', 'a9', true);
-    return db;
+    return IH.fyllStandard(db);
   };
 
   /* --- Hjälpare ------------------------------------------------------- */

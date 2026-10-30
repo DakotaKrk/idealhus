@@ -26,6 +26,8 @@
       lopnr[t[0]] = Math.max(+lopnr[t[0]] || 0, hogst(ny[t[1]]));
     });
     ny.lopnr = lopnr;
+    // Version 4: aviseringar, mallar, taggar, egna fält, förväntat avslut och upprepning (data.js)
+    if (IH.fyllStandard) IH.fyllStandard(ny);
     return ny;
   };
   function ladda(franFlik) {
@@ -51,6 +53,8 @@
       } else db = IH.skapaExempeldata();
       try { localStorage.setItem(IH.NYCKEL, JSON.stringify(db)); } catch (e) { /* privat läge */ }
     }
+    // Fält som saknas (t.ex. i data som sparats mitt i ett byte) fylls i – inget skrivs över
+    if (IH.fyllStandard) IH.fyllStandard(db);
     // Namnbytet till Legohus: sparade offertnummer börjar på LH i stället för IH.
     (db.offerter || []).forEach(function (o) { if (/^IH-/.test(o.nummer || '')) o.nummer = 'LH-' + o.nummer.slice(3); });
     return db;
@@ -79,7 +83,7 @@
   };
   // En annan flik ändrade – läs om och rita om.
   window.addEventListener('storage', function (e) {
-    if (e.key === IH.NYCKEL) { var ny = ladda(true); if (ny) { IH.db = ny; rita(); } }
+    if (e.key === IH.NYCKEL) { var ny = ladda(true); if (ny) { IH.db = ny; IH.uppdateraMeny(); avisPanelRita(); rita(); } }
     if (e.key === 'ih-crm-inloggad' && !e.newValue) location.replace('logga-in.html');
     // Kontobyte eller supportläge i en annan flik: ladda om, så att alla flikar visar samma konto och roll
     if ((e.key === 'ih-crm-jag' || e.key === 'ih-crm-visa-som') && e.newValue !== e.oldValue) location.reload();
@@ -187,10 +191,13 @@
     return String(namn || '?').replace(/ (AB|ek\. förening)$/i, '').split(/\s+/).map(function (d) { return d.charAt(0); })
       .slice(0, 2).join('').toUpperCase();
   };
-  IH.hej = function () {
-    var h = new Date().getHours();
+  // Hälsningen (översikten, kontrollcentralen och inloggningen): IH.halsning(d) finns i tema.js, som både
+  // CRM:et och inloggningen laddar – samma regler överallt. Reserven här om tema.js inte laddats.
+  if (!IH.halsning) IH.halsning = function (d) {
+    var h = (d instanceof Date ? d : new Date()).getHours();
     return h < 5 ? 'God kväll' : h < 10 ? 'God morgon' : h < 14 ? 'Hej' : h < 18 ? 'God eftermiddag' : 'God kväll';
   };
+  IH.hej = function (d) { return IH.halsning(d); };
   IH.dagStr = function (d) {
     d = d ? new Date(d) : new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -295,12 +302,17 @@
     var t = document.createElement('div');
     // Fel och varningar ser inte ut som bekräftelser (val.typ eller ikonen avgör)
     var typ = val.typ || (/^(varning|stang|las|oga-av|papperskorg)$/.test(ikon || '') ? 'fel' : !ikon || ikon === 'bock' ? 'ok' : 'info');
-    t.className = 'toast toast--' + typ;
+    var knappar = Array.isArray(val.knappar) ? val.knappar.filter(function (k) { return k && k.text; }) : [];
+    t.className = 'toast toast--' + typ + (knappar.length > 1 ? ' toast--flera' : '');
     t.setAttribute('role', 'status');
     t.style.setProperty('--tid', tid + 'ms');
     t.innerHTML = '<span class="toast__ikon">' + IH.i(ikon || 'bock') + '</span><span class="toast__text"><b>' + IH.e(rubrik) + '</b>' +
       (text ? '<small>' + IH.e(text) + '</small>' : '') + '</span>' +
       (val.lank ? '<a class="toast__knapp" href="' + IH.e(val.lank) + '">' + IH.e(val.knapp || 'Öppna') + '</a>' : '') +
+      // val.knappar: [{ text, gor }] – knappar som kör något (Ångra, Klar, +1 h …); flera knappar läggs på en egen rad
+      (knappar.length ? (knappar.length > 1 ? '<span class="toast__knappar">' : '') + knappar.map(function (k, n) {
+        return '<button type="button" class="toast__knapp' + (n ? ' toast__knapp--sek' : '') + '" data-toast-knapp="' + n + '">' + IH.e(k.text) + '</button>';
+      }).join('') + (knappar.length > 1 ? '</span>' : '') : '') +
       '<i class="toast__tid"></i>';
     yta.appendChild(t);
     var borta = false;
@@ -316,7 +328,12 @@
         { height: '0px', marginTop: '-8px', paddingTop: '0px', paddingBottom: '0px' }], { duration: 240, delay: 70, easing: 'cubic-bezier(.23,1,.32,1)', fill: 'forwards' }).onfinish = function () { t.remove(); };
     };
     var timer = setTimeout(bort, tid);
-    t.addEventListener('click', function () { clearTimeout(timer); bort(); });
+    t.addEventListener('click', function (ev) {
+      var b = ev.target.closest && ev.target.closest('[data-toast-knapp]');
+      clearTimeout(timer); bort();
+      var k = b ? knappar[+b.getAttribute('data-toast-knapp')] : null;
+      if (k && typeof k.gor === 'function') k.gor();
+    });
     t.addEventListener('mouseenter', function () { clearTimeout(timer); t.classList.add('vilar'); });
     t.addEventListener('mouseleave', function () { t.classList.remove('vilar'); timer = setTimeout(bort, 1800); });
     return t;
@@ -359,6 +376,245 @@
       lager.appendChild(b);
     }
     setTimeout(function () { lager.remove(); }, 1900);
+  };
+
+  /* --- Gemensamma verktyg: ångra, CSV, aviseringar, sparade filter, sökgrupper (steg 11) ---------------
+     Andra moduler anropar dem med en reserv (if (IH.angra) …), så att inget går sönder om något saknas. */
+
+  // Ångra: en toast med knappen Ångra i 8 s. aterstall() lägger tillbaka det som togs bort; sedan sparas och ritas allt om.
+  IH.angra = function (rubrik, text, aterstall) {
+    var gjort = false;
+    return IH.toast(rubrik, text, 'aterstall', { typ: 'info', tid: 8000, knappar: [{ text: 'Ångra', gor: function () {
+      if (gjort || typeof aterstall !== 'function') return;
+      gjort = true;
+      try { aterstall(); } catch (e) {
+        IH.toast('Det gick inte att ångra', 'Ladda om sidan och kontrollera att allt finns kvar.', 'varning');
+        return;
+      }
+      IH.spara();
+      IH.uppdateraMeny();
+      rita();
+      IH.toast('Ångrat', rubrik, 'aterstall');
+    } }] });
+  };
+
+  // CSV: semikolon och BOM (Excel på svenska öppnar då filen rätt), och formelskydd: en text som börjar med
+  // = + - @ eller tabb får en apostrof först, så att Excel visar den som text i stället för att räkna den.
+  var CSV_FORMEL = /^[=+\-@\t\r]/;
+  function csvCell(x) {
+    var s = String(x == null ? '' : x);
+    if (typeof x !== 'number' && CSV_FORMEL.test(s)) s = "'" + s;
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  IH.csv = {
+    // kolumner: ['Rubrik', …] med rader som listor, eller [{ rubrik, falt }] med rader som objekt
+    text: function (kolumner, rader) {
+      kolumner = kolumner || [];
+      var rubriker = kolumner.map(function (k) { return k && typeof k === 'object' ? k.rubrik || k.namn || k.falt : k; });
+      var ut = [rubriker.map(csvCell).join(';')];
+      (rader || []).forEach(function (r) {
+        var celler = Array.isArray(r) ? r : kolumner.map(function (k) { var f = k && typeof k === 'object' ? k.falt || k.nyckel : k; return r ? r[f] : ''; });
+        ut.push(celler.map(csvCell).join(';'));
+      });
+      return '﻿' + ut.join('\r\n');
+    },
+    ladda: function (filnamn, kolumner, rader) {
+      var namn = String(filnamn || 'export').replace(/[\\/:*?"<>|]+/g, '-');
+      if (!/\.csv$/i.test(namn)) namn += '.csv';
+      var url = URL.createObjectURL(new Blob([IH.csv.text(kolumner, rader)], { type: 'text/csv;charset=utf-8' }));
+      var a = document.createElement('a');
+      a.href = url; a.download = namn; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      return namn;
+    },
+    // Tolkar CSV-text: citattecken, "" inne i fält, radbrytningar i fält, ; , eller tabb som avgränsare
+    tolka: function (text) {
+      text = String(text || '').replace(/^﻿/, '');
+      var forsta = '', ic = false;
+      for (var p = 0; p < text.length; p++) { var ch = text[p]; if (ch === '"') ic = !ic; else if (!ic && (ch === '\n' || ch === '\r')) break; forsta += ic ? '' : ch; }
+      var rakna = function (c) { return forsta.split(c).length - 1; };
+      var avg = [';', ',', '\t'].reduce(function (b, c) { return rakna(c) > rakna(b) ? c : b; }, ';');
+      var rader = [], rad = [], falt = '', inne = false, i = 0, n = text.length, harText = false;
+      while (i < n) {
+        var c = text[i];
+        if (inne) {
+          if (c === '"') { if (text[i + 1] === '"') { falt += '"'; i += 2; continue; } inne = false; i++; continue; }
+          falt += c; i++; continue;
+        }
+        if (c === '"' && falt === '') { inne = true; harText = true; i++; continue; }
+        if (c === avg) { rad.push(falt); falt = ''; harText = true; i++; continue; }
+        if (c === '\r' || c === '\n') {
+          rad.push(falt); falt = '';
+          if (harText || rad.length > 1 || rad[0] !== '') rader.push(rad);
+          rad = []; harText = false;
+          i += c === '\r' && text[i + 1] === '\n' ? 2 : 1; continue;
+        }
+        falt += c; harText = true; i++;
+      }
+      if (falt !== '' || rad.length) { rad.push(falt); rader.push(rad); }
+      return { avgransare: avg, rader: rader, oavslutad: inne };
+    },
+    // Läser en fil: { kolumner, rader (objekt per kolumnnamn), varningar }. Filreglerna (filregler.js) granskar
+    // innehållet först – en fil med formler som kör program tas inte emot. Formler i celler görs om till text.
+    las: function (fil) {
+      return new Promise(function (klar, fel) {
+        if (!fil) { fel(new Error('Ingen fil vald.')); return; }
+        if (fil.size > 5 * 1024 * 1024) { fel(new Error('Filen är större än 5 MB. Dela upp den i mindre filer.')); return; }
+        var r = new FileReader();
+        r.onerror = function () { fel(new Error('Filen gick inte att läsa.')); };
+        r.onload = function () {
+          var bytes = new Uint8Array(r.result), varningar = [];
+          var FR = window.IHFilregler;
+          if (FR && FR.granska) {
+            var g = FR.granska({ namn: fil.name || 'fil.csv', typ: 'text/csv', bytes: bytes });
+            var stopp = g.fynd.filter(function (x) { return x.allvar === 'blockera'; });
+            if (stopp.length) { fel(new Error(stopp.map(function (x) { return x.text; }).join('. '))); return; }
+            g.fynd.forEach(function (x) { varningar.push(x.text); });
+          }
+          var text;
+          try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); } catch (e) {
+            // Excel på Windows sparar ofta CSV i Windows-1252 (ANSI) – då läses den så, med en upplysning
+            try { text = new TextDecoder('windows-1252').decode(bytes); varningar.push('Filen var inte UTF-8 och lästes som Windows-1252 (Excel). Kontrollera å, ä och ö i förhandsvisningen.'); }
+            catch (e2) { fel(new Error('Filens teckenkodning gick inte att läsa.')); return; }
+          }
+          var t = IH.csv.tolka(text);
+          if (t.oavslutad) varningar.push('Ett citattecken avslutas aldrig – sista raden kan vara ofullständig.');
+          if (!t.rader.length) { fel(new Error('Filen är tom.')); return; }
+          var sett = {};
+          var kolumner = t.rader[0].map(function (k, n) {
+            var namn = String(k || '').trim() || 'Kolumn ' + (n + 1);
+            if (sett[namn]) namn += ' (' + (n + 1) + ')';
+            sett[namn] = 1;
+            return namn;
+          });
+          var formler = 0;
+          var rader = t.rader.slice(1).map(function (celler, rn) {
+            var o = {};
+            if (celler.length !== kolumner.length) varningar.push('Rad ' + (rn + 2) + ' har ' + celler.length + ' fält men rubrikraden ' + kolumner.length + '.');
+            kolumner.forEach(function (k, n) {
+              var v = String(celler[n] == null ? '' : celler[n]).trim();
+              // =, @ eller + och - följt av en bokstav/parentes ser ut som en formel (ett telefonnummer som +46 … gör det inte)
+              if (/^[=@]|^[+\-]\s*[A-Za-zÅÄÖåäö_(]/.test(v)) { v = "'" + v; formler++; }
+              o[k] = v;
+            });
+            return o;
+          });
+          if (formler) varningar.push(formler + (formler === 1 ? ' cell såg ut som en formel och sparas' : ' celler såg ut som formler och sparas') + ' som text (med en apostrof först).');
+          klar({ kolumner: kolumner, rader: rader, varningar: varningar, avgransare: t.avgransare });
+        };
+        r.readAsArrayBuffer(fil);
+      });
+    }
+  };
+
+  // Aviseringar: rader i db.aviseringar per person. Klockan i menyn/toppraden räknar de olästa. Allt finns bara
+  // i den här webbläsaren – det står i panelen (aviseringar mellan datorer kräver server).
+  var AVIS_MAX = 300;
+  function avisLista() { if (!Array.isArray(IH.db.aviseringar)) IH.db.aviseringar = []; return IH.db.aviseringar; }
+  IH.avisera = function (o) {
+    o = o || {};
+    var lista = avisLista(), till = o.till || IH.jag().id, nu = new Date().toISOString();
+    var lank = typeof o.lank === 'string' && /^#\/[^\s"'<>]*$/.test(o.lank) ? o.lank : null;
+    var rubrik = String(o.rubrik || '').slice(0, 200), text = String(o.text || '').slice(0, 400), rad = null;
+    // Samma nyckel (t.ex. en chattkonversation) slås ihop med en oläst rad i stället för en ny rad per händelse
+    if (o.nyckel) rad = lista.filter(function (x) { return x.till === till && x.nyckel === o.nyckel && !x.last; })[0] || null;
+    if (rad) { rad.rubrik = rubrik; rad.text = text; rad.lank = lank; rad.tid = nu; rad.antal = (rad.antal || 1) + 1; if (o.typ) rad.typ = o.typ; }
+    else {
+      rad = { id: 'av' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), till: till, typ: o.typ || 'info', rubrik: rubrik, text: text,
+        lank: lank, tid: nu, last: false, nyckel: o.nyckel || null, antal: 1, av: IH.jag().id };
+      lista.push(rad);
+      // Taket: de äldsta lästa går först, sedan de äldsta
+      while (lista.length > AVIS_MAX) {
+        var n = lista.findIndex(function (x) { return x.last; });
+        lista.splice(n >= 0 ? n : 0, 1);
+      }
+    }
+    if (o.spara !== false) IH.spara();
+    IH.uppdateraMeny();
+    avisPanelRita();
+    if (o.skrivbord && till === IH.jag().id) skrivbord(rubrik, text, lank, rad.nyckel || rad.id);
+    return rad;
+  };
+  IH.avisera.lista = function (till) {
+    till = till || IH.jag().id;
+    return avisLista().filter(function (x) { return x && x.till === till; }).sort(function (a, b) { return a.tid < b.tid ? 1 : a.tid > b.tid ? -1 : 0; });
+  };
+  IH.avisera.olasta = function (till) { return IH.avisera.lista(till).filter(function (x) { return !x.last; }).length; };
+  // Markerar olästa rader med en viss nyckel som lästa (chatten när en konversation läses)
+  IH.avisera.las = function (nyckel, till) {
+    till = till || IH.jag().id;
+    var andrat = false;
+    avisLista().forEach(function (x) { if (x.till === till && x.nyckel === nyckel && !x.last) { x.last = true; andrat = true; } });
+    if (andrat) { IH.spara(); IH.uppdateraMeny(); avisPanelRita(); }
+    return andrat;
+  };
+  // Skrivbordsaviseringar: samma val och behörighet som chatten (ih-crm-chatt → avisera), så att det finns ett enda val
+  var CHATT_PREF = 'ih-crm-chatt';
+  function chattPref() { try { return JSON.parse(localStorage.getItem(CHATT_PREF)) || {}; } catch (e) { return {}; } }
+  IH.avisera.skrivbordStod = function () { return 'Notification' in window; };
+  IH.avisera.skrivbordPa = function () { return IH.avisera.skrivbordStod() && Notification.permission === 'granted' && !!chattPref().avisera; };
+  IH.avisera.sattSkrivbord = function (pa) {
+    var p = chattPref(); p.avisera = !!pa;
+    try { localStorage.setItem(CHATT_PREF, JSON.stringify(p)); } catch (e) { /* privat läge */ }
+  };
+  function skrivbord(rubrik, text, lank, tagg) {
+    // Bara när fliken inte syns eller inte har fokus – annars räcker toasten och klockan
+    if (!IH.avisera.skrivbordPa() || (document.visibilityState === 'visible' && document.hasFocus())) return;
+    try {
+      var n = new Notification(rubrik, { body: text || '', tag: 'ih-' + (tagg || ''), icon: '../images/legohus.svg' });
+      n.onclick = function () { try { window.focus(); } catch (e) { /* */ } if (lank) IH.ga(lank); n.close(); };
+    } catch (e) { /* t.ex. Android kräver en service worker – klockan och toasten finns ändå */ }
+  }
+  IH.avisera.skrivbord = skrivbord;
+
+  // Sparade filter per användare och vy (localStorage, aldrig i den delade datan). Högst 20 per vy.
+  var FILTER_MAX = 20;
+  function filterNyckel() { return 'ih-crm-filter:' + (IH.jag().id || 'gast'); }
+  function filterAlla() { try { var o = JSON.parse(localStorage.getItem(filterNyckel())); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch (e) { return {}; } }
+  function filterSkriv(o) { try { localStorage.setItem(filterNyckel(), JSON.stringify(o)); return true; } catch (e) { return false; } }
+  IH.filter = {
+    MAX: FILTER_MAX,
+    lista: function (vy) { var l = filterAlla()[vy]; return Array.isArray(l) ? l.filter(function (x) { return x && x.id; }) : []; },
+    // Returnerar det sparade filtret, eller null (fullt, tomt namn eller lagringen går inte att skriva)
+    spara: function (vy, namn, data) {
+      namn = String(namn || '').trim().slice(0, 40);
+      if (!vy || !namn) return null;
+      var alla = filterAlla(), l = Array.isArray(alla[vy]) ? alla[vy] : [];
+      var samma = l.filter(function (x) { return x.namn.toLowerCase() === namn.toLowerCase(); })[0];
+      if (samma) { samma.data = data; samma.tid = new Date().toISOString(); }
+      else {
+        if (l.length >= FILTER_MAX) { IH.toast('Du har redan ' + FILTER_MAX + ' sparade filter här', 'Ta bort ett filter innan du sparar ett nytt.', 'varning'); return null; }
+        samma = { id: 'sf' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), namn: namn, data: data, tid: new Date().toISOString() };
+        l.push(samma);
+      }
+      alla[vy] = l;
+      if (!filterSkriv(alla)) { IH.toast('Filtret gick inte att spara', 'Webbläsaren tillåter inte lagring just nu (privat läge eller full lagring).', 'varning'); return null; }
+      return samma;
+    },
+    dopOm: function (vy, id, namn) {
+      namn = String(namn || '').trim().slice(0, 40);
+      var alla = filterAlla(), x = (alla[vy] || []).filter(function (f) { return f.id === id; })[0];
+      if (!x || !namn) return null;
+      x.namn = namn; filterSkriv(alla); return x;
+    },
+    bort: function (vy, id) {
+      var alla = filterAlla(), l = alla[vy] || [], x = l.filter(function (f) { return f.id === id; })[0];
+      if (!x) return null;
+      alla[vy] = l.filter(function (f) { return f.id !== id; }); filterSkriv(alla);
+      return x;
+    },
+    // Lägger tillbaka ett borttaget filter (för Ångra)
+    aterstall: function (vy, x) { var alla = filterAlla(); alla[vy] = (alla[vy] || []).filter(function (f) { return f.id !== x.id; }).concat([x]); filterSkriv(alla); }
+  };
+
+  // Sökgrupper från andra moduler (t.ex. chatten): fn(q) → [{ mal: 'ga:#/…' | 'g:namn', ikon, rubrik, under, typ, id }]
+  var SOK_GRUPPER = [];
+  IH.sok = {
+    lagg: function (grupp, fn, val) {
+      if (!grupp || typeof fn !== 'function') return;
+      SOK_GRUPPER = SOK_GRUPPER.filter(function (g) { return g.namn !== grupp; });
+      SOK_GRUPPER.push({ namn: grupp, fn: fn, vy: val && val.vy });
+    }
   };
 
   /* --- Panelen från höger ------------------------------------------- */
@@ -548,7 +804,7 @@
         '<span class="avatar" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + (IH.narvaroPrick ? IH.narvaroPrick(u.id) : '') + '</span><span>' + IH.e(u.namn) + '</span><span class="sido__ga">Gå in</span></button>';
     }).join('');
     return '<a class="sido__logo" href="#/"><img src="../images/legohus_logo.svg" alt="Legohus Stockholm"><span class="sido__crm">CRM <small>· Prototyp</small></span></a>' +
-      '<div class="sido__verktyg"><button class="sido__sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
+      '<div class="sido__verktyg"><button class="sido__sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' + klocka('sido') +
       (jag.roll === 'admin' ? '' : '<button class="sido__ny" type="button" data-g="ny" aria-label="Skapa ny" title="Skapa ny  N">' + IH.i('plus') + '</button>') + '</div>' +
       vaxel +
       '<nav class="sido__nav" aria-label="Huvudmeny"><span class="sido__markor" aria-hidden="true"></span>' + nav + '</nav>' +
@@ -587,10 +843,14 @@
       var br = b[p[0]];
       return '<a href="#/' + p[0] + '" data-vy="' + p[0] + '" title="' + p[1] + '" aria-label="' + p[1] + '">' + IH.i(p[2]) + (br && br[1] && br[0] ? '<i>' + br[0] + '</i>' : '') + '</a>';
     };
+    // Klockan (aviseringarna) sist i den nedre halvan, bland det egna (Meddelanden, Att göra, Inställningar)
+    var olasta = IH.db && IH.avisera ? IH.avisera.olasta() : 0;
+    var klockaRals = '<a href="#/" role="button" class="sido-rals__klocka" data-g="aviseringar" aria-haspopup="dialog" title="Aviseringar" aria-label="Aviseringar' + (olasta ? ', ' + olasta + ' olästa' : '') + '">' +
+      IH.i('bjallra') + (olasta ? '<i>' + (olasta > 99 ? '99+' : olasta) + '</i>' : '') + '</a>';
     return halvor.map(function (h, n) {
       return '<div class="sido-rals__halva sido-rals__halva--' + (n ? 'ner' : 'upp') + '">' + h.map(function (g, k) {
         return (k ? '<span class="sido-rals__delare" aria-hidden="true"></span>' : '') + g.map(lank).join('');
-      }).join('') + '</div>';
+      }).join('') + (n ? klockaRals : '') + '</div>';
     }).join('<span class="sido-rals__mitt" aria-hidden="true"></span>');
   }
   // Rälsens stil ligger i grund.css ("Sidomenyn – låda, knapp, räls, docka")
@@ -601,7 +861,7 @@
       IH.initialer(jag.namn) + (IH.narvaroPrick ? IH.narvaroPrick(jag.id) : '') + '</span>';
   }
   function skal() {
-    var app = $('#app'), h = { '.sido': sidomeny(), '.sido-rals': rals(), '.topp__konto': toppKonto(), '.mobilmeny': mobilmeny() };
+    var app = $('#app'), h = { '.sido': sidomeny(), '.sido-rals': rals(), '.topp__konto': toppKonto(), '.topp__klocka': klocka('topp'), '.mobilmeny': mobilmeny() };
     app.innerHTML = '<aside class="sido" id="sidomeny">' + h['.sido'] + '</aside>' +
       '<div class="sido-kant"><button class="sido-knapp" type="button" data-sido-knapp aria-controls="sidomeny" aria-expanded="true" aria-label="Dölj menyn" title="Dölj menyn  [">' +
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5 9 12l5.5 5.5"/></svg></button>' +
@@ -610,6 +870,7 @@
       '<button class="sok" type="button" data-g="palett" aria-haspopup="dialog">' + IH.i('sok') + '<span>Sök eller skriv ett kommando…</span><kbd>' + (MAC ? '⌘' : 'Ctrl ') + 'K</kbd></button>' +
       '<span class="topp__titel" data-topp-titel></span>' +
       '<span class="proto">Prototyp · exempeldata</span>' +
+      '<span class="topp__klocka">' + h['.topp__klocka'] + '</span>' +
       (IH.jag().roll === 'admin' ? '' : '<button class="knapp knapp--virke" type="button" data-g="ny">' + IH.i('plus') + 'Ny</button>') +
       '<button class="topp__konto" type="button" data-g="konto-meny" aria-haspopup="dialog" aria-label="Konto och status">' + h['.topp__konto'] + '</button>' +
       '</header><main class="vy" id="vy" tabindex="-1"></main></div>' +
@@ -977,6 +1238,8 @@
     var rlNy = !!rl && skrivMeny(rl, rals());
     if (sidoNy || mmNy || rlNy) markera(true);
     if (tk) skrivMeny(tk, toppKonto());
+    var tkl = $('.topp__klocka');
+    if (tkl) skrivMeny(tkl, klocka('topp'));
     return sidoNy;
   };
 
@@ -1222,7 +1485,12 @@
     ['km-nytt-konto', 'Nytt konto', 'kunder', 'Lägg till en användare', 'konto användare lägg till', true]];
   var ATGARDER = [['ny-kund', 'Ny kund', 'kunder', 'Privatperson eller företag'], ['ny-affar', 'Ny affär', 'tavla', 'Direkt på säljtavlan'],
     ['ny-forfragan', 'Ny förfrågan', 'inkorg', 'Någon ringde eller mejlade'], ['ny-uppgift', 'Ny uppgift', 'todo', 'Något att göra'],
+    ['offert-ny', 'Ny offert', 'offert', 'Välj affär och skapa offerten'], ['vm-nytt', 'Nytt videomöte', 'kamera', 'Boka en tid eller starta direkt'],
     ['starta-mote', 'Starta kundmöte', 'mote', 'Presentationen i helskärm']];
+  // Snabbåtgärder som finns (en modul som inte laddats visas inte) och som rollen får använda
+  function atgarder(jag) {
+    return ATGARDER.filter(function (x) { return IH.G[x[0]] && jag.roll !== 'admin' && !(jag.roll === 'prod' && /affar|forfragan|starta-mote/.test(x[0])); });
+  }
   var palett = null;
 
   // De senast öppnade kunderna, affärerna, förfrågningarna och offerterna.
@@ -1244,8 +1512,8 @@
     if (d[0] === 'offerter') { var o = IH.offert(id); var oa = o && IH.affar(o.affar); var ok = oa && IH.kund(oa.kund); return o && rad('ga:' + adr, IH.i('offert'), o.nummer, ok ? ok.namn : '', 'Offert'); }
     return '';
   }
-  function rad(mal, ikon, rubrik, under, typ) {
-    return '<button type="button" class="palett__rad" role="option" data-g="palett-val" data-mal="' + IH.e(mal) + '">' +
+  function rad(mal, ikon, rubrik, under, typ, id) {
+    return '<button type="button" class="palett__rad" role="option" data-g="palett-val" data-mal="' + IH.e(mal) + '"' + (id ? ' data-id="' + IH.e(id) + '"' : '') + '>' +
       '<span class="palett__ikon">' + ikon + '</span><span class="palett__text"><b>' + IH.e(rubrik) + '</b>' + (under ? '<small>' + IH.e(under) + '</small>' : '') + '</span>' +
       (typ ? '<span class="palett__typ">' + typ + '</span>' : '') + '</button>';
   }
@@ -1288,7 +1556,7 @@
     var html = '';
     if (!q) {
       html += grupp('Senaste', senaste().filter(function (x) { return x !== location.hash; }).map(senasteRad).filter(Boolean).slice(0, 5));
-      if (IH.jag().roll === 'salj') html += grupp('Snabbåtgärder', ATGARDER.map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
+      if (IH.jag().roll === 'salj') html += grupp('Snabbåtgärder', atgarder(IH.jag()).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
       html += grupp('Gå till', SIDOR.filter(function (x) { return x[0] !== IH.nuvarande.vy && sidaFor(x); }).map(function (x) { return rad('ga:#/' + x[0], IH.i(x[2]), x[1]); }));
     } else {
       var db = IH.db, jag = IH.jag(), far = function (vy) { return !IH.sparrad(vy); };
@@ -1304,6 +1572,12 @@
       var projekt = !far('produktion') ? [] : (db.projekt || []).filter(function (p) { var k = IH.kund(p.kund); return traff(projNamn(p) + ' ' + (k ? k.ort : ''), q, projNamn(p)); }).slice(0, 4);
       var uppgifter = (db.uppgifter || []).filter(function (u) { return !u.klar && (!u.ansvarig || u.ansvarig === jag.id) && traff(u.text, q, u.text); }).slice(0, 4);
       var konton = IH.ANVANDARE.filter(function (u) { return !u.inaktiv && traff(u.namn + ' ' + u.titel, q, u.namn); }).slice(0, 4);
+      // Dokumenten (med kundens namn) och anteckningarna och aktiviteterna i kundernas historik, nyast först
+      var dokument = !far('dokument') ? [] : (db.dokument || []).filter(function (d) { var k = d && d.kund && IH.kund(d.kund); return d && d.namn && d.sparad !== false && traff(d.namn + ' ' + (k ? k.namn : ''), q, d.namn); })
+        .sort(function (a, b) { return (a.tid || '') < (b.tid || '') ? 1 : -1; }).slice(0, 4);
+      var aktiviteter = !far('kunder') || q.length < 2 ? [] : (db.aktiviteter || []).filter(function (a) { return a && a.kund && a.text && IH.kund(a.kund) && String(a.text).toLowerCase().indexOf(q) >= 0; })
+        .sort(function (a, b) { return a.tid < b.tid ? 1 : -1; }).slice(0, 4);
+      var AKT_IKON = { samtal: 'tel', mejl: 'post', mote: 'mote', anteckning: 'anteckning', sms: 'meddelande' };
       var kommandon = KOMMANDON.filter(function (x) { return (!x[5] || jag.roll === 'admin') && (x[1] + ' ' + x[4]).toLowerCase().indexOf(q) >= 0; });
       html += grupp('Kunder', kunder.map(function (k) { return rad('ga:#/kunder/' + k.id, '<span class="avatar avatar--liten">' + IH.initialer(k.namn) + '</span>', k.namn, k.ort, 'Kund'); }));
       html += grupp('Affärer', affarer.map(function (a) { var k = IH.kund(a.kund); return rad('ga:#/salj/' + a.id, IH.i('tavla'), a.titel, (k ? k.namn + ' · ' : '') + IH.kort(a.varde), 'Affär'); }));
@@ -1311,8 +1585,22 @@
       html += grupp('Offerter', offerter.map(function (o) { var a = IH.affar(o.affar), k = a && IH.kund(a.kund); return rad('ga:#/offerter/' + o.id, IH.i('offert'), o.nummer, k ? k.namn : '', 'Offert'); }));
       html += grupp('Projekt', projekt.map(function (p) { return rad('ga:#/produktion/' + p.id, IH.i('produktion'), projNamn(p), p.montage ? 'Montage ' + IH.datum(p.montage) : '', 'Projekt'); }));
       html += grupp('Uppgifter', uppgifter.map(function (u) { return rad('ga:#/att-gora', IH.i('todo'), u.text, u.forfaller ? 'Förfaller ' + IH.datum(u.forfaller) : '', 'Uppgift'); }));
+      html += grupp('Dokument', dokument.map(function (d) { var k = d.kund && IH.kund(d.kund); return rad('g:dok-fil', IH.i('mapp'), d.namn, (k ? k.namn + ' · ' : '') + (d.tid ? IH.datum(d.tid, true) : ''), 'Dokument', d.id); }));
+      html += grupp('Anteckningar och aktiviteter', aktiviteter.map(function (a) {
+        var k = IH.kund(a.kund), t = String(a.text);
+        return rad('ga:#/kunder/' + a.kund, IH.i(AKT_IKON[a.typ] || 'anteckning'), t.length > 90 ? t.slice(0, 88) + '…' : t, k.namn + ' · ' + IH.datum(a.tid, new Date(a.tid).getFullYear() !== new Date().getFullYear()), 'Historik');
+      }));
+      // Grupper som andra moduler lagt till (t.ex. Chatt via IH.sok.lagg)
+      SOK_GRUPPER.forEach(function (g) {
+        if (g.vy && IH.sparrad(g.vy)) return;
+        var rader = [];
+        try { rader = g.fn(q) || []; } catch (e) { rader = []; }
+        html += grupp(IH.e(g.namn), rader.filter(function (r) { return r && r.rubrik && /^(ga:#\/|g:)/.test(String(r.mal || '')); }).slice(0, 5).map(function (r) {
+          return rad(r.mal, r.ikon || IH.i('sok'), r.rubrik, r.under || '', r.typ || '', r.id);
+        }));
+      });
       html += grupp('Konton', konton.map(function (u) { return rad('ga:#/profil/' + u.id, '<span class="avatar avatar--liten" style="--av:' + u.farg + '">' + IH.initialer(u.namn) + '</span>', u.namn, u.titel, 'Konto'); }));
-      html += grupp('Snabbåtgärder', ATGARDER.filter(function (x) { return jag.roll !== 'admin' && !(jag.roll === 'prod' && /affar|forfragan|mote/.test(x[0])) && traff(x[1], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
+      html += grupp('Snabbåtgärder', atgarder(jag).filter(function (x) { return traff(x[1] + ' ' + x[3], q, x[1]); }).map(function (x) { return rad('g:' + x[0], IH.i(x[2]), x[1], x[3]); }));
       var teman = !IH.tema || !IH.tema.lista || q.length < 2 ? [] : IH.tema.lista.filter(function (t) { var txt = ('tema ' + t.namn + ' ' + t.sok + ' utseende färg färger').toLowerCase(); return q.replace(/:/g, ' ').split(/\s+/).filter(Boolean).every(function (w) { return txt.indexOf(w) >= 0; }); });
       html += grupp('Tema', teman.map(temaRad));
       var lagen = !IH.layout || !IH.layout.lista || q.length < 2 ? [] : IH.layout.lista.filter(function (l) { var txt = ('layout läge lägen täthet ' + l.namn + ' ' + l.sok).toLowerCase(); return q.replace(/:/g, ' ').split(/\s+/).filter(Boolean).every(function (w) { return txt.indexOf(w) >= 0; }); });
@@ -1442,6 +1730,8 @@
         if (aktivtArk) { if (!arkAndrat() || fragaKasta('Tryck Esc igen för att stänga ändå.')) IH.stangArk(); return; }
       }
       if (inmatning || e.metaKey || e.ctrlKey || e.altKey || moteOppet()) return;
+      // Listornas tangenter (J/K, pilarna, Enter, X) går före allt annat, även i en panel
+      if (radTangent(e)) return;
       // G och sedan en bokstav hoppar direkt till en sida (G Ö översikt, G I förfrågningar, G T tavlan …)
       if (gVantar && Date.now() - gVantar < 1200) {
         gVantar = 0;
@@ -1590,8 +1880,249 @@
       kropp: '<div class="lista kort">' + tangent((MAC ? '⌘' : 'Ctrl') + ' K', 'Sök eller kör ett kommando') + tangent('/', 'Sök') +
         (IH.jag().roll === 'admin' ? '' : tangent('N', 'Skapa ny')) + tangent('Esc', 'Stäng panelen (tryck två gånger om du har skrivit något)') +
         tangent('[', 'Dölj eller visa menyn (dator)') +
-        (IH.jag().roll === 'admin' ? '' : tangent('G Ö · G I · G T', 'Gå till översikten, förfrågningarna eller säljtavlan') + tangent('G K · G O · G A', 'Gå till kunderna, offerterna eller Att göra') + tangent('G P · G M', 'Gå till projekten eller meddelandena')) + (admin ? tangent('Shift Esc', 'Lämna supportläget') : '') + tangent('?', 'Den här listan') + '</div>' });
+        (IH.jag().roll === 'admin' ? '' : tangent('G Ö · G I · G T', 'Gå till översikten, förfrågningarna eller säljtavlan') + tangent('G K · G O · G A', 'Gå till kunderna, offerterna eller Att göra') + tangent('G P · G M', 'Gå till projekten eller meddelandena')) + (admin ? tangent('Shift Esc', 'Lämna supportläget') : '') +
+        tangent('J · K', 'Nästa eller förra raden i en lista (även ↓ ↑ när en rad är vald)') + tangent('Enter', 'Öppna den valda raden') + tangent('X', 'Markera den valda raden (för åtgärder på flera)') +
+        tangent('?', 'Den här listan') + '</div>' });
   };
+
+  /* --- Aviseringscentret: klockan och panelen ----------------------------------------------------- */
+  // Klockan sitter bredvid Sök i sidomenyn och före Ny i toppraden (infälld meny och mobil)
+  function klocka(plats) {
+    var n = IH.db && IH.avisera ? IH.avisera.olasta() : 0;
+    return '<button class="ih-klocka ih-klocka--' + plats + '" type="button" data-g="aviseringar" aria-haspopup="dialog" aria-label="Aviseringar' + (n ? ', ' + n + ' olästa' : '') + '" title="Aviseringar">' +
+      IH.emo('bjallra') + (n ? '<i class="ih-klocka__antal" aria-hidden="true">' + (n > 99 ? '99+' : n) + '</i>' : '') + '</button>';
+  }
+  var AVIS_IKON = { paminnelse: 'klocka', sammanfattning: 'kalender', chatt: 'meddelande', fordelning: 'kunder', offert: 'offert', uppgift: 'uppgift', mote: 'kamera' };
+  var avisArk = null;
+  function avisRad(x) {
+    var lank = x.lank && /^#\//.test(x.lank) ? x.lank : null;
+    var inne = '<b>' + IH.e(x.rubrik || 'Avisering') + (x.antal > 1 ? ' <span class="avis__antal">' + x.antal + '</span>' : '') + '</b>' +
+      '<small>' + (x.text ? IH.e(x.text) + ' · ' : '') + '<time datetime="' + IH.e(x.tid) + '">' + IH.e(IH.sedan(x.tid)) + '</time></small>';
+    return '<div class="lista__rad avis' + (x.last ? '' : ' avis--ny') + '" data-rad>' +
+      '<span class="avis__ikon" aria-hidden="true">' + IH.i(AVIS_IKON[x.typ] || 'bjallra') + '</span>' +
+      (lank ? '<a class="lista__text avis__text" href="' + IH.e(lank) + '" data-g="avis-oppna" data-id="' + IH.e(x.id) + '" data-rad-oppna>' + inne + '</a>'
+        : '<span class="lista__text avis__text">' + inne + '</span>') +
+      '<button class="ch-ruta avis__last" type="button" data-g="avis-last" data-id="' + IH.e(x.id) + '" aria-label="' + (x.last ? 'Markera som oläst' : 'Markera som läst') + '" title="' + (x.last ? 'Markera som oläst' : 'Markera som läst') + '">' +
+      IH.i(x.last ? 'post' : 'bock') + '</button></div>';
+  }
+  function avisInnehall() {
+    var lista = IH.avisera.lista(), nya = lista.filter(function (x) { return !x.last; }), lasta = lista.filter(function (x) { return x.last; });
+    var stod = IH.avisera.skrivbordStod(), pa = IH.avisera.skrivbordPa(), nekad = stod && Notification.permission === 'denied';
+    var skrivbordRad = '<div class="avis-val"><span class="avis-val__text"><b>Skrivbordsaviseringar</b><small>' +
+      (!stod ? 'Webbläsaren kan inte visa skrivbordsaviseringar.' : nekad ? 'Blockerade för sidan. Tillåt aviseringar i webbläsarens inställningar för sidan.' :
+        pa ? 'På – påminnelser och chatt syns även när fliken inte är framme.' : 'Av – påminnelser syns här och som meddelande i CRM:et.') + '</small></span>' +
+      (stod && !nekad ? '<button class="knapp knapp--liten" type="button" data-g="avis-skrivbord" aria-pressed="' + pa + '">' + (pa ? 'Stäng av' : 'Slå på') + '</button>' : '') + '</div>';
+    var knappar = lista.length ? '<div class="avis-knappar">' +
+      '<button class="knapp knapp--liten" type="button" data-g="avis-alla-lasta"' + (nya.length ? '' : ' disabled') + '>' + IH.i('bock') + 'Markera alla som lästa</button>' +
+      '<button class="knapp knapp--liten" type="button" data-g="avis-rensa"' + (lasta.length ? '' : ' disabled') + '>' + IH.i('stang') + 'Ta bort lästa</button></div>' : '';
+    var tom = '<div class="avis-tom"><span class="avis__ikon" aria-hidden="true">' + IH.emo('bjallra') + '</span><p><b>Inga aviseringar</b>Påminnelser för uppgifter, dagens sammanfattning och annat som rör dig hamnar här.</p></div>';
+    return skrivbordRad + knappar +
+      (lista.length ? (nya.length ? '<p class="etikett avis-etikett">Nya · ' + nya.length + '</p><div class="lista kort avis-lista" data-radlista>' + nya.map(avisRad).join('') + '</div>' : '') +
+        (lasta.length ? '<p class="etikett avis-etikett">Tidigare</p><div class="lista kort avis-lista" data-radlista>' + lasta.slice(0, 60).map(avisRad).join('') + '</div>' : '') : tom) +
+      '<p class="avis-not">' + IH.i('larm') + 'Aviseringar visas när CRM:et är öppet i den här webbläsaren.</p>';
+  }
+  function avisPanelRita() {
+    if (!avisArk || !avisArk.isConnected) { avisArk = null; return; }
+    var yta = avisArk.querySelector('[data-avis]');
+    if (!yta) return;
+    var fokus = document.activeElement, g = fokus && avisArk.contains(fokus) ? fokus.getAttribute('data-g') : null, id = fokus && fokus.getAttribute ? fokus.getAttribute('data-id') : null;
+    yta.innerHTML = avisInnehall();
+    // Fokus står kvar på samma knapp när panelen ritas om (eller på motsvarande plats)
+    if (g) { var ny = yta.querySelector('[data-g="' + g + '"]' + (id ? '[data-id="' + id + '"]' : '')) || yta.querySelector('[data-g="' + g + '"]'); if (ny && !ny.disabled) ny.focus({ preventScroll: true }); }
+  }
+  IH.G.aviseringar = function () {
+    avisArk = IH.oppnaArk({ titel: 'Aviseringar', ikon: 'larm', under: 'Påminnelser och det som rör dig',
+      kropp: '<div class="avis-panel" data-avis>' + avisInnehall() + '</div>', vidStang: function () { avisArk = null; } });
+  };
+  function avisHitta(id) { return avisLista().filter(function (x) { return x.id === id; })[0] || null; }
+  IH.G['avis-oppna'] = function (el) {
+    var x = avisHitta(el.getAttribute('data-id'));
+    if (!x) return;
+    if (!x.last) { x.last = true; IH.spara(); IH.uppdateraMeny(); }
+    IH.stangArk(false, true);
+    if (x.lank) IH.ga(x.lank);
+  };
+  IH.G['avis-last'] = function (el) {
+    var x = avisHitta(el.getAttribute('data-id'));
+    if (!x) return;
+    x.last = !x.last; IH.spara(); IH.uppdateraMeny(); avisPanelRita();
+  };
+  IH.G['avis-alla-lasta'] = function () {
+    var n = 0;
+    IH.avisera.lista().forEach(function (x) { if (!x.last) { x.last = true; n++; } });
+    if (!n) return;
+    IH.spara(); IH.uppdateraMeny(); avisPanelRita();
+    IH.toast(n === 1 ? 'En avisering markerad som läst' : n + ' aviseringar markerade som lästa', null, 'bock');
+  };
+  IH.G['avis-rensa'] = function () {
+    var jag = IH.jag().id, bort = avisLista().filter(function (x) { return x.till === jag && x.last; });
+    if (!bort.length) return;
+    IH.db.aviseringar = avisLista().filter(function (x) { return bort.indexOf(x) < 0; });
+    IH.spara(); IH.uppdateraMeny(); avisPanelRita();
+    IH.angra(bort.length === 1 ? 'En läst avisering borttagen' : bort.length + ' lästa aviseringar borttagna', null, function () {
+      var finns = {}; avisLista().forEach(function (x) { finns[x.id] = 1; });
+      bort.forEach(function (x) { if (!finns[x.id]) avisLista().push(x); });
+      avisPanelRita();
+    });
+  };
+  IH.G['avis-skrivbord'] = function () {
+    if (!IH.avisera.skrivbordStod()) return;
+    if (IH.avisera.skrivbordPa()) { IH.avisera.sattSkrivbord(false); avisPanelRita(); IH.toast('Skrivbordsaviseringar är av', 'Gäller både påminnelser och chatten.', 'bjallra-av'); return; }
+    var svar = Notification.requestPermission(function () { /* äldre webbläsare */ });
+    var efter = function (p) {
+      IH.avisera.sattSkrivbord(p === 'granted'); avisPanelRita();
+      if (p === 'granted') IH.toast('Skrivbordsaviseringar är på', 'Gäller både påminnelser och chatten, när CRM:et är öppet i den här webbläsaren.', 'bjallra');
+      else IH.toast('Aviseringar är avstängda i webbläsaren', 'Tillåt aviseringar för sidan i webbläsarens inställningar.', 'varning');
+    };
+    if (svar && svar.then) svar.then(efter); else efter(Notification.permission);
+  };
+
+  /* --- Påminnelser: planeraren -------------------------------------------------------------------------
+     Vid start, varje minut och när fliken kommer fram: öppna uppgifter för mig vars tid har passerat larmar en gång
+     (u.larmat). Toast med Klar, +1 h och Öppna, en rad i aviseringscentret och en skrivbordsavisering om den är på.
+     Gäller alla uppgifter, även förfrågans "Påminn mig" och chattens påminnelser (chatten sätter också larmat). */
+  function uppgiftPlats(u) {
+    var k = u.kund && IH.kund(u.kund);
+    return k ? k.namn : '';
+  }
+  function uppgiftKlar(u) {
+    // Salj-modulen sköter upprepning (nästa uppgift skapas) i IH.uppgiftKlar – annars bockas den bara av
+    if (IH.uppgiftKlar) { IH.uppgiftKlar(u.id); return; }
+    u.klar = true; u.klarTid = new Date().toISOString();
+    IH.spara(); IH.uppdateraMeny(); rita();
+    IH.toast('Klar', u.text, 'bock');
+  }
+  function senareEnTimme(u) {
+    u.forfaller = new Date(Date.now() + 36e5).toISOString(); u.larmat = null;
+    IH.spara(); IH.uppdateraMeny(); rita();
+    IH.toast('Påminner igen om en timme', u.text + ' · ' + IH.lokal(u.forfaller, 't', { hour: '2-digit', minute: '2-digit' }), 'klocka');
+  }
+  function kollaPaminnelser() {
+    if (!IH.db || !Array.isArray(IH.db.uppgifter) || !inloggad()) return;
+    // I supportläget larmar inget – påminnelserna är kontots egna och ska nå personen själv
+    if (IH.visarSom && IH.visarSom()) return;
+    var jag = IH.jag().id, nu = Date.now();
+    if (!jag) return;
+    var nya = IH.db.uppgifter.filter(function (u) {
+      if (!u || u.klar || u.larmat || !u.forfaller) return false;
+      if (u.ansvarig && u.ansvarig !== jag) return false;
+      var t = Date.parse(u.forfaller);
+      return isFinite(t) && t <= nu;
+    });
+    if (!nya.length) return;
+    var tid = new Date().toISOString();
+    nya.forEach(function (u) {
+      u.larmat = tid;
+      var plats = uppgiftPlats(u);
+      IH.avisera({ typ: 'paminnelse', rubrik: u.text, text: 'Skulle vara klar ' + IH.datum(u.forfaller) + ' kl. ' + IH.lokal(u.forfaller, 't', { hour: '2-digit', minute: '2-digit' }) + (plats ? ' · ' + plats : ''),
+        lank: '#/att-gora', nyckel: 'uppgift:' + u.id, spara: false });
+    });
+    IH.spara();
+    if (nya.length === 1) {
+      var u = nya[0], plats = uppgiftPlats(u);
+      IH.toast('Påminnelse: ' + u.text, (plats ? plats + ' · ' : '') + 'skulle vara klar ' + IH.sedan(u.forfaller), 'klocka', { typ: 'info', tid: 20000, knappar: [
+        { text: 'Klar', gor: function () { uppgiftKlar(u); } },
+        { text: '+1 h', gor: function () { senareEnTimme(u); } },
+        { text: 'Öppna', gor: function () { IH.ga('#/att-gora'); } }] });
+      skrivbord('Påminnelse: ' + u.text, plats || 'Uppgift i Legohus CRM', '#/att-gora', 'uppgift:' + u.id);
+    } else {
+      var text = nya.slice(0, 3).map(function (x) { return x.text; }).join(' · ') + (nya.length > 3 ? ' · och ' + (nya.length - 3) + ' till' : '');
+      IH.toast(nya.length + ' uppgifter har passerat sin tid', text, 'klocka', { typ: 'info', tid: 15000, lank: '#/att-gora', knapp: 'Öppna Att göra' });
+      skrivbord(nya.length + ' uppgifter har passerat sin tid', text, '#/att-gora', 'uppgifter');
+    }
+  }
+  // Dagens sammanfattning: första gången kontot öppnar CRM:et en dag – uppgifter i dag och offerter som går ut inom 7 dagar
+  function dagSammanfattning() {
+    if (!IH.db || !inloggad() || (IH.visarSom && IH.visarSom())) return;
+    var jag = IH.jag();
+    if (!jag.id || jag.roll === 'admin') return;
+    var nyckel = 'ih-crm-dagsammanfattning:' + jag.id, idag = IH.dagStr(), forra = null;
+    try { forra = localStorage.getItem(nyckel); } catch (e) { forra = idag; }
+    if (forra === idag) return;
+    try { localStorage.setItem(nyckel, idag); } catch (e) { return; }
+    var slut = new Date(); slut.setHours(23, 59, 59, 999);
+    var uppg = (IH.db.uppgifter || []).filter(function (u) { return u && !u.klar && u.forfaller && (!u.ansvarig || u.ansvarig === jag.id) && Date.parse(u.forfaller) <= slut.getTime(); });
+    var off = (IH.db.offerter || []).filter(function (o) {
+      if (!o || o.status !== 'skickad') return false;
+      var a = IH.affar(o.affar);
+      if (a && a.ansvarig && a.ansvarig !== jag.id) return false;
+      var kvar = (o.giltig || 30) - IH.dagarSedan(o.skapad);
+      return kvar > 0 && kvar <= 7;
+    });
+    if (!uppg.length && !off.length) return;
+    var delar = [];
+    if (uppg.length) delar.push(uppg.length === 1 ? '1 uppgift i dag' : uppg.length + ' uppgifter i dag');
+    if (off.length) delar.push(off.length === 1 ? '1 offert går ut inom 7 dagar' : off.length + ' offerter går ut inom 7 dagar');
+    var detalj = uppg.slice(0, 2).map(function (u) { return u.text; }).concat(off.slice(0, 2).map(function (o) { var k = IH.kund(o.kund); return (o.nummer || 'Offert') + (k ? ' (' + k.namn + ')' : ''); }));
+    IH.avisera({ typ: 'sammanfattning', rubrik: 'Din dag: ' + delar.join(' och '), text: detalj.join(' · '), lank: uppg.length ? '#/att-gora' : '#/offerter', nyckel: 'dag:' + idag });
+  }
+  var planTimer = 0;
+  function startaPlanerare() {
+    if (planTimer) return;
+    var kor = function () { try { dagSammanfattning(); kollaPaminnelser(); } catch (e) { if (window.console) console.warn('Påminnelserna:', e); } };
+    setTimeout(kor, 1200);
+    planTimer = setInterval(kor, 60000);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') kor(); });
+  }
+  IH.paminnelser = { kolla: kollaPaminnelser };
+
+  /* --- Tangentbordet i listor: J/K eller pilarna, Enter öppnar, X kryssar ---------------------------------
+     En lista med data-radlista och rader med data-rad. Raden som öppnas: [data-rad-oppna], raden själv om den
+     är en länk eller har data-g, annars första länken. X kryssar radens kryssruta (input eller role=checkbox).
+     Inget händer när man skriver i ett fält. */
+  function radOppna(rad) {
+    var mal = rad.querySelector('[data-rad-oppna]') || (rad.matches('a[href], [data-g]') ? rad : null) || rad.querySelector('a[href]');
+    if (mal) mal.click();
+  }
+  function radTangent(e) {
+    var k = e.key;
+    if (e.shiftKey || e.defaultPrevented || aktivtArk && !aktivtArk.ark.contains(document.activeElement) || palett) return false;
+    if (!/^(j|k|x|J|K|X|ArrowDown|ArrowUp|Enter)$/.test(k)) return false;
+    // G och sedan K/… är ett sidhopp (G K = kunderna), inte ett radbyte
+    if (gVantar && Date.now() - gVantar < 1200 && /^[a-zåäö]$/i.test(k)) return false;
+    var omrade = aktivtArk ? aktivtArk.ark : $('#vy');
+    if (!omrade) return false;
+    var akt = document.activeElement, rad = akt && akt.closest ? akt.closest('[data-rad]') : null;
+    if (rad && !omrade.contains(rad)) rad = null;
+    var lista = rad ? rad.closest('[data-radlista]') : null;
+    if (!lista) {
+      // Pilarna och Enter gäller bara när man redan står i en lista – annars rullar pilarna sidan som vanligt
+      if (/^(Arrow|Enter)/.test(k) || /^[xX]$/.test(k)) return false;
+      lista = $$('[data-radlista]', omrade).filter(syns)[0];
+      if (!lista) return false;
+    }
+    var rader = $$('[data-rad]', lista).filter(function (r) { return r.closest('[data-radlista]') === lista && syns(r); });
+    if (!rader.length) return false;
+    if (k === 'Enter') {
+      if (!rad || akt !== rad) return false;
+      e.preventDefault(); radOppna(rad); return true;
+    }
+    if (k === 'x' || k === 'X') {
+      var ruta = rad.querySelector('input[type="checkbox"], [role="checkbox"]');
+      if (!ruta || ruta.disabled || ruta.getAttribute('aria-disabled') === 'true') return false;
+      e.preventDefault();
+      var radId = rad.getAttribute('data-id'), radNr = rader.indexOf(rad);
+      ruta.click();
+      // Listan ritas ofta om när en rad kryssas – behåll fokus på samma rad så att J/K och X fortsätter därifrån
+      setTimeout(function () {
+        if (rad.isConnected && rad.contains(document.activeElement)) return;
+        var ny = rad.isConnected ? rad : null;
+        if (!ny && radId) ny = $$('[data-rad]', omrade).filter(function (r) { return r.getAttribute('data-id') === radId; })[0];
+        if (!ny) { var l = $$('[data-radlista]', omrade).filter(syns)[0]; ny = l ? $$('[data-rad]', l).filter(syns)[radNr] : null; }
+        if (!ny) return;
+        if (!ny.hasAttribute('tabindex') && !/^(A|BUTTON)$/.test(ny.tagName)) ny.setAttribute('tabindex', '-1');
+        ny.focus({ preventScroll: true });
+      }, 0);
+      return true;
+    }
+    var steg = /^(j|J|ArrowDown)$/.test(k) ? 1 : -1, n = rad ? rader.indexOf(rad) : -1;
+    var ny = rader[n < 0 ? (steg > 0 ? 0 : rader.length - 1) : Math.max(0, Math.min(rader.length - 1, n + steg))];
+    e.preventDefault();
+    if (!ny.hasAttribute('tabindex') && !/^(A|BUTTON)$/.test(ny.tagName)) ny.setAttribute('tabindex', '-1');
+    ny.focus({ preventScroll: true });
+    ny.scrollIntoView({ block: 'nearest' });
+    return true;
+  }
 
   // 3D-scenerna (three.js) laddas först när en sida med en scen visas – modulerna monterar sig själva vid import.
   // Hämtningen börjar redan när man pekar på länken eller när sidan börjar ritas (Projekt, Kundmöte).
@@ -1626,6 +2157,7 @@
     new MutationObserver(function () { centreraAlla(); ladda3d(); }).observe($('#vy'), { childList: true, subtree: true });
     kopplaHandelser();
     rita();
+    startaPlanerare();
     requestAnimationFrame(function () { flyttaMarkor(true); });
     if (document.fonts) document.fonts.ready.then(function () { flyttaMarkor(true); });
     document.documentElement.classList.add('redo');

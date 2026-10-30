@@ -16,6 +16,13 @@
   var d = document.documentElement;
   var NYCKEL = 'ih-crm-tema:';
 
+  // Hälsningen efter tid på dygnet – EN regel för översikten, kontrollcentralen och inloggningen. Den bor här
+  // eftersom både CRM:et (index.html) och inloggningen (logga-in.html) laddar tema.js.
+  IH.halsning = function (d) {
+    var h = (d instanceof Date && !isNaN(d) ? d : new Date()).getHours();
+    return h < 5 ? 'God kväll' : h < 10 ? 'God morgon' : h < 14 ? 'Hej' : h < 18 ? 'God eftermiddag' : 'God kväll';
+  };
+
   // Ordningen är den som visas i väljarna. "kort" syns i Inställningar, "sok" används av sökpaletten.
   var TEMAN = [
     { id: 'system', namn: 'Följ systemet', mini: 'Auto', kort: 'Ljust eller mörkt som datorn', sok: 'system automatiskt auto dator följ' },

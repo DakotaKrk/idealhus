@@ -2,7 +2,7 @@
 
 Guiden (crm-guide) läser den här filen först. Allt här finns i koden – inget är påhittat. Siffror, namn och priser i CRM:et är **exempeldata** (data.js, `IH.skapaExempeldata`), skapade från dagens datum varje gång datan återställs.
 
-Senast genomgången: 2026-10-29 (app.js, vyer.js, ledning.js, kontroll.js, adminpanel.js, admin.js, sakerhet.js, stod.js, chatt.js, mote.js, kalender.js, valj.js, grund.js, data.js, index.html).
+Senast genomgången: 2026-10-30, steg 11 "bygg klart i klienten" (app.js, vyer.js, ledning.js, kontroll.js, adminpanel.js, admin.js, sakerhet.js, stod.js, chatt.js, mote.js, videomote.js, samtal*.js, tema.js, layout.js, kalender.js, valj.js, grund.js, data.js, index.html). Nytt i steg 11 står samlat i avsnitt 3b.
 
 ---
 
@@ -12,12 +12,16 @@ Senast genomgången: 2026-10-29 (app.js, vyer.js, ledning.js, kontroll.js, admin
 |---|---|
 | Startsida | `crm/index.html` (CSP: bara egna externa skript + fyra hashade inbyggda – lägg aldrig till inbyggda skript) |
 | Inloggning | `crm/logga-in.html` → `localStorage['ih-crm-inloggad']`, kontot i `ih-crm-jag` (ah, sa, ad) |
-| Data | `IH.db` i `localStorage['ih-crm-v1']` (version 3). `IH.spara()` sparar, `IH.ritaOm()` ritar om meny + vy |
+| Data | `IH.db` i `localStorage['ih-crm-v1']` (version 4: aviseringar, mallar, taggar, egna fält, förväntat avslut, upprepade uppgifter – äldre data uppgraderas, byts inte ut). `IH.spara()` sparar, `IH.ritaOm()` ritar om meny + vy |
 | Vyer | `IH.vyer[namn](del)` → `{ titel, html, efter }`. Adress `#/namn/del` |
 | Knappar | `data-g="namn"` → `IH.G[namn](el, ev)` (en klicklyssnare på document i app.js) |
 | Formulär | `data-form="namn"` → `IH.FORM[namn](form, FormData)` |
 | Panel från höger | `IH.oppnaArk({ titel, under, ikon, kropp, fot, bred })` → `aside.ark` + `.slojan`; `IH.stangArk()` |
-| Meddelanden | `IH.toast(rubrik, text, ikon, { lank, knapp })` i `.toaster` (nere till höger) |
+| Meddelanden | `IH.toast(rubrik, text, ikon, { lank, knapp, knappar })` i `.toaster` (nere till höger) |
+| Ångra | `IH.angra(rubrik, text, aterstall)` – toast med **Ångra** i 8 s. Används när affärer, uppgifter, anteckningar, kunder och importer tas bort |
+| Aviseringar | `IH.avisera({ typ, rubrik, text, lank, till })` → `db.aviseringar`; klockan `.ih-klocka` (`data-g="aviseringar"`) |
+| CSV | `IH.csv.ladda(fil, kolumner, rader)` (semikolon, BOM, formelskydd) och `IH.csv.las(fil)` |
+| Sparade filter | `IH.filter.spara/lista/bort` (per konto och vy, i den här webbläsaren) |
 | Konfetti | `IH.konfetti(x, y)` (vunnen affär, klart projekt, alla samtalsfrågor) |
 | Lugn rörelse | `IH.lugn` = prefers-reduced-motion |
 
@@ -41,17 +45,19 @@ Senast genomgången: 2026-10-29 (app.js, vyer.js, ledning.js, kontroll.js, admin
 | Logga | `.sido__logo` | – |
 | Sök (öppnar paletten) | `.sido__sok` (dator), `.topp .sok` (mobil/surfplatta) | `palett` |
 | Ny (+) | `.sido__ny`, `.topp [data-g="ny"]` | `ny` |
+| Aviseringar (klockan) | `.sido .ih-klocka` (bredvid sök och Ny), `.topp .ih-klocka`, i den infällda listen `.sido-rals__klocka` | `aviseringar` |
 | Säljvy/Chefsvy (bara chefen) | `.vy-vaxel` | `vy-byt` |
 | Kontokortet | `.anv` | `konto-meny` (panel `.km-panel` på dator, annars ark) |
 | Hemsidan / Logga ut | `.sido__smalt a`, `[data-g="logga-ut"]` | `lamna`, `logga-ut` |
 | Återställ exempeldata (admin) | `.sido__aterstall` | `sido-aterstall` |
 | Fäll in menyn | `[data-sido-knapp]` (kanten) | – (tangent `[`) |
+| Infälld meny (list) | `nav.sido-rals`: sidorna som ikoner i grupper (`.sido-rals__halva--upp/--ner`, avdelare), knappen mitt på kanten, klockan sist i nedre halvan. Sök, **Ny** och kontot (`.topp__konto`) sitter då i toppraden `.topp`. Den dockade chatten (`.chf-ikon`/`.chf-dock`) tar plats under knappen | – |
 | Mobilmenyn (< 1101 px) | `nav.mobilmeny`: säljare Översikt, Förfrågn. (aria-label Förfrågningar), Säljtavla, Kunder · produktion Översikt, Projekt, Kunder, Offerter · admin Översikt, Kontroll, Admin, Säkerhet – + **Mer** (`[data-mer]`, `data-g="mer"`) | `mer` |
 | Vyns yta | `main#vy` | – |
 
 Menyn (säljare): Översikt (+ Försäljning för chefen) · **Sälj**: Förfrågningar, Säljtavla, Kunder, Offerter, Dokument, Kundmöte · **Produktion**: Projekt · **Verktyg**: Kolla marken · **Mitt**: Meddelanden, Att göra, Inställningar. Brickor: nya förfrågningar (varm), öppna affärer, antal kunder, aktiva projekt, uppgifter i dag (varm), olästa (varm).
 
-Kontomenyn (`.km-panel`): status (snabbval `data-g="satt-narvaro"` + alla via `km-status`), **Byt konto** (exempelkontona, `valj-anvandare`), **Tema**, **Layout**, Min profil, Nytt konto (chef/admin, `km-nytt-konto`) eller Meddelanden, Logga ut.
+Kontomenyn (`.km-panel` på dator med utfälld meny, annars ark `.km-ark`; stängs vid klick utanför): status (snabbval `data-g="satt-narvaro"` + alla via `km-status`), **Byt konto** (exempelkontona, `valj-anvandare`), **Tema**, **Layout**, Min profil, Nytt konto (chef/admin, `km-nytt-konto`) eller Meddelanden, Logga ut.
 
 ### Kortkommandon
 
@@ -75,10 +81,11 @@ Kontomenyn (`.km-panel`): status (snabbval `data-g="satt-narvaro"` + alla via `k
 | **/ · Tab** | Chatten (i rutan) | Mallar / nästa fält i mallen |
 | **Ctrl J / Ctrl F** | Chatten | Nästa olästa konversation / sök i konversationen |
 | **↑ ↓ · R · E · P · T · Enter** | Chatten (fokus i tråden) | Flytta / svara / ändra / fäst / uppgift / meny |
+| **J / K · ↑ ↓ · Enter · X** | Listor med `data-radlista` (aviseringar, mallar, Ny offert m.fl.) | Nästa/föregående rad, öppna, kryssa (massåtgärder) |
 | **Shift + Esc** | Supportläge | Tillbaka till Admin |
 | **?** | Guiden | Öppnar guidemenyn (guide.js) |
 
-Kommandopaletten (`.palett`): Senaste (kund/affär/förfrågan/offert), **Snabbåtgärder** (Ny kund, Ny affär, Ny förfrågan, Ny uppgift, Starta kundmöte), **Gå till** (alla sidor rollen får se). Söker kunder, affärer, förfrågningar och offerter; från tre tecken även i ordning ("sgb" → Skärgårdsbyn).
+Kommandopaletten (`.palett`): Senaste (kund/affär/förfrågan/offert), **Snabbåtgärder** (Ny kund, Ny affär, Ny förfrågan, Ny uppgift, **Ny offert**, **Nytt videomöte**, Starta kundmöte – inte för admin), tema och layout (skriv t.ex. "tema", "mörk", "layout", "minimal"), **Gå till** (alla sidor rollen får se). Söker kunder, affärer, förfrågningar, offerter, **dokument**, **anteckningar och aktiviteter** och (via `IH.sok.lagg` från chatt.js) **chattmeddelanden**; från tre tecken även i ordning ("sgb" → Skärgårdsbyn).
 
 ---
 
@@ -129,7 +136,7 @@ För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 - `.offtopp` – `.offtopp__ord` (väntar på svar, Träffsäkerhet, Tid till ja, Godkänt värde, staplar per vecka), `.offtopp__hoger`: sök `[data-offsok]`, `.snartut` **Går ut snart** (`offert-folj-upp`, `offert-forlang` +14 d), `.offinsikt` (Per hus, Vanligaste posterna).
 - `.kundverktyg` – `off-filter` (Alla, Mina, Väntar på svar, Går ut snart, Godkända, Utkast, Avböjda), sortering `[data-offsort]` (Senaste först, Går ut först, Störst summa).
 - Tabellen `.tabell--offert` – rad `offert-oppna`, `offert-folj-upp`, `offert-ny-version`, `offert-forlang` (klocka när ≤ 10 d kvar).
-- Offertsidan: `.vyhuvud` (**Skriv ut / PDF** `skriv-ut`, **Markera som skickad** `offert-skicka` för utkast, **Kunden godkände** `aff-vinn` för skickad), `.ostatus` (Utkast → Skickad → Godkänd + giltighetsring), `.off-not` (skickad: "skapa en ny version" `offert-ny-version`), `.offertred` (modellrad `offert-modell`, rader `.offertrader` text/antal/pris + `offert-bort`, `.offertlagg` `[data-lagg]` ur prislistan eller Egen rad, `.offertsumma`), `.dokyta` (dokumentet `article.dok#dok`). Godkänd/ersatt/avböjd = låst. Summan blir affärens värde.
+- Offertsidan: `.vyhuvud` (länkar `.off-lankar` till affären, kunden och projektet; **Skriv ut / PDF** `skriv-ut`, **Mejl eller SMS** `mall-anvand`, **Skicka offerten** `offert-skicka` för utkast → arket med ämne och följebrev `[data-offmejl]` och knapparna `offert-pdf`, `offert-mejla` Öppna i mejlprogrammet, `offert-markera` **Markera som skickad** – sparar en kopia i dokumentarkivet och loggar "markerad som skickad, mejlutkast öppnat"), `.off-svar` för skickad: **Kunden godkände** `aff-vinn`, **Kunden avböjde** `offert-avbojd`, Följ upp, Förläng 14 d, Ny version; godkänd/avböjd visar utfall och datum, `.ostatus` (Utkast → Skickad → Godkänd + giltighetsring), `.off-not` (skickad: "skapa en ny version" `offert-ny-version`), `.offertred` (modellrad `offert-modell`, rader `.offertrader` text/antal/pris + `offert-bort`, `.offertlagg` `[data-lagg]` ur prislistan eller Egen rad, `.offertsumma`), `.dokyta` (dokumentet `article.dok#dok`). Godkänd/ersatt/avböjd = låst. Summan blir affärens värde.
 
 ### Dokument `#/dokument` (arkiv och mallar)
 - `.dk-hjalte` – `.dk-hjalte__text` (rubrik, `.dk-flikar` `dok-flik` Arkiv/Mallar, `.dk-hjalte__knappar`: **Ladda upp** `.dk-ladda` (filfält, filskannern kontrollerar), exportera `dok-csv`), `.dk-stats` (`dok-lage`: väntar på svar, godkänt & signerat, går ut inom 7 dagar, svarstid), `.dk-blick` / `.dk-fack` (`dok-fack`: Offerter, Ordrar, Avtal, Ritningar, Bygglov, Checklistor, Foton …; släpp filer), `.dk-verktyg` (sök, `dok-vem` Mina/Alla, år, sortering, gruppering, `.dk-lagen`).
@@ -156,6 +163,7 @@ För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 - Prototyp (kräver server, sägs i Om konversationen): notiser och pling till andra datorer (här bara mellan flikar + Simulera ett svar), läskvitton/”Sett av” och ”skriver …” mellan olika personer, påminnelser när fliken är stängd (påminnelsen ligger i Att göra och visas som toast om fliken är öppen), filer på server och riktig virusskanning, sökning i stor historik.
 
 ### Videomöten `#/videomote[/id]` (videomote.js, samtal.js, samtal-ui.js, mote-gast.html)
+- **Sidan Videomöten** `#/videomote` (nås via **Alla videomöten** `.komm__vm` under Kundmöte): `.vm-sidhuvud` med **Nytt videomöte** (`vm-nytt` – arket med **Starta nu** eller boka en tid), Kommande och Senaste (`.vm-lista`, `vm-anslut`), `.vm-arlig` (prototyptexten). Också i sökpaletten.
 - **Boka** (`vm-boka`, arket `#vm-boka-form`): knappen **Videomöte** på kundsidan (`.kh__knappar`), i kundlistan (`.kl__vm`), på affärssidan och affärsarket, **Boka videomöte** under Kundmöte (`.komm__vm`, med länken Alla videomöten) och på sidan Videomöten. I kalendern (Försäljningsledning och profilen, `kalForm`) finns växeln **Videomöte** (`.vm-vaxel`, syns när typen är Möte) – den skapar mötet med kunden som gäst och öppnar inbjudan. Fält: Vad, Dag, Tid, Längd (15/30/45/60 min, förval 45), gäster (namn, e-post valfri, kundens kontakt förifylld), kollegor, **Mötesinställningar**: Gäster väntar i väntrummet (på) och Vem går direkt in (Alla i företaget / Bara jag). Bokningen skapar `IH.db.videomoten` (id `v…`, rumskod som `kqd-mwpz-tfa`), en kalenderaktivitet (typ möte, fältet `video`) och en påminnelse under Att göra.
 - **Inbjudan** (`vm-inbjudan`, arket Inbjudan är klar): **Kopiera länk** (`vm-kopiera-lank`, länken till gästsidan `mote-gast.html#m=…` – allt efter # skickas aldrig till servern), **Skicka inbjudan** per deltagare (`vm-mejla`, öppnar mejlprogrammet med färdig text – inget skickas automatiskt), **Ladda ner kalenderfil** (`vm-ics`, .ics med länk och påminnelse 10 min före), **Kopiera inbjudningstext** (`vm-kopiera-text`). Kollegor får CRM-länken `index.html#/videomote/<id>` och går direkt in.
 - **Anslut** (`vm-anslut`): på kalenderns dagrader och dagarket, i profilens dagpanel, under Att göra (påminnelsen), i Kommande möten, på översikten (”Videomöte 14.00 · Anslut”, framträdande från 10 min före), på sidan Videomöten och i chattens kort. Öppnar man `#/videomote/<id>` direkt startar förhandsvisningen.
@@ -177,7 +185,7 @@ För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 - `.ao-band`: **Teamet just nu** (`lp-chef-filter`, `ch-skriv-till`), **Vem jobbar när** (`lp-narv-v`, `lp-franvaro`), **Teamets kalender** (`lp-kal-vem`, `lp-kal-man`, `lp-kal-vy`, `lp-kal-typ`, `lp-kal-ny`, `lp-kal-dag`, `lp-kal-ics`), **Behöver din uppmärksamhet** (`lp-agera-f`, `lp-fordela-smart` **Fördela smart** fördelar jämnt, `lp-ta-sjalv` Ta själv, `lp-fordela` Fördela), **Öppna affärer per säljare**, **Aktivitet 14 dagar**, **Topplistan** (`lp-topp-period` 30 d/90 d/I år).
 
 ### Inställningar `#/installningar`
-- **Utseende** (sex teman + Följ systemet), **Layout** (Minimal, Normal, Full), `.instopp` (prisspann, tillval, ändrad), `.prisrutnat` två `form.prisform[data-form=prislista]` (Husen, Tillval och poster), `.installning__proto` **Återställ exempeldata** (`aterstall`, kräver andra klick inom 4 s).
+- `.inst-tema` **Utseende** (sex teman + Följ systemet, `tema-val`), `.inst-layout` **Layout** (Minimal, Normal, Full, `layout-val`), `.inst-mallar` **Mallar för mejl och SMS** (`mall-ny`, `mall-forhand` Visa, `mall-andra` Ändra; fält `{förnamn}` m.fl.; kanal mejl, SMS eller chatt; "CRM:et skickar inget självt"), `.instopp` (prisspann, tillval, ändrad), `.prisrutnat` två `form.prisform[data-form=prislista]` (Husen, Tillval och poster), `.installning__proto` (prototyptexten; för admin **Återställ exempeldata** `aterstall`, kräver andra klick inom 4 s).
 
 ### Kolla marken `#/kolla-marken`
 - `.verktygtopp` + `iframe.verktygram__ram` med hemsidans verktyg (`vad-far-jag-bygga.html?crm=1`): jordart, vatten och djup till berg från SGU, sök adress eller position. Översiktligt – ingen geoteknik.
@@ -187,9 +195,49 @@ För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 - **Adminpanel** `#/admin`: `.ap-hjalte`, Konton och roller (`ap-filter`, `ap-andra`, `valj-anvandare` Visa som, `ap-aktiv` Inaktivera, `km-nytt-konto` Nytt konto), Bör åtgärdas, Vem får göra vad, För den här webbläsaren (utloggning vid inaktivitet), Data och system (export, import, `ad-aterstall`), Granskning och ändringar (`ap-logg`).
 - **Säkerhet** `#/sakerhet`: `.sh-hjalte`, `.sh-drift`, `.sh-verktyg` (`sh-rapport`, `sh-auto`, `sh-behorighet`, `sh-kopiera`), Sju kontroller (`sh-skanna[data-ids]`: skadlig kod, uppdateringar, buggar, läckor, intrång, avvikande beteende, trasigt), Skanningens logg (`sh-loggtyp`), Poängen över tid. Poäng = 100 − avdrag (hög −25, medel −10, låg −3).
 
+### Teman och layout (tema.js, layout.js)
+- **Teman** (`IH.tema`, sparas per konto i `ih-crm-tema:<id>`): Följ systemet (Original eller Mörk efter datorn), **Original** (varm kräm och bärnsten), **Ljus**, **Mörk**, **Färgglad**, **Bygg** (betong, stål och varselgult), **Office** (stramt, svalt och neutralt). Väljs i Inställningar (`.tema-valjare--stor`), kontomenyn (`.km-tema`, `.tema-valjare--liten`) och sökpaletten.
+- **Layout** (`IH.layout()`, `IH.layout.satt(id)`, sparas i `ih-crm-layout:<id>`, attributet `html[data-layout]`): **Minimal** (bara det du jobbar med – tätt och lugnt), **Normal** (överblick utan dekor), **Full** (allt, stora bildytor och 3D – förval). Inget försvinner; det som döljs i Minimal finns i Normal och Full. Väljs i Inställningar (`.inst-layout`), kontomenyn (`.km-layout`) och sökpaletten. Händelsen `ih:layout` skickas vid byte.
+- Turerna använder `om: inteMin / baraMin / baraFull` och reservlistor för det som döljs i ett läge.
+
 ### Gemensamma detaljer
 - Datumrutor får CRM:ets egen kalender (kalender.js), rullgardiner egen väljare (valj.js), talrutor −/+ (grund.js). Uppladdade filer kontrolleras av filskannern (filskanner.js + filregler.js).
 - `IH.lysUpp(väljare)` lyser upp det som ändrats; toasts med Ångra/Öppna.
+
+---
+
+## 3b. Nytt i steg 11 – färdigt i klienten (2026-10-30)
+
+Allt nedan finns i koden och fungerar i den här webbläsaren. Inget skickas av CRM:et självt – mejl och SMS öppnas i användarens eget program och loggas som "mejlutkast öppnat".
+
+**Skalet**
+- **Aviseringar**: klockan (se Skalet) öppnar arket Aviseringar (`.avis-panel`): Nya/Tidigare, klick öppnar det raden gäller (`avis-oppna`), `avis-last`, **Markera alla som lästa** (`avis-alla-lasta`), **Ta bort lästa** (`avis-rensa`), **Skrivbordsaviseringar** Slå på/Stäng av (`avis-skrivbord`). Text: "Aviseringar visas när CRM:et är öppet i den här webbläsaren."
+- **Påminnelser som larmar**: vid start, varje minut och när fliken visas igen går öppna uppgifter med förfallotid igenom. Passerad tid → toast med **Klar**, **+1 h**, **Öppna**, en avisering (en gång per uppgift) och skrivbordsavisering om den är på.
+- **Dagens sammanfattning**: första gången kontot öppnar CRM:et en dag – uppgifter i dag och offerter som går ut inom 7 dagar.
+- **Ångra** i 8 s efter borttagningar; **CSV** med formelskydd; **J/K/X** i listor; sökpaletten med Dokument, Anteckningar, Chatt, Ny offert och Nytt videomöte.
+
+**Sälj**
+- **Affär**: **Ändra affären** (`aff-andra`: Titel, Kund, Hus, Uppskattat värde – styrs av offerten när en finns, Ansvarig säljare för chef, **Förväntat avslut**), **Ta bort affären** (`aff-bort`, bara utan godkänd offert, två klick, Ångra), **Skriv ut** (`aff-skriv-ut`). Säljtavlan: **Exportera CSV** (`aff-csv`), massåtgärder i listläget **Flytta steg** (`aff-bulk-steg`) och byt ansvarig (chef, `aff-bulk-ansvarig`).
+- **Uppgifter**: Ändra (`uppg-andra`: Vad ska göras?, Datum, Tid, Ansvarig, Kund, Affär, **Upprepa**: Upprepas inte / Varje vecka / Var 14:e dag / Varje månad) och Ta bort med Ångra. En upprepad uppgift som bockas av skapar nästa. Massåtgärder under Att göra: Klar, Skjut, Ta bort (`uppg-bulk-*`).
+- **Anteckningar**: egna anteckningar i historiken kan ändras och tas bort (`akt-andra`, `akt-bort`); ändrade visas som ändrade. Systemhändelser går inte att ändra.
+- **Offerter**: **Ny offert** (`offert-ny`, välj affär – de utan offert först), **Skicka offerten** (arket ovan), **Kunden avböjde**, **Följ upp** (`offert-folj-upp`: Ring, SMS, Mejl `offert-kontakt` + uppföljning I morgon/Om 3 dagar/Nästa vecka), massåtgärd **Förläng 14 d** (`off-bulk-forlang`), **Exportera** (`off-csv`).
+- **Förfrågningar**: dubblettkontroll vid Lägg in förfrågan (telefon/e-post) med **Koppla till …** (`nyf-koppla`); **Välj flera** (`f-valjlage`) → Tilldela (chef, `f-bulk-tilldela`) och Ej aktuell (`f-bulk-ej`); **Annan mall** (`mall-anvand`) för svarsutkastet.
+- **Kunder**: **Mer** på kundkortet (`kund-mer`): Mejl eller SMS från mall, **Kolla marken**, Skriv ut kundkortet, Exportera historiken (CSV), **Registerutdrag** (utskrift eller JSON), **Slå ihop med…** (`kund-ihop`). **Taggar** (`kund-tagg-ny` med förslag ur befintliga `kund-tagg-val`, `kund-tagg-bort`; kundlistan kan filtreras på tagg), **egna fält** som admin definierat, **Importera** kunder från CSV (`kund-import`, chef och admin, högst 500 rader, förhandsvisning med dubbletter, Ångra).
+- **Sparade filter** (`filter-spara`, `filter-anvand`, `filter-hantera` döp om/ta bort) som flikar på Kunder, Säljtavlan, Förfrågningar och Offerter.
+- **Kolla marken** från kund eller affär (`kund-mark` → `#/kolla-marken/<kund>`): kunden står överst och **Spara på kunden/affären** (`km-spara`) sparar resultatet i historiken.
+- **Vunnen och klart**: vinsttoasten har **Skriv tackbrev**; när ett projekt blir Klart föreslås **Gör överlämningsprotokollet** och **Uppföljning om 30 dagar**.
+
+**Ledning och admin**
+- **Försäljningsledning**: rapporten med period (Denna månad, Förra månaden, Kvartalet, I år, Eget intervall, `lp-rapp-period`), jämförelse, förlustorsaker och CSV (`lp-rapp-csv`); uppgifter i teamets kalender kan ändras och tas bort (`lp-kal-uppg`); fördelning aviserar säljaren.
+- **Adminpanelen**: **Börja med tom data** (`ap-tom`: exportera först, skriv TÖM; konton, prislista, mallar och inställningar behålls), **egna kundfält** (`ap-ef-*`), **förlustorsaker** (`ap-fo-*`), **gallring** (av som standard; "Kunder utan aktivitet på N månader" med Registerutdrag och Radera), **Exportera hela aktivitetsloggen** (`logg-csv`).
+- **Kontrollcentralen** hittar kunder med samma telefon eller e-post (länk till Slå ihop).
+
+**Kommunikation**
+- Chatten: nya meddelanden och omnämnanden blir aviseringar, chattmeddelanden går att söka i paletten, egna chattmallar från Inställningar visas efter de inbyggda.
+- `IH.videomote.nytt()` / **Nytt videomöte** (`vm-nytt`): arket med **Starta nu** eller boka en tid, utan förvald kund. Sidan **Videomöten** `#/videomote` (nås via **Alla videomöten** under Kundmöte) visar Kommande och Senaste med **Anslut**. Gränssnittet säger "Prototyp – videomötet fungerar mellan flikar i den här webbläsaren."
+
+### Kräver server (listas, låtsas inte)
+Fleranvändare och synk mellan datorer · riktig inloggning och kontoflöden · förfrågningar direkt från hemsidans formulär · skicka mejl/SMS från CRM:et · kunden godkänner offerten själv (signering) · aviseringar när CRM:et är stängt och mellan personer · videomöten mellan datorer (signalväxel + TURN; stora möten senare med LiveKit) · kalendersynk med Outlook/Google · inkommande mejl på kunden · fillagring och riktig virusskanning · säker import/export · GDPR fullt ut (radering i backup, samtyckeslogg) · revisionslogg och behörighet som går att lita på · säkerhetsheaders · säkerhetskopior · eventuell SGU-proxy. Underlag: `.claude/kraver-server.md` och scratchpad `fardig/plan.md` del 2.
 
 ---
 
@@ -200,7 +248,7 @@ För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 3. **Skapa affär** (från förfrågan, från kundkortet med Ny affär, med N → Affär, eller Ny affär på säljtavlan): välj hus, värdet hämtas ur prislistan, steg Kontakt tagen. Förfrågan blir "Blev affär".
 4. **Säljtavlan**: boka platsbesök → **Tomt och platsbesök** (Platsbesöket är bokat / Boka platsbesök i mötet lägger en uppgift om en vecka). Följ "Nästa bästa steg" och Fokus i dag.
 5. **Kundmöte**: välj affär och upplägg, **Starta presentation**, anteckna (N), räkna i **kalkylen** (K) och **Spara som offert**, avsluta med **Boka platsbesök** eller **Mejla en sammanfattning**. Anteckningen sparas när mötet stängs.
-6. **Offert**: Skapa offert (huset + frakt + montage ur prislistan) → justera rader och tillval → **Skriv ut / PDF** → **Markera som skickad** (affären → Offert skickad, giltig 30 d). Ändringar efter skickad: **Ny version** (gamla = ersatt). Följ upp eller **förläng +14 d** under Offerter/Går ut snart eller i Dokument.
+6. **Offert**: Skapa offert (huset + frakt + montage ur prislistan) → justera rader och tillval → **Skicka offerten**: Skriv ut / PDF, Öppna i mejlprogrammet och bifoga PDF:en, **Markera som skickad** (affären → Offert skickad, giltig 30 d, kopia i dokumentarkivet). Svar: **Kunden godkände** eller **Kunden avböjde** på offertsidan. Ändringar efter skickad: **Ny version** (gamla = ersatt). Följ upp eller **förläng +14 d** under Offerter/Går ut snart eller i Dokument.
 7. **Förhandling** → **Order signerad** (eller Kunden godkände på offerten): affären vunnen, offerten godkänd, konfetti, **projekt** skapas (montage om 12 veckor) och projektvyn öppnas.
 8. **Projekt**: checklistan Innan montaget (kundens och vår del), montagedag, stegen Ritning och lov → Tillverkning → Grund och mark → Leverans och montage → Slutbesiktning → **Klart** (överlämnat).
 9. **Dokument och mallar** längs vägen: Följebrev till offert, Protokoll från platsbesök, Tack för ordern, Checklista inför montage, Leveransplan, Egenkontroll efter montage, Överlämningsprotokoll.
@@ -224,16 +272,20 @@ Dokumentsidan minns fliken Arkiv/Mallar i minnet – turerna använder `iArkiv(v
 
 | id | Namn | Roller |
 |---|---|---|
-| valkommen | Rundtur: hitta i CRM:et | alla |
+| valkommen | Rundtur: hitta i CRM:et (nu med klockan) | alla |
+| utseende | Teman och layout: sex teman, Följ systemet, Minimal/Normal/Full, kontomenyn, sökningen, den infällda menyn | alla |
+| aviseringar | Aviseringar och påminnelser: klockan, panelen, skrivbordsaviseringar, påminnelser som larmar | alla |
 | oversikt | Översikt | alla |
 | forfragningar, saljtavla, affar, kunder, kundsida, offerter, offert, dokument, kundmote, presentation, projekt | Sidorna | säljare (admin i supportläge) |
-| att-gora, chatt, profil, installningar | Sidorna | alla |
+| videomote | Videomöte med kund: boka från kundsidan, inbjudan, anslut, förhandsvisning, kontroller, väntrum, anteckning | säljare |
+| videomoten | Videomöten: Alla videomöten, Nytt videomöte/Starta nu, listan, prototyptexten, från chatten, kundens väg in, Dela innehåll, efter mötet | säljare |
+| att-gora, chatt, chatt-verktyg, profil, installningar | Sidorna (chatt-verktyg: meddelandets meny Mer, sök i tråden, fästa, mallar, eget fönster, tangenter) | alla |
 | chef | Försäljningsledning | chefen |
 | kontroll, adminpanel, sakerhet, supportlage | Ledning och admin | admin |
 | flode-ny-kund, flode-offert, flode-mote, flode-dokument, flode-overlamning | Flödena 1–5 | säljare |
 
-Testat i headless Edge (1440×900 och 390×844) för ah, sa och ad: varje steg hittar sitt element.
+Testat 2026-10-30 i headless Edge (scratchpad `g11/tur.mjs <jag> <läge> <turer|alla> [bredd] [höjd]`) i alla tre layoutlägena för ah, sa och ad: varje steg hittar sitt element eller hoppas medvetet över (`om`/`valfri`).
 
 ### Underhåll
-- Ändras en klass eller ett `data-g` i CRM:et: sök i `turer.js` och uppdatera, kör testskriptet (scratchpad `testa.mjs` + `utforska.mjs`) och uppdatera den här filen.
+- Ändras en klass eller ett `data-g` i CRM:et: sök i `turer.js` och uppdatera, kör testskriptet (scratchpad `g11/tur.mjs`, som använder `kortur.js`) i Minimal, Normal och Full och uppdatera den här filen.
 - Nya sidor: lägg till en tur med `vy` = vyns namn så hittar "Guida mig på den här sidan" den.

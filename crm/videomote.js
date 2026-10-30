@@ -14,6 +14,8 @@
   if (!IH || !IH.G) return;
   var e = IH.e, i = IH.i, G = IH.G;
   var ARLIG = 'Prototyp – videomötet fungerar mellan flikar i den här webbläsaren.';
+  // Står i inbjudningstexten och kalenderfilen: mottagaren ska inte tro att länken fungerar från en annan dator ännu
+  var ARLIG_LANK = 'Obs: testversion – länken fungerar just nu bara i samma webbläsare som mötet bokades i.';
   var LANGDER = [15, 30, 45, 60];
   var MAX = 4; // direktsamtal (mesh): högst fyra personer
 
@@ -131,7 +133,7 @@
       '1. Öppna länken i Chrome, Edge eller Safari, på dator eller mobil. Du behöver inget konto eller program.',
       '2. Skriv ditt namn och prova kamera och mikrofon.',
       v.vantrum ? '3. Klicka på Be att få gå med – jag släpper in dig.' : '3. Klicka på Gå med.');
-    rader.push('', kollega ? 'Vi ses!' : 'Hör av dig om tiden inte passar.', '', 'Hälsningar', vardNamn(v), 'Legohus');
+    rader.push('', kollega ? 'Vi ses!' : 'Hör av dig om tiden inte passar.', '', 'Hälsningar', vardNamn(v), 'Legohus', '', ARLIG_LANK);
     return rader.join('\r\n');
   }
   function amne(v) { var s = new Date(v.start); return 'Videomöte med Legohus – ' + kortDag(s) + ' kl. ' + kl(s); }
@@ -149,7 +151,7 @@
     var rader = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Legohus//CRM//SV', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
       'UID:' + v.rum + '@legohus-crm', 'DTSTAMP:' + f(new Date()), 'DTSTART:' + f(new Date(v.start)), 'DTEND:' + f(slut(v)),
       'SUMMARY:' + esc(v.titel), 'LOCATION:' + esc('Videomöte – ' + l), 'URL:' + l,
-      'DESCRIPTION:' + esc('Videomöte med ' + vardNamn(v) + ', Legohus.\n\nLänk: ' + l + '\n\nÖppna länken i Chrome, Edge eller Safari. Du behöver inget konto eller program.')];
+      'DESCRIPTION:' + esc('Videomöte med ' + vardNamn(v) + ', Legohus.\n\nLänk: ' + l + '\n\nÖppna länken i Chrome, Edge eller Safari. Du behöver inget konto eller program.\n\n' + ARLIG_LANK)];
     v.deltagare.forEach(function (d) { if (d.typ === 'gast' && d.epost && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.epost)) rader.push('ATTENDEE;CN=' + esc(d.namn || d.epost) + ';RSVP=TRUE:mailto:' + d.epost); });
     rader.push('BEGIN:VALARM', 'TRIGGER:-PT10M', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(v.titel), 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR');
     var vik = IH.icsVik || function (r) { return r; };
@@ -288,17 +290,20 @@
           '<label><input type="radio" name="direkt" value="jag"><span>Bara jag</span></label></fieldset></details>' +
       '<p class="vm-boka__fel" data-vm-fel role="alert" hidden></p>' +
       '<p class="vm-arlig">' + i('info') + ARLIG + '</p></form>';
-    IH.oppnaArk({ titel: 'Boka videomöte', ikon: 'kalender', under: 'Kunden får en länk – inget konto eller program behövs.', kropp: kropp,
-      fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp--virke" type="submit" form="vm-boka-form">' + IH.vmIk() + 'Boka och bjud in</button>' });
+    IH.oppnaArk({ titel: opt.startaNu ? 'Nytt videomöte' : 'Boka videomöte', ikon: 'kalender', under: opt.startaNu ? 'Starta direkt eller boka en tid. Gäster får en länk – inget konto eller program behövs.' : 'Kunden får en länk – inget konto eller program behövs.', kropp: kropp,
+      fot: '<button class="knapp" type="button" data-g="stang-ark">Avbryt</button>' +
+        (opt.startaNu ? '<button class="knapp" type="submit" form="vm-boka-form" data-vm-nu title="Mötet börjar nu – bjud in fler inifrån mötet">' + i('blixt') + 'Starta nu</button>' : '') +
+        '<button class="knapp knapp--virke" type="submit" form="vm-boka-form">' + IH.vmIk() + 'Boka och bjud in</button>' });
   }
   document.addEventListener('submit', function (ev) {
     var t = ev.target; if (!t.matches || !t.matches('[data-vm-boka]')) return;
     ev.preventDefault();
     var fel = function (txt, falt) { var p = t.querySelector('[data-vm-fel]'); if (p) { p.textContent = txt; p.hidden = false; } if (falt) falt.focus(); };
+    var nu = !!(ev.submitter && ev.submitter.hasAttribute('data-vm-nu'));
     var titel = t.titel.value.trim();
     if (!titel) { fel('Skriv vad mötet gäller.', t.titel); return; }
-    if (!t.datum.value) { fel('Välj en dag.', t.datum); return; }
-    var start = new Date(t.datum.value + 'T' + (t.tid.value || '10:00') + ':00');
+    if (!nu && !t.datum.value) { fel('Välj en dag.', t.datum); return; }
+    var start = nu ? new Date() : new Date(t.datum.value + 'T' + (t.tid.value || '10:00') + ':00');
     if (isNaN(start.getTime())) { fel('Dagen eller tiden går inte att läsa.', t.datum); return; }
     var deltagare = [], felFalt = null;
     t.querySelectorAll('.vm-boka__gast').forEach(function (r) {
@@ -311,14 +316,16 @@
     if (felFalt) { fel('E-postadressen ser inte ut att stämma – rätta den eller lämna fältet tomt.', felFalt); return; }
     t.querySelectorAll('input[name=kollega]:checked').forEach(function (c) { deltagare.push({ typ: 'kollega', id: c.value }); });
     if (deltagare.length > MAX - 1) { fel('Ett videomöte rymmer ' + MAX + ' personer – du och ' + (MAX - 1) + ' till. Ta bort någon.'); return; }
-    if (!deltagare.length) { fel('Bjud in minst en gäst eller kollega.', t.querySelector('[data-vm-gnamn]') || t.querySelector('[data-g="vm-gast-ny"]')); return; }
+    if (!deltagare.length && !nu) { fel('Bjud in minst en gäst eller kollega.', t.querySelector('[data-vm-gnamn]') || t.querySelector('[data-g="vm-gast-ny"]')); return; }
     var langd = +(t.querySelector('input[name=langd]:checked') || { value: 45 }).value;
     var v = skapa({ titel: titel, start: start, langd: langd, kund: t.getAttribute('data-kund') || null, affar: t.getAttribute('data-affar') || null,
-      deltagare: deltagare, vantrum: t.vantrum.checked, direkt: (t.querySelector('input[name=direkt]:checked') || { value: 'foretag' }).value });
-    IH.logga('system', 'Videomöte bokat: ' + v.titel + ' ' + narText(v), v.kund, v.affar);
+      deltagare: deltagare, vantrum: t.vantrum.checked, direkt: (t.querySelector('input[name=direkt]:checked') || { value: 'foretag' }).value, utanPaminnelse: nu });
+    IH.logga('system', (nu ? 'Videomöte startat: ' : 'Videomöte bokat: ') + v.titel + ' ' + narText(v), v.kund, v.affar);
     IH.spara();
     IH.rita();
-    inbjudanArk(v.id, true);
+    // Starta nu: rakt in i mötet – utom när gäster med e-post ska få inbjudan först (Anslut nu finns i arket)
+    if (nu && !deltagare.some(function (d) { return d.typ === 'gast' && d.epost; })) { anslut(v.id); return; }
+    inbjudanArk(v.id, !nu);
   });
   G['vm-gast-ny'] = function (el) {
     var f = el.closest('form'), yta = f && f.querySelector('[data-vm-gaster]'); if (!yta) return;
@@ -355,6 +362,13 @@
   }
 
   /* --- Klick ------------------------------------------------------------------------------ */
+  function nytt() {
+    var j = IH.jag(), stod = IH.visarSom && IH.visarSom();
+    if (stod) { IH.toast('Videomöten startas inte i supportläget', 'Lämna supportläget och starta från ditt eget konto.', 'oga-av'); return; }
+    if (j.roll === 'admin') { IH.toast('Videomöten startas från ett säljkonto', 'Administratörskontot har inga kund- eller kollegamöten.', 'info'); return; }
+    bokaArk({ startaNu: true });
+  }
+  G['vm-nytt'] = function () { nytt(); };
   G['vm-boka'] = function (el) {
     bokaArk({ kund: el.getAttribute('data-kund'), affar: el.getAttribute('data-affar'), dag: el.getAttribute('data-dag') });
   };
@@ -425,7 +439,7 @@
     var senaste = alla.filter(function (v) { var l = lage(v); return l === 'avslutat' || l === 'passerat'; }).sort(function (a, b) { return a.start < b.start ? 1 : -1; }).slice(0, 10);
     var kan = jag.roll !== 'admin' || (IH.visarSom && IH.visarSom());
     var html = '<header class="sidhuvud vm-sidhuvud"><div><p class="etikett">Kundmöte</p><h1>Videomöten</h1><p class="vm-sidhuvud__under">Möten med kunder och kollegor via länk – som Teams, direkt i CRM:et.</p></div>' +
-        (kan ? '<button type="button" class="knapp knapp--virke" data-g="vm-boka">' + IH.vmIk() + 'Boka videomöte</button>' : '') + '</header>' +
+        (kan ? '<button type="button" class="knapp knapp--virke" data-g="' + (IH.visarSom && IH.visarSom() ? 'vm-boka' : 'vm-nytt') + '">' + IH.vmIk() + 'Nytt videomöte</button>' : '') + '</header>' +
       (alla.length ? '<section class="kort" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('kalender') + '</span>Kommande</h2>' + (kommande.length ? '<span class="chip">' + kommande.length + '</span>' : '') + '</header><div class="kort__kropp">' +
           (kommande.length ? '<ul class="vm-lista">' + kommande.map(rad).join('') + '</ul>' : '<p class="vm-inbjudan__tom">Inga bokade videomöten.</p>') + '</div></section>' +
         (senaste.length ? '<section class="kort" data-in><header class="kort__huvud"><h2><span class="kort__ikon">' + i('klocka') + '</span>Senaste</h2></header><div class="kort__kropp"><ul class="vm-lista">' + senaste.map(rad).join('') + '</ul></div></section>' : '')
@@ -438,6 +452,6 @@
     skapa: skapa, skapaDirekt: skapaDirekt, hamta: hamta, forAktivitet: forAktivitet, lank: lank, mailto: mailto,
     inbjudningstext: inbjudningstext, ics: ics, bokaArk: bokaArk, inbjudanArk: inbjudanArk, motesInfo: motesInfo,
     markeraPagar: markeraPagar, sparaAvslut: sparaAvslut, anslut: anslut, lage: lage, narText: narText,
-    foljAktivitet: foljAktivitet, taBortForAktivitet: taBortForAktivitet, ARLIG: ARLIG
+    foljAktivitet: foljAktivitet, taBortForAktivitet: taBortForAktivitet, ARLIG: ARLIG, nytt: nytt
   };
 })();

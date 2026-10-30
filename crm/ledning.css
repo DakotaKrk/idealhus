@@ -1582,3 +1582,41 @@ html body .lp-kal__man > :is(button, .knapp, .ap-filter) { height: 36px; min-hei
 :root[data-tema]:not([data-tema="original"]) .lp-nv__d.jobb:not(.helg) { background: linear-gradient(170deg, color-mix(in srgb, var(--t-accent) 30%, var(--t-yta)), color-mix(in srgb, var(--t-accent) 70%, var(--t-yta))); }
 :root[data-tema]:not([data-tema="original"]) .lp-nv__d.jobb i { background: rgb(var(--t-blaeck-rgb) / .5); }
 .lp-nv__d.idag { box-shadow: 0 0 0 2px var(--t-yta), 0 0 0 3.5px var(--t-accent, var(--virke)); }
+
+/* Rapporten (lp-rapport): period, jämförelse, konvertering, tider, förlustorsaker och kommande avslut */
+.lp-rapp__verktyg { display: grid; gap: 10px; }
+.lp-rapp__verktyg .ap-filterrad { justify-content: flex-start; }
+.lp-rapp__eget { max-width: 420px; }
+.lp-rapp__period { margin: 0; font-size: .85rem; color: var(--text-2); }
+.lp-rapp__period b { color: var(--t-text); font-weight: 650; }
+.lp-rapp__tal { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 14px; }
+.lp-rapp__tal > div { display: grid; gap: 3px; padding: 12px 14px; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); }
+.lp-rapp__tal small { font-size: .74rem; color: var(--text-3); }
+.lp-rapp__tal strong { font: 700 1.3rem/1.1 var(--rubrik); color: var(--t-text); font-variant-numeric: tabular-nums; }
+.lp-rapp__tal span { font-size: .74rem; color: var(--text-3); }
+.lp-rapp__diff { font-style: normal; font-weight: 650; color: var(--text-2); }
+.lp-rapp__diff[data-upp="true"] { color: var(--t-gron-text); }
+.lp-rapp__diff[data-upp="false"] { color: var(--t-rod-text); }
+.lp-rapp__del .lp-del { margin-top: 22px; }
+.lp-rapp__konv, .lp-rapp__orsaker, .lp-rapp__kom, .lp-rapp__tider { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lp-rapp__konv li { display: grid; grid-template-columns: minmax(150px, 1.3fr) 2fr auto auto; align-items: center; gap: 12px; }
+.lp-rapp__konv li > span:first-child { display: grid; gap: 2px; }
+.lp-rapp__konv b { font-weight: 650; font-size: .88rem; color: var(--t-text); }
+.lp-rapp__konv small, .lp-rapp__fore { font-size: .74rem; color: var(--text-3); font-style: normal; }
+.lp-rapp__konv strong { font: 700 1rem/1 var(--rubrik); color: var(--t-text); min-width: 3.4em; text-align: right; font-variant-numeric: tabular-nums; }
+.lp-rapp__orsaker li, .lp-rapp__kom li { display: grid; grid-template-columns: minmax(120px, 1.2fr) 2fr auto minmax(70px, auto); align-items: center; gap: 12px; font-size: .86rem; }
+.lp-rapp__orsaker b, .lp-rapp__kom b { font-variant-numeric: tabular-nums; color: var(--t-text); text-align: right; }
+.lp-rapp__orsaker small, .lp-rapp__kom small { color: var(--text-3); font-size: .76rem; text-align: right; }
+.lp-rapp__tider { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.lp-rapp__tider li { display: grid; gap: 3px; padding: 12px 14px; border-radius: calc(14px * var(--t-radie-k, 1)); background: var(--t-yta); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .08); }
+.lp-rapp__tider small { font-size: .74rem; color: var(--text-3); }
+.lp-rapp__tider strong { font: 700 1.15rem/1.1 var(--rubrik); color: var(--t-text); }
+.lp-rapp__tider em { font-style: normal; font-size: .74rem; color: var(--text-3); }
+.lp-rapp__not { margin: 10px 0 0; font-size: .78rem; color: var(--text-3); line-height: 1.5; }
+@media (max-width: 640px) {
+  .lp-rapp__konv li { grid-template-columns: 1fr auto; }
+  .lp-rapp__konv .lp-mal__spar { grid-column: 1 / -1; grid-row: 2; }
+  .lp-rapp__konv .lp-rapp__fore { grid-column: 1 / -1; }
+  .lp-rapp__orsaker li, .lp-rapp__kom li { grid-template-columns: 1fr auto auto; }
+  .lp-rapp__orsaker .lp-mal__spar, .lp-rapp__kom .lp-mal__spar { grid-column: 1 / -1; grid-row: 2; }
+}

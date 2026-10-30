@@ -8620,3 +8620,119 @@ html[data-layout="minimal"] .senvunna { display: none; }
 .vy .tangenter .tangenter__lista > span { overflow: hidden; }
 .vy .tangenter .tangenter__lista > span { text-overflow: ellipsis; }
 .vy .tangenter .etikett { white-space: normal; }
+
+/* =====================================================================
+   Bygg klart (steg 11): ändra och ta bort, mallar, massåtgärder,
+   sparade filter, import, registerutdrag och utskrift. Bara befintliga
+   tokens, så att alla sex teman och tre layoutlägen följer med.
+   ===================================================================== */
+.formular__not .i { flex: none; }
+.logg__rad > div { min-width: 0; }
+.logg__atg { display: inline-flex; gap: 10px; margin-left: 10px; opacity: 0; transition: opacity .2s; }
+.logg__rad:hover .logg__atg, .logg__atg:focus-within { opacity: 1; }
+@media (hover: none) { .logg__atg { opacity: 1; } }
+.logg__knapp { padding: 0; border: 0; background: none; font: 600 .75rem/1.4 var(--rubrik); color: var(--virke-djup); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.logg__knapp:hover { color: var(--text); }
+.aff__forv { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; font-size: .72rem; color: var(--text-3); white-space: nowrap; }
+.aff__forv .i { width: 12px; height: 12px; }
+.aff__fot .aff__forv + * { margin-left: 0; }
+.off-lankar { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 4px 0 0; }
+.off-lankar a { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); font-size: .875rem; text-decoration: none; }
+.off-lankar a:hover { color: var(--virke-djup); text-decoration: underline; }
+.off-lankar .i { width: 15px; height: 15px; }
+.off-svar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 18px; margin: 0 0 14px; padding: 16px 18px; }
+.off-svar .etikett { margin: 0 0 2px; }
+.off-svar b { font: 600 1rem/1.3 var(--rubrik); }
+.off-svar__knappar { display: flex; flex-wrap: wrap; gap: 8px; }
+.off-svar--utfall { justify-content: flex-start; }
+.off-svar--utfall .emo-ik { width: 28px; height: 28px; }
+.kh__tagg { padding-right: 4px; }
+.kh__tagg .i { color: var(--virke-djup); }
+.kh__tagg-bort { display: grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--text-3); cursor: pointer; }
+.kh__tagg-bort:hover { background: rgb(var(--t-blaeck-rgb) / .08); color: var(--text); }
+.kh__tagg-bort .i { width: 11px; height: 11px; }
+button.kh__tagg-ny { border: 0; cursor: pointer; font: inherit; font-size: .82rem; }
+button.kh__tagg-ny:hover { color: var(--text); }
+.sparfilter { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 12px; }
+.sparfilter .ap-filter { display: inline-flex; align-items: center; gap: 6px; }
+.sparfilter .ap-filter .i { width: 13px; height: 13px; }
+.sparfilter .tv-ikon { width: 32px; height: 32px; }
+.sparfilter__ny { color: var(--text-3); }
+.sparfilter__namn { flex: 1; min-width: 0; height: 36px; padding: 0 10px; border: 0; border-radius: 10px; background: var(--t-falt); color: var(--text); font: inherit; }
+.f-valjlage { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; }
+.f-valjlage .i { width: 13px; height: 13px; }
+.fl-val { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px; padding-left: 10px; }
+.fl-val.vald { background: rgb(var(--t-virke-rgb) / .06); }
+.inkorg__lista .kl__bulk { margin: 8px 8px 6px; }
+.uppg > .kl__kryss { flex: none; margin-right: 2px; }
+.uppg.vald { background: rgb(var(--t-virke-rgb) / .06); }
+.uppg__andra { display: grid; place-items: center; padding: 5px 7px; }
+.uppg__andra .i { width: 13px; height: 13px; }
+.kundtagg { margin-left: 8px; }
+.km-kund { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; margin: 0 0 14px; padding: 14px 18px; }
+.km-kund > div { flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.km-kund small { color: var(--text-3); font-size: .78rem; }
+.km-kund b { font: 600 1rem/1.3 var(--rubrik); }
+.km-kund em { font-style: normal; font-size: .82rem; color: var(--text-2); }
+.km-kund__knappar { display: flex; flex-wrap: wrap; gap: 8px; }
+.inst-mallar .lista__rad { padding-left: 0; padding-right: 0; }
+.inst-mallar .lista__text { flex: 1; min-width: 0; }
+.inst-mallar .lista__text small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inst-mallar__knappar { display: flex; flex: none; gap: 6px; }
+.inst-mallar code { padding: 1px 5px; border-radius: 6px; background: var(--t-falt); font-size: .78rem; }
+.mall-forhand { margin: 0; padding: 16px 18px; border-radius: 14px; background: var(--t-falt); color: var(--text); font: 400 .9rem/1.6 var(--sans); white-space: pre-wrap; overflow-wrap: anywhere; }
+.mall-forhand__amne { display: flex; flex-direction: column; gap: 2px; margin: 0 0 12px; }
+.mall-forhand__amne small { color: var(--text-3); font-size: .78rem; }
+[data-mallyta] textarea, [data-offmejl] textarea { min-height: 200px; font: 400 .9rem/1.55 var(--sans); }
+.offmejl__steg { margin: 12px 0 0; padding-left: 20px; font-size: .86rem; color: var(--text-2); line-height: 1.7; }
+.foljupp__kanaler { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0 0 16px; }
+.foljupp__kanaler .knapp { justify-content: center; }
+.nyf-dubb { align-items: flex-start; margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; background: rgb(var(--t-accent-rgb) / .12); color: var(--text-2); }
+.nyf-dubb__knappar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.import__karta { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px 12px; }
+.import__karta .falt { margin: 0; }
+.import__tabell { max-height: 340px; margin-top: 10px; overflow: auto; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--kant); }
+.import__tabell .tabell { min-width: 560px; }
+.import__tabell td, .import__tabell th { padding: 8px 10px; font-size: .82rem; }
+.import--dub td { color: var(--text-3); }
+.import--fel td { color: var(--fara, #b0442c); }
+.register__lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 14px; margin: 14px 0 0; padding: 0; list-style: none; font-size: .9rem; color: var(--text-2); }
+.register__lista b { color: var(--text); }
+.utskrift__fakta { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px 18px; margin: 12px 0; }
+.utskrift__fakta div { min-width: 0; }
+.utskrift__fakta dt { font-size: .75rem; color: var(--text-3); }
+.utskrift__fakta dd { margin: 0; overflow-wrap: anywhere; }
+.utskrift { display: none; }
+@media (max-width: 640px) {
+  .foljupp__kanaler { grid-template-columns: minmax(0, 1fr); }
+  .off-svar__knappar .knapp { flex: 1 1 auto; }
+  .f-valjlage { margin-left: 0; }
+  .kundtagg { margin-left: 0; }
+  .inst-mallar .lista__rad { flex-wrap: wrap; }
+}
+@media print {
+  html[data-utskrift] body > *:not(.utskrift) { display: none !important; }
+  html[data-utskrift] body { background: #fff; }
+  html[data-utskrift] .utskrift { display: block; color: #1b1915; font: 11pt/1.5 system-ui, sans-serif; }
+  .utskrift__huvud { margin: 0 0 14pt; padding-bottom: 8pt; border-bottom: 2px solid #c98a45; }
+  .utskrift__huvud small { color: #6b6257; }
+  .utskrift h1 { margin: 2pt 0 0; font-size: 18pt; }
+  .utskrift h2 { margin: 16pt 0 6pt; font-size: 12pt; }
+  .utskrift table { width: 100%; border-collapse: collapse; }
+  .utskrift th, .utskrift td { padding: 4pt 6pt; border-bottom: 1px solid #e6dccd; text-align: left; vertical-align: top; }
+  .utskrift tr { break-inside: avoid; }
+  .utskrift .utskrift__fakta dt { color: #6b6257; }
+  .utskrift__tom { color: #6b6257; }
+}
+[data-import-yta] > fieldset { margin-top: 14px; }
+.off-svar > div:not(.off-svar__knappar) { display: flex; flex-direction: column; gap: 4px; }
+.sparfilter__hoger { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; }
+.sparfilter__hoger .i { width: 13px; height: 13px; }
+.rad-val { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.rad-val > .kl__kryss { flex: none; }
+.tabell tr.vald { background: rgb(var(--t-virke-2-rgb) / .16); }
+.kl__bulk + .nyuppg__tips { margin-top: 10px; }
+
+/* Mall: fält som inte kunde fyllas i */
+.mall-saknas { color: var(--text); font-weight: 600; }
+.mall-saknas[hidden] { display: none; }

@@ -173,7 +173,7 @@ function stol(farg) {
   const g = new THREE.Group(), tyg = farg ? mat({ color: farg, roughness: 0.92 }) : M.tyg, plast = mat({ color: '#1e1d1c', roughness: 0.55 }), aluM = mat({ color: '#b9bec2', roughness: 0.3, metalness: 0.9 });
   const sits = lada(0.96, 0.15, 0.9, tyg, 0.07); sits.position.y = 0.95; g.add(sits);
   const sitsSkal = lada(0.98, 0.05, 0.92, plast, 0.03); sitsSkal.position.y = 0.865; g.add(sitsSkal);
-  const som = lada(0.9, 0.006, 0.006, mat({ color: '#00000033', roughness: 1 }), 0); som.position.set(0, 1.026, 0.1); g.add(som);
+  const som = lada(0.9, 0.006, 0.006, mat({ color: '#000000', transparent: true, opacity: 0.2, roughness: 1 }), 0); som.position.set(0, 1.026, 0.1); g.add(som);
   const mek = lada(0.36, 0.08, 0.36, plast, 0.02); mek.position.y = 0.8; g.add(mek);
   const spak = cyl(0.012, 0.012, 0.22, aluM, 8); spak.rotation.z = Math.PI / 2; spak.position.set(0.25, 0.8, 0.08); g.add(spak);
   const rygg = new THREE.Group(); rygg.position.set(0, 1.05, -0.42); rygg.rotation.x = -0.14; g.add(rygg);

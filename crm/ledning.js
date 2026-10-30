@@ -645,7 +645,10 @@
   IH.G['lp-franvaro-bort'] = function (el) {
     var l = franvaroLista(), n = l.findIndex(function (x) { return x.id === el.getAttribute('data-fid'); }); if (n < 0) return;
     if (!kanFranvaro(l[n].u) || stodSparr(l[n].u)) return;
-    nollaStatus(l[n]); l.splice(n, 1); IH.spara(); IH.stangArk(); IH.rita(); IH.toast('Frånvaron är borttagen', '', 'kalender');
+    var f = l[n], fu = IH.anvandare(f.u); nollaStatus(f); l.splice(n, 1); IH.spara(); IH.stangArk(); IH.rita();
+    angra('Frånvaron är borttagen', (fu ? fu.namn.split(' ')[0] + ' · ' : '') + FRANVARO[f.typ][0].toLowerCase() + ' ' + kortDatum(new Date(f.fran)) + (f.till !== f.fran ? '–' + kortDatum(new Date(f.till)) : ''), function () {
+      var l2 = franvaroLista(); if (!l2.some(function (x) { return x.id === f.id; })) l2.splice(Math.min(n, l2.length), 0, f);
+    });
   };
   document.addEventListener('submit', function (ev) {
     var t = ev.target; if (!t.matches || !t.matches('[data-lp-franvaro]')) return;
@@ -732,7 +735,7 @@
     return '<li class="lp-dagrad" data-typ="' + x.slag + '"' + (x.sen ? ' data-sen' : '') + (vmAv(x) ? ' data-video' : '') + ' style="--av:' + u.farg + '">' +
       '<span class="avatar" style="background:' + u.farg + '">' + e(IH.initialer(u.namn)) + '</span>' +
       '<span class="lp-dagrad__text"><small>' + e(etikett) + (klock(x.tid) ? ' · ' + klock(x.tid) : '') + ' · ' + e(u.namn) + '</small><b>' + e(x.text) + '</b>' + (k ? '<button type="button" class="lp-lank" data-g="kund-oppna" data-id="' + k.id + '">' + e(k.namn) + '</button>' : '') + '</span>' +
-      '<span class="lp-dagrad__knappar">' + vmKnappar(x) + (x.slag === 'akt' && (x.typ === 'mote' || x.typ === 'samtal') ? '<button type="button" class="ap-filter" data-g="lp-kal-andra" data-id="' + x.id + '">' + i('skriv') + 'Ändra</button><button type="button" class="ch-ruta" data-g="lp-kal-bort" data-id="' + x.id + '" title="Ta bort" aria-label="Ta bort">' + i('stang') + '</button>' : '') + (x.slag === 'uppg' ? '<button type="button" class="ap-filter" data-g="lp-kal-klar" data-id="' + x.id + '">' + i('bock') + 'Klar</button><button type="button" class="ch-ruta" data-g="lp-kal-flytta" data-id="' + x.id + '" title="Flytta en dag framåt" aria-label="Flytta en dag framåt">' + i('pil') + '</button>' : '') + '</span></li>';
+      '<span class="lp-dagrad__knappar">' + vmKnappar(x) + (x.slag === 'akt' && (x.typ === 'mote' || x.typ === 'samtal') ? '<button type="button" class="ap-filter" data-g="lp-kal-andra" data-id="' + x.id + '">' + i('skriv') + 'Ändra</button><button type="button" class="ch-ruta" data-g="lp-kal-bort" data-id="' + x.id + '" title="Ta bort" aria-label="Ta bort">' + i('stang') + '</button>' : '') + (x.slag === 'uppg' ? '<button type="button" class="ap-filter" data-g="lp-kal-klar" data-id="' + x.id + '">' + i('bock') + 'Klar</button><button type="button" class="ap-filter" data-g="lp-kal-uppg" data-id="' + x.id + '">' + i('skriv') + 'Ändra</button><button type="button" class="ch-ruta" data-g="lp-kal-flytta" data-id="' + x.id + '" title="Flytta en dag framåt" aria-label="Flytta en dag framåt">' + i('pil') + '</button>' : '') + '</span></li>';
   }
   // h = ett befintligt möte eller samtal som ändras (då finns inte Uppgift som typ)
   function kalForm(ds, team, h) {
@@ -778,13 +781,64 @@
   IH.G['lp-kal-bort'] = function (el) {
     var h = aktiviteten(el.getAttribute('data-id')); if (!h) return;
     if (!el.hasAttribute('data-saker')) { el.setAttribute('data-saker', ''); el.setAttribute('aria-label', 'Klicka igen för att ta bort'); el.title = 'Klicka igen för att ta bort'; if (el.textContent.trim()) el.innerHTML = i('stang') + 'Klicka igen för att ta bort'; else el.classList.add('lp-saker'); return; }
-    db().aktiviteter.splice(db().aktiviteter.indexOf(h), 1);
-    db().uppgifter = db().uppgifter.filter(function (x) { return !(x.kalAkt === h.id && !x.klar); });
+    var hIx = db().aktiviteter.indexOf(h), bortU = db().uppgifter.filter(function (x) { return x.kalAkt === h.id && !x.klar; });
+    db().aktiviteter.splice(hIx, 1);
+    db().uppgifter = db().uppgifter.filter(function (x) { return bortU.indexOf(x) < 0; });
     if (h.video && IH.videomote) IH.videomote.taBortForAktivitet(h);
     var lista = el.closest('.lp-daglista'), ds = lista && lista.getAttribute('data-dag');
     IH.stangArk(); omRita(); if (ds) kalDag(ds);
-    IH.toast((h.typ === 'samtal' ? 'Samtalet' : h.video ? 'Videomötet' : 'Mötet') + ' är borttaget', h.text + (h.video ? ' – länken slutar fungera. Säg till gästerna.' : ''), 'kalender');
+    var rubrik = (h.typ === 'samtal' ? 'Samtalet' : h.video ? 'Videomötet' : 'Mötet') + ' är borttaget';
+    // Ett videomöte går inte att ångra – länken är redan borttagen
+    if (h.video) IH.toast(rubrik, h.text + ' – länken slutar fungera. Säg till gästerna.', 'kalender');
+    else angra(rubrik, h.text, function () {
+      if (!aktiviteten(h.id)) db().aktiviteter.splice(Math.min(hIx, db().aktiviteter.length), 0, h);
+      bortU.forEach(function (x) { if (!db().uppgifter.some(function (y) { return y.id === x.id; })) db().uppgifter.push(x); });
+    });
   };
+  // Uppgifter i kalendern: ändra text, dag, tid och ansvarig, eller ta bort (med Ångra)
+  var uppgI = function (id) { return db().uppgifter.find(function (x) { return x.id === id; }) || null; };
+  var arChef = function () { var j = IH.jag(); return !!(j.chef || j.roll === 'admin'); };
+  IH.G['lp-kal-uppg'] = function (el) {
+    var u = uppgI(el.getAttribute('data-id')); if (!u) return;
+    if (!arChef() && u.ansvarig !== IH.jag().id) { IH.toast('Bara chefen kan ändra en kollegas uppgift', null, 'las'); return; }
+    var team = kalTeam(); if (u.ansvarig && !team.some(function (x) { return x.u.id === u.ansvarig; }) && IH.anvandare(u.ansvarig)) team = team.concat([{ u: IH.anvandare(u.ansvarig) }]);
+    var d = new Date(u.forfaller), k = u.kund && IH.kund(u.kund), a = u.affar && IH.affar(u.affar);
+    IH.oppnaArk({ titel: 'Ändra uppgiften', ikon: 'todo', under: e(a ? a.titel : k ? k.namn : 'Under Att göra hos den ansvariga.'),
+      kropp: '<form id="lp-kalu-form" data-lp-kal-uppg="' + u.id + '" class="km-form lp-kalform">' +
+        '<label class="falt"><span>Uppgift</span><input name="text" required maxlength="120" value="' + e(u.text) + '"></label>' +
+        '<div class="lp-kalform__rad"><label class="falt"><span>Dag</span><input name="datum" type="date" required value="' + dagISO(d) + '"></label><label class="falt"><span>Tid</span><input name="tid" type="time" value="' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + '"></label></div>' +
+        '<label class="falt"><span>Ansvarig</span><select name="vem"' + (arChef() ? '' : ' disabled') + '>' + team.map(function (x) { return '<option value="' + x.u.id + '"' + (x.u.id === u.ansvarig ? ' selected' : '') + '>' + e(x.u.namn) + '</option>'; }).join('') + '</select></label></form>',
+      fot: '<button class="knapp" type="button" data-g="lp-kal-uppg-bort" data-id="' + u.id + '">' + i('stang') + 'Ta bort</button><button class="knapp knapp--virke" type="submit" form="lp-kalu-form">' + i('bock') + 'Spara</button>' });
+  };
+  IH.G['lp-kal-uppg-bort'] = function (el) {
+    var u = uppgI(el.getAttribute('data-id')); if (!u) return;
+    if (!arChef() && u.ansvarig !== IH.jag().id) { IH.toast('Bara chefen kan ta bort en kollegas uppgift', null, 'las'); return; }
+    if (!el.hasAttribute('data-saker')) { el.setAttribute('data-saker', ''); el.innerHTML = i('stang') + 'Klicka igen för att ta bort'; setTimeout(function () { if (el.isConnected) { el.removeAttribute('data-saker'); el.innerHTML = i('stang') + 'Ta bort'; } }, 4000); return; }
+    var ix = db().uppgifter.indexOf(u); db().uppgifter.splice(ix, 1);
+    IH.logga('system', 'Uppgiften ”' + u.text + '” togs bort av ' + IH.jag().namn + '.', u.kund, u.affar);
+    IH.stangArk(); omRita();
+    angra('Uppgiften är borttagen', u.text, function () { if (!uppgI(u.id)) db().uppgifter.splice(Math.min(ix, db().uppgifter.length), 0, u); });
+  };
+  document.addEventListener('submit', function (ev) {
+    var t = ev.target; if (!t.matches || !t.matches('[data-lp-kal-uppg]')) return;
+    ev.preventDefault();
+    var u = uppgI(t.getAttribute('data-lp-kal-uppg')); if (!u) { IH.stangArk(); return; }
+    var jag = IH.jag(), chef = arChef();
+    if (!chef && u.ansvarig !== jag.id) return;
+    var text = t.text.value.trim(); if (!text) return;
+    var ny = new Date(t.datum.value + 'T' + (t.tid.value || '09:00') + ':00'); if (isNaN(ny)) return;
+    var vem = chef && t.vem && !t.vem.disabled ? t.vem.value : u.ansvarig, vad = [];
+    if (text !== u.text) vad.push('ny text');
+    if (new Date(u.forfaller).getTime() !== ny.getTime()) vad.push(kortDatum(ny) + (ny.getHours() || ny.getMinutes() ? ' ' + t.tid.value : ''));
+    var bytt = vem !== u.ansvarig && IH.anvandare(vem);
+    if (bytt) vad.push('ansvarig ' + bytt.namn);
+    IH.stangArk();
+    if (!vad.length) { IH.toast('Inget att spara', 'Inget har ändrats.', 'bock'); return; }
+    u.text = text; u.forfaller = ny.toISOString(); u.larmat = null;
+    if (bytt) { u.ansvarig = vem; avisera(vem, 'Ny uppgift till dig', text + ' – från ' + jag.namn + '.', '#/att-gora'); }
+    IH.logga('system', 'Uppgiften ”' + text + '” ändrades av ' + jag.namn + ': ' + vad.join(', ') + '.', u.kund, u.affar);
+    omRita(); IH.toast('Uppgiften är sparad', text + ' · ' + vad.join(', '), 'todo');
+  });
   IH.G['lp-kal-typ'] = function (el) { chefUi.kalTyp = el.getAttribute('data-f'); IH.rita(); };
   IH.G['lp-kal-vy'] = function (el) { chefUi.kalVy = el.getAttribute('data-f'); IH.rita(); };
   // dra en uppgift till en annan dag för att flytta den
@@ -1091,7 +1145,24 @@
   G['lp-agera-alla'] = function () { chefUi.ageraAlla = !chefUi.ageraAlla; IH.rita(); };
   G['lp-topp-period'] = function (el) { var f = el.getAttribute('data-f'); chefUi.topp = f === 'ar' ? 'ar' : +f; IH.rita(); };
   var uppgiften = function (id) { return id ? db().uppgifter.find(function (x) { return x.id === id; }) || null : null; };
+  // Avisering till den som fick posten (aviseringscentret, app.js). Bara i den här webbläsaren – mellan datorer kräver server.
+  var avisera = function (till, rubrik, text, lank) { if (IH.avisera && till && till !== IH.jag().id) IH.avisera({ typ: 'fordelning', rubrik: rubrik, text: text, lank: lank, till: till }); };
+  // Ångra: IH.angra (app.js) om den finns, annars en toast med egen Ångra-knapp
+  var angra = function (rubrik, text, aterstall) {
+    var kor = function () { aterstall(); IH.spara(); if (IH.uppdateraMeny) IH.uppdateraMeny(); };
+    if (IH.angra) { IH.angra(rubrik, text, kor); return; }
+    IH.toast(rubrik, text, 'aterstall', { tid: 8000 });
+    var t = document.querySelector('.toaster .toast:last-child'); if (!t) return;
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'toast__knapp'; b.textContent = 'Ångra';
+    b.addEventListener('click', function (ev) { ev.stopPropagation(); kor(); IH.rita(); t.click(); IH.toast('Ångrat', null, 'aterstall'); });
+    t.insertBefore(b, t.querySelector('.toast__tid'));
+  };
+  IH.ledAngra = angra;
   var tilldela = function (a, f, till, upg) {
+    var av = IH.jag().namn;
+    if (a) avisera(till.id, 'Ny affär till dig', a.titel + ' – fördelad av ' + av + '.', '#/salj/' + a.id);
+    else if (f) avisera(till.id, 'Ny förfrågan till dig', f.namn + (f.ort ? ', ' + f.ort : '') + ' – fördelad av ' + av + '.', '#/forfragningar/' + f.id);
+    else if (upg) avisera(till.id, 'Ny uppgift till dig', upg.text + ' – från ' + av + '.', '#/att-gora');
     if (a) {
       a.ansvarig = till.id; a.andrad = new Date().toISOString(); IH.logga('system', 'Fördelad till ' + till.namn + ' av ' + IH.jag().namn + '.', a.kund, a.id);
       // affärens öppna uppgifter hos säljare följer med till den nya ansvariga
@@ -1219,7 +1290,134 @@
     if (IH.chattSkickaTill && IH.chattSkickaTill(u.id, 'Påminnelse – ' + el.getAttribute('data-text') + '. Hör av dig om du behöver hjälp!')) IH.toast('Påminnelsen är skickad', 'Till ' + u.namn + ' i chatten.', 'samtal');
     else IH.toast('Kunde inte skicka', 'Chatten är skrivskyddad i supportläget.', 'varning');
   };
+  /* Rapporten: välj period, jämför med perioden innan, konvertering, tid mellan stegen, förlustorsaker och
+     kommande avslut efter förväntat datum. Bara det som finns i datan – inga påhittade sannolikheter. */
+  var rapp = { period: 'manad', fran: '', till: '' };
+  var PERIODER = [['manad', 'Denna månad'], ['forra', 'Förra månaden'], ['kvartal', 'Kvartalet'], ['ar', 'I år'], ['eget', 'Eget intervall']];
+  function perioden() {
+    var nu = new Date(), y = nu.getFullYear(), m = nu.getMonth(), a, b, fa, typ = rapp.period;
+    if (typ === 'eget' && rapp.fran && rapp.till) {
+      a = new Date(rapp.fran + 'T00:00:00'); b = new Date(rapp.till + 'T00:00:00');
+      if (b < a) { var x = a; a = b; b = x; }
+      b.setDate(b.getDate() + 1); fa = new Date(a.getTime() - (b - a));
+      return { a: a, b: b, fa: fa, fb: a, pagar: false };
+    }
+    if (typ === 'forra') { a = new Date(y, m - 1, 1); b = new Date(y, m, 1); fa = new Date(y, m - 2, 1); }
+    else if (typ === 'kvartal') { var q0 = Math.floor(m / 3) * 3; a = new Date(y, q0, 1); b = new Date(y, q0 + 3, 1); fa = new Date(y, q0 - 3, 1); }
+    else if (typ === 'ar') { a = new Date(y, 0, 1); b = new Date(y + 1, 0, 1); fa = new Date(y - 1, 0, 1); }
+    else { a = new Date(y, m, 1); b = new Date(y, m + 1, 1); fa = new Date(y, m - 1, 1); }
+    // En pågående period jämförs med lika många dagar i början av perioden innan
+    if (b > nu) { var imorgon = dag0(nu); imorgon.setDate(imorgon.getDate() + 1); b = imorgon; return { a: a, b: b, fa: fa, fb: new Date(fa.getTime() + (b - a)), pagar: true }; }
+    return { a: a, b: b, fa: fa, fb: a, pagar: false };
+  }
+  var spann = function (a, b) { var s = new Date(b.getTime() - 864e5); return a.getFullYear() === s.getFullYear() && a.getMonth() === s.getMonth() && a.getDate() === 1 && new Date(b).getDate() === 1 ? IH.lokal(a, 'd', { month: 'long', year: 'numeric' }) : kortDatum(a) + (a.getFullYear() !== s.getFullYear() ? ' ' + a.getFullYear() : '') + ' – ' + kortDatum(s) + ' ' + s.getFullYear(); };
+  var medel = function (l) { return l.length ? l.reduce(function (t, v) { return t + v; }, 0) / l.length : null; };
+  function matt(a, b) {
+    var d = db(), inn = function (iso) { if (!iso) return false; var t = new Date(iso); return t >= a && t < b; };
+    var dagarMellan = function (x, y) { var v = (new Date(y) - new Date(x)) / 864e5; return isFinite(v) && v >= 0 ? v : null; };
+    var forstaOffert = function (aid) { return d.offerter.filter(function (o) { return o.affar === aid && o.skapad; }).sort(function (x, y) { return x.skapad < y.skapad ? -1 : 1; })[0] || null; };
+    var forf = d.forfragningar.filter(function (f) { return inn(f.skapad || f.tid); });
+    var aff = d.affarer.filter(function (x) { return inn(x.skapad); });
+    var off = d.offerter.filter(function (o) { return inn(o.skapad); });
+    var offAff = Object.keys(off.reduce(function (m, o) { if (o.affar) m[o.affar] = 1; return m; }, {}));
+    var vunna = d.affarer.filter(function (x) { return x.steg === 'vunnen' && inn(x.vunnen); });
+    var forl = d.affarer.filter(function (x) { return x.forlorad && inn(x.forlorad.tid); });
+    var summa = function (l) { return l.reduce(function (t, x) { return t + (x.varde || 0); }, 0); };
+    var t1 = [], t2 = [], t3 = [];
+    aff.forEach(function (x) { var f = d.forfragningar.find(function (y) { return y.affar === x.id; }); var v = f && dagarMellan(f.skapad || f.tid, x.skapad); if (v != null) t1.push(v); });
+    d.affarer.forEach(function (x) { var o = forstaOffert(x.id); if (o && inn(o.skapad)) { var v = dagarMellan(x.skapad, o.skapad); if (v != null) t2.push(v); } });
+    vunna.forEach(function (x) { var o = forstaOffert(x.id); var v = o && dagarMellan(o.skapad, x.vunnen); if (v != null) t3.push(v); });
+    var orsaker = {}; forl.forEach(function (x) { var o = x.forlorad.orsak || 'Ingen orsak'; orsaker[o] = orsaker[o] || { n: 0, v: 0 }; orsaker[o].n++; orsaker[o].v += x.varde || 0; });
+    return {
+      tal: [['forf', 'Förfrågningar', forf.length, false], ['aff', 'Nya affärer', aff.length, false], ['off', 'Offerter', off.length, false],
+        ['vunna', 'Vunna affärer', vunna.length, false], ['vunnet', 'Vunnet värde', summa(vunna), true], ['forl', 'Förlorade affärer', forl.length, false, true], ['forlorat', 'Förlorat värde', summa(forl), true, true]],
+      konv: [['Förfrågan → affär', forf.length, forf.filter(function (f) { return f.affar; }).length, 'av förfrågningarna i perioden blev affär'],
+        ['Affär → offert', aff.length, aff.filter(function (x) { return d.offerter.some(function (o) { return o.affar === x.id; }); }).length, 'av de nya affärerna har fått offert'],
+        ['Offert → vunnen', offAff.length, offAff.filter(function (id) { var x = IH.affar(id); return x && x.steg === 'vunnen'; }).length, 'av affärerna med offert i perioden är vunna']],
+      tider: [['Förfrågan till affär', medel(t1), t1.length], ['Affär till första offert', medel(t2), t2.length], ['Offert till vunnen', medel(t3), t3.length]],
+      orsaker: Object.keys(orsaker).map(function (k) { return { orsak: k, n: orsaker[k].n, v: orsaker[k].v }; }).sort(function (x, y) { return y.n - x.n || y.v - x.v; })
+    };
+  }
+  // Öppna affärer med förväntat avslut, per månad framåt (bara summor)
+  function kommande() {
+    var nu = new Date(), start = new Date(nu.getFullYear(), nu.getMonth(), 1), idag = dag0(nu);
+    var oppna = db().affarer.filter(function (a) { return a.steg !== 'vunnen' && !a.forlorad; });
+    var man = []; for (var k = 0; k < 6; k++) man.push({ a: new Date(start.getFullYear(), start.getMonth() + k, 1), b: new Date(start.getFullYear(), start.getMonth() + k + 1, 1), l: [] });
+    var passerat = [], senare = [], utan = [];
+    oppna.forEach(function (a) {
+      var t = a.forvantat ? new Date(a.forvantat) : null;
+      if (!t || isNaN(t)) { utan.push(a); return; }
+      if (t < idag) { passerat.push(a); return; }
+      var m = man.find(function (x) { return t >= x.a && t < x.b; }); if (m) m.l.push(a); else senare.push(a);
+    });
+    return { man: man, passerat: passerat, senare: senare, utan: utan };
+  }
+  var summaV = function (l) { return l.reduce(function (t, a) { return t + (a.varde || 0); }, 0); };
+  function rappHtml() {
+    var p = perioden(), nu = matt(p.a, p.b), fo = matt(p.fa, p.fb), km = kommande();
+    var namnNu = spann(p.a, p.b), namnFo = spann(p.fa, p.fb);
+    var diff = function (n, f, kr, omvand) {
+      if (n === f) return '<em class="lp-rapp__diff" data-upp="lika">± 0</em>';
+      var upp = n > f, bra = omvand ? !upp : upp, txt = f >= 5 || kr ? (f ? (upp ? '+' : '−') + Math.abs(Math.round((n - f) / f * 100)) + ' %' : 'ny') : (upp ? '+' : '−') + Math.abs(n - f);
+      return '<em class="lp-rapp__diff" data-upp="' + bra + '">' + (upp ? '↑ ' : '↓ ') + txt + '</em>';
+    };
+    var varde = function (v, kr) { return kr ? IH.kort(v) : String(v); };
+    var verktyg = '<div class="lp-rapp__verktyg"><div class="ap-filterrad" role="group" aria-label="Period">' + PERIODER.map(function (x) { return '<button type="button" class="ap-filter" data-g="lp-rapp-period" data-f="' + x[0] + '" aria-pressed="' + (rapp.period === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>' +
+      (rapp.period === 'eget' ? '<div class="lp-kalform__rad lp-rapp__eget"><label class="falt"><span>Från</span><input type="date" data-lp-rapp="fran" value="' + e(rapp.fran) + '"></label><label class="falt"><span>Till och med</span><input type="date" data-lp-rapp="till" value="' + e(rapp.till) + '"></label></div>' : '') +
+      '<p class="lp-rapp__period">' + (rapp.period === 'eget' && !(rapp.fran && rapp.till) ? 'Välj från och till för att se rapporten.' : '<b>' + e(namnNu) + '</b> jämfört med <b>' + e(namnFo) + '</b>' + (p.pagar ? ' · perioden pågår, så den jämförs med lika många dagar i perioden innan' : '')) + '</p></div>';
+    if (rapp.period === 'eget' && !(rapp.fran && rapp.till)) return verktyg;
+    var tal = '<div class="lp-rapp__tal">' + nu.tal.map(function (t, n) { var f = fo.tal[n][2]; return '<div><small>' + t[1] + '</small><strong>' + varde(t[2], t[3]) + '</strong><span>' + diff(t[2], f, t[3], t[4]) + ' mot ' + varde(f, t[3]) + '</span></div>'; }).join('') + '</div>';
+    var konv = '<ul class="lp-rapp__konv">' + nu.konv.map(function (k, n) {
+      var andel = k[1] ? k[2] / k[1] : null, fk = fo.konv[n], fAndel = fk[1] ? fk[2] / fk[1] : null;
+      return '<li style="--a:' + (andel || 0).toFixed(3) + '"><span><b>' + k[0] + '</b><small>' + (k[1] ? k[2] + ' av ' + k[1] : 'Inget i perioden') + '</small></span><span class="lp-mal__spar"><i></i></span><strong>' + (andel == null ? '–' : pct(andel)) + '</strong><em class="lp-rapp__fore">' + (fAndel == null ? 'innan: –' : 'innan: ' + pct(fAndel)) + '</em></li>';
+    }).join('') + '</ul><p class="lp-rapp__not">Räknat på posterna som skapades i perioden: hur stor del som har gått vidare till nästa steg.</p>';
+    var dagT = function (v) { return v == null ? '–' : (v < 10 ? IH.lokalTal ? IH.lokalTal(v, { maximumFractionDigits: 1 }) : v.toFixed(1) : Math.round(v)) + ' d'; };
+    var tider = '<ul class="lp-rapp__tider">' + nu.tider.map(function (t, n) { var f = fo.tider[n]; return '<li><small>' + t[0] + '</small><strong>' + dagT(t[1]) + '</strong><em>' + (t[2] ? 'snitt av ' + t[2] : 'inget att räkna på') + ' · innan ' + dagT(f[1]) + '</em></li>'; }).join('') + '</ul>';
+    var maxO = Math.max.apply(null, nu.orsaker.map(function (o) { return o.n; }).concat([1]));
+    var orsaker = nu.orsaker.length ? '<ul class="lp-rapp__orsaker">' + nu.orsaker.map(function (o) { return '<li style="--a:' + (o.n / maxO).toFixed(3) + '"><span>' + e(o.orsak) + '</span><span class="lp-mal__spar"><i></i></span><b>' + o.n + '</b><small>' + IH.kort(o.v) + '</small></li>'; }).join('') + '</ul>' : '<p class="lp-tom">Inga förlorade affärer i perioden.</p>';
+    var maxK = Math.max.apply(null, km.man.map(function (m) { return summaV(m.l); }).concat([1]));
+    var medDatum = km.man.reduce(function (t, m) { return t + m.l.length; }, 0) + km.passerat.length + km.senare.length;
+    var kom = '<ul class="lp-rapp__kom">' + km.man.map(function (m) { var s = summaV(m.l); return '<li style="--a:' + (s / maxK).toFixed(3) + '"><span>' + e(IH.lokal(m.a, 'd', { month: 'short', year: '2-digit' }).replace('.', '')) + '</span><span class="lp-mal__spar"><i></i></span><b>' + (s ? IH.kort(s) : '–') + '</b><small>' + plural(m.l.length, 'affär', 'affärer') + '</small></li>'; }).join('') + '</ul>' +
+      '<p class="lp-rapp__not">' + [km.passerat.length ? '<span class="lp-varm">' + plural(km.passerat.length, 'affär', 'affärer') + ' har passerat sitt datum (' + IH.kort(summaV(km.passerat)) + ')</span>' : '', km.senare.length ? plural(km.senare.length, 'affär', 'affärer') + ' senare (' + IH.kort(summaV(km.senare)) + ')' : '', km.utan.length ? plural(km.utan.length, 'öppen affär', 'öppna affärer') + ' utan förväntat avslut' : ''].filter(Boolean).join(' · ') +
+      (medDatum ? '' : (km.utan.length ? '. ' : '') + 'Sätt förväntat avslut på affärerna så fylls det här i.') + ' Summan är affärernas värde, inte en prognos.</p>';
+    var del = function (rubrik, inne) { return '<section class="lp-rapp__del"><h3 class="lp-del">' + rubrik + '</h3>' + inne + '</section>'; };
+    return verktyg + tal + del('Konvertering per steg', konv) + del('Tid mellan stegen', tider) + del('Förlustorsaker', orsaker) + del('Kommande avslut per månad', kom);
+  }
+  var ritaRapp = function () { var k = document.querySelector('[data-lp-rapp-yta]'); if (k) k.innerHTML = rappHtml(); };
   G['lp-rapport'] = function () {
+    if (!kravChef()) return;
+    IH.oppnaArk({ titel: 'Rapport', ikon: 'stapel', bred: true, under: 'Försäljningen i en period jämfört med perioden innan. Bygger på datan i den här webbläsaren.',
+      kropp: '<div class="lp-rapp" data-lp-rapp-yta>' + rappHtml() + '</div>',
+      fot: '<button class="knapp" type="button" data-g="lp-rapport-team">' + i('ladda-ner') + 'Teamet (CSV)</button><button class="knapp knapp--virke" type="button" data-g="lp-rapp-csv">' + i('ladda-ner') + 'Rapporten (CSV)</button>' });
+  };
+  G['lp-rapp-period'] = function (el) { rapp.period = el.getAttribute('data-f'); ritaRapp(); };
+  document.addEventListener('change', function (ev) {
+    var t = ev.target; if (!t.matches || !t.matches('[data-lp-rapp]')) return;
+    rapp[t.getAttribute('data-lp-rapp')] = t.value; ritaRapp();
+  });
+  // CSV: IH.csv.ladda (app.js) om den finns, annars samma formelskydd som tidigare
+  var csvQ = function (x) { var s = String(x == null ? '' : x); if (typeof x !== 'number' && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+  function laddaCsv(namn, kolumner, rader) {
+    if (IH.csv && IH.csv.ladda) { IH.csv.ladda(namn, kolumner, rader); return; }
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + [kolumner].concat(rader).map(function (r) { return r.map(csvQ).join(';'); }).join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+    a.download = namn; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+  }
+  G['lp-rapp-csv'] = function () {
+    if (!kravChef()) return;
+    if (rapp.period === 'eget' && !(rapp.fran && rapp.till)) { IH.toast('Välj ett intervall först', null, 'varning'); return; }
+    var p = perioden(), nu = matt(p.a, p.b), fo = matt(p.fa, p.fb), km = kommande(), namnNu = spann(p.a, p.b), namnFo = spann(p.fa, p.fb), rader = [];
+    nu.tal.forEach(function (t, n) { rader.push(['Översikt', t[1], t[2], fo.tal[n][2]]); });
+    nu.konv.forEach(function (k, n) { var f = fo.konv[n]; rader.push(['Konvertering', k[0] + ' (andel %)', k[1] ? Math.round(k[2] / k[1] * 100) : '', f[1] ? Math.round(f[2] / f[1] * 100) : '']); });
+    nu.tider.forEach(function (t, n) { var f = fo.tider[n]; rader.push(['Tid mellan stegen', t[0] + ' (dagar i snitt)', t[1] == null ? '' : Math.round(t[1] * 10) / 10, f[1] == null ? '' : Math.round(f[1] * 10) / 10]); });
+    nu.orsaker.forEach(function (o) { var f = fo.orsaker.find(function (x) { return x.orsak === o.orsak; }); rader.push(['Förlustorsak (antal)', o.orsak, o.n, f ? f.n : 0]); rader.push(['Förlustorsak (värde kr)', o.orsak, o.v, f ? f.v : 0]); });
+    km.man.forEach(function (m) { rader.push(['Kommande avslut (värde kr)', IH.lokal(m.a, 'd', { month: 'long', year: 'numeric' }), summaV(m.l), '']); });
+    if (km.passerat.length) rader.push(['Kommande avslut (värde kr)', 'Passerat datum', summaV(km.passerat), '']);
+    if (km.utan.length) rader.push(['Kommande avslut (antal)', 'Utan förväntat avslut', km.utan.length, '']);
+    laddaCsv('legohus-rapport-' + dagISO(p.a) + '.csv', ['Del', 'Mått', namnNu, namnFo], rader);
+    IH.toast('Rapporten är nedladdad', namnNu + ' jämfört med ' + namnFo + ' – öppnas i Excel.', 'ladda-ner');
+  };
+  G['lp-rapport-team'] = function () {
+    if (!kravChef()) return;
     // Text som börjar med = + - @ tolkas som formel i Excel – den får en apostrof först
     var q = function (x) { var s = String(x == null ? '' : x); if (typeof x !== 'number' && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
     var rader = [['Säljare', 'Öppna affärer', 'Öppet värde', 'Viktat', 'Vunnet 90 d', 'Vunna affärer 90 d', 'Årsmål', 'Händelser 14 d', 'Försenade uppgifter'].map(q).join(';')].concat(saljare().filter(function (u) { return !u.inaktiv; }).map(function (u) {
@@ -1253,7 +1451,7 @@
       var kv = t.koppling ? t.koppling.value : '', ka = kv.indexOf('a:') === 0 ? IH.affar(kv.slice(2)) : null, kk = ka ? ka.kund : kv.indexOf('k:') === 0 ? kv.slice(2) : null;
       db().uppgifter.push({ id: IH.nyttId('uppgift', 'u'), text: text, forfaller: new Date(t.datum.value + 'T09:00:00').toISOString(), klar: false, kund: kk || null, affar: ka ? ka.id : null, ansvarig: u.id, av: IH.jag().id });
       IH.spara(); IH.stangArk(); IH.uppdateraMeny(); IH.rita();
-      if (u.id === IH.jag().id) IH.toast('Uppgiften är tillagd', text, 'todo'); else { IH.toast('Uppgiften är skickad till ' + u.namn, 'Den syns under Att göra.', 'todo'); if (IH.chattSkickaTill) IH.chattSkickaTill(u.id, 'Ny uppgift till dig: ' + text + ' (klar senast ' + kortDatum(new Date(t.datum.value + 'T12:00:00')) + ').'); }
+      if (u.id === IH.jag().id) IH.toast('Uppgiften är tillagd', text, 'todo'); else { avisera(u.id, 'Ny uppgift till dig', text + ' – från ' + IH.jag().namn + '.', '#/att-gora'); IH.toast('Uppgiften är skickad till ' + u.namn, 'Den syns under Att göra.', 'todo'); if (IH.chattSkickaTill) IH.chattSkickaTill(u.id, 'Ny uppgift till dig: ' + text + ' (klar senast ' + kortDatum(new Date(t.datum.value + 'T12:00:00')) + ').'); }
     }
     if (t.matches('[data-lp-fordela]')) {
       ev.preventDefault();
