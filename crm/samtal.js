@@ -798,7 +798,7 @@
   //   temporal utjämning (stiger direkt, sjunker långsamt – inget flimmer, rörelser äts inte upp)
   //   → mjuk tröskel smoothstep(0,15–0,5) (osäkra axlar, hårkant och mörka kläder blir helt skarpa)
   //   → utvidgning med maxfilter (1 cell ≈ 2–5 px vid Oskärpa – fjädringen sköter resten, ingen vid Bild, +1 när masken är en bild gammal)
-  //   → lätt fjädring i liten storlek → mjuk uppskalning.
+  //   → lätt fjädring i liten storlek → mjuk uppskalning, eller kantförfining mot kamerabilden när datorn hinner med.
   // Oskärpan är maskad: personen skärs ut innan bakgrunden suddas, så hår och axlar smetas inte ut till en mörk ring.
   function mediapipeRitare(seg) {
     var ny = function () { return document.createElement('canvas'); };
@@ -809,6 +809,9 @@
     var person = ny(), pctx = person.getContext('2d');
     var hal = ny(), hx = hal.getContext('2d');
     var bak = ny(), bx = bak.getContext('2d');
+    var fin = ny(), fx = fin.getContext('2d', { willReadFrequently: true });
+    var finMask = ny(), fmx = finMask.getContext('2d');   // masken efter kantförfining
+    var fb = 0, fh = 0, idF = null, finMs = 0, G0 = null;
     var lb = 0, lh = 0, jamn = null, alfa = null, tmp = null, idP = null, idH = null;
     var senast = -1, harMask = false, hoppa = false, segMs = 0, helMs = 0, tungLage = false;
     function storlek(B, H) {
@@ -821,6 +824,68 @@
       idP = mpx.createImageData(lb, lh); idH = mhx.createImageData(lb, lh);
       for (var j = 0; j < n * 4; j += 4) { idP.data[j] = idP.data[j + 1] = idP.data[j + 2] = idH.data[j] = idH.data[j + 1] = idH.data[j + 2] = 255; }
       harMask = false;
+    }
+    // Glidande medelvärde (rutfilter) med radie r på en bild fb × fh.
+    function ruta(ut, inn, r) {
+      var x, y, i, s, n, k, t = G0.t;
+      for (y = 0; y < fh; y++) {
+        var rad = y * fb; s = 0; n = 0;
+        for (k = 0; k <= r && k < fb; k++) { s += inn[rad + k]; n++; }
+        for (x = 0; x < fb; x++) {
+          t[rad + x] = s / n;
+          if (x + r + 1 < fb) { s += inn[rad + x + r + 1]; n++; }
+          if (x - r >= 0) { s -= inn[rad + x - r]; n--; }
+        }
+      }
+      for (x = 0; x < fb; x++) {
+        s = 0; n = 0;
+        for (k = 0; k <= r && k < fh; k++) { s += t[k * fb + x]; n++; }
+        for (y = 0; y < fh; y++) {
+          ut[y * fb + x] = s / n;
+          if (y + r + 1 < fh) { s += t[(y + r + 1) * fb + x]; n++; }
+          if (y - r >= 0) { s -= t[(y - r) * fb + x]; n--; }
+        }
+      }
+    }
+    // Kantförfining (guidat filter, He m.fl.): den grova masken följer de riktiga kanterna i kamerabilden, så att hår och axlar
+    // blir skarpa och ingen ring av väggen följer med. Inne i personen är masken 1 och ändras inte, så kläder äts inte upp.
+    function forfina(video, B, H) {
+      var nb = Math.min(512, B), nh = Math.max(1, Math.round(nb * H / B)), i, x, y;
+      if (nb !== fb || nh !== fh) {
+        fb = nb; fh = nh; fin.width = finMask.width = fb; fin.height = finMask.height = fh;
+        var n0 = fb * fh, nyttF = function () { return new Float32Array(n0); };
+        G0 = { I: nyttF(), p: nyttF(), t: nyttF(), mI: nyttF(), mP: nyttF(), mIp: nyttF(), mII: nyttF(), a: nyttF(), b: nyttF() };
+        idF = fmx.createImageData(fb, fh);
+        for (i = 0; i < n0 * 4; i += 4) idF.data[i] = idF.data[i + 1] = idF.data[i + 2] = 255;
+      }
+      fx.drawImage(video, 0, 0, fb, fh);
+      var d = fx.getImageData(0, 0, fb, fh).data, n = fb * fh, I = G0.I, p = G0.p, a = G0.a, b = G0.b, sx = (lb - 1) / Math.max(1, fb - 1), sy = (lh - 1) / Math.max(1, fh - 1);
+      for (i = 0; i < n; i++) I[i] = (d[i * 4] * 0.299 + d[i * 4 + 1] * 0.587 + d[i * 4 + 2] * 0.114) / 255;
+      for (y = 0; y < fh; y++) {
+        var ty = y * sy, y0 = ty | 0, y1 = y0 + 1 < lh ? y0 + 1 : y0, ky = ty - y0;
+        for (x = 0; x < fb; x++) {
+          var tx = x * sx, x0 = tx | 0, x1 = x0 + 1 < lb ? x0 + 1 : x0, kx = tx - x0;
+          var o0 = alfa[y0 * lb + x0] * (1 - kx) + alfa[y0 * lb + x1] * kx, o1 = alfa[y1 * lb + x0] * (1 - kx) + alfa[y1 * lb + x1] * kx;
+          p[y * fb + x] = o0 * (1 - ky) + o1 * ky;
+        }
+      }
+      var r = 7, eps = 0.0006;
+      ruta(G0.mI, I, r); ruta(G0.mP, p, r);
+      for (i = 0; i < n; i++) { a[i] = I[i] * p[i]; b[i] = I[i] * I[i]; }
+      ruta(G0.mIp, a, r); ruta(G0.mII, b, r);
+      for (i = 0; i < n; i++) {
+        var mi = G0.mI[i], cov = G0.mIp[i] - mi * G0.mP[i], vr = G0.mII[i] - mi * mi;
+        a[i] = cov / (vr + eps); b[i] = G0.mP[i] - a[i] * mi;
+      }
+      ruta(G0.mI, a, r); ruta(G0.mP, b, r);
+      var ut = idF.data;
+      for (i = 0; i < n; i++) {
+        var q = G0.mI[i] * I[i] + G0.mP[i];
+        // Kurvan drar in den halvgenomskinliga kanten, det är där väggen annars lyser igenom
+        var s = (q - 0.3) / 0.5; s = s < 0 ? 0 : s > 1 ? 1 : s;
+        ut[i * 4 + 3] = s * s * (3 - 2 * s) * 255;
+      }
+      fmx.putImageData(idF, 0, 0);
     }
     // Separerbart maxfilter med radie r celler: alfa → ImageData (alfakanalen).
     function utvidga(r, id) {
@@ -862,7 +927,7 @@
             var nv = f[i], q = jamn[i];
             var mm = nv >= q ? nv : q * 0.5 + nv * 0.5;
             jamn[i] = mm;
-            var s = (mm - 0.15) / 0.35; s = s < 0 ? 0 : s > 1 ? 1 : s;
+            var s = (mm - 0.2) / 0.35; s = s < 0 ? 0 : s > 1 ? 1 : s;
             alfa[i] = s * s * (3 - 2 * s);
           }
           fick = true;
@@ -878,6 +943,9 @@
       var r = (bild ? 0 : 1) + (gammal ? 1 : 0);
       utvidga(r, idP); mpx.putImageData(idP, 0, 0);
       mjx.globalCompositeOperation = 'copy'; mjx.filter = 'blur(0.8px)'; mjx.drawImage(maskP, 0, 0); mjx.filter = 'none';
+      // Kantförfiningen stängs av på datorer där den tar för lång tid; då används den mjuka masken
+      var finOk = finMs < 14;
+      if (finOk) { var f0 = performance.now(); forfina(video, B, H); var fd = performance.now() - f0; finMs = finMs ? finMs * 0.9 + fd * 0.1 : fd; }
       // 1. Bakgrunden
       if (bild) {
         var iw = bild.naturalWidth || bild.width, ih = bild.naturalHeight || bild.height;
@@ -904,7 +972,7 @@
       if (person.width !== B || person.height !== H) { person.width = B; person.height = H; }
       pctx.globalCompositeOperation = 'copy'; pctx.filter = 'none';
       pctx.imageSmoothingEnabled = true; pctx.imageSmoothingQuality = 'high';
-      pctx.drawImage(mjuk, 0, 0, B, H);
+      pctx.drawImage(finOk ? finMask : mjuk, 0, 0, B, H);
       pctx.globalCompositeOperation = 'source-in'; pctx.filter = o.ljus || 'none';
       pctx.drawImage(video, 0, 0, B, H);
       pctx.globalCompositeOperation = 'source-over'; pctx.filter = 'none';

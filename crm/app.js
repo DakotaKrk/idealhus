@@ -749,18 +749,16 @@
 
   var MENY = [
     { rubrik: null, poster: [['oversikt', 'Översikt', 'hem']] },
-    { rubrik: 'Sälj', poster: [['forfragningar', 'Förfrågningar', 'inkorg'], ['salj', 'Säljtavla', 'tavla'],
-      ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote']] },
-    { rubrik: 'Produktion', poster: [['produktion', 'Projekt', 'produktion']] },
-    { rubrik: 'Verktyg', poster: [['kolla-marken', 'Kolla marken', 'grodd']] },
+    { rubrik: 'Försäljning', poster: [['forfragningar', 'Förfrågningar', 'inkorg'], ['salj', 'Säljtavla', 'tavla'],
+      ['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote']] },
+    { rubrik: 'Bygg', poster: [['produktion', 'Projekt', 'produktion'], ['dokument', 'Dokument', 'mapp'], ['kolla-marken', 'Kolla marken', 'grodd']] },
     { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'todo'], ['installningar', 'Inställningar', 'installning']] }
   ];
   // Produktionens meny: projekten, kunderna och offerterna – inte förfrågningar, säljtavlan eller kundmötet
   var PROD_MENY = [
     { rubrik: null, poster: [['oversikt', 'Översikt', 'hem']] },
-    { rubrik: 'Produktion', poster: [['produktion', 'Projekt', 'produktion']] },
-    { rubrik: 'Kunder', poster: [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp']] },
-    { rubrik: 'Verktyg', poster: [['kolla-marken', 'Kolla marken', 'grodd']] },
+    { rubrik: 'Bygg', poster: [['produktion', 'Projekt', 'produktion'], ['dokument', 'Dokument', 'mapp'], ['kolla-marken', 'Kolla marken', 'grodd']] },
+    { rubrik: 'Kunder', poster: [['kunder', 'Kunder', 'kunder'], ['offerter', 'Offerter', 'offert']] },
     { rubrik: 'Mitt', poster: [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'todo'], ['installningar', 'Inställningar', 'installning']] }
   ];
   function menyFor(jag) { return jag.roll === 'admin' ? ADMIN_MENY : jag.roll === 'prod' ? PROD_MENY : MENY; }
@@ -792,11 +790,14 @@
       // Försäljningen (chefsvyn) syns bara för chefen, under Översikt som i Uperformance (ledning.js) –
       // men inte när växeln Säljvy/Chefsvy står överst: då finns bara en väg dit
       var poster = !grupp.rubrik && jag.chef && jag.roll === 'salj' && !vaxel ? grupp.poster.concat([['chef', 'Försäljningsledning', 'graf']]) : grupp.poster;
-      return (grupp.rubrik ? '<p class="sido__rubrik">' + grupp.rubrik + '</p>' : '') + poster.map(function (p) {
+      var rader = poster.map(function (p) {
         var br = b[p[0]];
         var bricka = br && br[0] ? '<span class="sido__bricka' + (br[1] ? ' sido__bricka--varm' : '') + '">' + br[0] + '</span>' : '';
         return '<a class="sido__lank" href="#/' + p[0] + '" data-vy="' + p[0] + '">' + IH.i(p[2]) + '<span>' + p[1] + '</span>' + bricka + '</a>';
       }).join('');
+      // Det egna ligger för sig längst ner, nära kontot
+      if (grupp.rubrik === 'Mitt') return '<div class="sido__mitt">' + rader + '</div>';
+      return (grupp.rubrik ? '<p class="sido__rubrik">' + grupp.rubrik + '</p>' : '') + rader;
     }).join('');
     // Administratören går in i teamets konton härifrån (supportläget, stod.js)
     if (jag.roll === 'admin') nav += '<p class="sido__rubrik">Teamet</p>' + IH.ANVANDARE.filter(function (u) { return u.roll !== 'admin' && !u.inaktiv; }).map(function (u) {
@@ -841,11 +842,11 @@
     if (!halvor[1].length && halvor[0].length > 1) halvor[1].push(halvor[0].pop());
     var lank = function (p) {
       var br = b[p[0]];
-      return '<a href="#/' + p[0] + '" data-vy="' + p[0] + '" title="' + p[1] + '" aria-label="' + p[1] + '">' + IH.i(p[2]) + (br && br[1] && br[0] ? '<i>' + br[0] + '</i>' : '') + '</a>';
+      return '<a href="#/' + p[0] + '" data-vy="' + p[0] + '" data-namn="' + p[1] + '" aria-label="' + p[1] + '">' + IH.i(p[2]) + (br && br[1] && br[0] ? '<i>' + br[0] + '</i>' : '') + '</a>';
     };
     // Klockan (aviseringarna) sist i den nedre halvan, bland det egna (Meddelanden, Att göra, Inställningar)
     var olasta = IH.db && IH.avisera ? IH.avisera.olasta() : 0;
-    var klockaRals = '<a href="#/" role="button" class="sido-rals__klocka" data-g="aviseringar" aria-haspopup="dialog" title="Aviseringar" aria-label="Aviseringar' + (olasta ? ', ' + olasta + ' olästa' : '') + '">' +
+    var klockaRals = '<a href="#/" role="button" class="sido-rals__klocka" data-g="aviseringar" aria-haspopup="dialog" data-namn="Aviseringar" aria-label="Aviseringar' + (olasta ? ', ' + olasta + ' olästa' : '') + '">' +
       IH.i('bjallra') + (olasta ? '<i>' + (olasta > 99 ? '99+' : olasta) + '</i>' : '') + '</a>';
     return halvor.map(function (h, n) {
       return '<div class="sido-rals__halva sido-rals__halva--' + (n ? 'ner' : 'upp') + '">' + h.map(function (g, k) {
@@ -854,6 +855,26 @@
     }).join('<span class="sido-rals__mitt" aria-hidden="true"></span>');
   }
   // Rälsens stil ligger i grund.css ("Sidomenyn – låda, knapp, räls, docka")
+  // Glasbubblan med sidans namn: ligger utanför rälsen, som klipper sitt innehåll
+  function kopplaBubbla() {
+    var bubbla = document.createElement('div');
+    bubbla.className = 'sido-bubbla'; bubbla.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(bubbla);
+    function visa(a) {
+      var r = a.getBoundingClientRect();
+      bubbla.textContent = a.getAttribute('data-namn');
+      bubbla.style.top = Math.round(r.top + r.height / 2) + 'px';
+      bubbla.style.left = Math.round(r.right + 12) + 'px';
+      bubbla.classList.add('syns');
+    }
+    function dolj() { bubbla.classList.remove('syns'); }
+    [['mouseover', 'mouseout'], ['focusin', 'focusout']].forEach(function (par) {
+      document.addEventListener(par[0], function (ev) { var a = ev.target.closest && ev.target.closest('.sido-rals a[data-namn]'); if (a) visa(a); });
+      document.addEventListener(par[1], function (ev) { if (ev.target.closest && ev.target.closest('.sido-rals a[data-namn]')) dolj(); });
+    });
+    document.addEventListener('click', dolj, true);
+    window.addEventListener('hashchange', dolj);
+  }
   // Kontot i toppraden när menyn är infälld: avatar med närvaroprick (kontokortet i sidomenyn syns inte då)
   function toppKonto() {
     var jag = IH.jag();
@@ -1191,11 +1212,13 @@
     if (direkt) m.style.transition = 'none';
     m.style.opacity = '1';
     m.style.height = a.offsetHeight + 'px';
-    m.style.transform = 'translateY(' + a.offsetTop + 'px)';
+    // Mäts mot menyn, inte offsetTop: raderna längst ner ligger i en egen yta
+    var y = a.getBoundingClientRect().top - nav.getBoundingClientRect().top + nav.scrollTop;
+    m.style.transform = 'translateY(' + y + 'px)';
     if (direkt) { void m.offsetWidth; m.style.transition = ''; }
     // I låga fönster rullar menyn: den valda raden ska alltid synas.
-    if (a.offsetTop < nav.scrollTop || a.offsetTop + a.offsetHeight > nav.scrollTop + nav.clientHeight) {
-      nav.scrollTo({ top: Math.max(0, a.offsetTop - nav.clientHeight / 2 + a.offsetHeight / 2), behavior: direkt ? 'auto' : 'smooth' });
+    if (y < nav.scrollTop || y + a.offsetHeight > nav.scrollTop + nav.clientHeight) {
+      nav.scrollTo({ top: Math.max(0, y - nav.clientHeight / 2 + a.offsetHeight / 2), behavior: direkt ? 'auto' : 'smooth' });
     }
     sidoMer();
   }
@@ -1849,9 +1872,9 @@
     // Det som redan står i bottenmenyn visas inte en gång till. Rutorna grupperas som i sidomenyn.
     var mitt = ['Mitt', [['chatt', 'Meddelanden', 'meddelande'], ['att-gora', 'Att göra', 'todo'], ['installningar', 'Inställningar', 'installning'], ['profil', 'Min profil', 'anstallda']]];
     var grupper = jag.roll === 'admin' ? [mitt]
-      : jag.roll === 'prod' ? [['Kunder', [['dokument', 'Dokument', 'mapp']]], ['Verktyg', [['kolla-marken', 'Kolla marken', 'grodd']]], mitt]
-      : [['Sälj', [['offerter', 'Offerter', 'offert'], ['dokument', 'Dokument', 'mapp'], ['mote', 'Kundmöte', 'mote']].concat(jag.chef ? [['chef', 'Försäljningsledning', 'graf']] : [])],
-        ['Produktion', [['produktion', 'Projekt', 'produktion'], ['kolla-marken', 'Kolla marken', 'grodd']]], mitt];
+      : jag.roll === 'prod' ? [['Bygg', [['dokument', 'Dokument', 'mapp'], ['kolla-marken', 'Kolla marken', 'grodd']]], mitt]
+      : [['Försäljning', [['offerter', 'Offerter', 'offert'], ['mote', 'Kundmöte', 'mote']].concat(jag.chef ? [['chef', 'Försäljningsledning', 'graf']] : [])],
+        ['Bygg', [['produktion', 'Projekt', 'produktion'], ['dokument', 'Dokument', 'mapp'], ['kolla-marken', 'Kolla marken', 'grodd']]], mitt];
     var ruta = function (p) {
       var br = b[p[0]];
       return '<a class="mer-ruta' + (p[0] === vy ? ' aktiv' : '') + '" href="#/' + p[0] + '"' + (p[0] === vy ? ' aria-current="page"' : '') + '><span class="mer-ruta__ikon">' + i(p[2]) + '</span><span class="mer-ruta__namn">' + p[1] + '</span>' +
@@ -2040,6 +2063,8 @@
         lank: '#/att-gora', nyckel: 'uppgift:' + u.id, spara: false });
     });
     IH.spara();
+    // Under presentationen ska kunden inte se säljarens påminnelser: de väntar i klockan
+    if (document.querySelector('.mote__bild')) return;
     if (nya.length === 1) {
       var u = nya[0], plats = uppgiftPlats(u);
       IH.toast('Påminnelse: ' + u.text, (plats ? plats + ' · ' : '') + 'skulle vara klar ' + IH.sedan(u.forfaller), 'klocka', { typ: 'info', tid: 20000, knappar: [
@@ -2182,6 +2207,10 @@
     startaPlanerare();
     requestAnimationFrame(function () { flyttaMarkor(true); });
     if (document.fonts) document.fonts.ready.then(function () { flyttaMarkor(true); });
+    kopplaBubbla();
+    // Menyns entré spelas en gång när CRM:et öppnas, inte när menyn ritas om
+    document.documentElement.classList.add('sido-entre');
+    setTimeout(function () { document.documentElement.classList.remove('sido-entre'); flyttaMarkor(true); }, 1200);
     document.documentElement.classList.add('redo');
     if (IH.dataVarning) IH.toast('Den sparade datan gick inte att läsa', IH.dataVarning + ' Exempeldatan visas i stället.', 'varning', { tid: 12000 });
   };

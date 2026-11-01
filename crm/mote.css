@@ -1635,3 +1635,74 @@
 /* Nästa steg: stegkorten fyller bildens bredd i stället för att sluta vid 900 px. */
 .nasta3 { max-width: none; }
 .nasta3 li { align-content: start; }
+
+/* ---------- Lyftet: mjuka byten utan oskärpa och 3D, lugn typografi, inget skimmer ---------- */
+.mote__bild, .mote__bild.nu { transition: transform .5s var(--mjuk), opacity .4s ease, visibility 0s linear .5s; }
+.mote__bild.nu { transition: transform .5s var(--mjuk), opacity .4s ease, visibility 0s; }
+.mote__bild.in-h { transform: translate3d(28px, 0, 0); filter: none; }
+.mote__bild.in-v { transform: translate3d(-28px, 0, 0); filter: none; }
+.mote__bild.ut-v { transform: translate3d(-28px, 0, 0); filter: none; }
+.mote__bild.ut-h { transform: translate3d(28px, 0, 0); filter: none; }
+
+.mb__etikett { margin: 0 0 12px; font: 500 1rem/1.3 var(--sans); letter-spacing: 0; text-transform: none; color: inherit; opacity: .68; }
+.mb__etikett::before { display: none; }
+.mb__titel { font-size: clamp(2.5rem, 1.5rem + 3.2vw, 4.5rem); font-weight: 600; line-height: 1.08; letter-spacing: -.025em; }
+.mb__titel--mindre { font-size: clamp(2.2rem, 1.4rem + 2.4vw, 3.6rem); }
+.mb__titel em, :root[data-tema="bygg"] .mb__titel em { background: none; -webkit-background-clip: border-box; background-clip: border-box; -webkit-text-fill-color: currentColor; color: var(--t-accent-text, var(--virke-djup)); animation: none; }
+.mb__text { margin-top: 16px; max-width: 42ch; font-size: clamp(1.0625rem, 1rem + .3vw, 1.25rem); line-height: 1.55; }
+
+/* Filmen: ljuset får vara kvar till höger, bara texten får en mörk bakgrund. Glas ovanpå video kostar mycket och får bilden att hacka */
+.mb__slojan--vanster { background: radial-gradient(120% 130% at 0% 70%, rgb(var(--t-natt-rgb) / .9) 0%, rgb(var(--t-natt-rgb) / .62) 42%, rgb(var(--t-natt-rgb) / 0) 72%), linear-gradient(0deg, rgb(var(--t-natt-rgb) / .45), rgb(var(--t-natt-rgb) / 0) 30%); }
+.mote:has(.mote__bild.nu .mb--hantverk) .mote__botten { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.mb--hantverk .mb__bak { will-change: auto; }
+
+/* Punkter i stället för piller */
+.mb__chips { gap: 8px 22px; margin-top: 22px; }
+.mb__chips span { display: inline-flex; align-items: center; gap: 8px; padding: 0; background: none; box-shadow: none; font: 500 .9375rem/1.3 var(--sans); color: inherit; }
+.mb__chips span::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--virke); }
+
+/* Verktygsraden: var ni är och vad som kommer sen */
+.mote__namn { display: grid; gap: 2px; min-width: 170px; }
+.mote__namn b { font: 600 .875rem/1.25 var(--rubrik); }
+.mote__namn small { font-size: .75rem; line-height: 1.2; opacity: .62; white-space: nowrap; }
+
+/* Innehållet glider upp rent, utan oskärpa och 3D */
+.mote__bild [data-m-in] { transform: translateY(16px); filter: none; transition: opacity .5s ease, transform .6s var(--mjuk); }
+.mote__bild.nu [data-m-in] { transform: none; filter: none; transition-delay: calc(.12s + var(--mi, 0) * .07s); }
+
+/* Filmen: slöjan ligger bara bakom texten, resten av bilden behåller sitt ljus */
+.mb--hantverk .mb__slojan.mb__slojan--vanster { background: radial-gradient(120% 130% at 0% 70%, rgb(var(--t-sand-rgb) / .96) 0%, rgb(var(--t-sand-rgb) / .74) 42%, rgb(var(--t-sand-rgb) / 0) 74%), linear-gradient(0deg, rgb(var(--t-sand-rgb) / .4), rgb(var(--t-sand-rgb) / 0) 28%); }
+
+/* ---------- Prestanda: inget glas i presentationen, inget rör sig på dolda bilder, 3D ritas bara när huset syns ---------- */
+.mote, .mote * { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.mote__bild:not(.nu):not(.ut-v):not(.ut-h) * { animation-play-state: paused !important; }
+.mote__bild:not(.nu) model-viewer { display: none; }
+
+/* ---------- Bytet: bilden lämnar bakåt i rummet, nästa kommer fram från sidan. Bara transform och opacity ---------- */
+.mote { perspective: 1600px; }
+.mote__bild { backface-visibility: hidden; transform-style: flat; }
+.mote__bild, .mote__bild.nu { transition: transform .6s cubic-bezier(.2, .75, .25, 1), opacity .38s ease, visibility 0s linear .6s; }
+.mote__bild.nu { transition: transform .6s cubic-bezier(.2, .75, .25, 1), opacity .38s ease .06s, visibility 0s; }
+.mote__bild.in-h { transform: translate3d(6%, 0, -60px) rotateY(-7deg); transition: none; }
+.mote__bild.in-v { transform: translate3d(-6%, 0, -60px) rotateY(7deg); transition: none; }
+.mote__bild.ut-v { transform: translate3d(-5%, 0, -120px) rotateY(6deg); }
+.mote__bild.ut-h { transform: translate3d(5%, 0, -120px) rotateY(-6deg); }
+
+/* Innehållet reser sig med lite djup, ett stycke i taget */
+.mote__bild [data-m-in] { transform: perspective(1000px) translateY(18px) rotateX(7deg); transform-origin: 50% 100%; }
+.mote__bild.nu [data-m-in] { transform: none; }
+
+/* Fotot och 3D-scenen lutar in och lägger sig rakt */
+.mote__bild .mb__foto, .mote__bild .husvisning { transform: perspective(1400px) rotateY(-9deg) scale(.96); transition: transform .8s cubic-bezier(.2, .75, .25, 1); }
+.mote__bild.nu .mb__foto, .mote__bild.nu .husvisning { transform: none; transition-delay: .1s; }
+
+/* Prickarna och linjen följer bytet mjukt */
+.mote__prick i { transition: width .35s cubic-bezier(.2, .75, .25, 1), background-color .25s ease; }
+.mote__framsteg i { transition: transform .6s cubic-bezier(.2, .75, .25, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .mote__bild, .mote__bild.nu, .mote__bild [data-m-in], .mote__bild .mb__foto, .mote__bild .husvisning { transition: opacity .2s linear; transform: none !important; }
+}
+
+/* Under presentationen ritas inget bakom den */
+html[data-presenterar] #app { content-visibility: hidden; }

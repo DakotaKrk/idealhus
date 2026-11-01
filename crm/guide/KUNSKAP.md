@@ -2,7 +2,7 @@
 
 Guiden (crm-guide) läser den här filen först. Allt här finns i koden – inget är påhittat. Siffror, namn och priser i CRM:et är **exempeldata** (data.js, `IH.skapaExempeldata`), skapade från dagens datum varje gång datan återställs.
 
-Senast genomgången: 2026-10-30, steg 11 "bygg klart i klienten" (app.js, vyer.js, ledning.js, kontroll.js, adminpanel.js, admin.js, sakerhet.js, stod.js, chatt.js, mote.js, videomote.js, samtal*.js, tema.js, layout.js, kalender.js, valj.js, grund.js, data.js, index.html). Nytt i steg 11 står samlat i avsnitt 3b.
+Senast genomgången: 2026-11-01 (guiden och hjälpassistenten, avsnitt 5 och 6), dessförinnan 2026-10-30, steg 11 "bygg klart i klienten" (app.js, vyer.js, ledning.js, kontroll.js, adminpanel.js, admin.js, sakerhet.js, stod.js, chatt.js, mote.js, videomote.js, samtal*.js, tema.js, layout.js, kalender.js, valj.js, grund.js, data.js, index.html). Nytt i steg 11 står samlat i avsnitt 3b.
 
 ---
 
@@ -55,7 +55,7 @@ Senast genomgången: 2026-10-30, steg 11 "bygg klart i klienten" (app.js, vyer.j
 | Mobilmenyn (< 1101 px) | `nav.mobilmeny`: säljare Översikt, Förfrågn. (aria-label Förfrågningar), Säljtavla, Kunder · produktion Översikt, Projekt, Kunder, Offerter · admin Översikt, Kontroll, Admin, Säkerhet – + **Mer** (`[data-mer]`, `data-g="mer"`) | `mer` |
 | Vyns yta | `main#vy` | – |
 
-Menyn (säljare): Översikt (+ Försäljning för chefen) · **Sälj**: Förfrågningar, Säljtavla, Kunder, Offerter, Dokument, Kundmöte · **Produktion**: Projekt · **Verktyg**: Kolla marken · **Mitt**: Meddelanden, Att göra, Inställningar. Brickor: nya förfrågningar (varm), öppna affärer, antal kunder, aktiva projekt, uppgifter i dag (varm), olästa (varm).
+Menyn (säljare): Översikt (+ Försäljning för chefen) · **Försäljning**: Förfrågningar, Säljtavla, Kunder, Offerter, Kundmöte · **Bygg**: Projekt, Dokument, Kolla marken · längst ner: Meddelanden, Att göra, Inställningar. Brickor: nya förfrågningar (varm), öppna affärer, antal kunder, aktiva projekt, uppgifter i dag (varm), olästa (varm).
 
 Kontomenyn (`.km-panel` på dator med utfälld meny, annars ark `.km-ark`; stängs vid klick utanför): status (snabbval `data-g="satt-narvaro"` + alla via `km-status`), **Byt konto** (exempelkontona, `valj-anvandare`), **Tema**, **Layout**, Min profil, Nytt konto (chef/admin, `km-nytt-konto`) eller Meddelanden, Logga ut.
 
@@ -83,7 +83,7 @@ Kontomenyn (`.km-panel` på dator med utfälld meny, annars ark `.km-ark`; stän
 | **↑ ↓ · R · E · P · T · Enter** | Chatten (fokus i tråden) | Flytta / svara / ändra / fäst / uppgift / meny |
 | **J / K · ↑ ↓ · Enter · X** | Listor med `data-radlista` (aviseringar, mallar, Ny offert m.fl.) | Nästa/föregående rad, öppna, kryssa (massåtgärder) |
 | **Shift + Esc** | Supportläge | Tillbaka till Admin |
-| **?** | Guiden | Öppnar guidemenyn (guide.js) |
+| **?** | Guiden | Öppnar Kortkommandon i CRM:et; bokknappen vid menyn öppnar Lär dig CRM:et (guide.js) |
 
 Kommandopaletten (`.palett`): Senaste (kund/affär/förfrågan/offert), **Snabbåtgärder** (Ny kund, Ny affär, Ny förfrågan, Ny uppgift, **Ny offert**, **Nytt videomöte**, Starta kundmöte – inte för admin), tema och layout (skriv t.ex. "tema", "mörk", "layout", "minimal"), **Gå till** (alla sidor rollen får se). Söker kunder, affärer, förfrågningar, offerter, **dokument**, **anteckningar och aktiviteter** och (via `IH.sok.lagg` från chatt.js) **chattmeddelanden**; från tre tecken även i ordning ("sgb" → Skärgårdsbyn).
 
@@ -198,7 +198,7 @@ För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 ### Teman och layout (tema.js, layout.js)
 - **Teman** (`IH.tema`, sparas per konto i `ih-crm-tema:<id>`): Följ systemet (Original eller Mörk efter datorn), **Original** (varm kräm och bärnsten), **Ljus**, **Mörk**, **Färgglad**, **Bygg** (betong, stål och varselgult), **Office** (stramt, svalt och neutralt). Väljs i Inställningar (`.tema-valjare--stor`), kontomenyn (`.km-tema`, `.tema-valjare--liten`) och sökpaletten.
 - **Layout** (`IH.layout()`, `IH.layout.satt(id)`, sparas i `ih-crm-layout:<id>`, attributet `html[data-layout]`): **Minimal** (bara det du jobbar med – tätt och lugnt), **Normal** (överblick utan dekor), **Full** (allt, stora bildytor och 3D – förval). Inget försvinner; det som döljs i Minimal finns i Normal och Full. Väljs i Inställningar (`.inst-layout`), kontomenyn (`.km-layout`) och sökpaletten. Händelsen `ih:layout` skickas vid byte.
-- Turerna använder `om: inteMin / baraMin / baraFull` och reservlistor för det som döljs i ett läge.
+- Turerna använder `om: inteMin` och reservlistor för det som döljs i ett läge.
 
 ### Gemensamma detaljer
 - Datumrutor får CRM:ets egen kalender (kalender.js), rullgardiner egen väljare (valj.js), talrutor −/+ (grund.js). Uppladdade filer kontrolleras av filskannern (filskanner.js + filregler.js).
@@ -256,36 +256,64 @@ Fleranvändare och synk mellan datorer · riktig inloggning och kontoflöden · 
 
 ---
 
-## 5. Guiderna (crm/guide/)
+## 5. Guiderna (crm/guide/) – omgjorda 2026-11-01
 
 | Fil | Innehåll |
 |---|---|
-| `guide.css` | Slöjan (`.ihg`, `.ihg-hal` med skugghål), ramen (`.ihg-ring`, pulserar), "Klicka här" (`.ihg-skylt`), bubblan (`.ihg-bubbla`), muspekaren i autospel (`.ihg-mus`), hjälpknappen (`.ihg-knapp`), guidemenyn (`.ihg-meny`), välkomstkortet (`.ihg-hej`) |
-| `guide.js` | Motorn `IH.guide`: `registrera`, `starta(id, {auto})`, `stang`, `nasta`, `forra`, `oppna` (meny), `turForSidan`, `klara`, `lage`, `nollstall`. Länk: `index.html?tur=<id>#/<sida>` (&auto=1 = autospel). `?` öppnar menyn. Klara turer i `localStorage['ih-guide-klara']`, välkomstkortet en gång (`ih-guide-sett`). Händelsen `ih-guide` (start, steg, klar, slut) på window |
-| `turer.js` | Turerna som data (se tabell nedan) |
-| `presentation.html/.css/.js` | Bildspelet för nya säljare med skärmbilder i `bilder/` och "Prova i CRM:et" |
-| `video.html/.css/.js`, `video/` | Genomgången `video/genomgang.mp4` (1440×900, 8:36, 8 kapitel: Välkommen, Hitta i CRM:et, flöde 1–5, Prova själv) med kapitel (`video/kapitel.js`, `video/kapitel.vtt`) och "Prova själv" |
+| `guide.css` | Slöjan, hålet (`.ihg-hal`), ramen (`.ihg-ring`), rutan (`.ihg-bubbla`), startsidan (`.ihg-meny`, `.ihg-kurs`), hjälpknappen (`.ihg-knapp`), välkomstkortet (`.ihg-hej`). Sista blocket "Guiden omgjord" är den gällande stilen: glas, bara `--t-*`, slöjan bygger på `--t-skugga-rgb` |
+| `guide.js` | Motorn `IH.guide`: `registrera`, `starta(id, {auto, fran})`, `stang`, `nasta`, `forra`, `fortsatt`, `peka(mal, {sida, rubrik, text, saknas})`, `oppna` (startsidan), `turForSidan`, `klara`, `lage`, `nollstall`, `nastaTur`. Länk: `index.html?tur=<id>#/<sida>` (&auto=1 = autospel). Händelsen `ih-guide` (start, steg, klar, slut) |
+| `turer.js` | Turerna och kurserna (`IH.guide.kurser`) som data |
+| `presentation.html/.css/.js` | Bildspelet för nya säljare |
+| `video.html/.css/.js`, `video/` | Genomgången `video/genomgang.mp4`. Inspelad före omgörningen: bilderna visar de gamla, längre turerna |
 
-Steg i en tur: `sida`, `mal` (väljare/lista/funktion – första synliga vinner), `rubrik`, `text`, `vanta` (användaren klickar själv; "Gör det åt mig" klickar), `fri` (man får klicka/skriva i hålet), `fyll` (exempelvärden), `om` (villkor), `valfri` (hoppas över om det saknas), `fore`, `placering`, `luft`, `behallArk`, `efterKlick`, `tangent` (ett vänta-steg går också vidare på en tangent, t.ex. `n`), `tangenter` (sidans egna tangenter fungerar i steget, t.ex. pilarna i presentationen).
+**Guiden stannar aldrig.** Den förbereder skärmen själv och hoppar tyst över det som inte gäller. Det gamla meddelandet "Den här delen syns inte just nu" är borttaget.
+- Menyn: ett mål i sidomenyn när menyn är infälld fäller ut den (`fallUt: true` på steget, annars automatiskt när målet är `.sido…`, `.anv` eller `.vy-vaxel`). Menyläget återställs när turen slutar och också vid omladdning (`ih-guide-sido-ater`). Rader under Mer pekas ut med `.sido__merknapp` (hjälparen `meny(vy)` i turer.js).
+- Saknas målet efter väntetiden (sidbyte 7 s, valfri 2 s, annars 4,5 s) läggs steget i `aktiv.hoppade` och nästa steg visas. Räknaren visar bara steg som gäller.
+- När turen slutar stängs ark, sökpalett, kontomeny och (i övning) presentationen som turen öppnat.
 
-Dokumentsidan minns fliken Arkiv/Mallar i minnet – turerna använder `iArkiv(väljare)` som växlar till Arkiv först.
+**Steg:** `sida`, `mal` (väljare/lista/funktion, första synliga vinner), `rubrik`, `text`, `vanta` (användaren klickar på det markerade), `prova` + `klar(ctx)` (går vidare när handlingen är gjord), `gor` (uppmaningen), `bra` (berömmet), `gorSjalv` ("Gör det åt mig"), `fri`, `fyll`, `om`, `roller`, `valfri`, `fallUt`, `fore`, `placering`, `luft`, `behallArk`, `efterKlick`, `tangent`, `tangenter`, `klickaPa`.
 
-| id | Namn | Roller |
-|---|---|---|
-| valkommen | Rundtur: hitta i CRM:et (nu med klockan) | alla |
-| utseende | Teman och layout: sex teman, Följ systemet, Minimal/Normal/Full, kontomenyn, sökningen, den infällda menyn | alla |
-| aviseringar | Aviseringar och påminnelser: klockan, panelen, skrivbordsaviseringar, påminnelser som larmar | alla |
-| oversikt | Översikt | alla |
-| forfragningar, saljtavla, affar, kunder, kundsida, offerter, offert, dokument, kundmote, presentation, projekt | Sidorna | säljare (admin i supportläge) |
-| videomote | Videomöte med kund: boka från kundsidan, inbjudan, anslut, förhandsvisning, kontroller, väntrum, anteckning | säljare |
-| videomoten | Videomöten: Alla videomöten, Nytt videomöte/Starta nu, listan, prototyptexten, från chatten, kundens väg in, Dela innehåll, efter mötet | säljare |
-| att-gora, chatt, chatt-verktyg, profil, installningar | Sidorna (chatt-verktyg: meddelandets meny Mer, sök i tråden, fästa, mallar, eget fönster, tangenter) | alla |
-| chef | Försäljningsledning | chefen |
-| kontroll, adminpanel, sakerhet, supportlage | Ledning och admin | admin |
-| flode-ny-kund, flode-offert, flode-mote, flode-dokument, flode-overlamning | Flödena 1–5 | säljare |
+**Övning:** `ovning: true` på turen tar en kopia av `IH.db` (i `ih-guide-ovning`) och lägger tillbaka den när turen slutar, också om sidan laddas om mitt i. Klarkortet har **Behåll det jag gjorde**. Övningar: forfragningar, saljtavla, affar, kunder, presentation, videomote, projekt, att-gora, flode-ny-kund, flode-offert, flode-mote, flode-overlamning.
 
-Testat 2026-10-30 i headless Edge (scratchpad `g11/tur.mjs <jag> <läge> <turer|alla> [bredd] [höjd]`) i alla tre layoutlägena för ah, sa och ad: varje steg hittar sitt element eller hoppas medvetet över (`om`/`valfri`).
+**Startsidan Lär dig CRM:et** (bokknappen `.ihg-knapp` vid menyn): ring med procent och antal klara, vad man senast lärde sig, **Fortsätt där du slutade** eller **Nästa**, förslag för sidan och rollen, sökruta bland kurserna, kurskort med ikon, tid kvar och status (Klar, Nästa, Pågår, Inte börjad), **Fråga assistenten**. När en hel kurs blir klar firas det på klarkortet. Framsteg per konto: `ih-guide-klara:<konto>`, var man slutade: `ih-guide-pagar:<konto>` (en övning börjar om, annars fortsätter den från närmaste steg med egen sida).
+
+| Kurs | Turer |
+|---|---|
+| Kom igång | valkommen (Hitta i CRM:et), oversikt, utseende, aviseringar |
+| Från förfrågan till affär | flode-ny-kund, forfragningar, saljtavla, affar |
+| Kunder och offerter | kunder, kundsida, flode-offert, offerter, offert |
+| Kundmöten | flode-mote, kundmote, presentation, videomote, videomoten |
+| Order, bygge och dokument | flode-overlamning, projekt, flode-dokument, dokument |
+| Din dag | att-gora, chatt, chatt-verktyg, profil, installningar |
+| Försäljningsledning | chef (chefen) |
+| Administration | kontroll, adminpanel, sakerhet, supportlage (admin) |
+
+Dokumentsidan minns fliken Arkiv/Mallar – turerna använder `iArkiv(väljare)`.
 
 ### Underhåll
-- Ändras en klass eller ett `data-g` i CRM:et: sök i `turer.js` och uppdatera, kör testskriptet (scratchpad `g11/tur.mjs`, som använder `kortur.js`) i Minimal, Normal och Full och uppdatera den här filen.
-- Nya sidor: lägg till en tur med `vy` = vyns namn så hittar "Guida mig på den här sidan" den.
+- Ändras en klass eller ett `data-g`: sök i `turer.js` och `assistent-kunskap.js`, kör `scratchpad/lg/tur.mjs <jag> <läge> <infälld 0|1> <turer|alla> [bredd] [höjd]`. Raden `HOPPADE` visar steg vars mål saknas.
+- Nya sidor: lägg till en tur med `vy` = vyns namn och lägg turen i en kurs.
+
+---
+
+## 6. Hjälpassistenten (crm/assistent*.js) – 2026-11-01
+
+Lokal hjälpassistent, **ingen AI**, och det står i panelen. Ingen server och ingen nyckel i webbläsaren; inget skickas iväg.
+
+| Fil | Innehåll |
+|---|---|
+| `assistent-kunskap.js` | Handskrivna ämnen ur den här filen (`amnen`), synonymer, spärrord och förslag per sida. Turerna indexeras automatiskt |
+| `assistent.js` | Motorn (matchning, avsikter, följdfrågor), verktygen och panelen |
+| `assistent3d.js` | Husfiguren i three.js, ES-modul som laddas när sidan ritats |
+| `assistent.css` | Figurknappen `.ia-knapp`, panelen `.ia-panel`, bubblan `.ia-bubbla` och valen `.ia-val` |
+
+- **Gränssnitt för riktig AI senare:** `IH.assistent.svara(fraga, sammanhang)` ger en Promise med `{text, rader, knappar, utfor, kalla}`. `IH.assistent.sattMotor({namn, svara})` byter motor. `IH.assistent.verktyg` är de läsande verktygen. Fel i motorn faller tillbaka på den lokala.
+- **Ordning:** småprat, följdfråga, rollspärr, handling, sidbyte, guide, data, kund, kunskapsbas. Under 0,34 i poäng säger den att den inte vet och föreslår närmaste ämnen; 0,34–0,55 frågar den vad du menar.
+- **Språket:** å/ä/ö vikas, svenska ändelser kapas, stavfel rättas (en bokstav i korta ord, två från sju bokstäver), synonymer, sammansatta ord.
+- **Verktyg:** nyaForfragningar, senaUppgifter, uppgifter(dag), offerterVantar, offerterGarUt, moten, storstaAffarer, stillaAffarer, prognos, nastaMontage, hittaKund, teamLage (chef). Alla frågar `far(vy)`, som bygger på `IH.jag()` och `IH.sparrad`.
+- **Handlingar:** ny kund, ny uppgift, ny förfrågan, ny affär, ny offert och nytt videomöte öppnar det vanliga formuläret förifyllt. Assistenten sparar aldrig något själv.
+- **Roller:** säljare får inte chefens eller adminens delar, administratören får inte säljdelarna (hänvisas till supportläget). Svaret nämner bara vilken del det gäller.
+- **Figuren:** husfiguren i 3D är själva knappen (`.ia-knapp`, en canvas och en WebGL-kontext) och kliver upp i panelens huvud när den öppnas. Laddas med `requestIdleCallback` efter första ritningen. Tillstånd: vila, lyssnar, tanker, svarar. I vila ritas inget: en kort gest (blinka, titta upp) var 3–7 s, högst 24 bilder/s; andningen är CSS. Vinkar när musen pekar på den och visar en bubbla (`.ia-bubbla`) med ett eller två klickbara förslag ur läget på sidan, en gång per sida och högst var 45:e sekund. Klick ställer frågan. Stängd med krysset kommer den inte tillbaka på 10 minuter. Figuren tittar på bubblan. `granska()` stoppar vid dold flik, `html[data-presenterar]`, `.mote`, `#vm`, ark, palett, guide och öppet chattfönster. `prefers-reduced-motion` ger en stillbild. Panelen Lär dig CRM:et visar en stillbild av figuren (`IH.assistent.figurBild()`), ingen egen WebGL.
+- **Inställningar:** kortet `.inst-assistent`: Levande, Stilla, Liten ikon (ingen 3D alls) och Till höger, Till vänster. Sparas i `ih-crm-assistent:<konto>`.
+- **Placering:** nere till höger, till vänster om chattbubblan (`body.chf-bubbla-plats`), på mobil ovanför bottenmenyn. Toasterna lyfts över figuren och sidan får luft nedtill. Dold under presentation och videomöte (`html[data-ia-dold]`).
+- Ändras CRM:et: uppdatera `amnen` i `assistent-kunskap.js` tillsammans med den här filen.

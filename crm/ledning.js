@@ -107,7 +107,7 @@
       }).join('') + '</div>' : '') +
       '<div class="km-grupp"><p class="km-rubrik"><span>Byt konto</span><small>Prototyp: logga in som någon annan i teamet</small></p>' +
         '<div class="km-lista" role="list">' + [jag].concat(andra).map(function (u, n) { return '<div role="listitem" style="--i:' + n + '">' + kontoRad(u, u.id === jag.id) + '</div>'; }).join('') + '</div></div>' +
-      (IH.tema && IH.tema.valjare ? '<div class="km-tema"><p class="km-rubrik"><span>Tema</span><small data-tema-namn>' + e(IH.tema.beskrivning()) + '</small></p>' + IH.tema.valjare('liten') + '</div>' : '') +
+      (IH.tema && IH.tema.valjare ? '<div class="km-tema"><p class="km-rubrik"><span>Tema</span><small data-tema-namn>' + e(IH.tema.beskrivning()) + '</small></p>' + IH.tema.valjare('liten') + '<div class="km-glas">' + IH.tema.glasVaxel() + '</div></div>' : '') +
       (IH.layout && IH.layout.valjare ? '<div class="km-layout"><p class="km-rubrik"><span>Layout</span><small data-layout-namn>' + e(IH.layout.namn()) + '</small></p>' + IH.layout.valjare('liten') + '</div>' : '') +
       '<footer class="km-fot">' + lank('href="#/profil"', 'anstallda', 'Min profil') +
         lank('href="#/installningar"', 'installningar', 'Inställningar') +
@@ -116,7 +116,10 @@
   IH.G['konto-meny'] = function () {
     if (km) { stangKm(); return; }
     var sido = document.querySelector('.sido'), r = sido && sido.getBoundingClientRect();
-    if (!r || r.width < 200 || !matchMedia('(min-width: 1101px)').matches || document.documentElement.hasAttribute('data-sido-dold')) {
+    var dold = document.documentElement.hasAttribute('data-sido-dold'), rals = dold && document.querySelector('.sido-rals');
+    // Infälld meny: samma panel, bredvid listen. Arket används bara på små skärmar
+    if (dold && rals) { var rr = rals.getBoundingClientRect(); r = { left: rr.right + 14, top: 12, width: 304, height: window.innerHeight - 24 }; }
+    if (!r || r.width < 200 || !matchMedia('(min-width: 1101px)').matches) {
       IH.oppnaArk({ titel: IH.jag().namn, under: e(IH.jag().titel), ikon: 'kunder', kropp: '<div class="km-ark">' + kmHtml() + '</div>' });
       return;
     }
@@ -1002,7 +1005,7 @@
       var vnr = veckonr(veckaStart(11 - n));
       return '<span title="Vecka ' + vnr + (n === 11 ? ' (den här veckan)' : '') + ': ' + (v ? IH.kr(v) : 'inget vunnet') + '"><em>' + (v ? IH.kort(v) : '') + '</em><i style="--h:' + (v / maxV).toFixed(3) + ';--n:' + n + '" class="' + (v ? 'pa' : '') + (n === 11 ? ' nu' : '') + '"></i><small' + ((11 - n) % 2 ? ' class="udda"' : '') + '>v' + vnr + '</small></span>'; }).join('') + '</span></div>';
     var hjalte = '<section class="ap-hjalte ao-hjalte kort lp-chefhjalte lp-mork"><div class="sh-rutnat" aria-hidden="true"></div><i class="lp-mork__glod" aria-hidden="true"></i><i class="lp-mork__glod lp-mork__glod--2" aria-hidden="true"></i>' + himlen(h) +
-      '<div class="ao-text"><p class="etikett"><i class="sh-live"></i>Försäljningsledning · live ur CRM:et</p><h1>' + hals + ', ' + e(jag.namn.split(' ')[0]) + '. <em>Så går teamet.</em></h1>' +
+      '<div class="ao-text"><p class="etikett">Försäljningsledning</p><h1>' + hals + ', <strong class="lp-namn">' + e(jag.namn.split(' ')[0]) + '<svg class="hero__krull" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 9.5C38 3.5 74 12 112 6.5S172 3.5 197 8"/></svg></strong><em>Så här går det för teamet</em></h1>' +
         '<p class="ao-ingress">' + plural(team.length, 'säljare', 'säljare') + ' · ' + aktivaNu + ' i tjänst nu · ' + plural(oppnaN, 'öppen affär', 'öppna affärer') + (utan.length ? ' · <strong class="lp-varm">' + plural(utan.length, 'affär', 'affärer') + ' utan ansvarig</strong>' : '') + '</p>' +
         '<div class="sh-knappar"><button type="button" class="sh-knapp sh-knapp--accent" data-g="km-nytt-konto">' + IH.emo('anvandare-plus') + '<span>Nytt konto</span></button>' +
           '<button type="button" class="sh-knapp" data-g="lp-mal">' + IH.emo('mal') + '<span>Sätt mål</span></button><button type="button" class="sh-knapp" data-g="lp-uppgift">' + IH.emo('todo') + '<span>Ge uppgift</span></button>' +

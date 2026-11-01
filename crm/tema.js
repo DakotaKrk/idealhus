@@ -102,13 +102,29 @@
     markera();
     return upplos(val);
   };
+  // Glasdesignen: på som förval, valet sparas per konto som temat
+  var GLAS = 'ih-crm-glas:';
+  tema.glasPa = function () { try { return localStorage.getItem(GLAS + konto()) !== '0'; } catch (e) { return d.hasAttribute('data-glas'); } };
+  function glasTillampa() { d.toggleAttribute('data-glas', tema.glasPa()); }
+  tema.glasSatt = function (pa) {
+    try { localStorage.setItem(GLAS + konto(), pa ? '1' : '0'); } catch (e) { /* privat läge: gäller tills sidan laddas om */ }
+    d.classList.add('tema-byter');
+    d.toggleAttribute('data-glas', !!pa);
+    clearTimeout(stopp);
+    stopp = setTimeout(function () { d.classList.remove('tema-byter'); }, 320);
+    markera();
+  };
+  tema.glasVaxel = function () {
+    return '<button type="button" class="glas-vaxel" role="switch" data-g="glas-vaxla" aria-checked="' + tema.glasPa() + '"><span class="glas-vaxel__spar" aria-hidden="true"><i></i></span>' +
+      '<span class="glas-vaxel__text"><b>Glasdesign</b><small>Frostat glas i hela CRM:et</small></span></button>';
+  };
   // Efter kontobyte (app.js) eller när en annan flik ändrat: läs kontots val på nytt.
-  tema.lasOm = function (hur) { tillampa(upplos(lasVal()), hur && hur.direkt); markera(); };
+  tema.lasOm = function (hur) { tillampa(upplos(lasVal()), hur && hur.direkt); glasTillampa(); markera(); };
 
   if (mork.addEventListener) mork.addEventListener('change', function () { if (lasVal() === 'system') tillampa(upplos('system')); markera(); });
   else if (mork.addListener) mork.addListener(function () { if (lasVal() === 'system') tillampa(upplos('system')); });
   window.addEventListener('storage', function (e) {
-    if (e.key === 'ih-crm-jag' || (e.key && e.key.indexOf(NYCKEL) === 0)) tema.lasOm();
+    if (e.key === 'ih-crm-jag' || (e.key && (e.key.indexOf(NYCKEL) === 0 || e.key.indexOf(GLAS) === 0))) tema.lasOm();
   });
 
   /* --- Väljarna ----------------------------------------------------- */
@@ -157,10 +173,12 @@
       if (!b.classList.contains('palett__rad')) b.setAttribute('aria-pressed', String(b.getAttribute('data-tema-id') === val));
     });
     Array.prototype.forEach.call(document.querySelectorAll('[data-tema-namn]'), function (s) { s.textContent = tema.beskrivning(); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-g="glas-vaxla"]'), function (b) { b.setAttribute('aria-checked', String(tema.glasPa())); });
   }
   tema.markera = markera;
 
   IH.G = IH.G || {};
+  IH.G['glas-vaxla'] = function () { tema.glasSatt(!tema.glasPa()); };
   IH.G['tema-val'] = function (el) {
     var id = el.getAttribute('data-tema-id');
     var t = tema.satt(id);

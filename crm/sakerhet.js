@@ -31,7 +31,7 @@
   var FARG = { kod: '#3f6b50', uppdatering: '#4f6f8f', buggar: '#7b5c8f', lacka: '#c4577e', intrang: '#3d8a96', beteende: '#e8a456', trasigt: '#8f5424' };
   var KORT = { kod: 'Skadlig kod', uppdatering: 'Uppdateringar', buggar: 'Buggar', lacka: 'Läckor', intrang: 'Intrångsförsök', beteende: 'Beteende', trasigt: 'Trasigt' };
   var TYPNAMN = { skanning: 'Skanning', filskanning: 'Filskanning', konto: 'Konto', support: 'Support', atkomst: 'Åtkomst', intrang: 'Intrång', export: 'Export', import: 'Import', aterstall: 'Återställning', inaktiv: 'Utloggning', installning: 'Inställning', rensning: 'Rensning' };
-  var KANDA = /^(data|app|mote|vyer|ledning|chatt|admin|adminpanel|kontroll|sakerhet|stod|valj|kalender|overgang|grund|filregler|filskanner|resa3d|motesrum3d|three\.module\.min|[A-Za-z]+(Pass|Loader|Geometry|Environment|Composer|Utils|Shader))\.js$/;
+  var KANDA = /^(data|app|mote|vyer|ledning|chatt|admin|adminpanel|kontroll|sakerhet|stod|valj|kalender|overgang|grund|filregler|filskanner|resa3d|motesrum3d|tema|tema-tidigt|layout|samtal|samtal-ui|samtal-dela|videomote|guide|turer|assistent|assistent-kunskap|assistent3d|three\.module\.min|[A-Za-z]+(Pass|Loader|Geometry|Environment|Composer|Utils|Shader))\.js$/;
   var FARLIGT = [[/<\s*script/i, 'Skripttagg'], [/javascript:/i, 'javascript:-länk'], [/\bon(error|load|click|mouseover)\s*=/i, 'Händelseattribut'], [/<\s*iframe/i, 'Inbäddad ram']];
   // Alla textfält i datan (kunder, affärer, aktiviteter, uppgifter, chatten)
   function strangar() {

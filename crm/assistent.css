@@ -1,0 +1,139 @@
+/* Hjälpassistenten: knappen och glaspanelen. Bara --t-tokens. Rörelser med transform och opacity.
+   Knappen står i hörnet nere till höger. Är chattbubblan där står den till vänster om bubblan.
+   Toasterna lyfts över knappen och flyttar åt vänster när panelen är öppen. */
+.ia-knapp { --ia-bas: .82; position: fixed; right: 14px; bottom: 14px; z-index: 59; display: grid; place-items: center; width: 88px; height: 88px; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer;
+  transform: translate(var(--ia-x, 0), var(--ia-y, 0)) scale(var(--ia-s, var(--ia-bas))); transition: transform .46s cubic-bezier(.3, 1.12, .4, 1), opacity .2s ease; }
+.ia-knapp:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: -6px; }
+.ia-knapp__ikon { grid-area: 1 / 1; display: grid; place-items: center; width: 56px; height: 56px; padding: 12px; border-radius: 50%;
+  background: linear-gradient(165deg, rgb(var(--t-glas-rgb) / .92), rgb(var(--t-glas-rgb) / .76)); box-shadow: inset 0 0 0 1px rgb(var(--t-glans-rgb) / .34), 0 14px 30px -14px rgb(var(--t-skugga-rgb) / .7); color: var(--t-accent-text); transition: opacity .3s ease; }
+.ia-knapp svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ia-knapp svg .ia-oga { fill: currentColor; stroke: none; }
+/* Figuren andas med CSS: inget ritas om medan den står still */
+.ia-knapp__figur { grid-area: 1 / 1; width: 88px; height: 88px; opacity: 0; pointer-events: none; transform-origin: 50% 82%; transition: opacity .35s ease; }
+.ia-knapp--3d .ia-knapp__figur { opacity: 1; animation: ia-andas 4.4s ease-in-out infinite; }
+.ia-knapp--3d .ia-knapp__ikon { opacity: 0; }
+@keyframes ia-andas { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.028); } }
+html[data-ia-stilla] .ia-knapp__figur, html[data-ia-dold] .ia-knapp__figur { animation: none; }
+html[data-ia-ikon] .ia-knapp__figur { display: none; }
+body.chf-bubbla-plats .ia-knapp { right: 66px; }
+html[data-ia-vanster] body .ia-knapp { right: auto; left: calc(var(--sido, 264px) + 30px); }
+html[data-ia-vanster][data-sido-dold] body .ia-knapp { left: 66px; }
+html[data-ia-oppen] body .ia-knapp { cursor: default; pointer-events: none; }
+body:has(.ia-knapp) .toaster { bottom: 104px; }
+body:has(.ia-knapp) .vy:not(:has(.ch)) { padding-bottom: 104px; }
+html[data-ia-oppen] .toaster { right: 446px; }
+html[data-ia-dold] :is(.ia-knapp, .ia-panel, .ia-bubbla) { display: none !important; }
+html[data-ia-guide] .ia-knapp, html[data-ia-undan] .ia-knapp, html[data-ark-oppen] .ia-knapp, html[data-palett-oppen] .ia-knapp, html:not([data-ia-oppen])[data-konto-oppen] .ia-knapp { opacity: 0; pointer-events: none; }
+html[data-ark-oppen] .ia-panel, html[data-palett-oppen] .ia-panel, html[data-ia-guide] .ia-panel { opacity: 0 !important; pointer-events: none; }
+
+.ia-bubbla { position: fixed; right: 92px; bottom: 34px; z-index: 57; display: flex; align-items: flex-start; gap: 2px; max-width: 280px; padding: 5px; border-radius: 18px; background: linear-gradient(165deg, rgb(var(--t-glas-rgb) / .97), rgb(var(--t-glas-rgb) / .9)); -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%); box-shadow: inset 0 0 0 1px rgb(var(--t-glans-rgb) / .3), inset 0 1px 0 rgb(var(--t-glans-rgb) / .5), 0 18px 38px -18px rgb(var(--t-skugga-rgb) / .8); opacity: 0; transform: translateY(12px) scale(.86); transform-origin: 100% 78%; }
+/* Den lilla pilen mot figuren */
+.ia-bubbla::after { content: ""; position: absolute; right: -6px; bottom: 16px; width: 13px; height: 13px; border-radius: 3px; background: rgb(var(--t-glas-rgb) / .92); box-shadow: inset -1px -1px 0 rgb(var(--t-glans-rgb) / .24); transform: rotate(-45deg); }
+.ia-bubbla.syns { opacity: 1; transform: none; transition: opacity .22s ease; animation: ia-bubbla-in .56s linear both; }
+/* Lätt fjädring: går förbi läget en aning och landar mjukt */
+@keyframes ia-bubbla-in { 0% { transform: translateY(12px) scale(.86); } 42% { transform: translateY(-3px) scale(1.018); } 70% { transform: translateY(1px) scale(.996); } 100% { transform: none; } }
+.ia-bubbla.ut { opacity: 0; transform: translateY(6px) scale(.97); transition: opacity .2s ease, transform .22s ease; }
+.ia-bubbla__rader { display: grid; gap: 2px; min-width: 0; }
+.ia-bubbla__rader button { padding: 6px 8px 6px 10px; border: 0; border-radius: 13px; background: none; color: var(--t-text); font: 600 .8125rem/1.35 var(--sans); text-align: left; cursor: pointer; transition: background-color .16s ease; }
+.ia-bubbla__rader button + button { color: var(--t-text-2); font-weight: 500; }
+.ia-bubbla__rader button:hover { background: rgb(var(--t-accent-rgb) / .16); color: var(--t-accent-text-djup); }
+.ia-bubbla__rader button:focus-visible, .ia-bubbla__x:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: 1px; }
+.ia-bubbla__rader span { display: inline-block; opacity: 0; animation: ia-ord .3s ease both; animation-delay: calc(var(--o) * 42ms + .16s); }
+@keyframes ia-ord { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+.ia-bubbla__x { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border: 0; border-radius: 50%; background: none; color: var(--t-text-2); cursor: pointer; transition: background-color .16s ease; }
+.ia-bubbla__x:hover { background: rgb(var(--t-blaeck-rgb) / .07); color: var(--t-text); }
+.ia-bubbla__x svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+body.chf-bubbla-plats .ia-bubbla { right: 148px; }
+html[data-ia-vanster] body .ia-bubbla { right: auto; left: calc(var(--sido, 264px) + 122px); transform-origin: 0 78%; }
+html[data-ia-vanster] body .ia-bubbla::after { right: auto; left: -6px; transform: rotate(135deg); }
+html[data-ia-vanster][data-sido-dold] body .ia-bubbla { left: 158px; }
+
+.ia-val { display: inline-flex; flex-wrap: wrap; gap: 4px; margin: 0 8px 8px 0; padding: 4px; border-radius: 999px; background: rgb(var(--t-blaeck-rgb) / .05); }
+.ia-val button { min-height: 32px; padding: 0 12px; border: 0; border-radius: 999px; background: none; color: var(--t-text-2); font: 500 .8125rem/1 var(--sans); cursor: pointer; transition: background-color .16s ease, color .16s ease; }
+.ia-val button[aria-pressed="true"] { background: rgb(var(--t-glas-rgb) / .95); color: var(--t-text); box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .3); }
+.ia-val button:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: 1px; }
+.ia-val__not { margin: 2px 0 0; color: var(--t-text-2); font-size: .8125rem; }
+
+.ia-panel { position: fixed; right: 22px; bottom: 22px; z-index: 58; display: flex; flex-direction: column; width: min(404px, calc(100vw - 32px)); height: min(640px, calc(100dvh - 44px)); border-radius: calc(26px * var(--t-radie-k, 1)); overflow: hidden;
+  background: linear-gradient(165deg, rgb(var(--t-glas-rgb) / .94), rgb(var(--t-glas-rgb) / .86));
+  -webkit-backdrop-filter: blur(28px) saturate(170%); backdrop-filter: blur(28px) saturate(170%);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-glans-rgb) / .28), inset 0 1px 0 rgb(var(--t-glans-rgb) / .5), 0 40px 90px -36px rgb(var(--t-skugga-rgb) / .85);
+  color: var(--t-text); font-family: var(--sans); opacity: 0; transform: translateY(12px) scale(.97); transform-origin: 100% 100%; transition: opacity .2s ease, transform .3s cubic-bezier(.22, 1, .36, 1); }
+.ia-panel.syns { opacity: 1; transform: none; }
+.ia-panel[hidden] { display: none; }
+
+.ia-topp { position: relative; display: flex; align-items: center; gap: 10px; padding: 12px 44px 10px 14px; }
+.ia-figur { position: relative; flex: none; width: 88px; height: 88px; }
+.ia-topp__text { min-width: 0; }
+.ia-topp h2 { margin: 0; font: 600 1.0625rem/1.2 var(--rubrik); letter-spacing: -.01em; }
+.ia-topp p { margin: 3px 0 0; color: var(--t-text-2); font-size: .8125rem; line-height: 1.3; }
+.ia-x { position: absolute; top: 10px; right: 10px; display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 50%; background: none; color: var(--t-text-2); cursor: pointer; transition: background-color .18s ease, color .18s ease; }
+.ia-x:hover { background: rgb(var(--t-blaeck-rgb) / .07); color: var(--t-text); }
+.ia-x:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: 1px; }
+.ia-x svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+.ia-logg { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 6px 14px 10px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; outline: none; }
+.ia-medd { max-width: 92%; font-size: .9rem; line-height: 1.5; animation: ia-in .24s ease both; }
+@keyframes ia-in { from { opacity: 0; transform: translateY(4px); } }
+.ia-medd--jag { align-self: flex-end; padding: 8px 12px; border-radius: 16px 16px 5px 16px; background: var(--t-knapp-bas); color: var(--t-pa-accent); overflow-wrap: anywhere; }
+.ia-medd--ia { align-self: flex-start; }
+.ia-medd__text b { font-weight: 600; }
+.ia-rader { display: grid; gap: 4px; margin: 6px 0 0; padding: 0; list-style: none; }
+.ia-rader a { display: block; padding: 7px 10px; border-radius: 12px; background: rgb(var(--t-blaeck-rgb) / .045); color: inherit; text-decoration: none; transition: background-color .16s ease; }
+.ia-rader a:hover { background: rgb(var(--t-blaeck-rgb) / .08); }
+.ia-rader a:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: 1px; }
+.ia-rader b { display: block; font: 600 .8125rem/1.3 var(--sans); }
+.ia-rader small { display: block; color: var(--t-text-2); font-size: .75rem; line-height: 1.35; }
+.ia-knappar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+.ia-knappar button, .ia-forslag button { min-height: 32px; padding: 6px 12px; border: 0; border-radius: 999px; background: rgb(var(--t-accent-rgb) / .16); color: var(--t-accent-text-djup); font: 600 .78125rem/1.2 var(--sans); text-align: left; cursor: pointer; transition: background-color .16s ease; }
+.ia-knappar button:hover { background: rgb(var(--t-accent-rgb) / .28); }
+.ia-knappar button:focus-visible, .ia-forslag button:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: 1px; }
+.ia-forslag { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 14px 8px; }
+.ia-forslag button { background: rgb(var(--t-blaeck-rgb) / .055); color: var(--t-text-2); font-weight: 500; }
+.ia-forslag button:hover { background: rgb(var(--t-blaeck-rgb) / .09); color: var(--t-text); }
+.ia-rad { display: flex; align-items: center; gap: 6px; margin: 0 10px 10px; padding: 4px 4px 4px 14px; border-radius: 999px; background: rgb(var(--t-blaeck-rgb) / .055); box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .06); transition: box-shadow .18s ease; }
+.ia-rad:focus-within { box-shadow: inset 0 0 0 1.5px var(--t-fokus); }
+.ia-rad input { flex: 1; min-width: 0; height: 36px; border: 0; background: none; color: var(--t-text); font: 400 1rem/1.2 var(--sans); outline: none; }
+.ia-rad input::placeholder { color: var(--t-text-2); opacity: 1; }
+.ia-skicka { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--t-knapp-bas); color: var(--t-pa-accent); cursor: pointer; transition: transform .16s ease; }
+.ia-skicka:active { transform: scale(.92); }
+.ia-skicka:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: 2px; }
+.ia-skicka svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Mobil och platta: ovanför bottenmenyn, över guideknappen, och chattbubblan står kvar under */
+@media (max-width: 1100px) {
+  .ia-knapp { --ia-bas: .72; right: 2px; bottom: 80px; }
+  body.chf-bubbla-plats .ia-knapp { right: 2px; bottom: 134px; }
+  .ia-bubbla { right: 80px; bottom: 96px; max-width: min(260px, calc(100vw - 96px)); }
+  body.chf-bubbla-plats .ia-bubbla { right: 80px; bottom: 150px; }
+  html[data-ia-vanster] body .ia-knapp { left: 2px; right: auto; bottom: 134px; }
+  html[data-ia-vanster] body .ia-bubbla { left: 80px; bottom: 150px; }
+  body:has(.ia-knapp) .toaster { bottom: 96px; }
+  html[data-ia-oppen] body .ia-knapp { z-index: 71; }
+  html[data-ia-oppen] .toaster { right: 12px; }
+  .ia-panel { right: 14px; bottom: 92px; height: min(620px, calc(100dvh - 112px)); }
+}
+@media (max-width: 640px) {
+  .ia-panel { left: 8px; right: 8px; bottom: 8px; width: auto; height: calc(100dvh - 16px); max-height: none; z-index: 70; transform-origin: 50% 100%; }
+  .ia-figur { width: 64px; height: 64px; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .ia-knapp, .ia-panel { background: var(--t-yta); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ia-knapp { transition: opacity .15s linear; }
+  .ia-panel { transition: opacity .15s linear; transform: none; }
+  .ia-bubbla, .ia-bubbla.ut { transform: none; transition: opacity .15s linear; }
+  .ia-bubbla.syns { animation: none; }
+  .ia-bubbla__rader span { animation: none; opacity: 1; }
+  .ia-knapp__figur { animation: none !important; }
+  .ia-medd { animation: none; }
+}
+@media print { .ia-knapp, .ia-panel { display: none !important; } }
+/* Mobil: bubblan står över figuren, och guideknappen går undan när panelen är öppen */
+@media (max-width: 1100px) {
+  html body .ia-bubbla { right: 14px; bottom: 150px; }
+  html body .ia-bubbla::after { right: 28px; bottom: -5px; transform: rotate(45deg); }
+  html body.chf-bubbla-plats .ia-bubbla { right: 14px; bottom: 204px; }
+  html[data-ia-oppen] .ihg-knapp { opacity: 0; pointer-events: none; }
+}

@@ -810,14 +810,10 @@ html[data-konto-oppen] .ihg-knapp, html[data-konto-oppen] .ihg-hej, body:has(.ch
   html[data-sido-dold] .ihg-knapp__ikon { font: 600 17px/1 var(--sans, sans-serif) !important; color: inherit !important; transform: none !important; animation: none !important; padding-top: 1px; }
 }
 
-/* ?-knappen på dator (2026-10-29): en linjeikon i samma tjocklek och storlek som menyns övriga ikoner i stället
-   för en fet bokstav – samma i rälsen och i den utfällda menyns fot. Rälsens nedre ikoner slutar ovanför
+/* Guideknappen på dator: boken (.ihg-knapp__bok, se slutet av filen) i samma stil som menyns ikoner. Rälsens nedre ikoner slutar ovanför
    ?-knappen och kontot (marginal i stället för inre luft, så att en rullande lista aldrig hamnar under dem). */
 @media (min-width: 1101px) {
   html body .ihg-knapp .ihg-knapp__ikon { font-size: 0 !important; color: inherit !important; }
-  html body .ihg-knapp .ihg-knapp__ikon::before { content: "" !important; display: block !important; position: static; width: 18px; height: 18px; inset: auto; border: 0; border-radius: 0; box-shadow: none; animation: none; opacity: 1;
-    background: currentColor !important; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath stroke-width='1.7' d='M9.1 9.3a3 3 0 1 1 4.4 2.6c-.95.5-1.5 1.2-1.5 2.3v.4'/%3E%3Cpath stroke-width='2.3' d='M12 18.2h.01'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath stroke-width='1.7' d='M9.1 9.3a3 3 0 1 1 4.4 2.6c-.95.5-1.5 1.2-1.5 2.3v.4'/%3E%3Cpath stroke-width='2.3' d='M12 18.2h.01'/%3E%3C/svg%3E") center / contain no-repeat; }
-  html:not([data-sido-dold]) body .ihg-knapp .ihg-knapp__ikon::before { width: 16px; height: 16px; }
   html[data-sido-dold] body .sido-rals .sido-rals__halva--ner { padding-bottom: 0 !important; margin-bottom: 84px; }
 }
 
@@ -1036,3 +1032,217 @@ html[data-layout="minimal"] body .ch-ruta:not(.lp-saker):not([data-saker]) { wid
 @keyframes knapp-gloed { 0%, 100% { box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .35), 0 0 0 0 rgb(var(--t-accent-rgb) / 0); }
   50% { box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .5), 0 0 0 4px rgb(var(--t-accent-rgb) / .1), 0 0 14px rgb(var(--t-accent-rgb) / .28); } }
 @media (prefers-reduced-motion: reduce) { html[data-sido-dold] body .sido-kant .sido-knapp { animation: none; } }
+
+/* ===== Guiden omgjord (2026-11-01) =====================================================
+   Glas som i resten av CRM:et och färger bara från --t-*. Hålet, ramen och rutan flyttas med
+   transform och glider mellan stegen (guide.js). Inget följer musen. Slöjan bygger på
+   --t-skugga-rgb, som är mörk i alla teman. */
+.ihg-hal { left: 0; top: 0; transform-origin: 0 0; box-shadow: 0 0 0 160vmax rgb(var(--t-skugga-rgb) / .5); transition: opacity .3s ease; }
+.ihg--flytt .ihg-hal, .ihg--flytt .ihg-ring { transition: opacity .3s ease; }
+.ihg-ring { left: 0; top: 0; transform-origin: 0 0; box-shadow: 0 0 0 1.5px var(--t-accent), 0 0 0 5px rgb(var(--t-accent-rgb) / .2); transition: opacity .3s ease; }
+.ihg-ring::before, .ihg-ring::after { display: none; }
+.ihg-ring--klicka { box-shadow: 0 0 0 2px var(--t-accent), 0 0 0 6px rgb(var(--t-accent-rgb) / .24); }
+.ihg-ring--klicka::before { display: block; animation: ihg-andas 2.4s ease-in-out infinite; box-shadow: 0 0 0 7px rgb(var(--t-accent-rgb) / .22); }
+@keyframes ihg-andas { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+.ihg-skylt.syns { animation: none; }
+
+.ihg-bubbla { left: 0; top: 0; width: min(348px, calc(100vw - 24px)); padding: 15px 16px 13px; border-radius: calc(22px * var(--t-radie-k, 1));
+  background: linear-gradient(165deg, rgb(var(--t-glas-rgb) / .95), rgb(var(--t-glas-rgb) / .88));
+  -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-glans-rgb) / .3), inset 0 1px 0 rgb(var(--t-glans-rgb) / .5), 0 28px 64px -30px rgb(var(--t-skugga-rgb) / .85);
+  color: var(--t-text); opacity: 0; transform: translate3d(var(--x, 0), var(--y, 0), 0) scale(.98); transform-origin: 50% 50%;
+  transition: opacity .24s ease, transform .52s cubic-bezier(.22, 1, .36, 1); will-change: transform; }
+.ihg-bubbla.syns { opacity: 1; transform: translate3d(var(--x, 0), var(--y, 0), 0); }
+.ihg--flytt .ihg-bubbla.syns { transition: opacity .24s ease, transform .52s cubic-bezier(.22, 1, .36, 1); }
+.ihg-bubbla--direkt, .ihg--flytt .ihg-bubbla--direkt.syns { transition: opacity .24s ease; }
+.ihg-bubbla--mitt { width: min(400px, calc(100vw - 24px)); padding: 20px 20px 15px; }
+.ihg-bubbla--mitt h3 { font-size: 1.25rem; }
+.ihg-bubbla--ny .ihg-bubbla__inne { animation: ihg-in .32s ease both; }
+@keyframes ihg-in { from { opacity: 0; } to { opacity: 1; } }
+.ihg-bubbla--laddar .ihg-bubbla__inne { opacity: .5; transition: opacity .2s ease; }
+.ihg-pil { display: none !important; }
+.ihg-tur { font-weight: 600; font-size: .75rem; letter-spacing: 0; text-transform: none; color: var(--t-text-2, var(--text-2)); }
+.ihg-raknare { background: none; padding: 0; color: var(--t-text-2, var(--text-2)); font-weight: 500; font-size: .75rem; }
+.ihg-prova { flex: 1; min-width: 0; color: var(--t-accent-text); font: 600 .75rem/1.2 var(--ihg-rubrik); }
+.ihg-bubbla h3 { font-size: 1.0625rem; margin-bottom: 4px; }
+.ihg-text { font-size: .875rem; line-height: 1.5; color: var(--t-text-2, var(--text-2)); }
+.ihg-text b { color: var(--t-text); }
+.ihg-gor { margin-top: 10px; padding: 9px 11px; border-radius: calc(12px * var(--t-radie-k, 1)); background: rgb(var(--t-accent-rgb) / .16); color: var(--t-accent-text-djup); transition: background-color .25s ease, color .25s ease; }
+.ihg-gor--klar { background: rgb(var(--t-gron-rgb) / .16); color: var(--t-gron-text); }
+.ihg-framsteg { height: 3px; margin: 12px 0 10px; }
+.ihg-framsteg i { background: var(--t-accent); }
+.ihg-k--mork, .ihg-k--mork:hover { background: linear-gradient(170deg, var(--t-knapp-topp), var(--t-knapp-bas)); color: var(--t-pa-accent); }
+.ihg-k--mork:hover { filter: brightness(1.08); }
+.ihg-k--kant { box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .16); color: var(--t-text); }
+.ihg-k--svag { color: var(--t-text-2, var(--text-2)); }
+.ihg-tips { color: var(--t-text-2, var(--text-2)); font-size: .75rem; text-align: left; }
+.ihg-klar-ikon { width: 44px; height: 44px; margin-bottom: 10px; border-radius: 50%; background: rgb(var(--t-gron-rgb) / .18); box-shadow: none; }
+.ihg-klar-ikon svg { width: 22px; height: 22px; stroke: var(--t-gron-text); }
+.ihg-letar { color: var(--t-text-2, var(--text-2)); }
+
+/* Startsidan Lär dig CRM:et */
+.ihg-meny { background: linear-gradient(165deg, rgb(var(--t-glas-rgb) / .96), rgb(var(--t-glas-rgb) / .9)); -webkit-backdrop-filter: blur(26px) saturate(170%); backdrop-filter: blur(26px) saturate(170%);
+  box-shadow: inset 0 0 0 1px rgb(var(--t-glans-rgb) / .28), inset 0 1px 0 rgb(var(--t-glans-rgb) / .5), 0 40px 90px -40px rgb(var(--t-skugga-rgb) / .85); color: var(--t-text); }
+.ihg-meny__topp { padding: 18px 18px 12px; background: none; color: var(--t-text); }
+.ihg-meny__topp h2 { font-size: 1.25rem; }
+.ihg-meny__topp p { margin-top: 3px; color: var(--t-text-2, var(--text-2)); }
+.ihg-meny__topp .ihg-x { top: 12px; right: 12px; color: var(--t-text-2, var(--text-2)); }
+.ihg-meny__topp .ihg-x:hover { background: rgb(var(--t-blaeck-rgb) / .07); color: var(--t-text); }
+.ihg-meny__framsteg { margin-top: 12px; }
+.ihg-meny__framsteg span { height: 4px; background: rgb(var(--t-blaeck-rgb) / .09); }
+.ihg-meny__framsteg span i { width: 100%; transform: scaleX(var(--a, 0)); transform-origin: 0 50%; background: var(--t-accent); transition: transform .6s cubic-bezier(.22, 1, .36, 1); }
+.ihg-meny__framsteg b { color: var(--t-text-2, var(--text-2)); font-weight: 500; }
+.ihg-meny__kropp { padding: 4px 10px 12px; }
+.ihg-meny .ihg-har { margin: 0 0 8px; padding: 10px 12px; border-radius: calc(16px * var(--t-radie-k, 1)); background: var(--t-accent-djup); color: var(--t-pa-kol-vit); box-shadow: none; }
+.ihg-har__ikon { width: 34px; height: 34px; border-radius: 50%; background: rgb(255 255 255 / .16); }
+.ihg-har__ikon svg { stroke: currentColor; fill: currentColor; width: 16px; height: 16px; }
+.ihg-har small { opacity: .85; }
+.ihg-sidan { display: flex; align-items: center; gap: 10px; width: 100%; margin: 0 0 8px; padding: 9px 12px; border: 0; border-radius: calc(14px * var(--t-radie-k, 1)); background: rgb(var(--t-blaeck-rgb) / .045); color: var(--t-text-2, var(--text-2)); font: 500 .8125rem/1.3 var(--ihg-sans); text-align: left; cursor: pointer; transition: background-color .18s ease; }
+.ihg-sidan:hover { background: rgb(var(--t-blaeck-rgb) / .08); }
+.ihg-sidan b { color: var(--t-text); font-weight: 600; }
+.ihg-sidan svg { flex: none; width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ihg-kurs { border-radius: calc(16px * var(--t-radie-k, 1)); transition: background-color .18s ease; }
+.ihg-kurs[open] { background: rgb(var(--t-blaeck-rgb) / .03); }
+.ihg-kurs summary { display: flex; align-items: center; gap: 11px; padding: 9px 8px; border-radius: inherit; cursor: pointer; list-style: none; }
+.ihg-kurs summary::-webkit-details-marker { display: none; }
+.ihg-kurs summary:hover { background: rgb(var(--t-blaeck-rgb) / .045); }
+.ihg-kurs summary:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: -2px; }
+.ihg-kurs__ikon { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: rgb(var(--t-accent-rgb) / .15); color: var(--t-accent-text); }
+.ihg-kurs__ikon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ihg-kurs__text { flex: 1; min-width: 0; }
+.ihg-kurs__text b { display: block; font: 600 .875rem/1.25 var(--ihg-rubrik); }
+.ihg-kurs__text small { display: block; margin-top: 1px; color: var(--t-text-2, var(--text-2)); font-size: .75rem; line-height: 1.3; }
+.ihg-kurs__antal { flex: none; color: var(--t-text-2, var(--text-2)); font: 500 .75rem/1 var(--ihg-sans); font-variant-numeric: tabular-nums; }
+.ihg-kurs__pil { flex: none; display: grid; width: 16px; color: var(--t-text-2, var(--text-2)); transition: transform .24s ease; }
+.ihg-kurs__pil svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ihg-kurs[open] .ihg-kurs__pil { transform: rotate(180deg); }
+.ihg-kurs__turer { padding: 0 4px 6px; }
+.ihg-rad { padding: 7px 8px; gap: 10px; }
+.ihg-rad:hover, .ihg-rad:focus-visible { background: rgb(var(--t-blaeck-rgb) / .05); box-shadow: none; }
+.ihg-rad:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: -2px; }
+.ihg-rad__ikon { width: 28px; height: 28px; border-radius: 50%; background: none; box-shadow: inset 0 0 0 1px rgb(var(--t-blaeck-rgb) / .14); }
+.ihg-rad__ikon svg { width: 14px; height: 14px; stroke: var(--t-text-2, var(--text-2)); }
+.ihg-rad--klar .ihg-rad__ikon { background: rgb(var(--t-gron-rgb) / .18); }
+.ihg-rad--klar .ihg-rad__ikon svg { stroke: var(--t-gron-text); }
+.ihg-rad__text small { color: var(--t-text-2, var(--text-2)); }
+.ihg-rad__tid { color: var(--t-text-2, var(--text-2)); font-weight: 500; }
+.ihg-meny__fot { background: none; border-top-color: rgb(var(--t-blaeck-rgb) / .08); padding: 8px 12px 10px; }
+.ihg-meny__fot a, .ihg-meny__fot button { min-height: 30px; font-weight: 500; color: var(--t-text-2, var(--text-2)); }
+.ihg-meny__fot a:hover, .ihg-meny__fot button:hover { background: rgb(var(--t-blaeck-rgb) / .06); color: var(--t-text); }
+.ihg-meny__las { background: rgb(var(--t-accent-rgb) / .12); color: var(--t-text); }
+.ihg-hej { background: linear-gradient(165deg, rgb(var(--t-glas-rgb) / .96), rgb(var(--t-glas-rgb) / .9)); -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%); box-shadow: inset 0 0 0 1px rgb(var(--t-glans-rgb) / .28), 0 30px 70px -30px rgb(var(--t-skugga-rgb) / .85); color: var(--t-text); }
+
+@media (prefers-reduced-transparency: reduce) {
+  .ihg-bubbla, .ihg-meny, .ihg-hej { background: var(--t-yta); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ihg-bubbla, .ihg-bubbla.syns, .ihg--flytt .ihg-bubbla.syns { transition: opacity .15s linear; }
+  .ihg-ring--klicka::before { animation: none; opacity: 1; }
+  .ihg-bubbla--ny .ihg-bubbla__inne { animation: none; }
+  .ihg-kurs__pil, .ihg-meny__framsteg span i { transition: none; }
+}
+
+/* Guideknappen är en öppen bok i menyikonernas linjestil, i alla lägen. Den ärver färgen och därmed hovringen. */
+.ihg-knapp__ikon { display: grid; place-items: center; }
+.ihg-knapp__ikon::before, .ihg-knapp__ikon::after { content: none !important; display: none !important; }
+.ihg-knapp__bok { position: relative; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+@media (min-width: 1101px) { html:not([data-sido-dold]) .ihg-knapp__bok { width: 16px; height: 16px; } }
+
+/* Lär dig CRM:et, omgjord: jämn marginal, glaskort, ring med procent och kurser som kort.
+   Knappen Nästa har samma varma accent som CRM:ets huvudknappar. Rörelser: bara transform och opacity. */
+.ihg-meny, .ihg-meny *, .ihg-meny *::before, .ihg-meny *::after { box-sizing: border-box; }
+.ihg-meny { width: min(432px, calc(100vw - 24px)); max-height: min(760px, calc(100dvh - 40px)); perspective: 1200px; }
+.ihg-meny.syns { animation: ihg-panel-in .42s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes ihg-panel-in { from { opacity: 0; transform: translateX(-14px) scale(.97); } }
+.ihg-meny__topp { display: flex; align-items: center; gap: 10px; padding: 12px 44px 8px 14px; }
+.ihg-figur { position: relative; flex: none; width: 64px; height: 64px; }
+.ihg-figur img { position: absolute; inset: 0; width: 64px; height: 64px; animation: ihg-figur-in .5s cubic-bezier(.3, 1.4, .5, 1) both; }
+@keyframes ihg-figur-in { from { opacity: 0; transform: translateY(8px) scale(.9); } }
+.ihg-meny--utan .ihg-figur { display: none; }
+.ihg-meny__rubrik { min-width: 0; }
+.ihg-meny__topp h2 { font-size: 1.1875rem; }
+.ihg-meny__topp p { font-size: .8125rem; }
+.ihg-meny__kropp { display: grid; align-content: start; gap: 8px; padding: 4px 14px 14px; perspective: 1000px; }
+.ihg-meny__kropp > * { animation: ihg-kort-in .38s cubic-bezier(.22, 1, .36, 1) both; }
+.ihg-meny__kropp > :nth-child(2) { animation-delay: .04s; } .ihg-meny__kropp > :nth-child(3) { animation-delay: .08s; } .ihg-meny__kropp > :nth-child(4) { animation-delay: .12s; } .ihg-meny__kropp > :nth-child(n + 5) { animation-delay: .16s; }
+@keyframes ihg-kort-in { from { opacity: 0; transform: translateY(8px); } }
+
+.ihg-lage { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: calc(16px * var(--t-radie-k, 1)); background: rgb(var(--t-glas-rgb) / .5); box-shadow: inset 0 0 0 1px rgb(var(--t-glans-rgb) / .22), 0 10px 22px -18px rgb(var(--t-skugga-rgb) / .6); }
+.ihg-ring-tal { position: relative; flex: none; display: grid; place-items: center; width: 50px; height: 50px; }
+.ihg-ring-tal svg { position: absolute; inset: 0; transform: rotate(-90deg); animation: ihg-ring-in .7s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes ihg-ring-in { from { opacity: 0; transform: rotate(-170deg) scale(.9); } }
+.ihg-ring-tal circle { fill: none; stroke-width: 4.5; stroke: rgb(var(--t-blaeck-rgb) / .1); }
+.ihg-ring-tal circle:last-child { stroke: var(--t-accent); stroke-linecap: round; }
+.ihg-ring-tal b { font: 600 .75rem/1 var(--ihg-rubrik); font-variant-numeric: tabular-nums; }
+.ihg-lage__text { min-width: 0; }
+.ihg-lage__text b { display: block; font: 600 .9375rem/1.25 var(--ihg-rubrik); }
+.ihg-lage__text small { display: block; margin-top: 2px; color: var(--t-text-2); font-size: .75rem; line-height: 1.3; }
+
+.ihg-meny .ihg-har { width: 100%; margin: 0; padding: 10px 12px; border-radius: calc(16px * var(--t-radie-k, 1)); background: linear-gradient(170deg, var(--t-knapp-topp), var(--t-knapp-bas)); color: var(--t-pa-accent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .35), 0 12px 24px -16px rgb(var(--t-accent-djup-rgb) / .8); transition: transform .22s cubic-bezier(.3, 1.4, .5, 1); }
+.ihg-meny .ihg-har:hover { transform: translateY(-1px); filter: none; }
+.ihg-meny .ihg-har:active { transform: scale(.985); }
+.ihg-meny .ihg-har:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: 2px; }
+.ihg-har__ikon { background: rgb(var(--t-glas-rgb) / .55); }
+.ihg-har small { opacity: .8; }
+.ihg-sidan { margin: 0; padding: 8px 12px; border-radius: calc(14px * var(--t-radie-k, 1)); background: rgb(var(--t-glas-rgb) / .4); box-shadow: inset 0 0 0 1px rgb(var(--t-glans-rgb) / .18); color: var(--t-text); }
+.ihg-sidan:hover { background: rgb(var(--t-glas-rgb) / .7); }
+.ihg-sidan small { display: block; color: var(--t-text-2); font-size: .6875rem; line-height: 1.2; }
+.ihg-sidan b { display: block; font-size: .8125rem; line-height: 1.3; }
+.ihg-sidan:focus-visible { outline: 2px solid var(--t-fokus); outline-offset: 1px; }
+.ihg-meny__las { margin: 0; }
+.ihg-sok { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border-radius: 999px; background: rgb(var(--t-blaeck-rgb) / .05); color: var(--t-text-2); }
+.ihg-sok:focus-within { box-shadow: inset 0 0 0 1.5px var(--t-fokus); }
+.ihg-sok svg { flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; }
+.ihg-sok input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; color: var(--t-text); font: 400 .875rem/1 var(--ihg-sans); outline: none; }
+.ihg-sok input::placeholder { color: var(--t-text-2); opacity: 1; }
+.ihg-kurser { display: grid; gap: 6px; }
+
+.ihg-kurs { border-radius: calc(16px * var(--t-radie-k, 1)); background: rgb(var(--t-glas-rgb) / .42); box-shadow: inset 0 0 0 1px rgb(var(--t-glans-rgb) / .18); transform-style: preserve-3d; animation: ihg-kurs-in .4s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--n, 0) * 35ms + .1s); transition: transform .3s cubic-bezier(.22, 1, .36, 1); }
+@keyframes ihg-kurs-in { from { opacity: 0; transform: translateY(10px) rotateX(-10deg); } }
+.ihg-kurs[open] { background: rgb(var(--t-glas-rgb) / .68); box-shadow: inset 0 0 0 1px rgb(var(--t-accent-rgb) / .28), inset 0 1px 0 rgb(var(--t-glans-rgb) / .5), 0 18px 34px -24px rgb(var(--t-skugga-rgb) / .75); transform: translateZ(12px); }
+.ihg-kurs summary { padding: 9px 10px; }
+.ihg-kurs summary:hover { background: none; }
+.ihg-kurs__ikon { align-self: flex-start; }
+.ihg-kurs--klar .ihg-kurs__ikon { background: rgb(var(--t-gron-rgb) / .18); color: var(--t-gron-text); }
+.ihg-kurs__meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; color: var(--t-text-2); font: 500 .6875rem/1.2 var(--ihg-sans); font-variant-numeric: tabular-nums; }
+.ihg-status { padding: 2px 7px; border-radius: 999px; background: rgb(var(--t-blaeck-rgb) / .06); font-style: normal; font-weight: 600; color: var(--t-text-2); }
+.ihg-kurs--nasta .ihg-status { background: rgb(var(--t-accent-rgb) / .2); color: var(--t-accent-text-djup); }
+.ihg-kurs--klar .ihg-status { background: rgb(var(--t-gron-rgb) / .16); color: var(--t-gron-text); }
+.ihg-kurs__turer { display: grid; gap: 2px; padding: 0 6px 6px; }
+.ihg-rad { width: 100%; border-radius: calc(12px * var(--t-radie-k, 1)); animation: ihg-rad-in .3s ease both; animation-delay: calc(var(--n, 0) * 30ms); }
+@keyframes ihg-rad-in { from { opacity: 0; transform: translateY(5px); } }
+.ihg-rad--nasta .ihg-rad__ikon { background: rgb(var(--t-accent-rgb) / .2); box-shadow: none; }
+.ihg-rad--nasta .ihg-rad__ikon svg { stroke: var(--t-accent-text-djup); fill: var(--t-accent-text-djup); }
+.ihg-rad--nasta .ihg-rad__tid { color: var(--t-accent-text-djup); font-weight: 600; }
+.ihg-rad--klar .ihg-rad__tid { color: var(--t-gron-text); font-weight: 600; }
+.ihg-rad--ny .ihg-rad__ikon svg { animation: ihg-bock .5s cubic-bezier(.3, 1.6, .5, 1) .25s both; }
+@keyframes ihg-bock { from { opacity: 0; transform: scale(.3) rotate(-20deg); } }
+.ihg-tomt { padding: 14px 8px; text-align: center; color: var(--t-text-2); font-size: .8125rem; }
+.ihg-tomt p { margin: 0 0 8px; }
+.ihg-tomt svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ihg-meny__fot { align-items: center; padding: 8px 14px 10px; }
+.ihg-meny__fot .ihg-fraga { background: rgb(var(--t-accent-rgb) / .16); box-shadow: none; color: var(--t-accent-text-djup); font-weight: 600; }
+.ihg-meny__fot .ihg-fraga:hover { background: rgb(var(--t-accent-rgb) / .28); color: var(--t-accent-text-djup); }
+.ihg-meny__fot .ihg-hoger { padding: 0; width: 30px; justify-content: center; }
+
+/* Bocken poppar in när en tur blir klar, och när en hel kurs är klar flyger små gnistor ut */
+.ihg-klar-ikon { position: relative; animation: ihg-bock .5s cubic-bezier(.3, 1.6, .5, 1) both; }
+.ihg-klar-ikon i { display: none; }
+.ihg-bubbla--firar .ihg-klar-ikon i { display: block; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px; border-radius: 50%; background: var(--t-accent); opacity: 0; animation: ihg-gnista .8s ease-out .15s both; }
+.ihg-bubbla--firar .ihg-klar-ikon i:nth-of-type(2n) { background: var(--t-gron); }
+.ihg-klar-ikon i:nth-of-type(1) { --a: 0deg; } .ihg-klar-ikon i:nth-of-type(2) { --a: 60deg; } .ihg-klar-ikon i:nth-of-type(3) { --a: 120deg; } .ihg-klar-ikon i:nth-of-type(4) { --a: 180deg; } .ihg-klar-ikon i:nth-of-type(5) { --a: 240deg; } .ihg-klar-ikon i:nth-of-type(6) { --a: 300deg; }
+@keyframes ihg-gnista { 0% { opacity: 1; transform: rotate(var(--a)) translateY(-16px) scale(1); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-44px) scale(.4); } }
+
+@media (min-width: 1101px) and (max-height: 760px) { .ihg-meny { max-height: calc(100dvh - 24px); } }
+@media (max-width: 640px) {
+  .ihg-meny, [data-sido-dold] .ihg-meny { width: auto; max-height: calc(100dvh - 16px); }
+  .ihg-sok input { font-size: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ihg-meny.syns, .ihg-figur img, .ihg-meny__kropp > *, .ihg-kurs, .ihg-rad, .ihg-ring-tal svg, .ihg-klar-ikon, .ihg-rad--ny .ihg-rad__ikon svg { animation: none; }
+  .ihg-ring-tal svg { transform: rotate(-90deg); }
+  .ihg-kurs[open] { transform: none; }
+  .ihg-bubbla--firar .ihg-klar-ikon i { display: none; }
+  .ihg-meny .ihg-har { transition: none; }
+}
+.ihg-knapp .ihg-knapp__ikon { padding: 0 !important; }

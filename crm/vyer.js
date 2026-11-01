@@ -30,6 +30,7 @@
   }
   function oppnaAffarer() { return db().affarer.filter(function (a) { return a.steg !== 'vunnen' && !a.forlorad; }); }
   function summa(lista) { return lista.reduce(function (s, a) { return s + (a.varde || 0); }, 0); }
+  IH.viktat = function (l) { return viktat(l); };
   function viktat(lista) {
     return lista.reduce(function (s, a) { return s + (a.varde || 0) * sannolikhet(a) / 100; }, 0);
   }
@@ -486,6 +487,16 @@
     return '<span class="kpi__dagar" title="Vunnet per månad i år">' + sum.map(function (a, n) { return '<i style="--a:' + (a / max).toFixed(2) + ';--n:' + n + '"' + (n === nu ? ' class="idag"' : '') + '></i>'; }).join('') + '</span>';
   }
 
+  // Nästa inbokade möte eller platsbesök: en mörk bubbla över byn, samma urval som Kommande möten
+  function nastaMoteBubbla() {
+    var i0 = new Date(); i0.setHours(0, 0, 0, 0);
+    var u = db().uppgifter.filter(function (x) { return !x.klar && (!x.ansvarig || x.ansvarig === IH.jag().id) && /möte|träff|bes[öo]k|visning/i.test(x.text) && new Date(x.forfaller) >= i0; })
+      .sort(function (a, b) { return a.forfaller < b.forfaller ? -1 : 1; })[0];
+    if (!u) return '';
+    var t = dagarTill(u.forfaller), k = u.kund ? IH.kund(u.kund) : null;
+    return '<a class="hero__mote" href="#/mote"><small>Nästa möte · ' + (t === 0 ? 'i dag' : t === 1 ? 'i morgon' : 'om ' + t + ' dagar') + '</small><b>' + e(u.text) + '</b>' + (k ? '<span>' + kundAvatar(k, true) + e(k.namn) + '</span>' : '') + '</a>';
+  }
+
   // Dagens läge i tre korta rader: vad som förfaller i dag, möten i dag och nästa montage
   function dagensLage(uppg, nastaMontage) {
     var i0 = new Date(); i0.setHours(0, 0, 0, 0); var i1 = new Date(i0); i1.setDate(i1.getDate() + 1);
@@ -573,12 +584,12 @@
       '<section class="hero kort kort--mork hero--' + dygn() + '" data-in>' + (IH.himlen ? IH.himlen(new Date().getHours()) : '') + ljusfall() +
         '<div class="hero__ord">' +
           '<p class="hero__datum"><i></i>' + datumrad() + '</p>' +
-          '<h1 class="hero__titel"><span class="rad-mask"><span style="--o:0">' + IH.hej() + ',</span></span><span class="rad-mask"><span style="--o:1"><em>' + e(forsta(jag.namn)) + '.</em></span></span></h1>' +
+          '<h1 class="hero__titel"><span class="rad-mask"><span style="--o:0">' + IH.hej() + ',</span></span><span class="rad-mask"><span style="--o:1"><em>' + e(forsta(jag.namn)) + '<svg class="hero__krull" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 9.5C38 3.5 74 12 112 6.5S172 3.5 197 8"/></svg></em></span></span></h1>' +
           '<p class="hero__text">' + text + '</p>' +
           dagensLage(uppg, nastaMontage) +
           '<div class="hero__handling">' + nasta + (IH.jag().roll === 'admin' ? '' : '<div class="hero__snabb" role="group" aria-label="Skapa ny"><small aria-hidden="true">Ny</small>' + [['ny-forfragan', 'Förfrågan', 'inkorg'], ['ny-kund', 'Kund', 'kunder'], ['ny-affar', 'Affär', 'tavla'], ['ny-uppgift', 'Uppgift', 'uppgift'], ['starta-mote', 'Kundmöte', 'mote']].map(function (b, n) {
             return '<button type="button" data-g="' + b[0] + '" style="--n:' + n + '" title="Ny ' + b[1].toLowerCase() + '">' + i(b[2]) + '<span>' + b[1] + '</span></button>'; }).join('') + '</div>') + '</div>' +
-          '<div class="hero__kpi">' +
+          '<div class="hero__kpi" data-stark="' + (nya.length ? 0 : 1) + '">' +
             kpi('inkorg', 'Nya förfrågningar', nya.length, 'tal', nya.length ? 'senaste ' + IH.sedan(nya.sort(function (a, b) { return b.skapad < a.skapad ? -1 : 1; })[0].skapad) : 'allt besvarat', '#/forfragningar', sjuDagar()) +
             kpi('graf', 'Öppna affärer', summa(oppna), 'kort', oppna.length + (oppna.length === 1 ? ' affär' : ' affärer') + ' · viktat ' + IH.kort(viktat(oppna)), '#/salj',
               '<span class="kpi__band">' + steg.slice(0, 5).map(function (s) { return '<i style="--f:' + s.farg + ';flex:' + Math.max(s.summa, 1) + '"></i>'; }).join('') + '</span>') +
@@ -590,7 +601,7 @@
                 return '<i style="--f:' + s.farg + ';flex:' + Math.max(n, 0.35) + '"></i>';
               }).join('') + '</span>') +
           '</div>' +
-        '</div><div class="hero__by">' + stad(steg) + pipeRad(steg) + '</div>' +
+        '</div><div class="hero__by">' + nastaMoteBubbla() + stad(steg) + pipeRad(steg) + '</div>' +
       '</section>' +
 
       '<div class="oversikt"><div class="oversikt__kol">' +
@@ -3846,13 +3857,19 @@
 
   // Tidsbandet: de valda bilderna i presentationens ordning, bredd efter
   // minuterna, så man ser var tiden går.
+  // Mötets gång: bandet visar hur tiden fördelas, listan vad som händer när
   function tidsband(valda) {
-    var med = IH.MOTE_BILDER.map(function (bb, n) { return [bb, n]; }).filter(function (x) { return valda.indexOf(x[0].id) >= 0; });
-    if (!med.length) return '<div class="tidsband tidsband--tom" data-tidsband>Inga bilder valda</div>';
-    return '<div class="tidsband" data-tidsband aria-label="Tiden per bild">' + med.map(function (x, k) {
-      var min = MOTE_MIN[x[0].id] || 1;
-      return '<span style="flex:' + min + ';--k:' + k + '" title="' + e(x[0].namn) + ' · ' + min + ' min"><b>' + (x[1] + 1) + '</b>' + (min >= 3 ? '<small>' + min + ' min</small>' : '') + '</span>';
-    }).join('') + '</div>';
+    var med = IH.MOTE_BILDER.filter(function (bb) { return valda.indexOf(bb.id) >= 0; });
+    if (!med.length) return '<div class="moteplan moteplan--tom" data-tidsband>Inga bilder valda. Välj minst en bild ovan.</div>';
+    var tid = 0, total = med.reduce(function (t, bb) { return t + (MOTE_MIN[bb.id] || 1); }, 0), band = '', lista = '';
+    med.forEach(function (bb) {
+      var min = MOTE_MIN[bb.id] || 1;
+      band += '<i style="flex:' + min + '" title="' + e(bb.namn) + ' · ' + min + ' min"></i>';
+      lista += '<li><small>' + tid + '–' + (tid + min) + ' min</small><span>' + e(bb.namn) + '</span></li>';
+      tid += min;
+    });
+    return '<div class="moteplan" data-tidsband><header><b>Mötets gång</b><span>' + IH.emo('klocka') + 'ca ' + total + ' min · ' + med.length + (med.length === 1 ? ' bild' : ' bilder') + '</span></header>' +
+      '<div class="moteplan__band" aria-hidden="true">' + band + '</div><ol class="moteplan__lista">' + lista + '</ol></div>';
   }
 
   // Samtalsstöd för vald affär: det kunden nämnt (med färdiga svar) och frågorna som återstår – bockas av under mötet
@@ -3967,7 +3984,7 @@
             var med = valda.indexOf(bb.id) >= 0, kan = bb.id !== 'er' || !!f;
             return '<label class="agenda__kort' + (med ? ' med' : '') + (kan ? '' : ' agenda__kort--saknas') + '" style="--n:' + n + '"><input type="checkbox" name="bild" value="' + bb.id + '"' + (med ? ' checked' : '') + (kan ? '' : ' disabled') + '>' +
               '<img src="' + IH.liten(bb.bild, 400) + '" alt="" loading="lazy" decoding="async"><span class="agenda__nr">' + (n + 1) + '</span><span class="agenda__text"><b>' + e(bb.namn) + '</b><small>' + (kan ? MOTE_MIN[bb.id] + ' min' : 'kräver förfrågan') + '</small></span><i class="agenda__bock">' + i('bock') + '</i></label>';
-          }).join('') + '</div>' + tidsband(valda) + '<p class="agenda__summa">' + IH.emo('klocka') + ' Beräknad tid <b data-motetid>≈ ' + total + ' min</b> · <span data-moteantal>' + valda.length + (valda.length === 1 ? ' bild' : ' bilder') + '</span></p></fieldset>' +
+          }).join('') + '</div>' + tidsband(valda) + '</fieldset>' +
 
           (a ? '<div class="motecheck"><p class="etikett">Inför mötet</p><ul>' + check.map(function (c) {
             return '<li class="' + (c[0] ? 'klar' : '') + '"><i>' + i(c[0] ? 'bock' : 'klocka') + '</i><span><b>' + c[1] + '</b><small>' + c[2] + '</small></span>' + c[3] + '</li>';
@@ -4022,9 +4039,8 @@
           var chip = $('.motescen__chips span', rot), tid0 = ids.reduce(function (t, id) { return t + (MOTE_MIN[id] || 0); }, 0);
           if (chip) chip.innerHTML = '<i aria-hidden="true"><svg class="emo-ik" aria-hidden="true"><use href="#i-bild"/></svg></i>' + ids.length + (ids.length === 1 ? ' bild' : ' bilder') + ' · ≈ ' + tid0 + ' min';
           $$('.agenda__kort', ag).forEach(function (l) { l.classList.toggle('med', l.querySelector('input').checked); });
-          var tot = ids.reduce(function (t, id) { return t + (MOTE_MIN[id] || 0); }, 0);
-          $('[data-motetid]', rot).textContent = '≈ ' + tot + ' min';
-          $('[data-moteantal]', rot).textContent = ids.length + ' bilder';
+          var kortChip = ag.closest('.kort').querySelector('.kort__huvud .chip');
+          if (kortChip) kortChip.textContent = ids.length + (ids.length === 1 ? ' bild' : ' bilder') + ' · ≈ ' + tid0 + ' min';
           var tb = $('[data-tidsband]', rot);
           if (tb) tb.outerHTML = tidsband(ids);
           $$('.upplagg__val', rot).forEach(function (b) { b.classList.remove('vald'); b.setAttribute('aria-pressed', 'false'); });
@@ -4893,8 +4909,9 @@
         })() +
         '</div></section>' +
       (IH.tema && IH.tema.valjare ? '<section class="kort inst-tema" data-in aria-labelledby="inst-tema-rubrik"><header class="kort__huvud"><h2 id="inst-tema-rubrik"><span class="kort__ikon">' + i('installning') + '</span>Utseende</h2><small data-tema-namn>' + e(IH.tema.beskrivning()) + '</small></header>' +
-        '<div class="kort__kropp">' + IH.tema.valjare('stor') +
+        '<div class="kort__kropp">' + IH.tema.valjare('stor') + IH.tema.glasVaxel() +
         '<p class="inst-tema__not">Temat sparas för ditt konto i den här webbläsaren. Följ systemet växlar mellan Original och Mörk efter datorns läge. Snabbare: kontomenyn, eller Ctrl K och skriv ”tema”.</p></div></section>' : '') +
+      (IH.assistent && IH.assistent.instHtml ? IH.assistent.instHtml() : '') +
       (IH.layout && IH.layout.valjare ? '<section class="kort inst-layout" data-in aria-labelledby="inst-layout-rubrik"><header class="kort__huvud"><h2 id="inst-layout-rubrik"><span class="kort__ikon">' + i('rutnat') + '</span>Layout</h2><small data-layout-namn>' + e(IH.layout.namn()) + '</small></header>' +
         '<div class="kort__kropp">' + IH.layout.valjare('stor') +
         '<p class="inst-tema__not">Layouten sparas för ditt konto. Minimal visar bara det du jobbar med, Normal lite överblick och Full allt. Inget försvinner – det som döljs i Minimal finns i Normal och Full. Snabbare: kontomenyn, eller Ctrl K och skriv ”layout”.</p></div></section>' : '') +

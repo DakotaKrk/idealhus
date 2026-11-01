@@ -867,10 +867,6 @@ html[data-layout="minimal"] .vm-yta { padding-inline: 12px; }
 ::view-transition-group(ih-vm-mini) { animation: none; }
 ::view-transition-old(ih-vm-mini) { display: none; }
 ::view-transition-new(ih-vm-mini) { animation: none; }
-.vm-mini[data-horn="nh"] { right: 16px; bottom: 84px; }
-.vm-mini[data-horn="nv"] { left: 16px; bottom: 84px; }
-.vm-mini[data-horn="oh"] { right: 16px; top: 16px; }
-.vm-mini[data-horn="ov"] { left: 16px; top: 16px; }
 .vm-mini__bild { position: absolute; inset: 0; }
 .vm-mini__bild video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .vm-mini[data-kam-av] .vm-mini__bild video { opacity: 0; }
@@ -1008,7 +1004,6 @@ html[data-layout="minimal"] .vm-yta { padding-inline: 12px; }
   .vm[data-fas="mote"] .vm-avisering-yta { top: 50px; }
   /* Minirutan på mobil: 44 px tryckytor (mikrofon, kamera, tillbaka, lämna) */
   .vm-mini { width: min(236px, calc(100vw - 32px)); aspect-ratio: auto; height: 140px; border-radius: 16px; }
-  .vm-mini[data-horn="nh"], .vm-mini[data-horn="nv"] { bottom: 86px; }
   .vm-mini__info { top: 8px; left: 10px; right: 10px; }
   .vm-mini__tid, .vm-mini__vantar { display: none; }
   .vm-mini__knappar { bottom: 8px; gap: 6px; }
@@ -1054,3 +1049,59 @@ html[data-vm-oppen] .chf-ikon, html[data-vm-oppen] .chf-dock { visibility: hidde
   .vm-mini__info { padding-right: 44px; }
 }
 @media print { .vm { display: none !important; } }
+
+/* ---------- Rutan: flyttbar och valfri storlek ---------- */
+.vm-mini { container: vm-mini / inline-size; width: 320px; cursor: grab; touch-action: none; border-radius: 22px; box-shadow: 0 30px 70px -24px rgba(0, 0, 0, .75), 0 0 0 1px rgba(255, 255, 255, .09); user-select: none; -webkit-user-select: none; }
+.vm-mini[data-dras="flytta"] { cursor: grabbing; }
+.vm-mini[data-glid] { transition: width 220ms var(--vm-kurva), left 220ms var(--vm-kurva), top 220ms var(--vm-kurva); }
+.vm-mini[data-skarm] .vm-mini__bild video { object-fit: contain; }
+.vm-mini::after { opacity: .7; transition: opacity 180ms linear; }
+.vm-mini:hover::after, .vm-mini:focus-within::after { opacity: 1; }
+.vm-mini__knappar { bottom: 12px; gap: 6px; opacity: 0; transform: translateY(6px); transition: opacity 160ms linear, transform 200ms var(--vm-kurva); }
+.vm-mini:hover .vm-mini__knappar, .vm-mini:focus-within .vm-mini__knappar, .vm-mini[data-dras] .vm-mini__knappar { opacity: 1; transform: none; }
+.vm-mini__knappar .vm-knapp { position: relative; }
+.vm-mini__nya { position: absolute; top: -3px; right: -3px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: var(--vm-accent); font: 700 .625rem/16px var(--vm-rubrik); font-style: normal; text-align: center; color: var(--vm-pa-accent); }
+.vm-mini__horn { position: absolute; z-index: 6; width: 22px; height: 22px; }
+.vm-mini__horn[data-h="ov"] { left: 0; top: 0; cursor: nwse-resize; }
+.vm-mini__horn[data-h="oh"] { right: 0; top: 0; cursor: nesw-resize; }
+.vm-mini__horn[data-h="nv"] { left: 0; bottom: 0; cursor: nesw-resize; }
+.vm-mini__horn[data-h="nh"] { right: 0; bottom: 0; cursor: nwse-resize; }
+.vm-mini__flytta { top: 10px; right: 14px; }
+.vm-mini__info { top: 13px; left: 18px; right: 18px; }
+@container vm-mini (max-width: 300px) { .vm-mini__extra { display: none; } }
+@container vm-mini (min-width: 460px) {
+  .vm-mini__knappar { bottom: 16px; gap: 8px; }
+  .vm-mini__knappar .vm-knapp { width: 44px; height: 44px; }
+  .vm-mini__namn { font-size: .95rem; }
+  .vm-mini__info { top: 18px; left: 22px; font-size: .82rem; }
+  .vm-mini__flytta { top: 12px; right: 16px; width: 32px; height: 32px; }
+}
+@media (hover: none) { .vm-mini__knappar { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .vm-mini[data-glid] { transition: none; } }
+
+/* ---------- Mötet: rund scen med luft runt om, chatten flyter bredvid ---------- */
+.vm[data-fas="mote"]:not([data-mini]) { background: #0f0d0b; }
+.vm-scen { inset: 12px; overflow: hidden; border-radius: 28px; background: radial-gradient(120% 90% at 50% 0%, rgba(255, 196, 130, .07), transparent 60%), var(--vm-scen); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06); }
+.vm[data-panel] .vm-scen { right: 384px; }
+.vm-panel { border-radius: 28px; }
+.vm-topp { padding-inline: 22px; }
+.vm-kontroller { padding-bottom: 14px; }
+.vm-egen, .vm-ruta { border-radius: 22px; }
+.vm-egen { box-shadow: 0 18px 40px -18px rgba(0, 0, 0, .7), 0 0 0 1px rgba(255, 255, 255, .1); }
+.vm-ensam__ikon { width: 76px; height: 76px; background: linear-gradient(160deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, .03)); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+@media (max-width: 720px) {
+  .vm-scen { inset: 0; border-radius: 0; }
+  .vm[data-panel] .vm-scen { right: 0; }
+  .vm-panel { top: 0; right: 0; bottom: 0; border-radius: 0; }
+}
+
+/* Mobilens fasta höjd gäller inte längre: rutan håller alltid 16:9 */
+.vm-mini { height: auto; aspect-ratio: 16 / 9; }
+/* Hörnen: tydliga greppytor som syns när pekaren är över rutan */
+.vm-mini__horn { width: 30px; height: 30px; }
+.vm-mini__horn::after { content: ""; position: absolute; width: 12px; height: 12px; border: 2px solid rgba(255, 255, 255, .85); opacity: 0; transition: opacity 160ms linear; }
+.vm-mini:hover .vm-mini__horn::after { opacity: .75; }
+.vm-mini__horn[data-h="nh"]::after { right: 8px; bottom: 8px; border-width: 0 2px 2px 0; border-bottom-right-radius: 10px; }
+.vm-mini__horn[data-h="nv"]::after { left: 8px; bottom: 8px; border-width: 0 0 2px 2px; border-bottom-left-radius: 10px; }
+.vm-mini__horn[data-h="oh"], .vm-mini__horn[data-h="ov"] { z-index: 2; }
+.vm-mini__horn[data-h="oh"]::after, .vm-mini__horn[data-h="ov"]::after { display: none; }

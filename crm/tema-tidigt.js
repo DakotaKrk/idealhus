@@ -13,6 +13,10 @@
   var l = null;
   try { l = localStorage.getItem('ih-crm-layout:' + (localStorage.getItem('ih-crm-jag') || 'gast')); } catch (e) { l = null; }
   d.setAttribute('data-layout', /^(minimal|normal|full)$/.test(l || '') ? l : 'full');
+  // Glasdesignen är på tills kontot stänger av den ('ih-crm-glas:<id>' = '0')
+  var g = null;
+  try { g = localStorage.getItem('ih-crm-glas:' + (localStorage.getItem('ih-crm-jag') || 'gast')); } catch (e) { g = null; }
+  if (g !== '0') d.setAttribute('data-glas', '');
   // Mobilens adressfält i rätt färg direkt (Original behåller sidans egen; tema.js håller den i takt vid byten).
   var farg = { ljus: '#fcfcfa', mork: '#151311', fargglad: '#fff7ee', bygg: '#e9e7e3', office: '#f3f4f6' }[t];
   try {

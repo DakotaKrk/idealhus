@@ -732,10 +732,12 @@
       mini.innerHTML = '<div class="vm-mini__bild"><video class="vm-video" autoplay playsinline muted></video><div class="vm-ruta__initialer"><span></span></div></div>' +
         '<div class="vm-mini__info"><b class="vm-mini__namn"></b><span class="vm-mini__tid"></span><span class="vm-mini__vantar" hidden></span></div>' +
         '<span class="vm-mini__delat" hidden></span>' +
-        '<button type="button" class="vm-mini__flytta" data-vm="flytta-mini" aria-label="Flytta rutan till nästa hörn">' + ik('vm-flytta') + '</button>' +
-        '<div class="vm-mini__knappar"></div>';
+        '<button type="button" class="vm-mini__flytta" data-vm="storlek-mini" aria-label="Ändra rutans storlek" title="Större eller mindre (dra i ett hörn för valfri storlek)">' + ik('vm-flytta') + '</button>' +
+        '<div class="vm-mini__knappar"></div>' +
+        '<i class="vm-mini__horn" data-h="ov"></i><i class="vm-mini__horn" data-h="oh"></i><i class="vm-mini__horn" data-h="nv"></i><i class="vm-mini__horn" data-h="nh"></i>';
     }
-    mini.setAttribute('data-horn', S.miniHorn || 'nh');
+    kopplaMini(mini);
+    miniPlacera(mini);
     var v = mini.querySelector('video'), egen = !visa;
     var strom = visa ? visa.s : egenStrom();
     if (v.srcObject !== (strom || null)) { v.srcObject = strom || null; if (strom) spela(v); }
@@ -744,6 +746,7 @@
     var kamAv = visa ? (!visa.skarm && (!visa.d.kam || !harVideo(strom))) : (!j.kam || !harVideo(strom));
     mini.toggleAttribute('data-kam-av', kamAv);
     mini.toggleAttribute('data-talar', !!(visa && visa.d.talar));
+    mini.toggleAttribute('data-skarm', !!(visa && visa.skarm));
     mini.querySelector('.vm-ruta__initialer span').textContent = visa ? (visa.d.initialer || initialer(visa.d.namn)) : S.jag.initialer;
     mini.querySelector('.vm-mini__namn').textContent = visa ? (visa.skarm ? fornamn(visa.d.namn) + ' delar skärmen' : visa.d.namn) : 'Du är ensam i mötet';
     var vt = mini.querySelector('.vm-mini__vantar');
@@ -753,11 +756,99 @@
     mini.querySelector('.vm-mini__knappar').innerHTML =
       '<button type="button" class="vm-knapp vm-knapp--liten' + (mik ? '' : ' vm-knapp--av') + '" data-vm="mik" aria-pressed="' + !mik + '" aria-label="' + (mik ? 'Stäng av mikrofonen' : 'Slå på mikrofonen') + '">' + ik(mik ? 'vm-mik' : 'vm-mik-av') + '</button>' +
       '<button type="button" class="vm-knapp vm-knapp--liten' + (kam ? '' : ' vm-knapp--av') + '" data-vm="kam" aria-pressed="' + !kam + '" aria-label="' + (kam ? 'Stäng av kameran' : 'Slå på kameran') + '">' + ik(kam ? 'vm-kam' : 'vm-kam-av') + '</button>' +
+      '<button type="button" class="vm-knapp vm-knapp--liten vm-mini__extra" data-vm="mini-dela" aria-pressed="' + !!j.delar + '" aria-label="' + (j.delar ? 'Sluta dela' : 'Dela skärmen') + '" title="' + (j.delar ? 'Sluta dela' : 'Dela skärmen') + '">' + ik('vm-dela') + '</button>' +
+      '<button type="button" class="vm-knapp vm-knapp--liten vm-mini__extra" data-vm="mini-chatt" aria-label="Chatt i mötet' + (S.olasta ? ', ' + S.olasta + ' nya' : '') + '" title="Chatt i mötet">' + ik('vm-chatt') + (S.olasta ? '<i class="vm-mini__nya">' + S.olasta + '</i>' : '') + '</button>' +
       '<button type="button" class="vm-knapp vm-knapp--liten vm-knapp--tillbaka" data-vm="tillbaka" aria-label="Återgå till mötet" title="Återgå till mötet">' + ik('vm-atergaa') + '</button>' +
       '<span class="vm-mini__skilj" aria-hidden="true"></span>' +
       '<button type="button" class="vm-knapp vm-knapp--liten vm-knapp--lamna" data-vm="lamna-direkt" aria-label="Lämna mötet" title="Lämna mötet">' + ik('vm-lamna') + '</button>';
     ritaMiniDelat(mini);
     tickTid();
+  }
+
+  /* ---------- Rutan: flytta och ändra storlek. Läge och storlek sparas per dator ---------- */
+  var MINI_NYCKEL = 'ih-crm-videomote:mini', MINI_MIN = 240, MINI_MARG = 8, MINI_STEG = [320, 480, 720];
+  function miniMax() { return Math.min(window.innerWidth - MINI_MARG * 2, (window.innerHeight - MINI_MARG * 2) * 16 / 9); }
+  function miniLas() {
+    if (S.miniPos) return S.miniPos;
+    var p = null;
+    try { p = JSON.parse(localStorage.getItem(MINI_NYCKEL)); } catch (err) { p = null; }
+    S.miniPos = p && typeof p.b === 'number' ? { x: typeof p.x === 'number' ? p.x : null, y: typeof p.y === 'number' ? p.y : null, b: p.b } : { x: null, y: null, b: 320 };
+    return S.miniPos;
+  }
+  function miniSpara() { try { localStorage.setItem(MINI_NYCKEL, JSON.stringify(S.miniPos)); } catch (err) { /* privat läge */ } }
+  function miniPlacera(mini) {
+    var p = miniLas(), b = Math.max(Math.min(MINI_MIN, miniMax()), Math.min(p.b, miniMax())), h = b * 9 / 16;
+    var x = p.x === null ? window.innerWidth - b - 16 : p.x, y = p.y === null ? window.innerHeight - h - 84 : p.y;
+    x = Math.max(MINI_MARG, Math.min(x, window.innerWidth - b - MINI_MARG));
+    y = Math.max(MINI_MARG, Math.min(y, window.innerHeight - h - MINI_MARG));
+    mini.style.width = Math.round(b) + 'px'; mini.style.left = Math.round(x) + 'px'; mini.style.top = Math.round(y) + 'px';
+    return { x: x, y: y, b: b, h: h };
+  }
+  function kopplaMini(mini) {
+    if (mini._kopplad) return;
+    mini._kopplad = true;
+    mini.tabIndex = 0;
+    mini.addEventListener('pointerdown', function (ev) {
+      if (!S || ev.button !== 0 || ev.target.closest('button')) return;
+      var horn = ev.target.getAttribute('data-h'), st = miniPlacera(mini), x0 = ev.clientX, y0 = ev.clientY, flyttad = false;
+      try { mini.setPointerCapture(ev.pointerId); } catch (err) { /* pekaren är redan släppt */ }
+      mini.setAttribute('data-dras', horn ? 'storlek' : 'flytta');
+      ev.preventDefault();
+      function flytta(e2) {
+        var dx = e2.clientX - x0, dy = e2.clientY - y0;
+        if (!flyttad && Math.abs(dx) + Math.abs(dy) < 3) return;
+        flyttad = true;
+        var p = S.miniPos;
+        if (!horn) { p.x = st.x + dx; p.y = st.y + dy; miniPlacera(mini); return; }
+        // Hörnet följer pekaren, motsatt hörn står still och bildformatet behålls
+        var vanster = horn.charAt(1) === 'v', ovan = horn.charAt(0) === 'o';
+        var nyB = Math.max(MINI_MIN, Math.min(st.b + (vanster ? -dx : dx), miniMax()));
+        p.b = nyB;
+        p.x = vanster ? st.x + st.b - nyB : st.x;
+        p.y = ovan ? st.y + st.h - nyB * 9 / 16 : st.y;
+        miniPlacera(mini);
+      }
+      function slapp() {
+        mini.removeEventListener('pointermove', flytta);
+        mini.removeEventListener('pointerup', slapp);
+        mini.removeEventListener('pointercancel', slapp);
+        mini.removeAttribute('data-dras');
+        if (!S || !flyttad) return;
+        // Nära en kant lägger sig rutan mot kanten, med samma luft runt om
+        var nu = miniPlacera(mini), p = S.miniPos, m = 16, n = 28;
+        if (!horn) {
+          if (nu.x < n) nu.x = m; else if (window.innerWidth - nu.x - nu.b < n) nu.x = window.innerWidth - nu.b - m;
+          if (nu.y < n) nu.y = m; else if (window.innerHeight - nu.y - nu.h < n) nu.y = window.innerHeight - nu.h - m;
+        }
+        p.x = nu.x; p.y = nu.y; p.b = nu.b;
+        miniPlacera(mini); miniSpara();
+      }
+      mini.addEventListener('pointermove', flytta);
+      mini.addEventListener('pointerup', slapp);
+      mini.addEventListener('pointercancel', slapp);
+    });
+    mini.addEventListener('dblclick', function (ev) { if (!ev.target.closest('button')) minimera(false); });
+    // Tangentbord: pilarna flyttar rutan, + och − ändrar storleken
+    mini.addEventListener('keydown', function (ev) {
+      if (ev.target !== mini) return;
+      var p = miniLas(), nu = miniPlacera(mini), d = { ArrowLeft: [-24, 0], ArrowRight: [24, 0], ArrowUp: [0, -24], ArrowDown: [0, 24] }[ev.key];
+      if (d) { p.x = nu.x + d[0]; p.y = nu.y + d[1]; }
+      else if (ev.key === '+' || ev.key === '-') { p.x = nu.x; p.y = nu.y; p.b = nu.b + (ev.key === '+' ? 60 : -60); }
+      else return;
+      ev.preventDefault(); miniPlacera(mini); miniSpara();
+    });
+    window.addEventListener('resize', function () { if (S && S.mini && !mini.hidden) miniPlacera(mini); });
+  }
+  // Knappen: stegar 320 → 480 → 720 → så stor som skärmen tillåter → 320
+  function miniStorlek() {
+    var mini = S.el.querySelector('.vm-mini'), p = miniLas(), nu = miniPlacera(mini), max = miniMax();
+    var steg = MINI_STEG.filter(function (b) { return b < max; }).concat([max]);
+    var nasta = steg.filter(function (b) { return b > nu.b + 8; })[0] || steg[0];
+    // Rutan växer från sin mitt och stannar kvar på skärmen
+    p.x = nu.x + (nu.b - nasta) / 2; p.y = nu.y + (nu.h - nasta * 9 / 16) / 2; p.b = nasta;
+    mini.setAttribute('data-glid', '');
+    miniPlacera(mini); miniSpara();
+    setTimeout(function () { mini.removeAttribute('data-glid'); }, 260);
   }
 
   /* ---------- Aviseringar i scenen ---------- */
@@ -1705,13 +1796,9 @@
         S.el.querySelector('.vm-egen').setAttribute('data-horn', S.horn);
         break;
       }
-      case 'flytta-mini': {
-        var H2 = ['nh', 'nv', 'ov', 'oh'];
-        S.miniHorn = H2[(H2.indexOf(S.miniHorn || 'nh') + 1) % 4];
-        S.el.querySelector('.vm-mini').setAttribute('data-horn', S.miniHorn);
-        try { localStorage.setItem('ih-crm-videomote:mini-horn', S.miniHorn); } catch (err) { /* */ }
-        break;
-      }
+      case 'storlek-mini': miniStorlek(); break;
+      case 'mini-chatt': minimera(false); oppnaPanel('chatt'); break;
+      case 'mini-dela': if (j.delar) kor('slutaDela'); else dela('text'); break;
       case 'kopiera-lank': stangMeny(false); kopieraLank(); break;
       case 'las': stangMeny(false); kor('las', !t.last); live(t.last ? 'Mötet är upplåst.' : 'Mötet är låst.'); setTimeout(function () { if (S) { ritaTopp(); if (S.panel === 'deltagare') ritaPanel(); } }, 50); break;
       case 'slapp-in': kor('slappIn', peer); var a1 = el.closest('.vm-avis'); if (a1) stangAvis(a1); break;
@@ -1937,7 +2024,7 @@
       S.el.removeAttribute('role'); S.el.removeAttribute('aria-modal');
       ritaMini();
       var f = S.fokusFore; if (f && f.isConnected && !S.el.contains(f)) f.focus({ preventScroll: true });
-      live('Mötet är minimerat. Det fortsätter i rutan nere i hörnet.');
+      live('Mötet är minimerat. Det fortsätter i en flyttbar ruta. Pilarna flyttar rutan, plus och minus ändrar storleken.');
     } else {
       S.el.removeAttribute('data-mini');
       S.el.setAttribute('role', 'dialog'); S.el.setAttribute('aria-modal', 'true');
@@ -1958,8 +2045,6 @@
       stang(true);
     }
     S = nyS(opt);
-    try { S.miniHorn = localStorage.getItem('ih-crm-videomote:mini-horn') || 'nh'; } catch (err) { S.miniHorn = 'nh'; }
-    if (!/^(nh|nv|oh|ov)$/.test(S.miniHorn)) S.miniHorn = 'nh';
     var el = bygg();
     S.el = el;
     D.body.appendChild(el);

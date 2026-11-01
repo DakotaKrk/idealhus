@@ -14,7 +14,7 @@
   IH.MOTE_BILDER = [
     { id: 'titel', namn: 'Välkommen', bild: '../images/hus-r1.webp' },
     { id: 'er', namn: 'Er förfrågan', bild: '../images/hus-r3.webp', kraver: 'forfragan' },
-    { id: 'hantverk', namn: 'Byggt under tak', bild: '../images/hero-video-poster.webp' },
+    { id: 'hantverk', namn: 'Byggt under tak', bild: '../images/video/hero-video-mote-poster.webp' },
     { id: 'husen', namn: 'Husen i 3D', bild: '../images/hus-r5.webp' },
     { id: 'regler', namn: 'Vad får ni bygga?', bild: '../images/hus-r4.webp' },
     { id: 'resan', namn: 'Så går det till', bild: '../images/hus-r2.webp' },
@@ -88,8 +88,7 @@
           (fm ? '<div class="er__forslag"><img src="' + fm.m.tumme + '" alt=""><span><small>' + IH.i('stjarna') + 'Vårt förslag</small><b>' + e(fm.m.namn) + (fm.m.yta ? ' · ' + fm.m.yta + ' m²' : '') + '</b><em>' + e(fm.varfor) + '</em></span></div>' : '') +
           '</div></div></div>';
       case 'hantverk':
-        return '<div class="mb mb--hantverk"><video class="mb__bak" muted loop playsinline preload="metadata" poster="../images/hero-video-poster.webp">' +
-          '<source src="../images/video/hero-video-720.mp4" type="video/mp4" media="(max-width: 900px)"><source src="../images/video/hero-video-1080.mp4" type="video/mp4"></video>' +
+        return '<div class="mb mb--hantverk"><video class="mb__bak" muted loop playsinline preload="none" poster="../images/video/hero-video-mote-poster.webp"></video>' +
           '<div class="mb__slojan mb__slojan--vanster"></div><div class="mb__in">' +
           '<p class="mb__etikett" data-m-in>Hantverket</p>' +
           '<h2 class="mb__titel" data-m-in>Byggt under tak.<br><em>Monterat på dagar.</em></h2>' +
@@ -239,6 +238,30 @@
   }
 
   /* --- Husen i 3D ------------------------------------------------------ */
+  // Filmen hämtas hel innan den spelas: då stannar den aldrig för att vänta på nätet, och slingan börjar om utan glapp.
+  // 1080p bara på stora skärmar med gott om processorkraft, annars 720p.
+  function forladdaFilm() {
+    var v = s.el.querySelector('video.mb__bak'); if (!v) return;
+    var stor = window.innerWidth * (window.devicePixelRatio || 1) > 1600 && (navigator.hardwareConcurrency || 4) >= 8;
+    var fil = '../images/video/hero-video-mote-' + (stor ? 1080 : 720) + '.mp4', el = s.el;
+    fetch(fil).then(function (r) { if (!r.ok) throw new Error('film'); return r.blob(); }).then(function (b) {
+      if (!s || s.el !== el) return;
+      s.filmUrl = URL.createObjectURL(b);
+      v.src = s.filmUrl; v.preload = 'auto';
+      spelaFilm();
+    }).catch(function () { if (s && s.el === el) { v.src = fil; spelaFilm(); } });
+  }
+  function spelaFilm() {
+    var v = s.el.querySelector('.mote__bild.nu video');
+    if (!v || IH.lugn || !v.src) return;
+    var p = v.play(); if (p && p.catch) p.catch(function () {});
+  }
+  // Husen laddas i förväg när mötet är igång, så att bytet till 3D-bilden aldrig stannar upp
+  function forladdaHus() {
+    if (!s || s.husId || s.bilder.indexOf('husen') < 0) return;
+    IH.laddaModelViewer();
+    visaHus(s.modell && IH.modell(s.modell).glb ? s.modell : 'r1');
+  }
   function visaHus(id) {
     var m = IH.modell(id);
     var mv = s.el.querySelector('[data-mv]');
@@ -251,7 +274,7 @@
     var forra = mv.querySelector('model-viewer');
     var nyMv = document.createElement('div');
     nyMv.innerHTML = '<model-viewer class="vantar" src="' + m.glb + '" alt="' + e(m.namn) + ' i 3D" camera-controls auto-rotate auto-rotate-delay="0" rotation-per-second="14deg" ' +
-      'camera-orbit="32deg 74deg auto" interaction-prompt="none" shadow-intensity="1.1" shadow-softness="0.9" exposure="1.38" environment-image="neutral" tone-mapping="neutral" disable-zoom></model-viewer>';
+      'camera-orbit="-24deg 84deg 118%" interpolation-decay="140" loading="eager" interaction-prompt="none" shadow-intensity="1.1" shadow-softness="0.9" exposure="1.38" environment-image="neutral" tone-mapping="neutral" disable-zoom></model-viewer>';
     nyMv = nyMv.firstChild;
     var klar = false;
     function visa() {
@@ -259,6 +282,8 @@
       klar = true;
       if (vy) vy.classList.remove('laddar');
       nyMv.classList.remove('vantar');
+      // Kameran glider in mot huset när det visas
+      setTimeout(function () { if (nyMv.isConnected) nyMv.cameraOrbit = '32deg 74deg auto'; }, IH.lugn ? 0 : 60);
       if (forra) { forra.classList.add('vantar'); setTimeout(function () { if (forra.parentNode) forra.remove(); }, IH.lugn ? 0 : 520); }
     }
     nyMv.addEventListener('load', visa);
@@ -291,8 +316,9 @@
       gammal.classList.add(fram ? 'ut-v' : 'ut-h');
       var g = gammal;
       setTimeout(function () { g.classList.remove('ut-v', 'ut-h'); }, 900);
+      // Filmen spolas tillbaka när den är dold, så att nästa besök börjar på samma bild som stillbilden
       var v = gammal.querySelector('video');
-      if (v) v.pause();
+      if (v) { v.pause(); setTimeout(function () { if (!g.classList.contains('nu')) v.currentTime = 0; }, 620); }
     }
     ny.classList.remove('ut-v', 'ut-h');
     ny.classList.add(fram ? 'in-h' : 'in-v');
@@ -302,13 +328,16 @@
     s.nu = n;
     var id = s.bilder[n];
     var video = ny.querySelector('video');
-    if (video && !IH.lugn) { video.playbackRate = 0.7; var p = video.play(); if (p && p.catch) p.catch(function () {}); }
-    if (id === 'husen' && !s.husId) { IH.laddaModelViewer(); visaHus(s.modell && IH.modell(s.modell).glb ? s.modell : 'r1'); }
+    // Stillbilden är filmens första bild, så starten syns inte
+    if (video) spelaFilm();
+    if (id === 'husen') forladdaHus();
     if (id === 'kalkyl') ritaKvitto(false);
     if (id === 'regler') setTimeout(function () { placeraPill(); }, 60);
     // Botten: namn, prickar och räknare.
     s.el.querySelector('[data-mnamn]').textContent = IH.MOTE_BILDER.filter(function (b) { return b.id === id; })[0].namn;
     s.el.querySelector('[data-mraknare]').textContent = (n + 1) + ' / ' + s.bilder.length;
+    var nastaId = s.bilder[n + 1], nastaB = nastaId && IH.MOTE_BILDER.filter(function (b) { return b.id === nastaId; })[0];
+    s.el.querySelector('[data-mnasta]').textContent = nastaB ? 'Nästa: ' + nastaB.namn : 'Sista bilden';
     s.el.querySelectorAll('.mote__prick').forEach(function (p, k) { p.classList.toggle('nu', k === n); p.setAttribute('aria-current', k === n ? 'step' : 'false'); });
     s.el.querySelector('[data-mote="bak"]').disabled = n === 0;
     s.el.querySelector('[data-mote="fram"]').disabled = n === s.bilder.length - 1;
@@ -363,6 +392,9 @@
     if (!s) return;
     var el = s.el;
     clearInterval(s.klocka);
+    clearTimeout(s.bakom);
+    document.documentElement.removeAttribute('data-presenterar');
+    if (s.filmUrl) { var filmUrl = s.filmUrl; setTimeout(function () { URL.revokeObjectURL(filmUrl); }, 1000); }
     var not = el.querySelector('[data-manteckning]');
     if (not && not.value.trim() && s.kund && IH.jag().roll !== 'admin') {
       IH.logga('mote', 'Kundmöte (' + minuter() + ' min): ' + not.value.trim(), s.kund.id, s.affar ? s.affar.id : null);
@@ -503,7 +535,7 @@
         d.etikett = 'Hantverket'; d.titel = ['Byggt under tak.', 'Monterat på dagar.'];
         d.text = 'Väggar, golv och tak byggs inomhus i jämn temperatur och fuktnivå. På tomten återstår att lyfta, koppla samman och täta.';
         d.chips = ['Svensk tillverkning', 'En kontakt hela vägen', 'Offert post för post'];
-        d.bild = '../images/hero-video-poster.webp';
+        d.bild = '../images/video/hero-video-mote-poster.webp';
         break;
       case 'husen':
         d.etikett = 'Husen i 3D'; d.titel = ['Fem hus.', 'Ett formspråk.'];
@@ -556,7 +588,7 @@
         '<button class="mote__ikon" type="button" data-mote="anteckna" aria-label="Anteckningar (N)" aria-pressed="false">' + IH.i('anteckning') + '</button>' +
         '<button class="mote__ikon" type="button" data-mote="helskarm" aria-label="Helskärm">' + IH.i('helskarm') + '</button>' +
         '<button class="mote__ikon" type="button" data-mote="stang" aria-label="Avsluta mötet">' + IH.i('stang') + '</button></header>' +
-        '<footer class="mote__botten"><span class="mote__namn" data-mnamn></span>' +
+        '<footer class="mote__botten"><span class="mote__namn"><b data-mnamn></b><small data-mnasta></small></span>' +
         '<div class="mote__prickar">' + bilder.map(function (id, n) {
           var b = IH.MOTE_BILDER.filter(function (x) { return x.id === id; })[0];
           return '<button class="mote__prick" type="button" data-mote="till" data-n="' + n + '" aria-label="' + e(b.namn) + '"><i></i></button>';
@@ -666,6 +698,12 @@
 
       var startN = opt.start ? Math.max(0, bilder.indexOf(opt.start)) : 0;
       ga(startN, 1);
+      // Säljarens aviseringar ska inte synas för kunden, och 3D-husen hämtas i lugn och ro efter första bilden
+      document.querySelectorAll('.toast').forEach(function (t) { t.remove(); });
+      forladdaFilm();
+      setTimeout(function () { if (s && s.el === el) forladdaHus(); }, 1800);
+      // När presentationen täcker skärmen pausas allt bakom den: 3D-rummet, himlen och animeringarna
+      s.bakom = setTimeout(function () { if (s && s.el === el) document.documentElement.setAttribute('data-presenterar', ''); }, 800);
     }
   };
 })();
