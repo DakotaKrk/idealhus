@@ -180,3 +180,28 @@ html[data-glas][data-tema="mork"]::before { opacity: .62; }
   html:not([data-sido-dold]) body .sido .sido__smalt > button.sido__aterstall { flex: 0 0 32px; width: 32px !important; padding: 0 !important; }
 }
 @media (min-width: 1101px) { html:not([data-sido-dold]) .ihg-knapp { margin-bottom: 1px; background: none; } }
+
+/* Infälld meny utan Ny-knapp (Admin): menyknappen tar plusets plats, så att det inte blir en lucka */
+@media (min-width: 1101px) {
+  html[data-sido-dold] body:not(:has(.topp > .knapp)) .sido-kant .sido-knapp, html[data-sido-dold] body:not(:has(.topp > .knapp)) .sido-kant .sido-knapp:hover, html[data-sido-dold] body:not(:has(.topp > .knapp)) .sido-kant .sido-knapp:focus-visible { top: 105px !important; }
+  html[data-sido-dold] body:not(:has(.topp > .knapp)) .sido-rals .sido-rals__halva--upp { margin-top: 112px !important; }
+  html[data-sido-dold] body:not(:has(.topp > .knapp)):has(.chf-ikon) .sido-rals .sido-rals__halva--upp { margin-top: 154px !important; }
+}
+@media (min-width: 1101px) and (max-height: 760px) {
+  html[data-sido-dold] body:not(:has(.topp > .knapp)) .sido-kant .sido-knapp, html[data-sido-dold] body:not(:has(.topp > .knapp)) .sido-kant .sido-knapp:hover, html[data-sido-dold] body:not(:has(.topp > .knapp)) .sido-kant .sido-knapp:focus-visible { top: 92px !important; }
+  html[data-sido-dold] body:not(:has(.topp > .knapp)) .sido-rals .sido-rals__halva--upp { margin-top: 96px !important; }
+}
+
+/* Menyn måste vara ett eget lager även utan oskärpa, annars lägger sig listan över menyknappen och tar dess klick */
+html body .sido { isolation: isolate; }
+
+/* Infälld meny: listen släpper igenom klick mellan sina ikoner, så att menyknappen alltid går att trycka på */
+@media (min-width: 1101px) {
+  html[data-sido-dold] body .sido-rals, html[data-sido-dold] body .sido-rals__halva { pointer-events: none; }
+  html[data-sido-dold] body .sido-rals a { pointer-events: auto; }
+}
+
+/* Sidan slutar på samma nivå som menyn, med samma luft runt om */
+@media (min-width: 1101px) {
+  html body:has(.ia-knapp) .vy:not(:has(.ch)) { padding-bottom: var(--ram, 12px); }
+}

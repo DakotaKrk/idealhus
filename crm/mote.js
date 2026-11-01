@@ -14,7 +14,7 @@
   IH.MOTE_BILDER = [
     { id: 'titel', namn: 'Välkommen', bild: '../images/hus-r1.webp' },
     { id: 'er', namn: 'Er förfrågan', bild: '../images/hus-r3.webp', kraver: 'forfragan' },
-    { id: 'hantverk', namn: 'Byggt under tak', bild: '../images/video/hero-video-mote-poster.webp' },
+    { id: 'hantverk', namn: 'Byggt under tak', bild: '../images/video/hero-video-mote-poster.webp?v=2' },
     { id: 'husen', namn: 'Husen i 3D', bild: '../images/hus-r5.webp' },
     { id: 'regler', namn: 'Vad får ni bygga?', bild: '../images/hus-r4.webp' },
     { id: 'resan', namn: 'Så går det till', bild: '../images/hus-r2.webp' },
@@ -88,7 +88,7 @@
           (fm ? '<div class="er__forslag"><img src="' + fm.m.tumme + '" alt=""><span><small>' + IH.i('stjarna') + 'Vårt förslag</small><b>' + e(fm.m.namn) + (fm.m.yta ? ' · ' + fm.m.yta + ' m²' : '') + '</b><em>' + e(fm.varfor) + '</em></span></div>' : '') +
           '</div></div></div>';
       case 'hantverk':
-        return '<div class="mb mb--hantverk"><video class="mb__bak" muted loop playsinline preload="none" poster="../images/video/hero-video-mote-poster.webp"></video>' +
+        return '<div class="mb mb--hantverk"><video class="mb__bak" muted loop playsinline preload="none" poster="../images/video/hero-video-mote-poster.webp?v=2"></video>' +
           '<div class="mb__slojan mb__slojan--vanster"></div><div class="mb__in">' +
           '<p class="mb__etikett" data-m-in>Hantverket</p>' +
           '<h2 class="mb__titel" data-m-in>Byggt under tak.<br><em>Monterat på dagar.</em></h2>' +
@@ -243,7 +243,7 @@
   function forladdaFilm() {
     var v = s.el.querySelector('video.mb__bak'); if (!v) return;
     var stor = window.innerWidth * (window.devicePixelRatio || 1) > 1600 && (navigator.hardwareConcurrency || 4) >= 8;
-    var fil = '../images/video/hero-video-mote-' + (stor ? 1080 : 720) + '.mp4', el = s.el;
+    var fil = '../images/video/hero-video-mote-' + (stor ? 1080 : 720) + '.mp4?v=2', el = s.el;
     fetch(fil).then(function (r) { if (!r.ok) throw new Error('film'); return r.blob(); }).then(function (b) {
       if (!s || s.el !== el) return;
       s.filmUrl = URL.createObjectURL(b);
@@ -535,7 +535,7 @@
         d.etikett = 'Hantverket'; d.titel = ['Byggt under tak.', 'Monterat på dagar.'];
         d.text = 'Väggar, golv och tak byggs inomhus i jämn temperatur och fuktnivå. På tomten återstår att lyfta, koppla samman och täta.';
         d.chips = ['Svensk tillverkning', 'En kontakt hela vägen', 'Offert post för post'];
-        d.bild = '../images/video/hero-video-mote-poster.webp';
+        d.bild = '../images/video/hero-video-mote-poster.webp?v=2';
         break;
       case 'husen':
         d.etikett = 'Husen i 3D'; d.titel = ['Fem hus.', 'Ett formspråk.'];
