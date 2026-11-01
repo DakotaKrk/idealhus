@@ -211,7 +211,7 @@
     },
     stillaAffarer: function () {
       if (!far('salj')) return { nekad: 'Säljtavlan' };
-      var l = oppna().filter(function (a) { return IH.dagarSedan(a.andrad) > 10; }).sort(function (a, b) { return a.andrad < b.andrad ? -1 : 1; });
+      var l = oppna().filter(function (a) { return IH.dagarSedan(a.andrad) > 14; }).sort(function (a, b) { return a.andrad < b.andrad ? -1 : 1; });
       return { antal: l.length, rader: l.slice(0, 5).map(function (a) { return { titel: a.titel, under: 'Ingen ändring på ' + IH.dagarSedan(a.andrad) + ' dagar · ' + kundNamn(a.kund), lank: '#/salj/' + a.id }; }) };
     },
     prognos: function () {
@@ -275,7 +275,7 @@
     var m;
     if (f.rader && (m = /(?:^|\s)(forsta|1|andra|2|tredje|3|fjarde|4|femte|5)(?:\s|$)/.exec(q)) && q.split(' ').length <= 5) {
       var n = { forsta: 0, 1: 0, andra: 1, 2: 1, tredje: 2, 3: 2, fjarde: 3, 4: 3, femte: 4, 5: 4 }[m[1]], r = f.rader[n];
-      if (r) return svar('Jag öppnar <b>' + esc(r.titel) + '</b>.', { utfor: { typ: 'ga', adress: r.lank } });
+      if (r) return svar('Jag öppnar <b>' + esc(r.titel) + '</b>.', { utfor: { typ: 'ga', adress: r.lank }, sida: r.lank, post: { typ: 'rad', namn: r.titel, lank: r.lank, kund: kundUrLank(r.lank) } });
     }
     if (/^(visa( mig)?( det| den| var| dar)?|peka( ut)?( den| det)?|var( ar| finns)?( den| det| da)?|var da)$/.test(q)) {
       if (f.visa) return svar('Jag pekar ut det.', { utfor: { typ: 'visa', visa: f.visa } });
@@ -298,6 +298,11 @@
       if (/(och )?(i )?dag$/.test(q) && q.length < 14) return uppgifterDag(0, 'i dag');
     }
     return null;
+  }
+  function kundUrLank(l) {
+    var m = /^#\/([a-z]+)\/([^/]+)/.exec(l || ''); if (!m) return null;
+    var x = m[1] === 'kunder' ? { id: m[2] } : m[1] === 'salj' ? { id: (IH.affar(m[2]) || {}).kund } : m[1] === 'offerter' ? { id: (IH.offert(m[2]) || {}).kund } : m[1] === 'forfragningar' ? { id: (IH.forfragan(m[2]) || {}).kund } : null;
+    return x && x.id || null;
   }
   function sparr(q) {
     var j = jag();
@@ -392,12 +397,12 @@
     ['mote', '#/mote', 'Kundmöte', 'kundmote kundmoten moten'],
     ['videomote', '#/videomote', 'Videomöten', 'videomote videomoten'],
     ['produktion', '#/produktion', 'Projekt', 'projekt projekten produktion produktionen'],
-    ['dokument', '#/dokument', 'Dokument', 'dokument dokumenten arkivet mallar'],
+    ['dokument', '#/dokument', 'Dokument', 'dokument dokumenten arkivet'],
     ['kolla-marken', '#/kolla-marken', 'Kolla marken', 'kolla marken marken'],
     ['att-gora', '#/att-gora', 'Att göra', 'att gora uppgifter uppgifterna'],
     ['chatt', '#/chatt', 'Meddelanden', 'meddelanden chatt chatten'],
-    ['installningar', '#/installningar', 'Inställningar', 'installningar installningarna prislistan'],
-    ['profil', '#/profil', 'Min profil', 'profil profilen min profil kalender kalendern'],
+    ['installningar', '#/installningar', 'Inställningar', 'installningar installningarna'],
+    ['profil', '#/profil', 'Min profil', 'profil profilen min profil'],
     ['chef', '#/chef', 'Försäljningsledning', 'forsaljningsledning chefsvyn chefsvy'],
     ['kontroll', '#/kontroll', 'Kontrollcentralen', 'kontrollcentral kontrollcentralen'],
     ['admin', '#/admin', 'Adminpanelen', 'adminpanel adminpanelen admin'],
@@ -412,14 +417,6 @@
       else if (!bast && o.length >= 6) text.split(' ').forEach(function (w) { if (w.length >= 5 && dist(w, o, o.length >= 8 ? 2 : 1) <= (o.length >= 8 ? 2 : 1)) bast = { s: s, o: o }; });
     }); });
     return bast && bast.s;
-  }
-  function navigera(q) {
-    var m = /^(?:kan du )?(?:ta mig till|ga till|ga in pa|oppna|navigera till|byt till|till|hoppa till)\s+(?:sidan\s+|min\s+|mina\s+|fliken\s+)?(.+)$/.exec(q);
-    if (!m) return null;
-    var s = sidaI(m[1]);
-    if (!s) return null;
-    if (!far(s[0])) return sparr(s[0]) || saljSparrSida(s);
-    return svar('Jag öppnar <b>' + esc(s[2]) + '</b>.', { utfor: { typ: 'ga', adress: s[1] } });
   }
   function saljSparrSida(s) {
     if (s[0] === 'chef') return svar('Försäljningsledningen ingår inte i ditt konto. Prata med din försäljningschef.', { kalla: 'sparr' });
@@ -476,7 +473,7 @@
     }
     if (/affar/.test(q) && /(star still|stilla|fastnat|gamla|ingen hant|inte hant|inaktiv)/.test(q) && !/^vad (betyder|ar)/.test(q)) {
       r = V.stillaAffarer(); if (r.nekad) return nekat(r);
-      return svar(r.antal ? '<b>' + plural(r.antal, 'affär', 'affärer') + '</b> har inte ändrats på över tio dagar.' : 'Ingen affär står still.', { rader: r.rader, kalla: 'data', sida: '#/salj' });
+      return svar(r.antal ? '<b>' + plural(r.antal, 'affär', 'affärer') + '</b> har inte ändrats på över 14 dagar.' : 'Ingen affär står still.', { rader: r.rader, kalla: 'data', sida: '#/salj' });
     }
     if (/(prognos|pipen|pipeline|oppna affarer|hur mycket .*(oppet|affarer)|affarer .*(varda|vart)|varde pa)/.test(q) && !/^vad (betyder|ar) /.test(q)) {
       r = V.prognos(); if (r.nekad) return nekat(r);
@@ -545,6 +542,11 @@
       if (tva && tva.po > bast.po * 0.94 && bast.po < 0.7 && tva.d.a.tur !== bast.d.a.tur) return osakerSvar(tillat);
       return amneSvar(bast.d.a, visaNu);
     }
+    // Inget hjälpämne: finns det en rubrik eller knapp med det namnet pekas den ut
+    if (visaNu) {
+      var rest = q.replace(/^(visa mig|visa var|peka( ut| pa)?|var (ar|finns|hittar jag|ligger)|vart (ar|finns))\s*/, ''), d = rest ? hittaDel(rest) : [];
+      if (d.length) return svar('Jag pekar ut <b>' + esc(d[0].namn) + '</b> på sidan ' + esc(d[0].sidnamn) + '.', { kalla: 'kunskap', visa: delVisa(d[0]), sida: d[0].adress, utfor: { typ: 'visa', visa: delVisa(d[0]) } });
+    }
     if (bast && bast.po >= 0.34) return osakerSvar(tillat);
     return okant(tillat);
   }
@@ -552,6 +554,7 @@
     var kn = [];
     if (a.visa) kn.push({ etikett: 'Visa mig', typ: 'visa', visa: a.visa });
     if (a.sida) kn.push({ etikett: 'Ta mig dit', typ: 'ga', adress: a.sida });
+    if (a.vag && vagFor(a.vag) && vagTillats(vagFor(a.vag))) kn.unshift({ etikett: 'Visa mig stegen', typ: 'vag', vag: a.vag });
     if (a.tur && IH.guide && IH.guide.tur(a.tur)) kn.push({ etikett: 'Starta guiden', typ: 'tur', tur: a.tur });
     if (a.id === 'lar') kn.push({ etikett: 'Öppna kurserna', typ: 'guide' });
     var ut = svar(a.s, { knappar: kn, kalla: 'kunskap', visa: a.visa, sida: a.sida, tur: a.tur, amne: a.id });
@@ -572,12 +575,294 @@
     });
   }
 
+  /* =====================================================================
+     KARTAN: sidor, delar och knappar byggs ur de riktiga menyerna och vyerna,
+     så att listan aldrig blir inaktuell. Vyerna ritas bara till text (DOMParser),
+     utan efter-funktioner, och resultatet sparas per konto och layout.
+     ===================================================================== */
+  // Chatten kan markera som läst när vyn ritas, och de här saknar något att peka på
+  var INTE_I_KARTAN = { chatt: 1, videomote: 1, 'kolla-marken': 1 };
+  var kartan = null, kartNyckel = '';
+  function ren(t) { return String(t || '').replace(/\s+/g, ' ').trim(); }
+  function karta() {
+    var nyckel = jag().id + '|' + (IH.layout ? IH.layout() : '');
+    if (kartan && kartNyckel === nyckel) return kartan;
+    var sidor = {}, delar = [];
+    [].forEach.call(document.querySelectorAll('.sido__lank[data-vy], .sido-rals a[data-vy], .mobilmeny [data-vy]'), function (a) {
+      var vy = a.getAttribute('data-vy'), n = a.querySelector('span:not(.sido__bricka)');
+      if (!sidor[vy] && far(vy)) sidor[vy] = { vy: vy, adress: vy === 'oversikt' ? '#/' : '#/' + vy, namn: ren(a.getAttribute('data-namn') || a.getAttribute('aria-label') || (n && n.textContent) || a.textContent) };
+    });
+    SIDOR.forEach(function (x) { if (!sidor[x[0]] && far(x[0]) && (x[0] === 'oversikt' || (IH.vyer && IH.vyer[x[0]]))) sidor[x[0]] = { vy: x[0], adress: x[1], namn: x[2] }; });
+    var P = new DOMParser();
+    Object.keys(sidor).forEach(function (vy) {
+      if (INTE_I_KARTAN[vy] || !IH.vyer || !IH.vyer[vy]) return;
+      var r, d, sedda = {};
+      // Vyn får inte lämna spår i datan: en vy som skapar en tom post vid första ritningen städas bort igen
+      var nycklar = Object.keys(IH.db);
+      try { r = IH.vyer[vy]([]); d = P.parseFromString(r.html || '', 'text/html'); } catch (e) { return; }
+      Object.keys(IH.db).forEach(function (n) { if (nycklar.indexOf(n) < 0) delete IH.db[n]; });
+      var lagg = function (t, typ, sel) {
+        t = ren(t);
+        if (t.length < 3 || t.length > 44 || !/[a-zåäö]{3}/i.test(t) || sedda[t.toLowerCase()]) return;
+        sedda[t.toLowerCase()] = 1;
+        delar.push({ typ: typ, vy: vy, adress: sidor[vy].adress, sidnamn: sidor[vy].namn, namn: t, sel: sel, ord: ordOf(t).map(stam) });
+      };
+      [].forEach.call(d.querySelectorAll('h2, h3, .etikett'), function (h) { lagg(h.textContent, 'del', null); });
+      [].forEach.call(d.querySelectorAll('button[data-g], a[data-g], label.dk-ladda'), function (b) {
+        if (b.hasAttribute('data-id') || b.hasAttribute('data-kund') || b.hasAttribute('data-affar') || b.closest('tr, li, article')) return;
+        var g = b.getAttribute('data-g'), f = b.getAttribute('data-f'), kopia = b.cloneNode(true);
+        [].forEach.call(kopia.querySelectorAll('b, svg, i'), function (x) { x.remove(); });
+        var sel = g ? '#vy [data-g="' + g + '"]' + (f ? '[data-f="' + f + '"]' : '') : '#vy .dk-ladda';
+        lagg(kopia.textContent || b.getAttribute('aria-label') || b.getAttribute('title'), 'knapp', sel);
+      });
+    });
+    kartan = { sidor: sidor, delar: delar }; kartNyckel = nyckel;
+    return kartan;
+  }
+  A.karta = karta;
+  // Målet för en rubrik: kortet eller sektionen den står i
+  function rubrikMal(namn) {
+    return function () {
+      var l = document.querySelectorAll('#vy h2, #vy h3, #vy .etikett');
+      for (var i = 0; i < l.length; i++) if (ren(l[i].textContent) === namn) return l[i].closest('section, .kort, .ao-band') || l[i];
+      return null;
+    };
+  }
+  function delVisa(d) { return { sida: d.adress, mal: d.sel || rubrikMal(d.namn), rubrik: d.namn, text: '' }; }
+  function samma(a, b) { return a === b || (a.length >= 5 && b.length >= 4 && dist(a, b, a.length >= 7 ? 2 : 1) <= (a.length >= 7 ? 2 : 1)) || (a.length >= 5 && b.indexOf(a) >= 0); }
+  var AGARE = { chefens: 'chef', chefsvyn: 'chef', forsaljningsledningens: 'chef', adminpanelens: 'admin', adminpanelen: 'admin', kontrollcentralens: 'kontroll', kontrollcentralen: 'kontroll', sakerhetssidans: 'sakerhet', installningarnas: 'installningar', installningar: 'installningar', installningarna: 'installningar', profilens: 'profil' };
+  function hittaDel(text) {
+    var vy = null, t = norm(text).split(' ').filter(function (w) {
+      if (AGARE[w]) { vy = AGARE[w]; return false; }
+      return w && !STOPP[w] && !/^(sidan|delen|knappen|fliken|rutan|kortet|sektionen)$/.test(w);
+    }).map(function (w) { var x = K.synonymer[w]; return [stam(w)].concat(x && x.indexOf(' ') < 0 ? [stam(x)] : []); });
+    if (!t.length) return [];
+    var ut = [];
+    karta().delar.forEach(function (d) {
+      if (vy && d.vy !== vy) return;
+      var tr = t.filter(function (v) { return v.some(function (w) { return d.ord.some(function (o) { return samma(w, o); }); }); }).length;
+      if (tr === t.length) ut.push({ d: d, po: tr / Math.max(1, d.ord.length) + (d.typ === 'del' ? 0.05 : 0) });
+    });
+    ut.sort(function (a, b) { return b.po - a.po; });
+    return ut.map(function (x) { return x.d; });
+  }
+
+  /* --- Poster: kund, affär, offert, förfrågan, projekt, dokument, kollega ------------- */
+  function poster() {
+    var ut = [], j = jag();
+    var lagg = function (typ, id, namn, under, lank, kund) { ut.push({ typ: typ, id: id, namn: namn, under: under, lank: lank, kund: kund || null, ord: norm(namn).split(' ').filter(function (w) { return w.length >= 2; }) }); };
+    if (far('kunder')) IH.db.kunder.forEach(function (k) { lagg('kund', k.id, k.namn, 'Kund' + (k.ort ? ' · ' + k.ort : ''), '#/kunder/' + k.id, k.id); });
+    if (far('salj')) IH.db.affarer.forEach(function (a) { lagg('affar', a.id, a.titel + ' ' + kundNamn(a.kund), 'Affär · ' + kundNamn(a.kund), '#/salj/' + a.id, a.kund); });
+    if (far('offerter')) IH.db.offerter.forEach(function (o) { lagg('offert', o.id, o.nummer + ' ' + kundNamn(o.kund), 'Offert · ' + kundNamn(o.kund), '#/offerter/' + o.id, o.kund); });
+    if (far('forfragningar')) IH.db.forfragningar.forEach(function (f) { lagg('forfragan', f.id, f.namn, 'Förfrågan' + (f.ort ? ' · ' + f.ort : ''), '#/forfragningar/' + f.id, f.kund); });
+    if (far('produktion')) IH.db.projekt.forEach(function (p) { lagg('projekt', p.id, kundNamn(p.kund), 'Projekt', '#/produktion/' + p.id, p.kund); });
+    if (far('dokument')) (IH.db.dokument || []).forEach(function (d) { if (!d.arkiv) lagg('dokument', d.id, d.namn, 'Dokument' + (d.kund ? ' · ' + kundNamn(d.kund) : ''), '#/dokument', d.kund); });
+    IH.ANVANDARE.forEach(function (u) { if (!u.inaktiv && (u.roll !== 'admin' || j.roll === 'admin')) lagg('kollega', u.id, u.namn, 'Kollega', '#/profil/' + u.id); });
+    return ut;
+  }
+  var TYPORD = [[/^(kunden|kund|kundkortet)\b/, 'kund'], [/^(affaren|affar|dealen)\b/, 'affar'], [/^(offerten|offert)\b/, 'offert'], [/^(forfragan|forfragningen)\b/, 'forfragan'], [/^(projektet|projekt|bygget)\b/, 'projekt'], [/^(dokumentet|dokument|filen)\b/, 'dokument'], [/^(kollegan|kollega|saljaren)\b/, 'kollega']];
+  // Delar upp "offerten till Sandberg" i typ och namn
+  function typOchNamn(q) {
+    var typ = null, r = q.replace(/^(en|ett|den|det|min|mitt)\s+/, '');
+    TYPORD.some(function (x) { var m = x[0].exec(r); if (m) { typ = x[1]; r = r.slice(m[0].length); return true; } return false; });
+    return { typ: typ, namn: r.replace(/^\s*(till|for|med|at|pa|hos|om|som heter|nummer)\s+/, '').trim() };
+  }
+  function hittaPost(q) {
+    var x = typOchNamn(q), t = x.namn.split(' ').filter(function (w) { return w && !STOPP[w]; });
+    if (!t.length) return { typ: x.typ, lista: [] };
+    var lista = poster().filter(function (p) { return !x.typ || p.typ === x.typ; }).map(function (p) {
+      var tr = 0, exakt = 0;
+      t.forEach(function (w) { var hit = false; p.ord.forEach(function (o) { if (o === w) { hit = true; exakt++; } else if (samma(w, o) || (w.length === 4 && o.length >= 4 && dist(w, o, 1) <= 1)) hit = true; }); if (hit) tr++; });
+      return { p: p, tr: tr, exakt: exakt };
+    }).filter(function (m) { return m.tr === t.length; }).sort(function (a, b) { return b.exakt - a.exakt; });
+    var topp = lista.length ? lista[0].exakt : 0, ut = lista.filter(function (m) { return m.exakt === topp; }).map(function (m) { return m.p; });
+    // Utan angiven typ går kunden med just det namnet före allt som bara hör till kunden
+    if (!x.typ) {
+      var k = ut.filter(function (p) { return p.typ === 'kund'; });
+      if (k.length === 1 && ut.every(function (p) { return p === k[0] || p.kund === k[0].id || p.namn.indexOf(k[0].namn) >= 0; })) ut = k;
+    }
+    return { typ: x.typ, lista: ut };
+  }
+  function postRader(l) { return l.slice(0, 6).map(function (p) { return { titel: p.typ === 'affar' ? p.namn.replace(' ' + kundNamn(p.kund), '') : p.namn, under: p.under, lank: p.lank }; }); }
+  function postSvar(l, typOrd) {
+    // Samma kund finns ofta som kund, förfrågan och projekt: utan angiven typ går kundkortet först
+    if (l.length > 1 && l.every(function (p) { return p.kund && p.kund === l[0].kund; })) { var k = l.filter(function (p) { return p.typ === 'kund'; })[0]; if (k) l = [k]; }
+    if (l.length === 1) { var p = l[0]; return svar('Jag öppnar <b>' + esc(postRader([p])[0].titel) + '</b>.', { utfor: { typ: 'ga', adress: p.lank }, post: p, kalla: 'data', sida: p.lank }); }
+    return svar('Jag hittade ' + l.length + ' ' + (typOrd || 'träffar') + '. Vilken menar du?', { rader: postRader(l), kalla: 'data', valLista: true });
+  }
+
+  /* --- Filter: rätt sida med rätt filter ---------------------------------------------- */
+  var FILTER = [
+    [/offert.*(vantar|obesvar|skickade)/, 'offerter', 'off-filter', 'Väntar på svar', 'offerter som väntar på svar'],
+    [/offert.*(gar ut|utgar)/, 'offerter', 'off-filter', 'Går ut snart', 'offerter som går ut snart'],
+    [/offert.*godkand|godkanda offerter/, 'offerter', 'off-filter', 'Godkända', 'godkända offerter'],
+    [/offert.*utkast|utkast/, 'offerter', 'off-filter', 'Utkast', 'utkast'],
+    [/offert.*avboj|avbojda offerter/, 'offerter', 'off-filter', 'Avböjda', 'avböjda offerter'],
+    [/mina offerter/, 'offerter', 'off-filter', 'Mina', 'dina offerter'],
+    [/affar.*(star still|stilla)/, 'salj', 'tv-filter', 'Står still', 'affärer som står still'],
+    [/mina affarer/, 'salj', 'tv-vem', 'Mina', 'dina affärer'],
+    [/affar.*(har uppgift|med uppgift)/, 'salj', 'tv-filter', 'Har uppgift', 'affärer med uppgift'],
+    [/affar.*(over 600|stora)/, 'salj', 'tv-filter', 'Över 600 tkr', 'affärer över 600 tkr'],
+    [/(sena|forsenade) uppgifter/, 'att-gora', 'ag-vem', 'Mina', 'dina försenade uppgifter', '.uppgrupp--sen'],
+    [/mina uppgifter/, 'att-gora', 'ag-vem', 'Mina', 'dina uppgifter'],
+    [/alla uppgifter/, 'att-gora', 'ag-vem', 'Alla', 'alla uppgifter'],
+    [/kunder.*uppmarksamhet/, 'kunder', 'kund-filter', 'Behöver uppmärksamhet', 'kunder som behöver uppmärksamhet'],
+    [/mina kunder/, 'kunder', 'kund-filter', 'Mina', 'dina kunder'],
+    [/foretagskunder|kunder.*foretag/, 'kunder', 'kund-filter', 'Företag', 'företagskunder'],
+    [/forfrag.*\b(nya|ny)\b|\bnya forfrag/, 'forfragningar', 'f-filter', 'Ny', 'nya förfrågningar'],
+    [/forfrag.*kontaktad|kontaktade forfrag/, 'forfragningar', 'f-filter', 'Kontaktad', 'kontaktade förfrågningar'],
+    [/forfrag.*ej aktuell/, 'forfragningar', 'f-filter', 'Ej aktuell', 'förfrågningar som inte är aktuella']
+  ];
+  function filtrera(fraga, q) {
+    if (/^(hur|vad|varfor|nar|vilka|vilken|har|finns|kan|ar)\b/.test(q)) return null;
+    var m = /\bkunder? (?:i|fran|pa|som bor i)\s+(.+)$/.exec(q);
+    if (m) {
+      if (!far('kunder')) return saljSparr('Kunder');
+      var o = m[1].trim(), l = IH.db.kunder.filter(function (k) { var n = norm(k.ort); return n === o || (o.length >= 5 && dist(n, o, 1) <= 1); });
+      if (!l.length) return svar('Jag hittar inga kunder i ' + esc(o.charAt(0).toUpperCase() + o.slice(1)) + '.', { kalla: 'data' });
+      return svar('<b>' + plural(l.length, 'kund', 'kunder') + '</b> i ' + esc(l[0].ort) + '.', { kalla: 'data', utfor: { typ: 'filter', adress: '#/kunder', g: 'kund-filter', f: 'Alla', sok: { sel: '[data-kundsok]', v: l[0].ort } }, rader: l.slice(0, 6).map(function (k) { return { titel: k.namn, under: 'Kund · ' + k.ort, lank: '#/kunder/' + k.id }; }) });
+    }
+    for (var i = 0; i < FILTER.length; i++) {
+      var f = FILTER[i];
+      if (!f[0].test(q)) continue;
+      if (!far(f[1])) return saljSparr(f[4].charAt(0).toUpperCase() + f[4].slice(1));
+      if (f[3] === 'Står still' && !V.stillaAffarer().antal) return svar('Just nu står ingen affär still.', { kalla: 'data', sida: '#/salj' });
+      return svar('Jag visar ' + esc(f[4]) + '.', { kalla: 'data', sida: '#/' + f[1], utfor: { typ: 'filter', adress: '#/' + f[1], g: f[2], f: f[3], peka: f[5] } });
+    }
+    return null;
+  }
+
+  /* --- Navigering: sida, del av sida eller bestämd post -------------------------------- */
+  function navigera(fraga, q, mjuk) {
+    var m = (mjuk ? /^(?:visa|hitta|sok( efter)?|leta( efter)?)\s+(?:upp\s+)?(?:mig\s+)?(.+)$/ : /^(?:kan du )?(?:ta mig till|ta mig|ga till|ga in pa|oppna|navigera till|byt till|hoppa till|till)\s+(?:sidan\s+|fliken\s+)?(.+)$/).exec(q);
+    if (!m) return null;
+    var rest = m[m.length - 1].replace(/^(min|mina|mitt)\s+/, '').trim(), x = typOchNamn(rest);
+    if (x.typ && x.namn) return postTraff(rest);
+    var s = sidaI(rest);
+    if (s && rest.split(' ').length <= 2 && sidaExakt(s, rest)) {
+      if (!far(s[0])) return sparr(rest) || saljSparrSida(s);
+      return svar('Jag öppnar <b>' + esc(s[2]) + '</b>.', { utfor: { typ: 'ga', adress: s[1] }, sida: s[1] });
+    }
+    if (mjuk && hittaPost(rest).lista.length) return postTraff(rest);
+    var d = hittaDel(rest);
+    if (d.length === 1 || (d.length > 1 && hittaPost(rest).lista.length === 0)) {
+      if (d.length === 1) return svar('Jag visar <b>' + esc(d[0].namn) + '</b> på sidan ' + esc(d[0].sidnamn) + '.', { kalla: 'kunskap', visa: delVisa(d[0]), sida: d[0].adress, utfor: { typ: 'visa', visa: delVisa(d[0]) } });
+      return svar('Det finns flera. Vilken menar du?', { kalla: 'data', knappar: d.slice(0, 4).map(function (y) { return { etikett: y.namn + ' · ' + y.sidnamn, typ: 'visa', visa: delVisa(y) }; }) });
+    }
+    if (s && far(s[0])) return svar('Jag öppnar <b>' + esc(s[2]) + '</b>.', { utfor: { typ: 'ga', adress: s[1] }, sida: s[1] });
+    if (s) return sparr(rest) || saljSparrSida(s);
+    return postTraff(rest);
+  }
+  function sidaExakt(s, rest) { return s[3].split(' ').indexOf(rest.split(' ').pop()) >= 0 || s[3].indexOf(rest) >= 0; }
+  function postTraff(rest) {
+    var r = hittaPost(rest), x = typOchNamn(rest);
+    if (r.lista.length) return postSvar(r.lista, x.typ === 'offert' ? 'offerter' : x.typ === 'affar' ? 'affärer' : x.typ === 'kund' ? 'kunder' : null);
+    // Administratören får samma svar oavsett om namnet finns, så att inga säljposter avslöjas
+    if (!far('kunder')) return saljSparr('Kunder, affärer och offerter');
+    if (x.typ) return svar('Jag hittar ingen sådan post. Kontrollera stavningen eller prova sökningen med Ctrl K.', { kalla: 'okand' });
+    return null;
+  }
+
+  /* --- Medveten om sidan ------------------------------------------------------------------ */
+  function platsen() {
+    var h = (location.hash || '#/').replace(/^#\/?/, '').split('/'), vy = h[0] || 'oversikt', id = h[1], p = null;
+    if (id) {
+      if (vy === 'kunder' && far(vy)) { var k = IH.kund(id); if (k) p = { typ: 'kund', id: id, namn: k.namn, kund: id, lank: '#/kunder/' + id }; }
+      else if (vy === 'salj' && far(vy)) { var a = IH.affar(id); if (a) p = { typ: 'affar', id: id, namn: a.titel, kund: a.kund, lank: '#/salj/' + id }; }
+      else if (vy === 'offerter' && far(vy)) { var o = IH.offert(id); if (o) p = { typ: 'offert', id: id, namn: o.nummer, kund: o.kund, lank: '#/offerter/' + id }; }
+      else if (vy === 'forfragningar' && far(vy)) { var f = IH.forfragan(id); if (f) p = { typ: 'forfragan', id: id, namn: f.namn, kund: f.kund, lank: '#/forfragningar/' + id }; }
+      else if (vy === 'produktion' && far(vy)) { var q = IH.projekt(id); if (q) p = { typ: 'projekt', id: id, namn: kundNamn(q.kund), kund: q.kund, lank: '#/produktion/' + id }; }
+    }
+    return { vy: vy, post: p };
+  }
+  function nastaSteg() {
+    var pl = platsen(), p = pl.post;
+    if (!p) return dagen();
+    var ut = function (t, sel) { return svar(t, { post: p, kalla: 'data', visa: sel ? { sida: p.lank, mal: sel, rubrik: 'Nästa steg' } : null, knappar: sel ? [{ etikett: 'Visa mig', typ: 'visa', visa: { sida: p.lank, mal: sel, rubrik: 'Nästa steg' } }] : [] }); };
+    if (p.typ === 'affar') {
+      var a = IH.affar(p.id), of = IH.offertFor(a.id);
+      if (a.forlorad) return ut('<b>' + esc(a.titel) + '</b> är förlorad. Du kan återuppta den.', '.af-nasta');
+      var T = { ny: 'Ring kunden och markera Kontakt tagen.', kontakt: 'Boka platsbesöket.', besok: of ? 'Skicka offerten.' : 'Skapa offerten.', offert: 'Följ upp offerten eller gå vidare till Förhandling.', forhandling: 'Stäm av och markera Order signerad.', vunnen: 'Öppna projektet.' };
+      return ut('För <b>' + esc(a.titel) + '</b>: ' + (T[a.steg] || 'Följ Nästa bästa steg.'), '.af-nasta');
+    }
+    if (p.typ === 'forfragan') {
+      var f = IH.forfragan(p.id), F = { ny: 'Ring, eller skriv ett svarsutkast, och markera Kontaktad.', kontaktad: 'Skapa en affär.', kvalificerad: 'Öppna affären.', ej: 'Inget just nu. Du kan öppna den igen.' };
+      return ut('För förfrågan från <b>' + esc(f.namn) + '</b>: ' + (F[f.status] || ''), '.nbs');
+    }
+    if (p.typ === 'offert') {
+      var o = IH.offert(p.id), O = { utkast: 'Skicka offerten.', skickad: 'Följ upp, eller markera vad kunden svarade.', godkand: 'Klart. Följ projektet.', avbojd: 'Offerten är avböjd.', ersatt: 'En nyare version gäller.' };
+      return ut('För <b>' + esc(o.nummer) + '</b>: ' + (O[o.status] || ''), o.status === 'utkast' ? '.vyhuvud [data-g="offert-skicka"]' : '.off-svar');
+    }
+    if (p.typ === 'projekt') {
+      var q = IH.projekt(p.id), N = { ritning: 'Ritningar klara', lov: 'Bygglov eller anmälan', grund: 'Grund, el, vatten och avlopp', framkomlighet: 'Framkomlighet' };
+      var kvar = Object.keys(N).filter(function (x) { return !q.check || !q.check[x]; });
+      return ut(kvar.length ? 'Kvar i checklistan för <b>' + esc(p.namn) + '</b>: ' + esc(kvar.map(function (x) { return N[x]; }).join(', ')) + '.' : 'Checklistan för <b>' + esc(p.namn) + '</b> är klar.', null);
+    }
+    var aff = IH.db.affarer.filter(function (x) { return x.kund === p.id && !x.forlorad && x.steg !== 'vunnen'; });
+    return ut(aff.length ? 'För <b>' + esc(p.namn) + '</b>: öppna affären ' + esc(aff[0].titel) + ' och följ Nästa bästa steg.' : '<b>' + esc(p.namn) + '</b> har ingen öppen affär. Skapa en eller logga kontakten.', '.kn');
+  }
+  function postInfo(p) {
+    var k = p.kund ? IH.kund(p.kund) : null, bit = [];
+    if (p.typ === 'kollega') return svar('<b>' + esc(p.namn) + '</b> är din kollega.', { post: p, kalla: 'data', knappar: [{ etikett: 'Öppna profilen', typ: 'ga', adress: p.lank }] });
+    if (k) { if (k.telefon) bit.push(esc(k.telefon)); if (k.epost) bit.push(esc(k.epost)); }
+    var aff = k ? IH.db.affarer.filter(function (a) { return a.kund === k.id && !a.forlorad && a.steg !== 'vunnen'; }).length : 0;
+    var kn = [];
+    if (p.lank && location.hash !== p.lank) kn.push({ etikett: 'Öppna', typ: 'ga', adress: p.lank });
+    kn.push({ etikett: 'Vad är nästa steg?', typ: 'fraga' });
+    if (k) kn.push({ etikett: 'Ny uppgift', typ: 'form', form: 'uppgift', falt: { kund: k.id, text: '' } });
+    return svar('<b>' + esc(p.namn) + '</b>' + (k && k.namn !== p.namn ? ' · ' + esc(k.namn) : '') + (bit.length ? ': ' + bit.join(' · ') : '') + '.' + (aff ? ' ' + plural(aff, 'öppen affär', 'öppna affärer') + '.' : ''), { post: p, kalla: 'data', knappar: kn });
+  }
+  function medveten(q) {
+    if (/(vad kan jag gora|vad gor jag|vad finns|vad gar att gora|vad ar det har for|vad ar det har).*(har|sidan)?$/.test(q) && /(^|\s)(har|sidan)$/.test(q)) {
+      var pl = platsen(), kn = [], t = K.plats[pl.vy] || 'Här finns sidans egna verktyg.';
+      if (pl.post) return postInfo(pl.post);
+      var g = IH.guide && IH.guide.turForSidan ? IH.guide.turForSidan() : null;
+      (K.forslag[pl.vy] || []).filter(function (f) { return !sparr(norm(f)); }).slice(0, 2).forEach(function (f) { kn.push({ etikett: f, typ: 'fraga' }); });
+      if (g) kn.push({ etikett: 'Starta guiden', typ: 'tur', tur: g.id });
+      return svar(esc(t), { knappar: kn, kalla: 'kunskap', tur: g ? g.id : null });
+    }
+    if (/^(vad ar )?(mitt )?nasta steg$|^vad ska jag gora nu$|^vad gor jag nu$/.test(q)) return nastaSteg();
+    if (/den har (kunden|affaren|offerten|forfragan|projektet|posten)|det har (projektet|arendet)/.test(q)) {
+      var p = platsen().post;
+      if (!p) return svar('Du står inte på någon sådan post just nu. Öppna den först.', { kalla: 'data' });
+      return postInfo(p);
+    }
+    return null;
+  }
+  // "henne", "den", "öppna den": den senaste posten, annars posten man står på
+  function pronomen(q, f) {
+    var har = /\b(hen|hon|han|henne|honom|hens|hennes|hans|den|det|dom|dem|deras|kunden)\b/.test(q);
+    if (!har || q.split(' ').length > 7) return null;
+    if (f && f.valLista) return svar('Vilken menar du? Klicka på en rad eller säg <b>den första</b>.', { senaste: f });
+    var p = (f && f.post) || platsen().post;
+    if (!p) return null;
+    var k = p.kund ? IH.kund(p.kund) : null, namn = k ? k.namn : p.namn;
+    if (/^(oppna|visa|ga till|ta mig till)( den| det| dit| henne| honom| hen| kunden)?( igen)?$/.test(q)) return svar('Jag öppnar <b>' + esc(p.namn) + '</b>.', { utfor: { typ: 'ga', adress: p.lank }, post: p, sida: p.lank });
+    if (/telefon|nummer|ringa?\b/.test(q)) return svar(k && k.telefon ? 'Telefon till ' + esc(namn) + ': <b>' + esc(k.telefon) + '</b>.' : 'Det finns inget telefonnummer för ' + esc(namn) + '.', { post: p, kalla: 'data' });
+    if (/mejl|e-?post|epost|adress/.test(q)) return svar(k && k.epost ? 'E-post till ' + esc(namn) + ': <b>' + esc(k.epost) + '</b>.' : 'Det finns ingen e-post för ' + esc(namn) + '.', { post: p, kalla: 'data' });
+    if (/uppgift|paminn/.test(q) && k) { if (jag().roll === 'admin') return null; return svar('Jag fyller i en uppgift för <b>' + esc(namn) + '</b>. Du sparar själv.', { utfor: { typ: 'form', form: 'uppgift', falt: { kund: k.id, text: '' } }, kalla: 'form', post: p }); }
+    if (/video ?mote/.test(q) && k) return svar('Jag öppnar bokningen för <b>' + esc(namn) + '</b>. Du bokar själv.', { utfor: { typ: 'form', form: 'videomote', falt: { kund: k.id } }, kalla: 'form', post: p });
+    if (/^(vem|vad|info|beratta)/.test(q)) return postInfo(p);
+    return null;
+  }
+
+  /* --- Vägvisning i flera steg ----------------------------------------------------------- */
+  function vagFor(id) { return (K.vagar || []).filter(function (v) { return v.id === id; })[0]; }
+  function vagTillats(v) { return !(v.vy && !far(v.vy)) && !(v.salj && jag().roll === 'admin'); }
+  function vagFraga(q) {
+    if (!/^(visa|lar|led|guida|hjalp).*\b(hur|genom|att)\b/.test(q) && !/^(visa mig stegen|ta mig genom|led mig)/.test(q)) return null;
+    var l = (K.vagar || []).filter(function (v) { return v.ord.test(q); });
+    if (!l.length) return null;
+    if (!vagTillats(l[0])) return saljSparr(l[0].namn);
+    return svar('Jag visar steg för steg hur du gör: <b>' + esc(l[0].namn) + '</b>. Du gör själv varje steg och kan avbryta när du vill.', { kalla: 'kunskap', utfor: { typ: 'vag', vag: l[0].id } });
+  }
+
   /* --- Motorn ---------------------------------------------------------------------- */
   var lokalMotor = {
     namn: 'lokal',
     svara: function (fraga, s) {
       var q = norm(fraga);
-      return smaprat(q) || foljd(q, s) || sparr(q) || handling(fraga, q) || navigera(q) || guider(fraga, q) || dataFraga(q) || kundFraga(fraga, q) || kunskap(fraga, q);
+      return smaprat(q) || medveten(q) || foljd(q, s) || pronomen(q, s.senaste) || sparr(q) || vagFraga(q) || handling(fraga, q) || filtrera(fraga, q) || navigera(fraga, q, false) || guider(fraga, q) || dataFraga(q) || navigera(fraga, q, true) || kundFraga(fraga, q) || kunskap(fraga, q);
     }
   };
   var motor = lokalMotor;
@@ -722,17 +1007,40 @@
   }
   function utfor(k) {
     if (!k) return;
-    if (k.typ === 'ga') { if (mobilbredd() || /^#\/kunder\//.test(k.adress)) A.stang(); IH.ga ? IH.ga(k.adress) : (location.hash = k.adress); return; }
+    if (k.typ === 'ga') { kompakt(); if (IH.stangArk) IH.stangArk(true); IH.ga ? IH.ga(k.adress) : (location.hash = k.adress); return; }
+    if (k.typ === 'filter') { kompakt(); korFilter(k); return; }
+    if (k.typ === 'vag') {
+      var v = vagFor(k.vag); if (!v || !IH.guide || !IH.guide.vag) return;
+      var ater1 = oppen; A.stang();
+      IH.guide.vag(v.namn, v.steg(), { slutText: v.slut, vidSlut: function () { if (ater1) setTimeout(A.oppna, 380); }, saknas: function () { if (IH.toast) IH.toast('Det gick inte att visa alla steg', 'Något steg syns inte i den här layouten.', 'info'); } });
+      return;
+    }
     if (k.typ === 'tur') { A.stang(); if (IH.guide) IH.guide.starta(k.tur); return; }
     if (k.typ === 'guide') { A.stang(); if (IH.guide) setTimeout(function () { IH.guide.oppna(); }, 60); return; }
     if (k.typ === 'form') { A.stang(); formular(k.form, k.falt); return; }
     if (k.typ === 'visa') {
+      // Panelen går undan så att den aldrig täcker det den pekar på, och kommer tillbaka efteråt
+      var ater2 = oppen;
       A.stang();
-      if (IH.guide && IH.guide.peka) IH.guide.peka(k.visa.mal, { sida: k.visa.sida, rubrik: k.visa.rubrik, text: k.visa.text,
+      if (IH.guide && IH.guide.peka) IH.guide.peka(k.visa.mal, { sida: k.visa.sida, rubrik: k.visa.rubrik, text: k.visa.text, vidSlut: function () { if (ater2) setTimeout(A.oppna, 380); },
         saknas: function () { if (IH.toast) IH.toast('Den syns inte här', 'Det kan bero på sidan eller layouten.', 'info'); } });
     }
   }
   function mobilbredd() { return window.innerWidth <= 640; }
+  function kompakt() { if (mobilbredd()) A.stang(); }
+  // Går till sidan, väljer filtret och fyller i sökrutan. Saknas filtret i layouten står sidan kvar utan det.
+  function korFilter(k) {
+    if (IH.stangArk) IH.stangArk(true);
+    if (location.hash !== k.adress) IH.ga(k.adress);
+    var n = 0;
+    (function vanta() {
+      var b = [].filter.call(document.querySelectorAll('#vy [data-g="' + k.g + '"]'), function (x) { return x.textContent.indexOf(k.f) >= 0; })[0];
+      if (!b) { if (n++ < 24) setTimeout(vanta, 100); return; }
+      if (b.getAttribute('aria-pressed') !== 'true') b.click();
+      if (k.sok) setTimeout(function () { fyll(k.sok.sel, k.sok.v); }, 120);
+      if (k.peka) setTimeout(function () { var x = document.querySelector(k.peka); if (x) x.scrollIntoView({ block: 'center', behavior: lugn.matches ? 'auto' : 'smooth' }); }, 200);
+    })();
+  }
 
   A.fraga = function (t) {
     if (!oppen) A.oppna();
@@ -743,7 +1051,7 @@
       setTimeout(function () {
         if (!panel) return;
         s = s || svar('Det vet jag inte.');
-        A.senaste = s.senaste || (/^(data|kunskap|form)$/.test(s.kalla || '') || s.visa || s.sida || s.tur || s.rader ? s : A.senaste);
+        A.senaste = s.senaste || (/^(data|kunskap|form)$/.test(s.kalla || '') || s.visa || s.sida || s.tur || s.rader || s.post ? s : A.senaste);
         A.sistaSvar = s;
         meddelande('ia', s);
         sattFigur('svarar');

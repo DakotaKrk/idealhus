@@ -280,7 +280,7 @@
     var mote = document.querySelector('.mote [data-mote="stang"]');
     if (mote && a.tur.ovning) { try { mote.click(); } catch (x) { /* */ } }
     if (document.documentElement.hasAttribute('data-palett-oppen') && IH.stangPalett) IH.stangPalett();
-    if (!a.arkFore && document.querySelector('.ark.syns') && IH.stangArk) IH.stangArk(true);
+    if (!a.arkFore && !a.tur.verklig && document.querySelector('.ark.syns') && IH.stangArk) IH.stangArk(true);
     if (IH.stangKm) { try { IH.stangKm(); } catch (x) { /* */ } }
   }
   G.stang = function (tyst) {
@@ -303,6 +303,7 @@
   G.nasta = function () {
     if (!aktiv || aktiv.pagar === aktiv.stegId) return;
     var s = steg();
+    if (aktiv.tur.verklig) { visa(aktiv.n + 1, 1); return; }
     if (s && s.vanta && aktiv.el) { gorKlick(s, aktiv.el); return; }
     if (s && s.prova && s.gorSjalv && aktiv.el) { gorProva(s, aktiv.el); return; }
     visa(aktiv.n + 1, 1);
@@ -319,6 +320,12 @@
     opt = opt || {};
     return G.starta({ id: 'peka', namn: opt.namn || 'Här', tillfallig: true, dold: true, saknas: opt.saknas,
       steg: [{ sida: opt.sida, sidaPrefix: true, mal: mal, rubrik: opt.rubrik || 'Här är det', text: opt.text || '', knapp: 'Okej', vantaMs: opt.vantaMs || 4000 }] }, { vidSlut: opt.vidSlut });
+  };
+  // Vägvisning på riktigt (assistentens "visa hur"): flera steg utan övningskopia. Guiden pekar och väntar,
+  // men gör aldrig något åt användaren. Avbryts med Avbryt, krysset eller Esc, och ett öppet formulär står kvar.
+  G.vag = function (namn, steg, opt) {
+    opt = opt || {};
+    return G.starta({ id: 'vag', namn: namn, tillfallig: true, verklig: true, dold: true, slutText: opt.slutText, saknas: opt.saknas, steg: steg }, { vidSlut: opt.vidSlut });
   };
   G.lage = function () {
     if (!aktiv) return { aktiv: false };
@@ -421,6 +428,7 @@
 
   function knapparHtml(s, sista) {
     var gor = (s.vanta || s.prova) && aktiv.el;
+    if (aktiv.tur.verklig) return '<div class="ihg-knappar"><button type="button" class="ihg-k ihg-k--svag" data-ihg="stang">Avbryt</button><span class="ihg-tom"></span><button type="button" class="ihg-k ihg-k--kant" data-ihg="nasta">' + (sista ? 'Klart' : gor ? 'Hoppa över' : 'Nästa') + '</button></div>';
     if (aktiv.tur.tillfallig) return '<div class="ihg-knappar"><span class="ihg-tom"></span><button type="button" class="ihg-k ihg-k--mork" data-ihg="nasta">Okej</button></div>';
     var bak = kanBakat() ? '<button type="button" class="ihg-k ihg-k--kant" data-ihg="forra" aria-label="Föregående">' + SVG.pilv + '</button>' : '';
     var fyll = s.fyll && aktiv.el ? '<button type="button" class="ihg-k ihg-k--kant" data-ihg="fyll">Fyll i exempel</button>' : '';
@@ -442,7 +450,7 @@
 
   function visaSteg(x) {
     if (!aktiv || !rot) return;
-    var s = steg(), tur = aktiv.tur, n = aktiv.n;
+    var s = steg(), tur = aktiv.tur, n = aktiv.n, enkel = tur.tillfallig && tur.steg.length === 1;
     var forst = aktiv.visadId == null;
     var lista = giltiga(), pos = lista.indexOf(n) + 1, sista = lista[lista.length - 1] === n;
     aktiv.el = x; aktiv.letar = false;
@@ -451,21 +459,23 @@
     if (!tur.tillfallig) sparaPagar(tur.id, n);
     var text = varde(s.text, aktiv.ctx) || '', prova = !!((s.vanta || s.prova) && x);
     var hadeSyns = bubbla.classList.contains('syns');
-    bubbla.className = 'ihg-bubbla ihg-bubbla--ny' + (x ? '' : ' ihg-bubbla--mitt') + (hadeSyns ? ' syns' : '') + (forst ? ' ihg-bubbla--direkt' : '') + (tur.tillfallig ? ' ihg-bubbla--peka' : '');
+    bubbla.className = 'ihg-bubbla ihg-bubbla--ny' + (x ? '' : ' ihg-bubbla--mitt') + (hadeSyns ? ' syns' : '') + (forst ? ' ihg-bubbla--direkt' : '') + (enkel ? ' ihg-bubbla--peka' : '');
     bubbla.innerHTML = '<i class="ihg-pil" hidden></i><div class="ihg-bubbla__inne">' +
       '<div class="ihg-bubbla__topp">' + (prova ? '<span class="ihg-prova">Prova själv</span>' : '<span class="ihg-tur">' + esc(tur.namn) + '</span>') +
-      (tur.tillfallig ? '' : '<span class="ihg-raknare">' + pos + ' / ' + lista.length + '</span>') +
+      (enkel ? '' : '<span class="ihg-raknare">' + pos + ' / ' + lista.length + '</span>') +
       '<button type="button" class="ihg-x" data-ihg="stang" aria-label="Stäng guiden (Esc)">' + SVG.stang + '</button></div>' +
       '<h3 id="ihg-rubrik">' + varde(s.rubrik, aktiv.ctx) + '</h3>' +
       (text ? '<div class="ihg-text" id="ihg-text">' + (/^\s*</.test(text) ? text : '<p>' + text + '</p>') + '</div>' : '') +
       '<p class="ihg-gor"' + (prova ? '' : ' hidden') + '>' + SVG.hand + '<span>' + esc(varde(s.gor, aktiv.ctx) || 'Klicka på det markerade') + '</span></p>' +
-      (tur.tillfallig ? '' : '<div class="ihg-framsteg"><i style="--a:' + (pos / lista.length).toFixed(3) + '"></i></div>') +
+      (enkel ? '' : '<div class="ihg-framsteg"><i style="--a:' + (pos / lista.length).toFixed(3) + '"></i></div>') +
       knapparHtml(s, sista) +
       (pos === 1 && tur.ovning ? '<p class="ihg-tips">Det här är en övning. Det du gör sparas inte.</p>' : '') + '</div>';
     pilEl = bubbla.querySelector('.ihg-pil');
     // Hålet: spärra klick i hålet om steget inte vill att man gör något där.
     var fri = !!(x && (s.vanta || s.fri || s.prova));
     sparr.las.hidden = fri;
+    // Formulär med egna rullgardiner och kalendrar: rutorna öppnas utanför hålet, så inget får spärras
+    rot.classList.toggle('ihg--fritt', !!(s.fritt && x));
     ringEl.className = 'ihg-ring' + (s.vanta && x ? ' ihg-ring--klicka' : '') + (ringEl.classList.contains('syns') ? ' syns' : '');
     skyltEl.querySelector('span').textContent = varde(s.skylt, aktiv.ctx) || 'Klicka här';
     aktiv.glid = !forst;
@@ -776,9 +786,10 @@
     if (!aktiv) return;
     var tur = aktiv.tur;
     if (tur.tillfallig) {
-      var saknas = aktiv.hoppade.length && tur.saknas;
+      var saknas = aktiv.hoppade.length && tur.saknas, slut = tur.slutText;
       G.stang(true);
       if (saknas) { try { saknas(); } catch (x) { /* */ } }
+      else if (slut && IH.toast) IH.toast('Klart', slut, 'bock');
       return;
     }
     var kursFore = kursKlarFor(tur.id);

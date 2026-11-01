@@ -1246,3 +1246,6 @@ html[data-layout="minimal"] body .ch-ruta:not(.lp-saker):not([data-saker]) { wid
   .ihg-meny .ihg-har { transition: none; }
 }
 .ihg-knapp .ihg-knapp__ikon { padding: 0 !important; }
+
+/* Vägvisning: i formulär får man klicka överallt, rullgardiner och kalendrar öppnas utanför hålet */
+.ihg--fritt .ihg-sparr { pointer-events: none; }

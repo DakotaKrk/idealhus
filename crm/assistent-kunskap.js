@@ -50,23 +50,23 @@
     { id: 'aviseringar', t: 'Aviseringar', o: 'avisering klocka notis paminn skrivbord olast', s: 'Klockan samlar påminnelser och det som rör dig. <b>Slå på</b> skrivbordsaviseringar i panelen. De visas när CRM:et är öppet i webbläsaren.', tur: 'aviseringar', visa: { mal: ['.sido .ih-klocka', '.topp .ih-klocka', '.sido-rals__klocka'], rubrik: 'Klockan' } },
     /* --- Förfrågningar --- */
     { id: 'forfragan', t: 'Förfrågningar', o: 'forfragan forfragningar inkorg svarsmal poang', s: 'Inkorgen samlar förfrågningar med poäng och svarsmål på <b>24 timmar</b>. Öppna en, följ <b>Nästa bästa steg</b> och markera <b>Kontaktad</b> när ni pratat.', sida: '#/forfragningar', tur: 'forfragningar', vy: 'forfragningar' },
-    { id: 'forfragan-ny', t: 'Lägga in en förfrågan', o: 'lagga in forfragan ringde mejlade manuellt ny forfragan', s: 'Under Förfrågningar klickar du på <b>Lägg in förfrågan</b> när någon ringer eller mejlar. Dubbletter upptäcks på telefon och e-post.', vy: 'forfragningar', visa: { sida: '#/forfragningar', mal: '[data-g="ny-forfragan"]', rubrik: 'Lägg in förfrågan' } },
+    { id: 'forfragan-ny', vag: 'forfragan', t: 'Lägga in en förfrågan', o: 'lagga in forfragan ringde mejlade manuellt ny forfragan', s: 'Under Förfrågningar klickar du på <b>Lägg in förfrågan</b> när någon ringer eller mejlar. Dubbletter upptäcks på telefon och e-post.', vy: 'forfragningar', visa: { sida: '#/forfragningar', mal: '[data-g="ny-forfragan"]', rubrik: 'Lägg in förfrågan' } },
     { id: 'forfragan-svar', t: 'Svara på en förfrågan', o: 'svara forfragan svarsutkast mejl utkast ta den', s: 'Öppna förfrågan, klicka på <b>Ta den</b>, ring eller välj <b>Svarsutkast</b> (tangenten U) och markera sedan <b>Kontaktad</b>. Då skapas kundkortet.', vy: 'forfragningar', tur: 'flode-ny-kund', visa: { sida: '#/forfragningar', mal: '.nbs', rubrik: 'Nästa bästa steg' } },
     { id: 'samtalsguide', t: 'Samtalsguiden', o: 'samtalsguide fragor forsta samtalet detaljplan', s: 'I förfrågan finns <b>Samtalsguiden</b>: detaljplan, byggnader, tomtgräns, framkomlighet, grund, strandskydd, anmälan och tidplan. Bocka av medan du pratar.', vy: 'forfragningar', visa: { sida: '#/forfragningar', mal: '.inkorg__las .guide', rubrik: 'Samtalsguiden' } },
     { id: 'poang', t: 'Poängen', o: 'poang score vardering varm', s: 'Poängen räknas fram ur svaren och texten. Skälen står bredvid. Den är en fingervisning, inget facit.', vy: 'forfragningar' },
     { id: 'simulera', t: 'Simulera en förfrågan', o: 'simulera testa exempel forfragan prova', s: '<b>Simulera ny förfrågan</b> visar hur det ser ut när någon fyller i hemsidans formulär.', vy: 'forfragningar', visa: { sida: '#/forfragningar', mal: '[data-g="simulera"]', rubrik: 'Simulera' } },
     /* --- Affärer --- */
     { id: 'saljtavla', t: 'Säljtavlan', o: 'saljtavla tavla steg spalter affarer pipeline', s: 'Säljtavlan har sex steg: Ny förfrågan 10 %, Kontakt tagen 20 %, Tomt och platsbesök 40 %, Offert skickad 60 %, Förhandling 75 % och Order signerad.', sida: '#/salj', tur: 'saljtavla', vy: 'salj' },
-    { id: 'affar-ny', t: 'Skapa en affär', o: 'skapa ny affar', s: 'Klicka på <b>Skapa affär</b> på förfrågan, <b>Ny affär</b> på kundkortet eller på säljtavlan. Värdet hämtas ur prislistan.', vy: 'salj', tur: 'flode-ny-kund', visa: { sida: '#/salj', mal: '[data-g="ny-affar"]', rubrik: 'Ny affär' } },
+    { id: 'affar-ny', vag: 'affar', t: 'Skapa en affär', o: 'skapa ny affar', s: 'Klicka på <b>Skapa affär</b> på förfrågan, <b>Ny affär</b> på kundkortet eller på säljtavlan. Värdet hämtas ur prislistan.', vy: 'salj', tur: 'flode-ny-kund', visa: { sida: '#/salj', mal: '[data-g="ny-affar"]', rubrik: 'Ny affär' } },
     { id: 'affar-flytta', t: 'Flytta en affär', o: 'flytta affar steg dra slapp vidare', s: 'Dra kortet till nästa spalt eller klicka på <b>Vidare</b> på kortet. På affärssidan klickar du på steget.', vy: 'salj', tur: 'saljtavla', visa: { sida: '#/salj', mal: '.tavla .aff', rubrik: 'Affärskortet' } },
     { id: 'viktat', t: 'Viktad prognos', o: 'viktat varde prognos chans procent', s: 'Viktat värde är affärens värde gånger chansen i steget. Summan är den viktade prognosen.', vy: 'salj', visa: { sida: '#/salj', mal: '.puls__kpi', rubrik: 'Prognosen' } },
-    { id: 'star-still', t: 'Står still', o: 'star still stilla gammal fastnat affar', s: '<b>Står still</b> betyder att affären inte ändrats på över tio dagar. Filtret finns på säljtavlan.', vy: 'salj', visa: { sida: '#/salj', mal: '.tv-verktyg', rubrik: 'Filter' } },
+    { id: 'star-still', t: 'Står still', o: 'star still stilla gammal fastnat affar', s: '<b>Står still</b> betyder att affären inte ändrats på över 14 dagar. Filtret finns på säljtavlan.', vy: 'salj', visa: { sida: '#/salj', mal: '.tv-verktyg', rubrik: 'Filter' } },
     { id: 'forlorad', t: 'Förlorad affär', o: 'forlorad affar markera aterupppta orsak dra forlustdocka', s: 'Dra affären till förlustdockan eller välj <b>Markera som förlorad</b> med orsak. <b>Återuppta</b> finns under Förlorade på säljtavlan.', vy: 'salj' },
     { id: 'vunnen', t: 'Vinna en affär', o: 'vunnen vinna order signerad godkand', s: 'Klicka på <b>Order signerad</b> på affären eller <b>Kunden godkände</b> på offerten. Då blir affären vunnen och ett projekt skapas med montage om 12 veckor.', vy: 'salj', tur: 'flode-overlamning' },
     { id: 'affar-andra', t: 'Ändra eller ta bort en affär', o: 'andra ta bort radera affar titel forvantat avslut', s: 'På affärssidan finns <b>Ändra affären</b> och <b>Ta bort affären</b>. Borttagning går bara utan godkänd offert och kan ångras i 8 sekunder.', vy: 'salj' },
     /* --- Kunder --- */
     { id: 'kunder', t: 'Kunder', o: 'kunder kundregister lista varma filter', s: 'Under Kunder ser du alla kunder som kort eller lista. Filtrera på <b>Mina</b>, <b>Affär pågår</b> och <b>Behöver uppmärksamhet</b>.', sida: '#/kunder', tur: 'kunder', vy: 'kunder' },
-    { id: 'kund-ny', t: 'Skapa en kund', o: 'skapa ny lagga till kund', s: 'Klicka på <b>Ny kund</b> under Kunder, eller säg <b>ny kund Anna Berg</b> så öppnar jag formuläret. En kund skapas också automatiskt när en förfrågan markeras Kontaktad.', vy: 'kunder', tur: 'kunder', visa: { sida: '#/kunder', mal: '[data-g="ny-kund"]', rubrik: 'Ny kund' } },
+    { id: 'kund-ny', vag: 'kund', t: 'Skapa en kund', o: 'skapa ny lagga till kund', s: 'Klicka på <b>Ny kund</b> under Kunder, eller säg <b>ny kund Anna Berg</b> så öppnar jag formuläret. En kund skapas också automatiskt när en förfrågan markeras Kontaktad.', vy: 'kunder', tur: 'kunder', visa: { sida: '#/kunder', mal: '[data-g="ny-kund"]', rubrik: 'Ny kund' } },
     { id: 'kundhalsa', t: 'Kundhälsan', o: 'kundhalsa halsa tal gron rod', s: 'Kundhälsan är ett tal 0–100 utifrån senaste kontakt, försenade uppföljningar och affärer. Grönt från 75, gult från 50, annars rött.', vy: 'kunder', tur: 'kundsida' },
     { id: 'kund-bort', t: 'Ta bort en kund', o: 'ta bort radera kund', s: 'Öppna kunden och välj <b>Ändra</b>. Där finns <b>Ta bort</b> om kunden inte är bunden till affärer eller projekt. Det går att ångra i 8 sekunder.', vy: 'kunder' },
     { id: 'dubblett', t: 'Slå ihop dubbletter', o: 'dubblett sla ihop sammanfoga kunder', s: 'Öppna kunden, klicka på <b>Mer</b> och välj <b>Slå ihop med…</b>.', vy: 'kunder' },
@@ -77,7 +77,7 @@
     { id: 'historik', t: 'Logga samtal och anteckningar', o: 'logga anteckning samtal mejl mote historik skriva', s: 'På kund- eller affärssidan skriver du en rad under <b>Historik</b> och väljer Anteckning, Samtal, Mejl eller Möte.', vy: 'kunder', tur: 'affar' },
     /* --- Offerter --- */
     { id: 'offerter', t: 'Offerter', o: 'offerter lista traffsakerhet gar ut', s: 'Under Offerter ser du vad som väntar på svar och går ut snart. Offerter gäller i 30 dagar och kan förlängas 14 dagar i taget.', sida: '#/offerter', tur: 'offerter', vy: 'offerter' },
-    { id: 'offert-ny', t: 'Skapa en offert', o: 'skapa ny offert hur', s: 'Klicka på <b>Skapa offert</b> på affären, eller <b>Ny offert</b> under Offerter. Huset, frakt och montage läggs in ur prislistan.', vy: 'offerter', tur: 'flode-offert', visa: { sida: '#/offerter', mal: '[data-g="offert-ny"]', rubrik: 'Ny offert' } },
+    { id: 'offert-ny', vag: 'offert', t: 'Skapa en offert', o: 'skapa ny offert hur', s: 'Klicka på <b>Skapa offert</b> på affären, eller <b>Ny offert</b> under Offerter. Huset, frakt och montage läggs in ur prislistan.', vy: 'offerter', tur: 'flode-offert', visa: { sida: '#/offerter', mal: '[data-g="offert-ny"]', rubrik: 'Ny offert' } },
     { id: 'offert-skicka', t: 'Skicka en offert', o: 'skicka offert mejla kund markera skickad', s: 'Klicka på <b>Skicka offerten</b>: skriv ut som PDF, öppna i mejlprogrammet, bifoga och klicka på <b>Markera som skickad</b>. CRM:et skickar inget själv.', vy: 'offerter', tur: 'flode-offert' },
     { id: 'offert-andra', t: 'Ändra en skickad offert', o: 'andra skickad offert ny version ersatt', s: 'En skickad offert ändras inte. Klicka på <b>Ny version</b>, ändra och skicka den. Den gamla markeras som ersatt.', vy: 'offerter', tur: 'offert' },
     { id: 'offert-forlang', t: 'Förlänga en offert', o: 'forlanga offert giltig giltighet 14 dagar', s: '<b>Förläng 14 d</b> finns på offerten, i listan och under Dokument.', vy: 'offerter', visa: { sida: '#/offerter', mal: ['.snartut', '.kundverktyg'], rubrik: 'Går ut snart' } },
@@ -103,7 +103,7 @@
     { id: 'mark', t: 'Kolla marken', o: 'mark kolla marken jordart berg vatten tomt sgu', s: '<b>Kolla marken</b> visar jordart, vatten och djup till berg från SGU. Det är översiktligt och ingen geoteknik. Från en kund kan resultatet sparas i historiken.', sida: '#/kolla-marken', vy: 'kunder' },
     /* --- Min dag --- */
     { id: 'att-gora', t: 'Att göra', o: 'att gora uppgift uppgifter lista vecka', s: 'Under Att göra lägger du till uppgifter, bockar av och skjuter upp med <b>+1 d</b>. Säg <b>ny uppgift ring Anna i morgon</b> så fyller jag i.', sida: '#/att-gora', tur: 'att-gora' },
-    { id: 'uppgift-ny', t: 'Lägga till en uppgift', o: 'lagga till skapa ny uppgift gora', s: 'Under <b>Att göra</b> skriver du uppgiften, väljer kund och dag och klickar på <b>Lägg till</b>. Säg <b>ny uppgift ring Anna i morgon</b> så fyller jag i.', sida: '#/att-gora', tur: 'att-gora', visa: { sida: '#/att-gora', mal: '.nyuppg', rubrik: 'Ny uppgift' } },
+    { id: 'uppgift-ny', vag: 'uppgift', t: 'Lägga till en uppgift', o: 'lagga till skapa ny uppgift gora', s: 'Under <b>Att göra</b> skriver du uppgiften, väljer kund och dag och klickar på <b>Lägg till</b>. Säg <b>ny uppgift ring Anna i morgon</b> så fyller jag i.', sida: '#/att-gora', tur: 'att-gora', visa: { sida: '#/att-gora', mal: '.nyuppg', rubrik: 'Ny uppgift' } },
     { id: 'upprepa', t: 'Upprepade uppgifter', o: 'upprepa upprepad aterkommande varje vecka uppgift', s: 'Ändra uppgiften och välj <b>Upprepa</b>: varje vecka, var 14:e dag eller varje månad. När den bockas av skapas nästa.' },
     { id: 'paminn', t: 'Påminnelser', o: 'paminn paminnelse larma uppgift', s: 'En uppgift med tid larmar när tiden passerat, med <b>Klar</b>, <b>+1 h</b> och <b>Öppna</b>. Det gäller när CRM:et är öppet.', tur: 'aviseringar' },
     { id: 'meddelande', t: 'Meddelanden', o: 'meddelande chatt skicka kollega grupp teamet', s: 'Under Meddelanden chattar du med teamet. <b>@</b> nämner en kollega, <b>#</b> länkar en kund eller affär och <b>/</b> ger mallar. I prototypen syns meddelanden bara i den här webbläsaren.', sida: '#/chatt', tur: 'chatt' },
@@ -130,6 +130,7 @@
     { id: 'aterstall', t: 'Återställ exempeldata', o: 'aterstall exempeldata nollstall', s: 'Under Inställningar eller i Adminpanelen: <b>Återställ exempeldata</b>. Det kräver ett andra klick.', roller: ['admin'], sida: '#/admin' },
     { id: 'konto-ny', t: 'Nytt konto', o: 'nytt konto skapa konto anvandare ny saljare', s: '<b>Nytt konto</b> finns i kontomenyn för chef och administratör och i Adminpanelen.', roller: ['chef', 'admin'] },
     { id: 'figur', t: 'Assistentens figur', o: 'figur figuren assistent assistenten huset stang av flytta undan dolj stilla ikon', s: 'Under <b>Inställningar</b> väljer du Levande, Stilla eller Liten ikon, och om figuren ska stå till höger eller vänster.', sida: '#/installningar', visa: { sida: '#/installningar', mal: '.inst-assistent', rubrik: 'Hjälpassistenten' } },
+    { id: 'hitta-assistent', t: 'Vad assistenten kan öppna', o: 'oppna hitta navigera assistenten sidor poster filter', s: 'Säg till exempel <b>öppna Karin Holm</b>, <b>ta mig till prislistan</b>, <b>visa offerter som väntar</b>, <b>visa hur jag skapar en offert</b> eller <b>vad är nästa steg</b>.' },
     { id: 'roller', t: 'Roller', o: 'roller behorighet rattigheter vem far gora', s: 'Säljare ser säljmenyn. Chefen ser också Försäljningsledning. Administratören ser Ledning och går in hos säljare via supportläget.' }
   ];
 
@@ -140,13 +141,76 @@
     { re: /adminpanel|kontrollcentral|sakerhetslogg|sakerhetspoang|inaktivera|tom data|aterstall exempeldata|supportlage|\bskanna/, roller: ['admin'], namn: 'administrationen', till: 'administratören' }
   ];
 
+  // Vägvisningar: assistenten leder genom stegen på riktigt med guidens motor. ord = vad man kan skriva.
+  // Inget steg klickar åt användaren, och sparandet gör användaren själv.
+  var antal = function (k) { return ((IH.db || {})[k] || []).length; };
+  A.vagar = [
+    { id: 'offert', namn: 'Skapa en offert', ord: /offert/, vy: 'offerter', slut: 'Offerten är ett utkast tills du markerar den som skickad.', steg: function () { return [
+      { sida: '#/offerter', mal: '[data-g="offert-ny"]', rubrik: 'Ny offert', vanta: true, efterKlick: 600, gor: 'Klicka på Ny offert' },
+      { mal: '.ark .kort, .ark [data-radlista]', behallArk: true, rubrik: 'Välj affären', prova: true, klar: function () { return /^#\/offerter\/./.test(location.hash); }, gor: 'Klicka på affären som offerten gäller', text: 'Då skapas ett utkast med hus, frakt och montage.' },
+      { mal: '.offertlagg', valfri: true, rubrik: 'Lägg till rader', fri: true, fritt: true, text: 'Välj tillval ur prislistan eller lägg en egen rad. Summan räknas om direkt.' },
+      { mal: '.vyhuvud [data-g="offert-skicka"]', valfri: true, rubrik: 'Skicka när du är klar', text: 'Knappen öppnar utskrift och mejl. CRM:et skickar inget självt.' }
+    ]; } },
+    { id: 'kund', namn: 'Skapa en kund', ord: /\bkund/, vy: 'kunder', slut: 'Kunden finns nu under Kunder.', steg: function () { var n = antal('kunder'); return [
+      { sida: '#/kunder', mal: '[data-g="ny-kund"]', rubrik: 'Ny kund', vanta: true, efterKlick: 600, gor: 'Klicka på Ny kund' },
+      { mal: '#ny-kund-form', behallArk: true, fritt: true, placering: 'vanster', rubrik: 'Fyll i och spara', prova: true, klar: function () { return antal('kunder') > n; }, gor: 'Skriv namnet och klicka på Spara kund' }
+    ]; } },
+    { id: 'affar', namn: 'Skapa en affär', ord: /affar/, vy: 'salj', slut: 'Affären ligger på säljtavlan.', steg: function () { var n = antal('affarer'); return [
+      { sida: '#/salj', mal: '[data-g="ny-affar"]', rubrik: 'Ny affär', vanta: true, efterKlick: 600, gor: 'Klicka på Ny affär' },
+      { mal: '#ny-affar-form', behallArk: true, fritt: true, placering: 'vanster', rubrik: 'Välj kund och hus', prova: true, klar: function () { return antal('affarer') > n; }, gor: 'Fyll i och klicka på Skapa affär', text: 'Värdet hämtas ur prislistan.' }
+    ]; } },
+    { id: 'forfragan', namn: 'Lägga in en förfrågan', ord: /forfragan|forfragningar/, vy: 'forfragningar', slut: 'Förfrågan ligger i inkorgen.', steg: function () { var n = antal('forfragningar'); return [
+      { sida: '#/forfragningar', mal: '[data-g="ny-forfragan"]', rubrik: 'Lägg in förfrågan', vanta: true, efterKlick: 600, gor: 'Klicka på Lägg in förfrågan' },
+      { mal: '#nyf-form', behallArk: true, fritt: true, placering: 'vanster', rubrik: 'Fyll i och lägg in', prova: true, klar: function () { return antal('forfragningar') > n; }, gor: 'Fyll i och klicka på Lägg in' }
+    ]; } },
+    { id: 'uppgift', namn: 'Lägga till en uppgift', ord: /uppgift/, vy: 'att-gora', salj: true, slut: 'Uppgiften ligger under Att göra.', steg: function () { var n = antal('uppgifter'); return [
+      { sida: '#/att-gora', mal: '.nyuppg', fri: true, fritt: true, rubrik: 'Skriv uppgiften', prova: true, klar: function () { return antal('uppgifter') > n; }, gor: 'Skriv vad som ska göras och klicka på Lägg till' }
+    ]; } },
+    { id: 'videomote', namn: 'Boka ett videomöte', ord: /video ?mote/, vy: 'mote', steg: function () { return [
+      { sida: '#/videomote', mal: '.vm-sidhuvud [data-g="vm-nytt"]', rubrik: 'Nytt videomöte', vanta: true, efterKlick: 600, gor: 'Klicka på Nytt videomöte' },
+      { mal: '.ark', behallArk: true, fri: true, fritt: true, placering: 'vanster', rubrik: 'Starta eller boka', text: 'Tryck på <b>Starta nu</b> eller välj en tid och boka. Kunden får en länk.' }
+    ]; } },
+    { id: 'kundmote', namn: 'Hålla ett kundmöte', ord: /kundmote|presentation/, vy: 'mote', steg: function () { return [
+      { sida: '#/mote', mal: ['label:has([data-moteaffar])', '[data-moteaffar]'], valfri: true, fri: true, fritt: true, rubrik: 'Välj affär', text: 'Kunden och huset följer med in i presentationen.' },
+      { mal: '.motescen [data-g="starta-mote"]', rubrik: 'Starta', text: 'Klicka på <b>Starta presentation</b> när du är redo.', fri: true }
+    ]; } },
+    { id: 'tema', namn: 'Byta tema', ord: /tema|utseende/, steg: function () { return [
+      { sida: '#/installningar', mal: '.inst-tema', fri: true, fritt: true, placering: 'vanster', rubrik: 'Välj tema', text: 'Bytet syns direkt och sparas för ditt konto.' }
+    ]; } },
+    { id: 'ladda', namn: 'Ladda upp en fil', ord: /ladda upp|fil\b|dokument/, vy: 'dokument', steg: function () { return [
+      { sida: '#/dokument', mal: ['.dk-ladda', '.dk-hjalte__knappar'], fri: true, rubrik: 'Ladda upp', text: 'Klicka här och välj filen. Den kontrolleras först, sedan väljer du typ och kund.' }
+    ]; } }
+  ];
+
+  // Vad man kan göra på varje sida
+  A.plats = {
+    oversikt: 'Här ser du dagens läge och vad du bör göra först.',
+    forfragningar: 'Här svarar du på förfrågningar: öppna en, följ Nästa bästa steg och markera Kontaktad.',
+    salj: 'Här flyttar du affärer mellan stegen och ser prognosen.',
+    kunder: 'Här hittar du kunder, filtrerar och skapar nya.',
+    offerter: 'Här ser du vad som väntar på svar och går ut snart, och skapar nya offerter.',
+    mote: 'Här förbereder du kundmötet och startar presentationen.',
+    videomote: 'Här bokar och startar du videomöten.',
+    produktion: 'Här följer du projekten, checklistorna och montagen.',
+    dokument: 'Här finns arkivet och mallarna, och här laddar du upp filer.',
+    'kolla-marken': 'Här kollar du jordart, vatten och djup till berg.',
+    'att-gora': 'Här lägger du till, bockar av och skjuter upp uppgifter.',
+    chatt: 'Här skriver du till teamet. @ nämner en kollega och # länkar en kund.',
+    installningar: 'Här väljer du utseende, ställer in assistenten, mallar och prislistan.',
+    profil: 'Här finns ditt id-kort, din aktivitet och din kalender.',
+    chef: 'Här följer du teamet, fördelar förfrågningar och exporterar rapporten.',
+    kontroll: 'Här ser du konton, skydd, data och drift i en blick.',
+    admin: 'Här hanterar du konton, roller, data och loggen.',
+    sakerhet: 'Här kör du kontrollerna och följer säkerhetspoängen.'
+  };
+
   // Förslag efter sidan man står på
   A.forslag = {
     oversikt: ['Vad ska jag göra i dag?', 'Har jag sena uppgifter?', 'När är nästa möte?'],
     forfragningar: ['Hur många nya förfrågningar?', 'Hur svarar jag på en förfrågan?', 'Visa samtalsguiden'],
-    salj: ['Vilka är de största affärerna?', 'Vilka affärer står still?', 'Hur flyttar jag en affär?'],
-    kunder: ['Ny kund', 'Hur skapar jag en kund?', 'Vad är kundhälsan?'],
-    offerter: ['Vilka offerter väntar på svar?', 'Vilka går ut snart?', 'Hur ändrar jag en skickad offert?'],
+    salj: ['Vad är nästa steg?', 'Affärer som står still', 'Vilka är de största affärerna?'],
+    kunder: ['Ny kund', 'Visa hur jag skapar en kund', 'Vad kan jag göra här?'],
+    offerter: ['Visa offerter som väntar', 'Visa hur jag skapar en offert', 'Hur ändrar jag en skickad offert?'],
     mote: ['När är nästa möte?', 'Nytt videomöte', 'Hur fungerar kalkylen?'],
     videomote: ['Nytt videomöte', 'Varför fungerar det inte mellan datorer?'],
     produktion: ['När är nästa montage?', 'Vad är checklistan?', 'Hur lämnar jag över huset?'],

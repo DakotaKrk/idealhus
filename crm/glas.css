@@ -205,3 +205,12 @@ html body .sido { isolation: isolate; }
 @media (min-width: 1101px) {
   html body:has(.ia-knapp) .vy:not(:has(.ch)) { padding-bottom: var(--ram, 12px); }
 }
+
+/* Klickkänslan: allt som går att trycka på sjunker lätt och fjädrar tillbaka, och en mjuk ring tonar ut från det.
+   Släppet är långsammare än trycket, det är det som gör att det känns mjukt */
+html body :is(button, .knapp, a.kpi, a.lista__rad, .fokus__rad, .hero__nasta, .hero__mote, .aff, .kundkort, .sido__lank, .sido-rals a, .uppg, .agenda__kort, .upplagg__val, .tema-kort, .layout-kort, .ch-rad, .sido__sok, .ih-klocka):not(:disabled) { transition-property: scale, background-color, color, box-shadow, opacity, transform; transition-duration: .32s, .18s, .18s, .22s, .18s, .28s; transition-timing-function: cubic-bezier(.3, 1.6, .5, 1), ease, ease, ease, ease, ease; }
+html body :is(button, .knapp, a.kpi, a.lista__rad, .fokus__rad, .hero__nasta, .hero__mote, .sido-rals a, .agenda__kort, .upplagg__val, .tema-kort, .layout-kort, .sido__sok, .ih-klocka):not(:disabled):active { scale: .96; transition-duration: .09s, .18s, .18s, .22s, .18s, .28s; }
+html body :is(.aff, .kundkort, .sido__lank, .uppg, .ch-rad, a.kpi):active { scale: .985; transition-duration: .09s, .18s, .18s, .22s, .18s, .28s; }
+.klick-ring { position: fixed; z-index: 1000; pointer-events: none; box-shadow: 0 0 0 1.5px rgb(var(--t-accent-rgb) / .75), 0 0 16px rgb(var(--t-accent-rgb) / .45); animation: klick-ring .46s cubic-bezier(.2, .7, .3, 1) forwards; }
+@keyframes klick-ring { from { opacity: .9; transform: scale(.985); } to { opacity: 0; transform: scale(1.05); } }
+@media (prefers-reduced-motion: reduce) { html body :is(button, .knapp, a.kpi, a.lista__rad, .fokus__rad, .hero__nasta, .hero__mote, .aff, .kundkort, .sido__lank, .sido-rals a, .uppg, .agenda__kort, .upplagg__val, .tema-kort, .layout-kort, .ch-rad, .sido__sok, .ih-klocka):active { scale: none; } }

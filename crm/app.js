@@ -856,6 +856,24 @@
   }
   // Rälsens stil ligger i grund.css ("Sidomenyn – låda, knapp, räls, docka")
   // Glasbubblan med sidans namn: ligger utanför rälsen, som klipper sitt innehåll
+  // Klickkänslan: en mjuk ring växer ut från knappen eller kortet man tryckte på. Bara en kort tändning vid klicket,
+  // inget som följer musen. Trycket i sig (knappen sjunker lätt) ligger i glas.css
+  function kopplaKlick() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    document.addEventListener('pointerdown', function (ev) {
+      if (ev.button !== 0 || !ev.target.closest) return;
+      var el = ev.target.closest('button, a, [role="button"], [data-g], label.agenda__kort');
+      if (!el || el.disabled || el.closest('.vm-mini, .vm-scen')) return;
+      var r = el.getBoundingClientRect();
+      if (r.width < 12 || r.width > 760 || r.height > 420) return;
+      var ring = document.createElement('i');
+      ring.className = 'klick-ring';
+      ring.setAttribute('aria-hidden', 'true');
+      ring.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;border-radius:' + getComputedStyle(el).borderRadius;
+      document.body.appendChild(ring);
+      ring.addEventListener('animationend', function () { ring.remove(); });
+    }, { passive: true });
+  }
   function kopplaBubbla() {
     var bubbla = document.createElement('div');
     bubbla.className = 'sido-bubbla'; bubbla.setAttribute('aria-hidden', 'true');
@@ -2208,6 +2226,7 @@
     requestAnimationFrame(function () { flyttaMarkor(true); });
     if (document.fonts) document.fonts.ready.then(function () { flyttaMarkor(true); });
     kopplaBubbla();
+    kopplaKlick();
     // Menyns entré spelas en gång när CRM:et öppnas, inte när menyn ritas om
     document.documentElement.classList.add('sido-entre');
     setTimeout(function () { document.documentElement.classList.remove('sido-entre'); flyttaMarkor(true); }, 1200);

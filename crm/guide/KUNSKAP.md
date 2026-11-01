@@ -119,7 +119,7 @@ För varje sida: adress, sektioner (väljare) och knappar (`data-g`).
 ### Säljtavlan `#/salj` och affärssidan `#/salj/id`
 - `.puls` – byggets lager (`.bygge`), `.puls__kpi` (Öppna affärer, Viktad prognos, Snitt per affär, Vunnet 90 d), `.forslag` **Smarta förslag** + `tavla-lage` (Tavla/Lista) + **Ny affär** (`ny-affar`).
 - `.stegband` – sex knappar `till-spalt` (rullar till spalten).
-- `.tv-verktyg` – sök `[data-tv-sok]`, `tv-vem` Alla/Mina, `tv-filter` Allt/Står still (>10 d)/Har uppgift/Över 600 tkr, sortering `[data-tv-sort]` (Senast ändrad, Störst värde, Viktat värde), `tv-forlorade` (lista + **Återuppta** `aff-ateruppta`), `tv-kompakt`.
+- `.tv-verktyg` – sök `[data-tv-sok]`, `tv-vem` Alla/Mina, `tv-filter` Allt/Står still (>14 d)/Har uppgift/Över 600 tkr, sortering `[data-tv-sort]` (Senast ändrad, Störst värde, Viktat värde), `tv-forlorade` (lista + **Återuppta** `aff-ateruppta`), `tv-kompakt`.
 - `.tv-fokus` – Fokus i dag, tre `.tv-fokus__kort` (`aff-oppna`).
 - `.tavla-ram` / `.tavla` – `section.spalt#spalt-<steg>` (summa, chans, viktat, snitt dagar, "står still"), kort `article.aff[data-aff]` (`.aff--farsk/lugn/still`, ring = chans), knappar på kortet: `aff-flyttmeny`, `kund-ring`, `aff-logga`, `aff-uppg`, `aff-vidare` (Vidare → nästa steg). `tavla-rulla` pilar. Dra och släpp; `.forlustdocka` = släpp för förlorad (orsaksformulär `forlora`).
 - Listläget: tabell, rad = `aff-oppna`.
@@ -317,3 +317,11 @@ Lokal hjälpassistent, **ingen AI**, och det står i panelen. Ingen server och i
 - **Inställningar:** kortet `.inst-assistent`: Levande, Stilla, Liten ikon (ingen 3D alls) och Till höger, Till vänster. Sparas i `ih-crm-assistent:<konto>`.
 - **Placering:** nere till höger, till vänster om chattbubblan (`body.chf-bubbla-plats`), på mobil ovanför bottenmenyn. Toasterna lyfts över figuren och sidan får luft nedtill. Dold under presentation och videomöte (`html[data-ia-dold]`).
 - Ändras CRM:et: uppdatera `amnen` i `assistent-kunskap.js` tillsammans med den här filen.
+
+### Navigering och hjälp på plats (2026-11-02)
+- **Kartan:** `karta()` i assistent.js bygger sidor ur menyerna och delar (rubriker, namngivna knappar) ur `IH.vyer[vy]([])`, tolkade med DOMParser utan `efter`. Chatt, Videomöten och Kolla marken ingår inte. Sparas per konto och layout.
+- **Poster:** kund, affär, offert, förfrågan, projekt, dokument och kollega med stavningstolerans. Flera träffar ger en lista. Administratören får samma svar oavsett om namnet finns.
+- **Filter:** tabellen `FILTER` klickar sidans egna filterknappar (hittas på texten) och `kunder i <ort>` fyller sökrutan.
+- **Vägvisning:** `IH.guide.vag(namn, steg, opt)` och `K.vagar`. Riktig data, ingen övningskopia, inget klickas åt användaren. `fritt: true` på ett steg släpper klick utanför hålet (rullgardiner och kalendrar). Avbryt, krysset och Esc stoppar, formuläret står kvar.
+- **Sidan:** `platsen()` läser adressen. "Vad kan jag göra här", "vad är nästa steg", "den här kunden". `pronomen()` förstår hen, henne, den och öppna den utifrån senaste svaret.
+- **Panelen** går undan när något pekas ut och kommer tillbaka efteråt. Chatten är kvar vid sidbyte.
