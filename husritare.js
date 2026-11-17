@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261119g';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261119g';
-import { skapaPlanlager } from './husritare-plan.js?v=20261119g';
+import { skapaMiljo } from './husritare-miljo.js?v=20261119h';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261119h';
+import { skapaPlanlager } from './husritare-plan.js?v=20261119h';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -361,7 +361,8 @@ export async function skapaRitare(duk, alternativ = {}) {
     let k = false; const f = () => { if (!k) { k = true; r(); } };
     requestAnimationFrame(() => setTimeout(f, 0)); setTimeout(f, 80);
   });
-  const marke = n => { try { performance.mark(n); } catch (e) { /* utan mätning */ } };
+  // mätmärkena går också till sidan (alternativ.vidLaddning), som visar laddningens förlopp
+  const marke = n => { try { performance.mark(n); } catch (e) { /* utan mätning */ } if (typeof alternativ.vidLaddning === 'function') { try { alternativ.vidLaddning(n); } catch (e) { console.warn(e); } } };
   // Mjuka skuggor, men skuggkartan räknas bara om när något ändras
   // (huset byggs, solen flyttas). Att vrida kameran kostar då inget extra.
   renderer.shadowMap.enabled = true;
@@ -403,6 +404,7 @@ export async function skapaRitare(duk, alternativ = {}) {
     geo.dispose(); m.dispose();
     return (envCache[namn] = rt.texture);
   }
+  marke('rit-motor');
   await paus();
   scene.environment = himmelEnv('studio');
   scene.environmentIntensity = 0.9;
@@ -462,8 +464,10 @@ export async function skapaRitare(duk, alternativ = {}) {
   const manePos = new THREE.Vector3();
   const HIM_DAG = new THREE.Color(0xcfdcea), HIM_KVALL = new THREE.Color(0x56607e), HIM_MARK = new THREE.Color(0x6a604f), HIM_INNE = new THREE.Color(0xdcc5a6), HIM_GYLLEN = new THREE.Color(0xf4cfa6), STUDS = new THREE.Color(0xd9bf9c), NATT_GOLV = new THREE.Color(0x5a4c3e);
 
+  marke('rit-himmel');
   await paus();
   const omgivning = skapaMiljo(THREE, scene, renderer);
+  marke('rit-miljo');
   await paus();
   scene.background = new THREE.Color('#ece7df');
   scene.fog = new THREE.Fog(scene.background, 34, 90);
@@ -4493,7 +4497,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       inneForbered(hus);
       forvarmOppen(hus, bit < 40 ? 1 : 8).then(klar, klar);
     };
-    steg();
+    // korta bitar (Se inne): första biten först efter två ritade rutor, så att trycket syns och
+    // kameran hinner börja röra sig (inredningens första steg kan ta en sekund på mobil)
+    if (bit < 40) { const t0 = performance.now(); const vanta = () => (performance.now() - t0 < 350 ? nastaRuta().then(vanta) : steg()); nastaRuta().then(vanta); } else steg();
   }
   function takMaterial(opac) {
     const tak = husGrupp && husGrupp.userData.delar.tak;
@@ -5444,7 +5450,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (flyg) flygSlut(!!tillInne && !flyg.vantar);
   }
   function kanFlyga(pa, vyIndex) {
-    if (lugn || FOTO || !husGrupp || byggT < 1 || rivGrupp || oppen.pa || oppen.t > 0 || oppen.vantar || oppen.svav > 0) return false;
+    // (mitt i monteringen och introt går det också: flygStart gör huset färdigt först; förut blev
+    // det i stället det raka bytet, som byggde hela inredningen i trycket, 13 s på mobil)
+    if (lugn || FOTO || !husGrupp || oppen.pa || oppen.t > 0 || oppen.vantar || oppen.svav > 0) return false;
     if (!HUS[val.modell].oppningar.some(o => o[5] === 'd' || o[5] === 'dg')) return false;
     if (pa) {
       if (inneLage) return false;
@@ -5475,6 +5483,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       F.vantar = false; begarRender();
       return F.lofte;
     }
+    // huset monteras färdigt direkt (det gamla huset sjunker inte klart), så att banan utgår från det färdiga huset
+    if (byggT < 1) { byggT = 1; satsBygg(1); nySkugga = true; }
+    if (rivGrupp) { sluta(rivGrupp); rivGrupp = null; }
     ute = { pos: kamera.position.clone(), mal: styr.target.clone(), min: styr.minDistance, max: styr.maxDistance, pMin: styr.minPolarAngle, pMax: styr.maxPolarAngle, zoom: styr.enableZoom };
     // Hela banan kräver att inredningen är byggd, kompilerad och värmd (varmInne). Är den inte
     // det börjar kameran ändå direkt på bågen mot dörren (halv bana) och stannar mjukt framför
@@ -5806,10 +5817,10 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     }
     // åkningen genom ytterdörren styr kameran själv (ingen gång, ingen OrbitControls under tiden)
     const flyger = flyg ? stegFlyg(dt) : false;
-    // Skärpan under rörelse: medan kameran åker genom dörren eller taket lyfts ritas bilden med
-    // pixeltäthet högst 1,25 (rörelsen döljer det, och rutorna blir lättare); full skärpa är
-    // tillbaka i samma ruta som rörelsen stannar (efter toningen, så att den inte bryts).
-    const villLag = !FOTO && (flyger || lyfter);
+    // Skärpan under rörelse (avstängd): att byta pixeltäthet gör om bildbufferten (setSize), och
+    // det gav ett stopp precis när åkningen började och slutade (uppmätt 4,4 s i mobilemulering).
+    // Skärpan står därför still; kvar finns bara återställningen om den någon gång sänkts.
+    const villLag = false;
     if (villLag && !rorSkarpa.lag) {
       rorSkarpa.lag = true; rorSkarpa.full = renderer.getPixelRatio();
       if (rorSkarpa.full > 1.3) { renderer.setPixelRatio(1.25); storlek(); }
@@ -5945,6 +5956,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   window.addEventListener('husritare:nytt', () => { renderer.shadowMap.needsUpdate = true; begarRender(); });
   if (typeof omgivning.satLiv === 'function') { try { omgivning.satLiv(liv.pa); } catch (e) { console.warn(e); } }
 
+  marke('rit-ytor');
   await paus();
   visa(alternativ.modell || val.modell, alternativ.montera !== false);
   storlek();
@@ -5982,7 +5994,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // Introt: kameran svävar in från högt och långt bort medan huset monteras
   if (!lugn && alternativ.montera !== false) {
     const slut = kamera.position.clone();
-    kamera.position.copy(slut.clone().sub(styr.target).applyAxisAngle(new THREE.Vector3(0, 1, 0), -0.9).multiplyScalar(1.9).add(new THREE.Vector3(0, 6, 0)).add(styr.target));
+    // (från ovanför trädtopparna: startvyn står lågt, och en start långt ut i samma höjd hamnade inne i skogen)
+    kamera.position.copy(slut.clone().sub(styr.target).applyAxisAngle(new THREE.Vector3(0, 1, 0), -0.45).multiplyScalar(1.35).add(new THREE.Vector3(0, 11, 0)).add(styr.target));
     aka = { fran: kamera.position.clone(), till: slut, t: 0, tid: 2.1 };
     begarRender();
   }

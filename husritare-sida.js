@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119g';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119h';
 
-const MOTOR_V = '20261119g';
+const MOTOR_V = '20261119h';
 const Q0 = new URLSearchParams(location.search);
 const INB = Q0.get('inbaddad') === '1';
 if (INB) document.documentElement.classList.add('inbaddad');
@@ -100,10 +100,42 @@ let ritare = null;
 // hämtas), sedan byggs scenen i steg med pauser emellan och dess program kompileras utan att
 // låsa sidan. När första bilden finns öppnas slöjan, och först då börjar monteringen och
 // kamerans intro (motorns starta), så att man ser dem från början.
-const T_LOGGA = 900;
+// Förloppslinjen följer motorns mätmärken (vidLaddning); mellan märkena kryper den långsamt mot
+// nästa steg, så att den aldrig står still och aldrig går bakåt. Raden under säger vad som pågår.
+const LADD_STEG = {
+  'rit-motor': [0.3, 'Tänder himlen'], 'rit-himmel': [0.36, 'Planterar runt huset'], 'rit-miljo': [0.55, 'Målar fasaden'],
+  'rit-ytor': [0.62, 'Reser väggarna'], 'rit-scen': [0.74, 'Lägger taket'], 'rit-kompilerat': [0.93, 'Tänder lamporna'], 'rit-forsta-bild': [1, null],
+};
+const ladd = { mal: 0.24, nu: 0.02, tak: 0.3, raf: 0, sist: 0, text: '' };
+const laddLinje = laddar && laddar.querySelector('.ritare__laddar-linje i'), laddText = laddar && laddar.querySelector('[data-laddar-text]');
+function laddStatus(text) {
+  if (!laddText || !text || text === ladd.text) return;
+  ladd.text = text;
+  if (lugn()) { laddText.textContent = text; return; }
+  laddText.classList.add('byt');
+  setTimeout(() => { laddText.textContent = text; laddText.classList.remove('byt'); }, 220);
+}
+function laddSteg(namn) {
+  const s = LADD_STEG[namn];
+  if (!s) return;
+  ladd.mal = Math.max(ladd.mal, s[0]);
+  const ordning = Object.values(LADD_STEG).map(x => x[0]), nasta = ordning.find(x => x > s[0]);
+  ladd.tak = Math.max(ladd.tak, nasta ? s[0] + (nasta - s[0]) * 0.85 : 1);
+  laddStatus(s[1]);
+}
+function laddRita(nu) {
+  ladd.raf = 0;
+  const dt = ladd.sist ? Math.min(0.1, (nu - ladd.sist) / 1000) : 0;
+  ladd.sist = nu;
+  // ikapp mot målet, annars en krypfart mot nästa steg (högst 85 % av vägen dit)
+  const ny = ladd.nu < ladd.mal ? ladd.nu + (ladd.mal - ladd.nu) * (1 - Math.exp(-dt / 0.25)) : Math.min(ladd.tak, ladd.nu + dt * 0.012);
+  if (ny > ladd.nu) { ladd.nu = ny; laddLinje.style.setProperty('--p', ladd.nu.toFixed(4)); }
+  if (!laddar.classList.contains('klar')) ladd.raf = requestAnimationFrame(laddRita);
+}
+if (laddLinje && !FOTO) { laddStatus('Hämtar ritningen'); ladd.raf = requestAnimationFrame(laddRita); }
 try {
-  if (!FOTO && !lugn() && performance.now() < T_LOGGA) await new Promise(r => setTimeout(r, T_LOGGA - performance.now()));
   ritare = await skapaRitare(duk, {
+    vidLaddning: laddSteg,
     // modellen ur länken direkt, så att huset inte byggs två gånger
     modell: START_MODELL, montera: !FOTO && Q0.get('intro') !== '0', foto: FOTO,
     // motorn stängde av livet för att datorn inte orkade
@@ -122,13 +154,17 @@ try {
   // slöjan öppnas när logotypen har ritat sig (cirka 1,4 s) och scenens första bild är klar;
   // en dator som aldrig blir klar får se scenen ändå efter 20 s. Sedan bort helt.
   const visaScen = () => {
+    // klart inom 0,6 s (cachat): ingen uppritning, bara en snabb toning
+    if (performance.now() < 600) laddar.classList.add('snabb');
+    cancelAnimationFrame(ladd.raf);
     laddar.classList.add('klar'); scen.classList.add('kf__scen--klar');
     try { if (typeof ritare.starta === 'function') ritare.starta(); } catch (e) { console.warn(e); }
     setTimeout(() => laddar.classList.add('borta'), 1200);
   };
   const redo = ritare.redo && typeof ritare.redo.then === 'function' ? ritare.redo : Promise.resolve();
-  const minst = new Promise(r => setTimeout(r, lugn() ? 300 : Math.max(200, 1450 - performance.now())));
-  Promise.all([Promise.race([redo, new Promise(r => setTimeout(r, 20000))]), minst]).then(visaScen, visaScen);
+  // logotypen hinner rita sig (1,6 s från första målningen), utom när allt var klart inom 0,6 s
+  const klarVid = Promise.race([redo, new Promise(r => setTimeout(r, 20000))]).then(() => performance.now(), () => performance.now());
+  klarVid.then(t => new Promise(r => setTimeout(r, t < 600 || lugn() ? 0 : Math.max(0, 1650 - performance.now())))).then(visaScen, visaScen);
 } catch (e) {
   laddar.textContent = 'Din webbläsare kan inte visa 3D. Planerna finns längre ner.';
   laddar.removeAttribute('aria-hidden'); laddar.setAttribute('role', 'alert');
@@ -1065,6 +1101,7 @@ function sattInne(pa, vyIndex, opt) {
   scen.classList.toggle('kf__scen--inne', pa);
   kf.classList.toggle('kf--inne', pa);
   inneKnapp.setAttribute('aria-pressed', String(pa));
+  if (typeof ritaLagesknappar === 'function') ritaLagesknappar();   // (alla tre knapparna efter läget)
   inneKnapp.querySelector('span').textContent = pa ? 'Se ute' : 'Se inne';
   inneKnapp.setAttribute('data-tips', pa ? 'Gå ut ur huset' : 'Gå in i huset');
   if (pa && oppetLage) sattOppen(false, true);
@@ -1127,7 +1164,7 @@ if (kanInne) {
   // med tangentbordet (detail 0), och med mus, går fokus till duken, så att W A S D
   // fungerar direkt (på pekskärm skulle fokus bara visa tangentbordet i onödan)
   const fokusDuk = e => { if (inneLage && (e.detail === 0 || finPekare.matches)) duk.focus({ preventScroll: true }); };
-  inneKnapp.addEventListener('click', e => { sattInne(!inneLage, undefined, DORR); fokusDuk(e); });
+  inneKnapp.addEventListener('click', e => { bytLage(vyLage() === 'inne' ? 'ute' : 'inne'); fokusDuk(e); });
   if (inneTumme) inneTumme.addEventListener('click', e => { sattInne(true, undefined, DORR); fokusDuk(e); });
   // pekaren eller fokus på knappen: inredningen byggs färdigt nu, så att åkningen kan börja direkt
   if (kan('forbered')) [inneKnapp, inneTumme].forEach(el => el && ['pointerenter', 'focus', 'touchstart'].forEach(h => el.addEventListener(h, () => { try { ritare.forbered(); } catch (err) { console.warn(err); } }, { passive: true })));
@@ -1207,6 +1244,7 @@ function sattOppen(pa, utanMotor, direkt) {
   spara();
   if (!pa) nyaTummar();
   visaLyftLaddar();
+  ritaLagesknappar();
   return true;
 }
 // Taket svävar medan inredningen byggs färdigt: knappen är redan intryckt och pricken pulserar
@@ -1223,7 +1261,7 @@ function visaLyftLaddar() {
 }
 if (kanOppna) {
   oppnaKnapp.hidden = false;
-  oppnaKnapp.addEventListener('click', () => sattOppen(!oppetLage));
+  oppnaKnapp.addEventListener('click', () => bytLage(vyLage() === 'tak' ? 'ute' : 'tak'));
   if (lagerRad) lagerRad.addEventListener('click', e => {
     const b = e.target.closest('[data-lager-val]');
     if (!b || !oppetLage) return;
@@ -1262,6 +1300,7 @@ function visaPlan(pa) {
     if (sn.getAttribute('aria-pressed') === 'true') { ritare.snurra(false); sn.setAttribute('aria-pressed', 'false'); }
   }
   spara();
+  ritaLagesknappar();
 }
 function sattPlan(pa, direkt) {
   if (!kanPlan) return;
@@ -1271,17 +1310,58 @@ function sattPlan(pa, direkt) {
   try { ok = !!ritare.plan(pa, { direkt: !!direkt }); } catch (e) { console.warn(e); }
   visaPlan(ok);
 }
+
+// ---- Vyns läge: EN tillståndsmaskin för Se inne, Öppna tak och Planlösning ----
+// Läget är exakt ett av ute, inne, tak (taket av) och plan (planlösningen går före: den lyfter
+// taket själv, men då är bara Planlösning "på"). Knappar, tangenter och Esc går genom bytLage,
+// som kör rätt övergång från läget man är i; knapparnas utseende ritas bara från läget.
+// Tomt hus är en egen flagga som gäller i alla lägen (sattTomt).
+function vyLage() { return planLage ? 'plan' : inneLage ? 'inne' : oppetLage ? 'tak' : 'ute'; }
+let planFran = 'ute';
+function ritaLagesknappar() {
+  const l = vyLage();
+  if (inneKnapp) inneKnapp.setAttribute('aria-pressed', String(l === 'inne'));
+  if (oppnaKnapp) {
+    oppnaKnapp.setAttribute('aria-pressed', String(l === 'tak'));
+    const s = oppnaKnapp.querySelector('span'); if (s) s.textContent = l === 'tak' ? 'Lägg på tak' : 'Öppna tak';
+    oppnaKnapp.setAttribute('data-tips', l === 'tak' ? 'Lägg tillbaka taket' : 'Lyft av taket och se in');
+  }
+  if (planKnapp) planKnapp.setAttribute('aria-pressed', String(l === 'plan'));
+}
+function bytLage(mal) {
+  const fran = vyLage();
+  if (mal === fran) { ritaLagesknappar(); return; }
+  if (mal === 'plan') {
+    planFran = fran;
+    if (fran === 'inne') sattInne(false, undefined, TONA);   // ut utan åkning; planen sveper upp från ytterbilden
+    sattPlan(true);
+  } else if (fran === 'plan') {
+    if (mal === planFran && mal !== 'inne') sattPlan(false);   // motorn spelar tillbaka till ute eller taket av
+    else {
+      sattPlan(false, true);   // direkt (förra bilden tonas bort), sedan vidare till målet
+      if (mal === 'inne') { if (oppetLage) sattOppen(false, true); sattInne(true, undefined, TONA); }
+      else if (mal === 'tak') { if (!oppetLage) sattOppen(true); }
+      else if (oppetLage) sattOppen(false);
+    }
+  } else if (mal === 'inne') {
+    // från taket av: in direkt (motorn lägger på taket utan att först visa utsidan)
+    if (fran === 'tak') { sattOppen(false, true); sattInne(true, undefined, TONA); }
+    else sattInne(true, undefined, DORR);
+  } else if (mal === 'tak') sattOppen(true);   // sattOppen går ut ur huset först om man är inne
+  else if (mal === 'ute') { if (fran === 'inne') sattInne(false, undefined, DORR); else if (fran === 'tak') sattOppen(false); }
+  ritaLagesknappar();
+}
 if (kanTomt) {
   tomtKnapp.hidden = false;
   tomtKnapp.addEventListener('click', () => sattTomt(!tomtLage));
 }
 if (kanPlan) {
   planKnapp.hidden = false;
-  planKnapp.addEventListener('click', () => sattPlan(!planLage));
+  planKnapp.addEventListener('click', () => bytLage(vyLage() === 'plan' ? planFran : 'plan'));
   duk.addEventListener('husritare:plan', e => visaPlan(!!(e.detail && e.detail.pa)));
   // klick på ett rum i ritningen: in i det rummet (motorn tonar över från planlösningen)
   duk.addEventListener('husritare:planrum', e => { if (kanInne && e.detail) sattInne(true, e.detail.vy | 0); });
-  scen.addEventListener('keydown', e => { if (e.key === 'Escape' && planLage && !oppenMeny) { e.stopPropagation(); sattPlan(false); } }, true);
+  scen.addEventListener('keydown', e => { if (e.key === 'Escape' && planLage && !oppenMeny) { e.stopPropagation(); bytLage(planFran); } }, true);
 }
 
 // ---- miljö: listan kommer från motorn om den finns ----
@@ -1684,12 +1764,12 @@ window.addEventListener('keydown', e => {
     return;
   }
   if (e.code === 'KeyI' && kanInne) { e.preventDefault(); inneKnapp.click(); }
-  else if (e.code === 'KeyT' && kanOppna) { e.preventDefault(); sattOppen(!oppetLage); }
+  else if (e.code === 'KeyT' && kanOppna) { e.preventDefault(); bytLage(vyLage() === 'tak' ? 'ute' : 'tak'); }
   else if (e.code === 'KeyM' && !inneLage && !mk.hidden) { e.preventDefault(); mk.click(); }
   else if (e.code === 'KeyL' && ljusKnapp) { e.preventDefault(); ljusKnapp.click(); }
-  else if (e.code === 'KeyP' && kanPlan) { e.preventDefault(); sattPlan(!planLage); }
+  else if (e.code === 'KeyP' && kanPlan) { e.preventDefault(); bytLage(vyLage() === 'plan' ? planFran : 'plan'); }
   else if (e.code === 'KeyB' && kanTomt) { e.preventDefault(); sattTomt(!tomtLage); }
-  else if (e.key === 'Escape' && planLage && !oppenMeny) { e.preventDefault(); sattPlan(false); }
+  else if (e.key === 'Escape' && planLage && !oppenMeny) { e.preventDefault(); bytLage(planFran); }
 });
 
 // duken berättar för skärmläsare vilket hus, vilket läge och vilket ljus som syns
@@ -1792,26 +1872,35 @@ if (!FOTO && karta) {
   new MutationObserver(folj).observe(karta, { attributes: true, attributeFilter: ['hidden'] });
   folj();
 }
-// "Vänd telefonen för helskärm": en gång per besök, när man går in i stående läge
-const vandTips = (() => {
-  if (FOTO || INB) return null;
-  const v = document.createElement('div');
-  v.className = 'kf__vand'; v.setAttribute('role', 'status'); v.hidden = true;
-  v.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect class="kf__vand-tel" x="7.5" y="3" width="9" height="18" rx="2"/><path d="M11 18h2"/></svg><span>Vänd telefonen för helskärm</span><button type="button">Helskärm</button>';
-  scen.appendChild(v);
-  let tid = 0, hjalpEfter = false;
-  // tipsen turas om på samma plats: vänd-tipset först, hjälpen om hur man går när det har gått bort
-  const gom = () => { clearTimeout(tid); const var_ = !v.hidden; v.hidden = true; if (var_ && hjalpEfter && inneLage && !(karta && karta.classList.contains('kf__karta--oppen'))) { hjalpEfter = false; visaGang(true, 4000); } };
-  v.querySelector('button').addEventListener('click', e => { e.stopPropagation(); gom(); helskarm(true); });
-  return { visa() {
-    let sett = false; try { sett = !!sessionStorage.getItem('legohus-vand'); } catch (e) { /* privat läge */ }
-    if (sett || !pekskarm() || !matchMedia('(orientation: portrait)').matches) return false;
-    try { sessionStorage.setItem('legohus-vand', '1'); } catch (e) { /* privat läge */ }
-    if (gangTips && gangTips.classList.contains('syns')) { visaGang(false); hjalpEfter = true; }
-    v.hidden = false; clearTimeout(tid); tid = setTimeout(gom, 6000);
-    return true;
-  }, gom, syns: () => !v.hidden };
-})();
+// (vänd-tipset är borttaget på användarens begäran: helskärmsknappen framhävs i stället, se nedan)
+const vandTips = null;
+// Helskärmsknappen på pekskärm: accentfärgad, och när man kommer in pulserar en ring 2–3 gånger
+// (sedan en svag glöd) tills man har tryckt på den en gång (localStorage)
+const HEL_NYCKEL = 'legohus-helskarm-tryckt';
+function helPuls() {
+  let tryckt = false; try { tryckt = !!localStorage.getItem(HEL_NYCKEL); } catch (e) { /* privat läge */ }
+  if (tryckt || INB || FOTO || hk.hidden) return;   // (mobil och dator)
+  // glittrande stjärnor runt knappen: fem gnistor i en egen behållare (tar inga tryck),
+  // animerade med CSS (förskjutna i tid), ingen JS per bildruta
+  if (!hk.querySelector('.kf__glitter')) {
+    // (inte <span>: radens regel som döljer knapptext på smal rad, .kf__vk > span, klippte bort dem)
+    const g = document.createElement('i');
+    g.className = 'kf__glitter'; g.setAttribute('aria-hidden', 'true');
+    [[-4, -3, 0], [34, -5, 0.55], [40, 30, 1.1], [-6, 32, 1.65], [16, -8, 2.2]].forEach(([x, y, d], i) => {
+      const s = document.createElement('b');
+      s.style.cssText = '--x:' + (x - 1) + 'px;--y:' + (y - 1) + 'px;--d:' + d + 's;--s:' + (i % 2 ? 9 : 13) + 'px';
+      g.appendChild(s);
+    });
+    hk.appendChild(g);
+  }
+  hk.classList.add('kf__vk--lockar');
+}
+hk.addEventListener('click', () => {
+  try { localStorage.setItem(HEL_NYCKEL, '1'); } catch (e) { /* privat läge */ }
+  hk.classList.remove('kf__vk--lockar'); hk.classList.add('kf__vk--sedd');
+  const g = hk.querySelector('.kf__glitter'); if (g) g.remove();
+});
+try { if (localStorage.getItem(HEL_NYCKEL)) hk.classList.add('kf__vk--sedd'); } catch (e) { /* privat läge */ }
 // liggande telefon inne: scenen fyller skärmen; tillbaka till stående = vanlig sida
 const liggande = matchMedia('(orientation: landscape) and (max-height: 540px)');
 function passaFyll() {
@@ -1826,7 +1915,9 @@ new MutationObserver(() => {
   passaFyll.inne = inne;
   passaFyll();
   // vänd-tipset när man har kommit in (efter åkningen genom dörren), sedan hjälpen (visaGang väntar)
-  if (inne && vandTips) { let n = 0; const nar = () => { if (!inneLage || fyllLage) return; if (kan('flyger') && ritare.flyger() && ++n < 150) { setTimeout(nar, 200); return; } vandTips.visa(); }; setTimeout(nar, 300); }
+  // helskärmsknappen lockar när man har kommit in (efter åkningen genom dörren)
+  if (inne) { let n = 0; const nar = () => { if (!inneLage || fyllLage) return; if (kan('flyger') && ritare.flyger() && ++n < 150) { setTimeout(nar, 200); return; } helPuls(); }; setTimeout(nar, 300); }
+  else hk.classList.remove('kf__vk--lockar');
   if (!inne && vandTips) vandTips.gom();
 }).observe(scen, { attributes: true, attributeFilter: ['class'] });
 
@@ -1882,7 +1973,8 @@ if (kan('spak') && !FOTO) {
   sista.appendChild(hall);
   const knapp = hall.firstChild, lista = hall.lastChild;
   // i den ordning de lämnar raden
-  const ORDNING = ['[data-tangenter]', '[data-liv]', '[data-ladda]', '[data-snurra]', '[data-matt-knapp]', '[data-helskarm]', '[data-hjalp]', '[data-spel]', '[data-lampor]', '[data-oppna]'];
+  // (Helskärm flyttas aldrig inne på pekskärm: där är den ett framhävt val, se passa)
+  const ORDNING = ['[data-tangenter]', '[data-liv]', '[data-ladda]', '[data-snurra]', '[data-matt-knapp]', '[data-helskarm]', '[data-hjalp]', '[data-spel]', '[data-lampor]', '[data-oppna]', '[data-plan]', '[data-tomt]'];
   const poster = ORDNING.map(s => ({ sel: s, el: rad.querySelector('.kf__vk' + s) })).filter(p => p.el).map((p, i) => { const plats = document.createComment('mer' + i); p.el.after(plats); p.plats = plats; return p; });
   // radens ordning från vänster (för listan i menyn)
   const ORDNING_RAD = poster.slice().sort((a, b) => (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
@@ -1941,6 +2033,8 @@ if (kan('spak') && !FOTO) {
       for (let i = 0; i < kp.length && bredd() > plats; i++) {
         const e = kp[i].el;
         if (!e || e.hidden || !e.offsetWidth) continue;   // syns inte i det här läget
+        // inne, tills man har tryckt på den en gång (då glittrar den): alltid synlig i raden
+        if (e.matches('[data-helskarm]') && inneLage && !e.classList.contains('kf__vk--sedd') && !INB && !FOTO) continue;
         e.remove(); ut.push(i);
       }
       if (!ut.length) kMer.hidden = true;

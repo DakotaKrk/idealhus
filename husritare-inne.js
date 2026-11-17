@@ -215,9 +215,12 @@ function symForm(x, [ox, oy, w, h], start, segs) {
   x.closePath();
 }
 
-function bladTextur() {
+// kör en generator till slut (de synkrona anropen); stegvis via lagaMaterialSteg
+const kor = it => { let r = it.next(); while (!r.done) r = it.next(); return r.value; };
+function bladTextur() { return kor(bladTexturSteg()); }
+function* bladTexturSteg() {
   const c = DUK(ATL); if (!c) return null;
-  const x = c.getContext('2d');
+  const x = c.getContext('2d', { willReadFrequently: true });   // läses tillbaka (dilateradTextur): ritas på CPU, ingen dyr GPU-återläsning
   let s = 4711; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
   x.lineCap = 'round';
   const grad = (cell, a, b) => { const [ox, oy, w, h] = cell, g = x.createLinearGradient(ox, oy, ox + w, oy + h); g.addColorStop(0, a); g.addColorStop(1, b); return g; };
@@ -280,6 +283,7 @@ function bladTextur() {
     x.globalCompositeOperation = 'source-over';
     x.strokeStyle = '#7a9a5a'; x.lineWidth = 9; x.beginPath(); x.moveTo(cx, oy + h); x.lineTo(cx, oy + h * 0.86); x.stroke();
   }
+  yield;
   // fiolfikus: bred topp, midja, ljusa nerver
   {
     const C = BL.fikus;
@@ -306,6 +310,7 @@ function bladTextur() {
       x.restore();
     }
   }
+  yield;
   // blomma: stjälk, två blad och en ljus ranunkel
   {
     const C = BL.blomma, [ox, oy, w, h] = C, cx = ox + w / 2;
@@ -328,6 +333,7 @@ function bladTextur() {
     x.fillStyle = grad(C, '#46743f', '#2b5230'); x.fill();
     x.save(); x.clip(); nerv(C, 0.97, 0.05, 6, 0.3, 'rgba(170,200,130,0.4)', 1.6, 0.1); x.restore();
   }
+  yield;
   // pothos: hjärtblad, ett med ljusa strimmor
   [[BL.pothos, '#5a8a3e', '#356a2c', true], [BL.pothos2, '#3f6f32', '#264f26', false]].forEach(([C, a, b, strimma]) => {
     symForm(x, C, 0.88, [[0.3, 0.99, 0.0, 0.86, 0.05, 0.55], [0.1, 0.28, 0.38, 0.1, 0.5, 0.03]]);
@@ -355,6 +361,7 @@ function bladTextur() {
       }
     }
   }
+  yield;
   // gräs: smala strån
   {
     const [ox, oy, w, h] = BL.gras;
@@ -364,27 +371,31 @@ function bladTextur() {
       x.beginPath(); x.moveTo(bx, oy + h); x.quadraticCurveTo(bx, oy + h * 0.5, tx, ty); x.stroke();
     }
   }
-  return dilateradTextur(x, ATL);
+  yield;
+  return yield* dilateradTexturSteg(x, ATL);
 }
 
 // Atlasen som datatextur där genomskinliga pixlar fått kantfärgen från bladet bredvid
 // (alfa ligger kvar på 0): inga ljusa eller mörka fransar vid hål och kanter i mipmapparna.
-function dilateradTextur(x, N) {
+function* dilateradTexturSteg(x, N) {
   const id = x.getImageData(0, 0, N, N), d = id.data, fyllt = new Uint8Array(N * N);
   for (let i = 0; i < N * N; i++) fyllt[i] = d[i * 4 + 3] > 8 ? 1 : 0;
+  // (utan allokering per bildpunkt: förr skapades fyra små arrayer per pixel och pass, vilket
+  // tog flera sekunder på en mobil; nu typade buffertar och direkta grannar)
+  const nyI = new Int32Array(N * N), nyC = new Uint8Array(N * N * 3);
   for (let pass = 0; pass < 6; pass++) {
-    const ny = [];
+    yield;
+    let k = 0;
     for (let yy = 0; yy < N; yy++) for (let xx = 0; xx < N; xx++) {
       const i = yy * N + xx; if (fyllt[i]) continue;
-      let r = 0, g = 0, b = 0, n = 0;
-      for (const [ddx, ddy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        const X = xx + ddx, Y = yy + ddy; if (X < 0 || Y < 0 || X >= N || Y >= N) continue;
-        const j = Y * N + X; if (!fyllt[j]) continue;
-        r += d[j * 4]; g += d[j * 4 + 1]; b += d[j * 4 + 2]; n++;
-      }
-      if (n) ny.push(i, r / n, g / n, b / n);
+      let r = 0, g = 0, b = 0, n = 0, j;
+      if (xx + 1 < N && fyllt[j = i + 1]) { r += d[j * 4]; g += d[j * 4 + 1]; b += d[j * 4 + 2]; n++; }
+      if (xx > 0 && fyllt[j = i - 1]) { r += d[j * 4]; g += d[j * 4 + 1]; b += d[j * 4 + 2]; n++; }
+      if (yy + 1 < N && fyllt[j = i + N]) { r += d[j * 4]; g += d[j * 4 + 1]; b += d[j * 4 + 2]; n++; }
+      if (yy > 0 && fyllt[j = i - N]) { r += d[j * 4]; g += d[j * 4 + 1]; b += d[j * 4 + 2]; n++; }
+      if (n) { nyI[k] = i; nyC[k * 3] = r / n; nyC[k * 3 + 1] = g / n; nyC[k * 3 + 2] = b / n; k++; }
     }
-    for (let k = 0; k < ny.length; k += 4) { const i = ny[k]; d[i * 4] = ny[k + 1]; d[i * 4 + 1] = ny[k + 2]; d[i * 4 + 2] = ny[k + 3]; fyllt[i] = 1; }
+    for (let q = 0; q < k; q++) { const i = nyI[q]; d[i * 4] = nyC[q * 3]; d[i * 4 + 1] = nyC[q * 3 + 1]; d[i * 4 + 2] = nyC[q * 3 + 2]; fyllt[i] = 1; }
   }
   // raderna vänds så att uv följer samma konvention som en canvastextur (flipY)
   const ut = new Uint8Array(N * N * 4);
@@ -396,7 +407,8 @@ function dilateradTextur(x, N) {
   return t;
 }
 
-function tryckTextur() {
+function tryckTextur() { return kor(tryckTexturSteg()); }
+function* tryckTexturSteg() {
   // dubbel upplösning (2048 px) för skarpa motiv och mattor; ritas i 1024-koordinater
   const c = DUK(ATL * 2); if (!c) return null;
   const x = c.getContext('2d');
@@ -427,6 +439,7 @@ function tryckTextur() {
     x.strokeStyle = 'rgba(138,112,90,0.6)'; x.lineWidth = 3; x.strokeRect(ox + 12, oy + 12, w - 24, h - 24);
     x.strokeStyle = 'rgba(138,112,90,0.35)'; x.lineWidth = 1.2; x.strokeRect(ox + 18, oy + 18, w - 36, h - 36);
   }
+  yield;
   // matta B: flatvävd med ränder i sand, terrakotta och grädde
   {
     const C = TR.mattaB, [ox, oy, w, h] = C;
@@ -439,6 +452,7 @@ function tryckTextur() {
     for (let i = 0; i < 1400; i++) { x.fillStyle = 'rgba(255,255,255,0.16)'; x.fillRect(ox + 20 + r() * (w - 40), oy + 30 + r() * (h - 60), 0.8, 3 + r() * 4); }
     brus(C, 6000, 0.12, false);
   }
+  yield;
   // konst: fem egna målningar på duk (256 px per ruta), med dukens väv och lite korn
   const duk = (C, n, a) => {
     const [ox, oy, w, h] = C;
@@ -463,6 +477,7 @@ function tryckTextur() {
     x.strokeStyle = 'rgba(60,60,58,0.7)'; x.lineWidth = 0.7;
     for (const [bx, by] of [[0.3, 0.22], [0.36, 0.25], [0.33, 0.19]]) { x.beginPath(); x.moveTo(ox + w * bx - 4, oy + h * by); x.quadraticCurveTo(ox + w * bx - 1.5, oy + h * by - 2.5, ox + w * bx, oy + h * by); x.quadraticCurveTo(ox + w * bx + 1.5, oy + h * by - 2.5, ox + w * bx + 4, oy + h * by); x.stroke(); }
   }); duk(C, 500, 0.03); }
+  yield;
   // 1: botanisk linjeteckning: tunn kolgrå linje, kvist med blad och ådror, svag salviatvätt
   { const C = TR.k1, [ox, oy, w, h] = C; mjukt(C, () => {
     x.fillStyle = '#f3efe7'; x.fillRect(ox, oy, w, h);
@@ -478,6 +493,7 @@ function tryckTextur() {
       x.restore();
     }
   }); duk(C, 900, 0.04); }
+  yield;
   // 2: bågar och cirklar i terrakotta och salvia på havre
   { const C = TR.k2, [ox, oy, w, h] = C; mjukt(C, () => {
     x.fillStyle = '#e8dfd0'; x.fillRect(ox, oy, w, h);
@@ -487,6 +503,7 @@ function tryckTextur() {
     x.fillStyle = '#d7a77f'; x.beginPath(); x.arc(ox + 190, oy + 70, 26, 0, 2 * PI); x.fill();
     x.fillStyle = '#3d3d3b'; x.beginPath(); x.arc(ox + 62, oy + 58, 9, 0, 2 * PI); x.fill();
   }); duk(C, 1400, 0.06); }
+  yield;
   // 3: kornigt svartvitt foto av en klippkust
   { const C = TR.k3, [ox, oy, w, h] = C; mjukt(C, () => {
     let g = x.createLinearGradient(0, oy, 0, oy + h * 0.55); g.addColorStop(0, '#d9d9d6'); g.addColorStop(1, '#f1f1ee'); x.fillStyle = g; x.fillRect(ox, oy, w, h * 0.56);
@@ -499,6 +516,7 @@ function tryckTextur() {
     x.strokeStyle = 'rgba(255,255,255,0.55)'; x.lineWidth = 0.6; x.beginPath(); x.moveTo(ox, oy + h * 0.555); x.lineTo(ox + w, oy + h * 0.555); x.stroke();   // skarp horisont
     for (let i = 0; i < 4000; i++) { const v = Math.floor(r() * 255); x.fillStyle = `rgba(${v},${v},${v},0.05)`; x.fillRect(ox + r() * w, oy + r() * h, 0.5, 0.5); }
   }); }
+  yield;
   // 4: skarp geometrisk komposition: rena fält i havre, terrakotta, salvia och kol,
   // en halvcirkel och en tunn linje (rena kanter)
   { const C = TR.k4, [ox, oy, w, h] = C; mjukt(C, () => {
@@ -509,6 +527,7 @@ function tryckTextur() {
     x.fillStyle = '#3e3d3a'; x.beginPath(); x.arc(ox + w * 0.76, oy + h * 0.22, w * 0.06, 0, 2 * PI); x.fill();
     x.strokeStyle = '#3e3d3a'; x.lineWidth = 1; x.beginPath(); x.moveTo(ox + w * 0.12, oy + h * 0.78); x.lineTo(ox + w * 0.66, oy + h * 0.78); x.stroke();
   }); duk(C, 400, 0.03); }
+  yield;
   // tidningar
   [[TR.tidning1, '#e9e2d6', '#a7b29a', '#1f1e1c', 'FORM'], [TR.tidning2, '#2f3a33', '#c79a6b', '#f3efe8', 'HEM']].forEach(([C, bg, bild, txt, ord]) => {
     const [ox, oy, w, h] = C;
@@ -539,7 +558,10 @@ function kakelTextur(k = 1) {
     const g = x.createLinearGradient(tx, ty, tx + P, ty + Q);
     g.addColorStop(0, 'rgba(255,255,255,0.05)'); g.addColorStop(0.5, 'rgba(160,150,138,0.035)'); g.addColorStop(1, 'rgba(255,255,255,0.03)');
     x.fillStyle = g; x.fillRect(tx, ty, P, Q);
-    for (let j = 0; j < 3000 * k; j++) { x.fillStyle = `rgba(120,110,100,${r() * 0.06})`; x.fillRect(tx + r() * P, ty + r() * Q, 1.5, 1.5); }
+    // (samma korn, men alfa via globalAlpha: förr tolkades en ny färgsträng per korn, 24 000 gånger)
+    x.fillStyle = 'rgb(120,110,100)';
+    for (let j = 0; j < 3000 * k; j++) { x.globalAlpha = r() * 0.06; x.fillRect(tx + r() * P, ty + r() * Q, 1.5, 1.5); }
+    x.globalAlpha = 1;
   }
   // fogar: 3 px ljusgrå, lika breda åt båda hållen, med en ljus fas på ena sidan
   [0, 1].forEach(i => {
@@ -587,7 +609,9 @@ function linneTextur() {
 const VAV = { linne: 0, perkal: 1, boucle: 2, sammet: 3, frotte: 4, stick: 5, ull: 6, skinn: 7 };
 const VAVM = [0.26, 0.12, 0.16, 0.4, 0.07, 0.1, 0.22, 0.24];
 const PAL = { havre: '#d9cfbf', sand: '#cbb89a', vitt: '#f3f0ea', kol: '#3d3d3b', salvia: '#9aa58c', rost: '#a65a3a', duvbla: '#8797a6' };
-function tygBibliotek() {
+function tygBibliotek() { const it = tygBibliotekSteg(); let r = it.next(); while (!r.done) r = it.next(); return r.value; }
+// (paus efter var 32:a rad i varje lager: ett lager med cellbrus tog flera hundra ms på mobil)
+function* tygBibliotekSteg() {
   if (typeof document === 'undefined') return null;
   const N = 256, NL = 8, D = new Uint8Array(N * N * 4 * NL);
   const hs = (i, j, s) => { let h = Math.imul(i, 374761393) ^ Math.imul(j, 668265263) ^ Math.imul(s + 17, 2246822519); h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
@@ -634,9 +658,12 @@ function tygBibliotek() {
     (x, y) => { const q = br(x, y, 6, 12) * 10 + br(x, y, 12, 13) * 5;
       return 0.74 + 0.22 * Math.pow(0.5 + 0.5 * Math.sin(q + br(x, y, 24, 14) * 3), 1.4) + 0.05 * (br(x, y, 64, 15) - 0.5); },
   ];
-  for (let L = 0; L < NL; L++) for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-    const v = Math.max(0, Math.min(1, F[L](x, y))), k = ((L * N + y) * N + x) * 4;
-    D[k] = 255 * v; D[k + 1] = 252 * v; D[k + 2] = 246 * v; D[k + 3] = 255;
+  for (let L = 0; L < NL; L++) for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      const v = Math.max(0, Math.min(1, F[L](x, y))), k = ((L * N + y) * N + x) * 4;
+      D[k] = 255 * v; D[k + 1] = 252 * v; D[k + 2] = 246 * v; D[k + 3] = 255;
+    }
+    if ((y & 31) === 31) yield;
   }
   const t = new T.DataArrayTexture(D, N, N, NL);
   t.format = T.RGBAFormat; t.type = T.UnsignedByteType; t.colorSpace = T.SRGBColorSpace;
@@ -813,13 +840,33 @@ function ekTextur() {
 
 function lagaMaterial() {
   if (MAT) return MAT;
+  const it = lagaMaterialSteg(); let r = it.next(); while (!r.done) r = it.next();
+  return MAT;
+}
+// Texturerna byggs en i taget, med en paus (yield) mellan: inredningens bygge körs i små
+// steg när datorn är ledig, och ett enda steg med alla texturer tog flera sekunder på mobil
+// (kameran stod still efter Se inne). Tygbiblioteket ger också en paus per lager. Resultatet
+// sparas i MAT och delas av alla hus, så det görs bara första gången.
+let TEXV = null;
+function* lagaMaterialSteg() {
+  if (MAT) return MAT;
+  const tx = TEXV || (TEXV = {});
+  const steg = [['karta', plankTextur], ['blad', bladTexturSteg], ['tryck', tryckTexturSteg], ['kakel', () => kakelTextur(2)], ['klinker', () => kakelTextur(1)],
+    ['ek', ekTextur], ['stal', stalTextur], ['spegelM', spegelMiljo], ['neutral', neutralMiljo], ['skugga', skuggTextur], ['sken', skenTextur], ['eld', eldTextur]];
+  // (bladatlasen och tryckatlasen ritas själva i flera steg, med en paus mellan motiven)
+  for (const [k, f] of steg) if (!(k in tx)) { const v = f(); tx[k] = v && typeof v.next === 'function' ? yield* v : v; yield; }
+  if (!('vavar' in tx)) { const it = tygBibliotekSteg(); let r = it.next(); while (!r.done) { yield; r = it.next(); } tx.vavar = r.value; }
+  // linnetexturen behövs bara om tygbiblioteket saknas (ingen texturarray): förr byggdes den alltid
+  if (!('linne' in tx)) { tx.linne = tx.vavar ? null : linneTextur(); yield; }
+  if (MAT) return MAT;
   const S = o => new T.MeshStandardMaterial({ vertexColors: true, ...o });
-  const karta = plankTextur(), blad = bladTextur(), tryck = tryckTextur(), kakel = kakelTextur(2), klinker = kakelTextur(1), linne = linneTextur(), vavar = tygBibliotek();
+  const karta = tx.karta, blad = tx.blad, tryck = tx.tryck, kakel = tx.kakel, klinker = tx.klinker, linne = tx.linne, vavar = tx.vavar;
+  const tNeutral = () => tx.neutral, tSpegel = () => tx.spegelM, tEk = () => tx.ek, tStal = () => tx.stal, tSkugga = () => tx.skugga, tSken = () => tx.sken, tEld = () => tx.eld;
   // vägg/vit/tyg har vit grundfärg: tonen ligger i hörnfärgerna (se GRUND och ALIAS)
   MAT = {
     golv: reliefPatch(S({ color: karta ? 0xffffff : 0xc29b70, map: karta, roughness: 0.64, envMapIntensity: 0.7 }), 0.0026, 'golv', 0.5),
-    vagg: S({ color: 0xffffff, roughness: 0.94, envMapIntensity: 0.65, envMap: neutralMiljo() }),
-    ek: reliefPatch(S({ color: 0xc69c6d, map: ekTextur(), roughness: 0.5, envMapIntensity: 0.75 }), 0.0022, 'ek', 1.6, 0.86),
+    vagg: S({ color: 0xffffff, roughness: 0.94, envMapIntensity: 0.65, envMap: tNeutral() }),
+    ek: reliefPatch(S({ color: 0xc69c6d, map: tEk(), roughness: 0.5, envMapIntensity: 0.75 }), 0.0022, 'ek', 1.6, 0.86),
     tyg: tygPatch(S({ color: 0xffffff, map: vavar ? null : linne, roughness: 0.97, side: T.DoubleSide, envMapIntensity: 0.6 }), vavar),
     // gardiner: linne, lätt genomskinligt (och svagt självlysande i dagsljus, se ENV)
     gardin: tygPatch(S({ color: 0xffffff, map: vavar ? null : linne, roughness: 0.96, side: T.DoubleSide, transparent: true, opacity: 0.9, forceSinglePass: true, emissive: 0xfff4e6, emissiveIntensity: 0, envMapIntensity: 0.6 }), vavar),
@@ -830,26 +877,26 @@ function lagaMaterial() {
     kakel: glansPatch(S({ color: 0xffffff, map: kakel, roughness: 0.35, envMapIntensity: 0.9 }), 0.004),
     klinker: glansPatch(S({ color: 0xffffff, map: klinker, roughness: 0.35, envMapIntensity: 0.9 }), 0.004),
     // spegel och krom: egen målad badrumsomgivning som reflex (ingen realtidsspegel)
-    spegel: S({ color: 0xe2e2de, metalness: 1, roughness: 0.4, roughnessMap: stalTextur(), envMap: spegelMiljo(), envMapIntensity: 1 }),
+    spegel: S({ color: 0xe2e2de, metalness: 1, roughness: 0.4, roughnessMap: tStal(), envMap: tSpegel(), envMapIntensity: 1 }),
     // diskho: eget borstat rostfritt, neutral reflex (inte badrummets målade omgivning)
-    diskstal: S({ color: 0xd9d6d0, metalness: 0.82, roughness: 0.46, envMap: neutralMiljo(), envMapIntensity: 1.0, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -2 }),
+    diskstal: S({ color: 0xd9d6d0, metalness: 0.82, roughness: 0.46, envMap: tNeutral(), envMapIntensity: 1.0, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -2 }),
     blad: S({ color: 0xffffff, map: blad, alphaTest: 0.5, side: T.DoubleSide, roughness: 0.55, envMapIntensity: 0.6 }),
     tryck: S({ color: 0xffffff, map: tryck, roughness: 0.88, envMapIntensity: 0.55 }),
     // glas: genomskinligt med en svag reflex av rummet (ingen djupskrivning: inget flimmer mot det bakom)
-    glas: new T.MeshStandardMaterial({ color: 0xdde7e9, roughness: 0.04, metalness: 0.1, transparent: true, opacity: 0.16, depthWrite: false, envMap: spegelMiljo(), envMapIntensity: 0.55 }),
+    glas: new T.MeshStandardMaterial({ color: 0xdde7e9, roughness: 0.04, metalness: 0.1, transparent: true, opacity: 0.16, depthWrite: false, envMap: tSpegel(), envMapIntensity: 0.55 }),
     // allt som lyser: motorn styr emissiveIntensity efter kvällen (userData.lampMaterial)
     lampa: new T.MeshStandardMaterial({ color: 0xf7f3ec, emissive: 0xffbd7d, emissiveIntensity: 0.8, roughness: 0.6 }),   // ~2700 K
     // lampskärmar i linne: svagt självlysande på kvällen (userData.skarmMaterial)
     skarm: S({ color: 0xffffff, emissive: 0xffbd7d, emissiveIntensity: 0.0, roughness: 0.95, side: T.DoubleSide, envMapIntensity: 0.6 }),
-    skugga: new T.MeshBasicMaterial({ map: skuggTextur(), color: 0xffffff, transparent: true, vertexColors: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }),
+    skugga: new T.MeshBasicMaterial({ map: tSkugga(), color: 0xffffff, transparent: true, vertexColors: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }),
     osynlig: new T.MeshBasicMaterial({ visible: false }),
   };
-  MAT.skenTex = skenTextur();
+  MAT.skenTex = tSken();
   // levande ljus: varje låga får en egen kopia (motorn kan fladdra dem var för sig)
   MAT.flamma = new T.MeshStandardMaterial({ color: 0xffd9a0, emissive: 0xffa448, emissiveIntensity: 2.2, roughness: 1, transparent: true, opacity: 0.92, depthWrite: false });
   // kaminens glöd (glödbädd och lågor bakom glaset): userData.eld.material
   // Lågor, glödbädd och skenet på glasets insida: additivt och mjukt (eldTextur, uv väljer del)
-  MAT.eld = new T.MeshBasicMaterial({ map: eldTextur(), color: 0xffffff, transparent: true, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide, toneMapped: false });
+  MAT.eld = new T.MeshBasicMaterial({ map: tEld(), color: 0xffffff, transparent: true, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide, toneMapped: false });
   return MAT;
 }
 // gamla materialnamn slås ihop med andra (färgen läggs i hörnfärgerna)
@@ -2589,7 +2636,9 @@ function ladaInnehall(w, k) {
 }
 // garderobens inredning: klädstång med galgar och kläder, hylla, skor, lådor och korg
 const KLADTON = ['#7d8a94', '#d9cdb7', '#9a7a62', '#6a7a6c', '#b6a48a', '#b97a64', '#e7e1d6', '#7a828e', '#8f9b84', '#c9b6a0'];
-function garderobInne(w, d, h, typ) {
+let SKO_ENKEL = false;
+function garderobInne(w, d, h, typ) { SKO_ENKEL = true; try { garderobInne0(w, d, h, typ); } finally { SKO_ENKEL = false; } }
+function garderobInne0(w, d, h, typ) {
   const xi = w / 2 - 0.02, z0 = -d / 2 - 0.002, z1 = d / 2 - 0.035, zc = (z0 + z1) / 2, dz = z1 - z0, hw = 2 * xi + 0.004;
   if (typ === 'bad') {
     [0.45, 0.85, 1.25, 1.65].forEach((y, j) => {
@@ -2604,7 +2653,7 @@ function garderobInne(w, d, h, typ) {
   ton(BJORK, () => { box('vit', hw, 0.018, dz, 0, hylla, zc); ton('#f6f2ea', () => box('vit', hw, 0.02, 0.003, 0, hylla, z1)); });
   lagg('spegel', new T.CylinderGeometry(0.012, 0.012, hw, 12).rotateZ(PI / 2), mx(0, sy, zc));
   for (const s of [-1, 1]) cyl('spegel', 0.018, 0.018, 0.012, s * (xi - 0.004), sy, zc, 16, false, 0, PI / 2);
-  const steg = typ === 'hall' ? 0.115 : 0.092, n = Math.floor((2 * xi - 0.06) / steg);
+  const steg = typ === 'hall' ? 0.13 : 0.104, n = Math.floor((2 * xi - 0.06) / steg);
   let s = 77; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < n; i++) {
     const x = -xi + 0.04 + i * steg + (r() - 0.5) * 0.015, L = typ === 'hall' ? 0.85 + r() * 0.2 : (r() < 0.25 ? 1.05 : 0.62 + r() * 0.25), bw = Math.min(dz - 0.12, 0.4) * (0.8 + 0.2 * ((i * 0.618) % 1)), ry = (r() - 0.5) * (i % 3 === 2 ? 0.5 : 0.2);   // olika breda, någon hänger snett
@@ -2643,82 +2692,109 @@ function garderobInne(w, d, h, typ) {
   ton('#cdb595', () => svarv('tyg', [[0, 0], [0.12, 0], [0.13, 0.01], [0.138, 0.1], [0.14, 0.28], [0.145, 0.3], [0.14, 0.31], [0.134, 0.3], [0.13, 0.28], [0.128, 0.1], [0.118, 0.012], [0, 0.01]], -xi + 0.16, y0, zc - 0.05, 32));
 }
 
-// Plagg på galge vid stången (x, sy), plagget i planet z (bredd bw), längd L:
-// galge i ek (krok, hals och en välvd axelpinne), plagget med sluttande axlar, mjuk
-// tjocklek, veck som växer nedåt och form efter typ (skjorta, jacka, klänning).
-function plagg(x, sy, zc, bw, L, typ, fg, ry = 0) {
-  const rock = typ === 'rock', byxa = typ === 'byxa', kl = typ === 'klanning', tjock = typ === 'jacka' || typ === 'kofta' || rock;
-  const hw = (byxa ? Math.min(0.15, bw * 0.36) : bw / 2), b = hw * 1.8;
-  ton('#c9c6c0', () => lagg('spegel', new T.TorusGeometry(0.017, 0.0025, 3, 8, PI * 1.3).rotateZ(-PI * 0.15), mx(x, sy + 0.005, zc, PI / 2)));
-  ton('#c09a6c', () => tub('ek', [V(x, sy - 0.03, zc - b / 2), V(x, sy - 0.016, zc - b / 4), V(x, sy - 0.012, zc), V(x, sy - 0.016, zc + b / 4), V(x, sy - 0.03, zc + b / 2)], 0.0055, 0.0055, 6, 4));
-  // Plagget som ett enda mjukt rör runt galgen: tunn kropp med veck som växer nedåt, tjockare
-  // i kanterna där ärmarna hänger (ärmen slutar i en rundad manschett ovanför fållen), sluttande
-  // axlar, lätt vågig fåll. Byxor hänger dubbelvikta över galgens pinne, klänningar vidgas.
-  const tb = typ === 'jacka' || rock ? 0.024 : typ === 'kofta' ? 0.016 : byxa ? 0.021 : 0.012, ts = kl || byxa ? 0 : typ === 'jacka' || rock ? 0.043 : typ === 'kofta' ? 0.033 : 0.027, Ls = Math.min(rock ? 0.7 : tjock ? 0.62 : 0.58, L * 0.8), tS = Ls / L;
-  const fas = x * 37 + zc * 11, NA = 14, ss = (a, e0, e1) => { const q = Math.min(1, Math.max(0, (a - e0) / (e1 - e0))); return q * q * (3 - 2 * q); };
-  const rader = [0, 0.035, 0.1, 0.25, 0.45, 0.65, 0.82, 0.93, 1].concat(ts ? [tS - 0.02, tS + 0.05 / L] : []).filter(t => t >= 0 && t <= 1).sort((p, q) => p - q);
-  const tjTill = (t, zn) => { const kr = tb * (rock ? 1.9 - 1.5 * t + 1.1 * t * t : 1.3 - 0.9 * t + 0.8 * t * t) * (1 - 0.45 * zn * zn * (rock ? 1 : 0)), a = ts ? ss(Math.abs(zn), 0.5, 0.92) * (1 - ss(t, tS - 0.01, tS + 0.05 / L)) : 0; return [kr + Math.max(0, tb * 1.5 - kr) * a, a * 0.5]; };
-  const veckX = (t, zn) => (kl ? 1.9 : 1) * (0.011 * Math.sin(zn * 6.5 + fas + t * 2.2) * Math.min(1, t * 2.5) + 0.004 * Math.sin(zn * 15 + fas * 1.7) * t);
-  const pos = [], ix = [];
-  rader.forEach((t, j) => {
-    // (rocken i lätt A-form; axlarna rundas: översta raderna är smalare och faller mer mot kanten)
-    const vid = (kl ? 0.7 + 0.42 * Math.pow(t, 1.4) : byxa ? 1 - 0.12 * t : rock ? 0.84 + 0.26 * t : tjock ? 1 + 0.04 * t : 1 - 0.05 * t) * (byxa ? 1 : 1 - 0.24 * Math.max(0, 1 - t / 0.13) ** 2), nyp = j === 0 ? 0.4 : 1;
+// Plagg som en sluten tygvolym (ny byggare). Lokalt: bredden längs z, djupet längs x, framsidan
+// +x, toppen (halsen) i y = 0 under stången sy. Kroppen är ringar ned längs plagget: runda
+// axlar som följer galgen, lätt A-form, tjockast mitt fram och bak och tunn mot sidosömmarna,
+// mjuka lodräta veck (samma våg fram och bak, som ett tyg som faller) och en böljande fåll.
+// Ärmar är egna, plattade rör som börjar i axeln och hänger utanför kroppen med en lätt böj
+// vid armbågen; krage och slag har volym och viker ut; knappar är små skivor på tyget.
+// o.fin: fler segment (hallens rock på nära håll); o.ogla: ingen galge, en tygögla vid kragen
+// (rocken på krokraden). Typer: skjorta, kofta, jacka, rock, klanning, byxa (dubbelvikt över
+// galgens pinne).
+function plagg(x, sy, zc, bw, L, typ, fg, ry = 0, o = {}) {
+  const rock = typ === 'rock', byxa = typ === 'byxa', kl = typ === 'klanning', jacka = typ === 'jacka', kofta = typ === 'kofta', tjock = jacka || rock || kofta;
+  const fas = x * 37.1 + zc * 11.3 + sy * 5.7, h1 = ((Math.sin(fas) * 43758.5453) % 1 + 1) % 1;
+  const sm = (a, b, q) => { const t = Math.min(1, Math.max(0, (q - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const hw = byxa ? Math.min(0.12, bw * 0.32) : bw / 2;
+  const D = rock ? 0.03 : jacka ? 0.032 : kofta ? 0.021 : byxa ? 0.017 : kl ? 0.013 : 0.014;
+  const AF = rock ? 0.16 : kl ? 0.45 : jacka ? 0.03 : byxa ? -0.1 : kofta ? 0.06 : 0.02;
+  const VK = (kl ? 1.6 : byxa ? 0.55 : jacka ? 0.6 : rock ? 0.85 : 1) * (0.75 + 0.5 * h1);
+  const SL = byxa ? 0 : 0.055, tS = byxa ? 0.05 : Math.min(0.2, 0.11 / L * 0.9);
+  const fin = !!o.fin, NA = fin ? 26 : 18;
+  const T0 = fin ? [0, 0.015, 0.03, 0.05, 0.07, 0.09, 0.11, 0.14, 0.18, 0.24, 0.31, 0.39, 0.47, 0.55, 0.63, 0.71, 0.79, 0.86, 0.92, 0.97, 1]
+    : [0, 0.03, 0.06, 0.09, 0.13, 0.2, 0.3, 0.42, 0.55, 0.68, 0.8, 0.9, 0.96, 1];
+  const yT = t => byxa ? -L * t : t < tS ? -SL * (1 - Math.cos(t / tS * PI / 2)) : -SL - (L - SL) * (t - tS) / (1 - tS);
+  const wT = t => byxa ? hw * (1 + AF * t) : hw * (0.22 + 0.78 * Math.pow(Math.sin(Math.min(1, t / tS) * PI / 2), 0.8)) * (1 + AF * Math.pow(Math.max(0, (t - tS) / (1 - tS)), 1.3));
+  const dT = t => D * (byxa ? Math.sqrt(Math.min(1, t / 0.04 + 0.05)) : 0.35 + 0.65 * sm(0, 0.09, t)) * (1 - (kl ? 0.25 : 0.08) * t);
+  // (djupare, bredare veck: på nära håll såg framstycket platt ut; veck från axeln ned i en diagonal)
+  const veck = (zn, t) => VK * ((0.005 + 0.017 * sm(0.08, 0.8, t)) * Math.sin(zn * PI * 2.3 + fas + t * 1.7) + 0.005 * sm(0, 0.3, t) * Math.sin(zn * PI * 5.1 + fas * 1.3 + t * 3) * (1 - 0.5 * t));
+  const kant = zn => 0.3 + 0.7 * Math.sqrt(Math.max(0, 1 - zn * zn));
+  // framsidans läge (x) vid (z, t): för knappar, slå och knappslå som ska ligga an mot tyget
+  const framX = (zz, t) => { const zn = Math.max(-1, Math.min(1, zz / wT(t))), c = Math.pow(Math.abs(zn), 1 / 0.55); return dT(t) * Math.sqrt(Math.max(0, 1 - c * c)) * kant(zn) + veck(zn, t); };
+  const pos = [], ix = [], N = T0.length;
+  T0.forEach((t, j) => {
+    const w = wT(t), d = dT(t) * (j === N - 1 ? 0.85 : 1), y = yT(t);
     for (let a = 0; a < NA; a++) {
-      const v = a / NA * 2 * PI, c = Math.cos(v), s = Math.sin(v), zn = Math.sign(c) * Math.pow(Math.abs(c), 0.6);
-      const [tj, arm] = tjTill(t, zn), fall = byxa ? 0 : (kl ? 0.035 : 0.075) * Math.pow(Math.abs(zn), 1.9);
-      pos.push(s * tj * nyp + veckX(t, zn) * (1 - arm) * Math.abs(c) ** 0.3, -(fall * (1 - t) + L * t) + (j === rader.length - 1 ? 0.012 * Math.sin(zn * 4.6 + fas) : 0), zn * hw * vid * (1 + 0.05 * arm) * (1 + 0.035 * Math.sin(t * 8 + fas + Math.sign(zn)) * t));   // sidokanterna böljar lite (inga raka skivkanter)
+      const v = a / NA * 2 * PI, c = Math.cos(v), s = Math.sin(v), zn = Math.sign(c) * Math.pow(Math.abs(c), 0.55);
+      pos.push(d * s * kant(zn) + veck(zn, t), y + (j === N - 1 ? 0.012 * VK * Math.sin(zn * 4.3 + fas) : 0), zn * w * (1 + 0.025 * t * Math.sin(t * 9 + fas + Math.sign(c) * 2)));
     }
     if (j) for (let a = 0; a < NA; a++) { const p0 = (j - 1) * NA + a, p1 = (j - 1) * NA + (a + 1) % NA, q0 = j * NA + a, q1 = j * NA + (a + 1) % NA; ix.push(p0, q0, p1, p1, q0, q1); }
   });
-  for (let a = 1; a < NA - 1; a++) ix.push(0, a, a + 1);   // axelsömmen stängd upptill
-  const g = new T.BufferGeometry();
-  g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setIndex(ix); g.computeVertexNormals();
-  const m = mx(x, sy - 0.03, zc, ry);
-  ton(fg, () => vav(typ === 'kofta' ? 'stick' : 'linne', () => lagg('tyg', g, m)));
+  { const ct = pos.length / 3; pos.push(0, 0.004, 0); for (let a = 0; a < NA; a++) ix.push(ct, a, (a + 1) % NA);
+    const cb = ct + 1, e = (N - 1) * NA; pos.push(veck(0, 1), yT(1) + 0.004, 0); for (let a = 0; a < NA; a++) ix.push(cb, e + (a + 1) % NA, e + a); }
+  const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setIndex(ix); g.computeVertexNormals();
+  const m = mx(x, sy - 0.045, zc, ry);
+  const vv = kofta ? 'stick' : 'linne';
+  ton(fg, () => vav(vv, () => lagg('tyg', g, m)));
+  // upphängning: krok och hals i stål ovanför kragen (pinnen ligger dold i axlarna), eller en
+  // tygögla vid kragen när plagget hänger direkt på en knagg
+  if (o.ogla) {
+    ton(skiftTon(fg, 0.85), () => { lagg('tyg', new T.TorusGeometry(0.021, 0.0032, 5, 14).rotateY(PI / 2), m.clone().multiply(new T.Matrix4().makeTranslation(0, 0.03, 0)));
+      lagg('tyg', new T.CylinderGeometry(0.003, 0.004, 0.014, 6), m.clone().multiply(new T.Matrix4().makeTranslation(0, 0.004, 0))); });
+  } else {
+    ton('#c9c6c0', () => { lagg('spegel', new T.TorusGeometry(0.017, 0.0025, 3, 8, PI * 1.3).rotateZ(-PI * 0.15), mx(x, sy + 0.005, zc, ry + PI / 2));
+      lagg('spegel', new T.CylinderGeometry(0.0022, 0.0022, 0.035, 5), m.clone().multiply(new T.Matrix4().makeTranslation(0, 0.022, 0))); });
+    // byxorna hänger över galgens pinne: pinnens ändar syns på var sida
+    if (byxa) ton('#c09a6c', () => lagg('ek', new T.CapsuleGeometry(0.006, 2 * hw + 0.08, 3, 6).rotateX(PI / 2), m.clone().multiply(new T.Matrix4().makeTranslation(0, -0.002, 0))));
+  }
   if (byxa || kl) {
-    // byxans linning med hällor resp. klänningens ringning: en smal, mörkare kant upptill
-    ton(skiftTon(fg, 0.82), () => vav('linne', () => lagg('tyg', new T.BoxGeometry(tb * 2.2 + 0.004, byxa ? 0.035 : 0.012, hw * (kl ? 1.0 : 1.96)), mx(x, sy - 0.03 - (byxa ? 0.02 : 0.004), zc, ry))));
+    // byxans pressveck resp. klänningens ringning
+    if (byxa) ton(skiftTon(fg, 0.86), () => { const sp = [], si = []; T0.forEach((t, j) => { if (t < 0.06) return; const xx = framX(0, t) + 0.0012; sp.push(xx, yT(t), -0.0025, xx, yT(t), 0.0025); const q = sp.length / 3 - 2; if (q) si.push(q - 2, q - 1, q, q - 1, q + 1, q); });
+      const sg = new T.BufferGeometry(); sg.setAttribute('position', new T.Float32BufferAttribute(sp, 3)); sg.setIndex(si); sg.computeVertexNormals(); lagg('tyg', sg, m.clone()); });
+    else ton(skiftTon(fg, 0.85), () => lagg('tyg', new T.TorusGeometry(0.04, 0.005, 4, 12, PI).rotateX(PI / 2).rotateY(-PI / 2).scale(0.5, 1, 1), m.clone().multiply(new T.Matrix4().makeTranslation(dT(0.03) * 0.5, -0.008, 0))));
     return;
   }
-  // ärmarna: mjuka, lite plattade rör som hänger från axlarna längs plaggets kanter (det är
-  // dem man ser framifrån i garderoben), smalare mot en mörkare manschett med öppning
+  // ärmarna: plattade rör längs en mjuk kurva från axeln, utanför kroppen, smalare mot ärmslutet
   {
-    const ap = [], ai = [], mp = [], mi = [], RA = 8, TT = [0, 0.025, 0.08, 0.3, 0.6, 0.9, 1], FF = [0.12, 0.6, 0.95, 0.96, 0.9, 0.82, 0.8];   // rund axelkulle upptill
+    const rS = rock || jacka ? 0.04 : kofta ? 0.034 : 0.029, dS = Math.min(rS * 0.8, D * 1.1 + 0.006), Ls = Math.min(rock ? 0.7 : tjock ? 0.62 : 0.58, L * 0.82);
+    const RA = fin ? 10 : 8, SEG = fin ? 14 : 9, ap = [], ai = [];
     [-1, 1].forEach((s, e) => {
-      // (ärmen hänger fritt utanför plaggets sidokant hela vägen från axeln, med egen rundning)
-      // (axeln rundas in mot galgen)
-      const cz = t => s * (hw * (0.62 + 0.3 * Math.min(1, t / 0.16) ** 0.55) + ts * 0.5 + 0.012 * t), cxx = t => 0.006 * Math.sin(t * 3 + fas + s) - 0.004, yy = t => -(0.06 + Ls * t);
-      TT.forEach((t, j) => { for (let a = 0; a < RA; a++) { const v = a / RA * 2 * PI; ap.push(cxx(t) + Math.sin(v) * ts * FF[j], yy(t) + (j < 2 ? -0.022 * (Math.cos(v) * s + 1) * (j ? 0.5 : 1) : 0), cz(t) + Math.cos(v) * ts * 1.25 * FF[j]); }
-        if (j) for (let a = 0; a < RA; a++) { const o = e * TT.length * RA, p0 = o + (j - 1) * RA + a, p1 = o + (j - 1) * RA + (a + 1) % RA, q0 = o + j * RA + a, q1 = o + j * RA + (a + 1) % RA; ai.push(p0, q0, p1, p1, q0, q1); } });
-      for (let a = 1; a < RA - 1; a++) ai.push(e * TT.length * RA, e * TT.length * RA + a, e * TT.length * RA + a + 1);
-      // manschett: kort krage runt ärmslutet och den mörka öppningen
-      for (let a = 0; a < RA; a++) { const v = a / RA * 2 * PI; for (const [dy, f] of [[0.022, 0.815], [-0.003, 0.8]]) mp.push(cxx(1) + Math.sin(v) * ts * f, yy(1) + dy, cz(1) + Math.cos(v) * ts * 1.25 * f); }
-      for (let a = 0; a < RA; a++) { const o = e * RA * 2, p0 = o + a * 2, p1 = o + ((a + 1) % RA) * 2; mi.push(p0, p0 + 1, p1, p1, p0 + 1, p1 + 1); }
-      for (let a = 1; a < RA - 1; a++) mi.push(e * RA * 2 + 1, e * RA * 2 + a * 2 + 3, e * RA * 2 + a * 2 + 1);
+      const ws = wT(tS), tEnd = Math.min(0.98, tS + (Ls - 0.02) / (L - SL) * (1 - tS)), wE = wT(tEnd);
+      const k = new T.CatmullRomCurve3([V(0, -SL * 0.45, s * ws * 0.8), V(0.002, -SL - 0.03, s * (ws + rS * 0.55)), V(0.012, -SL - Ls * 0.5, s * (wT((tS + tEnd) / 2) + rS * 0.7)), V(0.008, -SL - Ls, s * (wE + rS * 0.7))], false, 'centripetal');
+      for (let i = 0; i <= SEG; i++) { const u = i / SEG, p = k.getPointAt(u), f = Math.sin(Math.min(1, u * 5 + 0.25) * PI / 2) * (1 - 0.22 * u), cuff = u > 0.93 ? 1.06 : 1;
+        for (let a = 0; a < RA; a++) { const v = a / RA * 2 * PI; ap.push(p.x + Math.sin(v) * dS * f * cuff + veck(s, 0.3 + u * 0.5) * 0.5, p.y, p.z + Math.cos(v) * rS * f * cuff); }
+        if (i) for (let a = 0; a < RA; a++) { const o = e * ((SEG + 1) * RA + 1), p0 = o + (i - 1) * RA + a, p1 = o + (i - 1) * RA + (a + 1) % RA, q0 = o + i * RA + a, q1 = o + i * RA + (a + 1) % RA; ai.push(p0, q0, p1, p1, q0, q1); } }
+      // ärmslutet: en mörk öppning (fläkt) i ärmens ände
+      const o = e * ((SEG + 1) * RA + 1), pe = k.getPointAt(1); ap.push(pe.x, pe.y + 0.004, pe.z); const c = o + (SEG + 1) * RA;
+      for (let a = 0; a < RA; a++) ai.push(c, o + SEG * RA + (a + 1) % RA, o + SEG * RA + a);
     });
     const ag = new T.BufferGeometry(); ag.setAttribute('position', new T.Float32BufferAttribute(ap, 3)); ag.setIndex(ai); ag.computeVertexNormals();
-    const mg = new T.BufferGeometry(); mg.setAttribute('position', new T.Float32BufferAttribute(mp, 3)); mg.setIndex(mi); mg.computeVertexNormals();
-    ton(fg, () => vav(typ === 'kofta' ? 'stick' : 'linne', () => lagg('tyg', ag, m.clone())));
-    ton(skiftTon(fg, 0.94), () => vav('linne', () => lagg('tyg', mg, m.clone())));
+    ton(fg, () => vav(vv, () => lagg('tyg', ag, m.clone())));
   }
-  // krage runt galgens hals (jackor och koftor: en tjockare, stående krage)
-  ton(skiftTon(fg, tjock ? 0.86 : 1.08), () => vav('linne', () => lagg('tyg', new T.TorusGeometry(tjock ? 0.04 : 0.032, tjock ? 0.016 : 0.01, 4, 10).rotateX(PI / 2).scale(0.55, tjock ? 1.5 : 0.8, 1), mx(x, sy - 0.02, zc, ry))));
-  // knappslå med knappar (skjorta, kofta) eller dragkedja (jacka) mitt fram, följer vecken
-  {
-    const kant = t => { const [tj] = tjTill(t, 0); return tj + veckX(t, 0) + 0.0015; }, sp = [], si = [], br = typ === 'jacka' ? 0.004 : 0.008;
-    rader.filter(t => t > 0.03).forEach((t, j) => { sp.push(kant(t), -(L * t), -br, kant(t), -(L * t), br); if (j) { const q = j * 2; si.push(q - 2, q - 1, q, q - 1, q + 1, q); } });
+  // krage med volym runt halsen (jacka och rock: tjockare och stående)
+  ton(skiftTon(fg, tjock ? 0.9 : 1.06), () => vav(vv, () => lagg('tyg', new T.TorusGeometry(wT(0) + 0.01, tjock ? 0.013 : 0.0075, 5, 12).rotateX(PI / 2).scale((dT(0) + 0.012) / (wT(0) + 0.01), tjock ? 1.5 : 1, 1), m.clone().multiply(new T.Matrix4().makeTranslation(0, -0.006, 0)))));
+  // slag (rock): vikta flikar i V som lyfter ut från kroppen, med en kant som ger tjocklek
+  if (rock) { const lp = [], li = [], NS = fin ? 6 : 4;
+    [-1, 1].forEach((s, e) => { for (let j = 0; j <= NS; j++) { const u = j / NS, t = 0.02 + 0.32 * u, zi = s * (wT(0) * 0.85 * (1 - u) + 0.006), zo = s * (wT(0) * 0.85 + 0.055 * Math.sin(Math.min(1, u * 1.6) * PI / 2) * (1 - u * 0.85)) * (1 - u * 0.75);
+      lp.push(framX(zi, t) + 0.003, yT(t), zi, framX(zo, t) + 0.013 * (1 - u * 0.6), yT(t) - 0.008, zo, framX(zo, t) + 0.001, yT(t) - 0.008, zo);
+      if (j) { const q = e * (NS + 1) * 3 + j * 3, p = q - 3; if (s > 0) li.push(p, p + 1, q, p + 1, q + 1, q, p + 1, p + 2, q + 1, p + 2, q + 2, q + 1); else li.push(p, q, p + 1, p + 1, q, q + 1, p + 1, q + 1, p + 2, p + 2, q + 1, q + 2); } } });
+    const lg = new T.BufferGeometry(); lg.setAttribute('position', new T.Float32BufferAttribute(lp, 3)); lg.setIndex(li); lg.computeVertexNormals();
+    ton(skiftTon(fg, 1.04), () => vav(vv, () => lagg('tyg', lg, m.clone())));
+    // slagens vikta ytterkant: en mörkare, rundad kant där tyget viker sig, som ger fliken
+    // tjocklek och skiljer den från framstycket under
+    ton(skiftTon(fg, 0.72), () => [-1, 1].forEach(s => { const kp = [];
+      for (let j = 0; j <= NS; j++) { const u = j / NS, t = 0.02 + 0.32 * u, zo = s * (wT(0) * 0.85 + 0.055 * Math.sin(Math.min(1, u * 1.6) * PI / 2) * (1 - u * 0.85)) * (1 - u * 0.75);
+        kp.push(V(framX(zo, t) + 0.008 * (1 - u * 0.6), yT(t) - 0.009, zo).applyMatrix4(m)); }
+      tub('tyg', kp, 0.0035, 0.0025, fin ? 16 : 8, 5); })); }
+  // knappslå (skjorta, kofta), dragkedja (jacka) och knappar som små rundade skivor
+  { const br = jacka ? 0.0035 : 0.007, sp = [], si = [], t0 = rock ? 0.34 : 0.05;
+    T0.filter(t => t >= t0).forEach((t, j) => { const xx = framX(0, t) + 0.0012; sp.push(xx, yT(t), -br, xx, yT(t), br); if (j) { const q = j * 2; si.push(q - 2, q - 1, q, q - 1, q + 1, q); } });
     const sg = new T.BufferGeometry(); sg.setAttribute('position', new T.Float32BufferAttribute(sp, 3)); sg.setIndex(si); sg.computeVertexNormals();
-    ton(typ === 'jacka' ? '#6f6c66' : skiftTon(fg, 1.1), () => vav('linne', () => lagg('tyg', sg, m.clone())));
-    // rockens slag: två vikta flikar i V från kragen ned mot översta knappen, med lite lyft
-    if (rock) { const lp = [], li = [];
-      [-1, 1].forEach((s, e) => { for (let j = 0; j <= 3; j++) { const u = j / 3, t = 0.035 + 0.3 * u, zi = s * (0.045 - 0.04 * u), zo = zi + s * 0.05 * (1 - 0.75 * u);
-        lp.push(kant(t) + 0.004, -L * t, zi, kant(t) + 0.02 - 0.012 * u, -L * t - 0.014, zo); if (j) { const q = e * 8 + j * 2; if (s > 0) li.push(q - 2, q - 1, q, q - 1, q + 1, q); else li.push(q - 2, q, q - 1, q - 1, q, q + 1); } } });
-      const lg = new T.BufferGeometry(); lg.setAttribute('position', new T.Float32BufferAttribute(lp, 3)); lg.setIndex(li); lg.computeVertexNormals();
-      ton(skiftTon(fg, 0.9), () => vav('linne', () => lagg('tyg', lg, m.clone()))); }
-    if (typ !== 'jacka') ton(skiftTon(fg, 0.55), () => { for (let k = 0; k < (rock ? 3 : 4); k++) { const t = rock ? 0.4 + k * 0.14 : 0.12 + k * 0.2; lagg('tyg', new T.CylinderGeometry(rock ? 0.008 : 0.0045, rock ? 0.008 : 0.0045, 0.003, 8).rotateZ(PI / 2), m.clone().multiply(new T.Matrix4().makeTranslation(kant(t) + 0.001, -L * t, 0))); } });
+    ton(jacka ? '#6f6c66' : skiftTon(fg, 0.94), () => vav('linne', () => lagg('tyg', sg, m.clone())));
+    if (!jacka) ton(skiftTon(fg, 0.55), () => { const kn = rock ? [0.4, 0.55, 0.7] : kofta ? [0.15, 0.32, 0.49, 0.66] : [0.12, 0.3, 0.48, 0.66], r = rock ? 0.009 : 0.005;
+      kn.forEach(t => lagg('tyg', new T.SphereGeometry(r, 8, 3).scale(0.35, 1, 1), m.clone().multiply(new T.Matrix4().makeTranslation(framX(0, t) + 0.002, yT(t), 0)))); });
   }
 }
-
 // Vägghängd toalett framför ett kaklat installationsschakt (dold cistern) med ekhylla.
 // Lokalt: väggen vid z = -0.33, schaktets framsida vid z = -0.13.
 function toalett() {
@@ -4623,7 +4699,8 @@ function sko(x, y, z, ry, typ, fg, sida = 1) {
     }
     // ovandelen: halv båge per tvärsnitt, från sulkant över vristen till sulkant
     {
-      const NA = 12, i0 = toff ? 9 : 0, pos = [], ix = [];
+      // (skor inne i garderober: färre segment runt om och ingen snörning, de syns bara på avstånd)
+      const NA = SKO_ENKEL ? 7 : 12, i0 = toff ? 9 : 0, pos = [], ix = [];
       for (let i = i0; i < n; i++) { const u = SKO_U[i], w = SKO_W[i], c = cx(u), h = hov[i] * (toff && i === i0 ? 0.92 : 1);
         for (let a = 0; a < NA; a++) { const [px, py] = skoSek(i, a / (NA - 1) * PI, w, h, kfU(u));
           pos.push(c + px, sh(u) - 0.002 + py, zU(u)); }
@@ -4647,7 +4724,7 @@ function sko(x, y, z, ry, typ, fg, sida = 1) {
     // snörning (inte på stövlar): fem snörpar som korsar över vristen mellan två rader hål,
     // lagda på ovanlädret (ändarna i hålen, mitten lyft 1,5 mm över åsen), och en plös som
     // sticker upp framför öppningen
-    if (!stov) {
+    if (!stov && !SKO_ENKEL) {
       const yta = (u, v, lyft) => { const i = Math.max(1, SKO_U.findIndex(q => q >= u)), f = (u - SKO_U[i - 1]) / (SKO_U[i] - SKO_U[i - 1]);
         const a = skoSek(i - 1, v, SKO_W[i - 1], hov[i - 1], kfU(SKO_U[i - 1])), b = skoSek(i, v, SKO_W[i], hov[i], kfU(SKO_U[i])); return [cx(u) + a[0] + (b[0] - a[0]) * f, sh(u) - 0.002 + a[1] + (b[1] - a[1]) * f + lyft, zU(u)]; };
       const pos = [], ix = [], u0 = klack ? 0.4 : 0.42, du = 0.042, vH = 0.42, b = 0.0022;
@@ -4700,22 +4777,47 @@ function hallen(x, z, ry, o = {}) {
     // rock i kamelfärgad ull på galge över knaggen: samma mjuka plagg som i garderoben
     // (tung kropp med veck, ärmar som faller rakt ned längs sidorna, krage, knappar), vänd
     // med framsidan ut i rummet. Förr en platt figur med ärmar som stod ut som vingar.
-    med(-0.2, 0.075, -PI / 2, () => plagg(0, 1.728, 0, 0.44, 0.98, 'rock', '#c2a888', 0));
+    // (utan galge: rocken hänger i en tygögla vid kragen på knaggen)
+    med(-0.2, 0.075, -PI / 2, () => plagg(0, 1.715, 0, 0.44, 0.98, 'rock', '#c2a888', 0, { fin: true, ogla: true }));
     // väska i konjaksbrunt läder: mjuk påse som bukar nedtill och smalnar mot öppningen,
     // rundade hörn, en axelrem som hänger i en lång ögla från knaggen och ett lock med kant
+    // Kroppen är ringar nerifrån och upp (rundad rektangel i tvärsnitt) som bukar ut nedtill
+    // där tyngden ligger; locket följer framsidan och har rundade nedre hörn och en kant; remmen
+    // är ett platt band som går upp över knoppen och ned till väskans båda övre hörn.
     ton('#b9895c', () => {
-      const pk = [[0.3, 1.712, 0.094], [0.262, 1.6, 0.097], [0.2, 1.42, 0.1], [0.165, 1.3, 0.098]].map(q => V(...q));
-      tub('tyg', pk, 0.006, 0.006, 8, 5); tub('tyg', pk.map(q => V(0.6 - q.x, q.y, q.z)), 0.006, 0.006, 8, 5);
-      const g = new T.SphereGeometry(1, 22, 14), p = g.attributes.position;
-      for (let i = 0; i < p.count; i++) { const X = p.getX(i), Y = p.getY(i), Z = p.getZ(i), ned = 0.5 - 0.5 * Y;
-        const bx = Math.sign(X) * Math.pow(Math.abs(X), 0.6), by = Math.sign(Y) * Math.pow(Math.abs(Y), 0.7), bz = Math.sign(Z) * Math.pow(Math.abs(Z), 0.75);
-        p.setXYZ(i, bx * 0.155 * (0.86 + 0.14 * ned), by * 0.125 - 0.012 * ned * ned, bz * (0.03 + 0.03 * ned) + 0.006 * Math.sin(X * 5 + Y * 3) * ned); }
-      g.computeVertexNormals();
-      lagg('tyg', g, mx(0.3, 1.185, 0.098));
-      // lock över framsidan med rundad nederkant och ett litet spänne
-      const lk = new T.SphereGeometry(1, 20, 6, 0, 2 * PI, 0, PI / 2).scale(0.15, 0.028, 0.105).rotateX(PI / 2);
-      ton('#a87a50', () => lagg('tyg', lk, mx(0.3, 1.262, 0.132, 0, 0.12)));
-      ton('#c8a46c', () => rbx('diskstal', 0.022, 0.016, 0.006, 0.3, 1.2, 0.158, 0.003, 0, 0, 1));
+      const bx = 0.3, by = 1.06, bz = 0.062, NA = 20, P = 0.42;
+      const R = [[0, 0.11, 0.012], [0.008, 0.138, 0.034], [0.03, 0.152, 0.049], [0.08, 0.157, 0.051], [0.15, 0.155, 0.045], [0.2, 0.15, 0.036], [0.228, 0.144, 0.024], [0.24, 0.136, 0.01]];
+      const pos = [], ix = [];
+      R.forEach(([y, w, d], j) => { for (let a = 0; a < NA; a++) { const v = a / NA * 2 * PI, c = Math.cos(v), s = Math.sin(v);
+          pos.push(bx + w * Math.sign(c) * Math.pow(Math.abs(c), P), by + y + 0.004 * Math.sin(c * 3 + j) * (1 - y / 0.24), bz + d * Math.sign(s) * Math.pow(Math.abs(s), P)); }
+        if (j) for (let a = 0; a < NA; a++) { const p0 = (j - 1) * NA + a, p1 = (j - 1) * NA + (a + 1) % NA, q0 = j * NA + a, q1 = j * NA + (a + 1) % NA; ix.push(p0, p1, q0, p1, q1, q0); } });
+      { const cb = pos.length / 3; pos.push(bx, by + 0.002, bz); for (let a = 0; a < NA; a++) ix.push(cb, a, (a + 1) % NA);
+        const ct = cb + 1, e = (R.length - 1) * NA; pos.push(bx, by + 0.242, bz); for (let a = 0; a < NA; a++) ix.push(ct, e + (a + 1) % NA, e + a); }
+      const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setIndex(ix); g.computeVertexNormals();
+      lagg('tyg', g, mx(0, 0, 0));
+      // framsidans z vid (höjd över botten, x från mitten), för locket som ska ligga an
+      const radVid = y => { let i = 1; while (i < R.length - 1 && R[i][0] < y) i++; const f = (y - R[i - 1][0]) / (R[i][0] - R[i - 1][0]); return [R[i - 1][1] + (R[i][1] - R[i - 1][1]) * f, R[i - 1][2] + (R[i][2] - R[i - 1][2]) * f]; };
+      const framZ = (y, xx) => { const [w, d] = radVid(y), c = Math.min(1, Math.pow(Math.abs(xx) / w, 1 / P)); return bz + d * Math.pow(Math.sqrt(Math.max(0, 1 - c * c)), P); };
+      const NU = 10, NS = 9, lp = [], li = [], kantP = [];
+      for (let j = 0; j <= NS; j++) { const s = j / NS, y = s < 0.2 ? 0.236 : 0.236 - (s - 0.2) / 0.8 * 0.125, q = s < 0.72 ? 1 : 0.4 + 0.6 * Math.sqrt(Math.max(0, 1 - ((s - 0.72) / 0.28) ** 2));
+        for (let i = 0; i <= NU; i++) { const u = i / NU * 2 - 1, xx = u * 0.142 * q, zz = s < 0.2 ? bz + (framZ(0.236, xx) - bz) * (s / 0.2) + 0.006 : framZ(y, xx) + 0.005;
+          lp.push(bx + xx, by + y + (s < 0.2 ? 0.006 : 0), zz); if (j === NS || i === 0 || i === NU) kantP.push([j, i, bx + xx, by + y, zz + 0.001]); }
+        if (j) for (let i = 0; i < NU; i++) { const a = (j - 1) * (NU + 1) + i, b = a + NU + 1; li.push(a, b, a + 1, a + 1, b, b + 1); } }
+      const lg = new T.BufferGeometry(); lg.setAttribute('position', new T.Float32BufferAttribute(lp, 3)); lg.setIndex(li); lg.computeVertexNormals();
+      ton('#a87a50', () => lagg('tyg', lg, mx(0, 0, 0)));
+      // kant (kedern) runt lockets nederkant och sidor
+      { const ut = []; for (let j = 2; j <= NS; j++) ut.push(V(...kantP.find(k => k[0] === j && k[1] === 0).slice(2)));
+        for (let i = 1; i < NU; i++) ut.push(V(...kantP.find(k => k[0] === NS && k[1] === i).slice(2)));
+        for (let j = NS; j >= 2; j--) ut.push(V(...kantP.find(k => k[0] === j && k[1] === NU).slice(2)));
+        ton('#93693f', () => tub('tyg', ut, 0.0028, 0.0028, 40, 5)); }
+      ton('#c8a46c', () => rbx('diskstal', 0.024, 0.016, 0.005, bx, by + 0.115, framZ(0.11, 0) + 0.008, 0.003, 0, 0, 1));
+      // remmen: ett platt band (2 cm) från hörnen upp över knoppen, med en mjuk båge
+      const band = pts => { const k = new T.CatmullRomCurve3(pts.map(q => V(...q)), false, 'centripetal'), N = 28, bp = [], bi = [];
+        for (let i = 0; i <= N; i++) { const p = k.getPointAt(i / N), t = k.getTangentAt(i / N), sd = V(0, 0, 1).cross(t).normalize().multiplyScalar(0.0105);
+          bp.push(p.x - sd.x, p.y - sd.y, p.z - sd.z, p.x + sd.x, p.y + sd.y, p.z + sd.z); if (i) { const q = i * 2; bi.push(q - 2, q - 1, q, q - 1, q + 1, q); } }
+        const bg = new T.BufferGeometry(); bg.setAttribute('position', new T.Float32BufferAttribute(bp, 3)); bg.setIndex(bi); bg.computeVertexNormals(); lagg('tyg', bg, mx(0, 0, 0)); };
+      ton('#9d7149', () => { band([[bx - 0.128, by + 0.232, bz], [bx - 0.104, by + 0.36, bz + 0.012], [bx - 0.056, by + 0.52, bz + 0.026], [bx - 0.016, by + 0.632, 0.088], [bx, by + 0.66, 0.092], [bx + 0.016, by + 0.632, 0.088], [bx + 0.056, by + 0.52, bz + 0.026], [bx + 0.104, by + 0.36, bz + 0.012], [bx + 0.128, by + 0.232, bz]]);
+        for (const s of [-1, 1]) rbx('tyg', 0.026, 0.022, 0.006, bx + s * 0.128, by + 0.222, bz + s * 0, 0.003, 0, 0, 1); });
     });
   });
 }
@@ -5693,7 +5795,7 @@ export function byggInne(THREE, id, H) {
 }
 export function* byggInneSteg(THREE, id, H) {
   T = THREE;
-  lagaMaterial();
+  yield* lagaMaterialSteg();
   ACC = new Map(); BAS = new T.Matrix4(); HH = H; CEIL = lagaTak(H); LJUS = null;
   VAGGAR = []; LOFT = []; HAL = []; TON = null; RGH = 1; EFTER = []; BADRUM = []; DUSCHAR = [];
   SPEGLAR = []; OPP = []; LAMPOR = []; SITT = []; BRYT = []; ID = id; NSTOL = 0; NSANG = 0; SEED = 7; LAGER = 'botten'; VAXTNR = 0;

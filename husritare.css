@@ -165,6 +165,46 @@ html.inbaddad .ritare__laddar .kl-logga { height: clamp(34px, 9vw, 52px); }
   html body .ritare__laddar.klar .kl-logga { transform: none; }
 }
 
+/* Laddningen, version 2 (ersätter delar av reglerna ovan). Tidslinje från första målningen:
+   0–0,9 s husmärkets kontur ritas upp runt om (stroke-dashoffset, taket först, sedan väggarna),
+   0,75–1,05 s ytorna fylls i medan linjerna tonas bort, 0,95–1,6 s fönstret tänds varmt,
+   0,9–1,6 s ordet sveper fram (clip-path), från 0,3 s förloppslinjen och från 1,0 s raden om vad
+   som händer. Förloppslinjen följer den verkliga laddningen (sidan sätter --p, 0–1). Klart:
+   linjen drar ut till full bredd, logotypen lyfter och tonar, slöjan tonar bort över scenen
+   och kamerans intro börjar. Bara transform, opacity, clip-path och stroke-dashoffset. */
+.ritare__laddar { clip-path: none; gap: 18px; transition: opacity 0.6s ease 0.4s; }
+.ritare__laddar.klar { clip-path: none; opacity: 0; }
+/* logotypens mått står fast från första layouten (ingen förskjutning när ordet sveper fram) */
+.kl-logga .kl-hus { aspect-ratio: 272 / 316; }
+.kl-logga .kl-ord { aspect-ratio: 884 / 316; }
+.kl-streck path { stroke-dasharray: 1 1; stroke-dashoffset: 1; animation: kl-rita 0.7s cubic-bezier(0.55, 0, 0.3, 1) forwards, kl-bort 0.35s ease 0.95s forwards; animation-delay: calc(var(--i) * 0.07s), calc(0.85s + var(--i) * 0.03s); }
+.kl-streck path:first-child { animation-duration: 0.8s, 0.35s; }
+.kl-vagg, .kl-tak { transform: none; opacity: 0; animation: kl-fyll 0.35s ease forwards; animation-delay: calc(0.72s + var(--i, 0) * 0.06s); }
+.kl-tak { animation-delay: 0.7s; }
+.kl-fonster { fill: #e8a35c; }
+.kl-fonster rect { animation-delay: calc(0.98s + var(--i) * 0.06s); }
+.kl-ljus rect { animation-delay: calc(1.04s + var(--i) * 0.06s); }
+.kl-ord { animation-delay: 0.88s; }
+.ritare__laddar-linje { width: clamp(160px, 18vw, 220px); height: 2px; border-radius: 2px; animation-delay: 0.3s; }
+.ritare__laddar-linje i { --p: 0.02; background: var(--k-accent); border-radius: inherit; transform: scaleX(var(--p)); animation: none; transition: none; }
+.kl-status { margin: -6px 0 0; min-height: 1.5em; font: 500 0.75rem/1.5 var(--sans); letter-spacing: 0.01em; color: color-mix(in srgb, var(--kl-blk) 55%, transparent); opacity: 0; animation: kl-upp 0.5s ease 1s forwards; }
+.kl-status span { display: inline-block; transition: opacity 0.22s ease, transform 0.22s ease; }
+.kl-status span.byt { opacity: 0; transform: translateY(3px); }
+.ritare__laddar.klar .ritare__laddar-linje i { transform: scaleX(1); transition: transform 0.35s var(--k-ut); }
+.ritare__laddar.klar .kl-logga { transform: translateY(-10px); opacity: 0; transition: transform 0.6s var(--k-ut) 0.2s, opacity 0.4s ease 0.25s; }
+.ritare__laddar.klar :is(.kl-status, .ritare__laddar-linje) { opacity: 0; transition: opacity 0.3s ease 0.3s; }
+/* kort laddning (cachad): ingen uppritning, bara en snabb toning */
+.ritare__laddar.snabb { transition: opacity 0.25s ease; }
+.ritare__laddar.snabb * { animation: none !important; transition: none !important; }
+@keyframes kl-rita { to { stroke-dashoffset: 0; } }
+@keyframes kl-bort { to { opacity: 0; } }
+@keyframes kl-fyll { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  html body .ritare__laddar .kl-streck { display: none; }
+  html body .ritare__laddar :is(.kl-vagg, .kl-tak, .kl-status) { opacity: 1 !important; animation: none !important; }
+  html body .ritare__laddar.klar .kl-logga { transform: none; }
+}
+
 /* tipset: en liten hand som vrider, försvinner efter första draget */
 .ritare__tips { position: absolute; z-index: 2; left: 50%; top: 16px; bottom: auto; height: auto; translate: -50% 0; display: inline-flex; align-items: center; gap: 8px; max-width: calc(100% - 32px); margin: 0; padding: 8px 14px 8px 10px; border-radius: 999px; background: var(--k-glas); color: #fff; font: 500 0.75rem/1 var(--sans); white-space: nowrap; pointer-events: none; transition: opacity 0.24s var(--k-ut), translate 0.24s var(--k-ut); }
 .ritare__tips span { overflow: hidden; text-overflow: ellipsis; }
@@ -1247,22 +1287,18 @@ html.foto .kf__flyg { display: none; }
 /* små lappar har ändå en träffyta som ett finger hittar */
 .kplanvy__rum::after { content: ""; position: absolute; inset: -13px; }
 /* smal scen: mindre text i hela ritningen */
-@container scen (max-width: 520px) {
-  .kplanvy__rum { padding: 5px 9px 6px; border-radius: 10px; }
-  .kplanvy__rum b { font-size: 0.75rem; }
-  .kplanvy__rum span { font-size: 0.65625rem; }
-  .kplanvy__rum--liten { padding: 3px 7px 4px; }
-  .kplanvy__rum--liten b, .kplanvy__rum--mini b { font-size: 0.65625rem; }
-  .kplanvy__rum--liten span { font-size: 0.59375rem; }
-  .kplanvy__mattal, .kplanvy__lofttext { padding: 2px 7px; font-size: 0.65625rem; }
-}
+/* (ingen egen mindre stil på smal scen: hela ritningens skyltar skalas lika, se husritare-plan.js,
+   så att mobilen ser ut som datorn i mindre format) */
+.kplanvy__lappar > * { transform-origin: 50% 50%; }
 @media (hover: hover) { .kplanvy__rum:hover { background: #fff; box-shadow: 0 0 0 2px var(--k-accent, #f0b56e), 0 10px 22px -8px rgba(0, 0, 0, 0.6); } }
 .kplanvy__rum:focus-visible { outline: 2px solid var(--k-accent, #f0b56e); outline-offset: 2px; }
 .kplanvy__rum:active { background: #f1ece3; }
 .kplanvy__mattal, .kplanvy__lofttext { padding: 3px 9px; border-radius: 999px; background: rgba(22, 20, 17, 0.8); color: #fff; font-size: 0.71875rem; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .kplanvy__lofttext { background: rgba(22, 20, 17, 0.62); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5); font-size: 0.65625rem; }
 /* smal scen: inne tar Se ute, lampor och hjälp platsen, så Planlösning går bort där (P finns kvar) */
-@container scen (max-width: 600px) { .kf__scen--inne .kf__vk[data-plan] { display: none; } }
+/* Öppna tak och Planlösning ska gå att nå även inne på en smal scen (förut doldes de, och då
+   gick det inte att byta läge inifrån på telefon): ryms de inte hamnar de under ⋯ */
+@container scen (max-width: 600px) { .kf__scen.kf__scen--inne .kf__verktyg .kf__vk[data-oppna]:not([hidden]), .kf__scen.kf__scen--inne .kf__verktyg .kf__vk[data-plan]:not([hidden]) { display: inline-flex; } }
 /* i planlösningen: tipset om att dra göms, pekaren är en vanlig pil över ritningen */
 .kf__scen--plan .ritare__tips { opacity: 0 !important; pointer-events: none; }
 /* minskad rörelse: ritningen står på plats direkt och tonas bara in */
@@ -1342,6 +1378,34 @@ html.foto .kf__flyg { display: none; }
 .kf__kartknapp:active { transform: scale(0.95); }
 @media (max-width: 860px) { .kf__kartknapp { right: 10px; bottom: 100px; } }
 .kf__scen--flyger .kf__kartknapp, .kf__scen--spel .kf__kartknapp { opacity: 0; pointer-events: none; }
+
+/* Helskärmsknappen på pekskärm: accentfärgad (som Rita ditt hus). När man kommer in pulserar en
+   ring 3 gånger, sedan en svag kvarvarande glöd; efter första trycket en vanlig knapp. Bara
+   transform och opacity. Dator (mus): vanlig knapp. */
+@media (hover: none), (pointer: coarse) {
+  .kf__verktyg .kf__vk[data-helskarm]:not(.kf__vk--sedd) { background: var(--k-accent, #f0b56e); color: #1b1915; box-shadow: 0 6px 16px -8px rgba(240, 181, 110, 0.9); }
+  .kf__verktyg .kf__vk[data-helskarm]:not(.kf__vk--sedd)::before { display: none; }
+}
+/* glittret inne, på mobil och dator, tills man har tryckt på Helskärm en gång */
+.kf__verktyg .kf__vk[data-helskarm].kf__vk--lockar { background: var(--k-accent, #f0b56e); color: #1b1915; }
+.kf__verktyg .kf__vk[data-helskarm].kf__vk--lockar::before { display: none; }
+.kf__scen:not(.kf__scen--inne) .kf__vk[data-helskarm].kf__vk--lockar .kf__glitter { display: none !important; }
+@media all {
+  /* svag gyllene glöd bakom knappen medan den lockar */
+  .kf__verktyg .kf__vk[data-helskarm].kf__vk--lockar { box-shadow: 0 0 14px 2px rgba(246, 201, 140, 0.55), 0 6px 16px -8px rgba(240, 181, 110, 0.9); }
+  /* glansen som sveper över ikonen (en gång per glittervarv) */
+  .kf__verktyg .kf__vk[data-helskarm].kf__vk--lockar::after { content: ""; display: block !important; position: absolute; inset: 0; left: 0; bottom: auto; translate: none; padding: 0; border-radius: inherit; background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.75) 50%, transparent 65%); box-shadow: none; opacity: 1; transform: translateX(-120%); pointer-events: none; overflow: hidden; animation: kf-hel-glans 2.75s ease-in-out 0.4s infinite; }
+  .kf__vk[data-helskarm] { overflow: visible; }
+  .kf__vk[data-helskarm] .kf__glitter { display: none; }
+  .kf__vk[data-helskarm].kf__vk--lockar .kf__glitter { display: block; }
+}
+/* gnistorna: fyruddiga stjärnor (clip-path) i guld och accent; dyker upp runt kanten, växer
+   0,6 → 1 med en liten vridning, blinkar och tonar bort, förskjutna i tid */
+.kf__glitter { position: absolute; inset: 0; width: auto; height: auto; pointer-events: none; display: none; overflow: visible; clip-path: none; }
+.kf__glitter b { position: absolute; left: var(--x); top: var(--y); width: var(--s, 9px); height: var(--s, 9px); background: radial-gradient(circle, #fff6d8 0 22%, #f6c98c 45%, var(--k-accent, #f0b56e) 75%); clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%); opacity: 0; transform: scale(0.6) rotate(0deg); animation: kf-gnista 2.75s ease-in-out var(--d, 0s) infinite; will-change: transform, opacity; }
+@keyframes kf-gnista { 0% { opacity: 0; transform: scale(0.6) rotate(0deg); } 14% { opacity: 1; transform: scale(1) rotate(30deg); } 22% { opacity: 0.55; } 30% { opacity: 1; transform: scale(0.95) rotate(45deg); } 46% { opacity: 0; transform: scale(0.7) rotate(70deg); } 100% { opacity: 0; transform: scale(0.6) rotate(70deg); } }
+@keyframes kf-hel-glans { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
+@media (prefers-reduced-motion: reduce) { .kf__glitter { display: none !important; } .kf__verktyg .kf__vk[data-helskarm].kf__vk--lockar::after { animation: none; opacity: 0; } }
 
 /* "Vänd telefonen för helskärm": under flikarna, en rad */
 .kf__vand { position: absolute; z-index: 4; left: 50%; top: 62px; translate: -50% 0; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 24px); padding: 6px 6px 6px 12px; border-radius: 999px; background: rgba(24, 22, 19, 0.86); color: #fff; font: 500 0.8125rem/1.2 var(--sans); white-space: nowrap; box-shadow: 0 12px 28px -14px rgba(0, 0, 0, 0.8); animation: k-popup 0.26s var(--k-ut); }
