@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261119f';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261119f';
-import { skapaPlanlager } from './husritare-plan.js?v=20261119f';
+import { skapaMiljo } from './husritare-miljo.js?v=20261119g';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261119g';
+import { skapaPlanlager } from './husritare-plan.js?v=20261119g';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -2187,7 +2187,36 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     modell: [0.62, 0.26, 0.76, 1], fasad: [0.42, 0.1, 0.9, 0.92], tak: [-0.45, 0.85, 0.55, 0.95],
     fonster: [-0.32, 0.12, 0.95, 0.86], summa: [0.7, 0.22, 0.66, 1],
   };
+  // Startvyn ("Runt om", även efter husbyte): rakt mot entrén, 22° åt det håll där altanen
+  // ligger, i låg höjd (10° nedåt mot husets mitt). Avståndet väljs så att huset med altanen
+  // fyller 80 % av bildens bredd (eller 36 % av höjden, det som kräver mest avstånd), och mitten
+  // ligger symmetriskt kring målpunkten. Huset hamnar en aning över mitten, fritt från verktygsraden.
+  const ENTRE = { vinkel: THREE.MathUtils.degToRad(22), lut: THREE.MathUtils.degToRad(7), bredd: 0.78, hojd: 0.36 };   // hojd: på bred skärm även bilen och marken framför, ovanför verktygsraden
+  function entreVy(kam, mitt) {
+    const Y = dorrInfo(), d = husGrupp.userData, H = HUS[val.modell];
+    if (!Y) return null;
+    const SN = { S: [0, 0, 1], N: [0, 0, -1], E: [1, 0, 0], W: [-1, 0, 0] }[H.altan];
+    const s = SN ? Math.sign(SN[0] * Y.u.x + SN[2] * Y.u.z) || 1 : 1;
+    const dir = Y.n.clone().multiplyScalar(Math.cos(ENTRE.vinkel)).addScaledVector(Y.u, s * Math.sin(ENTRE.vinkel)).normalize();
+    const hoger = new THREE.Vector3(-dir.z, 0, dir.x);
+    // husets utbredning (med takfot, utan altanen: den får gå ut mot bildkanten, som i en
+    // vanlig husbild) åt sidorna från målpunkten, två gånger den största sidan
+    const e = { x0: -d.L / 2 - 0.35, x1: d.L / 2 + 0.35, z0: -d.W / 2 - 0.35, z1: d.W / 2 + 0.35 };
+    let sida = 0, fram = 0;
+    [[e.x0, e.z0], [e.x1, e.z0], [e.x0, e.z1], [e.x1, e.z1]].forEach(([x, z]) => {
+      sida = Math.max(sida, Math.abs((x - mitt.x) * hoger.x + (z - mitt.z) * hoger.z));
+      fram = Math.max(fram, (x - mitt.x) * dir.x + (z - mitt.z) * dir.z);
+    });
+    const vf = THREE.MathUtils.degToRad(kam.fov) / 2, hf = Math.atan(Math.tan(vf) * kam.aspect);
+    const dist = Math.max((2 * sida) / ENTRE.bredd / (2 * Math.tan(hf)), d.hojd / ENTRE.hojd / (2 * Math.tan(vf))) + fram;
+    return new THREE.Vector3(dir.x * Math.cos(ENTRE.lut), Math.sin(ENTRE.lut), dir.z * Math.cos(ENTRE.lut)).multiplyScalar(dist).add(mitt);
+  }
   function mal(vy, kam = kamera, mitt = styr.target) {
+    if ((vy === 'runt' || vy === 'modell' || !VYER[vy]) && vy !== 'hjalte' && husGrupp) {
+      let p = null;
+      try { p = entreVy(kam, mitt); } catch (e) { console.warn(e); }
+      if (p) return p;
+    }
     if (vy === 'hjalte') {
       // hjältebilden: låg trekvart i ögonhöjd (1,7 m över marken), lite himmel ovanför
       const r = new THREE.Vector3(0.64, 0, 0.77).normalize();
@@ -2269,9 +2298,17 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     begarRender();
   }
   // när datorn är ledig (requestIdleCallback, annars en kort timeout)
+  // senaste trycket, klicket eller tangenten: förberedelserna i vila håller sig undan en stund
+  let inmatSist = -1e9;
+  ['pointerdown', 'keydown', 'touchstart'].forEach(h => window.addEventListener(h, () => { inmatSist = performance.now(); }, { capture: true, passive: true }));
+  // väntar någon på förberedelserna just nu? (då ska de gå på för fullt)
+  const vantarPaKomp = () => !!((flyg && flyg.bana && flyg.bana.halv) || oppen.vantar);
+  const nastaRuta = () => new Promise(r => { let k = false; const f = () => { if (!k) { k = true; r(); } }; requestAnimationFrame(() => setTimeout(f, 0)); setTimeout(f, 100); });
   function ledigt(fn, ms = 600) {
     if (typeof requestIdleCallback === 'function') requestIdleCallback(fn, { timeout: ms });
-    else setTimeout(() => fn({ timeRemaining: () => 8, didTimeout: true }), 60);
+    // utan requestIdleCallback (iPhone Safari): 10 ms arbete var 16:e ms. Förut 8 ms var 60:e,
+    // och inredningen hann inte byggas och värmas innan man tryckte på Se inne (lång väntan)
+    else setTimeout(() => fn({ timeRemaining: () => 10, didTimeout: true }), 16);
   }
   function skickaOvergang(opts) {
     if (!opts || opts.overgang !== 'tona') return;
@@ -2338,7 +2375,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   window.addEventListener('pointerup', () => { pekarNere = false; }, { passive: true });
   window.addEventListener('pointercancel', () => { pekarNere = false; }, { passive: true });
   // inget bygge medan man drar, zoomar eller kameran åker
-  const inneVanta = () => byggT < 1 || rivGrupp || aka || pekarNere || zoomMal !== null || tona.pa || gang.glid;
+  const inneVanta = () => byggT < 1 || rivGrupp || aka || pekarNere || zoomMal !== null || tona.pa || gang.glid || performance.now() - inmatSist < 400;
   function planeraInne(ms) {
     clearTimeout(inneTimer);
     inneBygge = null;
@@ -2364,7 +2401,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         // dockskåpets snitt och takkopior kompileras samtidigt (annars vid första lyftet).
         // Inredningen blir synlig (lageLjus) först när allt är kompilerat.
         inneForbered(hus);
-        forvarmOppen(hus).then(syns, syns);
+        forvarmOppen(hus, 1).then(syns, syns);   // ett program i taget (se kompKlipp)
       }, 1200);
     }, ms);
   }
@@ -4355,9 +4392,14 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         let skiva = performance.now() + 12;
         for (const x of objekt) {
           if (giltig && !giltig()) return;
+          // ett tryck eller en tangent nyss: vänta tills sidan har svarat (utom när någon väntar på
+          // just detta: åkningen som står framför dörren eller taket som svävar)
+          while (performance.now() - inmatSist < 400 && !vantarPaKomp()) await sov(60);
+          const pf = renderer.info.programs.length;
           ettObjekt(x, n, nya);
-          // högst cirka 12 ms i sträck, sedan får sidan rita (många objekt låste annars sidan)
-          if (performance.now() > skiva) { await sov(0); skiva = performance.now() + 12; if (giltig && !giltig()) return; }
+          // högst cirka 12 ms i sträck, och aldrig mer än ett nytt program per ruta: utan parallell
+          // kompilering (Safari) låser varje program sidan, och flera i rad gav sekundlånga stopp
+          if (performance.now() > skiva || renderer.info.programs.length > pf) { await nastaRuta(); skiva = performance.now() + 12; if (giltig && !giltig()) return; }
           if (renderer.info.programs.length - p0 >= sats) {
             const slut = performance.now() + 3000;
             while (!redo(nya) && performance.now() < slut) await sov(12);            nya.forEach(m => alla.add(m)); nya = new Set(); p0 = renderer.info.programs.length;
@@ -4449,7 +4491,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         try { forberedInne(r.value); } catch (e) { console.warn(e); klar(); return; }
       }
       inneForbered(hus);
-      forvarmOppen(hus, 8).then(klar, klar);
+      forvarmOppen(hus, bit < 40 ? 1 : 8).then(klar, klar);
     };
     steg();
   }
@@ -5203,7 +5245,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     const J = varmJobb;
     if (!J) return false;
     if (J.hus !== husGrupp) { varmJobb = null; J.klar(false); return false; }
-    if (!varmFar()) { setTimeout(begarRender, 300); return false; }   // väntar: ett nytt försök lite senare
+    // väntar (något annat pågår, eller man har just tryckt): ett nytt försök lite senare
+    if (!varmFar() || (performance.now() - inmatSist < 400 && !vantarPaKomp())) { setTimeout(begarRender, 300); return false; }
     const d = J.hus.userData, skugga = renderer.shadowMap.needsUpdate;
     renderer.shadowMap.needsUpdate = false;
     try {
@@ -6123,6 +6166,17 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // dockskåpet: oppna(true, { lager: { tak, loft, fokus: 'loft' } })
     oppna,
     arOppen: () => oppen.pa || oppen.vantar,
+    // för bildverktygen: sittplatserna inne med läge på skärmen (px i duken) och avstånd, bara läsning
+    provSitt() {
+      const ut = iaData(), Y0 = husGrupp ? husGrupp.userData.delar.Y0 : 0;
+      if (!ut || !inneLage) return [];
+      return ut.sitt.map((s, i) => {
+        if (!s) return null;
+        pV.set(s.pos[0], s.pos[1] + Y0 - 0.45, s.pos[2]);
+        const d = pV.distanceTo(kamera.position); pV.project(kamera);
+        return { i, namn: s.namn, avstand: +d.toFixed(2), framfor: pV.z < 1, x: Math.round((pV.x * 0.5 + 0.5) * dukB), y: Math.round((0.5 - pV.y * 0.5) * dukH) };
+      }).filter(Boolean);
+    },
     // styrspaken på pekskärm: spak(fram, sidled) med -1..1, spak(0, 0) = släppt
     spak: (fw, st) => satSpak(+fw || 0, +st || 0),
     // Tomt hus: tomt(true/false) döljer eller visar möblerna (tonas 0,4 s), tomt() läser läget

@@ -1310,8 +1310,17 @@ html.foto .kf__flyg { display: none; }
 @media (hover: none), (pointer: coarse) {
   .kf__scen--inne:not(.kf__scen--flyger):not(.kf__scen--spel) .kf__spak { display: block; }
   .kf__scen--inne:has(.kf__res:not([hidden])) .kf__spak { display: none; }
-  /* tipset om hur man går står ovanför spaken */
-  .kf__scen--inne .kf__gang { bottom: 186px; }
+  /* hjälpen om hur man går: mitt i bilden (aldrig över flikarna, spaken eller raden), två korta rader */
+  .kf__scen--inne .kf__gang { left: 50%; top: 60px; bottom: auto; translate: -50% -6px; max-width: calc(100% - 48px); flex-wrap: wrap; justify-content: center; row-gap: 2px; border-radius: 18px; pointer-events: none; }
+  .kf__scen--inne .kf__gang.syns { translate: -50% 0; }
+  .kf__scen--inne .kf__gang .kf__gang-del--pek[style*="--i:2"] { display: none; }
+  .kf__scen--inne .kf__gang .kf__gang-del + .kf__gang-del { box-shadow: none; }
+  /* kartan: hopfälld till en rund knapp nere till höger; öppen som överlägg ovanför den */
+  .kf__scen--inne .kf__kartknapp:not([hidden]) { display: grid; }
+  .kf__scen--inne .kf__karta:not(.kf__karta--oppen) { display: none; }
+  /* öppen: under flikarna, mitt i bilden, smal nog att gå fri från kartknappen; spaken vilar så länge */
+  .kf__scen--inne .kf__karta.kf__karta--oppen { z-index: 5; top: 60px; bottom: auto; left: 50%; right: auto; translate: -50% 0; width: min(240px, calc(100% - 112px)); animation: k-popup 0.2s var(--k-ut); }
+  .kf__scen.kf__scen--inne:has(.kf__karta.kf__karta--oppen) .kf__spak { display: none; }
   /* träffytor på minst 44 px för fingrar */
   .kf__verktyg .kf__vk { min-width: 44px; height: 44px; }
   .kf__verktyg .kf__ljusknapp { width: 44px; height: 44px; }
@@ -1325,6 +1334,41 @@ html.foto .kf__flyg { display: none; }
   .ritsida .kf__planlank { min-height: 44px; }
 }
 @media (max-width: 860px) { .kf__spak { left: 10px; bottom: 76px; } }
+
+/* kartknappen (bara inne på pekskärm, se ovan): samma höjd som spaken, i motsatt hörn */
+.kf__kartknapp { position: absolute; z-index: 3; right: 14px; bottom: 110px; display: none; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: rgba(24, 22, 19, 0.62); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 8px 18px -10px rgba(0, 0, 0, 0.7); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); -webkit-tap-highlight-color: transparent; cursor: pointer; }
+.kf__kartknapp svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.kf__kartknapp[aria-expanded="true"] { background: #fff; color: #1b1915; }
+.kf__kartknapp:active { transform: scale(0.95); }
+@media (max-width: 860px) { .kf__kartknapp { right: 10px; bottom: 100px; } }
+.kf__scen--flyger .kf__kartknapp, .kf__scen--spel .kf__kartknapp { opacity: 0; pointer-events: none; }
+
+/* "Vänd telefonen för helskärm": under flikarna, en rad */
+.kf__vand { position: absolute; z-index: 4; left: 50%; top: 62px; translate: -50% 0; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 24px); padding: 6px 6px 6px 12px; border-radius: 999px; background: rgba(24, 22, 19, 0.86); color: #fff; font: 500 0.8125rem/1.2 var(--sans); white-space: nowrap; box-shadow: 0 12px 28px -14px rgba(0, 0, 0, 0.8); animation: k-popup 0.26s var(--k-ut); }
+.kf__vand[hidden] { display: none; }
+.kf__vand svg { flex: none; width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.kf__vand-tel { transform-origin: 12px 12px; animation: kf-vand 2.4s var(--k-ut) 0.3s infinite; }
+@keyframes kf-vand { 0%, 20% { transform: rotate(0); } 45%, 75% { transform: rotate(-90deg); } 100% { transform: rotate(0); } }
+.kf__vand button { flex: none; min-height: 36px; padding: 0 12px; border: 0; border-radius: 999px; background: #fff; color: #1b1915; font: 600 0.75rem/1 var(--sans); cursor: pointer; }
+.kf__vand button::after { content: ""; position: absolute; inset: -4px; }
+.kf__vand button { position: relative; }
+@container scen (max-width: 380px) { .kf__vand { gap: 8px; padding-left: 10px; font-size: 0.75rem; } .kf__vand button { padding: 0 10px; } }
+@container scen (max-width: 310px) { .kf__vand span { white-space: normal; } }
+@media (prefers-reduced-motion: reduce) { .kf__vand-tel { animation: none; transform: rotate(-90deg); } }
+
+/* Fyll skärmen (liggande telefon inne, eller Helskärm där elementet inte stöder helskärm):
+   scenen ligger över hela fönstret, sidan under är dold och rullar inte */
+html.ritare-fyll, html.ritare-fyll body { overflow: hidden; overscroll-behavior: none; }
+html.ritare-fyll .kf__scen { position: fixed !important; inset: 0; z-index: 1000; width: 100% !important; height: 100% !important; height: 100dvh !important; min-height: 0 !important; max-height: none !important; aspect-ratio: auto !important; margin: 0; border-radius: 0 !important; box-shadow: none; }
+html.ritare-fyll :is(.site-header, .kf__handling, .kf__rad) { visibility: hidden; }
+/* liggande och låg: raderna i kanterna, så att bilden får resten */
+@media (orientation: landscape) and (max-height: 540px) {
+  html.ritare-fyll .kf__verktyg { bottom: max(6px, env(safe-area-inset-bottom)); }
+  html.ritare-fyll .kf__rum { top: max(6px, env(safe-area-inset-top)); left: max(8px, env(safe-area-inset-left)); right: max(8px, env(safe-area-inset-right)); }
+  html.ritare-fyll .kf__spak { left: max(12px, env(safe-area-inset-left)); bottom: 74px; }
+  html.ritare-fyll .kf__kartknapp { right: max(12px, env(safe-area-inset-right)); bottom: 98px; }
+  html.ritare-fyll .kf__scen--inne .kf__karta.kf__karta--oppen { top: 56px; }
+}
 
 /* ---- Verktygsraden klipps aldrig: Mer-menyn (husritare-sida.js) ----
    --mat: raden i sin naturliga bredd medan skriptet mäter. --trang: tidsreglaget krymper

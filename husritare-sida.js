@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119f';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119g';
 
-const MOTOR_V = '20261119f';
+const MOTOR_V = '20261119g';
 const Q0 = new URLSearchParams(location.search);
 const INB = Q0.get('inbaddad') === '1';
 if (INB) document.documentElement.classList.add('inbaddad');
@@ -825,10 +825,31 @@ if (livKnapp) livKnapp.addEventListener('click', () => {
   if (kan('liv')) livKnapp.setAttribute('aria-pressed', String(!!ritare.liv(livKnapp.getAttribute('aria-pressed') !== 'true')));
 });
 const hk = document.querySelector('[data-helskarm]');
-if (!scen.requestFullscreen || document.fullscreenEnabled === false) hk.hidden = true;
-hk.addEventListener('click', () => { if (document.fullscreenElement) document.exitFullscreen(); else scen.requestFullscreen().catch(() => {}); });
+// Helskärm: riktig helskärm där elementet stöder det, annars (iPhone Safari) fyller scenen
+// skärmen med en egen layout (html.ritare-fyll: scenen position fixed, resten av sidan dold)
+const kanHel = !!scen.requestFullscreen && document.fullscreenEnabled !== false;
+let fyllLage = null;   // null, 'knapp' eller 'auto' (liggande telefon)
+function fyll(pa, hur) {
+  pa = !!pa;
+  if (pa === !!fyllLage) { if (pa && hur === 'knapp') fyllLage = 'knapp'; return; }
+  fyllLage = pa ? hur || 'knapp' : null;
+  document.documentElement.classList.toggle('ritare-fyll', pa);
+  if (pa) scen.scrollIntoView({ block: 'center' });
+  hk.setAttribute('aria-pressed', String(pa || !!document.fullscreenElement));
+  hk.querySelector('span').textContent = pa ? 'Lämna helskärm' : 'Helskärm';
+  hk.setAttribute('data-tips', pa ? 'Lämna helskärm' : 'Helskärm');
+}
+function helskarm(pa) {
+  if (pa === undefined) pa = !(document.fullscreenElement || fyllLage);
+  if (!pa) { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); fyll(false); return; }
+  fyll(true, 'knapp');
+  if (kanHel) scen.requestFullscreen().then(() => { try { const o = screen.orientation; if (o && o.lock) o.lock('landscape').catch(() => {}); } catch (e) { /* stöds inte */ } }).catch(() => {});
+}
+hk.addEventListener('click', () => helskarm());
 document.addEventListener('fullscreenchange', () => {
   const hel = !!document.fullscreenElement;
+  if (!hel && fyllLage === 'knapp' && !kanHel) return;
+  if (!hel && fyllLage) fyll(false);
   hk.setAttribute('data-tips', hel ? 'Lämna helskärm' : 'Helskärm');
   hk.querySelector('span').textContent = hel ? 'Lämna helskärm' : 'Helskärm';
   hk.setAttribute('aria-pressed', String(hel));
@@ -1061,7 +1082,13 @@ function sattInne(pa, vyIndex, opt) {
     const visaNar = () => {
       if (!inneLage) return;
       if (kan('flyger') && ritare.flyger() && (vantat += 200) < 30000) { setTimeout(visaNar, 200); return; }
-      visaGang(true, pek ? 6000 : 4000);
+      // vänd-tipset först (samma plats under flikarna); hjälpen när det har gått bort
+      if (typeof vandTips !== 'undefined' && vandTips && (vantat += 200) < 40000 && (vandTips.syns() || vantat < 900)) { setTimeout(visaNar, 300); return; }
+      // kartan öppen: hjälpen hade lagt sig under den; den hoppas över (?-knappen visar den)
+      if (karta && karta.classList.contains('kf__karta--oppen')) return;
+      // på pekskärm bara första gången (?-knappen visar den igen)
+      if (pek) { let sett = false; try { sett = !!localStorage.getItem('legohus-gang-sett'); localStorage.setItem('legohus-gang-sett', '1'); } catch (e) { /* privat läge */ } if (sett) return; }
+      visaGang(true, 4000);
     };
     setTimeout(visaNar, lugn() ? 0 : 380);
   } else if (!pa && forra) {
@@ -1747,6 +1774,61 @@ function rullRad(el) {
 }
 rullRad(inneRumRad);
 rullRad(lagerRad);
+
+// ---- Inne på telefon: kartan som knapp, vänd telefonen, liggande fyller skärmen ----
+const pekskarm = () => matchMedia('(hover: none), (pointer: coarse)').matches;
+if (!FOTO && karta) {
+  // kartan hopfälld till en rund knapp (karta-ikon) nere till höger; ett tryck visar den
+  // som ett överlägg, tryck utanför stänger (CSS visar knappen bara inne på pekskärm)
+  const kk = document.createElement('button');
+  kk.type = 'button'; kk.className = 'kf__kartknapp'; kk.setAttribute('aria-label', 'Visa kartan'); kk.setAttribute('aria-expanded', 'false');
+  kk.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg>';
+  scen.appendChild(kk);
+  // (kartan öppen: vänd-tipset och hjälpen bort; hjälpen tar inte över platsen under kartan)
+  const kartaOppen = pa => { if (pa) { if (typeof vandTips !== 'undefined' && vandTips) vandTips.gom(); visaGang(false); } karta.classList.toggle('kf__karta--oppen', pa); kk.setAttribute('aria-expanded', String(pa)); kk.setAttribute('aria-label', pa ? 'Dölj kartan' : 'Visa kartan'); };
+  kk.addEventListener('click', e => { e.stopPropagation(); kartaOppen(!karta.classList.contains('kf__karta--oppen')); });
+  document.addEventListener('pointerdown', e => { if (karta.classList.contains('kf__karta--oppen') && !e.target.closest('.kf__karta, .kf__kartknapp')) kartaOppen(false); }, true);
+  const folj = () => { kk.hidden = karta.hidden; if (karta.hidden) kartaOppen(false); };
+  new MutationObserver(folj).observe(karta, { attributes: true, attributeFilter: ['hidden'] });
+  folj();
+}
+// "Vänd telefonen för helskärm": en gång per besök, när man går in i stående läge
+const vandTips = (() => {
+  if (FOTO || INB) return null;
+  const v = document.createElement('div');
+  v.className = 'kf__vand'; v.setAttribute('role', 'status'); v.hidden = true;
+  v.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect class="kf__vand-tel" x="7.5" y="3" width="9" height="18" rx="2"/><path d="M11 18h2"/></svg><span>Vänd telefonen för helskärm</span><button type="button">Helskärm</button>';
+  scen.appendChild(v);
+  let tid = 0, hjalpEfter = false;
+  // tipsen turas om på samma plats: vänd-tipset först, hjälpen om hur man går när det har gått bort
+  const gom = () => { clearTimeout(tid); const var_ = !v.hidden; v.hidden = true; if (var_ && hjalpEfter && inneLage && !(karta && karta.classList.contains('kf__karta--oppen'))) { hjalpEfter = false; visaGang(true, 4000); } };
+  v.querySelector('button').addEventListener('click', e => { e.stopPropagation(); gom(); helskarm(true); });
+  return { visa() {
+    let sett = false; try { sett = !!sessionStorage.getItem('legohus-vand'); } catch (e) { /* privat läge */ }
+    if (sett || !pekskarm() || !matchMedia('(orientation: portrait)').matches) return false;
+    try { sessionStorage.setItem('legohus-vand', '1'); } catch (e) { /* privat läge */ }
+    if (gangTips && gangTips.classList.contains('syns')) { visaGang(false); hjalpEfter = true; }
+    v.hidden = false; clearTimeout(tid); tid = setTimeout(gom, 6000);
+    return true;
+  }, gom, syns: () => !v.hidden };
+})();
+// liggande telefon inne: scenen fyller skärmen; tillbaka till stående = vanlig sida
+const liggande = matchMedia('(orientation: landscape) and (max-height: 540px)');
+function passaFyll() {
+  if (FOTO || INB) return;
+  if (inneLage && pekskarm() && liggande.matches) { if (vandTips) vandTips.gom(); fyll(true, 'auto'); }
+  else if (fyllLage === 'auto') fyll(false);
+}
+try { liggande.addEventListener('change', passaFyll); } catch (e) { liggande.addListener(passaFyll); }
+new MutationObserver(() => {
+  const inne = scen.classList.contains('kf__scen--inne');
+  if (inne === passaFyll.inne) return;
+  passaFyll.inne = inne;
+  passaFyll();
+  // vänd-tipset när man har kommit in (efter åkningen genom dörren), sedan hjälpen (visaGang väntar)
+  if (inne && vandTips) { let n = 0; const nar = () => { if (!inneLage || fyllLage) return; if (kan('flyger') && ritare.flyger() && ++n < 150) { setTimeout(nar, 200); return; } vandTips.visa(); }; setTimeout(nar, 300); }
+  if (!inne && vandTips) vandTips.gom();
+}).observe(scen, { attributes: true, attributeFilter: ['class'] });
 
 // ---- Styrspaken: gå runt inne på pekskärm ----
 // En rund spak nere till vänster (syns bara inne och bara på pekskärm, se husritare.css).
