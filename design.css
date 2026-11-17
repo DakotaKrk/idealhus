@@ -16199,7 +16199,7 @@ html:not([data-tema="mork"]) .pf-topp__tre span {
 }
 
 .sprang--utan3d .sprang__scen {
-  background: url("images/hus-r1.webp") center / cover no-repeat;
+  background: url("images/stamning/gratt-hus-skargard.webp") center / cover no-repeat;
 }
 
 .sprang__scen model-viewer {
@@ -17944,55 +17944,7 @@ html[data-tema="mork"] .at-steg__lista li {
   box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
 }
 
-/* --- Kontakten: centrerad som resten -------------------------------------- */
-.katsida .contact-section__intro {
-  text-align: center;
-}
-
-.katsida .contact-section__title,
-.katsida .contact-section__text {
-  margin-inline: auto;
-}
-
-.katsida .tillit {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  width: 100%;
-}
-
-.katsida .tillit li {
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-  padding: 18px 10px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.06);
-  text-align: center;
-}
-
-html[data-tema="mork"] .katsida .tillit li {
-  background: rgba(247, 245, 240, 0.04);
-  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.08);
-}
-
 @media (min-width: 1041px) {
-  .katsida .contact-section__inner {
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-    gap: 40px;
-  }
-
-  .katsida .contact-section__intro {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 50rem;
-  }
-
-  .katsida .contact-section .kontaktkort {
-    width: min(620px, 100%);
-  }
 }
 
 /* --- Mellanstora skärmar --------------------------------------------------- */
@@ -18083,14 +18035,6 @@ html[data-tema="mork"] .katsida .tillit li {
     max-width: 520px;
     margin-inline: auto;
   }
-
-  .katsida .tillit {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .katsida .contact-section__intro .tillit {
-    margin-inline: auto;
-  }
 }
 
 @media (max-width: 560px) {
@@ -18122,34 +18066,6 @@ html[data-tema="mork"] .katsida .tillit li {
 
 .katsida .category__head.kat-huvud {
   gap: 0;
-}
-
-.katsida .contact-section__intro .section-label {
-  margin-bottom: 20px;
-}
-
-.katsida .contact-section .kontaktkort {
-  text-align: center;
-}
-
-.katsida .contact-section .kontaktkort__rubrik {
-  justify-content: center;
-}
-
-.katsida .contact-section .kontaktkort__rubrik::after {
-  content: "";
-  display: block;
-  width: 22px;
-  height: 1px;
-  background: var(--virke);
-}
-
-.katsida .contact-section .kontaktkort .contact-section__meta > div {
-  justify-items: center;
-}
-
-.katsida .contact-section .kontaktkort .contact-section__meta > div > * {
-  justify-content: center;
 }
 
 /* De färgade orden i rubrikerna hålls ihop på en rad. */
@@ -18485,23 +18401,6 @@ html[data-tema="mork"] .hus-pris__kort .model-price__card span {
 
 /* --- Formuläret: centrerat under rubriken --------------------------------- */
 @media (min-width: 1041px) {
-  .husida .contact-section .contact-form {
-    width: min(760px, 100%);
-  }
-
-  .husida .contact-section__meta {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px 40px;
-    margin-top: 28px;
-  }
-
-  .husida .contact-section__meta > div {
-    display: grid;
-    justify-items: center;
-    gap: 6px;
-  }
 }
 
 /* --- Mindre skärmar ----------------------------------------------------------- */
@@ -18552,22 +18451,6 @@ html[data-tema="mork"] .hus-pris__kort .model-price__card span {
   .hus-fler__text small {
     font-size: 0.75rem;
   }
-}
-
-/* Kontaktintrot var klistrat (sticky) från tvåspaltsläget och gled in
-   över formuläret när det står under. Huskortets formulär får luft
-   mellan raderna. */
-.katsida .contact-section__intro {
-  position: static;
-  top: auto;
-}
-
-.husida .contact-section .contact-form {
-  row-gap: 18px;
-}
-
-.husida .contact-section .contact-form__row {
-  gap: 18px 20px;
 }
 
 /* 3D-avsnittet: två spalter på datorn, centrerat på mobilen som resten. */
@@ -19067,56 +18950,56 @@ html body main > * + *:not(.vagar):not(.rg-kort):not(dialog) {
 
 /* Öppna avsnitt och paneler vars luft sitter på ett inre block: ingen
    egen luft på själva avsnittet. */
-html body main > .ih-sektion:not(.ih-sektion--sand):not(.vagar),
-html body main > .category,
-html body main > .prisskala,
-html body main > .prisfaktorer,
-html body main > .prisvag,
-html body main > .pf-lev,
-html body main > .pf-band,
-html body main > .pf-steg,
-html body main > .flode-intro,
-html body main > .flode,
-html body main > .segment,
-html body main > .manifest,
-html body main > .kontakt-topp,
-html body main > .tv,
-html body main > .kollen-hus,
-html body main > .markkoll,
-html body main > .againtro,
-html body main > .kalkyl,
-html body main > .rg,
-html body main > .guide,
-html body main > .siffror,
-html body main > .husval,
-html body main > .at-anv,
-html body main > .at-foto,
-html body main > .at-steg,
-html body main > .hus-plan,
-html body main > .hus-fler,
-html body main > .hus-pris,
-html body main > .pf-tak,
-html body main > .studio3d,
-html body main > .hus3dvy,
-html body main > .prisoffert,
-html body main > .checklista,
-html body main > .samagare,
+html body main > .ih-sektion:not(.ih-sektion--sand):not(.vagar),
+html body main > .category,
+html body main > .prisskala,
+html body main > .prisfaktorer,
+html body main > .prisvag,
+html body main > .pf-lev,
+html body main > .pf-band,
+html body main > .pf-steg,
+html body main > .flode-intro,
+html body main > .flode,
+html body main > .segment,
+html body main > .manifest,
+html body main > .kontakt-topp,
+html body main > .tv,
+html body main > .kollen-hus,
+html body main > .markkoll,
+html body main > .againtro,
+html body main > .kalkyl,
+html body main > .rg,
+html body main > .guide,
+html body main > .siffror,
+html body main > .husval,
+html body main > .at-anv,
+html body main > .at-foto,
+html body main > .at-steg,
+html body main > .hus-plan,
+html body main > .hus-fler,
+html body main > .hus-pris,
+html body main > .pf-tak,
+html body main > .studio3d,
+html body main > .hus3dvy,
+html body main > .prisoffert,
+html body main > .checklista,
+html body main > .samagare,
 html body main > .rg-slut {
   padding-block: 0;
 }
 
 /* Paneler: samma inre luft. */
-html body main > .contact-section.contact-section,
-html body main > .ih-sektion--sand.ih-sektion--sand,
-html body main > .virke.virke,
-html body .studio3d__inner.studio3d__inner,
-html body .hus3dvy__inner.hus3dvy__inner,
-html body .prisoffert__inner.prisoffert__inner,
-html body .checklista__inre.checklista__inre,
-html body .samagare__inner.samagare__inner,
-html body .rg-slut__inre.rg-slut__inre,
-html body .at-steg__kort.at-steg__kort,
-html body .hus-pris__panel.hus-pris__panel,
+html body main > .contact-section.contact-section,
+html body main > .ih-sektion--sand.ih-sektion--sand,
+html body main > .virke.virke,
+html body .studio3d__inner.studio3d__inner,
+html body .hus3dvy__inner.hus3dvy__inner,
+html body .prisoffert__inner.prisoffert__inner,
+html body .checklista__inre.checklista__inre,
+html body .samagare__inner.samagare__inner,
+html body .rg-slut__inre.rg-slut__inre,
+html body .at-steg__kort.at-steg__kort,
+html body .hus-pris__panel.hus-pris__panel,
 html body .pf-tak__inre.pf-tak__inre {
   padding-top: var(--panel);
   padding-bottom: var(--panel);
@@ -19134,18 +19017,18 @@ html body main > .flode-intro + .flode {
 }
 
 /* Rubrikblocken: samma luft ned till innehållet. */
-html body main .ih-huvud,
-html body main .category__head.kat-huvud,
-html body main .prisskala__topp,
-html body main .prisfaktorer__topp,
-html body main .prisvag__topp,
-html body main .pf-lev__huvud,
-html body main .pf-band__huvud,
-html body main .pf-steg__huvud,
-html body main .kollen-hus__topp,
-html body main .markkoll__topp,
-html body main .samagare__topp,
-html body main .kalkyl__topp,
+html body main .ih-huvud,
+html body main .category__head.kat-huvud,
+html body main .prisskala__topp,
+html body main .prisfaktorer__topp,
+html body main .prisvag__topp,
+html body main .pf-lev__huvud,
+html body main .pf-band__huvud,
+html body main .pf-steg__huvud,
+html body main .kollen-hus__topp,
+html body main .markkoll__topp,
+html body main .samagare__topp,
+html body main .kalkyl__topp,
 html body main .studio3d__topp {
   margin-bottom: var(--huvud);
 }
@@ -19169,18 +19052,18 @@ html body main > .virke.virke.virke {
 
 /* Rubrikblockens luft ned till innehållet vinner över äldre regler
    (t.ex. .husval .ih-huvud) - klassen tredubblad för specificiteten. */
-html body main .ih-huvud.ih-huvud.ih-huvud,
-html body main .kat-huvud.kat-huvud.kat-huvud,
-html body main .prisskala__topp.prisskala__topp.prisskala__topp,
-html body main .prisfaktorer__topp.prisfaktorer__topp.prisfaktorer__topp,
-html body main .prisvag__topp.prisvag__topp.prisvag__topp,
-html body main .pf-lev__huvud.pf-lev__huvud.pf-lev__huvud,
-html body main .pf-band__huvud.pf-band__huvud.pf-band__huvud,
-html body main .pf-steg__huvud.pf-steg__huvud.pf-steg__huvud,
-html body main .kollen-hus__topp.kollen-hus__topp.kollen-hus__topp,
-html body main .markkoll__topp.markkoll__topp.markkoll__topp,
-html body main .samagare__topp.samagare__topp.samagare__topp,
-html body main .kalkyl__topp.kalkyl__topp.kalkyl__topp,
+html body main .ih-huvud.ih-huvud.ih-huvud,
+html body main .kat-huvud.kat-huvud.kat-huvud,
+html body main .prisskala__topp.prisskala__topp.prisskala__topp,
+html body main .prisfaktorer__topp.prisfaktorer__topp.prisfaktorer__topp,
+html body main .prisvag__topp.prisvag__topp.prisvag__topp,
+html body main .pf-lev__huvud.pf-lev__huvud.pf-lev__huvud,
+html body main .pf-band__huvud.pf-band__huvud.pf-band__huvud,
+html body main .pf-steg__huvud.pf-steg__huvud.pf-steg__huvud,
+html body main .kollen-hus__topp.kollen-hus__topp.kollen-hus__topp,
+html body main .markkoll__topp.markkoll__topp.markkoll__topp,
+html body main .samagare__topp.samagare__topp.samagare__topp,
+html body main .kalkyl__topp.kalkyl__topp.kalkyl__topp,
 html body main .studio3d__topp.studio3d__topp.studio3d__topp {
   margin-bottom: var(--huvud);
 }
@@ -19899,53 +19782,8 @@ html[data-tema="mork"] body .site-header__inner::before {
   background: linear-gradient(180deg, rgba(33, 30, 25, 0.62), rgba(20, 19, 16, 0.5));
 }
 
-/* =====================================================================
-   Tillitsrutorna i kontaktdelen (2026-10-06): glaskort, ikonen i en
-   varm bricka, lyft vid hovring, och de tonas in en i taget ur oskärpa
-   när de rullas fram (scroll-driven; utan stöd står de bara där).
-   ===================================================================== */
-html body .katsida .tillit li {
-  position: relative;
-  gap: 12px;
-  padding: 24px 14px 22px;
-  border-radius: 22px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.42));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
-    0 0 0 1px rgba(27, 25, 21, 0.05),
-    0 18px 36px -26px rgba(90, 60, 25, 0.45);
-  font: 600 0.9375rem/1.3 var(--knappfont);
-  letter-spacing: -0.01em;
-  color: var(--text);
-  transition: transform 0.5s var(--mjuk), box-shadow 0.5s var(--mjuk);
-}
-
-html body .katsida .tillit li:hover {
-  transform: translateY(-4px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
-    0 0 0 1px rgba(27, 25, 21, 0.06),
-    0 28px 50px -28px rgba(90, 60, 25, 0.55);
-}
-
-html body .katsida .tillit svg {
-  box-sizing: content-box;
-  width: 22px;
-  height: 22px;
-  padding: 12px;
-  border-radius: 16px;
-  background: radial-gradient(circle at 30% 25%, rgba(255, 233, 200, 1), rgba(240, 181, 110, 0.55));
-  stroke: var(--virke-djup);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 10px 20px -12px rgba(240, 181, 110, 0.9);
-  transition: transform 0.6s var(--mjuk);
-}
-
-html body .katsida .tillit li:hover svg {
-  transform: rotate(-6deg) scale(1.07);
-}
-
+/* Tillitsrutorna i den gamla korta kontaktdelen togs bort 2026-11-17:
+   alla sidor har nu startsidans slut (_avslut.py). */
 @keyframes tillit-in {
   from {
     opacity: 0;
@@ -19963,29 +19801,7 @@ html body .katsida .tillit li:hover svg {
 
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    html body .katsida .tillit li {
-      animation: tillit-in linear both;
-      animation-timeline: view();
-      animation-range: entry 5% cover 30%;
-    }
-
-    html body .katsida .tillit li:nth-child(2) {
-      animation-range: entry 12% cover 36%;
-    }
-
-    html body .katsida .tillit li:nth-child(3) {
-      animation-range: entry 19% cover 42%;
-    }
-
-    html body .katsida .tillit li:nth-child(4) {
-      animation-range: entry 26% cover 48%;
-    }
   }
-}
-
-html[data-tema="mork"] body .katsida .tillit li {
-  background: linear-gradient(160deg, rgba(247, 245, 240, 0.07), rgba(247, 245, 240, 0.03));
-  box-shadow: inset 0 1px 0 rgba(247, 245, 240, 0.08), inset 0 0 0 1px rgba(247, 245, 240, 0.08);
 }
 
 /* Övergångsnamnet sätts av skriptet i head bara under sidbytet. */
@@ -20360,13 +20176,11 @@ html body .contact-section .kontaktkort .tillit {
    i). premium.js sätter .glid och sedan .glid--in när de syns - då
    spelas hela inträdet på en gång, en ruta i taget. */
 html body .contact-section .kontaktkort .tillit li,
-html body .katsida .tillit li,
 html body .flode-intro__skeden a {
   animation: none;
 }
 
 html.ih-js body .contact-section .kontaktkort .tillit li.glid,
-html.ih-js body .katsida .tillit li.glid,
 html.ih-js body .flode-intro__skeden a.glid {
   opacity: 0;
   translate: 0 20px;
@@ -20380,7 +20194,6 @@ html.ih-js body .flode-intro__skeden a.glid {
 }
 
 html.ih-js body .contact-section .kontaktkort .tillit li.glid.glid--in,
-html.ih-js body .katsida .tillit li.glid.glid--in,
 html.ih-js body .flode-intro__skeden a.glid.glid--in {
   opacity: 1;
   translate: 0 0;
@@ -20389,7 +20202,6 @@ html.ih-js body .flode-intro__skeden a.glid.glid--in {
 
 @media (prefers-reduced-motion: reduce) {
   html.ih-js body .contact-section .kontaktkort .tillit li.glid,
-  html.ih-js body .katsida .tillit li.glid,
   html.ih-js body .flode-intro__skeden a.glid {
     opacity: 1;
     translate: none;
@@ -26081,17 +25893,6 @@ html body .ih-fraga summary:active {
   }
 }
 
-/* Tillitsrutorna: ikonen överst i varje ruta, och varmt glas i mörkt läge. */
-html body .katsida .tillit li {
-  justify-content: flex-start;
-}
-
-html[data-tema="mork"] body .katsida .tillit svg {
-  background: rgba(240, 181, 110, 0.14);
-  stroke: #f0b56e;
-  box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.28);
-}
-
 /* "Tre steg till ditt hus.": rubriken i kortet behåller sin egen luft. */
 html body main .at-steg__kort .ih-huvud.ih-huvud.ih-huvud {
   margin-bottom: clamp(28px, 3vw, 40px);
@@ -31427,4 +31228,1502 @@ html body main .contact-section .kontaktkort .kopiera-rad.kopiera-rad {
   html body .subpage-hero.helbild.helbild {
     height: max(min(80vh, 740px), calc(950px - 22vw));
   }
+}
+
+/* ===== Toppen utan film (2026-11-06) ==========================================
+   En stillbild av ett av våra hus fyller ramen, och husväljaren nere till höger
+   byter hus: bilden tonas över och växer långsamt, namnet och fakta byts.
+   Rubriken står kvar till vänster. Ingen film, ingen stillbild från filmen. */
+html body .topp4::before { content: none; }
+html body .topp4 .topp3__ton {
+  background:
+    linear-gradient(90deg, rgba(20, 18, 15, 0.72) 0%, rgba(20, 18, 15, 0.42) 38%, rgba(20, 18, 15, 0) 66%),
+    linear-gradient(0deg, rgba(20, 18, 15, 0.55) 0%, rgba(20, 18, 15, 0) 42%),
+    linear-gradient(180deg, rgba(20, 18, 15, 0.28) 0%, rgba(20, 18, 15, 0) 20%);
+}
+.topp4__bilder { position: absolute; inset: 0; }
+.topp4__bild {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 62% 60%;
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 1.1s ease, transform 7s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+.topp4__bild.aktiv { opacity: 1; transform: scale(1); }
+
+/* Husväljaren */
+.topp4__val {
+  position: absolute;
+  right: clamp(20px, 3vw, 40px);
+  bottom: clamp(20px, 3vw, 40px);
+  z-index: 2;
+  display: grid;
+  gap: 14px;
+  width: min(430px, calc(100% - 40px));
+  padding: 18px 18px 16px;
+  border-radius: 24px;
+  background: rgba(24, 22, 18, 0.42);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.16), 0 24px 60px -28px rgba(0, 0, 0, 0.6);
+  color: var(--krita, #f7f5f0);
+  animation: topp3-in 0.9s var(--mjuk) 0.9s both;
+}
+.topp4__etikett {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--knappfont);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(247, 245, 240, 0.72);
+}
+.topp4__prick { width: 7px; height: 7px; border-radius: 50%; background: var(--virke, #e8a45a); box-shadow: 0 0 0 4px rgba(232, 164, 90, 0.22); }
+.topp4__info { display: grid; gap: 2px; }
+.topp4__info.byt { animation: topp4-byt 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
+.topp4__namn { font-family: var(--knappfont); font-size: clamp(1.4rem, 1.1rem + 0.8vw, 1.75rem); font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; }
+.topp4__typ { font-size: 0.95rem; color: rgba(247, 245, 240, 0.78); font-variant-numeric: tabular-nums; }
+.topp4__lista { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.topp4__hus {
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: rgba(247, 245, 240, 0.1);
+  cursor: pointer;
+  opacity: 0.62;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.2s ease;
+}
+.topp4__hus img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.topp4__hus:hover { opacity: 0.9; transform: translateY(-2px); }
+.topp4__hus:active { transform: scale(0.96); }
+.topp4__hus[aria-pressed="true"] { opacity: 1; box-shadow: 0 0 0 2px var(--krita, #f7f5f0), 0 8px 18px -10px rgba(0, 0, 0, 0.7); }
+.topp4__lank {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 8px;
+  font-family: var(--knappfont);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--krita, #f7f5f0);
+  text-decoration: none;
+}
+.topp4__lank svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+.topp4__lank:hover svg { transform: translateX(3px); }
+@keyframes topp4-byt { from { opacity: 0; transform: translateY(6px); } }
+
+/* Texten får plats ovanför väljaren på lägre skärmar */
+@media (max-width: 1100px) {
+  html body .topp4 .topp3__inre { justify-content: flex-start; padding-top: clamp(40px, 7vh, 72px); }
+}
+@media (max-width: 900px) {
+  html body .topp3__ram.topp4 { height: auto; min-height: 0; }
+  html body .topp4 .topp3__inre { position: relative; padding: 36px 22px 18px; }
+  .topp4__val { position: relative; right: auto; bottom: auto; width: auto; margin: 0 14px 14px; }
+  .topp4__bild { object-position: 60% 50%; }
+  html body .topp4 .topp3__ton { background: linear-gradient(180deg, rgba(20, 18, 15, 0.62) 0%, rgba(20, 18, 15, 0.35) 45%, rgba(20, 18, 15, 0.55) 100%); }
+  html body .topp4 .topp3__rulla { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .topp4__bild { transition: opacity 0.4s ease; transform: none; }
+  .topp4__bild.aktiv { transform: none; }
+  .topp4__val, .topp4__info.byt { animation: none; }
+}
+
+/* Toppen: texten till vänster på mörkt, huset till höger (fotot börjar en bit in
+   och tonar ut i det mörka), väljaren nere till höger. */
+@media (min-width: 901px) {
+  html body .topp4 .topp4__bilder { left: 30%; }
+  html body .topp4 .topp4__bilder::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgb(27, 25, 21) 0%, rgba(27, 25, 21, 0.55) 16%, rgba(27, 25, 21, 0) 42%);
+    pointer-events: none;
+  }
+  html body .topp4 .topp3__ton {
+    background:
+      linear-gradient(90deg, rgba(27, 25, 21, 0.35) 0%, rgba(27, 25, 21, 0) 50%),
+      linear-gradient(0deg, rgba(20, 18, 15, 0.45) 0%, rgba(20, 18, 15, 0) 36%);
+  }
+  html body .topp4 .topp3__inre {
+    align-items: flex-start;
+    justify-content: center;
+    padding-left: clamp(36px, 5.5vw, 88px);
+    padding-right: 52%;
+    text-align: left;
+  }
+  html body .topp4 .topp3__ord { align-items: flex-start; margin: 0; max-width: 40rem; }
+  html body .topp4 .topp3__rubrik { font-size: clamp(2.8rem, 1rem + 4.4vw, 5.2rem); }
+  html body .topp4 .topp3__ingress { margin-left: 0; max-width: 30rem; }
+  html body .topp4 .topp3__knappar { justify-content: flex-start; }
+  html body .topp4 .topp3__rulla { left: clamp(36px, 5.5vw, 88px); right: auto; margin-left: 0; transform: none; }
+}
+@media (min-width: 901px) and (max-width: 1100px) {
+  html body .topp4 .topp3__inre { padding-right: 40%; justify-content: center; padding-top: 0; }
+}
+
+/* ===== Korten över husbilderna täcker mindre (2026-11-06) =====================
+   Offertkortet och faktakortet i sidtopparna och takkortet i "Så fungerar det"
+   låg över en stor del av husbilden. Nu syns bara kortets rubrik som en liten
+   flik i bildens hörn; listan fälls ut när pekaren vilar på bilden eller när
+   något i toppen har fokus. Kortet är också mindre och skjuter mer ut över
+   bildens kant än in i den. */
+@media (min-width: 901px) {
+  html body .subpage-hero.helbild .hoffert {
+    width: 252px;
+    padding: 12px 14px;
+    right: calc(clamp(28px, 4vw, 64px) + min(var(--bildb, 54%), 54%) - 150px);
+    bottom: clamp(64px, 10vh, 96px);
+  }
+  html body .subpage-hero.helbild .hoffert .hoffert__lista,
+  html body .subpage-hero.helbild .hoffert .hoffert__fot.hoffert__fot,
+  html body .takkort .takkort__rad,
+  html body .takkort .hoffert__fot.hoffert__fot {
+    max-height: 420px;
+    overflow: hidden;
+    transition: max-height 0.45s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+  }
+  html body .subpage-hero.helbild:not(:hover):not(:focus-within) .hoffert .hoffert__lista,
+  html body .subpage-hero.helbild:not(:hover):not(:focus-within) .hoffert .hoffert__fot.hoffert__fot {
+    max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-color: transparent;
+    opacity: 0;
+  }
+  html body .subpage-hero.helbild .hoffert .hoffert__huvud { margin-bottom: 0; padding-bottom: 0; border-bottom-color: transparent; }
+  html body .subpage-hero.helbild:is(:hover, :focus-within) .hoffert .hoffert__huvud { margin-bottom: 10px; padding-bottom: 10px; border-bottom-color: rgba(27, 25, 21, 0.08); }
+
+  /* Takkortet: bara den första raden syns tills pekaren vilar på bilden */
+  html body .takkort { width: 260px; left: -64px; }
+  html body .segment__bildram:not(:hover) .takkort .takkort__rad:not(:first-child),
+  html body .segment__bildram:not(:hover) .takkort .hoffert__fot.hoffert__fot {
+    max-height: 0;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-color: transparent;
+    opacity: 0;
+  }
+  html body .segment__bildram:not(:hover) .takkort .takkort__rad:first-child { border-bottom-color: transparent; }
+
+  /* Husväljaren i startsidans topp: tätare och lägre */
+  html body .topp4__val { width: min(372px, calc(100% - 40px)); gap: 10px; padding: 14px 14px 12px; }
+  html body .topp4__etikett { display: none; }
+  html body .topp4__lista { gap: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .subpage-hero.helbild .hoffert .hoffert__lista,
+  html body .subpage-hero.helbild .hoffert .hoffert__fot.hoffert__fot,
+  html body .takkort .takkort__rad,
+  html body .takkort .hoffert__fot.hoffert__fot { transition: none; }
+}
+
+/* ===== Startsidans topp i samma ljusa form som sidtopparna (2026-11-06) ======
+   Ljus botten, mörk rubrik, huset som rundat fotokort till höger. Husväljaren
+   ligger i textspalten under knapparna och täcker aldrig huset. */
+html body .starttopp .subpage-hero__title em {
+  font-style: normal;
+  color: var(--virke-djup, #b06a26);
+}
+html body .starttopp__bild { transition: opacity 0.26s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
+html body .starttopp__bild.byter { opacity: 0; transform: scale(0.985); }
+
+.starttopp__val {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 18px;
+  margin-top: clamp(22px, 3.5vh, 34px);
+  padding: 14px 16px;
+  max-width: 34rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(27, 25, 21, 0.06), 0 18px 40px -28px rgba(90, 60, 25, 0.45);
+}
+.starttopp__info { display: grid; gap: 1px; min-width: 0; }
+.starttopp__info.byt { animation: starttopp-byt 0.45s cubic-bezier(0.23, 1, 0.32, 1); }
+.starttopp__etikett { font-family: var(--knappfont); font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--virke-djup, #b06a26); }
+.starttopp__namn { font-family: var(--knappfont); font-size: 1.25rem; font-weight: 600; line-height: 1.2; letter-spacing: -0.015em; color: var(--text, #1b1915); }
+.starttopp__typ { font-size: 0.9rem; color: var(--text-2, #5e574d); font-variant-numeric: tabular-nums; }
+.starttopp__lank {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: end;
+  font-family: var(--knappfont);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text, #1b1915);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.starttopp__lank svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+.starttopp__lank:hover svg { transform: translateX(3px); }
+.starttopp__lista { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.starttopp__hus {
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: #efe9df;
+  cursor: pointer;
+  opacity: 0.72;
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.08);
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.2s ease;
+}
+.starttopp__hus img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.starttopp__hus:hover { opacity: 1; transform: translateY(-2px); }
+.starttopp__hus:active { transform: scale(0.96); }
+.starttopp__hus[aria-pressed="true"] { opacity: 1; box-shadow: 0 0 0 2px var(--virke-djup, #b06a26), 0 8px 18px -12px rgba(90, 60, 25, 0.7); }
+.starttopp__hus:focus-visible { outline: 2px solid var(--virke-djup, #b06a26); outline-offset: 2px; }
+@keyframes starttopp-byt { from { opacity: 0; transform: translateY(5px); } }
+
+html[data-tema="mork"] .starttopp__val { background: rgba(255, 255, 255, 0.06); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1); }
+html[data-tema="mork"] .starttopp__namn, html[data-tema="mork"] .starttopp__lank { color: #f4efe7; }
+html[data-tema="mork"] .starttopp__typ { color: rgba(244, 239, 231, 0.72); }
+
+@media (max-width: 560px) {
+  .starttopp__lista { gap: 6px; }
+  .starttopp__val { padding: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .starttopp__bild { transition: none; }
+  .starttopp__info.byt { animation: none; }
+}
+
+/* ===== Startsidans topp: ljus, lugn, med ett svävande husfoto i 3D (2026-11-06) ==
+   Text till vänster, till höger ett stort husfoto som byts med ett svep.
+   Namn och nästa hus svävar framför i djupled. Pekaren lutar scenen lite.
+   Inget säljkort, inga priser – bara husen och vägen dit. */
+html body .ltopp {
+  position: relative;
+  margin: 18px 12px 0;
+  border-radius: 32px;
+  overflow: clip;
+  isolation: isolate;
+  background:
+    radial-gradient(55% 70% at 100% 0%, rgba(255, 210, 150, 0.4), transparent 65%),
+    radial-gradient(50% 60% at 0% 100%, rgba(190, 220, 180, 0.3), transparent 65%),
+    linear-gradient(165deg, #fffdf9 0%, #fdf6ec 55%, #f6f2e8 100%);
+  box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 40px 80px -52px rgba(90, 60, 25, 0.45);
+}
+/* Ett mjukt ljus som andas långsamt bakom husen */
+html body .ltopp::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: -8%;
+  top: -18%;
+  width: 62%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 214, 160, 0.55), rgba(255, 214, 160, 0));
+  animation: ltopp-ljus 14s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes ltopp-ljus { to { transform: translate(-6%, 8%) scale(1.08); } }
+
+html body .ltopp__inre {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: clamp(28px, 4vw, 60px);
+  min-height: clamp(540px, calc(100svh - 150px), 740px);
+  padding: clamp(40px, 6vh, 72px) clamp(20px, 5.6vw, 80px);
+}
+html body .ltopp__text { min-width: 0; container-type: inline-size; }
+
+/* Etiketten: ett streck som ritas, sedan texten */
+html body .ltopp__etikett {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 clamp(18px, 2.6vh, 26px);
+  font-family: var(--knappfont);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--virke-djup);
+  animation: ltopp-tona 0.8s var(--mjuk) 0.05s backwards;
+}
+html body .ltopp__etikett span {
+  flex: none;
+  width: 28px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: currentColor;
+  transform-origin: left;
+  animation: ltopp-streck 0.9s var(--mjuk) 0.1s backwards;
+}
+
+/* Rubriken: två rader som stiger upp ur sin egen kant */
+html body .ltopp .ltopp__rubrik {
+  margin: 0;
+  /* Alltid två rader: storleken följer spaltens bredd */
+  font-size: clamp(2.1rem, 14cqi, 4.4rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: var(--text);
+  text-wrap: balance;
+}
+html body .ltopp__rad {
+  display: block;
+  overflow: clip;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+html body .ltopp__rad > span {
+  display: inline-block;
+  white-space: nowrap;
+  animation: ltopp-stig 1s var(--mjuk) backwards;
+}
+html body .ltopp__rad:nth-child(1) > span { animation-delay: 0.12s; }
+html body .ltopp__rad:nth-child(2) > span { animation-delay: 0.22s; }
+html body .ltopp__rubrik em {
+  font-style: normal;
+  color: var(--virke-djup);
+}
+
+html body .ltopp .ltopp__ingress {
+  max-width: 34rem;
+  margin: clamp(18px, 2.6vh, 26px) 0 0;
+  font-size: clamp(1rem, 0.94rem + 0.25vw, 1.125rem);
+  line-height: 1.6;
+  color: var(--text-2);
+  animation: ltopp-tona 0.9s var(--mjuk) 0.4s backwards;
+}
+html body .ltopp__knappar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: clamp(24px, 3.4vh, 34px);
+  animation: ltopp-tona 0.9s var(--mjuk) 0.5s backwards;
+}
+
+/* Tre steg i korthet, under en hårfin linje */
+html body .ltopp .ltopp__steg {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  max-width: 34rem;
+  margin: clamp(30px, 5vh, 52px) 0 0;
+  padding: 18px 0 0;
+  list-style: none;
+  border-top: 1px solid rgba(27, 25, 21, 0.1);
+  animation: ltopp-tona 0.9s var(--mjuk) 0.62s backwards;
+}
+html body .ltopp .ltopp__steg li {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+html body .ltopp .ltopp__steg li::before { content: none; }
+html body .ltopp__steg b {
+  font-family: var(--knappfont);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--virke-djup);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Bildscenen ---------------------------------------------------------
+   Ett stort husfoto (aldrig beskuret, 3:2) som byts med ett svep från höger.
+   Namnet och nästa-kortet svävar framför fotot i djupled (translateZ) och
+   rör sig därför mer än fotot när pekaren lutar scenen. */
+html body .ltopp__scen {
+  position: relative;
+  min-width: 0;
+  padding-top: 34px;
+  perspective: 1600px;
+  perspective-origin: 50% 40%;
+}
+html body .ltopp__rum {
+  position: relative;
+  transform-style: preserve-3d;
+  --px: 0;
+  --py: 0;
+}
+/* Mjuk skugga på golvet, lite bakom fotot */
+html body .ltopp__rum::after {
+  content: "";
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  bottom: -30px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(70, 45, 15, 0.26), rgba(70, 45, 15, 0));
+  transform: translateZ(-80px);
+  pointer-events: none;
+}
+html body .ltopp__skugga { display: none; }
+
+html body .ltopp__foto {
+  position: relative;
+  aspect-ratio: 1600 / 1062;
+  border-radius: 26px;
+  overflow: hidden;
+  background: #e9e1d4;
+  box-shadow:
+    0 0 0 1px rgba(27, 25, 21, 0.06),
+    0 2px 8px -2px rgba(60, 40, 15, 0.16),
+    0 40px 70px -36px rgba(60, 40, 15, 0.55);
+  animation: ltopp-foto-in 1.4s cubic-bezier(0.77, 0, 0.175, 1) 0.2s backwards;
+}
+html body .ltopp__lager {
+  position: absolute;
+  inset: -2%;
+  transform: translate3d(calc(var(--px) * -16px), calc(var(--py) * -10px), 0);
+  animation: ltopp-zoom 2.2s var(--mjuk) 0.2s backwards;
+}
+html body .ltopp__bild {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+html body .ltopp__bild.aktiv { opacity: 1; }
+html body .ltopp__bild.under { z-index: 1; animation: ltopp-bort 1.3s cubic-bezier(0.77, 0, 0.175, 1) both; }
+html body .ltopp__bild.in {
+  z-index: 2;
+  animation:
+    ltopp-svep 1.3s cubic-bezier(0.77, 0, 0.175, 1) both,
+    ltopp-zoom 2s var(--mjuk) both;
+}
+
+/* Ett ljusstråk som följer pekaren */
+html body .ltopp__glans {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(105deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.22) 50%, rgba(255, 255, 255, 0) 70%);
+  background-size: 220% 100%;
+  background-position: calc(50% - var(--px) * 120%) 0;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+/* Namnet, svävande uppe till vänster (skylten sitter nere till vänster) */
+html body .ltopp .ltopp__info {
+  position: absolute;
+  left: 18px;
+  top: 52px;
+  z-index: 4;
+  display: grid;
+  gap: 2px;
+  padding: 12px 18px 13px 16px;
+  border-radius: 16px;
+  color: var(--text);
+  text-decoration: none;
+  background: rgba(255, 253, 249, 0.8);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.65), 0 18px 34px -18px rgba(40, 25, 10, 0.55);
+  transform: translateZ(50px);
+  transition: box-shadow 0.25s ease;
+  animation: ltopp-svav 1s var(--mjuk) 1.05s backwards;
+}
+html body .ltopp .ltopp__info:hover { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9), 0 22px 40px -18px rgba(40, 25, 10, 0.6); }
+html body .ltopp .ltopp__info:focus-visible { outline: 2px solid var(--virke-djup); outline-offset: 3px; }
+html body .ltopp__nr {
+  font-family: var(--knappfont);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+html body .ltopp__nr b { font-weight: 600; color: var(--virke-djup); }
+html body .ltopp .ltopp__namn {
+  font-family: var(--knappfont);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+html body .ltopp__typ {
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Nästa hus, svävande längst fram över fotots övre högra hörn */
+html body .ltopp .ltopp__nasta {
+  position: absolute;
+  right: -22px;
+  top: -30px;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 66px auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px 8px 8px;
+  border: 0;
+  border-radius: 18px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+  background: rgba(255, 253, 249, 0.86);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7), 0 24px 44px -20px rgba(40, 25, 10, 0.55);
+  transform: translateZ(90px);
+  transition: transform 0.35s var(--mjuk), box-shadow 0.25s ease;
+  animation: ltopp-svav 1s var(--mjuk) 1.2s backwards;
+}
+html body .ltopp .ltopp__nasta:hover { transform: translateZ(110px) translateY(-2px); }
+html body .ltopp .ltopp__nasta:active { transform: translateZ(90px) scale(0.97); transition-duration: 0.12s; }
+html body .ltopp .ltopp__nasta:focus-visible { outline: 2px solid var(--virke-djup); outline-offset: 3px; }
+html body .ltopp__tumme {
+  display: block;
+  width: 66px;
+  aspect-ratio: 3 / 2;
+  border-radius: 11px;
+  overflow: hidden;
+  background: #e9e1d4;
+}
+html body .ltopp__tumme img { display: block; width: 100%; height: 100%; object-fit: cover; }
+html body .ltopp__nasta-text { display: grid; gap: 1px; }
+html body .ltopp__nasta-text small {
+  font-family: var(--knappfont);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+html body .ltopp__nasta-text b {
+  font-family: var(--knappfont);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+/* Vid bytet tonar texterna ur och in igen */
+html body .ltopp.byter .ltopp__info > *,
+html body .ltopp.byter .ltopp__nasta > * { animation: ltopp-byt 0.75s var(--mjuk); }
+
+/* Pilar och en tunn linje som visar tiden till nästa hus */
+html body .ltopp__styr {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 26px;
+  animation: ltopp-tona 0.9s var(--mjuk) 0.9s backwards;
+}
+html body .ltopp__pil {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(27, 25, 21, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.16s ease-out;
+}
+html body .ltopp__pil:hover { background: #fff; border-color: rgba(27, 25, 21, 0.24); }
+html body .ltopp__pil:active { transform: scale(0.94); }
+html body .ltopp__pil:focus-visible { outline: 2px solid var(--virke-djup); outline-offset: 2px; }
+html body .ltopp__pil svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+html body .ltopp__takt {
+  position: relative;
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(27, 25, 21, 0.12);
+}
+html body .ltopp__takt span {
+  position: absolute;
+  inset: 0;
+  background: var(--virke-djup);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+html body .ltopp__takt.gar span { animation: ltopp-takt var(--takt, 6500ms) linear both; }
+html body .ltopp__scen.vilar .ltopp__takt span { animation-play-state: paused; }
+
+@keyframes ltopp-tona { from { opacity: 0; transform: translateY(14px); } }
+@keyframes ltopp-stig { from { transform: translateY(108%); } }
+@keyframes ltopp-streck { from { transform: scaleX(0); } }
+@keyframes ltopp-takt { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes ltopp-foto-in { from { clip-path: inset(100% 0 0 0 round 26px); } to { clip-path: inset(0 0 0 0 round 26px); } }
+@keyframes ltopp-zoom { from { scale: 1.12; } to { scale: 1; } }
+@keyframes ltopp-svep { from { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0 0 0 0); } }
+@keyframes ltopp-bort { to { scale: 1.06; translate: -3% 0; filter: brightness(0.8); } }
+@keyframes ltopp-svav { from { opacity: 0; translate: 0 18px; } }
+@keyframes ltopp-byt {
+  0% { opacity: 1; translate: 0 0; }
+  34% { opacity: 0; translate: 0 -6px; }
+  35% { opacity: 0; translate: 0 8px; }
+  100% { opacity: 1; translate: 0 0; }
+}
+
+/* Mörkt tema */
+html[data-tema="mork"] body .ltopp {
+  background:
+    radial-gradient(55% 70% at 100% 0%, rgba(240, 181, 110, 0.14), transparent 65%),
+    radial-gradient(50% 60% at 0% 100%, rgba(63, 107, 80, 0.18), transparent 65%),
+    linear-gradient(165deg, #26221c 0%, #1e1b17 60%, #181612 100%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 40px 80px -52px rgba(0, 0, 0, 0.7);
+}
+html[data-tema="mork"] body .ltopp::before { background: radial-gradient(closest-side, rgba(240, 181, 110, 0.16), rgba(240, 181, 110, 0)); }
+html[data-tema="mork"] body .ltopp .ltopp__rubrik,
+html[data-tema="mork"] body .ltopp .ltopp__steg li { color: #f4efe7; }
+html[data-tema="mork"] body .ltopp .ltopp__ingress { color: rgba(244, 239, 231, 0.74); }
+html[data-tema="mork"] body .ltopp__rubrik em,
+html[data-tema="mork"] body .ltopp__etikett,
+html[data-tema="mork"] body .ltopp__steg b { color: var(--virke); }
+html[data-tema="mork"] body .ltopp .ltopp__steg { border-top-color: rgba(255, 255, 255, 0.12); }
+html[data-tema="mork"] body .ltopp .ltopp__info,
+html[data-tema="mork"] body .ltopp .ltopp__nasta {
+  color: #f4efe7;
+  background: rgba(30, 27, 23, 0.78);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 20px 40px -18px rgba(0, 0, 0, 0.75);
+}
+html[data-tema="mork"] body .ltopp__nr,
+html[data-tema="mork"] body .ltopp__typ,
+html[data-tema="mork"] body .ltopp__nasta-text small { color: rgba(244, 239, 231, 0.7); }
+html[data-tema="mork"] body .ltopp__nr b { color: var(--virke); }
+html[data-tema="mork"] body .ltopp__pil { color: #f4efe7; background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.16); }
+html[data-tema="mork"] body .ltopp__pil:hover { background: rgba(255, 255, 255, 0.12); }
+html[data-tema="mork"] body .ltopp__takt { background: rgba(255, 255, 255, 0.14); }
+html[data-tema="mork"] body .ltopp__takt span { background: var(--virke); }
+html[data-tema="mork"] body .ltopp__rum::after { background: radial-gradient(closest-side, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0)); }
+
+@media (max-width: 1180px) and (min-width: 901px) {
+  html body .ltopp__inre { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  html body .ltopp .ltopp__steg { gap: 12px; }
+  html body .ltopp .ltopp__steg li { font-size: 0.8125rem; }
+  html body .ltopp .ltopp__nasta { right: -14px; }
+  html body .ltopp .ltopp__info { left: 12px; top: 46px; padding: 9px 13px 10px; border-radius: 13px; }
+  html body .ltopp .ltopp__namn { font-size: 0.9375rem; }
+  html body .ltopp__typ { font-size: 0.75rem; }
+}
+/* Surfplatta och mobil: texten först, fotot under */
+@media (max-width: 900px) {
+  html body .ltopp { margin: 12px 10px 0; border-radius: 26px; }
+  html body .ltopp__inre {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    gap: 34px;
+    padding: 40px 22px 26px;
+  }
+  html body .ltopp__scen { padding-top: 26px; }
+  html body .ltopp .ltopp__nasta { right: 12px; top: -22px; }
+  html body .ltopp .ltopp__info { top: 44px; }
+}
+@media (max-width: 560px) {
+  html body .ltopp__inre { padding: 34px 18px 22px; gap: 28px; }
+  html body .ltopp__etikett { gap: 10px; font-size: 0.6875rem; letter-spacing: 0.1em; white-space: nowrap; }
+  html body .ltopp__etikett span { width: 20px; }
+  html body .ltopp .ltopp__steg { gap: 12px; }
+  html body .ltopp .ltopp__steg li { font-size: 0.8125rem; }
+  html body .ltopp__knappar .hero__link { flex: 1 1 auto; justify-content: center; }
+  html body .ltopp__scen { padding-top: 0; }
+  html body .ltopp__foto { border-radius: 20px; }
+  html body .ltopp .ltopp__nasta { display: none; }
+  /* Litet namnkort nere till höger, så varken taket eller skylten täcks */
+  html body .ltopp .ltopp__info { left: auto; top: auto; right: 10px; bottom: 10px; gap: 0; padding: 7px 11px 8px; border-radius: 12px; }
+  html body .ltopp__nr { display: none; }
+  html body .ltopp .ltopp__namn { font-size: 0.875rem; }
+  html body .ltopp__typ { font-size: 0.75rem; }
+  html body .ltopp__styr { margin-top: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .ltopp::before,
+  html body .ltopp__etikett,
+  html body .ltopp__etikett span,
+  html body .ltopp__rad > span,
+  html body .ltopp .ltopp__ingress,
+  html body .ltopp__knappar,
+  html body .ltopp .ltopp__steg,
+  html body .ltopp__foto,
+  html body .ltopp__lager,
+  html body .ltopp__bild.in,
+  html body .ltopp__bild.under,
+  html body .ltopp .ltopp__info,
+  html body .ltopp .ltopp__nasta,
+  html body .ltopp.byter .ltopp__info > *,
+  html body .ltopp.byter .ltopp__nasta > *,
+  html body .ltopp__styr { animation: none; }
+}
+
+/* Modellsidornas intresseanmälan: en centrerad, symmetrisk avslutning –
+   etikett, rubrik, ingress och knappar på samma mittlinje. */
+@media (min-width: 1100px) {
+  html body main.katsida .nyhus-cta .ih-huvud.ih-huvud--mitt.kat-mitt.kat-mitt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 52rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+  html body main.katsida .nyhus-cta .ih-huvud.ih-huvud--mitt.kat-mitt.kat-mitt > * {
+    text-align: center;
+    margin-inline: auto;
+  }
+  html body main.katsida .nyhus-cta .ih-huvud.ih-huvud--mitt.kat-mitt.kat-mitt > .ih-etikett {
+    justify-content: center;
+  }
+  html body main.katsida .nyhus-cta .ih-huvud.ih-huvud--mitt.kat-mitt.kat-mitt > .ih-ingress {
+    max-width: 34rem;
+    margin-top: 1.25rem;
+    padding: 0;
+  }
+  html body main.katsida .nyhus-cta .ih-huvud.ih-huvud--mitt.kat-mitt.kat-mitt > .nyhus-3d__knappar {
+    justify-content: center;
+    margin-top: 2rem;
+  }
+}
+
+/* Sidfotens spalter: lika långa (5 + 3 och 3 + 5 länkar) och rubrik och
+   underrubrik i samma stil, så spalterna läses som ett par. */
+html body .site-footer__heading,
+html body .site-footer__nav .site-footer__etikett {
+  font-family: var(--knappfont);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+html body .site-footer__nav .site-footer__etikett {
+  margin-top: 22px;
+  margin-bottom: 2px;
+  opacity: 0.72;
+}
+
+/* Stegkortet på Så fungerar det: "Vem gör vad". Skedena som små rubriker,
+   numret i en egen kolumn, stegets namn på en rad och en tydlig bricka. */
+html body .hoffert--steg .hoffert__huvud { padding-bottom: 10px; }
+html body .hoffert--steg .hoffert__typ { font-size: 0.6875rem; color: #8f5424; }
+html body .hoffert__antal {
+  font: 600 0.6875rem/1 var(--knappfont);
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+html body .hoffert--steg .hoffert__lista { gap: 0; margin-top: 4px; }
+html body .hoffert--steg .hoffert__lista li {
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 6px 2px;
+  border-bottom: 0;
+  font-size: 0.8125rem;
+}
+html body .hoffert--steg .hoffert__lista li > span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html body .hoffert--steg .hoffert__lista b { margin: 0; font-size: 0.75rem; }
+html body .hoffert--steg .hoffert__lista li.hoffert__fas {
+  display: block;
+  margin-top: 8px;
+  padding: 8px 2px 2px;
+  border-top: 1px dashed rgba(143, 84, 36, 0.24);
+  font: 700 0.5625rem/1 var(--knappfont);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #a07650;
+}
+html body .hoffert--steg .hoffert__lista li.hoffert__fas:first-child { margin-top: 0; border-top: 0; }
+html body .hoffert--steg .hoffert__lista em { min-width: 34px; text-align: center; }
+html body .hoffert--steg .hoffert__fot { margin-top: 8px; }
+@media (min-width: 901px) {
+  html body .subpage-hero.helbild .hoffert--steg { width: 344px; padding: 18px 18px 16px; }
+}
+html body .hoffert--steg .hoffert__lista li > span { white-space: normal; overflow: visible; text-wrap: balance; }
+/* Faktakortet på Om oss: rubrik och stämpel på en rad, foten utan radbrytning. */
+html body .hoffert--fakta .hoffert__huvud { flex-wrap: nowrap; }
+html body .hoffert--fakta .hoffert__stampel { flex: none; white-space: nowrap; }
+html body .hoffert--fakta .hoffert__fot { gap: 12px; }
+html body .hoffert--fakta .hoffert__fot strong { white-space: nowrap; }
+/* Fler hus: luft under korten innan nästa sektion (sidfoten) börjar. */
+html body main > .hus-fler.ih-sektion.ih-sektion.ih-sektion:not(.x) { padding-bottom: clamp(56px, 7vw, 104px); }
+/* Husväljarens faktarutor: långa värden ("1 sovrum + loft") bryts mjukt i
+   stället för att gå utanför rutan. */
+html body .husval .husval__fakta.husval__fakta > div > dd {
+  white-space: normal;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  font-size: clamp(1.05rem, 0.7rem + 0.7vw, 1.344rem);
+  line-height: 1.15;
+}
+
+/* =====================================================================
+   Helhetsgenomgången 2026-11-17 (designteamet). Allt nytt från den
+   omgången ligger samlat här, sist i filen.
+   ===================================================================== */
+
+/* Samma slut på alla sidor (_avslut.py): rubriken i kontaktdelen bryts
+   likadant på kategorisidor och hussidor som på startsidan. */
+html body .katsida .contact-section .contact-section__title em {
+  display: inline;
+}
+
+/* Länkar i löptext ska synas som länkar. Färgen ärvs, så de håller
+   kontrasten på både ljus och mörk botten; strecket bär signalen. */
+html body :is(.ih-ingress, .category__ingress) a:not([class]) {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--virke);
+  transition: text-decoration-color 0.2s ease, color 0.2s ease;
+}
+
+html body :is(.ih-ingress, .category__ingress) a:not([class]):hover {
+  color: var(--virke-djup);
+  text-decoration-color: currentColor;
+}
+
+/* Tryckkänslan (scale 0,97) på det som saknade den: de nya huskorten,
+   menylänkarna, verktygens knappar och formulärets val. */
+@media (prefers-reduced-motion: no-preference) {
+  html body :is(.main-nav__link, .model-card__se, .model-card__rita, .model-card__3dchip,
+    .cta-bar__button, .checklista__steg, .checklista__rensa, .kollen__dela, .marksok__knapp,
+    .tomtrapport__prata, .tv__ryms, .husval__flik, .main-nav__guider a, .main-nav__modeller a):active {
+    scale: 0.97;
+  }
+
+  html body :is(.hus-fler__kort, .merplats__kort, .markkort, .tvhus, .againtro__kort,
+    .main-nav__sub > a, .main-nav__tips):active,
+  html body .contact-form :is(.val, .bildval) input + span:active {
+    scale: 0.985;
+  }
+}
+
+/* Träffytor på mobil: minst 44 px på det man trycker på med tummen. */
+@media (max-width: 760px) {
+  html body .site-footer .site-footer__nav a,
+  html body .site-footer .site-footer__policy,
+  html body .site-footer .site-footer__text a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  html body :is(.kopiera, .kat-tillbaka, .kat-topp__ryms, .prisskala__chip,
+    .contact-section__meta-value[href]) {
+    min-height: 44px;
+  }
+
+  html body :is(.kat-tillbaka, .kat-topp__ryms, .prisskala__chip) {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  html body .tipsruta__stang {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* =====================================================================
+   Startsidans topp som en scen (2026-11-17): bilden fyller hela ytan,
+   rubriken står stort ovanpå och besökaren väljer själv var huset ska
+   stå. Platsen byts med ett svep (clip-path), linjen under platsen
+   visar när nästa kommer. Ersätter .ltopp. Skriptet ligger i index.html.
+   ===================================================================== */
+html body .platstopp {
+  --pf: #f0b56e;
+  --pt-fg: #fff;
+  --pt-dim: rgba(255, 255, 255, 0.86);
+  --pt-svag: rgba(255, 255, 255, 0.66);
+  --pt-linje: rgba(255, 255, 255, 0.24);
+  --pt-radie: clamp(26px, 2.6vw, 40px);
+  position: relative;
+  margin: 14px 12px 0;
+}
+html body .platstopp[data-plats="havet"] { --pf: #a9d0e0; }
+html body .platstopp[data-plats="skogen"] { --pf: #b5d597; }
+html body .platstopp[data-plats="fjallet"] { --pf: #d3dcf0; }
+html body .platstopp[data-plats="tradgarden"] { --pf: #dde39a; }
+
+/* Scenen ryms alltid i fönstret, så att alla fyra runda hörnen syns:
+   sidhuvudet tar 94 px och under scenen lämnas 32 px luft. */
+html body .platstopp__scen {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  min-height: clamp(470px, calc(100svh - 140px), 860px);
+  padding: clamp(22px, 2.4vw, 38px) clamp(24px, 3.4vw, 56px) clamp(24px, 2.6vw, 40px);
+  border-radius: var(--pt-radie);
+  overflow: hidden;
+  overflow: clip;
+  container-type: inline-size;
+  color: var(--pt-fg);
+  background: #1b1915;
+  box-shadow: 0 40px 80px -52px rgba(60, 40, 15, 0.6);
+}
+
+/* Bilderna ligger på varandra; bara den aktiva (och den som är på väg ut)
+   syns. Behållaren har samma radie som scenen, så hörnen är runda även
+   medan lagren rör sig. */
+html body .platstopp__bilder {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  overflow: hidden;
+  overflow: clip;
+}
+html body .platstopp__lager {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+html body .platstopp__lager.aktiv,
+html body .platstopp__lager.ut {
+  visibility: visible;
+}
+html body .platstopp__lager.aktiv { z-index: 2; }
+html body .platstopp__lager.ut { z-index: 1; }
+html body .platstopp__lager img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+
+/* Mörkret som bär texten: en mjuk toning nerifrån och lite upptill.
+   Ligger stilla - bara bilden under rör sig. */
+html body .platstopp__sloja {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(16, 13, 9, 0.46) 0%, rgba(16, 13, 9, 0) 22%),
+    linear-gradient(180deg, rgba(16, 13, 9, 0) 26%, rgba(16, 13, 9, 0.28) 46%, rgba(16, 13, 9, 0.66) 68%, rgba(16, 13, 9, 0.9) 100%);
+}
+
+html body .platstopp__topp {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+html body .platstopp__etikett,
+html body .platstopp__not {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font: 600 0.75rem/1.2 var(--knappfont);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pt-fg);
+  text-shadow: 0 1px 12px rgba(16, 13, 9, 0.45);
+}
+html body .platstopp__etikett::before {
+  content: "";
+  flex: none;
+  width: 30px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--pf);
+  transition: background-color 0.6s ease;
+}
+html body .platstopp__not { color: var(--pt-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+html body .platstopp__not b { font-weight: 600; color: var(--pt-fg); }
+
+html body .platstopp__rubrik {
+  margin: 0;
+  max-width: none;
+  font-size: clamp(2.5rem, 6.7vw, 7.4rem);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  color: var(--pt-fg);
+  text-shadow: 0 2px 30px rgba(16, 13, 9, 0.35);
+}
+html body .platstopp__rad {
+  display: inline-block;
+  overflow: hidden;
+  overflow: clip;
+  overflow-clip-margin: 0.06em;
+  padding-bottom: 0.1em;
+  vertical-align: top;
+}
+html body .platstopp__rad > span { display: inline-block; }
+html body .platstopp__rubrik em {
+  font-style: normal;
+  color: var(--virke);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+/* Nederdelen: två block som delar underkant. Till vänster ingressen med
+   knapparna under, till höger platsväljaren. Ett riktigt flöde - det som
+   inte ryms bryts ner till nästa rad, inget kan hamna ovanpå något annat. */
+html body .platstopp__nedre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px clamp(28px, 4vw, 72px);
+  margin-top: clamp(14px, 1.6vw, 24px);
+  padding-top: clamp(20px, 2vw, 30px);
+  border-top: 1px solid var(--pt-linje);
+}
+html body .platstopp__ord {
+  flex: 1 1 22rem;
+  max-width: 27rem;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 1.7vw, 24px);
+}
+html body .platstopp__ingress {
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+  color: var(--pt-dim);
+  text-shadow: 0 1px 14px rgba(16, 13, 9, 0.4);
+}
+html body .platstopp__knappar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+html body .platstopp__knapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 54px;
+  padding: 0 26px;
+  border-radius: 999px;
+  font: 600 1rem/1 var(--knappfont);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--pt-fg);
+  box-shadow: inset 0 0 0 1.5px var(--pt-svag);
+  transition: transform 0.25s var(--mjuk), background-color 0.2s ease, box-shadow 0.25s ease;
+}
+html body .platstopp__knapp svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.25s var(--mjuk);
+}
+html body .platstopp__knapp--fylld {
+  color: #1b1915;
+  background: #f0b56e;
+  box-shadow: 0 14px 30px -14px rgba(240, 181, 110, 0.9);
+}
+@media (hover: hover) {
+  html body .platstopp__knapp:hover { transform: translateY(-2px); background-color: rgba(255, 255, 255, 0.14); }
+  html body .platstopp__knapp--fylld:hover { background-color: #f5c283; }
+  html body .platstopp__knapp:hover svg { transform: translateX(4px); }
+}
+html body .platstopp__knapp:focus-visible,
+html body .platstopp__plats:focus-visible,
+html body .platstopp__paus:focus-visible,
+html body .platstopp__mer:focus-visible {
+  outline: 2px solid var(--pf);
+  outline-offset: 3px;
+}
+
+/* Platsväljaren: frågan från formuläret, svaret byter scen. Fyra små
+   bilder av platserna; den valda lyser och linjen under den fylls tills
+   nästa plats kommer. Pausknappen sitter i väljarens egen rubrikrad. */
+html body .platstopp__val {
+  flex: 0 1 auto;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px 16px;
+}
+html body .platstopp__fraga {
+  margin: 0;
+  font: 600 0.75rem/1.2 var(--knappfont);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pt-dim);
+}
+html body .platstopp__platser {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+html body .platstopp__plats {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: clamp(112px, 10.6vw, 164px);
+  margin: 0;
+  padding: 0 0 12px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font: 600 0.9375rem/1.2 var(--knappfont);
+  letter-spacing: -0.01em;
+  text-align: left;
+  white-space: nowrap;
+  color: var(--pt-svag);
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+html body .platstopp__tumme {
+  display: block;
+  aspect-ratio: 3 / 2;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.28);
+  opacity: 0.72;
+  transition: opacity 0.3s ease, box-shadow 0.3s ease, transform 0.35s var(--mjuk);
+}
+html body .platstopp__tumme img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+html body .platstopp__namn {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+html body .platstopp__namn b {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+}
+html body .platstopp__plats i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--pt-linje);
+}
+html body .platstopp__plats i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--pf);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: background-color 0.6s ease;
+}
+html body .platstopp__plats[aria-pressed="true"] { color: var(--pt-fg); }
+html body .platstopp__plats[aria-pressed="true"] .platstopp__tumme {
+  opacity: 1;
+  box-shadow: 0 0 0 2px #fff, 0 14px 26px -14px rgba(0, 0, 0, 0.8);
+}
+html body .platstopp__plats[aria-pressed="true"] i::after { transform: scaleX(1); }
+@media (hover: hover) {
+  html body .platstopp__plats:hover { color: var(--pt-fg); }
+  html body .platstopp__plats:hover .platstopp__tumme { opacity: 1; transform: translateY(-3px); }
+}
+html body .platstopp__paus {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -6px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--pt-fg);
+  box-shadow: inset 0 0 0 1.5px var(--pt-linje);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+html body .platstopp__paus svg { width: 14px; height: 14px; fill: currentColor; }
+html body .platstopp__paus .spela,
+html body .platstopp__paus[aria-pressed="true"] .pausa { display: none; }
+html body .platstopp__paus[aria-pressed="true"] .spela { display: block; }
+@media (hover: hover) {
+  html body .platstopp__paus:hover { box-shadow: inset 0 0 0 1.5px var(--pt-fg); }
+}
+
+/* Raden under scenen: de tre stegen och vägen vidare. */
+html body .platstopp__under {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding: 18px clamp(14px, 3.4vw, 56px) 0;
+}
+html body .platstopp__steg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px clamp(20px, 3.4vw, 56px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 500 0.9375rem/1.3 var(--knappfont);
+  color: var(--text);
+}
+html body .platstopp__steg li { display: flex; align-items: baseline; gap: 10px; margin: 0; padding: 0; }
+html body .platstopp__steg li::before { content: none; }
+html body .platstopp__steg b {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--virke-djup);
+}
+html body .platstopp__mer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font: 600 0.9375rem/1 var(--knappfont);
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--text);
+}
+html body .platstopp__mer svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.25s var(--mjuk);
+}
+@media (hover: hover) {
+  html body .platstopp__mer:hover svg { transform: translateX(4px); }
+}
+
+/* --- Rörelsen: bara transform, opacity och clip-path ---------------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* Bilden lever: zoomar in snabbt och glider sedan mycket långsamt. */
+  html body .platstopp__lager.aktiv img,
+  html body .platstopp__lager.ut img {
+    animation: pt-lev 9s cubic-bezier(0.16, 0.7, 0.2, 1) both;
+  }
+  /* Platsbytet: den nya bilden sveper in över den gamla, som glider undan. */
+  html body .platstopp__lager.in { animation: pt-svep 0.95s cubic-bezier(0.76, 0, 0.2, 1) both; }
+  html body .platstopp__lager.in.bak { animation-name: pt-svep-bak; }
+  html body .platstopp__lager.ut { animation: pt-undan 0.95s cubic-bezier(0.76, 0, 0.2, 1) both; }
+  html body .platstopp__lager.ut.bak { animation-name: pt-undan-bak; }
+
+  /* Linjen under vald plats fylls tills nästa plats kommer. */
+  html body .platstopp.gar .platstopp__plats[aria-pressed="true"] i::after {
+    animation: pt-takt var(--takt, 7s) linear both;
+  }
+  html body .platstopp.vilar .platstopp__plats[aria-pressed="true"] i::after {
+    animation-play-state: paused;
+  }
+
+  /* Intoningen vid laddning, klar inom 0,9 s. */
+  html body .platstopp__bilder { animation: pt-fram 0.7s ease both; }
+  html body .platstopp__rad > span { animation: pt-rad 0.7s var(--mjuk) 0.1s both; }
+  html body .platstopp__rad + .platstopp__rad > span { animation-delay: 0.18s; }
+  html body .platstopp__topp { animation: pt-fram 0.5s ease 0.1s both; }
+  html body .platstopp__nedre > * { animation: pt-upp 0.5s var(--mjuk) 0.3s both; }
+  html body .platstopp__nedre > :nth-child(2) { animation-delay: 0.38s; }
+  html body .platstopp__under { animation: pt-fram 0.5s ease 0.4s both; }
+
+  html body :is(.platstopp__knapp, .platstopp__paus, .platstopp__mer, .platstopp__plats):active { scale: 0.97; }
+}
+
+@keyframes pt-lev { from { transform: scale(1.12); } to { transform: scale(1.02); } }
+@keyframes pt-svep { from { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0 0 0 0); } }
+@keyframes pt-svep-bak { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes pt-undan { to { transform: translateX(-5%); } }
+@keyframes pt-undan-bak { to { transform: translateX(5%); } }
+@keyframes pt-takt { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes pt-fram { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pt-rad { from { transform: translateY(108%); } to { transform: translateY(0); } }
+@keyframes pt-upp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- Lågt fönster på dator: mindre bilder i väljaren, så huset syns ---- */
+@media (min-width: 901px) and (max-height: 780px) {
+  html body .platstopp__plats { width: clamp(100px, 9vw, 132px); gap: 8px; }
+  html body .platstopp__tumme { aspect-ratio: 2 / 1; border-radius: 12px; }
+  html body .platstopp__scen { gap: 18px; }
+}
+@media (min-width: 901px) and (max-height: 640px) {
+  html body .platstopp__tumme { display: none; }
+  html body .platstopp__plats { width: auto; padding: 10px 6px 14px; }
+  html body .platstopp__platser { display: flex; gap: 10px 18px; }
+}
+
+/* --- Mobil och surfplatta: bilden överst, orden under på sidans botten.
+   Väljaren blir en segmentkontroll för tummen. ------------------------- */
+@media (max-width: 900px) {
+  html body .platstopp {
+    --pt-fg: var(--text);
+    --pt-dim: var(--text-2);
+    --pt-svag: var(--text-2);
+    --pt-linje: rgba(27, 25, 21, 0.14);
+    --pt-radie: 26px;
+    margin-top: 10px;
+  }
+  html[data-tema="mork"] body .platstopp { --pt-linje: rgba(247, 245, 240, 0.16); }
+  html body .platstopp__scen {
+    --bildh: calc(100cqw / 1.5);
+    display: block;
+    min-height: 0;
+    padding: 0;
+    border-radius: 0;
+    overflow: visible;
+    background: none;
+    box-shadow: none;
+  }
+  html body .platstopp__bilder {
+    position: relative;
+    inset: auto;
+    z-index: 0;
+    height: var(--bildh);
+    border-radius: var(--pt-radie);
+    background: #1b1915;
+  }
+  html body .platstopp__lager img { object-position: 56% 50%; }
+  html body .platstopp__sloja {
+    inset: 0 0 auto 0;
+    z-index: 1;
+    height: var(--bildh);
+    border-radius: var(--pt-radie);
+    background: linear-gradient(180deg, rgba(16, 13, 9, 0.56) 0%, rgba(16, 13, 9, 0) 38%);
+  }
+  html body .platstopp__topp {
+    position: absolute;
+    z-index: 2;
+    top: 16px;
+    left: 18px;
+    right: 18px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  html body .platstopp__etikett,
+  html body .platstopp__not { font-size: 0.625rem; color: #fff; }
+  html body .platstopp__not b { color: #fff; }
+  html body .platstopp__fot { padding: 22px 6px 0; }
+  html body .platstopp__rubrik {
+    font-size: clamp(2.5rem, 11.6vw, 4.6rem);
+    text-shadow: none;
+  }
+  html body .platstopp__rad { display: block; }
+  html body .platstopp__rubrik em { color: var(--virke-djup); }
+  html body .platstopp__nedre {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 22px;
+    margin-top: 22px;
+    padding-top: 0;
+    border-top: 0;
+  }
+  html body .platstopp__ord { flex: 0 0 auto; max-width: 34rem; gap: 20px; }
+  html body .platstopp__ingress { font-size: 1rem; text-shadow: none; }
+  html body .platstopp__knapp { flex: 1 1 0; padding: 0 18px; }
+  html body .platstopp__val { order: -1; gap: 8px 12px; }
+  html body .platstopp__fraga { font-size: 0.6875rem; }
+  html body .platstopp__paus { margin: 0; }
+  html body .platstopp__platser {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px;
+    border-radius: 20px;
+    background: rgba(27, 25, 21, 0.06);
+  }
+  html[data-tema="mork"] body .platstopp__platser { background: rgba(247, 245, 240, 0.07); }
+  html body .platstopp__tumme { display: none; }
+  html body .platstopp__plats {
+    width: auto;
+    min-height: 50px;
+    padding: 0 14px;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 16px;
+    font-size: 0.9375rem;
+    transition: color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  html body .platstopp__plats i { left: 14px; right: 14px; bottom: 7px; height: 2px; background: none; }
+  html body .platstopp__plats[aria-pressed="true"] {
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(27, 25, 21, 0.1), 0 8px 18px -12px rgba(27, 25, 21, 0.35);
+  }
+  html[data-tema="mork"] body .platstopp__plats[aria-pressed="true"] {
+    background: rgba(247, 245, 240, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  }
+  html body .platstopp__plats[aria-pressed="true"] i::after { background: var(--virke-djup); }
+  html body .platstopp__under { flex-direction: column; align-items: flex-start; gap: 6px; padding: 24px 6px 0; }
+  html body .platstopp__steg { flex-direction: column; gap: 8px; }
+}
+@media (max-width: 900px) and (min-width: 560px) {
+  html body .platstopp__scen { --bildh: calc(100cqw / 1.78); }
+  html body .platstopp__knapp { flex: 0 1 auto; padding: 0 26px; }
+  html body .platstopp__platser { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  html body .platstopp__plats { justify-content: center; }
+  html body .platstopp__plats i { left: 24%; right: 24%; }
+  html body .platstopp__steg { flex-direction: row; gap: 8px 28px; }
+}
+@media (max-width: 340px) {
+  html body .platstopp__plats { padding: 0 10px; font-size: 0.875rem; }
+  html body .platstopp__plats i { left: 10px; right: 10px; }
+}
+
+/* Sidhuvudet mellan 1041 och 1279 px: "Logga in" (finns bara i den lokala
+   förhandsvisningen) trängde ihop logotypen till en prick. Där blir den
+   kompakt, och under 1181 px får den vika för logotypen. */
+@media (min-width: 1181px) and (max-width: 1279px) {
+  html body .site-header__actions { gap: 8px; }
+  html body .site-header__actions .crm-lank { padding: 0 12px; }
+  html body .site-header__actions .crm-lank svg { display: none; }
+}
+@media (min-width: 1001px) and (max-width: 1180px) {
+  html body .site-header__actions .crm-lank { display: none; }
 }

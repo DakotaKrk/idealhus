@@ -1,6 +1,6 @@
     <main id="innehall">
       <section class="subpage-hero">
-        <img class="subpage-hero__image" src="images/foto/dronare-platta.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Två personer i arbete på betongplattan mellan de resta väggarna">
+        <img class="subpage-hero__image" src="images/generated-house-garden-01.webp" width="900" height="600" fetchpriority="high" decoding="async" alt="Småhus i trä med uteplats i en grönskande trädgård">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
@@ -8,7 +8,7 @@
             <p class="subpage-hero__meta">Du når oss direkt, utan växel och utan säljorganisation. Berätta kort om ditt projekt, så återkommer vi med nästa steg.</p>
             <div class="subpage-hero__actions">
               <a class="hero__link hero__link--solid" href="#kontaktformular">Till formuläret</a>
-              <a class="hero__link" href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>
+              <a class="hero__link" href="mailto:info@legohusstockholm.se">info@legohusstockholm.se</a>
             </div>
           </div>
         </div>
@@ -34,7 +34,7 @@
             <span class="kontakt-direkt__namn">Skriv till oss</span>
             <span class="kontakt-direkt__roll">E-post</span>
             <span class="kontakt-direkt__lankar">
-              <a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>
+              <a href="mailto:info@legohusstockholm.se">info@legohusstockholm.se</a>
             </span>
           </div>
 

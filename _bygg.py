@@ -57,7 +57,8 @@ def modellankar(fil):
 
 
 GUIDELANKAR = ('<a href="attefallshus-regler.html">Attefallshus: reglerna</a>'
-               '<a href="aga-och-hyra-ut.html">Äga och hyra ut</a>')
+               '<a href="aga-och-hyra-ut.html">Äga och hyra ut</a>'
+               '<a href="rita-hus.html">Rita ditt hus</a>')
 
 
 def kategorirad(namn, fil):
@@ -186,7 +187,7 @@ def mobilmeny():
         '<strong>Vad får jag bygga?</strong><em class="mmeny__tipsrad">Fem frågor · svar direkt</em></span>' + MMENY_PIL + '</a>')
     rader.append(f'          <a class="mmeny__cta" href="kontakt.html" style="--i:{i + 2}">Börja här</a>')
     rader.append(f'          <p class="mmeny__kontakt" style="--i:{i + 3}">'
-                 '<a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a><span>Stockholm, Sverige</span></p>')
+                 '<a href="mailto:info@legohusstockholm.se">info@legohusstockholm.se</a><span>Stockholm, Sverige</span></p>')
     return "\n".join(rader)
 
 
@@ -278,7 +279,7 @@ ORG = {
     "url": BAS,
     "logo": BAS + "images/legohus.svg",
     "image": BAS + "images/hus-r2.webp",
-    "email": "kontakt@legohusstockholm.se",
+    "email": "info@legohusstockholm.se",
     "description": "Legohus Stockholm formger och bygger attefallshus och fritidshus och tillverkar byggelement för proffs, allt under tak i Sverige.",
     "address": {"@type": "PostalAddress", "addressLocality": "Stockholm", "addressCountry": "SE"},
     "identifier": {"@type": "PropertyValue", "propertyID": "Organisationsnummer", "value": "559606-0524"},
@@ -395,9 +396,11 @@ SIDFOT = '''    <footer class="site-footer">
             <a href="sa-fungerar-det.html">Så fungerar det</a>
             <a href="om-oss.html">Om oss</a>
             <a href="kontakt.html">Kontakt</a>
+            <span class="site-footer__etikett">Guider</span>
             <a href="attefallshus-regler.html">Attefallshus: reglerna</a>
             <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>
             <a href="aga-och-hyra-ut.html">Äga och hyra ut</a>
+            <a href="rita-hus.html">Rita ditt hus</a>
           </nav>
         </div>
 
@@ -406,15 +409,16 @@ SIDFOT = '''    <footer class="site-footer">
           <nav class="site-footer__nav" aria-label="Sidfotens husmodeller">
 ''' + "\n".join(
     [f'            <a href="{fil}">{namn}</a>' for namn, fil in KATEGORIER_PRIVAT]
-    + [f'            <span class="site-footer__etikett">{PROFFS_ETIKETT}</span>']
-    + [f'            <a href="{fil}">{namn}</a>' for namn, fil in KATEGORIER_PROFFS]) + '''
+    + [f'            <a href="{fil}">{namn}</a>' for namn, fil in KATEGORIER_PROFFS]
+    + ['            <span class="site-footer__etikett">Modeller</span>']
+    + [f'            <a href="{f}.html">{n}</a>' for n, f in [("Sadel 30", "sadel-30"), ("Sadel 40", "sadel-40"), ("Sadel 50", "sadel-50"), ("Pulpet 70", "pulpet-70"), ("Sadel 90", "sadel-90")]]) + '''
           </nav>
         </div>
 
         <div>
           <h2 class="site-footer__heading">Kontakta oss</h2>
           <p class="site-footer__text">
-            <a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a><br>
+            <a href="mailto:info@legohusstockholm.se">info@legohusstockholm.se</a><br>
             Stockholm, Sverige
           </p>
           <a class="site-footer__button" href="kontakt.html">Hör av dig</a>

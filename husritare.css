@@ -1,0 +1,1253 @@
+/* Husritaren (rita-hus.html), omgjord 2026-11-14.
+   Upplägg som en bilkonfigurator: en rad med åtgärder överst, stor scen med
+   verktyg i bilden, vinklar i en remsa under, valen i fällbara kort till höger
+   och planen i samma rutnät under. Menyraden och sidfoten har samma bredd
+   och samma ytterkant som scenen och panelen.
+
+   Skala
+   - luft: 4 8 12 16 24 32 48 64
+   - hörn: 8 (små), 12 (knappar), 20 (kort och scen), 24 (dialoger)
+   - text: 12 13 14 15 17 / rubriker 22 28 44, lätt vikt (300) för namn och tal
+   - rörelse: gränssnittet 0.16–0.28 s med var(--k-ut), aldrig ease-in; bara scenens egna
+     glidningar (kamera, ljus, laddningen) får vara längre. Inget som går hela tiden. */
+
+/* ---------- Tokens ---------- */
+body.ritsidan {
+  --k-kant: clamp(16px, 2.4vw, 40px);
+  --k-sida: min(1680px, 100% - 2 * var(--k-kant));
+  --k-panel: clamp(340px, 27vw, 440px);
+  --k-gap: clamp(16px, 2vw, 32px);
+  --k-topp: 96px;
+  --k-yta: #f4f2ee; --k-kort: #ffffff; --k-linje: rgba(27, 25, 21, 0.09); --k-linje-2: rgba(27, 25, 21, 0.18);
+  --k-svag: #ebe8e2; --k-svag-2: #dfdbd3; --k-text: #1b1915; --k-text-2: #5e584f; --k-text-3: #726b60;
+  --k-scen: #ece7df; --k-knapp-hover: #3a362f; --k-accent: #f0b56e; --k-accent-djup: var(--virke-djup, #9a6a33);
+  --k-r-s: 8px; --k-r-m: 12px; --k-r-l: 20px; --k-r-xl: 24px;
+  --k-glas: rgba(24, 22, 19, 0.88);
+  --k-skugga: 0 1px 2px rgba(27, 25, 21, 0.04), 0 18px 40px -30px rgba(27, 25, 21, 0.4);
+  --k-ut: cubic-bezier(0.22, 1, 0.36, 1);
+  --k-fokus: var(--k-accent-djup);
+  background: var(--k-yta);
+}
+html[data-tema="mork"] body.ritsidan {
+  --k-yta: #171512; --k-kort: #1f1c18; --k-linje: rgba(247, 245, 240, 0.09); --k-linje-2: rgba(247, 245, 240, 0.2);
+  --k-svag: #2a2722; --k-svag-2: #35312b; --k-text: #f2eee6; --k-text-2: #cfc8bc; --k-text-3: #9c9488;
+  --k-scen: #24211c; --k-knapp-hover: #e4ded2;
+  --k-skugga: 0 1px 2px rgba(0, 0, 0, 0.2), 0 18px 40px -30px rgba(0, 0, 0, 0.7);
+}
+.ritsida { color: var(--k-text); font-family: var(--sans); }
+.ritsida .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* liten etikett ovanför rubriker, samma överallt */
+.ritsida .k-etikett { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 12px; font: 600 0.75rem/1 var(--sans); letter-spacing: 0.12em; text-transform: uppercase; color: var(--k-accent-djup); }
+.ritsida .k-etikett::before { content: ""; width: 20px; height: 1.5px; background: currentColor; }
+.ritsida .k-etikett--tyst { color: var(--k-text-3); }
+.ritsida .k-etikett--tyst::before { display: none; }
+
+/* ---------- Menyraden och sidfoten i samma bredd som sidan ---------- */
+html body.ritsidan .site-header__inner { width: var(--k-sida); }
+html body.ritsidan .site-header,
+html body.ritsidan .site-header *,
+html body.ritsidan .site-header__inner::before { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html body.ritsidan .site-header .site-header__inner, html body.ritsidan .main-nav__sub { background-color: color-mix(in srgb, var(--vit, #fff) 97%, transparent); }
+html body.ritsidan .site-header__inner::before { background: color-mix(in srgb, var(--vit, #fff) 97%, transparent) !important; }
+html[data-tema="mork"] body.ritsidan .site-header__inner::before { background: rgba(27, 25, 21, 0.97) !important; }
+html body.ritsidan :is(.main-nav__verktyg::before, .main-nav__verktyg::after, .main-nav__verktyg-text, .main-nav__verktyg *) { animation: none !important; }
+
+/* sidfoten: ett rundat kort i sidans bredd, utan sken och kantlinje */
+html body.ritsidan .site-footer {
+  width: var(--k-sida); margin: 0 auto var(--k-kant); border: 0; border-radius: var(--k-r-xl);
+  background: var(--k-kort); box-shadow: 0 0 0 1px var(--k-linje), var(--k-skugga);
+}
+html body.ritsidan .site-footer::before, html body.ritsidan .site-footer::after { display: none; }
+html[data-tema="mork"] body.ritsidan .site-footer { background: #1f1c18; }
+
+/* ---------- Gemensamma knappar ---------- */
+.kf__knapp { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 24px; border: 0; border-radius: var(--k-r-m); background: var(--k-text); color: var(--k-kort); font: 500 0.9375rem/1 var(--sans); text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color 0.2s ease, transform 0.16s var(--k-ut), box-shadow 0.25s ease; }
+.kf__knapp:hover { background: var(--k-knapp-hover); box-shadow: 0 10px 20px -14px rgba(27, 25, 21, 0.7); }
+.kf__knapp:active { transform: scale(0.97); }
+.kf__knapp--ljus { background: var(--k-kort); color: var(--k-text); box-shadow: inset 0 0 0 1px var(--k-linje-2); }
+.kf__knapp--ljus:hover { background: var(--k-svag); box-shadow: inset 0 0 0 1px var(--k-linje-2); }
+.kf__knapp--bred { width: 100%; }
+.kdela { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 16px; border: 0; border-radius: var(--k-r-m); background: transparent; box-shadow: inset 0 0 0 1px var(--k-linje-2); color: var(--k-text); font: 500 0.875rem/1 var(--sans); cursor: pointer; transition: background-color 0.2s ease, transform 0.16s var(--k-ut); }
+.kdela:hover { background: var(--k-svag); }
+.kdela:active { transform: scale(0.97); }
+.ritsida :is(.kf__knapp, .kdela, .kf__lank, .kplan__forstora, .kplan__flikar button, .kf__lista-jamfor, .kf__lista-knapp, .kf__lista-ladda, .kdialog__stang, .kf__planlank):focus-visible { outline: 2px solid var(--k-fokus); outline-offset: 3px; }
+
+/* ---------- Raden överst: åtgärder till vänster, köp till höger ---------- */
+.kf { width: var(--k-sida); margin: 0 auto; padding-top: 20px; }
+.kf__rad { display: grid; grid-template-columns: minmax(0, 1fr) var(--k-panel); gap: var(--k-gap); align-items: center; margin-bottom: 16px; }
+.kf__lankar { justify-self: start; display: flex; align-items: center; gap: 2px; height: 48px; padding: 4px; border-radius: var(--k-r-m); background: var(--k-kort); box-shadow: inset 0 0 0 1px var(--k-linje); }
+.kf__lank { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border: 0; border-radius: var(--k-r-s); background: none; font: 500 0.875rem/1 var(--sans); color: var(--k-text); text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color 0.2s ease, transform 0.16s var(--k-ut); }
+.kf__lank:hover, .kf__lank[aria-expanded="true"] { background: var(--k-svag); }
+.kf__lank:active { transform: scale(0.97); }
+.kf__lank svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.kf__lank b { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--k-text); color: var(--k-kort); font: 600 0.6875rem/1 var(--sans); font-variant-numeric: tabular-nums; }
+.kf__lank b[hidden] { display: none; }
+.kf__lank b.studs { animation: k-studs 0.28s var(--k-ut); }
+.kf__handling { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.kf__handling .kf__knapp { padding: 0 16px; }
+.kf__storlek { display: none; }
+
+/* Mina hus */
+.kf__meny { position: relative; }
+.kf__lista { position: absolute; z-index: 20; left: -4px; top: calc(100% + 12px); width: min(380px, 90vw); padding: 8px; border-radius: var(--k-r-l); background: var(--k-kort); box-shadow: 0 0 0 1px var(--k-linje), 0 30px 60px -28px rgba(27, 25, 21, 0.45); transform-origin: top left; animation: k-popup 0.25s var(--k-ut); }
+.kf__lista[hidden] { display: none; }
+.kf__lista-tom { margin: 8px; font-size: 0.875rem; line-height: 1.5; color: var(--k-text-3); }
+.kf__lista ul { display: grid; gap: 4px; max-height: 50vh; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.kf__lista ul:empty { display: none; }
+.kf__lista li { display: grid; grid-template-columns: auto 72px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 8px; border-radius: var(--k-r-m); transition: background-color 0.2s ease; }
+.kf__lista li:hover { background: var(--k-yta); }
+.kf__lista li img { width: 72px; aspect-ratio: 16 / 9.4; object-fit: cover; border-radius: var(--k-r-s); background: var(--k-svag); }
+.kf__lista li b { display: block; font: 500 0.875rem/1.2 var(--sans); color: var(--k-text); }
+.kf__lista li small { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--k-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kf__lista li input { width: 18px; height: 18px; margin: 0; accent-color: var(--k-text); }
+.kf__lista-ladda { all: unset; display: block; min-width: 0; border-radius: var(--k-r-s); cursor: pointer; }
+.kf__lista-knapp { padding: 8px; border: 0; border-radius: var(--k-r-s); background: none; color: var(--k-text-3); font: 500 0.8125rem/1 var(--sans); cursor: pointer; }
+.kf__lista-knapp:hover { background: var(--k-svag); color: var(--k-text); }
+.kf__lista-jamfor { width: 100%; min-height: 44px; margin-top: 8px; border: 0; border-radius: var(--k-r-m); background: var(--k-text); color: var(--k-kort); font: 500 0.875rem/1 var(--sans); cursor: pointer; }
+.kf__lista-jamfor:disabled { background: var(--k-svag); color: var(--k-text-3); cursor: default; }
+.kf__lista:has(ul:empty) .kf__lista-jamfor { display: none; }
+
+/* ---------- Rutnätet: scen och vinklar till vänster, panelen till höger ---------- */
+.kf__yta, .kplan__yta, .kplan__huvud { display: grid; grid-template-columns: minmax(0, 1fr) var(--k-panel); gap: var(--k-gap); }
+.kf__yta { align-items: start; }
+.kf__vanster { position: sticky; top: var(--k-topp); min-width: 0; }
+
+/* ---------- Scenen ---------- */
+.kf__scen { position: relative; width: 100%; aspect-ratio: 16 / 9.4; min-height: 380px; max-height: calc(100svh - 280px); border-radius: var(--k-r-l); overflow: hidden; background: var(--k-scen); box-shadow: 0 0 0 1px var(--k-linje); isolation: isolate; animation: k-scen 0.9s var(--k-ut) both; }
+.kf__scen:fullscreen { max-height: none; border-radius: 0; }
+.ritare__duk { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; outline: none; }
+.ritare__duk:active { cursor: grabbing; }
+.ritare__duk:focus-visible { box-shadow: inset 0 0 0 2px var(--k-fokus); }
+.kf__scen--inne .ritare__duk { cursor: grab; }
+.ritare__fel { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 24px; text-align: center; color: var(--k-text-2); }
+
+/* övergången mellan vinklar ritas av motorn i WebGL (förra bilden tonas bort på grafikkortet) */
+
+/* laddningen: den riktiga logotypen ritar sig (cirka 1,4 s), fönstren tänds ett i taget,
+   ordet glider fram; sedan växer logotypen lite och tonas medan slöjan öppnas i en cirkel
+   från mitten (clip-path med evenodd). Bara transform, opacity och clip-path; inget går
+   kvar efteråt (.borta = display: none). */
+.ritare__laddar { --kl-blk: #1b1915; position: absolute; inset: 0; z-index: 4; display: grid; place-content: center; justify-items: center; gap: 22px; margin: 0; padding: 24px; text-align: center; font: 500 0.875rem/1.5 var(--sans); color: var(--k-text-3); background: radial-gradient(80% 70% at 50% 42%, color-mix(in srgb, var(--k-scen) 50%, #fff), var(--k-scen));
+  clip-path: polygon(evenodd, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 50% 0%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%, 50.00% 50.00%); transition: clip-path 0.95s cubic-bezier(0.65, 0, 0.35, 1) 0.12s, opacity 0.6s ease 0.45s; }
+.ritare__laddar.klar { clip-path: polygon(evenodd, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 50% 0%, 50.00% -26.00%, 69.67% -23.41%, 88.00% -15.82%, 103.74% -3.74%, 115.82% 12.00%, 123.41% 30.33%, 126.00% 50.00%, 123.41% 69.67%, 115.82% 88.00%, 103.74% 103.74%, 88.00% 115.82%, 69.67% 123.41%, 50.00% 126.00%, 30.33% 123.41%, 12.00% 115.82%, -3.74% 103.74%, -15.82% 88.00%, -23.41% 69.67%, -26.00% 50.00%, -23.41% 30.33%, -15.82% 12.00%, -3.74% -3.74%, 12.00% -15.82%, 30.33% -23.41%, 50.00% -26.00%); opacity: 0; pointer-events: none; }
+.ritare__laddar.borta { display: none; }
+.kl-logga { display: flex; align-items: flex-end; gap: clamp(8px, 1vw, 12px); height: clamp(40px, 5.2vw, 60px); color: var(--kl-blk); transform-origin: 50% 60%; transition: transform 0.7s var(--k-ut), opacity 0.45s ease; }
+.ritare__laddar.klar .kl-logga { transform: scale(1.04); opacity: 0; }
+.kl-logga svg { display: block; height: 100%; width: auto; overflow: visible; }
+/* 1. huset: väggarna reser sig nerifrån, taket sänks på plats */
+.kl-vagg, .kl-tak, .kl-fonster rect, .kl-ljus rect { transform-box: fill-box; }
+.kl-vagg { transform-origin: 50% 100%; transform: scaleY(0); animation: kl-res 0.55s cubic-bezier(0.3, 0.7, 0.2, 1) forwards; animation-delay: calc(0.08s + var(--i) * 0.09s); }
+.kl-tak { transform-origin: 50% 100%; opacity: 0; transform: translateY(-26%); animation: kl-tak 0.6s var(--k-ut) 0.32s forwards; }
+/* 2. fönstren tänds ett i taget med ett varmt sken */
+.kl-fonster rect { opacity: 0; transform-origin: 50% 50%; transform: scale(0.4); animation: kl-fonster 0.35s var(--k-ut) forwards; animation-delay: calc(0.62s + var(--i) * 0.11s); }
+.kl-ljus { fill: #f0b56e; filter: drop-shadow(0 0 5px rgba(240, 181, 110, 0.85)); }
+.kl-ljus rect { opacity: 0; animation: kl-ljus 0.9s ease forwards; animation-delay: calc(0.7s + var(--i) * 0.11s); }
+/* 3. ordet visas från vänster till höger */
+.kl-ord { clip-path: inset(0 100% 0 0); opacity: 0.2; transform: translateX(-6px); animation: kl-ord 0.85s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards; }
+/* 4. hårlinjen: ett lugnt svep, fylls helt när scenen är klar */
+.ritare__laddar-linje { position: relative; width: clamp(140px, 16vw, 200px); height: 1px; overflow: hidden; background: color-mix(in srgb, var(--kl-blk) 14%, transparent); opacity: 0; animation: kl-upp 0.5s ease 0.9s forwards; }
+.ritare__laddar-linje i { position: absolute; inset: 0; background: var(--kl-blk); transform: translateX(-100%) scaleX(0.35); transform-origin: left; animation: kl-svep 1.5s cubic-bezier(0.65, 0, 0.35, 1) 0.9s 3; }
+.ritare__laddar.klar .ritare__laddar-linje i { animation: none; transform: none; transition: transform 0.35s var(--k-ut); }
+html[data-tema="mork"] .ritare__laddar { --kl-blk: #f2eee6; background: radial-gradient(80% 70% at 50% 42%, #2b2722, var(--k-scen)); }
+html.inbaddad .ritare__laddar .kl-logga { height: clamp(34px, 9vw, 52px); }
+@keyframes kl-res { to { transform: none; } }
+@keyframes kl-tak { to { opacity: 1; transform: none; } }
+@keyframes kl-fonster { to { opacity: 1; transform: none; } }
+@keyframes kl-ljus { 0% { opacity: 0; } 45% { opacity: 1; } 100% { opacity: 0.85; } }
+@keyframes kl-ord { to { clip-path: inset(0 0 0 0); opacity: 1; transform: none; } }
+@keyframes kl-upp { to { opacity: 1; } }
+@keyframes kl-svep { 0% { transform: translateX(-100%) scaleX(0.35); } 100% { transform: translateX(100%) scaleX(0.35); } }
+@media (prefers-reduced-motion: reduce) {
+  html body .ritare__laddar { clip-path: none !important; transition: opacity 0.4s ease !important; }
+  html body .ritare__laddar :is(.kl-vagg, .kl-tak, .kl-fonster rect, .kl-ord, .ritare__laddar-linje) { opacity: 1 !important; transform: none !important; clip-path: none !important; }
+  html body .ritare__laddar .kl-ljus rect { opacity: 0.85 !important; }
+  html body .ritare__laddar.klar .kl-logga { transform: none; }
+}
+
+/* tipset: en liten hand som vrider, försvinner efter första draget */
+.ritare__tips { position: absolute; z-index: 2; left: 50%; top: 16px; bottom: auto; height: auto; translate: -50% 0; display: inline-flex; align-items: center; gap: 8px; max-width: calc(100% - 32px); margin: 0; padding: 8px 14px 8px 10px; border-radius: 999px; background: var(--k-glas); color: #fff; font: 500 0.75rem/1 var(--sans); white-space: nowrap; pointer-events: none; transition: opacity 0.24s var(--k-ut), translate 0.24s var(--k-ut); }
+.ritare__tips span { overflow: hidden; text-overflow: ellipsis; }
+.ritare__tips svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; animation: k-vrid 1.6s ease-in-out 0.8s 2; }
+.ritare__tips.borta { opacity: 0; translate: -50% -4px; }
+.kf__scen--dragit:not(.kf__scen--inne) .ritare__tips:not(.kf__tips--besked) { opacity: 0; }
+/* inne ligger tipset ovanför verktygen; html.inbaddad satte förr top också, och då
+   drogs tipset ut till en hög mörk kapsel mitt i bilden */
+html .kf__scen--inne .ritare__tips, html.inbaddad .kf__scen--inne .ritare__tips { top: auto; bottom: 84px; }
+/* utsidans tips hoppar inte ned och tonas inte över chipet när man kliver in */
+html .kf__scen--inne .ritare__tips.borta { visibility: hidden; transition: none; }
+
+/* ---------- Verktygen i bilden: en rad i mitten, i grupper ---------- */
+.kf__verktyg { position: absolute; z-index: 3; left: 50%; bottom: 16px; translate: -50% 0; display: flex; align-items: center; gap: 4px; max-width: calc(100% - 32px); height: 56px; padding: 6px; border-radius: 16px; background: var(--k-glas); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 18px 36px -20px rgba(0, 0, 0, 0.7); }
+.kf__vgrupp { display: flex; align-items: center; gap: 2px; }
+.kf__streck { flex: none; width: 1px; height: 24px; margin: 0 4px; background: rgba(255, 255, 255, 0.16); }
+.kf__vk { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 44px; height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; color: rgba(255, 255, 255, 0.84); font: 500 0.875rem/1 var(--sans); white-space: nowrap; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease, transform 0.16s var(--k-ut); }
+.kf__vk:has(> .sr) { padding: 0; }
+/* inne finns inga mått eller snurr: gruppen och dess streck faller bort */
+.kf__scen--inne .kf__vgrupp:has([data-matt-knapp]), .kf__scen--inne .kf__vgrupp:has([data-matt-knapp]) + .kf__streck { display: none; }
+.kf__vk[hidden] { display: none; }
+.kf__vk svg, .kf__sol svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.kf__vk:hover, .kf__vk[aria-expanded="true"] { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.kf__vk:active { transform: scale(0.97); }
+.kf__vk[aria-pressed="true"] { background: rgba(255, 255, 255, 0.18); color: #fff; }
+.kf__vk[aria-pressed="true"]::before { content: ""; position: absolute; left: 50%; bottom: 3px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--k-accent); }
+/* taket svävar medan rummen laddas: pricken pulserar tills lyftet börjar */
+.kf__vk[aria-busy="true"]::before { animation: kf-lyft-laddar 0.9s ease-in-out infinite; }
+@keyframes kf-lyft-laddar { 50% { transform: scale(1.8); opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) { .kf__vk[aria-busy="true"]::before { animation: none; } }
+/* Se inne är verktygens huvudknapp: ljus så att den syns först */
+.kf__vk--inne { background: rgba(255, 255, 255, 0.94); color: #1b1915; }
+.kf__vk--inne:hover { background: #fff; color: #1b1915; }
+.kf__vk--inne[aria-pressed="true"] { background: var(--k-accent); color: #1b1915; }
+.kf__vk--inne[aria-pressed="true"]::before { display: none; }
+.kf__vk:focus-visible, .ritare__reglage:focus-visible, .kf__popup button:focus-visible, .kf__rum button:focus-visible, .kf__prick:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+
+/* verktygstips ovanför knappen */
+.kf__vk[data-tips]::after { content: attr(data-tips); position: absolute; left: 50%; bottom: calc(100% + 14px); translate: -50% 4px; padding: 7px 10px; border-radius: var(--k-r-s); background: #fff; color: #1b1915; font: 500 0.75rem/1 var(--sans); white-space: nowrap; box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.5); opacity: 0; pointer-events: none; transition: opacity 0.15s ease, translate 0.2s var(--k-ut); }
+@media (hover: hover) { .kf__vk[data-tips]:hover::after { opacity: 1; translate: -50% 0; transition-delay: 0.35s; } }
+.kf__vk[data-tips]:focus-visible::after { opacity: 1; translate: -50% 0; }
+.kf__vk[aria-expanded="true"]::after { opacity: 0 !important; }
+
+/* ljuset: tid på dagen */
+.kf__sol { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 12px 0 10px; }
+.kf__sol label { display: inline-flex; color: rgba(255, 255, 255, 0.84); cursor: pointer; }
+/* solen öppnar ljusets snabbval (Morgon, Dag, Gyllene timmen, Kväll) */
+.kf__meny--ljus { display: inline-flex; }
+.kf__ljusknapp { position: relative; display: inline-grid; place-items: center; width: 36px; height: 36px; margin: 0 -6px 0 -4px; padding: 0; border: 0; border-radius: 10px; background: transparent; color: rgba(255, 255, 255, 0.84); cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease, transform 0.16s var(--k-ut); }
+.kf__ljusknapp:hover, .kf__ljusknapp[aria-expanded="true"] { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.kf__ljusknapp:active { transform: scale(0.97); }
+.kf__ljusknapp:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.kf__ljusknapp svg { transition: transform 0.24s var(--k-ut); }
+.kf__ljusknapp[aria-expanded="true"] svg { transform: rotate(45deg); }
+/* en liten prick när tiden står på ett snabbval */
+.kf__ljusknapp::before { content: ""; position: absolute; right: 6px; top: 6px; width: 5px; height: 5px; border-radius: 50%; background: var(--k-accent); opacity: 0; scale: 0.4; transition: opacity 0.2s ease, scale 0.3s var(--k-ut); }
+.kf__ljusknapp--val::before { opacity: 1; scale: 1; }
+@media (hover: hover) { .kf__ljusknapp[data-tips]::after { content: attr(data-tips); position: absolute; left: 50%; bottom: calc(100% + 12px); translate: -50% 4px; padding: 6px 10px; border-radius: 8px; background: rgba(24, 22, 19, 0.96); color: #fff; font: 500 0.75rem/1 var(--sans); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s ease, translate 0.2s var(--k-ut); } .kf__ljusknapp[data-tips]:hover:not([aria-expanded="true"])::after { opacity: 1; translate: -50% 0; transition-delay: 0.35s; } }
+.kf__popup.kf__popup--ljus { min-width: 232px; }
+.kf__popup--ljus i { border-radius: 50%; }
+.kf__popup--ljus small { margin-left: auto; font: 500 0.75rem/1 var(--sans); font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, 0.5); }
+.kf__popup--ljus button[aria-checked="true"]::after { margin-left: 0; }
+.kf__sol output { min-width: 2.9em; font: 500 0.8125rem/1 var(--sans); font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, 0.86); }
+.ritare__reglage { --p: 50%; -webkit-appearance: none; appearance: none; width: clamp(96px, 9vw, 150px); height: 28px; margin: 0; background: transparent; cursor: pointer; }
+.ritare__reglage::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, #f3c27c, #fff3d4 45%, #f6c47e 75%, #6f7090); }
+.ritare__reglage::-moz-range-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, #f3c27c, #fff3d4 45%, #f6c47e 75%, #6f7090); }
+.ritare__reglage::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14), 0 2px 6px rgba(0, 0, 0, 0.35); transition: transform 0.16s var(--k-ut), box-shadow 0.2s ease; }
+.ritare__reglage::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14), 0 2px 6px rgba(0, 0, 0, 0.35); }
+.ritare__reglage:hover::-webkit-slider-thumb { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.18), 0 2px 6px rgba(0, 0, 0, 0.35); }
+.ritare__reglage:active::-webkit-slider-thumb { transform: scale(1.12); }
+
+/* menyerna (Vy och Miljö) */
+.kf__popup { position: absolute; z-index: 5; left: 50%; bottom: calc(100% + 16px); min-width: 196px; padding: 6px; border-radius: 14px; background: rgba(24, 22, 19, 0.97); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 24px 48px -24px rgba(0, 0, 0, 0.7); translate: -50% 0; transform-origin: bottom center; animation: k-popup 0.25s var(--k-ut); }
+.kf__popup[hidden] { display: none; }
+.kf__popup button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 40px; padding: 0 12px; border: 0; border-radius: var(--k-r-s); background: transparent; color: rgba(255, 255, 255, 0.8); font: 500 0.875rem/1 var(--sans); text-align: left; white-space: nowrap; cursor: pointer; transition: background-color 0.15s ease, color 0.15s ease; }
+.kf__popup button:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.kf__popup button[aria-checked="true"] { color: #fff; }
+.kf__popup button[aria-checked="true"]::after { content: ""; width: 6px; height: 6px; margin-left: auto; border-radius: 50%; background: var(--k-accent); }
+.kf__popup i { width: 18px; height: 18px; flex: none; border-radius: 5px; background: var(--f, linear-gradient(135deg, #8a8378, #4e4a43)); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2); }
+
+/* ---------- Inne: rummen överst och kartan i hörnet ---------- */
+.kf__rum { position: absolute; z-index: 2; top: 16px; left: calc(var(--karta, 216px) + 32px); right: calc(var(--karta, 216px) + 32px); display: flex; justify-content: center; pointer-events: none; }
+.kf__rum[hidden] { display: none; }
+.kf__rum > div { display: flex; gap: 2px; max-width: 100%; padding: 4px; border-radius: 999px; background: var(--k-glas); overflow-x: auto; scrollbar-width: none; pointer-events: auto; animation: k-popup 0.24s var(--k-ut); }
+.kf__rum > div::-webkit-scrollbar { display: none; }
+.kf__rum button { flex: none; min-height: 36px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: rgba(255, 255, 255, 0.8); font: 500 0.8125rem/1 var(--sans); white-space: nowrap; cursor: pointer; transition: background-color 0.25s ease, color 0.25s ease; }
+.kf__rum button:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.kf__rum button[aria-pressed="true"] { background: #fff; color: #1b1915; }
+
+.kf__scen { --karta: clamp(168px, 15vw, 216px); }
+.kf__karta { position: absolute; z-index: 2; top: 16px; right: 16px; width: var(--karta); padding: 8px; border-radius: 14px; background: rgba(255, 255, 255, 0.96); box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.06), 0 18px 36px -20px rgba(0, 0, 0, 0.55); animation: k-popup 0.24s var(--k-ut); }
+.kf__karta[hidden] { display: none; }
+.kf__karta-yta { position: relative; }
+.kf__karta-yta img { display: block; width: 100%; height: auto; border-radius: 6px; opacity: 0.78; }
+.kf__karta-namn { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 8px 4px 2px; font: 500 0.6875rem/1.2 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: #847d72; }
+.kf__karta-namn b { font: 500 0.8125rem/1.2 var(--sans); letter-spacing: 0; text-transform: none; color: #1b1915; }
+.kf__prick { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; }
+.kf__prick i { position: absolute; inset: 6px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 2px #1b1915; transition: transform 0.2s var(--k-ut), background-color 0.2s ease; }
+.kf__prick:hover i { transform: scale(1.25); }
+.kf__prick--har { z-index: 1; }
+.kf__prick--har i { inset: 4px; background: var(--k-accent); box-shadow: 0 0 0 2px #fff, 0 2px 6px rgba(0, 0, 0, 0.35); }
+/* konen visar åt vilket håll kameran tittar */
+.kf__prick--har::before { content: ""; position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 0; background: conic-gradient(from 60deg at 0 50%, transparent 0deg, rgba(240, 181, 110, 0.55) 1deg, rgba(240, 181, 110, 0.55) 59deg, transparent 60deg); transform: rotate(var(--v)); transform-origin: 0 50%; -webkit-mask: radial-gradient(circle at 0 50%, #000 40%, transparent 72%); mask: radial-gradient(circle at 0 50%, #000 40%, transparent 72%); pointer-events: none; }
+.kf__prick--har::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px var(--k-accent); animation: k-puls 0.9s var(--k-ut) both; pointer-events: none; }
+
+/* ---------- Vinkelremsan: sju lika breda bilder, kanterna i linje med scenen ---------- */
+.kf__tummar { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px; margin-top: 12px; }
+.ktumme { position: relative; display: grid; gap: 8px; min-width: 0; padding: 0; border: 0; background: none; color: inherit; text-align: center; cursor: pointer; }
+.ktumme[hidden] { display: none; }
+.ktumme__bild { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9.4; border-radius: var(--k-r-m); background: var(--k-svag) center / cover no-repeat; box-shadow: inset 0 0 0 1px var(--k-linje); overflow: hidden; transition: transform 0.24s var(--k-ut), box-shadow 0.24s var(--k-ut), opacity 0.28s var(--k-ut), filter 0.28s var(--k-ut); }
+.ktumme__bild::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.08); pointer-events: none; }
+.ktumme__tom { width: 40%; max-width: 44px; fill: none; stroke: var(--k-text-3); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; opacity: 0.6; transition: opacity 0.3s ease; }
+.ktumme__bild.har-bild .ktumme__tom { opacity: 0; }
+/* två dukar per bild: den nya tonas in över den gamla (bara opacitet) */
+.ktumme__duk { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.28s var(--k-ut); pointer-events: none; }
+.ktumme__duk.syns { opacity: 1; }
+.ktumme--inne .ktumme__bild { background: linear-gradient(160deg, var(--k-kort), var(--k-svag)); color: var(--k-text-2); }
+.ktumme--inne svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.ktumme__namn { overflow: hidden; font: 500 0.8125rem/1.1 var(--sans); color: var(--k-text-3); white-space: nowrap; text-overflow: ellipsis; transition: color 0.2s ease; }
+.ktumme:hover .ktumme__namn, .ktumme[aria-pressed="true"] .ktumme__namn { color: var(--k-text); }
+.ktumme:active .ktumme__bild { transform: scale(0.97); }
+.ktumme:focus-visible { outline: none; }
+.ktumme:focus-visible .ktumme__bild { outline: 2px solid var(--k-fokus); outline-offset: 2px; }
+@media (hover: hover) { .ktumme:hover .ktumme__bild { transform: translateY(-2px); box-shadow: inset 0 0 0 1px var(--k-linje), 0 12px 20px -14px rgba(27, 25, 21, 0.55); } }
+/* ringen glider till vald bild; den ritas inåt så att den aldrig klipps */
+.kf__tummar-ring { position: absolute; z-index: 1; left: 0; top: 0; border-radius: var(--k-r-m); box-shadow: inset 0 0 0 2px var(--k-text), inset 0 0 0 4px var(--k-kort); opacity: 0; pointer-events: none; transition: transform 0.28s var(--k-ut), width 0.28s var(--k-ut), opacity 0.2s var(--k-ut); }
+.kf__tummar-ring.syns { opacity: 1; }
+/* inne i huset: utsidans bilder ligger kvar men tonas ned */
+.kf--inne .ktumme:not(.ktumme--inne) .ktumme__bild { opacity: 0.55; filter: saturate(0.4); }
+.kf--inne .ktumme:not(.ktumme--inne):hover .ktumme__bild { opacity: 0.9; filter: none; }
+
+/* ---------- Panelen ---------- */
+.kf__panel { min-width: 0; padding-bottom: 48px; }
+.kf__panel > * { animation: k-upp 0.28s var(--k-ut) both; animation-delay: calc(0.08s + var(--d, 0) * 40ms); }
+.kf__panel > :nth-child(2) { --d: 1; } .kf__panel > :nth-child(3) { --d: 2; } .kf__panel > :nth-child(4) { --d: 3; } .kf__panel > :nth-child(5) { --d: 4; } .kf__panel > :nth-child(6) { --d: 5; }
+.kf__huvud { margin-bottom: 16px; }
+.kf__huvudrad { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.kf__huvudrad .k-etikett { margin: 0; }
+html body .kf__namn { margin: 0 0 20px; font: 300 clamp(2.25rem, 3vw, 2.75rem)/1.05 var(--sans); letter-spacing: -0.035em; color: var(--k-text); }
+.kf__namn .bokstav { display: inline-block; opacity: 0; transform: translateY(0.4em); animation: kf-bokstav 0.28s var(--k-ut) forwards; animation-delay: calc(var(--i) * 20ms); }
+.kf__planlank { display: inline-flex; align-items: center; gap: 6px; font: 500 0.8125rem/1 var(--sans); color: var(--k-text-2); text-decoration: none; transition: color 0.2s ease; }
+.kf__planlank:hover { color: var(--k-text); }
+.kf__planlank svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.25s var(--k-ut); }
+.kf__planlank:hover svg { transform: translateY(2px); }
+
+/* tre nyckeltal i lika breda rutor (samma form som i planen) */
+.kf__nyckel, .kplan__siffror { display: grid; gap: 1px; margin: 0; border-radius: var(--k-r-l); overflow: hidden; background: var(--k-linje); box-shadow: 0 0 0 1px var(--k-linje); }
+.kf__nyckel { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.kf__nyckel > div, .kplan__siffror > div { padding: 14px 16px; background: var(--k-kort); }
+.kf__nyckel dt, .kplan__siffror dt { font-size: 0.75rem; line-height: 1.2; color: var(--k-text-3); }
+.kf__nyckel dd, .kplan__siffror dd { display: flex; align-items: baseline; gap: 4px; margin: 8px 0 0; color: var(--k-text); white-space: nowrap; }
+.kf__nyckel b, .kplan__siffror b { font: 300 1.5rem/1 var(--sans); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.kf__nyckel small, .kplan__siffror small { font: 500 0.75rem/1 var(--sans); color: var(--k-text-2); }
+
+/* fällbara kort */
+.kgrupp { position: relative; margin-bottom: 12px; border-radius: var(--k-r-l); background: var(--k-kort); box-shadow: inset 0 0 0 1px var(--k-linje); transition: box-shadow 0.3s ease; }
+.kgrupp > summary { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 0 20px; border-radius: var(--k-r-l); list-style: none; cursor: pointer; font: 500 1.0625rem/1.2 var(--sans); color: var(--k-text); }
+.kgrupp > summary::-webkit-details-marker { display: none; }
+.kgrupp > summary span { flex: 1; }
+.kgrupp > summary em { min-width: 0; font: 400 0.875rem/1.2 var(--sans); font-style: normal; color: var(--k-text-3); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kgrupp > summary svg { width: 20px; height: 20px; flex: none; fill: none; stroke: var(--k-text-2); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.24s var(--k-ut); }
+.kgrupp[open] > summary svg { transform: rotate(180deg); }
+.kgrupp > summary:focus-visible { outline: 2px solid var(--k-fokus); outline-offset: -2px; }
+.kgrupp__inre { position: relative; z-index: 1; overflow: hidden; transition: height 0.28s var(--k-ut); }
+.kgrupp__text { margin: -4px 20px 16px; font-size: 0.875rem; line-height: 1.5; color: var(--k-text-2); }
+.kgrupp__etikett { margin: 0 20px 10px; font: 500 0.75rem/1.2 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: var(--k-text-3); }
+
+/* ljuset som följer pekaren över korten */
+.kljus { position: relative; }
+.kljus::after { content: ""; position: absolute; inset: 0; z-index: 0; border-radius: inherit; background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 0), color-mix(in srgb, var(--k-accent) 14%, transparent), transparent 65%); opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
+@media (hover: hover) and (pointer: fine) { .kljus:hover::after { opacity: 1; } .kgrupp:hover { box-shadow: inset 0 0 0 1px var(--k-linje-2); } }
+
+/* färgprover: lyfts och lutar lite vid hovring, studsar när de väljs */
+.kfarger { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 10px; padding: 0 20px 20px; perspective: 600px; }
+.kfarger:empty { display: none; }
+.kfarg { position: relative; display: block; cursor: pointer; animation: k-upp 0.28s var(--k-ut) both; animation-delay: calc(var(--i, 0) * 16ms); }
+.kfarg input { position: absolute; opacity: 0; pointer-events: none; }
+.kfarg__prov { position: relative; display: block; aspect-ratio: 1; border-radius: var(--k-r-s); background: var(--f); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1); overflow: hidden; transform-origin: 50% 100%; transition: transform 0.24s var(--k-ut), box-shadow 0.24s var(--k-ut); }
+.kfarg__prov::before { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, 0.14)); }
+.kfarg__prov::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 3px var(--k-kort); opacity: 0; transition: opacity 0.2s ease; }
+.kfarg:active .kfarg__prov { transform: scale(0.97); }
+.kfarg input:checked + .kfarg__prov { box-shadow: 0 0 0 2px var(--k-text); animation: k-valj 0.28s var(--k-ut); }
+.kfarg input:checked + .kfarg__prov::after { opacity: 1; }
+.kfarg input:focus-visible + .kfarg__prov { outline: 2px solid var(--k-fokus); outline-offset: 4px; }
+.kfarg__namn { position: absolute; z-index: 3; left: 50%; bottom: calc(100% + 8px); translate: -50% 4px; padding: 6px 10px; border-radius: var(--k-r-s); background: var(--k-text); color: var(--k-kort); font: 500 0.75rem/1 var(--sans); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.15s ease, translate 0.2s var(--k-ut); }
+.kfarg input:focus-visible ~ .kfarg__namn { opacity: 1; translate: -50% 0; }
+@media (hover: hover) {
+  .kfarg:hover .kfarg__prov { transform: translateY(-3px) rotateX(14deg) scale(1.05); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1), 0 12px 14px -10px rgba(27, 25, 21, 0.6); }
+  .kfarg:hover input:checked + .kfarg__prov { box-shadow: 0 0 0 2px var(--k-text), 0 12px 14px -10px rgba(27, 25, 21, 0.6); }
+  .kfarg:hover .kfarg__namn { opacity: 1; translate: -50% 0; transition-delay: 0.1s; }
+}
+
+/* modellkorten */
+.kmodeller { display: grid; gap: 2px; padding: 0 8px 8px; }
+.kmodell { position: relative; display: block; cursor: pointer; }
+.kmodell input { position: absolute; opacity: 0; pointer-events: none; }
+.kmodell__kort { display: grid; grid-template-columns: 104px minmax(0, 1fr) auto 22px; align-items: center; gap: 16px; min-height: 84px; padding: 12px; border-radius: var(--k-r-m); transition: background-color 0.3s ease, box-shadow 0.3s ease; }
+.kmodell:hover .kmodell__kort { background: var(--k-yta); }
+.kmodell:active .kmodell__kort { background: var(--k-svag); }
+.kmodell input:checked + .kmodell__kort { background: var(--k-yta); box-shadow: inset 0 0 0 1.5px var(--k-text); }
+.kmodell input:focus-visible + .kmodell__kort { outline: 2px solid var(--k-fokus); outline-offset: 2px; }
+.kmodell__bild { display: flex; align-items: flex-end; height: 42px; }
+.kmodell .kmodell__ritning { width: 104px; height: 40px; overflow: visible; transition: transform 0.24s var(--k-ut); }
+.kmodell:hover .kmodell__ritning { transform: translateY(-2px); }
+.kmodell__ritning path { fill: none; stroke: var(--k-text-2); stroke-width: 0.9; stroke-linejoin: round; vector-effect: non-scaling-stroke; transition: fill 0.35s ease, stroke 0.35s ease; }
+.kmodell__ritning .v { fill: var(--k-kort); }
+.kmodell__ritning .g { fill: var(--k-svag); }
+.kmodell__ritning .t { fill: color-mix(in srgb, var(--k-text) 12%, var(--k-kort)); }
+.kmodell__ritning .m { stroke: var(--k-linje); stroke-width: 1; }
+.kmodell input:checked + .kmodell__kort .kmodell__ritning path { stroke: var(--k-text); }
+.kmodell input:checked + .kmodell__kort .kmodell__ritning .t { fill: var(--k-text); }
+.kmodell__text { min-width: 0; }
+.kmodell__text b { display: block; font: 400 1.0625rem/1.2 var(--sans); letter-spacing: -0.01em; color: var(--k-text); }
+.kmodell__text small { display: block; margin-top: 4px; font-size: 0.8125rem; line-height: 1.3; color: var(--k-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kmodell__fakta { text-align: right; }
+.kmodell__fakta em { display: block; font: 300 1.5rem/1 var(--sans); font-style: normal; letter-spacing: -0.03em; color: var(--k-text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kmodell__fakta em sup { margin-left: 2px; font-size: 0.75rem; font-weight: 500; letter-spacing: 0; vertical-align: 0.65em; }
+.kmodell__fakta small { display: block; margin-top: 4px; font-size: 0.75rem; color: var(--k-text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.kmodell__bock { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--k-linje-2); transition: background-color 0.24s var(--k-ut), box-shadow 0.24s var(--k-ut), transform 0.24s var(--k-ut); }
+.kmodell__bock svg { width: 14px; height: 14px; fill: none; stroke: var(--k-kort); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 20; stroke-dashoffset: 20; transition: stroke-dashoffset 0.24s var(--k-ut) 0.04s; }
+.kmodell input:checked + .kmodell__kort .kmodell__bock { background: var(--k-text); box-shadow: none; animation: k-valj 0.28s var(--k-ut); }
+.kmodell input:checked + .kmodell__kort .kmodell__bock svg { stroke-dashoffset: 0; }
+
+/* sammanfattningen i panelen */
+.ksumma { margin-top: 24px; padding: 24px 20px; border-radius: var(--k-r-l); background: var(--k-kort); box-shadow: inset 0 0 0 1px var(--k-linje); scroll-margin-top: 100px; }
+.ksumma > * { position: relative; z-index: 1; }
+html body .ksumma h2 { margin: 0 0 16px; font: 300 1.75rem/1.1 var(--sans); letter-spacing: -0.03em; color: var(--k-text); }
+.ksumma dl, .ksam__lista, .kjmf__kol dl { margin: 0 0 24px; border-top: 1px solid var(--k-linje); }
+:is(.ksumma, .ksam__lista, .kjmf__kol) dl > div, .ksam__lista > div { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--k-linje); }
+:is(.ksumma, .ksam__lista, .kjmf__kol) dt { font-size: 0.875rem; color: var(--k-text-3); }
+:is(.ksumma, .ksam__lista, .kjmf__kol) dd { display: flex; align-items: center; gap: 8px; margin: 0; font: 500 0.875rem/1.3 var(--sans); color: var(--k-text); text-align: right; }
+:is(.ksumma, .ksam__lista, .kjmf__kol) dd i { width: 16px; height: 16px; flex: none; border-radius: 4px; background: var(--f); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15); }
+.ksumma__not, .ksam__not { margin: 16px 0 0; font-size: 0.8125rem; line-height: 1.5; color: var(--k-text-3); }
+
+/* ---------- Dialogerna: samma hörn, stängknapp och entré ---------- */
+.kdialog { max-width: none; max-height: none; padding: 0; border: 0; border-radius: var(--k-r-xl); background: var(--k-kort); color: var(--k-text); font-family: var(--sans); box-shadow: 0 40px 100px -40px rgba(0, 0, 0, 0.6); }
+.kdialog { opacity: 0; translate: 0 10px; scale: 0.985; transition: opacity 0.2s var(--k-ut), translate 0.24s var(--k-ut), scale 0.24s var(--k-ut), overlay 0.24s var(--k-ut) allow-discrete, display 0.24s var(--k-ut) allow-discrete; }
+.kdialog[open] { opacity: 1; translate: 0 0; scale: 1; }
+@starting-style { .kdialog[open] { opacity: 0; translate: 0 14px; scale: 0.985; } }
+.kdialog::backdrop { background: rgba(18, 16, 13, 0); transition: background-color 0.24s var(--k-ut), overlay 0.24s var(--k-ut) allow-discrete, display 0.24s var(--k-ut) allow-discrete; }
+.kdialog[open]::backdrop { background: rgba(18, 16, 13, 0.6); }
+@starting-style { .kdialog[open]::backdrop { background: rgba(18, 16, 13, 0); } }
+.kdialog__stang { position: absolute; top: 16px; right: 16px; z-index: 3; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--k-svag); color: var(--k-text); cursor: pointer; transition: background-color 0.2s ease, transform 0.25s var(--k-ut); }
+.kdialog__stang:hover { background: var(--k-svag-2); transform: rotate(90deg); }
+.kdialog__stang:active { transform: scale(0.97); }
+.kdialog__stang svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.kdialog__topp { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+.kdialog__topp .kdialog__stang { position: static; }
+html body .kdialog__topp h2 { margin: 0; font: 300 2.25rem/1 var(--sans); letter-spacing: -0.035em; color: var(--k-text); }
+
+/* sammanfattning */
+.ksam { width: min(1240px, 100vw - 2 * var(--k-kant)); height: min(800px, 100svh - 2 * var(--k-kant)); overflow: hidden; }
+.ksam[open] { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(340px, 0.6fr); }
+.ksam__bild { position: relative; overflow: hidden; background: var(--k-scen); }
+.ksam__bild :is(img, canvas) { display: block; width: 100%; height: 100%; object-fit: cover; animation: ksam-bild 0.4s var(--k-ut); }
+.ksam__bild img:not([src]), .ksam__bild img[src=""] { visibility: hidden; }
+.ksam__text { position: relative; padding: clamp(24px, 3vw, 40px); overflow-y: auto; }
+.ksam__text > :not(.kdialog__stang) { animation: k-upp 0.28s var(--k-ut) both; }
+.ksam__text > :nth-child(3) { animation-delay: 0.03s; } .ksam__text > :nth-child(4) { animation-delay: 0.06s; } .ksam__text > :nth-child(5) { animation-delay: 0.09s; } .ksam__text > :nth-child(6) { animation-delay: 0.12s; } .ksam__text > :nth-child(n+7) { animation-delay: 0.15s; }
+html body .ksam__namn { margin: 0; font: 300 clamp(2.25rem, 3.6vw, 3.25rem)/1 var(--sans); letter-spacing: -0.035em; color: var(--k-text); }
+.ksam__fakta { margin: 12px 0 24px; font-size: 0.9375rem; color: var(--k-text-2); font-variant-numeric: tabular-nums; }
+.ksam__plan { margin: 0 0 24px; padding: 16px; border-radius: var(--k-r-l); background: #fff; box-shadow: inset 0 0 0 1px var(--k-linje); }
+.ksam__plan img { display: block; width: 100%; height: auto; }
+.ksam__plan figcaption { margin-top: 8px; font-size: 0.75rem; color: #6c665c; }
+.ksam__knappar { display: grid; gap: 8px; }
+.ksam__smaknappar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* jämför */
+.kjmf { width: min(1320px, 100vw - 2 * var(--k-kant)); max-height: min(860px, 100svh - 2 * var(--k-kant)); padding: clamp(24px, 3vw, 40px); overflow-y: auto; }
+.kjmf__kolumner { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+.kjmf__kol { display: flex; flex-direction: column; padding: 12px 12px 16px; border-radius: var(--k-r-l); box-shadow: inset 0 0 0 1px var(--k-linje); animation: k-upp 0.28s var(--k-ut) both; }
+.kjmf__kol:nth-child(2) { animation-delay: 0.05s; } .kjmf__kol:nth-child(3) { animation-delay: 0.1s; }
+.kjmf__kol img { width: 100%; aspect-ratio: 16 / 9.4; object-fit: cover; border-radius: var(--k-r-m); background: var(--k-scen); }
+html body .kjmf__kol h3 { margin: 16px 4px 4px; font: 300 1.5rem/1.1 var(--sans); letter-spacing: -0.02em; color: var(--k-text); }
+.kjmf__kol p { margin: 0 4px 12px; font-size: 0.875rem; color: var(--k-text-3); }
+.kjmf__kol dl { margin: 0 4px 16px; }
+.kjmf__kol .kf__knapp { width: 100%; margin-top: auto; }
+
+/* planen i helskärm */
+.kplanstor { width: min(1500px, 100vw - 2 * var(--k-kant)); height: min(940px, 100svh - 2 * var(--k-kant)); padding: clamp(32px, 4vw, 64px); background: #fff; }
+.kplanstor[open] { display: grid; place-items: center; }
+.kplanstor img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.kplanstor .kdialog__stang { background: #efebe3; color: #1b1915; }
+
+/* ---------- Planen, i samma rutnät som konfiguratorn ---------- */
+/* sidans egna mellanrum mellan avsnitt (design.css) nollar marginalen under; här gäller planens egen */
+html body.ritsidan main.ritsida > .kplan { width: var(--k-sida); margin: clamp(72px, 9vw, 128px) auto clamp(56px, 7vw, 96px); scroll-margin-top: 100px; }
+.kplan__huvud { align-items: end; margin-bottom: 20px; }
+html body .kplan__namn { margin: 0; font: 300 clamp(2.25rem, 3vw, 2.75rem)/1.05 var(--sans); letter-spacing: -0.035em; color: var(--k-text); }
+.kplan__under { margin: 10px 0 0; font-size: 0.9375rem; color: var(--k-text-2); }
+.kplan__styr { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.kplan__flikar { display: inline-flex; gap: 2px; padding: 4px; border-radius: var(--k-r-m); background: var(--k-svag); }
+.kplan__flikar[hidden] { display: inline-flex; visibility: hidden; }
+.kplan__flikar button { min-height: 36px; padding: 0 18px; border: 0; border-radius: var(--k-r-s); background: transparent; font: 500 0.875rem/1 var(--sans); color: var(--k-text-2); cursor: pointer; transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease; }
+.kplan__flikar button:hover { color: var(--k-text); }
+.kplan__flikar button[aria-selected="true"] { background: var(--k-kort); color: var(--k-text); box-shadow: 0 1px 2px rgba(27, 25, 21, 0.08), 0 4px 12px -6px rgba(27, 25, 21, 0.2); }
+.kplan__forstora { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 0; border-radius: var(--k-r-m); background: var(--k-kort); box-shadow: inset 0 0 0 1px var(--k-linje-2); font: 500 0.875rem/1 var(--sans); color: var(--k-text); cursor: pointer; transition: background-color 0.2s ease; }
+.kplan__forstora:hover { background: var(--k-svag); }
+.kplan__forstora svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* plankortet och panelen bredvid får samma höjd; ritningen får plats helt */
+.kplan__yta { align-items: stretch; }
+.kplan__bild { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 16px; min-width: 0; margin: 0; padding: clamp(20px, 3vw, 48px); border-radius: var(--k-r-l); background: #fff; box-shadow: inset 0 0 0 1px var(--k-linje); cursor: zoom-in; }
+.kplan__bild img { position: relative; z-index: 1; display: block; width: 100%; height: auto; max-height: min(66vh, 680px); object-fit: contain; opacity: 0; transform: scale(0.985); transition: opacity 0.28s var(--k-ut), transform 0.28s var(--k-ut); }
+.kplan__bild img.syns { opacity: 1; transform: none; }
+.kplan__kalla { position: relative; z-index: 1; margin: 0; font-size: 0.8125rem; color: #847d72; text-align: center; }
+html[data-tema="mork"] :is(.kplan__bild, .kplanstor, .ksam__plan) { background: #efebe3; }
+
+.kplan__panel { display: flex; flex-direction: column; min-width: 0; padding: 20px; border-radius: var(--k-r-l); background: var(--k-kort); box-shadow: inset 0 0 0 1px var(--k-linje); }
+.kplan__panel > * { position: relative; z-index: 1; }
+.kplan__siffror { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 24px; }
+.kplan__panel .k-etikett { margin-bottom: 4px; }
+.kplan__rum { margin: 0; padding: 0; list-style: none; }
+.kplan__rum li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid var(--k-linje); }
+.kplan__rumnamn { font: 400 0.9375rem/1.2 var(--sans); color: var(--k-text); }
+.kplan__yta-tal { font: 500 0.875rem/1.2 var(--sans); color: var(--k-text-2); font-variant-numeric: tabular-nums; }
+.kplan__stapel { grid-column: 1 / -1; height: 3px; border-radius: 2px; overflow: hidden; background: var(--k-svag); }
+.kplan__stapel i { display: block; width: calc(var(--b) * 100%); height: 100%; border-radius: 2px; background: var(--k-text); transform-origin: left; transform: scaleX(0); }
+.kplan__rum.in .kplan__stapel i { transform: none; animation: kplan-stapel 0.45s var(--k-ut) both; animation-delay: calc(var(--i) * 40ms + 0.05s); }
+.kplan__not { margin: auto 0 0; padding-top: 20px; font-size: 0.8125rem; line-height: 1.5; color: var(--k-text-3); }
+
+/* ---------- Rörelser (alla en gång, inget som går hela tiden) ---------- */
+@keyframes k-scen { from { opacity: 0; transform: scale(0.985); } }
+@keyframes k-upp { from { opacity: 0; transform: translateY(12px); } }
+@keyframes k-popup { from { opacity: 0; transform: translateY(6px) scale(0.97); } }
+@keyframes kf-bokstav { to { opacity: 1; transform: none; } }
+@keyframes k-valj { 0% { transform: scale(0.88); } 55% { transform: scale(1.07); } 100% { transform: scale(1); } }
+@keyframes k-studs { 0% { transform: scale(0.6); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
+@keyframes k-puls { from { transform: scale(0.6); opacity: 1; } to { transform: scale(1.9); opacity: 0; } }
+@keyframes k-vrid { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(-3px) rotate(-8deg); } 70% { transform: translateX(3px) rotate(8deg); } }
+@keyframes ksam-bild { from { transform: scale(1.04); opacity: 0.4; } }
+@keyframes kplan-stapel { from { transform: scaleX(0); } }
+
+/* ---------- Mellanstora skärmar ---------- */
+@media (max-width: 1240px) {
+  .kmodell__kort { grid-template-columns: 80px minmax(0, 1fr) auto 22px; gap: 12px; }
+  .kmodell .kmodell__ritning { width: 80px; height: 31px; }
+  .kmodell__bild { height: 33px; }
+  .kf__lank { padding: 0 10px; }
+}
+@media (max-width: 1100px) {
+  body.ritsidan { --k-panel: 340px; }
+  .kf__lank:not([data-byt]) > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .kf__lank:not([data-byt]) { width: 40px; padding: 0; justify-content: center; }
+  .kf__vk:not(.kf__vk--inne) > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .kf__vk:not(.kf__vk--inne) { padding: 0; }
+  .kf__sol output { display: none; }
+  .kf__scen { --karta: 150px; }
+}
+
+/* ---------- Mobil: scenen först, verktyg att trycka på, fast rad längst ner ---------- */
+@media (max-width: 860px) {
+  body.ritsidan { --k-kant: 12px; --k-panel: 100%; padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  .kf { padding-top: 12px; }
+  .kf__rad { display: block; margin-bottom: 12px; }
+  .kf__lankar { width: 100%; justify-content: space-between; }
+  .kf__lank, .kf__lank:not([data-byt]) { flex: 1; width: auto; min-width: 44px; height: 40px; padding: 0; justify-content: center; }
+  .kf__lank > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .kf__lista { left: 50%; translate: -50% 0; }
+  .kf__meny--rad { flex: 1; display: flex; }
+
+  .kf__handling { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 10px max(12px, env(safe-area-inset-left, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--k-kort); box-shadow: 0 -1px 0 var(--k-linje), 0 -12px 32px -24px rgba(27, 25, 21, 0.5); }
+  .kf__storlek { display: grid; gap: 2px; margin: 0; min-width: 0; }
+  .kf__storlek small { font: 500 0.9375rem/1.2 var(--sans); color: var(--k-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kf__storlek b { font: 400 0.8125rem/1.2 var(--sans); color: var(--k-text-3); font-variant-numeric: tabular-nums; }
+  .kf__handling .kf__knapp { min-height: 48px; padding: 0 16px; }
+
+  .kf__yta, .kplan__yta, .kplan__huvud { grid-template-columns: minmax(0, 1fr); }
+  .kf__vanster { position: static; }
+  .kf__scen { aspect-ratio: 4 / 3.6; min-height: 320px; max-height: 64svh; border-radius: 16px; }
+  .ritare__tips { top: 12px; }
+  .kf__verktyg { left: 8px; right: 8px; bottom: 8px; translate: none; max-width: none; height: 56px; justify-content: space-between; padding: 6px; }
+  .kf__vgrupp:first-child { flex: 1; min-width: 0; }
+  .kf__vk[data-vy-knapp] { display: none; }
+  .kf__sol { flex: 1; min-width: 0; padding: 0 6px 0 8px; }
+  .ritare__reglage { width: 100%; min-width: 60px; }
+  .kf__streck { margin: 0 2px; }
+  .kf__vk { min-width: 44px; }
+  .kf__vk--inne { padding: 0 12px; }
+  .kf__vk[data-tips]::after { display: none; }
+  .kf__popup { left: auto; right: -40px; translate: none; transform-origin: bottom right; }
+  html .kf__scen--inne .ritare__tips, html.inbaddad .kf__scen--inne .ritare__tips { bottom: 76px; }
+  .kf__rum { top: 8px; left: 8px; right: 8px; justify-content: flex-start; }
+  .kf__scen { --karta: 128px; }
+  .kf__karta { top: auto; right: 8px; bottom: 72px; padding: 6px; }
+  .kf__karta-namn span { display: none; }
+
+  .kf__tummar { grid-auto-flow: column; grid-auto-columns: 96px; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; margin-inline: calc(-1 * var(--k-kant)); padding: 4px var(--k-kant); scroll-padding-inline: var(--k-kant); }
+  .kf__tummar::-webkit-scrollbar { display: none; }
+  .ktumme { scroll-snap-align: start; }
+
+  .kf__panel { padding: 20px 0 24px; }
+  .kgrupp { margin-bottom: 8px; }
+  .kgrupp > summary { min-height: 56px; padding: 0 16px; }
+  .kgrupp__text, .kgrupp__etikett { margin-left: 16px; margin-right: 16px; }
+  .kfarger { grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 8px; padding: 0 16px 16px; }
+  .ksumma { padding: 20px 16px; }
+
+  html body.ritsidan main.ritsida > .kplan { margin: 56px auto 32px; }
+  .kplan__huvud { gap: 16px; }
+  .kplan__bild { padding: 16px; }
+  .kplan__bild img { max-height: none; }
+  .kplan__panel { padding: 16px; }
+
+  .ksam { width: 100vw; height: 100svh; border-radius: 0; }
+  .ksam[open] { grid-template-columns: minmax(0, 1fr); grid-template-rows: 40svh auto; overflow-y: auto; }
+  .ksam__text { overflow: visible; padding: 24px 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
+  .kjmf, .kplanstor { width: 100vw; max-height: 100svh; border-radius: 0; }
+  .kplanstor { height: 100svh; padding: 64px 12px 12px; }
+  html body.ritsidan .site-footer { border-radius: 20px; }
+}
+@media (max-width: 560px) {
+  .kf__vk[data-ladda] { display: none; }
+  .kf__streck:nth-of-type(3) { display: none; }
+}
+@media (max-width: 420px) {
+  .kf__handling .kf__knapp--summa { width: 48px; padding: 0; }
+  .kf__knapp--summa svg { display: block; }
+  .kf__knapp--summa > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .kmodell__kort { grid-template-columns: 68px minmax(0, 1fr) auto; gap: 12px; }
+  .kmodell__bock { display: none; }
+  .kmodell .kmodell__ritning { width: 68px; height: 26px; }
+  .kf__nyckel > div { padding: 12px; }
+  .kf__nyckel b { font-size: 1.25rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ritsida *, .ritsida *::before, .ritsida *::after { animation: none !important; transition-duration: 0.01ms !important; }
+  .kf__namn .bokstav { opacity: 1; transform: none; }
+  .kplan__bild img { opacity: 1; transform: none; }
+  .kplan__stapel i { transform: none; }
+}
+
+/* ---------- Liv, Kväll, Öppna tak och våningarna ---------- */
+/* våningsvalet svävar ovanför verktygsraden, så att raden inte blir bredare */
+.kf__lager { position: absolute; left: 50%; bottom: calc(100% + 10px); translate: -50% 0; display: flex; gap: 2px; padding: 4px; border-radius: 999px; background: var(--k-glas); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 18px 36px -20px rgba(0, 0, 0, 0.7); animation: k-popup 0.24s var(--k-ut); }
+.kf__lager[hidden], .kf__lager button[hidden] { display: none; }
+.kf__lager button { min-height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: rgba(255, 255, 255, 0.8); font: 500 0.8125rem/1 var(--sans); white-space: nowrap; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease, transform 0.16s var(--k-ut); }
+.kf__lager button:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.kf__lager button:active { transform: scale(0.97); }
+.kf__lager button[aria-pressed="true"] { background: #fff; color: #1b1915; }
+.kf__lager button:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.kf__scen--oppen .kf__vgrupp:has([data-matt-knapp]) [data-matt-knapp] { display: none; }
+.kf__prick--du { z-index: 2; pointer-events: none; transition: left 0.12s linear, top 0.12s linear; }
+.kf__prick--du::after { animation: none; }
+.kf__stat { position: absolute; z-index: 9; left: 8px; top: 8px; margin: 0; padding: 6px 8px; border-radius: 6px; background: rgba(0, 0, 0, 0.75); color: #fff; font: 12px/1.3 ui-monospace, monospace; white-space: pre-wrap; max-width: 60%; pointer-events: none; }
+@media (max-width: 860px) {
+  .kf__lager button { padding: 0 9px; font-size: 0.75rem; }
+}
+@media (max-width: 560px) {
+  .kf__scen--oppen .kf__vk[data-miljo-knapp] { display: none; }
+}
+
+/* Verktygsraden får aldrig bli bredare än scenen: etiketterna göms när
+   scenen är smal, och sist i nödfall kan raden rullas i sidled. */
+.kf__scen { container-type: inline-size; container-name: scen; }
+.kf__verktyg { overflow: visible; flex-wrap: nowrap; }
+.kf__verktyg::-webkit-scrollbar { display: none; }
+.kf__verktyg > * { flex: none; }
+@container scen (max-width: 1040px) {
+  .kf__verktyg .kf__vk:not(.kf__vk--inne) > span:not(.sr) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .kf__verktyg .kf__vk:not(.kf__vk--inne) { padding: 0; }
+  .kf__verktyg .kf__sol output { display: none; }
+  .kf__verktyg .ritare__reglage { width: 110px; }
+}
+/* smal scen inne: Se ute, Spel, Lampor, ? och Öppna tak tar platsen, så reglaget
+   och Öppna tak går bort */
+@container scen (max-width: 600px) {
+  .kf__scen--inne .kf__sol .ritare__reglage, .kf__scen--inne .kf__vk[data-oppna] { display: none; }
+  .kf__scen--inne .kf__sol { flex: none; }
+}
+@container scen (max-width: 760px) {
+  .kf__verktyg .ritare__reglage { width: 84px; }
+  .kf__verktyg output { display: none; }
+}
+
+/* Rumsvalen: alla rum ska synas. Mindre knappar, och om de ändå inte ryms
+   bryts raden mjukt i två i stället för att klippas i kanten. */
+.kf__rum { left: 16px; right: calc(var(--karta, 216px) + 32px); }
+.kf__rum > div { flex-wrap: wrap; justify-content: center; overflow: visible; border-radius: 22px; row-gap: 2px; }
+.kf__rum button { min-height: 34px; padding: 0 13px; font-size: 0.78125rem; }
+@container scen (max-width: 900px) { .kf__rum button { padding: 0 10px; min-height: 32px; } }
+@container scen (max-width: 640px) { .kf__rum { right: 16px; top: 12px; } }
+
+/* Menyerna i verktygsraden (Vy, Miljö) får aldrig klippas eller hamna utanför scenen */
+.kf__verktyg .kf__popup { left: 50%; right: auto; translate: -50% 0; }
+.kf__verktyg .kf__meny:first-child .kf__popup, .kf__verktyg .kf__vgrupp:first-child .kf__popup { left: 0; translate: none; }
+
+/* Långa menyer (Vy har sju val) får aldrig gå utanför scenen: de rullar i stället */
+.kf__popup { max-height: min(296px, calc(100svh - 360px)); min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+@media (max-height: 640px) { .kf__popup { max-height: 216px; } }
+
+/* mätrutan (?prestanda=1) */
+.kf__prestanda { position: absolute; z-index: 9; right: 8px; top: 8px; margin: 0; padding: 8px 10px; border-radius: 8px; background: rgba(0, 0, 0, 0.78); color: #e8ffe8; font: 11px/1.45 ui-monospace, Consolas, monospace; white-space: pre; pointer-events: none; }
+
+/* länken till hela husritaren syns bara inbäddad */
+.kf__full { display: none; }
+
+/* ---------- Inbäddat läge: rita-hus.html?modell=<id>&inbaddad=1 i en iframe ----------
+   Bara scenen och en kort verktygsrad (Vy, Ljus, Miljö, Se inne, 360, Helskärm).
+   Sidan är genomskinlig, så att iframens egna rundade hörn och bakgrund gäller. */
+html.inbaddad, html.inbaddad body.ritsidan { height: 100%; margin: 0; padding: 0 !important; background: transparent !important; overflow: hidden; }
+html.inbaddad body.ritsidan::before, html.inbaddad body.ritsidan::after { display: none !important; }
+html.inbaddad :is(.skip, .site-header, .site-footer, .kf__rad, .kf__panel, .kf__tummar, .kplan, .kf__handling) { display: none !important; }
+/* allt utom scenen bort, även sådant som andra skript lägger i body */
+html.inbaddad body > :not(main):not(script) { display: none !important; }
+html.inbaddad main.ritsida { width: 100%; height: 100%; margin: 0 !important; padding: 0 !important; }
+html.inbaddad .kf { width: 100%; height: 100%; margin: 0; padding: 0; }
+html.inbaddad :is(.kf__yta, .kf__vanster) { display: block; position: static; height: 100%; }
+html.inbaddad .kf__scen { position: fixed; inset: 0; width: 100%; height: 100%; min-height: 0; max-height: none; aspect-ratio: auto; border-radius: 0; box-shadow: none; animation: none; }
+html.inbaddad .kf__vk:is([data-oppna], [data-matt-knapp], [data-liv], [data-ladda]), html.inbaddad .kf__lager { display: none !important; }
+html.inbaddad .kf__vk[data-vy-knapp] { display: inline-flex; }
+html.inbaddad .kf__popup { max-height: calc(100vh - 104px); }
+html.inbaddad .kf__full { position: absolute; z-index: 3; left: 12px; top: 12px; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px 0 14px; border-radius: 999px; background: var(--k-glas); color: #fff; font: 500 0.8125rem/1 var(--sans); text-decoration: none; transition: background-color 0.2s ease, transform 0.16s var(--k-ut); }
+html.inbaddad .kf__full:hover { background: rgba(24, 22, 19, 0.96); }
+html.inbaddad .kf__full:active { transform: scale(0.97); }
+html.inbaddad .kf__full:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+html.inbaddad .kf__full svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* tipset och rumsvalen flyttar så att de inte krockar med länken */
+html.inbaddad .ritare__tips { top: 56px; }
+html.inbaddad .kf__scen--inne .kf__full { top: auto; bottom: 80px; }
+@media (max-width: 560px) {
+  html.inbaddad .kf__vk[data-snurra] { display: inline-flex; }
+  html.inbaddad .kf__streck:nth-of-type(3) { display: block; }
+}
+
+/* ---------- Fotoläge: rita-hus.html?foto=1 (bilder med headless Edge) ----------
+   Scenen över hela fönstret utan hörn; inget gränssnitt alls. */
+html.foto, html.foto body.ritsidan { height: 100%; margin: 0; padding: 0 !important; overflow: hidden; }
+html.foto body > :not(main):not(script), html.foto main.ritsida > :not(.kf), html.foto :is(.kf__rad, .kf__panel, .kf__tummar) { display: none !important; }
+html.foto .kf__scen { position: fixed; inset: 0; width: 100vw; height: 100vh; min-height: 0; max-height: none; aspect-ratio: auto; border-radius: 0; box-shadow: none; animation: none; }
+html.foto .kf__scen > :not(canvas) { display: none !important; }
+html.foto .ritare__duk { cursor: default; }
+
+/* ---------- Inne: hur man går (ikoner i stället för en mening) ----------
+   Ett litet chip ovanför verktygsraden, aldrig mitt i bilden. Glider in när man kliver in,
+   försvinner efter 4 s eller vid första rörelsen; ?-knappen visar det igen. */
+.kf__gang { position: absolute; z-index: 3; left: 50%; top: auto; bottom: 84px; height: auto; display: flex; align-items: center; gap: 4px; max-width: calc(100% - 32px); margin: 0; padding: 6px 8px; border-radius: 999px; background: rgba(24, 22, 19, 0.78); -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09), 0 14px 30px -18px rgba(0, 0, 0, 0.7); color: rgba(255, 255, 255, 0.92); font: 500 0.75rem/1 var(--sans); white-space: nowrap; pointer-events: none;
+  opacity: 0; visibility: hidden; translate: -50% 10px; scale: 0.96; transform-origin: 50% 100%;
+  transition: opacity 0.2s var(--k-ut), translate 0.24s var(--k-ut), scale 0.24s var(--k-ut), visibility 0s linear 0.24s; }
+.kf__gang.syns { opacity: 1; visibility: visible; translate: -50% 0; scale: 1; transition: opacity 0.24s var(--k-ut), translate 0.28s var(--k-ut), scale 0.28s var(--k-ut), visibility 0s; }
+.kf__gang-del { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px; }
+.kf__gang-del + .kf__gang-del { box-shadow: -1px 0 0 rgba(255, 255, 255, 0.14); }
+.kf__gang.syns .kf__gang-del { animation: kg-in 0.28s var(--k-ut) both; animation-delay: calc(0.08s + var(--i, 0) * 40ms); }
+.kf__gang svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.kf__gang-knapp { fill: currentColor; stroke: none; opacity: 0.35; }
+.kf__gang.syns .kf__gang-knapp { animation: kg-klick 1.1s ease-in-out 0.6s 2; }
+.kf__gang.syns .kf__gang-dra { animation: k-vrid 1.6s ease-in-out 0.9s 2; }
+.kf__gang-ring { opacity: 0.4; transform-origin: 12px 9px; }
+.kf__gang.syns .kf__gang-ring { animation: kg-tryck 1.2s var(--k-ut) 0.5s 2; }
+/* tangenterna som ett litet inverterat T */
+.kf__gang-tangenter { display: grid; grid-template-columns: repeat(3, 14px); grid-template-rows: repeat(2, 13px); gap: 2px; }
+.kf__gang-tangenter kbd { display: grid; place-items: center; margin: 0; padding: 0; border-radius: 3px; background: rgba(255, 255, 255, 0.14); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.12); color: #fff; font: 600 0.5625rem/1 var(--sans); }
+.kf__gang-tangenter kbd:first-child { grid-column: 2; }
+.kf__gang.syns .kf__gang-tangenter kbd:first-child { animation: kg-tangent 0.9s ease 0.8s 2; }
+/* pekskärm: tryck och dra; mus och tangenter bort */
+.kf__gang-del--pek { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .kf__gang-del--mus { display: none; }
+  .kf__gang-del--pek { display: inline-flex; }
+  .kf__gang-del--mus + .kf__gang-del--pek { box-shadow: none; }
+}
+.kf__vk[data-hjalp] svg { width: 19px; height: 19px; }
+html.inbaddad .kf__scen--inne .kf__gang { bottom: 124px; }
+@media (max-width: 860px) {
+  .kf__gang { bottom: 76px; }
+}
+@container scen (max-width: 560px) {
+  .kf__gang { left: 8px; translate: 0 10px; max-width: calc(100% - var(--karta, 128px) - 28px); flex-wrap: wrap; row-gap: 2px; border-radius: 16px; transform-origin: 0 100%; }
+  .kf__gang.syns { translate: 0 0; }
+  .kf__gang-del + .kf__gang-del { box-shadow: none; }
+}
+@keyframes kg-in { from { opacity: 0; transform: translateY(6px); } }
+@keyframes kg-klick { 0%, 100% { opacity: 0.35; } 40% { opacity: 1; } }
+@keyframes kg-tryck { from { transform: scale(0.5); opacity: 0.9; } to { transform: scale(1.25); opacity: 0; } }
+@keyframes kg-tangent { 0%, 100% { background: rgba(255, 255, 255, 0.14); } 40% { background: rgba(240, 181, 110, 0.75); } }
+/* minskad rörelse: ritsidans regel ovan gör övergångarna momentana, inget glider */
+
+/* ---- Inne: dörrar, sittplatser och lampor ----
+   Etiketten följer pekaren ("Öppna dörr" + E). I Spelläget står den under siktet mitt i bilden. */
+.kf__gang-tangenter--en { grid-template-columns: 16px; grid-template-rows: 16px; }
+.kf__gang-tangenter--en kbd:first-child { grid-column: 1; font-size: 0.625rem; }
+.kf__mal { position: absolute; z-index: 4; left: 0; top: 0; display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 6px 6px 6px 11px; border-radius: 999px; background: rgba(24, 22, 19, 0.8); -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 24px -14px rgba(0, 0, 0, 0.7); color: #fff; font: 500 0.75rem/1 var(--sans); white-space: nowrap; pointer-events: none; animation: kmal-in 0.16s var(--k-ut) both; will-change: transform; }
+.kf__mal[hidden] { display: none; }
+.kf__mal kbd, .kf__res kbd { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 5px; background: rgba(255, 255, 255, 0.16); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.14); color: #fff; font: 600 0.625rem/1 var(--sans); }
+.kf__mal--mitt { left: 50%; top: 50%; transform: translate(-50%, 22px); }
+@keyframes kmal-in { from { opacity: 0; } }
+/* pekskärm: ingen tangent, och ingen etikett (ett tryck gör det direkt) */
+@media (hover: none) and (pointer: coarse) {
+  .kf__mal { display: none; }
+  .kf__vk[data-spel] { display: none; }
+  .kf__res kbd { display: none; }
+}
+/* siktet: en liten prick mitt i bilden, bara i Spelläget */
+.kf__sikte { position: absolute; z-index: 4; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: rgba(255, 255, 255, 0.92); box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.35); pointer-events: none; opacity: 0; transition: opacity 0.2s ease; }
+.kf__scen--spel .kf__sikte { opacity: 1; }
+.kf__scen--spel .ritare__duk { cursor: none; }
+/* Res dig: ett chip mitt ovanför verktygsraden medan man sitter */
+.kf__res { position: absolute; z-index: 4; left: 50%; bottom: 84px; translate: -50% 0; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 14px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.94); color: #1b1915; font: 600 0.8125rem/1 var(--sans); cursor: pointer; box-shadow: 0 12px 26px -14px rgba(0, 0, 0, 0.6); animation: kmal-in 0.25s var(--k-ut) both; transition: transform 0.16s var(--k-ut); }
+.kf__res kbd { background: rgba(27, 25, 21, 0.08); box-shadow: inset 0 0 0 1px rgba(27, 25, 21, 0.14); color: #1b1915; }
+.kf__res:active { transform: scale(0.97); }
+.kf__res:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.kf__res[hidden] { display: none; }
+.kf__scen:not(.kf__scen--inne) :is(.kf__res, .kf__mal, .kf__sikte) { display: none; }
+@media (max-width: 860px) { .kf__res { bottom: 76px; } }
+/* tipset, gångchipet och Res dig ligger annars på samma plats: Res dig går först,
+   tipset hamnar ovanför chipet */
+.kf__scen--inne:has(.kf__res:not([hidden])) .kf__gang { opacity: 0; visibility: hidden; }
+html .kf__scen--inne .ritare__tips, html.inbaddad .kf__scen--inne .ritare__tips { bottom: 128px; }
+@media (max-width: 860px) { html .kf__scen--inne .ritare__tips, html.inbaddad .kf__scen--inne .ritare__tips { bottom: 120px; } }
+html.inbaddad .kf__scen--inne .ritare__tips { bottom: 168px; }
+/* hus utan bild (sparat inne): ingen trasig bildikon */
+.kjmf__kol img:not([src]), .kjmf__kol img[src=""], .kf__lista img[src=""], .kf__lista img:not([src]) { visibility: hidden; }
+html.inbaddad .kf__vk[data-spel] { display: none; }
+@media (prefers-reduced-motion: reduce) { .kf__mal, .kf__res { animation: none; } }
+
+/* ---------- Granskningen 2026-11-15: mjukare, tydligare och inget som klipps ---------- */
+
+/* Verktygsraden ryms alltid i scenen. Mellan 420 och 640 px scenbredd går 360 och Liv
+   undan; under 420 px blir reglaget och Se inne bara ikoner (solens meny har snabbvalen)
+   och knapparna 40 px. Uträknat för 375 px: cirka 290 px mot 335 px som finns. */
+@container scen (max-width: 640px) {
+  .kf__verktyg .kf__vk:is([data-snurra], [data-liv]) { display: none; }
+  html.inbaddad .kf__verktyg .kf__vk[data-snurra] { display: inline-flex; }
+}
+@container scen (max-width: 420px) {
+  .kf__verktyg { gap: 2px; padding: 6px 4px; }
+  .kf__verktyg .kf__vk { min-width: 40px; height: 40px; }
+  .kf__verktyg .kf__sol { gap: 0; padding: 0 2px 0 6px; }
+  .kf__verktyg .kf__sol .ritare__reglage { display: none; }
+  .kf__verktyg .kf__vk--inne { width: 40px; padding: 0; }
+  .kf__verktyg .kf__vk--inne > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .kf__verktyg .kf__streck { margin: 0 1px; }
+}
+
+/* kortkommandon: bara med mus och tangentbord, och bara där raden har plats */
+@media (hover: none), (pointer: coarse) { .kf__vk--tangent { display: none; } }
+@container scen (max-width: 760px) { .kf__verktyg .kf__vk--tangent { display: none; } }
+html.inbaddad .kf__vk--tangent { display: none !important; }
+.kf__vk--tangent svg { width: 21px; height: 21px; }
+
+/* Inne-rutan läses som en knapp ("Gå in"), inte som en bild som saknas */
+.ktumme--inne .ktumme__bild { background: var(--k-text); color: var(--k-kort); box-shadow: none; }
+.ktumme--inne .ktumme__bild::after { box-shadow: none; }
+.ktumme--inne svg { width: 28px; height: 28px; transition: transform 0.24s var(--k-ut); }
+@media (hover: hover) { .ktumme--inne:hover svg { transform: translateY(-2px); } }
+.ktumme--inne[aria-pressed="true"] .ktumme__bild { background: var(--k-accent); color: #1b1915; }
+.ktumme--inne .ktumme__namn { color: var(--k-text); }
+
+/* Sammanfattningens ikon (syns bara när knappen är en ikonknapp, se 420 px) */
+.kf__knapp--summa svg { display: none; width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+/* (420 px-regeln högre upp kommer före i filen och vann aldrig: ikonknappen var tom) */
+@media (max-width: 420px) { .kf__handling .kf__knapp--summa svg { display: block; } }
+
+/* Åtgärdsraden: verktygstips när bara ikonerna syns (861–1100 px) */
+@media (min-width: 861px) and (max-width: 1100px) and (hover: hover) {
+  .kf__lank[data-tips]:not([data-byt])::after { content: attr(data-tips); position: absolute; z-index: 25; left: 50%; top: calc(100% + 10px); translate: -50% -4px; padding: 7px 10px; border-radius: var(--k-r-s); background: var(--k-text); color: var(--k-kort); font: 500 0.75rem/1 var(--sans); white-space: nowrap; box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.5); opacity: 0; pointer-events: none; transition: opacity 0.16s var(--k-ut), translate 0.2s var(--k-ut); }
+  .kf__lank[data-tips]:not([data-byt]):hover::after { opacity: 1; translate: -50% 0; transition-delay: 0.3s; }
+  .kf__lank[aria-expanded="true"]::after { opacity: 0 !important; }
+}
+/* surfplatta: texten står kvar bredvid ikonen (det finns plats) */
+@media (min-width: 600px) and (max-width: 860px) {
+  .kf__lankar .kf__lank > span { position: static; width: auto; height: auto; overflow: hidden; clip-path: none; text-overflow: ellipsis; font-size: 0.8125rem; }
+  .kf__lankar .kf__lank { gap: 6px; padding: 0 8px; }
+}
+/* telefon: en liten etikett under varje ikon */
+@media (max-width: 599px) {
+  .kf__lankar { height: 58px; }
+  .kf__lankar .kf__lank { flex-direction: column; gap: 4px; height: 50px; padding: 0 2px; min-width: 0; }
+  .kf__lankar .kf__lank > span { position: static; width: auto; height: auto; max-width: 100%; overflow: hidden; clip-path: none; text-overflow: ellipsis; font: 500 0.6875rem/1 var(--sans); color: var(--k-text-2); }
+  .kf__lankar .kf__lank b { position: absolute; top: 2px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; font-size: 0.625rem; }
+}
+
+/* Kopiera länk utan urklipp: adressen markerad i ett litet fält under raden */
+.kf__lankar { position: relative; }
+.kf__adress { position: absolute; z-index: 21; left: 4px; right: 4px; top: calc(100% + 8px); padding: 6px; border-radius: var(--k-r-m); background: var(--k-kort); box-shadow: 0 0 0 1px var(--k-linje), 0 20px 40px -24px rgba(27, 25, 21, 0.45); opacity: 0; translate: 0 -4px; visibility: hidden; pointer-events: none; transition: opacity 0.2s var(--k-ut), translate 0.24s var(--k-ut), visibility 0s linear 0.24s; }
+.kf__adress.syns { opacity: 1; translate: 0 0; visibility: visible; pointer-events: auto; transition-delay: 0s; }
+.kf__adress input { box-sizing: border-box; width: 100%; min-height: 40px; padding: 0 12px; border: 0; border-radius: var(--k-r-s); background: var(--k-yta); color: var(--k-text); font: 500 0.8125rem/1 var(--sans); }
+.kf__adress input:focus-visible { outline: 2px solid var(--k-fokus); outline-offset: 1px; }
+
+/* Kartan inne: du-pricken är större med vit ring, rummens prickar mindre och klickbara */
+.kf__prick--du i { inset: 3px; background: var(--k-accent); box-shadow: 0 0 0 3px #fff, 0 2px 8px rgba(0, 0, 0, 0.4); }
+.kf__prick:not(.kf__prick--du) i { inset: 7px; }
+.kf__prick.kf__prick--har:not(.kf__prick--du) i { inset: 5px; }
+
+/* Mörkt läge: Logga in i sidhuvudet som en tunn kontur i stället för en grå platta */
+html[data-tema="mork"] body.ritsidan .site-header .crm-lank { background: transparent; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22); color: #f2eee6; }
+html[data-tema="mork"] body.ritsidan .site-header .crm-lank:hover { color: #2a1a0b; box-shadow: 0 12px 24px -12px rgba(226, 154, 74, 0.6); }
+
+/* Kortkommandon */
+.ktang { width: min(780px, 100vw - 2 * var(--k-kant)); max-height: min(760px, 100svh - 2 * var(--k-kant)); padding: clamp(24px, 3vw, 40px); overflow-y: auto; }
+.ktang__kolumner { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px 40px; }
+html body .ktang h3 { margin: 0 0 4px; font: 600 0.75rem/1.2 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--k-text-3); }
+.ktang dl { margin: 0; }
+.ktang dl > div { display: grid; grid-template-columns: 124px minmax(0, 1fr); align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--k-linje); }
+.ktang dt { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--k-text-3); }
+.ktang dd { margin: 0; font-size: 0.875rem; line-height: 1.4; color: var(--k-text); }
+.ktang kbd { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 7px; border-radius: 7px; background: var(--k-yta); box-shadow: inset 0 0 0 1px var(--k-linje-2), inset 0 -2px 0 var(--k-linje); font: 600 0.75rem/1 var(--sans); color: var(--k-text); }
+.ktang__not { margin: 20px 0 0; font-size: 0.8125rem; color: var(--k-text-3); }
+.ktang__not kbd { min-width: 22px; height: 22px; margin: 0 2px; }
+@media (max-width: 860px) { .ktang { width: 100vw; max-height: 100svh; border-radius: 0; } }
+
+/* vinklar som inte ritats än: en lugn, skimrande platta (inget foto av fel hus) */
+.ktumme__bild--vantar { background-image: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--k-kort) 55%, transparent) 50%, transparent 70%) !important; background-size: 250% 100% !important; animation: kt-skimmer 1.6s var(--k-ut) infinite; }
+@keyframes kt-skimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+@media (prefers-reduced-motion: reduce) { .ktumme__bild--vantar { animation: none; } }
+
+/* ---------- Granskningen 2026-11-16 ---------- */
+/* surfplatta och telefon: första gruppen fyller raden, så reglaget får växa i stället för
+   att lämna ett tomt hål mellan solen och Miljö */
+@media (max-width: 860px) {
+  .kf__verktyg .kf__sol .ritare__reglage { flex: 1; width: auto; min-width: 72px; max-width: 240px; }
+}
+/* pekskärm: solknappen (ensam i gruppen när reglaget går undan) får en större träffyta */
+@media (max-width: 560px) { .kf__verktyg .kf__ljusknapp { width: 40px; height: 40px; } }
+
+/* ---------- Verktygsraden 2026-11-16: glas, tydliga lägen och små rörelser ----------
+   Mörkt glas över scenen (blur + en tunn ljuskant), samma 44 px-knappar som förut,
+   ett ljus som följer musen, Se inne som ett piller som glider in, en klockbubbla
+   vid reglaget och mikrorörelser i ikonerna. Bara transform och opacity animeras. */
+body.ritsidan { --kfv-ut: cubic-bezier(0.23, 1, 0.32, 1); --kfv-inut: cubic-bezier(0.77, 0, 0.175, 1); --kfv-glas: rgba(22, 20, 17, 0.74); }
+html[data-tema="mork"] body.ritsidan { --kfv-glas: rgba(30, 27, 23, 0.72); }
+
+.kf__verktyg { isolation: isolate; gap: 2px; border-radius: 18px; background: var(--kfv-glas);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 2px rgba(0, 0, 0, 0.2), 0 22px 44px -22px rgba(0, 0, 0, 0.75);
+  animation: kfv-in 0.5s var(--kfv-ut) 0.2s both; }
+html[data-tema="mork"] .kf__verktyg { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 22px 44px -22px rgba(0, 0, 0, 0.9); }
+@keyframes kfv-in { from { opacity: 0; transform: translateY(14px) scale(0.97); } }
+.kf__verktyg > .kf__vgrupp { animation: kfv-grupp 0.4s var(--kfv-ut) both; }
+.kf__verktyg > .kf__vgrupp:nth-of-type(1) { animation-delay: 0.28s; }
+.kf__verktyg > .kf__vgrupp:nth-of-type(2) { animation-delay: 0.32s; }
+.kf__verktyg > .kf__vgrupp:nth-of-type(3) { animation-delay: 0.36s; }
+.kf__verktyg > .kf__vgrupp:nth-of-type(4) { animation-delay: 0.4s; }
+@keyframes kfv-grupp { from { opacity: 0; transform: translateY(6px); } }
+.kf__verktyg .kf__streck { width: 1px; height: 20px; margin: 0 5px; background: linear-gradient(transparent, rgba(255, 255, 255, 0.22), transparent); }
+
+/* ljuset som följer musen: en mjuk fläck i glaset, klippt av radens hörn */
+.kf__vyta { position: absolute; z-index: -1; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; }
+.kf__vyta::before { content: ""; position: absolute; inset: 0 0 50% 0; background: linear-gradient(rgba(255, 255, 255, 0.06), transparent); }
+.kf__vglod { position: absolute; left: 0; top: 50%; width: 140px; height: 140px; margin-top: -70px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 236, 205, 0.16), transparent); opacity: 0; transition: opacity 0.3s var(--kfv-ut); will-change: transform; }
+.kf__verktyg--glod .kf__vglod { opacity: 1; }
+
+/* knapparna: lugn vila, ljusare vid hover, tryck-känsla */
+.kf__verktyg :is(.kf__vk, .kf__ljusknapp) { border-radius: 12px; color: rgba(255, 255, 255, 0.78); -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.18s var(--kfv-ut), color 0.18s var(--kfv-ut), transform 0.16s var(--kfv-ut), box-shadow 0.18s var(--kfv-ut); }
+.kf__verktyg .kf__vk > span:not(.sr) { font: 500 0.8125rem/1 var(--sans); letter-spacing: 0.005em; }
+@media (hover: hover) {
+  .kf__verktyg :is(.kf__vk, .kf__ljusknapp):hover { background: rgba(255, 255, 255, 0.09); color: #fff; }
+}
+.kf__verktyg :is(.kf__vk, .kf__ljusknapp)[aria-expanded="true"] { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.kf__verktyg :is(.kf__vk, .kf__ljusknapp):active { transform: scale(0.97); }
+.kf__verktyg .kf__vk svg { transition: transform 0.24s var(--kfv-ut); }
+
+/* på: fylld platta med ljuskant och en glödande prick under ikonen */
+.kf__verktyg .kf__vk[aria-pressed="true"] { background: rgba(255, 255, 255, 0.16); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12); }
+.kf__verktyg .kf__vk::before { content: ""; position: absolute; left: 50%; bottom: 4px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--k-accent); box-shadow: 0 0 6px 1px rgba(240, 181, 110, 0.7); opacity: 0; transform: scale(0.3); transition: opacity 0.2s var(--kfv-ut), transform 0.24s var(--kfv-ut); pointer-events: none; }
+.kf__verktyg .kf__vk[aria-pressed="true"]::before { opacity: 1; transform: none; }
+.kf__verktyg .kf__vk[aria-pressed="true"] svg { transform: translateY(-1px); }
+.kf__verktyg .kf__vk[aria-busy="true"]::before { opacity: 1; transform: none; animation: kf-lyft-laddar 0.9s ease-in-out infinite; }
+/* kort studs när ett läge byts (klassen sätts av sidan) */
+.kf__vk--slag svg { animation: kfv-slag 0.28s var(--kfv-ut); }
+@keyframes kfv-slag { 40% { transform: scale(0.86); } }
+
+/* Se inne: ljust piller; när man är inne glider ett varmt piller in från vänster */
+.kf__verktyg .kf__vk--inne { background: rgba(255, 255, 255, 0.95); color: #1b1915; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 6px 16px -8px rgba(0, 0, 0, 0.6); }
+@media (hover: hover) { .kf__verktyg .kf__vk--inne:hover { background: #fff; color: #1b1915; } }
+.kf__verktyg .kf__vk--inne[aria-pressed="true"] { background: rgba(255, 255, 255, 0.95); color: #1b1915; box-shadow: 0 6px 18px -8px rgba(240, 181, 110, 0.8); }
+.kf__verktyg .kf__vk--inne::before { display: none; }
+.kf__vk-yta { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; }
+.kf__vk-yta > i { position: absolute; inset: 0; background: linear-gradient(100deg, #f6c98c, var(--k-accent) 55%, #e9a65c); transform: translateX(-101%); transition: transform 0.28s var(--kfv-inut); }
+.kf__vk--inne[aria-pressed="true"] .kf__vk-yta > i { transform: none; }
+.kf__vk--inne > svg, .kf__vk--inne > span { position: relative; }
+.kf__vk--inne.kf__vk--slag > span { animation: kfv-text 0.28s var(--kfv-ut); }
+@keyframes kfv-text { from { opacity: 0; transform: translateY(5px); } }
+
+/* mikrorörelser i ikonerna */
+@media (hover: hover) {
+  .kf__verktyg .kf__vk[data-vy-knapp]:hover svg { transform: rotate(-18deg); }
+  .kf__verktyg .kf__vk:is([data-miljo-knapp], [data-oppna], .kf__vk--inne):hover svg { transform: translateY(-1.5px); }
+  .kf__verktyg .kf__vk[data-matt-knapp]:hover svg { transform: rotate(-8deg); }
+  .kf__verktyg .kf__vk[data-snurra]:hover:not([aria-pressed="true"]) svg { transform: rotate(40deg); }
+  .kf__verktyg .kf__vk[data-ladda]:hover svg { transform: translateY(1.5px); }
+  .kf__verktyg .kf__vk[data-helskarm]:hover svg { transform: scale(1.12); }
+  .kf__verktyg .kf__vk[data-helskarm][aria-pressed="true"]:hover svg { transform: scale(0.8); }
+  .kf__verktyg .kf__vk--tangent:hover svg { transform: translateY(-1px); }
+}
+/* snurra på: ikonen går runt, lugnt */
+.kf__verktyg .kf__vk[data-snurra][aria-pressed="true"] svg { animation: kfv-snurr 2.8s linear infinite; }
+@keyframes kfv-snurr { to { transform: rotate(360deg); } }
+/* helskärm på: hörnen drar ihop sig */
+.kf__verktyg .kf__vk[data-helskarm][aria-pressed="true"] svg { transform: scale(0.86); }
+
+/* verktygstips: mörkt glas med kortkommandot */
+.kf__verktyg .kf__vk[data-tips]::after, .kf__verktyg .kf__ljusknapp[data-tips]::after { content: attr(data-tips); position: absolute; z-index: 6; left: 50%; bottom: calc(100% + 14px); white-space: nowrap; opacity: 0; pointer-events: none; padding: 8px 11px; border-radius: 10px; background: rgba(20, 18, 15, 0.92); color: #fff; font: 500 0.75rem/1 var(--sans);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 24px -12px rgba(0, 0, 0, 0.7);
+  translate: -50% 0; transform: translateY(4px) scale(0.96); transform-origin: 50% 100%; transition: opacity 0.16s var(--kfv-ut), transform 0.2s var(--kfv-ut); }
+.kf__verktyg :is(.kf__vk, .kf__ljusknapp)[data-kort]::after { content: attr(data-tips) "  ·  " attr(data-kort); white-space: pre; }
+@media (hover: hover) {
+  .kf__verktyg :is(.kf__vk, .kf__ljusknapp)[data-tips]:hover::after { opacity: 1; transform: none; transition-delay: 0.4s; }
+}
+.kf__verktyg :is(.kf__vk, .kf__ljusknapp)[data-tips]:focus-visible::after { opacity: 1; transform: none; }
+.kf__verktyg :is(.kf__vk, .kf__ljusknapp)[aria-expanded="true"]::after, .kf__sol--drar .kf__ljusknapp::after { opacity: 0 !important; }
+
+/* tangentbordsfokus: en varm ring som syns mot både glaset och Se inne */
+.kf__verktyg :is(.kf__vk, .kf__ljusknapp):focus-visible { outline: 2px solid var(--k-accent); outline-offset: 2px; }
+.kf__verktyg .ritare__reglage:focus-visible { outline: none; }
+.kf__verktyg .ritare__reglage:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--k-accent), 0 0 16px 2px var(--tidfarg, #fff3d4); }
+.kf__verktyg .ritare__reglage:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--k-accent), 0 0 16px 2px var(--tidfarg, #fff3d4); }
+
+/* solen vrider sig med tiden på dygnet */
+.kf__sol { position: relative; }
+.kf__verktyg .kf__ljusknapp svg { transform: rotate(var(--sol-vrid, 0deg)); transition: transform 0.24s var(--kfv-ut); }
+.kf__verktyg .kf__ljusknapp[aria-expanded="true"] svg { transform: rotate(calc(var(--sol-vrid, 0deg) + 45deg)); }
+.kf__verktyg .kf__ljusknapp::before { box-shadow: 0 0 6px 1px rgba(240, 181, 110, 0.7); }
+
+/* reglaget: spåret är dygnets himmel med prickar vid snabbvalen, tummen lyser i tidens färg */
+.kf__verktyg .ritare__reglage { --spar: radial-gradient(circle at 9.4% 50%, rgba(27, 25, 21, 0.4) 0 1.5px, transparent 2px), radial-gradient(circle at 43.75% 50%, rgba(27, 25, 21, 0.35) 0 1.5px, transparent 2px), radial-gradient(circle at 82.5% 50%, rgba(27, 25, 21, 0.4) 0 1.5px, transparent 2px), radial-gradient(circle at 96.9% 50%, rgba(255, 255, 255, 0.7) 0 1.5px, transparent 2px), linear-gradient(90deg, #f2a38c 0%, #f7d39c 18%, #fff4dc 44%, #f8d496 69%, #f1a04c 82%, #c27aa0 94%, #7d74c4 100%); }
+.kf__verktyg .ritare__reglage::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--spar); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12); }
+.kf__verktyg .ritare__reglage::-moz-range-track { height: 6px; border-radius: 3px; background: var(--spar); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12); }
+.kf__verktyg .ritare__reglage::-webkit-slider-thumb { width: 18px; height: 18px; margin-top: -6px; background: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12), 0 0 14px 1px var(--tidfarg, #fff3d4), 0 2px 6px rgba(0, 0, 0, 0.4); transition: transform 0.18s var(--kfv-ut); }
+.kf__verktyg .ritare__reglage::-moz-range-thumb { width: 18px; height: 18px; background: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12), 0 0 14px 1px var(--tidfarg, #fff3d4), 0 2px 6px rgba(0, 0, 0, 0.4); transition: transform 0.18s var(--kfv-ut); }
+@media (hover: hover) { .kf__verktyg .ritare__reglage:hover::-webkit-slider-thumb { transform: scale(1.08); } }
+.kf__verktyg .ritare__reglage:active::-webkit-slider-thumb { transform: scale(1.18); }
+.kf__verktyg .ritare__reglage:active::-moz-range-thumb { transform: scale(1.18); }
+.kf__verktyg .kf__sol output { color: rgba(255, 255, 255, 0.72); letter-spacing: 0.01em; }
+
+/* klockbubblan ovanför tummen medan man drar */
+.kf__tidbubbla { position: absolute; z-index: 6; left: 0; bottom: calc(100% + 14px); padding: 7px 10px; border-radius: 10px; background: rgba(255, 255, 255, 0.96); color: #1b1915; font: 600 0.75rem/1 var(--sans); font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none;
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.7); translate: calc(var(--tid-x, 50%) - 50%) 0; opacity: 0; transform: translateY(6px) scale(0.92); transform-origin: 50% 100%; transition: opacity 0.16s var(--kfv-ut), transform 0.22s var(--kfv-ut); }
+.kf__tidbubbla::after { content: ""; position: absolute; left: calc(50% + var(--pil-x, 0px)); top: 100%; width: 8px; height: 8px; margin: -4px 0 0 -4px; background: inherit; border-radius: 2px; transform: rotate(45deg); }
+.kf__sol--drar .kf__tidbubbla { opacity: 1; transform: none; }
+
+/* menyerna: samma glas som raden */
+.kf__verktyg .kf__popup { background: rgba(22, 20, 17, 0.9); -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5); border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 24px 48px -24px rgba(0, 0, 0, 0.8); }
+.kf__verktyg .kf__popup button { border-radius: 10px; transition: background-color 0.15s var(--kfv-ut), color 0.15s var(--kfv-ut), transform 0.16s var(--kfv-ut); }
+.kf__verktyg .kf__popup button:active { transform: scale(0.98); }
+.kf__verktyg .kf__popup button[aria-checked="true"] { background: rgba(255, 255, 255, 0.07); }
+.kf__verktyg .kf__popup button[aria-checked="true"]::after { box-shadow: 0 0 6px 1px rgba(240, 181, 110, 0.6); }
+.kf__verktyg .kf__popup button:focus-visible { outline: 2px solid var(--k-accent); outline-offset: -2px; }
+
+/* pekskärm: ingen musglöd och inga tips */
+@media (hover: none), (pointer: coarse) { .kf__vyta .kf__vglod { display: none; } }
+@media (max-width: 860px) { .kf__verktyg .kf__ljusknapp[data-tips]::after { display: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .kf__verktyg, .kf__verktyg > .kf__vgrupp, .kf__vk--slag svg, .kf__vk--inne.kf__vk--slag > span, .kf__verktyg .kf__vk[data-snurra][aria-pressed="true"] svg { animation: none !important; }
+  .kf__vk-yta > i, .kf__tidbubbla, .kf__verktyg .kf__ljusknapp svg { transition: none; }
+  .kf__vglod { display: none; }
+}
+/* mörkt läge: sidans allmänna input-bakgrund lade en mörk platta bakom reglaget */
+html .kf__verktyg input.ritare__reglage { background-color: transparent; }
+
+/* smal scen: Se inne/Se ute står först, så att knappen inte flyttar sig när reglaget
+   går bort inne (annars hamnade nästa klick på en annan knapp) */
+@container scen (max-width: 600px) {
+  .kf__verktyg > :nth-child(4) { order: 1; }
+  .kf__verktyg > :nth-child(3) { order: 2; }
+  .kf__verktyg > :nth-child(2) { order: 3; }
+  .kf__verktyg > :nth-child(n+5) { order: 4; }
+}
+
+/* ---------- Panelen Ditt hus 2026-11-16: lugn, symmetrisk och levande ----------
+   Sifferraden i tre lika breda, centrerade celler. Husraderna har fasta kolumner
+   (ritning, text, tal, plan, val) och samma höjd; ett fält glider bakom det valda
+   huset och ritningens tak tonas i accentfärg. Ihopfälld visar rubriken husets ritning. */
+body.ritsidan { --kp-ut: cubic-bezier(0.2, 0.9, 0.25, 1); --kp-glid: cubic-bezier(0.65, 0, 0.25, 1); --kp-rad: 76px; }
+
+/* knapparna ovanför panelen: lika breda, Skicka får en pil som skjuts fram */
+.kf__knapp--skicka svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.22s var(--kp-ut); }
+@media (hover: hover) { .kf__knapp--skicka:hover svg { transform: translateX(3px); } .kf__knapp--summa:hover { transform: translateY(-1px); } }
+.kf__handling .kf__knapp { transition: background-color 0.2s var(--kp-ut), box-shadow 0.2s var(--kp-ut), transform 0.16s var(--kp-ut); }
+
+/* rubriken */
+.kf__huvudrad { min-height: 24px; }
+.kf__planlank { padding: 6px 10px; margin-right: -10px; border-radius: 999px; transition: color 0.2s var(--kp-ut), background-color 0.2s var(--kp-ut); }
+@media (hover: hover) { .kf__planlank:hover { background: var(--k-svag); } }
+
+/* sifferraden */
+.kf__nyckel > div { display: grid; justify-items: center; align-content: center; gap: 8px; padding: 16px 8px 18px; text-align: center; transition: background-color 0.24s var(--kp-ut); }
+.kf__nyckel dt { font: 500 0.6875rem/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--k-text-3); }
+.kf__nyckel dd { justify-content: center; margin: 0; gap: 3px; }
+.kf__nyckel b { display: inline-flex; align-items: baseline; font-size: 1.625rem; }
+.kf__nyckel b i { font-style: normal; font-weight: 300; margin: 0 0.16em; color: var(--k-text-3); }
+@media (hover: hover) and (pointer: fine) { .kf__nyckel > div:hover { background: color-mix(in srgb, var(--k-yta) 70%, var(--k-kort)); } }
+
+/* ihopfälld: det valda husets ritning i rubriken */
+.kgrupp > summary .kgrupp__mini { display: none; flex: none; }
+.kgrupp:not([open]) > summary .kgrupp__mini { display: block; animation: kp-mini 0.24s var(--kp-ut) both; }
+.kgrupp > summary .kgrupp__mini svg { display: block; width: 56px; height: 22px; overflow: visible; transform: none; transition: none; }
+.kgrupp__mini svg path { stroke: var(--k-text); }
+.kgrupp__mini svg .t { fill: var(--k-accent); }
+@keyframes kp-mini { from { opacity: 0; transform: translateX(-6px); } }
+
+/* raderna */
+.kmodeller { position: relative; gap: 2px; padding: 0 8px 8px; }
+.kmodell { position: relative; z-index: 1; display: block; }
+.kmodell__val { display: block; cursor: pointer; }
+.kmodell__val input { position: absolute; opacity: 0; pointer-events: none; }
+.kmodell__kort { grid-template-columns: 88px minmax(0, 1fr) 68px 32px 22px; gap: 14px; height: var(--kp-rad); min-height: 0; padding: 0 14px; background: transparent; transition: background-color 0.2s var(--kp-ut); }
+.kmodell:hover .kmodell__kort, .kmodell:active .kmodell__kort { background: transparent; }
+@media (hover: hover) { .kmodell:not(.kmodell--vald):hover .kmodell__kort { background: color-mix(in srgb, var(--k-yta) 75%, transparent); } }
+.kmodell input:checked + .kmodell__kort { background: transparent; box-shadow: none; }
+.kmodell__bild { justify-content: center; height: 40px; }
+.kmodell .kmodell__ritning { width: 88px; height: 34px; transition: transform 0.26s var(--kp-ut); }
+.kmodell__ritning .t { transition: fill 0.26s var(--kp-ut); }
+@media (hover: hover) { .kmodell:hover .kmodell__ritning { transform: translateY(-2px); } }
+.kmodell--vald .kmodell__ritning, .kmodell input:checked + .kmodell__kort .kmodell__ritning { transform: translateY(-2px); }
+.kmodell input:checked + .kmodell__kort .kmodell__ritning .t { fill: var(--k-accent); }
+.kmodell__text b { transition: transform 0.22s var(--kp-ut); }
+.kmodell__fakta { justify-self: end; }
+.kmodell__fakta em { font-size: 1.375rem; }
+.kmodell__plats { width: 32px; }
+.kmodell__bock { justify-self: center; }
+
+/* planknappen på raden */
+.kmodell__plan { position: absolute; z-index: 2; top: 50%; right: 50px; display: grid; place-items: center; width: 32px; height: 32px; margin-top: -16px; padding: 0; border: 0; border-radius: 9px; background: transparent; color: var(--k-text-3); cursor: pointer; opacity: 0.7; transition: opacity 0.2s var(--kp-ut), background-color 0.2s var(--kp-ut), color 0.2s var(--kp-ut), transform 0.16s var(--kp-ut); }
+.kmodell__plan svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.kmodell:hover .kmodell__plan, .kmodell--vald .kmodell__plan { opacity: 1; }
+@media (hover: hover) { .kmodell__plan:hover { background: var(--k-svag); color: var(--k-text); } }
+.kmodell__plan:active { transform: scale(0.94); }
+.kmodell__plan:focus-visible { opacity: 1; outline: 2px solid var(--k-fokus); outline-offset: 1px; }
+
+/* fältet som glider bakom det valda huset */
+.kmodeller__falt { position: absolute; z-index: 0; left: 8px; right: 8px; top: 0; border-radius: var(--k-r-m); background: var(--k-yta); box-shadow: inset 0 0 0 1px var(--k-text), 0 12px 26px -20px rgba(27, 25, 21, 0.55); opacity: 0; pointer-events: none; transition: transform 0.28s var(--kp-glid), opacity 0.2s var(--kp-ut); }
+.kmodeller__falt.syns { opacity: 1; }
+html[data-tema="mork"] .kmodeller__falt { background: var(--k-svag); box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.55), 0 12px 26px -18px rgba(0, 0, 0, 0.8); }
+
+/* utfällning: raderna glider in efter varandra */
+.kmodeller--in .kmodell { animation: kp-rad 0.26s var(--kp-ut) both; animation-delay: calc(40ms + var(--i, 0) * 30ms); }
+@keyframes kp-rad { from { opacity: 0; transform: translateY(8px); } }
+.kgrupp__inre { transition: height 0.28s var(--kp-ut), opacity 0.22s var(--kp-ut); }
+.kgrupp[data-stanger] > .kgrupp__inre { opacity: 0; }
+
+@media (max-width: 1240px) {
+  body.ritsidan { --kp-rad: 72px; }
+  .kmodell__kort { grid-template-columns: 72px minmax(0, 1fr) 64px 32px 22px; gap: 12px; padding: 0 12px; }
+  .kmodell .kmodell__ritning { width: 72px; height: 28px; }
+  .kmodell__plan { right: 46px; }
+}
+@media (max-width: 560px) {
+  body.ritsidan { --kp-rad: 68px; }
+  .kmodell__kort { grid-template-columns: 60px minmax(0, 1fr) 64px 32px 22px; gap: 10px; }
+  .kmodell .kmodell__ritning { width: 60px; height: 24px; }
+  .kmodell__plan { right: 44px; opacity: 1; }
+  .kmodell__fakta em { font-size: 1.25rem; }
+  .kf__nyckel > div { padding: 12px 4px 14px; }
+  .kf__nyckel b { font-size: 1.3125rem; }
+}
+@media (max-width: 420px) {
+  .kf__knapp--skicka svg { display: none; }
+  .kmodell__kort { grid-template-columns: 60px minmax(0, 1fr) 64px 32px; }
+  .kmodell__plan { right: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kmodeller__falt, .kmodell .kmodell__ritning, .kgrupp__inre { transition: none; }
+  .kmodeller--in .kmodell, .kgrupp:not([open]) > summary .kgrupp__mini { animation: none; }
+}
+
+/* verktygstipsen ytterst i raden växer inåt, så att scenens kant inte klipper dem */
+.kf__verktyg > .kf__vgrupp:last-of-type > .kf__vk:last-child::after { left: auto; right: 0; translate: none; transform-origin: 100% 100%; }
+.kf__verktyg > .kf__vgrupp:first-of-type > .kf__meny:first-child > .kf__vk::after { left: 0; translate: none; transform-origin: 0 100%; }
+
+/* ---------- Raden ovanför 3D-vyn 2026-11-16: glas, fem lika breda knappar ----------
+   Raden går kant i kant med scenen. Spara visar om huset redan finns i Mina hus,
+   Kopiera länk och Börja om bekräftar med en bock, Börja om frågar först om något är ändrat. */
+body.ritsidan { --kr-ut: cubic-bezier(0.2, 0.9, 0.25, 1); --kr-glas: rgba(255, 255, 255, 0.72); }
+html[data-tema="mork"] body.ritsidan { --kr-glas: rgba(31, 28, 24, 0.72); }
+.kf__lankar { justify-self: stretch; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; height: 48px; padding: 4px; border-radius: 14px; background: var(--kr-glas);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 0 0 1px var(--k-linje), 0 1px 2px rgba(27, 25, 21, 0.05), 0 14px 30px -24px rgba(27, 25, 21, 0.45);
+  animation: kr-in 0.28s var(--kr-ut) 0.05s both; }
+html[data-tema="mork"] .kf__lankar { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), inset 0 0 0 1px var(--k-linje), 0 14px 30px -22px rgba(0, 0, 0, 0.8); }
+@keyframes kr-in { from { opacity: 0; transform: translateY(-6px); } }
+.kf__lankar > * { animation: kr-knapp 0.26s var(--kr-ut) both; }
+.kf__lankar > :nth-child(1) { animation-delay: 0.08s; } .kf__lankar > :nth-child(2) { animation-delay: 0.11s; } .kf__lankar > :nth-child(3) { animation-delay: 0.14s; } .kf__lankar > :nth-child(4) { animation-delay: 0.17s; } .kf__lankar > :nth-child(5) { animation-delay: 0.2s; }
+@keyframes kr-knapp { from { opacity: 0; transform: translateY(4px); } }
+.kf__lankar .kf__adress { animation: none; }
+.kf__meny--rad { display: flex; min-width: 0; }
+.kf__lankar .kf__lank { --g: 8px; gap: var(--g); z-index: 1; flex: 1; justify-content: center; width: auto; min-width: 0; height: 40px; padding: 0 10px; border-radius: 10px; color: var(--k-text);
+  transition: background-color 0.18s var(--kr-ut), color 0.18s var(--kr-ut), transform 0.14s var(--kr-ut), box-shadow 0.18s var(--kr-ut); }
+.kf__lankar .kf__lank > span { overflow: hidden; text-overflow: ellipsis; }
+@media (hover: hover) { .kf__lankar .kf__lank:hover { background: color-mix(in srgb, var(--k-svag) 80%, transparent); } }
+.kf__lankar .kf__lank[aria-expanded="true"] { background: var(--k-svag); }
+.kf__lankar .kf__lank:active { transform: scale(0.97); }
+.kf__lankar .kf__lank svg { transition: transform 0.26s var(--kr-ut), opacity 0.18s var(--kr-ut), fill 0.2s var(--kr-ut); }
+/* ljuset som följer musen ligger under knapparna */
+.kf__lankar.kljus::after { z-index: 0; }
+
+/* mikrorörelser */
+@media (hover: hover) {
+  .kf__lank[data-byt]:hover svg { transform: translateX(-3px); }
+  .kf__lank[data-aterstall]:not(.kf__lank--fraga):hover svg:not(.kf__lank-bock) { transform: rotate(-360deg); transition-duration: 0.3s; }
+  .kf__lank[data-dela]:hover svg:not(.kf__lank-bock) { transform: rotate(-12deg); }
+  .kf__lank[data-mina]:hover svg { transform: scaleX(1.12); }
+  .kf__lank[data-spara]:hover .kf__lank-bokmarke { fill: color-mix(in srgb, currentColor 22%, transparent); transform: translateY(-1px); }
+}
+/* Spara: ifyllt bokmärke när huset finns i Mina hus */
+.kf__lank--sparad .kf__lank-bokmarke, .kf__lank--sparad:hover .kf__lank-bokmarke { fill: var(--k-accent); stroke: var(--k-accent-djup); }
+html[data-tema="mork"] .kf__lank--sparad .kf__lank-bokmarke { stroke: var(--k-accent); }
+.kf__lank--sparad.kf__lank--klar .kf__lank-bokmarke { animation: kr-fyll 0.3s var(--kr-ut); }
+@keyframes kr-fyll { 40% { transform: scale(1.22) translateY(-1px); } }
+
+/* bocken: ritas in där ikonen var */
+.kf__lank-bock { margin-left: calc(-18px - var(--g, 8px)); opacity: 0; stroke-width: 2 !important; stroke-dasharray: 22; stroke-dashoffset: 22; pointer-events: none; }
+.kf__lank--klar:not([data-spara]) > svg:not(.kf__lank-bock) { opacity: 0; transform: scale(0.6); }
+.kf__lank--klar .kf__lank-bock { opacity: 1; stroke-dashoffset: 0; color: var(--k-accent-djup); transition: opacity 0.12s var(--kr-ut), stroke-dashoffset 0.26s var(--kr-ut) 0.04s !important; }
+html[data-tema="mork"] .kf__lank--klar .kf__lank-bock { color: var(--k-accent); }
+
+/* Börja om frågar: varm platta och texten Säker? */
+.kf__lankar .kf__lank--fraga { background: color-mix(in srgb, var(--k-accent) 26%, transparent); color: var(--k-text); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--k-accent) 70%, transparent); }
+.kf__lank--fraga > span { animation: kr-text 0.2s var(--kr-ut); }
+@keyframes kr-text { from { opacity: 0; transform: translateY(4px); } }
+
+/* antalet i Mina hus */
+.kf__lankar .kf__lank b { background: var(--k-accent); color: #1b1915; box-shadow: 0 2px 6px -2px rgba(154, 106, 51, 0.6); }
+
+/* text, ikon eller båda efter bredd: lika breda knappar hela vägen */
+@media (min-width: 861px) and (max-width: 1100px) {
+  .kf__lankar .kf__lank, .kf__lankar .kf__lank:not([data-byt]) { --g: 6px; width: auto; padding: 0 8px; gap: var(--g); }
+  .kf__lankar .kf__lank > span, .kf__lankar .kf__lank:not([data-byt]) > span { position: static; width: auto; height: auto; clip-path: none; font-size: 0.8125rem; }
+}
+@media (min-width: 861px) and (max-width: 1000px) {
+  .kf__lankar .kf__lank > span, .kf__lankar .kf__lank:not([data-byt]) > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
+@media (min-width: 861px) and (max-width: 1000px) and (hover: hover) {
+  .kf__lank[data-byt][data-tips]::after { content: attr(data-tips); position: absolute; z-index: 25; left: 50%; top: calc(100% + 10px); translate: -50% -4px; padding: 7px 10px; border-radius: var(--k-r-s); background: var(--k-text); color: var(--k-kort); font: 500 0.75rem/1 var(--sans); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.16s var(--k-ut), translate 0.2s var(--k-ut); }
+  .kf__lank[data-byt][data-tips]:hover::after { opacity: 1; translate: -50% 0; transition-delay: 0.3s; }
+}
+@media (min-width: 1001px) and (max-width: 1100px) { .kf__lank[data-tips]::after { display: none; } }
+@media (max-width: 599px) {
+  .kf__lankar { height: 60px; gap: 2px; padding: 5px 4px; }
+  .kf__lankar .kf__lank { height: 50px; padding: 0 2px; }
+  .kf__lankar .kf__lank { --g: 4px; gap: var(--g); }
+  .kf__lankar .kf__lank-bock { margin: calc(-18px - var(--g)) 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kf__lankar, .kf__lankar > *, .kf__lank--sparad.kf__lank--klar .kf__lank-bokmarke, .kf__lank--fraga > span { animation: none !important; }
+  .kf__lankar .kf__lank svg { transition: none; }
+  .kf__lank-bock { stroke-dashoffset: 0; }
+}
+
+/* Åkningen genom ytterdörren: en mjuk vinjett som tätnar kring dörröppningen. Motorn sätter
+   bara lagrets opacitet per ruta (ingen oskärpa, inget filter). Skyltarna inne (rummen, kartan,
+   gå-tipset) väntar tills kameran har landat och tonas sedan in. */
+/* Laddningen: verktygsraden väntar (pausad i sitt första läge, osynlig) tills slöjan öppnas
+   och sidan sätter kf__scen--klar; då glider raden in och grupperna följer i tur och ordning.
+   Hårlinjens svep går på kompositorn, så det flyter även medan scenen byggs. */
+.kf__scen:not(.kf__scen--klar) :is(.kf__verktyg, .kf__verktyg > .kf__vgrupp) { animation-play-state: paused; pointer-events: none; }
+.ritare__laddar-linje i { will-change: transform; }
+.kf__flyg { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; background: radial-gradient(ellipse 76% 80% at 50% 50%, transparent 40%, rgba(12, 10, 8, 0.32) 76%, rgba(12, 10, 8, 0.6) 100%); }
+.kf__scen--inne :is(.kf__rum, .kf__karta, .kf__gang) { transition: opacity 0.4s ease; }
+.kf__scen--flyger :is(.kf__rum, .kf__karta, .kf__gang, .kf__mal, .kf__res, .kf__sikte, .ritare__tips) { opacity: 0 !important; pointer-events: none !important; }
+.kf__scen--flyger .ritare__duk { cursor: default; }
+html.foto .kf__flyg { display: none; }
+
+/* ---- Planlösningen: ritningen ovanpå 3D-bilden (husritare-plan.js) ----
+   Väggarnas snitt, fönster, mått och rumsnamn ligger som SVG och HTML över duken och
+   flyttas av motorn varje ruta. Lagret tar inga klick; bara rumsnamnen är knappar. */
+.kplanvy { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+.kplanvy[hidden] { display: none; }
+.kplanvy__ritning { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.kplanvy__kontur { fill: none; stroke: rgba(255, 255, 255, 0.92); stroke-width: 3.5; stroke-linejoin: round; }
+.kplanvy__snitt { fill: #1f1c19; stroke: #1f1c19; stroke-width: 0.6; stroke-linejoin: round; }
+.kplanvy__glas path { fill: #e3edf2; stroke: #1f1c19; stroke-width: 1; }
+.kplanvy__loft path { fill: rgba(255, 255, 255, 0.05); stroke: #fff; stroke-width: 1.5; stroke-dasharray: 7 5; filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.7)); }
+.kplanvy__matt path { fill: none; stroke: #fff; stroke-width: 1.25; filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, 0.6)); }
+.kplanvy__lappar > * { position: absolute; left: 0; top: 0; opacity: 0; will-change: transform, opacity; }
+.kplanvy__rum { display: grid; justify-items: center; gap: 1px; margin: 0; padding: 6px 11px 7px; border: 0; border-radius: 12px; background: rgba(255, 255, 255, 0.93); color: #1b1915; font: inherit; line-height: 1.15; white-space: nowrap; cursor: pointer; pointer-events: auto; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.07), 0 8px 18px -8px rgba(0, 0, 0, 0.55); transition: background-color 0.16s ease, box-shadow 0.16s ease; }
+.kplanvy__rum b { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.01em; }
+.kplanvy__rum span { font-size: 0.71875rem; font-variant-numeric: tabular-nums; opacity: 0.72; }
+.kplanvy__rum--liten { padding: 4px 8px 5px; border-radius: 9px; }
+.kplanvy__rum--liten b { font-size: 0.6875rem; }
+.kplanvy__rum--liten span { font-size: 0.625rem; }
+@media (hover: hover) { .kplanvy__rum:hover { background: #fff; box-shadow: 0 0 0 2px var(--k-accent, #f0b56e), 0 10px 22px -8px rgba(0, 0, 0, 0.6); } }
+.kplanvy__rum:focus-visible { outline: 2px solid var(--k-accent, #f0b56e); outline-offset: 2px; }
+.kplanvy__rum:active { background: #f1ece3; }
+.kplanvy__mattal, .kplanvy__lofttext { padding: 3px 9px; border-radius: 999px; background: rgba(22, 20, 17, 0.8); color: #fff; font-size: 0.71875rem; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kplanvy__lofttext { background: rgba(22, 20, 17, 0.62); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5); font-size: 0.65625rem; }
+/* smal scen: inne tar Se ute, lampor och hjälp platsen, så Planlösning går bort där (P finns kvar) */
+@container scen (max-width: 600px) { .kf__scen--inne .kf__vk[data-plan] { display: none; } }
+/* i planlösningen: tipset om att dra göms, pekaren är en vanlig pil över ritningen */
+.kf__scen--plan .ritare__tips { opacity: 0 !important; pointer-events: none; }
+/* minskad rörelse: ritningen står på plats direkt och tonas bara in */
+@media (prefers-reduced-motion: reduce) { .kplanvy:not([hidden]) { animation: kplanvy-in 0.25s ease-out; } }
+@keyframes kplanvy-in { from { opacity: 0; } }

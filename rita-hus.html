@@ -1,0 +1,965 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rita ditt hus i 3D | Legohus Stockholm</title>
+    <meta name="description" content="Välj modell och färger och se huset i 3D, i morgonljus eller kvällsljus. Måtten och planerna kommer från bygglovsritningarna.">
+    <meta name="theme-color" content="#1b1915">
+    <link rel="icon" href="images/legohus.svg?v=3" type="image/svg+xml">
+    <link rel="icon" href="favicon.ico?v=3" sizes="16x16 32x32 48x48">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+    <link rel="canonical" href="https://legohusstockholm.se/rita-hus.html">
+
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="sv_SE">
+    <meta property="og:site_name" content="Legohus Stockholm">
+    <meta property="og:title" content="Rita ditt hus i 3D | Legohus Stockholm">
+    <meta property="og:description" content="Välj modell och färger och se huset i 3D, i morgonljus eller kvällsljus. Måtten och planerna kommer från bygglovsritningarna.">
+    <meta property="og:image" content="https://legohusstockholm.se/images/delning/stamning-gront-hus-skog.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Grönt trähus med rött sadeltak bland tallar, illustration">
+    <meta property="og:url" content="https://legohusstockholm.se/rita-hus.html">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="styles.css?v=20261010l">
+    <link rel="stylesheet" href="design.css?v=20261117f">
+    <link rel="stylesheet" href="husritare.css?v=20261119c">
+    <link rel="modulepreload" href="husritare-sida.js?v=20261119c">
+    <link rel="modulepreload" href="husritare.js?v=20261119c">
+    <link rel="modulepreload" href="vendor/three/three.module.min.js">
+    <link rel="modulepreload" href="vendor/three/addons/controls/OrbitControls.js">
+    <link rel="modulepreload" href="vendor/three/addons/utils/BufferGeometryUtils.js">
+    <link rel="modulepreload" href="vendor/three/addons/geometries/RoundedBoxGeometry.js">
+    <link rel="modulepreload" href="husritare-miljo.js?v=20261119c">
+    <link rel="modulepreload" href="husritare-inne.js?v=20261119c">
+    <link rel="modulepreload" href="husritare-plan.js?v=20261119c">
+    <link rel="modulepreload" href="husritare-bil.js?v=20261119c">
+    <link rel="modulepreload" href="husritare-bebott.js?v=20261119c">
+    <link rel="modulepreload" href="vendor/three/addons/loaders/GLTFLoader.js">
+    <link rel="stylesheet" href="nya-hus.css?v=20261114j">
+    <script src="premium.js?v=20261117f" defer></script>
+    <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
+    <script>var q=location.search;if(/[?&]inbaddad=1(&|$)/.test(q))document.documentElement.classList.add('inbaddad');if(/[?&]foto=1(&|$)/.test(q))document.documentElement.classList.add('foto')</script>
+  </head>
+  <body class="ritsidan">
+    <a class="skip" href="#innehall">Hoppa till innehållet</a>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="logo" href="./" aria-label="Till Legohus Stockholms startsida">
+          <img class="logo__svg" src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
+        </a>
+
+        <nav class="main-nav" aria-label="Huvudmeny">
+          <a class="main-nav__link" href="./">Hem</a>
+          <div class="main-nav__item" data-dropdown>
+            <button class="main-nav__link main-nav__toggle" type="button" aria-expanded="false" aria-controls="undermeny-hus">Våra hus<span class="main-nav__pil" aria-hidden="true"></span></button>
+            <div class="main-nav__sub" id="undermeny-hus">
+              <p class="main-nav__sub-etikett">För dig som ska bo</p>
+              <a href="attefallshus.html">
+                <img src="images/tumme/meny-attefallshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async">
+                <span>
+                  <strong>Attefallshus</strong>
+                  <em>Sadel 30, inom attefallsmåtten</em>
+                </span>
+              </a>
+              <p class="main-nav__modeller"><a href="sadel-30.html">Sadel 30</a></p>
+              <a href="fritidshus.html">
+                <img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async">
+                <span>
+                  <strong>Fritidshus</strong>
+                  <em>Fyra modeller, 40–90 m²</em>
+                </span>
+              </a>
+              <p class="main-nav__modeller"><a href="sadel-40.html">Sadel 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+              <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
+              <a href="proffs.html">
+                <img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async">
+                <span>
+                  <strong>Proffs</strong>
+                  <em>Väggar, block och moduler</em>
+                </span>
+              </a>
+              <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">Bra att veta</p>
+              <p class="main-nav__guider"><a href="attefallshus-regler.html">Attefallshus: reglerna</a><a href="aga-och-hyra-ut.html">Äga och hyra ut</a><a href="rita-hus.html">Rita ditt hus</a></p>
+              <a class="main-nav__tips" href="vad-far-jag-bygga.html">
+                <span class="main-nav__tips-bild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M8 15.3 3.5 17.4 12 21.4l8.5-4L16 15.3"/><path d="M8 17.5v-6.3l4-3.6 4 3.6v6.3M11 17.5v-3h2v3"/><path d="M18.6 3v3.4M16.9 4.7h3.4"/></svg></span>
+                <span class="main-nav__tips-text">
+                  <span class="main-nav__tips-etikett">Prova</span>
+                  <strong>Vad får jag bygga?</strong>
+                  <em>Räkna ut vad som ryms på din tomt</em>
+                </span>
+                <svg class="main-nav__tips-pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            </div>
+          </div>
+          <a class="main-nav__link main-nav__verktyg" href="vad-far-jag-bygga.html"><span class="main-nav__verktyg-ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path class="mv-mark" pathLength="1" d="M8 15.3 3.5 17.4 12 21.4l8.5-4L16 15.3"/><path class="mv-hus" pathLength="1" d="M8 17.5v-6.3l4-3.6 4 3.6v6.3M11 17.5v-3h2v3"/><path class="mv-matt" pathLength="1" d="M18.6 3v3.4M16.9 4.7h3.4"/></svg></span><span class="main-nav__verktyg-text">Vad får jag bygga?</span></a>
+          <a class="main-nav__link" href="priser.html">Priser</a>
+          <a class="main-nav__link" href="sa-fungerar-det.html">Så fungerar det</a>
+          <a class="main-nav__link" href="om-oss.html">Om oss</a>
+          <a class="main-nav__link" href="kontakt.html">Kontakt</a>
+        </nav>
+
+        <div class="site-header__actions">
+          <button class="temaknapp" type="button" aria-pressed="false" aria-label="Byt till mörkt läge"><svg class="temaknapp__sol" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg><svg class="temaknapp__mane" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+          <a class="header-button" href="kontakt.html">Börja här</a>
+
+          <button class="menu-button" type="button" aria-label="Öppna meny" aria-expanded="false" aria-controls="mobile-nav">
+            <span class="menu-button__line"></span>
+            <span class="menu-button__line"></span>
+            <span class="menu-button__line"></span>
+          </button>
+        </div>
+      </div>
+
+      <nav class="mmeny" id="mobile-nav" aria-label="Meny" hidden>
+        <div class="mmeny__panel">
+          <div class="mmeny__grupp" style="--i:0">
+            <p class="mmeny__etikett">För dig som ska bo</p>
+            <div class="mmeny__hus">
+            <a class="mmeny__kort" href="attefallshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-attefallshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Attefallshus</strong><em>Sadel 30, inom attefallsmåtten</em></span></a>
+            <a class="mmeny__kort" href="fritidshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Fritidshus</strong><em>Fyra modeller, 40–90 m²</em></span></a>
+            </div>
+            <p class="mmeny__modeller"><a href="sadel-30.html">Sadel 30</a><a href="sadel-40.html">Sadel 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+            <p class="mmeny__etikett">För dig som bygger</p>
+            <a class="mmeny__kort mmeny__kort--bred" href="proffs.html"><span class="mmeny__bild"><img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Proffs</strong><em>Väggar, block och moduler</em></span></a>
+            <p class="mmeny__etikett">Bra att veta</p>
+            <p class="mmeny__guider"><a href="attefallshus-regler.html">Attefallshus: reglerna</a><a href="aga-och-hyra-ut.html">Äga och hyra ut</a><a href="rita-hus.html">Rita ditt hus</a></p>
+          </div>
+          <a class="mmeny__tips" href="vad-far-jag-bygga.html" style="--i:6"><span class="mmeny__tipsbild" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path pathLength="1" d="M8 15.3 3.5 17.4 12 21.4l8.5-4L16 15.3"/><path pathLength="1" d="M8 17.5v-6.3l4-3.6 4 3.6v6.3M11 17.5v-3h2v3"/><path pathLength="1" d="M18.6 3v3.4M16.9 4.7h3.4"/></svg></span><span class="mmeny__tipstext"><span class="mmeny__prova">Prova</span><strong>Vad får jag bygga?</strong><em class="mmeny__tipsrad">Fem frågor · svar direkt</em></span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="mmeny__lank" href="./" style="--i:1"><span>Hem</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="mmeny__lank" href="priser.html" style="--i:2"><span>Priser</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="mmeny__lank" href="sa-fungerar-det.html" style="--i:3"><span>Så fungerar det</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="mmeny__lank" href="om-oss.html" style="--i:4"><span>Om oss</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="mmeny__lank" href="kontakt.html" style="--i:5"><span>Kontakt</span><svg class="mmeny__pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="mmeny__cta" href="kontakt.html" style="--i:8">Börja här</a>
+          <p class="mmeny__kontakt" style="--i:9"><a href="mailto:info@legohusstockholm.se">info@legohusstockholm.se</a><span>Stockholm, Sverige</span></p>
+        </div>
+      </nav>
+    </header>
+
+    <main id="innehall" class="ritsida">
+      <section class="kf" aria-labelledby="kf-namn">
+        <div class="kf__rad">
+          <div class="kf__lankar" role="group" aria-label="Ditt hus">
+            <a class="kf__lank" href="#kgrupp-modell" data-byt data-tips="Välj ett annat hus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span>Byt hus</span></a>
+            <button type="button" class="kf__lank" data-spara data-tips="Spara huset i Mina hus"><svg class="kf__lank-bokmarke" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h11v17l-5.5-3.8-5.5 3.8z"/></svg><span>Spara</span></button>
+            <div class="kf__meny kf__meny--rad">
+              <button type="button" class="kf__lank" data-mina aria-expanded="false" aria-controls="kf-mina" data-tips="Dina sparade hus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg><span>Mina hus</span><b data-antal hidden></b></button>
+              <div class="kf__lista" id="kf-mina" role="region" aria-label="Mina hus" hidden>
+                <p class="kf__lista-tom" data-tom>Inga sparade hus än. Tryck på Spara så hamnar huset här.</p>
+                <ul data-sparade></ul>
+                <button type="button" class="kf__lista-jamfor" data-jamfor disabled>Jämför markerade</button>
+              </div>
+            </div>
+            <button type="button" class="kf__lank" data-dela data-tips="Kopiera länken till huset"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><svg class="kf__lank-bock" viewBox="0 0 24 24" aria-hidden="true"><path d="m5.5 12.5 4.2 4.2 8.8-9.4"/></svg><span>Kopiera länk</span></button>
+            <button type="button" class="kf__lank" data-aterstall data-tips="Tillbaka till husets egna kulörer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v4h4"/></svg><svg class="kf__lank-bock" viewBox="0 0 24 24" aria-hidden="true"><path d="m5.5 12.5 4.2 4.2 8.8-9.4"/></svg><span>Börja om</span></button>
+          </div>
+          <div class="kf__handling">
+            <p class="kf__storlek"><small data-namn-bar>Sadel 40</small><b data-yta>40 m²</b></p>
+            <button type="button" class="kf__knapp kf__knapp--ljus kf__knapp--summa" data-oppna-summa><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M8 8.5h8M8 12h8M8 15.5h5"/></svg><span>Sammanfattning</span></button>
+            <a class="kf__knapp kf__knapp--skicka" href="kontakt.html#kontaktformular" data-skicka><span>Skicka förfrågan</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+        </div>
+
+        <div class="kf__yta">
+          <div class="kf__vanster">
+            <div class="kf__scen">
+              <canvas class="ritare__duk" tabindex="0" role="img" aria-label="Huset i 3D. Dra för att vrida, scrolla eller nyp för att zooma."></canvas>
+              <div class="kf__flyg" aria-hidden="true"></div>
+              <div class="ritare__laddar" aria-hidden="true"><div class="kl-logga"><svg class="kl-hus" viewBox="-6 -6 272 316" fill="currentColor"><path class="kl-tak" d="M0 112 L145 0 L260 103 L260 129 L145 27 L0 138 Z"/><rect class="kl-vagg" style="--i:0" x="30" y="100" width="30" height="152"/><rect class="kl-vagg" style="--i:1" x="95" y="80" width="30" height="172"/><rect class="kl-vagg" style="--i:2" x="95" y="222" width="165" height="30"/><g class="kl-fonster"><rect style="--i:0" x="170" y="138" width="22" height="22"/><rect style="--i:1" x="198" y="138" width="22" height="22"/><rect style="--i:2" x="170" y="166" width="22" height="22"/><rect style="--i:3" x="198" y="166" width="22" height="22"/></g><g class="kl-ljus"><rect style="--i:0" x="170" y="138" width="22" height="22"/><rect style="--i:1" x="198" y="138" width="22" height="22"/><rect style="--i:2" x="170" y="166" width="22" height="22"/><rect style="--i:3" x="198" y="166" width="22" height="22"/></g></svg><svg class="kl-ord" viewBox="360 -6 884 316" fill="currentColor"><path d="M368.22222222222223 252.0V88.0H385.63901977539064V235.33481072319879H463.17488674587673V252.0Z"/><path d="M530.8338534884982 255.41666666666666Q512.8660252888997 255.41666666666666 499.61320682101774 247.453943294949Q486.3603883531358 239.49121992323134 479.0468608432345 225.0178321838379Q471.7333333333333 210.54444444444445 471.7333333333333 191.08458421495226Q471.7333333333333 170.92625088161893 478.9481603834364 156.22320505777995Q486.16298743353946 141.52015923394097 499.26965984768333 133.55174628363716Q512.3763322618272 125.58333333333334 530.1657572428385 125.58333333333334Q548.4448752509223 125.58333333333334 561.3484571668837 133.9731157090929Q574.252039082845 142.36289808485242 580.8519050598145 158.01119249131943Q587.4517710367838 173.65948689778645 586.7419187757704 195.40464613172742H569.0175920274522V189.20932413736978Q568.5847947862413 165.5126220703125 558.9268515692817 153.50476820203994Q549.268908352322 141.49691433376736 530.6668294270833 141.49691433376736Q511.0132315741645 141.49691433376736 500.63212797376843 154.2222390068902Q490.2510243733724 166.94756368001302 490.2510243733724 190.5Q490.2510243733724 213.46785210503472 500.63212797376843 226.1096647474501Q511.0132315741645 238.75147738986544 530.1657572428385 238.75147738986544Q543.172043524848 238.75147738986544 552.8375566270615 232.74564581976995Q562.5030697292751 226.73981424967448 568.0837226019966 215.47223815917968L584.4906599256727 221.6145222981771Q577.1827733357748 237.74874911838108 562.963779619005 246.58270789252387Q548.7447859022352 255.41666666666666 530.8338534884982 255.41666666666666ZM484.1467356363932 195.40464613172742V180.9107696533203H577.5209713406033V195.40464613172742Z"/><path d="M657.0544674343533 310.0833333333333Q647.5865498860677 310.0833333333333 638.4223036024306 307.26460766262477Q629.2580573187935 304.4458819919162 621.5098036024306 298.46671532524954Q613.7615498860678 292.4875486585829 608.5150424533421 283.0005360921224L624.3753909640842 274.2996585422092Q629.3562225341797 284.31069624159073 638.450410885281 288.7087752448188Q647.5445992363824 293.1068542480469 657.1379794650608 293.1068542480469Q670.1443630642361 293.1068542480469 678.2780170864529 288.31961432562935Q686.4116711086697 283.5323744032118 690.1491264343261 274.0869718763563Q693.8865817599826 264.64156934950086 693.8030697292752 250.59494866265192V217.57488674587674H695.7998372395833V129.0H711.3641330295139V250.76197272406685Q711.3641330295139 255.9667241414388 711.0737212287056 260.7671748691135Q710.7833094278972 265.5676255967882 709.9747080485026 270.27506544325087Q707.7349256727431 283.85831739637587 700.9320178561741 292.66199662950305Q694.129110039605 301.4656758626302 683.0895063612197 305.7745045979817Q672.0499026828343 310.0833333333333 657.0544674343533 310.0833333333333ZM655.9080573187935 255.41666666666666Q638.6500813802083 255.41666666666666 626.4355223761665 246.83893356323242Q614.2209633721246 238.26120045979818 607.7160372416179 223.53346735636393Q601.2111111111111 208.80573425292968 601.2111111111111 190.3557342529297Q601.2111111111111 171.99686482747396 607.6856603834365 157.32607616848418Q614.1602096557617 142.65528750949437 626.2836380852593 134.11931042141384Q638.4070665147569 125.58333333333334 655.3385155571832 125.58333333333334Q672.6610058254666 125.58333333333334 684.5111398484972 134.01680068969728Q696.3612738715278 142.45026804606118 702.4391409979926 157.1058682759603Q708.5170081244574 171.7614685058594 708.5170081244574 190.3557342529297Q708.5170081244574 208.73360137939454 702.4543294270834 223.4613344828288Q696.3916507297092 238.18906758626304 684.6687137179905 246.80286712646483Q672.9457767062718 255.41666666666666 655.9080573187935 255.41666666666666ZM657.7453219943577 239.25254957411025Q670.7059943305121 239.25254957411025 679.1490578545464 232.92404903835723Q687.5921213785807 226.59554850260417 691.6959793090821 215.53492084079318Q695.7998372395833 204.4742931789822 695.7998372395833 190.3557342529297Q695.7998372395833 176.09290957980687 691.6599128723144 165.10441479153104Q687.5199885050456 154.1159200032552 679.1604370117188 147.9316852145725Q670.800885518392 141.74745042588975 658.162882147895 141.74745042588975Q645.0579440646702 141.74745042588975 636.519989352756 148.18603057861327Q627.982034640842 154.62461073133682 623.8554183959961 165.6339835272895Q619.7288021511501 176.6433563232422 619.7288021511501 190.3557342529297Q619.7288021511501 204.18200107150608 623.9579281277126 215.26350674099393Q628.1870541042751 226.3450124104818 636.6206187778049 232.79878099229603Q645.0541834513347 239.25254957411025 657.7453219943577 239.25254957411025Z"/><path d="M790.8296461317275 255.41666666666666Q772.4821558634441 255.41666666666666 759.4115498860677 247.10277777777776Q746.3409439086914 238.7888888888889 739.3690830654568 224.11810022989908Q732.3972222222222 209.44731157090928 732.3972222222222 190.3557342529297Q732.3972222222222 171.0363791571723 739.5038499620225 156.43772337171765Q746.6104777018229 141.839067586263 759.7171501159669 133.7112004597982Q772.8238225301108 125.58333333333334 790.8296461317275 125.58333333333334Q809.249269273546 125.58333333333334 822.3407532585992 133.86115578545463Q835.4322372436524 142.13897823757594 842.3889096577963 156.73763402303058Q849.3455820719402 171.33628980848525 849.3455820719402 190.3557342529297Q849.3455820719402 209.7054662068685 842.3319652133519 224.34018842909072Q835.3183483547635 238.97491065131294 822.1907979329428 247.19578865898978Q809.063247511122 255.41666666666666 790.8296461317275 255.41666666666666ZM790.8296461317275 238.75147738986544Q811.0147903442383 238.75147738986544 820.9213406880697 225.28206566704642Q830.8278910319011 211.81265394422743 830.8278910319011 190.3557342529297Q830.8278910319011 168.40150299072266 820.8435182359484 155.32501280042862Q810.8591454399957 142.24852261013456 790.8296461317275 142.24852261013456Q777.2311570909288 142.24852261013456 768.3951720343696 148.39100138346356Q759.5591869778103 154.53348015679254 755.2370501200357 165.3606404622396Q750.9149132622613 176.18780076768664 750.9149132622613 190.3557342529297Q750.9149132622613 212.2795886569553 761.0435518052843 225.51553302341037Q771.1721903483074 238.75147738986544 790.8296461317275 238.75147738986544Z"/><path d="M958.9996585422093 252.0V189.44442850748698Q958.9996585422093 179.53204260932074 957.1375119527181 171.0358439127604Q955.275365363227 162.53964521620009 951.0803768581815 156.11442184448242Q946.8853883531359 149.68919847276476 940.177274407281 146.11312628851996Q933.4691604614259 142.53705410427517 923.777225748698 142.53705410427517Q915.1746107313369 142.53705410427517 908.4911354064942 145.48495441012912Q901.8076600816515 148.43285471598307 897.2444859822592 154.076141611735Q892.6813118828668 159.71942850748698 890.2991440667047 167.89290957980688Q887.9169762505426 176.06639065212676 887.9169762505426 186.55930820041232L875.7766737196181 183.61362881130643Q875.7766737196181 164.92427724202474 882.3480918036568 152.06052237616646Q888.9195098876954 139.19676751030818 900.5323672824436 132.5646930270725Q912.1452246771919 125.93261854383681 927.368243069119 125.93261854383681Q938.5861526489258 125.93261854383681 946.8677357143827 129.3871832953559Q955.1493187798395 132.841748046875 960.8665701972114 138.73542505900065Q966.5838216145834 144.62910207112628 970.0461022271052 152.15902820163302Q973.5083828396268 159.68895433213976 975.0459314982097 167.95925555759007Q976.5834801567926 176.22955678304038 976.5834801567926 184.28172505696614V252.0ZM870.3331546359593 252.0V88.0H886.0644744873048V180.21239386664496H887.9169762505426V252.0Z"/><path d="M1049.1096815321182 255.0673814561632Q1037.8917719523113 255.0673814561632 1029.6101888868545 251.6128167046441Q1021.3286058213977 248.158251953125 1015.6113544040256 242.26457494099935Q1009.8941029866537 236.3708979288737 1006.431822374132 228.84097179836698Q1002.9695417616103 221.31104566786024 1001.4319931030275 213.04074444240993Q999.8944444444445 204.77044321695962 999.8944444444445 196.71827494303386V129.0H1017.4782660590279V191.55557149251302Q1017.4782660590279 201.3958245171441 1019.340412648519 209.928089650472Q1021.20255923801 218.46035478379991 1025.3975477430556 224.88557815551758Q1029.5925362481012 231.31080152723524 1036.3006501939562 234.88687371148004Q1043.0087641398113 238.46294589572483 1052.700698852539 238.46294589572483Q1061.3033138699002 238.46294589572483 1067.9867891947429 235.51504558987088Q1074.6702645195855 232.56714528401693 1079.233438618978 226.923858388265Q1083.7966127183704 221.28057149251302 1086.1787805345325 213.08621241251626Q1088.5609483506946 204.89185333251953 1088.5609483506946 194.44069179958768L1100.701250881619 197.38637118869357Q1100.701250881619 216.07572275797526 1094.1298327975805 228.93947762383357Q1087.5584147135419 241.80323248969185 1075.9455573187936 248.43530697292752Q1064.3326999240453 255.0673814561632 1049.1096815321182 255.0673814561632ZM1090.4134501139324 252.0V221.18211432562936H1088.5609483506946V129.0H1106.0612579345704V252.0Z"/><path d="M1179.9691684299046 255.27240091959635Q1158.2506254408095 255.27240091959635 1144.2821678161622 245.89180467393663Q1130.3137101915147 236.51120842827692 1127.0944444444444 219.71650390625L1144.9060438368056 216.80862528483073Q1147.5634836832683 227.19536980523003 1157.1834314982098 233.3188508775499Q1166.803379313151 239.44233194986978 1180.9485544840495 239.44233194986978Q1194.6420320298937 239.44233194986978 1202.5517662048342 233.70791447957356Q1210.4615003797744 227.97349700927734 1210.4615003797744 218.0535898844401Q1210.4615003797744 212.46155785454644 1207.9179494222005 208.9423327975803Q1205.3743984646267 205.42310774061414 1197.6109076605903 202.39362436930338Q1189.8474168565538 199.36414099799262 1174.358430650499 195.18438958062066Q1157.7381740993924 190.7351043701172 1148.2720881991918 186.13210322062176Q1138.806002298991 181.52910207112632 1134.8559576246475 175.51579793294272Q1130.905912950304 169.50249379475912 1130.905912950304 160.84317762586807Q1130.905912950304 150.29712490505642 1136.7977583143447 142.34202007717556Q1142.6896036783855 134.3869152492947 1153.2110177781847 129.98512429131404Q1163.732431877984 125.58333333333334 1177.7141489664714 125.58333333333334Q1191.600974867079 125.58333333333334 1202.5817537943522 130.0610664367676Q1213.5625327216255 134.5387995402018 1220.308544752333 142.63060022989907Q1227.0545567830404 150.72240091959634 1228.288336859809 161.45071478949654L1210.476737467448 164.69264153374564Q1208.8139207628037 154.03626590304904 1199.9740777757434 147.85010214911568Q1191.1342347886828 141.6639383951823 1177.5318878173828 141.4134023030599Q1164.6622487386069 141.06035647922093 1156.594989352756 146.21583065456815Q1148.5277299669053 151.37130482991535 1148.5277299669053 159.9700619167752Q1148.5277299669053 164.81800689697266 1151.4338255988228 168.24422107272676Q1154.33992123074 171.67043524848089 1162.1014830695258 174.66954176161022Q1169.8630449083116 177.66864827473958 1184.357310655382 181.31309271918403Q1201.1788260565863 185.6067330254449 1210.817674255371 190.41094436645508Q1220.456522454156 195.21515570746527 1224.5090768602158 201.73907953898112Q1228.561631266276 208.26300337049696 1228.561631266276 217.75753716362846Q1228.561631266276 235.29256812201606 1215.616293334961 245.2824845208062Q1202.6709554036458 255.27240091959635 1179.9691684299046 255.27240091959635Z"/></svg></div><span class="ritare__laddar-linje"><i></i></span></div>
+              <noscript><p class="ritare__fel">Husritaren behöver JavaScript. Planerna finns längre ner på sidan.</p></noscript>
+              <a class="kf__full" href="rita-hus.html" target="_top" data-full>Öppna i husritaren<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+              <p class="ritare__tips" aria-live="polite"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13a8 4 0 0 0 16 0"/><path d="m17 15 3-2 1 3.5"/><path d="M9 9V5.5a1.5 1.5 0 0 1 3 0V9l3.2.5a2 2 0 0 1 1.7 2.2L16.5 15"/></svg><span>Dra för att vrida · scrolla för att zooma</span></p>
+              <div class="kf__gang" data-gang-tips role="note" aria-label="Så går du runt i huset" aria-hidden="true"><span class="kf__gang-del kf__gang-del--mus" style="--i:0"><svg class="kf__gang-mus" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="3" width="11" height="18" rx="5.5"/><path class="kf__gang-knapp" d="M12 3.2a5.4 5.4 0 0 0-5.3 5.3V10H12z"/><path d="M12 6.5v3.5"/></svg>Klicka för att gå</span><span class="kf__gang-del kf__gang-del--mus" style="--i:1"><span class="kf__gang-tangenter" aria-hidden="true"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><span class="sr">W A S D: </span>Gå</span><span class="kf__gang-del kf__gang-del--mus" style="--i:2"><svg class="kf__gang-dra" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.4"/><path d="M3.5 12h4.2M16.3 12h4.2M6.5 9l-3 3 3 3M17.5 9l3 3-3 3"/></svg>Dra för att titta runt</span><span class="kf__gang-del kf__gang-del--mus" style="--i:3"><span class="kf__gang-tangenter kf__gang-tangenter--en" aria-hidden="true"><kbd>E</kbd></span>Klicka eller E för att öppna dörrar</span><span class="kf__gang-del kf__gang-del--pek" style="--i:0"><svg class="kf__gang-tryck" viewBox="0 0 24 24" aria-hidden="true"><circle class="kf__gang-ring" cx="12" cy="9" r="5.5"/><circle cx="12" cy="9" r="2.2"/><path d="M12 14.5V21"/></svg>Tryck för att gå</span><span class="kf__gang-del kf__gang-del--pek" style="--i:1"><svg class="kf__gang-dra" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13a8 4 0 0 0 16 0"/><path d="m17 15 3-2 1 3.5"/><path d="M9 9V5.5a1.5 1.5 0 0 1 3 0V9l3.2.5a2 2 0 0 1 1.7 2.2L16.5 15"/></svg>Dra för att titta</span><span class="kf__gang-del kf__gang-del--pek" style="--i:2">Tryck på en dörr för att öppna</span></div><p class="kf__mal" data-mal aria-live="polite" hidden><span data-mal-text></span><kbd>E</kbd></p><span class="kf__sikte" aria-hidden="true"></span><button type="button" class="kf__res" data-res-dig hidden>Res dig<kbd>W</kbd></button>
+              <div class="kf__rum" data-inne-rum hidden><div role="group" aria-label="Rum att titta i"></div></div>
+              <div class="kf__karta" data-karta hidden>
+                <div class="kf__karta-yta"><img alt="" data-karta-bild><div class="kf__karta-punkter" data-karta-punkter></div></div>
+                <p class="kf__karta-namn"><span>Du står i</span><b data-karta-namn></b></p>
+              </div>
+              <div class="kf__verktyg" role="group" aria-label="Verktyg för 3D-vyn">
+                <div class="kf__vgrupp">
+                  <div class="kf__meny">
+                    <button type="button" class="kf__vk" data-vy-knapp aria-haspopup="menu" aria-expanded="false" aria-controls="kf-vy" data-tips="Vinklar" data-kort="1–6"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Vy</span></button>
+                    <div class="kf__popup" id="kf-vy" role="menu" aria-label="Vinklar" hidden>
+                      <button type="button" role="menuitemradio" aria-checked="false" data-vy-val="runt">Runt om</button>
+                      <button type="button" role="menuitemradio" aria-checked="false" data-vy-val="soder">Söder</button>
+                      <button type="button" role="menuitemradio" aria-checked="false" data-vy-val="ost">Öster</button>
+                      <button type="button" role="menuitemradio" aria-checked="false" data-vy-val="norr">Norr</button>
+                      <button type="button" role="menuitemradio" aria-checked="false" data-vy-val="vast">Väster</button>
+                      <button type="button" role="menuitemradio" aria-checked="false" data-vy-val="ovan">Ovanifrån</button>
+                    </div>
+                  </div>
+                  <div class="kf__sol">
+                    <div class="kf__meny kf__meny--ljus">
+                      <button type="button" class="kf__ljusknapp" data-ljus-knapp aria-haspopup="menu" aria-expanded="false" aria-controls="kf-ljus" data-tips="Morgon, dag, gyllene timmen, kväll" data-kort="L" aria-keyshortcuts="L"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg><span class="sr">Ljus</span></button>
+                      <div class="kf__popup kf__popup--ljus" id="kf-ljus" role="menu" aria-label="Ljus" hidden>
+                        <button type="button" role="menuitemradio" aria-checked="false" data-ljus="morgon"><i style="--f:linear-gradient(160deg, #f6d6a8, #9fb7d4)"></i>Morgon<small>07:30</small></button>
+                        <button type="button" role="menuitemradio" aria-checked="false" data-ljus="dag"><i style="--f:linear-gradient(160deg, #cfe3f3, #7fa9d1)"></i>Dag<small>13:00</small></button>
+                        <button type="button" role="menuitemradio" aria-checked="false" data-ljus="gyllene"><i style="--f:linear-gradient(160deg, #f7c06a, #c8653a)"></i>Gyllene timmen<small>19:12</small></button>
+                        <button type="button" role="menuitemradio" aria-checked="false" data-ljus="kvall"><i style="--f:linear-gradient(160deg, #3a4a78, #121a33)"></i>Kväll<small>21:30</small></button>
+                      </div>
+                    </div>
+                    <input class="ritare__reglage" id="rit-tid" type="range" min="6" max="22" step="any" value="14" aria-label="Tid på dagen">
+                    <output for="rit-tid" data-tid>14:00</output>
+                  </div>
+                </div>
+                <span class="kf__streck" aria-hidden="true"></span>
+                <div class="kf__vgrupp">
+                  <div class="kf__meny">
+                    <button type="button" class="kf__vk" data-miljo-knapp aria-haspopup="menu" aria-expanded="false" aria-controls="kf-miljo" data-tips="Miljö runt huset"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18M6 20l4-9 3 5 2-3 3 7"/><circle cx="17" cy="6" r="2"/></svg><span>Miljö</span></button>
+                    <div class="kf__popup" id="kf-miljo" role="menu" aria-label="Miljö" hidden>
+                      <button type="button" role="menuitemradio" aria-checked="true" data-miljo="studio"><i style="--f:#d6d0c6"></i>Studio</button>
+                      <button type="button" role="menuitemradio" aria-checked="false" data-miljo="tradgard"><i style="--f:#6e7d47"></i>Trädgård</button>
+                      <button type="button" role="menuitemradio" aria-checked="false" data-miljo="vinter"><i style="--f:#eef0f2"></i>Vinter</button>
+                    </div>
+                  </div>
+                  <button type="button" class="kf__vk kf__vk--inne" data-inne aria-pressed="false" hidden data-tips="Gå in i huset" data-kort="I" aria-keyshortcuts="I"><i class="kf__vk-yta" aria-hidden="true"><i></i></i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Se inne</span></button>
+                  <button type="button" class="kf__vk" data-spel aria-pressed="false" hidden data-tips="Spelläge: musen tittar, Esc avslutar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 7.5h9a4.5 4.5 0 0 1 4.4 3.6l.9 4.6a2.6 2.6 0 0 1-4.5 2.2L15 15.5H9l-2.3 2.4a2.6 2.6 0 0 1-4.5-2.2l.9-4.6a4.5 4.5 0 0 1 4.4-3.6z"/><path d="M7.5 10.5v3M6 12h3"/><path d="M15.6 11.2v.01M17.4 12.8v.01"/></svg><span class="sr">Spelläge</span></button>
+                  <button type="button" class="kf__vk" data-lampor aria-pressed="false" hidden data-tips="Tänd eller släck alla lampor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M8.5 14.5A6 6 0 1 1 15.5 14.5c-.6.5-1 1.2-1 2V17h-5v-.5c0-.8-.4-1.5-1-2z"/></svg><span class="sr">Alla lampor</span></button>
+                  <button type="button" class="kf__vk" data-hjalp aria-pressed="false" hidden data-tips="Så går du runt"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.85.85c0 1.65-2.45 2.1-2.45 3.55"/><path d="M12 17.1v.01"/></svg><span class="sr">Hjälp</span></button>
+                  <button type="button" class="kf__vk" data-oppna aria-pressed="false" hidden data-tips="Lyft av taket och se in" data-kort="T" aria-keyshortcuts="T"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.5 12 3l9 5.5"/><path d="M3 12.5h18"/><path d="M5 12.5V21h14v-8.5"/><path d="M9 21v-5h6v5"/></svg><span class="sr">Öppna tak</span></button>
+                  <button type="button" class="kf__vk" data-plan aria-pressed="false" hidden data-tips="Planlösning ovanifrån" data-kort="P" aria-keyshortcuts="P"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M4 11h5M12.5 11H20M12.5 4v4M12.5 14v6"/></svg><span class="sr">Planlösning</span></button>
+                  <button type="button" class="kf__vk" data-tomt aria-pressed="false" hidden data-tips="Tomt hus: dölj möblerna" data-kort="B" aria-keyshortcuts="B"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11V9a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><path d="M4 18v-5a1.8 1.8 0 0 1 3.6 0v1.5h8.800V13a1.800 1.800 0 0 1 3.600 0v5z"/><path d="M6.500 18v1.800M17.500 18v1.800"/><path d="M4 3.500 20 21"/></svg><span class="sr">Tomt hus</span></button>
+                  <div class="kf__lager" data-lager role="group" aria-label="Våningar" hidden><button type="button" data-lager-val="hela" aria-pressed="true">Hela huset</button><button type="button" data-lager-val="botten" aria-pressed="false">Bottenvåning</button><button type="button" data-lager-val="loft" aria-pressed="false">Loft</button></div>
+                </div>
+                <span class="kf__streck" aria-hidden="true"></span>
+                <div class="kf__vgrupp">
+                  <button type="button" class="kf__vk" data-matt-knapp aria-pressed="false" data-tips="Visa mått" data-kort="M" aria-keyshortcuts="M"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17 17 3l4 4L7 21z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/></svg><span class="sr">Mått</span></button>
+                  <button type="button" class="kf__vk" data-snurra aria-pressed="true" data-tips="Snurra runt"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg><span class="sr">360°</span></button>
+                  <button type="button" class="kf__vk" data-liv aria-pressed="false" hidden data-tips="Vind, moln och fåglar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h10a3 3 0 1 0-3-3"/><path d="M3 12h15a3 3 0 1 1-3 3"/><path d="M3 16h7"/></svg><span class="sr">Liv</span></button>
+                </div>
+                <span class="kf__streck" aria-hidden="true"></span>
+                <div class="kf__vgrupp">
+                  <button type="button" class="kf__vk" data-ladda data-tips="Ladda ned bild"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span class="sr">Ladda ned bild</span></button>
+                  <button type="button" class="kf__vk" data-helskarm aria-pressed="false" data-tips="Helskärm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span class="sr">Helskärm</span></button>
+                  <button type="button" class="kf__vk kf__vk--tangent" data-tangenter aria-haspopup="dialog" data-tips="Kortkommandon" data-kort="?" aria-keyshortcuts="?"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M8 14h8"/></svg><span class="sr">Kortkommandon</span></button>
+                </div>
+              </div>
+            </div>
+            <div class="kf__tummar" role="group" aria-label="Vinklar"><span class="kf__tummar-ring" aria-hidden="true"></span>
+            <button type="button" class="ktumme" data-vy="runt" aria-pressed="true"><span class="ktumme__bild"><svg class="ktumme__tom" viewBox="0 0 44 32" aria-hidden="true"><path d="M3 15 22 4l19 11M7 13v16h30V13"/></svg></span><span class="ktumme__namn">Runt om</span></button>
+            <button type="button" class="ktumme" data-vy="soder" aria-pressed="false"><span class="ktumme__bild"><svg class="ktumme__tom" viewBox="0 0 44 32" aria-hidden="true"><path d="M3 15 22 4l19 11M7 13v16h30V13"/></svg></span><span class="ktumme__namn">Söder</span></button>
+            <button type="button" class="ktumme" data-vy="ost" aria-pressed="false"><span class="ktumme__bild"><svg class="ktumme__tom" viewBox="0 0 44 32" aria-hidden="true"><path d="M3 15 22 4l19 11M7 13v16h30V13"/></svg></span><span class="ktumme__namn">Öster</span></button>
+            <button type="button" class="ktumme" data-vy="norr" aria-pressed="false"><span class="ktumme__bild"><svg class="ktumme__tom" viewBox="0 0 44 32" aria-hidden="true"><path d="M3 15 22 4l19 11M7 13v16h30V13"/></svg></span><span class="ktumme__namn">Norr</span></button>
+            <button type="button" class="ktumme" data-vy="vast" aria-pressed="false"><span class="ktumme__bild"><svg class="ktumme__tom" viewBox="0 0 44 32" aria-hidden="true"><path d="M3 15 22 4l19 11M7 13v16h30V13"/></svg></span><span class="ktumme__namn">Väster</span></button>
+            <button type="button" class="ktumme" data-vy="ovan" aria-pressed="false"><span class="ktumme__bild"><svg class="ktumme__tom" viewBox="0 0 44 32" aria-hidden="true"><path d="M3 15 22 4l19 11M7 13v16h30V13"/></svg></span><span class="ktumme__namn">Ovanifrån</span></button>
+            <button type="button" class="ktumme ktumme--inne" data-inne-tumme aria-pressed="false" hidden><span class="ktumme__bild"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></span><span class="ktumme__namn">Gå in</span></button>
+            </div>
+          </div>
+
+          <aside class="kf__panel" aria-label="Val för huset">
+            <div class="kf__huvud">
+              <div class="kf__huvudrad"><p class="k-etikett">Ditt hus</p><a class="kf__planlank" href="#planen">Planritning<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></div>
+              <h1 class="kf__namn" id="kf-namn"><span data-namn>Sadel 40</span></h1>
+              <dl class="kf__nyckel">
+                <div><dt>Byggyta</dt><dd><b data-k-yta>40</b><small>m²</small></dd></div>
+                <div><dt>Mått</dt><dd><b data-k-matt><span data-k-l>10</span><i>×</i><span data-k-w>4</span></b><small>m</small></dd></div>
+                <div><dt>Rum</dt><dd><b data-k-rum>3</b></dd></div>
+              </dl>
+            </div>
+            <details class="kgrupp" id="kgrupp-modell" data-grupp="modell" data-kamera="modell" open>
+              <summary><span>Hus</span><span class="kgrupp__mini" data-valt-mini aria-hidden="true"></span><em data-valt="modell"></em><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <div class="kmodeller" role="radiogroup" aria-label="Välj hus"><span class="kmodeller__falt" aria-hidden="true"></span>
+              <div class="kmodell" style="--i:0"><label class="kmodell__val"><input type="radio" name="modell" value="sadel-30"><span class="kmodell__kort"><span class="kmodell__bild"><svg class="kmodell__ritning" viewBox="0 0 112 44" aria-hidden="true"><path class="m" d="M2 41 H110"/><path class="v" d="M4.0 41.0 L54.25 41.0 L54.25 23.58 L4.0 23.58 Z"/><path class="g" d="M54.25 41.0 L67.26 34.08 L67.26 16.66 L60.76 13.29 L54.25 23.58 Z"/><path class="t" d="M2.34 24.73 L54.6 24.73 L61.76 13.29 L9.5 13.29 Z"/><path class="v" d="M4.0 23.58 L29.46 23.58 L29.46 17.88 L4.0 17.88 Z"/><path class="t" d="M2.51 18.14 L29.64 18.14 L36.64 13.29 L9.5 13.29 Z"/><path class="g" d="M29.46 23.58 L29.46 17.88 L35.97 13.29 L35.97 13.29 Z"/></svg></span><span class="kmodell__text"><b>Sadel 30</b><small>Kupa · loft</small></span><span class="kmodell__fakta"><em>30<sup>m²</sup></em><small>7,5 × 4 m</small></span><span class="kmodell__plats" aria-hidden="true"></span><span class="kmodell__bock" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 12.5 4 4 8-9"/></svg></span></span></label><button type="button" class="kmodell__plan" data-visa-plan="sadel-30" aria-label="Visa planritningen för Sadel 30" title="Planritning"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path d="M3.5 12h7v7.5M10.5 4.5V9M14 12h6.5"/></svg></button></div>
+              <div class="kmodell" style="--i:1"><label class="kmodell__val"><input type="radio" name="modell" value="sadel-40" checked><span class="kmodell__kort"><span class="kmodell__bild"><svg class="kmodell__ritning" viewBox="0 0 112 44" aria-hidden="true"><path class="m" d="M2 41 H110"/><path class="v" d="M4.0 41.0 L71.0 41.0 L71.0 23.58 L4.0 23.58 Z"/><path class="g" d="M71.0 41.0 L84.01 34.08 L84.01 16.66 L77.51 13.29 L71.0 23.58 Z"/><path class="t" d="M2.34 24.73 L71.35 24.73 L78.51 13.29 L9.5 13.29 Z"/><path class="v" d="M4.0 23.58 L33.01 23.58 L33.01 17.88 L4.0 17.88 Z"/><path class="t" d="M2.51 18.14 L33.19 18.14 L40.19 13.29 L9.5 13.29 Z"/><path class="g" d="M33.01 23.58 L33.01 17.88 L39.52 13.29 L39.52 13.29 Z"/></svg></span><span class="kmodell__text"><b>Sadel 40</b><small>Kupa · loft</small></span><span class="kmodell__fakta"><em>40<sup>m²</sup></em><small>10 × 4 m</small></span><span class="kmodell__plats" aria-hidden="true"></span><span class="kmodell__bock" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 12.5 4 4 8-9"/></svg></span></span></label><button type="button" class="kmodell__plan" data-visa-plan="sadel-40" aria-label="Visa planritningen för Sadel 40" title="Planritning"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path d="M3.5 12h7v7.5M10.5 4.5V9M14 12h6.5"/></svg></button></div>
+              <div class="kmodell" style="--i:2"><label class="kmodell__val"><input type="radio" name="modell" value="sadel-50"><span class="kmodell__kort"><span class="kmodell__bild"><svg class="kmodell__ritning" viewBox="0 0 112 44" aria-hidden="true"><path class="m" d="M2 41 H110"/><path class="v" d="M4.0 41.0 L87.75 41.0 L87.75 24.45 L4.0 24.45 Z"/><path class="g" d="M87.75 41.0 L100.76 34.08 L100.76 17.53 L94.26 13.29 L87.75 24.45 Z"/><path class="t" d="M2.34 25.6 L88.1 25.6 L95.26 13.29 L9.5 13.29 Z"/></svg></span><span class="kmodell__text"><b>Sadel 50</b><small>Loft · bastu</small></span><span class="kmodell__fakta"><em>50<sup>m²</sup></em><small>12,5 × 4 m</small></span><span class="kmodell__plats" aria-hidden="true"></span><span class="kmodell__bock" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 12.5 4 4 8-9"/></svg></span></span></label><button type="button" class="kmodell__plan" data-visa-plan="sadel-50" aria-label="Visa planritningen för Sadel 50" title="Planritning"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path d="M3.5 12h7v7.5M10.5 4.5V9M14 12h6.5"/></svg></button></div>
+              <div class="kmodell" style="--i:3"><label class="kmodell__val"><input type="radio" name="modell" value="pulpet-70"><span class="kmodell__kort"><span class="kmodell__bild"><svg class="kmodell__ritning" viewBox="0 0 112 44" aria-hidden="true"><path class="m" d="M2 41 H110"/><path class="v" d="M4.0 41.0 L71.0 41.0 L71.0 16.41 L4.0 16.41 Z"/><path class="g" d="M71.0 41.0 L93.78 28.89 L93.78 8.39 L71.0 16.41 Z"/><path class="t" d="M2.34 16.42 L71.35 16.42 L95.43 7.71 L26.42 7.71 Z"/></svg></span><span class="kmodell__text"><b>Pulpet 70</b><small>Tre sovrum</small></span><span class="kmodell__fakta"><em>70<sup>m²</sup></em><small>10 × 7 m</small></span><span class="kmodell__plats" aria-hidden="true"></span><span class="kmodell__bock" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 12.5 4 4 8-9"/></svg></span></span></label><button type="button" class="kmodell__plan" data-visa-plan="pulpet-70" aria-label="Visa planritningen för Pulpet 70" title="Planritning"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path d="M3.5 12h7v7.5M10.5 4.5V9M14 12h6.5"/></svg></button></div>
+              <div class="kmodell" style="--i:4"><label class="kmodell__val"><input type="radio" name="modell" value="sadel-90"><span class="kmodell__kort"><span class="kmodell__bild"><svg class="kmodell__ritning" viewBox="0 0 112 44" aria-hidden="true"><path class="m" d="M2 41 H110"/><path class="v" d="M4.0 41.0 L84.4 41.0 L84.4 26.33 L4.0 26.33 Z"/><path class="g" d="M84.4 41.0 L107.18 28.89 L107.18 14.22 L95.79 10.82 L84.4 26.33 Z"/><path class="t" d="M2.34 27.48 L84.75 27.48 L96.79 10.82 L14.38 10.82 Z"/></svg></span><span class="kmodell__text"><b>Sadel 90</b><small>Tre sovrum</small></span><span class="kmodell__fakta"><em>90<sup>m²</sup></em><small>12 × 7 m</small></span><span class="kmodell__plats" aria-hidden="true"></span><span class="kmodell__bock" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 12.5 4 4 8-9"/></svg></span></span></label><button type="button" class="kmodell__plan" data-visa-plan="sadel-90" aria-label="Visa planritningen för Sadel 90" title="Planritning"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path d="M3.5 12h7v7.5M10.5 4.5V9M14 12h6.5"/></svg></button></div>
+              </div>
+            </details>
+            <details class="kgrupp" data-grupp="fasad" data-kamera="fasad" open>
+              <summary><span>Fasad</span><em data-valt="fasad"></em><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <p class="kgrupp__text">Stående träpanel.</p>
+              <p class="kgrupp__etikett">Ritningens kulör</p>
+              <div class="kfarger" data-lista="ritning"></div>
+              <p class="kgrupp__etikett">Fler kulörer</p>
+              <div class="kfarger" data-lista="fler"></div>
+            </details>
+            <details class="kgrupp" data-grupp="tak" data-kamera="tak" open>
+              <summary><span>Tak</span><em data-valt="tak"></em><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <p class="kgrupp__text">Bandplåt med falsar. Kameran åker upp så att taket syns.</p>
+              <p class="kgrupp__etikett">Ritningens kulör</p>
+              <div class="kfarger" data-lista="ritning"></div>
+              <p class="kgrupp__etikett">Fler kulörer</p>
+              <div class="kfarger" data-lista="fler"></div>
+            </details>
+            <details class="kgrupp" data-grupp="detalj" data-kamera="fonster" open>
+              <summary><span>Fönster och plåt</span><em data-valt="detalj"></em><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <p class="kgrupp__text">Fönster och dörrar i trä/aluminium, med foder, vindskivor och plåt i samma kulör.</p>
+              <p class="kgrupp__etikett">Ritningens kulör</p>
+              <div class="kfarger" data-lista="ritning"></div>
+              <p class="kgrupp__etikett">Fler kulörer</p>
+              <div class="kfarger" data-lista="fler"></div>
+            </details>
+
+            <section class="ksumma" id="sammanfattning" aria-labelledby="summa-rubrik">
+              <p class="k-etikett">Klart?</p>
+              <h2 id="summa-rubrik">Sammanfattning</h2>
+              <dl data-summa-lista></dl>
+              <a class="kf__knapp kf__knapp--bred" href="kontakt.html#kontaktformular" data-skicka>Skicka förfrågan</a>
+              <p class="ksumma__not">Vi hör av oss med pris och tider. Det du valt följer med i meddelandet, och länken sparar allt.</p>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <dialog class="kdialog ksam" data-summa-dialog aria-labelledby="ksam-namn">
+        <div class="ksam__bild"><canvas data-summa-bild role="img" aria-label=""></canvas></div>
+        <div class="ksam__text">
+          <button type="button" class="kdialog__stang" data-stang aria-label="Stäng"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+          <p class="k-etikett">Ditt hus</p>
+          <h2 class="ksam__namn" id="ksam-namn" data-summa-namn>Sadel 40</h2>
+          <p class="ksam__fakta" data-summa-fakta></p>
+          <dl class="ksam__lista" data-summa-dl></dl>
+          <figure class="ksam__plan"><img data-summa-plan alt="" loading="lazy"><figcaption>Planritning ur bygglovsritningen</figcaption></figure>
+          <div class="ksam__knappar">
+            <a class="kf__knapp kf__knapp--bred" href="kontakt.html#kontaktformular" data-skicka>Skicka förfrågan</a>
+            <div class="ksam__smaknappar">
+              <button type="button" class="kdela" data-ladda-summa>Ladda ned bild</button>
+              <button type="button" class="kdela" data-spara-summa>Spara huset</button>
+            </div>
+          </div>
+          <p class="ksam__not">Vi hör av oss med pris och tider. Ytorna kommer från ritningen; exakta mått bekräftas i offerten.</p>
+        </div>
+      </dialog>
+
+      <dialog class="kdialog kjmf" data-jamfor-dialog aria-labelledby="kjmf-rubrik">
+        <div class="kdialog__topp"><div><p class="k-etikett">Mina hus</p><h2 id="kjmf-rubrik">Jämför</h2></div><button type="button" class="kdialog__stang" data-stang aria-label="Stäng"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="kjmf__kolumner" data-jamfor-kolumner></div>
+      </dialog>
+
+      <dialog class="kdialog ktang" data-tangent-dialog aria-labelledby="ktang-rubrik">
+        <div class="kdialog__topp"><div><p class="k-etikett">Husritaren</p><h2 id="ktang-rubrik">Kortkommandon</h2></div><button type="button" class="kdialog__stang" data-stang aria-label="Stäng"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="ktang__kolumner">
+          <section aria-labelledby="ktang-ute"><h3 id="ktang-ute">Utsidan</h3><dl>
+            <div><dt><kbd>1</kbd>–<kbd>6</kbd></dt><dd>Runt om, Söder, Öster, Norr, Väster, Ovanifrån</dd></div>
+            <div><dt><kbd>←</kbd><kbd>→</kbd></dt><dd>Nästa väderstreck (med fokus på bilden)</dd></div>
+            <div><dt><kbd>I</kbd></dt><dd>Se inne eller Se ute</dd></div>
+            <div><dt><kbd>T</kbd></dt><dd>Öppna taket eller lägg på det</dd></div>
+            <div><dt><kbd>P</kbd></dt><dd>Planlösning ovanifrån</dd></div>
+            <div><dt><kbd>B</kbd></dt><dd>Tomt hus: möblerna av och på</dd></div>
+            <div><dt><kbd>M</kbd></dt><dd>Mått av och på</dd></div>
+            <div><dt><kbd>L</kbd></dt><dd>Ljusvalen: morgon, dag, gyllene timmen, kväll</dd></div>
+          </dl></section>
+          <section aria-labelledby="ktang-inne"><h3 id="ktang-inne">Inne i huset</h3><dl>
+            <div><dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>Gå (eller piltangenterna)</dd></div>
+            <div><dt><kbd>Shift</kbd></dt><dd>Gå fortare medan du håller in den</dd></div>
+            <div><dt><kbd>E</kbd></dt><dd>Öppna dörrar, sätt dig, tänd lampor</dd></div>
+            <div><dt><kbd>G</kbd></dt><dd>Spelläge: musen tittar runt</dd></div>
+            <div><dt><kbd>Esc</kbd></dt><dd>Lämna Spelläget, eller gå ut</dd></div>
+          </dl></section>
+        </div>
+        <p class="ktang__not">Tryck <kbd>?</kbd> när som helst för att visa rutan igen.</p>
+      </dialog>
+
+      <section class="kplan" id="planen" aria-labelledby="plan-rubrik">
+        <header class="kplan__huvud">
+          <div>
+            <p class="k-etikett">Planritning</p>
+            <h2 class="kplan__namn" id="plan-rubrik"><span data-namn-plan>Sadel 40</span></h2>
+            <p class="kplan__under" data-plan-under></p>
+          </div>
+          <div class="kplan__styr">
+            <div class="kplan__flikar" role="tablist" aria-label="Våningsplan" data-planflikar></div>
+            <button type="button" class="kplan__forstora" data-forstora><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>Förstora</span></button>
+          </div>
+        </header>
+        <div class="kplan__yta">
+          <figure class="kplan__bild" data-planbild id="planpanel" role="tabpanel" aria-label="Planritning">
+            <img alt="" decoding="async" data-planimg>
+            <figcaption class="kplan__kalla">Ur bygglovsritningen, skala ungefärlig. Norr är uppåt.</figcaption>
+          </figure>
+          <aside class="kplan__panel" aria-label="Rum och ytor">
+            <dl class="kplan__siffror" data-plan-siffror></dl>
+            <p class="k-etikett k-etikett--tyst">Rummen</p>
+            <ul class="kplan__rum" data-rum></ul>
+            <p class="kplan__not">Ytorna är rummens golvytor enligt ritningen. Exakta mått och utförande bekräftas i offerten.</p>
+          </aside>
+        </div>
+      </section>
+
+      <dialog class="kdialog kplanstor" data-plan-dialog aria-label="Planritning i helskärm">
+        <button type="button" class="kdialog__stang" data-stang aria-label="Stäng"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        <img alt="" data-plan-stor>
+      </dialog>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div>
+          <img class="site-footer__logo" src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
+          <p class="site-footer__text">
+            Attefallshus, fritidshus och byggelement, byggda under tak i Sverige.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="site-footer__heading">Navigation</h2>
+          <nav class="site-footer__nav" aria-label="Sidfotens navigering">
+            <a href="./">Hem</a>
+            <a href="priser.html">Priser</a>
+            <a href="sa-fungerar-det.html">Så fungerar det</a>
+            <a href="om-oss.html">Om oss</a>
+            <a href="kontakt.html">Kontakt</a>
+            <span class="site-footer__etikett">Guider</span>
+            <a href="attefallshus-regler.html">Attefallshus: reglerna</a>
+            <a href="vad-far-jag-bygga.html">Vad får jag bygga?</a>
+            <a href="aga-och-hyra-ut.html">Äga och hyra ut</a>
+            <a href="rita-hus.html">Rita ditt hus</a>
+          </nav>
+        </div>
+
+        <div>
+          <h2 class="site-footer__heading">Våra hus</h2>
+          <nav class="site-footer__nav" aria-label="Sidfotens husmodeller">
+            <a href="attefallshus.html">Attefallshus</a>
+            <a href="fritidshus.html">Fritidshus</a>
+            <a href="proffs.html">Proffs</a>
+            <span class="site-footer__etikett">Modeller</span>
+            <a href="sadel-30.html">Sadel 30</a>
+            <a href="sadel-40.html">Sadel 40</a>
+            <a href="sadel-50.html">Sadel 50</a>
+            <a href="pulpet-70.html">Pulpet 70</a>
+            <a href="sadel-90.html">Sadel 90</a>
+          </nav>
+        </div>
+
+        <div>
+          <h2 class="site-footer__heading">Kontakta oss</h2>
+          <p class="site-footer__text">
+            <a href="mailto:info@legohusstockholm.se">info@legohusstockholm.se</a><br>
+            Stockholm, Sverige
+          </p>
+          <a class="site-footer__button" href="kontakt.html">Hör av dig</a>
+        </div>
+      </div>
+
+      <div class="site-footer__bottom">
+        <span>© 2026 LegoHus i Stockholm AB · Org.nr 559606-0524 · Godkänd för F-skatt</span>
+        <a class="site-footer__policy" href="integritetspolicy.html">Integritetspolicy</a>
+      </div>
+
+      <p class="site-footer__ord" aria-hidden="true">Legohus</p>
+    </footer>
+
+    <script type="module" src="husritare-sida.js?v=20261119c"></script>
+    <script>
+      // En sidovergang som hoppas over avvisar sina loften. Utan
+      // detta hamnar "Transition was skipped" i konsolen pa varje
+      // sidbyte som webblasaren valjer bort.
+      (function () {
+        function tyst(e) {
+          if (e.viewTransition) e.viewTransition.finished.catch(function () {});
+        }
+        window.addEventListener('pageswap', tyst);
+        window.addEventListener('pagereveal', tyst);
+      })();
+    </script>
+    <script>
+      (function () {
+        var item = document.querySelector('[data-dropdown]');
+        if (!item) return;
+        var knapp = item.querySelector('.main-nav__toggle');
+        var stangTimer;
+        function satt(oppen) {
+          item.classList.toggle('main-nav__item--open', oppen);
+          knapp.setAttribute('aria-expanded', String(oppen));
+        }
+        knapp.addEventListener('click', function () {
+          satt(!item.classList.contains('main-nav__item--open'));
+        });
+        item.addEventListener('mouseenter', function () {
+          window.clearTimeout(stangTimer);
+          if (window.matchMedia('(hover: hover)').matches) satt(true);
+        });
+        item.addEventListener('mouseleave', function () {
+          if (!window.matchMedia('(hover: hover)').matches) return;
+          stangTimer = window.setTimeout(function () { satt(false); }, 420);
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && item.classList.contains('main-nav__item--open')) {
+            satt(false); knapp.focus();
+          }
+        });
+        document.addEventListener('click', function (e) {
+          if (!item.contains(e.target)) satt(false);
+        });
+      })();
+
+      (function () {
+        var knapp = document.querySelector('.menu-button');
+        var panel = document.getElementById('mobile-nav');
+        if (!knapp || !panel) return;
+        knapp.addEventListener('click', function () {
+          var oppen = knapp.getAttribute('aria-expanded') === 'true';
+          knapp.setAttribute('aria-expanded', String(!oppen));
+          knapp.setAttribute('aria-label', oppen ? 'Öppna meny' : 'Stäng meny');
+          knapp.classList.toggle('menu-button--open', !oppen);
+          panel.hidden = oppen;
+          // Sidans rullelement ar <html>. Utan last rullar sidan bakom
+          // en meny som tacker nastan hela skarmen.
+          document.documentElement.style.overflow = oppen ? '' : 'hidden';
+        });
+      })();
+
+      (function () {
+        if (!window.IntersectionObserver) return;
+        var valjare = ['.subpage-hero__content', '.category-filter', '.filter', '.category__head',
+          '.model-card', '.process__head', '.process__lista li', '.team-kort',
+          '.galleri figure', '.segment__block', '.contact-page-hero__inner',
+          '.contact-person', '.textsida > *', '.contact-section__intro', '.contact-form'].join(',');
+        var element = Array.prototype.slice.call(document.querySelectorAll(valjare));
+        if (!element.length) return;
+        document.documentElement.classList.add('js-reveal');
+        var raknare = new Map();
+        element.forEach(function (el) {
+          el.classList.add('reveal');
+          var f = el.parentElement;
+          var i = raknare.get(f) || 0;
+          raknare.set(f, i + 1);
+          if (i) el.style.setProperty('--reveal-delay', (i * 0.06).toFixed(2) + 's');
+        });
+        element.forEach(function (el) {
+          if (el.getBoundingClientRect().top < window.innerHeight) {
+            el.style.setProperty('--reveal-delay', '0s');
+            el.classList.add('reveal--inne');
+          }
+        });
+        var obs = new IntersectionObserver(function (poster) {
+          poster.forEach(function (p) {
+            if (!p.isIntersecting) return;
+            p.target.classList.add('reveal--inne');
+            obs.unobserve(p.target);
+          });
+        }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+        element.forEach(function (el) { obs.observe(el); });
+        // Skyddsnatet mater bara det som ar kvar, hogst fyra ganger i
+        // sekunden, och kopplar bort sig sjalvt nar allt ar framme. Att
+        // mata alla element i varje bildruta tvingade fram en layout per
+        // bildruta - det var det som hackade under rullning.
+        var kvar = element.filter(function (el) {
+          return !el.classList.contains('reveal--inne');
+        });
+        var senast = 0;
+        function kolla() {
+          var nu = Date.now();
+          if (nu - senast < 250) return;
+          senast = nu;
+          for (var i = kvar.length - 1; i >= 0; i--) {
+            var el = kvar[i];
+            if (el.classList.contains('reveal--inne')) {
+              kvar.splice(i, 1);
+              continue;
+            }
+            var r = el.getBoundingClientRect();
+            if (r.top < window.innerHeight && r.bottom > 0) {
+              el.classList.add('reveal--inne');
+              obs.unobserve(el);
+              kvar.splice(i, 1);
+            }
+          }
+          if (!kvar.length) window.removeEventListener('scroll', kolla);
+        }
+        if (kvar.length) window.addEventListener('scroll', kolla, { passive: true });
+      })();
+
+      (function () {
+        var rad = document.querySelector('.category-filter');
+        if (!rad) return;
+        function uppdatera() {
+          var mer = rad.scrollWidth - rad.clientWidth - rad.scrollLeft > 8;
+          rad.classList.toggle('category-filter--mer', mer);
+        }
+        uppdatera();
+        rad.addEventListener('scroll', uppdatera, { passive: true });
+        window.addEventListener('resize', uppdatera);
+      })();
+
+      // Egen rullgardin. Systemets egen lista gar inte att forma, sa den
+      // byggs om har. Selecten ligger kvar dold och bar vardet, vilket
+      // gor att formularets ovriga kod inte behover veta om det har.
+      (function () {
+        var listor = document.querySelectorAll('.contact-form select');
+        var lopnr = 0;
+        Array.prototype.forEach.call(listor, function (select) {
+          if (!select.options.length) return;
+          lopnr += 1;
+          var skal = document.createElement('div');
+          skal.className = 'valj';
+          select.parentNode.insertBefore(skal, select);
+          skal.appendChild(select);
+
+          var knapp = document.createElement('button');
+          knapp.type = 'button';
+          knapp.className = 'valj__knapp';
+          knapp.setAttribute('aria-haspopup', 'listbox');
+          knapp.setAttribute('aria-expanded', 'false');
+          var etikett = select.id
+            ? document.querySelector('label[for="' + select.id + '"]')
+            : null;
+          if (etikett) {
+            if (!etikett.id) etikett.id = 'valj-etikett-' + lopnr;
+            knapp.setAttribute('aria-labelledby', etikett.id + ' valj-text-' + lopnr);
+          }
+
+          var text = document.createElement('span');
+          text.className = 'valj__text';
+          text.id = 'valj-text-' + lopnr;
+          var pil = document.createElement('span');
+          pil.className = 'valj__pil';
+          knapp.appendChild(text);
+          knapp.appendChild(pil);
+
+          var lista = document.createElement('ul');
+          lista.className = 'valj__lista';
+          lista.id = 'valj-lista-' + lopnr;
+          lista.setAttribute('role', 'listbox');
+          lista.hidden = true;
+          knapp.setAttribute('aria-controls', lista.id);
+
+          var val = [];
+          Array.prototype.forEach.call(select.options, function (o, i) {
+            var li = document.createElement('li');
+            li.className = 'valj__val';
+            li.id = 'valj-' + lopnr + '-' + i;
+            li.setAttribute('role', 'option');
+            li.setAttribute('aria-selected', String(i === select.selectedIndex));
+            li.textContent = o.textContent;
+            lista.appendChild(li);
+            val.push(li);
+          });
+
+          skal.appendChild(knapp);
+          skal.appendChild(lista);
+
+          var markerad = select.selectedIndex < 0 ? 0 : select.selectedIndex;
+
+          function visaValt() {
+            var o = select.options[select.selectedIndex];
+            text.textContent = o ? o.textContent : '';
+            text.classList.toggle('valj__text--tom', !select.value);
+          }
+
+          function markera(i) {
+            if (i < 0) i = 0;
+            if (i > val.length - 1) i = val.length - 1;
+            markerad = i;
+            val.forEach(function (li, n) {
+              li.classList.toggle('valj__val--markerad', n === i);
+            });
+            knapp.setAttribute('aria-activedescendant', val[i].id);
+            if (!lista.hidden && val[i].scrollIntoView) {
+              val[i].scrollIntoView({ block: 'nearest' });
+            }
+          }
+
+          function oppna() {
+            lista.hidden = false;
+            knapp.setAttribute('aria-expanded', 'true');
+            markera(select.selectedIndex < 0 ? 0 : select.selectedIndex);
+          }
+
+          function stang(aterfokus) {
+            lista.hidden = true;
+            knapp.setAttribute('aria-expanded', 'false');
+            knapp.removeAttribute('aria-activedescendant');
+            if (aterfokus) knapp.focus();
+          }
+
+          function valj(i) {
+            select.selectedIndex = i;
+            val.forEach(function (li, n) {
+              li.setAttribute('aria-selected', String(n === i));
+            });
+            visaValt();
+            var h = document.createEvent('HTMLEvents');
+            h.initEvent('change', true, false);
+            select.dispatchEvent(h);
+          }
+
+          knapp.addEventListener('click', function () {
+            if (lista.hidden) oppna(); else stang(false);
+          });
+
+          knapp.addEventListener('keydown', function (e) {
+            var k = e.key;
+            if (lista.hidden) {
+              if (k === 'ArrowDown' || k === 'ArrowUp' || k === 'Enter' || k === ' ') {
+                e.preventDefault();
+                oppna();
+              }
+              return;
+            }
+            if (k === 'ArrowDown') { e.preventDefault(); markera(markerad + 1); }
+            else if (k === 'ArrowUp') { e.preventDefault(); markera(markerad - 1); }
+            else if (k === 'Home') { e.preventDefault(); markera(0); }
+            else if (k === 'End') { e.preventDefault(); markera(val.length - 1); }
+            else if (k === 'Enter' || k === ' ') {
+              e.preventDefault();
+              valj(markerad);
+              stang(true);
+            } else if (k === 'Escape') { e.preventDefault(); stang(true); }
+            else if (k === 'Tab') { stang(false); }
+          });
+
+          lista.addEventListener('mousedown', function (e) { e.preventDefault(); });
+
+          lista.addEventListener('click', function (e) {
+            var i = val.indexOf(e.target);
+            if (i < 0) return;
+            valj(i);
+            stang(true);
+          });
+
+          lista.addEventListener('mousemove', function (e) {
+            var i = val.indexOf(e.target);
+            if (i > -1 && i !== markerad) markera(i);
+          });
+
+          document.addEventListener('click', function (e) {
+            if (!lista.hidden && !skal.contains(e.target)) stang(false);
+          });
+
+          visaValt();
+        });
+      })();
+
+    </script>
+    <!-- avslutskript, se _avslut.py -->
+    <script>
+      // Kontaktformularet.
+      //
+      // Medvetet val: ingen extern formulartjanst. Formularet oppnar
+      // besokarens e-postprogram med forfragan ifylld, sa ingen
+      // persondata passerar en tredje part. Priset ar att besokare utan
+      // konfigurerat e-postprogram maste mejla manuellt - darfor visas
+      // adressen alltid som en klickbar lank i kvittensen.
+      //
+      // Om valet nagon gang andras: klistra in en endpoint (Formspree,
+      // FormSubmit eller liknande) i FORM_ENDPOINT nedan, sa skickas
+      // formularet i bakgrunden i stallet. Ingen annan andring behovs.
+      var FORM_ENDPOINT = '';
+      var FORM_MOTTAGARE = 'info@legohusstockholm.se';
+
+      (function () {
+        var form = document.getElementById('kontaktformular');
+        if (!form) return;
+
+        var button = form.querySelector('button[type="submit"]');
+        var status = form.querySelector('.contact-form__status');
+        var knappText = button.textContent;
+
+        // Tva steg. Utan skript star bada oppna, sa formularet fungerar
+        // anda - doljningen gors har, inte i markupen.
+        var delar = form.querySelectorAll('.contact-form__del');
+        var raknare = form.querySelector('[data-raknare]');
+        var knappNasta = form.querySelector('[data-nasta]');
+        var knappTillbaka = form.querySelector('[data-tillbaka]');
+
+        function visaSteg(nr) {
+          delar[0].hidden = nr !== 1;
+          delar[1].hidden = nr !== 2;
+          form.setAttribute('data-steg', nr);
+          if (raknare) {
+            raknare.hidden = false;
+            raknare.querySelector('span').textContent = nr;
+          }
+        }
+
+        // Framstegslinjen i toppen: första delen fylls fråga för fråga,
+        // andra delen fält för fält (namn, e-post, samtycke).
+        var faser = form.querySelectorAll('.contact-form__faser i');
+        function framsteg() {
+          if (faser.length !== 2 || delar.length !== 2) return;
+          var fragor = delar[0].querySelectorAll('fieldset');
+          var svar = 0;
+          Array.prototype.forEach.call(fragor, function (f) {
+            var text = f.querySelector('input[type="text"]');
+            if (text) f.classList.toggle('valgrupp--besvarad', !!text.value.trim());
+            if (f.querySelector('input:checked') || (text && text.value.trim())) svar++;
+          });
+          var e = form.elements;
+          var fyllda = [e.name.value.trim(), e.email.value.trim(), e.consent.checked].filter(Boolean).length;
+          faser[0].style.setProperty('--klar', fragor.length ? svar / fragor.length : 0);
+          faser[1].style.setProperty('--klar', fyllda / 3);
+        }
+        form.addEventListener('input', framsteg);
+        form.addEventListener('change', framsteg);
+        framsteg();
+
+        if (delar.length === 2 && knappNasta) {
+          visaSteg(1);
+          knappNasta.addEventListener('click', function () {
+            visaSteg(2);
+            form.elements.name.focus();
+          });
+          if (knappTillbaka) {
+            knappTillbaka.addEventListener('click', function () {
+              visaSteg(1);
+              // Tillbaka till formulärets topp, med fokus på det man valde.
+              var lugnt = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+              form.scrollIntoView({ block: 'start', behavior: lugnt ? 'auto' : 'smooth' });
+              var forsta = delar[0].querySelector('input:checked') || delar[0].querySelector('input');
+              if (forsta) forsta.focus({ preventScroll: true });
+            });
+          }
+        }
+
+        function visaFel(falt, meddelande) {
+          var wrap = falt.closest('.field') || falt.closest('.contact-form__check');
+          if (!wrap) return;
+          wrap.classList.add('field--error');
+          // Skärmläsare ska höra felet på fältet, inte bara se det rött.
+          falt.setAttribute('aria-invalid', 'true');
+          if (wrap.querySelector('.field__error')) return;
+          var p = document.createElement('span');
+          p.className = 'field__error';
+          p.id = 'fel-' + (falt.name || falt.id);
+          p.textContent = meddelande;
+          wrap.appendChild(p);
+          falt.setAttribute('aria-describedby', p.id);
+        }
+
+        function rensaFel(falt) {
+          var wrap = falt.closest('.field') || falt.closest('.contact-form__check');
+          if (!wrap) return;
+          wrap.classList.remove('field--error');
+          falt.removeAttribute('aria-invalid');
+          falt.removeAttribute('aria-describedby');
+          var p = wrap.querySelector('.field__error');
+          if (p) p.remove();
+        }
+
+        function validera() {
+          var fel = [];
+          var namn = form.elements.name;
+          var epost = form.elements.email;
+          var samtycke = form.elements.consent;
+
+          [namn, epost, samtycke].forEach(rensaFel);
+
+          if (!namn.value.trim()) {
+            visaFel(namn, 'Fyll i ditt namn.');
+            fel.push(namn);
+          }
+          if (!epost.value.trim()) {
+            visaFel(epost, 'Fyll i din e-postadress.');
+            fel.push(epost);
+          } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(epost.value.trim())) {
+            visaFel(epost, 'Kontrollera e-postadressen.');
+            fel.push(epost);
+          }
+          if (!samtycke.checked) {
+            visaFel(samtycke, 'Du behöver godkänna att vi kontaktar dig.');
+            fel.push(samtycke);
+          }
+          return fel;
+        }
+
+        // medMejllank lagger till en klickbar adress sist i meddelandet,
+        // sa besokaren aldrig hamnar i en atervandsgrand.
+        function visaStatus(text, typ, medMejllank) {
+          status.textContent = text;
+          if (medMejllank) {
+            var lank = document.createElement('a');
+            lank.href = 'mailto:' + FORM_MOTTAGARE;
+            lank.textContent = FORM_MOTTAGARE;
+            status.appendChild(document.createTextNode(' '));
+            status.appendChild(lank);
+            status.appendChild(document.createTextNode('.'));
+          }
+          status.className = 'contact-form__status contact-form__status--' + typ;
+          status.hidden = false;
+        }
+
+        function byggMailto() {
+          var v = function (namn) {
+            var f = form.elements[namn];
+            return f && f.value ? f.value.trim() : '';
+          };
+          var rader = [
+            'Namn: ' + v('name'),
+            'E-post: ' + v('email'),
+            'Telefon: ' + (v('phone') || '-'),
+            'Ort: ' + (v('city') || '-'),
+            'Miljö: ' + (v('miljo') || '-'),
+            'Funderar på: ' + (v('hustyp') || '-'),
+            'Ska användas till: ' + (v('anvandning') || '-'),
+            '',
+            v('message') || '(inget meddelande)'
+          ];
+          return 'mailto:' + FORM_MOTTAGARE +
+            '?subject=' + encodeURIComponent('Förfrågan från legohusstockholm.se: ' + v('name')) +
+            '&body=' + encodeURIComponent(rader.join('\n'));
+        }
+
+        ['name', 'email', 'consent'].forEach(function (namn) {
+          var falt = form.elements[namn];
+          if (falt) {
+            falt.addEventListener('input', function () { rensaFel(falt); });
+            falt.addEventListener('change', function () { rensaFel(falt); });
+          }
+        });
+
+        form.addEventListener('submit', function (event) {
+          event.preventDefault();
+
+          var fel = validera();
+          if (fel.length) {
+            visaStatus('Kontrollera de markerade fälten.', 'fail');
+            fel[0].focus();
+            return;
+          }
+
+          // Boten fyllde i lockbetet - las tyst som skickat.
+          if (form.elements._honey && form.elements._honey.value) {
+            visaStatus('Tack! Vi hör av oss inom kort.', 'ok');
+            return;
+          }
+
+          if (!FORM_ENDPOINT) {
+            window.location.href = byggMailto();
+            visaStatus(
+              'Ditt e-postprogram öppnas nu med förfrågan ifylld. Tryck skicka där. ' +
+              'Händer ingenting kan du mejla oss direkt på',
+              'ok',
+              true
+            );
+            return;
+          }
+
+          button.disabled = true;
+          button.textContent = 'Skickar …';
+          status.hidden = true;
+
+          fetch(FORM_ENDPOINT, {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: new FormData(form)
+          })
+            .then(function (svar) {
+              if (!svar.ok) throw new Error('HTTP ' + svar.status);
+              form.reset();
+              visaStatus('Tack! Din förfrågan är skickad. Vi hör av oss inom kort.', 'ok');
+            })
+            .catch(function () {
+              visaStatus(
+                'Något gick fel när förfrågan skulle skickas. Mejla oss gärna direkt på',
+                'fail',
+                true
+              );
+            })
+            .then(function () {
+              button.disabled = false;
+              button.textContent = knappText;
+            });
+        });
+      })();
+    </script>
+    <!-- /avslutskript -->
+  </body>
+</html>

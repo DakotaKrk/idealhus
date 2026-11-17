@@ -171,7 +171,7 @@ skriv("om-oss.html", "Om oss | Legohus Stockholm",
           <article class="team-kort">
             <h3>Skriv till oss</h3>
             <p class="team-kort__roll">E-post</p>
-            <a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>
+            <a href="mailto:info@legohusstockholm.se">info@legohusstockholm.se</a>
           </article>
         </div>
       </section>

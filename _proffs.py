@@ -327,27 +327,27 @@ def delar():
 
 
 BILDER = [
-    ("stommar-stapel.webp", 1800, 1200, "Färdiga väggstommar i trä staplade på varandra",
-     "Färdiga väggstommar i trä"),
-    ("reglar.webp", 1200, 800, "Närbild av träreglar i en väggstomme hos Legohus Stockholm",
-     "Reglarna i en väggstomme"),
-    ("arbetare-vattenpass.webp", 1800, 1200, "En snickare i varselkläder håller vattenpass mot en väggstomme",
-     "Vattenpass mot en väggstomme"),
-    ("dronare-leverans.webp", 1600, 900, "Drönarbild av en lastbil med takstolar och väggstommar vid bygget",
-     "Leveransen: takstolar och väggstommar"),
-    ("lyft-stommar.webp", 1800, 1200, "En kran lyfter väggstommar i trä förbi en rest vägg",
-     "Kranen lyfter stommarna på plats"),
-    ("dronare-montage.webp", 1600, 900, "Drönarbild av ett hus under montage, med inplastade väggar runt en betongplatta och en kran",
-     "Montaget runt betongplattan"),
-    ("dronare-platta.webp", 1600, 900, "Två personer i arbete på betongplattan mellan de resta väggarna",
-     "Arbete mellan de resta väggarna"),
+    ("generated-house-forest-01.webp", 900, 600, "Mörkt småhus med stort glasparti i en tallskog",
+     "I tallskogen"),
+    ("generated-interior-01.webp", 1536, 1024, "Ljust vardagsrum med soffa och stora fönster mot skogen",
+     "Ljust och luftigt inuti"),
+    ("generated-category-attefallshus-wide-01.webp", 1920, 1280, "Mörkt attefallshus med altan på klipporna vid vattnet",
+     "Attefallshus vid vattnet"),
+    ("generated-house-meadow-01.webp", 1536, 1024, "Småhus i trä med altan på en sommaräng",
+     "På sommarängen"),
+    ("generated-house-gabled-01.webp", 780, 520, "Svart hus med sadeltak på en klippa vid vattnet",
+     "Sadeltak på klippan"),
+    ("generated-house-coast-01.webp", 1536, 1024, "Svart småhus med stora glaspartier på en klippa vid havet",
+     "Glaspartier mot havet"),
+    ("generated-house-garden-01.webp", 900, 600, "Småhus i trä med uteplats i en grönskande trädgård",
+     "I trädgården"),
 ]
 
 
 def bildmatt(fil, b, h):
     try:
         from PIL import Image
-        return Image.open("images/foto/" + fil).size
+        return Image.open("images/" + fil).size
     except Exception:
         return b, h
 
@@ -358,7 +358,7 @@ def bildband():
         b, h = bildmatt(fil, b, h)
         ut.append(f'''            <li class="pf-band__bild" style="--ar:{b / h:.3f}">
               <figure>
-                <span class="pf-band__ram"><img src="images/foto/{fil}" width="{b}" height="{h}" loading="lazy" decoding="async" alt="{alt}" draggable="false"></span>
+                <span class="pf-band__ram"><img src="images/{fil}" width="{b}" height="{h}" loading="lazy" decoding="async" alt="{alt}" draggable="false"></span>
                 <figcaption><span>{i:02d}</span>{text}</figcaption>
               </figure>
             </li>''')
@@ -407,7 +407,7 @@ MAIN = f'''    <main id="innehall">
           </div>
 
           <figure class="pf-topp__bild">
-            <span class="pf-topp__ram"><img src="images/foto/montor-vaggelement.webp" width="978" height="650" fetchpriority="high" decoding="async" alt="En montör i varselkläder och hjälm kontrollerar ett väggelement med vattenpass på bygget"></span>
+            <span class="pf-topp__ram"><img src="images/foto/lyft-modul.webp?v=2" srcset="images/foto/lyft-modul-600.webp?v=2 600w, images/foto/lyft-modul.webp?v=2 1058w" sizes="(max-width: 900px) 92vw, 50vw" width="1058" height="992" fetchpriority="high" decoding="async" alt="En husmodul lyfts med kran på plats vid vattnet medan montörer tar emot den, illustration"></span>
           </figure>
         </div>
       </section>
@@ -460,7 +460,7 @@ MAIN = f'''    <main id="innehall">
       </section>
 
       <section class="pf-tak">
-        <img class="pf-tak__bild" src="images/foto/lyft-stommar.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="">
+        <img class="pf-tak__bild" src="images/generated-house-gabled-01.webp" width="780" height="520" loading="lazy" decoding="async" alt="">
         <div class="pf-tak__inre">
           <div class="pf-tak__ord">
             <p class="ih-etikett ih-etikett--ljus">Varför element</p>
@@ -537,7 +537,7 @@ MAIN = f'''    <main id="innehall">
             <div class="contact-section__meta">
               <div>
                 <span class="contact-section__meta-label">E-post</span>
-                <a class="contact-section__meta-value" href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>
+                <a class="contact-section__meta-value" href="mailto:info@legohusstockholm.se">info@legohusstockholm.se</a>
               </div>
               <div>
                 <span class="contact-section__meta-label">Plats</span>

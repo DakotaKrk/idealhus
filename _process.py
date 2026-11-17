@@ -143,12 +143,13 @@ CHECK_HTML = "\n".join(
 SKEDESLUT = {spann[1] for _namn, spann, _t in FASER[:-1]}
 HERO_STEG = (
     '        <div class="hoffert hoffert--steg" aria-hidden="true">\n'
-    '          <div class="hoffert__huvud"><span class="hoffert__typ">Sju steg · tre skeden</span><span class="hoffert__stampel">I ordning</span></div>\n'
+    '          <div class="hoffert__huvud"><span class="hoffert__typ">Vem gör vad</span><span class="hoffert__antal">7 steg</span></div>\n'
     '          <ul class="hoffert__lista">\n'
-    + "".join(f'            <li style="--i:{i}"{' class="hoffert__skede"' if i + 1 in SKEDESLUT else ''}>'
-              f'<i class="hoffert__prick hoffert__prick--{klass}"></i><span><b>{i + 1:02d}</b> {rubrik}</span>'
-              f'<em class="hoffert__vem hoffert__vem--{klass}">{VEMNAMN[klass]}</em></li>\n'
-              for i, (rubrik, _vem, klass, _text) in enumerate(STEG))
+    + "".join(
+        "".join(f'            <li class="hoffert__fas">{f[0]}</li>\n' for f in FASER if f[1][0] == i + 1)
+        + f'            <li style="--i:{i}"><b>{i + 1:02d}</b><span>{rubrik}</span>'
+          f'<em class="hoffert__vem hoffert__vem--{klass}">{VEMNAMN[klass]}</em></li>\n'
+        for i, (rubrik, _vem, klass, _text) in enumerate(STEG))
     + '          </ul>\n'
     '          <div class="hoffert__fot"><span>Hela vägen</span><strong>En kontakt</strong></div>\n'
     '        </div>'
@@ -167,8 +168,8 @@ TAKKORT = (
 
 KROPP = f'''    <main id="innehall">
       <section class="subpage-hero helbild">
-        <img class="helbild__bak" src="images/foto/dronare-montage.webp" width="1600" height="900" alt="" aria-hidden="true" decoding="async">
-        <img class="subpage-hero__image" src="images/foto/dronare-montage.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Drönarbild av ett hus under montage, med inplastade väggar runt en betongplatta och en kran">
+        <img class="helbild__bak" src="images/generated-house-coast-01.webp" width="1536" height="1024" alt="" aria-hidden="true" decoding="async">
+        <img class="subpage-hero__image" src="images/generated-house-coast-01.webp" width="1536" height="1024" fetchpriority="high" decoding="async" alt="Svart småhus med stora glaspartier på en klippa vid havet">
 {HERO_STEG}
 
         <div class="subpage-hero__content-wrap">
@@ -308,7 +309,7 @@ KROPP = f'''    <main id="innehall">
           </div>
           <div class="segment__bildram">
             <div class="segment__media">
-              <img src="images/foto/stommar-stapel.webp" width="1800" height="1200" loading="lazy" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra">
+              <img src="images/generated-house-forest-01.webp" width="900" height="600" loading="lazy" decoding="async" alt="Mörkt småhus med stort glasparti i en tallskog">
             </div>
 {TAKKORT}
           </div>

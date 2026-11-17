@@ -42,7 +42,7 @@ POLICY = '''    <main id="innehall">
             <p>
               LegoHus i Stockholm AB, organisationsnummer 559606-0524, Stockholm, är
               personuppgiftsansvarig för behandlingen som beskrivs här. Du når
-              oss på <a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>.
+              oss på <a href="mailto:info@legohusstockholm.se">info@legohusstockholm.se</a>.
             </p>
 
             <h2>Vilka uppgifter vi behandlar</h2>
@@ -133,7 +133,7 @@ POLICY = '''    <main id="innehall">
               Du har rätt att få veta vilka uppgifter vi har om dig, att få dem
               rättade eller raderade, att invända mot behandlingen och att
               begära att den begränsas. Mejla oss på
-              <a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>, så ordnar
+              <a href="mailto:info@legohusstockholm.se">info@legohusstockholm.se</a>, så ordnar
               vi det. Är du inte nöjd med hur vi hanterar saken kan du vända
               dig till Integritetsskyddsmyndigheten, IMY.
             </p>
@@ -215,7 +215,7 @@ KATEGORIER_PRIS = [_kategori(*p) for p in PRISER]
 # offert som fylls i när man svarar om tomten, och fem faktorer med egna
 # animerade bilder. Stil i design.css 18, skript i premium.js (Prissidan).
 
-YMIN, YMAX = 20, 60
+YMIN, YMAX = 20, 90
 
 
 def _p(yta):
@@ -374,8 +374,8 @@ HERO_OFFERT = (
 
 PRISSIDA = f'''    <main id="innehall">
       <section class="subpage-hero helbild">
-        <img class="helbild__bak" src="images/foto/stommar-stapel.webp" width="1800" height="1200" alt="" aria-hidden="true" decoding="async">
-        <img class="subpage-hero__image" src="images/foto/stommar-stapel.webp" width="1800" height="1200" fetchpriority="high" decoding="async" alt="Färdiga väggstommar i trä staplade på varandra">
+        <img class="helbild__bak" src="images/generated-house-forest-01.webp" width="900" height="600" alt="" aria-hidden="true" decoding="async">
+        <img class="subpage-hero__image" src="images/generated-house-forest-01.webp" width="900" height="600" fetchpriority="high" decoding="async" alt="Mörkt småhus med stort glasparti i en tallskog">
 {HERO_OFFERT}
 
         <div class="subpage-hero__content-wrap">
@@ -424,15 +424,15 @@ PRISSIDA = f'''    <main id="innehall">
               </div>
               <div class="prisskala__linjal">
                 <div class="prisskala__zoner" aria-hidden="true">
-                  <span class="zon zon--a" style="--fran:0;--till:0.25"><b><span class="lang">Attefallshus</span><span class="kort">Attefall</span></b></span>
-                  <span class="zon zon--b" style="--fran:0.25;--till:0.75"><b><span class="lang">Utanför detaljplan, upp till 50 m²</span><span class="kort">Utanför detaljplan</span></b></span>
-                  <span class="zon zon--c" style="--fran:0.75;--till:1"><b>Bygglov</b></span>
+                  <span class="zon zon--a" style="--fran:0;--till:0.1429"><b><span class="lang">Attefallshus</span><span class="kort">Attefall</span></b></span>
+                  <span class="zon zon--b" style="--fran:0.1429;--till:0.4286"><b><span class="lang">Utanför detaljplan, upp till 50 m²</span><span class="kort">Utanför detaljplan</span></b></span>
+                  <span class="zon zon--c" style="--fran:0.4286;--till:1"><b>Bygglov</b></span>
                 </div>
                 <div class="prisskala__bubbla" aria-hidden="true"><span data-yta-bubbla>30 m²</span></div>
                 <div class="prisskala__spar" aria-hidden="true"><i></i>{skalans_hak()}</div>
                 <input type="range" id="onskad-yta" min="{YMIN}" max="{YMAX}" step="1" value="30" aria-describedby="yta-svar">
                 <div class="prisskala__siffror" aria-hidden="true">
-                  <span style="--p:0">20</span><span style="--p:0.25">30</span><span style="--p:0.5">40</span><span style="--p:0.75">50</span><span style="--p:1">60 m²</span>
+                  <span style="--p:0.0000">20</span><span style="--p:0.1429">30</span><span style="--p:0.2857">40</span><span style="--p:0.4286">50</span><span style="--p:0.5714">60</span><span style="--p:0.7143">70</span><span style="--p:0.8571">80</span><span style="--p:1.0000">90 m²</span>
                 </div>
               </div>
               <div class="prisskala__modeller" role="group" aria-label="Våra hus på skalan">
@@ -455,8 +455,8 @@ PRISSIDA = f'''    <main id="innehall">
               <div class="prisskala__granser" aria-hidden="true">
                 <p class="granser__rubrik">Lovgränserna</p>
                 <div class="granser__spar"><i data-yta-gransfyll></i>
-                  <span class="granser__mark" style="--p:0.5"><b>30 m²</b><small>inom detaljplan</small></span>
-                  <span class="granser__mark" style="--p:0.8333"><b>50 m²</b><small>utanför detaljplan</small></span>
+                  <span class="granser__mark" style="--p:0.3333"><b>30 m²</b><small>inom detaljplan</small></span>
+                  <span class="granser__mark" style="--p:0.5556"><b>50 m²</b><small>utanför detaljplan</small></span>
                 </div>
               </div>
               <dl class="prisskala__fakta">

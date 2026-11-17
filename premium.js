@@ -75,7 +75,7 @@
     $$('main h2').forEach(function (h) {
       // Toppens rubriker får en entré med bara CSS (de syntes annars,
       // försvann och steg igen när skriptet hade laddat).
-      if (h.closest('.hero, .ihtopp, .subpage-hero, .guidehero, .kollen-topp, .fyrafyra, .pf-topp') || h.closest('.kollen__svar')) return;
+      if (h.closest('.hero, .ihtopp, .ltopp, .platstopp, .subpage-hero, .guidehero, .kollen-topp, .fyrafyra, .pf-topp') || h.closest('.kollen__svar')) return;
       if (h.id || h.hasAttribute('data-model-title') || h.querySelector('[data-model-title]')) return;
       var bara = Array.prototype.every.call(h.childNodes, function (n) {
         return n.nodeType === 3;
@@ -205,7 +205,7 @@
      lite inne i sin ram när man för pekaren över kortet den sitter
      i. Ramen klipper, så bilden aldrig går utanför sina hörn. */
   $$('main img').forEach(function (img) {
-    if (img.closest('.hero, .ihtopp, .subpage-hero, .kat-topp, .at-foto, .heroscen, .ordband, .val, .vag, .hus, .kuliss, .bygget, .virke, .pf-tak, .husval, .sprang, .segment')) return;
+    if (img.closest('.hero, .ihtopp, .ltopp, .platstopp, .subpage-hero, .kat-topp, .at-foto, .heroscen, .ordband, .val, .vag, .hus, .kuliss, .bygget, .virke, .pf-tak, .husval, .sprang, .segment')) return;
     // Husfotona (skylten nere till vänster) beskärs aldrig, inte ens
     // under pekaren - de får ett ljuslyft i CSS:en i stället.
     if (/hus-r\d/.test(img.getAttribute('src') || '')) return;
@@ -2044,7 +2044,9 @@
 
   // 3D-motorn (930 kB) hämtas och kompileras i en lugn stund efter att
   // sidan laddats, inte mitt i rullningen när sektionen närmar sig.
-  if ($('#i-3d, [data-studio3d], [data-sprang]') && !(navigator.connection && navigator.connection.saveData)) {
+  // De nya hussidornas #i-3d (.nyhus-3d) visar husritaren, inte model-
+  // viewer - där ska motorn inte hämtas alls (2026-11-17).
+  if ($('#i-3d:not(.nyhus-3d), [data-studio3d], [data-sprang]') && !(navigator.connection && navigator.connection.saveData)) {
     var forladda3d = function () {
       var vila = window.requestIdleCallback ? window.requestIdleCallback.bind(window) : function (f) { return setTimeout(f, 1200); };
       vila(function () {
@@ -2744,7 +2746,7 @@
      Som Kasters lanseringsnotis: visas en gång efter halva sidan,
      aldrig där det redan finns ett formulär eller verktyget självt,
      och inte igen på fjorton dagar efter att man stängt det. */
-  var utan = ['index.html', '', 'huskort.html', 'sadel-30.html', 'sadel-30-bred.html', 'pulpet-30.html', 'kupa-40.html', 'kupa-50.html', 'priser.html', 'aga-och-hyra-ut.html', 'vad-far-jag-bygga.html', 'kontakt.html', '404.html', 'integritetspolicy.html', 'attefallshus-regler.html', 'proffs.html'];
+  var utan = ['index.html', '', 'huskort.html', 'sadel-30.html', 'sadel-30-bred.html', 'pulpet-30.html', 'kupa-40.html', 'kupa-50.html', 'priser.html', 'aga-och-hyra-ut.html', 'vad-far-jag-bygga.html', 'kontakt.html', '404.html', 'integritetspolicy.html', 'attefallshus-regler.html', 'proffs.html', 'rita-hus.html', 'sadel-40.html', 'sadel-50.html', 'pulpet-70.html', 'sadel-90.html'];
   // En riktig 404 visas på den trasiga adressen, inte på 404.html, så
   // sidan känns igen på sitt innehåll.
   if (utan.indexOf(sida) < 0 && !$('.fyrafyra')) {
@@ -3655,7 +3657,7 @@
 
   if (!lugn && window.IntersectionObserver) {
     // Stora bilder i innehållet avslöjas ur en ram.
-    var UNDANTAG = '.ihtopp, .subpage-hero, .kat-topp, .guidehero, .heroscen, .ordband, .val, .bildval, .husval, .sprang, ' +
+    var UNDANTAG = '.ihtopp, .ltopp, .platstopp, .subpage-hero, .kat-topp, .guidehero, .heroscen, .ordband, .val, .bildval, .husval, .sprang, ' +
       '.main-nav__sub, .kuliss, .hus, .bygget, .vag, .virke, .helbild__bak, .kollen-hus, ' +
       '.jamforruta, .storlek3d, .hus3dvy, .site-footer, .model-plan, .pf-tak, .model-card__media, .hus-fler, .pkort, .segment__media';
     var bilder = $$('main img').filter(function (img) {
@@ -3689,7 +3691,7 @@
     }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
     var syskon = new Map();
     $$(KORT).forEach(function (k) {
-      if (k.classList.contains('reveal') || k.closest('.ihtopp')) return;
+      if (k.classList.contains('reveal') || k.closest('.ihtopp, .ltopp, .platstopp')) return;
       var f = k.parentElement;
       var i = syskon.get(f) || 0;
       syskon.set(f, i + 1);
@@ -3700,7 +3702,7 @@
   }
 
   // Magnetiska knappar: följer pekaren några pixlar.
-  if (finPekare && !lugn) {
+  if (finPekare && !lugn && !document.querySelector('.ritsida')) {
     $$('.ih-knapp--virke, .header-button, .hero__link--solid, .knapp-fylld, .kontaktkort__knapp, ' +
        '.model-price__button, .site-footer__button').forEach(function (k) {
       k.addEventListener('pointermove', function (e) {
@@ -4717,4 +4719,55 @@
     });
   }, { threshold: 0.2 });
   Array.prototype.forEach.call(grupper, function (g) { io.observe(g); });
+})();
+
+/* Lokalt (localhost) kopplas hemsidan till inloggningen: en knapp i sidhuvudet och mobilmenyn. Syns aldrig på den publika sidan */
+(function () {
+  if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
+  var PIL = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>';
+  var CSS = '.crm-lank{position:relative;isolation:isolate;display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 15px 0 18px;overflow:hidden;border-radius:999px;background:rgb(255 255 255/.5);box-shadow:inset 0 0 0 1px rgb(120 96 64/.26),inset 0 1px 0 rgb(255 255 255/.7),0 8px 18px -12px rgb(60 40 20/.5);font-weight:600;font-size:.875rem;line-height:1;color:inherit;text-decoration:none;white-space:nowrap;animation:crm-in .6s cubic-bezier(.2,.8,.25,1) .25s backwards;transition:color .22s ease,box-shadow .28s ease,scale .3s cubic-bezier(.3,1.6,.5,1)}' +
+    '.crm-lank::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:linear-gradient(120deg,#f3c07e,#e29a4a);transform:translateX(-101%);transition:transform .42s cubic-bezier(.2,.8,.25,1)}' +
+    '.crm-lank svg{transition:transform .32s cubic-bezier(.3,1.5,.5,1)}' +
+    '.crm-lank:hover{color:#2a1a0b;box-shadow:0 12px 24px -12px rgb(226 154 74/.85)}.crm-lank:hover::before{transform:none}.crm-lank:hover svg{transform:translateX(3px)}' +
+    '.crm-lank:active{scale:.95;transition-duration:.22s,.28s,.09s}.crm-lank:focus-visible{outline:2px solid #e29a4a;outline-offset:2px}' +
+    '.crm-lank--meny{display:flex;justify-content:center;margin:12px 0;min-height:48px}' +
+    '@keyframes crm-in{from{opacity:0;transform:translateY(-6px)}}' +
+    '@media (prefers-reduced-motion:reduce){.crm-lank,.crm-lank::before,.crm-lank svg{animation:none;transition:none}}';
+  function lank(extra) {
+    var a = document.createElement('a');
+    a.href = 'crm/logga-in.html'; a.className = 'crm-lank' + (extra || ''); a.setAttribute('data-crm-lank', '');
+    a.innerHTML = 'Logga in' + PIL;
+    return a;
+  }
+  function koppla() {
+    if (!document.getElementById('crm-lank-stil')) { var st = document.createElement('style'); st.id = 'crm-lank-stil'; st.textContent = CSS; document.head.appendChild(st); }
+    var plats = document.querySelector('.site-header__actions'), cta = plats && plats.querySelector('.header-button');
+    if (plats && !plats.querySelector('[data-crm-lank]') && window.innerWidth > 1000) plats.insertBefore(lank(), cta || plats.firstChild);
+    var meny = document.querySelector('.mmeny__panel');
+    if (meny && !meny.querySelector('[data-crm-lank]')) meny.appendChild(lank(' crm-lank--meny'));
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', koppla); else koppla();
+})();
+
+/* Huskorten glider in när de syns, 60 ms mellan korten som dyker upp
+   samtidigt (nya-hus.css: .kort-vantar och .kort-in). */
+(function () {
+  if (!window.IntersectionObserver) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var kort = Array.prototype.slice.call(document.querySelectorAll('.model-grid .model-card, .model-grid .merplats, .hus-fler__kort'));
+  if (!kort.length) return;
+  kort.forEach(function (k) { k.classList.add('kort-vantar'); });
+  var io = new IntersectionObserver(function (poster) {
+    var i = 0;
+    poster.forEach(function (p) {
+      if (!p.isIntersecting) return;
+      var k = p.target;
+      k.style.setProperty('--kort-droj', (i++ * 0.06).toFixed(2) + 's');
+      k.classList.remove('kort-vantar');
+      k.classList.add('kort-in');
+      io.unobserve(k);
+      k.addEventListener('animationend', function () { k.classList.remove('kort-in'); }, { once: true });
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+  kort.forEach(function (k) { io.observe(k); });
 })();

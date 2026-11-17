@@ -33,7 +33,7 @@ principblock = "\n\n".join(f'''        <article class="segment__block">
 
 KROPP = f'''    <main id="innehall">
       <section class="subpage-hero">
-        <img class="subpage-hero__image" src="images/foto/arbetare-vattenpass.webp" width="1800" height="1200" fetchpriority="high" decoding="async" alt="En snickare i varselkläder håller vattenpass mot en väggstomme">
+        <img class="subpage-hero__image" src="images/generated-category-attefallshus-wide-01.webp" width="1920" height="1280" fetchpriority="high" decoding="async" alt="Mörkt attefallshus med altan på klipporna vid vattnet">
 
         <div class="subpage-hero__content-wrap">
           <div class="subpage-hero__content">
@@ -88,7 +88,7 @@ KROPP = f'''    <main id="innehall">
       </section>
 
       <section class="virke">
-        <img class="virke__bild" src="images/foto/dronare-bygget.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Drönarbild av en betongplatta med inplastade väggar runt om, en kran och folk som arbetar">
+        <img class="virke__bild" src="images/generated-house-winter-01.webp" width="900" height="600" loading="lazy" decoding="async" alt="Mörkt småhus med uteplats i en snöig skog">
         <div class="virke__inre">
           <p class="ih-etikett ih-etikett--ljus">Bakom varje hus</p>
           <h2 class="virke__rubrik">Från verkstad <em>till tomt.</em></h2>
@@ -130,7 +130,7 @@ KROPP = f'''    <main id="innehall">
             <span class="kontakt-direkt__namn">Skriv till oss</span>
             <span class="kontakt-direkt__roll">E-post</span>
             <span class="kontakt-direkt__lankar">
-              <a href="mailto:kontakt@legohusstockholm.se">kontakt@legohusstockholm.se</a>
+              <a href="mailto:info@legohusstockholm.se">info@legohusstockholm.se</a>
             </span>
           </div>
 

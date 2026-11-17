@@ -4,3 +4,5 @@ Enda ändringen: importen "from 'three'" i addons/ är omskriven till en relativ
 (så att inget importkarta/byggsteg behövs). Används av 3D-scenerna i crm/ (scen3d.js m.fl.).
 
 laggt till 2026-10-28: addons/loaders/GLTFLoader.js, addons/utils/BufferGeometryUtils.js, addons/utils/SkeletonUtils.js (samma omskrivning av importen).
+
+laggt till 2026-11-13: addons/controls/OrbitControls.js (samma omskrivning av importen). Används av husritaren (rita-hus.html).
