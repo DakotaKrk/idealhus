@@ -415,7 +415,7 @@ function* tryckTexturSteg() {
   x.scale(2, 2);
   let s = 977; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
   const ruta = (C, f) => { x.fillStyle = f; x.fillRect(C[0], C[1], C[2], C[3]); };
-  const brus = (C, n, a, ljus) => { x.fillStyle = ljus ? 'rgb(255,255,255)' : 'rgb(60,50,40)'; for (let i = 0; i < n; i++) { x.globalAlpha = a * r(); x.fillRect(C[0] + r() * C[2], C[1] + r() * C[3], 1 + r() * 2, 1 + r() * 2); } };
+  const brus = (C, n, a, ljus) => { x.fillStyle = ljus ? 'rgb(255,255,255)' : 'rgb(60,50,40)'; for (let i = 0; i < n; i++) { x.globalAlpha = a * r(); x.fillRect(C[0] + r() * C[2], C[1] + r() * C[3], 1 + r() * 2, 1 + r() * 2); } x.globalAlpha = 1; };
   // matta A: berber, gräddvit med kolgrått rutmönster av romber
   {
     const C = TR.mattaA, [ox, oy, w, h] = C;
@@ -2790,13 +2790,13 @@ function plagg(x, sy, zc, bw, L, typ, fg, ry = 0, o = {}) {
       lp.push(framX(zi, t) + 0.003, yT(t), zi, framX(zo, t) + 0.013 * (1 - u * 0.6), yT(t) - 0.008, zo, framX(zo, t) + 0.001, yT(t) - 0.008, zo);
       if (j) { const q = e * (NS + 1) * 3 + j * 3, p = q - 3; if (s > 0) li.push(p, p + 1, q, p + 1, q + 1, q, p + 1, p + 2, q + 1, p + 2, q + 2, q + 1); else li.push(p, q, p + 1, p + 1, q, q + 1, p + 1, q + 1, p + 2, p + 2, q + 1, q + 2); } } });
     const lg = new T.BufferGeometry(); lg.setAttribute('position', new T.Float32BufferAttribute(lp, 3)); lg.setIndex(li); lg.computeVertexNormals();
-    ton(skiftTon(fg, 1.04), () => vav(vv, () => lagg('tyg', lg, m.clone())));
+    ton(skiftTon(fg, 0.95), () => vav(vv, () => lagg('tyg', lg, m.clone())));
     // slagens vikta ytterkant: en mörkare, rundad kant där tyget viker sig, som ger fliken
     // tjocklek och skiljer den från framstycket under
     ton(skiftTon(fg, 0.72), () => [-1, 1].forEach(s => { const kp = [];
       for (let j = 0; j <= NS; j++) { const u = j / NS, t = 0.02 + 0.32 * u, zo = s * (wT(0) * 0.85 + 0.055 * Math.sin(Math.min(1, u * 1.6) * PI / 2) * (1 - u * 0.85)) * (1 - u * 0.75);
-        kp.push(V(framX(zo, t) + 0.008 * (1 - u * 0.6), yT(t) - 0.009, zo).applyMatrix4(m)); }
-      tub('tyg', kp, 0.0035, 0.0025, fin ? 16 : 8, 5); })); }
+        kp.push(V(framX(zo, t) + 0.008 * (1 - u * 0.6), yT(t) - 0.009, zo)); }
+      iRam(m, () => tub('tyg', kp, 0.0035, 0.0025, fin ? 16 : 8, 5)); })); }   // (i plaggets ram: förr dubbeltransformerad, hamnade fel)
   // knappslå (skjorta, kofta), dragkedja (jacka) och knappar som små rundade skivor
   { const br = jacka ? 0.0035 : 0.007, sp = [], si = [], t0 = rock ? 0.34 : 0.05;
     T0.filter(t => t >= t0).forEach((t, j) => { const xx = framX(0, t) + 0.0012; sp.push(xx, yT(t), -br, xx, yT(t), br); if (j) { const q = j * 2; si.push(q - 2, q - 1, q, q - 1, q + 1, q); } });
@@ -5175,7 +5175,9 @@ const MODELL = {
     vagg('z', -2.02, -1.75, 1.75, { topp: LU, dorrar: [{ a: 0.2, b: 1.0, h: 2.1, gang: 'b', sida: 1, vinkel: 88 }] });
     vagg('x', 0.035, -1.97, 0.25, { topp: LU, dorrar: [{ a: -1.55, b: -0.75, h: 2.1, gang: 'a', sida: 1, vinkel: 75 }] });
     vagg('z', 0.30, -1.75, 0.09, { topp: LU });
+    yield;   // (väggar, trappa och loft i var sitt steg)
     trappa(0.29, -1.96, 1.08, 1.75);
+    yield;
     loft(0.35, 0.09, -1.96, 1.08);
     yield;   // (köket i ett eget steg)
     kok({ axel: 'z', vagg: 0.35, ut: 1, s0: -1.75, s1: 0.09, spis: -1.42, disk: -0.3, kyl: 'under', over: [[-1.75, -0.9]], hylla: [[-0.75, 0.05]] });
@@ -5225,7 +5227,9 @@ const MODELL = {
     vagg('z', -3.07, -1.75, 1.75, { topp: LU, dorrar: [{ a: 0.18, b: 0.98, h: 2.1, gang: 'b', sida: 1, vinkel: 88 }] });
     vagg('x', 0.02, -3.02, -0.82, { topp: LU, dorrar: [{ a: -2.67, b: -1.94, h: 2.1, gang: 'a', sida: 1, vinkel: 75 }] });
     vagg('z', -0.765, -1.75, 0.08, { topp: LU });
+    yield;   // (väggar, trappa och loft i var sitt steg)
     trappa(-0.25, -3.02, 1.08, 1.75);
+    yield;
     loft(-0.71, 0.08, -3.02, 1.08);
     yield;   // (köket i ett eget steg)
     kok({ axel: 'z', vagg: -0.715, ut: 1, s0: -1.75, s1: 0.08, spis: -1.42, disk: -0.25, kyl: 'under', over: [[-1.75, -0.9]], hylla: [[-0.75, 0.05]] });
@@ -5243,6 +5247,7 @@ const MODELL = {
     [0.78, 1.38].forEach(z => { med(1.8, z, PI / 2, stol); med(3.04, z, -PI / 2, stol); });
     pendel(2.42, 1.08, 1.5, true);
     med(2.42, 1.08, 0, () => bordsdukning(0.74));
+    yield;
     vaxt(4.1, 1.1, true, 0, 'monstera');   // fri från altandörren och gångvägen; bladen gick in i söderfönstrets gardin
     vagghylla(2.12, -1.75, 0, 0.5, 1.3, true);   // x 1,87–2,37, efter knaggarna och före soffan; kort ranka (den långa hängde ner till soffkarmen bakom golvlampan)
     med(4.5, 0.5, 0, pladkorg);
@@ -5252,6 +5257,7 @@ const MODELL = {
     yield;
     // sovrum
     med(-3.96, -1.75 + 1.025 + 0.085, 0, () => sang(1.2, 2.05, { pled: '#a7b098', kudde: '#c09a6e' }));
+    yield;
     matta(-4.02, 0.78, 1.2, 0.7);
     // (växten stod framför det golvlånga fönstret)
     // garderob i hörnet bredvid dörren (rummet saknade förvaring; pallen stod där)
@@ -5260,15 +5266,18 @@ const MODELL = {
     konst(-4.75, 1.45, -0.15, PI / 2, 0.5, 0.6, 4, 'svart');
     vagglampa(-4.5, 1.32, -1.75, 0); vagglampa(-3.42, 1.32, -1.75, 0);
     konst(-1.38, 1.45, 0.07, 0, 0.5, 0.6, 3);   // hallens badrumsvägg var tom
+    yield;
     hallen(1.38, -1.75, 0);   // knaggarna (x 1,07–1,79) börjar höger om dörrfodret (slutar x 1,04); väskan hänger fritt vänster om vägghyllan
     plafond(-3.9, 0.7);
     spot(-2.45, 0.56); spot(-1.35, 0.56);   // hallen framför loftet: infällda i takfallet
     yield;
     // bad
     bad(-3.02, -0.815, -1.75, -0.03);
+    yield;
     med(-2.58, -1.75 + 0.33, 0, toalett);
     dusch(-1.73, -1.75, -0.82, -0.84, [[-1.73, -1.75, -1.73, -0.84], [-1.73, -0.84, -1.3, -0.84]], 'E');
     med(-1.12, -0.34, -PI / 2, tvatt);
+    yield;
     med(-3.02 + 0.23, -0.55, PI / 2, () => handfat({ sida: 1 }));   // sist: stegen/kroken ser allt annat
     gardiner(1, 'b', 0.3);
     gardiner(7, 'v', 0.3);   // bara norra längden: den södra krockade med fönster 1:s längd i hörnet
@@ -5283,7 +5292,9 @@ const MODELL = {
     vagg('x', 0.02, -3.17, 0.43, { topp: LU, dorrar: [{ a: -1.15, b: -0.38, h: 2.1, gang: 'a', sida: 1, vinkel: 78 }] });
     vagg('z', -1.92, -1.75, -0.03, { topp: LU, dorrar: [{ a: -0.78, b: -0.13, h: 2.0, gang: 'b', sida: 1, vinkel: 80, mk: 'glas' }] });
     vagg('z', 0.485, -1.75, 0.48, { topp: LU });
+    yield;   // (väggar, trappa och loft i var sitt steg)
     trappa(-0.12, -3.17, 1.08, 1.75);
+    yield;
     loft(0.54, 0.08, -3.17, 1.08);
     yield;   // (köket i ett eget steg)
     kok({ axel: 'z', vagg: 0.535, ut: 1, s0: -1.75, s1: 0.48, hog: [[-1.75, -1.15]], spis: -0.62, disk: 0.25, over: [[-1.15, -0.25]], hylla: [[-0.1, 0.45]] });

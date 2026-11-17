@@ -1390,7 +1390,8 @@ html.foto .kf__flyg { display: none; }
   .kf__scen--inne .kf__kartknapp:not([hidden]) { display: grid; }
   .kf__scen--inne .kf__karta:not(.kf__karta--oppen) { display: none; }
   /* öppen: under flikarna, mitt i bilden, smal nog att gå fri från kartknappen; spaken vilar så länge */
-  .kf__scen--inne .kf__karta.kf__karta--oppen { z-index: 5; top: 60px; bottom: auto; left: 50%; right: auto; translate: -50% 0; width: min(240px, calc(100% - 112px)); animation: k-popup 0.2s var(--k-ut); }
+  /* (till vänster, där spaken vilar medan kartan är öppen: fri från kartknappen med miniatyren) */
+  .kf__scen--inne .kf__karta.kf__karta--oppen { z-index: 5; top: 60px; bottom: auto; left: 10px; right: auto; translate: none; width: min(260px, calc(100% - 96px)); animation: k-popup 0.2s var(--k-ut); }
   .kf__scen.kf__scen--inne:has(.kf__karta.kf__karta--oppen) .kf__spak { display: none; }
   /* träffytor på minst 44 px för fingrar */
   .kf__verktyg .kf__vk { min-width: 44px; height: 44px; }
@@ -1516,3 +1517,57 @@ html.ritare-fyll :is(.site-header, .kf__handling, .kf__rad) { visibility: hidden
 .kf__verktyg .kf__merlista .kf__vk::after { display: none !important; }
 .kf__verktyg .kf__merlista .kf__vk::before { left: auto; right: 12px; bottom: 50%; margin: 0 0 -2px; }
 .kf__verktyg .kf__merlista .kf__vk[aria-pressed="true"] svg { transform: none; }
+
+/* ===== Ritarsidan mobil – ram (designteamet, 2026-11-18) =====================
+   Bara det som ligger UTANFÖR 3D-scenen: åtgärdsraden, scenens yttre kort,
+   vinkelbilderna, panelen, planen och bottenraden. Ett system: samma
+   sidomarginal som sidhuvudet (12 px), 12 px mellan alla kort, radie 20 px
+   på kort och scen, 14 px på bilder och inre rutor, hel rundning på knappar. */
+@media (max-width: 860px) {
+  body.ritsidan {
+    --rm-luft: 12px;
+    --rm-kort: 20px;
+    --rm-inre: 14px;
+    /* plats under sidans slut åt den flytande bottenraden */
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+  body.ritsidan .kf__rad { margin-bottom: var(--rm-luft); }
+  body.ritsidan .kf__lankar { border-radius: var(--rm-kort); }
+  body.ritsidan .kf__lank { border-radius: var(--rm-inre); }
+  body.ritsidan .kf__scen { border-radius: var(--rm-kort); }
+
+  /* Vinkelbilderna: rullar med snäpp, tonas ut mot högerkanten. */
+  body.ritsidan .kf__tummar {
+    margin-top: var(--rm-luft);
+    scroll-snap-type: x mandatory;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
+  }
+  body.ritsidan .ktumme__bild,
+  body.ritsidan .kf__tummar-ring { border-radius: var(--rm-inre); }
+
+  /* Panelen och planen: kort med samma radie och luft. */
+  body.ritsidan .kf__panel { padding: 24px 0 0; }
+  body.ritsidan .kf__huvud { margin-bottom: var(--rm-luft); }
+  body.ritsidan .kgrupp { margin-bottom: var(--rm-luft); border-radius: var(--rm-kort); }
+  body.ritsidan .ksumma { margin-top: 0; border-radius: var(--rm-kort); }
+  html body.ritsidan main.ritsida > .kplan { margin: 32px auto 0; }
+  body.ritsidan .kplan__huvud { margin-bottom: var(--rm-luft); }
+  body.ritsidan .kplan__yta { gap: var(--rm-luft); }
+  body.ritsidan :is(.kplan__bild, .kplan__panel) { border-radius: var(--rm-kort); }
+  body.ritsidan .kplan__siffror { border-radius: var(--rm-inre); }
+  body.ritsidan :is(.kplan__flikar, .kplan__forstora) { border-radius: 999px; }
+  html body.ritsidan .site-footer { margin-top: 32px; border-radius: var(--rm-kort); }
+
+  /* Bottenraden: en flytande, rundad rad med luft till kanterna och
+     iPhones hemrad, och en mjuk skugga mot innehållet under. */
+  body.ritsidan .kf__handling {
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    padding: 8px 8px 8px 20px;
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.06), 0 18px 40px -14px rgba(27, 25, 21, 0.38);
+  }
+  body.ritsidan .kf__handling .kf__knapp { border-radius: 999px; }
+}

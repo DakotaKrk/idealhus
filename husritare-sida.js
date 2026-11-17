@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119i';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119k';
 
-const MOTOR_V = '20261119i';
+const MOTOR_V = '20261119k';
 const Q0 = new URLSearchParams(location.search);
 const INB = Q0.get('inbaddad') === '1';
 if (INB) document.documentElement.classList.add('inbaddad');
@@ -1927,10 +1927,21 @@ if (!FOTO && karta) {
 const vandTips = null;
 // Helskärmsknappen på pekskärm: accentfärgad, och när man kommer in pulserar en ring 2–3 gånger
 // (sedan en svag glöd) tills man har tryckt på den en gång (localStorage)
+// Användarens önskan: knappen glittrar ALLTID utom medan man är i helskärm. Lämnar man helskärm
+// (knappen, Esc, vänder telefonen) eller kommer tillbaka till sidan glittrar den igen. Inget minne.
 const HEL_NYCKEL = 'legohus-helskarm-tryckt';
+const iHelskarm = () => !!(document.fullscreenElement || fyllLage);
+function helGlitter() {
+  if (INB || FOTO) return;
+  const pa = !iHelskarm();
+  hk.classList.toggle('kf__vk--lockar', pa);
+  hk.classList.toggle('kf__vk--sedd', !pa);
+  const g = hk.querySelector('.kf__glitter');
+  if (!pa) { if (g) g.remove(); return; }
+  if (!g) helPuls();
+}
 function helPuls() {
-  let tryckt = false; try { tryckt = !!localStorage.getItem(HEL_NYCKEL); } catch (e) { /* privat läge */ }
-  if (tryckt || INB || FOTO || hk.hidden) return;   // (mobil och dator)
+  if (INB || FOTO || iHelskarm()) return;   // (mobil och dator)
   // glittrande stjärnor runt knappen: fem gnistor i en egen behållare (tar inga tryck),
   // animerade med CSS (förskjutna i tid), ingen JS per bildruta
   if (!hk.querySelector('.kf__glitter')) {
@@ -1946,13 +1957,15 @@ function helPuls() {
   }
   hk.classList.add('kf__vk--lockar');
 }
-hk.addEventListener('click', () => {
-  try { localStorage.setItem(HEL_NYCKEL, '1'); } catch (e) { /* privat läge */ }
-  hk.classList.remove('kf__vk--lockar'); hk.classList.add('kf__vk--sedd');
-  const g = hk.querySelector('.kf__glitter'); if (g) g.remove();
-});
-try { if (localStorage.getItem(HEL_NYCKEL)) hk.classList.add('kf__vk--sedd'); } catch (e) { /* privat läge */ }
-helPuls();   // glittrar från start, i alla lägen, tills man har tryckt en gång
+// följ helskärmsläget: efter klick, när helskärm lämnas (Esc, systemets knapp) och när den egna
+// fyll-layouten slås av/på (liggande telefon) – klassen ritare-fyll på <html>
+hk.addEventListener('click', () => setTimeout(helGlitter, 0));
+document.addEventListener('fullscreenchange', () => setTimeout(helGlitter, 0));
+new MutationObserver(helGlitter).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) helGlitter(); });
+window.addEventListener('pageshow', helGlitter);
+try { localStorage.removeItem(HEL_NYCKEL); sessionStorage.removeItem(HEL_NYCKEL); } catch (e) { /* privat läge */ }
+helGlitter();   // glittrar från start, i alla lägen, utom i helskärm
 // liggande telefon inne: scenen fyller skärmen; tillbaka till stående = vanlig sida
 const liggande = matchMedia('(orientation: landscape) and (max-height: 540px)');
 function passaFyll() {
