@@ -722,7 +722,8 @@ html.foto .ritare__duk { cursor: default; }
 .kf__gang.syns .kf__gang-tangenter kbd:first-child { animation: kg-tangent 0.9s ease 0.8s 2; }
 /* pekskärm: tryck och dra; mus och tangenter bort */
 .kf__gang-del--pek { display: none; }
-@media (hover: none) and (pointer: coarse) {
+/* (eller, inte och: samma villkor som styrspaken, så att hjälpen och spaken alltid följs åt) */
+@media (hover: none), (pointer: coarse) {
   .kf__gang-del--mus { display: none; }
   .kf__gang-del--pek { display: inline-flex; }
   .kf__gang-del--mus + .kf__gang-del--pek { box-shadow: none; }
@@ -1239,6 +1240,21 @@ html.foto .kf__flyg { display: none; }
 .kplanvy__rum--liten { padding: 4px 8px 5px; border-radius: 9px; }
 .kplanvy__rum--liten b { font-size: 0.6875rem; }
 .kplanvy__rum--liten span { font-size: 0.625rem; }
+.kplanvy__rum--mini { padding: 3px 7px 4px; border-radius: 8px; }
+.kplanvy__rum--mini b { font-size: 0.65625rem; }
+.kplanvy__rum--mini span { display: none; }
+/* små lappar har ändå en träffyta som ett finger hittar */
+.kplanvy__rum::after { content: ""; position: absolute; inset: -11px; }
+/* smal scen: mindre text i hela ritningen */
+@container scen (max-width: 520px) {
+  .kplanvy__rum { padding: 5px 9px 6px; border-radius: 10px; }
+  .kplanvy__rum b { font-size: 0.75rem; }
+  .kplanvy__rum span { font-size: 0.65625rem; }
+  .kplanvy__rum--liten { padding: 3px 7px 4px; }
+  .kplanvy__rum--liten b, .kplanvy__rum--mini b { font-size: 0.65625rem; }
+  .kplanvy__rum--liten span { font-size: 0.59375rem; }
+  .kplanvy__mattal, .kplanvy__lofttext { padding: 2px 7px; font-size: 0.65625rem; }
+}
 @media (hover: hover) { .kplanvy__rum:hover { background: #fff; box-shadow: 0 0 0 2px var(--k-accent, #f0b56e), 0 10px 22px -8px rgba(0, 0, 0, 0.6); } }
 .kplanvy__rum:focus-visible { outline: 2px solid var(--k-accent, #f0b56e); outline-offset: 2px; }
 .kplanvy__rum:active { background: #f1ece3; }
@@ -1252,12 +1268,38 @@ html.foto .kf__flyg { display: none; }
 @media (prefers-reduced-motion: reduce) { .kplanvy:not([hidden]) { animation: kplanvy-in 0.25s ease-out; } }
 @keyframes kplanvy-in { from { opacity: 0; } }
 
+/* tappad grafik: beskedet ligger över den svarta duken */
+.ritare__fel--tappad { z-index: 6; background: var(--k-scen); color: var(--k-text); font: 500 0.9375rem/1.5 var(--sans); }
+.ritare__fel--tappad button { margin-top: 12px; min-height: 44px; }
+
 /* ---- Våningsraden (tak av) ligger i scenen: centrerad mot scenen, aldrig utanför ---- */
 .kf__scen > .kf__lager { z-index: 3; left: 50%; bottom: 84px; translate: -50% 0; max-width: calc(100% - 32px); overflow-x: auto; scrollbar-width: none; }
 .kf__scen > .kf__lager::-webkit-scrollbar { display: none; }
 .kf__scen > .kf__lager button { flex: none; }
 .kf__scen--plan > .kf__lager, .kf__scen--inne > .kf__lager { display: none; }
 @media (max-width: 860px) { .kf__scen > .kf__lager { bottom: 76px; max-width: calc(100% - 16px); } }
+
+/* ---- Flikrader i scenen (rummen inne, våningarna): alltid EN rad ----
+   Ryms de inte rullar raden i sidled i sin pill, med tonade kanter där det finns mer
+   (data-rulla="v", "h" eller "vh", satt av husritare-sida.js) och snäpp per flik. */
+.kf__rum > div, .kf__scen > .kf__lager { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scroll-padding: 0 18px; scrollbar-width: none; border-radius: 999px; -webkit-overflow-scrolling: touch; touch-action: pan-x; }
+.kf__rum > div::-webkit-scrollbar { display: none; }
+.kf__rum > div > button, .kf__scen > .kf__lager > button { flex: none; scroll-snap-align: center; }
+.kf__rum { justify-content: center; }
+.kf__rum > div { max-width: 100%; width: max-content; }
+:is(.kf__rum > div, .kf__scen > .kf__lager)[data-rulla="h"] { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent); }
+:is(.kf__rum > div, .kf__scen > .kf__lager)[data-rulla="v"] { -webkit-mask-image: linear-gradient(90deg, transparent, #000 26px); mask-image: linear-gradient(90deg, transparent, #000 26px); }
+:is(.kf__rum > div, .kf__scen > .kf__lager)[data-rulla="vh"] { -webkit-mask-image: linear-gradient(90deg, transparent, #000 26px, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(90deg, transparent, #000 26px, #000 calc(100% - 26px), transparent); }
+@container scen (max-width: 640px) {
+  .kf__rum { left: 8px; right: 8px; top: 8px; }
+  .kf__rum > div { gap: 0; padding: 3px; }
+  .kf__rum button { padding: 0 11px; font-size: 0.75rem; }
+}
+@container scen (max-width: 400px) { .kf__rum button { padding: 0 9px; } }
+/* smal scen: kartan är en översikt (pricken visar var man står); rummen byts med flikarna,
+   så de små rumspunkterna tar inga tryck (de låg på varandra och träffades fel) */
+@container scen (max-width: 640px) { .kf__karta .kf__prick { pointer-events: none; } }
+@media (pointer: coarse) { .kf__karta .kf__prick { pointer-events: none; } }
 
 /* ---- Styrspaken: gå runt inne på pekskärm (husritare-sida.js, ritare.spak) ---- */
 .kf__spak { position: absolute; z-index: 3; left: 14px; bottom: 86px; display: none; width: 92px; height: 92px; border-radius: 50%; background: rgba(24, 22, 19, 0.38); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.26), 0 10px 24px -14px rgba(0, 0, 0, 0.7); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); touch-action: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -1272,8 +1314,10 @@ html.foto .kf__flyg { display: none; }
   /* träffytor på minst 44 px för fingrar */
   .kf__verktyg .kf__vk { min-width: 44px; height: 44px; }
   .kf__verktyg .kf__ljusknapp { width: 44px; height: 44px; }
-  .kf__lager button { min-height: 44px; }
-  .kf__rum button { min-height: 40px; }
+  .kf__lager button { min-height: 44px; min-width: 44px; }
+  .kf__rum button { min-height: 44px; min-width: 44px; }
+  /* den lilla planritningsknappen i huslistan: 32 px syns, 44 px träffyta */
+  .kmodell__plan::after { content: ""; position: absolute; inset: -6px; }
   .ritsida .kf__planlank { min-height: 44px; }
 }
 @media (max-width: 860px) { .kf__spak { left: 10px; bottom: 76px; } }
@@ -1285,9 +1329,31 @@ html.foto .kf__flyg { display: none; }
 .kf__verktyg--mat > *, .kf__verktyg--mat .kf__sol { flex: none !important; }
 .kf__verktyg--mat .ritare__reglage { flex: none !important; }
 .kf__verktyg.kf__verktyg--trang .kf__sol .ritare__reglage { flex: 1 1 72px; width: 72px; min-width: 56px; }
+/* trångt: lite mindre luft i kanterna och vid avdelarna (ger plats åt en knapp till) */
+.kf__verktyg.kf__verktyg--trang { padding-left: 4px; padding-right: 4px; gap: 1px; }
+.kf__verktyg.kf__verktyg--trang .kf__streck { margin: 0 2px; }
 .kf__verktyg.kf__verktyg--trang .kf__sol output { display: none; }
 .kf__mer[hidden], .kf__merlista[hidden] { display: none; }
-.kf__verktyg .kf__popup.kf__merlista { left: auto; right: -6px; translate: none; display: grid; gap: 2px; min-width: 208px; transform-origin: bottom right; }
+/* tomma grupper (allt i dem ligger under Mer eller syns inte) och deras avdelare tar ingen plats */
+.kf__verktyg .kf__vgrupp.kf__vgrupp--tom, .kf__verktyg .kf__vgrupp--tom + .kf__streck, .kf__verktyg .kf__streck:has(+ .kf__vgrupp--tom:last-child) { display: none; }
+/* trångt: Se inne blir en ikon (texten finns kvar för skärmläsare) */
+.kf__verktyg.kf__verktyg--ikon .kf__vk--inne { width: 44px; min-width: 44px; padding: 0; }
+.kf__verktyg.kf__verktyg--ikon .kf__vk--inne > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* sista utvägen: reglaget går bort, solknappen med morgon, dag, gyllene timmen och kväll står kvar */
+.kf__verktyg.kf__verktyg--utantid .kf__sol .ritare__reglage, .kf__verktyg.kf__verktyg--utantid .kf__sol output { display: none; }
+.kf__verktyg.kf__verktyg--utantid .kf__sol { flex: none; padding: 0; }
+.kf__verktyg.kf__verktyg--utanmiljo .kf__meny:has(> [data-miljo-knapp]) { display: none; }
+.kf__verktyg .kf__popup.kf__merlista { left: auto; right: -6px; bottom: calc(100% + 14px); translate: none; display: grid; gap: 2px; min-width: 208px; max-height: none; overflow: visible; transform-origin: bottom right;
+  background: #1a1815; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 20px 40px -16px rgba(0, 0, 0, 0.85);
+  animation: kf-mer-in 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both; will-change: opacity, transform; contain: layout paint; }
+@keyframes kf-mer-in { from { opacity: 0; transform: translateY(4px) scale(0.98); } }
+/* stängd är stängd (display: grid ovan vann annars över [hidden], och listan stod alltid öppen) */
+.kf__verktyg .kf__popup.kf__merlista[hidden], .kf__verktyg .kf__mer[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .kf__verktyg .kf__popup.kf__merlista { animation: none; } }
+/* i listan: inga övergångar (knapparna flyttas hit och dit, och ska inte glida in) */
+.kf__verktyg .kf__merlista .kf__vk, .kf__verktyg .kf__merlista .kf__vk svg, .kf__verktyg .kf__merlista .kf__vk::before { transition: none !important; animation: none !important; }
+.kf__verktyg .kf__merlista .kf__vk:active { transform: none; background: rgba(255, 255, 255, 0.12); }
+.kf__verktyg .kf__merlista .kf__vk[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); box-shadow: none; }
 .kf__verktyg .kf__merlista .kf__vk { display: flex; justify-content: flex-start; gap: 12px; width: 100%; min-width: 0; height: 44px; padding: 0 12px; text-align: left; }
 .kf__verktyg .kf__merlista .kf__vk[hidden] { display: none; }
 .kf__verktyg .kf__merlista .kf__vk > span { position: static !important; width: auto !important; height: auto !important; overflow: visible !important; clip-path: none !important; font: 500 0.875rem/1 var(--sans); }

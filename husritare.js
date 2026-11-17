@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261119d';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261119d';
-import { skapaPlanlager } from './husritare-plan.js?v=20261119d';
+import { skapaMiljo } from './husritare-miljo.js?v=20261119e';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261119e';
+import { skapaPlanlager } from './husritare-plan.js?v=20261119e';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -566,6 +566,9 @@ export async function skapaRitare(duk, alternativ = {}) {
             const yy = i * B + 3 + r() * (B - 6); g.strokeStyle = r() > 0.5 ? 'rgba(40,34,28,.16)' : 'rgba(255,250,240,.12)';
             g.lineWidth = 0.6 + r() * 1.4; g.beginPath(); g.moveTo(x, yy); g.bezierCurveTo(x + len * 0.3, yy + (r() - 0.5) * 4, x + len * 0.7, yy + (r() - 0.5) * 4, x + len, yy); g.stroke();
           }
+          // ändträet vid skarven: brädändarna har tagit upp mer väta och är mörkare, med en sprickad ände
+          { const ge = g.createLinearGradient(x + len - 12, 0, x + len, 0); ge.addColorStop(0, 'rgba(40,32,24,0)'); ge.addColorStop(1, 'rgba(40,32,24,.28)'); g.fillStyle = ge; g.fillRect(x + len - 12, i * B, 12, B); }
+          if (r() > 0.6) { g.strokeStyle = 'rgba(30,24,18,.35)'; g.lineWidth = 0.8; const sy = i * B + B * (0.3 + r() * 0.4); g.beginPath(); g.moveTo(x + len, sy); g.lineTo(x + len - 10 - r() * 14, sy + (r() - 0.5) * 2); g.stroke(); }
           g.fillStyle = 'rgba(30,26,22,.85)'; g.fillRect(x + len - 2, i * B, 2, B);   // skarv
           g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(x + len * 0.08, i * B + B * 0.2, 2, 2); g.fillRect(x + len * 0.08, i * B + B * 0.72, 2, 2);   // skruvar
           x += len;
@@ -4834,14 +4837,20 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // läget rakt ovanifrån: norr uppåt (hög, smal bild: huset vridet ett kvarts varv), huset
   // mitt i den fria ytan mellan bildens kanter och verktygsraden
   function planTopp() {
-    const d = husGrupp.userData, H = HUS[val.modell], B = Math.max(1, dukB), Hh = Math.max(1, dukH), staende = Hh > B * 1.08;
-    const bred = (staende ? H.W : H.L) + 2.9, hog = (staende ? H.L : H.W) + 2.9;
-    const mS = Math.min(48, B * 0.05), mT = Math.min(64, Hh * 0.1), mB = Math.min(112, Hh * 0.2);
-    const halv = Math.max(bred / 2 / ((B - 2 * mS) / Hh), hog / 2 / ((Hh - mT - mB) / Hh));
-    const ned = (mB - mT) / 2 * (2 * halv / Hh);
+    const d = husGrupp.userData, H = HUS[val.modell], B = Math.max(1, dukB), Hh = Math.max(1, dukH);
+    // fri yta: bilden minus kanterna och verktygsraden. Huset fyller den, med plats för
+    // måttlinjerna (0,85 m ut + talet) på två sidor; skalan s är bildpunkter per meter.
+    const mS = 12, mT = 14, mB = 86, fW = B - 2 * mS, fH = Hh - mT - mB;
+    const sL = Math.min((fW - 46) / (H.L + 1.5), (fH - 40) / (H.W + 1.5)), sP = Math.min((fW - 76) / (H.W + 2.4), (fH - 76) / (H.L + 2.4));
+    // hög, smal bild: huset vrids ett kvarts varv om det blir tydligt större så
+    const staende = sP > sL * 1.12, s = Math.max(3, staende ? sP : sL), halv = Hh / (2 * s), ned = (mB - mT) / 2 / s;
     let theta = 0;
     if (staende) { pS.setFromVector3(pV.copy(kamera.position).sub(styr.target)); theta = pS.theta < 0 ? -Math.PI / 2 : Math.PI / 2; }
-    return { mal: new THREE.Vector3(Math.sin(theta) * ned, d.delar.Y0 + 1.2, Math.cos(theta) * ned), theta, phi: 0.0007, halv, fov: PLAN_FOV };
+    const mal = new THREE.Vector3(Math.sin(theta) * ned, d.delar.Y0 + 1.2, Math.cos(theta) * ned);
+    // liggande: måtten står i väster och i söder (norr om altanen ligger i söder), så huset
+    // skjuts en bit åt andra hållet och hamnar mitt i det som blir över
+    if (!staende) { const u = (0.5 * s + 20) / 2 / s; mal.x -= u; mal.z += H.altan === 'S' ? -u : u; }
+    return { mal, theta, phi: 0.0007, halv, fov: PLAN_FOV };
   }
   // kameran längs banan mellan A (vyn före) och B (rakt ovanifrån), e = 0..1
   function planKam(e) {
@@ -4858,6 +4867,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   function planKlar() {
     if (plan.grans) { styr.maxDistance = plan.grans.max; styr.minPolarAngle = plan.grans.pMin; plan.grans = null; }
     plan.fov = 0; plan.t = 0; plan.data = null;
+    planBil(false);
     if (!inneLage) { kamera.fov = fovFor(false); kamera.updateProjectionMatrix(); }
     if (plan.lager) plan.lager.gom();
   }
@@ -4883,7 +4893,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       try { oppna(true, { lager: { tak: false, loft: false, fokus: null }, direkt }); } catch (e) { console.warn(e); } finally { plan.egen = false; }
       aka = null; zoomMal = null; styr.autoRotate = false;
       styr.minPolarAngle = 0; styr.maxDistance = Math.max(styr.maxDistance, plan.B.halv / Math.tan(THREE.MathUtils.degToRad(plan.B.fov) / 2) * 1.5);
-      if (direkt) { plan.t = 1; planHamta(); planKam(1); nySkugga = true; styrNu(); }
+      if (direkt) { plan.t = 1; planHamta(); planKam(1); planBil(true); nySkugga = true; styrNu(); }
     } else {
       if (direkt && !lugn) { try { fangaOvergang(); tona.tid = 0.4; } catch (e) { console.warn(e); } }
       if (plan.t >= 1) { const A = plan.A; plan.B = planPose(); if (A) plan.A = A; }   // man kan ha vridit eller zoomat i planvyn
@@ -4925,8 +4935,18 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (plan.pa && !plan.data) plan.t = Math.min(plan.t, 0.34);
     aka = null;
     planKam(inUt(del(plan.t, 0, 0.7)));
+    planBil(plan.t > 0.34);
     if (!plan.pa && plan.t <= 0) { planKlar(); nySkugga = true; }
     return plan.t !== forr || (plan.pa && !plan.data);
+  }
+  // bilen på tomten skymmer ritningen (i smala bilder ligger den över måtten): borta medan
+  // ritningen syns, tillbaka när man lämnar planlösningen. Bara synligheten, inget byggs om.
+  function planBil(dold) {
+    if (dold === !!plan.bilDold) return;
+    const bil = scene.getObjectByName('elbil');
+    if (!bil) return;
+    if (dold) { plan.bilSyns = bil.visible; bil.visible = false; } else bil.visible = plan.bilSyns !== false;
+    plan.bilDold = dold; nySkugga = true;
   }
 
   // ---- Ytterdörren och åkningen in genom den ----
@@ -5645,6 +5665,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   function ram(nu) {
     ramId = 0;
     if (!ritKlar) return;   // scenens program kompileras ännu; första rutan begärs när de är klara
+    // grafiken tappad (telefonen tog minnet): inget ritas förrän den är tillbaka (sidan laddar om)
+    if (renderer.getContext().isContextLost()) return;
     iRam = true;   // allt som begär en ruta under rutan hamnar i den här (ingen extra rAF)
     nu = nu || performance.now();
     const t0 = performance.now();

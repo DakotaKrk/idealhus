@@ -23,8 +23,8 @@
 //   miljo.lista                                  // [['studio','Studio'], ...]
 //   miljo.statistik()                            // { anrop, trianglar } för den aktiva miljön
 //   miljo.dispose();
-import { skapaBil } from './husritare-bil.js?v=20261119d';   // elbilen med laddbox vid entrén
-import { skapaBebott } from './husritare-bebott.js?v=20261119d';   // spår av folk som bor där: brevlåda, cykel, grill …
+import { skapaBil } from './husritare-bil.js?v=20261119e';   // elbilen med laddbox vid entrén
+import { skapaBebott } from './husritare-bebott.js?v=20261119e';   // spår av folk som bor där: brevlåda, cykel, grill …
 
 // ---- små hjälpare (utan THREE) -------------------------------------------
 function slump(fro) {
@@ -1871,17 +1871,14 @@ export function skapaMiljo(THREE, scene, renderer) {
     // 8-bitarsbruset i kanterna till ljusa prickar)
     if ( tI.a < 0.06 ) discard;
     tI.rgb /= max( tI.a, 0.25 );
-    { vec2 dd = fwidth( iu0 ) * ${IMP.toFixed(1)}; float dm = max( max( dd.x, dd.y ), 1e-4 ); tI.a *= 1.0 + max( log2( dm ), 0.0 ) * 0.4;
-      // nära kameran: kanten fransas upp i fina, sneda barrstreck (finare än atlasens texlar), så att
-      // skottens rundade spetsar inte står som en hård sågtandskant; kronans inre (alfa 1) rörs inte
-      vec2 bq = vImpUv * vec2( 520.0, 1040.0 );
-      float bn = fract( sin( dot( floor( vec2( bq.x + bq.y * 0.7, bq.y * 0.22 ) ), vec2( 12.9898, 78.233 ) ) ) * 43758.5453 );
-      float bn2 = fract( sin( dot( floor( vec2( bq.x - bq.y * 0.7, bq.y * 0.22 ) ), vec2( 39.346, 11.135 ) ) ) * 24634.6345 );
-      tI.a *= mix( 1.0, 0.62 + 0.7 * min( bn, bn2 + 0.25 ), clamp( 2.2 - dm, 0.0, 1.0 ) ); }
+    { vec2 dd = fwidth( iu0 ) * ${IMP.toFixed(1)}; tI.a *= 1.0 + max( log2( max( max( dd.x, dd.y ), 1e-4 ) ), 0.0 ) * 0.4; }
     diffuseColor *= tI;`;
   function impMaterial(A) {
     const U = { uImpN: { value: A.rtN.texture }, uBox: { value: A.box.concat([0, 0, 0, 0].map(() => new THREE.Vector4())).slice(0, 4) } };
-    const m = new THREE.MeshLambertMaterial({ map: A.rtF.texture, alphaTest: 0.5, alphaToCoverage: false, side: THREE.DoubleSide });
+    // alphaToCoverage: den verkliga orsaken till sågtandskanterna var alfatestet (varje pixel helt in eller
+    // ut). Med a2c blir kanten MSAA-utjämnad; three skärper alfan med fwidth, så inget brus av mipnivåerna.
+    // Samma enda programvariant som förut (kompileras när miljön byggs), djupmaterialet har kvar alfatestet.
+    const m = new THREE.MeshLambertMaterial({ map: A.rtF.texture, alphaTest: 0.5, alphaToCoverage: true, side: THREE.DoubleSide });
     m.onBeforeCompile = s => {
       Object.assign(s.uniforms, U, { uTid: VU.uTid, uVind: VU.uVind, uNatt: VU.uNatt, miljoLjus: LJUS, uHus: VU.uHus });
       s.vertexShader = IMP_V + s.vertexShader
@@ -1890,6 +1887,8 @@ export function skapaMiljo(THREE, scene, renderer) {
         .replace('#include <worldpos_vertex>', 'vec4 worldPosition = vec4( transformed, 1.0 );');
       s.fragmentShader = 'uniform sampler2D uImpN;\nuniform vec4 uHus;\nuniform float uNatt;\nuniform vec3 miljoLjus;\nvarying vec2 vImpUv; varying vec3 vR; varying vec3 vF; varying float vK0; varying float vK1; varying float vKf; varying float vRad; varying vec3 vImpP;\n' + s.fragmentShader
         .replace('#include <map_fragment>', NARA_GLSL('vImpP') + IMP_MAP)
+        // natt: hela täckningen igen (mörka kronor mot ljusare dis gav ljusa prickar i de utjämnade kanterna)
+        .replace('#include <alphatest_fragment>', '#include <alphatest_fragment>\n    diffuseColor.a = mix( diffuseColor.a, 1.0, smoothstep( 0.2, 0.6, uNatt ) );')
         .replace('#include <color_fragment>', '#include <color_fragment>\n    diffuseColor.rgb *= mix( vec3( 1.0 ), vec3( 0.6, 0.68, 0.92 ), uNatt * 0.75 );   // natt: dovare och månblå\n    diffuseColor.rgb = mix( diffuseColor.rgb, min( diffuseColor.rgb, vec3( 0.26, 0.3, 0.42 ) ), uNatt * 0.8 );   // natt: snön på grenarna dämpas (lyste som vitt brus mot de mörka kronorna)')
         .replace('#include <normal_fragment_begin>', `
     float faceDirection = 1.0;

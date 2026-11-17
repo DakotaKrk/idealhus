@@ -34,12 +34,16 @@ export function skapaPlanlager(duk, vidRum) {
   });
 
   let D = null, syns = false;
+  // lapparnas storlekar: hel, liten, bara namnet
+  const KLASS = ['', ' kplanvy__rum--liten', ' kplanvy__rum--mini'];
+  let matB = 0, matH = 0, block = [], rumMatt = [], mattMatt = [], loftMatt = [0, 0], lage = [];
+  const lador = [];   // lappar som redan står på plats den här rutan
   const el = { vagg: [], glas: [], loft: [], matt: [], rum: [], loftLapp: null };
   const p = [0, 0], q = [0, 0], r = [0, 0], s = [0, 0];
   const bana = (tag, grupp) => { const e = document.createElementNS(NS, tag); grupp.appendChild(e); return e; };
 
   function satt(data) {
-    D = data;
+    D = data; matB = 0;
     gLoft.textContent = ''; gVagg.textContent = ''; gGlas.textContent = ''; gMatt.textContent = ''; lappar.textContent = '';
     // två banor för alla väggar: en ljus kontur underst och den mörka snittytan överst
     // (konturen syns då aldrig i skarvarna mellan väggbitarna)
@@ -86,6 +90,8 @@ export function skapaPlanlager(duk, vidRum) {
     const visa = t > 0.34;
     if (visa !== syns) { syns = visa; rot.hidden = !visa; }
     if (!visa) return;
+    if (matB !== B || matH !== H) matUpp(B, H);
+    lador.length = 0;
     let vd = '';
     for (let i = 0; i < D.vaggar.length; i++) {
       const o = D.vaggar[i], a = 0.36 + 0.3 * (o.i / Math.max(1, D.nOrdning)), k = inUt(del(t, a, a + 0.12));
@@ -110,34 +116,99 @@ export function skapaPlanlager(duk, vidRum) {
       E.linje.setAttribute('d', 'M' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + 'L' + q[0].toFixed(1) + ' ' + q[1].toFixed(1) +
         'M' + (p[0] - nx).toFixed(1) + ' ' + (p[1] - ny).toFixed(1) + 'L' + (p[0] + nx).toFixed(1) + ' ' + (p[1] + ny).toFixed(1) +
         'M' + (q[0] - nx).toFixed(1) + ' ' + (q[1] - ny).toFixed(1) + 'L' + (q[0] + nx).toFixed(1) + ' ' + (q[1] + ny).toFixed(1));
+      // talet vid linjens mitt; ligger något i vägen (hörnknapp, bildkant) glider det längs linjen
       proj(mx + m.ut[0], mz + m.ut[1], r);
-      E.lapp.style.transform = 'translate(' + r[0].toFixed(1) + 'px,' + r[1].toFixed(1) + 'px) translate(-50%,-50%)';
+      const [lw, lh] = mattMatt[i] || [44, 22];
+      let lx = r[0], ly = r[1];
+      if (!fri(lx, ly, lw, lh, B, H)) {
+        for (const f of [0.18, -0.18, 0.32, -0.32, 0.44, -0.44]) { if (fri(r[0] + dx * f, r[1] + dy * f, lw, lh, B, H)) { lx = r[0] + dx * f; ly = r[1] + dy * f; break; } }
+      }
+      lx = klam(lx, lw / 2 + 4, B - lw / 2 - 4); ly = klam(ly, lh / 2 + 4, H - lh / 2 - 4);
+      lador.push([lx - lw / 2, ly - lh / 2, lx + lw / 2, ly + lh / 2]);
+      E.lapp.style.transform = 'translate(' + lx.toFixed(1) + 'px,' + ly.toFixed(1) + 'px) translate(-50%,-50%)';
     }
     // rumsnamnen: en efter en, 10 px upp på plats; små rum får en mindre lapp
     const nR = el.rum.length, steg = Math.min(0.045, 0.2 / Math.max(1, nR));
     proj(0, 0, p); proj(1, 0, q);
     const pxm = Math.hypot(q[0] - p[0], q[1] - p[1]);   // bildpunkter per meter
+    // 1) storlek efter rummet i bilden: hel lapp, liten lapp eller bara namnet
     for (let i = 0; i < nR; i++) {
-      const R = D.rum[i], b = el.rum[i], k = utKub(del(t, 0.66 + i * steg, 0.84 + i * steg));
+      const R = D.rum[i], L = lage[i], S = rumMatt[i];
+      proj(R.x, R.z, p); proj(R.x - R.w / 2, R.z - R.d / 2, q); proj(R.x + R.w / 2, R.z + R.d / 2, r);
+      const bw = Math.abs(r[0] - q[0]), bh = Math.abs(r[1] - q[1]);
+      let k = 0;
+      while (k < 2 && (S[k][0] > bw - 4 || S[k][1] > bh - 4)) k++;
+      L.x = p[0]; L.y = p[1]; L.k = k; L.a = bw * bh;
+    }
+    // 2) lappar som krockar: den i det mindre rummet krymper först, sedan flyttas de isär
+    for (let varv = 0; varv < 5; varv++) {
+      let krock = false;
+      for (let i = 0; i < nR; i++) for (let j = i + 1; j < nR; j++) {
+        const A = lage[i], C = lage[j], sa = rumMatt[i][A.k], sc = rumMatt[j][C.k];
+        const ox = (sa[0] + sc[0]) / 2 + 3 - Math.abs(A.x - C.x), oy = (sa[1] + sc[1]) / 2 + 3 - Math.abs(A.y - C.y);
+        if (ox <= 0 || oy <= 0) continue;
+        krock = true;
+        const liten = A.a <= C.a ? A : C, stor = liten === A ? C : A;
+        if (liten.k < 2) liten.k++;
+        else if (stor.k < 2) stor.k++;
+        else if (ox < oy) { const d = (ox / 2 + 0.5) * (A.x < C.x ? -1 : 1); A.x += d; C.x -= d; }
+        else { const d = (oy / 2 + 0.5) * (A.y < C.y ? -1 : 1); A.y += d; C.y -= d; }
+      }
+      if (!krock) break;
+    }
+    // 3) inom bilden, fria från knappar i hörnen, verktygsraden och måttalen; sedan på plats
+    const hinder = block.concat(lador.map(l => [l[0] - 3, l[1] - 3, l[2] + 3, l[3] + 3]));
+    for (let i = 0; i < nR; i++) {
+      const b = el.rum[i], L = lage[i], [w, h] = rumMatt[i][L.k], k = utKub(del(t, 0.66 + i * steg, 0.84 + i * steg));
+      for (const bl of hinder) {
+        const ox = Math.min(L.x + w / 2, bl[2]) - Math.max(L.x - w / 2, bl[0]), oy = Math.min(L.y + h / 2, bl[3]) - Math.max(L.y - h / 2, bl[1]);
+        if (ox > 0 && oy > 0) { if (oy <= ox) L.y += (L.y < (bl[1] + bl[3]) / 2 ? -oy : oy); else L.x += (L.x < (bl[0] + bl[2]) / 2 ? -ox : ox); }
+      }
+      L.x = klam(L.x, w / 2 + 4, B - w / 2 - 4); L.y = klam(L.y, h / 2 + 4, H - h / 2 - 4);
+      lador.push([L.x - w / 2, L.y - h / 2, L.x + w / 2, L.y + h / 2]);
+      if (b._k !== L.k) { b._k = L.k; b.className = 'kplanvy__rum' + KLASS[L.k]; }
       b.style.opacity = k;
       b.style.pointerEvents = k > 0.6 ? '' : 'none';
-      if (k <= 0) continue;
-      proj(R.x, R.z, p);
-      // håll lappen inom bilden (smal vy)
-      const x = klam(p[0], 34, B - 34), y = klam(p[1], 20, H - 20);
-      b.style.transform = 'translate(' + x.toFixed(1) + 'px,' + (y + (1 - k) * 10).toFixed(1) + 'px) translate(-50%,-50%) scale(' + (0.94 + 0.06 * k).toFixed(3) + ')';
-      const liten = Math.min(R.w, R.d * 1.6) * pxm < 86;
-      if (liten !== b.classList.contains('kplanvy__rum--liten')) b.classList.toggle('kplanvy__rum--liten', liten);
+      if (k > 0) b.style.transform = 'translate(' + L.x.toFixed(1) + 'px,' + (L.y + (1 - k) * 10).toFixed(1) + 'px) translate(-50%,-50%) scale(' + (0.94 + 0.06 * k).toFixed(3) + ')';
     }
+    // loftets text vid loftets kontur: ovanför, under, till höger eller vänster om den – den
+    // första platsen som ligger fritt inom bilden; annars en rad längst ned ovanför verktygen
     if (el.loftLapp) {
-      const L0 = D.loft[0];
       el.loftLapp.style.opacity = utKub(del(t, 0.8, 1));
-      // utanför norra ytterväggen, mitt för loftet (inne i huset krockar den med rumsnamnen)
-      // (skjuts ut från väggen i bildens led, så att den går fri även när huset är vridet)
-      proj((L0.x0 + L0.x1) / 2, -D.W / 2, p); proj((L0.x0 + L0.x1) / 2, 0, q);
-      const ux = p[0] - q[0], uy = p[1] - q[1], un = Math.hypot(ux, uy) || 1, ut = Math.abs(ux / un) * 74 + Math.abs(uy / un) * 12 + 9;
-      el.loftLapp.style.transform = 'translate(' + (p[0] + ux / un * ut).toFixed(1) + 'px,' + (p[1] + uy / un * ut).toFixed(1) + 'px) translate(-50%,-50%)';
+      let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+      for (const o of D.loft) for (const [x, z] of [[o.x0, o.z0], [o.x1, o.z1]]) { proj(x, z, p); x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); }
+      const [w, h] = loftMatt, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, u = 0.3 * pxm + 8;
+      const val = [[cx, y0 - u - h / 2], [cx, y1 + u + h / 2], [x1 + u + w / 2, cy], [x0 - u - w / 2, cy], [B / 2, H - 92 - h / 2], [B / 2, h / 2 + 8]];
+      let pl = val.find(v => fri(v[0], v[1], w, h, B, H)) || val[4];
+      el.loftLapp.style.transform = 'translate(' + klam(pl[0], w / 2 + 4, B - w / 2 - 4).toFixed(1) + 'px,' + klam(pl[1], h / 2 + 4, H - h / 2 - 4).toFixed(1) + 'px) translate(-50%,-50%)';
     }
+  }
+  // ligger en lapp (mitt x, y; bredd, höjd) fritt: inom bilden och inte över knappar eller andra lappar
+  function fri(x, y, w, h, B, H) {
+    const a = x - w / 2, b = y - h / 2, c = x + w / 2, d = y + h / 2;
+    if (a < 4 || b < 4 || c > B - 4 || d > H - 4) return false;
+    for (const l of block) if (a < l[2] && c > l[0] && b < l[3] && d > l[1]) return false;
+    for (const l of lador) if (a < l[2] + 3 && c > l[0] - 3 && b < l[3] + 3 && d > l[1] - 3) return false;
+    return true;
+  }
+  // Mäts en gång per bildstorlek: lapparnas mått i sina tre storlekar, måttalens och loftets
+  // mått, och det som ligger i vägen i scenen (verktygsraden, hörnknappen, kartan).
+  function matUpp(B, H) {
+    matB = B; matH = H;
+    const r0 = rot.getBoundingClientRect();
+    block = [];
+    (rot.parentNode || document).querySelectorAll('.kf__verktyg, .kf__full, .kf__karta, .kf__rum > div').forEach(e => {
+      if (e.closest('[hidden]')) return;
+      const cs = getComputedStyle(e);
+      if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity < 0.05) return;
+      const rr = e.getBoundingClientRect();
+      if (rr.width > 1 && rr.height > 1) block.push([rr.left - r0.left - 6, rr.top - r0.top - 6, rr.right - r0.left + 6, rr.bottom - r0.top + 6]);
+    });
+    rumMatt = el.rum.map(b => KLASS.map(k => { b.className = 'kplanvy__rum' + k; return [b.offsetWidth, b.offsetHeight]; }));
+    el.rum.forEach(b => { b._k = 0; b.className = 'kplanvy__rum'; });
+    mattMatt = el.matt.map(E => [E.lapp.offsetWidth, E.lapp.offsetHeight]);
+    loftMatt = el.loftLapp ? [el.loftLapp.offsetWidth, el.loftLapp.offsetHeight] : [0, 0];
+    lage = el.rum.map(() => ({ x: 0, y: 0, k: 0, a: 0 }));
   }
   function gom() { if (syns) { syns = false; rot.hidden = true; } }
   return { satt, rita, gom, rot };

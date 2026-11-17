@@ -32810,3 +32810,95 @@ html body .platstopp__mer { justify-self: start; }
 @media (min-width: 901px) and (max-width: 1180px) {
   html body .platstopp__namn b { display: none; }
 }
+
+/* --- Kategorisidans rubrik över korten (nya-hus.css) ------------------
+   På smal skärm blev rutnätet en spalt, men rubriken stod kvar i spalt 1
+   och ingressen i spalt 2-3 eftersom de reglerna vägde tyngre. Rubriken
+   fick 0 px bredd och lades bokstav för bokstav. :is() ger tyngd nog. */
+@media (max-width: 900px) {
+  html body #modeller .category__head.kat-huvud--synk.kat-huvud--synk > :is(.ih-etikett, h2, .category__ingress, .kat-huvud__lankar, .category__count) {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+/* --- Träffytor minst 44 x 44 px på telefon och surfplatta -------------- */
+@media (max-width: 900px) {
+  html body :is(.pkort__lank, .checklista__steg, .ar-har, .prisskala__chip, .marksok__knapp, .marksok__plats) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  html body label.tval { min-height: 44px; }
+  html body .hustypval button { min-width: 44px; }
+  html body .flode__prickar a { min-width: 44px; justify-content: center; }
+  html body .site-footer .site-footer__nav a { min-width: 44px; }
+  html body .tv__reglage input[type="range"] { height: 44px; }
+  /* Uthyrningsreglaget: spåret är kvar 8 px men tummen får 44 px att träffa. */
+  html body .kalkyl__rad input {
+    box-sizing: content-box;
+    height: 8px;
+    border-block: 18px solid transparent;
+    background-clip: padding-box;
+  }
+}
+
+/* --- Läsbar text: inget brödstycke under 14 px på mobil ---------------- */
+@media (max-width: 900px) {
+  html body :is(.prisskala__ytanot, .offert__summa, .tv__friskrivning, .tv__regler-not, .markkoll__not,
+    .samagare__nyckel, .samagare__not, .kalkyl__not) {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  html body .platstopp__etikett { font-size: 0.6875rem; }
+  /* Formulärfält under 16 px zoomar in sidan på iPhone. */
+  html body .samagare__namnrad input { font-size: 1rem; }
+  /* Etiketten och knapparna får brytas i stället för att gå utanför. */
+  html body .marksok__etikett { max-width: 100%; overflow-wrap: anywhere; }
+  html body :is(.checklista__punkt, .pf-lev__namn) { min-width: 0; overflow-wrap: anywhere; }
+  html body .tomtteaser__fot .ih-knapp { max-width: 100%; white-space: normal; text-align: center; }
+}
+
+/* --- Tipset om verktyget på telefon: en smal rad längst ner -------------
+   Bara "Prova", länken och krysset; frågan står redan på länken. */
+@media (max-width: 700px) {
+  html body .tipsruta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    padding: 6px 6px 6px 16px;
+    border-radius: 999px;
+  }
+  html body .tipsruta[hidden] { display: none; }
+  html body .tipsruta__etikett { flex: none; margin: 0; }
+  html body .tipsruta__text { display: none; }
+  html body .tipsruta__lank {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 44px;
+    align-items: center;
+    padding: 0 16px;
+  }
+  html body .tipsruta__stang { position: static; flex: none; width: 44px; height: 44px; }
+}
+
+/* Om oss: bilderna har fått width/height (inga layouthopp) - formatet
+   kommer fortfarande från aspect-ratio i CSS. */
+html body .segment__media img { height: auto; }
+
+/* Kategorisidornas flikar, länkpiller och kortrubriker: 44 px höga på telefon. */
+@media (max-width: 900px) {
+  html body :is(.category-filter a, .kat-huvud__lankar a) { min-height: 44px; }
+  html body .model-card__title > a { display: inline-flex; align-items: center; min-height: 44px; }
+  html body .marksok > .marksok__etikett { justify-self: start; width: auto; min-width: 0; letter-spacing: 0.12em; }
+}
+
+/* Liggande telefon: sidhuvudet har redan "Börja här", så bottenraden döljs
+   och sidan får tillbaka en sjättedel av den låga skärmen. */
+@media (max-height: 500px) and (orientation: landscape) {
+  html body .cta-bar { display: none; }
+}

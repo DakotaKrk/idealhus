@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119d';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119e';
 
-const MOTOR_V = '20261119d';
+const MOTOR_V = '20261119e';
 const Q0 = new URLSearchParams(location.search);
 const INB = Q0.get('inbaddad') === '1';
 if (INB) document.documentElement.classList.add('inbaddad');
@@ -1055,7 +1055,15 @@ function sattInne(pa, vyIndex, opt) {
     if (sn.getAttribute('aria-pressed') === 'true') { ritare.snurra(false); sn.setAttribute('aria-pressed', 'false'); }
     visaTips(null);
     // efter toningen in (0,5 s), så att chipet inte glider in över den gamla bilden
-    setTimeout(() => { if (inneLage) visaGang(true); }, lugn() ? 0 : 380);
+    // (efter åkningen in genom dörren: annars hann chipet gå bort innan man var inne)
+    const pek = matchMedia('(hover: none), (pointer: coarse)').matches;
+    let vantat = 0;
+    const visaNar = () => {
+      if (!inneLage) return;
+      if (kan('flyger') && ritare.flyger() && (vantat += 200) < 8000) { setTimeout(visaNar, 200); return; }
+      visaGang(true, pek ? 6000 : 4000);
+    };
+    setTimeout(visaNar, lugn() ? 0 : 380);
   } else if (!pa && forra) {
     markeraTumme(null);
     if (mattForeInne) ritare.satt('matt', true);
@@ -1689,6 +1697,57 @@ if (FOTO && ritare) {
 markeraTumme(nuVy || (inneLage ? 'inne' : 'runt'));
 nyaTummar();
 
+// ---- Grafiken tappas (telefonen behövde minnet, appbyte, drivrutinen startade om) ----
+// three.js väntar på att sammanhanget kommer tillbaka; då laddas sidan om (länken har alla
+// val, så samma hus, färger och läge kommer tillbaka). Under tiden: ett vänligt besked.
+if (!FOTO) {
+  let tappad = null;
+  duk.addEventListener('webglcontextlost', e => {
+    e.preventDefault();
+    if (tappad) return;
+    tappad = document.createElement('p');
+    tappad.className = 'ritare__fel ritare__fel--tappad'; tappad.setAttribute('role', 'status');
+    tappad.innerHTML = '<span>Bilden behöver laddas om.<br><button type="button" class="kf__knapp">Ladda om</button></span>';
+    tappad.querySelector('button').addEventListener('click', () => location.reload());
+    scen.appendChild(tappad);
+  });
+  duk.addEventListener('webglcontextrestored', () => { try { spara(); } catch (err) { /* länken var redan rätt */ } setTimeout(() => location.reload(), 150); });
+}
+
+// ---- Flikraderna i scenen (rummen, våningarna) på en rad ----
+// Tonade kanter där det finns mer att rulla till, och den valda fliken rullas in i bild
+// (bara raden rullas, aldrig sidan).
+function rullRad(el) {
+  if (!el) return;
+  const kant = () => {
+    const mer = el.scrollWidth - el.clientWidth;
+    const v = mer > 1 && el.scrollLeft > 2, h = mer > 1 && el.scrollLeft < mer - 2;
+    const n = (v ? 'v' : '') + (h ? 'h' : '');
+    if ((el.getAttribute('data-rulla') || '') !== n) { if (n) el.setAttribute('data-rulla', n); else el.removeAttribute('data-rulla'); }
+  };
+  // rullar man själv i raden får den vara i fred en stund (annars drog den tillbaka mitt i ett
+  // tryck, och fingret träffade grannfliken); den valda fliken rullas fram bara när den byts
+  let egen = 0, sistVald = null;
+  ['pointerdown', 'touchstart', 'wheel'].forEach(n => el.addEventListener(n, () => { egen = performance.now(); }, { passive: true }));
+  const visaVald = () => {
+    const b = el.querySelector('[aria-pressed="true"]');
+    if (b === sistVald || performance.now() - egen < 2500) { kant(); return; }
+    sistVald = b;
+    if (b && el.scrollWidth > el.clientWidth + 1) {
+      const l = b.offsetLeft, r = l + b.offsetWidth, m = 22;
+      if (l - m < el.scrollLeft) el.scrollTo({ left: Math.max(0, l - m), behavior: lugn() ? 'auto' : 'smooth' });
+      else if (r + m > el.scrollLeft + el.clientWidth) el.scrollTo({ left: r + m - el.clientWidth, behavior: lugn() ? 'auto' : 'smooth' });
+    }
+    kant();
+  };
+  el.addEventListener('scroll', kant, { passive: true });
+  if (typeof ResizeObserver === 'function') new ResizeObserver(kant).observe(el);
+  new MutationObserver(() => requestAnimationFrame(visaVald)).observe(el, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-pressed', 'hidden'] });
+  requestAnimationFrame(visaVald);
+}
+rullRad(inneRumRad);
+rullRad(lagerRad);
+
 // ---- Styrspaken: gå runt inne på pekskärm ----
 // En rund spak nere till vänster (syns bara inne och bara på pekskärm, se husritare.css).
 // Tummen drar knoppen; motorn går åt det hållet med samma krock och hinder som W A S D.
@@ -1742,43 +1801,116 @@ if (kan('spak') && !FOTO) {
   const knapp = hall.firstChild, lista = hall.lastChild;
   // i den ordning de lämnar raden
   const ORDNING = ['[data-tangenter]', '[data-liv]', '[data-ladda]', '[data-snurra]', '[data-matt-knapp]', '[data-helskarm]', '[data-hjalp]', '[data-spel]', '[data-lampor]', '[data-oppna]'];
-  const poster = ORDNING.map(s => rad.querySelector('.kf__vk' + s)).filter(Boolean).map(el => { const plats = document.createComment('mer'); el.after(plats); return { el, plats }; });
-  const oppna = pa => { lista.hidden = !pa; knapp.setAttribute('aria-expanded', String(pa)); };
+  const poster = ORDNING.map(s => ({ sel: s, el: rad.querySelector('.kf__vk' + s) })).filter(p => p.el).map((p, i) => { const plats = document.createComment('mer' + i); p.el.after(plats); p.plats = plats; return p; });
+  // radens ordning från vänster (för listan i menyn)
+  const ORDNING_RAD = poster.slice().sort((a, b) => (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+  const oppna = pa => { pa = !!pa; if (lista.hidden === !pa) return; lista.hidden = !pa; knapp.setAttribute('aria-expanded', String(pa)); };
+  // ett tryck = ett klick (inget pointerdown här, så att pekskärmen inte öppnar och stänger dubbelt)
   knapp.addEventListener('click', e => { e.stopPropagation(); visaMeny(null); oppna(lista.hidden); });
-  lista.addEventListener('click', () => oppna(false));
-  document.addEventListener('click', e => { if (!lista.hidden && !e.target.closest('.kf__mer')) oppna(false); });
+  lista.addEventListener('click', e => { if (e.target.closest('.kf__vk')) oppna(false); });
+  // tryck utanför stänger direkt (även på bilden, där 3D-styrningen annars tar klicket)
+  document.addEventListener('pointerdown', e => { if (!lista.hidden && !e.target.closest('.kf__mer')) oppna(false); }, true);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !lista.hidden) { e.stopPropagation(); oppna(false); knapp.focus(); } }, true);
-  // ryms raden? (naturlig bredd mot scenens bredd minus luften i kanterna)
-  const forStor = () => {
-    rad.classList.add('kf__verktyg--mat');
-    const w = rad.offsetWidth;
-    rad.classList.remove('kf__verktyg--mat');
-    // luften i kanterna: 2 × radens vänsterkant när den är spänd mellan kanterna, annars 32 px
-    const cs = getComputedStyle(rad), spand = cs.translate === 'none' || cs.translate === '';
-    return w > rad.parentNode.clientWidth - (spand ? 2 * (parseFloat(cs.left) || 8) : 32) + 0.5;
+  // Mätningen görs på en osynlig kopia av raden (aldrig på den riktiga: där startade
+  // flyttningarna fram och tillbaka knapparnas övergångar, och menyn hoppade).
+  // Kopian får alla knappar på sina platser och sin naturliga bredd; sedan tas knapparna
+  // bort ur kopian i ORDNING tills den ryms. Den riktiga raden ändras bara om resultatet ändras.
+  const kopiaPost = k => {
+    // platshållarna heter mer0, mer1 … efter knappens nummer (de ligger i radens ordning,
+    // inte i ORDNING: förut parades de ihop fel och knappar hamnade i fel grupp i kopian)
+    const plats = {}, tw = document.createTreeWalker(k, NodeFilter.SHOW_COMMENT);
+    while (tw.nextNode()) if (/^mer\d+$/.test(tw.currentNode.data)) plats[tw.currentNode.data] = tw.currentNode;
+    return poster.map((p, i) => ({ el: k.querySelector('.kf__vk' + p.sel), plats: plats['mer' + i] }));
   };
-  let vantar = 0;
-  function passa() {
+  const STEG = ['kf__verktyg--trang', 'kf__verktyg--ikon', 'kf__verktyg--utantid', 'kf__verktyg--utanmiljo'];
+  let nuUt = null, vantar = 0;
+  // korrektionen (px) som behövdes sist, för samma scenbredd och samma läge: en ny mätning
+  // börjar där, annars växlade raden fram och tillbaka (flytten mätte om utan korrektionen)
+  let korr = 0, korrNyckel = '';
+  function passa(minus = null, varv = 0) {
     vantar = 0;
-    poster.forEach(p => { if (p.el.parentNode === lista) p.plats.before(p.el); });
-    rad.classList.remove('kf__verktyg--trang'); hall.hidden = true;
-    if (forStor()) {
-      rad.classList.add('kf__verktyg--trang');
-      if (forStor()) {
-        hall.hidden = false;   // Mer-knappen tar själv plats: den räknas med från början
-        for (let i = 0; i < poster.length && forStor(); i++) {
-          const el = poster[i].el;
-          if (el.hidden || !el.offsetWidth) continue;   // syns inte i det här läget
-          lista.appendChild(el);
-        }
-        if (!lista.children.length) hall.hidden = true;
+    const kn = rad.parentNode.clientWidth + '|' + lageNu();
+    if (minus === null) minus = kn === korrNyckel ? korr : 0;
+    const cs = getComputedStyle(rad), spand = cs.translate === 'none' || cs.translate === '';
+    const plats = rad.parentNode.clientWidth - (spand ? 2 * (parseFloat(cs.left) || 8) : 32) + 0.5 - minus;
+    const k = rad.cloneNode(true);
+    k.removeAttribute('id'); k.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+    k.classList.add('kf__verktyg--mat'); k.classList.remove('kf__verktyg--trang');
+    k.setAttribute('aria-hidden', 'true');
+    k.style.cssText = 'visibility:hidden;pointer-events:none;animation:none;transition:none';
+    const kp = kopiaPost(k), kMer = k.querySelector('.kf__mer');
+    kp.forEach(p => { if (p.el && p.plats && p.el.parentNode !== p.plats.parentNode) p.plats.before(p.el); });
+    kMer.hidden = true;
+    STEG.forEach(c => k.classList.remove(c));
+    rad.parentNode.appendChild(k);
+    // grupper utan något synligt (och deras avdelare) tar ingen plats
+    const kg = [...k.querySelectorAll('.kf__vgrupp')];
+    const bredd = () => {
+      kg.forEach(g => g.classList.remove('kf__vgrupp--tom'));
+      const tom = kg.map(g => ![...g.children].some(c => c.offsetWidth > 0));
+      kg.forEach((g, i) => { if (tom[i]) g.classList.add('kf__vgrupp--tom'); });
+      return k.offsetWidth;
+    };
+    // stegen i tur och ordning: smalare reglage, knappar till Mer, Se inne som ikon, reglaget bort
+    const steg = []; const ut = [];
+    if (bredd() > plats) { steg.push('kf__verktyg--trang'); k.classList.add('kf__verktyg--trang'); }
+    if (bredd() > plats) {
+      kMer.hidden = false;
+      for (let i = 0; i < kp.length && bredd() > plats; i++) {
+        const e = kp[i].el;
+        if (!e || e.hidden || !e.offsetWidth) continue;   // syns inte i det här läget
+        e.remove(); ut.push(i);
       }
+      if (!ut.length) kMer.hidden = true;
     }
+    if (bredd() > plats) { steg.push('kf__verktyg--ikon'); k.classList.add('kf__verktyg--ikon'); }
+    if (bredd() > plats) { steg.push('kf__verktyg--utantid'); k.classList.add('kf__verktyg--utantid'); }
+    // allra trängst (inbäddad, 320 px, med Vinklar): miljöknappen, den minst viktiga, går bort
+    if (bredd() > plats) { steg.push('kf__verktyg--utanmiljo'); k.classList.add('kf__verktyg--utanmiljo'); }
+    bredd();
+    const tomma = kg.map(g => g.classList.contains('kf__vgrupp--tom'));
+    k.remove();
+    const nyckel = ut.join(',') + '|' + steg.join(',') + '|' + tomma.map(Number).join('');
+    if (nyckel !== nuUt) { nuUt = nyckel; satt(ut, steg, tomma); }
+    // kontroll mot den riktiga raden: spiller den ändå över (kopian är aldrig exakt likadan),
+    // mät om med så mycket mindre plats (högst fyra varv, så att det aldrig blir en slinga)
+    // (även inne i grupperna: solgruppen får krympa på mobil, och då spillde den över i
+    // grannen utan att raden själv blev bredare)
+    // Mäts på knapparnas verkliga lägen (scrollWidth räknade med absolut placerade barn, t.ex.
+    // tidsbubblan, och larmade fast inget låg fel): utanför raden eller ovanpå varandra
+    const R = rad.getBoundingClientRect(), hoger = R.right - (parseFloat(cs.paddingRight) || 0) + 1;
+    const lagen = [...rad.querySelectorAll('.kf__vk, .kf__ljusknapp, .ritare__reglage')].filter(e => e.offsetWidth && !e.closest('.kf__popup')).map(e => e.getBoundingClientRect()).sort((a, b) => a.left - b.left);
+    let over = 0;
+    // (solknappen har avsiktligt negativa marginaler, -4/-6 px: grannar får gå 6 px in i varandra)
+    lagen.forEach((r, i) => { over = Math.max(over, r.right - hoger); if (i) over = Math.max(over, lagen[i - 1].right - r.left - 6); });
+    if (over > 1 && varv < 4) { passa(minus + over + 2, varv + 1); return; }
+    korr = minus; korrNyckel = kn;
+  }
+  function satt(ut, steg, tomma) {
+    STEG.forEach(c => { const pa = steg.includes(c); if (rad.classList.contains(c) !== pa) rad.classList.toggle(c, pa); });
+    poster.forEach((p, i) => {
+      const ska = ut.includes(i);
+      if (ska && p.el.parentNode !== lista) lista.appendChild(p.el);
+      else if (!ska && p.el.parentNode === lista) p.plats.before(p.el);
+    });
+    // listans ordning: som i raden (från vänster), inte i den ordning de lämnade den
+    poster.slice().sort((a, b) => ORDNING_RAD.indexOf(a) - ORDNING_RAD.indexOf(b)).forEach(p => { if (p.el.parentNode === lista) lista.appendChild(p.el); });
+    rad.querySelectorAll('.kf__vgrupp').forEach((g, i) => { if (g.classList.contains('kf__vgrupp--tom') !== !!tomma[i]) g.classList.toggle('kf__vgrupp--tom', !!tomma[i]); });
+    hall.hidden = !ut.length;
     if (hall.hidden) oppna(false);
   }
-  const snart = () => { if (!vantar) vantar = requestAnimationFrame(passa); };
+  const snart = () => { if (!vantar) vantar = requestAnimationFrame(() => passa()); };
   new ResizeObserver(snart).observe(rad.parentNode);
-  new MutationObserver(snart).observe(scen, { attributes: true, attributeFilter: ['class'] });
-  new MutationObserver(l => { if (l.some(r => r.target !== hall && r.target !== lista)) snart(); }).observe(rad, { attributes: true, attributeFilter: ['hidden'], subtree: true });
+  // gruppernas egen bredd (typsnittet laddas, Se inne blir Se ute, en knapp döljs): mät om.
+  // Resultatet är stabilt, så flyttningarna här ger ingen ny omgång.
+  const grpObs = new ResizeObserver(snart);
+  rad.querySelectorAll('.kf__vgrupp').forEach(g => grpObs.observe(g));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(snart);
+  new MutationObserver(() => { const n = lageNu(); if (n !== sistLage) { sistLage = n; snart(); } }).observe(scen, { attributes: true, attributeFilter: ['class'] });
+  // en knapp som döljs eller visas (Spel, Lampor, Hjälp inne) kan ändra vad som ryms
+  new MutationObserver(l => { if (l.some(r => r.target !== hall && r.target !== lista && r.target.classList && r.target.classList.contains('kf__vk'))) snart(); }).observe(rad, { attributes: true, attributeFilter: ['hidden'], subtree: true });
+  // scenens klass: bara de lägen som byter knappar (inne, tak av, plan), inte t.ex. dragningar
+  let sistLage = '';
+  const lageNu = () => ['kf__scen--inne', 'kf__scen--oppen', 'kf__scen--plan', 'kf__scen--klar'].map(c => scen.classList.contains(c) ? 1 : 0).join('');
   passa();
 })();
