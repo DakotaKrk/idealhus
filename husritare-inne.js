@@ -654,7 +654,8 @@ function* tygBibliotekSteg() {
     // perkal: tät, slät väv
     (x, y) => 0.955 + ((((x >> 1) + (y >> 1)) & 1) ? 0.012 : -0.012) + 0.025 * (br(x, y, 12, 2) - 0.5),
     // bouclé: små öglor i ojämna klungor
-    (x, y) => { const d = cl(x, y, 30, 3); return 0.8 + 0.2 * ring(d, 0.32, 0.012) - 0.08 * (d < 0.12 ? 1 : 0) + 0.08 * (br(x, y, 16, 4) - 0.5); },
+    // (mjukare öglor: på nära håll såg den starka kontrasten ut som ett regelbundet prickraster)
+    (x, y) => { const d = cl(x, y, 30, 3); return 0.86 + 0.11 * ring(d, 0.32, 0.016) - 0.03 * (d < 0.12 ? 1 : 0) + 0.07 * (br(x, y, 16, 4) - 0.5) + 0.03 * (br(x, y, 5, 41) - 0.5); },
     // sammet: slät lugg med mjuka, stora skiftningar (glansen kommer i skuggningen)
     (x, y) => 0.88 + 0.1 * (br(x, y, 4, 5) - 0.5) + 0.04 * (br(x, y, 16, 6) - 0.5),
     // frotté: täta öglor i rader
@@ -1330,6 +1331,61 @@ function ramMatris(f, djup) {
   return m;
 }
 
+// Dörrtrycke (samma modell i hela huset): rund rosett med fasad kant mot bladet, rund hals,
+// ett avrundat rör som böjer 90° ut från halsen och smalnar mot en rundad ände, och under det
+// en separat rund skylt med ett vred. Lokalt i ramen M: trycket sitter i (x, y, z), bladets
+// normal ut mot rummet är k·z (k = ±1), greppet pekar åt sx (±1) längs x. Allt läggs i mk.
+function trycke(mk, M, x, y, z, k, sx, vred = true) {
+  iRam(M, () => {
+    const ros = (r, yy) => lagg(mk, new T.LatheGeometry([[0, 0], [r, 0], [r + 0.0012, 0.0025], [r, 0.006], [r - 0.004, 0.008], [0, 0.008]].map(q => new T.Vector2(q[0], q[1])), 16).rotateX(k * PI / 2), mx(x, yy, z));
+    ros(0.025, y);
+    lagg(mk, new T.CylinderGeometry(0.0085, 0.009, 0.046, 10, 1, true).rotateX(PI / 2), mx(x, y, z + k * 0.03));
+    const P = [V(x, y, z + k * 0.046), V(x + sx * 0.012, y, z + k * 0.0575), V(x + sx * 0.04, y, z + k * 0.0605), V(x + sx * 0.09, y - 0.002, z + k * 0.0605), V(x + sx * 0.128, y - 0.004, z + k * 0.059)];
+    tub(mk, P, 0.0098, 0.0078, 12, 8);
+    lagg(mk, new T.SphereGeometry(0.0078, 8, 4, 0, 2 * PI, 0, PI / 2).rotateZ(-sx * PI / 2), mx(P[4].x, P[4].y, P[4].z));   // rundad ände
+    lagg(mk, new T.SphereGeometry(0.0098, 8, 4), mx(P[0].x, P[0].y, P[0].z));
+    if (vred === false) return;
+    ros(0.019, y - 0.13);
+    // vred: en liten, rundad tunga på en kort hals
+    lagg(mk, new T.CylinderGeometry(0.006, 0.0065, 0.012, 8, 1, true).rotateX(PI / 2), mx(x, y - 0.13, z + k * 0.014));
+    rbx(mk, 0.008, 0.03, 0.012, x, y - 0.13, z + k * 0.024, 0.0035, 0, 0, 1);
+  });
+}
+// Fönsterhandtag: rundad rektangulär rosett mot karmen, en kort rund bas och ett platt,
+// mjukt avrundat vridgrepp som pekar nedåt. Lokalt i M, normal ut i rummet k·z.
+function fonsterHandtag(mk, M, x, y, z, k) {
+  iRam(M, () => {
+    rbx(mk, 0.034, 0.072, 0.009, x, y, z + k * 0.0045, 0.0042, 0, 0, 1);
+    lagg(mk, new T.CylinderGeometry(0.0105, 0.0115, 0.02, 10, 1, true).rotateX(PI / 2), mx(x, y, z + k * 0.018));
+    lagg(mk, new T.SphereGeometry(0.012, 10, 5), mx(x, y, z + k * 0.029));
+    const g = new T.CapsuleGeometry(0.0078, 0.085, 3, 10).scale(1, 1, 0.68);
+    lagg(mk, g, mx(x, y - 0.052, z + k * 0.031));
+  });
+}
+// Skjutdörrens grepp: en smal, rundad stång på två runda distanser. Lokalt i M, normal k·z.
+function skjutGrepp(mk, M, x, y, z, k) {
+  iRam(M, () => {
+    for (const dy of [-0.12, 0.12]) { lagg(mk, new T.CylinderGeometry(0.014, 0.0155, 0.004, 12).rotateX(PI / 2), mx(x, y + dy, z + k * 0.002)); lagg(mk, new T.CylinderGeometry(0.0055, 0.0055, 0.03, 8, 1, true).rotateX(PI / 2), mx(x, y + dy, z + k * 0.018)); }
+    lagg(mk, new T.CapsuleGeometry(0.0095, 0.3, 3, 10), mx(x, y, z + k * 0.036));
+  });
+}
+
+// Fönsterbänk i ramen m (u längs väggen, v upp, n ut från väggen negativt in i rummet):
+// överkant i v, baksidan i nBak (inne i smygen), framkanten i nFram, längd L kring cu.
+function fonsterBank(m, cu, v, nBak, nFram, L) {
+  const t = 0.03, b = 0.004, r = 0.016, hl = L / 2 - b, s = new T.Shape();
+  // planform (x = u, y = -n): rak bakkant, rundade framhörn
+  const y0 = -nBak - b, y1 = -nFram - b;
+  s.moveTo(-hl, y0); s.lineTo(hl, y0); s.lineTo(hl, y1 - r); s.quadraticCurveTo(hl, y1, hl - r, y1); s.lineTo(-hl + r, y1); s.quadraticCurveTo(-hl, y1, -hl, y1 - r); s.lineTo(-hl, y0);
+  const g = new T.ExtrudeGeometry(s, { depth: t - 2 * b, bevelEnabled: true, bevelThickness: b, bevelSize: b, bevelSegments: 2, curveSegments: 4 });
+  g.rotateX(-PI / 2).translate(cu, v - t + b, 0);
+  lagg('ek', g, m.clone());
+  // ändträ: mörkare, matt ton på bänkens raka ändar (0,3 mm utanför)
+  ton('#8a6748', () => { for (const sd of [-1, 1]) { const q = new T.PlaneGeometry(Math.max(0.005, (y1 - r) - y0 - 0.004), t - 0.006).rotateY(sd * PI / 2).translate(cu + sd * (hl + b + 0.0003), v - t / 2, -((y0 + y1 - r) / 2)); lagg('ek', q, m.clone()); } });
+  // skuggfog: en svag, mörk springa där bänkens underkant möter väggen
+  ton('#7d7368', () => boxM('vagg', m, L - 0.03, 0.003, 0.002, cu, v - t - 0.0015, -I - 0.001));
+}
+
 function boxM(mk, m, w, h, d, cu, cv, cn) {
   if (w <= 0.002 || h <= 0.002) return;
   const g = new T.BoxGeometry(w, h, d);
@@ -1409,7 +1465,9 @@ function oppningsDetaljer(H) {
       boxM('vagg', m0, w + 0.04, 0.02, d, cu, h.v1 + 0.01, cn);
       boxM('vagg', m0, 0.02, hh, d, h.u0 - 0.01, cv, cn);
       boxM('vagg', m0, 0.02, hh, d, h.u1 + 0.01, cv, cn);
-      if (h.v0 > 0.01) boxM('ek', m0, w + 0.1, 0.03, d + 0.045, cu, h.v0 - 0.015, cn - 0.0225);
+      // fönsterbänk i ek: sticker ut 2,5 cm förbi fodren, rundade framhörn, 4 mm rundad kant
+      // runt om (en liten näsa fram), ändträ i mörkare ton på ändarna och en skuggfog mot väggen
+      if (h.v0 > 0.01) fonsterBank(m0, cu, h.v0, cn + d / 2, cn - 0.0225 - (d + 0.045) / 2, w + 0.17);
       // ett levande ljus i fönsterbänken (lagt i ljusLagor)
       if (LAGER === 'botten' && h.v0 > 0.5 && h.v0 < 1.3 && w > 0.5 && nljus < 2) {
         const p = V(cu - w * 0.28, h.v0, cn - 0.03).applyMatrix4(m0);
@@ -1427,10 +1485,9 @@ function oppningsDetaljer(H) {
         boxM('vit', m0, 0.062, rh, kd, ru0 + 0.031, rcv, kn);
         boxM('vit', m0, 0.062, rh, kd, ru1 - 0.031, rcv, kn);
         for (let i = 1; i < rutor; i++) boxM('vit', m0, 0.08, rh, kd, ru0 + (rw * i) / rutor, rcv, kn);
-        if (typ === 'sk') boxM('svart', m0, 0.025, 0.32, 0.03, rcu - rw * 0.02, 1.05, kn - 0.03);
-        else if (LAGER === 'botten') { const hx = ru0 + rw / rutor - 0.1;
-          boxM('svart', m0, 0.035, 0.07, 0.008, hx, rcv, kn - 0.023); boxM('svart', m0, 0.012, 0.012, 0.02, hx, rcv, kn - 0.037);
-          boxM('svart', m0, 0.02, 0.11, 0.014, hx, rcv - 0.045, kn - 0.054); }
+        // (handtagen förr: raka svarta lådor; nu rundad rosett, bas och avrundat grepp)
+        if (typ === 'sk') skjutGrepp('svart', m0, rcu - rw * 0.02, 1.05, kn - kd / 2, -1);
+        else if (LAGER === 'botten') fonsterHandtag('svart', m0, ru0 + rw / rutor - 0.1, rcv, kn - kd / 2, -1);
       } else {
         // ytterdörr: vit insida med handtag
         // vit karm på insidan av motorns dörrkarm (5,5 cm), bladet ryms mellan karmsidorna
@@ -1447,12 +1504,8 @@ function oppningsDetaljer(H) {
           boxM('vit', m0, gw, b0 + bh - (gc + gh / 2), dd, rcu, (b0 + bh + gc + gh / 2) / 2, dn);
         } else boxM('vit', m0, bw, bh, dd, rcu, b0 + bh / 2, dn);
         const sida = s === 'N' || s === 'W' ? -1 : 1;
-        boxM('svart', m0, 0.13, 0.02, 0.022, rcu + sida * (rw / 2 - 0.12), 1.0, dn - 0.027 - 0.011);
-        boxM('svart', m0, 0.03, 0.06, 0.012, rcu + sida * (rw / 2 - 0.07), 1.0, dn - 0.009);
-        boxM('svart', m0, 0.014, 0.014, 0.018, rcu + sida * (rw / 2 - 0.07), 1.0, dn - 0.024);
-        // vred (låsvred) på en egen skylt under trycket, samma linje som trycket
-        boxM('svart', m0, 0.03, 0.05, 0.006, rcu + sida * (rw / 2 - 0.07), 0.9, dn - 0.006);
-        boxM('svart', m0, 0.008, 0.032, 0.016, rcu + sida * (rw / 2 - 0.07), 0.9, dn - 0.017);
+        // trycke och låsvred (förr raka svarta lådor): samma modell som innerdörrarna
+        trycke('svart', m0, rcu + sida * (rw / 2 - 0.07), 1.0, dn - dd / 2, -1, -sida);
       }
       // foderlist runt om på väggens insida
       const A = 0.06, fn = -I - 0.009, fd = 0.018;
@@ -1462,7 +1515,7 @@ function oppningsDetaljer(H) {
       boxM('vit', m0, A, top - bot, fd, h.u0 - A / 2, (top + bot) / 2, fn);
       boxM('vit', m0, A, top - bot, fd, h.u1 + A / 2, (top + bot) / 2, fn);
       if (top - h.v1 > 0.02) boxM('vit', m0, w + 2 * A, top - h.v1, fd, cu, (top + h.v1) / 2, fn);
-      if (h.v0 > 0.01) boxM('vit', m0, w + 0.04, A, fd, cu, h.v0 - 0.03 - A / 2, fn);   // smygbräda under bänken
+      if (h.v0 > 0.01) boxM('vit', m0, w + 0.17 - 0.03, A, fd, cu, h.v0 - 0.03 - A / 2, fn);   // smygbräda under bänken, i liv med bänkens raka del
     }));
     // golvsockel mellan öppningarna som går ner till golvet
     let a = ua;
@@ -1602,15 +1655,9 @@ function vagg(axel, c, s0, s1, op = {}) {
         return;
       }
       // trycke på 1,0 m på båda sidor: rosett mot bladet (+0,5 mm), hals och grepp
+      // (samma trycke som ytterdörren; greppet pekar in mot gångjärnet; i dörrens egen ram)
       ton('#2a2928', () => {
-        for (const k of [1, -1]) {
-          const yta = zb + k * tj / 2;
-          lagg(glasd ? 'svart' : 'vit', new T.CylinderGeometry(0.024, 0.024, 0.008, 24).rotateX(PI / 2), mx(w - 0.07, 1.0, yta + k * 0.0045));
-          lagg(glasd ? 'svart' : 'vit', new T.CylinderGeometry(0.008, 0.008, 0.05, 12).rotateX(PI / 2), mx(w - 0.07, 1.0, yta + k * 0.033));
-          rbx(glasd ? 'svart' : 'vit', 0.13, 0.019, 0.019, w - 0.07 - 0.055, 1.0, yta + k * 0.0575, 0.008, 0, 0, 2);
-          // nyckelskylt under trycket
-          rbx(glasd ? 'svart' : 'vit', 0.03, 0.06, 0.006, w - 0.07, 0.86, yta + k * 0.0035, 0.003, 0, 0, 1);
-        }
+        for (const k of [1, -1]) trycke(glasd ? 'svart' : 'vit', BAS, w - 0.07, 1.0, zb + k * tj / 2, k, -1);
       });
     }, glasd ? 'Bastu' : dRum);
     // låsbleck i karmen vid låskanten
@@ -1800,8 +1847,9 @@ function loftInne(xA, zA, xB, zTrappa) {
   // madrass, puff och växt på loftet
   // 90-bädd med en 50 cm bred gång mellan bädden och räcket: förr stod 120-bädden 9 cm från
   // räcket, så att man i gångläget inte kom förbi den från trappan in på loftet
-  med(XW + 1.09, zA - 1.055, PI / 2, () => sang(0.9, 2.0, { lag: true, tacke: '#efe9de', pled: '#cf9f78', kudde: '#b9c2a6' }));
-  // lykta på golvet vid fotänden (norr om gången): ram, glas och ett levande ljus; skenet är en egen lampa
+  // lykta på golvet vid fotänden (norr om gången): ram, glas och ett levande ljus; skenet är en egen lampa.
+  // (byggs före bädden: fårskinnet vid fotänden letar plats runt hindren och lade sig förr in
+  // under lyktan, så att lyktan stod i skinnet och ljuset såg ut att gå in i ett ben)
   med(XW + 2.55, zA - 1.0, 0, () => {
     skugga(0, 0, 0.16, 0.16, 0, 0.06, 0.35, LT + 0.021);
     hind(0.2, 0.2);
@@ -1810,10 +1858,11 @@ function loftInne(xA, zA, xB, zTrappa) {
       for (const sx of [-1, 1]) for (const sz of [-1, 1]) rbx('keramik', 0.012, 0.25, 0.012, sx * 0.079, LT + 0.137, sz * 0.079, 0.003, 0, 0, 1);
       lagg('keramik', new T.TorusGeometry(0.035, 0.004, 8, 20, PI), mx(0, LT + 0.28, 0)); }));
     for (const [a, b] of [[0, 0.079], [0, -0.079], [0.079, 0], [-0.079, 0]]) platta('glas', 0.146, 0.244, mx(a, LT + 0.137, b, a ? PI / 2 : 0), null, [1, 1]);
-    ljus(0, LT + 0.012, 0, 0.035, 0.1);
+    ljus(0, LT + 0.012, 0, 0.028, 0.1);   // (smalare ljus: minst 4,5 cm till stolparna)
     const li = egenLampa('Lykta', [0, LT + 0.32, 0], () => lagg('lampa', new T.CircleGeometry(0.03, 16).rotateX(-PI / 2), mx(0, LT + 0.0125, 0)));
     sken(li, 0, LT + 0.006, 0, 0.3, 0.3, 0.3, false, 0.35);
   });
+  med(XW + 1.09, zA - 1.055, PI / 2, () => sang(0.9, 2.0, { lag: true, tacke: '#efe9de', pled: '#cf9f78', kudde: '#b9c2a6' }));
   med(0, 0, 0, () => {
     ton('#b7875b', () => vav('stick', () => svarv('tyg', [[0, 0], [0.22, 0], [0.245, 0.04], [0.25, 0.26], [0.22, 0.3], [0, 0.31]], XW + 0.62, LT, (zA + ZS) / 2 + 0.1, 32)));
     // (puffen 28 cm närmare gaveln: den stod i vägen vid trappans topp i det smala loftet)
@@ -2039,7 +2088,8 @@ function farskinn(x, y, z, ry, a = 0.5, b = 0.78, fg = '#f6efe3') {
     { const nn = g.attributes.normal, v = V(0, 0, 0); for (let j = 0; j < nn.count; j++) { v.fromBufferAttribute(nn, j); v.y += 1.3; v.normalize(); nn.setXYZ(j, v.x, v.y, v.z); } }
     tof.push(g);
   }
-  if (tof.length) { const tg = mergeGeometries(tof); tof.forEach(g => g.dispose()); ton(skiftTon(fg, 1.02), () => vav('boucle', () => lagg('tyg', tg, mx(x, y, z, ry)))); }
+  // (fårskinnets eget, luggiga lager i tygbiblioteket: med bouclé blev det ett regelbundet prickmönster på nära håll)
+  if (tof.length) { const tg = mergeGeometries(tof); tof.forEach(g => g.dispose()); ton(skiftTon(fg, 1.02), () => vav('skinn', () => lagg('tyg', tg, mx(x, y, z, ry)))); }
   for (let i = 0; i < ns; i++) ix.push(0, 1 + (i + 1) % ns, 1 + i);
   for (let j = 1; j < nr; j++) for (let i = 0; i < ns; i++) {
     const a0 = 1 + (j - 1) * ns + i, a1 = 1 + (j - 1) * ns + (i + 1) % ns, b0 = a0 + ns, b1 = a1 + ns;
@@ -2047,7 +2097,7 @@ function farskinn(x, y, z, ry, a = 0.5, b = 0.78, fg = '#f6efe3') {
   }
   const g = new T.BufferGeometry();
   g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setIndex(ix); g.computeVertexNormals();
-  ton(fg, () => vav('boucle', () => lagg('tyg', g, mx(x, y, z, ry))));
+  ton(fg, () => vav('skinn', () => lagg('tyg', g, mx(x, y, z, ry))));
 }
 
 // Tyg som ligger på en yta och viker sig ner över kanterna (täcke, pläd).
@@ -2721,7 +2771,7 @@ function plagg(x, sy, zc, bw, L, typ, fg, ry = 0, o = {}) {
   const AF = rock ? 0.16 : kl ? 0.45 : jacka ? 0.03 : byxa ? -0.1 : kofta ? 0.06 : 0.02;
   const VK = (kl ? 1.6 : byxa ? 0.55 : jacka ? 0.6 : rock ? 0.85 : 1) * (0.75 + 0.5 * h1);
   const SL = byxa ? 0 : 0.055, tS = byxa ? 0.05 : Math.min(0.2, 0.11 / L * 0.9);
-  const fin = !!o.fin, NA = fin ? 26 : 18;
+  const fin = !!o.fin, NA = fin ? 26 : 15;
   const T0 = fin ? [0, 0.015, 0.03, 0.05, 0.07, 0.09, 0.11, 0.14, 0.18, 0.24, 0.31, 0.39, 0.47, 0.55, 0.63, 0.71, 0.79, 0.86, 0.92, 0.97, 1]
     : [0, 0.03, 0.06, 0.09, 0.13, 0.2, 0.3, 0.42, 0.55, 0.68, 0.8, 0.9, 0.96, 1];
   const yT = t => byxa ? -L * t : t < tS ? -SL * (1 - Math.cos(t / tS * PI / 2)) : -SL - (L - SL) * (t - tS) / (1 - tS);
@@ -2768,7 +2818,7 @@ function plagg(x, sy, zc, bw, L, typ, fg, ry = 0, o = {}) {
   // ärmarna: plattade rör längs en mjuk kurva från axeln, utanför kroppen, smalare mot ärmslutet
   {
     const rS = rock || jacka ? 0.04 : kofta ? 0.034 : 0.029, dS = Math.min(rS * 0.8, D * 1.1 + 0.006), Ls = Math.min(rock ? 0.7 : tjock ? 0.62 : 0.58, L * 0.82);
-    const RA = fin ? 10 : 8, SEG = fin ? 14 : 9, ap = [], ai = [];
+    const RA = fin ? 10 : 7, SEG = fin ? 14 : 7, ap = [], ai = [];
     [-1, 1].forEach((s, e) => {
       const ws = wT(tS), tEnd = Math.min(0.98, tS + (Ls - 0.02) / (L - SL) * (1 - tS)), wE = wT(tEnd);
       const k = new T.CatmullRomCurve3([V(0, -SL * 0.45, s * ws * 0.8), V(0.002, -SL - 0.03, s * (ws + rS * 0.55)), V(0.012, -SL - Ls * 0.5, s * (wT((tS + tEnd) / 2) + rS * 0.7)), V(0.008, -SL - Ls, s * (wE + rS * 0.7))], false, 'centripetal');
@@ -2897,7 +2947,7 @@ function handfat(o = {}) {
   // rund spegel med varmt sken runt kanten (självlysande skiva bakom ger en ljusring)
   // (spegel och hylla sitter 8 cm högre än förr: blandarspaken har nu ~9 cm luft under hyllan)
   spegelYta(0, 1.58, -0.204, 0.3);
-  const sl = egenLampa('Spegelbelysning', [0, 1.58, -0.2], () => lagg('lampa', new T.RingGeometry(0.296, 0.322, 48, 1), mx(0, 1.58, -0.2075)), false, []);   // ingen gloria mitt på spegeln
+  const sl = egenLampa('Spegelbelysning', [0, 1.58, -0.2], () => ton('#e2ded6', () => lagg('lampa', new T.RingGeometry(0.299, 0.311, 64, 1), mx(0, 1.58, -0.2075))), false, []);   // ingen gloria mitt på spegeln; ljusringen 1,2 cm (förr 2,6 cm: såg ut som ett tjockt vitt rör när den var släckt)
   sken(sl, 0, 1.58, -0.2115, 0.36, 0.36, 0.42, true, 0.24);   // mjukt sken på kaklet runt spegeln
   // smal ekhylla under spegeln: tvålpump, tandborstmugg, ljus och en liten växt
   rbx('ek', 0.52, 0.022, 0.11, 0, 1.24, -0.175, 0.005, 0, 0, 2);
@@ -3402,9 +3452,12 @@ function spot(x, z) {
   iLager('tak', () => {
     const t = takVid(x, z);
     const [rx, rz] = takLut(x, z);
-    ton('#f4f2ee', () => lagg('vagg', new T.CylinderGeometry(0.042, 0.042, 0.008, 32), mx(x, t - 0.0005, z, 0, rx, rz)));
-    ton('#2a2928', () => lagg('svart', new T.TorusGeometry(0.031, 0.0022, 4, 24).rotateX(PI / 2), mx(x, t - 0.0045, z, 0, rx, rz)));
-    li = egenLampa('Spotlights', [x, t - 0.011, z], () => lagg('lampa', new T.CylinderGeometry(0.029, 0.029, 0.002, 24), mx(x, t - 0.005, z, 0, rx, rz)), true, [[x, t - 0.03, z, 0.3]]);   // gloria vid varje spot
+    // infälld downlight: tunn vit krage med fasad kant mot taket, en försänkt reflektor i
+    // borstat stål (kort kon upp mot linsen) och en lins som glöder när lampan är tänd och är
+    // matt ljusgrå när den är släckt (förr en platt ring och en platt skiva: ett klistermärke)
+    ton('#f4f2ee', () => lagg('vagg', new T.LatheGeometry([[0.033, 0.001], [0.035, -0.0035], [0.0435, -0.0045], [0.0465, -0.0025], [0.047, 0.001]].map(q => new T.Vector2(q[0], q[1])), 28), mx(x, t, z, 0, rx, rz)));
+    ton('#d8d6d1', () => lagg('diskstal', new T.LatheGeometry([[0.0335, -0.0042], [0.0285, -0.0018], [0.0235, 0.0004]].map(q => new T.Vector2(q[0], q[1])), 24), mx(x, t, z, 0, rx, rz)));
+    li = egenLampa('Spotlights', [x, t - 0.011, z], () => ton('#cfcac3', () => lagg('lampa', new T.CircleGeometry(0.024, 20).rotateX(PI / 2), mx(x, t - 0.0002, z, 0, rx, rz))), true, [[x, t - 0.03, z, 0.3]]);   // gloria vid varje spot
   });
   EFTER.push(() => spotKagla(li, x, z));
 }

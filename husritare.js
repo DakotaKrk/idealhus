@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261119k';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261119k';
-import { skapaPlanlager } from './husritare-plan.js?v=20261119k';
+import { skapaMiljo } from './husritare-miljo.js?v=20261120a';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261120a';
+import { skapaPlanlager } from './husritare-plan.js?v=20261120a';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -738,7 +738,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // Tomt hus (möblerna dolda) och planlösningen (vyn rakt ovanifrån), se längre ned
   const tomt = { pa: false };
   const plan = { pa: false, t: 0, fov: 0, egen: false, A: null, B: null, data: null, lager: null, grans: null, varOppen: false, lagerFore: null, y: 0 };
-  let val = { modell: 'sadel-40', fasad: null, tak: null, detalj: null, tid: 14, matt: false };
+  // sidans helskärm: helO är övergången som pågår, helMarg kontrollernas ytor i helskärm (px)
+  let helO = null, helMarg = null, helSparad = null;
+  let val ={ modell: 'sadel-40', fasad: null, tak: null, detalj: null, tid: 14, matt: false };
 
   // ---- Hjälpare för ytor ----
   // En vägg i ett lokalt plan: u åt höger sett utifrån, v uppåt.
@@ -2249,7 +2251,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     begarRender();
   }
   let inneFov = 0;   // vyns eget synfält (INNE_VYER[].fov), 0 = standard
-  const fovFor = inneVy => inneVy ? (kamera.aspect < 1 ? Math.max(inneFov || 62, 74) : (inneFov || 62)) : (kamera.aspect < 1 ? 42 : 32);
+  const fovAsp = (inneVy, asp) => inneVy ? (asp < 1 ? Math.max(inneFov || 62, 74) : (inneFov || 62)) : (asp < 1 ? 42 : 32);
+  const fovFor = inneVy => fovAsp(inneVy, kamera.aspect);
 
   // ---- Övergångar i WebGL ----
   // Förra rutan kopieras till en textur på grafikkortet (copyTexSubImage2D: ingen JPEG,
@@ -4663,6 +4666,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   }
   function stangDirekt() { oppen.pa = false; oppen.vantar = false; oppen.svav = 0; oppen.t = 0; oppen.fore = null; oppen.skarv = null; satsOppen(); if (matGrupp) matGrupp.visible = val.matt; }
   function oppna(pa, opts) {
+    if (pa) startLage = false;
     pa = !!pa; vakna();
     // Öppna tak utifrån avslutar planlösningen först (inte planvyns eget lyft, och inte dess
     // fortsättning när inredningen byggts färdigt)
@@ -4899,7 +4903,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     const d = husGrupp.userData, H = HUS[val.modell], B = Math.max(1, dukB), Hh = Math.max(1, dukH);
     // fri yta: bilden minus kanterna och verktygsraden. Huset fyller den, med plats för
     // måttlinjerna (0,85 m ut + talet) på två sidor; skalan s är bildpunkter per meter.
-    const mS = 12, mT = 14, mB = 86, fW = B - 2 * mS, fH = Hh - mT - mB;
+    const mS = helMarg ? Math.max(12, helMarg.l, helMarg.r) : 12, mT = helMarg ? Math.max(14, helMarg.t) : 14, mB = helMarg ? Math.max(30, helMarg.b) : 86, fW =B - 2 * mS, fH = Hh - mT - mB;
     const sL = Math.min((fW - 46) / (H.L + 1.5), (fH - 40) / (H.W + 1.5)), sP = Math.min((fW - 76) / (H.W + 2.4), (fH - 76) / (H.L + 2.4));
     // hög, smal bild: huset vrids ett kvarts varv om det blir tydligt större så
     const staende = sP > sL * 1.12, s = Math.max(3, staende ? sP : sL), halv = Hh / (2 * s), ned = (mB - mT) / 2 / s;
@@ -5531,6 +5535,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // Se inne och tillbaka ut. opts.overgang: 'dorr' = åkningen genom ytterdörren (där det går,
   // annars toning), 'tona' = förra bilden tonas bort. Utan opts: direkt (länkar, bildverktyg).
   function inne(pa, vyIndex = 0, opts) {
+    startLage = false;
     pa = !!pa;
     if (pa) planBryt();
     const dorr = !!(opts && opts.overgang === 'dorr');
@@ -5552,6 +5557,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // Ett tal som andra argument tolkas som den gamla farten per ruta.
   let aka = null;
   function akTill(vy, opts) {
+    startLage = vy === 'runt' && !!(opts && opts.hopp);   // en vald vinkel ligger kvar; startvyn med hopp följer storleken igen
     const o = opts && typeof opts === 'object' ? opts : {};
     planBryt();
     flygAvbryt(false);
@@ -5770,6 +5776,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (aka.t >= 1) { aka = null; kamera.fov = fovFor(false); }
       kamera.updateProjectionMatrix();
     }
+    const helRor = !!helO;
+    if (helO) helSteg(nu);   // sidans helskärm: rutan och kameran i samma bildruta
     let zoomar = false;
     if (zoomMal !== null) {
       v1.copy(kamera.position).sub(styr.target);
@@ -5845,7 +5853,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     stegPunktAnim(nu, pFart); if (pFart === 1) punktAnim.sistRit = nu;
     const iaRor = stegIa(dt);
     const ringRor = inneLage && stegRing(dt);
-    if (!inneLage && husGrupp && husGrupp.userData.inne) {
+    // (under helskärmens glidning byts inget: det tunga bytet kommer när bilden har landat)
+    if (!inneLage && husGrupp && husGrupp.userData.inne && !helO) {
       // inredningen syns utifrån inom 30 m (släpps vid 32 m), så att man ser in genom fönstren
       const langt = kamera.position.lengthSq() > (inneLangt ? 30 * 30 : 32 * 32);  // syns genom fönstren från normal vy
       if (langt !== inneLangt) { inneLangt = langt; lageLjus(); }
@@ -5860,7 +5869,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     const mn = styr.minDistance, mx = styr.maxDistance;
     if (!inneLage) { styr.minDistance = mn * 0.86; styr.maxDistance = mx * 1.14; }
     styrIRam = true;
-    const rorde = flyger ? false : styr.update(dt);
+    const rorde = flyger || helO ? false : styr.update(dt);
     // Spelläget: det som är mitt i bilden, när kameran eller delarna rört sig
     // (högst tio gånger per sekund; en skuld ritas ikapp i en senare ruta)
     if (spel.pa && inneLage && (gar || rorde || iaRor || spel.smuts || spel.skuld)) {
@@ -5909,7 +5918,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (tona.t >= 1) { tona.pa = false; tona.tid = 0.5; } else tonaKor = true;
     }
     if (inneLage && (gar || rorde)) flytt.smuts = true;
-    const rorSig = rorde || flyger || planRor || aka || zoomar ||styr.autoRotate || tonade || byggT < 1 || rivGrupp || lyfter || gar || tonaKor || ringRor || iaRor || ljusRor || spel.skuld;
+    const rorSig = rorde || flyger || planRor || aka || helRor || zoomar ||styr.autoRotate || tonade || byggT < 1 || rivGrupp || lyfter || gar || tonaKor || ringRor || iaRor || ljusRor || spel.skuld;
     rorForra = !!rorSig;
     liv.ritade = true;
     const fortsatt = !!(rorSig || varmKor || livKor() || punktFart(nu) === 1 || tummeKo.length) && aktiv && !vantaStart;
@@ -5945,7 +5954,11 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // nypzoom kan ha gått förbi gränsen: glid tillbaka när fingrarna släpper
   styr.addEventListener('end', () => { if (!inneLage) zoomTillbaka(); });
 
+  // fryst under sidans helskärmsövergång: duken sträcks med CSS medan den glider ut, och
+  // bildbufferten byts först när rörelsen har stannat (annars en tung ruta mitt i rörelsen)
+  let storlekFryst = false;
   function storlek() {
+    if (storlekFryst) return;
     const r = duk.getBoundingClientRect();
     if (!r.width || !r.height) return;
     renderer.setSize(r.width, r.height, false);
@@ -5955,11 +5968,191 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     kamera.fov = plan.fov || fovFor(inneLage);
     kamera.updateProjectionMatrix();
     // planlösningen passas in på nytt i den nya bildstorleken
-    if (plan.pa && plan.B) { const B = planTopp(); if (B.theta !== plan.B.theta) B.theta = plan.B.theta; plan.B = B; if (plan.t >= 1) planKam(1); }
+    // (vridningen behålls bara om både den gamla och den nya bilden vill ha huset vridet, så att det
+    // inte slår om mellan ±90°; byts bilden från hög till bred gäller den nya, annars blev skalan fel)
+    if (plan.pa && plan.B) { const B = planTopp(); if (B.theta !== 0 && plan.B.theta !== 0) B.theta = plan.B.theta; plan.B = B; if (plan.t >= 1) planKam(1); }
+    foljStart();   // startvyn (och introts slutpunkt) i den nya bildstorleken
     tona.farsk = false;
     begarRender();
   }
   new ResizeObserver(storlek).observe(duk);
+
+  // ---- Sidans helskärm ----
+  // Duken har sin slutliga storlek (och bildbuffert) under hela övergången; sidan klipper
+  // scenen till en ruta som glider mellan platsen på sidan och hela fönstret. Kameran får en
+  // vy-förskjutning (setViewOffset) så att bilden är komponerad för just den rutan: i första
+  // rutan exakt bilden från sidan, i sista den nya kompositionen. Rutan, klippet och kameran
+  // räknas i samma bildruta (helSteg i ram), så ingenting glider isär eller hackar.
+  const helPose = () => ({ pos: kamera.position.clone(), mal: styr.target.clone(), fov: kamera.fov });
+  const hV1 = new THREE.Vector3(), hS0 = new THREE.Spherical(), hS1 = new THREE.Spherical(), hS = new THREE.Spherical();
+  // Utsikten i helskärm: hela huset med altan och bil ryms i den fria ytan (bilden minus
+  // kontrollerna, m = { t, b, l, r } i px), sett från kamerans nuvarande håll runt huset.
+  // Höjden följer formatet: högt och smalt = lite högre upp, så marken framför fyller nedre delen.
+  function helVy(w, h, m) {
+    const d = husGrupp.userData;
+    m = m || { t: 0, b: 0, l: 0, r: 0 };
+    const asp = w / h, fov = fovAsp(false, asp);
+    const tV = Math.tan(THREE.MathUtils.degToRad(fov) / 2), tH = tV * asp;
+    const luft = asp > 1 ? 0.8 : 0.92;
+    const gT = tV * Math.max(0.3, 1 - 2 * m.t / h) * luft, gB = tV * Math.max(0.3, 1 - 2 * m.b / h) * luft;
+    const gL = tH * Math.max(0.3, 1 - 2 * m.l / w) * luft, gR = tH * Math.max(0.3, 1 - 2 * m.r / w) * luft;
+    // riktningen från startvyn "Runt om" (mal('runt'): låg, nästan rakt mot entrén), oavsett var
+    // kameran står nu; på högt och smalt format en aning högre, så att marken fyller nedre delen
+    let start = null;
+    try { start = mal('runt', kamera, hem); } catch (e) { start = null; }
+    hS0.setFromVector3(start ? hV1.copy(start).sub(hem) : hV1.set(0.6, 0.12, 0.79));
+    const lutAsp = THREE.MathUtils.degToRad(THREE.MathUtils.lerp(16, 0, THREE.MathUtils.clamp((asp - 0.55) / 0.55, 0, 1)));
+    const lut = Math.max(lutAsp, Math.min(Math.PI / 2 - hS0.phi, THREE.MathUtils.degToRad(30)));
+    const dir = new THREE.Vector3().setFromSphericalCoords(1, Math.PI / 2 - lut, hS0.theta);
+    const hoger = new THREE.Vector3(dir.z, 0, -dir.x).normalize();
+    const upp = new THREE.Vector3().crossVectors(hoger, dir.clone().negate()).normalize();
+    // punkterna som ska synas: huset med takfot, altanen och bilen
+    const P = [];
+    const x0 = d.L / 2 + 0.35, z0 = d.W / 2 + 0.35;
+    for (const x of [-x0, x0]) for (const z of [-z0, z0]) for (const y of [0, d.hojd]) P.push(new THREE.Vector3(x, y, z));
+    try {
+      const ute = d.delar && d.delar.ute, A = ute && ute.userData.altan;
+      if (A) {
+        ute.updateWorldMatrix(true, false);
+        for (const u of [A.cu - A.Wd / 2, A.cu + A.Wd / 2]) for (const n of [0, A.Dd + 0.4]) P.push(new THREE.Vector3(u, A.top + 0.9, n).applyMatrix4(A.mtx).applyMatrix4(ute.matrixWorld));
+      }
+      const bil = scene.getObjectByName('elbil');
+      if (bil && bil.visible) {
+        const b = new THREE.Box3().setFromObject(bil);
+        if (!b.isEmpty() && b.max.distanceTo(b.min) < 12) for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) P.push(new THREE.Vector3(x, y, z));
+      }
+    } catch (e) { console.warn(e); }
+    // avståndet där alla punkter ryms (perspektiv: djupet räknas per punkt)
+    const passa = mal => {
+      let D = 0;
+      for (const p of P) {
+        hV1.copy(p).sub(mal);
+        const fd = hV1.dot(dir), x = hV1.dot(hoger), y = hV1.dot(upp);
+        D = Math.max(D, fd + (x > 0 ? x / gR : -x / gL), fd + (y > 0 ? y / gT : -y / gB));
+      }
+      return D;
+    };
+    const mitt = hem.clone();
+    let D = passa(mitt);
+    // flytta målet så att allt hamnar mitt i den fria ytan (på högt format en aning över mitten)
+    for (let i = 0; i < 2; i++) {
+      let xa = Infinity, xb = -Infinity, ya = Infinity, yb = -Infinity;
+      for (const p of P) {
+        hV1.copy(p).sub(mitt);
+        const z = D - hV1.dot(dir);
+        if (z <= 0.1) continue;
+        const x = hV1.dot(hoger) / z / tH, y = hV1.dot(upp) / z / tV;
+        xa = Math.min(xa, x); xb = Math.max(xb, x); ya = Math.min(ya, y); yb = Math.max(yb, y);
+      }
+      if (!isFinite(xa)) break;
+      const fx = (m.l - m.r) / w, fy = (m.b - m.t) / h + (asp < 0.8 ? 0.14 : 0);
+      const dx = ((xa + xb) / 2 - fx) * D * tH, dy = ((ya + yb) / 2 - fy) * D * tV;
+      mitt.addScaledVector(hoger, dx).addScaledVector(upp, dy);
+      // målet stannar nära huset och över marken (som zoomen)
+      hV1.copy(mitt).sub(hem); hV1.y = 0;
+      if (hV1.length() > hemR) { hV1.setLength(hemR); mitt.x = hem.x + hV1.x; mitt.z = hem.z + hV1.z; }
+      mitt.y = Math.min(hemTopp, Math.max(0, mitt.y));
+      D = passa(mitt);
+    }
+    return { pos: dir.clone().multiplyScalar(D).add(mitt), mal: mitt, fov };
+  }
+  function helSteg(nu) {
+    const H = helO;
+    if (nu !== null && H.t0 === null) H.t0 = nu;
+    const k = nu === null ? 0 : Math.min(1, Math.max(0, (nu - H.t0) / H.tid)), e = H.kurva(k);
+    const R = { x: H.fran.x + (H.till.x - H.fran.x) * e, y: H.fran.y + (H.till.y - H.fran.y) * e, w: H.fran.w + (H.till.w - H.fran.w) * e, h: H.fran.h + (H.till.h - H.fran.h) * e };
+    try { if (H.vidRuta) H.vidRuta(R, e, k); } catch (er) { console.warn(er); }
+    if (H.P1) {
+      styr.target.lerpVectors(H.P0.mal, H.P1.mal, e);
+      let dth = hS1.theta - hS0.theta; if (dth > Math.PI) dth -= Math.PI * 2; if (dth < -Math.PI) dth += Math.PI * 2;
+      hS.set(hS0.radius * Math.pow(hS1.radius / hS0.radius, e), hS0.phi + (hS1.phi - hS0.phi) * e, hS0.theta + dth * e);
+      kamera.position.setFromSpherical(hS).add(styr.target);
+      kamera.fov = H.P0.fov + (H.P1.fov - H.P0.fov) * e;
+    }
+    kamera.aspect = R.w / R.h;
+    kamera.setViewOffset(R.w, R.h, -R.x, -R.y, dukB, dukH);
+    // bara rutan som syns ritas (utanför den är scenen bortklippt): mindre arbete per bildruta
+    const sx = Math.max(0, Math.floor(R.x) - 1), sy = Math.max(0, Math.floor(dukH - R.y - R.h) - 1);
+    renderer.setScissor(sx, sy, Math.min(dukB - sx, Math.ceil(R.w) + 2), Math.min(dukH - sy, Math.ceil(R.h) + 2));
+    renderer.setScissorTest(k < 1);
+    if (k >= 1) helKlar();
+  }
+  function helKlar() {
+    const H = helO;
+    if (!H) return;
+    helO = null;
+    kamera.clearViewOffset();
+    renderer.setScissorTest(false); renderer.setScissor(0, 0, dukB, dukH);
+    if (H.P1) { kamera.position.copy(H.P1.pos); styr.target.copy(H.P1.mal); }
+    helMarg = H.marg;
+    try { if (H.klar) H.klar(); } catch (e) { console.warn(e); }
+    storlekFryst = false;
+    // samma storlek som under glidningen (in i helskärm): ingen ny buffert, bara projektionen
+    const r = duk.getBoundingClientRect();
+    if (Math.abs(r.width - dukB) > 0.5 || Math.abs(r.height - dukH) > 0.5 || plan.pa) storlek();
+    else { dukV = r.left; dukT = r.top; kamera.aspect = dukB / dukH; kamera.fov = fovFor(inneLage); kamera.updateProjectionMatrix(); }
+    styr.enabled = H.en; styr.autoRotate = H.rot;
+    styrNu();
+    if (H.inUt) helSparad = { fore: H.P0, efter: helPose(), ute: !inneLage && !plan.pa };
+    begarRender();
+  }
+  // o: { fran, till } rutor i dukens px (duken har redan sin storlek i övergången),
+  // tid (ms), kurva (0..1 → 0..1), marg (kontrollerna vid slutet, null = sidan),
+  // inUt (true = in i helskärm), vidRuta(R, e, k) varje bildruta, klar() när den landat.
+  // direkt: inget glid, bara den nya utsikten (minskad rörelse; sidan har redan bytt läge).
+  function helStart(o) {
+    if (helO) helKlar();
+    if (!husGrupp) { helMarg = o.marg || null; if (o.klar) o.klar(); storlekFryst = false; storlek(); return; }
+    const P0 = helPose();
+    aka = null; zoomMal = null; zoomRa = null;
+    const rot = styr.autoRotate;
+    styr.autoRotate = false;
+    const till = o.direkt ? null : o.till;
+    if (o.direkt) { helMarg = o.marg || null; storlekFryst = false; storlek(); P0.fov = kamera.fov; }
+    const tw = till ? till.w : dukB, th = till ? till.h : dukH, asp = tw / th;
+    // målets utsikt för rutan vid slutet
+    let P1 = null;
+    if (flyg) P1 = null;
+    else if (plan.pa) {
+      if (plan.t >= 1 && plan.B) {
+        const sB = dukB, sH = dukH, sM = helMarg;
+        dukB = tw; dukH = th; helMarg = o.marg || null;
+        const B = planTopp();
+        dukB = sB; dukH = sH; helMarg = sM;
+        B.theta = plan.B.theta;
+        hS.set(B.halv / Math.tan(THREE.MathUtils.degToRad(B.fov) / 2), B.phi, B.theta);
+        P1 = { pos: new THREE.Vector3().setFromSpherical(hS).add(B.mal), mal: B.mal.clone(), fov: B.fov };
+      }
+    } else if (inneLage) P1 = { pos: P0.pos.clone(), mal: P0.mal.clone(), fov: fovAsp(true, asp) };
+    else if (!o.inUt && helSparad && helSparad.ute && helSparad.efter.pos.distanceTo(P0.pos) < 0.02 && helSparad.efter.mal.distanceTo(P0.mal) < 0.02) {
+      // ingen rörelse i helskärm: tillbaka till exakt samma bild som före
+      P1 = { pos: helSparad.fore.pos.clone(), mal: helSparad.fore.mal.clone(), fov: fovAsp(false, asp) };
+    } else if (!o.inUt) P1 = { pos: P0.pos.clone(), mal: P0.mal.clone(), fov: fovAsp(false, asp) };
+    else {
+      try { P1 = helVy(tw, th, o.marg); } catch (e) { console.warn(e); P1 = null; }
+    }
+    if (P1) styr.maxDistance = Math.max(styr.maxDistance, P1.pos.distanceTo(P1.mal) * 1.3);
+    // inredningen genom fönstren (syns inom 30 m): tänds redan nu om kameran landar nära, så
+    // att det tunga bytet sker medan bilden står still och inte mitt i glidningen
+    if (P1 && !inneLage && husGrupp.userData.inne && inneLangt && P1.pos.lengthSq() < 30 * 30) { inneLangt = false; lageLjus(); }
+    if (o.direkt) {
+      if (P1) { kamera.position.copy(P1.pos); styr.target.copy(P1.mal); }
+      styr.autoRotate = rot; styrNu();
+      if (o.inUt) helSparad = { fore: P0, efter: helPose(), ute: !inneLage && !plan.pa };
+      begarRender();
+      return;
+    }
+    // ny bildbuffert direkt, före rörelsen (den tunga rutan kommer medan bilden står still)
+    storlekFryst = false; storlek(); storlekFryst = true;
+    kamera.position.copy(P0.pos); styr.target.copy(P0.mal); kamera.fov = P0.fov;
+    if (P1) { hS0.setFromVector3(hV1.copy(P0.pos).sub(P0.mal)); hS1.setFromVector3(hV1.copy(P1.pos).sub(P1.mal)); }
+    helO = { P0, P1, t0: null, tid: Math.max(1, o.tid || 700), kurva: o.kurva || inUt, fran: o.fran, till: o.till, vidRuta: o.vidRuta, klar: o.klar, marg: o.marg || null, inUt: !!o.inUt, rot, en: styr.enabled };
+    styr.enabled = false;
+    helSteg(null);
+    renderer.render(scene, kamera);
+    tona.farsk = false;
+    begarRender();
+  }
   // pausa när duken inte syns
   new IntersectionObserver(e => { dukSyns = e[e.length - 1].isIntersecting; aktiv = dukSyns && flikSyns; if (aktiv) begarRender(); }).observe(duk);
   document.addEventListener('visibilitychange', () => { flikSyns = !document.hidden; aktiv = dukSyns && flikSyns; if (aktiv) begarRender(); });
@@ -5998,6 +6191,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   }
   function starta() {
     if (!vantaStart) return;
+    foljStart();   // scenens storlek har satt sig: introts slutpunkt räknas om på den
     vantaStart = false; forra = 0; marke('rit-start');
     clearTimeout(snurrTid); snurrTid = setTimeout(() => { styr.autoRotate = false; }, 7000);
     begarRender();
@@ -6007,9 +6201,21 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     const slut = kamera.position.clone();
     // (från ovanför trädtopparna: startvyn står lågt, och en start långt ut i samma höjd hamnade inne i skogen)
     kamera.position.copy(slut.clone().sub(styr.target).applyAxisAngle(new THREE.Vector3(0, 1, 0), -0.45).multiplyScalar(1.35).add(new THREE.Vector3(0, 11, 0)).add(styr.target));
-    aka = { fran: kamera.position.clone(), till: slut, t: 0, tid: 2.1 };
+    aka = { fran: kamera.position.clone(), till: slut, t: 0, tid: 2.1, intro: true };
     begarRender();
   }
+  // Startvyn följer scenens slutliga storlek: så länge ingen har rört kameran (dragit, zoomat,
+  // valt en vinkel, gått in, lyft taket) räknas den om när scenen ändrar storlek (sidhuvudet,
+  // typsnitten, en rullningslist under laddningen), och introt landar i den omräknade vyn.
+  var startLage = true;   // (var: storlek() anropas redan innan raden har körts; då står den odefinierad = av)
+  function foljStart() {
+    if (!startLage || !husGrupp) return;
+    const p = mal('runt', kamera, hem);
+    if (aka && aka.intro) aka.till.copy(p);
+    else if (!aka && !inneLage && !flyg && !oppen.pa && oppen.t === 0) { styr.target.copy(hem); kamera.position.copy(p); styrNu(); begarRender(); }
+  }
+  styr.addEventListener('start', () => { startLage = false; });
+  duk.addEventListener('wheel', () => { startLage = false; }, { passive: true });
 
   // Tumnaglar ritas alltid som utsidan, även om man just står inne i huset.
   // rita = false: huvudbilden ritas ändå direkt efter (i ram), så den hoppas över här.
@@ -6062,6 +6268,27 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   return {
     // redo: löfte som blir klart när första bilden är ritad; starta(): introt börjar (slöjan öppnas)
     redo, starta,
+    fryStorlek(pa) { storlekFryst = !!pa; if (!pa) storlek(); },
+    // sidans helskärm (husritare-sida.js): övergången och kontrollernas marginaler i helskärm
+    helStart,
+    helMarg(m) { helMarg = m || null; if (!helO) storlek(); },
+    helPagar: () => !!helO,
+    // ny utsikt i helskärm efter vridning av telefonen (bara ute, bara om kameran inte flyttats)
+    helOmrama(m) {
+      if (helO || !husGrupp || inneLage || plan.pa || flyg || !helSparad || !helSparad.ute) return false;
+      const P = helPose();
+      if (helSparad.efter.pos.distanceTo(P.pos) > 0.02 || helSparad.efter.mal.distanceTo(P.mal) > 0.02) return false;
+      helMarg = m || null;
+      const fore = helSparad.fore;
+      const P1 = helVy(dukB, dukH, m);
+      aka = null; zoomMal = null;
+      kamera.position.copy(P1.pos); styr.target.copy(P1.mal); kamera.fov = fovFor(false); kamera.updateProjectionMatrix();
+      styr.maxDistance = Math.max(styr.maxDistance, P1.pos.distanceTo(P1.mal) * 1.3);
+      styrNu();
+      helSparad = { fore, efter: helPose(), ute: true };
+      begarRender();
+      return true;
+    },
     visa,
     satt(nyckel, varde) {
       val[nyckel] = varde;

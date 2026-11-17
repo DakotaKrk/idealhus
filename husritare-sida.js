@@ -6,9 +6,27 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119k';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261120a';
 
-const MOTOR_V = '20261119k';
+const MOTOR_V = '20261120a';
+// Standardutseendet: utan val i adressen (och när man kommer tillbaka till sidan med bakåtknappen
+// eller laddar om den) möts man av samma bild varje gång: Sadel 40 i falurött med svart tak och
+// vita detaljer, vinter, gyllene timmen, kameran i startvyn. Adressen som sidan själv skriver
+// medan man väljer (spara) minns i sessionStorage, så att en delad länk med val fortfarande gäller.
+const STANDARD = 'modell=sadel-40&fasad=falu&tak=svart&detalj=vit&tid=19.2&miljo=vinter';
+const LAGE_NYCKLAR = ['modell', 'fasad', 'tak', 'detalj', 'tid', 'miljo', 'vy', 'rum', 'matt', 'oppen', 'lager', 'tomt', 'plan'];
+const EGEN_NYCKEL = 'rita-hus-egen';
+const egenAdress = () => { try { return sessionStorage.getItem(EGEN_NYCKEL) || ''; } catch (e) { return ''; } };
+(function standardval() {
+  const q = new URLSearchParams(location.search);
+  let nav = {};
+  try { nav = performance.getEntriesByType('navigation')[0] || {}; } catch (e) { /* äldre webbläsare */ }
+  const tillbaka = (nav.type === 'back_forward' || nav.type === 'reload') && location.search.slice(1) === egenAdress();
+  if (LAGE_NYCKLAR.some(k => q.has(k)) && !tillbaka) return;
+  const ny = new URLSearchParams(STANDARD);
+  q.forEach((v, k) => { if (!LAGE_NYCKLAR.includes(k)) ny.set(k, v); });   // prov, intro, inbaddad, foto … följer med
+  try { history.replaceState(history.state, '', '?' + ny.toString() + location.hash); } catch (e) { /* förhandsvisning */ }
+})();
 const Q0 = new URLSearchParams(location.search);
 const INB = Q0.get('inbaddad') === '1';
 if (INB) document.documentElement.classList.add('inbaddad');
@@ -316,15 +334,60 @@ function byggProver() {
     let n = 0;
     Object.entries(FARGER[g]).forEach(([id, [namn, hex]]) => {
       const l = document.createElement('label');
-      l.className = 'kfarg';
+      // materialprov (kfarg--fasad: stående panel, --tak: falsad plåt, --detalj: slät lack) och en bock
+      l.className = 'kfarg kfarg--' + g;
       l.style.setProperty('--i', n++);
-      l.innerHTML = '<input type="radio" name="' + g + '" value="' + id + '" aria-label="' + GRUPPNAMN[g] + ': ' + esc(namn) + '"><span class="kfarg__prov" style="--f:' + hex + '"></span><span class="kfarg__namn" aria-hidden="true">' + esc(namn) + '</span>';
-      (id === H.farg[g] ? rit : fler).appendChild(l);
+      const ritningens = id === H.farg[g];
+      l.innerHTML = '<input type="radio" name="' + g + '" value="' + id + '" aria-label="' + GRUPPNAMN[g] + ': ' + esc(namn) + (ritningens ? ' (ritningens kulör)' : '') + '"><span class="kfarg__prov" style="--f:' + hex + '"><svg class="kfarg__bock" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l3.8 3.8L18 8"/></svg></span><span class="kfarg__namn" aria-hidden="true">' + esc(namn) + '</span>';
+      (ritningens ? rit : fler).appendChild(l);
     });
     // rubriken "Fler kulörer" följer med bara när det finns fler
     const etikett = fler.previousElementSibling;
     if (etikett && etikett.classList.contains('kgrupp__etikett')) etikett.hidden = !fler.children.length;
+    // "Ritningens kulör" som rekommendation, och en knapp som återställer till den (syns bara
+    // när man har valt något annat, se uppdatera)
+    const ritEt = rit.previousElementSibling;
+    if (ritEt && ritEt.classList.contains('kgrupp__etikett') && !ritEt.querySelector('.kgrupp__rek')) ritEt.insertAdjacentHTML('beforeend', ' <span class="kgrupp__rek">Rekommenderad</span>');
+    if (!sek.querySelector('[data-aterstall]')) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'kgrupp__aterstall'; b.setAttribute('data-aterstall', g); b.hidden = true;
+      b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"/></svg>Återställ till ritningens kulör';
+      b.addEventListener('click', () => valjKulorer({ [g]: MODELLER[val.modell].farg[g] }));
+      rit.after(b);
+    }
   });
+  byggPaletter();
+}
+// Byter kulörer (en eller flera grupper) som om man hade valt dem i listorna: motorn tonar huset
+// mjukt (tonaFarger), rubrikerna och sammanfattningen följer med
+function valjKulorer(v) {
+  Object.entries(v).forEach(([g, id]) => {
+    if (!FARGER[g] || !FARGER[g][id]) return;
+    val[g] = id;
+    if (ritare) ritare.satt(g, id);
+  });
+  uppdatera(); spara(); nyaTummar();
+}
+// Färdiga kombinationer: bara kulörer som redan finns i FARGER, högst tre, med beskrivande namn
+const PALETTER = [
+  ['Klassisk falu', { fasad: 'falu', tak: 'svart', detalj: 'vit' }],
+  ['Skogsgrön', { fasad: 'mossgron', tak: 'antracit', detalj: 'salvia' }],
+  ['Nordiskt ljus', { fasad: 'ljusgra', tak: 'gra', detalj: 'vit' }],
+].filter(([, p]) => Object.entries(p).every(([g, id]) => FARGER[g] && FARGER[g][id]));
+function byggPaletter() {
+  const forsta = document.querySelector('.kgrupp[data-grupp="fasad"]');
+  if (!forsta || !PALETTER.length) return;
+  let ruta = document.querySelector('[data-paletter]');
+  if (!ruta) {
+    ruta = document.createElement('div');
+    ruta.className = 'kpaletter'; ruta.setAttribute('data-paletter', '');
+    ruta.setAttribute('role', 'group'); ruta.setAttribute('aria-label', 'Färdiga kombinationer');
+    ruta.innerHTML = '<p class="kgrupp__etikett">Färdiga kombinationer</p><div class="kpaletter__rad">' + PALETTER.map(([namn, p], i) =>
+      '<button type="button" class="kpalett" data-palett="' + i + '" aria-pressed="false" style="--i:' + i + '"><span class="kpalett__prov" aria-hidden="true">' +
+      ['fasad', 'tak', 'detalj'].map(g => '<i style="--f:' + FARGER[g][p[g]][1] + '"></i>').join('') + '</span><span class="kpalett__namn">' + esc(namn) + '</span></button>').join('') + '</div>';
+    ruta.addEventListener('click', e => { const b = e.target.closest('[data-palett]'); if (b) valjKulorer(PALETTER[+b.getAttribute('data-palett')][1]); });
+    forsta.before(ruta);
+  }
 }
 document.querySelectorAll('.kgrupp[data-grupp]').forEach(sek => {
   const g = sek.getAttribute('data-grupp');
@@ -453,7 +516,20 @@ function uppdatera() {
     const id = aktiv(g);
     const inp = sek.querySelector('input[value="' + id + '"]');
     if (inp) inp.checked = true;
-    sek.querySelector('[data-valt]').textContent = FARGER[g][id][0];
+    // rubrikens kulörnamn byter med en kort toning (bara när det ändras)
+    const valt = sek.querySelector('[data-valt]'), nytt = FARGER[g][id][0];
+    if (valt.textContent !== nytt) {
+      const forut = !!valt.textContent;
+      valt.textContent = nytt;
+      if (forut) { valt.classList.remove('kgrupp__bytt'); void valt.offsetWidth; valt.classList.add('kgrupp__bytt'); }
+    }
+    const at = sek.querySelector('[data-aterstall]');
+    if (at) at.hidden = id === H.farg[g];
+  });
+  // färdiga kombinationer: den som stämmer med valen är markerad
+  document.querySelectorAll('[data-palett]').forEach(b => {
+    const p = PALETTER[+b.getAttribute('data-palett')][1];
+    b.setAttribute('aria-pressed', String(Object.entries(p).every(([g, id]) => aktiv(g) === id)));
   });
   document.querySelector('[data-valt="modell"]').textContent = H.namn + ' · ' + H.yta + ' m²';
   ritaHusval();
@@ -869,19 +945,264 @@ function fyll(pa, hur) {
   pa = !!pa;
   if (pa === !!fyllLage) { if (pa && hur === 'knapp') fyllLage = 'knapp'; return; }
   fyllLage = pa ? hur || 'knapp' : null;
+  // en platshållare av scenens storlek står kvar på sidan, så att sidan inte hoppar ihop
+  // under den (och glidningen ut vet vart bilden ska landa)
+  if (pa) {
+    if (!helPlats) { helPlats = document.createElement('div'); helPlats.className = 'kf__hel-plats'; helPlats.setAttribute('aria-hidden', 'true'); }
+    const r = scen.getBoundingClientRect();
+    helPlats.style.height = r.height + 'px';
+    helPlats.style.borderRadius = getComputedStyle(scen).borderTopLeftRadius;
+    scen.before(helPlats);
+    helRadSynk();
+    // scenens förälder (sticky på dator) är en egen stapel: lyft hela den över sidan, panelen
+    // och sidhuvudet (bakgrunden ligger i samma stapel, under scenen)
+    const v = scen.parentElement;
+    if (getComputedStyle(v).position === 'static') v.style.position = 'relative';
+    v.style.zIndex = '2147483000';
+    if (helBakgrund && helBakgrund.parentElement !== v) v.insertBefore(helBakgrund, v.firstChild);
+  } else {
+    if (helPlats) helPlats.remove();
+    const v = scen.parentElement;
+    v.style.position = ''; v.style.zIndex = '';
+  }
   document.documentElement.classList.toggle('ritare-fyll', pa);
-  if (pa) scen.scrollIntoView({ block: 'center' });
+  if (pa && hur === 'auto') scen.scrollIntoView({ block: 'center' });
+  if (!pa) helVila(false);
   hk.setAttribute('aria-pressed', String(pa || !!document.fullscreenElement));
   hk.querySelector('span').textContent = pa ? 'Lämna helskärm' : 'Helskärm';
   hk.setAttribute('data-tips', pa ? 'Lämna helskärm' : 'Helskärm');
 }
+// Mjukt byte in i och ut ur helskärm: en mörk slöja i scenen tonar upp (160 ms), bytet sker
+// bakom den, sedan tonar slöjan bort medan bilden glider fram från lätt förminskad (420 ms).
+// Själva helskärmsbytet är webbläsarens och går inte att animera; slöjan döljer hoppet.
+const lugnRorelse = matchMedia('(prefers-reduced-motion: reduce)');
+let helSloja = null, helBytes = false;
+function helFram() {
+  if (lugnRorelse.matches) return;
+  scen.classList.remove('kf__scen--hel-in'); void scen.offsetWidth;   // starta om animationen
+  scen.classList.add('kf__scen--hel-in');
+  setTimeout(() => scen.classList.remove("kf__scen--hel-in"), 760);
+}
+function mjuktByte(gor) {
+  if (lugnRorelse.matches || helBytes) { gor(); return; }
+  if (!helSloja) { helSloja = document.createElement('div'); helSloja.className = 'kf__hel-sloja'; helSloja.setAttribute('aria-hidden', 'true'); scen.appendChild(helSloja); }
+  helBytes = true;
+  helSloja.classList.add('kf__hel-sloja--pa');
+  // Slöjan står kvar tills scenen har bytt storlek och ritats några gånger i den nya storleken
+  // (första rutorna efter en storleksändring är tunga – det var där det hackade), sedan tonas
+  // den lugnt bort. Högst 900 ms även om ingen storleksändring kommer.
+  setTimeout(() => {
+    let klar = false, ro = null;
+    const slapp = () => {
+      if (klar) return; klar = true;
+      if (ro) ro.disconnect();
+      let n = 0;
+      const ruta = () => { if (++n < 4) { requestAnimationFrame(ruta); return; }
+        helSloja.classList.remove('kf__hel-sloja--pa');
+        helFram();
+        setTimeout(() => { helBytes = false; }, 300);
+      };
+      requestAnimationFrame(ruta);
+    };
+    // scenens egen storlek (fyll-layouten ändrar inte fönstret, bara scenen); första mätningen
+    // är nuvarande storlek och räknas inte
+    let forsta = true;
+    try { ro = new ResizeObserver(() => { if (forsta) { forsta = false; return; } setTimeout(slapp, 60); }); ro.observe(scen); } catch (e) { /* äldre webbläsare */ }
+    setTimeout(slapp, 380);
+    gor();
+  }, 240);
+}
+// Helskärm – visningsvyn. Bilden växer ut från sin plats på sidan till hela fönstret (och
+// tillbaka) som ett klipp (clip-path) som öppnas, över en ljus bakgrund. Duken har sin slutliga
+// storlek från första rutan, och motorn (ritare.helStart) komponerar bilden för rutan som syns
+// i varje bildruta: i början exakt bilden från sidan, i slutet den nya utsikten där hela huset
+// ryms mellan kontrollerna. Klipp, bakgrund och kamera räknas i samma bildruta, så inget glider
+// isär. Kontrollerna är svävande glasöar som tonar in i kaskad när bilden nästan har landat.
+// Knappen använder den här fyll-layouten i alla webbläsare (webbläsarens egen helskärm går inte
+// att animera – den hoppar alltid – och finns inte i iPhone Safari).
+let helBakgrund = null, helRor = false, helPlats = null, helRad = null;
+// mjuka kurvor (kubisk bezier, som i CSS): ut ur vila utan ryck, lång mjuk landning
+function bezier(x1, y1, x2, y2) {
+  const kx = t => ((1 - 3 * x2 + 3 * x1) * t + (3 * x2 - 6 * x1)) * t * t + 3 * x1 * t;
+  const ky = t => ((1 - 3 * y2 + 3 * y1) * t + (3 * y2 - 6 * y1)) * t * t + 3 * y1 * t;
+  const dx = t => 3 * (1 - 3 * x2 + 3 * x1) * t * t + 2 * (3 * x2 - 6 * x1) * t + 3 * x1;
+  return x => {
+    if (x <= 0) return 0; if (x >= 1) return 1;
+    let t = x;
+    for (let i = 0; i < 6; i++) { const d = dx(t); if (Math.abs(d) < 1e-6) break; t -= (kx(t) - x) / d; t = Math.min(1, Math.max(0, t)); }
+    return ky(t);
+  };
+}
+const helKurvaIn = bezier(0.42, 0, 0.12, 1), helKurvaUt = bezier(0.45, 0, 0.18, 1);
+const HEL_IN = 760, HEL_UT = 640, HEL_RADIE = 20;
+// överraden i helskärm: husets namn och yta till vänster, Stäng till höger
+function helRadSynk() {
+  if (!helRad) {
+    helRad = document.createElement('div');
+    helRad.className = 'kf__helrad';
+    helRad.innerHTML = '<p class="kf__helnamn"><b></b><small></small></p>'
+      + '<button type="button" class="kf__helstang" aria-label="Stäng helskärm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><span>Stäng</span></button>';
+    helRad.querySelector('.kf__helstang').addEventListener('click', () => helskarm(false));
+    scen.appendChild(helRad);
+  }
+  const namn = document.querySelector('#kf-namn [data-namn]') || document.querySelector('[data-namn]'), yta = document.querySelector('[data-yta]');
+  helRad.querySelector('b').textContent = namn ? (namn.getAttribute('data-namn') || namn.querySelector('.sr')?.textContent || namn.textContent).trim() : '';
+  helRad.querySelector('small').textContent = yta ? yta.textContent.trim() : '';
+}
+// kontrollerna i scenen (det som syns)
+const helUI = () => [...scen.querySelectorAll(':scope > .kf__helrad, :scope > .kf__rum, :scope > .kf__verktyg, :scope > .kf__spak, :scope > .kf__kartknapp, :scope > .kf__karta, :scope > .kf__lager')]
+  .filter(e => !e.hidden && e.offsetParent !== null && getComputedStyle(e).display !== 'none');
+const helUIAnim = new Map();
+// tona kontrollerna (bara opacity och transform, Web Animations: överst i stacken, även över
+// radens egna CSS-animationer). pa = in; sedan släpps animationen och CSS gäller igen.
+function helUITona(pa, tid = 420, forsk = 0, fordrojning = 0, lista = helUI()) {
+  lista.forEach((e, i) => {
+    const gammal = helUIAnim.get(e);
+    const fran = gammal ? +getComputedStyle(e).opacity : pa ? 0 : 1;
+    if (gammal) gammal.cancel();
+    const dy = e.matches('.kf__helrad, .kf__rum') ? -10 : 10;
+    const a = e.animate(pa
+      ? [{ opacity: fran, transform: `translateY(${(dy * (1 - fran)).toFixed(1)}px) scale(${(1 - 0.015 * (1 - fran)).toFixed(4)})` }, { opacity: 1, transform: 'none' }]
+      : [{ opacity: fran, transform: 'none' }, { opacity: 0, transform: `translateY(${dy * 0.5}px) scale(0.99)` }],
+      { duration: lugnRorelse.matches ? 1 : tid, delay: lugnRorelse.matches ? 0 : fordrojning + i * forsk, easing: pa ? 'cubic-bezier(0.22, 1, 0.36, 1)' : 'cubic-bezier(0.4, 0, 1, 1)', fill: 'both' });
+    helUIAnim.set(e, a);
+    if (pa) a.onfinish = () => { if (helUIAnim.get(e) === a) { a.cancel(); helUIAnim.delete(e); } };
+  });
+}
+function helUISlapp() { helUIAnim.forEach(a => a.cancel()); helUIAnim.clear(); }
+// kontrollernas ytor i helskärm, som marginaler för kameran (px från kanterna, med luft)
+function helMarginaler() {
+  const B = scen.getBoundingClientRect(), m = { t: 0, b: 0, l: 0, r: 0 };
+  if (!B.width) return m;
+  scen.querySelectorAll(':scope > .kf__helrad > *, :scope > .kf__rum > div, :scope > .kf__verktyg').forEach(e => {
+    if (e.offsetParent === null) return;
+    const r = e.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    if (r.top + r.height / 2 < B.top + B.height / 2) m.t = Math.max(m.t, r.bottom - B.top + 10);
+    else m.b = Math.max(m.b, B.bottom - r.top + 10);
+  });
+  m.l = m.r = Math.min(24, B.width * 0.04);
+  return m;
+}
+function glidHel(pa) {
+  if (helRor) return;
+  if (pa && fyllLage === 'auto') { fyll(true, 'knapp'); return; }   // liggande telefon: redan fylld
+  if (pa === !!fyllLage) return;
+  if (!helBakgrund) { helBakgrund = document.createElement('div'); helBakgrund.className = 'kf__hel-bakgrund'; helBakgrund.setAttribute('aria-hidden', 'true'); }
+  if (helBakgrund.parentElement !== scen.parentElement) scen.parentElement.insertBefore(helBakgrund, scen.parentElement.firstChild);
+  const html = document.documentElement;
+  // minskad rörelse (eller äldre motor): direkt byte, ny utsikt utan glid
+  if (lugnRorelse.matches || !kan('helStart')) {
+    fyll(pa, 'knapp');
+    try { ritare.helStart({ direkt: true, inUt: pa, marg: pa ? helMarginaler() : null }); } catch (e) { /* äldre motor */ }
+    if (pa) helVila(true);
+    return;
+  }
+  helRor = true;
+  html.classList.add('ritare-glid');
+  if (pa) {
+    const A = scen.getBoundingClientRect();
+    fyll(true, 'knapp');
+    const B = scen.getBoundingClientRect();
+    if (!A.width || !B.width) { html.classList.remove('ritare-glid'); helRor = false; return; }
+    const marg = helMarginaler();
+    helFormat = B.width / B.height;
+    // kontrollerna osynliga tills bilden nästan har landat
+    const ui = helUI();
+    helUITona(false, 1, 0, 0, ui);
+    let uiIn = false;
+    helBakgrund.style.opacity = '0';
+    ritare.helStart({
+      inUt: true, tid: HEL_IN, kurva: helKurvaIn, marg,
+      fran: { x: A.left - B.left, y: A.top - B.top, w: A.width, h: A.height },
+      till: { x: 0, y: 0, w: B.width, h: B.height },
+      vidRuta(R, e, k) {
+        scen.style.clipPath = `inset(${R.y.toFixed(2)}px ${(B.width - R.x - R.w).toFixed(2)}px ${(B.height - R.y - R.h).toFixed(2)}px ${R.x.toFixed(2)}px round ${(HEL_RADIE * (1 - e)).toFixed(2)}px)`;
+        helBakgrund.style.opacity = Math.min(1, e * 1.6).toFixed(3);
+        if (!uiIn && k >= 0.5) { uiIn = true; helUITona(true, 460, 55, 0, ui); }
+      },
+      klar() {
+        scen.style.clipPath = '';
+        helBakgrund.style.opacity = '';
+        html.classList.remove('ritare-glid');
+        if (!uiIn) helUITona(true, 460, 55, 0, ui);
+        helRor = false;
+        helVila(true);
+      },
+    });
+  } else {
+    if (!helPlats || !helPlats.isConnected) { fyll(false); html.classList.remove('ritare-glid'); helRor = false; return; }
+    const B = scen.getBoundingClientRect(), T = helPlats.getBoundingClientRect();
+    helVila(false);
+    helUITona(false, 200);
+    helBakgrund.style.opacity = '1';
+    ritare.helStart({
+      inUt: false, tid: HEL_UT, kurva: helKurvaUt, marg: null,
+      fran: { x: 0, y: 0, w: B.width, h: B.height },
+      till: { x: T.left - B.left, y: T.top - B.top, w: T.width, h: T.height },
+      vidRuta(R, e) {
+        scen.style.clipPath = `inset(${R.y.toFixed(2)}px ${(B.width - R.x - R.w).toFixed(2)}px ${(B.height - R.y - R.h).toFixed(2)}px ${R.x.toFixed(2)}px round ${(HEL_RADIE * e).toFixed(2)}px)`;
+        helBakgrund.style.opacity = Math.max(0, 1 - e * 1.25).toFixed(3);
+      },
+      klar() {
+        // bilden har landat på sin plats: tillbaka in i sidan (motorn byter buffert direkt efter)
+        fyll(false);
+        scen.style.clipPath = '';
+        helBakgrund.style.opacity = '';
+        html.classList.remove('ritare-glid');
+        helUISlapp();
+        helRor = false;
+      },
+    });
+  }
+}
+// kontrollerna vilar (tonar bort) när man inte rört mus, finger eller tangent på en stund
+let helVilaTid = 0, helVilar = false;
+function helVilaKan() {
+  if (!fyllLage || helRor) return false;
+  if (scen.querySelector('.kf__popup:not([hidden]), .kf__karta--oppen, .kf__spak--drar, [aria-expanded="true"]')) return false;
+  if (scen.querySelector(':scope > :is(.kf__helrad, .kf__verktyg, .kf__rum, .kf__karta, .kf__lager):hover')) return false;
+  const a = document.activeElement;
+  if (a && a !== document.body && scen.contains(a) && !a.matches('canvas') && a.matches(':focus-visible')) return false;
+  return true;
+}
+function helVila(vaken) {
+  clearTimeout(helVilaTid);
+  if (helVilar) { helVilar = false; document.documentElement.classList.remove('ritare-vila'); if (fyllLage && !helRor) helUITona(true, 280); }
+  if (vaken && fyllLage) helVilaTid = setTimeout(() => {
+    if (!helVilaKan()) { helVila(true); return; }
+    helVilar = true;
+    document.documentElement.classList.add('ritare-vila');
+    helUITona(false, 700);
+  }, 3600);
+}
+['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(t => window.addEventListener(t, () => { if (fyllLage && !helRor) helVila(true); }, { passive: true, capture: true }));
+// Esc stänger helskärmen (om ingen meny, dialog eller spelläget tar den först)
+window.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || fyllLage !== 'knapp' || helRor || e.defaultPrevented) return;
+  if (document.pointerLockElement || document.querySelector('.kf__popup:not([hidden]), dialog[open]')) return;
+  helskarm(false);
+});
+// vriden telefon eller ändrat fönster i helskärm: kontrollernas ytor och utsikten räknas om
+let helStorlekTid = 0, helFormat = 0;
+window.addEventListener('resize', () => {
+  if (!fyllLage || helRor) return;
+  clearTimeout(helStorlekTid);
+  helStorlekTid = setTimeout(() => {
+    if (!fyllLage || helRor || !kan('helMarg')) return;
+    const m = helMarginaler(), f = innerWidth / innerHeight;
+    if (helFormat && Math.abs(f / helFormat - 1) > 0.15 && kan('helOmrama')) ritare.helOmrama(m); else ritare.helMarg(m);
+    helFormat = f;
+  }, 180);
+});
 function helskarm(pa) {
   if (pa === undefined) pa = !(document.fullscreenElement || fyllLage);
-  if (!pa) { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); fyll(false); return; }
-  fyll(true, 'knapp');
-  if (kanHel) scen.requestFullscreen().then(() => { try { const o = screen.orientation; if (o && o.lock) o.lock('landscape').catch(() => {}); } catch (e) { /* stöds inte */ } }).catch(() => {});
+  if (!pa && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  glidHel(!!pa);
 }
 hk.addEventListener('click', () => helskarm());
+// lämnar man helskärm med Esc eller systemets knapp glider bilden mjukt tillbaka
+document.addEventListener('fullscreenchange', () => { if (!helBytes && !document.fullscreenElement) helFram(); });
 document.addEventListener('fullscreenchange', () => {
   const hel = !!document.fullscreenElement;
   if (!hel && fyllLage === 'knapp' && !kanHel) return;
@@ -1494,7 +1815,19 @@ function spara() {
   // inbäddad: iframens adress lämnas i fred, bara länken till hela husritaren följer med
   if (INB) return;
   try { history.replaceState(null, '', '?' + q.toString()); } catch (e) { /* förhandsvisning utan historik */ }
+  try { sessionStorage.setItem(EGEN_NYCKEL, q.toString()); } catch (e) { /* privat läge */ }
 }
+// Tillbaka från webbläsarens sidcache (bakåtknappen, sidan står kvar i minnet): adressen som
+// sidan själv skrev ersätts med standarden. Står allt redan som standard läggs bara kameran i
+// startvyn (utan intro); annars laddas sidan om i standardläget utan intro.
+window.addEventListener('pageshow', e => {
+  if (!e.persisted || INB || FOTO || !ritare || location.search.slice(1) !== egenAdress()) return;
+  const sq = new URLSearchParams(STANDARD), q = new URLSearchParams(location.search);
+  const somStandard = ['modell', 'fasad', 'tak', 'detalj', 'miljo'].every(k => q.get(k) === sq.get(k)) && Math.abs(+q.get('tid') - 19.2) < 0.01 && !inneLage && !oppetLage && !tomtLage && !planLage && q.get('matt') !== '1';
+  if (!somStandard) { location.replace('?' + STANDARD + '&intro=0' + location.hash); return; }
+  try { ritare.vy('runt', { hopp: true }); } catch (err) { console.warn(err); }
+  nuVy = 'runt'; markeraTumme('runt'); spara();
+});
 (function () {
   const q = new URLSearchParams(location.search);
   const m = q.get('modell');

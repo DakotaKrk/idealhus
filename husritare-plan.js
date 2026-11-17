@@ -166,9 +166,14 @@ export function skapaPlanlager(duk, vidRum) {
     const hinder = block.concat(lador.map(l => [l[0] - 3, l[1] - 3, l[2] + 3, l[3] + 3]));
     for (let i = 0; i < nR; i++) {
       const b = el.rum[i], L = lage[i], [w, h] = mattLapp(i), k = utKub(del(t, 0.66 + i * steg, 0.84 + i * steg));
-      for (const bl of hinder) {
-        const ox = Math.min(L.x + w / 2, bl[2]) - Math.max(L.x - w / 2, bl[0]), oy = Math.min(L.y + h / 2, bl[3]) - Math.max(L.y - h / 2, bl[1]);
-        if (ox > 0 && oy > 0) { if (oy <= ox) L.y += (L.y < (bl[1] + bl[3]) / 2 ? -oy : oy); else L.x += (L.x < (bl[0] + bl[2]) / 2 ? -ox : ox); }
+      // (upp till tre varv: en flytt bort från ett hinder kan hamna i ett annat, t.ex. ett måttal)
+      for (let varv = 0; varv < 3; varv++) {
+        let flytt = false;
+        for (const bl of hinder.concat(lador)) {
+          const ox = Math.min(L.x + w / 2, bl[2]) - Math.max(L.x - w / 2, bl[0]), oy = Math.min(L.y + h / 2, bl[3]) - Math.max(L.y - h / 2, bl[1]);
+          if (ox > 0 && oy > 0) { flytt = true; if (oy <= ox) L.y += (L.y < (bl[1] + bl[3]) / 2 ? -oy - 1 : oy + 1); else L.x += (L.x < (bl[0] + bl[2]) / 2 ? -ox - 1 : ox + 1); }
+        }
+        if (!flytt) break;
       }
       L.x = klam(L.x, w / 2 + 4, B - w / 2 - 4); L.y = klam(L.y, h / 2 + 4, H - h / 2 - 4);
       lador.push([L.x - w / 2, L.y - h / 2, L.x + w / 2, L.y + h / 2]);
