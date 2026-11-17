@@ -1251,3 +1251,46 @@ html.foto .kf__flyg { display: none; }
 /* minskad rörelse: ritningen står på plats direkt och tonas bara in */
 @media (prefers-reduced-motion: reduce) { .kplanvy:not([hidden]) { animation: kplanvy-in 0.25s ease-out; } }
 @keyframes kplanvy-in { from { opacity: 0; } }
+
+/* ---- Våningsraden (tak av) ligger i scenen: centrerad mot scenen, aldrig utanför ---- */
+.kf__scen > .kf__lager { z-index: 3; left: 50%; bottom: 84px; translate: -50% 0; max-width: calc(100% - 32px); overflow-x: auto; scrollbar-width: none; }
+.kf__scen > .kf__lager::-webkit-scrollbar { display: none; }
+.kf__scen > .kf__lager button { flex: none; }
+.kf__scen--plan > .kf__lager, .kf__scen--inne > .kf__lager { display: none; }
+@media (max-width: 860px) { .kf__scen > .kf__lager { bottom: 76px; max-width: calc(100% - 16px); } }
+
+/* ---- Styrspaken: gå runt inne på pekskärm (husritare-sida.js, ritare.spak) ---- */
+.kf__spak { position: absolute; z-index: 3; left: 14px; bottom: 86px; display: none; width: 92px; height: 92px; border-radius: 50%; background: rgba(24, 22, 19, 0.38); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.26), 0 10px 24px -14px rgba(0, 0, 0, 0.7); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); touch-action: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+.kf__spak::before { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: radial-gradient(circle at 50% 0, rgba(255, 255, 255, 0.5) 0 2.5px, transparent 3px), radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.3) 0 2px, transparent 2.5px), radial-gradient(circle at 0 50%, rgba(255, 255, 255, 0.3) 0 2px, transparent 2.5px), radial-gradient(circle at 100% 50%, rgba(255, 255, 255, 0.3) 0 2px, transparent 2.5px); }
+.kf__spak i { position: absolute; left: 50%; top: 50%; width: 42px; height: 42px; margin: -21px 0 0 -21px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.7); transition: transform 0.14s ease-out; will-change: transform; }
+.kf__spak--drar i { transition: none; }
+@media (hover: none), (pointer: coarse) {
+  .kf__scen--inne:not(.kf__scen--flyger):not(.kf__scen--spel) .kf__spak { display: block; }
+  .kf__scen--inne:has(.kf__res:not([hidden])) .kf__spak { display: none; }
+  /* tipset om hur man går står ovanför spaken */
+  .kf__scen--inne .kf__gang { bottom: 186px; }
+  /* träffytor på minst 44 px för fingrar */
+  .kf__verktyg .kf__vk { min-width: 44px; height: 44px; }
+  .kf__verktyg .kf__ljusknapp { width: 44px; height: 44px; }
+  .kf__lager button { min-height: 44px; }
+  .kf__rum button { min-height: 40px; }
+  .ritsida .kf__planlank { min-height: 44px; }
+}
+@media (max-width: 860px) { .kf__spak { left: 10px; bottom: 76px; } }
+
+/* ---- Verktygsraden klipps aldrig: Mer-menyn (husritare-sida.js) ----
+   --mat: raden i sin naturliga bredd medan skriptet mäter. --trang: tidsreglaget krymper
+   först. Det som ändå inte ryms flyttas in i listan under knappen med tre prickar. */
+.kf__verktyg--mat { width: max-content !important; max-width: none !important; right: auto !important; }
+.kf__verktyg--mat > *, .kf__verktyg--mat .kf__sol { flex: none !important; }
+.kf__verktyg--mat .ritare__reglage { flex: none !important; }
+.kf__verktyg.kf__verktyg--trang .kf__sol .ritare__reglage { flex: 1 1 72px; width: 72px; min-width: 56px; }
+.kf__verktyg.kf__verktyg--trang .kf__sol output { display: none; }
+.kf__mer[hidden], .kf__merlista[hidden] { display: none; }
+.kf__verktyg .kf__popup.kf__merlista { left: auto; right: -6px; translate: none; display: grid; gap: 2px; min-width: 208px; transform-origin: bottom right; }
+.kf__verktyg .kf__merlista .kf__vk { display: flex; justify-content: flex-start; gap: 12px; width: 100%; min-width: 0; height: 44px; padding: 0 12px; text-align: left; }
+.kf__verktyg .kf__merlista .kf__vk[hidden] { display: none; }
+.kf__verktyg .kf__merlista .kf__vk > span { position: static !important; width: auto !important; height: auto !important; overflow: visible !important; clip-path: none !important; font: 500 0.875rem/1 var(--sans); }
+.kf__verktyg .kf__merlista .kf__vk::after { display: none !important; }
+.kf__verktyg .kf__merlista .kf__vk::before { left: auto; right: 12px; bottom: 50%; margin: 0 0 -2px; }
+.kf__verktyg .kf__merlista .kf__vk[aria-pressed="true"] svg { transform: none; }

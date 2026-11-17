@@ -32727,3 +32727,86 @@ html body .platstopp__mer svg {
 @media (min-width: 1001px) and (max-width: 1180px) {
   html body .site-header__actions .crm-lank { display: none; }
 }
+
+/* =====================================================================
+   Mobilgenomgången 2026-11-18: rättningar för 320–1000 px. Ligger sist
+   i filen och ska ligga kvar sist.
+   ===================================================================== */
+
+/* --- Hjälten: platsväljaren håller sig inom marginalen ----------------
+   Fyra lika breda segment med centrerad text. Texten får brytas till
+   två rader hellre än att slå i kanten. */
+@media (max-width: 900px) {
+  html body .platstopp__val { width: 100%; min-width: 0; }
+  html body .platstopp__platser { min-width: 0; }
+  html body .platstopp__plats {
+    min-width: 0;
+    justify-content: center;
+    padding: 6px 8px;
+    line-height: 1.15;
+    text-align: center;
+    white-space: normal;
+  }
+  html body .platstopp__namn { flex-wrap: wrap; justify-content: center; column-gap: 6px; }
+  html body .platstopp__plats i { left: 24%; right: 24%; }
+}
+@media (min-width: 560px) and (max-width: 720px) {
+  html body .platstopp__namn b { display: none; }
+}
+
+/* --- Hjälten: de tre stegen i ett rent rutnät --------------------------
+   Tre lika breda kolumner när det ryms, annars alla tre under varandra -
+   aldrig två plus en. Länken avslutar listan. */
+html body .platstopp__under {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 12px 32px;
+}
+html body .platstopp__steg {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 24px;
+}
+html body .platstopp__steg li { min-width: 0; }
+html body .platstopp__mer { justify-self: start; }
+@media (max-width: 1100px) {
+  html body .platstopp__under { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  /* Linjer över och under: bytet till nästa, centrerade sektion blir tydligt. */
+  html body .platstopp__under {
+    margin: 26px 6px 0;
+    padding: 20px 0 14px;
+    border-top: 1px solid var(--pt-linje);
+    border-bottom: 1px solid var(--pt-linje);
+  }
+}
+@media (max-width: 699px) {
+  html body .platstopp__steg { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* --- Kategorisidans faktakort på mobil: en del, inte två ---------------
+   Kortet är lika brett som fotot och fortsätter rakt ner under det, med
+   samma ytterkanter. Stämpeln har luft åt alla håll. */
+@media (max-width: 699px) {
+  html body .kat-topp .hoffert--fakta {
+    width: 100%;
+    margin: -22px 0 0;
+    padding: 40px 16px 14px;
+    border-radius: 0 0 22px 22px;
+  }
+  html body .kat-topp .hoffert--fakta .hoffert__huvud {
+    min-height: 44px;
+    padding: 0 128px 10px 0;
+  }
+  html body .kat-topp .kat-topp__fakta > .hoffert__stampel {
+    top: 38px;
+    right: 16px;
+  }
+}
+
+/* Hjälten 901–1180 px: numret i väljaren viker så att namnet ryms i sin ruta. */
+@media (min-width: 901px) and (max-width: 1180px) {
+  html body .platstopp__namn b { display: none; }
+}

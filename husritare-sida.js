@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119c';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119d';
 
-const MOTOR_V = '20261119c';
+const MOTOR_V = '20261119d';
 const Q0 = new URLSearchParams(location.search);
 const INB = Q0.get('inbaddad') === '1';
 if (INB) document.documentElement.classList.add('inbaddad');
@@ -1124,6 +1124,9 @@ if (kanInne) {
 // ---- Öppna tak: taket lyfts av och man ser ned i rummen, våning för våning ----
 const oppnaKnapp = document.querySelector('[data-oppna]');
 const lagerRad = document.querySelector('[data-lager]');
+// våningsraden ligger i scenen (inte i en verktygsgrupp): då centreras den mot scenen och
+// kan aldrig sticka ut utanför den (gruppens animation gjorde gruppen till dess ram)
+if (lagerRad) scen.appendChild(lagerRad);
 const kanOppna = kan('oppna') && !!oppnaKnapp;
 const LAGER = { hela: { tak: false, loft: true, fokus: null }, botten: { tak: false, loft: false, fokus: null }, loft: { tak: false, loft: true, fokus: 'loft' } };
 let oppetLage = false, lagerVal = 'hela';
@@ -1685,3 +1688,97 @@ if (FOTO && ritare) {
 }   // länken Öppna i husritaren får samma hus och val
 markeraTumme(nuVy || (inneLage ? 'inne' : 'runt'));
 nyaTummar();
+
+// ---- Styrspaken: gå runt inne på pekskärm ----
+// En rund spak nere till vänster (syns bara inne och bara på pekskärm, se husritare.css).
+// Tummen drar knoppen; motorn går åt det hållet med samma krock och hinder som W A S D.
+// Ett annat finger på bilden ser sig om under tiden.
+if (kan('spak') && !FOTO) {
+  const spak = document.createElement('div');
+  spak.className = 'kf__spak'; spak.setAttribute('aria-hidden', 'true'); spak.innerHTML = '<i></i>';
+  scen.appendChild(spak);
+  const knopp = spak.firstChild;
+  let pid = null;
+  const dra = e => {
+    const r = spak.getBoundingClientRect(), R = r.width / 2, m = Math.max(8, R - 16);
+    let dx = e.clientX - (r.left + R), dy = e.clientY - (r.top + R);
+    const l = Math.hypot(dx, dy);
+    if (l > m) { dx *= m / l; dy *= m / l; }
+    knopp.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
+    try { ritare.spak(-dy / m, dx / m); } catch (err) { console.warn(err); }
+  };
+  const slapp = e => {
+    if (pid === null || (e && e.pointerId !== undefined && e.pointerId !== pid)) return;
+    pid = null; spak.classList.remove('kf__spak--drar'); knopp.style.transform = '';
+    try { ritare.spak(0, 0); } catch (err) { console.warn(err); }
+  };
+  spak.addEventListener('pointerdown', e => {
+    if (pid !== null || !inneLage) return;
+    pid = e.pointerId; e.preventDefault();
+    try { spak.setPointerCapture(pid); } catch (err) { /* äldre webbläsare */ }
+    spak.classList.add('kf__spak--drar'); gangRorelse(); dra(e);
+  });
+  spak.addEventListener('pointermove', e => { if (e.pointerId === pid) dra(e); });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(n => spak.addEventListener(n, slapp));
+  spak.addEventListener('contextmenu', e => e.preventDefault());
+  window.addEventListener('blur', () => slapp());
+}
+
+// ---- Verktygsraden klipps aldrig: det som inte ryms flyttas in under Mer (⋯) ----
+// Raden mäts i sin naturliga bredd (klassen kf__verktyg--mat) mot scenens bredd. Först
+// krymper tidsreglaget (kf__verktyg--trang), sedan flyttas knapparna en i taget, de minst
+// viktiga först, till en liten meny. Se inne, Planlösning, Tomt hus och tiden står alltid kvar.
+// Knapparna flyttas som de är (samma element), så klick, lägen och genvägar följer med.
+(function () {
+  const rad = document.querySelector('.kf__verktyg');
+  if (!rad || FOTO || typeof ResizeObserver !== 'function') return;
+  const grupper = rad.querySelectorAll('.kf__vgrupp'), sista = grupper[grupper.length - 1];
+  if (!sista) return;
+  const hall = document.createElement('div');
+  hall.className = 'kf__meny kf__mer'; hall.hidden = true;
+  hall.innerHTML = '<button type="button" class="kf__vk" data-mer aria-haspopup="true" aria-expanded="false" aria-controls="kf-mer" data-tips="Fler verktyg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 12h.01M12 12h.01M18.5 12h.01" stroke-width="2.6"/></svg><span class="sr">Fler verktyg</span></button>' +
+    '<div class="kf__popup kf__merlista" id="kf-mer" role="group" aria-label="Fler verktyg" hidden></div>';
+  sista.appendChild(hall);
+  const knapp = hall.firstChild, lista = hall.lastChild;
+  // i den ordning de lämnar raden
+  const ORDNING = ['[data-tangenter]', '[data-liv]', '[data-ladda]', '[data-snurra]', '[data-matt-knapp]', '[data-helskarm]', '[data-hjalp]', '[data-spel]', '[data-lampor]', '[data-oppna]'];
+  const poster = ORDNING.map(s => rad.querySelector('.kf__vk' + s)).filter(Boolean).map(el => { const plats = document.createComment('mer'); el.after(plats); return { el, plats }; });
+  const oppna = pa => { lista.hidden = !pa; knapp.setAttribute('aria-expanded', String(pa)); };
+  knapp.addEventListener('click', e => { e.stopPropagation(); visaMeny(null); oppna(lista.hidden); });
+  lista.addEventListener('click', () => oppna(false));
+  document.addEventListener('click', e => { if (!lista.hidden && !e.target.closest('.kf__mer')) oppna(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !lista.hidden) { e.stopPropagation(); oppna(false); knapp.focus(); } }, true);
+  // ryms raden? (naturlig bredd mot scenens bredd minus luften i kanterna)
+  const forStor = () => {
+    rad.classList.add('kf__verktyg--mat');
+    const w = rad.offsetWidth;
+    rad.classList.remove('kf__verktyg--mat');
+    // luften i kanterna: 2 × radens vänsterkant när den är spänd mellan kanterna, annars 32 px
+    const cs = getComputedStyle(rad), spand = cs.translate === 'none' || cs.translate === '';
+    return w > rad.parentNode.clientWidth - (spand ? 2 * (parseFloat(cs.left) || 8) : 32) + 0.5;
+  };
+  let vantar = 0;
+  function passa() {
+    vantar = 0;
+    poster.forEach(p => { if (p.el.parentNode === lista) p.plats.before(p.el); });
+    rad.classList.remove('kf__verktyg--trang'); hall.hidden = true;
+    if (forStor()) {
+      rad.classList.add('kf__verktyg--trang');
+      if (forStor()) {
+        hall.hidden = false;   // Mer-knappen tar själv plats: den räknas med från början
+        for (let i = 0; i < poster.length && forStor(); i++) {
+          const el = poster[i].el;
+          if (el.hidden || !el.offsetWidth) continue;   // syns inte i det här läget
+          lista.appendChild(el);
+        }
+        if (!lista.children.length) hall.hidden = true;
+      }
+    }
+    if (hall.hidden) oppna(false);
+  }
+  const snart = () => { if (!vantar) vantar = requestAnimationFrame(passa); };
+  new ResizeObserver(snart).observe(rad.parentNode);
+  new MutationObserver(snart).observe(scen, { attributes: true, attributeFilter: ['class'] });
+  new MutationObserver(l => { if (l.some(r => r.target !== hall && r.target !== lista)) snart(); }).observe(rad, { attributes: true, attributeFilter: ['hidden'], subtree: true });
+  passa();
+})();

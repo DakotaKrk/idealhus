@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261119c';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261119c';
-import { skapaPlanlager } from './husritare-plan.js?v=20261119c';
+import { skapaMiljo } from './husritare-miljo.js?v=20261119d';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261119d';
+import { skapaPlanlager } from './husritare-plan.js?v=20261119d';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -3359,6 +3359,26 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   });
   window.addEventListener('keyup', e => { if (e.key === 'Shift') gang.snabb = false; const k = TANGENT[e.code]; if (k) gang.tangent.delete(k); });
   window.addEventListener('blur', () => { gang.tangent.clear(); gang.snabb = false; });
+  // Styrspaken på pekskärm (sidan ritar den): fram/bak och sidled, -1..1. Den trycker på samma
+  // riktningar som W A S D, så gången, krocken, trappan och dörrarna beter sig likadant.
+  let spakNu = new Set();
+  function satSpak(fw, st) {
+    const vill = new Set();
+    if (inneLage && !spel.pa && !flyg) {
+      if (fw > 0.34) vill.add('f'); else if (fw < -0.34) vill.add('b');
+      if (st > 0.34) vill.add('h'); else if (st < -0.34) vill.add('v');
+    }
+    if (vill.size && !spakNu.size) {
+      // första rörelsen: reser en som sitter, avbryter en glidning (som en tangent)
+      if (gang.sitter >= 0) { resDig(); return; }
+      if (gang.glid && !gang.glid.satt) avbrytGlid();
+    }
+    if (gang.sitter >= 0) vill.clear();
+    spakNu.forEach(k => { if (!vill.has(k)) gang.tangent.delete(k); });
+    vill.forEach(k => gang.tangent.add(k));
+    spakNu = vill;
+    vakna(); begarRender();
+  }
   // ---- Saker att göra inne: dörrar, luckor och lådor, sittplatser och lampor ----
   // Inredningen lämnar userData.oppningsbara [{ obj, typ, axel, max, start, namn }] (obj är en
   // pivå vid gångjärnet eller lådans stängda läge, i stängt läge när den lämnas över),
@@ -6081,6 +6101,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // dockskåpet: oppna(true, { lager: { tak, loft, fokus: 'loft' } })
     oppna,
     arOppen: () => oppen.pa || oppen.vantar,
+    // styrspaken på pekskärm: spak(fram, sidled) med -1..1, spak(0, 0) = släppt
+    spak: (fw, st) => satSpak(+fw || 0, +st || 0),
     // Tomt hus: tomt(true/false) döljer eller visar möblerna (tonas 0,4 s), tomt() läser läget
     tomt: (pa, opts) => (pa === undefined ? tomt.pa : satTomt(pa, opts)),
     // Planlösningen rakt ovanifrån: plan(true/false, { direkt }), plan() läser läget.
