@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119h';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119i';
 
-const MOTOR_V = '20261119h';
+const MOTOR_V = '20261119i';
 const Q0 = new URLSearchParams(location.search);
 const INB = Q0.get('inbaddad') === '1';
 if (INB) document.documentElement.classList.add('inbaddad');
@@ -1001,8 +1001,12 @@ function ritaRum() {
   if (!inneRum) return;
   const p = rumPunkter(), ga = p.length > 0 && kan('gaTill');
   const l = ga ? p : inneVyer();
-  inneRumRad.innerHTML = l.map((v, i) =>
-    '<button type="button" ' + (ga ? 'data-rum-ga' : 'data-rum-vy') + '="' + i + '" aria-pressed="' + (i === (ga ? aktivtRum : inneVy)) + '">' + esc((v && v.namn) || 'Vy ' + (i + 1)) + '</button>').join('');
+  // varje flik: en liten ikon för rummet (syns på bred scen) och namnet; den valda markeras av
+  // en gemensam markör som glider mellan flikarna (rullRad flyttar den)
+  inneRumRad.innerHTML = '<i class="kf__rum-markor" aria-hidden="true"></i>' + l.map((v, i) => {
+    const namn = (v && v.namn) || 'Vy ' + (i + 1);
+    return '<button type="button" ' + (ga ? 'data-rum-ga' : 'data-rum-vy') + '="' + i + '" aria-pressed="' + (i === (ga ? aktivtRum : inneVy)) + '">' + rumIkon(namn) + '<span>' + esc(namn) + '</span></button>';
+  }).join('');
   inneRum.hidden = !inneLage || l.length < 2;
   ritaKarta(inneVyer());
 }
@@ -1317,6 +1321,8 @@ function sattPlan(pa, direkt) {
 // som kör rätt övergång från läget man är i; knapparnas utseende ritas bara från läget.
 // Tomt hus är en egen flagga som gäller i alla lägen (sattTomt).
 function vyLage() { return planLage ? 'plan' : inneLage ? 'inne' : oppetLage ? 'tak' : 'ute'; }
+// en smal etikett under ikonen när läget är på (pekskärm, se husritare.css): man ser var man är
+[[oppnaKnapp, 'Tak av'], [planKnapp, 'Plan'], [tomtKnapp, 'Tomt']].forEach(([b, t]) => { if (b) b.dataset.etikett = t; });
 let planFran = 'ute';
 function ritaLagesknappar() {
   const l = vyLage();
@@ -1821,6 +1827,21 @@ if (!FOTO) {
   duk.addEventListener('webglcontextrestored', () => { try { spara(); } catch (err) { /* länken var redan rätt */ } setTimeout(() => location.reload(), 150); });
 }
 
+// rummens små ikoner (2 px streck, samma stil som verktygsraden)
+const RUM_IKON = [
+  [/kök/i, '<path d="M4 11h16M6 11v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6"/><path d="M9 7.5c0-1 1-1.2 1-2.2M13 7.5c0-1 1-1.2 1-2.2"/>'],
+  [/allrum|vardag/i, '<path d="M5 12V9.5A2.5 2.5 0 0 1 7.5 7h9A2.5 2.5 0 0 1 19 9.5V12"/><path d="M3.5 12.5a1.5 1.5 0 0 1 3 0V14h11v-1.5a1.5 1.5 0 0 1 3 0V18h-17z"/>'],
+  [/sov/i, '<path d="M3 18V8M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.6"/>'],
+  [/wc|bad|dusch/i, '<path d="M5 12h14v2a5 5 0 0 1-5 5h-4a5 5 0 0 1-5-5z"/><path d="M7 12V6a2 2 0 0 1 3.5-1.3"/>'],
+  [/loft/i, '<path d="M5 20h4v-4h4v-4h4V8h3"/>'],
+  [/bastu/i, '<path d="M12 4c1.5 2.5 4 4 4 7.5a4 4 0 0 1-8 0c0-1.6.8-2.6 1.6-3.4.3 1.4 1 2 1.9 2.2C11 8.5 11 6.3 12 4z"/>'],
+  [/hall|korridor|entr/i, '<path d="M7 20V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v15M5 20h14"/><path d="M14 12h.01"/>'],
+];
+function rumIkon(namn) {
+  const t = RUM_IKON.find(([re]) => re.test(namn));
+  return t ? '<svg viewBox="0 0 24 24" aria-hidden="true">' + t[1] + '</svg>' : '';
+}
+
 // ---- Flikraderna i scenen (rummen, våningarna) på en rad ----
 // Tonade kanter där det finns mer att rulla till, och den valda fliken rullas in i bild
 // (bara raden rullas, aldrig sidan).
@@ -1847,10 +1868,22 @@ function rullRad(el) {
     }
     kant();
   };
+  // den gemensamma markören (rumsflikarna): glider till den valda fliken; första gången utan glid
+  let mkForst = true;
+  const markor = () => {
+    const m = el.querySelector(':scope > .kf__rum-markor');
+    if (!m) return;
+    const b = el.querySelector('[aria-pressed="true"]');
+    if (!b) { m.style.opacity = '0'; return; }
+    if (mkForst || m.style.opacity === '0') { m.style.transition = 'none'; requestAnimationFrame(() => { m.style.transition = ''; }); mkForst = false; }
+    m.style.opacity = '1';
+    m.style.width = b.offsetWidth + 'px'; m.style.height = b.offsetHeight + 'px';
+    m.style.transform = 'translate(' + b.offsetLeft + 'px,' + b.offsetTop + 'px)';
+  };
   el.addEventListener('scroll', kant, { passive: true });
-  if (typeof ResizeObserver === 'function') new ResizeObserver(kant).observe(el);
-  new MutationObserver(() => requestAnimationFrame(visaVald)).observe(el, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-pressed', 'hidden'] });
-  requestAnimationFrame(visaVald);
+  if (typeof ResizeObserver === 'function') new ResizeObserver(() => { kant(); markor(); }).observe(el);
+  new MutationObserver(l => { if (l.some(r => r.type === 'childList')) mkForst = true; requestAnimationFrame(() => { markor(); visaVald(); }); }).observe(el, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-pressed', 'hidden'] });
+  requestAnimationFrame(() => { markor(); visaVald(); });
 }
 rullRad(inneRumRad);
 rullRad(lagerRad);
@@ -1863,6 +1896,24 @@ if (!FOTO && karta) {
   const kk = document.createElement('button');
   kk.type = 'button'; kk.className = 'kf__kartknapp'; kk.setAttribute('aria-label', 'Visa kartan'); kk.setAttribute('aria-expanded', 'false');
   kk.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg>';
+  // en liten miniatyr av planen med en prick där man står (samma bild och prick som kartan,
+  // kopierade när de ändras; inget eget ritande)
+  const mini = document.createElement('span');
+  mini.className = 'kf__kartknapp-mini'; mini.setAttribute('aria-hidden', 'true');
+  mini.innerHTML = '<img alt=""><i hidden></i>';
+  kk.appendChild(mini);
+  const mImg = mini.querySelector('img'), mPrick = mini.querySelector('i');
+  const synkMini = () => {
+    const src = kartaBild && kartaBild.getAttribute('src');
+    if (!src) { kk.classList.remove('kf__kartknapp--mini'); return; }
+    if (mImg.getAttribute('src') !== src) mImg.setAttribute('src', src);
+    kk.classList.add('kf__kartknapp--mini');
+    const du = kartaPunkter && kartaPunkter.querySelector('.kf__prick--du');
+    if (du && du.style.left) { mPrick.style.left = du.style.left; mPrick.style.top = du.style.top; mPrick.hidden = false; } else mPrick.hidden = true;
+  };
+  if (kartaBild) new MutationObserver(synkMini).observe(kartaBild, { attributes: true, attributeFilter: ['src'] });
+  if (kartaPunkter) new MutationObserver(synkMini).observe(kartaPunkter, { subtree: true, childList: true, attributes: true, attributeFilter: ['style'] });
+  synkMini();
   scen.appendChild(kk);
   // (kartan öppen: vänd-tipset och hjälpen bort; hjälpen tar inte över platsen under kartan)
   const kartaOppen = pa => { if (pa) { if (typeof vandTips !== 'undefined' && vandTips) vandTips.gom(); visaGang(false); } karta.classList.toggle('kf__karta--oppen', pa); kk.setAttribute('aria-expanded', String(pa)); kk.setAttribute('aria-label', pa ? 'Dölj kartan' : 'Visa kartan'); };
@@ -1901,6 +1952,7 @@ hk.addEventListener('click', () => {
   const g = hk.querySelector('.kf__glitter'); if (g) g.remove();
 });
 try { if (localStorage.getItem(HEL_NYCKEL)) hk.classList.add('kf__vk--sedd'); } catch (e) { /* privat läge */ }
+helPuls();   // glittrar från start, i alla lägen, tills man har tryckt en gång
 // liggande telefon inne: scenen fyller skärmen; tillbaka till stående = vanlig sida
 const liggande = matchMedia('(orientation: landscape) and (max-height: 540px)');
 function passaFyll() {
@@ -1916,8 +1968,7 @@ new MutationObserver(() => {
   passaFyll();
   // vänd-tipset när man har kommit in (efter åkningen genom dörren), sedan hjälpen (visaGang väntar)
   // helskärmsknappen lockar när man har kommit in (efter åkningen genom dörren)
-  if (inne) { let n = 0; const nar = () => { if (!inneLage || fyllLage) return; if (kan('flyger') && ritare.flyger() && ++n < 150) { setTimeout(nar, 200); return; } helPuls(); }; setTimeout(nar, 300); }
-  else hk.classList.remove('kf__vk--lockar');
+  // (glittret gäller i alla lägen tills man har tryckt på Helskärm, se helPuls nedan)
   if (!inne && vandTips) vandTips.gom();
 }).observe(scen, { attributes: true, attributeFilter: ['class'] });
 
@@ -1927,9 +1978,10 @@ new MutationObserver(() => {
 // Ett annat finger på bilden ser sig om under tiden.
 if (kan('spak') && !FOTO) {
   const spak = document.createElement('div');
-  spak.className = 'kf__spak'; spak.setAttribute('aria-hidden', 'true'); spak.innerHTML = '<i></i>';
+  // glasyta, en båge som tänds åt det håll man går, och kulan (fjädrar tillbaka när man släpper)
+  spak.className = 'kf__spak'; spak.setAttribute('aria-hidden', 'true'); spak.innerHTML = '<b class="kf__spak-bage"></b><i></i>';
   scen.appendChild(spak);
-  const knopp = spak.firstChild;
+  const knopp = spak.querySelector('i'), bage = spak.querySelector('.kf__spak-bage');
   let pid = null;
   const dra = e => {
     const r = spak.getBoundingClientRect(), R = r.width / 2, m = Math.max(8, R - 16);
@@ -1937,11 +1989,15 @@ if (kan('spak') && !FOTO) {
     const l = Math.hypot(dx, dy);
     if (l > m) { dx *= m / l; dy *= m / l; }
     knopp.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
+    // bågen pekar åt det håll man går och lyser starkare ju längre ut kulan är
+    const styrka = Math.min(1, Math.hypot(dx, dy) / m);
+    bage.style.transform = 'rotate(' + (Math.atan2(dx, -dy) * 180 / Math.PI).toFixed(1) + 'deg)';
+    bage.style.opacity = styrka > 0.2 ? (0.35 + 0.65 * styrka).toFixed(2) : '0';
     try { ritare.spak(-dy / m, dx / m); } catch (err) { console.warn(err); }
   };
   const slapp = e => {
     if (pid === null || (e && e.pointerId !== undefined && e.pointerId !== pid)) return;
-    pid = null; spak.classList.remove('kf__spak--drar'); knopp.style.transform = '';
+    pid = null; spak.classList.remove('kf__spak--drar'); knopp.style.transform = ''; bage.style.opacity = '0';
     try { ritare.spak(0, 0); } catch (err) { console.warn(err); }
   };
   spak.addEventListener('pointerdown', e => {
@@ -2033,8 +2089,8 @@ if (kan('spak') && !FOTO) {
       for (let i = 0; i < kp.length && bredd() > plats; i++) {
         const e = kp[i].el;
         if (!e || e.hidden || !e.offsetWidth) continue;   // syns inte i det här läget
-        // inne, tills man har tryckt på den en gång (då glittrar den): alltid synlig i raden
-        if (e.matches('[data-helskarm]') && inneLage && !e.classList.contains('kf__vk--sedd') && !INB && !FOTO) continue;
+        // Helskärm flyttas aldrig till ⋯ (högsta prioritet): andra knappar flyttas före den
+        if (e.matches('[data-helskarm]')) continue;
         e.remove(); ut.push(i);
       }
       if (!ut.length) kMer.hidden = true;

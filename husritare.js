@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261119h';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261119h';
-import { skapaPlanlager } from './husritare-plan.js?v=20261119h';
+import { skapaMiljo } from './husritare-miljo.js?v=20261119i';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261119i';
+import { skapaPlanlager } from './husritare-plan.js?v=20261119i';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -668,6 +668,14 @@ export async function skapaRitare(duk, alternativ = {}) {
   }`);
   };
   mat.fasad.customProgramCacheKey = () => 'fasad-brador';
+  // Kupans östvägg (gaveltriangeln ovanför huvudtaket) är den enda fasadytan vars utsida
+  // vetter in mot rummen: inifrån, snett uppåt mot innertaket, ligger den bakom innertaket men
+  // framför kameran. Med stencilmärket ritades den först och innertaket hoppades över där:
+  // en grön triangel genom taket. Samma panel och färg, men inget märke och vanlig ordning,
+  // så djuptestet avgör. (Inga möbler står där uppe, så strimfelet som märket löste uppstår inte.)
+  mat.fasadKupa = mat.fasad.clone();
+  mat.fasadKupa.stencilWrite = false; mat.fasadKupa.stencilFunc = THREE.AlwaysStencilFunc;
+  mat.fasadKupa.onBeforeCompile = mat.fasad.onBeforeCompile; mat.fasadKupa.customProgramCacheKey = mat.fasad.customProgramCacheKey;
   // taket har ingen undersida i skuggpasset (takUnder kastar inte skugga): med enkelsidig
   // skugga ritades bara baksidorna, och solen lyste igenom takutsprånget (ljusa streck i
   // husets skugga, solljus i rummen). Båda sidorna kastar skugga.
@@ -1629,6 +1637,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // Kupans östvägg ovanför huvudtaket
     if (H.kupa) {
       vagg(vaggar, new THREE.Vector3(xk, 0, zs), new THREE.Vector3(0, 0, -1), new THREE.Vector3(1, 0, 0), [[0, hS], [0, H.kupa.hk], [W / 2, hR]], []);
+      // utsidan vetter in mot huset (öster om kupan): med fasadens stencilmärke syntes den
+      // genom innertaket (inredningen ritas inte där fasaden märkt), se mat.fasadKupa
+      vaggar.children[vaggar.children.length - 1].material = mat.fasadKupa;
     }
     // insidan stängd: ett mörkt "tak" i väggtoppen så att man aldrig ser igenom
     const inner = new THREE.Mesh(new THREE.BoxGeometry(L - 0.02, 0.02, W - 0.02), mat.insida);
@@ -1756,7 +1767,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     const d = FARGER.detalj[val.detalj || H.farg.detalj][1];
     // färgerna tonar över i stället för att hoppa
     // färgprovets hex är skärmfärg; i dagsljus blir den för mättad, så den dämpas något
-    malFarg.fasad.set(f); dampa(malFarg.fasad, 0.88);
+    malFarg.fasad.set(f); dampa(malFarg.fasad, 0.88); malFarg.fasadKupa.copy(malFarg.fasad);
     malFarg.tak.set(t); dampa(malFarg.tak, 0.78);
     malFarg.falsar.copy(malFarg.tak).offsetHSL(0, 0, 0.06);
     malFarg.takMork.copy(malFarg.tak).offsetHSL(0, 0, -0.07);
@@ -1771,7 +1782,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   }
   const hsl = { h: 0, s: 0, l: 0 };
   function dampa(c, k) { c.getHSL(hsl); c.setHSL(hsl.h, hsl.s * k, hsl.l); return c; }
-  const malFarg = { fasad: new THREE.Color(), tak: new THREE.Color(), falsar: new THREE.Color(), takMork: new THREE.Color(), detalj: new THREE.Color(), detaljMork: new THREE.Color(), stupror: new THREE.Color(), takUnder: new THREE.Color() };
+  const malFarg = { fasad: new THREE.Color(), fasadKupa: new THREE.Color(), tak: new THREE.Color(), falsar: new THREE.Color(), takMork: new THREE.Color(), detalj: new THREE.Color(), detaljMork: new THREE.Color(), stupror: new THREE.Color(), takUnder: new THREE.Color() };
   let tonar = false, forstaFarg = true;
   function tonaFarger(f) {
     if (!tonar) return false;

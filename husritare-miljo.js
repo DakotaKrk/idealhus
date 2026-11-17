@@ -23,8 +23,8 @@
 //   miljo.lista                                  // [['studio','Studio'], ...]
 //   miljo.statistik()                            // { anrop, trianglar } för den aktiva miljön
 //   miljo.dispose();
-import { skapaBil } from './husritare-bil.js?v=20261119h';   // elbilen med laddbox vid entrén
-import { skapaBebott } from './husritare-bebott.js?v=20261119h';   // spår av folk som bor där: brevlåda, cykel, grill …
+import { skapaBil } from './husritare-bil.js?v=20261119i';   // elbilen med laddbox vid entrén
+import { skapaBebott } from './husritare-bebott.js?v=20261119i';   // spår av folk som bor där: brevlåda, cykel, grill …
 
 // ---- små hjälpare (utan THREE) -------------------------------------------
 function slump(fro) {

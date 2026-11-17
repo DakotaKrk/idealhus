@@ -415,15 +415,24 @@ function* tryckTexturSteg() {
   x.scale(2, 2);
   let s = 977; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
   const ruta = (C, f) => { x.fillStyle = f; x.fillRect(C[0], C[1], C[2], C[3]); };
-  const brus = (C, n, a, ljus) => { for (let i = 0; i < n; i++) { x.fillStyle = `rgba(${ljus ? '255,255,255' : '60,50,40'},${a * r()})`; x.fillRect(C[0] + r() * C[2], C[1] + r() * C[3], 1 + r() * 2, 1 + r() * 2); } };
+  const brus = (C, n, a, ljus) => { x.fillStyle = ljus ? 'rgb(255,255,255)' : 'rgb(60,50,40)'; for (let i = 0; i < n; i++) { x.globalAlpha = a * r(); x.fillRect(C[0] + r() * C[2], C[1] + r() * C[3], 1 + r() * 2, 1 + r() * 2); } };
   // matta A: berber, gräddvit med kolgrått rutmönster av romber
   {
     const C = TR.mattaA, [ox, oy, w, h] = C;
     ruta(C, '#eee7db');
     // berberns öglor: täta rader av korta, mjuka streck i ljusare och mörkare gräddvitt
-    for (let yy = oy; yy < oy + h; yy += 2.5) for (let xx = ox + (yy % 5 ? 0 : 1.2); xx < ox + w; xx += 2.4) {
-      const v = r(); x.fillStyle = v < 0.5 ? `rgba(255,252,244,${0.25 + v * 0.4})` : `rgba(150,128,100,${(v - 0.5) * 0.22})`; x.fillRect(xx, yy, 1.7, 1.6);
+    // (samma öglor men färgen sätts bara när den byts och alfa via globalAlpha: förr tolkades en
+    // ny färgsträng för var och en av ~44 000 öglor; paus efter var 64:e rad)
+    let rad = 0, fy = -1;
+    for (let yy = oy; yy < oy + h; yy += 2.5) {
+      for (let xx = ox + (yy % 5 ? 0 : 1.2); xx < ox + w; xx += 2.4) {
+        const v = r(), ljus = v < 0.5 ? 1 : 0;
+        if (ljus !== fy) { x.fillStyle = ljus ? 'rgb(255,252,244)' : 'rgb(150,128,100)'; fy = ljus; }
+        x.globalAlpha = ljus ? 0.25 + v * 0.4 : (v - 0.5) * 0.22; x.fillRect(xx, yy, 1.7, 1.6);
+      }
+      if (++rad % 64 === 0) { x.globalAlpha = 1; yield; fy = -1; }
     }
+    x.globalAlpha = 1;
     brus(C, 4000, 0.08, false);
     x.save(); x.beginPath(); x.rect(ox + 22, oy + 22, w - 44, h - 44); x.clip();
     // romber i varm gråbrun ton (inget svart), dubbla linjer som i en handknuten berber
@@ -546,7 +555,8 @@ function* tryckTexturSteg() {
 // k = höjd/bredd för en upprepning (2 x 2 plattor). Väggen: 0,6 x 1,2 m (k = 2, plattor
 // 30 x 60) på en 1024 x 2048-duk, så att fogarna blir lika breda åt båda hållen (~2 mm).
 // Golvet: 1,2 x 1,2 m (k = 1, klinker 60 x 60, fog ~3 mm).
-function kakelTextur(k = 1) {
+function kakelTextur(k = 1) { return kor(kakelTexturSteg(k)); }
+function* kakelTexturSteg(k = 1) {
   const N = 1024, c = DUK(N); if (!c) return null;
   const H = N * k; c.height = H;
   const x = c.getContext('2d'), P = N / 2, Q = H / 2;
@@ -562,6 +572,7 @@ function kakelTextur(k = 1) {
     x.fillStyle = 'rgb(120,110,100)';
     for (let j = 0; j < 3000 * k; j++) { x.globalAlpha = r() * 0.06; x.fillRect(tx + r() * P, ty + r() * Q, 1.5, 1.5); }
     x.globalAlpha = 1;
+    yield;   // paus per platta
   }
   // fogar: 3 px ljusgrå, lika breda åt båda hållen, med en ljus fas på ena sidan
   [0, 1].forEach(i => {
@@ -851,8 +862,8 @@ let TEXV = null;
 function* lagaMaterialSteg() {
   if (MAT) return MAT;
   const tx = TEXV || (TEXV = {});
-  const steg = [['karta', plankTextur], ['blad', bladTexturSteg], ['tryck', tryckTexturSteg], ['kakel', () => kakelTextur(2)], ['klinker', () => kakelTextur(1)],
-    ['ek', ekTextur], ['stal', stalTextur], ['spegelM', spegelMiljo], ['neutral', neutralMiljo], ['skugga', skuggTextur], ['sken', skenTextur], ['eld', eldTextur]];
+  const steg = [['karta', plankTextur], ['blad', bladTexturSteg], ['tryck', tryckTexturSteg], ['kakel', () => kakelTexturSteg(2)], ['klinker', () => kakelTexturSteg(1)],
+    ['ek', ekTextur], ['stal', stalTextur], ['spegelM', spegelMiljo], ['neutral', neutralMiljo], ['skugga', skuggTextur], ['sken', skenTextur], ['eld', eldTexturSteg]];
   // (bladatlasen och tryckatlasen ritas själva i flera steg, med en paus mellan motiven)
   for (const [k, f] of steg) if (!(k in tx)) { const v = f(); tx[k] = v && typeof v.next === 'function' ? yield* v : v; yield; }
   if (!('vavar' in tx)) { const it = tygBibliotekSteg(); let r = it.next(); while (!r.done) { yield; r = it.next(); } tx.vavar = r.value; }
@@ -4834,7 +4845,8 @@ function ljus(x, y, z, r = 0.03, h = 0.08, fg = '#f3eee4') {
 }
 // Eldens textur (256 x 256): vänster halva en mjuk låga (vit-gul kärna, orange mantel,
 // genomskinlig spets), höger överdel glöd (orange brus), höger nederdel ett runt sken.
-function eldTextur() {
+function eldTextur() { return kor(eldTexturSteg()); }
+function* eldTexturSteg() {
   if (typeof document === 'undefined') return null;
   const N = 256, c = document.createElement('canvas'); c.width = c.height = N;
   const x = c.getContext('2d'), d = x.createImageData(N, N);
@@ -4860,6 +4872,7 @@ function eldTextur() {
       R = 1; G = 0.62; B = 0.3; A = Math.pow(ss(1 - q), 1.6) * 0.5;
     }
     d.data[k] = Math.round(R * 255); d.data[k + 1] = Math.round(Math.min(1, G) * 255); d.data[k + 2] = Math.round(Math.min(1, B) * 255); d.data[k + 3] = Math.round(Math.max(0, Math.min(1, A)) * 255);
+    if (i === N - 1 && (j & 63) === 63) yield;   // paus var 64:e rad
   }
   x.putImageData(d, 0, 0);
   const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; return t;
@@ -5164,6 +5177,7 @@ const MODELL = {
     vagg('z', 0.30, -1.75, 0.09, { topp: LU });
     trappa(0.29, -1.96, 1.08, 1.75);
     loft(0.35, 0.09, -1.96, 1.08);
+    yield;   // (köket i ett eget steg)
     kok({ axel: 'z', vagg: 0.35, ut: 1, s0: -1.75, s1: 0.09, spis: -1.42, disk: -0.3, kyl: 'under', over: [[-1.75, -0.9]], hylla: [[-0.75, 0.05]] });
     yield;
     // matplats vid norrväggen
@@ -5213,6 +5227,7 @@ const MODELL = {
     vagg('z', -0.765, -1.75, 0.08, { topp: LU });
     trappa(-0.25, -3.02, 1.08, 1.75);
     loft(-0.71, 0.08, -3.02, 1.08);
+    yield;   // (köket i ett eget steg)
     kok({ axel: 'z', vagg: -0.715, ut: 1, s0: -1.75, s1: 0.08, spis: -1.42, disk: -0.25, kyl: 'under', over: [[-1.75, -0.9]], hylla: [[-0.75, 0.05]] });
     yield;
     // soffa mot norr med soffbord och matta
@@ -5270,6 +5285,7 @@ const MODELL = {
     vagg('z', 0.485, -1.75, 0.48, { topp: LU });
     trappa(-0.12, -3.17, 1.08, 1.75);
     loft(0.54, 0.08, -3.17, 1.08);
+    yield;   // (köket i ett eget steg)
     kok({ axel: 'z', vagg: 0.535, ut: 1, s0: -1.75, s1: 0.48, hog: [[-1.75, -1.15]], spis: -0.62, disk: 0.25, over: [[-1.15, -0.25]], hylla: [[-0.1, 0.45]] });
     yield;
     // bastu: ribbade lavar, ryggstöd, pärlspont, aggregat med stenkorg, ämbar och termometer
@@ -5668,7 +5684,7 @@ function* slaIhopSteg(grupp, H) {
       geos.push(k);
       if (!arLos) nFast += n;
       raknat += n;
-      if (raknat > 6000) { raknat = 0; yield; }
+      if (raknat > 2500) { raknat = 0; yield; }   // (hörnmörkret per hörn är dyrt: kortare steg)
     }
     let ihop = null;
     try { ihop = mergeGeometries(geos, false); } catch (e) { ihop = null; }
@@ -5815,7 +5831,9 @@ export function* byggInneSteg(THREE, id, H) {
   LOS = false;
   yield;
   golvOchTak(H);
+  yield;
   loftYtor();
+  yield;
   oppningsDetaljer(H);
   yield;
   yield* slaIhopSteg(grupp, H);
