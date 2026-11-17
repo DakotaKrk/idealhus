@@ -221,7 +221,8 @@ html .kf__scen--inne .ritare__tips.borta { visibility: hidden; transition: none;
 .kf__ljusknapp[aria-expanded="true"] svg { transform: rotate(45deg); }
 /* en liten prick när tiden står på ett snabbval */
 .kf__ljusknapp::before { content: ""; position: absolute; right: 6px; top: 6px; width: 5px; height: 5px; border-radius: 50%; background: var(--k-accent); opacity: 0; scale: 0.4; transition: opacity 0.2s ease, scale 0.3s var(--k-ut); }
-.kf__ljusknapp--val::before { opacity: 1; scale: 1; }
+/* (ingen prick för valt ljus: orange prick betyder bara "på"; valet syns med bock i ljusmenyn) */
+.kf__ljusknapp--val::before { opacity: 0; }
 @media (hover: hover) { .kf__ljusknapp[data-tips]::after { content: attr(data-tips); position: absolute; left: 50%; bottom: calc(100% + 12px); translate: -50% 4px; padding: 6px 10px; border-radius: 8px; background: rgba(24, 22, 19, 0.96); color: #fff; font: 500 0.75rem/1 var(--sans); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s ease, translate 0.2s var(--k-ut); } .kf__ljusknapp[data-tips]:hover:not([aria-expanded="true"])::after { opacity: 1; translate: -50% 0; transition-delay: 0.35s; } }
 .kf__popup.kf__popup--ljus { min-width: 232px; }
 .kf__popup--ljus i { border-radius: 50%; }
@@ -1244,7 +1245,7 @@ html.foto .kf__flyg { display: none; }
 .kplanvy__rum--mini b { font-size: 0.65625rem; }
 .kplanvy__rum--mini span { display: none; }
 /* små lappar har ändå en träffyta som ett finger hittar */
-.kplanvy__rum::after { content: ""; position: absolute; inset: -11px; }
+.kplanvy__rum::after { content: ""; position: absolute; inset: -13px; }
 /* smal scen: mindre text i hela ritningen */
 @container scen (max-width: 520px) {
   .kplanvy__rum { padding: 5px 9px 6px; border-radius: 10px; }
@@ -1318,6 +1319,9 @@ html.foto .kf__flyg { display: none; }
   .kf__rum button { min-height: 44px; min-width: 44px; }
   /* den lilla planritningsknappen i huslistan: 32 px syns, 44 px träffyta */
   .kmodell__plan::after { content: ""; position: absolute; inset: -6px; }
+  /* hörnknappen i inbäddningen och tidsreglaget: fingervänlig höjd (spåret ritas i mitten) */
+  html.inbaddad .kf__full { min-height: 44px; }
+  .kf__verktyg .kf__sol .ritare__reglage { height: 44px; }
   .ritsida .kf__planlank { min-height: 44px; }
 }
 @media (max-width: 860px) { .kf__spak { left: 10px; bottom: 76px; } }

@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119e';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261119f';
 
-const MOTOR_V = '20261119e';
+const MOTOR_V = '20261119f';
 const Q0 = new URLSearchParams(location.search);
 const INB = Q0.get('inbaddad') === '1';
 if (INB) document.documentElement.classList.add('inbaddad');
@@ -1060,7 +1060,7 @@ function sattInne(pa, vyIndex, opt) {
     let vantat = 0;
     const visaNar = () => {
       if (!inneLage) return;
-      if (kan('flyger') && ritare.flyger() && (vantat += 200) < 8000) { setTimeout(visaNar, 200); return; }
+      if (kan('flyger') && ritare.flyger() && (vantat += 200) < 30000) { setTimeout(visaNar, 200); return; }
       visaGang(true, pek ? 6000 : 4000);
     };
     setTimeout(visaNar, lugn() ? 0 : 380);
