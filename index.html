@@ -28,9 +28,9 @@
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="styles.css?v=20261010l">
-    <link rel="stylesheet" href="design.css?v=20261118g">
+    <link rel="stylesheet" href="design.css?v=20261118i">
     <link rel="stylesheet" href="nya-hus.css?v=20261114j">
-    <script src="premium.js?v=20261118g" defer></script>
+    <script src="premium.js?v=20261118i" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script type="application/ld+json">
     {
@@ -267,11 +267,11 @@
               <div class="platstopp__val" role="group" aria-labelledby="plats-fraga">
                 <p class="platstopp__fraga" id="plats-fraga">Var ska huset stå?</p>
                 <button type="button" class="platstopp__paus" aria-pressed="false" aria-label="Pausa bildväxlingen" hidden><svg class="pausa" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/></svg><svg class="spela" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.5 2.5v11l9-5.5z"/></svg></button>
-                <div class="platstopp__platser">
-                  <button type="button" class="platstopp__plats" data-plats="havet" data-varde="Vid havet" aria-pressed="true"><span class="platstopp__tumme" aria-hidden="true"><img data-src="images/stamning/gront-hus-havet-600.webp" width="600" height="400" alt="" decoding="async"></span><span class="platstopp__namn"><b aria-hidden="true">01</b>Vid havet</span><i aria-hidden="true"></i></button>
-                  <button type="button" class="platstopp__plats" data-plats="skogen" data-varde="I skogen" aria-pressed="false"><span class="platstopp__tumme" aria-hidden="true"><img data-src="images/stamning/gront-hus-skog-600.webp" width="600" height="400" alt="" decoding="async"></span><span class="platstopp__namn"><b aria-hidden="true">02</b>I skogen</span><i aria-hidden="true"></i></button>
-                  <button type="button" class="platstopp__plats" data-plats="fjallet" data-varde="På fjället" aria-pressed="false"><span class="platstopp__tumme" aria-hidden="true"><img data-src="images/stamning/svart-hus-fjallet-600.webp" width="600" height="400" alt="" decoding="async"></span><span class="platstopp__namn"><b aria-hidden="true">03</b>På fjället</span><i aria-hidden="true"></i></button>
-                  <button type="button" class="platstopp__plats" data-plats="tradgarden" data-varde="I trädgården" aria-pressed="false"><span class="platstopp__tumme" aria-hidden="true"><img data-src="images/stamning/svart-hus-tradgard-600.webp" width="600" height="400" alt="" decoding="async"></span><span class="platstopp__namn"><b aria-hidden="true">04</b>I trädgården</span><i aria-hidden="true"></i></button>
+                <div class="platstopp__platser" role="radiogroup" aria-labelledby="plats-fraga"><span class="platstopp__markor" aria-hidden="true"></span>
+                  <button type="button" class="platstopp__plats" data-plats="havet" data-varde="Vid havet" role="radio" aria-checked="true" tabindex="0"><span class="platstopp__tumme" aria-hidden="true"><img data-src="images/stamning/gront-hus-havet-600.webp" data-srcset="images/stamning/gront-hus-havet-240.webp 240w, images/stamning/gront-hus-havet-600.webp 600w" sizes="(max-width: 900px) 48px, 164px" width="600" height="400" alt="" decoding="async"></span><span class="platstopp__namn"><b aria-hidden="true">01</b>Vid havet</span><i aria-hidden="true"></i></button>
+                  <button type="button" class="platstopp__plats" data-plats="skogen" data-varde="I skogen" role="radio" aria-checked="false" tabindex="-1"><span class="platstopp__tumme" aria-hidden="true"><img data-src="images/stamning/gront-hus-skog-600.webp" data-srcset="images/stamning/gront-hus-skog-240.webp 240w, images/stamning/gront-hus-skog-600.webp 600w" sizes="(max-width: 900px) 48px, 164px" width="600" height="400" alt="" decoding="async"></span><span class="platstopp__namn"><b aria-hidden="true">02</b>I skogen</span><i aria-hidden="true"></i></button>
+                  <button type="button" class="platstopp__plats" data-plats="fjallet" data-varde="På fjället" role="radio" aria-checked="false" tabindex="-1"><span class="platstopp__tumme" aria-hidden="true"><img data-src="images/stamning/svart-hus-fjallet-600.webp" data-srcset="images/stamning/svart-hus-fjallet-240.webp 240w, images/stamning/svart-hus-fjallet-600.webp 600w" sizes="(max-width: 900px) 48px, 164px" width="600" height="400" alt="" decoding="async"></span><span class="platstopp__namn"><b aria-hidden="true">03</b>På fjället</span><i aria-hidden="true"></i></button>
+                  <button type="button" class="platstopp__plats" data-plats="tradgarden" data-varde="I trädgården" role="radio" aria-checked="false" tabindex="-1"><span class="platstopp__tumme" aria-hidden="true"><img data-src="images/stamning/svart-hus-tradgard-600.webp" data-srcset="images/stamning/svart-hus-tradgard-240.webp 240w, images/stamning/svart-hus-tradgard-600.webp 600w" sizes="(max-width: 900px) 48px, 164px" width="600" height="400" alt="" decoding="async"></span><span class="platstopp__namn"><b aria-hidden="true">04</b>I&nbsp;trädgården</span><i aria-hidden="true"></i></button>
                 </div>
                 <span class="field__dold" role="status" aria-live="polite" data-plats-status></span>
               </div>
@@ -873,16 +873,16 @@
           img.removeAttribute('data-srcset');
           return img;
         }
-        // Väljarens små bilder visas bara på bred skärm och hämtas bara där.
-        var bred = window.matchMedia('(min-width: 901px)');
+        // Väljarens små bilder hämtas när sidan laddat klart: 240 px på
+        // mobilen, 600 px på dator (srcset).
         function laddaTummar() {
-          if (!bred.matches) return;
           Array.prototype.forEach.call(topp.querySelectorAll('.platstopp__tumme img[data-src]'), function (t) {
+            if (t.getAttribute('data-srcset')) t.srcset = t.getAttribute('data-srcset');
             t.src = t.getAttribute('data-src');
             t.removeAttribute('data-src');
+            t.removeAttribute('data-srcset');
           });
         }
-        if (bred.addEventListener) bred.addEventListener('change', laddaTummar);
         function laddaAlla() { for (var i = 1; i < N; i++) ladda(i); laddaTummar(); }
         if (document.readyState === 'complete') laddaAlla();
         else window.addEventListener('load', laddaAlla);
@@ -918,7 +918,11 @@
           if (img.decode && !img.complete) img.decode().then(byt, byt); else byt();
           nu = i;
           topp.setAttribute('data-plats', inn.getAttribute('data-plats'));
-          knappar.forEach(function (k, j) { k.setAttribute('aria-pressed', String(j === i)); });
+          knappar.forEach(function (k, j) {
+            k.setAttribute('aria-checked', String(j === i));
+            k.tabIndex = j === i ? 0 : -1;
+          });
+          flyttaMarkor(true);
           if (nr) nr.textContent = '0' + (i + 1);
           if (vald) {
             if (status) status.textContent = knappar[i].getAttribute('data-varde');
@@ -932,10 +936,36 @@
           takt();
         }
 
+        // Markören under det valda: en vit yta som glider till nästa val
+        // (bara transform, Web Animations - CSS-övergångar startar inte
+        // pålitligt i alla webbläsare när läget sätts från skript).
+        var markor = topp.querySelector('.platstopp__markor');
+        var markorPos = null;
+        function flyttaMarkor(mjukt) {
+          if (!markor) return;
+          var k = knappar[nu];
+          if (!k.offsetWidth || getComputedStyle(markor).display === 'none') { markorPos = null; return; }
+          var ny = { x: k.offsetLeft, y: k.offsetTop };
+          markor.style.width = k.offsetWidth + 'px';
+          markor.style.height = k.offsetHeight + 'px';
+          var till = 'translate(' + ny.x + 'px, ' + ny.y + 'px)';
+          if (mjukt && markorPos && !lugn && markor.animate) {
+            markor.animate([
+              { transform: 'translate(' + markorPos.x + 'px, ' + markorPos.y + 'px)' },
+              { transform: till }
+            ], { duration: 260, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+          }
+          markor.style.transform = till;
+          markorPos = ny;
+          markor.classList.add('syns');
+        }
+        flyttaMarkor(false);
+        window.addEventListener('resize', function () { flyttaMarkor(false); });
+
         knappar.forEach(function (k, i) {
           k.addEventListener('click', function () { visa(i, i < nu ? -1 : 1, true); });
           k.addEventListener('keydown', function (e) {
-            var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+            var d = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0;
             if (!d) return;
             e.preventDefault();
             var j = (i + d + N) % N;

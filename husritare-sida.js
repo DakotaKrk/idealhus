@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261120a';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261120e';
 
-const MOTOR_V = '20261120a';
+const MOTOR_V = '20261120e';
 // Standardutseendet: utan val i adressen (och när man kommer tillbaka till sidan med bakåtknappen
 // eller laddar om den) möts man av samma bild varje gång: Sadel 40 i falurött med svart tak och
 // vita detaljer, vinter, gyllene timmen, kameran i startvyn. Adressen som sidan själv skriver
@@ -2491,4 +2491,35 @@ if (kan('spak') && !FOTO) {
   let sistLage = '';
   const lageNu = () => ['kf__scen--inne', 'kf__scen--oppen', 'kf__scen--plan', 'kf__scen--klar'].map(c => scen.classList.contains(c) ? 1 : 0).join('');
   passa();
+})();
+
+// Bottenraden på mobil gömmer sig när man scrollar nedåt (så den inte ligger över innehållet)
+// och glider tillbaka när man scrollar uppåt eller är nära sidans topp/botten.
+(() => {
+  const rad = document.querySelector('.kf__handling');
+  if (!rad || INB || FOTO) return;
+  const smal = matchMedia('(max-width: 860px)');
+  let forra = window.scrollY;
+  // Web Animations (CSS-övergångar startade inte pålitligt i alla miljöer); klassen bär slutläget
+  const lugn = matchMedia('(prefers-reduced-motion: reduce)');
+  const UT = 'translateY(calc(100% + 24px + env(safe-area-inset-bottom, 0px)))';
+  const visa = pa => {
+    if (rad.classList.contains('kf__handling--gomd') === !pa) return;
+    rad.classList.toggle('kf__handling--gomd', !pa);
+    if (lugn.matches || !rad.animate) return;
+    rad.animate(pa ? [{ transform: UT, opacity: 0 }, { transform: 'none', opacity: 1 }] : [{ transform: 'none', opacity: 1 }, { transform: UT, opacity: 0 }],
+      { duration: pa ? 340 : 260, easing: pa ? 'cubic-bezier(0.22, 1, 0.36, 1)' : 'cubic-bezier(0.55, 0, 0.45, 1)' });
+  };
+  const kolla = () => {
+    const y = window.scrollY, dy = y - forra;
+    if (!smal.matches || document.documentElement.classList.contains('ritare-fyll')) { visa(true); forra = y; return; }
+    const nraBotten = y + innerHeight > document.documentElement.scrollHeight - 140;
+    if (y < 80 || nraBotten) visa(true);
+    else if (dy > 6) visa(false);
+    else if (dy < -6) visa(true);
+    if (Math.abs(dy) > 6) forra = y;
+  };
+  addEventListener('scroll', kolla, { passive: true });   // billigt: bara scrollY och en klass
+  // fokus i raden (tangentbord) visar den alltid
+  rad.addEventListener('focusin', () => visa(true));
 })();

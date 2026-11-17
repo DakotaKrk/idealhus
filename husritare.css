@@ -1728,3 +1728,9 @@ html.ritare-vila .kf__scen > .kf__helrad * { pointer-events: none !important; }
   }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .kf__hel-bakgrund { background: #14120f; } }
 :root[data-theme="dark"] .kf__hel-bakgrund { background: #14120f; }
+
+/* Bottenraden på mobil glider undan vid scroll nedåt (husritare-sida.js) */
+@media (max-width: 860px) {
+  body.ritsidan .kf__handling { will-change: transform; }
+  body.ritsidan .kf__handling.kf__handling--gomd { transform: translateY(calc(100% + 24px + env(safe-area-inset-bottom, 0px))); opacity: 0; pointer-events: none; }
+}

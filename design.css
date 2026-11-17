@@ -32460,12 +32460,12 @@ html body .platstopp__plats i::after {
   transform-origin: 0 50%;
   transition: background-color 0.6s ease;
 }
-html body .platstopp__plats[aria-pressed="true"] { color: var(--pt-fg); }
-html body .platstopp__plats[aria-pressed="true"] .platstopp__tumme {
+html body .platstopp__plats[aria-checked="true"] { color: var(--pt-fg); }
+html body .platstopp__plats[aria-checked="true"] .platstopp__tumme {
   opacity: 1;
   box-shadow: 0 0 0 2px #fff, 0 14px 26px -14px rgba(0, 0, 0, 0.8);
 }
-html body .platstopp__plats[aria-pressed="true"] i::after { transform: scaleX(1); }
+html body .platstopp__plats[aria-checked="true"] i::after { transform: scaleX(1); }
 @media (hover: hover) {
   html body .platstopp__plats:hover { color: var(--pt-fg); }
   html body .platstopp__plats:hover .platstopp__tumme { opacity: 1; transform: translateY(-3px); }
@@ -32558,10 +32558,10 @@ html body .platstopp__mer svg {
   html body .platstopp__lager.ut.bak { animation-name: pt-undan-bak; }
 
   /* Linjen under vald plats fylls tills nästa plats kommer. */
-  html body .platstopp.gar .platstopp__plats[aria-pressed="true"] i::after {
+  html body .platstopp.gar .platstopp__plats[aria-checked="true"] i::after {
     animation: pt-takt var(--takt, 7s) linear both;
   }
-  html body .platstopp.vilar .platstopp__plats[aria-pressed="true"] i::after {
+  html body .platstopp.vilar .platstopp__plats[aria-checked="true"] i::after {
     animation-play-state: paused;
   }
 
@@ -32691,15 +32691,15 @@ html body .platstopp__mer svg {
     transition: color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
   }
   html body .platstopp__plats i { left: 14px; right: 14px; bottom: 7px; height: 2px; background: none; }
-  html body .platstopp__plats[aria-pressed="true"] {
+  html body .platstopp__plats[aria-checked="true"] {
     background: #fff;
     box-shadow: 0 1px 2px rgba(27, 25, 21, 0.1), 0 8px 18px -12px rgba(27, 25, 21, 0.35);
   }
-  html[data-tema="mork"] body .platstopp__plats[aria-pressed="true"] {
+  html[data-tema="mork"] body .platstopp__plats[aria-checked="true"] {
     background: rgba(247, 245, 240, 0.12);
     box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
   }
-  html body .platstopp__plats[aria-pressed="true"] i::after { background: var(--virke-djup); }
+  html body .platstopp__plats[aria-checked="true"] i::after { background: var(--virke-djup); }
   html body .platstopp__under { flex-direction: column; align-items: flex-start; gap: 6px; padding: 24px 6px 0; }
   html body .platstopp__steg { flex-direction: column; gap: 8px; }
 }
@@ -32901,4 +32901,123 @@ html body .segment__media img { height: auto; }
    och sidan får tillbaka en sjättedel av den låga skärmen. */
 @media (max-height: 500px) and (orientation: landscape) {
   html body .cta-bar { display: none; }
+}
+
+/* --- Hjältens platsväljare på mobil (2026-11-18, omgång 2) ---------------
+   Fyra kort med en liten bild av platsen och namnet. Det valda lyfts av en
+   vit yta som glider dit (Web Animations i index.html), har en tunn ring i
+   accentfärg runt bilden och en linje under som fylls till nästa byte.
+   Siffrorna visas inte på mobil. */
+html body .platstopp__markor { display: none; }
+@media (max-width: 900px) {
+  html body .platstopp__val { gap: 10px 12px; }
+  html body .platstopp__platser {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 6px;
+    border-radius: 22px;
+    background: rgba(27, 25, 21, 0.05);
+  }
+  html[data-tema="mork"] body .platstopp__platser { background: rgba(247, 245, 240, 0.06); }
+  html body .platstopp__markor {
+    display: block;
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    left: 0;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(27, 25, 21, 0.08), 0 10px 22px -12px rgba(27, 25, 21, 0.4);
+    opacity: 0;
+    pointer-events: none;
+  }
+  html body .platstopp__markor.syns { opacity: 1; }
+  html[data-tema="mork"] body .platstopp__markor {
+    background: rgba(247, 245, 240, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(247, 245, 240, 0.14);
+  }
+  html body .platstopp__plats,
+  html body .platstopp__plats[aria-checked="true"],
+  html[data-tema="mork"] body .platstopp__plats[aria-checked="true"] {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    width: auto;
+    min-width: 0;
+    min-height: 60px;
+    padding: 8px 10px 8px 8px;
+    border-radius: 16px;
+    background: none;
+    box-shadow: none;
+    text-align: left;
+    white-space: normal;
+    color: var(--text-2);
+  }
+  html body .platstopp__plats[aria-checked="true"] { color: var(--text); }
+  html body .platstopp__tumme {
+    display: block;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    aspect-ratio: auto;
+    border-radius: 12px;
+    opacity: 1;
+    box-shadow: 0 0 0 1px rgba(27, 25, 21, 0.08);
+    transition: box-shadow 0.25s ease, transform 0.25s var(--mjuk);
+  }
+  html body .platstopp__plats[aria-checked="true"] .platstopp__tumme {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--virke);
+  }
+  html[data-tema="mork"] body .platstopp__plats[aria-checked="true"] .platstopp__tumme {
+    box-shadow: 0 0 0 2px #2a2620, 0 0 0 3.5px var(--virke);
+  }
+  html body .platstopp__namn { display: block; min-width: 0; font: 600 0.9375rem/1.2 var(--knappfont); }
+  html body .platstopp__namn b { display: none; }
+  /* Linjen under det valda, från bildens kant till kortets. */
+  html body .platstopp__plats i { left: 62px; right: 12px; bottom: 7px; height: 2px; background: none; }
+  html body .platstopp__plats[aria-checked="true"] i { background: rgba(27, 25, 21, 0.08); }
+  html body .platstopp__plats[aria-checked="true"] i::after { background: var(--virke); }
+  html body .platstopp__plats:focus-visible { outline: 2px solid var(--virke-djup); outline-offset: 2px; }
+  /* Pausknappen i samma stil som väljaren. */
+  html body .platstopp__paus {
+    width: 44px;
+    height: 44px;
+    background: rgba(27, 25, 21, 0.05);
+    box-shadow: none;
+    color: var(--text);
+  }
+  html[data-tema="mork"] body .platstopp__paus { background: rgba(247, 245, 240, 0.06); }
+}
+@media (max-width: 900px) and (min-width: 600px) {
+  html body .platstopp__platser { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 399px) {
+  html body .platstopp__plats,
+  html body .platstopp__plats[aria-checked="true"] { gap: 8px; padding-right: 8px; }
+  html body .platstopp__tumme { width: 40px; height: 40px; }
+  html body .platstopp__plats i { left: 56px; }
+  html body .platstopp__namn { font-size: 0.875rem; letter-spacing: -0.01em; }
+}
+/* Smalast: bilden ovanför namnet, så namnet alltid ryms på en rad. */
+@media (max-width: 360px) {
+  html body .platstopp__plats,
+  html body .platstopp__plats[aria-checked="true"] {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 6px 6px 14px;
+    text-align: center;
+  }
+  html body .platstopp__tumme { width: 100%; height: auto; aspect-ratio: 2 / 1; }
+  html body .platstopp__plats i { left: 14px; right: 14px; bottom: 6px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html body .platstopp__plats:active .platstopp__tumme { transform: scale(0.97); }
 }

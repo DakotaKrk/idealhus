@@ -35,7 +35,7 @@ import _bygg as B  # noqa: E402
 PROVA = "--prova" in sys.argv
 HOPPA = {"rita-hus.html"}
 # Byt när design.css eller premium.js ändras.
-VERSION = "20261118g"
+VERSION = "20261118i"
 
 A0, A1 = "      <!-- avslut: gemensamt slut, se _avslut.py -->\n", "      <!-- /avslut -->\n"
 S0, S1 = "    <!-- avslutskript, se _avslut.py -->\n", "    <!-- /avslutskript -->\n"

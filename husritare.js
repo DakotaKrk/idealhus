@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261120a';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261120a';
-import { skapaPlanlager } from './husritare-plan.js?v=20261120a';
+import { skapaMiljo } from './husritare-miljo.js?v=20261120e';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261120e';
+import { skapaPlanlager } from './husritare-plan.js?v=20261120e';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -2251,7 +2251,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     begarRender();
   }
   let inneFov = 0;   // vyns eget synfält (INNE_VYER[].fov), 0 = standard
-  const fovAsp = (inneVy, asp) => inneVy ? (asp < 1 ? Math.max(inneFov || 62, 74) : (inneFov || 62)) : (asp < 1 ? 42 : 32);
+  const fovAsp = (inneVy, asp) => inneVy ? (asp < 1 ? Math.max(inneFov || 62, 74) : (inneFov || 62)) : (asp < 0.8 ? 64 : asp < 1 ? 42 : 32);
   const fovFor = inneVy => fovAsp(inneVy, kamera.aspect);
 
   // ---- Övergångar i WebGL ----
@@ -6001,11 +6001,17 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     let start = null;
     try { start = mal('runt', kamera, hem); } catch (e) { start = null; }
     hS0.setFromVector3(start ? hV1.copy(start).sub(hem) : hV1.set(0.6, 0.12, 0.79));
-    const lutAsp = THREE.MathUtils.degToRad(THREE.MathUtils.lerp(16, 0, THREE.MathUtils.clamp((asp - 0.55) / 0.55, 0, 1)));
-    const lut = Math.max(lutAsp, Math.min(Math.PI / 2 - hS0.phi, THREE.MathUtils.degToRad(30)));
-    const dir = new THREE.Vector3().setFromSphericalCoords(1, Math.PI / 2 - lut, hS0.theta);
-    const hoger = new THREE.Vector3(dir.z, 0, -dir.x).normalize();
-    const upp = new THREE.Vector3().crossVectors(hoger, dir.clone().negate()).normalize();
+    // Högt och smalt (stående telefon): kameran står som en drönare, högt över trädtopparna och
+    // tittar ned (36°), så att tomten fyller bilden, inga träd står mellan kameran och huset och
+    // skogen bara syns som bakgrund upptill. Mot brett format glider den ned till startvyns höjd.
+    const lutAsp = THREE.MathUtils.degToRad(THREE.MathUtils.lerp(34, 0, THREE.MathUtils.smoothstep(asp, 0.55, 1.15)));
+    let lut = Math.max(lutAsp, Math.min(Math.PI / 2 - hS0.phi, THREE.MathUtils.degToRad(40)));
+    const dir = new THREE.Vector3(), hoger = new THREE.Vector3(), upp = new THREE.Vector3();
+    const rikta = () => {
+      dir.setFromSphericalCoords(1, Math.PI / 2 - lut, hS0.theta);
+      hoger.set(dir.z, 0, -dir.x).normalize();
+      upp.crossVectors(hoger, dir).negate().normalize();
+    };
     // punkterna som ska synas: huset med takfot, altanen och bilen
     const P = [];
     const x0 = d.L / 2 + 0.35, z0 = d.W / 2 + 0.35;
@@ -6021,6 +6027,22 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         const b = new THREE.Box3().setFromObject(bil);
         if (!b.isEmpty() && b.max.distanceTo(b.min) < 12) for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) P.push(new THREE.Vector3(x, y, z));
       }
+      // gården: sakerna runt huset (snögubbe, bänk, pulka, sopkärl, grill …, husritare-bebott.js)
+      // inom tomten; näten är ihopbakade per material, så hörnen läses ur geometrin (gles provtagning)
+      const bebott = scene.getObjectByName('bebott'), R = Math.max(d.L, d.W) / 2 + 6;
+      if (bebott && bebott.visible) {
+        bebott.updateWorldMatrix(true, true);
+        const v = new THREE.Vector3();
+        bebott.traverseVisible(o => {
+          const pos = o.isMesh && o.geometry && o.geometry.attributes.position;
+          if (!pos) return;
+          const steg = Math.max(1, Math.floor(pos.count / 600));
+          for (let i = 0; i < pos.count; i += steg) {
+            v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
+            if (Math.hypot(v.x - hem.x, v.z - hem.z) <= R && v.y < 3) P.push(v.clone());
+          }
+        });
+      }
     } catch (e) { console.warn(e); }
     // avståndet där alla punkter ryms (perspektiv: djupet räknas per punkt)
     const passa = mal => {
@@ -6032,8 +6054,14 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       }
       return D;
     };
-    const mitt = hem.clone();
-    let D = passa(mitt);
+    // Kameran ska stå i gläntan (skog och vinter: träden står från ~30 m framför huset), annars
+    // skymmer stammar och grenar förgrunden. Räcker inte synfältet blir vinkeln brantare i stället.
+    const GLANTA = 27;
+    let mitt, D;
+    for (let f = 0; f < 8; f++) {
+    rikta();
+    mitt = hem.clone();
+    D = passa(mitt);
     // flytta målet så att allt hamnar mitt i den fria ytan (på högt format en aning över mitten)
     for (let i = 0; i < 2; i++) {
       let xa = Infinity, xb = -Infinity, ya = Infinity, yb = -Infinity;
@@ -6045,7 +6073,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         xa = Math.min(xa, x); xb = Math.max(xb, x); ya = Math.min(ya, y); yb = Math.max(yb, y);
       }
       if (!isFinite(xa)) break;
-      const fx = (m.l - m.r) / w, fy = (m.b - m.t) / h + (asp < 0.8 ? 0.14 : 0);
+      const fx = (m.l - m.r) / w, fy = (m.b - m.t) / h + (asp < 0.8 ? 0.04 : 0);
       const dx = ((xa + xb) / 2 - fx) * D * tH, dy = ((ya + yb) / 2 - fy) * D * tV;
       mitt.addScaledVector(hoger, dx).addScaledVector(upp, dy);
       // målet stannar nära huset och över marken (som zoomen)
@@ -6053,6 +6081,10 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (hV1.length() > hemR) { hV1.setLength(hemR); mitt.x = hem.x + hV1.x; mitt.z = hem.z + hV1.z; }
       mitt.y = Math.min(hemTopp, Math.max(0, mitt.y));
       D = passa(mitt);
+    }
+    const ut = Math.hypot(mitt.x + dir.x * D, mitt.z + dir.z * D);
+    if (ut <= GLANTA || lut >= THREE.MathUtils.degToRad(46)) break;
+    lut = Math.min(THREE.MathUtils.degToRad(46), lut + Math.max(THREE.MathUtils.degToRad(3), Math.acos(Math.min(1, GLANTA / ut)) * 0.5));
     }
     return { pos: dir.clone().multiplyScalar(D).add(mitt), mal: mitt, fov };
   }
