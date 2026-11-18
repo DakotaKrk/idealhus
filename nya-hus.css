@@ -224,8 +224,8 @@ html body .main-nav .main-nav__sub :is(.main-nav__modeller, .main-nav__guider) a
 html body .main-nav .main-nav__sub :is(.main-nav__modeller, .main-nav__guider) a:is(:hover, :focus-visible)::after { opacity: 0.9; transform: translateX(2px); }
 html body .main-nav .main-nav__sub :is(.main-nav__modeller, .main-nav__guider) a[aria-current="page"] { box-shadow: inset 0 0 0 1.5px var(--virke, #f0b56e); }
 html body .main-nav .main-nav__sub a:focus-visible { outline: 2px solid var(--virke, #f0b56e); outline-offset: 2px; }
-html body :is(.main-nav__sub, .mmeny) a[href^="sadel-30.html"]::before { content: "30 m²"; }
-html body :is(.main-nav__sub, .mmeny) a[href^="sadel-40.html"]::before { content: "40 m²"; }
+html body :is(.main-nav__sub, .mmeny) a[href^="kupa-30.html"]::before { content: "30 m²"; }
+html body :is(.main-nav__sub, .mmeny) a[href^="kupa-40.html"]::before { content: "40 m²"; }
 html body :is(.main-nav__sub, .mmeny) a[href^="sadel-50.html"]::before { content: "50 m²"; }
 html body :is(.main-nav__sub, .mmeny) a[href^="pulpet-70.html"]::before { content: "70 m²"; }
 html body :is(.main-nav__sub, .mmeny) a[href^="sadel-90.html"]::before { content: "90 m²"; }

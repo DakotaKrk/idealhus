@@ -411,7 +411,7 @@ SIDFOT = '''    <footer class="site-footer">
     [f'            <a href="{fil}">{namn}</a>' for namn, fil in KATEGORIER_PRIVAT]
     + [f'            <a href="{fil}">{namn}</a>' for namn, fil in KATEGORIER_PROFFS]
     + ['            <span class="site-footer__etikett">Modeller</span>']
-    + [f'            <a href="{f}.html">{n}</a>' for n, f in [("Sadel 30", "sadel-30"), ("Sadel 40", "sadel-40"), ("Sadel 50", "sadel-50"), ("Pulpet 70", "pulpet-70"), ("Sadel 90", "sadel-90")]]) + '''
+    + [f'            <a href="{f}.html">{n}</a>' for n, f in [("Kupa 30", "kupa-30"), ("Kupa 40", "kupa-40"), ("Sadel 50", "sadel-50"), ("Pulpet 70", "pulpet-70"), ("Sadel 90", "sadel-90")]]) + '''
           </nav>
         </div>
 

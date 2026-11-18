@@ -6,14 +6,19 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261120g';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261120h';
 
-const MOTOR_V = '20261120g';
+const MOTOR_V = '20261120h';
 // Standardutseendet: utan val i adressen (och när man kommer tillbaka till sidan med bakåtknappen
-// eller laddar om den) möts man av samma bild varje gång: Sadel 40 i falurött med svart tak och
+// eller laddar om den) möts man av samma bild varje gång: Kupa 40 i falurött med svart tak och
 // vita detaljer, vinter, gyllene timmen, kameran i startvyn. Adressen som sidan själv skriver
 // medan man väljer (spara) minns i sessionStorage, så att en delad länk med val fortfarande gäller.
-const STANDARD = 'modell=sadel-40&fasad=falu&tak=svart&detalj=vit&tid=19.2&miljo=vinter';
+const STANDARD = 'modell=kupa-40&fasad=falu&tak=svart&detalj=vit&tid=19.2&miljo=vinter';
+// Kupa 30 och Kupa 40 hette Sadel 30 och Sadel 40 (namnbyte 2026-11-18). Koden, bilderna och
+// planerna har kvar id:na sadel-30/sadel-40; adressen visar kupa-30/kupa-40 och båda läses.
+const MODELL_IN = { 'kupa-30': 'sadel-30', 'kupa-40': 'sadel-40' };
+const MODELL_UT = { 'sadel-30': 'kupa-30', 'sadel-40': 'kupa-40' };
+const modellId = m => MODELL_IN[m] || m;
 const LAGE_NYCKLAR = ['modell', 'fasad', 'tak', 'detalj', 'tid', 'miljo', 'vy', 'rum', 'matt', 'oppen', 'lager', 'tomt', 'plan'];
 const EGEN_NYCKEL = 'rita-hus-egen';
 const egenAdress = () => { try { return sessionStorage.getItem(EGEN_NYCKEL) || ''; } catch (e) { return ''; } };
@@ -36,7 +41,7 @@ if (INB) document.documentElement.classList.add('inbaddad');
 // (runt, soder, ost, norr, vast, hjalte m.fl.).
 const FOTO = Q0.get('foto') === '1';
 if (FOTO) document.documentElement.classList.add('foto');
-const START_MODELL = MODELLER[Q0.get('modell')] ? Q0.get('modell') : 'sadel-40';
+const START_MODELL = MODELLER[modellId(Q0.get('modell'))] ? modellId(Q0.get('modell')) : 'sadel-40';
 const scen = document.querySelector('.kf__scen');
 // inbäddad: vänta tills ramen syns (iframen kan ligga långt ned på sidan)
 if (INB && !FOTO && 'IntersectionObserver' in window) {
@@ -1850,7 +1855,7 @@ function spara() {
   ritaEtikett();
   try { ritaSparaLage(); } catch (e) { /* listan är inte uppsatt än */ }
   const q = new URLSearchParams();
-  q.set('modell', val.modell);
+  q.set('modell', MODELL_UT[val.modell] || val.modell);
   ['fasad', 'tak', 'detalj'].forEach(g => { if (val[g]) q.set(g, val[g]); });
   const tv = Math.round(+tid.value * 100) / 100;
   if (tv !== 14) q.set('tid', String(tv));
@@ -1881,7 +1886,7 @@ window.addEventListener('pageshow', e => {
 });
 (function () {
   const q = new URLSearchParams(location.search);
-  const m = q.get('modell');
+  const m = modellId(q.get('modell'));
   // modellen är redan byggd av skapaRitare (START_MODELL)
   if (m && MODELLER[m]) document.querySelector('input[name="modell"][value="' + m + '"]').checked = true;
   ['fasad', 'tak', 'detalj'].forEach(g => {

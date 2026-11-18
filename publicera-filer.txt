@@ -8,6 +8,7 @@ huskort.html
 index.html
 integritetspolicy.html
 kontakt.html
+kupa-30.html
 kupa-40.html
 kupa-50.html
 om-oss.html

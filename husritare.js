@@ -6,16 +6,16 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261120g';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261120g';
-import { skapaPlanlager } from './husritare-plan.js?v=20261120g';
+import { skapaMiljo } from './husritare-miljo.js?v=20261120h';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261120h';
+import { skapaPlanlager } from './husritare-plan.js?v=20261120h';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
 // Typer: f fönster, d dörr, dg dörr med glas, sk skjutdörr.
 const HUS = {
   'sadel-30': {
-    namn: 'Sadel 30', yta: 30, L: 7.5, W: 4, tak: 'sadel', he: 2.6, hr: 3.62, altan: 'E',
+    namn: 'Kupa 30', yta: 30, L: 7.5, W: 4, tak: 'sadel', he: 2.6, hr: 3.62, altan: 'E',
     kupa: { langd: 3.8, hk: 3.45 },
     rum: [['Allrum', 14.8], ['Sovrum', 4.9], ['WC/bad', 3.7], ['Loft', 9.0]],
     farg: { fasad: 'gran', tak: 'svart', detalj: 'gragron' },
@@ -26,7 +26,7 @@ const HUS = {
     ],
   },
   'sadel-40': {
-    namn: 'Sadel 40', yta: 40, L: 10, W: 4, tak: 'sadel', he: 2.6, hr: 3.62, altan: 'E',
+    namn: 'Kupa 40', yta: 40, L: 10, W: 4, tak: 'sadel', he: 2.6, hr: 3.62, altan: 'E',
     kupa: { langd: 4.33, hk: 3.45 },
     rum: [['Allrum', 22.8], ['Sovrum', 5.6], ['WC/bad', 3.7], ['Loft', 9.7]],
     farg: { fasad: 'mossgron', tak: 'rod', detalj: 'salvia' },
@@ -5993,7 +5993,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   function helVy(w, h, m) {
     const d = husGrupp.userData;
     m = m || { t: 0, b: 0, l: 0, r: 0 };
-    const asp = w / h, luft = asp > 1 ? 0.8 : 0.92;
+    const asp = w / h, luft = asp > 1 ? 0.8 : 0.97;
     let fov, tV, tH, gT, gB, gL, gR;
     const satFov = f => {
       fov = f; tV = Math.tan(THREE.MathUtils.degToRad(fov) / 2); tH = tV * asp;
@@ -6010,6 +6010,18 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // synfält (64°) så att hela tomten ryms i bredd utan att kameran backar in bland träden.
     const lutAsp = THREE.MathUtils.degToRad(THREE.MathUtils.lerp(10, 0, THREE.MathUtils.smoothstep(asp, 0.55, 1.15)));
     let lut = Math.max(lutAsp, Math.min(Math.PI / 2 - hS0.phi, THREE.MathUtils.degToRad(40)));
+    // Skogen (husritare-miljo.js, regler): träden står inte i siktgatorna ut från huset (vinklarna
+    // nedan, atan2(z, x), fria till 32 m). På högt format står kameran längre ut än startvyn, så
+    // den vrids till närmaste siktgata (högst 30°): inga stammar eller grenar framför kameran.
+    if (asp < 1) {
+      let bast = null, bastD = THREE.MathUtils.degToRad(30);
+      for (const g of [0, 51, 90, 180, -90, -129]) {
+        const a = THREE.MathUtils.degToRad(g), th = Math.atan2(Math.cos(a), Math.sin(a));
+        let dth = th - hS0.theta; dth = Math.atan2(Math.sin(dth), Math.cos(dth));
+        if (Math.abs(dth) < bastD) { bastD = Math.abs(dth); bast = th; }
+      }
+      if (bast !== null) hS0.theta = bast;
+    }
     const dir = new THREE.Vector3(), hoger = new THREE.Vector3(), upp = new THREE.Vector3();
     const rikta = () => {
       dir.setFromSphericalCoords(1, Math.PI / 2 - lut, hS0.theta);
@@ -6033,7 +6045,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       }
       // gården: sakerna runt huset (snögubbe, bänk, pulka, sopkärl, grill …, husritare-bebott.js)
       // inom tomten; näten är ihopbakade per material, så hörnen läses ur geometrin (gles provtagning)
-      const bebott = scene.getObjectByName('bebott'), R = Math.max(d.L, d.W) / 2 + 8;
+      const bebott = scene.getObjectByName('bebott'), R = Math.max(d.L, d.W) / 2 + 4.5;
       if (bebott && bebott.visible) {
         bebott.updateWorldMatrix(true, true);
         const v = new THREE.Vector3();
@@ -6061,7 +6073,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // Kameran ska stå i gläntan (skog och vinter: träden står från ~30 m framför huset), annars
     // skymmer stammar och grenar förgrunden. Räcker det inte vidgas synfältet (högst 76°), sist
     // blir vinkeln brantare.
-    const GLANTA = 27;
+    const GLANTA = asp < 1 ? 29 : 27;   // (siktgatan är fri till 32 m)
     let mitt, D;
     for (let f = 0; f < 12; f++) {
     rikta();
@@ -6088,9 +6100,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       D = passa(mitt);
     }
     const ut = Math.hypot(mitt.x + dir.x * D, mitt.z + dir.z * D);
-    if (ut <= GLANTA || lut >= THREE.MathUtils.degToRad(40)) break;
-    if (fov < 76) satFov(Math.min(76, fov * Math.min(1.25, Math.max(1.04, ut / GLANTA))));
-    else lut = Math.min(THREE.MathUtils.degToRad(40), lut + THREE.MathUtils.degToRad(5));
+    if (ut <= GLANTA || lut >= THREE.MathUtils.degToRad(38)) break;
+    if (fov < 72) satFov(Math.min(72, fov * Math.min(1.2, Math.max(1.04, ut / GLANTA))));
+    else lut = Math.min(THREE.MathUtils.degToRad(38), lut + THREE.MathUtils.degToRad(4));
     }
     return { pos: dir.clone().multiplyScalar(D).add(mitt), mal: mitt, fov };
   }

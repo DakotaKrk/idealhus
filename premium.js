@@ -2746,7 +2746,7 @@
      Som Kasters lanseringsnotis: visas en gång efter halva sidan,
      aldrig där det redan finns ett formulär eller verktyget självt,
      och inte igen på fjorton dagar efter att man stängt det. */
-  var utan = ['index.html', '', 'huskort.html', 'sadel-30.html', 'sadel-30-bred.html', 'pulpet-30.html', 'kupa-40.html', 'kupa-50.html', 'priser.html', 'aga-och-hyra-ut.html', 'vad-far-jag-bygga.html', 'kontakt.html', '404.html', 'integritetspolicy.html', 'attefallshus-regler.html', 'proffs.html', 'rita-hus.html', 'sadel-40.html', 'sadel-50.html', 'pulpet-70.html', 'sadel-90.html'];
+  var utan = ['index.html', '', 'huskort.html', 'sadel-30.html', 'sadel-30-bred.html', 'pulpet-30.html', 'kupa-40.html', 'kupa-50.html', 'priser.html', 'aga-och-hyra-ut.html', 'vad-far-jag-bygga.html', 'kontakt.html', '404.html', 'integritetspolicy.html', 'attefallshus-regler.html', 'proffs.html', 'rita-hus.html', 'sadel-40.html', 'kupa-30.html', 'sadel-50.html', 'pulpet-70.html', 'sadel-90.html'];
   // En riktig 404 visas på den trasiga adressen, inte på 404.html, så
   // sidan känns igen på sitt innehåll.
   if (utan.indexOf(sida) < 0 && !$('.fyrafyra')) {
