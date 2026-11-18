@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261120e';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261120f';
 
-const MOTOR_V = '20261120e';
+const MOTOR_V = '20261120f';
 // Standardutseendet: utan val i adressen (och när man kommer tillbaka till sidan med bakåtknappen
 // eller laddar om den) möts man av samma bild varje gång: Sadel 40 i falurött med svart tak och
 // vita detaljer, vinter, gyllene timmen, kameran i startvyn. Adressen som sidan själv skriver
@@ -228,7 +228,16 @@ function visaGang(pa, ms = 4000) {
   gangTips.classList.toggle('syns', pa);
   gangTips.setAttribute('aria-hidden', String(!pa));
   if (hjalpKnapp) hjalpKnapp.setAttribute('aria-pressed', String(pa));
-  if (pa) { gangVisad = performance.now(); gangTid = setTimeout(() => visaGang(false), ms); }
+  if (pa) {
+    gangVisad = performance.now(); gangTid = setTimeout(() => visaGang(false), ms);
+    // krockar raden med kartan (låg scen, kartan uppe till höger): till vänster om kartan
+    gangTips.classList.remove('kf__gang--vanster');
+    const k = document.querySelector('[data-karta]');
+    if (k && !k.hidden && getComputedStyle(k).display !== 'none') {
+      const a = gangTips.getBoundingClientRect(), b = k.getBoundingClientRect();
+      if (a.right > b.left && a.left < b.right && a.bottom > b.top && a.top < b.bottom) gangTips.classList.add('kf__gang--vanster');
+    }
+  }
 }
 // första rörelsen i scenen tar bort det (inte samma klick som visade det)
 function gangRorelse() {
@@ -948,6 +957,7 @@ function fyll(pa, hur) {
   // en platshållare av scenens storlek står kvar på sidan, så att sidan inte hoppar ihop
   // under den (och glidningen ut vet vart bilden ska landa)
   if (pa) {
+    helScrollY = scrollY;
     if (!helPlats) { helPlats = document.createElement('div'); helPlats.className = 'kf__hel-plats'; helPlats.setAttribute('aria-hidden', 'true'); }
     const r = scen.getBoundingClientRect();
     helPlats.style.height = r.height + 'px';
@@ -964,6 +974,7 @@ function fyll(pa, hur) {
     if (helPlats) helPlats.remove();
     const v = scen.parentElement;
     v.style.position = ''; v.style.zIndex = '';
+    try { if (Math.abs(scrollY - helScrollY) > 1) window.scrollTo(0, helScrollY); } catch (e) { /* äldre webbläsare */ }
   }
   document.documentElement.classList.toggle('ritare-fyll', pa);
   if (pa && hur === 'auto') scen.scrollIntoView({ block: 'center' });
@@ -1085,7 +1096,9 @@ function helMarginaler() {
   return m;
 }
 function glidHel(pa) {
-  if (helRor) return;
+  // ett tryck mitt i en glidning sparas och görs när bilden har landat (inget avbrott, inget hack)
+  if (helRor) { helOnskan = pa === helMalLage ? null : pa; return; }
+  helOnskan = null;
   if (pa && fyllLage === 'auto') { fyll(true, 'knapp'); return; }   // liggande telefon: redan fylld
   if (pa === !!fyllLage) return;
   if (!helBakgrund) { helBakgrund = document.createElement('div'); helBakgrund.className = 'kf__hel-bakgrund'; helBakgrund.setAttribute('aria-hidden', 'true'); }
@@ -1098,7 +1111,7 @@ function glidHel(pa) {
     if (pa) helVila(true);
     return;
   }
-  helRor = true;
+  helRor = true; helMalLage = pa;
   html.classList.add('ritare-glid');
   if (pa) {
     const A = scen.getBoundingClientRect();
@@ -1112,6 +1125,7 @@ function glidHel(pa) {
     helUITona(false, 1, 0, 0, ui);
     let uiIn = false;
     helBakgrund.style.opacity = '0';
+    helVakt = setTimeout(() => { if (helRor) helStad(true); }, HEL_IN + 1500);
     ritare.helStart({
       inUt: true, tid: HEL_IN, kurva: helKurvaIn, marg,
       fran: { x: A.left - B.left, y: A.top - B.top, w: A.width, h: A.height },
@@ -1126,13 +1140,18 @@ function glidHel(pa) {
         helBakgrund.style.opacity = '';
         html.classList.remove('ritare-glid');
         if (!uiIn) helUITona(true, 460, 55, 0, ui);
+        clearTimeout(helVakt);
         helRor = false;
         helVila(true);
+        helNasta();
       },
     });
   } else {
-    if (!helPlats || !helPlats.isConnected) { fyll(false); html.classList.remove('ritare-glid'); helRor = false; return; }
+    if (!helPlats || !helPlats.isConnected) { helStad(false); return; }
+    // sidan står där den stod före helskärm (platshållaren mäts i samma läge)
+    try { if (Math.abs(scrollY - helScrollY) > 1) window.scrollTo(0, helScrollY); } catch (e) { /* äldre webbläsare */ }
     const B = scen.getBoundingClientRect(), T = helPlats.getBoundingClientRect();
+    helVakt = setTimeout(() => { if (helRor) helStad(false); }, HEL_UT + 1500);
     helVila(false);
     helUITona(false, 200);
     helBakgrund.style.opacity = '1';
@@ -1146,15 +1165,38 @@ function glidHel(pa) {
       },
       klar() {
         // bilden har landat på sin plats: tillbaka in i sidan (motorn byter buffert direkt efter)
-        fyll(false);
-        scen.style.clipPath = '';
-        helBakgrund.style.opacity = '';
-        html.classList.remove('ritare-glid');
-        helUISlapp();
-        helRor = false;
+        helStad(false, true);
       },
     });
   }
+}
+// Städningen när en övergång är klar eller avbryts (×, Esc, knappen, vriden telefon, vakten):
+// allt som helskärmen ändrat återställs. Tål att anropas flera gånger. iHel = läget ska bli helskärm.
+// franMotorn: anropet kommer från motorns egen avslutning (då ska motorn inte avbrytas igen).
+let helVakt = 0, helScrollY = 0, helOnskan = null, helMalLage = false;
+// sparat tryck under glidningen: görs nu (efter att den förra bilden ritats färdigt)
+function helNasta() {
+  const o = helOnskan; helOnskan = null;
+  if (o !== null && o !== !!fyllLage) requestAnimationFrame(() => glidHel(o));
+}
+function helStad(iHel, franMotorn) {
+  clearTimeout(helVakt);
+  const html = document.documentElement;
+  if (!franMotorn && kan('helAvbryt')) { try { if (ritare.helPagar()) ritare.helAvbryt(); } catch (e) { /* äldre motor */ } }
+  if (!iHel && fyllLage) fyll(false);
+  scen.style.clipPath = ''; scen.style.transform = '';
+  if (helBakgrund) helBakgrund.style.opacity = '';
+  html.classList.remove('ritare-glid');
+  helUISlapp();
+  helRor = false;
+  if (iHel) { helVila(true); helNasta(); return; }
+  clearTimeout(helVilaTid); clearTimeout(helStorlekTid); helVilar = false;
+  html.classList.remove('ritare-vila');
+  if (helPlats) helPlats.remove();
+  const v = scen.parentElement; v.style.position = ''; v.style.zIndex = '';
+  if (!franMotorn) { try { ritare.fryStorlek(false); } catch (e) { /* äldre motor */ } }
+  helGlitter();
+  helNasta();
 }
 // kontrollerna vilar (tonar bort) när man inte rört mus, finger eller tangent på en stund
 let helVilaTid = 0, helVilar = false;
@@ -1196,7 +1238,8 @@ window.addEventListener('resize', () => {
   }, 180);
 });
 function helskarm(pa) {
-  if (pa === undefined) pa = !(document.fullscreenElement || fyllLage);
+  // (mitt i en glidning gäller ett nytt tryck motsatsen till dit bilden är på väg)
+  if (pa === undefined) pa = helRor ? !helMalLage : !(document.fullscreenElement || fyllLage);
   if (!pa && document.fullscreenElement) document.exitFullscreen().catch(() => {});
   glidHel(!!pa);
 }
@@ -1450,6 +1493,8 @@ function sattInne(pa, vyIndex, opt) {
       if (karta && karta.classList.contains('kf__karta--oppen')) return;
       // på pekskärm bara första gången (?-knappen visar den igen)
       if (pek) { let sett = false; try { sett = !!localStorage.getItem('legohus-gang-sett'); localStorage.setItem('legohus-gang-sett', '1'); } catch (e) { /* privat läge */ } if (sett) return; }
+      // på dator första gången per besök
+      else { let sett = false; try { sett = !!sessionStorage.getItem('legohus-gang-sett'); sessionStorage.setItem('legohus-gang-sett', '1'); } catch (e) { /* privat läge */ } if (sett) return; }
       visaGang(true, 4000);
     };
     setTimeout(visaNar, lugn() ? 0 : 380);

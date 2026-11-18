@@ -53,13 +53,8 @@ html body.ritsidan .site-header__inner::before { background: color-mix(in srgb, 
 html[data-tema="mork"] body.ritsidan .site-header__inner::before { background: rgba(27, 25, 21, 0.97) !important; }
 html body.ritsidan :is(.main-nav__verktyg::before, .main-nav__verktyg::after, .main-nav__verktyg-text, .main-nav__verktyg *) { animation: none !important; }
 
-/* sidfoten: ett rundat kort i sidans bredd, utan sken och kantlinje */
-html body.ritsidan .site-footer {
-  width: var(--k-sida); margin: 0 auto var(--k-kant); border: 0; border-radius: var(--k-r-xl);
-  background: var(--k-kort); box-shadow: 0 0 0 1px var(--k-linje), var(--k-skugga);
-}
-html body.ritsidan .site-footer::before, html body.ritsidan .site-footer::after { display: none; }
-html[data-tema="mork"] body.ritsidan .site-footer { background: #1f1c18; }
+/* sidfoten: samma som på alla andra sidor (design.css) sedan 2026-11-18 -
+   den egna kortvarianten utan sken klippte ordbilden och såg annorlunda ut. */
 
 /* ---------- Gemensamma knappar ---------- */
 .kf__knapp { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 24px; border: 0; border-radius: var(--k-r-m); background: var(--k-text); color: var(--k-kort); font: 500 0.9375rem/1 var(--sans); text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color 0.2s ease, transform 0.16s var(--k-ut), box-shadow 0.25s ease; }
@@ -615,7 +610,6 @@ html[data-tema="mork"] :is(.kplan__bild, .kplanstor, .ksam__plan) { background: 
   .ksam__text { overflow: visible; padding: 24px 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
   .kjmf, .kplanstor { width: 100vw; max-height: 100svh; border-radius: 0; }
   .kplanstor { height: 100svh; padding: 64px 12px 12px; }
-  html body.ritsidan .site-footer { border-radius: 20px; }
 }
 @media (max-width: 560px) {
   .kf__vk[data-ladda] { display: none; }
@@ -1338,6 +1332,18 @@ html.foto .kf__flyg { display: none; }
 @container scen (max-width: 640px) { .kf__karta .kf__prick { pointer-events: none; } }
 @media (pointer: coarse) { .kf__karta .kf__prick { pointer-events: none; } }
 
+/* ---- Tipsraden inne (dator): W överst i mitten och A S D under; raden ryms alltid i scenen
+   (radbryts hellre till två rader), ligger mitt nere ovanför verktygsraden ---- */
+.kf__gang-tangenter:not(.kf__gang-tangenter--en) kbd:nth-child(1) { grid-area: 1 / 2; }
+.kf__gang-tangenter:not(.kf__gang-tangenter--en) kbd:nth-child(2) { grid-area: 2 / 1; }
+.kf__gang-tangenter:not(.kf__gang-tangenter--en) kbd:nth-child(3) { grid-area: 2 / 2; }
+.kf__gang-tangenter:not(.kf__gang-tangenter--en) kbd:nth-child(4) { grid-area: 2 / 3; }
+.kf__gang { max-width: calc(100% - 32px); flex-wrap: wrap; justify-content: center; row-gap: 2px; }
+.kf__gang-del { white-space: nowrap; }
+/* krockar raden med kartan (låg scen) flyttar sidan den till vänster om kartan */
+.kf__gang.kf__gang--vanster { left: 16px; translate: 0 10px; max-width: calc(100% - var(--karta, 216px) - 64px); }
+.kf__gang.kf__gang--vanster.syns { translate: 0 0; }
+
 /* ---- Inbäddad ritare (hussidorna): ingen styrspak (den låg över "Öppna i husritaren"); där är
    knappen vägen in till gången. Tryck på golvet och dra för att se sig om fungerar ändå.
    Rumsflikarna ligger under hörnknappen i stället för på den. ---- */
@@ -1437,7 +1443,7 @@ html.inbaddad .kf__scen--inne .kf__rum { top: 58px; }
   .kf__scen--inne:not(.kf__scen--flyger):not(.kf__scen--spel) .kf__spak { display: block; }
   .kf__scen--inne:has(.kf__res:not([hidden])) .kf__spak { display: none; }
   /* hjälpen om hur man går: mitt i bilden (aldrig över flikarna, spaken eller raden), två korta rader */
-  .kf__scen--inne .kf__gang { left: 50%; top: 60px; bottom: auto; translate: -50% -6px; max-width: calc(100% - 48px); flex-wrap: wrap; justify-content: center; row-gap: 2px; border-radius: 18px; pointer-events: none; }
+  .kf__scen--inne .kf__gang { left: 50%; top: 64px; bottom: auto; translate: -50% -6px; max-width: calc(100% - 48px); flex-wrap: wrap; justify-content: center; row-gap: 2px; border-radius: 18px; pointer-events: none; }
   .kf__scen--inne .kf__gang.syns { translate: -50% 0; }
   .kf__scen--inne .kf__gang .kf__gang-del--pek[style*="--i:2"] { display: none; }
   .kf__scen--inne .kf__gang .kf__gang-del + .kf__gang-del { box-shadow: none; }
@@ -1530,6 +1536,8 @@ html.ritare-fyll:not(.ritare-glid) :is(.site-header, .kf__handling, .kf__rad, .k
 @media (orientation: landscape) and (max-height: 540px) {
   html.ritare-fyll .kf__verktyg { bottom: max(6px, env(safe-area-inset-bottom)); }
   html.ritare-fyll .kf__rum { top: max(6px, env(safe-area-inset-top)); left: max(8px, env(safe-area-inset-left)); right: max(8px, env(safe-area-inset-right)); }
+  /* (helskärmens egen rad, husnamnet och Stäng, sköts av helskärmsläget; tipsraden under flikarna) */
+  html.ritare-fyll .kf__scen--inne .kf__gang { top: calc(max(6px, env(safe-area-inset-top)) + 64px); }
   html.ritare-fyll .kf__spak { left: max(12px, env(safe-area-inset-left)); bottom: 74px; }
   html.ritare-fyll .kf__kartknapp { right: max(12px, env(safe-area-inset-right)); bottom: 98px; }
   html.ritare-fyll .kf__scen--inne .kf__karta.kf__karta--oppen { top: 56px; }
@@ -1541,7 +1549,7 @@ html.ritare-fyll:not(.ritare-glid) :is(.site-header, .kf__handling, .kf__rad, .k
    vänster, Stäng till höger, rumsflikarna i mitten. Nederst i mitten verktygs-
    raden, spak och kartknapp i nedre hörnen. Glidningen styrs av husritare-sida.js
    (glidHel) och motorn (helStart): bara clip-path, opacity och transform. */
-html.ritare-fyll .kf__scen { z-index: 2147483001; animation: none; background: #ece6db;
+html.ritare-fyll .kf__scen { z-index: 2147483001; background: #ece6db;
   --hel-luft: 14px;
   --hel-t: max(var(--hel-luft), env(safe-area-inset-top));
   --hel-b: max(var(--hel-luft), calc(env(safe-area-inset-bottom) + 4px));
@@ -1675,7 +1683,7 @@ html.ritare-vila .kf__scen > .kf__helrad * { pointer-events: none !important; }
   body.ritsidan :is(.kplan__bild, .kplan__panel) { border-radius: var(--rm-kort); }
   body.ritsidan .kplan__siffror { border-radius: var(--rm-inre); }
   body.ritsidan :is(.kplan__flikar, .kplan__forstora) { border-radius: 999px; }
-  html body.ritsidan .site-footer { margin-top: 32px; border-radius: var(--rm-kort); }
+  html body.ritsidan .site-footer { margin-top: 32px; }
 
   /* Bottenraden: en flytande, rundad rad med luft till kanterna och
      iPhones hemrad, och en mjuk skugga mot innehållet under. */
@@ -1692,15 +1700,13 @@ html.ritare-vila .kf__scen > .kf__helrad * { pointer-events: none !important; }
   /* Mellanrummen (2026-11-18, omgång 2) */
   /* Under sidhuvudet: samma 12 px som mellan korten (var 18 + 12 px). */
   html body.ritsidan main.ritsida > .kf { margin-top: 0; padding-top: var(--rm-luft); }
-  /* Längst ner: bottenradens höjd (64) + avståndet till kanten (12) + 12 px
-     luft upp till sidfoten, plus hemraden. Sidfoten själv har ingen
-     marginal under, så luften blir exakt 12 px. */
-  body.ritsidan { padding-bottom: calc(64px + 12px + var(--rm-luft) + env(safe-area-inset-bottom, 0px)); }
-  html body.ritsidan .site-footer { margin-bottom: 0; }
-  /* Ordbilden tonas ut innan kortets kant i stället för att klippas. */
-  html body.ritsidan .site-footer__ord {
-    -webkit-mask-image: linear-gradient(180deg, #000 25%, transparent 88%);
-    mask-image: linear-gradient(180deg, #000 25%, transparent 88%);
+  /* Längst ner: sidfoten går ända ner som på alla andra sidor. Under
+     ordbilden lämnas plats för bottenraden (64) + avståndet till kanten
+     (12) + 12 px luft + hemraden, så att inget av sidfoten döljs. */
+  body.ritsidan { padding-bottom: 0; }
+  html body.ritsidan .site-footer {
+    margin-bottom: 0;
+    padding-bottom: calc(64px + 12px + var(--rm-luft) + env(safe-area-inset-bottom, 0px));
   }
   /* Bottenraden: lika hög luft runt allt, knapparna lika höga (48 px).
      Sammanfattningsknappen är en rund ikonknapp i hela mobilspannet, så
