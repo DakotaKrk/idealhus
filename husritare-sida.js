@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261120f';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261120g';
 
-const MOTOR_V = '20261120f';
+const MOTOR_V = '20261120g';
 // Standardutseendet: utan val i adressen (och när man kommer tillbaka till sidan med bakåtknappen
 // eller laddar om den) möts man av samma bild varje gång: Sadel 40 i falurött med svart tak och
 // vita detaljer, vinter, gyllene timmen, kameran i startvyn. Adressen som sidan själv skriver
@@ -1221,10 +1221,16 @@ function helVila(vaken) {
 ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(t => window.addEventListener(t, () => { if (fyllLage && !helRor) helVila(true); }, { passive: true, capture: true }));
 // Esc stänger helskärmen (om ingen meny, dialog eller spelläget tar den först)
 window.addEventListener('keydown', e => {
-  if (e.key !== 'Escape' || fyllLage !== 'knapp' || helRor || e.defaultPrevented) return;
-  if (document.pointerLockElement || document.querySelector('.kf__popup:not([hidden]), dialog[open]')) return;
+  // (planlösningen och menyerna tar Esc först: ett tryck stänger dem, nästa stänger helskärmen)
+  if (e.key !== 'Escape' || e.defaultPrevented || planLage || oppenMeny) return;
+  // (mitt i en glidning in räknas den som helskärm: Esc köas och tar inte samtidigt en ut ur huset)
+  if (helRor) { e.stopPropagation(); if (helMalLage) helskarm(false); return; }
+  if (fyllLage !== 'knapp') return;
+  if (document.pointerLockElement || spelPa || performance.now() - spelSlut < 500 || document.querySelector('.kf__popup:not([hidden]), dialog[open]')) return;
+  // i helskärm stänger Esc bara helskärmen (inte samtidigt Se inne): ett steg i taget
+  e.stopPropagation();
   helskarm(false);
-});
+}, true);
 // vriden telefon eller ändrat fönster i helskärm: kontrollernas ytor och utsikten räknas om
 let helStorlekTid = 0, helFormat = 0;
 window.addEventListener('resize', () => {

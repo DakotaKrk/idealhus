@@ -1592,7 +1592,7 @@ html.ritare-fyll .kf__scen .kf__rum > div { min-height: 44px; align-items: cente
   html.ritare-fyll .kf__scen .kf__rum { top: calc(var(--hel-t) + 56px); left: var(--hel-v); right: var(--hel-h); }
 }
 /* kartan (inne, dator): under Stäng */
-html.ritare-fyll .kf__scen .kf__karta { top: calc(var(--hel-t) + 58px); right: var(--hel-h); }
+html.ritare-fyll .kf__scen .kf__karta { top: calc(var(--hel-t) + 58px); right: var(--hel-h); bottom: auto; height: auto; max-height: calc(100% - var(--hel-t) - var(--hel-b) - 150px); }
 html.ritare-fyll .kf__scen--inne .kf__karta.kf__karta--oppen { top: calc(var(--hel-t) + 58px); }
 @media (max-width: 899px) and (min-height: 541px) {
   html.ritare-fyll .kf__scen--inne .kf__karta.kf__karta--oppen { top: calc(var(--hel-t) + 112px); }

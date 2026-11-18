@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261120f';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261120f';
-import { skapaPlanlager } from './husritare-plan.js?v=20261120f';
+import { skapaMiljo } from './husritare-miljo.js?v=20261120g';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261120g';
+import { skapaPlanlager } from './husritare-plan.js?v=20261120g';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -6129,7 +6129,12 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     const r = duk.getBoundingClientRect();
     if (Math.abs(r.width - dukB) > 0.5 || Math.abs(r.height - dukH) > 0.5 || plan.pa) storlek();
     else { dukV = r.left; dukT = r.top; kamera.aspect = dukB / dukH; kamera.fov = fovFor(inneLage); kamera.updateProjectionMatrix(); }
-    styr.enabled = H.en; styr.autoRotate = H.rot;
+    // storlek() kan lägga kameran i startvyn (foljStart): övergångens slutbild gäller, och
+    // startvyn följer inte längre storleken (annars hoppade bilden en ruta efter landningen)
+    if (H.P1 && !plan.pa) { kamera.position.copy(H.P1.pos); styr.target.copy(H.P1.mal); startLage = false; }
+    // kontrollerna tillbaka bara om övergången stängde av dem (en åkning genom dörren styr själv)
+    if (H.en && !flyg) styr.enabled = true;
+    styr.autoRotate = H.rot;
     styrNu();
     if (H.inUt) helSparad = { fore: H.P0, efter: helPose(), ute: !inneLage && !plan.pa };
     begarRender();
@@ -6251,7 +6256,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // typsnitten, en rullningslist under laddningen), och introt landar i den omräknade vyn.
   var startLage = true;   // (var: storlek() anropas redan innan raden har körts; då står den odefinierad = av)
   function foljStart() {
-    if (!startLage || !husGrupp) return;
+    // (i sidans helskärm räknar sidan om utsikten själv, helOmrama: där gäller helskärmens utsikt)
+    if (!startLage || !husGrupp || helMarg || helO) return;
     const p = mal('runt', kamera, hem);
     if (aka && aka.intro) aka.till.copy(p);
     else if (!aka && !inneLage && !flyg && !oppen.pa && oppen.t === 0) { styr.target.copy(hem); kamera.position.copy(p); styrNu(); begarRender(); }
