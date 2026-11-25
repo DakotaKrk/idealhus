@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261125d';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261125n';
 
-const MOTOR_V = '20261125d';
+const MOTOR_V = '20261125n';
 // Standardutseendet: utan val i adressen (och när man kommer tillbaka till sidan med bakåtknappen
 // eller laddar om den) möts man av samma bild varje gång: Kupa 40 i falurött med svart tak och
 // vita detaljer, vinter, gyllene timmen, kameran i startvyn. Adressen som sidan själv skriver
@@ -19,7 +19,7 @@ const STANDARD = 'modell=kupa-40&fasad=falu&tak=svart&detalj=vit&tid=19.2&miljo=
 const MODELL_IN = { 'kupa-30': 'sadel-30', 'kupa-40': 'sadel-40' };
 const MODELL_UT = { 'sadel-30': 'kupa-30', 'sadel-40': 'kupa-40' };
 const modellId = m => MODELL_IN[m] || m;
-const LAGE_NYCKLAR = ['modell', 'fasad', 'tak', 'detalj', 'tid', 'miljo', 'vy', 'rum', 'matt', 'oppen', 'lager', 'tomt', 'plan'];
+const LAGE_NYCKLAR = ['modell', 'fasad', 'tak', 'detalj', 'tid', 'miljo', 'vy', 'rum', 'matt', 'oppen', 'lager', 'tomt', 'plan', 'bil'];
 const EGEN_NYCKEL = 'rita-hus-egen';
 const egenAdress = () => { try { return sessionStorage.getItem(EGEN_NYCKEL) || ''; } catch (e) { return ''; } };
 (function standardval() {
@@ -161,6 +161,7 @@ try {
     vidLaddning: laddSteg,
     // modellen ur länken direkt, så att huset inte byggs två gånger
     modell: START_MODELL, montera: !FOTO && Q0.get('intro') !== '0', foto: FOTO,
+    miljo: Q0.get('miljo') || undefined,   // miljön byggs direkt (inte studion först)
     // motorn stängde av livet för att datorn inte orkade
     vidLiv: pa => { const b = document.querySelector('[data-liv]'); if (b) b.setAttribute('aria-pressed', String(!!pa)); if (!pa) visaTips('Rörelserna i miljön pausades för att bilden ska flyta', 4000); },
     vidFlytt: pos => flyttadInne(pos),
@@ -1792,6 +1793,25 @@ if (kanPlan) {
   scen.addEventListener('keydown', e => { if (e.key === 'Escape' && planLage && !oppenMeny) { e.stopPropagation(); bytLage(planFran); } }, true);
 }
 
+// ---- Bilen vid huset: Tesla, Volvo eller ingen, under miljöerna i miljömenyn (adressen: bil=volvo) ----
+// Motorn byter och tonar över när modellen är laddad; Kör iväg/Kör hem gäller den valda bilen.
+const BILVAL = [['tesla', 'Tesla', '#e8e9eb'], ['volvo', 'Volvo', '#1c2c44'], ['ingen', 'Ingen bil', 'transparent']];
+var bilVal = 'tesla';   // var: spara() kan köras innan raden har nåtts
+function byggBilval() {
+  if (!kan('bilModell') || !mpopup || mpopup.querySelector('[data-bilval]')) return;
+  mpopup.insertAdjacentHTML('beforeend', '<p class="kf__poprubrik" role="presentation">Bil</p>' + BILVAL.map(([id, namn, f]) =>
+    '<button type="button" role="menuitemradio" aria-checked="' + (id === bilVal) + '" data-bilval="' + id + '"><i style="--f:' + f + '"' + (id === 'ingen' ? ' class="kf__ingen"' : '') + '></i>' + namn + '</button>').join(''));
+}
+function valjBil(id, tyst) {
+  if (!kan('bilModell')) return;
+  bilVal = BILVAL.some(b => b[0] === id) ? id : 'tesla';
+  byggBilval();
+  mpopup.querySelectorAll('[data-bilval]').forEach(b => b.setAttribute('aria-checked', String(b.getAttribute('data-bilval') === bilVal)));
+  const knapp = document.querySelector('[data-bil]');
+  if (knapp && kan('bil')) knapp.hidden = bilVal === 'ingen';
+  try { Promise.resolve(ritare.bilModell(bilVal)).then(() => { if (typeof visaBil === 'function' && kan('bil')) visaBil(ritare.bil()); }); } catch (e) { console.warn(e); }
+  if (!tyst) spara();
+}
 // ---- miljö: listan kommer från motorn om den finns ----
 const mpopup = document.getElementById('kf-miljo');
 const MILJOFARG = { studio: '#d6d0c6', tradgard: '#6e7d47', skog: '#3f5236', vinter: '#eef0f2', kust: '#4f7f98', villa: '#a8826a' };
@@ -1821,8 +1841,9 @@ function valjMiljo(id, tyst) {
   if (!tyst) spara();
   return true;
 }
-meny(document.querySelector('[data-miljo-knapp]'), mpopup, miljoKnappar, b => valjMiljo(b.getAttribute('data-miljo')));
+meny(document.querySelector('[data-miljo-knapp]'), mpopup, miljoKnappar, b => { if (b.hasAttribute('data-bilval')) valjBil(b.getAttribute('data-bilval')); else valjMiljo(b.getAttribute('data-miljo')); });
 byggMiljo();
+byggBilval();
 visaLiv();
 // miljön kan byggas klart sent på en långsam dator: titta efter liv en stund (högst 10 s)
 {
@@ -1911,6 +1932,7 @@ function spara() {
   if (mk.getAttribute('aria-pressed') === 'true' && !inneLage) q.set('matt', '1');
   if (oppetLage) { q.set('oppen', '1'); if (lagerVal !== 'hela') q.set('lager', lagerVal); }
   if (tomtLage) q.set('tomt', '1');
+  if (typeof bilVal === 'string' && bilVal !== 'tesla') q.set('bil', bilVal);
   if (planLage) q.set('plan', '1');
   if (fullLank) fullLank.href = 'rita-hus.html?' + q.toString();
   // inbäddad: iframens adress lämnas i fred, bara länken till hela husritaren följer med
@@ -1924,7 +1946,7 @@ function spara() {
 window.addEventListener('pageshow', e => {
   if (!e.persisted || INB || FOTO || !ritare || location.search.slice(1) !== egenAdress()) return;
   const sq = new URLSearchParams(STANDARD), q = new URLSearchParams(location.search);
-  const somStandard = ['modell', 'fasad', 'tak', 'detalj', 'miljo'].every(k => q.get(k) === sq.get(k)) && Math.abs(+q.get('tid') - 19.2) < 0.01 && !inneLage && !oppetLage && !tomtLage && !planLage && q.get('matt') !== '1';
+  const somStandard = ['modell', 'fasad', 'tak', 'detalj', 'miljo'].every(k => q.get(k) === sq.get(k)) && Math.abs(+q.get('tid') - 19.2) < 0.01 && !inneLage && !oppetLage && !tomtLage && !planLage && q.get('matt') !== '1' && !q.has('bil');
   if (!somStandard) { location.replace('?' + STANDARD + '&intro=0' + location.hash); return; }
   try { ritare.vy('runt', { hopp: true }); } catch (err) { console.warn(err); }
   nuVy = 'runt'; markeraTumme('runt'); spara();
@@ -1970,6 +1992,7 @@ window.addEventListener('pageshow', e => {
   }
   // tomt=1: möblerna dolda från början; plan=1: planlösningen när huset står klart
   if (q.get('tomt') === '1') sattTomt(true, true);
+  if (q.has('bil')) valjBil(q.get('bil'), true);
   if (q.get('plan') === '1' && kanPlan && vy !== 'inne') {
     let forsok = 0;
     const planNar = () => {
@@ -2479,7 +2502,8 @@ if (kan('spak') && !FOTO) {
   const knapp = hall.firstChild, lista = hall.lastChild;
   // i den ordning de lämnar raden
   // (Helskärm flyttas aldrig inne på pekskärm: där är den ett framhävt val, se passa)
-  const ORDNING = ['[data-tangenter]', '[data-bil]', '[data-liv]', '[data-ladda]', '[data-snurra]', '[data-matt-knapp]', '[data-helskarm]', '[data-hjalp]', '[data-spel]', '[data-lampor]', '[data-oppna]', '[data-plan]', '[data-tomt]'];
+  // (Kör iväg står kvar längst: den syns annars inte för kunden)
+  const ORDNING = ['[data-tangenter]', '[data-liv]', '[data-ladda]', '[data-snurra]', '[data-matt-knapp]', '[data-helskarm]', '[data-hjalp]', '[data-spel]', '[data-lampor]', '[data-oppna]', '[data-plan]', '[data-tomt]', '[data-bil]'];
   const poster = ORDNING.map(s => ({ sel: s, el: rad.querySelector('.kf__vk' + s) })).filter(p => p.el).map((p, i) => { const plats = document.createComment('mer' + i); p.el.after(plats); p.plats = plats; return p; });
   // radens ordning från vänster (för listan i menyn)
   const ORDNING_RAD = poster.slice().sort((a, b) => (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));

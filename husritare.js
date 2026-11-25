@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261125d';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261125d';
-import { skapaPlanlager } from './husritare-plan.js?v=20261125d';
+import { skapaMiljo } from './husritare-miljo.js?v=20261125n';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261125n';
+import { skapaPlanlager } from './husritare-plan.js?v=20261125n';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -356,7 +356,9 @@ export async function skapaRitare(duk, alternativ = {}) {
   // foto: true (sidans ?foto=1) ger skarpaste bilden: pixeltäthet 1,5, inget intro, ingen snurr, inget liv
   const FOTO = !!alternativ.foto;
   // skärmens egen pixeltäthet upp till 2 (taket 1,25 gav suddig bild och trappiga linjer på täta skärmar)
-  const SKARP = FOTO ? 1.5 : Math.min(window.devicePixelRatio || 1, 2);
+  // svaga enheter (pekskärm eller smal skärm, oftast en telefon): skärpan högst 1,5 och skuggkartan 1024
+  const SVAG = !FOTO && (() => { try { return matchMedia('(pointer: coarse)').matches || Math.min(screen.width, screen.height) < 760; } catch (e) { return false; } })();
+  const SKARP = FOTO ? 1.5 : Math.min(window.devicePixelRatio || 1, SVAG ? 1.5 : 2);
   renderer.setPixelRatio(SKARP);
   // en paus som släpper fram en ritad ruta (i en dold flik: högst 80 ms); fotoläget väntar inte
   const paus = FOTO ? () => Promise.resolve() : () => new Promise(r => {
@@ -411,7 +413,7 @@ export async function skapaRitare(duk, alternativ = {}) {
   scene.environment = himmelEnv('studio');
   scene.environmentIntensity = 0.9;
 
-  const kamera = new THREE.PerspectiveCamera(32, 1, 0.1, 300);
+  const kamera = new THREE.PerspectiveCamera(32, 1, 0.1, 300); if (/[?&]prov=1/.test(location.search)) { window.__scen = scene; window.__kam = kamera; window.__rend = renderer; }   // TEMP-MAT
   kamera.position.set(13, 6, 15);
 
   // Tung, mjuk känsla: lång glidning efter ett svep, lugn rotation
@@ -458,7 +460,7 @@ export async function skapaRitare(duk, alternativ = {}) {
   const LJ_DAG = new THREE.Color(0xffe7d2), LJ_2700 = new THREE.Color(0xffc58e), SPOT_DAG = new THREE.Color(0xffead6), SPOT_2700 = new THREE.Color(0xffcb98), LJ2_2700 = new THREE.Color(0xffb979);
   const sol = new THREE.DirectionalLight(0xfff1e0, 3.2);
   sol.castShadow = true;
-  sol.shadow.mapSize.set(2048, 2048);
+  sol.shadow.mapSize.set(SVAG ? 1024 : 2048, SVAG ? 1024 : 2048);
   const sk = sol.shadow.camera; sk.left = -14; sk.right = 14; sk.top = 14; sk.bottom = -14; sk.near = 1; sk.far = 80;
   sol.shadow.bias = -0.00025; sol.shadow.normalBias = 0.035;   // takets båda sidor kastar skugga: lite mer normalBias mot acne
   scene.add(sol, sol.target);
@@ -477,6 +479,8 @@ export async function skapaRitare(duk, alternativ = {}) {
   const RUMSLJUS = new THREE.Color(0x8c7b68), RUM_DAG = new THREE.Color(0x4a433b);
   let miljoNamn = 'studio';
   const GAMLA_NAMN = { gras: 'tradgard', sno: 'vinter' };
+  // miljön ur länken direkt (alternativ.miljo), så att inte studion byggs och kompileras först och sedan byts
+  { const m0 = GAMLA_NAMN[alternativ.miljo] || alternativ.miljo; if (m0 && omgivning.lista.some(m => m[0] === m0)) miljoNamn = m0; }
 
   // Kontaktskugga: en mjuk mörk rand tätt runt sockeln, ritad efter husets mått.
   // Hålls svag; miljön kan lägga sin egen ring utanpå.
@@ -6111,9 +6115,28 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       else jobb.klar(false);
       perf.tummeAnrop = renderer.info.render.calls; renderer.info.reset();
     }
+    // grannarnas fulla bilar byts mot de förenklade efter kamerans avstånd (husritare-miljo.js)
+    if (typeof omgivning.narBilar === 'function') { try { omgivning.narBilar(kamera.position); } catch (e) { console.warn(e); } }
     if (nySkugga || byggT < 1 || rivGrupp) { renderer.shadowMap.needsUpdate = true; nySkugga = false; }
     // Yttertaket (lager 1) ritas inte inifrån, men skuggpasset testar lagren mot huvudkameran:
     // i en ruta där skuggkartan räknas om är taket med (det syns ändå inte bakom innertaket)
+    // tona in miljöns väntande delar: bilden utan dem (med egen skugga) kopieras och läggs ovanpå
+    let senK = -1;
+    if (senTona && !tona.pa) {
+      senTona.t = Math.min(1, senTona.t + dt / 0.7);
+      senK = senTona.t * senTona.t * (3 - 2 * senTona.t);
+      if (senTona.t < 1) {
+        senTona.objs.forEach(o => { o.visible = false; });
+        renderer.shadowMap.needsUpdate = true;
+        kamera.layers.mask = inneLage ? 1 : 3;
+        renderer.render(scene, kamera);
+        kopieraRuta();
+        renderer.info.reset();
+      }
+      senTona.objs.forEach(o => { o.visible = true; });
+      renderer.shadowMap.needsUpdate = true;
+      if (senTona.t >= 1) { senTona = null; senK = -1; }
+    }
     const skuggRuta = renderer.shadowMap.needsUpdate;
     kamera.layers.mask = !inneLage || skuggRuta ? 3 : 1;
     renderer.render(scene, kamera);
@@ -6122,6 +6145,10 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (skuggRuta) perf.skuggAnrop = renderer.info.render.calls;
     else { perf.anrop = renderer.info.render.calls; perf.tri = renderer.info.render.triangles; }
     // förra bilden tonas bort ovanpå (0,5 s)
+    if (senK >= 0) {
+      tonMat.uniforms.alfa.value = 1 - senK; tonMat.uniforms.skala.value = 1;
+      renderer.autoClear = false; renderer.render(tonScen, tonKam); renderer.autoClear = true;
+    }
     let tonaKor = false;
     if (tona.pa) {
       tona.t = Math.min(1, tona.t + dt / tona.tid);
@@ -6129,7 +6156,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (tona.t >= 1) { tona.pa = false; tona.tid = 0.5; } else tonaKor = true;
     }
     if (inneLage && (gar || rorde)) flytt.smuts = true;
-    const rorSig = rorde || flyger || planRor || aka || helRor || zoomar ||styr.autoRotate || tonade || byggT < 1 || rivGrupp || lyfter || gar || tonaKor || ringRor || iaRor || ljusRor || spel.skuld || bilRor;
+    const rorSig = senK >= 0 || rorde || flyger || planRor || aka || helRor || zoomar ||styr.autoRotate || tonade || byggT < 1 || rivGrupp || lyfter || gar || tonaKor || ringRor || iaRor || ljusRor || spel.skuld || bilRor;
     rorForra = !!rorSig;
     liv.ritade = true;
     const fortsatt = !!(rorSig || varmKor || livKor() || punktFart(nu) === 1 || tummeKo.length) && aktiv && !vantaStart;
@@ -6147,7 +6174,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (kval.pa && !rorSkarpa.lag) {
       if (kval.ror && perf.sistRuta && nu - perf.sistRuta < 250) { kval.sum += nu - perf.sistRuta; kval.n++; }
       kval.ror = !!rorSig && fortsatt;
-      if (kval.n >= 45) { const snitt = kval.sum / kval.n; kval.sum = 0; kval.n = 0; if (snitt > 40) sankKvalitet(); }
+      // de första 8 sekunderna efter starten: redan under 40 bilder/s (30 rutor) sänks kvaliteten, sedan under 25 (45 rutor)
+      const tidig = kval.t0 > 0 && nu - kval.t0 < 8000;
+      if (kval.n >= (tidig ? 30 : 45)) { const snitt = kval.sum / kval.n; kval.sum = 0; kval.n = 0; if (snitt > (tidig ? 25 : 40)) sankKvalitet(); }
     }
     perf.sistRuta = nu; perf.rutor++;
     behov = false;   // det som begärdes under rutan är redan med i bilden
@@ -6447,20 +6476,49 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       // bara det som syns i första bilden (och hela huset, vars tak och trappor monteras strax):
       // allt annat i scenen kompileras i vila efteråt. Förut väntade första bilden på alla
       // program, också för sådant som inte visas förrän senare.
+      // miljöns avlägsna delar (grannhus, gator, skog, bilar, gräs längre bort) väntar: första bilden
+      // visar huset och vår tomt, resten kompileras efteråt och tonas in (visaSenare)
+      let sen = [];
+      // ?senare=0: allt i första bilden som förr (för jämförelser)
+      if (!/[?&]senare=0/.test(location.search)) try { sen = typeof omgivning.senare === 'function' ? omgivning.senare().filter(o => o.visible) : []; } catch (e) { console.warn(e); }
+      sen.forEach(o => { o.visible = false; });
       const synliga = [];
       scene.traverseVisible(o => { if (o.isMesh || o.isLine || o.isPoints) synliga.push(o); });
       try { await Promise.race([kompKlipp([husGrupp, { traverse: f => synliga.forEach(f) }], null), new Promise(r => setTimeout(r, 6000))]); } catch (e) { console.warn(e); }
       marke('rit-kompilerat');
       ritKlar = true; begarRender();
+      if (sen.length) visaSenare(sen);
       setTimeout(() => ledigt(() => { try { kompKlipp([scene], null, 6); } catch (e) { console.warn(e); } }, 2000), 6000);
     })();
     // utan starta() från sidan börjar introt ändå efter en stund
     setTimeout(() => starta(), 25000);
   }
+  // De väntande delarna: programmen kompileras i små omgångar (kompKlipp), sedan tonas de in över 0,7 s
+  // (senTona i ram: bilden utan dem ritas, kopieras och läggs ovanpå bilden med dem). Byts miljön under
+  // tiden, eller går något fel, blir de synliga direkt; efter 9 s syns de alltid.
+  let senTona = null;
+  function visaSenare(sen) {
+    const nyckel = miljoNamn;
+    let klar = false;
+    const visa = tona => {
+      if (klar) return; klar = true;
+      if (tona && nyckel === miljoNamn && !lugn && sen.every(o => o.parent)) { senTona = { objs: sen, t: 0 }; }
+      else sen.forEach(o => { o.visible = true; });
+      nySkugga = true; begarRender();
+    };
+    setTimeout(() => visa(false), 9000);
+    (async () => {
+      // först när första bilden är ritad och introt har börjat (eller efter 4 s)
+      for (let i = 0; i < 40 && (forstaRuta || vantaStart); i++) await new Promise(r => setTimeout(r, 100));
+      // alla program på en gång (parallellt, snabbast totalt), men högst 2,5 s: miljön får aldrig dröja kvar tom
+      await Promise.race([kompKlipp(sen, () => !klar), new Promise(r => setTimeout(r, 2500))]);
+      visa(true);
+    })().catch(e => { console.warn(e); visa(false); });
+  }
   function starta() {
     if (!vantaStart) return;
     foljStart();   // scenens storlek har satt sig: introts slutpunkt räknas om på den
-    vantaStart = false; forra = 0; marke('rit-start');
+    vantaStart = false; forra = 0; kval.t0 = performance.now(); marke('rit-start');
     clearTimeout(snurrTid); snurrTid = setTimeout(() => { styr.autoRotate = false; }, 7000);
     begarRender();
   }
@@ -6726,6 +6784,13 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     tomt: (pa, opts) => (pa === undefined ? tomt.pa : satTomt(pa, opts)),
     // Elbilen: bil('ut') kör iväg, bil('hem') kör hem, bil('parkera') står direkt hemma, bil() läser läget
     // ('hemma', 'ut', 'borta', 'in'). Duken skickar 'husritare:bil' ({ lage }) när läget ändras.
+    // Bilen vid huset: bilModell('tesla' | 'volvo' | 'ingen') byter (tonas över när modellen är laddad) och
+    // returnerar ett Promise med det som gäller; bilModell() läser valet.
+    bilModell(v) {
+      if (typeof omgivning.bilModell !== 'function') return v === undefined ? 'tesla' : Promise.resolve('tesla');
+      if (v === undefined) return omgivning.bilModell();
+      return Promise.resolve(omgivning.bilModell(v, { fore: () => { if (husGrupp) fangaOvergang(); } })).then(r => { renderer.shadowMap.needsUpdate = true; begarRender(); return r; });
+    },
     bil(vad) {
       if (typeof omgivning.bilKor !== 'function') return 'hemma';
       if (vad === 'parkera') omgivning.bilParkera();

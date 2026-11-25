@@ -159,8 +159,8 @@ export function skapaBil(THREE, rot, VU) {
   // ände från väggen, så kabelns väg blir densamma. hj: hjulens mått (radie, axelavstånd, bakaxel, styrvinkel).
   const BILAR = {
     tesla: { rot: Math.PI / 2, hj: { R: 0.405, WB: 3.019, bak: 1.573, styr0: -0.3979 }, neon: NEON, klar: false },
-    volvo: { rot: -Math.PI / 2, hj: { R: 0.372, WB: 2.865, bak: 1.336, styr0: 0 }, neon: '#9fd6ff', klar: false,
-      portFr: [[0.27, 0.86], [0.25, 0.84], [0.29, 0.88], [0.26, 0.8], [0.23, 0.9], [0.31, 0.82]] },
+    volvo: { rot: -Math.PI / 2, hj: { R: 0.375, WB: 2.864, bak: 1.343, styr0: 0 }, neon: '#9fd6ff', klar: false,
+      portFr: [[0.315, 0.86], [0.3, 0.84], [0.33, 0.86], [0.315, 0.8], [0.29, 0.88]] },   // framskärmen mellan hjulhuset och framdörren
   };
   let MODELL = 'tesla';
   function sparaMatt(namn, yt) {
@@ -500,7 +500,7 @@ export function skapaBil(THREE, rot, VU) {
     // lackfärg: egen (uLackF) eller en ny per varv för bilen på gatan; lyktor, bakljus och blinkers
     const fh = 'uniform float uLjus;\nuniform float uBlink;\nuniform vec3 uLackF;\nuniform float uTid;\nuniform vec4 uKor;\n' + (fb ? `vec3 bForbiF() {
       float v = floor( ( uTid * uKor.x + uKor.w ) / uKor.y ), h = fract( sin( v * 12.9898 + 4.1 ) * 43758.5453 );
-      return h < 0.3 ? vec3( 0.525, 0.535, 0.55 ) : h < 0.5 ? vec3( 0.03, 0.031, 0.035 ) : h < 0.7 ? vec3( 0.2, 0.21, 0.22 ) : h < 0.85 ? vec3( 0.04, 0.09, 0.24 ) : vec3( 0.36, 0.03, 0.025 );
+      return mix( vec3( 0.04, 0.11, 0.3 ), vec3( 0.06, 0.15, 0.36 ), h );   // blå metallic, lite olika ton varje varv
     }\n` : '');
     sh.fragmentShader = fh + sh.fragmentShader.replace('vec3 bLackF = vec3( 0.525, 0.535, 0.55 ) *', 'vec3 bLackF = ' + (fb ? 'bForbiF()' : 'uLackF') + ' *')
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
@@ -563,8 +563,8 @@ export function skapaBil(THREE, rot, VU) {
     BILAR.tesla.box = box; BILAR.tesla.boxm = { ...BOXM };
     BIL.klar = true;
     byggPort();
-    if (MODELL !== 'tesla') { const m = MODELL; MODELL = 'tesla'; modell(m); }   // valet kom före laddningen
-    else if (mal0) satt(miljo, mal0);
+    if (mal0) satt(miljo, mal0);
+    if (modellMal !== 'tesla') { const m = modellMal; modellMal = 'tesla'; modell(m); }   // valet kom före laddningen
     try { window.dispatchEvent(new Event('husritare:nytt')); } catch (e) { /* utan fönster */ }
   });
 
@@ -1019,7 +1019,7 @@ export function skapaBil(THREE, rot, VU) {
   function rigg(forbi) {
     let S = forbi ? FORBI : null;
     if (!S) {
-      const U = { uRull: { value: 0 }, uStyr: { value: HJ.styr0 }, uLjus: { value: 0 }, uBlink: { value: 0 }, uLackF: { value: V(0.525, 0.535, 0.55) }, uKor: { value: new THREE.Vector4() } };
+      const U = { uRull: { value: 0 }, uStyr: { value: forbi ? 0 : BILAR.tesla.hj.styr0 }, uLjus: { value: 0 }, uBlink: { value: 0 }, uLackF: { value: V(0.525, 0.535, 0.55) }, uKor: { value: new THREE.Vector4() } };
       S = { U, forbi, kar: bilMat(MOD.map, { U, hjul: false, forbi }), hj: bilMat(MOD.map, { U, hjul: true, forbi }), sk: skuggMat };
       if (forbi) {
         U.uKor.value.set(forbi.fart, forbi.varv, forbi.syns, forbi.start);
@@ -1041,17 +1041,202 @@ export function skapaBil(THREE, rot, VU) {
     g.userData.U = S.U; g.userData.skugga = sk;
     return g;
   }
-  // bilen som kör förbi på gatan: lokala +z framåt, rörelsen i skuggaren (som förut: 7,8 m/s, syns inom
-  // ±85 m och gör sedan en paus), ny lackfärg varje varv. Visar inget förrän modellen har laddats.
-  function forbi(x, y, z, ry) {
+  // bilarna som kör förbi på gatan: lokala +z framåt, rörelsen i skuggaren (7,8 m/s, syns inom ±85 m och gör
+  // sedan en paus). typ 'tesla' (blå) eller 'volvo' (röd, ett halvt varv efter Teslan: de möts aldrig).
+  // Visar inget förrän modellen har laddats.
+  function forbi(x, y, z, ry, typ = 'tesla') {
     const g = new THREE.Group(); g.name = 'elbil-forbi'; g.position.set(x, y, z); g.rotation.y = ry;
-    const fyll = () => {
-      if (dod || !MOD || g.children.length) return;
-      g.add(rigg({ fart: 7.8, varv: 520, syns: 85, start: 40 }));
+    // förenklad modell (bil-lod.bin): gatan ligger en bit bort, och den fulla modellen kostade 88–150k trianglar
+    // och upp till 30 ritanrop hela tiden (rörelsen i skuggaren gör att näten inte kan gallras)
+    const F = typ === 'volvo' ? { fart: 7.8, varv: 520, syns: 85, start: 300, farg: '#8c1219' } : { fart: 7.8, varv: 520, syns: 85, start: 40, farg: '#1f4fa8' };
+    hamtaLod().then(() => {
+      if (dod || g.children.length || !LOD[typ]) return;
+      const o = new THREE.Mesh(LOD[typ], lodMat(F)); o.castShadow = false; o.receiveShadow = true; o.frustumCulled = false; g.add(o);
+      if (!skuggGeoZ) skuggGeoZ = spara(new THREE.PlaneGeometry(5.6, 2.9).rotateX(-Math.PI / 2).rotateY(Math.PI / 2));
+      const Uk = FUK[F.start] || (FUK[F.start] = { value: new THREE.Vector4(F.fart, F.varv, F.syns, F.start) });
+      const sk = new THREE.Mesh(skuggGeoZ, forbiSkugga(Uk)); sk.position.y = 0.012; sk.renderOrder = 2; sk.frustumCulled = false; g.add(sk);
       try { window.dispatchEvent(new Event('husritare:nytt')); } catch (e) { /* utan fönster */ }
-    };
-    if (MOD) fyll(); else laddning.then(fyll);
+    }).catch(e => console.warn('bil-lod.bin kunde inte laddas', e));
     return g;
+  }
+
+  // ================= Volvon (images/3d/volvo.glb: S60 laddhybrid, ~88k trianglar, inga texturer) =================
+  // Delarna heter efter materialet (lack, glas, ruta, krom, falg, gummi …); hjulen är egna noder med navet i
+  // origo (hjul_ftl, hjul_ftr, hjul_bkl, hjul_bkr), så de rullar och styr med nodens vridning.
+  let VOLVO = null, VS = null;
+  const hamtaVolvo = () => VOLVO || (VOLVO = new Promise((ok, fel) => new GLTFLoader().load(new URL('images/3d/volvo.glb?v=7', import.meta.url).href, g => ok(g.scene), undefined, fel)));
+  const VM = {};
+  function vMat(kat) {
+    if (VM[kat]) return VM[kat];
+    const P = o => spara(new THREE.MeshPhysicalMaterial(o)), S = o => spara(new THREE.MeshStandardMaterial(o));
+    const f = {
+      lack: () => P({ color: 0x1c2c44, metalness: 0.4, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.05 }),   // mörkblå metallic
+      svart: () => S({ color: 0x0b0b0c, roughness: 0.62, metalness: 0 }),
+      blank: () => P({ color: 0x060607, roughness: 0.2, metalness: 0, clearcoat: 0.8, clearcoatRoughness: 0.08 }),
+      krom: () => S({ color: 0xd6d9de, roughness: 0.14, metalness: 1 }),
+      falg: () => S({ color: 0xe2e5e9, roughness: 0.38, metalness: 0.65, vertexColors: true }),   // färgkartans två toner som hörnfärger (konverteringen)
+      skiva: () => S({ color: 0x5c5d60, roughness: 0.45, metalness: 0.8 }),
+      ok: () => S({ color: 0x26272a, roughness: 0.5, metalness: 0.3 }),
+      glas: () => P({ color: 0xe8eef4, roughness: 0.04, metalness: 0, transparent: true, opacity: 0.22, depthWrite: false }),
+      ruta: () => P({ color: 0x06080b, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.9, clearcoat: 1, clearcoatRoughness: 0.03 }),
+      drl: () => S({ color: 0xdfe4ea, roughness: 0.25, metalness: 0.2, emissive: 0xffffff, emissiveIntensity: 0 }),
+      bak: () => S({ color: 0x5a0707, roughness: 0.25, metalness: 0, emissive: 0xff1a0e, emissiveIntensity: 0 }),
+      blink: () => S({ color: 0x7a3305, roughness: 0.3, metalness: 0, emissive: 0xff8a10, emissiveIntensity: 0 }),
+      inre: () => S({ color: 0x141415, roughness: 0.85, metalness: 0 }),
+      gummi: () => S({ color: 0x111112, roughness: 0.9, metalness: 0 }),
+      lyktinre: () => S({ color: 0x8c9096, roughness: 0.28, metalness: 0.75 }),
+    }[kat];
+    return (VM[kat] = f ? f() : S({ color: 0x777777, roughness: 0.6 }));
+  }
+  // neutral väggbox i grafit med en smal ljuslist (inget märke), byts tillsammans med bilen
+  function volvoBox() {
+    const g = new THREE.Group(), rr = (w, h, r) => {
+      const s = new THREE.Shape(), x0 = -w / 2, x1 = w / 2;
+      s.moveTo(x0 + r, 0); s.lineTo(x1 - r, 0); s.quadraticCurveTo(x1, 0, x1, r); s.lineTo(x1, h - r); s.quadraticCurveTo(x1, h, x1 - r, h);
+      s.lineTo(x0 + r, h); s.quadraticCurveTo(x0, h, x0, h - r); s.lineTo(x0, r); s.quadraticCurveTo(x0, 0, x0 + r, 0); return s;
+    };
+    const kropp = new THREE.Mesh(spara(new THREE.ExtrudeGeometry(rr(0.2, 0.3, 0.04), { depth: 0.07, bevelEnabled: true, bevelThickness: 0.014, bevelSize: 0.01, bevelSegments: 3, curveSegments: 6 })),
+      spara(new THREE.MeshPhysicalMaterial({ color: 0x2c2f33, roughness: 0.42, metalness: 0.15, clearcoat: 0.4, clearcoatRoughness: 0.2 })));
+    const front = new THREE.Mesh(spara(new THREE.ExtrudeGeometry(rr(0.15, 0.17, 0.025), { depth: 0.004, bevelEnabled: false, curveSegments: 6 })),
+      spara(new THREE.MeshPhysicalMaterial({ color: 0x121315, roughness: 0.12, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.04 })));
+    front.position.set(0, 0.09, 0.084);
+    g.add(kropp, front);
+    g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    return g;
+  }
+  function forberedVolvo(sc) {
+    if (VS || dod) return;
+    sc.traverse(o => {
+      if (!o.isMesh) return;
+      const k = o.material.name; o.userData.kat = k; o.material.dispose(); o.material = vMat(k);
+      o.castShadow = k !== 'glas' && k !== 'ruta'; o.receiveShadow = true; skrap.push(o.geometry);
+    });
+    VS = sc;
+    const yt = new THREE.Group(), m = sc.clone(); m.rotation.y = BILAR.volvo.rot; yt.add(m);
+    const spar = { langd: BIL.langd, bak: BIL.bak, port: BIL.port, portN: BIL.portN, bredd: BIL.bredd };
+    mattBil(yt, BILAR.volvo.portFr); sparaMatt('volvo', yt); Object.assign(BIL, spar);
+    BILAR.volvo.box = volvoBox(); BILAR.volvo.boxm = { ut: 0.098, topp: 0.3, halv: 0.11 };
+  }
+  // forbi: rörelsen och hjulens rullning i skuggaren (som Teslan på gatan)
+  const FV = {};
+  function forbiMat(kat, hjul, Uk, farg) {
+    const nyckel = kat + (hjul ? '-h' : '') + (farg && kat === 'lack' ? farg : '') + Uk.value.w;
+    if (FV[nyckel]) return FV[nyckel];
+    const m = spara(vMat(kat).clone()); if (farg && kat === 'lack') m.color.set(farg);
+    const R = BILAR.volvo.hj.R.toFixed(3);
+    m.onBeforeCompile = s => {
+      s.uniforms.uTid = VU.uTid; s.uniforms.uKor = Uk;
+      const rul = `float hA = mod( uTid * uKor.x, ${(2 * Math.PI).toFixed(4)} * ${R} ) / ${R}; float hC = cos( hA ), hS = sin( hA );`;
+      s.vertexShader = 'uniform float uTid;\nuniform vec4 uKor;\n' + s.vertexShader
+        .replace('#include <beginnormal_vertex>', '#include <beginnormal_vertex>\n' + (hjul ? rul + ' objectNormal.yz = vec2( hC * objectNormal.y - hS * objectNormal.z, hS * objectNormal.y + hC * objectNormal.z );' : ''))
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\n' + (hjul ? 'transformed.yz = vec2( hC * transformed.y - hS * transformed.z, hS * transformed.y + hC * transformed.z );\n' : '')
+          + ' float bS = mod( uTid * uKor.x + uKor.w, uKor.y ) - 0.5 * uKor.y; transformed.z += bS; if ( abs( bS ) > uKor.z ) transformed.y -= 400.0;');
+    };
+    m.customProgramCacheKey = () => 'volvo-forbi-' + (hjul ? 'h' : 'k');
+    return (FV[nyckel] = m);
+  }
+  const FSK = {};
+  function forbiSkugga(Uk) {
+    const k = Uk.value.w; if (FSK[k]) return FSK[k];
+    const sm = spara(skuggMat.clone());
+    sm.onBeforeCompile = s => {
+      s.uniforms.uTid = VU.uTid; s.uniforms.uKor = Uk;
+      s.vertexShader = 'uniform float uTid;\nuniform vec4 uKor;\n' + s.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n float bS = mod( uTid * uKor.x + uKor.w, uKor.y ) - 0.5 * uKor.y; transformed.z += bS; if ( abs( bS ) > uKor.z ) transformed.y -= 400.0;');
+    };
+    sm.customProgramCacheKey = () => 'elbil-forbi-skugga';
+    return (FSK[k] = sm);
+  }
+  const FUK = {};
+  // en Volvo att köra (forbi = null) eller köra förbi; egen lack (farg) och egna lyktor per kopia
+  function riggVolvo(forbi, farg = null) {
+    const U = { uRull: { value: 0 }, uStyr: { value: 0 }, uLjus: { value: 0 }, uBlink: { value: 0 }, uLackF: { value: V() }, uKor: { value: new THREE.Vector4() } };
+    let Uk = null;
+    if (forbi) { const k = forbi.start; Uk = FUK[k] || (FUK[k] = { value: new THREE.Vector4(forbi.fart, forbi.varv, forbi.syns, forbi.start) }); }
+    const g = new THREE.Group(), m = VS.clone(); g.add(m);
+    const egna = {};
+    if (!forbi) {
+      if (farg) { egna.lack = spara(vMat('lack').clone()); egna.lack.color.set(farg); }
+      for (const k of ['drl', 'bak']) egna[k] = spara(vMat(k).clone());
+      const bl = egna.blink = spara(vMat('blink').clone());
+      bl.onBeforeCompile = s => {      // blinkersen bara på ena sidan: +x är bilens vänstra
+        s.uniforms.uBlink = U.uBlink;
+        s.vertexShader = 'varying float vBx;\n' + s.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vBx = position.x;');
+        s.fragmentShader = 'uniform float uBlink;\nvarying float vBx;\n' + s.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n totalEmissiveRadiance *= step( 0.5, uBlink * sign( vBx ) );');
+      };
+      bl.customProgramCacheKey = () => 'volvo-blink';
+    }
+    const hjul = [];
+    m.traverse(o => {
+      if (/^hjul_/.test(o.name) && o.parent === m) hjul.push({ o, fram: /ft/.test(o.name) });
+      if (!o.isMesh) return;
+      const k = o.userData.kat;
+      let iHjul = false; for (let p = o; p; p = p.parent) if (/^hjul_/.test(p.name)) iHjul = true;
+      if (forbi) { o.material = forbiMat(k, iHjul, Uk, farg); o.castShadow = false; o.frustumCulled = false; }
+      else if (egna[k]) o.material = egna[k];
+    });
+    if (!skuggGeoZ) skuggGeoZ = spara(new THREE.PlaneGeometry(5.6, 2.9).rotateX(-Math.PI / 2).rotateY(Math.PI / 2));
+    const sk = new THREE.Mesh(skuggGeoZ, forbi ? forbiSkugga(Uk) : skuggMat); sk.position.y = 0.012; sk.renderOrder = 2; sk.frustumCulled = !forbi; g.add(sk);
+    g.userData.U = U; g.userData.skugga = sk;
+    g.userData.pose = () => {
+      for (const h of hjul) h.o.rotation.set(U.uRull.value, h.fram ? U.uStyr.value : 0, 0, 'YXZ');
+      if (egna.drl) { egna.drl.emissiveIntensity = 2.4 * U.uLjus.value; egna.bak.emissiveIntensity = 1.4 * U.uLjus.value; egna.blink.emissiveIntensity = U.uBlink.value ? 2.6 : 0; }
+    };
+    return g;
+  }
+
+  // ---- bilval: modell('tesla' | 'volvo' | 'ingen') → Promise<namnet som gäller> ----
+  // Bilen står alltid parkerad efter bytet; boxen, kabeln och ljusets färg byts med bilen.
+  // 'ingen': ingen bil, kabeln hänger på boxen.
+  let modellMal = 'tesla';
+  function neonFarg(c) { for (const m of [neonMat, gloriaBox, gloriaPort, polMat]) m.color.set(c); }
+  function bytTill(namn) {
+    parkera(true);
+    const gam = BILAR[MODELL];
+    if (gam && gam.yt) bilen.remove(gam.yt);
+    if (snoBil) { bilen.remove(snoBil); if (gam) gam.sno = snoBil; }
+    if (rigP) rigP.visible = false;
+    MODELL = namn;
+    const rec = BILAR[namn];
+    if (rec) {
+      bilen.add(rec.yt); snoKalla = rec.yt; snoBil = rec.sno || null; if (snoBil) bilen.add(snoBil);
+      Object.assign(BIL, rec.matt); byggPort();
+      Object.assign(HJ, rec.hj); rigP = rec.rig || null; rigSno = rec.rigSno || null;
+      if (rec.boxm) Object.assign(BOXM, rec.boxm);
+      neonFarg(rec.neon);
+    }
+    if (mal0) satt(miljo, mal0);
+    else bilen.visible = !!rec;
+    try { window.dispatchEvent(new Event('husritare:nytt')); } catch (e) { /* utan fönster */ }
+  }
+  function modell(namn, o = {}) {   // o.fore(): körs precis före bytet (motorn fångar bilden och tonar över)
+    if (namn !== 'ingen' && !BILAR[namn]) namn = 'tesla';
+    modellMal = namn;
+    if (namn === MODELL) return Promise.resolve(MODELL);
+    const klar = namn === 'volvo' ? hamtaVolvo().then(forberedVolvo) : laddning;
+    return klar.then(() => {
+      if (dod || modellMal !== namn || namn === MODELL) return MODELL;
+      if (!BIL.klar) return MODELL;             // Teslans laddning byter när den är klar (modellMal)
+      if (namn === 'volvo' && !BILAR.volvo.klar) return MODELL;
+      if (o.fore) { try { o.fore(); } catch (e) { /* bara övertoningen */ } }
+      bytTill(namn);
+      return MODELL;
+    }).catch(e => { console.warn('bilen kunde inte bytas', e); return MODELL; });
+  }
+  // en parkerad kopia med valfri lack att ställa ut (grannarnas uppfarter): kopia('volvo' | 'tesla', '#b3121b')
+  // → Promise<Object3D | null>. Modellens ram: +z fram, origo mitt under bilen, marken y = 0. Delar geometrin
+  // med vår bil. Kostnad: Teslan ~150k trianglar och 3 ritanrop, Volvon ~88k trianglar och ~30 ritanrop (+ skuggpass).
+  function kopia(typ = 'tesla', farg = null) {
+    if (typ === 'volvo') return hamtaVolvo().then(forberedVolvo).then(() => {
+      if (!VS) return null;
+      const g = riggVolvo(null, farg); g.name = 'volvo-kopia'; g.userData.pose(); return g;
+    });
+    return laddning.then(() => {
+      if (!MOD) return null;
+      const g = rigg(null); g.name = 'tesla-kopia';
+      const U = g.userData.U; U.uStyr.value = BILAR.tesla.hj.styr0; U.uRull.value = 0;
+      if (farg) { const c = new THREE.Color(farg); U.uLackF.value.set(c.r * 0.55, c.g * 0.55, c.b * 0.55); }
+      return g;
+    });
   }
 
   // ---- Kör iväg / Kör hem ----
@@ -1279,10 +1464,77 @@ export function skapaBil(THREE, rot, VU) {
     return true;
   }
 
+  // ================= Förenklade bilar (LOD, images/3d/bil-lod.bin: Teslan ~3,6k, Volvon ~4,3k och ~2,6k trianglar) =================
+  // Gjorda med team-prestanda/bil-lod.py (fast_simplification) ur samma modeller; hörnfärger efter delarna och lacken
+  // märkt i alfa, så att varje bil får sin lackfärg som instansfärg. Alla parkerade bilar längre bort och bilarna som
+  // kör förbi: ett instansierat nät per modell (ett ritanrop) i stället för 88–150k trianglar per bil.
+  let LODP = null;
+  const LOD = {};
+  const hamtaLod = () => LODP || (LODP = fetch(new URL('images/3d/bil-lod.bin?v=1', import.meta.url).href).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); }).then(buf => {
+    const jl = new DataView(buf).getUint32(0, true), J = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 4, jl))), b0 = 4 + jl;
+    for (const k of Object.keys(J)) {
+      const d = J[k], g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(buf, b0 + d.p, d.n * 3), 3));
+      g.setAttribute('normal', new THREE.BufferAttribute(new Int8Array(buf, b0 + d.nr, d.n * 3), 3, true));
+      g.setAttribute('color', new THREE.BufferAttribute(new Uint8Array(buf, b0 + d.c, d.n * 4), 4, true));
+      g.setIndex(new THREE.BufferAttribute(new Uint16Array(buf, b0 + d.ix, d.i), 1));
+      g.computeBoundingSphere();
+      LOD[k] = spara(g);
+    }
+    return LOD;
+  }));
+  // lacken (alfa = 1) får instansens färg (eller uLodF för bilarna som kör förbi) och blankare yta
+  const LODM = {};
+  function lodMat(forbi = null) {
+    const k = forbi ? 'f' + forbi.start : 'p';
+    if (LODM[k]) return LODM[k];
+    const m = spara(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.55, metalness: 0.1 }));
+    const Uk = forbi ? { value: new THREE.Vector4(forbi.fart, forbi.varv, forbi.syns, forbi.start) } : null, F = forbi ? { value: new THREE.Color(forbi.farg) } : null;
+    m.onBeforeCompile = s => {
+      s.uniforms.uNatt = VU.uNatt;
+      if (forbi) { s.uniforms.uTid = VU.uTid; s.uniforms.uKor = Uk; s.uniforms.uLodF = F; }
+      s.vertexShader = 'varying float vLack;\n' + (forbi ? 'uniform float uTid;\nuniform vec4 uKor;\nuniform vec3 uLodF;\n' : '') + s.vertexShader
+        .replace('#include <color_vertex>', '#include <color_vertex>\n vLack = color.a;\n vColor = vec4( mix( color.rgb, ' + (forbi ? 'uLodF' : '( instanceColor.rgb )') + ', color.a ), 1.0 );')
+        .replace('#include <begin_vertex>', '#include <begin_vertex>' + (forbi ? '\n float bS = mod( uTid * uKor.x + uKor.w, uKor.y ) - 0.5 * uKor.y; transformed.z += bS; if ( abs( bS ) > uKor.z ) transformed.y -= 400.0;' : ''));
+      s.fragmentShader = 'varying float vLack;\n' + s.fragmentShader
+        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n roughnessFactor = mix( 0.62, 0.3, vLack );')
+        .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\n metalnessFactor = mix( 0.05, 0.35, vLack );');
+    };
+    m.customProgramCacheKey = () => forbi ? 'bil-lod-forbi' : 'bil-lod';
+    return (LODM[k] = m);
+  }
+  // lodBilar([{ x, y, z, ry, typ: 'tesla' | 'volvo', farg }]) → Group: ett instansierat nät per modell och
+  // kontaktskuggorna i ett eget (fylls när bil-lod.bin har laddats)
+  function lodBilar(lista) {
+    const g = new THREE.Group(); g.name = 'bilar-lod';
+    if (!lista.length) return g;
+    hamtaLod().then(() => {
+      if (dod) return;
+      const M = new THREE.Matrix4(), q = new THREE.Quaternion(), Y = new THREE.Vector3(0, 1, 0), p = new THREE.Vector3(), s1 = new THREE.Vector3(1, 1, 1), c = new THREE.Color();
+      // Teslan ~3,6k trianglar; Volvon ~4,3k inom 45 m från huset, längre bort fjärrnivån (~2,6k)
+      const niva = b => (b.typ === 'volvo' ? (Math.hypot(b.x, b.z) > 45 && LOD['volvo-f'] ? 'volvo-f' : 'volvo') : 'tesla');
+      // ett nät per modell och kvadrant runt huset, så att bilarna bakom kameran gallras bort (bara en kvadrant
+      // eller två syns åt gången)
+      const kv = b => Math.min(3, Math.floor((Math.atan2(b.z, b.x) + Math.PI) / (Math.PI / 2)));
+      for (const typ of ['tesla', 'volvo', 'volvo-f']) for (let q4 = 0; q4 < 4; q4++) {
+        const L = lista.filter(b => niva(b) === typ && (lista.length < 3 || kv(b) === q4));
+        if (!L.length || !LOD[typ] || (lista.length < 3 && q4)) continue;
+        const im = new THREE.InstancedMesh(LOD[typ], lodMat(), L.length); im.name = 'bilar-lod-' + typ;
+        L.forEach((b, i) => { im.setMatrixAt(i, M.compose(p.set(b.x, b.y, b.z), q.setFromAxisAngle(Y, b.ry), s1)); im.setColorAt(i, c.set(b.farg || '#9a9da2')); });
+        im.castShadow = true; im.receiveShadow = true; im.computeBoundingSphere(); g.add(im);
+      }
+      if (!skuggGeoZ) skuggGeoZ = spara(new THREE.PlaneGeometry(5.6, 2.9).rotateX(-Math.PI / 2).rotateY(Math.PI / 2));
+      const sk = new THREE.InstancedMesh(skuggGeoZ, skuggMat, lista.length); sk.name = 'bilar-lod-skugga'; sk.renderOrder = 2;
+      lista.forEach((b, i) => sk.setMatrixAt(i, M.compose(p.set(b.x, b.y + 0.012, b.z), q.setFromAxisAngle(Y, b.ry), s1)));
+      sk.computeBoundingSphere(); g.add(sk);
+      g.traverse(o => { o.userData.egen = false; });
+      try { window.dispatchEvent(new Event('husritare:nytt')); } catch (e) { /* utan fönster */ }
+    }).catch(e => console.warn('bil-lod.bin kunde inte laddas', e));
+    return g;
+  }
   function dispose() {
     dod = true; stada(); rot.remove(grupp);
     skrap.forEach(o => o && o.dispose && o.dispose()); skrap.length = 0;
   }
-  try { window.__elbilTMP = { grupp, KOR, bilen, plats: () => plats, rig: () => rigP, VU }; } catch (e) {} // TMP
-  return { planera, satt, dispose, laddning, plats: () => plats, forbi, kor, steg, parkera, lage: () => KOR.lage };
+  return { planera, satt, dispose, laddning, plats: () => plats, forbi, kor, steg, parkera, lage: () => KOR.lage, modell, modellNu: () => MODELL, kopia, lodBilar };
 }

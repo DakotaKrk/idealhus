@@ -49,7 +49,7 @@ const lekModell = () => LEKGEO || (LEKGEO = new Promise(res => new GLTFLoader().
 }, undefined, () => res(null))));
 
 export function skapaOmgivning(H) {
-  const { THREE, r, pt, hy, iGata, ledig, husR, vagar, HU, BAK, GHW, GTR, VD, TS, BD, V, N, lod, trad, ror, lada3, vkvad, UG, ETT,
+  const { parkBil, THREE, r, pt, hy, iGata, ledig, husR, vagar, HU, BAK, GHW, GTR, VD, TS, BD, V, N, lod, trad, ror, lada3, vkvad, UG, ETT,
     lagg, ting, bilDel, grannBygg, GRANNTYP, GRANNFARG, C, VU, LJUS, VARMT, egenMat, yta, planta, lykta, ryMot, uppfarter, hack } = H;
   const n0 = pt(0, 0), nv = sub([...pt(1, 0), 0], [...n0, 0]), tv = sub([...pt(0, 1), 0], [...n0, 0]);
   const VN = [nv[0], 0, nv[1]], VT = [tv[0], 0, tv[1]];            // kvarterets sv- och lat-riktning i världen
@@ -328,9 +328,9 @@ export function skapaOmgivning(H) {
     // uppfart, bil, brevlåda, häck mot gatan, träd och buskar på tomten
     const ux = (spegel ? -1 : 1) * (typ.L / 2 - 1.6), F = typ.W / 2, [a0, b0] = R.svlat(ux, F + 0.1), [a1, b1] = R.svlat(ux, F + 6.1);
     uppfarter.push([a0, b0, a1, b1, 3]);
-    if (r() < 0.6) { const [x, y, z] = R.P(ux, F + 3); if (bilOk(x, z)) lagg(TS, bilDel(), x, y, z, 1, R.ry + Math.PI, 8, 0, BF[r() * BF.length | 0]); }
+    if (r() < 0.6) { const [x, y, z] = R.P(ux, F + 3); if (bilOk(x, z)) parkBil(x, y, z, R.ry + Math.PI, BF[r() * BF.length | 0]); }
     const hk = r() < 0.6, HF = hk ? [0.04, 0.09, 0.03] : [0.85, 0.84, 0.8];
-    for (const [l0, l1] of [[-12, ux - 1.8], [ux + 1.8, 12]]) { if (l1 - l0 < 1) continue; const m = (l0 + l1) / 2, [x, y, z] = R.P(m, F + 5.4); lada3(VD, [x, y + (hk ? 0.55 : 0.4), z], R.ax(0), [(l1 - l0) / 2, hk ? 0.55 : 0.4, hk ? 0.4 : 0.03], HF); }
+    for (const [l0, l1] of [[-12, ux - 1.8], [ux + 1.8, 12]]) { if (l1 - l0 < 1) continue; if (hk && d < 90) { hack(1, (u, w) => R.svlat(u, w), l0, F + 5.4, l1, F + 5.4); continue; } const m = (l0 + l1) / 2, [x, y, z] = R.P(m, F + 5.4); lada3(VD, [x, y + (hk ? 0.55 : 0.4), z], R.ax(0), [(l1 - l0) / 2, hk ? 0.55 : 0.4, hk ? 0.4 : 0.03], HF); }
     { const [x, , z] = R.P(-(spegel ? -1 : 1) * 6 * (0.6 + r() * 0.5), -F - 5 - r() * 3), q2 = r(); if (ledig(...R.svlat(-(spegel ? -1 : 1) * 6, -F - 6), 1)) trad(q2 < 0.35 ? 'bjork' : q2 < 0.6 ? 'ek' : q2 < 0.8 ? 'gran1' : 'tall0', x, z, q2 < 0.35 ? 10 + r() * 5 : 8 + r() * 4, 0); }
     if (r() < 0.5) { const [x, , z] = R.P((spegel ? -1 : 1) * 8.5, -F - 3); trad('ek', x, z, 6 + r() * 3, 0); }
     if (d < 75) for (const sx of [-1, 1]) { const [x, , z] = R.P(sx * (typ.L / 2 + 0.9), F + 0.8); trad('buske', x, z, 0.9 + r() * 0.4, 0); }
@@ -399,12 +399,10 @@ export function skapaOmgivning(H) {
         { const p = at(0.3, -0.86); lada3(VD, [p[0], p[1] + 1.4, p[2]], A3, [0.3, 0.22, 0.02], [0.85, 0.85, 0.82]); lada3(VD, [p[0], p[1] + 1.4, p[2]], A3, [0.25, 0.17, 0.025], [0.05, 0.06, 0.07]); }
       }
       if (nara) {
-        const mu = u + (sp ? -0.9 : 0.9), [tx, ty, tz] = R.P(mu, -F - 1.9), Y = ty + 0.16, A3 = R.ax(0), MOB = k % 2 ? [0.08, 0.08, 0.09] : [0.4, 0.28, 0.17];
-        lada3(VD, [tx, Y + 0.72, tz], A3, [0.45, 0.02, 0.45], MOB); ror(VD, [[tx, Y, tz, 0.03], [tx, Y + 0.71, tz, 0.03]], 4, UG, 1, () => MOB);
-        for (const sx of [-1, 1]) { const [cx, , cz] = R.P(mu + sx * 0.75, -F - 1.9); lada3(VD, [cx, Y + 0.44, cz], A3, [0.21, 0.02, 0.21], MOB); lada3(VD, [cx + A3[0][0] * sx * 0.2, Y + 0.7, cz + A3[0][2] * sx * 0.2], A3, [0.02, 0.26, 0.21], MOB); for (const w of [-0.17, 0.17]) lada3(VD, [cx, Y + 0.21, cz + 0], A3, [0.18, 0.21, 0.015], MOB); }
+        { const [tx, ty, tz] = R.P(u + (sp ? -0.9 : 0.9), -F - 1.9); lagg(TS, ting(k % 2 ? 'utegruppSvart' : 'utegrupp'), tx, ty + 0.16, tz, 1, R.ry, 8, 0); }   // bord och stolar med dynor
         kruka(R.P(u + (sp ? -2.6 : 2.6), -F - 2.8, 0.16), [[1.05, 0.5, 0.6], [1.0, 0.9, 0.4]][k % 2]);
       }
-      if (r() < 0.35) { const [bx, by, bz] = R.P(u - (sp ? 1.2 : -1.2) * 0.2, F + 7.5); if (bilOk(bx, bz)) lagg(TS, bilDel(), bx, by, bz, 1, R.ry + Math.PI / 2, 8, 0, BF[r() * BF.length | 0]); }
+      if (r() < 0.35) { const [bx, by, bz] = R.P(u - (sp ? 1.2 : -1.2) * 0.2, F + 7.5); if (bilOk(bx, bz)) parkBil(bx, by, bz, R.ry + Math.PI / 2, BF[r() * BF.length | 0]); }
       if (r() < 0.6) { const [tx, , tz] = R.P(u + (sp ? -1.5 : 1.5), -F - 5.8 - r()); trad(r() < 0.5 ? 'frukt' : 'buske', tx, tz, 2.4 + r() * 1.2, 0); }
     }
     husR.push({ sv: hsv, lat: s, f: [-sd, 0], ax: [0, sd], L: Ltot, W: typ.W });
@@ -412,17 +410,63 @@ export function skapaOmgivning(H) {
   }
 
   // ---- grannetomten bakom vår tomt (mot bakgatan): ett lågt enplanshus som inte konkurrerar med vårt hus ----
-  const LAGHUS = { L: 10.5, W: 7.6, he: 2.75, R: 1.7, dorr: 6.7, extra: 'trappa',
-    fram: [[1.8, 1.0, 1.2, 1.15], [4.0, 1.0, 1.2, 1.15], [9.0, 1.0, 1.2, 1.15]], bak: [[2.0, 1.0, 1.2, 1.15], [5.3, 1.0, 2.0, 1.15], [8.6, 1.0, 1.2, 1.15]],
-    gavel: [[2.2, 1.0, 1.1, 1.1], [5.4, 1.0, 1.1, 1.1]] };
+  const LAGHUS = { L: 10.5, W: 7.0, he: 2.45, R: 1.15, dorr: 6.7, extra: 'trappa',
+    fram: [[1.8, 0.95, 1.2, 1.1], [4.0, 0.95, 1.2, 1.1], [9.0, 0.95, 1.2, 1.1]], bak: [[2.0, 0.95, 1.2, 1.1], [5.3, 0.95, 2.0, 1.1], [8.6, 0.95, 1.2, 1.1]],
+    gavel: [[2.2, 0.95, 1.1, 1.05], [5.0, 0.95, 1.1, 1.05]] };
+  // när inget hus får plats bakom vår tomt: en liten kvartersfruktträdgård (allt lågt) med häck mot gatan och grind,
+  // grusgångar, bänkar, rabatter, lekstuga och äppelträd i rader
+  function fruktTradgard(T, gk) {
+    const lc = (T.lat0 + T.lat1) / 2, sv0 = gk + 0.6, sv1 = T.svB - 1.4;
+    if (sv1 - sv0 < 6) return;
+    const sc = (sv0 + sv1) / 2, R = ram(sc, lc, -1, 0), HD = (sv1 - sv0) / 2;    // +w mot gatan, w ∈ [−HD, HD]
+    // bredden: så långt det är ledigt åt båda hållen (högst 22 m)
+    const fri2 = (u, w) => { const [a, b] = R.svlat(u, w); return ledig(a, b, 0.4) && a < T.svB - 1.2; };
+    let U0 = 0, U1 = 0;
+    for (let x = 0.5; x <= 22; x += 0.5) { if (![-HD + 0.3, 0, HD - 0.3].every(w => fri2(-x, w))) break; U0 = -x; }
+    for (let x = 0.5; x <= 22; x += 0.5) { if (![-HD + 0.3, 0, HD - 0.3].every(w => fri2(x, w))) break; U1 = x; }
+    if (U1 - U0 < 8) return;
+    const um = (U0 + U1) / 2, lok = (u, w) => R.svlat(u, w), GRUS = [1.5, 1.38, 1.15], TRA = [0.42, 0.28, 0.16], VIT = [0.86, 0.86, 0.83];
+    RES.push([sc, lc, Math.max(HD, (U1 - U0) / 2)]);
+    // häck mot gatan med en öppning och grindstolpar; låg häck längs sidorna
+    hack(1, lok, U0, HD - 0.2, um - 1.1, HD - 0.2); hack(1, lok, um + 1.1, HD - 0.2, U1, HD - 0.2);
+    for (const sx of [-1, 1]) { const [x, y, z] = R.P(um + sx * 1.1, HD - 0.2); lada3(VD, [x, y + 0.6, z], R.ax(0), [0.07, 0.6, 0.07], VIT); }
+    for (const xs of [U0, U1]) hack(1, lok, xs, HD - 0.8, xs, -HD + 0.5);
+    // grusgång in från grinden och en tvärgång genom trädgården
+    { const [a0, b0] = lok(um, HD), [a1, b1] = lok(um, -HD + 1.2); yta(a0, b0, a1, b1, 1.4, 0.03, GRUS, 6); }
+    { const [a0, b0] = lok(U0 + 1, 0), [a1, b1] = lok(U1 - 1, 0); yta(a0, b0, a1, b1, 1.2, 0.03, GRUS, 6); }
+    // äppel- och päronträd i rader (låga), rabatter längs mittgången, bänkar vid korsningen, lekstuga i ett hörn
+    for (let u = U0 + 2.5; u < U1 - 1.5; u += 4.2) for (const w of [-HD * 0.55, HD * 0.5]) {
+      if (Math.abs(u - um) < 2 || (Math.abs(u - (U1 - 2.6)) < 2.8 && w < 0)) continue;
+      const [x, , z] = R.P(u + (r() - 0.5) * 0.6, w + (r() - 0.5) * 0.6); trad('frukt', x, z, 2.8 + r() * 1.0, 2.0);
+    }
+    for (const sx of [-1, 1]) {
+      const [a0, b0] = lok(um + sx * 1.2, HD - 1.5), [a1, b1] = lok(um + sx * 1.2, 1.2); yta(a0, b0, a1, b1, 0.8, 0.02, [0.5, 0.4, 0.31], 5);
+      for (let w = 1.4; w < HD - 1.6; w += 0.5) { const [x, , z] = R.P(um + sx * 1.2, w); planta('blomma', x, z, 0.36 + r() * 0.14, [[1.05, 0.55, 0.62], [1.0, 0.95, 0.75], [0.78, 0.6, 1.0], [1.05, 0.42, 0.36]][(w * 2 | 0) % 4]); }
+    }
+    for (const [u, w, vr] of [[um - 2.4, -1.1, 0], [um + 2.4, -1.1, 0]]) {
+      R.lada(u, w, 0.44, 0.85, 0.025, 0.22, TRA, vr); R.lada(u, w - 0.2, 0.72, 0.85, 0.12, 0.025, TRA, vr);
+      for (const k of [-0.7, 0.7]) R.lada(u + k, w, 0.22, 0.03, 0.22, 0.2, [0.15, 0.15, 0.16], vr);
+    }
+    { const [x, y, z] = R.P(um + 3.6, -1.1); ror(VD, [[x, y, z, 0.03], [x, y + 0.85, z, 0.03]], 4, UG, 1, () => [0.2, 0.2, 0.21]); ror(VD, [[x, y + 0.45, z, 0.2], [x, y + 0.95, z, 0.2]], 8, UG, 1, () => [0.12, 0.3, 0.16]); }
+    { const [x, y, z] = R.P(U1 - 2.6, -HD + 2.2); lagg(TS, ting('lekstuga'), x, y, z, 1, R.ry + Math.PI, 8, 0); }
+    if (U1 - U0 > 16) { const [x, y, z] = R.P(U0 + 3.2, -HD + 2.6); lagg(TS, ting('studsmatta'), x, y, z, 1, 0, 8, 0); }
+    // ängsblommor och högre gräs längs häcken
+    for (let u = U0 + 0.6; u < U1 - 0.4; u += 0.7) { const [x, , z] = R.P(u, -HD + 0.4 + r() * 0.5); if (r() < 0.6) planta('gras', x, z, 0.4 + r() * 0.3, [0.66, 0.7, 0.42]); else planta('blomma', x, z, 0.35, [1.0, 1.0, 0.92]); }
+    globalThis.__grannTomt = { tradgard: true, U0, U1, HD };
+  }
+
   function grannTomt() {
     const T = H.VRAM && H.VRAM.tomt, M = H.mal; if (!T || !M || !M.dorr) return;
-    const typ = LAGHUS, F = typ.W / 2, gk = BAK + GHW + GTR, hsv = gk + 6 + F, ZF = F + 5.4;
-    const dn = [M.dorr.nx, M.dorr.nz];
+    const typ = LAGHUS, F = typ.W / 2, gk = BAK + GHW + GTR, hsv = gk + 5.2 + F, ZF = F + 4.6;
+    // startvyns kamera (som entreVy i husritare.js): 22° från entréns normal åt altanens sida. Huset läggs rakt bakom vårt
+    // hus sett därifrån, så att vårt hus skymmer det låga huset i startvyn; annars byggs ingen grannetomt alls.
+    const dn = [M.dorr.nx, M.dorr.nz], du = [-M.dorr.nz, M.dorr.nx], D = M.dack;
+    const sA = D ? Math.sign(((D.x0 + D.x1) / 2 - M.dorr.x) * du[0] + ((D.z0 + D.z1) / 2 - M.dorr.z) * du[1]) || 1 : 1, v22 = 22 * Math.PI / 180;
+    const kam = nrm([dn[0] * Math.cos(v22) + du[0] * sA * Math.sin(v22), 0, dn[1] * Math.cos(v22) + du[1] * sA * Math.sin(v22)]);
     // kandidater längs bakgatan: hela tomten ledig, bakom vår tomtgräns, inte framför vårt hus (startvyns och helskärmens
     // kil mot entrén); bäst rakt bakom huset sett från entrén, där vårt eget hus skymmer det låga huset
     let bast = null;
-    for (let d = 0; d <= 22; d += 1) for (const sg of d ? [1, -1] : [1]) {
+    for (let d = 0; d <= 40; d += 0.5) for (const sg of d ? [1, -1] : [1]) {
       const lat = (T.lat0 + T.lat1) / 2 + sg * d, R = ram(hsv, lat, -1, 0), XL = -(typ.L / 2 + 4.5), XR = typ.L / 2 + 4.5;
       const bakre = -(Math.min(T.svB - 1.6, hsv + F + 9) - hsv);       // trädgården bakåt (−w) till strax före vårt staket
       if (bakre > -F - 3) continue;
@@ -430,13 +474,18 @@ export function skapaOmgivning(H) {
       for (const u of [XL, 0, XR]) for (const w of [ZF - 0.3, F, 0, -F, bakre + 0.3]) prov.push([u, w]);
       const ok = prov.every(([u, w]) => { const [a, b] = R.svlat(u, w); return ledig(a, b, 0.4) && a < T.svB - 1.2; });
       if (!ok) continue;
-      const [x, z] = R.o, l = Math.hypot(x, z) || 1, fram = (x * dn[0] + z * dn[1]) / l;
-      if (fram > 0.2) continue;                                       // framför entrén: där tittar kameran
-      const poang = fram + d * 0.01;
+      const [x, z] = R.o, l = Math.hypot(x, z) || 1, bak = -(x * kam[0] + z * kam[2]) / l;   // 1 = rakt bakom vårt hus från kameran
+      if (bak < Math.cos(4 * Math.PI / 180)) continue;
+      const poang = -bak;
       if (!bast || poang < bast.poang) bast = { R, lat, poang, bakre, XL, XR };
     }
-    if (!bast) return;
-    const { R, lat, bakre, XL, XR } = bast, fg = GRANNFARG[(r() * GRANNFARG.length) | 0], spegel = r() < 0.5, sp = spegel ? -1 : 1;
+    if (!bast) { fruktTradgard(T, gk); return; }
+    const { R, lat, bakre } = bast, fg = GRANNFARG[(r() * GRANNFARG.length) | 0], spegel = r() < 0.5, sp = spegel ? -1 : 1;
+    // tomten breddas åt det håll där gräsytan bakom vår tomt ligger (mot vår tomts mitt), så långt det är ledigt
+    const si = Math.sign((R.svlat(1, 0)[1] - lat) * ((T.lat0 + T.lat1) / 2 - lat)) || 1;
+    let XI = typ.L / 2 + 4.5;
+    for (let x = XI + 0.5; x <= 26; x += 0.5) { if (![ZF - 0.3, 0, bakre + 0.3].every(w => { const [a, b] = R.svlat(si * x, w); return ledig(a, b, 0.4) && a < T.svB - 1.2; })) break; XI = x; }
+    const XL = si > 0 ? -(typ.L / 2 + 4.5) : -XI, XR = si > 0 ? XI : typ.L / 2 + 4.5, BRED = XI - (typ.L / 2 + 4.5);
     const farg = [C(fg[0]).toArray(), C(fg[1]).toArray(), C(fg[2]).toArray(), fg[3]], [hx, hz] = R.o;
     const hy0 = Math.min(...[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b]) => R.P(a * typ.L / 2, b * F)[1]));
     const ut = grannBygg(BD, typ, hx, hy0, hz, R.ry, farg, r(), spegel, { nara: true, racke: true, altandorr: true, sol: r() < 0.4 });
@@ -468,25 +517,33 @@ export function skapaOmgivning(H) {
       for (let u = a + 0.3, k = 0; u < b - 0.2; u += 0.55, k++) { const [x, , z] = R.P(u, F + 0.5); if (k % 4 === 2) trad('buske', x, z, 0.6, 0); else planta('blomma', x, z, 0.36 + r() * 0.14, [[1.05, 0.55, 0.62], [1.0, 0.95, 0.75], [0.78, 0.6, 1.0], [1.05, 0.42, 0.36]][k % 4]); }
     }
     // uteplats i trä på baksidan med bord, stolar och parasoll
-    const uc = sp * typ.L * 0.12, wb = -F - 1.7;
-    { const [a0, b0] = lok(uc - 2.4, wb), [a1, b1] = lok(uc + 2.4, wb); yta(a0, b0, a1, b1, 3.2, 0.3, [1.2, 0.9, 0.62], 2); const [x, y, z] = R.P(uc, wb); lada3(VD, [x, y + 0.15, z], R.ax(0), [2.4, 0.15, 1.6], [0.22, 0.15, 0.1]); }
+    const uc = sp * typ.L * 0.12, wb = -F - 1.3;
+    { const [a0, b0] = lok(uc - 2.2, wb), [a1, b1] = lok(uc + 2.2, wb); yta(a0, b0, a1, b1, 2.5, 0.14, [1.2, 0.9, 0.62], 2); const [x, y, z] = R.P(uc, wb); lada3(VD, [x, y + 0.06, z], R.ax(0), [2.2, 0.06, 1.25], [0.22, 0.15, 0.1]); }
     {
-      const [tx, ty, tz] = R.P(uc + 0.5, wb - 0.2), Y = ty + 0.3, A3 = R.ax(0), MOB = [0.36, 0.24, 0.15];
-      lada3(VD, [tx, Y + 0.72, tz], A3, [0.75, 0.02, 0.45], MOB);
-      for (const s2 of [-1, 1]) lada3(VD, [tx + A3[0][0] * s2 * 0.6, Y + 0.36, tz + A3[0][2] * s2 * 0.6], A3, [0.03, 0.36, 0.38], MOB);
-      for (const [du, dw] of [[-0.4, 0.75], [0.4, 0.75], [-0.4, -0.75], [0.4, -0.75]]) {
-        const [cx, , cz] = R.P(uc + 0.5 + du, wb - 0.2 + dw); lada3(VD, [cx, Y + 0.45, cz], A3, [0.22, 0.02, 0.21], MOB); lada3(VD, [cx, Y + 0.22, cz], A3, [0.2, 0.22, 0.02], MOB);
-        const [bx, , bz] = R.P(uc + 0.5 + du, wb - 0.2 + dw * 1.26); lada3(VD, [bx, Y + 0.72, bz], A3, [0.22, 0.26, 0.018], MOB);
-      }
+      const [tx, ty, tz] = R.P(uc + 0.5, wb - 0.1), Y = ty + 0.14;
+      lagg(TS, ting('utegrupp'), tx, Y, tz, 1, R.ry, 8, 0);   // bord, stolar och dynor
       ror(VD, [[tx, Y, tz, 0.022], [tx, Y + 2.4, tz, 0.018]], 5, UG, 1, () => [0.75, 0.75, 0.73]);
       ror(VD, [[tx, Y + 2.4, tz, 0.03], [tx, Y + 2.1, tz, 1.3], [tx, Y + 2.06, tz, 1.3]], 10, UG, 1, () => [0.22, 0.36, 0.26]);
     }
     // fruktträd, studsmatta eller lekstuga, cykel vid entrén och buskar i hörnen
-    for (const [u, w] of [[-sp * 3.2, bakre + 2.6], [sp * 3.8, bakre + 3.2]]) { const [x, , z] = R.P(u, w); trad('frukt', x, z, 3.4 + r() * 1.0, 2.2); }
-    { const [x, y, z] = R.P(-sp * 0.5, Math.max(bakre + 2.6, -F - 6)); lagg(TS, ting(r() < 0.5 ? 'studsmatta' : 'lekstuga'), x, y, z, 1, R.ry + Math.PI, 8, 0); }
+    for (const [u, w] of [[-sp * 4.2, bakre + 1.6], [sp * (typ.L / 2 + 2.4), bakre + 1.8]]) { const [x, , z] = R.P(u, w); trad('frukt', x, z, 3.0 + r() * 0.8, 2.0); }
+    { const [x, y, z] = R.P(-sp * (typ.L / 2 + 2.3), -0.6); r(); lagg(TS, ting('lekstuga'), x, y, z, 1, R.ry + Math.PI / 2, 8, 0); }   // lekstugan i sidotomten, studsmattan på den breda sidan
     cykelVD(R.P(xd + sp * 1.5, F + 1.6), R.X, [0.1, 0.25, 0.45]);
     { const [x, , z] = R.P(XR - 1.2, bakre + 1.2); trad('buske', x, z, 1.6, 0); const [x2, , z2] = R.P(XL + 1.2, bakre + 1.0); trad('buske', x2, z2, 1.4, 0); }
-    globalThis.__grannTomt = { lat, hsv, bakre, svB: T.svB };
+    // den breda sidotomten: studsmatta, lekstuga, odlingslådor, äppelträd, flaggstång och en rabatt mot gatan
+    if (BRED > 5) {
+      const uI = si * (typ.L / 2 + 4.5 + BRED * 0.5), at = (k, w) => R.P(uI + si * k, w);
+      { const [x, y, z] = at(-BRED * 0.2, -1.5); lagg(TS, ting('studsmatta'), x, y, z, 1, 0, 8, 0); }
+      for (const k of [-0.9, 0.9]) {
+        const [x, y, z] = at(BRED * 0.25 + k, ZF - 3.2), A3 = R.ax(0);
+        lada3(VD, [x, y + 0.2, z], A3, [0.4, 0.2, 0.9], [0.34, 0.24, 0.15]); lada3(VD, [x, y + 0.38, z], A3, [0.36, 0.03, 0.86], [0.12, 0.09, 0.07]);
+        for (let j = 0; j < 4; j++) { const [px, , pz] = at(BRED * 0.25 + k, ZF - 3.2 - 0.6 + j * 0.4); planta('gras', px, pz, 0.32, [0.55, 0.85, 0.4]); }
+      }
+      for (const [k, w] of [[-BRED * 0.35, bakre + 2.0], [BRED * 0.05, bakre + 1.6]]) { const [x, , z] = at(k, w); trad('frukt', x, z, 3.0 + r() * 0.8, 2.0); }
+      { const [x, y, z] = at(BRED * 0.4, ZF - 1.6); lagg(TS, ting('flagga'), x, y, z, 1, Math.atan2(-0.33, 0.94), 8, 0.002); }
+      for (let k = -BRED / 2 + 0.8; k < BRED / 2 - 0.5; k += 0.6) { const [x, , z] = at(k, ZF - 0.8); planta('blomma', x, z, 0.35 + r() * 0.12, [[1.05, 0.55, 0.62], [1.0, 0.95, 0.75], [0.78, 0.6, 1.0]][(k * 3 | 0) % 3 < 0 ? 0 : (k * 3 | 0) % 3]); }
+    }
+    globalThis.__grannTomt = { lat, hsv, bakre, svB: T.svB, BRED };
   }
 
   // ---- bygg(): gator, hus, parkstråket, liv och bakgrund ----
@@ -515,7 +572,7 @@ export function skapaOmgivning(H) {
       if (r() < 0.45) continue;
       const sv = FRAM - GHW + 1.0, [x, z] = pt(sv, l + r() * 4);
       if (uppfarter.some(([, , c2, d2]) => Math.abs(c2 - sv) < 9 && Math.abs(d2 - l) < 4)) continue;
-      if (bilOk(x, z)) lagg(TS, bilDel(), x, hy(x, z), z, 1, ryMot(0, 1), 8, 0, BF[r() * BF.length | 0]);
+      if (bilOk(x, z)) parkBil(x, hy(x, z), z, ryMot(0, 1), BF[r() * BF.length | 0]);   // (BF: slumpen dras som förr, så att kvarteret står kvar)
     }
     // busshållplats och återvinningsstation vid den nya gatan
     { const [x, z] = pt(FRAM - GHW - GTR + 0.9, 30); lagg(TS, ting('kur'), x, hy(x, z), z, 1, ryMot(1, 0), 8, 0); const [x2, z2] = pt(FRAM - GHW - 0.5, 26.5); lagg(TS, ting('hallplats'), x2, hy(x2, z2), z2, 1, ryMot(1, 0), 8, 0); }

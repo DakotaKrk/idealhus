@@ -815,6 +815,9 @@ html.inbaddad .kf__scen--inne .ritare__tips { bottom: 168px; }
 /* hus utan bild (sparat inne): ingen trasig bildikon */
 .kjmf__kol img:not([src]), .kjmf__kol img[src=""], .kf__lista img[src=""], .kf__lista img:not([src]) { visibility: hidden; }
 html.inbaddad .kf__vk[data-spel] { display: none; }
+/* bilvalet i miljömenyn: egen rubrik under miljöerna */
+.kf__poprubrik { margin: 6px 10px 2px; padding: 10px 2px 4px; border-top: 1px solid rgba(255, 255, 255, 0.12); font: 600 0.6875rem/1 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
+.kf__popup i.kf__ingen { background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55); }
 /* elbilens knapp: av medan bilen kör */
 .kf__vk[data-bil]:disabled { opacity: 0.45; cursor: default; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .kf__mal, .kf__res { animation: none; } }
@@ -1742,3 +1745,38 @@ html.ritare-vila .kf__scen > .kf__helrad * { pointer-events: none !important; }
   body.ritsidan .kf__handling { will-change: transform; }
   body.ritsidan .kf__handling.kf__handling--gomd { transform: translateY(calc(100% + 24px + env(safe-area-inset-bottom, 0px))); opacity: 0; pointer-events: none; }
 }
+
+/* Miljö-menyn: ett rutnät av små landskap (himmel över mark) i två kolumner, bilvalet som
+   tre segment under – allt ryms utan rullning, och bara det valda är markerat */
+.kf__verktyg #kf-miljo { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; width: 344px; min-width: 0; padding: 8px; max-height: none; overflow: visible; }
+.kf__verktyg #kf-miljo[hidden] { display: none; }
+#kf-miljo button[data-miljo] { position: relative; grid-column: span 2; flex-direction: column; align-items: stretch; gap: 6px; min-height: 0; padding: 5px 5px 8px; border-radius: 12px; font-size: 0.75rem; color: rgba(255, 255, 255, 0.72); }
+#kf-miljo button[data-miljo] i { width: 100%; height: auto; aspect-ratio: 16 / 10; border-radius: 8px; background: var(--s, var(--f)); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); transition: box-shadow 0.2s var(--kfv-ut, ease), filter 0.2s ease; filter: saturate(0.85); }
+#kf-miljo button[data-miljo]:hover { background: rgba(255, 255, 255, 0.05); }
+#kf-miljo button[data-miljo]:hover i { filter: none; }
+#kf-miljo button[data-miljo][aria-checked="true"] { background: rgba(255, 255, 255, 0.08); color: #fff; }
+#kf-miljo button[data-miljo][aria-checked="true"] i { filter: none; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25), 0 0 0 2px var(--k-accent); }
+#kf-miljo button[data-miljo][aria-checked="true"]::after { position: absolute; top: 10px; right: 10px; margin: 0; width: 7px; height: 7px; background: #fff; box-shadow: 0 0 0 2px var(--k-accent), 0 0 8px 1px rgba(240, 181, 110, 0.7); }
+#kf-miljo [data-miljo="studio"]   { --s: url("images/miljo/studio.webp?v=1") center / cover no-repeat, #8a8378; }
+#kf-miljo [data-miljo="tradgard"] { --s: url("images/miljo/tradgard.webp?v=1") center / cover no-repeat, #8a8378; }
+#kf-miljo [data-miljo="skog"]     { --s: url("images/miljo/skog.webp?v=1") center / cover no-repeat, #8a8378; }
+#kf-miljo [data-miljo="vinter"]   { --s: url("images/miljo/vinter.webp?v=1") center / cover no-repeat, #8a8378; }
+#kf-miljo [data-miljo="kust"]     { --s: url("images/miljo/kust.webp?v=1") center / cover no-repeat, #8a8378; }
+#kf-miljo [data-miljo="villa"]    { --s: url("images/miljo/villa.webp?v=1") center / cover no-repeat, #8a8378; }
+#kf-miljo .kf__poprubrik { grid-column: 1 / -1; margin: 6px 4px 2px; }
+#kf-miljo button[data-bilval] { grid-column: span 2; justify-content: center; gap: 8px; min-height: 36px; padding: 0 8px; border-radius: 10px; background: rgba(255, 255, 255, 0.04); font-size: 0.8125rem; }
+#kf-miljo button[data-bilval]:hover { background: rgba(255, 255, 255, 0.09); }
+#kf-miljo button[data-bilval][aria-checked="true"] { background: rgba(255, 255, 255, 0.15); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); }
+#kf-miljo button[data-bilval]::after { display: none; }
+#kf-miljo button[data-bilval] i { width: 12px; height: 12px; border-radius: 50%; }
+@media (max-width: 420px) { .kf__verktyg #kf-miljo { width: min(344px, calc(100vw - 32px)); } }
+
+/* Verktygsradens ikoner: lite större, jämnare linje, mjukare tryck och hovring */
+.kf__verktyg .kf__vk svg { width: 21px; height: 21px; stroke-width: 1.7; }
+.kf__verktyg .kf__vk:not(.kf__vk--inne) { color: rgba(255, 255, 255, 0.78); }
+.kf__verktyg .kf__vk { border-radius: 12px; }
+.kf__verktyg .kf__vk:not(.kf__vk--inne):hover { background: rgba(255, 255, 255, 0.09); color: #fff; }
+.kf__verktyg .kf__vk:hover svg { transform: translateY(-1px); }
+.kf__verktyg .kf__vk:active { transform: scale(0.95); }
+.kf__verktyg .kf__vk[data-bil]:not(:disabled) svg { transition: transform 0.24s var(--kfv-ut, ease); }
+.kf__verktyg .kf__vk[data-bil]:hover:not(:disabled) svg { transform: translateX(2px); }

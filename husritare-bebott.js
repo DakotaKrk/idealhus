@@ -799,6 +799,13 @@ export function skapaBebott(THREE, rot, VU) {
 
   // Alla enkla nät med samma material (och skuggflagga) bakas till ett nät i gruppens rum:
   // ~150 små ritanrop blir 35–70. Instansade nät och nät med flera material står kvar som de är.
+  const KARTOR = ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'alphaMap', 'emissiveMap', 'aoMap', 'bumpMap', 'lightMap', 'envMap', 'displacementMap'];
+  const enkel = m => m.isMeshStandardMaterial && !m.isMeshPhysicalMaterial && !m.transparent && m.opacity === 1 && m.alphaTest === 0 && !m.flatShading && !m.wireframe
+    && m.onBeforeCompile === THREE.Material.prototype.onBeforeCompile && KARTOR.every(t => !m[t]) && m.emissiveIntensity === 1;
+  const hornMat = m => {
+    const k = 'horn|' + m.roughness.toFixed(2) + '|' + m.metalness.toFixed(2) + '|' + m.emissive.getHexString() + '|' + m.side + '|' + m.envMapIntensity;
+    return MAT[k] || (MAT[k] = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: m.roughness, metalness: m.metalness, emissive: m.emissive.clone(), side: m.side, envMapIntensity: m.envMapIntensity }));
+  };
   function slaIhop() {
     const inv = new THREE.Matrix4().copy(grupp.matrixWorld).invert(), M = new THREE.Matrix4(), N3 = new THREE.Matrix3();
     const hinkar = new Map(), kvar = [];
@@ -806,15 +813,21 @@ export function skapaBebott(THREE, rot, VU) {
       if (!o.isMesh) return;
       M.multiplyMatrices(inv, o.matrixWorld);
       if (o.isInstancedMesh || Array.isArray(o.material)) { kvar.push([o, M.clone()]); return; }
-      const k = o.material.uuid + (o.castShadow ? '+' : '-');
-      if (!hinkar.has(k)) hinkar.set(k, { m: o.material, kast: o.castShadow, pos: [], nor: [], col: [] });
-      const h = hinkar.get(k), g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry;
+      // enkla material (bara färg, råhet, metall, glöd) delas efter råhet och metall: färgen bakas in som
+      // hörnfärg, så att ~50 ritanrop blir ~10 (team-prestanda)
+      const om = o.material, en = enkel(om), m = en ? hornMat(om) : om;
+      const k = (en ? m.uuid : om.uuid) + (o.castShadow ? '+' : '-');
+      if (!hinkar.has(k)) hinkar.set(k, { m, kast: o.castShadow, pos: [], nor: [], col: [] });
+      const h = hinkar.get(k), g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry, fc = en ? om.color : null;
       const P = g.attributes.position, Nn = g.attributes.normal, Cc = g.attributes.color, v = new THREE.Vector3();
       N3.getNormalMatrix(M);
       for (let i = 0; i < P.count; i++) {
         v.fromBufferAttribute(P, i).applyMatrix4(M); h.pos.push(v.x, v.y, v.z);
         v.fromBufferAttribute(Nn, i).applyMatrix3(N3).normalize(); h.nor.push(v.x, v.y, v.z);
-        if (h.m.vertexColors) { if (Cc) h.col.push(Cc.getX(i), Cc.getY(i), Cc.getZ(i)); else h.col.push(1, 1, 1); }
+        if (h.m.vertexColors) {
+          const cr = Cc && om.vertexColors ? Cc.getX(i) : 1, cg = Cc && om.vertexColors ? Cc.getY(i) : 1, cb = Cc && om.vertexColors ? Cc.getZ(i) : 1;
+          if (fc) h.col.push(cr * fc.r, cg * fc.g, cb * fc.b); else h.col.push(cr, cg, cb);
+        }
       }
       if (g !== o.geometry) g.dispose();
       if (o.userData.egen) o.geometry.dispose();

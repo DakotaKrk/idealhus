@@ -180,3 +180,9 @@ modeller/hus-r2.glb
 modeller/hus-r3.glb
 modeller/hus-r4.glb
 modeller/hus-r5.glb
+images/miljo/studio.webp
+images/miljo/tradgard.webp
+images/miljo/skog.webp
+images/miljo/vinter.webp
+images/miljo/kust.webp
+images/miljo/villa.webp

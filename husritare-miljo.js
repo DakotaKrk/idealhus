@@ -23,11 +23,11 @@
 //   miljo.lista                                  // [['studio','Studio'], ...]
 //   miljo.statistik()                            // { anrop, trianglar } för den aktiva miljön
 //   miljo.dispose();
-import { skapaBil } from './husritare-bil.js?v=20261125d';   // elbilen med laddbox vid entrén
+import { skapaBil } from './husritare-bil.js?v=20261125n';   // elbilen med laddbox vid entrén
 import { GLTFLoader } from './vendor/three/addons/loaders/GLTFLoader.js';   // 3D-grästuvorna (images/3d/gras-tuvor.glb)
-import { skapaBebott } from './husritare-bebott.js?v=20261125d';   // spår av folk som bor där: brevlåda, cykel, grill …
-import { skapaVaxtPaket } from './husritare-vaxter.js?v=20261125d';   // fotoskannade gräs och markväxter (images/3d/vaxt-paket.bin)
-import { skapaOmgivning, villaSkog } from './husritare-omgivning.js?v=20261125d';   // lekplats, park, fler kvarter, liv och skogsbryn i villaområdet
+import { skapaBebott } from './husritare-bebott.js?v=20261125n';   // spår av folk som bor där: brevlåda, cykel, grill …
+import { skapaVaxtPaket } from './husritare-vaxter.js?v=20261125n';   // fotoskannade gräs och markväxter (images/3d/vaxt-paket.bin)
+import { skapaOmgivning, villaSkog } from './husritare-omgivning.js?v=20261125n';   // lekplats, park, fler kvarter, liv och skogsbryn i villaområdet
 
 // ---- små hjälpare (utan THREE) -------------------------------------------
 function slump(fro) {
@@ -110,7 +110,7 @@ export function skapaMiljo(THREE, scene, renderer) {
   const C = h => new THREE.Color(h);
 
   const rot = new THREE.Group(); rot.name = 'miljo'; rot.matrixAutoUpdate = false;
-  scene.add(rot); if (location.search.includes('tmpdel=1')) setInterval(() => { const ut = {}; scene.traverseVisible(o => { if (!o.isMesh || !o.geometry) return; const g = o.geometry; const t = (g.index ? g.index.count : g.attributes.position.count) / 3 * (o.isInstancedMesh ? o.count : g.isInstancedBufferGeometry ? g.instanceCount : 1); const k = o.name || '?'; ut[k] = (ut[k] || 0) + Math.round(t); }); document.body.setAttribute('data-tmpdel', JSON.stringify(Object.entries(ut).sort((a, b) => b[1] - a[1]).slice(0, 40))); }, 1500); // TILLFÄLLIG MÄTNING – TAS BORT
+  scene.add(rot);
 
   // gemensamma uniformer för allt liv (tick sätter bara uTid)
   const VU = {
@@ -129,7 +129,13 @@ export function skapaMiljo(THREE, scene, renderer) {
     uNatt: { value: 0 },                              // natt 0..1 (impostorträden dovnar och blir månblå)
     uHus: { value: new THREE.Vector4(5, 3, 5, 0) },   // husets halva L, halva W, höjd med tak (huset står kring origo)
     uInne: { value: 0 },                              // 1 = kameran är inne (sätts av uppdatera({ inne }))
+    // uppfartens korridor (glänta): start [x, z] och riktning n; tvärriktning t, böjens sida, längd (0 = av). Träd, buskar,
+    // stenar, drivor och fläckar vars fot står i korridoren försvinner i skuggaren (fjärrsetet byggs en gång per miljö)
+    uVagA: { value: new THREE.Vector4(0, 0, 0, 1) }, uVagB: { value: new THREE.Vector4(1, 0, 1, 0) },
   };
+  const VAG_GLSL = `uniform vec4 uVagA;\nuniform vec4 uVagB;\nfloat iVagF( vec2 p, float m ) {\n  if ( uVagB.w < 1.0 ) return 0.0;\n  vec2 d = p - uVagA.xy; float sv = dot( d, uVagA.zw ), lat = dot( d, uVagB.xy ), boj = 1.6 * smoothstep( 4.0, 16.0, sv ) * uVagB.z;\n  return step( -1.5, sv ) * step( sv, uVagB.w ) * step( abs( lat - boj ), m );\n}\n`;
+  // samma test i JS (stolpar m.m.)
+  const iVagJS = (x, z, m) => { const A = VU.uVagA.value, B = VU.uVagB.value; if (B.w < 1) return false; const dx = x - A.x, dz = z - A.y, sv = dx * A.z + dz * A.w, lat = dx * B.x + dz * B.y; return sv > -1.5 && sv < B.w && Math.abs(lat - 1.6 * mjuk(4, 16, sv) * B.z) < m; };
 
   const bil = skapaBil(THREE, rot, VU);   // elbilen, laddboxen och kabeln (husritare-bil.js)
   const bebott = skapaBebott(THREE, rot, VU);   // brevlåda, cykel, grill m.m. (husritare-bebott.js)
@@ -623,6 +629,13 @@ export function skapaMiljo(THREE, scene, renderer) {
           diffuseColor.rgb *= ( 0.972 + 0.056 * sh ) * ( 1.0 - 0.17 * exp( -sd * 0.6 ) ) * mix( 1.03, 0.9, smoothstep( 7.0, 44.0, length( vVM.xz ) ) );
         }`);
       }
+      if (sten || glitter) {
+        Object.assign(s.uniforms, { uVagA: VU.uVagA, uVagB: VU.uVagB });
+        s.vertexShader = VAG_GLSL + s.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+          #ifdef USE_INSTANCING
+            if ( iVagF( vec2( instanceMatrix[3][0], instanceMatrix[3][2] ), 4.0 ) > 0.5 ) transformed = vec3( 0.0, -500.0, 0.0 );
+          #endif`);
+      }
       if (mark || glitter || sten || studio) {
         s.vertexShader = 'varying vec3 vVM;\n' + s.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
           { vec4 wq = vec4( transformed, 1.0 );
@@ -816,7 +829,8 @@ export function skapaMiljo(THREE, scene, renderer) {
   function vegPatch(m, { sss = false, sno = false, fade = false, mip = false, upp = false, glod = false, snoBak = 0.3, fadeAv = null, nara = false } = {}) {
     m.onBeforeCompile = s => {
       Object.assign(s.uniforms, { miljoLjus: LJUS, uTid: VU.uTid, uVind: VU.uVind, uSol: VU.uSol, uSSS: VU.uSSS, uSno: VU.uSno, uFade: VU.uFade, uGlod: VU.uGlod, uLampa: VU.uLampa, uHus: VU.uHus, uNatt: VU.uNatt });
-      s.vertexShader = 'uniform float uTid;\nuniform vec2 uVind;\nattribute vec4 aVind;\nattribute float aSno;\nvarying float vSno;\nvarying vec3 vVarld;\n' +
+      Object.assign(s.uniforms, { uVagA: VU.uVagA, uVagB: VU.uVagB });
+      s.vertexShader = VAG_GLSL + 'uniform float uTid;\nuniform vec2 uVind;\nattribute vec4 aVind;\nattribute float aSno;\nvarying float vSno;\nvarying vec3 vVarld;\n' +
         s.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
           {
             float fas = aVind.x * 0.07 + aVind.y * 0.05;
@@ -840,6 +854,7 @@ export function skapaMiljo(THREE, scene, renderer) {
               transformed.xz -= vn * a * a * 0.8 * ( 1.25 - styrka );
             }
           }
+          if ( iVagF( aVind.xy, 5.0 ) > 0.5 ) transformed = vec3( 0.0, -500.0, 0.0 );   // står i uppfartens glänta
           vSno = aSno;
           vVarld = transformed;`);
       let f = 'uniform vec4 uHus;\nuniform float uNatt;\nuniform vec3 miljoLjus;\nuniform vec3 uSSS;\nuniform vec3 uSol;\nuniform float uSno;\nuniform vec2 uFade;\nuniform vec3 uGlod;\nuniform float uLampa;\nvarying float vSno;\nvarying vec3 vVarld;\n' + s.fragmentShader;
@@ -1225,7 +1240,15 @@ export function skapaMiljo(THREE, scene, renderer) {
 
   // ---- material (delas mellan miljöerna) ----
   const MAT = {};
-  const djup = map => spara(new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map, alphaTest: 0.5, side: THREE.DoubleSide }));
+  const djup = map => {
+    const d = spara(new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map, alphaTest: 0.5, side: THREE.DoubleSide }));
+    d.onBeforeCompile = s => {   // inga skuggor från träd som tagits bort ur uppfartens glänta
+      Object.assign(s.uniforms, { uVagA: VU.uVagA, uVagB: VU.uVagB });
+      s.vertexShader = VAG_GLSL + 'attribute vec4 aVind;\n' + s.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n  if ( iVagF( aVind.xy, 5.0 ) > 0.5 ) transformed = vec3( 0.0, -500.0, 0.0 );');
+    };
+    d.customProgramCacheKey = () => 'djup-vag';
+    return d;
+  };
   const mat = namn => MAT[namn] || (MAT[namn] = spara(({
     bark: () => vegPatch(new THREE.MeshLambertMaterial({ map: tx('bark'), vertexColors: true }), { glod: true, nara: true }),
     lov: () => {
@@ -1239,7 +1262,9 @@ export function skapaMiljo(THREE, scene, renderer) {
     tramp: () => patcha(new THREE.MeshLambertMaterial({ map: tx('tramp'), transparent: true, depthWrite: false, emissive: C('#0e1524'), polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 })),
     sten: () => patcha(new THREE.MeshLambertMaterial({ map: tx('sten'), vertexColors: true }), { sten: true }),
     platta: () => patcha(new THREE.MeshLambertMaterial({ map: tx('sten') })),
-    flack: () => new THREE.MeshBasicMaterial({ map: tx('flack'), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }),
+    flack: () => { const m = new THREE.MeshBasicMaterial({ map: tx('flack'), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+      m.onBeforeCompile = sh => { Object.assign(sh.uniforms, { uVagA: VU.uVagA, uVagB: VU.uVagB }); sh.vertexShader = VAG_GLSL + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n#ifdef USE_INSTANCING\n  if ( iVagF( vec2( instanceMatrix[3][0], instanceMatrix[3][2] ), 5.0 ) > 0.5 ) transformed = vec3( 0.0, -500.0, 0.0 );\n#endif'); };
+      m.customProgramCacheKey = () => 'flack-vag'; return m; },
     grus: () => tvaSkalor(new THREE.MeshLambertMaterial({ map: tx('grus'), vertexColors: true, transparent: true, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })),
     ao: () => new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }),
   })[namn]()));
@@ -1737,6 +1762,8 @@ export function skapaMiljo(THREE, scene, renderer) {
   // Gemensam verktygslåda för en miljös vegetation: träd (bark + lövverk nära/fjärran), markväxter
   const NARA = 24;
   // impostorträden: [art, minsta och största höjd]; ridåns granar är mindre. Björk och ek tar given höjd.
+  // buskarternas toner i villaområdet: liguster, tuja (mörk), spirea (ljust gulgrön), berberis (röd), syren (blågrön)
+  const BUSKARTER = [[0.72, 0.84, 0.66], [0.5, 0.66, 0.5], [0.95, 1.0, 0.62], [0.82, 0.36, 0.3], [0.62, 0.76, 0.68], [0.78, 0.9, 0.6]];
   const BARR = { gran0: ['gran', 14, 24], gran1: ['gran', 14, 24], gran2: ['gran', 11, 19], tall0: ['tall', 15, 22], tall1: ['tall', 15, 22], bjork: ['bjork', 12, 18], bjorkKal: ['bjorkKal', 12, 18], ek: ['ek', 9, 14], tallLut: ['tallLut', 12, 17] };
   function verktyg(r, hy, blk = null, sno = false) {
     const V = { bark: samling(), nara: samling(), fjarr: samling(), mark: samling(), matta: samling(), barr: [] }, flack = [];
@@ -1754,8 +1781,10 @@ export function skapaMiljo(THREE, scene, renderer) {
       }
       const v = variant(typ, r() * 3 | 0), s = h / v.H, y = hy(x, z), ry = r() * 6.283;
       if (v.bark.I.length) lagg(V.bark, v.bark, x, y, z, s, ry, v.H, VK[typ], BARKTON[typ]);
-      lagg(Math.hypot(x, z) < NARA ? V.nara : V.fjarr, v.lov, x, y, z, s, ry, v.H, VK[typ], ton(r, LOVTON[typ]));
-      if (flackB) flack.push({ m: matris(x, y + 0.02, z, flackB, 1, flackB, 0) });
+      // villaområdets buskar: olika arter i färg (liguster, tuja, spirea, berberis, syren) och alltid en skugga under
+      const villaBuske = typ === 'buske' && hy === hojdVilla, art = villaBuske ? BUSKARTER[(r() * BUSKARTER.length) | 0] : null;
+      lagg(Math.hypot(x, z) < NARA ? V.nara : V.fjarr, v.lov, x, y, z, s, ry, v.H, VK[typ], ton(r, art || LOVTON[typ], villaBuske ? 0.08 : undefined));
+      if (flackB || villaBuske) flack.push({ m: matris(x, y + 0.02, z, flackB || h * 0.55, 1, flackB || h * 0.55, 0) });
     };
     const vaxt = (typ, x, z, s, tint) => (blk && blk(x, z, 0.7)) || lagg(V.mark, variant(typ, r() * 3 | 0).lov, x, hy(x, z) - 0.02, z, s, r() * 6.283, 1, VK[typ], tint);
     // gräsmatta: korta strån 2–12 m från huset (där kameran tittar), tunnas ut utåt
@@ -2024,7 +2053,7 @@ export function skapaMiljo(THREE, scene, renderer) {
   }
 
   // impostorkortens skuggare (delas av färg- och djupmaterialet)
-  const IMP_V = `uniform float uTid;
+  const IMP_V = VAG_GLSL + `uniform float uTid;
     uniform vec2 uVind;
     uniform vec4 uBox[4];
     attribute float aKol;
@@ -2045,6 +2074,7 @@ export function skapaMiljo(THREE, scene, renderer) {
     ${djup ? '// skuggkortet flyttas bort från ljuset bakom trädet: ingen självskugga på kortet mot kameran\n    transformed -= vF * bredd * 0.55;' : ''}
     float by = 0.6 + 0.4 * sin( uTid * 0.23 + ip.x * 0.05 ) * sin( uTid * 0.137 + ip.z * 0.05 + 1.3 );
     transformed.xz += uVind * hn * hn * isy * ( 0.012 * by + 0.003 * sin( uTid * 1.1 + ip.x * 0.3 + ip.z * 0.2 ) );
+    if ( iVagF( ip.xz, 5.5 ) > 0.5 ) transformed = vec3( 0.0, -500.0, 0.0 );   // trädet står i uppfartens glänta
     vImpUv = vec2( position.x + 0.5, position.y ); vImpP = transformed;`;
   const IMP_PROJ = 'vec4 mvPosition = viewMatrix * vec4( transformed, 1.0 );\n    gl_Position = projectionMatrix * mvPosition;';
   const IMP_MAP = `
@@ -2058,7 +2088,7 @@ export function skapaMiljo(THREE, scene, renderer) {
     { vec2 dd = fwidth( iu0 ) * ${IMP.toFixed(1)}; tI.a *= 1.0 + max( log2( max( max( dd.x, dd.y ), 1e-4 ) ), 0.0 ) * 0.4; }
     diffuseColor *= tI;`;
   function impMaterial(A) {
-    const U = { uImpN: { value: A.rtN.texture }, uBox: { value: A.box.concat([0, 0, 0, 0].map(() => new THREE.Vector4())).slice(0, 4) } };
+    const U = { uImpN: { value: A.rtN.texture }, uBox: { value: A.box.concat([0, 0, 0, 0].map(() => new THREE.Vector4())).slice(0, 4) }, uVagA: VU.uVagA, uVagB: VU.uVagB };
     // alphaToCoverage: den verkliga orsaken till sågtandskanterna var alfatestet (varje pixel helt in eller
     // ut). Med a2c blir kanten MSAA-utjämnad; three skärper alfan med fwidth, så inget brus av mipnivåerna.
     // Samma enda programvariant som förut (kompileras när miljön byggs), djupmaterialet har kvar alfatestet.
@@ -3031,13 +3061,15 @@ export function skapaMiljo(THREE, scene, renderer) {
       // karmen (5 cm) och fodret runt (10 cm, på väggen)
       kant(a - KB, e + KB, yt, yt + KB, FD, KD); kant(a - KB, a, yb, yt, FD, KD); kant(e, e + KB, yb, yt, FD, KD);
       if (!dorr) kant(a - KB, e + KB, y0 - KB, y0, FD, KD);
-      kant(a - KB - FB, e + KB + FB, yt + KB, yt + KB + FB, 0, FD); kant(a - KB - FB, a - KB, yb, yt + KB, 0, FD); kant(e + KB, e + KB + FB, yb, yt + KB, 0, FD);
+      // fodret (3,5 cm): bara framsidan och ytterkanterna (innerkanterna döljs av karmen)
+      rekt(w, a - KB - FB, e + KB + FB, yt + KB, yt + KB + FB, FD, 1); rekt(w, a - KB - FB, a - KB, yb, yt + KB, FD, 1); rekt(w, e + KB, e + KB + FB, yb, yt + KB, FD, 1);
+      if (opt.hjalte) { sida(w, a - KB - FB, yb, yt + KB + FB, 0, FD, ut, 1); sida(w, e + KB + FB, yb, yt + KB + FB, 0, FD, w.t, 1); tvar(w, a - KB - FB, e + KB + FB, yt + KB + FB, 0, FD, [0, 1, 0], 1); }
       if (!dorr) {
         // fönsterbleck: plåt som sticker ut 17 cm med en liten fall-kant
         rekt(w, a - KB - FB - 0.02, e + KB + FB + 0.02, y0 - KB - 0.07, y0 - KB, KD + 0.06, 6); tvar(w, a - KB - FB - 0.02, e + KB + FB + 0.02, y0 - KB, FD, KD + 0.06, [0, 1, 0], 6);
         // bågar och spröjs: lodpost (2-luft) och på högre fönster även en tvärpost (4-luft)
         const BB = 0.045, BDd = GD + 0.03, lod = b > 1.6 ? [a + b / 3, a + 2 * b / 3] : [u];
-        if (nara) { kant(a, e, yt - BB, yt, GD, BDd); kant(a, e, y0, y0 + BB, GD, BDd); kant(a, a + BB, y0, yt, GD, BDd); kant(e - BB, e, y0, yt, GD, BDd); }
+        if (nara) { rekt(w, a, e, yt - BB, yt, BDd, 1); rekt(w, a, e, y0, y0 + BB, BDd, 1); rekt(w, a, a + BB, y0, yt, BDd, 1); rekt(w, e - BB, e, y0, yt, BDd, 1); if (opt.hjalte) { tvar(w, a + BB, e - BB, yt - BB, GD, BDd, [0, -1, 0], 1); tvar(w, a + BB, e - BB, y0 + BB, GD, BDd, [0, 1, 0], 1); } }   // bågen (3 cm): framsida, och på de närmaste husen bågens inre kanter
         lod.forEach(x => kant(x - 0.032, x + 0.032, y0, yt, GD, KD + 0.02));   // mittposten står djupare ut än karmen (skugglinje), som på attefallshusen
         if (h > 1.0 && (k % 3)) kant(a, e, y0 + h * 0.62 - 0.02, y0 + h * 0.62 + 0.02, GD, BDd);
       }
@@ -3251,9 +3283,52 @@ export function skapaMiljo(THREE, scene, renderer) {
       for (let i = 0; i < 18; i++) { const a = i / 18 * 6.283, b = (i + 1) / 18 * 6.283, k = D.P.length / 3; hp(D, 0, 0.84, 0, 0, 1, 0, 0.7, 0.5, MORK); hp(D, Math.cos(b) * 1.7, 0.84, Math.sin(b) * 1.7, 0, 1, 0, 0.7, 0.5, MORK); hp(D, Math.cos(a) * 1.7, 0.84, Math.sin(a) * 1.7, 0, 1, 0, 0.7, 0.5, MORK); D.I.push(k, k + 1, k + 2); }
       for (let i = 0; i < 4; i++) { const a = i * 1.571 + 0.4; L3([Math.cos(a) * 1.75, 0.42, Math.sin(a) * 1.75], [0.03, 0.42, 0.03], [0.4, 0.4, 0.42]); }
     } else if (namn === 'lekstuga') {
-      L3([0, 0.75, 0], [0.9, 0.75, 0.75], [0.42, 0.08, 0.05]); L3([0, 0.55, 0.76], [0.25, 0.5, 0.01], [0.85, 0.84, 0.8]);
-      const th = 0.6, ca = Math.cos(th), sa = Math.sin(th);
-      for (const sz of [-1, 1]) lada3(D, [0, 1.5 + 0.22, sz * 0.42], [[1, 0, 0], [0, ca, -sz * sa], [0, sz * sa, ca]], [1.0, 0.03, 0.55], [0.05, 0.05, 0.055]);
+      // liten faluröd stuga: vita knutar, dörr och spröjsat fönster på gaveln (lokala +z), sadeltak med takfot och
+      // vita vindskivor, fönster på ena långsidan, trappsteg och en låg grund
+      const FALU = [0.4, 0.07, 0.045], VIT = [0.88, 0.87, 0.83], GLAS = [0.05, 0.065, 0.08], TAK = [0.06, 0.06, 0.065];
+      const HB = 0.75, HD = 0.85, HV = 1.38, HN = 2.05;
+      L3([0, 0.05, 0], [HB + 0.03, 0.05, HD + 0.03], [0.3, 0.29, 0.27]);
+      L3([0, 0.1 + (HV - 0.1) / 2, 0], [HB, (HV - 0.1) / 2, HD], FALU);
+      for (const sz of [-1, 1]) {   // gavelspetsarna
+        const k = D.P.length / 3;
+        hp(D, -HB, HV, sz * HD, 0, 0, sz, 0.83, 0.5, FALU); hp(D, HB, HV, sz * HD, 0, 0, sz, 0.83, 0.5, FALU); hp(D, 0, HN, sz * HD, 0, 0, sz, 0.83, 0.5, FALU);
+        if (sz > 0) D.I.push(k, k + 1, k + 2); else D.I.push(k, k + 2, k + 1);
+      }
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) L3([sx * HB, 0.1 + (HV - 0.1) / 2, sz * HD], [0.04, (HV - 0.1) / 2, 0.04], VIT);
+      // dörr med foder och ett spröjsat fönster bredvid på gaveln
+      L3([0.3, 0.6, HD + 0.01], [0.21, 0.48, 0.01], [0.7, 0.55, 0.2]);
+      for (const [x, y, hx, hy] of [[0.07, 0.62, 0.025, 0.52], [0.53, 0.62, 0.025, 0.52], [0.3, 1.11, 0.255, 0.025]]) L3([x, y, HD + 0.015], [hx, hy, 0.012], VIT);
+      L3([0.42, 0.62, HD + 0.025], [0.015, 0.015, 0.01], [0.15, 0.15, 0.15]);
+      const fonster = (cx, cy, cz, ax, w, h) => {   // glas, karm och korsspröjs; ax: 'z' = på gaveln, 'x' = på långsidan
+        const P = (a, b) => ax === 'z' ? [cx + a, cy + b, cz] : [cx, cy + b, cz + a], H = (ha, hb, t) => ax === 'z' ? [ha, hb, t] : [t, hb, ha];
+        L3(P(0, 0), H(w, h, 0.008), GLAS);
+        const d = ax === 'z' ? [0, 0, 0.012] : [0.012 * Math.sign(cx), 0, 0], Q = (a, b) => { const p = P(a, b); return [p[0] + d[0], p[1], p[2] + d[2]]; };
+        for (const [a, b, ha, hb] of [[0, h, w + 0.03, 0.03], [0, -h, w + 0.03, 0.03], [-w, 0, 0.03, h], [w, 0, 0.03, h], [0, 0, w, 0.015], [0, 0, 0.015, h]]) L3(Q(a, b), H(ha, hb, 0.012), VIT);
+      };
+      fonster(-0.38, 0.85, HD + 0.008, 'z', 0.2, 0.2);
+      fonster(HB + 0.008, 0.85, -0.1, 'x', 0.25, 0.2);
+      // sadeltaket (ryggen längs z) med takfot, vita vindskivor på gavlarna
+      const th = Math.atan2(HN - HV, HB), hl = Math.hypot(HB, HN - HV) / 2 + 0.09;
+      for (const sx of [-1, 1]) {
+        const d = [sx * Math.cos(th), -Math.sin(th), 0], up = [sx * Math.sin(th), Math.cos(th), 0], ax3 = [d, up, cross(d, up)];
+        const c = [sx * HB / 2 + d[0] * 0.09 + up[0] * 0.03, (HV + HN) / 2 + d[1] * 0.09 + up[1] * 0.03, 0];
+        lada3(D, c, ax3, [hl, 0.025, HD + 0.14], TAK);
+        for (const sz of [-1, 1]) lada3(D, [c[0] - up[0] * 0.04, c[1] - up[1] * 0.04, sz * (HD + 0.13)], ax3, [hl, 0.05, 0.012], VIT);
+      }
+      L3([0.3, 0.07, HD + 0.2], [0.28, 0.07, 0.16], [0.42, 0.32, 0.22]);   // trappsteg
+    } else if (namn === 'utegrupp' || namn === 'utegruppSvart') {
+      // bord med ben, sarg och spjälad skiva, fyra stolar med ryggstöd och dynor (lokala z: stolarna på var sin sida)
+      const T = namn === 'utegrupp' ? [0.4, 0.27, 0.16] : [0.075, 0.075, 0.08], TM = T.map(v => v * 0.75), DYNA = namn === 'utegrupp' ? [0.78, 0.74, 0.64] : [0.55, 0.12, 0.08];
+      for (let i = 0; i < 5; i++) L3([0, 0.735, -0.36 + i * 0.18], [0.75, 0.016, 0.075], T);
+      for (const sz of [-1, 1]) L3([0, 0.69, sz * 0.4], [0.7, 0.035, 0.015], TM);
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) L3([sx * 0.66, 0.36, sz * 0.36], [0.025, 0.36, 0.025], TM);
+      for (const [cx, cz, s] of [[-0.4, 0.78, 1], [0.4, 0.78, 1], [-0.4, -0.78, -1], [0.4, -0.78, -1]]) {
+        L3([cx, 0.44, cz], [0.21, 0.018, 0.2], T);
+        for (const sx of [-1, 1]) for (const sz of [-1, 1]) L3([cx + sx * 0.18, 0.22, cz + sz * 0.17], [0.017, 0.22, 0.017], TM);
+        for (const sx of [-1, 1]) L3([cx + sx * 0.18, 0.7, cz + s * 0.19], [0.017, 0.26, 0.017], TM);
+        for (const y of [0.62, 0.78]) L3([cx, y, cz + s * 0.2], [0.18, 0.04, 0.012], T);
+        L3([cx, 0.48, cz - s * 0.01], [0.19, 0.025, 0.18], DYNA);
+      }
     } else if (namn === 'flagga') {
       // stång med knopp; vimpeln 3,2 m lång och 0,34 m hög vid stången (ca 1:9), blå ovanför och gul under mittlinjen,
       // avsmalnande till en spets. Lokala +x = med vinden (placeras vriden efter vinden). W < 0 = vimpelns våg i skuggaren.
@@ -3538,7 +3613,7 @@ export function skapaMiljo(THREE, scene, renderer) {
     const F = -(djup + (typ === 'villa' || typ === 'tradgard' ? 62 : 36)), ryP = Math.atan2(-du[1], du[0]), stolpar = [];
     for (let s = -120; s <= 120; s += 40) {
       const x = dn[0] * F + du[0] * s, z = dn[1] * F + du[1] * s;
-      if (Math.hypot(x, z) > 140 || (vatten && vatten(x, z)) || mal.blockerad(x, z, 2)) { stolpar.push(null); continue; }
+      if (Math.hypot(x, z) > 140 || (vatten && vatten(x, z)) || mal.blockerad(x, z, 2) || iVagJS(x, z, 6)) { stolpar.push(null); continue; }   // aldrig i uppfartens glänta
       const y = hy(x, z) - 0.25; poster.push({ namn: 'elstolpe', x, y, z, ry: ryP }); stolpar.push([x, y, z]);
     }
     // ledningar: tre faser mellan stolparna (fästen på tvärslån), kedjekurva med ~0,5 m nedhäng; enkla isolatorer
@@ -3994,14 +4069,17 @@ export function skapaMiljo(THREE, scene, renderer) {
   const HACK = {};
   function hackVar(typ, v) {
     const k = typ + '-' + v; if (HACK[k]) return HACK[k];
-    const r = slump(301 + typ * 17 + v * 5), Lv = del(), H = typ ? 1.25 : 1.8, D = typ ? 0.6 : 0.8, n = typ ? 11 : 14;
+    // tät klippt form: sidor (ljusa ytterblad), rundade axlar och topp, några mörka kluster längre in som fyller gliporna
+    const r = slump(301 + typ * 17 + v * 5), Lv = del(), H = typ ? 1.25 : 1.8, D = typ ? 0.6 : 0.8, n = typ ? 32 : 36;
     const nf = p => norm([p[0] * 0.3, (p[1] - H * 0.55) / H * 1.6, p[2] / D * 2.4]);
     for (let i = 0; i < n; i++) {
-      const sida = i % 5 === 4 ? 0 : (i & 1 ? 1 : -1);
-      const x = (r() - 0.5) * 1.0, y = sida ? H * (0.1 + r() * 0.84) : H * (0.94 + r() * 0.07), z = sida ? sida * D * (0.4 + r() * 0.12) : (r() - 0.5) * D * 0.8;
-      const ut = sida ? [(r() - 0.5) * 0.5, (r() - 0.5) * 0.4, sida] : [(r() - 0.5) * 0.5, 1, (r() - 0.5) * 0.5];
-      const f = (0.58 + 0.38 * y / H) * (0.8 + r() * 0.34);
-      kluster(Lv, r, [x, y, z], (typ ? 0.52 : 0.62) + r() * 0.2, norm(ut), 0.15, 1, [f, f, f], nf, 0, 0.008);
+      const del5 = i % 6, sida = i & 1 ? 1 : -1, x = (r() - 0.5) * 1.1;
+      let y, z, ut, f;
+      if (del5 < 3) { y = H * (0.06 + r() * 0.8); z = sida * D * (0.34 + r() * 0.14); ut = [(r() - 0.5) * 0.5, (r() - 0.5) * 0.3, sida]; f = (0.6 + 0.42 * y / H) * (0.85 + r() * 0.3); }
+      else if (del5 === 3) { y = H * (0.86 + r() * 0.08); z = sida * D * (0.3 + r() * 0.1); ut = [(r() - 0.5) * 0.4, 0.8, sida * 0.7]; f = 1.0 + r() * 0.15; }        // axeln
+      else if (del5 === 4) { y = H * (0.95 + r() * 0.06); z = (r() - 0.5) * D * 0.55; ut = [(r() - 0.5) * 0.5, 1, (r() - 0.5) * 0.4]; f = 1.02 + r() * 0.16; }        // toppen
+      else { y = H * (0.2 + r() * 0.6); z = sida * D * (0.18 + r() * 0.1); ut = [(r() - 0.5) * 0.6, (r() - 0.5) * 0.4, sida]; f = 0.42 + r() * 0.12; }                  // inne i häcken
+      kluster(Lv, r, [x, y, z], (typ ? 0.42 : 0.5) + r() * 0.18, norm(ut), 0.2, 1, [f, f, f], nf, 0, 0.008);
     }
     return (HACK[k] = Lv);
   }
@@ -4039,6 +4117,10 @@ export function skapaMiljo(THREE, scene, renderer) {
   const bilDel = () => BILFORM || (BILFORM = bilForm(del(), ETT));   // parkerade bilar (tint per bil i lagg)
   function villaNara(mal, F) {
     const r = slump(505), { krav, kant } = regler(mal), hy = hojdVilla;
+    // alla parkerade bilar längre bort: Tesla och Volvo i förenklad modell (bil.lodBilar, ett instansierat nät per modell);
+    // egen slump för modell och färg, så att resten av kvarteret står kvar (vit, svart, grå, mörkblå, röd, silver)
+    const LODB = [], rB = slump(9191), LACK = ['#e9e9e6', '#111214', '#6d7075', '#1b2a4a', '#8c1219', '#b4b8bd', '#e9e9e6', '#2a2c30'];
+    const parkBil = (x, y, z, ry) => { LODB.push({ x, y, z, ry, typ: rB() < 0.5 ? 'tesla' : 'volvo', farg: LACK[rB() * LACK.length | 0] }); };
     const { V, flack, trad, vaxt, matta } = verktyg(r, hy, mal.blockerad, false), N = narSet(V, flack);
     grasKant(mal, kant, vaxt, matta, r, [0.64, 0.7, 0.5], 0);   // inga korta strån: 3D-tuvorna tar över (vår tomt nedan)
     const P = bil.plats(), TS = samling();
@@ -4062,7 +4144,21 @@ export function skapaMiljo(THREE, scene, renderer) {
       const iGata = (sv, lat, m = 0) => vagar.some(v => { const q = v.dir === 'lat' ? sv - v.c : lat - v.c, s = v.dir === 'lat' ? lat : sv; return Math.abs(q) < GHW + GTR + m && s > v.a0 - m && s < v.a1 + m; });
       // vår tomt (staket, häckar, rabatter, gångar, träd) byggs i andra varvet nedan
       // gatlyktor längs gatorna (tänds från huset och utåt)
-      const lykta = (sv, lat, dsv, dlat) => {
+      // startvyns siktkil (kameran står 22° från entrén åt altanens sida, helskärmen rakt fram eller åt andra hållet):
+      // höga saker där tonas bort med rutmönster i vegetationsskuggaren och blev prickiga, så de flyttas ut ur kilen
+      const iSiktkil = (() => {
+        const d = mal.dorr; if (!d) return () => false;
+        const dn = [d.nx, d.nz], du = [-d.nz, d.nx], Rh = Math.hypot(mal.L || 8, mal.W || 6) / 2;
+        const ax = [-22, 0, 22].map(g => { const a = g * Math.PI / 180; return [dn[0] * Math.cos(a) + du[0] * Math.sin(a), dn[1] * Math.cos(a) + du[1] * Math.sin(a)]; });
+        return (x, z, m = 0.8) => ax.some(([ux, uz]) => { const t = x * ux + z * uz, q = Math.abs(-x * uz + z * ux); return t > 0 && t < 75 && q < Rh + 1.5 + m + t * 0.1; });
+      })();
+      const lykta = (sv0, lat0, dsv, dlat) => {
+        let sv = sv0, lat = lat0;
+        for (const k of [0, 6, -6, 12, -12, 18, -18, 24, -24]) {   // längs gatan bort ur siktkilen
+          sv = sv0 + (dsv ? 0 : k); lat = lat0 + (dsv ? k : 0);
+          if (!iSiktkil(...pt(sv, lat))) break;
+          if (k === -24) return;
+        }
         if (iGata(sv, lat, -GTR) || kant(...pt(sv, lat)) < 3) return;
         const [x, z] = pt(sv, lat), y = hy(x, z), ry = ryMot(dsv, dlat), ford = 0.12 + Math.hypot(x, z) * 0.004;
         lagg(V.bark, lyktaDel(), x, y, z, 1, ry, 1, 0, ETT, ford);
@@ -4075,7 +4171,7 @@ export function skapaMiljo(THREE, scene, renderer) {
       [-60, -20, 20, 60].forEach(l => lykta(BAK - GHW - GTR + 0.5, l, 1, 0));
       // grannhusen: tomter längs gatorna, husen vända mot sin gata; nära = detaljerade, längre bort enkla volymer
       const BD = { P: [], N: [], U: [], D: [], F1: [], F2: [], F3: [], H: [], I: [] }, lod = [], upp = [], uppfarter = [];
-      const tomter = [], husR = [], tomtD = [], tomma = [], RUT = [];   // RUT: grannhusens glasrutor (instansierat glas)   // tomma: tomtplatser utan hus (siktgator, avstånd) – fylls med buskage eller lekplats
+      const tomter = [], husR = [], tomtD = [], tomma = [], RUT = [], PARK = [];   // PARK: grannarnas parkerade bilar   // RUT: grannhusens glasrutor (instansierat glas)   // tomma: tomtplatser utan hus (siktgator, avstånd) – fylls med buskage eller lekplats
       [[0, 26, 7], [1, 26, 9], [2, 26, 3]].forEach(([vi, steg, off]) => { const v = vagar[vi]; for (const sd of [1, -1]) for (let s = v.a0 + off; s <= v.a1; s += steg) tomter.push({ v, sd, s: s + (r() - 0.5) * 3 }); });
       let nDet = 0;
       for (const tm of tomter) {
@@ -4094,13 +4190,13 @@ export function skapaMiljo(THREE, scene, renderer) {
         const ry = ryMot(f[0], f[1]), hy0 = Math.min(...hor.slice(0, 4).map(([a, b]) => hy(...pt(a, b)))), fg = GRANNFARG[fi], farg = [C(fg[0]).toArray(), C(fg[1]).toArray(), C(fg[2]).toArray(), fg[3]];
         if (Math.hypot(hx, hz) < 150 && nDet < 44) {   // alla hus som syns får takfot, vindskivor, hörnbrädor, sockel och riktiga fönster (enklare modul långt bort)   // alla hus i synhåll är detaljerade (dörr, farstu, sockel, stuprör); ~800 trianglar styck
           nDet++;
-          const hh = r(), ut = grannBygg(BD, typ, hx, hy0, hz, ry, farg, r(), spegel, { sol: hh < 0.4, racke: true, altandorr: true, nara: Math.hypot(hx, hz) < 70, hjalte: Math.hypot(hx, hz) < 62, lang: Math.hypot(hx, hz) > 105, rutor: RUT });   // hjältenivå på alla grannhus i synhåll; längst bort (över 125 m, i diset) en enklare men 3D-modul   // hjältenivå: alla hus inom ~60 m (syns i startvyn)
+          const hh = r(), ut = grannBygg(BD, typ, hx, hy0, hz, ry, farg, r(), spegel, { sol: hh < 0.4, racke: true, altandorr: true, nara: Math.hypot(hx, hz) < 52, hjalte: Math.hypot(hx, hz) < 46,   /* (team-prestanda: detaljnivån till 52/46 m, förr 70/62) */ lang: Math.hypot(hx, hz) > 105, rutor: RUT });   // hjältenivå på alla grannhus i synhåll; längst bort (över 125 m, i diset) en enklare men 3D-modul   // hjältenivå: alla hus inom ~60 m (syns i startvyn)
           N.glod.push([ut.dorr[0], ut.dorr[1] + 0.12, ut.dorr[2], 0.3, 0, ...VARMT, 0.25 + r() * 0.3]);
           lagg(TS, ting('entre'), ut.dorr[0], ut.dorr[1], ut.dorr[2], 1, 0, 8, 0, ETT, 0.25);   // lampa vid entrén
           // uppfart vid husets ena gavel, ut till trottoaren; bil på en del av dem, brevlåda vid infarten
           const ux = (spegel ? -1 : 1) * (typ.L / 2 - 1.6), [a0, b0] = lok(ux, typ.W / 2 + 0.1), [a1, b1] = lok(ux, typ.W / 2 + 6.1);
           uppfarter.push([a0, b0, a1, b1, 3]);
-          if (bilP < 0.5) { const [c0, c1] = lok(ux, typ.W / 2 + 2.9), BF = [[0.62, 0.62, 0.64], [0.02, 0.02, 0.025], [0.32, 0.03, 0.02], [0.03, 0.08, 0.2], [0.78, 0.78, 0.76], [0.2, 0.22, 0.2]]; { const [bx, bz] = pt(c0, c1); lagg(TS, bilDel(), bx, hy(bx, bz), bz, 1, ryMot(-f[0], -f[1]), 8, 0, BF[r() * BF.length | 0]); } }
+          if (bilP < 0.5) { const [c0, c1] = lok(ux, typ.W / 2 + 2.9), BF = [[0.62, 0.62, 0.64], [0.02, 0.02, 0.025], [0.32, 0.03, 0.02], [0.03, 0.08, 0.2], [0.78, 0.78, 0.76], [0.2, 0.22, 0.2]]; { const [bx, bz] = pt(c0, c1); PARK.push({ x: bx, z: bz, ry: ryMot(-f[0], -f[1]), tint: BF[r() * BF.length | 0], d: Math.hypot(bx, bz) }); } }
           { const [m0, m1] = lok(ux + (spegel ? -1 : 1) * 2.1, typ.W / 2 + 5.8); ting1('brevlada', m0, m1, ryMot(f[0], f[1]) + Math.PI / 2); }
           { const [t0, t1] = lok((spegel ? 1 : -1) * (typ.L / 2 + 0.7), typ.W / 2 - 1.2); ting1('tunna', t0, t1, ry, [0.06, 0.16, 0.08]); }
           // staket, häckar, rabatter, gångar, altan och träd läggs i andra varvet (villaTomt), när alla hus är kända
@@ -4108,7 +4204,7 @@ export function skapaMiljo(THREE, scene, renderer) {
           // ibland studsmatta, lekstuga eller flaggstång
           const [k0, k1] = lok((spegel ? -1 : 1) * typ.L * 0.3, -typ.W / 2 - 3.2), [kx, kz] = pt(k0, k1);
           if (krav(kx, kz, 'lag') && kant(kx, kz) > 6 && !iGata(k0, k1, 1)) {
-            if (extra > 0.8) ting1('studsmatta', k0, k1, 0); else if (extra > 0.65) ting1('lekstuga', k0, k1, ry + Math.PI); else if (extra > 0.55) { r(); ting1('flagga', k0, k1, Math.atan2(-0.33, 0.94)); }
+            if (extra > 0.8) ting1('studsmatta', k0, k1, 0); else if (extra > 0.65) { ting1('lekstuga', k0, k1, ry + Math.PI); husR.push({ sv: k0, lat: k1, f, ax, L: 2.6, W: 2.8 }); /* lekstugan står fri: träd, buskar och markväxter håller undan */ } else if (extra > 0.55) { r(); ting1('flagga', k0, k1, Math.atan2(-0.33, 0.94)); }
           }
         } else lod.push({ x: hx, z: hz, y: hy0, L: typ.L, W: typ.W, H: typ.he, ry, vagg: C(fg[0]), tak: C(fg[2]) });
       }
@@ -4154,8 +4250,13 @@ export function skapaMiljo(THREE, scene, renderer) {
           const t = (k + 0.5) / n, [a, b] = lok(lx0 + (lx1 - lx0) * t, lz0 + (lz1 - lz0) * t);
           if (!ledig(a, b, 0.3)) continue;
           const [x, y, z] = W3(a, b);
-          lagg(V.nara, hackVar(typH, (k * 7 + n) % 3), x, y, z, 1, ryS, H, 0.004, ton(r, typH ? LIGUSTER : TUJA, 0.04));
-          vlada(VD, x, y + H * 0.46, z, ryS, len / n / 2 + 0.03, H * 0.45, Dj * 0.34, typH ? [0.1, 0.17, 0.05] : [0.06, 0.11, 0.05], 0, true);
+          // sex varianter i oregelbunden följd, lite olika höjd och tjocklek per modul (ojämn klippt kant)
+          const sk = 0.94 + 0.12 * fbm(x * 0.7 + 3, z * 0.7), vi = ((k * 7 + n + Math.floor(Math.abs(x * 3.1 + z * 1.7))) % 6);
+          lagg(V.nara, hackVar(typH, vi), x, y - 0.03, z, sk, ryS, H, 0.004, ton(r, typH ? LIGUSTER : TUJA, 0.06));
+          // mörk kärna innanför bladen (rundad topp: smalare krön), barkmull i en mörk rand längs foten
+          const KF = typH ? [0.035, 0.06, 0.022] : [0.022, 0.045, 0.022];
+          vlada(VD, x, y + H * sk * 0.44, z, ryS, len / n / 2 + 0.03, H * sk * 0.43, Dj * 0.22, KF, 0, true);
+          vlada(VD, x, y + 0.012, z, ryS, len / n / 2 + 0.05, 0.012, Dj * 0.62, [0.11, 0.075, 0.05], 0, true);
         }
       };
       // ett staketfack (1,8 m · k längs lokala x) mitt i (x, z): 0 vitt spjälstaket, 1 stående trästaket, 2 låg stenmur
@@ -4572,14 +4673,7 @@ export function skapaMiljo(THREE, scene, renderer) {
           { const [x, y, z] = P3(c, -F - 3.15); vlada(VD, x, y + 0.08, z, ry, 0.7, 0.08, 0.17, [0.3, 0.22, 0.15]); }
           const MOB = d.h2 < 0.5 ? [0.36, 0.24, 0.15] : [0.1, 0.1, 0.11];
           const [tx, ty, tz] = P3(c + 0.6, zb - 0.1), Y = ty + y0;
-          vlada(VD, tx, Y + 0.72, tz, ry, 0.75, 0.02, 0.45, MOB);
-          for (const sx of [-1, 1]) vlada(VD, tx + ex[0] * sx * 0.6, Y + 0.36, tz + ex[2] * sx * 0.6, ry, 0.03, 0.36, 0.38, MOB);
-          for (const [u, v, rot] of [[-0.4, 0.78, 0], [0.4, 0.78, 0], [-0.4, -0.78, Math.PI], [0.4, -0.78, Math.PI]]) {
-            const r3 = ry + rot, x = tx + ex[0] * u + ez[0] * v, z = tz + ex[2] * u + ez[2] * v, bx = Math.sin(r3), bz = Math.cos(r3);
-            vlada(VD, x, Y + 0.45, z, r3, 0.22, 0.02, 0.21, MOB);
-            vlada(VD, x + bx * 0.2, Y + 0.72, z + bz * 0.2, r3, 0.22, 0.26, 0.018, MOB);
-            vlada(VD, x, Y + 0.22, z, r3, 0.2, 0.22, 0.015, MOB);
-          }
+          lagg(TS, ting(d.h2 < 0.5 ? 'utegrupp' : 'utegruppSvart'), tx, Y, tz, 1, ry, 8, 0);   // bord och fyra stolar med dynor (ting)
           if (d.h2 < 0.65) {
             const DUK = [[0.86, 0.8, 0.66], [0.22, 0.36, 0.26], [0.7, 0.2, 0.14], [0.85, 0.85, 0.82]][(d.h * 13 | 0) % 4];
             ror(VD, [[tx, Y, tz, 0.022], [tx, Y + 2.42, tz, 0.018]], 5, UG, 1, () => [0.75, 0.75, 0.73]);
@@ -4653,7 +4747,7 @@ export function skapaMiljo(THREE, scene, renderer) {
       // tomma tomtplatser (där inget hus får stå för siktens skull, eller för nära vår tomt): en lekplats och annars buskage,
       // så att det inte blir stora tomma gräsytor. Allt lågt (under ~2,3 m).
       // omgivningen (husritare-omgivning.js): lekplatsen, parkstråket, fler kvarter, liv och fjärran
-      const OMG = skapaOmgivning({ THREE, r, pt, hy, iGata, ledig, husR, vagar, HU, BAK, GHW, GTR, VD, TS, BD, V, N, lod, trad, ror, lada3, vkvad, hp, UG, ETT,
+      const OMG = skapaOmgivning({ parkBil, THREE, r, pt, hy, iGata, ledig, husR, vagar, HU, BAK, GHW, GTR, VD, TS, BD, V, N, lod, trad, ror, lada3, vkvad, hp, UG, ETT,
         lagg, ting, bilDel, lyktaDel, grannBygg, GRANNTYP, GRANNFARG, C, VU, LJUS, VARMT, egenMat, yta, planta, lykta, ryMot, uppfarter, hack, mal, VRAM });
       {
         const fyllda = []; let lek = 0;
@@ -4677,7 +4771,7 @@ export function skapaMiljo(THREE, scene, renderer) {
       const iKors = (a, b, m) => vagar.filter(v => { const q = v.dir === 'lat' ? a - v.c : b - v.c, s = v.dir === 'lat' ? b : a; return Math.abs(q) < GHW + GTR + m && s > v.a0 - m && s < v.a1 + m; }).length > 1;
       for (const sd of [1, -1]) for (let l = -90; l <= 90; l += 30) {
         const sv = HU + sd * (GHW + GTR - 0.8), [x, z] = pt(sv, l);
-        if (iKors(sv, l, 1) || !krav(x, z, 'stor') || uppfarter.some(([, , c2, d2]) => Math.hypot(c2 - sv, d2 - l) < 3)) continue;
+        if (iKors(sv, l, 1) || !krav(x, z, 'stor') || uppfarter.some(([, , c2, d2]) => Math.hypot(c2 - sv, d2 - l) < 3) || iSiktkil(x, z, 2)) continue;
         trad('mellan', x, z, 7 + r() * 2, 0);
         punkt(sv, l, 0.6, 0.6, 0.14, 4);
       }
@@ -4712,10 +4806,25 @@ export function skapaMiljo(THREE, scene, renderer) {
       lagg(TS, VD, 0, 0, 0, 1, 0, 8, 0);
       N.extra.push(...OMG.liv());
       // vår elbil (samma modell) kör sakta förbi på huvudgatan i bortre körfältet (högertrafik), med jämna mellanrum
-      { const sd = Math.sign(t[0] * n[1] - t[1] * n[0]) || 1, [x, z] = pt(HU + 1.55, 0), d0 = pt(HU + 1.55, sd); if (typeof bil.forbi === 'function') N.extra.push(bil.forbi(x, hy(x, z), z, Math.atan2(d0[0] - x, d0[1] - z))); }
+      { const sd = Math.sign(t[0] * n[1] - t[1] * n[0]) || 1, [x, z] = pt(HU + 1.55, 0), d0 = pt(HU + 1.55, sd); if (typeof bil.forbi === 'function') { const ry = Math.atan2(d0[0] - x, d0[1] - z); N.extra.push(bil.forbi(x, hy(x, z), z, ry), bil.forbi(x, hy(x, z), z, ry, 'volvo')); } }   // blå Tesla, röd Volvo ett halvt varv efter
       N.extra.push(gataNat(pt, hy, vagar, uppfarter, YT));
       N.extra.push(VP.grupp(VP.villa({ mal, hy, ledig, iGata, svAv, latAv, pt, uppfarter, YT, husR, tomtD, ram: VRAM })));   // gräs och markväxter på tomterna (husritare-vaxter.js)
       const nat = grannNat(BD); if (nat) N.extra.push(nat);
+      // parkerade bilar: hos de två närmaste grannarna fulla modeller (bilteamets kopior: röd Volvo, blå Tesla),
+      // längre bort de förenklade. Kopiorna laddas i bakgrunden; geometrin delas med vår bil (disponeras inte här).
+      {
+        const RIKTIGA = [['volvo', '#b3121b'], ['tesla', '#1f4fa8']], grp = new THREE.Group(); grp.name = 'grannbilar';
+        PARK.sort((a, b) => a.d - b.d).forEach((b, i) => {
+          const rk = i < RIKTIGA.length && b.d < 60 && typeof bil.kopia === 'function' ? RIKTIGA[i] : null;
+          if (!rk) { parkBil(b.x, hy(b.x, b.z), b.z, b.ry); return; }
+          // samma bil i förenklad modell syns tills kameran kommer nära (narBilar, 26 m): först då den fulla (88–150k trianglar)
+          const y = hy(b.x, b.z), nb = { x: b.x, z: b.z, lod: typeof bil.lodBilar === 'function' ? bil.lodBilar([{ x: b.x, y, z: b.z, ry: b.ry, typ: rk[0], farg: rk[1] }]) : null, full: null };
+          if (nb.lod) grp.add(nb.lod);
+          NARBIL.push(nb);
+          bil.kopia(rk[0], rk[1]).then(o => { if (!o) return; o.position.set(b.x, y, b.z); o.rotation.y = b.ry; o.traverse(q => { q.userData.egen = false; }); o.visible = !nb.lod; nb.full = o; nb.nara = !nb.lod; grp.add(o); }).catch(() => {});
+        });
+        N.extra.push(grp);
+      }
       // glaset i grannhusens fönster och dörrar: samma material som attefallshusens glas (mörkt, blankt, speglar himlen
       // via scenens miljökarta, halvgenomskinligt över det målade rummet med gardiner), alla rutor i ett instansierat nät
       if (RUT.length) {
@@ -4735,6 +4844,7 @@ export function skapaMiljo(THREE, scene, renderer) {
       const imp = impNara(V.barr, ['gran', 'ek', 'tall', 'bjork'], F.atlas); if (imp) N.extra.push(imp);
       V.barr = [];
     }
+    if (LODB.length && typeof bil.lodBilar === 'function') N.extra.push(bil.lodBilar(LODB));
     const tm = vegMesh('ting', TS, egenMat('ting', () => vegPatch(new THREE.MeshLambertMaterial({ vertexColors: true }), { glod: true })), true, true);
     if (tm) N.extra.push(tm);
     N.extra.push(vagDetaljer(mal, V, hy, 'villa'));   // elstolpar med ledningar i bakgrunden
@@ -5099,6 +5209,7 @@ export function skapaMiljo(THREE, scene, renderer) {
     VU.uHus.value.set(mal.L / 2, mal.W / 2, mal.top, 0);
     if (ny === nyckel) return;
     bil.planera(mal, H);                     // bilens plats; utökar mal.blockerad innan naturen placeras
+    { const Pv = bil.plats(); if (Pv && Pv.vag && namn !== 'villa' && namn !== 'studio') { VU.uVagA.value.set(Pv.vag.x0, Pv.vag.z0, Pv.n[0], Pv.n[1]); VU.uVagB.value.set(Pv.t[0], Pv.t[1], Pv.vag.sida || 1, 120); } else VU.uVagB.value.w = 0; }
     nyckel = ny; aktuell = namn;
     const d = DEF[namn], b = hamta(namn);
     mark.geometry = b.geo; mark.material = b.mat;
@@ -5129,7 +5240,34 @@ export function skapaMiljo(THREE, scene, renderer) {
     uppdatera();
     renderer.shadowMap.needsUpdate = true;
   }
+  // grannarnas fulla bilar: bara när kameran är nära (annars den förenklade); motorn anropar före varje bild
+  const NARBIL = [];
+  function narBilar(pos) {
+    for (const nb of NARBIL) {
+      if (!nb.full || !nb.lod) continue;
+      const d2 = (pos.x - nb.x) ** 2 + (pos.z - nb.z) ** 2, nara = nb.nara ? d2 < 30 * 30 : d2 < 26 * 26;
+      if (nara === nb.nara) continue;
+      nb.nara = nara; nb.full.visible = nara; nb.lod.visible = !nara;
+      renderer.shadowMap.needsUpdate = true;
+    }
+  }
+  // Delar av miljön som kan vänta till efter första bilden (motorn döljer dem vid starten, kompilerar
+  // deras program i vila och tonar in dem): allt utom livet och det som ligger helt inom 24 m från huset
+  // (vår tomt: gräsmatta, gång, staket, stenar, tuvor). Tomma grupper (laddas ännu) räknas till de senare.
+  const SENARE_B = new THREE.Box3(), SENARE_S = new THREE.Sphere();
+  function senare() {
+    if (!kuliss) return [];
+    const liv = Object.values(kuliss.userData.liv || {});
+    return kuliss.children.filter(o => {
+      if (liv.includes(o)) return false;
+      SENARE_B.setFromObject(o, false);
+      if (SENARE_B.isEmpty()) return true;
+      SENARE_B.getBoundingSphere(SENARE_S);
+      return SENARE_S.center.length() + SENARE_S.radius > 24;
+    });
+  }
   function slapp() {
+    NARBIL.length = 0;
     if (!kuliss) return;
     rot.remove(kuliss);
     kuliss.traverse(o => {
@@ -5186,5 +5324,5 @@ export function skapaMiljo(THREE, scene, renderer) {
   }
 
   // bilKor('ut' | 'hem'), bilSteg(dt, { stopp }), bilLage(), bilParkera(): elbilen kör iväg och hem (husritare-bil.js)
-  return { satt, uppdatera, lista, statistik, dispose, tick, harLiv, satLiv, bilKor: v => (typeof bil.kor === 'function' ? bil.kor(v) : 'hemma'), bilSteg: (dt, o) => (typeof bil.steg === 'function' ? bil.steg(dt, o) : false), bilLage: () => (typeof bil.lage === 'function' ? bil.lage() : 'hemma'), bilParkera: () => (typeof bil.parkera === 'function' ? bil.parkera() : undefined) };
+  return { satt, uppdatera, lista, statistik, dispose, tick, narBilar, senare, harLiv, satLiv, bilKor: v => (typeof bil.kor === 'function' ? bil.kor(v) : 'hemma'), bilSteg: (dt, o) => (typeof bil.steg === 'function' ? bil.steg(dt, o) : false), bilLage: () => (typeof bil.lage === 'function' ? bil.lage() : 'hemma'), bilParkera: () => (typeof bil.parkera === 'function' ? bil.parkera() : undefined), bilModell: (v, o) => (typeof bil.modell === 'function' ? (v === undefined ? bil.modellNu() : bil.modell(v, o)) : 'tesla'), bilKopia: (typ, farg) => (typeof bil.kopia === 'function' ? bil.kopia(typ, farg) : Promise.resolve(null)) };
 }

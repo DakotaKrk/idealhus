@@ -11,6 +11,8 @@
 const TRI = [800, 400, 700, 800, 700, 900, 1500];
 const URL_PAKET = 'images/3d/vaxt-paket.bin?v=3';
 const AV = (() => { try { return new URLSearchParams(location.search).get('vaxter') === '0'; } catch (e) { return false; } })();   // ?vaxter=0 stänger av (för jämförelser)
+// svaga enheter (pekskärm eller smal skärm): hälften så många markväxter (instanser och trianglar)
+const KVAL = (() => { try { return matchMedia('(pointer: coarse)').matches || Math.min(screen.width, screen.height) < 760 ? 0.5 : 1; } catch (e) { return 1; } })();
 
 export function skapaVaxtPaket(THREE, { VU, LJUS, ANISO = 4, renderer = null }) {
   // mjuka strånkanter med alpha-to-coverage när renderaren har MSAA, annars bara alfatest
@@ -150,6 +152,7 @@ export function skapaVaxtPaket(THREE, { VU, LJUS, ANISO = 4, renderer = null }) 
   function sprid(o) {
     const { r, hy, fri } = o, ut = [], per = o.per || [4, 10], sprid = o.sprid || 0.85, sk = o.skala || 1.9;
     let tri = 0;
+    o = Object.assign({}, o, { tri: o.tri * KVAL });
     const linjer = o.linjer || [], punkter = o.punkter || [];
     const lLen = linjer.map(([a, b, c, d]) => Math.hypot(c - a, d - b)), lTot = lLen.reduce((s, v) => s + v, 0);
     for (let f = 0, k = 0; f < o.nK * 30 && k < o.nK && tri < o.tri; f++) {
@@ -253,11 +256,11 @@ export function skapaVaxtPaket(THREE, { VU, LJUS, ANISO = 4, renderer = null }) 
       const pkt = [];
 
       egen = sprid({ r, hy, fri: inne, linjer: lin, punkter: pkt, yta: ytaRunt(mal, 12), fram: framYta(mal, r), nK: 90, kantAndel: 0.9, per: [3, 7],
-        kantArter: [[2, 6], [1, 2], [3, 1], [0, 1], [4, 1]], ytArter: [[1, 3], [2, 2], [0, 1]], tri: 90000, torr: 0.5 });
+        kantArter: [[2, 6], [1, 2], [3, 1], [0, 1], [4, 1]], ytArter: [[1, 3], [2, 2], [0, 1]], tri: 60000, torr: 0.5 });
     } else egen = sprid({ r, hy, fri: (x, z, m) => kantAv(mal, x, z) < 14 && fri(x, z, m), linjer: [...linjer.slice(0, 6), ...framLinje(mal, grundBredd(mal) + 1.15), ...tomtLinjer(mal), tomtLinjer(mal)[0], tomtLinjer(mal)[0]], yta: ytaRunt(mal, 12), fram: framYta(mal, r), nK: 64, kantAndel: 0.55,
       kantArter: [[2, 3], [3, 2], [0, 3], [5, 2], [4, 1]], ytArter: [[0, 4], [1, 3], [4, 2]], tri: 70000, torr: 0.2 });
     return egen.concat(sprid({ r, hy, fri: (x, z, m) => kantAv(mal, x, z) > 10 && fri(x, z, m), linjer: linjer.slice(6), yta: [-R, -R, R, R], nK: 50, kantAndel: 0.8,
-      kantArter: [[2, 3], [3, 2], [0, 3], [5, 2], [4, 1]], ytArter: [[0, 4], [1, 3], [4, 2]], tri: 115000 - trianglar(egen), torr: 0.2 }));
+      kantArter: [[2, 3], [3, 2], [0, 3], [5, 2], [4, 1]], ytArter: [[0, 4], [1, 3], [4, 2]], tri: 62000 - trianglar(egen) / KVAL, torr: 0.2 }));   // (sprid gångrar med KVAL; grannarnas tomter syns knappt i diset)
   }
   const segAv = (x, z, ax, az, bx, bz) => { const ex = bx - ax, ez = bz - az, l2 = ex * ex + ez * ez || 1, t = Math.max(0, Math.min(1, ((x - ax) * ex + (z - az) * ez) / l2)); return Math.hypot(x - ax - ex * t, z - az - ez * t); };
 
