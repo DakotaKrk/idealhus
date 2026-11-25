@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261120h';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261120h';
-import { skapaPlanlager } from './husritare-plan.js?v=20261120h';
+import { skapaMiljo } from './husritare-miljo.js?v=20261125d';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261125d';
+import { skapaPlanlager } from './husritare-plan.js?v=20261125d';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -342,6 +342,8 @@ const HIMMEL = {
   tradgard: { top: '#7da2cc', hor: '#e5eaee', mark: '#5a6839', band: '#3a4729', bandH: 0.13 },
   skog: { top: '#7b9bc2', hor: '#dde4e7', mark: '#3e4930', band: '#25321e', bandH: 0.28 },
   vinter: { top: '#9db4cc', hor: '#eef1f4', mark: '#e9edf2', band: '#3a4943', bandH: 0.2 },
+  kust: { top: '#78a0cd', hor: '#e4e9ec', mark: '#4a5d5a', band: '#34432f', bandH: 0.12 },      // vid sjön: skogsklädda stränder i diset (speglas i vattnet)
+  villa: { top: '#7da2cc', hor: '#e6e8e8', mark: '#5a6839', band: '#585950', bandH: 0.11 },     // villaområdet: hustak och träd
 };
 
 // ---- Scenen -----------------------------------------------------------
@@ -1334,6 +1336,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     tradgard: { ram: 0x8c6243, grov: 0.55, dyna: 0xe3ddd0, kudde: [0xae7a5e, 0xc4b28c, 0x7d8869], pled: 0xb59f7c, matta: 0x8e877a, kruka: 0xa8674c, vaxt: [5, 1, 3], oliv: true, parasoll: 'uppe', eld: false, sno: false, fall: 0 },
     skog: { ram: 0x4a3829, grov: 0.5, dyna: 0x5d6748, kudde: [0x9a7b4e, 0x6e5c4a], pled: 0x7c5242, matta: 0x5d5448, kruka: 0x3e3c39, vaxt: [1, 0], oliv: false, parasoll: null, eld: true, sno: false, fall: 1 },
     vinter: { ram: 0x7c6957, grov: 0.72, dyna: null, kudde: null, pled: null, matta: null, kruka: 0x3e3c39, vaxt: [4, 4], oliv: false, parasoll: 'nere', eld: false, sno: true, fall: 2 },
+    // vid sjön: ljusa, blå-vita dynor; villaområdet som trädgården
+    kust: { ram: 0x9a8a78, grov: 0.6, dyna: 0xe8e6df, kudde: [0x5f7f9a, 0xc9c2b0, 0x8fa3ad], pled: 0xb9b2a2, matta: 0x8c8a82, kruka: 0xa8674c, vaxt: [5, 1], oliv: false, parasoll: 'uppe', eld: false, sno: false, fall: 0 },
+    villa: { ram: 0x8c6243, grov: 0.55, dyna: 0xe3ddd0, kudde: [0xae7a5e, 0xc4b28c, 0x7d8869], pled: 0xb59f7c, matta: 0x8e877a, kruka: 0xa8674c, vaxt: [5, 1, 3], oliv: true, parasoll: 'uppe', eld: false, sno: false, fall: 0 },
   };
   const SNO = 0xf1f3f6, FALL = 0xebe2d2;
   function byggMobler(ute) {
@@ -1598,6 +1603,85 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     nySkugga = true;
   }
 
+  // ---- Takgenomföringar: frånluft över spisen och badet, avluftare för avloppet, och en
+  // stålskorsten rakt över kaminen där inredningen har en (pulpet-70, sadel-90). Lägena är
+  // husets koordinater (x längs, z tvärs, mitt i huset) och tagna ur inredningen
+  // (husritare-inne.js: kok(), bad(), med(..., kamin)); skorstenen står där kaminens rökrör
+  // går upp i taket. Allt läggs i takgruppen: lyfts med taket, slås ihop per material.
+  const GENOMF = {
+    'sadel-30': { kok: [0.65, -1.42], bad: [-0.86, -0.88] },
+    'sadel-40': { kok: [-0.415, -1.42], bad: [-1.92, -0.89] },
+    'sadel-50': { kok: [0.835, -0.62], bad: [-0.72, -0.89] },
+    'pulpet-70': { kok: [4.45, 2.29], bad: [3.1, -2.47], kamin: [-4.51, 0.36] },
+    'sadel-90': { kok: [-2.6, 2.95], bad: [2.0, 2.34], kamin: [-3.27, -3.01] },
+  };
+  mat.skorsten = new THREE.MeshStandardMaterial({ color: 0x1f2022, roughness: 0.48, metalness: 0.45 });
+  mat.skorsten.shadowSide = THREE.DoubleSide;
+  // lite snö: med 0,9 blev regnhuven helvit och skorstenen såg hattlös ut mot det vita taket
+  snoPa(mat.skorsten, 0.3);
+  function genomforingar(tak, id, Y0, T, nock) {
+    const G = GENOMF[id];
+    if (!G) return;
+    tak.updateMatrixWorld(true);
+    const ytor = tak.children.filter(m => m.isMesh && m.material === mat.tak);
+    const ray = new THREE.Raycaster(), NED = new THREE.Vector3(0, -1, 0);
+    // takets ovansida (i takgruppens koordinater) och dess normal vid (x, z)
+    const traff = (x, z) => {
+      ray.set(new THREE.Vector3(x, 30, z), NED);
+      const t = ray.intersectObjects(ytor, false)[0];
+      if (!t) return null;
+      const n = t.face.normal.clone().transformDirection(t.object.matrixWorld);
+      return { y: t.point.y - tak.position.y, n: n.y > 0 ? n : n.negate() };
+    };
+    const lagg = (geo, material, x, y, z, q, skugga = true) => {
+      const m = new THREE.Mesh(geo, material); m.position.set(x, y, z); if (q) m.quaternion.copy(q);
+      m.castShadow = skugga; m.receiveShadow = true; tak.add(m); return m;
+    };
+    const cyl = (r0, r1, h, seg = 16) => new THREE.CylinderGeometry(r0, r1, h, seg);
+    // fotplåten följer takfallet; röret står lodrätt genom den
+    const fot = (p, x, z, s, material) => lagg(new THREE.BoxGeometry(s, 0.012, s), material, x, p.y + 0.008, z, new THREE.Quaternion().setFromUnitVectors(UPP, p.n), false);
+    // ventilationshuv: rör, en vidare huv med regnskydd (konisk hatt) i takets plåt
+    const huv = (x, z, rr, h) => {
+      const p = traff(x, z); if (!p) return;
+      fot(p, x, z, rr * 4.6, mat.falsar);
+      lagg(cyl(rr * 1.35, rr * 1.9, 0.07), mat.falsar, x, p.y + 0.035, z, null, false);   // manschett
+      lagg(cyl(rr, rr, h + T), mat.takMork, x, p.y + (h - T) / 2, z);
+      const hh = rr * 1.4, yh = p.y + h;
+      lagg(cyl(rr * 1.55, rr * 1.55, hh, 20), mat.takMork, x, yh - hh / 2, z);
+      lagg(cyl(rr * 1.62, rr * 1.62, 0.012, 20), mat.falsar, x, yh - hh + 0.02, z, null, false);   // nedre kant
+      lagg(cyl(0.004, rr * 1.95, rr * 0.75, 20), mat.takMork, x, yh + rr * 0.375 + 0.01, z);       // hatten
+    };
+    // avluftare för avloppet: smalt svart rör med liten hatt
+    const avlufta = (x, z) => {
+      const p = traff(x, z); if (!p) return;
+      fot(p, x, z, 0.2, mat.skorsten);
+      lagg(cyl(0.04, 0.075, 0.06), mat.skorsten, x, p.y + 0.03, z, null, false);
+      lagg(cyl(0.028, 0.028, 0.36 + T), mat.skorsten, x, p.y + (0.36 - T) / 2, z);
+      lagg(cyl(0.003, 0.055, 0.04, 12), mat.skorsten, x, p.y + 0.39, z, null, false);
+    };
+    huv(G.kok[0], G.kok[1], 0.08, 0.42);
+    huv(G.bad[0], G.bad[1], 0.065, 0.36);
+    avlufta(G.bad[0] + 0.55, G.bad[1]);
+    if (G.kamin) {
+      // stålskorsten (Ø ca 20 cm) med regnkrage, genomföringsplåt och regnhuv på tre ben;
+      // mynningen ca 1 m över taket där den går igenom, aldrig lägre än nocken
+      const [x, z] = G.kamin, p = traff(x, z); if (!p) return;
+      const top = Math.max(p.y + 1.0, nock + T + 0.3), R = 0.1;
+      fot(p, x, z, 0.62, mat.skorsten);
+      lagg(cyl(R * 1.25, R * 2.4, 0.16, 24), mat.skorsten, x, p.y + 0.08, z, null, false);   // genomföring
+      lagg(cyl(R * 1.18, R * 1.18, 0.025, 24), mat.skorsten, x, p.y + 0.2, z, null, false);  // regnkrage
+      lagg(cyl(R, R, top - p.y + T, 24), mat.skorsten, x, (top + p.y - T) / 2, z);
+      lagg(cyl(R * 1.06, R * 1.06, 0.03, 24), mat.skorsten, x, top - 0.02, z, null, false);  // skarvband vid mynningen
+      for (let k = 0; k < 3; k++) { const a = k * 2.094; lagg(new THREE.BoxGeometry(0.012, 0.09, 0.012), mat.skorsten, x + Math.cos(a) * R * 0.95, top + 0.045, z + Math.sin(a) * R * 0.95, null, false); }
+      lagg(cyl(0.005, R * 2.1, 0.09, 24), mat.skorsten, x, top + 0.13, z);                    // regnhuven
+      // hög skorsten: ett stag snett ned mot taket (uppåt i takfallet)
+      if (top - p.y > 1.15) {
+        const upp = new THREE.Vector3(p.n.x, 0, p.n.z).normalize().negate(), a = new THREE.Vector3(x, top - 0.35, z), b0 = new THREE.Vector3(x + upp.x * 0.9, 0, z + upp.z * 0.9), pb = traff(b0.x, b0.z);
+        if (pb) { b0.y = pb.y + 0.01; ror(tak, a, b0, 0.011, mat.skorsten, 6); lagg(new THREE.BoxGeometry(0.08, 0.012, 0.08), mat.skorsten, b0.x, b0.y, b0.z, new THREE.Quaternion().setFromUnitVectors(UPP, pb.n), false); }
+      }
+    }
+  }
+
   function byggHus(id) {
     const H = HUS[id];
     const g = new THREE.Group();
@@ -1720,6 +1804,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     } else {
       takskiva(tak, xw - OG, xe + OG, [zn - 0.0, hN], [zs + OV, hS + (hS - hN) / W * OV], T, OV, { ranna: true, stupror: [stup('N', -1), stup('N', 1)], hogKant: true, y0: Y0 });
     }
+    try { genomforingar(tak, id, Y0, T, hR || Math.max(hN, hS)); } catch (e) { console.warn('takgenomföringar', id, e); }
 
     // sätt ihop och centrera på marken
     try { slaIhop(vaggar); } finally { var fonster = fonsterBygg || []; fonsterBygg = null; }
@@ -2323,6 +2408,11 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   ['pointerdown', 'keydown', 'touchstart'].forEach(h => window.addEventListener(h, () => { inmatSist = performance.now(); }, { capture: true, passive: true }));
   // väntar någon på förberedelserna just nu? (då ska de gå på för fullt)
   const vantarPaKomp = () => !!((flyg && flyg.bana && flyg.bana.halv) || oppen.vantar);
+  // står kameran still framför dörren och väntar på inredningen (halv bana, ingen inmatning nyss)?
+  // Då rör sig inget i bilden: förberedelserna får ta ~40 ms i sträck utan en ny ruta emellan
+  function parkerad() {
+    return !!(flyg && !flyg.paus && flyg.rikt > 0 && flyg.bana && flyg.bana.halv && flyg.s >= flyg.bana.sTak - 1e-3 && performance.now() - inmatSist > 400);
+  }
   const nastaRuta = () => new Promise(r => { let k = false; const f = () => { if (!k) { k = true; r(); } }; requestAnimationFrame(() => setTimeout(f, 0)); setTimeout(f, 100); });
   function ledigt(fn, ms = 600) {
     if (typeof requestIdleCallback === 'function') requestIdleCallback(fn, { timeout: ms });
@@ -3067,7 +3157,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     const tv = inneData().takVid;
     if (typeof tv === 'function') {
       const t = +tv(x, z, niva);
-      if (Number.isFinite(t)) y = Math.max(g + 0.9, Math.min(y, husGrupp.userData.delar.Y0 + t - 0.18));
+      // takets marginal går först (förr gick 0,9 m över golvet före, och under snedtaket vid
+      // trappans topp hamnade ögat ovanför innertaket); aldrig lägre än 0,35 m över golvet
+      if (Number.isFinite(t)) y = Math.max(g + 0.35, Math.min(y, husGrupp.userData.delar.Y0 + t - 0.18));
     }
     return y;
   }
@@ -3117,9 +3209,40 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       const cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2, l = Math.hypot(cx - ax, cz - az) + Math.hypot(bx - cx, bz - cz);
       if (l < bl && vagFri(ax, az, cx, cz, niva) && vagFri(cx, cz, bx, bz, niva)) { bl = l; bast = { x: cx, z: cz }; }
     }
-    return bast ? [bast] : null;
+    if (bast) return [bast];
+    // ingen dörr: runt ett hinders hörn, 0,42 m snett ut (loftets räcke mellan trappans topp och
+    // loftet: förr gick vägen rakt igenom räcket); båda sträckorna måste hålla 0,3 m fritt
+    // (trånga gångar, som Kupa 40:s 50 cm mellan bädden och räcket: ett andra varv med 0,2 m)
+    for (const m of [0.3, 0.2]) {
+      const fri3 = (x0, z0, x1, z1) => { const L = Math.hypot(x1 - x0, z1 - z0), n = Math.max(1, Math.ceil(L / 0.1)); for (let i = 1; i < n; i++) { const u = i / n, k = Math.min(u, 1 - u) * L; if (fri(x0 + (x1 - x0) * u, z0 + (z1 - z0) * u, niva, true) < (k < 0.35 ? 0.12 : m)) return false; } return true; };
+      for (let i = 0; i < H.length; i++) {
+        const b = H[i];
+        if (b.dorr >= 0 || b.trappa || (b.niva !== -1 && b.niva !== niva)) continue;
+        for (const o of [0.3, 0.22]) for (const [cx, cz] of [[b.x0 - o, b.z0 - o], [b.x1 + o, b.z0 - o], [b.x0 - o, b.z1 + o], [b.x1 + o, b.z1 + o]]) {
+          const l = Math.hypot(cx - ax, cz - az) + Math.hypot(bx - cx, bz - cz);
+          if (l < bl && fri(cx, cz, niva, true) >= m && fri3(ax, az, cx, cz) && fri3(cx, cz, bx, bz)) { bl = l; bast = { x: cx, z: cz }; }
+        }
+      }
+      if (bast) return [bast];
+    }
+    return null;
   }
   // läget längs vägen (e 0–1): x och z längs sträckorna, ögat följer golvet (trappan steg för steg)
+  // ögats läge d meter in på vägen V (samma som glidPunkt, utan glidningens startförskjutning)
+  function vagLage(V, d, ut) {
+    const Y0 = husGrupp.userData.delar.Y0;
+    let i = 1;
+    while (i < V.p.length - 1 && V.s[i] < d) i++;
+    const a = V.p[i - 1], b = V.p[i], sl = V.s[i] - V.s[i - 1];
+    const u = sl > 1e-6 ? Math.min(1, Math.max(0, (d - V.s[i - 1]) / sl)) : 1;
+    const x = a.x + (b.x - a.x) * u, z = a.z + (b.z - a.z) * u;
+    let g = a.g + (b.g - a.g) * u, nv = u < 0.5 ? a.nv : b.nv;
+    if (b.tr) {
+      if (trappaVid(x, z)) { g = Y0 + TR.y; nv = TR.s > 0.5 ? 1 : 0; }
+      else g = u < 0.5 ? a.g : b.g;
+    }
+    return ut.set(x, ogonVid(x, z, g, nv), z);
+  }
   function glidPunkt(G, e) {
     const V = G.vag, d = e * V.L, Y0 = husGrupp.userData.delar.Y0;
     let i = 1;
@@ -3156,7 +3279,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (!(opt && tal(opt.tid))) tid = Math.min(1.3, 0.45 + 0.17 * vag.L);
     }
     gang.glid = { fran: P.clone(), till, t: 0, tid, niva, golvY, satt, vag, dx: 0, dz: 0,
-      dy0: vag ? P.y - ogonVid(P.x, P.z, gang.golvY, gang.niva) : 0 };
+      dy0: vag ? P.y - ogonVid(P.x, P.z, gang.golvY, gang.niva) : 0, prov: null };
+    // mellan våningarna (trappan): blicken följer vägen, och lite mer tid (uppför steg för steg)
+    if (vag && vag.p.some(q => q.tr)) { gang.glid.trapp = true; if (!(opt && tal(opt.tid))) gang.glid.tid = Math.min(2.6, 0.7 + 0.28 * vag.L); }
     if (vrid) {
       const b = styr.target.clone().sub(P), r = b.length() || 0.01;
       const m = new THREE.Vector3(+malPunkt[0], +malPunkt[1] + husGrupp.userData.delar.Y0, +malPunkt[2]).sub(till);
@@ -3167,7 +3292,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         let dth = sT.theta - sF.theta; if (dth > Math.PI) dth -= Math.PI * 2; if (dth < -Math.PI) dth += Math.PI * 2;
         Object.assign(gang.glid, { r, sF, sT, dth });
         // en stor vridning på stället får lite mer tid
-        if (!satt) gang.glid.tid = Math.min(1.3, Math.max(gang.glid.tid, 0.5 + Math.abs(dth) * 0.25));
+        if (!satt && !gang.glid.trapp) gang.glid.tid = Math.min(1.3, Math.max(gang.glid.tid, 0.5 + Math.abs(dth) * 0.25));
       }
     }
     gang.vx = gang.vz = 0; gang.hjul = 0;
@@ -3285,7 +3410,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     gV.copy(styr.target).sub(kamera.position);    // blicken (någon cm framåt)
     const G = gang.glid, P = kamera.position;
     if (G) {
-      G.t = Math.min(1, G.t + dt / G.tid);
+      G.t = G.prov !== null && G.prov !== undefined ? G.prov : Math.min(1, G.t + dt / G.tid);
       if (G.vag) glidPunkt(G, inUtSin(G.t));
       else {
         // sätta sig: först fram, sedan ned med en mjuk sjunkning (2–3 cm) som sätter sig;
@@ -3298,6 +3423,21 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       }
       // musen i Spelläget tar över blicken; annars vrids den mot målet
       if (spelTitt()) G.sF = null;
+      else if (G.sF && G.trapp) {
+        // mellan våningarna: blicken följer vägen (en punkt 1,4 m fram i ögonhöjd: uppför
+        // trappan, in över loftet), och vrids mot målet först på slutet
+        const e = inUtSin(G.t), V = G.vag;
+        vagLage(V, Math.min(V.L, e * V.L + 1.4), gV3);
+        gV3.sub(P);
+        const sA = gS.setFromVector3(gV3.lengthSq() > 1e-4 ? gV3 : gV.set(0, 0, -1)), w = inUt(del(G.t, 0.62, 1));
+        const pA = Math.min(styr.maxPolarAngle - 0.02, Math.max(styr.minPolarAngle + 0.02, sA.phi));
+        const ev = inUt(Math.min(1, G.t * 4));   // från blicken man hade till vägens riktning
+        let dF = sA.theta - G.sF.theta; if (dF > Math.PI) dF -= Math.PI * 2; if (dF < -Math.PI) dF += Math.PI * 2;
+        const th = G.sF.theta + dF * ev, ph = G.sF.phi + (pA - G.sF.phi) * ev;
+        let dT = G.sT.theta - th; if (dT > Math.PI) dT -= Math.PI * 2; if (dT < -Math.PI) dT += Math.PI * 2;
+        gS.set(G.r, ph + (G.sT.phi - ph) * w, th + dT * w);
+        gV.setFromSpherical(gS);
+      }
       else if (G.sF) {
         const ev = inUt(Math.min(1, G.t * 1.1));
         gS.set(G.r, G.sF.phi + (G.sT.phi - G.sF.phi) * ev, G.sF.theta + G.dth * ev);
@@ -3980,9 +4120,56 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (!d.fonsterTraff) d.fonsterTraff = fonsterLista().map(f => f.traff).filter(Boolean);
     return d.fonsterTraff;
   }
-  // Utifrån: bara fönstren, inom 6 m, och inte genom väggen (fasaden har hål för fönstren)
+  // Ytterdörrarna utifrån (huvuddörren och glasdörren): en låda kring öppningen i väggarnas
+  // koordinater (golvet y = 0, +n utåt). Svarar med avståndet till träffen, eller null.
+  const dorrRay = new THREE.Ray(), dorrInv = new THREE.Matrix4(), dorrP = new THREE.Vector3();
+  function dorrLador() {
+    const d = husGrupp && husGrupp.userData;
+    if (!d || !d.delar) return [];
+    if (d.dorrLador) return d.dorrLador;
+    const H = HUS[val.modell], L = H.L, W = H.W, ut = [];
+    H.oppningar.filter(o => o[5] === 'd' || o[5] === 'dg').forEach(o => {
+      const ax = { S: [[-L / 2, 0, W / 2], [1, 0, 0], [0, 0, 1]], N: [[L / 2, 0, -W / 2], [-1, 0, 0], [0, 0, -1]], E: [[L / 2, 0, W / 2], [0, 0, -1], [1, 0, 0]], W: [[-L / 2, 0, -W / 2], [0, 0, 1], [-1, 0, 0]] }[o[0]];
+      if (!ax) return;
+      const O = new THREE.Vector3(...ax[0]), u = new THREE.Vector3(...ax[1]), n = new THREE.Vector3(...ax[2]), b = new THREE.Box3();
+      [o[1], o[1] + o[2]].forEach(uu => [o[3], o[3] + o[4]].forEach(y => [-0.25, 0.2].forEach(nn => b.expandByPoint(O.clone().addScaledVector(u, uu).addScaledVector(n, nn).setY(y)))));
+      ut.push({ b, O, u, n, o });
+    });
+    return (d.dorrLador = ut);
+  }
+  function dorrTraff() {
+    const D = dorrLador();
+    if (!D.length) return null;
+    const vg = husGrupp.userData.delar.vaggar;
+    vg.updateMatrixWorld(); dorrInv.copy(vg.matrixWorld).invert();
+    dorrRay.copy(ray.ray).applyMatrix4(dorrInv);
+    let bast = null;
+    D.forEach((x, i) => {
+      if (!dorrRay.intersectBox(x.b, dorrP)) return;
+      const dist = dorrP.applyMatrix4(vg.matrixWorld).distanceTo(ray.ray.origin);
+      if (!bast || dist < bast.d) bast = { sort: 'ytter', i, d: dist };
+    });
+    return bast;
+  }
+  // en ljus kant kring dörröppningen medan pekaren står på den (dator)
+  function dorrKant(i) {
+    const d = husGrupp && husGrupp.userData;
+    if (!d || !d.delar) return;
+    if (!d.dorrKanter) {
+      d.dorrKanter = dorrLador().map(x => {
+        const o = x.o, P = (uu, y) => x.O.clone().addScaledVector(x.u, uu).addScaledVector(x.n, 0.07).setY(y);
+        const a = P(o[1] + 0.02, o[3] + 0.01), b = P(o[1] + o[2] - 0.02, o[3] + 0.01), c = P(o[1] + o[2] - 0.02, o[3] + o[4] - 0.01), e = P(o[1] + 0.02, o[3] + o[4] - 0.01);
+        const l = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([a, b, c, e]), new THREE.LineBasicMaterial({ color: 0xffe2b0, transparent: true, opacity: 0.85, depthWrite: false, toneMapped: false }));
+        l.visible = false; l.name = 'dorr-kant'; l.renderOrder = 3;
+        d.delar.vaggar.add(l);
+        return l;
+      });
+    }
+    d.dorrKanter.forEach((l, k) => { l.visible = k === i; });
+  }
+  // Utifrån: fönstren inom 6 m och ytterdörrarna (klick = Se inne), inte genom väggen (fasaden har hål)
   function pekaUte() {
-    if (inneLage || !husGrupp || !gang.pekar || aka || oppen.pa || oppen.t > 0 || byggT < 1 || !fonsterTraff().length) return satMal(null);
+    if (inneLage || !husGrupp || !gang.pekar || aka || flyg || FOTO || plan.pa || plan.t > 0 || oppen.pa || oppen.t > 0 || byggT < 1) { dorrKant(-1); return satMal(null); }
     if (rektSmuts) lasRekt();
     ndc.set((gang.px - dukV) / dukB * 2 - 1, -((gang.py - dukT) / dukH) * 2 + 1);
     ray.setFromCamera(ndc, kamera);
@@ -3990,6 +4177,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     ray.intersectObjects(fonsterTraff(), false, traffar);
     let t = traffar.length ? { sort: 'fonster', i: traffar[0].object.userData.fonsterTraff, d: traffar[0].distance } : null;
     traffar.length = 0;
+    if (!t) { try { t = dorrTraff(); } catch (e) { console.warn(e); t = null; } }
     if (t) {
       const d = husGrupp.userData;
       if (!d.fasadMesh) { d.fasadMesh = []; d.delar.vaggar.children.forEach(m => { if (m.isMesh && m.material === mat.fasad) d.fasadMesh.push(m); }); }
@@ -4001,6 +4189,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     ray.far = Infinity;
     const byt = satMal(t);
     duk.style.cursor = t ? 'pointer' : '';
+    try { dorrKant(t && t.sort === 'ytter' ? t.i : -1); } catch (e) { console.warn(e); }
     return byt;
   }
   // mitt i bilden: det siktet träffar inom räckhåll, annars en dörr inom 2 m och ca 22° från blicken
@@ -4037,6 +4226,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     return siktMal();
   }
   function malText(m) {
+    if (m && m.sort === 'ytter') return 'Gå in';
     if (m && m.sort === 'fonster') {
       const f = fonsterLista()[m.i], oppet = !!(f && f.o && f.o.mal > 0.5);
       return f ? (oppet ? 'Stäng ' : 'Öppna ') + (f.typ === 'sk' ? 'skjutdörr' : 'fönster') : '';
@@ -4066,6 +4256,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     return !samma;
   }
   function gorMal(m) {
+    // ytterdörren utifrån: sidan gör samma byte som Se inne (dörråkningen)
+    if (m && m.sort === 'ytter') { if (inneLage) return false; satMal(null); dorrKant(-1); meddela('vidDorrIn', { i: m.i }); return true; }
     if (!m || (!inneLage && m.sort !== 'fonster')) return false;
     let ok = false;
     if (m.sort === 'opp') ok = vaxlaOpp(m.i);
@@ -4174,23 +4366,26 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   duk.addEventListener('pointerenter', () => { rektSmuts = true; });
   // ett tryck: rör sig högst 12 px (finger) eller 5 px (mus) och släpps inom 350 ms, samma pekare
   const SLOP_FINGER = 12, SLOP_MUS = 5, TRYCK_MS = 350;
-  const arTryck = (n, e) => !!n && !gang.drog && e.pointerId === n.id && Math.hypot(e.clientX - n.x, e.clientY - n.y) <= n.slop && performance.now() - n.t < TRYCK_MS;
+  const arTryck = (n, e) => !!n && !gang.drog && e.pointerId === n.id && Math.hypot(e.clientX - n.x, e.clientY - n.y) <= n.slop && evTid(e) - n.t < TRYCK_MS;
+  // händelsens egen tid (när fingret släpptes), inte när sidan hann ta hand om den: på en
+  // långsam telefon kunde ett kort tryck annars räknas som ett långt
+  const evTid = e => (e && e.timeStamp > 0 ? e.timeStamp : performance.now());
   duk.addEventListener('pointermove', e => {
     gang.pekar = true; gang.px = e.clientX; gang.py = e.clientY;
     if (liv.pa && performance.now() - liv.inmat > 15000) vakna(); else liv.inmat = performance.now();
     if (gang.ner && e.pointerId === gang.ner.id && Math.hypot(e.clientX - gang.ner.x, e.clientY - gang.ner.y) > gang.ner.slop) gang.drog = true;
     if (inneLage && e.pointerType !== 'touch') { pekRay = true; schema(); }
-    // utifrån: fönstren nära huset (inom 6 m från ett fönster, se pekaUte)
-    else if (!inneLage && e.pointerType !== 'touch' && !gang.ner && husGrupp && kamera.position.lengthSq() < 100) { pekRay = true; schema(); }
-    else if (!inneLage && ia.mal) { satMal(null); duk.style.cursor = ''; }
+    // utifrån: fönstren nära huset (inom 6 m från ett fönster) och ytterdörrarna (se pekaUte)
+    else if (!inneLage && e.pointerType !== 'touch' && !gang.ner && husGrupp) { pekRay = true; schema(); }
+    else if (!inneLage && ia.mal) { satMal(null); duk.style.cursor = ''; dorrKant(-1); }
   });
-  duk.addEventListener('pointerleave', () => { gang.pekar = false; if (inneLage) { pekRay = true; schema(); } });
+  duk.addEventListener('pointerleave', () => { gang.pekar = false; if (inneLage || ia.mal) { pekRay = true; schema(); } });
   duk.addEventListener('pointerdown', e => {
     vakna();
     // ett andra finger (nyp): inget tryck
     if (gang.ner && e.pointerId !== gang.ner.id) { gang.drog = true; return; }
     const finger = e.pointerType === 'touch';
-    gang.ner = e.button === 0 ? { x: e.clientX, y: e.clientY, id: e.pointerId, t: performance.now(), slop: finger ? SLOP_FINGER : SLOP_MUS } : null; gang.drog = false;
+    gang.ner = e.button === 0 ? { x: e.clientX, y: e.clientY, id: e.pointerId, t: evTid(e), slop: finger ? SLOP_FINGER : SLOP_MUS } : null; gang.drog = false;
     // inne: på pekskärm dras bilden med fingret, med musen vrids blicken som förut
     if (inneLage) styr.rotateSpeed = finger ? -0.38 : 0.42;
   });
@@ -4207,7 +4402,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (!tryck || !husGrupp) return;
       gang.px = e.clientX; gang.py = e.clientY; gang.pekar = true;
       pekaUte();
-      if (ia.mal && ia.mal.sort === 'fonster') { gorMal(ia.mal); if (e.pointerType === 'touch') satMal(null); }
+      if (ia.mal && (ia.mal.sort === 'fonster' || ia.mal.sort === 'ytter')) { gorMal(ia.mal); if (e.pointerType === 'touch') satMal(null); }
       return;
     }
     if (!tryck || !inneLage) return;
@@ -4419,7 +4614,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
           ettObjekt(x, n, nya);
           // högst cirka 12 ms i sträck, och aldrig mer än ett nytt program per ruta: utan parallell
           // kompilering (Safari) låser varje program sidan, och flera i rad gav sekundlånga stopp
-          if (performance.now() > skiva || renderer.info.programs.length > pf) { await nastaRuta(); skiva = performance.now() + 12; if (giltig && !giltig()) return; }
+          // (står kameran still framför dörren: flera program per bit om ~40 ms, ingen ruta emellan)
+          const pk = parkerad();
+          if (performance.now() > skiva || (!pk && renderer.info.programs.length > pf)) { await (pk ? sov(0) : nastaRuta()); skiva = performance.now() + (parkerad() ? 40 : 12); if (giltig && !giltig()) return; }
           if (renderer.info.programs.length - p0 >= sats) {
             const slut = performance.now() + 3000;
             while (!redo(nya) && performance.now() < slut) await sov(12);            nya.forEach(m => alla.add(m)); nya = new Set(); p0 = renderer.info.programs.length;
@@ -4502,11 +4699,14 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         }
         // 40 ms per bit: man väntar på just detta (svävet visar det), så hellre klart fort
         // med ~20 bilder/s än långsamt med fler
-        const jobb = inneBygge, slut = performance.now() + bit;
+        // står kameran redan still framför dörren (halv bana) behövs inga mjuka rutor: större bitar,
+        // annars följde byggtakten bildtakten (9 ms per ruta: minuter på en långsam telefon)
+        const stilla = bit < 40 && parkerad();
+        const jobb = inneBygge, slut = performance.now() + (stilla ? 40 : bit);
         let r;
         try { do { r = jobb.it.next(); } while (!r.done && performance.now() < slut); } catch (e) { console.warn(e); inneBygge = null; klar(); return; }
         // korta bitar (kameran rör sig under tiden): en ritad ruta mellan varje
-        if (!r.done) { if (bit < 40) requestAnimationFrame(() => setTimeout(steg, 0)); else setTimeout(steg, 0); return; }
+        if (!r.done) { if (bit < 40 && !stilla) requestAnimationFrame(() => setTimeout(steg, 0)); else setTimeout(steg, 0); return; }
         inneBygge = null;
         try { forberedInne(r.value); } catch (e) { console.warn(e); klar(); return; }
       }
@@ -5850,6 +6050,13 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (renderer.getPixelRatio() < rorSkarpa.full) { renderer.setPixelRatio(rorSkarpa.full); storlek(); }
     }
     const planRor = stegPlan(dt);   // planlösningen: kameran upp till lodrät vy och tillbaka
+    // elbilen som kör iväg/hem (husritare-bil.js): inne, i planlösningen och under åkningen står den parkerad.
+    // Skuggan följer bilen varannan ruta (som takets lyft).
+    let bilRor = false;
+    if (typeof omgivning.bilSteg === 'function') {
+      try { bilRor = !!omgivning.bilSteg(dt, { stopp: inneLage || plan.pa || plan.t > 0 || !!flyg }); } catch (e) { console.warn(e); }
+      if (bilRor && (perf.rutor & 1) === 0) nySkugga = true;
+    }
     const gar = inneLage && !flyg && stegGang(dt);
     const ljusRor = stegLjus(dt);
     stegPunktAnim(nu, pFart); if (pFart === 1) punktAnim.sistRit = nu;
@@ -5895,7 +6102,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     renderer.info.reset();
     // vinkelbilderna väntar tills dörrar och lampor rört sig klart (rutorna går ändå)
     // värmningen av inneläget: en bit per ruta, före den vanliga bilden
-    const varmKor = varmJobb ? stegVarm() : false;
+    let varmKor = varmJobb ? stegVarm() : false;
+    // står kameran still framför dörren: nästa steg direkt i samma ruta, så länge biten räcker (~40 ms)
+    for (const t0 = performance.now(); varmKor && varmJobb && parkerad() && performance.now() - t0 < 40;) varmKor = stegVarm();
     if (tummeKo.length && !iaRor && !iaRorSig()) {
       const jobb = tummeKo.shift();
       if (tummeKlar()) { try { ritaTumme(jobb.vy, jobb.duk); jobb.klar(true); } catch (e) { console.warn(e); jobb.klar(false); } }
@@ -5920,7 +6129,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (tona.t >= 1) { tona.pa = false; tona.tid = 0.5; } else tonaKor = true;
     }
     if (inneLage && (gar || rorde)) flytt.smuts = true;
-    const rorSig = rorde || flyger || planRor || aka || helRor || zoomar ||styr.autoRotate || tonade || byggT < 1 || rivGrupp || lyfter || gar || tonaKor || ringRor || iaRor || ljusRor || spel.skuld;
+    const rorSig = rorde || flyger || planRor || aka || helRor || zoomar ||styr.autoRotate || tonade || byggT < 1 || rivGrupp || lyfter || gar || tonaKor || ringRor || iaRor || ljusRor || spel.skuld || bilRor;
     rorForra = !!rorSig;
     liv.ritade = true;
     const fortsatt = !!(rorSig || varmKor || livKor() || punktFart(nu) === 1 || tummeKo.length) && aktiv && !vantaStart;
@@ -6440,6 +6649,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // grafikminnet: nya program eller texturer under en åkning betyder att något inte var förberett
     grafik: () => ({ program: renderer.info.programs.length, texturer: renderer.info.memory.textures, geometrier: renderer.info.memory.geometries, inneVarm: !!(husGrupp && husGrupp.userData.inneVarm) }),
     kameraLage: () => kamera.position.toArray().concat(styr.target.toArray(), [kamera.fov, styr.enabled ? 1 : 0]).map(x => +x.toFixed(3)),
+    // för bildverktygen: kameraProv([x, y, z], [mx, my, mz]) ställer kameran fritt (styrningen följer)
+    kameraProv(p, m) { aka = null; zoomMal = null; styr.maxDistance = Math.max(styr.maxDistance, 400); kamera.position.fromArray(p); if (m) styr.target.fromArray(m); styr.update(); begarRender(); return kamera.position.toArray(); },
     flygProv(s) {
       if (!flyg || flyg.vantar) return null;
       if (s === null || s === undefined) { flyg.paus = false; flyg.v = 0; begarRender(); return null; }
@@ -6491,10 +6702,37 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         return { i, namn: s.namn, avstand: +d.toFixed(2), framfor: pV.z < 1, x: Math.round((pV.x * 0.5 + 0.5) * dukB), y: Math.round((0.5 - pV.y * 0.5) * dukH) };
       }).filter(Boolean);
     },
+    // för bildverktygen: glidProv(t) fryser pågående glidning vid t (0–1), glidProv(null) släpper den
+    glidProv(t) {
+      const G = gang.glid;
+      if (!G) return null;
+      G.prov = t === null || t === undefined ? null : Math.min(1, Math.max(0, +t));
+      begarRender();
+      const P = kamera.position;
+      return { t: G.t, trapp: !!G.trapp, tid: G.tid, x: +P.x.toFixed(2), y: +P.y.toFixed(2), z: +P.z.toFixed(2), vag: G.vag ? G.vag.p.map(q => [+q.x.toFixed(2), +q.z.toFixed(2), q.nv, q.tr ? 1 : 0]) : null };
+    },
+    // för bildverktygen: ytterdörrarnas mitt på skärmen (px i duken) utifrån, bara läsning
+    provDorr() {
+      if (!husGrupp || inneLage) return [];
+      const vg = husGrupp.userData.delar.vaggar; vg.updateMatrixWorld();
+      return dorrLador().map((x, i) => {
+        x.b.getCenter(pV); pV.applyMatrix4(vg.matrixWorld); pV.project(kamera);
+        return { i, typ: x.o[5], framfor: pV.z < 1, x: Math.round((pV.x * 0.5 + 0.5) * dukB), y: Math.round((0.5 - pV.y * 0.5) * dukH) };
+      });
+    },
     // styrspaken på pekskärm: spak(fram, sidled) med -1..1, spak(0, 0) = släppt
     spak: (fw, st) => satSpak(+fw || 0, +st || 0),
     // Tomt hus: tomt(true/false) döljer eller visar möblerna (tonas 0,4 s), tomt() läser läget
     tomt: (pa, opts) => (pa === undefined ? tomt.pa : satTomt(pa, opts)),
+    // Elbilen: bil('ut') kör iväg, bil('hem') kör hem, bil('parkera') står direkt hemma, bil() läser läget
+    // ('hemma', 'ut', 'borta', 'in'). Duken skickar 'husritare:bil' ({ lage }) när läget ändras.
+    bil(vad) {
+      if (typeof omgivning.bilKor !== 'function') return 'hemma';
+      if (vad === 'parkera') omgivning.bilParkera();
+      else if (vad === 'ut' || vad === 'hem') { if (!inneLage && !plan.pa && !(plan.t > 0)) omgivning.bilKor(vad); }
+      begarRender();
+      return omgivning.bilLage();
+    },
     // Planlösningen rakt ovanifrån: plan(true/false, { direkt }), plan() läser läget.
     // Duken skickar 'husritare:plan' ({ pa }) när läget ändras och 'husritare:planrum'
     // ({ vy, namn }) när man klickar på ett rum. planLage() är för bildverktygen.

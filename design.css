@@ -32997,6 +32997,19 @@ html body .platstopp__markor { display: none; }
 }
 @media (max-width: 900px) and (min-width: 600px) {
   html body .platstopp__platser { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  /* Fyra på rad: bilden ovanför namnet, så att även "I trädgården" ryms
+     med samma luft på båda sidor. */
+  html body .platstopp__plats,
+  html body .platstopp__plats[aria-checked="true"],
+  html[data-tema="mork"] body .platstopp__plats[aria-checked="true"] {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 8px 8px 16px;
+    text-align: center;
+  }
+  html body .platstopp__tumme { width: 100%; height: auto; aspect-ratio: 2 / 1; }
+  html body .platstopp__plats i { left: 16px; right: 16px; bottom: 7px; }
 }
 @media (max-width: 399px) {
   html body .platstopp__plats,

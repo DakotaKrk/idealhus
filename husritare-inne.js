@@ -27,6 +27,9 @@ let LAGER = 'botten', HARLOFT = false, HINDER = null, VAXTNR = 0, TRAPPOR = [], 
 let LOS = false, LOSA = [];
 const SNITT = [2.2, 3.4];
 const snitt = () => (HARLOFT ? SNITT : [SNITT[0]]);
+// Rör genom taket (köksfläktens skorsten, kaminens rökrör) delas här, under varje hus
+// snitthöjd i dockskåpet (motorn skär hus utan loft lägre än 2,2 m), så att inget rör står kvar
+const ROR_SNITT = 1.9;
 const lagerFor = y => (y < SNITT[0] ? 'botten' : (HARLOFT && y < SNITT[1] ? 'loft' : 'tak'));
 function iLager(l, fn) { const f = LAGER; LAGER = l; fn(); LAGER = f; }
 
@@ -92,12 +95,12 @@ const PROV = globalThis.__INNE_PROV || null;
 if (PROV && PROV.vyer) Object.entries(PROV.vyer).forEach(([id, l]) => l.forEach((v, i) => { if (v && INNE_VYER[id] && INNE_VYER[id][i]) Object.assign(INNE_VYER[id][i], v); }));
 const RUM = {
   'sadel-30': [['Allrum', 1.6, 0.2, 0, [3.5, 1.15, -0.45]], ['Kök', 2.15, -0.3, 0, [0.3, 1.5, -1.55]], ['Hall', -0.9, 0.6, 0, [3.2, 1.25, 0.3]],
-    ['Sovrum', -2.5, 0.8, 0, [-3.0, 0.95, -1.7]], ['WC/bad', -1.1, -0.6, 0, [-1.97, 1.3, -0.35]], ['Loft', -2.6, 0.5, 'loft', [2.5, 1.6, -0.5]]],
+    ['Sovrum', -2.5, 0.8, 0, [-3.0, 0.95, -1.7]], ['WC/bad', -1.1, -0.6, 0, [-1.97, 1.3, -0.35]], ['Loft', -2.6, 0.5, 'loft', [-3.3, 2.5, -1.3]]],
   'sadel-40': [['Allrum', 1.4, 0.0, 0, [4.7, 1.2, -0.4]], ['Kök', 2.5, -0.15, 0, [-0.4, 1.5, -1.2]], ['Hall', -1.9, 0.57, 0, [3.5, 1.3, 0.4]],
-    ['Sovrum', -3.95, 1.1, 0, [-3.96, 0.95, -1.7]], ['WC/bad', -2.2, -0.6, 0, [-3.02, 1.3, -0.55]], ['Loft', -1.6, -0.5, 'loft', [3.5, 1.6, 0.0]]],
+    ['Sovrum', -3.95, 1.1, 0, [-3.96, 0.95, -1.7]], ['WC/bad', -2.2, -0.6, 0, [-3.02, 1.3, -0.55]], ['Loft', -1.6, -0.5, 'loft', [-4.2, 2.45, -0.9]]],
   'sadel-50': [['Allrum', 2.3, 0.15, 0, [6.0, 1.2, 0.3]], ['Kök', 3.3, 0.12, 0, [0.6, 1.5, -1.0]], ['Hall', -0.55, 0.6, 0, [4.0, 1.3, 0.4]],
     ['Sovrum', -4.4, 1.33, 0, [-5.9, 1.0, -0.2]], ['WC/bad', -0.45, -0.5, 0, [0.435, 1.3, -0.44]], ['Bastu', -2.1, -0.45, 0, [-3.0, 1.0, -1.2]],
-    ['Loft', -1.5, -0.6, 'loft', [4.0, 1.6, 0.3]]],
+    ['Loft', -1.5, -0.6, 'loft', [-5.2, 2.45, -0.9]]],   // mal: in över loftet (förr österut över räcket)
   'pulpet-70': [['Vardagsrum', -0.6, 0.95, 0, [-4.5, 0.95, 2.4]], ['Vardagsrum och kök', 2.75, 1.5, 0, [4.75, 1.1, 2.6]], ['Hall', 3.73, -0.85, 0, [0.0, 1.2, 2.5]],
     ['Sovrum 1', -3.38, -0.55, 0, [-4.3, 0.95, -3.25]], ['Sovrum 2', -2.15, -0.55, 0, [-1.2, 0.95, -3.25]], ['Sovrum 3', 0.72, -0.5, 0, [-0.3, 0.95, -3.25]],
     ['WC/bad', 2.75, -2.15, 0, [3.3, 1.1, -3.25]]],
@@ -1282,14 +1285,14 @@ function stav(mk, F, y0, y1, n) {
 const RADER = (topp) => { const r = [-0.03, 0.06, 0.16, 0.34, 0.6]; for (let v = 0.95; v < topp; v += 0.4) r.push(v); return r; };
 
 // Golv (eller loftgolv) som finmaskigt rutnät med plankkartan.
-function golvYta(x0, x1, z0, z1, y = 0.004) {
+function golvYta(x0, x1, z0, z1, y = 0.004, sk = 2.4) {
   const kx = [], kz = [];
   VAGGAR.forEach(w => { if (w.axel === 'z') kx.push(w.c - w.t / 2, w.c + w.t / 2); else kz.push(w.c - w.t / 2, w.c + w.t / 2); });
   // badrummen har eget klinkergolv (med fall mot brunnen): trägolvet har hål där
   const bad = y < 0.1 ? BADRUM : [];
   bad.forEach(b => { kx.push(b.x0, b.x1); kz.push(b.z0, b.z1); });
   const xs = bryt(x0, x1, kx.filter(v => v > x0 && v < x1), 0.45), zs = bryt(z0, z1, kz.filter(v => v > z0 && v < z1), 0.45);
-  yta('golv', (u, v) => V(u, y, v), V(0, 1, 0), xs, zs, () => z1, bad.map(b => ({ u0: b.x0 + 0.002, u1: b.x1 - 0.002, v0: b.z0 + 0.002, v1: b.z1 - 0.002 })), p => [p.x / 2.4, p.z / 2.4]);
+  yta('golv', (u, v) => V(u, y, v), V(0, 1, 0), xs, zs, () => z1, bad.map(b => ({ u0: b.x0 + 0.002, u1: b.x1 - 0.002, v0: b.z0 + 0.002, v1: b.z1 - 0.002 })), p => [p.x / sk, p.z / sk]);
 }
 
 // Plant tak mellan två räta kanter (a0 -> a1 längs x vid z0, b0 -> b1 vid z1), y från f(x, z).
@@ -1349,6 +1352,75 @@ function trycke(mk, M, x, y, z, k, sx, vred = true) {
     // vred: en liten, rundad tunga på en kort hals
     lagg(mk, new T.CylinderGeometry(0.006, 0.0065, 0.012, 8, 1, true).rotateX(PI / 2), mx(x, y - 0.13, z + k * 0.014));
     rbx(mk, 0.008, 0.03, 0.012, x, y - 0.13, z + k * 0.024, 0.0035, 0, 0, 1);
+  });
+}
+// ---- El: vägguttag, strömbrytare och brandvarnare (fast inredning, syns i Tomt hus) ----
+// Jordat uttag (ett eller dubbelt) i husets ram: (x, y, z) på väggytan, normal (nx, nz) ut i
+// rummet. Vit ram med rundade kanter, försänkta runda uttag i ljusgrått med två hål och
+// jordbleck upptill och nertill. Allt i 'vit' (inget nytt material).
+function eluttag(x, y, z, nx, nz, n = 2) {
+  iRam(new T.Matrix4().makeTranslation(x, y, z).multiply(new T.Matrix4().makeRotationY(Math.atan2(nx, nz))), () => {
+    const W = n === 2 ? 0.15 : 0.082;
+    // skuggkant mot väggen (en mörkare, något större platta bakom ramen) och ramen, 9 mm ut
+    ton('#a9a59d', () => box('vit', W + 0.006, 0.086, 0.0012, 0, 0, 0.0006));
+    ton('#ebe9e4', () => rbx('vit', W, 0.08, 0.009, 0, 0, 0.0045, 0.0045, 0, 0, 1));
+    for (let i = 0; i < n; i++) { const cx = n === 2 ? (i - 0.5) * 0.072 : 0;
+      // (insatsen ligger framför ramens framsida: tidigare låg den inne i ramen och syntes inte)
+      // en rund kant som står upp runt en gråare, lite försänkt botten, två mörka hål och jordblecksskåror
+      ton('#f4f3ef', () => lagg('vit', new T.CylinderGeometry(0.0215, 0.0235, 0.0035, 12, 1, true).rotateX(PI / 2), mx(cx, 0, 0.0105)));
+      ton('#cfccc4', () => lagg('vit', new T.CircleGeometry(0.0215, 12), mx(cx, 0, 0.0098)));
+      ton('#1f1e1c', () => { for (const s of [-1, 1]) lagg('vit', new T.CircleGeometry(0.0036, 8), mx(cx + s * 0.0095, 0, 0.0104)); });
+      ton('#4a4844', () => { for (const s of [-1, 1]) box('vit', 0.01, 0.0028, 0.001, cx, s * 0.0175, 0.0104); });
+    }
+  });
+}
+// Strömbrytare (ram och vippa) i husets ram, som vid innerdörrarna.
+function elbrytare(x, y, z, nx, nz) {
+  iRam(new T.Matrix4().makeTranslation(x, y, z).multiply(new T.Matrix4().makeRotationY(Math.atan2(nx, nz))), () => {
+    ton('#f6f5f2', () => rbx('vit', 0.08, 0.08, 0.009, 0, 0, 0.0045, 0.004, 0, 0, 1));
+    ton('#fbfaf7', () => rbx('vit', 0.05, 0.05, 0.006, 0, 0, 0.0105, 0.003, 0, 0.06, 1));
+  });
+  BRYT.push(V(x + nx * 0.006, y, z + nz * 0.006));
+}
+// Brandvarnare i taket (husets ram): rund, låg kupa med fasad kant och en liten röd lysdiod.
+function brandvarnare(x, z, tak) {
+  iLager('tak', () => {
+    ton('#f3f2ee', () => svarv('vagg', [[0, 0], [0.05, 0], [0.052, -0.006], [0.048, -0.03], [0.04, -0.036], [0, -0.038]], x, tak, z, 14));
+    ton('#d9d7d1', () => { for (let i = 0; i < 4; i++) { const a = i * PI / 3; box('vagg', 0.012, 0.003, 0.0035, x + Math.cos(a) * 0.03, tak - 0.022, z + Math.sin(a) * 0.03, -a); } });
+    ton('#b8402f', () => cyl('vagg', 0.002, 0.002, 0.002, x + 0.014, tak - 0.0385, z, 6));
+  });
+}
+// Uttag på närmaste vägg (husets ram) intill punkten (x, z), i höjden y: körs när alla möbler
+// står (EFTER). Letar längs väggen efter en plats som inte är i en dörr- eller fönster-
+// öppning, inte bakom eller i en möbel och inte vid en annan dosa; ger upp hellre än att hamna fel.
+const ELPLATS = [];
+function eluttagVid(x, z, y = 0.25, n = 2, marg = 0.7) {
+  EFTER.push(() => {
+    const XA = -HH.L / 2 + I, XB = HH.L / 2 - I, ZA = -HH.W / 2 + I, ZB = HH.W / 2 - I, W = n === 2 ? 0.15 : 0.08;
+    const vaggar = [[x - XA, XA, 1, 0, 'z', ZA, ZB, true], [XB - x, XB, -1, 0, 'z', ZA, ZB, true], [z - ZA, ZA, 0, 1, 'x', XA, XB, true], [ZB - z, ZB, 0, -1, 'x', XA, XB, true]];
+    VAGGAR.forEach(v => { if (v.bunn > 0) return; const s = v.axel === 'x' ? x : z, q = v.axel === 'x' ? z : x; if (s < v.lo - 0.3 || s > v.hi + 0.3) return;
+      const sd = Math.sign(q - v.c) || 1, f = v.c + sd * v.t / 2; vaggar.push([sd * (q - f), f, v.axel === 'x' ? 0 : sd, v.axel === 'x' ? sd : 0, v.axel === 'x' ? 'x' : 'z', v.lo, v.hi, false, v]); });
+    vaggar.filter(k => k[0] > -0.02 && k[0] < marg).sort((a, b) => a[0] - b[0]).some(([d, f, nx, nz, langs, lo, hi, ytter, v]) => {
+      for (const ds of [0, 0.22, -0.22, 0.4, -0.4, 0.6, -0.6, 0.85, -0.85, 1.1, -1.1]) {
+        const s = (langs === 'x' ? x : z) + ds, px = langs === 'x' ? s : f + nx * 0.001, pz = langs === 'x' ? f + nz * 0.001 : s;
+        if (s < lo + W / 2 + 0.06 || s > hi - W / 2 - 0.06) continue;
+        // öppningar: innerväggarnas dörrar (plus dörrbladets sväng) och ytterväggarnas fönster och dörrar
+        if (v && v.hal.some(o => s > o.a - W / 2 - 0.12 && s < o.b + W / 2 + 0.12)) continue;
+        if (ytter && HAL.some(o => { if (Math.abs(o.f.n.x + nx) > 0.5 || Math.abs(o.f.n.z + nz) > 0.5) return false; if (o.v0 > y + 0.06) return false;
+          const pa = o.f.o.clone().addScaledVector(o.f.u, o.u0), pb = o.f.o.clone().addScaledVector(o.f.u, o.u1), a = langs === 'x' ? pa.x : pa.z, b = langs === 'x' ? pb.x : pb.z;
+          return s > Math.min(a, b) - W / 2 - 0.12 && s < Math.max(a, b) + W / 2 + 0.12; })) continue;
+        // möbler: inget i en låda 15 cm ut från väggen kring dosan (inte inne i eller bakom en möbel)
+        const bx0 = Math.min(px, px + nx * 0.08) - (langs === 'x' ? W / 2 + 0.03 : 0), bx1 = Math.max(px, px + nx * 0.08) + (langs === 'x' ? W / 2 + 0.03 : 0);
+        const bz0 = Math.min(pz, pz + nz * 0.08) - (langs === 'z' ? W / 2 + 0.03 : 0), bz1 = Math.max(pz, pz + nz * 0.08) + (langs === 'z' ? W / 2 + 0.03 : 0);
+        if (HINDER.some(hd => hd.niva !== 'loft' && hd.typ === 'mobel' && hd.x1 > bx0 && hd.x0 < bx1 && hd.z1 > bz0 && hd.z0 < bz1)) continue;
+        if (ELPLATS.some(p => Math.hypot(p[0] - px, p[2] - pz) < 0.3 && Math.abs(p[1] - y) < 0.5) || BRYT.some(b => Math.hypot(b.x - px, b.z - pz) < 0.2)) continue;
+        ELPLATS.push([px, y, pz]);
+        const ut = BADRUM.some(b => px > b.x0 && px < b.x1 && pz > b.z0 && pz < b.z1) ? 0.013 : 0;   // på kaklet i badrummet
+        eluttag(px + nx * ut, y, pz + nz * ut, nx, nz, n);
+        return true;
+      }
+      return false;
+    });
   });
 }
 // Fönsterhandtag: rundad rektangulär rosett mot karmen, en kort rund bas och ett platt,
@@ -1426,6 +1498,20 @@ function golvOchTak(H) {
   EFTER.forEach(f => f()); EFTER = [];
   golvYta(xa, xb, za, zb);
   iLager('tak', () => takOver(H, xa, xb, za, zb));
+  // reservtak 12 cm ovanför innertaket över loftet och trappans topp: på loftet står ögat
+  // bara några cm under det sluttande taket, kamerans närplan (0,1 m) klipper då bort
+  // innertaket och man såg himlen genom det. Ses bara underifrån (tak-materialet är enkelsidigt).
+  if (HARLOFT && LOFT.length && H.tak === 'sadel') {
+    const x1 = Math.min(xb, Math.max(...LOFT.map(r => r[1]), ...TRAPPOR.map(t => Math.max(t.xL, t.xH))) + 0.3);
+    const fr = (u, v) => CEIL(u, v) + 0.12, nock = CEIL(0, 0);
+    const ned = s => V(0, -1, s * (nock - CEIL(xa, za)) / Math.abs(za)).normalize();
+    const xk = H.kupa ? Math.min(x1, -H.L / 2 + H.kupa.langd) : xa;
+    iLager('tak', () => {
+      takYta('tak', xa, x1, za, 0, fr, ned(1));
+      if (xk > xa + 0.01) takYta('tak', xa, xk, 0, zb, fr, ned(-1));
+      if (x1 > xk + 0.01) takYta('tak', xk, x1, 0, zb, fr, ned(-1));
+    });
+  }
 }
 function takOver(H, xa, xb, za, zb) {
   if (H.tak === 'sadel') {
@@ -1506,6 +1592,9 @@ function oppningsDetaljer(H) {
         const sida = s === 'N' || s === 'W' ? -1 : 1;
         // trycke och låsvred (förr raka svarta lådor): samma modell som innerdörrarna
         trycke('svart', m0, rcu + sida * (rw / 2 - 0.07), 1.0, dn - dd / 2, -1, -sida);
+        // strömbrytare på väggen vid låssidan, utanför fodret (fodret är 6 cm brett)
+        { const us = (sida > 0 ? h.u1 : h.u0) + sida * 0.13;
+          if (us > ua + 0.1 && us < ub - 0.1 && !hal.some(h2 => h2 !== h && us > h2.u0 - 0.15 && us < h2.u1 + 0.15)) { const p = V(us, 1.1, -I).applyMatrix4(m0), nn = V(0, 0, -1).transformDirection(m0); elbrytare(p.x, 1.1, p.z, nn.x, nn.z); } }
       }
       // foderlist runt om på väggens insida
       const A = 0.06, fn = -I - 0.009, fd = 0.018;
@@ -1702,7 +1791,8 @@ function trappa(xL, xH, z0, z1, hojd = LT) {
   const hv = Math.max(0.13 / Math.cos(a), r + 0.0275), c0 = r + 0.015 - hv, k = hojd / run;
   const uB = (hv - c0) / k, uT = (hojd - 0.005 - c0 - hv) / k;
   const vform = [[0, 0], [uB, 0], [run, hojd + c0 - hv], [run, hojd - 0.005], [uT, hojd - 0.005], [0, c0 + hv]].map(([u, y]) => new T.Vector2(xL + dir * u, y));
-  for (const zc of [z0 + 0.02, z1 - 0.025]) lagg('vit', new T.ExtrudeGeometry(new T.Shape(vform), { depth: 0.04, bevelEnabled: false }), mx(0, 0, zc - 0.02));
+  // (vangerna i ek som stegen och räcket: vita syntes de som lösa skivor vid loftkanten)
+  for (const zc of [z0 + 0.02, z1 - 0.025]) lagg('ek', new T.ExtrudeGeometry(new T.Shape(vform), { depth: 0.04, bevelEnabled: false }), mx(0, 0, zc - 0.02));
   // ledstång på den öppna sidan: en sammanhängande rundad ekprofil 45 x 45, 0,9 m över
   // nosarna; den slutar med en stolpe innan taket blir för lågt. Pinnar från vangen upp.
   const zr = z0 + 0.02, xa = t => xL + dir * run * t, yv = t => t * hojd + r + 0.015;
@@ -1711,7 +1801,7 @@ function trappa(xL, xH, z0, z1, hojd = LT) {
   if (tE > t0 + 0.1) {
     const L = Math.hypot(run * (tE - t0), hojd * (tE - t0)), tm = (t0 + tE) / 2;
     rbx('ek', L, 0.045, 0.045, xa(tm), yr(tm), zr, 0.012, 0, 0, 2, rz);
-    rbx('ek', L, 0.02, 0.06, xa(tm), yv(tm) + 0.01, zr, 0.004, 0, 0, 1, rz);   // vangens täcklist
+    rbx('ek', L, 0.02, 0.06, xa(tm), yv(tm) + 0.01, zr, 0.004, 0, 0, 1, rz);   // vangens täcklist, mellan stolparna
     const nb = Math.floor(run * (tE - t0) / 0.13);
     for (let i = 1; i < nb; i++) { const t = t0 + (tE - t0) * i / nb, h = yr(t) - 0.03 - yv(t) - 0.02; box('ek', 0.028, h, 0.028, xa(t), yv(t) + 0.02 + h / 2, zr); }
     for (const t of [t0, tE]) { const h = yr(t) + 0.04 - yv(t); rbx('ek', 0.07, h, 0.07, xa(t), yv(t) + h / 2, zr, 0.01, 0, 0, 2); }
@@ -1840,6 +1930,14 @@ function loftInne(xA, zA, xB, zTrappa) {
   const XW = -HH.L / 2 + I, ZN = -HH.W / 2 + I, ZS = HH.W / 2 - I;
   dack(XW, xA, ZN, zA);
   dack(XW, xB, zA, ZS);
+  // sarg i ek längs bjälklagets öppna kanter: täcker kanten från undersidan upp i jämnhöjd med
+  // loftgolvet (förr syntes en tunn vit kant med en ljus glipa mellan golv och bjälklag)
+  {
+    const t = 0.022, h = LT - LU + 0.012, y = LT + 0.004 - h / 2;
+    rbx('ek', xA - xB + t, h, t, (xA + xB + t) / 2, y, zA + t / 2, 0.005, 0, 0, 1);
+    rbx('ek', t, h, zA - ZN + t, xA + t / 2, y, (ZN + zA + t) / 2, 0.005, 0, 0, 1);
+    rbx('ek', t, h, ZS - zA, xB + t / 2, y, (zA + ZS) / 2, 0.005, 0, 0, 1);
+  }
   relang('z', xA - 0.03, ZN, zA);
   // räckena möts i gemensamma hörnstolpar (xA - 0,03, zA - 0,03) och (xB - 0,03, zA - 0,03)
   relang('x', zA - 0.03, xB - 0.06, xA);
@@ -1919,12 +2017,23 @@ function loftMer(XW, xA, zA, xB, ZN, ZS) {
   if (xB - XW > 2.4) {
     upp(XW + 1.35, 1.0, 0, () => { matta(0, 0, 1.5, 1.0, 0, '#d8cdbb', 1); MATTOR.pop(); });
     // (kistan stod precis vid trappans topp och spärrade vägen in på loftet: nu längre västerut)
-    upp(XW + 1.7, ZS - 0.42, 0, () => {
+    upp(XW + 1.7, ZS - 0.42, PI, () => {   // framsidan mot rummet, inte mot takfallet
       skugga(0, 0, 0.8, 0.38, 0, 0.1, 0.4, 0.038); hind(0.8, 0.38);
-      rbx('ek', 0.8, 0.26, 0.38, 0, 0.157, 0, 0.01, 0, 0, 1); rbx('ek', 0.82, 0.04, 0.4, 0, 0.309, 0, 0.01, 0, 0, 1);
-      ton('#9a7a58', () => { for (const s of [-1, 1]) box('ek', 0.05, 0.012, 0.36, s * 0.33, 0.021, 0); });
-      ton('#6b5a4a', () => rbx('ek', 0.05, 0.04, 0.006, 0, 0.27, 0.193, 0.002, 0, 0, 1));   // läderhasp
-      vikt(0.42, 0.3, 0.05, -0.12, 0.329, 0, 0.1, '#b9c2a6', 'stick');
+      // kista: indragen sockel, stomme med ramverk och fyllning framtill, lock med överstick och
+      // en mörk fog, hörnbeslag och handtag i grafit, läderhasp (förr en slät låda)
+      ton('#8c6c4c', () => rbx('ek', 0.74, 0.045, 0.32, 0, 0.0225, 0, 0.006, 0, 0, 1));
+      rbx('ek', 0.8, 0.25, 0.38, 0, 0.17, 0, 0.008, 0, 0, 1);
+      ton('#c39a6e', () => { for (const s of [-1, 1]) rbx('ek', 0.33, 0.15, 0.008, s * 0.19, 0.17, 0.19, 0.004, 0, 0, 1); });   // fyllningar
+      ton('#2b2520', () => box('ek', 0.802, 0.004, 0.382, 0, 0.296, 0));   // fog under locket
+      rbx('ek', 0.82, 0.036, 0.4, 0, 0.316, 0, 0.012, 0, 0, 2);
+      ton('#3d3a36', () => {
+        for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+          box('svart', 0.004, 0.25, 0.03, sx * 0.402, 0.17, sz * 0.176); box('svart', 0.03, 0.25, 0.004, sx * 0.386, 0.17, sz * 0.192);
+        }
+        for (const sx of [-1, 1]) { rbx('svart', 0.014, 0.022, 0.12, sx * 0.409, 0.24, 0, 0.005, 0, 0, 1); }
+      });
+      ton('#6b5a4a', () => rbx('ek', 0.05, 0.06, 0.006, 0, 0.285, 0.2025, 0.002, 0, 0, 1));   // läderhasp
+      vikt(0.42, 0.3, 0.05, -0.12, 0.335, 0, 0.1, '#b9c2a6', 'stick');
     });
   }
   SEED = s0;
@@ -1933,7 +2042,9 @@ function loftMer(XW, xA, zA, xB, ZN, ZS) {
 // Loftets undersida och golv (finmaskigt), läggs när alla väggar finns
 function loftYtor() {
   LOFT.forEach(([x0, x1, z0, z1]) => iLager('loft', () => {
-    golvYta(x0, x1, z0, z1, LT + 0.003);
+    // (samma ek som nere, i lite smalare brädor: 17 cm i stället för 20, så att golvet nära
+    // ögonhöjd i trappan inte ser ut som stora skivor)
+    golvYta(x0, x1, z0, z1, LT + 0.003, 2.0);
     takYta('tak', x0, x1, z0, z1, () => LU - 0.003, V(0, -1, 0));
   }));
 }
@@ -2245,6 +2356,8 @@ function soffa0(w, d0 = 0.86, o = {}) {
   [-1, 1].forEach(k => sitt('Soffan', [k * w * 0.22, 1.1, 0.02], [k * w * 0.1, 0.95, 2.6], [w * 0.4, 0.45, d * 0.8, k * w * 0.22, 0.3, 0.05]));
   skugga(0, 0, w, d, 0, 0.2, 0.6);
   hind(w, d);
+  // vägguttag vid soffans ena gavel (lampa och laddare)
+  if (LAGER !== 'loft') for (const sx of [1, -1]) { const p = V(sx * (w / 2 + 0.18), 0, -d / 2).applyMatrix4(BAS); eluttagVid(p.x, p.z, 0.25); }
   ton('#7a5a3c', () => {
     for (const sx of [-1, 1]) for (const sz of [-1, 1]) cyl('ek', 0.018, 0.012, 0.1, sx * (w / 2 - 0.1), 0.05, sz * (d / 2 - 0.1), 10);
   });
@@ -2316,6 +2429,7 @@ function bord(w, d, h = 0.74) {
   SENBORD = [w, d];
   skugga(0, 0, w, d, 0, 0.18, 0.28);
   hind(w, d);
+  { const p = V(0, 0, 0).applyMatrix4(BAS); eluttagVid(p.x, p.z, 0.25, 2, 1.3); }   // uttag på väggen närmast matbordet
   rbx('ek', w, 0.032, d, 0, h - 0.016, 0, 0.01, 0, 0, 2);
   rbx('ek', w - 0.12, 0.06, d - 0.12, 0, h - 0.062, 0, 0.005, 0, 0, 1);
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) lagg('ek', new T.CylinderGeometry(0.024, 0.017, h - 0.032, 10), mx(sx * (w / 2 - 0.08), (h - 0.032) / 2, sz * (d / 2 - 0.08)));
@@ -2503,6 +2617,11 @@ function sang0(w, l = 2.05, o = {}) {
 function nattbord(o = {}) {
   skugga(0, 0, 0.42, 0.38, 0, 0.1, 0.45);
   hind(0.42, 0.36);
+  { const p = V(0, 0, -0.1).applyMatrix4(BAS); eluttagVid(p.x, p.z, 0.25); }   // uttag bredvid nattduksbordet (lampa och laddare)
+  // laddsladd till en telefon på skivan: kabeln går över bakkanten ned mot väggen
+  { const s = o.sida ?? 1;   // (telefonen framför lampan, sladden förbi lampfoten och ned bakom)
+    ton('#ecebe7', () => tub('vit', [V(0.1 * s, 0.532, 0.066), V(0.17 * s, 0.532, 0.03), V(0.19 * s, 0.532, -0.1), V(0.19 * s, 0.53, -0.18), V(0.19 * s, 0.49, -0.2), V(0.19 * s, 0.38, -0.205)], 0.0018, 0.0018, 12, 4));
+    ton('#2b2b2c', () => glans(0.4, () => rbx('keramik', 0.072, 0.008, 0.15, 0.1 * s, 0.534, 0.14, 0.009, 0.15 * s, 0, 1))); }   // telefon
   // smala avsmalnande ekben, stomme med öppen hylla, låda upptill och en 2 cm skiva med utstick
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) lagg('ek', new T.CylinderGeometry(0.014, 0.01, 0.2, 10), mx(sx * 0.18, 0.1, sz * 0.13));
   stomme('ek', 0.42, 0.3, 0.34, 0, 0.2, -0.01, null, { utanTak: true, inre: '#d8bf98', hyllor: [0.375] });
@@ -2714,7 +2833,7 @@ function garderobInne0(w, d, h, typ) {
   ton(BJORK, () => { box('vit', hw, 0.018, dz, 0, hylla, zc); ton('#f6f2ea', () => box('vit', hw, 0.02, 0.003, 0, hylla, z1)); });
   lagg('spegel', new T.CylinderGeometry(0.012, 0.012, hw, 12).rotateZ(PI / 2), mx(0, sy, zc));
   for (const s of [-1, 1]) cyl('spegel', 0.018, 0.018, 0.012, s * (xi - 0.004), sy, zc, 16, false, 0, PI / 2);
-  const steg = typ === 'hall' ? 0.13 : 0.104, n = Math.floor((2 * xi - 0.06) / steg);
+  const steg = typ === 'hall' ? 0.14 : 0.112, n = Math.floor((2 * xi - 0.06) / steg);
   let s = 77; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < n; i++) {
     const x = -xi + 0.04 + i * steg + (r() - 0.5) * 0.015, L = typ === 'hall' ? 0.85 + r() * 0.2 : (r() < 0.25 ? 1.05 : 0.62 + r() * 0.25), bw = Math.min(dz - 0.12, 0.4) * (0.8 + 0.2 * ((i * 0.618) % 1)), ry = (r() - 0.5) * (i % 3 === 2 ? 0.5 : 0.2);   // olika breda, någon hänger snett
@@ -2771,7 +2890,7 @@ function plagg(x, sy, zc, bw, L, typ, fg, ry = 0, o = {}) {
   const AF = rock ? 0.16 : kl ? 0.45 : jacka ? 0.03 : byxa ? -0.1 : kofta ? 0.06 : 0.02;
   const VK = (kl ? 1.6 : byxa ? 0.55 : jacka ? 0.6 : rock ? 0.85 : 1) * (0.75 + 0.5 * h1);
   const SL = byxa ? 0 : 0.055, tS = byxa ? 0.05 : Math.min(0.2, 0.11 / L * 0.9);
-  const fin = !!o.fin, NA = fin ? 26 : 15;
+  const fin = !!o.fin, NA = fin ? 26 : 13;
   const T0 = fin ? [0, 0.015, 0.03, 0.05, 0.07, 0.09, 0.11, 0.14, 0.18, 0.24, 0.31, 0.39, 0.47, 0.55, 0.63, 0.71, 0.79, 0.86, 0.92, 0.97, 1]
     : [0, 0.03, 0.06, 0.09, 0.13, 0.2, 0.3, 0.42, 0.55, 0.68, 0.8, 0.9, 0.96, 1];
   const yT = t => byxa ? -L * t : t < tS ? -SL * (1 - Math.cos(t / tS * PI / 2)) : -SL - (L - SL) * (t - tS) / (1 - tS);
@@ -2949,6 +3068,9 @@ function handfat(o = {}) {
   spegelYta(0, 1.58, -0.204, 0.3);
   const sl = egenLampa('Spegelbelysning', [0, 1.58, -0.2], () => ton('#e2ded6', () => lagg('lampa', new T.RingGeometry(0.299, 0.311, 64, 1), mx(0, 1.58, -0.2075))), false, []);   // ingen gloria mitt på spegeln; ljusringen 1,2 cm (förr 2,6 cm: såg ut som ett tjockt vitt rör när den var släckt)
   sken(sl, 0, 1.58, -0.2115, 0.36, 0.36, 0.42, true, 0.24);   // mjukt sken på kaklet runt spegeln
+  // jordat uttag på kaklet bredvid spegeln (rakapparat, hårtork), på motsatt sida om handdukarna
+  // (utanpå kaklet: förr låg dosan inne i plattan)
+  { const p = V(-(o.sida ?? 1) * 0.315, 1.08, -0.2295 + 0.013).applyMatrix4(BAS), nn = V(0, 0, 1).transformDirection(BAS); eluttag(p.x, p.y, p.z, nn.x, nn.z, 1); ELPLATS.push([p.x, 1.08, p.z]); }
   // smal ekhylla under spegeln: tvålpump, tandborstmugg, ljus och en liten växt
   rbx('ek', 0.52, 0.022, 0.11, 0, 1.24, -0.175, 0.005, 0, 0, 2);
   const yh = 1.251;
@@ -3668,6 +3790,18 @@ function kok(k) {
       if (sx0 != null) kastrull(sx0 - 0.14, 0.8555, -0.08);
       if (sx0 != null) bort(sx0 - 0.29 - 0.05, sx0 + 0.29 + 0.05);
       if (k.horn != null) { const hx = lx(k.horn); bort(hx - 0.64, hx + 0.64); }
+      // vägguttagen väljs först (110 cm över golvet, under överskåpen): bredvid hällen och hon
+      // men inte över dem, minst 70 cm isär. Höga saker på bänken och knivlisten ställs sedan
+      // så att de inte skymmer uttagen (förr hamnade uttaget bakom redskapskrukan)
+      const elU = [];
+      reg.forEach(([p, q]) => { for (let c = p + 0.1; c <= q - 0.1; c += 0.05) {
+        if (sx0 != null && Math.abs(c - sx0) < 0.37) continue;
+        if (dx != null && Math.abs(c - dx) < 0.32) continue;
+        if (k.horn != null && Math.abs(c - lx(k.horn)) < 0.64) continue;
+        if (elU.some(v => Math.abs(v - c) < 0.7) || elU.length >= 3) continue;
+        elU.push(c);
+      } });
+      elU.forEach(c => bort(c - 0.09, c + 0.09));
       // föremål i tur och ordning: bredd och hur de ställs ut
       const saker = [
         [0.12, xc => redskap(xc, 0.852, -0.228)],
@@ -3683,7 +3817,7 @@ function kok(k) {
         [0.18, xc => kokshandduk(xc, 0.852, 0.06)],
         [0.1, xc => mugg(xc, 0.852, 0.1, '#c8b9a2', 0.5)],
       ];
-      const upptaget = [], tagen = new Set();   // höga föremål vid väggen (redskap, skärbräda) som knivlisten ska undvika
+      const upptaget = elU.map(c => [c - 0.1, c + 0.1]), tagen = new Set();   // höga föremål vid väggen (redskap, skärbräda) och uttagen, som knivlisten ska undvika
       // varje fri bänkyta fylls i tur och ordning med det som ryms (ett föremål som inte får
       // plats hoppas över, så att nästa mindre kan ta platsen); överbliven plats delas jämnt
       for (const iv of fri) {
@@ -3710,6 +3844,9 @@ function kok(k) {
             ton('#6b5a4a', () => rbx('ek', 0.024, 0.11, 0.018, bx + ox, yk + 0.075, zk + 0.0195 + 0.002, 0.006, 0, 0, 1));
           });
         }
+        // vägguttagen på stänkskyddet (platserna valda före föremålen ovan)
+        { const nyU = V(0, 0, 1).transformDirection(BAS); LOS = false;
+          elU.forEach(c => { const w = V(c, 1.05, -0.2873).applyMatrix4(BAS); eluttag(w.x, w.y, w.z, nyU.x, nyU.z, 2); }); }
       }
       LOS = los0;
     }
@@ -3764,13 +3901,15 @@ function flakt(k, sx0, span, cx, cz) {
     ton('#c9c9c4', () => { for (let j = 0; j < 4; j++) box('vit', 0.012, 0.003, 0.001, sx0 + 0.16 + j * 0.03, 1.418, 0.0118); });
     return;
   }
-  const wp = V(sx0, 0, -0.19).applyMatrix4(BAS), tt = takVid(wp.x, wp.z) - 0.002, y0 = 1.69, mid = Math.min(tt, SNITT[0]);
+  // (skorstenen delas vid ROR_SNITT, under varje hus snitthöjd i dockskåpet: delen ovanför ligger
+  // i taklagret och döljs med det; förr delades den vid 2,2 m och stack upp ur de skurna väggarna)
+  const wp = V(sx0, 0, -0.19).applyMatrix4(BAS), tt = takVid(wp.x, wp.z) - 0.002, y0 = 1.69, mid = Math.min(tt, ROR_SNITT);
   ton('#c9c9c6', () => { stalBox(0.6, 0.05, 0.5, sx0, 1.545, -0.05, 0.004); stalBox(0.3, 0.12, 0.26, sx0, 1.63, -0.17, 0.004); stalBox(0.26, mid - y0, 0.22, sx0, (y0 + mid) / 2, -0.19, 0.003); });
   // fettfilter i borstat stål med lameller, två lampor och knappar på kåpans framkant
   ton('#bdbdba', () => { stalBox(0.52, 0.003, 0.42, sx0, 1.5185, -0.05, 0.001); for (let j = 0; j < 10; j++) stalBox(0.004, 0.002, 0.4, sx0 - 0.225 + j * 0.05, 1.5165, -0.05, 0.0008); });
   ton('#fff6e2', () => { for (const s of [-1, 1]) cyl('vit', 0.02, 0.02, 0.002, sx0 + s * 0.27, 1.5195, 0.17, 16); });
   ton('#55575a', () => { for (let j = 0; j < 4; j++) cyl('vit', 0.006, 0.006, 0.002, sx0 + 0.13 + j * 0.035, 1.545, 0.2008, 12, false, PI / 2); });
-  if (tt > SNITT[0] + 0.02) iLager(lagerFor(tt - 0.01), () => ton('#c9c9c6', () => stalBox(0.26, tt - SNITT[0], 0.22, sx0, (SNITT[0] + tt) / 2, -0.19, 0.003)));
+  if (tt > ROR_SNITT + 0.02) iLager(HARLOFT && tt < SNITT[1] ? 'loft' : 'tak', () => ton('#c9c9c6', () => stalBox(0.26, tt - ROR_SNITT, 0.22, sx0, (ROR_SNITT + tt) / 2, -0.19, 0.003)));
 }
 // Inbyggd ugn under hällen: mörkt ugnsrum, kontrollpanel i svart glas med två vred i
 // stål och en display, och en nedfällbar lucka med fönster och handtag. Lokalt i bänken.
@@ -4675,6 +4814,7 @@ function bordslampa(x, y, z, s = 1, fot = '#c9b8a0') {
 
 // Ljusskärm på väggarm (sänglampa): (x, z) vid väggytan, ry så att +z pekar ut i rummet.
 function vagglampa(x, y, z, ry) {
+  if (LAGER !== 'loft') eluttagVid(x + Math.sin(ry) * 0.05, z + Math.cos(ry) * 0.05, 0.3, 1);   // uttag under vägglampan
   med(x, z, ry, () => {
     // väggplatta i grafit, arm och hals i mässing
     ton('#4f4d49', () => cyl('diskstal', 0.035, 0.035, 0.012, 0, y - 0.045, 0.006, 24, false, PI / 2));
@@ -4764,7 +4904,7 @@ function sko(x, y, z, ry, typ, fg, sida = 1) {
     // ovandelen: halv båge per tvärsnitt, från sulkant över vristen till sulkant
     {
       // (skor inne i garderober: färre segment runt om och ingen snörning, de syns bara på avstånd)
-      const NA = SKO_ENKEL ? 7 : 12, i0 = toff ? 9 : 0, pos = [], ix = [];
+      const NA = SKO_ENKEL ? 5 : 12, i0 = toff ? 9 : 0, pos = [], ix = [];
       for (let i = i0; i < n; i++) { const u = SKO_U[i], w = SKO_W[i], c = cx(u), h = hov[i] * (toff && i === i0 ? 0.92 : 1);
         for (let a = 0; a < NA; a++) { const [px, py] = skoSek(i, a / (NA - 1) * PI, w, h, kfU(u));
           pos.push(c + px, sh(u) - 0.002 + py, zU(u)); }
@@ -4825,6 +4965,7 @@ function hallbank(w = 0.9, d = 0.34) {
 // Hallen vid ytterdörren: skobricka med kant och tre par skor (utan bänk), en krokrad i
 // ek med runda knaggar, en rock och en väska som hänger på knaggarna.
 function hallen(x, z, ry, o = {}) {
+  eluttagVid(x + Math.sin(ry) * 0.05, z + Math.cos(ry) * 0.05, 0.3);   // uttag i hallen (dammsugare, laddare)
   med(x, z, ry, () => {
     if (!o.bank) {
       ton('#2a2826', () => {
@@ -4964,11 +5105,11 @@ function kamin(ved = 1) {
   ton('#3a3733', () => glans(1.7, () => {
     const yt = 0.078 + 0.62;
     // rökrör upp till taket
-    const wp = V(0, 0, -0.06).applyMatrix4(BAS), tt = Math.max(...[0, 1.57, 3.14, 4.71].map(a => takVid(wp.x + Math.cos(a) * 0.066, wp.z + Math.sin(a) * 0.066))) + 0.005, mid = Math.min(tt, SNITT[0]);
+    const wp = V(0, 0, -0.06).applyMatrix4(BAS), tt = Math.max(...[0, 1.57, 3.14, 4.71].map(a => takVid(wp.x + Math.cos(a) * 0.066, wp.z + Math.sin(a) * 0.066))) + 0.005, mid = Math.min(tt, ROR_SNITT);
     // takkrage som följer takfallet
     { const [rx, rz] = takLut(wp.x, wp.z); iLager(lagerFor(takVid(wp.x, wp.z) - 0.01), () => iRam(new T.Matrix4().makeTranslation(wp.x, takVid(wp.x, wp.z) - 0.006, wp.z), () => lagg('keramik', new T.CylinderGeometry(0.095, 0.095, 0.012, 32), mx(0, 0, 0, 0, rx, rz)))); }
     cyl('keramik', 0.065, 0.065, mid - yt, 0, (yt + mid) / 2, -0.06, 24, true);
-    if (tt > SNITT[0] + 0.02) iLager(lagerFor(tt - 0.01), () => cyl('keramik', 0.065, 0.065, tt - SNITT[0], 0, (SNITT[0] + tt) / 2, -0.06, 24, true));
+    if (tt > ROR_SNITT + 0.02) iLager(HARLOFT && tt < SNITT[1] ? 'loft' : 'tak', () => cyl('keramik', 0.065, 0.065, tt - ROR_SNITT, 0, (ROR_SNITT + tt) / 2, -0.06, 24, true));
   }));
   platta('glas', 0.23, 0.25, mx(0, 0.078 + 0.32, 0.192), null, [1, 1]);
   // eldstadens insida: sotig chamotte i mörkt varmgrått (bakvägg och sidor)
@@ -5878,7 +6019,7 @@ export function* byggInneSteg(THREE, id, H) {
   yield* lagaMaterialSteg();
   ACC = new Map(); BAS = new T.Matrix4(); HH = H; CEIL = lagaTak(H); LJUS = null;
   VAGGAR = []; LOFT = []; HAL = []; TON = null; RGH = 1; EFTER = []; BADRUM = []; DUSCHAR = [];
-  SPEGLAR = []; OPP = []; LAMPOR = []; SITT = []; BRYT = []; ID = id; NSTOL = 0; NSANG = 0; SEED = 7; LAGER = 'botten'; VAXTNR = 0;
+  SPEGLAR = []; OPP = []; LAMPOR = []; SITT = []; BRYT = []; ID = id; NSTOL = 0; NSANG = 0; SEED = 7; LAGER = 'botten'; VAXTNR = 0; ELPLATS.length = 0;
   HARLOFT = ['sadel-30', 'sadel-40', 'sadel-50'].includes(id);
   HINDER = []; TRAPPOR = []; VAVL = null; LJUSL = []; ELD = null; MATTOR = [];
   // ytterväggarna som hinder på alla nivåer
@@ -5893,6 +6034,9 @@ export function* byggInneSteg(THREE, id, H) {
   LOS = true; LOSA = [];   // i husens möblering är allt löst utom det som FAST-listan pekar ut
   if (MODELL[id]) yield* MODELL[id]();
   LOS = false;
+  // brandvarnare i taket i hall, sovrum och på loftet (fast, syns i Tomt hus)
+  (RUM[id] || []).forEach(([namn, x, z, nv]) => { if (!/hall|sovrum|loft|korridor/i.test(namn)) return;
+    const px = x + 0.42, pz = z; iLager(nv === 'loft' ? 'loft' : 'botten', () => brandvarnare(px, pz, nv === 'loft' ? CEIL(px, pz) : takVid(px, pz))); });
   yield;
   golvOchTak(H);
   yield;

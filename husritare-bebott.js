@@ -106,6 +106,14 @@ export function skapaBebott(THREE, rot, VU) {
       [-0.2, 0.2].forEach(h => cyl(0.1, 0.1, 0.05, 12, mat('#1b1c1d', 0.7), g, x + h, 0.1, 0.07, 0, 0, Math.PI / 2));
       if (sno) rund(0.5, 0.06, 0.58, 0.025, snoMat(), g, x, 1.06, 0.34);
     });
+    // sopskärm: liggande bräder på baksidan och sidorna, stolpar i hörnen
+    const tra = mat('#6a4e36', 0.85), stolp = mat('#5a4230', 0.85);
+    for (let k = 0; k < 6; k++) {
+      const y = 0.14 + k * 0.19;
+      [-0.72, 0.72].forEach(x => lada(0.025, 0.13, 0.74, tra, g, x, y, 0.36));   // bara sidorna (en fristående bakvägg lästes som en lös skiva)
+    }
+    [[-0.72, -0.03], [0.72, -0.03], [-0.72, 0.72], [0.72, 0.72]].forEach(([x, z]) => lada(0.07, 1.2, 0.07, stolp, g, x, 0.6, z));
+    lada(1.5, 0.05, 0.82, tra, g, 0, 1.22, 0.35);   // tak över kärlen
     return g;
   }
   function cykel() {
@@ -533,7 +541,8 @@ export function skapaBebott(THREE, rot, VU) {
   function satt(namn, mal, plats) {
     stada();
     if (!mal || namn === 'studio' || !mal.blockerad) return;
-    const sno = namn === 'vinter', skog = namn === 'skog', tradgard = namn === 'tradgard';
+    // vid sjön och villaområdet möbleras tomten som trädgården (odlingslådor, tvättlina, gunga …)
+    const sno = namn === 'vinter', skog = namn === 'skog', villa = namn === 'villa', tradgard = namn === 'tradgard' || villa || namn === 'kust';
     const { L, W, dorr, dack } = mal, hy = mal.hy || (() => 0);
     const r = slump(Math.round(L * 131 + W * 977 + dorr.x * 53 + dorr.z * 71 + (dorr.nx + 2) * 7 + (dorr.nz + 2) * 3) * 7 + namn.length * 1013);
     const brus = (x, z) => { const s = Math.sin(x * 12.9898 + z * 78.233 + L * 3.1 + W) * 43758.5453; return s - Math.floor(s); };
@@ -653,7 +662,7 @@ export function skapaBebott(THREE, rot, VU) {
     // helst vid bilplatsens yttre ände, på sidan bort från entrén (där sopbilen hämtar), inte framför dörren
     const vg = plats && plats.vag;
     const bilP = vg ? [vg.x0 + plats.t[0] * vg.sida * 2.7 - plats.n[0] * 0.9, vg.z0 + plats.t[1] * vg.sida * 2.7 - plats.n[1] * 0.9] : [dorr.x + n[0] * 4, dorr.z + n[1] * 4];
-    const sk = hittaFri(1.2, 0.7, (x, z) => Math.hypot(x - bilP[0], z - bilP[1]) * 0.5 + (Math.hypot(x - dorr.x, z - dorr.z) < 3.6 ? 4 : 0) + kant(x, z) * 0.2, 8);
+    const sk = hittaFri(1.55, 0.85, (x, z) => Math.hypot(x - bilP[0], z - bilP[1]) * 0.5 + (Math.hypot(x - dorr.x, z - dorr.z) < 3.6 ? 4 : 0) + kant(x, z) * 0.2, 8);
     if (sk) placera(sopkarl(sno), sk.ox, sk.oz, sk.ry);
 
     // 3. cykeln i ett cykelställ några meter från dörren (inte på vintern)
@@ -697,11 +706,17 @@ export function skapaBebott(THREE, rot, VU) {
     if (plats && plats.vag) {
       const v = plats.vag, pn = plats.n, pt = plats.t;
       let ok = false;
-      for (const sv of [10, 9, 11, 8, 12, 7]) {
+      // villaområdet: vid gatan (uppfarten slutar vid trottoaren, plats.vagL), i rad med grannarnas lådor
+      for (const sv of villa && plats.vagL ? [plats.vagL - 0.55, plats.vagL - 1.1] : [10, 9, 11, 8, 12, 7]) {
         for (const sd of [v.sida, -v.sida]) {
           const lat = vagBoj(sv) * v.sida + sd * (VAG.B / 2 + VAG.kant + 0.45), x = v.x0 + pn[0] * sv + pt[0] * lat, z = v.z0 + pn[1] * sv + pt[1] * lat;
           if (!nf.fri(x, z, 0.3) || (mal.pollare || []).some(([px, pz]) => Math.hypot(x - px, z - pz) < 1.2)) continue;
-          placera(brevlada(sno), x, z, fram(-pt[0] * sd, -pt[1] * sd)); boka(x, z, 0.4); ok = true; break;
+          placera(brevlada(sno), x, z, fram(-pt[0] * sd, -pt[1] * sd)); boka(x, z, 0.4); ok = true;
+          if (villa) for (const k of [1, 2]) {
+            const x2 = x - pn[0] * 0.34 * k, z2 = z - pn[1] * 0.34 * k;   // sida vid sida (lådorna vetter mot uppfarten)
+            placera(brevlada(sno), x2, z2, fram(-pt[0] * sd, -pt[1] * sd)); boka(x2, z2, 0.3);
+          }
+          break;
         }
         if (ok) break;
       }

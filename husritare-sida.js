@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261120h';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261125d';
 
-const MOTOR_V = '20261120h';
+const MOTOR_V = '20261125d';
 // Standardutseendet: utan val i adressen (och när man kommer tillbaka till sidan med bakåtknappen
 // eller laddar om den) möts man av samma bild varje gång: Kupa 40 i falurött med svart tak och
 // vita detaljer, vinter, gyllene timmen, kameran i startvyn. Adressen som sidan själv skriver
@@ -172,6 +172,8 @@ try {
     // ljusets snabbval glider i motorn; reglaget och klockan följer varje steg
     vidTid: t => foljTid(t),
     vidFlyg: i => visaFlyg(i),
+    // klick eller tryck på ytterdörren utifrån: samma som Se inne (åkningen genom dörren)
+    vidDorrIn: () => { dorrTipsSett(); if (vyLage() === 'ute') bytLage('inne'); },
   });
   ritare.tema(document.documentElement.getAttribute('data-tema') === 'mork');
   // slöjan öppnas när logotypen har ritat sig (cirka 1,4 s) och scenens första bild är klar;
@@ -183,6 +185,7 @@ try {
     laddar.classList.add('klar'); scen.classList.add('kf__scen--klar');
     try { if (typeof ritare.starta === 'function') ritare.starta(); } catch (e) { console.warn(e); }
     setTimeout(() => laddar.classList.add('borta'), 1200);
+    setTimeout(visaDorrTips, 5000);
   };
   const redo = ritare.redo && typeof ritare.redo.then === 'function' ? ritare.redo : Promise.resolve();
   // logotypen hinner rita sig (1,6 s från första målningen), utom när allt var klart inom 0,6 s
@@ -211,6 +214,15 @@ function visaTips(text, ms = 4000) {
   tips.classList.add('kf__tips--besked');
   tips.classList.remove('borta');
   tipsTid = setTimeout(() => tips.classList.add('borta'), ms);
+}
+// ytterdörren går att klicka på utifrån: ett diskret tips första gången (sedan aldrig mer)
+const DORR_TIPS = 'legohus-dorr-tips';
+function dorrTipsSett() { try { localStorage.setItem(DORR_TIPS, '1'); } catch (e) { /* privat läge */ } }
+function visaDorrTips() {
+  if (INB || FOTO || vyLage() !== 'ute') return;
+  try { if (localStorage.getItem(DORR_TIPS)) return; } catch (e) { return; }
+  dorrTipsSett();
+  visaTips(finPekare.matches ? 'Klicka på dörren för att gå in' : 'Tryck på dörren för att gå in', 5000);
 }
 // handen visas en gång per besök och går undan efter 5 s även om ingen drar
 const TIPS_NYCKEL = 'legohus-ritare-tips';
@@ -1249,6 +1261,7 @@ window.addEventListener('resize', () => {
   }, 180);
 });
 function helskarm(pa) {
+  bilHem();   // bilen står parkerad när bilden byter format
   // (mitt i en glidning gäller ett nytt tryck motsatsen till dit bilden är på väg)
   if (pa === undefined) pa = helRor ? !helMalLage : !(document.fullscreenElement || fyllLage);
   if (!pa && document.fullscreenElement) document.exitFullscreen().catch(() => {});
@@ -1549,10 +1562,19 @@ if (kanInne) {
   if (inneTumme) inneTumme.addEventListener('click', e => { sattInne(true, undefined, DORR); fokusDuk(e); });
   // pekaren eller fokus på knappen: inredningen byggs färdigt nu, så att åkningen kan börja direkt
   if (kan('forbered')) [inneKnapp, inneTumme].forEach(el => el && ['pointerenter', 'focus', 'touchstart'].forEach(h => el.addEventListener(h, () => { try { ritare.forbered(); } catch (err) { console.warn(err); } }, { passive: true })));
+  // fliken som väljs är den som fingret/musen tryckte ned på, även om raden gled under trycket
+  // (då hamnar släppet på grannfliken eller mellan dem och klicket gäller annars fel flik eller raden)
+  let rumNer = null, rumNerT = 0;
+  [inneRum, karta].forEach(el => el && el.addEventListener('pointerdown', e => {
+    rumNer = e.isPrimary !== false ? e.target.closest('[data-rum-ga], [data-rum-vy]') : null; rumNerT = performance.now();
+  }, { passive: true }));
   [inneRum, karta].forEach(el => el && el.addEventListener('click', e => {
-    const g = e.target.closest('[data-rum-ga]');
+    const ner = e.detail !== 0 && rumNer && rumNer.isConnected && el.contains(rumNer) && performance.now() - rumNerT < 1500 ? rumNer : null;
+    rumNer = null;
+    const mal = ner || e.target;
+    const g = mal.closest('[data-rum-ga]');
     if (g) { aktivtRum = +g.getAttribute('data-rum-ga'); ritare.gaTill(aktivtRum); inneRumRad.querySelectorAll('[data-rum-ga]').forEach(b => b.setAttribute('aria-pressed', String(b === g))); rumTillVy(); fokusDuk(e); return; }
-    const b = e.target.closest('[data-rum-vy]');
+    const b = mal.closest('[data-rum-vy]');
     if (b) { sistPos = null; sattInne(true, +b.getAttribute('data-rum-vy'), TONA); fokusDuk(e); }
   }));
   if (hjalpKnapp && gangTips) hjalpKnapp.addEventListener('click', () => visaGang(!gangTips.classList.contains('syns'), 6000));
@@ -1653,12 +1675,35 @@ if (kanOppna) {
   scen.addEventListener('keydown', e => { if (e.key === 'Escape' && oppetLage && !oppenMeny) sattOppen(false); });
 }
 
+// ---- Elbilen: Kör iväg / Kör hem ----
+// Motorn kör förloppet (ritare.bil): kontakten ur, lyktorna tänds, bilen kör iväg; sedan hem igen.
+// Knappen är av medan bilen kör och byter text efter läget (duken skickar 'husritare:bil').
+// Helskärm parkerar bilen direkt; Se inne, planlösningen och miljö-/modellbyten gör motorn själv.
+const bilKnapp = document.querySelector('[data-bil]');
+const kanBil = kan('bil') && !!bilKnapp;
+function visaBil(lage) {
+  if (!kanBil) return;
+  const kor = lage === 'ut' || lage === 'in', hem = lage === 'borta' || lage === 'ut';
+  bilKnapp.disabled = kor;
+  bilKnapp.setAttribute('aria-pressed', String(hem));
+  bilKnapp.querySelector('span').textContent = hem ? 'Kör hem' : 'Kör iväg';
+  bilKnapp.setAttribute('data-tips', lage === 'ut' ? 'Bilen kör iväg …' : lage === 'in' ? 'Bilen kommer hem …' : hem ? 'Kör hem bilen och ladda den' : 'Kör iväg med bilen');
+}
+function bilHem() { try { if (kanBil) visaBil(ritare.bil('parkera')); } catch (e) { /* före knappen fanns */ } }
+if (kanBil) {
+  bilKnapp.hidden = false; bilKnapp.dataset.etikett = 'Bil';
+  bilKnapp.addEventListener('click', () => { try { visaBil(ritare.bil(ritare.bil() === 'borta' ? 'hem' : 'ut')); } catch (e) { console.warn(e); } });
+  window.addEventListener('husritare:bil', e => visaBil(e.detail && e.detail.lage));
+  document.addEventListener('fullscreenchange', bilHem);
+  visaBil(ritare.bil());
+}
+
 // ---- Tomt hus (möblerna av och på) och Planlösning (vyn rakt ovanifrån) ----
 // Motorn gör bytet (ritare.tomt, ritare.plan); här hålls knapparna, länken och Esc i takt.
 // Planlösningen avslutas av motorn själv när ett annat läge tar över (husritare:plan).
 const tomtKnapp = document.querySelector('[data-tomt]'), planKnapp = document.querySelector('[data-plan]');
 const kanTomt = kan('tomt') && !!tomtKnapp, kanPlan = kan('plan') && !!planKnapp;
-let tomtLage = false, planLage = false;
+var tomtLage = false, planLage = false;   // var: vyLage() kan anropas (dörrtipset) innan raden körts
 function sattTomt(pa, direkt) {
   if (!kanTomt) return;
   tomtLage = !!pa;
@@ -1749,7 +1794,7 @@ if (kanPlan) {
 
 // ---- miljö: listan kommer från motorn om den finns ----
 const mpopup = document.getElementById('kf-miljo');
-const MILJOFARG = { studio: '#d6d0c6', tradgard: '#6e7d47', skog: '#3f5236', vinter: '#eef0f2' };
+const MILJOFARG = { studio: '#d6d0c6', tradgard: '#6e7d47', skog: '#3f5236', vinter: '#eef0f2', kust: '#4f7f98', villa: '#a8826a' };
 function byggMiljo() {
   if (!kan('miljoLista')) return;
   let lista;
@@ -2244,11 +2289,13 @@ function rullRad(el) {
   };
   // rullar man själv i raden får den vara i fred en stund (annars drog den tillbaka mitt i ett
   // tryck, och fingret träffade grannfliken); den valda fliken rullas fram bara när den byts
-  let egen = 0, sistVald = null;
-  ['pointerdown', 'touchstart', 'wheel'].forEach(n => el.addEventListener(n, () => { egen = performance.now(); }, { passive: true }));
+  let egen = 0, sistVald = null, haller = false;
+  ['pointerdown', 'touchstart', 'wheel'].forEach(n => el.addEventListener(n, e => { egen = performance.now(); if (n !== 'wheel') haller = true; }, { passive: true }));
+  // medan man håller ned rullar raden aldrig själv; efter släppet gäller vilan ovan
+  ['pointerup', 'pointercancel', 'touchend', 'touchcancel'].forEach(n => window.addEventListener(n, () => { if (haller) { haller = false; egen = performance.now(); } }, { passive: true }));
   const visaVald = () => {
     const b = el.querySelector('[aria-pressed="true"]');
-    if (b === sistVald || performance.now() - egen < 2500) { kant(); return; }
+    if (b === sistVald || haller || performance.now() - egen < 2500) { kant(); return; }
     sistVald = b;
     if (b && el.scrollWidth > el.clientWidth + 1) {
       const l = b.offsetLeft, r = l + b.offsetWidth, m = 22;
@@ -2432,7 +2479,7 @@ if (kan('spak') && !FOTO) {
   const knapp = hall.firstChild, lista = hall.lastChild;
   // i den ordning de lämnar raden
   // (Helskärm flyttas aldrig inne på pekskärm: där är den ett framhävt val, se passa)
-  const ORDNING = ['[data-tangenter]', '[data-liv]', '[data-ladda]', '[data-snurra]', '[data-matt-knapp]', '[data-helskarm]', '[data-hjalp]', '[data-spel]', '[data-lampor]', '[data-oppna]', '[data-plan]', '[data-tomt]'];
+  const ORDNING = ['[data-tangenter]', '[data-bil]', '[data-liv]', '[data-ladda]', '[data-snurra]', '[data-matt-knapp]', '[data-helskarm]', '[data-hjalp]', '[data-spel]', '[data-lampor]', '[data-oppna]', '[data-plan]', '[data-tomt]'];
   const poster = ORDNING.map(s => ({ sel: s, el: rad.querySelector('.kf__vk' + s) })).filter(p => p.el).map((p, i) => { const plats = document.createComment('mer' + i); p.el.after(plats); p.plats = plats; return p; });
   // radens ordning från vänster (för listan i menyn)
   const ORDNING_RAD = poster.slice().sort((a, b) => (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
