@@ -1271,6 +1271,7 @@ html.foto .kf__flyg { display: none; }
 .kplanvy__kontur { fill: none; stroke: rgba(255, 255, 255, 0.92); stroke-width: 3.5; stroke-linejoin: round; }
 .kplanvy__snitt { fill: #1f1c19; stroke: #1f1c19; stroke-width: 0.6; stroke-linejoin: round; }
 .kplanvy__glas path { fill: #e3edf2; stroke: #1f1c19; stroke-width: 1; }
+.kplanvy__dorr path { fill: none; stroke: #fff; stroke-width: 1.4; stroke-linejoin: round; filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, 0.75)); }
 .kplanvy__loft path { fill: rgba(255, 255, 255, 0.05); stroke: #fff; stroke-width: 1.5; stroke-dasharray: 7 5; filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.7)); }
 .kplanvy__matt path { fill: none; stroke: #fff; stroke-width: 1.25; filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, 0.6)); }
 .kplanvy__lappar > * { position: absolute; left: 0; top: 0; opacity: 0; will-change: transform, opacity; }
@@ -1780,3 +1781,9 @@ html.ritare-vila .kf__scen > .kf__helrad * { pointer-events: none !important; }
 .kf__verktyg .kf__vk:active { transform: scale(0.95); }
 .kf__verktyg .kf__vk[data-bil]:not(:disabled) svg { transition: transform 0.24s var(--kfv-ut, ease); }
 .kf__verktyg .kf__vk[data-bil]:hover:not(:disabled) svg { transform: translateX(2px); }
+
+/* Kreditering av fria 3D-modeller (CC BY) längst ner på ritarsidan */
+.kkredit { max-width: 1200px; margin: 32px auto 8px; padding: 0 16px; font: 400 0.8125rem/1.55 var(--sans); color: rgba(27, 25, 21, 0.62); }
+.kkredit summary { cursor: pointer; width: fit-content; font-weight: 500; }
+.kkredit ul { margin: 6px 0 0; padding-left: 18px; }
+.kkredit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }

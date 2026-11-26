@@ -99,13 +99,13 @@ const RUM = {
   'sadel-40': [['Allrum', 1.4, 0.0, 0, [4.7, 1.2, -0.4]], ['Kök', 2.5, -0.15, 0, [-0.4, 1.5, -1.2]], ['Hall', -1.9, 0.57, 0, [3.5, 1.3, 0.4]],
     ['Sovrum', -3.95, 1.1, 0, [-3.96, 0.95, -1.7]], ['WC/bad', -2.2, -0.6, 0, [-3.02, 1.3, -0.55]], ['Loft', -1.6, -0.5, 'loft', [-4.2, 2.45, -0.9]]],
   'sadel-50': [['Allrum', 2.3, 0.15, 0, [6.0, 1.2, 0.3]], ['Kök', 3.3, 0.12, 0, [0.6, 1.5, -1.0]], ['Hall', -0.55, 0.6, 0, [4.0, 1.3, 0.4]],
-    ['Sovrum', -4.4, 1.33, 0, [-5.9, 1.0, -0.2]], ['WC/bad', -0.45, -0.5, 0, [0.435, 1.3, -0.44]], ['Bastu', -2.1, -0.45, 0, [-3.0, 1.0, -1.2]],
+    ['Sovrum', -3.55, 0.45, 0, [-5.9, 1.0, -0.2]], ['WC/bad', -0.45, -0.5, 0, [0.435, 1.3, -0.44]], ['Bastu', -2.1, -0.45, 0, [-3.0, 1.0, -1.2]],
     ['Loft', -1.5, -0.6, 'loft', [-5.2, 2.45, -0.9]]],   // mal: in över loftet (förr österut över räcket)
   'pulpet-70': [['Vardagsrum', -0.6, 0.95, 0, [-4.5, 0.95, 2.4]], ['Vardagsrum och kök', 2.75, 1.5, 0, [4.75, 1.1, 2.6]], ['Hall', 3.73, -0.85, 0, [0.0, 1.2, 2.5]],
     ['Sovrum 1', -3.38, -0.55, 0, [-4.3, 0.95, -3.25]], ['Sovrum 2', -2.15, -0.55, 0, [-1.2, 0.95, -3.25]], ['Sovrum 3', 0.72, -0.5, 0, [-0.3, 0.95, -3.25]],
     ['WC/bad', 2.75, -2.15, 0, [3.3, 1.1, -3.25]]],
   'sadel-90': [['Allrum', -2.6, -0.9, 0, [-5.5, 1.0, -2.2]], ['Allrum och kök', -2.4, 1.6, 0, [-4.6, 1.1, 3.25]], ['Hall', -0.25, 2.2, 0, [-2.5, 1.2, -2.0]],
-    ['Korridor', 2.4, 0.65, 0, [-4.0, 1.2, -0.5]], ['Sovrum 1', 1.3, -1.2, 0, [0.6, 1.0, -3.25]], ['Sovrum 2', 3.15, -0.6, 0, [5.75, 1.1, -3.0]],
+    ['Korridor', 1.8, 0.45, 0, [-4.0, 1.2, 0.9]], ['Sovrum 1', 1.3, -1.2, 0, [0.6, 1.0, -3.25]], ['Sovrum 2', 3.15, -0.6, 0, [5.75, 1.1, -3.0]],
     ['Sovrum 3', 4.42, 1.6, 0, [5.75, 1.0, 0.6]], ['WC/bad', 2.15, 2.05, 0, [3.44, 1.25, 1.85]]],
 };
 
@@ -1349,6 +1349,9 @@ function trycke(mk, M, x, y, z, k, sx, vred = true) {
     lagg(mk, new T.SphereGeometry(0.0098, 8, 4), mx(P[0].x, P[0].y, P[0].z));
     if (vred === false) return;
     ros(0.019, y - 0.13);
+    // nyckelskylt: ett mörkt nyckelhål (rund topp och smal spalt) i skylten
+    if (vred === 'nyckel') { ton('#141312', () => { lagg('svart', new T.CircleGeometry(0.0042, 10), mx(x, y - 0.125, z + k * 0.0085, k < 0 ? PI : 0));
+      lagg('svart', new T.PlaneGeometry(0.0034, 0.011), mx(x, y - 0.1315, z + k * 0.0085, k < 0 ? PI : 0)); }); return; }
     // vred: en liten, rundad tunga på en kort hals
     lagg(mk, new T.CylinderGeometry(0.006, 0.0065, 0.012, 8, 1, true).rotateX(PI / 2), mx(x, y - 0.13, z + k * 0.014));
     rbx(mk, 0.008, 0.03, 0.012, x, y - 0.13, z + k * 0.024, 0.0035, 0, 0, 1);
@@ -1589,7 +1592,7 @@ function oppningsDetaljer(H) {
           boxM('vit', m0, gw, gc - gh / 2 - b0, dd, rcu, (b0 + gc - gh / 2) / 2, dn);
           boxM('vit', m0, gw, b0 + bh - (gc + gh / 2), dd, rcu, (b0 + bh + gc + gh / 2) / 2, dn);
         } else boxM('vit', m0, bw, bh, dd, rcu, b0 + bh / 2, dn);
-        const sida = s === 'N' || s === 'W' ? -1 : 1;
+        const sida = s === 'N' || s === 'W' || s === 'E' ? -1 : 1;   // låssidan (gångjärnen som i motorns oppning())
         // trycke och låsvred (förr raka svarta lådor): samma modell som innerdörrarna
         trycke('svart', m0, rcu + sida * (rw / 2 - 0.07), 1.0, dn - dd / 2, -1, -sida);
         // strömbrytare på väggen vid låssidan, utanför fodret (fodret är 6 cm brett)
@@ -1713,9 +1716,12 @@ function vagg(axel, c, s0, s1, op = {}) {
     const m = BAS.clone().multiply(new T.Matrix4().makeBasis(Xa, Ya, Za).setPosition(hp));
     const s = Za.dot(N(d.sida)) < 0 ? 1 : -1;   // positiv vinkel = öppnar åt d.sida
     const tj = d.mk === 'glas' ? 0.032 : 0.04, zb = (tj / 2 + 0.0005) * s;   // bladets mitt (lokalt z), inåt i öppningen
-    // dörren heter efter rummet den leder in i (sidan den inte öppnar mot)
-    const glasd = d.mk === 'glas', mitt = P(-d.sida, (d.a + d.b) / 2, 0).addScaledVector(N(-d.sida), 0.5);
-    const dRum = rumVid(mitt.x, mitt.z) || '', namn = glasd ? 'Bastudörr' : 'Dörr ' + dRum.toLowerCase();
+    // dörren heter efter rummet den hör till: rummet på andra sidan om hallen, korridoren eller
+    // allrummet (sovrummet den slår in i, badet den slår ut från); annars sidan den inte slår mot
+    const glasd = d.mk === 'glas', rumSida = sd => { const q = P(sd, (d.a + d.b) / 2, 0).addScaledVector(N(sd), 0.5); return rumVid(q.x, q.z) || ''; };
+    const gemen = r => /hall|korridor|allrum|vardagsrum|kök/i.test(r), rIn = rumSida(d.sida), rUt = rumSida(-d.sida);
+    const dRum = rIn && gemen(rUt) && !gemen(rIn) ? rIn : rUt || rIn;
+    const namn = glasd ? 'Bastudörr' : 'Dörr ' + dRum.toLowerCase();
     const idx = oppningsbar(namn, 'dorr', 'y', s * th, 1, m, () => {
       if (!glasd) rbx(d.mk || 'vit', w, h, tj, w / 2, h / 2 + 0.006, zb, Math.min(0.004, tj / 2 - 0.0005), 0, 0, 1);
       // tre gångjärn i bladets kant vid gångjärnsaxeln
@@ -1745,8 +1751,10 @@ function vagg(axel, c, s0, s1, op = {}) {
       }
       // trycke på 1,0 m på båda sidor: rosett mot bladet (+0,5 mm), hals och grepp
       // (samma trycke som ytterdörren; greppet pekar in mot gångjärnet; i dörrens egen ram)
-      ton('#2a2928', () => {
-        for (const k of [1, -1]) trycke(glasd ? 'svart' : 'vit', BAS, w - 0.07, 1.0, zb + k * tj / 2, k, -1);
+      // borstat stål (metall med mjuk glans, förr matt svart: såg ut som ett platt streck), samma
+      // på båda sidor; låsvred i badrummet, annars en nyckelskylt under trycket
+      ton('#c2bfb9', () => {
+        for (const k of [1, -1]) trycke('diskstal', BAS, w - 0.07, 1.0, zb + k * tj / 2, k, -1, /wc|bad|toa/i.test(dRum) ? true : 'nyckel');
       });
     }, glasd ? 'Bastu' : dRum);
     // låsbleck i karmen vid låskanten
@@ -1756,8 +1764,8 @@ function vagg(axel, c, s0, s1, op = {}) {
     }
     // stängd dörr spärrar dörröppningen (motorn släpper hindret när dörren är öppen)
     if (HINDER && bunn === 0) HINDER.push(axel === 'x' ? { x0: d.a, z0: c - t / 2, x1: d.b, z1: c + t / 2, niva: 'botten', dorr: idx } : { x0: c - t / 2, z0: d.a, x1: c + t / 2, z1: d.b, niva: 'botten', dorr: idx });
-    // strömbrytare vid låskanten, på båda sidor av väggen
-    const sb = d.gang === 'a' ? d.b + 0.17 : d.a - 0.17;
+    // strömbrytare vid låskanten, på båda sidor av väggen (d.bryt: eget läge, där låskanten är skymd)
+    const sb = d.bryt ?? (d.gang === 'a' ? d.b + 0.17 : d.a - 0.17);
     if (sb > lo + 0.06 && sb < hi - 0.06) for (const sd of [1, -1]) {
       const q = P(sd, sb, 1.1).addScaledVector(N(sd), 0.006);
       // ram med en vippa som står ut lite och lutar (en strömbrytare, inte en vit ruta)
@@ -2833,7 +2841,7 @@ function garderobInne0(w, d, h, typ) {
   ton(BJORK, () => { box('vit', hw, 0.018, dz, 0, hylla, zc); ton('#f6f2ea', () => box('vit', hw, 0.02, 0.003, 0, hylla, z1)); });
   lagg('spegel', new T.CylinderGeometry(0.012, 0.012, hw, 12).rotateZ(PI / 2), mx(0, sy, zc));
   for (const s of [-1, 1]) cyl('spegel', 0.018, 0.018, 0.012, s * (xi - 0.004), sy, zc, 16, false, 0, PI / 2);
-  const steg = typ === 'hall' ? 0.14 : 0.112, n = Math.floor((2 * xi - 0.06) / steg);
+  const steg = typ === 'hall' ? 0.165 : 0.112, n = Math.floor((2 * xi - 0.06) / steg);
   let s = 77; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < n; i++) {
     const x = -xi + 0.04 + i * steg + (r() - 0.5) * 0.015, L = typ === 'hall' ? 0.85 + r() * 0.2 : (r() < 0.25 ? 1.05 : 0.62 + r() * 0.25), bw = Math.min(dz - 0.12, 0.4) * (0.8 + 0.2 * ((i * 0.618) % 1)), ry = (r() - 0.5) * (i % 3 === 2 ? 0.5 : 0.2);   // olika breda, någon hänger snett
@@ -2841,8 +2849,14 @@ function garderobInne0(w, d, h, typ) {
     r();
     // blandat: i hallen korta jackor och en och annan lång rock, i garderoben skjortor,
     // koftor, byxor över galge och klänningar
-    if (typ === 'hall') plagg(x, sy, zc, bw, i % 3 === 1 ? L + 0.05 : L - 0.22, 'jacka', fg, ry);
-    else plagg(x, sy, zc, bw, L > 1 ? L : i % 4 === 1 ? 0.6 + (L - 0.62) * 0.4 : L, L > 1 ? 'klanning' : ['skjorta', 'byxa', 'kofta', 'skjorta'][i % 4], fg, ry);
+    // hallen: riktiga ytterplagg på galgar (parkas, dunjacka, ullkappa, regnjacka) i marin,
+    // oliv, svart, kamel och rött
+    if (typ === 'hall') ytterplagg(x, sy - 0.035, zc, ry * 0.5, ['parkas', 'dun', 'ull', 'regn', 'dun', 'parkas'][i % 6], ['#585e44', '#26314a', '#a9845a', '#a3332c', '#232426', '#2b3550'][i % 6], { W: Math.min(0.19, dz / 2 - 0.1) });
+    else { const t4 = L > 1 ? 'klanning' : ['skjorta', 'byxa', 'kofta', 'skjorta'][i % 4];
+      // skjortor och koftor: riktiga plagg med axlar, ärmar, krage och knappar, lite vridna på stången
+      if (t4 === 'klanning') ytterplagg(x, sy - 0.035, zc, ry * 0.6 + 0.15, 'ull', fg, { W: Math.min(0.18, dz / 2 - 0.09), L: Math.min(1.0, L) });
+      else if (t4 === 'skjorta' || t4 === 'kofta') ytterplagg(x, sy - 0.035, zc, ry * 0.6 + (i % 2 ? 0.22 : -0.18), t4, fg, { W: Math.min(0.185, dz / 2 - 0.08), L: t4 === 'kofta' ? 0.6 + 0.1 * (L - 0.62) : 0.7 + 0.1 * (L - 0.62) });
+      else plagg(x, sy, zc, bw, L > 1 ? L : 0.6 + (L - 0.62) * 0.4, t4, fg, ry); }
   }
   if (typ === 'hall') {
     // skohylla med skor, hattar och en väska på hyllan
@@ -2851,8 +2865,9 @@ function garderobInne0(w, d, h, typ) {
       const j = (k + (y > 0.2 ? 1 : 0)) % 4;
       par(-xi + 0.13 + k * 0.24, y + 0.0075, zc, 0, j === 0 ? 'kanga' : j === 2 ? 'toffel' : 'sneaker', ['#6b4a33', '#5a5653', '#b9ad9a', '#e9e5dd'][j]);
     }
-    for (let k = 0; k < 2; k++) ton(['#4b5560', '#b9895c'][k], () => svarv('tyg', [[0, 0], [0.15, 0], [0.15, 0.01], [0.09, 0.02], [0.085, 0.1], [0, 0.11]], -xi + 0.2 + k * 0.3, hylla + 0.009, zc, 32));
-    ton('#7a5a3c', () => { rbx('tyg', 0.3, 0.18, 0.12, xi - 0.22, hylla + 0.1, zc, 0.03, 0, 0, 1); lagg('tyg', new T.TorusGeometry(0.07, 0.008, 4, 12, PI), mx(xi - 0.22, hylla + 0.19, zc)); });
+    // hyllan: stickade mössor och vikta halsdukar (förr platta hattar och en lådformad väska)
+    mossa(-xi + 0.16, hylla + 0.009, zc, 0.3, '#8c3b2e'); mossa(-xi + 0.38, hylla + 0.009, zc + 0.03, -0.5, '#c9c1b4', false);
+    for (let j = 0; j < 3; j++) vikt(0.28, 0.2, 0.04, xi - 0.2, hylla + 0.009 + j * 0.04, zc, (j - 1) * 0.06, ['#b9b2a6', '#7b3a33', '#3d4a5a'][j], 'stick');
     return;
   }
   // kläder: vikta tröjor på hyllan, skor och en låda på golvet, tvättkorg
@@ -2861,13 +2876,8 @@ function garderobInne0(w, d, h, typ) {
   const nk = Math.floor(2 * xi / 0.26), y0 = 0.082;
   for (let k = 0; k < nk; k++) {
     const kx = -xi + 0.13 + k * 0.26;
-    if (xi > 0.4 && kx > xi - 0.5) continue;    // platsen för kartongen
     if (kx < -xi + 0.42) continue;               // platsen för tvättkorgen
     par(kx, y0, zc + 0.06, 0, ['sneaker', 'kanga', 'toffel'][k % 3], ['#e9e5dd', '#6b4a33', '#a9a08f'][k % 3]);
-  }
-  if (xi > 0.4) {
-    ton('#c8ad8a', () => rbx('tyg', 0.34, 0.12, 0.24, xi - 0.22, y0 + 0.06, zc - 0.02, 0.006, 0.08, 0, 2));
-    ton('#efe9df', () => rbx('tyg', 0.35, 0.03, 0.25, xi - 0.22, y0 + 0.125, zc - 0.02, 0.006, 0.08, 0, 2));
   }
   ton('#cdb595', () => svarv('tyg', [[0, 0], [0.12, 0], [0.13, 0.01], [0.138, 0.1], [0.14, 0.28], [0.145, 0.3], [0.14, 0.31], [0.134, 0.3], [0.13, 0.28], [0.128, 0.1], [0.118, 0.012], [0, 0.01]], -xi + 0.16, y0, zc - 0.05, 32));
 }
@@ -2974,6 +2984,213 @@ function plagg(x, sy, zc, bw, L, typ, fg, ry = 0, o = {}) {
     if (!jacka) ton(skiftTon(fg, 0.55), () => { const kn = rock ? [0.4, 0.55, 0.7] : kofta ? [0.15, 0.32, 0.49, 0.66] : [0.12, 0.3, 0.48, 0.66], r = rock ? 0.009 : 0.005;
       kn.forEach(t => lagg('tyg', new T.SphereGeometry(r, 8, 3).scale(0.35, 1, 1), m.clone().multiply(new T.Matrix4().makeTranslation(framX(0, t) + 0.002, yT(t), 0)))); });
   }
+}
+// ---- Ytterkläder: jackor och kappor på krok eller galge ----
+// Lokalt som plagg: upphängningen i origo, framsidan +x, bredden längs z, nedåt -y.
+// Kroppen är ringar nedåt (rundad framsida, plattare rygg), axlarna sjunker från kragen
+// (brant på en krok, där plagget hänger i hängaren vid kragen, flackt på en galge), ärmarna
+// är egna rör som hänger längs sidorna en aning framför kroppen och slutar i muddar.
+// Typer: parkas (huva med pälskant, stormlist med tryckknappar, lockfickor, snodd i fållen),
+// dun (vågräta kanaler som buktar, ståkrage, sneda fickor med blixtlås), ull (ullkappa med
+// nedvikt krage, slag och knappar), regn (huva, ståkrage, blixtlås under list, lockfickor).
+// o.krok: hänger i hängaren på en knagg; o.fin: fler segment (på nära håll i hallen).
+const YTTER = {
+  parkas: { L: 0.84, W: 0.19, D: 0.068, AF: 0.07, vav: 'perkal', huva: 'pals', krage: 'sta', las: 'list', ficka: 'lock', snodd: true },
+  dun: { L: 0.68, W: 0.195, D: 0.07, AF: -0.02, vav: 'perkal', kanal: 0.1, krage: 'sta', las: 'blixt', ficka: 'snett', glans: 0.82 },
+  ull: { L: 0.98, W: 0.18, D: 0.05, AF: 0.11, vav: 'linne', krage: 'vikt', las: 'knapp', ficka: 'lock' },
+  regn: { L: 0.8, W: 0.19, D: 0.058, AF: 0.06, vav: 'perkal', huva: 'slat', krage: 'sta', las: 'list', ficka: 'lock', glans: 0.78 },
+  // garderobens plagg: skjorta (liten krage, knappslå) och stickad kofta (resår, knappar)
+  skjorta: { L: 0.74, W: 0.185, D: 0.026, AF: 0.02, vav: 'perkal', krage: 'sta', kf: 0.62, las: 'knapp', rS: 0.033, knapp: '#e9e4da' },
+  kofta: { L: 0.66, W: 0.185, D: 0.034, AF: -0.02, vav: 'stick', las: 'knapp', rS: 0.036, rib: true },
+};
+// rörformat nät av ringar (lika många punkter per ring), slutet runt om eller öppet (wrap = false)
+function ringNat(R, wrap = true) {
+  const NA = R[0].length, pos = [], ix = [], M = wrap ? NA : NA - 1;
+  R.forEach((r, j) => { r.forEach(p => pos.push(p[0], p[1], p[2]));
+    if (j) for (let a = 0; a < M; a++) { const p0 = (j - 1) * NA + a, p1 = (j - 1) * NA + (a + 1) % NA, q0 = j * NA + a, q1 = j * NA + (a + 1) % NA; ix.push(p0, q0, p1, p1, q0, q1); } });
+  const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setIndex(ix); g.computeVertexNormals();
+  return g;
+}
+// lock (solfjäder) över en ring: mittpunkt c, ringen r ([[x,y,z]...])
+function ringLock(r, c) {
+  const pos = [c[0], c[1], c[2]], ix = [];
+  r.forEach(p => pos.push(p[0], p[1], p[2]));
+  for (let a = 0; a < r.length; a++) ix.push(0, 1 + a, 1 + (a + 1) % r.length);
+  const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setIndex(ix); g.computeVertexNormals();
+  return g;
+}
+function ytterplagg(x, y, z, ry, typ, fg, o = {}) {
+  const P = YTTER[typ] || YTTER.parkas, krok = !!o.krok, fin = !!o.fin, NA = fin ? 28 : 14;
+  const L = o.L ?? P.L, wS = o.W ?? P.W, D = P.D;
+  const fas = x * 37.1 + z * 11.3 + y * 5.7 + typ.length * 1.7;
+  const sm = (a, b, q) => { const t = Math.min(1, Math.max(0, (q - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const hN = 0.03, hS = krok ? 0.19 : 0.085, wN = 0.066, wB = wS + (krok ? 0.024 : 0.006);
+  const kan = h => (P.kanal && h > hS * 0.6 ? Math.pow(0.5 + 0.5 * Math.cos((h - hS) / P.kanal * 2 * PI), 0.45) : 0);
+  const wH = h => (h <= hS ? wN + (wS - wN) * Math.pow(Math.sin(PI / 2 * Math.max(0, (h - hN) / (hS - hN))), 0.7)
+    : wS + (wB - wS) * sm(hS, hS + 0.16, h) + wB * P.AF * Math.max(0, (h - hS) / (L - hS))) * (1 + 0.035 * kan(h));
+  // (oket under kragen har alltid lite djup: tunna skjortor och koftor fick annars en krage som en lös kloss)
+  const dH = h => Math.max(D * (0.45 + 0.55 * sm(hN, hS + 0.1, h)) * (1 - 0.12 * sm(L * 0.55, L, h)) * (P.kanal ? 0.82 + 0.32 * kan(h) : 1), 0.03 * (1 - sm(hS, hS + 0.16, h)));
+  // mjuka lodräta veck som växer nedåt (framstycket), svagare på ryggen
+  const veck = (zn, h) => { const k = sm(hS, L, h); return (P.kanal ? 0.5 : 1) * ((0.0025 + 0.007 * k) * Math.sin(zn * PI * 2.4 + fas + h * 2.2) + 0.0025 * k * Math.sin(zn * PI * 5.7 + fas * 1.3)); };
+  const sek = (v, h, fall = 0) => { const c = Math.cos(v), s = Math.sin(v), zn = Math.sign(c) * Math.pow(Math.abs(c), 0.6);
+    const xx = dH(h) * (s > 0 ? 1 : 0.6) * Math.sign(s) * Math.pow(Math.abs(s), 0.8) + veck(zn, h) * (s > 0 ? 1 : 0.4);
+    return [xx, -h + fall * 0.008 * Math.sin(zn * 4.1 + fas), zn * wH(h)]; };
+  // framsidans x vid (z, h): för fickor, list, knappar och dragkedja som ska ligga an
+  const framX = (zz, h) => { const zn = Math.max(-1, Math.min(1, zz / wH(h))), c = Math.pow(Math.abs(zn), 1 / 0.6), s = Math.sqrt(Math.max(0, 1 - c * c)); return dH(h) * Math.pow(s, 0.8) + veck(zn, h); };
+  const lut = (zz, h) => Math.atan((framX(zz + 0.01, h) - framX(zz - 0.01, h)) / 0.02);
+  const hs = []; const nt = fin ? 6 : 3;
+  for (let i = 0; i <= nt; i++) hs.push(hN + (hS - hN) * i / nt);
+  const steg = P.kanal ? P.kanal / (fin ? 4 : 2) : fin ? 0.045 : 0.1;   // (kanalerna: ringar mitt i varje söm, annars låg sömmen inne i tyget)
+  for (let h = hS + steg; h < L - steg * 0.4; h += steg) hs.push(h);
+  hs.push(L);
+  const m = mx(x, y, z, ry), mm = (a, b, c) => m.clone().multiply(new T.Matrix4().makeTranslation(a, b, c));
+  const vv = P.vav, gl = P.glans ?? 1, inner = skiftTon(fg, 0.32);
+  const tyg = (hex, fn) => ton(hex, () => vav(vv, () => glans(gl, fn)));
+  // kroppen
+  const R = hs.map((h, j) => Array.from({ length: NA }, (_, a) => sek(a / NA * 2 * PI, h, j === hs.length - 1 ? 1 : 0)));
+  tyg(fg, () => lagg('tyg', ringNat(R), m.clone()));
+  // dunjackan: sydda sömmar mellan kanalerna (mörka smala band där tyget dras in)
+  if (P.kanal) ton(skiftTon(fg, 0.66), () => { for (let h = hS + P.kanal / 2; h < L - 0.03; h += P.kanal) {
+    const band = [-0.003, 0.003].map(dh => Array.from({ length: NA }, (_, a) => { const q = sek(a / NA * 2 * PI, h + dh); return [q[0] * 1.03 + 0.0008, q[1], q[2] * 1.008]; }));
+    lagg('tyg', ringNat(band), m.clone()); } });
+  // fodret: mörkt i halsen och en bit upp i fållen
+  ton(inner, () => { lagg('tyg', ringLock(R[0].map(p => [p[0] * 0.92, p[1] - 0.004, p[2] * 0.92]), [0, -hN - 0.004, 0]), m.clone());
+    lagg('tyg', ringLock(R[R.length - 1].map(p => [p[0] * 0.94, p[1] + 0.014, p[2] * 0.96]), [0, -L + 0.014, 0]), m.clone()); });
+  // ärmarna: rör från axeln ned längs sidorna, lätt framåt, böj vid armbågen, mudd i änden
+  {
+    const rS = P.rS ?? (P.kanal ? 0.052 : typ === 'ull' ? 0.044 : 0.047), Ls = krok ? 0.56 : 0.54, SEG = fin ? 16 : 7, RA = fin ? 18 : 8;
+    const hw = h => wH(Math.min(L, h));
+    [-1, 1].forEach(s => {
+      const k = new T.CatmullRomCurve3([V(0.002, -(hS - 0.02), s * (wS - 0.018)), V(0.012, -(hS + 0.07), s * (hw(hS + 0.07) + rS * 0.5)),
+        V(0.026, -(hS + Ls * 0.52), s * (hw(hS + Ls * 0.52) + rS * 0.6)), V(0.034, -(hS + Ls), s * (hw(hS + Ls) + rS * 0.45))], false, 'centripetal');
+      const ring = (u, f, rib = 0) => { const p = k.getPointAt(Math.min(1, u)), rr = [];
+        for (let a = 0; a < RA; a++) { const v = a / RA * 2 * PI, w = 1 + rib * Math.cos(v * 10) + (fin ? 0.035 * Math.sin(v * 3 + u * 19 + fas) * sm(0.35, 0.6, u) * (1 - sm(0.75, 0.95, u)) : 0);
+          rr.push([p.x + Math.sin(v) * rS * 0.82 * f * w, p.y - (u > 1 ? (u - 1) * Ls : 0), p.z + Math.cos(v) * rS * f * w]); }
+        return rr; };
+      const fU = u => (0.5 + 0.5 * sm(0, 0.14, u)) * (1 - 0.16 * u) * (P.kanal ? 1 + 0.1 * Math.cos(u * Ls / P.kanal * 2 * PI) : 1);
+      const RR = []; for (let i = 0; i <= SEG; i++) RR.push(ring(i / SEG, fU(i / SEG)));
+      tyg(fg, () => { lagg('tyg', ringNat(RR), m.clone()); lagg('tyg', ringLock(RR[0], [k.getPointAt(0).x, -(hS - 0.035), s * (wS - 0.025)]), m.clone()); });
+      // mudd: stickad resår (dun, parkas) eller en uppvikt kant (ull, regn)
+      const rib = P.kanal || typ === 'parkas' || P.rib, f1 = fU(1), mu = [ring(1, f1 * 0.96, rib ? 0.03 : 0), ring(1.04, f1 * (rib ? 0.86 : 1.01), rib ? 0.035 : 0), ring(1.09, f1 * (rib ? 0.84 : 1.0), rib ? 0.035 : 0)];
+      ton(rib ? skiftTon(fg, 0.8) : skiftTon(fg, 0.94), () => vav(rib ? 'stick' : vv, () => lagg('tyg', ringNat(mu), m.clone())));
+      const pe = mu[2], c = pe.reduce((q, p) => [q[0] + p[0] / RA, q[1] + p[1] / RA, q[2] + p[2] / RA], [0, 0, 0]);
+      ton(inner, () => lagg('tyg', ringLock(pe.map(p => [c[0] + (p[0] - c[0]) * 0.85, p[1] + 0.006, c[2] + (p[2] - c[2]) * 0.85]), [c[0], c[1] + 0.012, c[2]]), m.clone()));
+    });
+  }
+  // krage: ståkrage med rullad kant, eller nedvikt krage med slag (ullkappan)
+  if (P.krage === 'sta') {
+    const kr = (yy, f, fx = 1) => Array.from({ length: NA }, (_, a) => { const v = a / NA * 2 * PI, c = Math.cos(v), s = Math.sin(v);
+      return [(s > 0 ? 0.046 : 0.034) * (P.kf ?? 1) * fx * f * Math.sign(s) * Math.pow(Math.abs(s), 0.8), yy, (P.kf ? wN * 0.86 : wN + 0.012) * f * Math.sign(c) * Math.pow(Math.abs(c), 0.7)]; });
+    const top = P.kf ? -0.004 : krok ? 0.03 : 0.05;   // (skjortans krage: smal och låg runt halsen, förr en lös kloss)
+    tyg(skiftTon(fg, 0.97), () => lagg('tyg', ringNat([kr(-hN - 0.012, 1.02), kr(-hN + 0.02, 1.04), kr(top - 0.006, 1.07, 1.05), kr(top, 1.04, 1.04), kr(top + 0.003, 0.97, 1.0), kr(top - 0.01, 0.9, 0.95)]), m.clone()));
+  } else if (P.krage === 'vikt') {
+    // nedvikt krage: från halsen ut och ned över axlarna, öppen fram
+    const NK = fin ? 20 : 10, kr = (yy, f, ut) => Array.from({ length: NK + 1 }, (_, a) => { const v = PI / 2 + 0.42 + a / NK * (2 * PI - 0.84), c = Math.cos(v), s = Math.sin(v);
+      return [(s > 0 ? 0.05 : 0.036) * f * Math.sign(s) * Math.pow(Math.abs(s), 0.8) + ut * 0.4 * Math.max(0, s), yy, (wN + 0.012) * f * Math.sign(c) * Math.pow(Math.abs(c), 0.7) * (1 + ut * 4)]; });
+    tyg(skiftTon(fg, 0.95), () => lagg('tyg', ringNat([kr(-hN + 0.03, 1.0, 0), kr(-hN + 0.038, 1.06, 0.004), kr(-hN + 0.01, 1.14, 0.012), kr(-hN - 0.05, 1.18, 0.026)], false), m.clone()));
+    // slag: flikar i V från kragen ned till översta knappen, med en mörkare vikt ytterkant
+    const hB = hS + 0.11, NS = fin ? 6 : 3;
+    [-1, 1].forEach(s => { const lp = [];
+      for (let j = 0; j <= NS; j++) { const u = j / NS, h = hN + 0.02 + (hB - hN - 0.02) * u, zi = s * (wN * 0.75 * (1 - u) + 0.004), zo = s * ((wN + 0.055) * (1 - u) + 0.006 + 0.03 * Math.sin(u * PI) * (1 - u));
+        lp.push([framX(zi, h) + 0.003, -h, zi], [framX(zo, h) + 0.009, -h - 0.004, zo], [framX(zo, h) + 0.002, -h - 0.006, zo * 1.04]); }
+      const R2 = []; for (let j = 0; j <= NS; j++) R2.push(lp.slice(j * 3, j * 3 + 3));
+      tyg(skiftTon(fg, 0.93), () => lagg('tyg', ringNat(R2, false), m.clone())); });
+    // halsduk-ringning innanför slagen: mörkt foder
+    ton(inner, () => lagg('tyg', new T.CircleGeometry(0.035, 10).scale(0.6, 1.4, 1).rotateY(PI / 2), mm(framX(0, hN + 0.06) - 0.004, -hN - 0.06, 0)));
+  }
+  // huva (parkas, regn): ligger nedfälld bakom kragen; parkasen har en luddig pälskant
+  if (P.huva) {
+    const hv = new T.SphereGeometry(1, fin ? 20 : 10, fin ? 10 : 6, 0, 2 * PI, 0, PI * 0.6).rotateX(PI).scale(0.06, 0.13, 0.125).rotateZ(-0.4);
+    tyg(skiftTon(fg, 0.96), () => lagg('tyg', hv, mm(-0.022, 0.0, 0)));
+    const sr = Math.sin(PI * 0.6), cy = -Math.cos(PI * 0.6) * 0.13;
+    if (P.huva === 'pals') {
+      const pl = new T.TorusGeometry(1, 0.17, fin ? 7 : 4, fin ? 40 : 16), pp = pl.attributes.position;
+      for (let i = 0; i < pp.count; i++) { const n = Math.sin(i * 12.9898) * 43758.5453 % 1; pp.setXYZ(i, pp.getX(i) * (1 + 0.06 * n), pp.getY(i) * (1 + 0.06 * n), pp.getZ(i) * (1 + 0.25 * n)); }
+      pl.rotateX(PI / 2).scale(0.06 * sr, 0.11, 0.125 * sr).translate(0, cy, 0).rotateZ(-0.4); pl.computeVertexNormals();
+      ton('#cbbfae', () => vav('skinn', () => lagg('tyg', pl, mm(-0.022, 0.0, 0))));
+    } else ton(skiftTon(fg, 0.85), () => vav(vv, () => lagg('tyg', new T.TorusGeometry(1, 0.06, 4, fin ? 32 : 14).rotateX(PI / 2).scale(0.06 * sr, 0.12, 0.125 * sr).translate(0, cy, 0).rotateZ(-0.4), mm(-0.022, 0.0, 0))));
+  }
+  // stängning: dragkedja (dun), stormlist med tryckknappar (parkas, regn), knappar (ull)
+  const hsF = hs.filter(h => h >= hN + 0.005);
+  const remsa = (z0, z1, ut, h0 = hN, h1 = L) => { const rr = hsF.filter(h => h >= h0 && h <= h1).map(h => [[framX(z0, h) + ut, -h, z0], [framX((z0 + z1) / 2, h) + ut + 0.0015, -h, (z0 + z1) / 2], [framX(z1, h) + ut, -h, z1]]); return ringNat(rr, false); };
+  if (P.las === 'blixt') {
+    ton('#2c2b29', () => vav('perkal', () => lagg('tyg', remsa(-0.005, 0.005, 0.0015), m.clone())));
+    ton('#bdb9b2', () => iRam(m, () => rbx('diskstal', 0.005, 0.03, 0.01, framX(0, hN + 0.05) + 0.006, -hN - 0.05, 0, 0.002, 0, 0, 1)));
+    ton('#bdb9b2', () => lagg('diskstal', new T.CylinderGeometry(0.0055, 0.0055, 0.004, 10).rotateZ(PI / 2), mm(framX(0, hN + 0.03) + 0.004, -hN - 0.03, 0)));
+  } else if (P.las === 'list') {
+    tyg(skiftTon(fg, 0.95), () => lagg('tyg', remsa(-0.012, 0.022, 0.004), m.clone()));
+    ton('#b4b0a8', () => { for (let h = hS + 0.04; h < L - 0.04; h += 0.12) lagg('diskstal', new T.CylinderGeometry(0.0055, 0.006, 0.004, 12).rotateZ(PI / 2), mm(framX(0.005, h) + 0.008, -h, 0.005)); });
+  } else {
+    ton(skiftTon(fg, 0.8), () => vav(vv, () => lagg('tyg', remsa(-0.0015, 0.0015, 0.001, P.krage === 'vikt' ? hS + 0.11 : hN), m.clone())));
+    const kn = P.krage === 'vikt' ? 0.11 : 0.02, ks = typ === 'ull' ? 0.13 : 0.1, kr = typ === 'ull' ? 0.011 : 0.0065, kz = typ === 'ull' ? 0.012 : 0;
+    ton(P.knapp || '#3a2d24', () => glans(0.6, () => { for (let i = 0; i < 7; i++) { const h = hS + kn + i * ks; if (h > L - 0.06) break;
+      lagg('keramik', new T.CylinderGeometry(kr, kr, 0.004, 12).rotateZ(PI / 2), mm(framX(kz, h) + 0.0025, -h, kz)); } }));
+  }
+  // fickor: lock (en rundad flik över en påsydd ficka), sneda fickor med blixtlås (dun)
+  if (P.ficka) {
+    const hF = hS + (L - hS) * (typ === 'ull' ? 0.5 : 0.58), zF = Math.min(0.13, wH(hF) * 0.55);
+    [-1, 1].forEach(s => { const zz = s * zF, a = lut(zz, hF);
+      if (P.ficka === 'snett') { ton('#2e2d2b', () => iRam(m, () => rbx('tyg', 0.004, 0.15, 0.007, framX(zz, hF) + 0.001, -hF, zz, 0.002, a, s * 0.38, 1))); return; }
+      // locket ljusare (ljuset uppifrån), en mörk skuggfog under locket och runt den påsydda fickan
+      tyg(skiftTon(fg, 1.12), () => iRam(m, () => rbx('tyg', 0.013, 0.055, 0.16, framX(zz, hF) + 0.009, -hF, zz, 0.006, a, 0, 2)));
+      ton(skiftTon(fg, 0.45), () => { iRam(m, () => rbx('tyg', 0.012, 0.006, 0.156, framX(zz, hF + 0.027) + 0.006, -hF - 0.028, zz, 0.002, a, 0, 1));
+        if (typ === 'parkas') iRam(m, () => rbx('tyg', 0.006, 0.166, 0.158, framX(zz, hF + 0.08) + 0.001, -hF - 0.08, zz, 0.003, lut(zz, hF + 0.08), 0, 1)); });
+      if (typ === 'parkas') tyg(fg, () => iRam(m, () => rbx('tyg', 0.008, 0.16, 0.15, framX(zz, hF + 0.08) + 0.004, -hF - 0.08, zz, 0.004, lut(zz, hF + 0.08), 0, 2)));
+      if (typ !== 'ull') ton('#b4b0a8', () => lagg('diskstal', new T.CylinderGeometry(0.005, 0.005, 0.004, 10).rotateZ(PI / 2).rotateY(a), mm(framX(zz, hF) + 0.0135, -hF - 0.012, zz)));
+    });
+  }
+  // snodd med stoppknappar i fållen (parkas)
+  if (P.snodd) ton('#3a3936', () => [-1, 1].forEach(s => { const zz = s * 0.045, xx = framX(zz, L - 0.02) + 0.004;
+    lagg('tyg', new T.CylinderGeometry(0.0022, 0.0022, 0.07, 5), mm(xx, -L + 0.0, zz));
+    lagg('tyg', new T.CylinderGeometry(0.006, 0.006, 0.02, 8), mm(xx, -L - 0.04, zz)); }));
+  // upphängning: hängare i tyg vid kragen (krok) eller en galge i stål och trä
+  if (krok) ton(skiftTon(fg, 0.7), () => lagg('tyg', new T.TorusGeometry(0.018, 0.003, 5, 12).rotateY(PI / 2), mm(-0.012, 0.008, 0)));
+  else {
+    ton('#c9c6c0', () => { lagg('spegel', new T.TorusGeometry(0.017, 0.0025, 3, 8, PI * 1.3).rotateZ(-PI * 0.15).rotateY(PI / 2), mm(0, 0.062, 0));
+      lagg('spegel', new T.CylinderGeometry(0.0022, 0.0022, 0.05, 5), mm(0, 0.035, 0)); });
+  }
+}
+// Halsduk som hänger över kroken framför jackan: två stickade ändar som följer bröstet,
+// den ena lite framför den andra, med frans. Lokalt som ytterplagg (krokens ram).
+function halsduk(fg, L = 0.5, fin = true, dx = 0) {
+  const NB = fin ? 9 : 5, NH = fin ? 12 : 6, B = 0.13, t = 0.011;
+  [[-1, 0, L], [1, 0.012, L - 0.07]].forEach(([s, ut, Le]) => {
+    const R = [];
+    for (let j = 0; j <= NH; j++) { const u = j / NH, h = -0.01 + Le * u, zc = s * (0.028 + 0.045 * Math.min(1, u * 3)), x0 = 0.035 + 0.05 * Math.min(1, u * 2.2) + ut + 0.006 * u;
+      const r = []; for (let a = 0; a < NB; a++) r.push([x0 + t / 2 + 0.004 * Math.sin(a * 2.1 + u * 7), -h, zc + (a / (NB - 1) - 0.5) * B * (0.7 + 0.3 * Math.min(1, u * 2))]);
+      for (let a = NB - 1; a >= 0; a--) r.push([x0 - t / 2 + 0.004 * Math.sin(a * 2.1 + u * 7), -h, zc + (a / (NB - 1) - 0.5) * B * (0.7 + 0.3 * Math.min(1, u * 2))]);
+      R.push(r); }
+    ton(fg, () => vav('stick', () => lagg('tyg', ringNat(R), mx(0, 0, 0))));
+    // frans: korta trådar i änden
+    ton(skiftTon(fg, 0.86), () => vav('stick', () => { const xe = 0.035 + 0.055 + ut + 0.006 + dx, nf = fin ? 16 : 6; for (let i = 0; i < nf; i++) { const q = Math.sin(i * 91.7 + s) * 0.5, l = 0.028 + 0.01 * q;
+      lagg('tyg', new T.CylinderGeometry(0.0013, 0.001, l, 4).translate(0, -l / 2, 0), mx(xe + 0.004 * q, -Le - 0.003, s * 0.073 + (i / (nf - 1) - 0.5) * B * 0.92, 0, 0.15 * q, 0.2 * q)); } }));
+  });
+}
+// Stickad mössa som ligger på hyllan: mjuk kupol, uppvikt resår och en tofs (lokalt: botten i origo).
+function mossa(x, y, z, ry, fg, tofs = true) {
+  const P = [[0, 0], [0.085, 0], [0.093, 0.006], [0.094, 0.03], [0.09, 0.04], [0.088, 0.045], [0.084, 0.07], [0.07, 0.093], [0.045, 0.108], [0, 0.113]].map(q => new T.Vector2(q[0], q[1]));
+  const g = new T.LatheGeometry(P, 28), p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) { const yy = p.getY(i), a = Math.atan2(p.getZ(i), p.getX(i)), k = yy < 0.042 ? 1 + 0.035 * Math.cos(a * 22) : 1;
+    p.setXYZ(i, p.getX(i) * k * 1.08, yy * 0.72 + 0.006 * Math.sin(a * 2 + 1) * yy / 0.11, p.getZ(i) * k); }
+  g.computeVertexNormals();
+  ton(fg, () => vav('stick', () => lagg('tyg', g, mx(x, y, z, ry))));
+  if (tofs) { const t = new T.IcosahedronGeometry(0.036, 2), q = t.attributes.position;
+    for (let i = 0; i < q.count; i++) { const n = 1 + 0.12 * (Math.sin(i * 78.233) * 43758.5453 % 1); q.setXYZ(i, q.getX(i) * n, q.getY(i) * n, q.getZ(i) * n); }
+    t.computeVertexNormals(); ton(skiftTon(fg, 1.12), () => vav('skinn', () => lagg('tyg', t, mx(x, y + 0.105, z, ry)))); }
+}
+// Hopfällt paraply som lutar mot väggen: veckad duk med band, spets och krökt trähandtag.
+function paraply(x, z, ry, fg = '#2d3440') {
+  const lut = -0.16;
+  med(x, z, ry, () => {
+    const NA = 24, prof = [[0.004, 0.0], [0.012, 0.03], [0.03, 0.18], [0.036, 0.36], [0.03, 0.52], [0.016, 0.6], [0.006, 0.62]];
+    const R = prof.map(([r, yy]) => Array.from({ length: NA }, (_, a) => { const v = a / NA * 2 * PI, k = 1 + 0.18 * Math.cos(v * 8) * (r > 0.01 ? 1 : 0.3); return [Math.cos(v) * r * k, yy + 0.07, Math.sin(v) * r * k]; }));
+    const m = mx(0, 0, 0, 0, lut, 0);
+    ton(fg, () => vav('perkal', () => lagg('tyg', ringNat(R), m.clone())));
+    ton(skiftTon(fg, 0.8), () => vav('perkal', () => lagg('tyg', new T.TorusGeometry(0.031, 0.005, 4, 16).rotateX(PI / 2), m.clone().multiply(new T.Matrix4().makeTranslation(0, 0.32, 0)))));
+    ton('#b9b5ae', () => lagg('diskstal', new T.CylinderGeometry(0.004, 0.0025, 0.07, 8), m.clone().multiply(new T.Matrix4().makeTranslation(0, 0.035, 0))));
+    ton('#3a3936', () => lagg('diskstal', new T.CylinderGeometry(0.0045, 0.0045, 0.16, 8), m.clone().multiply(new T.Matrix4().makeTranslation(0, 0.77, 0))));
+    iRam(m, () => ton('#6e4a2e', () => glans(0.7, () => tub('ek', [V(0, 0.84, 0), V(0, 0.93, 0), V(0, 0.975, 0.03), V(0, 0.95, 0.065), V(0, 0.91, 0.07)], 0.012, 0.011, 14, 8))));
+  });
 }
 // Vägghängd toalett framför ett kaklat installationsschakt (dold cistern) med ekhylla.
 // Lokalt: väggen vid z = -0.33, schaktets framsida vid z = -0.13.
@@ -4976,6 +5193,7 @@ function hallen(x, z, ry, o = {}) {
       par(-0.11, 0.012, 0.25, 0.06, 'stovel', '#86654a');
       par(0.11, 0.012, 0.26, -0.05, 'sneaker', '#f2f0ea');
       par(0.32, 0.012, 0.24, 0.1, 'kanga', '#8a6a4c');
+      if (Math.round(x * 100) !== -8) paraply(0.53, 0.19, 0, '#2d3440');   // (Kupa 30: köksbänken står där)
     }
     rbx('ek', 0.72, 0.1, 0.02, 0.05, 1.7, 0.01, 0.004, 0, 0, 1);
     for (const k of [-0.2, 0.05, 0.3]) { lagg('ek', new T.CylinderGeometry(0.012, 0.012, 0.07, 14).rotateX(PI / 2), mx(k, 1.7, 0.055)); lagg('ek', new T.SphereGeometry(0.016, 14, 10), mx(k, 1.7, 0.092)); }
@@ -4983,7 +5201,14 @@ function hallen(x, z, ry, o = {}) {
     // (tung kropp med veck, ärmar som faller rakt ned längs sidorna, krage, knappar), vänd
     // med framsidan ut i rummet. Förr en platt figur med ärmar som stod ut som vingar.
     // (utan galge: rocken hänger i en tygögla vid kragen på knaggen)
-    med(-0.2, 0.075, -PI / 2, () => plagg(0, 1.715, 0, 0.44, 0.98, 'rock', '#c2a888', 0, { fin: true, ogla: true }));
+    // ytterplagg på kroken (olika i varje hus): parkas, dunjacka, ullkappa eller regnjacka,
+    // med halsduk över kroken i några hus; hatthylla ovanför med en stickad mössa
+    const yv = { '-8': ['parkas', '#585e44', '#d8cdb9'], 138: ['dun', '#34415f', null], '-230': ['ull', '#a9845a', '#c86a52'], 425: ['regn', '#a3332c', null], 46: ['dun', '#232426', '#b9b2a6'] }[Math.round(x * 100)] || ['parkas', '#585e44', null];
+    med(-0.2, 0.075, -PI / 2, () => { ytterplagg(0, 1.715, 0, 0, yv[0], yv[1], { krok: true, fin: true });
+      if (yv[2]) forskjut(0, 1.715, 0, () => halsduk(yv[2], yv[0] === 'ull' ? 0.55 : 0.48, true, yv[0] === 'dun' ? 0.012 : 0)); });
+    rbx('ek', 0.72, 0.022, 0.21, 0.05, 1.86, 0.105, 0.004, 0, 0, 1);
+    for (const k of [-0.27, 0.37]) rbx('ek', 0.018, 0.09, 0.15, k, 1.805, 0.075, 0.003, 0, 0, 1);
+    mossa(0.2, 1.871, 0.11, 0.4, yv[0] === 'regn' ? '#3d4a5a' : yv[0] === 'ull' ? '#c9c1b4' : '#8c3b2e', yv[0] !== 'ull');
     // väska i konjaksbrunt läder: mjuk påse som bukar nedtill och smalnar mot öppningen,
     // rundade hörn, en axelrem som hänger i en lång ögla från knaggen och ett lock med kant
     // Kroppen är ringar nerifrån och upp (rundad rektangel i tvärsnitt) som bukar ut nedtill
@@ -5562,7 +5787,9 @@ const MODELL = {
     vagg('z', -2.78, -3.25, -0.11);
     vagg('z', -0.715, -3.25, -0.11);
     vagg('z', 1.40, -3.25, -1.58);
-    vagg('x', -1.63, 1.45, 4.75, { dorrar: [{ a: 2.85, b: 3.66, gang: 'a', sida: 1, vinkel: 85 }] });
+    // badrumsdörren som i planritningen: gångjärn mot öster, slår ut i hallen (bladet mot
+    // badrumsväggen); strömbrytaren på hallsidan öster om dörren (låskanten skyms av garderoben)
+    vagg('x', -1.63, 1.45, 4.75, { dorrar: [{ a: 2.85, b: 3.66, gang: 'b', sida: 1, vinkel: 85, bryt: 3.83 }] });
     yield;
     // garderobsblocket mellan sovrum 3 och hallen, med inklädnad upp till taket
     med(1.70, -0.845, -PI / 2, () => garderob(1.47, 0.66, 2.3, 2, 'klader'));
@@ -5570,7 +5797,7 @@ const MODELL = {
     vagg('z', 2.045, -1.58, -0.11, { t: 1.35, bunn: 2.3 });
     yield;
     // hall: bänk och krokar
-    med(4.1, -1.405, 0, () => hallbank(0.9, 0.34));
+    med(4.2, -1.405, 0, () => hallbank(0.75, 0.34));   // fri från badrumsdörrens öppna blad (x 3,6–3,7)
     hallen(4.25, -1.58, 0, { bank: true });   // rocken fri från strömbrytaren vid badrumsdörren
     spot(4.1, -0.8);
     yield;
@@ -5679,9 +5906,11 @@ const MODELL = {
     });
     vagg('z', -0.35, -3.25, -0.11);
     vagg('z', 2.25, -3.25, -0.11);
-    vagg('z', 3.49, -0.01, 3.25, { dorrar: [{ a: 0.12, b: 0.92, gang: 'b', sida: 1, vinkel: 85 }] });
-    // badrumsdörren öppnar in i badet (stod uppslagen över halva korridoren), gångjärn mot toaletten
-    vagg('x', 1.385, 0.46, 3.44, { dorrar: [{ a: 1.54, b: 2.31, gang: 'a', sida: 1, vinkel: 80 }] });
+    // sovrum 7,1 som i planritningen: gångjärnen mot norr, slår in i rummet med bladet mot
+    // korridorväggen
+    vagg('z', 3.49, -0.01, 3.25, { dorrar: [{ a: 0.12, b: 0.92, gang: 'a', sida: 1, vinkel: 85 }] });
+    // badrumsdörren som i planritningen: gångjärnen mot öster, slår ut i korridoren
+    vagg('x', 1.385, 0.46, 3.44, { dorrar: [{ a: 1.54, b: 2.31, gang: 'b', sida: -1, vinkel: 85 }] });
     vagg('z', 0.52, 1.435, 3.25);
     vagg('z', -1.575, 1.38, 3.25, { t: 0.13 });
     yield;
@@ -5738,8 +5967,9 @@ const MODELL = {
     med(2.6, -1.6, PI / 2, () => garderob(1.2, 0.6, 2.1, 2));
     yield;
     // sovrum 7,1
-    med(5.20, -0.01 + 1.025 + 0.085, 0, () => sang(0.9, 2.05, { pled: '#b9895c' }));
-    med(4.45, 0.2, 0, () => nattbord({ sida: -1 }));
+    // sängen intill östväggen och nattduksbordet bredvid, fritt från dörrbladet (öppet till x 4,3)
+    med(5.26, -0.01 + 1.025 + 0.085, 0, () => sang(0.9, 2.05, { pled: '#b9895c' }));
+    med(4.58, 0.2, 0, () => nattbord({ sida: -1 }));
     // garderob mot västväggen söder om dörren, smal matta i gången mot sängen
     med(3.84, 1.65, PI / 2, () => garderob(1.0, 0.6, 2.1, 2));
     matta(4.44, 1.45, 0.5, 1.3, 0, '#d8cdbb', 0);

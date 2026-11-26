@@ -21,9 +21,9 @@ export function skapaPlanlager(duk, vidRum) {
   rot.setAttribute('role', 'group'); rot.setAttribute('aria-label', 'Planlösning');
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('class', 'kplanvy__ritning');
-  const gLoft = document.createElementNS(NS, 'g'), gVagg = document.createElementNS(NS, 'g'), gGlas = document.createElementNS(NS, 'g'), gMatt = document.createElementNS(NS, 'g');
-  gLoft.setAttribute('class', 'kplanvy__loft'); gVagg.setAttribute('class', 'kplanvy__vaggar'); gGlas.setAttribute('class', 'kplanvy__glas'); gMatt.setAttribute('class', 'kplanvy__matt');
-  svg.append(gLoft, gVagg, gGlas, gMatt);
+  const gLoft = document.createElementNS(NS, 'g'), gVagg = document.createElementNS(NS, 'g'), gGlas = document.createElementNS(NS, 'g'), gMatt = document.createElementNS(NS, 'g'), gDorr = document.createElementNS(NS, 'g');
+  gLoft.setAttribute('class', 'kplanvy__loft'); gVagg.setAttribute('class', 'kplanvy__vaggar'); gGlas.setAttribute('class', 'kplanvy__glas'); gMatt.setAttribute('class', 'kplanvy__matt'); gDorr.setAttribute('class', 'kplanvy__dorr');
+  svg.append(gLoft, gDorr, gVagg, gGlas, gMatt);
   const lappar = document.createElement('div');
   lappar.className = 'kplanvy__lappar';
   rot.append(svg, lappar);
@@ -38,18 +38,20 @@ export function skapaPlanlager(duk, vidRum) {
   const KLASS = ['', ' kplanvy__rum--liten', ' kplanvy__rum--mini'];
   let matB = 0, matH = 0, block = [], rumMatt = [], mattMatt = [], loftMatt = [0, 0], lage = [];
   const lador = [];   // lappar som redan står på plats den här rutan
-  const el = { vagg: [], glas: [], loft: [], matt: [], rum: [], loftLapp: null };
+  const el = { vagg: [], glas: [], loft: [], matt: [], rum: [], loftLapp: null, dorr: null };
   const p = [0, 0], q = [0, 0], r = [0, 0], s = [0, 0];
   const bana = (tag, grupp) => { const e = document.createElementNS(NS, tag); grupp.appendChild(e); return e; };
 
   function satt(data) {
     D = data; matB = 0;
-    gLoft.textContent = ''; gVagg.textContent = ''; gGlas.textContent = ''; gMatt.textContent = ''; lappar.textContent = '';
+    gLoft.textContent = ''; gDorr.textContent = ''; gVagg.textContent = ''; gGlas.textContent = ''; gMatt.textContent = ''; lappar.textContent = '';
     // två banor för alla väggar: en ljus kontur underst och den mörka snittytan överst
     // (konturen syns då aldrig i skarvarna mellan väggbitarna)
     el.vagg = [bana('path', gVagg), bana('path', gVagg)];
     el.vagg[0].setAttribute('class', 'kplanvy__kontur'); el.vagg[1].setAttribute('class', 'kplanvy__snitt');
     el.glas = D.glas.map(() => bana('path', gGlas));
+    // dörrbågarna (bladet öppet och låskantens båge) i en bana
+    el.dorr = Array.isArray(D.dorrar) && D.dorrar.length ? bana('path', gDorr) : null;
     el.loft = D.loft.map(() => bana('path', gLoft));
     el.matt = D.matt.map(m => {
       const g = bana('g', gMatt), linje = bana('path', g);
@@ -106,6 +108,17 @@ export function skapaPlanlager(duk, vidRum) {
     if (kg > 0) {
       for (let i = 0; i < el.glas.length; i++) el.glas[i].setAttribute('d', rekt(proj, D.glas[i], 1));
       for (let i = 0; i < el.loft.length; i++) el.loft[i].setAttribute('d', rekt(proj, D.loft[i], 1));
+    }
+    gDorr.style.opacity = kg;
+    if (kg > 0 && el.dorr) {
+      let dd = '';
+      for (const o of D.dorrar) {
+        const n = o.bag.length - 1;
+        proj(o.h[0], o.h[1], p); proj(o.bag[n][0], o.bag[n][1], q);
+        dd += 'M' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + 'L' + q[0].toFixed(1) + ' ' + q[1].toFixed(1);
+        for (let i = 0; i <= n; i++) { proj(o.bag[i][0], o.bag[i][1], r); dd += (i ? 'L' : 'M') + r[0].toFixed(1) + ' ' + r[1].toFixed(1); }
+      }
+      el.dorr.setAttribute('d', dd);
     }
     // måttlinjerna: växer ut från mitten, talet tonar in
     for (let i = 0; i < el.matt.length; i++) {

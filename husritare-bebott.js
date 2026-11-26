@@ -22,6 +22,7 @@
 //   bebott.satt(namn, mal, plats)   // namn: 'studio' | 'tradgard' | 'skog' | 'vinter'
 //   bebott.dispose()
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
+import { fab } from './husritare-fab.js?v=20261126c';   // skannade odlingsbäddar (Fab) när husritare-miljo.js startat modulen
 
 // Husens öppningar (som HUS i husritare.js, nyckel L×W): [sida, u från vänster sett utifrån, bredd,
 // underkant, dörr]. Bara för att inte ställa saker framför fönster och dörrar; okänt hus = bara dörrarna i mal.
@@ -235,11 +236,15 @@ export function skapaBebott(THREE, rot, VU) {
   function odlingslador(odling, sno, r) {
     const g = ny('odlingslådor'), tra = mat('#7c6b57', 0.9), kant = mat('#6d5e4c', 0.9), jord = mat('#35281e', 1);
     const SALLAD = ['#6a8c48', '#7f9c55', '#587c40'], BLAST = ['#3a5a2e', '#48693a'], V = gronska();
+    const fo = fab.klar(), FM = [];   // fo: skannade odlingsbäddar (Fab, husritare-fab.js) i stället för lådorna; plantorna står kvar
     [-0.5, 0.5].forEach((z, j) => {
+      if (fo) { FM.push(new THREE.Matrix4().compose(new THREE.Vector3(0, -0.01, z), new THREE.Quaternion().setFromAxisAngle(UPP, j * Math.PI), new THREE.Vector3(1.2, 1.6, 1.2))); for (let k = 0; k < 14; k++) r(); }   // (slumpen dras som förut)
+      else {
       [-1, 1].forEach(s => { lada(1.24, 0.34, 0.045, tra, g, 0, 0.17, z + s * 0.3); lada(0.045, 0.34, 0.56, tra, g, s * 0.6, 0.17, z); });
       [-1, 1].forEach(s => { lada(1.3, 0.025, 0.08, kant, g, 0, 0.352, z + s * 0.29); lada(0.08, 0.025, 0.66, kant, g, s * 0.62, 0.352, z); });   // kantbräda att sitta på
       lada(1.16, 0.02, 0.56, jord, g, 0, 0.3, z);
       for (let k = 0; k < 7; k++) lada(1.12, 0.015, 0.03, jord, g, 0, 0.315, z - 0.24 + k * 0.08 + (r() - 0.5) * 0.01, 0, (r() - 0.5) * 0.03, 0);   // krattade fåror
+      }
       if (sno) { rund(1.2, 0.09, 0.6, 0.04, snoMat(), g, 0, 0.37, z); return; }
       if (!odling) return;
       if (j === 0) {   // tomatplantor uppbundna vid käppar, några mogna tomater
@@ -270,6 +275,7 @@ export function skapaBebott(THREE, rot, VU) {
       }
     });
     if (odling && !sno) V.nat(g);
+    if (fo) g.add(fab.odlingNat(FM));
     return g;
   }
   // skottkärra (lokalt: hjulet mot +x): galvat tråg, grönt rör, luftgummihjul; last = 'jord' | 'ved' | null
@@ -288,7 +294,13 @@ export function skapaBebott(THREE, rot, VU) {
     });
     nat(new THREE.TorusGeometry(0.15, 0.05, 8, 20), svart, g, 0.62, 0.2, 0);
     cyl(0.1, 0.1, 0.07, 12, mat('#c43a2c', 0.5), g, 0.62, 0.2, 0, Math.PI / 2);
-    if (last === 'jord') { const o = nat(new THREE.SphereGeometry(0.3, 14, 6, 0, Math.PI * 2, 0, Math.PI / 2), mat('#3d2d20', 1), g, 0.04, 0.6, 0); o.scale.set(1.05, 0.32, 0.72); }
+    if (last === 'jord') {
+      // kupad, knölig jordhög som sticker upp över trågkanten (förr en platt brun skiva)
+      const jg = new THREE.SphereGeometry(0.3, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), p = jg.attributes.position;
+      for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i), k = 1 + 0.12 * Math.sin(x * 23 + z * 17) * Math.sin(z * 19 - x * 7) * (y > 0.02 ? 1 : 0); p.setXYZ(i, x * k, y * k, z * k); }
+      jg.computeVertexNormals();
+      const o = nat(jg, mat('#3d2d20', 1), g, 0.04, 0.56, 0); o.scale.set(1.0, 0.78, 0.7);
+    }
     if (last === 'ved') for (let i = 0; i < 6; i++) {
       const o = cyl(0.05, 0.05, 0.4, 7, mat(i % 2 ? '#c7a77c' : '#6a5544', 0.9), g, -0.05 + (r() - 0.5) * 0.3, 0.6 + (i > 3 ? 0.08 : 0), (i % 4 - 1.5) * 0.11, Math.PI / 2, (r() - 0.5) * 0.4, 0);
       o.rotation.order = 'YXZ';
@@ -630,7 +642,7 @@ export function skapaBebott(THREE, rot, VU) {
       if (i === 0) {
         if (sno) placera(snoskyffel(), x, z, dw.ry + 0.12);
         else {
-          placera(kruka(0.22, 0.42, '#3a3b3c', 'klot', r), x, z);
+          placera(kruka(0.24, 0.34, '#a9694b', 'blommor', r), x, z);   // blommande pelargon i lerkruka (buxbomsklotet såg ut som en grön klump)
           placera(kruka(0.15, 0.28, '#a9694b', skog ? 'ormbunke' : 'blommor', r), lx, lz);
           if (!skog) placera(vattenkanna(), ...vp(dsd, uu + ld * 0.52, 0.24), dw.ry - Math.PI / 2 + ld * 0.45);   // pipen ut från väggen, inte in i den
         }

@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261125n';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261125n';
-import { skapaPlanlager } from './husritare-plan.js?v=20261125n';
+import { skapaMiljo } from './husritare-miljo.js?v=20261126c';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261126c';
+import { skapaPlanlager } from './husritare-plan.js?v=20261126c';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -342,7 +342,7 @@ const HIMMEL = {
   tradgard: { top: '#7da2cc', hor: '#e5eaee', mark: '#5a6839', band: '#3a4729', bandH: 0.13 },
   skog: { top: '#7b9bc2', hor: '#dde4e7', mark: '#3e4930', band: '#25321e', bandH: 0.28 },
   vinter: { top: '#9db4cc', hor: '#eef1f4', mark: '#e9edf2', band: '#3a4943', bandH: 0.2 },
-  kust: { top: '#78a0cd', hor: '#e4e9ec', mark: '#4a5d5a', band: '#34432f', bandH: 0.12 },      // vid sjön: skogsklädda stränder i diset (speglas i vattnet)
+  kust: { top: '#5f90d2', hor: '#dde9f2', mark: '#56653f', band: '#2f3e30', bandH: 0.1 },      // vid sjön: skogsklädda stränder i diset (speglas i vattnet)
   villa: { top: '#7da2cc', hor: '#e6e8e8', mark: '#5a6839', band: '#585950', bandH: 0.11 },     // villaområdet: hustak och träd
 };
 
@@ -352,7 +352,10 @@ const HIMMEL = {
 // dess redo (ett löfte) blir klart när programmen är kompilerade och första bilden är ritad.
 export async function skapaRitare(duk, alternativ = {}) {
   // stencil: fasaden märker sina pixlar så att inredningen aldrig ritas över den (se mat.fasad)
-  const renderer = new THREE.WebGLRenderer({ canvas: duk, antialias: true, alpha: false, powerPreference: 'high-performance', stencil: true });
+  // Egen kontext utan alfakanal: three skapar annars alltid en duk med alfa, och löv/barr med alphaToCoverage skrev
+  // alfa < 1 i kanterna – sidans ljusa bakgrund lyste igenom som glitter i granarna. Utan alfa är duken alltid täckande.
+  const glk = (() => { try { return duk.getContext('webgl2', { alpha: false, antialias: true, stencil: true, depth: true, powerPreference: 'high-performance', premultipliedAlpha: true, preserveDrawingBuffer: false }); } catch (e) { return null; } })();
+  const renderer = new THREE.WebGLRenderer({ canvas: duk, context: glk || undefined, antialias: true, alpha: false, powerPreference: 'high-performance', stencil: true });
   // foto: true (sidans ?foto=1) ger skarpaste bilden: pixeltäthet 1,5, inget intro, ingen snurr, inget liv
   const FOTO = !!alternativ.foto;
   // skärmens egen pixeltäthet upp till 2 (taket 1,25 gav suddig bild och trappiga linjer på täta skärmar)
@@ -374,6 +377,17 @@ export async function skapaRitare(duk, alternativ = {}) {
   renderer.shadowMap.autoUpdate = false;
   let nySkugga = true;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  // Vid sjön: sommargradering ovanpå ACES (CustomToneMapping, sätts i satMiljo): lite mer mättnad,
+  // svalt blå skuggor och varma högdagrar, en mjuk S-kontrast. Himlen (toneMapped: false) berörs inte.
+  if (!THREE.ShaderChunk.tonemapping_pars_fragment.includes('sommargradering')) THREE.ShaderChunk.tonemapping_pars_fragment = THREE.ShaderChunk.tonemapping_pars_fragment.replace('vec3 CustomToneMapping( vec3 color ) { return color; }', `vec3 CustomToneMapping( vec3 color ) {   // sommargradering
+	vec3 c = ACESFilmicToneMapping( color );
+	float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );
+	c = max( mix( vec3( l ), c, 1.14 ), 0.0 );
+	c *= mix( vec3( 0.96, 0.99, 1.05 ), vec3( 1.045, 1.01, 0.94 ), smoothstep( 0.04, 0.55, l ) );
+	vec3 s = pow( clamp( c, 0.0, 1.0 ), vec3( 0.4545 ) );
+	s = mix( s, s * s * ( 3.0 - 2.0 * s ), 0.16 );
+	return pow( s, vec3( 2.2 ) );
+}`);
   const EXPO = 1.12;
   renderer.toneMappingExposure = EXPO;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -383,10 +397,14 @@ export async function skapaRitare(duk, alternativ = {}) {
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envCache = {};
-  function himmelEnv(namn) {
-    if (envCache[namn]) return envCache[namn];
+  // sol (valfri): { d: riktning, f: färg × styrka } – en ljus solskiva med glöd i omgivningskartan, så att glas,
+  // lack och plåt speglar solen (vid sjön). Kartorna med sol cachas per avrundad riktning; högst fyra sparas.
+  const envSol = [];
+  function himmelEnv(namn, sol = null) {
+    const nyckel = sol ? namn + '|' + [sol.d.x, sol.d.y, sol.d.z].map(v => Math.round(v * 8)).join(',') + '|' + Math.round(sol.k * 10) : namn;
+    if (envCache[nyckel]) return envCache[nyckel];
     const d = HIMMEL[namn] || HIMMEL.studio;
-    const geo = new THREE.SphereGeometry(10, 64, 32);
+    const geo = new THREE.SphereGeometry(10, sol ? 128 : 64, sol ? 64 : 32);
     const pos = geo.attributes.position, f = new Float32Array(pos.count * 3);
     const top = new THREE.Color(d.top), hor = new THREE.Color(d.hor), mk = new THREE.Color(d.mark), band = d.band ? new THREE.Color(d.band) : null, c = new THREE.Color();
     for (let i = 0; i < pos.count; i++) {
@@ -399,6 +417,11 @@ export async function skapaRitare(duk, alternativ = {}) {
           if (yy < hb) c.copy(band).lerp(hor, (yy / hb) * 0.3);
         }
       }
+      if (sol && yy > -0.05) {   // solen: het kärna (HDR) och mjuk glöd runt
+        const v = Math.acos(Math.min(1, Math.max(-1, (pos.getX(i) * sol.d.x + pos.getY(i) * sol.d.y + pos.getZ(i) * sol.d.z) / 10)));
+        const k = sol.k * (36 * Math.exp(-Math.pow(v / 0.045, 2)) + 0.9 * Math.exp(-v * 6) + 0.08 * Math.exp(-v * 1.6));
+        c.r += sol.f.r * k; c.g += sol.f.g * k; c.b += sol.f.b * k;
+      }
       f[i * 3] = c.r; f[i * 3 + 1] = c.g; f[i * 3 + 2] = c.b;
     }
     geo.setAttribute('color', new THREE.BufferAttribute(f, 3));
@@ -406,14 +429,26 @@ export async function skapaRitare(duk, alternativ = {}) {
     const s = new THREE.Scene(); s.add(new THREE.Mesh(geo, m));
     const rt = pmrem.fromScene(s, 0.03);
     geo.dispose(); m.dispose();
-    return (envCache[namn] = rt.texture);
+    if (sol) {
+      envSol.push(nyckel);
+      while (envSol.length > 4) { const gam = envSol.shift(); if (envCache[gam] && envCache[gam] !== scene.environment) envCache[gam].dispose(); delete envCache[gam]; }
+    }
+    return (envCache[nyckel] = rt.texture);
+  }
+  // vid sjön: omgivningskartan med solen där den står (byts bara när riktningen ändrats märkbart)
+  const ENV_SOLF = new THREE.Color(0xfff0d8);
+  function solEnv(kvall) {
+    if (miljoNamn !== 'kust') return;
+    const dir = sol.position.clone().normalize(), k = (1 - mjuk(0.3, 0.85, kvall)) * mjuk(-0.02, 0.12, dir.y);
+    const e = k > 0.02 ? himmelEnv('kust', { d: dir, f: ENV_SOLF, k }) : himmelEnv('kust');
+    if (scene.environment !== e) { scene.environment = e; begarRender(); }
   }
   marke('rit-motor');
   await paus();
   scene.environment = himmelEnv('studio');
   scene.environmentIntensity = 0.9;
 
-  const kamera = new THREE.PerspectiveCamera(32, 1, 0.1, 300); if (/[?&]prov=1/.test(location.search)) { window.__scen = scene; window.__kam = kamera; window.__rend = renderer; }   // TEMP-MAT
+  const kamera = new THREE.PerspectiveCamera(32, 1, 0.1, 300);
   kamera.position.set(13, 6, 15);
 
   // Tung, mjuk känsla: lång glidning efter ett svep, lugn rotation
@@ -464,6 +499,7 @@ export async function skapaRitare(duk, alternativ = {}) {
   const sk = sol.shadow.camera; sk.left = -14; sk.right = 14; sk.top = 14; sk.bottom = -14; sk.near = 1; sk.far = 80;
   sol.shadow.bias = -0.00025; sol.shadow.normalBias = 0.035;   // takets båda sidor kastar skugga: lite mer normalBias mot acne
   scene.add(sol, sol.target);
+  const SOL_SOMMAR = new THREE.Color(0xffefd2), HIM_SOMMAR = new THREE.Color(0xc4dcf4), STUDS_GRAS = new THREE.Color(0x7f8c4c);   // sommarljuset vid sjön (satSol)
   const SOL_DAG = new THREE.Color(0xfff2e2), SOL_LAG = new THREE.Color(0xffb26a), SOL_KVALL = new THREE.Color(0xff8c55), MANE = new THREE.Color(0x9fb4d6);
   const manePos = new THREE.Vector3();
   const HIM_DAG = new THREE.Color(0xcfdcea), HIM_KVALL = new THREE.Color(0x56607e), HIM_MARK = new THREE.Color(0x6a604f), HIM_INNE = new THREE.Color(0xdcc5a6), HIM_GYLLEN = new THREE.Color(0xf4cfa6), STUDS = new THREE.Color(0xd9bf9c), NATT_GOLV = new THREE.Color(0x5a4c3e);
@@ -746,7 +782,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   const plan = { pa: false, t: 0, fov: 0, egen: false, A: null, B: null, data: null, lager: null, grans: null, varOppen: false, lagerFore: null, y: 0 };
   // sidans helskärm: helO är övergången som pågår, helMarg kontrollernas ytor i helskärm (px)
   let helO = null, helMarg = null, helSparad = null;
-  let val ={ modell: 'sadel-40', fasad: null, tak: null, detalj: null, tid: 14, matt: false };
+  let val ={ modell: 'sadel-40', fasad: null, tak: null, detalj: null, tid: 17, matt: false };   // tid 17: sen eftermiddag (sidans STANDARD_TID)
 
   // ---- Hjälpare för ytor ----
   // En vägg i ett lokalt plan: u åt höger sett utifrån, v uppåt.
@@ -866,7 +902,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         lada(grupp, mtx, gw, gh, 1.3, cu, gy, -DJUP - 0.65, mat.rum, false);   // mörkt rum bakom rutan, som i fönstren
       } else lada(grupp, mtx, bw, bh, 0.05, cu, by0 + bh / 2, z, mat.detalj);
       // tre gångjärn på bladets gångjärnssida (mot trycket)
-      const gs = o.sida === 'N' || o.sida === 'W' ? 1 : -1, gx = cu + gs * (w / 2 - KARM - 0.002);
+      const gs = o.sida === 'N' || o.sida === 'W' || o.sida === 'E' ? 1 : -1, gx = cu + gs * (w / 2 - KARM - 0.002);
       [0.22, bh / 2 + 0.03, bh - 0.18].forEach(gy => lada(grupp, mtx, 0.022, 0.1, 0.022, gx, gy, z + 0.03, mat.detaljMork));
       if (typ === 'dg') {
         const gm = lada(grupp, mtx, w * 0.42, h * 0.62, 0.01, cu, cv + h * 0.08, z + 0.028, mat.glas, false);
@@ -883,7 +919,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         lada(grupp, mtx, w - 0.24, 0.012, 0.006, cu, cv - h * 0.22, z + 0.026, mat.detaljMork, false);
       }
       // trycke: skylt, hals och handtag, plus låscylinder
-      const sida = o.sida === 'N' || o.sida === 'W' ? -1 : 1;
+      const sida = o.sida === 'N' || o.sida === 'W' || o.sida === 'E' ? -1 : 1;
       const hx = cu + sida * (w / 2 - 0.09);
       lada(grupp, mtx, 0.045, 0.21, 0.01, hx, 1.0, z + 0.03, mat.handtag, false);
       // runt trycke (hals, böj och grepp) och rund låscylinder i stället för kantiga klossar;
@@ -1234,7 +1270,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // vägglampan vid huvuddörren, på gångjärnssidan (bort från trycket)
     const huvud = dorrar.find(o => o[5] === 'd') || dorrar.find(o => o[5] === 'dg');
     if (!huvud) return { glod: null, altan: altanUt };
-    const mtx = mtxer[huvud.sida], sida = huvud.sida === 'N' || huvud.sida === 'W' ? -1 : 1;
+    const mtx = mtxer[huvud.sida], sida = huvud.sida === 'N' || huvud.sida === 'W' || huvud.sida === 'E' ? -1 : 1;
     const vagglangd = huvud.sida === 'S' || huvud.sida === 'N' ? L : m.W;
     const krock = u => u < 0.3 || u > vagglangd - 0.3 || omb[huvud.sida].some(p => p !== huvud && u > p.u0 - 0.22 && u < p.u0 + p[2] + 0.22 && p[3] < 2.25 && p[3] + p[4] > 1.7);
     const vanster = huvud.u0 - 0.3, hoger = huvud.u0 + huvud[2] + 0.3;
@@ -1927,7 +1963,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // utsikten inte bränns ut; rummet bärs av sin egen AO och lampan.
     // inne på dagen: lägre exponering och mer ljus i rummet, så att utsikten inte bränns ut
     // medan rummet blir lika ljust; på kvällen går exponeringen upp till fullt
-    renderer.toneMappingExposure = inneLage ? EXPO * (0.88 + k * 0.16) : EXPO * (1 - k * 0.06);
+    renderer.toneMappingExposure = inneLage ? EXPO * (0.88 + k * 0.16) : EXPO * (1 - k * 0.06) * (miljoNamn === 'kust' ? 1 + 0.07 * (1 - k) : 1);   // vid sjön lite ljusare dag
     scene.environmentIntensity = inneLage ? 0.9 : ljus.env;
     himmel.intensity = inneLage ? ljus.him * 1.3 : ljus.him;
     // utifrån: speglande glas som ändå släpper in blicken (0,42 dag, tunnare på kvällen)
@@ -2188,7 +2224,18 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     himmel.groundColor.copy(inneLage ? HIM_INNE : HIM_MARK).multiplyScalar(1 - kvall * 0.5);
     sol.shadow.bias = inneLage ? -0.0006 : -0.00025; sol.shadow.normalBias = inneLage ? 0.045 : 0.035;
     // natten: miljökartan är dagshimlen, så den dras ned nästan helt (plåt och glas lyste blågrått)
-    ljus.lag = lag; ljus.kvall = kvall; ljus.gry = gry; ljus.him = Math.max(0.3, 0.42 - kvall * 0.14); ljus.env = Math.max(0.12, 0.95 - kvall * 0.8 - gry * 0.25); ljus.sol = sol.intensity;
+    ljus.lag = lag; ljus.kvall = kvall; ljus.gry = gry; ljus.him = Math.max(0.3, 0.42 - kvall * 0.14); ljus.env = Math.max(0.12, 0.95 - kvall * 0.8 - gry * 0.25);
+    // vid sjön: lyxigt sommarljus – starkare, gyllenvit sol (inte orange), varmt himmelsljus ovanifrån och
+    // grönvarm studs från gräset; tonas bort i skymningen så att kvällen och natten är som förut
+    if (miljoNamn === 'kust' && !inneLage) {
+      const dag = 1 - mjuk(0.3, 0.9, kvall);
+      sol.intensity *= 1 + 0.28 * dag;
+      sol.color.lerp(SOL_SOMMAR, 0.55 * dag * (1 - lag * 0.6));
+      himmel.color.lerp(HIM_SOMMAR, 0.8 * dag);
+      himmel.groundColor.lerp(STUDS_GRAS, 0.75 * dag);
+      ljus.him *= 1 + 0.45 * dag;
+    }
+    ljus.sol = sol.intensity;
     // kvällen: rummen bakom glaset lyser varmt
     // vägglampan vid entrén tänds i skymningen; skenet är en additiv bild, inget ljus
     lampSken = mjuk(0.3, 0.65, kvall);
@@ -2203,6 +2250,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     passaSkugga();
     nySkugga = true;
     omgivning.uppdatera({ kvall, gryning: gry, mork: morktTema, sol: sol.position.clone().normalize(), inne: miljoInne });
+    solEnv(kvall);
     begarRender();
     if (alternativ.vidKvall) alternativ.vidKvall(kvall);
   }
@@ -2233,6 +2281,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     snoU.value = miljoNamn === 'vinter' ? 1 : 0;
     omgivning.satt(miljoNamn, HUS[val.modell]);
     scene.environment = himmelEnv(miljoNamn);
+    renderer.toneMapping = miljoNamn === 'kust' ? THREE.CustomToneMapping : THREE.ACESFilmicToneMapping;
+    satSol();                                // miljöns eget sommarljus (vid sjön) följer med direkt
   }
   function visa(id, montera = true) {
     vakna();
@@ -3197,39 +3247,121 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     return { p, s, L: s[s.length - 1] };
   }
   // fri väg mellan två punkter (prov var 10:e cm); dörrarnas lådor räknas inte, de öppnas på vägen
+  // (vägen får inte heller gå genom ett dörrblad: innerdörrarnas blad i öppet läge, se blad())
+  let ruttBlad = [];
+  // (sträckan mot lådorna utvidgade med 0,1 m, möbler 0,02 m, som fri(); ändarna 0,1 m in
+  // räknas inte, som när sträckan provades var 10:e cm)
   function vagFri(ax, az, bx, bz, niva) {
-    const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.ceil(L / 0.1));
-    for (let i = 1; i < n; i++) { const u = i / n; if (fri(ax + (bx - ax) * u, az + (bz - az) * u, niva, true) < 0.1) return false; }
-    return true;
-  }
-  // [] = rakt dit, [{ x, z }] = via en dörrlådas mitt, null = ingen väg
-  function rutt(ax, az, bx, bz, niva) {
-    if (vagFri(ax, az, bx, bz, niva)) return [];
+    const L = Math.hypot(bx - ax, bz - az);
+    if (L < 1e-6) return true;
+    const k = Math.min(0.1, L * 0.45) / L, x0 = ax + (bx - ax) * k, z0 = az + (bz - az) * k, dx = (bx - ax) * (1 - 2 * k), dz = (bz - az) * (1 - 2 * k);
     const H = hinderLista();
-    let bast = null, bl = Infinity;
     for (let i = 0; i < H.length; i++) {
       const b = H[i];
-      if (b.dorr < 0 || (b.niva !== -1 && b.niva !== niva)) continue;
-      const cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2, l = Math.hypot(cx - ax, cz - az) + Math.hypot(bx - cx, bz - cz);
-      if (l < bl && vagFri(ax, az, cx, cz, niva) && vagFri(cx, cz, bx, bz, niva)) { bl = l; bast = { x: cx, z: cz }; }
-    }
-    if (bast) return [bast];
-    // ingen dörr: runt ett hinders hörn, 0,42 m snett ut (loftets räcke mellan trappans topp och
-    // loftet: förr gick vägen rakt igenom räcket); båda sträckorna måste hålla 0,3 m fritt
-    // (trånga gångar, som Kupa 40:s 50 cm mellan bädden och räcket: ett andra varv med 0,2 m)
-    for (const m of [0.3, 0.2]) {
-      const fri3 = (x0, z0, x1, z1) => { const L = Math.hypot(x1 - x0, z1 - z0), n = Math.max(1, Math.ceil(L / 0.1)); for (let i = 1; i < n; i++) { const u = i / n, k = Math.min(u, 1 - u) * L; if (fri(x0 + (x1 - x0) * u, z0 + (z1 - z0) * u, niva, true) < (k < 0.35 ? 0.12 : m)) return false; } return true; };
-      for (let i = 0; i < H.length; i++) {
-        const b = H[i];
-        if (b.dorr >= 0 || b.trappa || (b.niva !== -1 && b.niva !== niva)) continue;
-        for (const o of [0.3, 0.22]) for (const [cx, cz] of [[b.x0 - o, b.z0 - o], [b.x1 + o, b.z0 - o], [b.x0 - o, b.z1 + o], [b.x1 + o, b.z1 + o]]) {
-          const l = Math.hypot(cx - ax, cz - az) + Math.hypot(bx - cx, bz - cz);
-          if (l < bl && fri(cx, cz, niva, true) >= m && fri3(ax, az, cx, cz) && fri3(cx, cz, bx, bz)) { bl = l; bast = { x: cx, z: cz }; }
-        }
+      if ((b.niva !== -1 && b.niva !== niva) || b.trappa || b.dorr >= 0) continue;
+      const e = 0.1 - (b.mobel ? RADIE - RADIE_M : 0);
+      // sträckan genom den utvidgade lådan (skivmetoden)
+      let t0 = 0, t1 = 1, ok = true;
+      for (const [p, d, lo, hi] of [[x0, dx, b.x0 - e, b.x1 + e], [z0, dz, b.z0 - e, b.z1 + e]]) {
+        if (Math.abs(d) < 1e-9) { if (p <= lo || p >= hi) { ok = false; break; } continue; }
+        let u0 = (lo - p) / d, u1 = (hi - p) / d;
+        if (u0 > u1) { const t = u0; u0 = u1; u1 = t; }
+        t0 = Math.max(t0, u0); t1 = Math.min(t1, u1);
+        if (t0 >= t1) { ok = false; break; }
       }
-      if (bast) return [bast];
+      if (ok) return false;
     }
-    return null;
+    if (niva === 0) for (const s of ruttBlad) if (strackAvst(ax, az, bx, bz, s[0], s[1], s[2], s[3]) < 0.1) return false;
+    return true;
+  }
+  // innerdörrarnas blad som sträckor [gångjärn x, z, låskant x, z] i helt öppet läge (dörrarna
+  // slår bara åt ett håll, så det är där bladet står när man går igenom)
+  function blad() {
+    const d = husGrupp && husGrupp.userData, ut = d && d.ia;
+    if (!ut) return [];
+    const M = new THREE.Matrix4(), v = new THREE.Vector3(), L = [];
+    ut.opp.forEach(o => {
+      if (!o || o.typ !== 'dorr' || !o.passage || o.axel !== 'y' || !o.obj || !o.obj.parent) return;
+      const r = Math.abs(o.cL.x) * 2, sx = Math.sign(o.cL.x) || 1, a = Math.abs(o.max) * o.tecken;
+      if (!(r > 0.3 && r < 1.5)) return;
+      M.copy(o.obj.parent.matrixWorld);
+      v.copy(o.obj.position).applyMatrix4(M); const hx = v.x, hz = v.z;
+      v.set(sx * r * Math.cos(a), 0, -sx * r * Math.sin(a)).add(o.obj.position).applyMatrix4(M);
+      // (gångjärnsänden 5 cm in: vägen genom öppningen tangerar gångjärnet)
+      const k = 0.05 / r;
+      L.push([hx + (v.x - hx) * k, hz + (v.z - hz) * k, v.x, v.z]);
+    });
+    return L;
+  }
+  // minsta avståndet mellan två sträckor i planet (0 om de korsar varandra)
+  function strackAvst(ax, az, bx, bz, cx, cz, dx, dz) {
+    const kr = (px, pz, qx, qz, rx, rz) => (qx - px) * (rz - pz) - (qz - pz) * (rx - px);
+    const d1 = kr(cx, cz, dx, dz, ax, az), d2 = kr(cx, cz, dx, dz, bx, bz), d3 = kr(ax, az, bx, bz, cx, cz), d4 = kr(ax, az, bx, bz, dx, dz);
+    if (d1 * d2 < 0 && d3 * d4 < 0) return 0;
+    const pt = (px, pz, sx, sz, ex, ez) => { const lx = ex - sx, lz = ez - sz, l2 = lx * lx + lz * lz, t = l2 > 0 ? Math.min(1, Math.max(0, ((px - sx) * lx + (pz - sz) * lz) / l2)) : 0; return Math.hypot(px - sx - lx * t, pz - sz - lz * t); };
+    return Math.min(pt(ax, az, cx, cz, dx, dz), pt(bx, bz, cx, cz, dx, dz), pt(cx, cz, ax, az, bx, bz), pt(dx, dz, ax, az, bx, bz));
+  }
+  // [] = rakt dit, [{ x, z }] = via en dörrlådas mitt, null = ingen väg
+  // (finns ingen väg förbi de öppna bladen: samma sökning utan dem, hellre nära ett blad än genom en vägg)
+  function rutt(ax, az, bx, bz, niva) {
+    try { ruttBlad = blad(); } catch (e) { ruttBlad = []; }
+    let r = ruttSok(ax, az, bx, bz, niva);
+    if (r === null && ruttBlad.length) { ruttBlad = []; r = ruttSok(ax, az, bx, bz, niva); }
+    return r;
+  }
+  // Vägsökning (A*) i en graf över dörrarna (mitten och en punkt 0,45 m ut på var sida, och
+  // mitten nås bara från de punkterna: vägen går rakt genom öppningen), hindrens hörn (0,3 och
+  // 0,22 m snett ut) och de öppna dörrbladens låskanter. En kant finns där vägen är fri (vagFri:
+  // inga väggar, möbler eller dörrblad). Ger alltid en väg utan väggar, eller null.
+  function ruttSok(ax, az, bx, bz, niva) {
+    if (vagFri(ax, az, bx, bz, niva)) return [];
+    // först en gles graf (dörrar och väggarnas hörn), sedan med möblernas hörn
+    return ruttGraf(ax, az, bx, bz, niva, false) || ruttGraf(ax, az, bx, bz, niva, true);
+  }
+  function ruttGraf(ax, az, bx, bz, niva, alla) {
+    const H = hinderLista(), N = [{ x: ax, z: az, d: -1 }, { x: bx, z: bz, d: -1 }];
+    const nod = (x, z, d, min) => { if (d >= 0 || fri(x, z, niva, true) >= min) N.push({ x, z, d }); };
+    H.forEach((b, i) => {
+      if (b.niva !== -1 && b.niva !== niva) return;
+      if (b.dorr >= 0) {
+        const cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2, nx = b.x1 - b.x0 < b.z1 - b.z0;
+        N.push({ x: cx, z: cz, d: i, mitt: true });
+        for (const s of [1, -1]) { const x = nx ? cx + s * 0.45 : cx, z = nx ? cz : cz + s * 0.45; if (fri(x, z, niva, true) >= 0.1) N.push({ x, z, d: i }); }
+      } else if (!b.trappa && (alla || !b.mobel)) {
+        for (const o of alla ? [0.3, 0.22] : [0.3]) for (const [x, z] of [[b.x0 - o, b.z0 - o], [b.x1 + o, b.z0 - o], [b.x0 - o, b.z1 + o], [b.x1 + o, b.z1 + o]]) nod(x, z, -1, 0.18);
+      }
+    });
+    if (niva === 0) ruttBlad.forEach(([hx, hz, tx, tz]) => {
+      const L = Math.hypot(tx - hx, tz - hz) || 1, dx = (tx - hx) / L, dz = (tz - hz) / L;
+      for (const [f, s] of [[0.32, 0], [0.22, 0.22], [0.22, -0.22]]) nod(tx + dx * f - dz * s, tz + dz * f + dx * s, -1, 0.18);
+    });
+    const n = N.length, g = new Float64Array(n).fill(Infinity), fran = new Int32Array(n).fill(-1), klar = new Uint8Array(n), kant = new Map();
+    const h = i => Math.hypot(N[i].x - bx, N[i].z - bz);
+    const far = (i, j) => {
+      const p = N[i], q = N[j];
+      // dörrens mitt nås bara från dörrens egna punkter (och tvärtom)
+      if ((p.mitt || q.mitt) && p.d !== q.d) return false;
+      const k = i < j ? i * n + j : j * n + i;
+      let v = kant.get(k);
+      if (v === undefined) { v = vagFri(p.x, p.z, q.x, q.z, niva); kant.set(k, v); }
+      return v;
+    };
+    g[0] = 0;
+    for (;;) {
+      let i = -1, bf = Infinity;
+      for (let j = 0; j < n; j++) if (!klar[j] && g[j] + h(j) < bf) { bf = g[j] + h(j); i = j; }
+      if (i < 0) return null;
+      if (i === 1) break;
+      klar[i] = 1;
+      for (let j = 0; j < n; j++) {
+        if (klar[j] || j === i) continue;
+        const l = g[i] + Math.hypot(N[j].x - N[i].x, N[j].z - N[i].z);
+        if (l < g[j] && far(i, j)) { g[j] = l; fran[j] = i; }
+      }
+    }
+    const vag = [];
+    for (let i = fran[1]; i > 0; i = fran[i]) vag.unshift({ x: N[i].x, z: N[i].z });
+    return vag;
   }
   // läget längs vägen (e 0–1): x och z längs sträckorna, ögat följer golvet (trappan steg för steg)
   // ögats läge d meter in på vägen V (samma som glidPunkt, utan glidningens startförskjutning)
@@ -3800,15 +3932,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (auto && o.stangd && performance.now() - o.stangd < 1000) return false;
     if (till === 0 && o.typ === 'dorr' && !o.fonster && inneLage && iStorrOppning(o)) return false;
     if (till === 0 && !auto) o.stangd = performance.now();
-    // dörrar öppnas bort från den som öppnar: åt det håll bladets mitt rör sig bort från kameran
-    if (till === 1 && o.typ === 'dorr' && Math.abs(o.t) < 0.02) {
-      o.obj.updateMatrixWorld(true);
-      const c = o.obj.localToWorld(iaV.copy(o.cL));
-      const r = iaV2.copy(c).sub(o.obj.getWorldPosition(iaV3));
-      const ax = iaV3.copy(AXEL[o.axel]).applyQuaternion(o.obj.getWorldQuaternion(iaQ2));
-      const s = ax.cross(r).dot(r.copy(c).sub(kamera.position));
-      if (Math.abs(s) > 1e-6) o.tecken = s > 0 ? 1 : -1;
-    }
+    // dörrarna slår åt ett håll, som i Sverige: gångjärnssidan och slagriktningen är fasta
+    // (inredningens max, efter planritningen), oavsett från vilken sida man öppnar
     o.fran = o.t; o.mal = till; o.k = 0;
     if (lugn) { o.t = till; o.k = -1; satsOpp(o); oppKlar(o); }
     iaAnnonsera(); begarRender();
@@ -3922,7 +4047,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       let syns = true;
       if (dock) syns = true;
       else if (inneLage) syns = o.passage || !grann || !o.rum || !kanda || !kanda.has(o.rum) || grann.has(o.rum) || o.k >= 0;
-      else syns = o.passage && nara;
+      // utifrån: skåpluckor, lådfronter och garderobsdörrar syns så länge inredningen syns (förr gömda: skåpen
+      // såg öppna ut genom fönstren); innerdörrarna som förut bara på nära håll
+      else syns = o.passage ? nara : !!(d.inne && d.inne.visible);
       o.obj.visible = syns;
     });
     ia.nara = nara;
@@ -5096,7 +5223,31 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       { a: [-L / 2, sz * (W / 2 + ut)], b: [L / 2, sz * (W / 2 + ut)], text: planTal(L, 2) + ' m', ut: [0, sz * 0.55] },
       { a: [-L / 2 - ut, -W / 2], b: [-L / 2 - ut, W / 2], text: planTal(W, 2) + ' m', ut: [-0.75, 0] },
     ];
-    return (d.planData = { L, W, vaggar, nOrdning: vaggar.length, glas, rum, loft, loftYta, loftText: 'N', matt });
+    // dörrbågarna som på en ritning: bladet i öppet läge och bågen som låskanten går, med
+    // samma gångjärnssida och slagriktning som dörrarna i 3D (innerdörrarnas max, ytterdörren utåt)
+    const dorrar = [];
+    try {
+      const ut2 = iaData(), inv = new THREE.Matrix4().copy(d.inne.matrixWorld).invert(), M = new THREE.Matrix4(), v = new THREE.Vector3(), N = 12;
+      (ut2 ? ut2.opp : []).forEach(o => {
+        if (!o || o.typ !== 'dorr' || !o.passage || !o.obj || !o.obj.parent || o.axel !== 'y') return;
+        const r = Math.abs(o.cL.x) * 2, sx = Math.sign(o.cL.x) || 1, ang = Math.abs(o.max) * o.tecken;
+        if (!(r > 0.3 && r < 1.5)) return;
+        M.multiplyMatrices(inv, o.obj.parent.matrixWorld);
+        const P = o.obj.position, pt = k => { v.set(sx * r * Math.cos(ang * k), 0, -sx * r * Math.sin(ang * k)).add(P).applyMatrix4(M); return [v.x, v.z]; };
+        v.copy(P).applyMatrix4(M);
+        const h = [v.x, v.z], bag = [];
+        for (let i = 0; i <= N; i++) bag.push(pt(i / N));
+        dorrar.push({ h, bag });
+      });
+      const Y = dorrInfo();
+      if (Y) {
+        const c = Y.mitt.clone().addScaledVector(Y.u, Y.gs * 0.03), r = Y.w - 0.114;
+        const h = c.clone().addScaledVector(Y.u, Y.gs * (Y.w / 2 - 0.057)).addScaledVector(Y.n, -0.045), bag = [];
+        for (let i = 0; i <= N; i++) { const a = i / N * Math.PI / 2; bag.push([h.x - Y.u.x * Y.gs * r * Math.cos(a) + Y.n.x * r * Math.sin(a), h.z - Y.u.z * Y.gs * r * Math.cos(a) + Y.n.z * r * Math.sin(a)]); }
+        dorrar.push({ h: [h.x, h.z], bag });
+      }
+    } catch (e) { console.warn(e); }
+    return (d.planData = { L, W, vaggar, nOrdning: vaggar.length, glas, rum, loft, loftYta, loftText: 'N', matt, dorrar });
   }
   // kamerans läge som (mål, riktning, halv bildhöjd i meter, synfält)
   function planPose() {
@@ -5241,8 +5392,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       const ax = { S: [[-L / 2, 0, W / 2], [1, 0, 0], [0, 0, 1]], N: [[L / 2, 0, -W / 2], [-1, 0, 0], [0, 0, -1]], E: [[L / 2, 0, W / 2], [0, 0, -1], [1, 0, 0]], W: [[-L / 2, 0, -W / 2], [0, 0, 1], [-1, 0, 0]] }[s];
       const uA = new THREE.Vector3(...ax[1]), nA = new THREE.Vector3(...ax[2]);
       const mtx = new THREE.Matrix4().makeBasis(uA, UPP, nA).setPosition(new THREE.Vector3(...ax[0]));
-      // gångjärnen sitter som i oppning(): höger sett utifrån på norr och väst, annars vänster
-      const gs = s === 'N' || s === 'W' ? 1 : -1, cu = u0 + w / 2, gx = cu + gs * (w / 2 - KARM - 0.002), PZ = -0.045;
+      // gångjärnen sitter som i oppning(): höger sett utifrån på norr, väst och öst (Pulpet 70:s
+      // entré, efter planritningen: gångjärn mot norr), annars vänster
+      const gs = s === 'N' || s === 'W' || s === 'E' ? 1 : -1, cu = u0 + w / 2, gx = cu + gs * (w / 2 - KARM - 0.002), PZ = -0.045;
       const vaggar = d.delar.vaggar, fast = new THREE.Group(), piv = new THREE.Group();
       fast.add(piv);
       new THREE.Matrix4().copy(mtx).multiply(new THREE.Matrix4().makeTranslation(gx, 0, PZ)).decompose(fast.position, fast.quaternion, fast.scale);
@@ -5328,7 +5480,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (d.dorrInfo !== undefined) return d.dorrInfo;
     const H = HUS[val.modell], o = H.oppningar.find(x => x[5] === 'd') || H.oppningar.find(x => x[5] === 'dg');
     if (!o) return (d.dorrInfo = null);
-    const L = H.L, W = H.W, s = o[0], gs = s === 'N' || s === 'W' ? 1 : -1;
+    const L = H.L, W = H.W, s = o[0], gs = s === 'N' || s === 'W' || s === 'E' ? 1 : -1;
     const ax = { S: [[-L / 2, 0, W / 2], [1, 0, 0], [0, 0, 1]], N: [[L / 2, 0, -W / 2], [-1, 0, 0], [0, 0, -1]], E: [[L / 2, 0, W / 2], [0, 0, -1], [1, 0, 0]], W: [[-L / 2, 0, -W / 2], [0, 0, 1], [-1, 0, 0]] }[s];
     const u = new THREE.Vector3(...ax[1]), n = new THREE.Vector3(...ax[2]);
     return (d.dorrInfo = { n, u, gs, w: o[2], mitt: new THREE.Vector3(...ax[0]).addScaledVector(u, o[1] + o[2] / 2 - gs * 0.03) });
@@ -6777,6 +6929,42 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         x.b.getCenter(pV); pV.applyMatrix4(vg.matrixWorld); pV.project(kamera);
         return { i, typ: x.o[5], framfor: pV.z < 1, x: Math.round((pV.x * 0.5 + 0.5) * dukB), y: Math.round((0.5 - pV.y * 0.5) * dukH) };
       });
+    },
+    // för bildverktygen: innerdörrarna (index, namn, läge, slagriktning); dorrProv(i) växlar dörr i
+    dorrProv(i) {
+      const ut = iaData();
+      if (!ut) return null;
+      if (Number.isInteger(i)) vaxlaOpp(i);
+      return ut.opp.map((o, j) => (o && o.typ === 'dorr' ? { i: j, namn: o.namn, t: +o.t.toFixed(2), mal: o.mal, tecken: o.tecken } : null)).filter(Boolean);
+    },
+    // för bildverktygen: gåvägarna mellan alla rumspunkter på bottenvåningen; varje sträcka
+    // provas mot väggarnas lådor (var 2:a cm). Ger { par, ms, fel: [[från, till, orsak]] }
+    ruttProv() {
+      if (!husGrupp || !husGrupp.userData.inne) return null;
+      const P = punkter().filter(p => !nivaTal(p.niva)), hl = inneData().hinder;
+      const W = (Array.isArray(hl) ? hl : []).filter(b => b && b.typ === 'vagg' && b.niva === 'botten').map(b => ({ x0: Math.min(b.x0, b.x1), x1: Math.max(b.x0, b.x1), z0: Math.min(b.z0, b.z1), z1: Math.max(b.z0, b.z1) }));
+      const Hu = HUS[val.modell], ute = (x, z) => Math.abs(x) > Hu.L / 2 - 0.2 || Math.abs(z) > Hu.W / 2 - 0.2;
+      const fel = [], t0 = performance.now();
+      let par = 0, max = 0;
+      for (const a of P) for (const b of P) {
+        if (a === b) continue;
+        par++;
+        const t1 = performance.now(), r = rutt(a.pos[0], a.pos[2], b.pos[0], b.pos[2], 0);
+        max = Math.max(max, performance.now() - t1);
+        if (!r) { fel.push([a.namn, b.namn, 'ingen väg ' + [a.pos[0], a.pos[2], b.pos[0], b.pos[2]].map(v => +(+v).toFixed(2)).join(',')]); continue; }
+        const pts = [[a.pos[0], a.pos[2]], ...r.map(q => [q.x, q.z]), [b.pos[0], b.pos[2]]];
+        for (let i = 1; i < pts.length; i++) {
+          const [x0, z0] = pts[i - 1], [x1, z1] = pts[i], m = Math.max(1, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / 0.02));
+          let traff = null;
+          for (let k = 0; k <= m && !traff; k++) {
+            const x = x0 + (x1 - x0) * k / m, z = z0 + (z1 - z0) * k / m;
+            if (ute(x, z)) traff = 'yttervägg';
+            else if (W.some(w => x > w.x0 + 0.001 && x < w.x1 - 0.001 && z > w.z0 + 0.001 && z < w.z1 - 0.001)) traff = 'vägg';
+          }
+          if (traff) { fel.push([a.namn, b.namn, traff + ' ' + pts.map(p => p.map(v => +v.toFixed(2)).join(',')).join(' > ')]); break; }
+        }
+      }
+      return { par, ms: Math.round(performance.now() - t0), max: Math.round(max), fel };
     },
     // styrspaken på pekskärm: spak(fram, sidled) med -1..1, spak(0, 0) = släppt
     spak: (fw, st) => satSpak(+fw || 0, +st || 0),

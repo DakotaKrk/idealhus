@@ -6,9 +6,9 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261125n';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261126c';
 
-const MOTOR_V = '20261125n';
+const MOTOR_V = '20261126c';
 // Standardutseendet: utan val i adressen (och när man kommer tillbaka till sidan med bakåtknappen
 // eller laddar om den) möts man av samma bild varje gång: Kupa 40 i falurött med svart tak och
 // vita detaljer, vinter, gyllene timmen, kameran i startvyn. Adressen som sidan själv skriver
@@ -766,7 +766,7 @@ function klarKnapp(k, ms) {
 }
 // Börja om frågar först när något är ändrat: första trycket blir "Säker?", andra gör det
 const aterKnapp = document.querySelector('[data-aterstall]');
-const andrat = () => !!(val.fasad || val.tak || val.detalj || Math.abs(+tid.value - 14) > 0.01 || valdMiljo() !== 'studio' ||
+const andrat = () => !!(val.fasad || val.tak || val.detalj || Math.abs(+tid.value - STANDARD_TID) > 0.01 || valdMiljo() !== 'studio' ||
   mk.getAttribute('aria-pressed') === 'true' || inneLage || oppetLage);
 function fragaAter(pa) {
   const span = aterKnapp.querySelector('span');
@@ -785,7 +785,7 @@ aterKnapp.addEventListener('click', () => {
   val.fasad = val.tak = val.detalj = null;
   if (ritare) ['fasad', 'tak', 'detalj'].forEach(g => ritare.satt(g, null));
   if (mk.getAttribute('aria-pressed') === 'true') mk.click();
-  if (Math.abs(+tid.value - 14) > 0.01) { kvFore = 14; glidTid(14); }
+  if (Math.abs(+tid.value - STANDARD_TID) > 0.01) { kvFore = STANDARD_TID; glidTid(STANDARD_TID); }
   if (valdMiljo() !== 'studio') valjMiljo('studio');
   lagerVal = 'hela'; ritaLager();
   nuVy = null; aka('runt', TONA);
@@ -822,6 +822,8 @@ dela.addEventListener('click', async () => {
 });
 
 // ---- verktygen i scenen ----
+// standardläget: sen eftermiddag (17:00) – varmt, lågt sidoljus med långa mjuka skuggor, klarblå himmel
+const STANDARD_TID = 17;
 const tid = document.getElementById('rit-tid');
 const ut = document.querySelector('[data-tid]');
 function visaTid(v) {
@@ -869,7 +871,7 @@ function radTid(v) {
 }
 // Ljuset glider till en ny tid på 1,2 s (Börja om, Mina hus, snabbval utan motorstöd)
 const kvKnapp = document.querySelector('[data-kvall]');
-let kvFore = 14, kvAnim = 0;
+let kvFore = STANDARD_TID, kvAnim = 0;
 const synkaKvall = () => { if (kvKnapp) kvKnapp.setAttribute('aria-pressed', String(+tid.value >= 20)); };
 function glidTid(till) {
   cancelAnimationFrame(kvAnim); ljusKor = 0;
@@ -887,7 +889,7 @@ if (kvKnapp) kvKnapp.addEventListener('click', () => {
   const pa = kvKnapp.getAttribute('aria-pressed') !== 'true';
   kvKnapp.setAttribute('aria-pressed', String(pa));
   // månen är samma sak som snabbvalet Kväll; av går tillbaka till tiden innan
-  if (pa) { if (+tid.value < 20) kvFore = +tid.value; valjLjus('kvall'); } else glidTid(kvFore < 20 ? kvFore : 14);
+  if (pa) { if (+tid.value < 20) kvFore = +tid.value; valjLjus('kvall'); } else glidTid(kvFore < 20 ? kvFore : STANDARD_TID);
 });
 tid.addEventListener('input', () => { cancelAnimationFrame(kvAnim); kvAnim = 0; ljusKor = 0; visaTid(+tid.value); synkaKvall(); });
 // reglaget har step="any" (snabbvalens 19:12 hamnar rätt); pilarna stegar ändå en kvart
@@ -1924,7 +1926,7 @@ function spara() {
   q.set('modell', MODELL_UT[val.modell] || val.modell);
   ['fasad', 'tak', 'detalj'].forEach(g => { if (val[g]) q.set(g, val[g]); });
   const tv = Math.round(+tid.value * 100) / 100;
-  if (tv !== 14) q.set('tid', String(tv));
+  if (tv !== STANDARD_TID) q.set('tid', String(tv));
   const m = valdMiljo();
   if (m !== 'studio') q.set('miljo', m);
   if (inneLage) { q.set('vy', 'inne'); if (inneVy) q.set('rum', inneVy); }
@@ -1961,9 +1963,9 @@ window.addEventListener('pageshow', e => {
     if (v && FARGER[g][v]) { val[g] = v; if (ritare) ritare.satt(g, v); }
   });
   const t = parseFloat(q.get('tid'));
-  if (t >= 6 && t <= 22) tid.value = t;
+  tid.value = String(t >= 6 && t <= 22 ? t : STANDARD_TID);
   tid.dispatchEvent(new Event('input'));
-  if (t >= 20) kvFore = 14;
+  if (t >= 20) kvFore = STANDARD_TID;
   // gamla namn i sparade länkar (motorn har samma karta, GAMLA_NAMN)
   const GAMLA_MILJO = { gras: 'tradgard', sno: 'vinter' };
   const mi = q.get('miljo');

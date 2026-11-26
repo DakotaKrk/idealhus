@@ -26,7 +26,7 @@ function hamtaModeller() {
   if (!LADDA) {
     const l = new GLTFLoader();
     const en = url => new Promise((ok, fel) => l.load(url, g => ok(g.scene), undefined, fel));
-    LADDA = Promise.allSettled([en(new URL('images/3d/elbil.glb?v=3', import.meta.url).href), en(new URL('images/3d/laddbox.glb', import.meta.url).href)]);
+    LADDA = Promise.allSettled([en(new URL('images/3d/elbil.glb?v=4', import.meta.url).href), en(new URL('images/3d/laddbox.glb', import.meta.url).href)]);
   }
   return LADDA;
 }
@@ -436,9 +436,9 @@ export function skapaBil(THREE, rot, VU) {
           float bFw = length( fwidth( vBP ) );
           float bFl = bHash( floor( vBP * 330.0 ) );
           float bNara = 1.0 - smoothstep( 0.0006, 0.0025, bFw );
-          // lacken: en jämn pärlvit ton; kartans fläckar och inbakade skuggor dämpas till 40 %
+          // lacken: en jämn pärlvit ton; kartans fläckar och inbakade skuggor dämpas till 14 % (buckligt annars)
           float bLum = clamp( dot( diffuseColor.rgb, vec3( 0.3333 ) ) / 0.46, 0.0, 1.0 );
-          vec3 bLackF = vec3( 0.525, 0.535, 0.55 ) * mix( bLum, 1.0, 0.6 );
+          vec3 bLackF = vec3( 0.525, 0.535, 0.55 ) * mix( bLum, 1.0, 0.86 );
           diffuseColor.rgb = mix( diffuseColor.rgb, bLackF, bLack );
           // fälgen: ren metall i två toner (kartans ljusa ekrar mot mörka mellanrum, utan inbakade blänk),
           // röda bromsok och en slät navkåpa
@@ -695,7 +695,10 @@ export function skapaBil(THREE, rot, VU) {
   // uppfarten: rakt ut från bilplatsen och i en mjuk böj bort från gången, tonar ut i fjärran
   function byggVag(P, typ, hy, y0) {
     // P.vagL (villaområdet): uppfarten slutar vid gatans trottoar, utan uttoning, med kantsten hela vägen
-    const v = P.vag, n = P.n, t = P.t, B = VAG.B, L = P.vagL || VAG.L, N = P.vagL ? 50 : 160, K = 6;
+    // villaområdet: plattorna går över trottoaren (2 m, i trottoarens höjd) och ner över en nedsänkt kantsten mot körbanan
+    const TR = 2.0, TH = 0.125, L = P.vagL ? P.vagL + TR + 0.32 : VAG.L;
+    const v = P.vag, n = P.n, t = P.t, B = VAG.B, N = P.vagL ? 70 : 160, K = 6;
+    const lyft = sv => !P.vagL ? 0 : sv < P.vagL - 0.6 ? 0 : sv < P.vagL ? TH * mjuk(P.vagL - 0.6, P.vagL, sv) : sv < P.vagL + TR ? TH : TH - (TH - 0.01) * Math.min(1, (sv - P.vagL - TR) / 0.32);
     const pos = [], uv = [], A = [], I = [], kanter = [[], []], ton = [];
     for (let i = 0; i <= N; i++) {
       const sv = -0.03 + (L + 0.03) * i / N, lat = vagBoj(sv) * v.sida, d = (vagBoj(sv + 0.05) - vagBoj(sv - 0.05)) / 0.1 * v.sida;
@@ -704,13 +707,13 @@ export function skapaBil(THREE, rot, VU) {
       const a = P.vagL ? 1 : 1 - mjuk(L - 22, L, sv);
       for (let j = 0; j <= K; j++) {
         const sd = j / K - 0.5, x = cx + px * sd * B, z = cz + pz * sd * B;
-        pos.push(x, hy(x, z) + y0, z); uv.push(x, z); A.push(a);
+        pos.push(x, hy(x, z) + y0 + lyft(sv), z); uv.push(x, z); A.push(a);
       }
       kanter[0].push([cx - px * B / 2, cz - pz * B / 2, -px, -pz]); kanter[1].push([cx + px * B / 2, cz + pz * B / 2, px, pz]); ton.push(a);
       if (i < N) for (let j = 0; j < K; j++) { const k = i * (K + 1) + j, k2 = k + K + 1; I.push(k, k2, k + 1, k + 1, k2, k2 + 1); }
     }
     const m = lagg0(geo(pos, uv, A, I), ytaTona(typ), 3); m.name = 'uppfart';
-    const ut = [m], slut = P.vagL ? N + 1 : Math.round(N * (L - 8.5) / L);
+    const ut = [m], slut = P.vagL ? Math.round(N * (P.vagL + 0.03) / (L + 0.03)) : Math.round(N * (L - 8.5) / L);   // kantstenen slutar vid trottoaren
     for (const kl of kanter) {
       if (typ === 'plattor') ut.push(lagg0(kantV(kl.slice(1, slut), YTA.kant, false, hy, y0 + 0.003), kantMat(), 1));   // kantstenen slutar innan vägen tonar ut
       else ut.push(lagg0(kantV(kl, 0.55, true, hy, y0, ton), ytaMjuk(typ), 2));
@@ -1044,19 +1047,47 @@ export function skapaBil(THREE, rot, VU) {
   // bilarna som kör förbi på gatan: lokala +z framåt, rörelsen i skuggaren (7,8 m/s, syns inom ±85 m och gör
   // sedan en paus). typ 'tesla' (blå) eller 'volvo' (röd, ett halvt varv efter Teslan: de möts aldrig).
   // Visar inget förrän modellen har laddats.
+  // Två nivåer: nära kameran (FORBI_NARA m, räknat vid 32° bildvinkel) den fulla modellen (samma geometri och
+  // lack som våra egna bilar, delad, ingen omladdning), längre bort den förenklade (bil-lod.bin, ~4k trianglar).
+  // Den fulla kostar 88k (Volvon) eller 150k (Teslan) trianglar men bara medan bilen passerar nära; de två bilarna
+  // är ett halvt varv isär och syns aldrig samtidigt. Bytet görs en gång per ruta i kontaktskuggans onBeforeRender
+  // (skuggan ritas alltid), samma uträkning av läget som i skuggaren.
+  const FORBI_NARA = 45, TAN16 = Math.tan(16 * Math.PI / 180);
   function forbi(x, y, z, ry, typ = 'tesla') {
     const g = new THREE.Group(); g.name = 'elbil-forbi'; g.position.set(x, y, z); g.rotation.y = ry;
-    // förenklad modell (bil-lod.bin): gatan ligger en bit bort, och den fulla modellen kostade 88–150k trianglar
-    // och upp till 30 ritanrop hela tiden (rörelsen i skuggaren gör att näten inte kan gallras)
     const F = typ === 'volvo' ? { fart: 7.8, varv: 520, syns: 85, start: 300, farg: '#8c1219' } : { fart: 7.8, varv: 520, syns: 85, start: 40, farg: '#1f4fa8' };
+    try { if (/[?&]prov=1/.test(location.search)) (window.__bilForbi = window.__bilForbi || []).push({ g, F, typ, VU }); } catch (e) { /* utan fönster */ }   // för provbilder
+    let lo = null, full = null, nara = true;
+    const vb = new THREE.Vector3(), vk = new THREE.Vector3();
+    const valj = (r, s, cam) => {
+      if (!full || !lo || !cam || !cam.isPerspectiveCamera) return;
+      const bS = ((VU.uTid.value * F.fart + F.start) % F.varv + F.varv) % F.varv - 0.5 * F.varv;
+      let ny = false;
+      if (Math.abs(bS) <= F.syns) {
+        vb.set(0, 0, bS).applyMatrix4(g.matrixWorld); vk.setFromMatrixPosition(cam.matrixWorld);
+        const d = vb.distanceTo(vk) * Math.tan(cam.fov * Math.PI / 360) / (TAN16 * (cam.zoom || 1));
+        ny = d < (nara ? FORBI_NARA + 6 : FORBI_NARA);      // lite glapp, så att den inte fladdrar vid gränsen
+      }
+      if (ny !== nara) { nara = ny; full.visible = ny; lo.visible = !ny; }
+    };
     hamtaLod().then(() => {
-      if (dod || g.children.length || !LOD[typ]) return;
-      const o = new THREE.Mesh(LOD[typ], lodMat(F)); o.castShadow = false; o.receiveShadow = true; o.frustumCulled = false; g.add(o);
+      if (dod || lo || !LOD[typ]) return;
+      lo = new THREE.Mesh(LOD[typ], lodMat(F)); lo.castShadow = false; lo.receiveShadow = true; lo.frustumCulled = false; lo.visible = !full; g.add(lo);
       if (!skuggGeoZ) skuggGeoZ = spara(new THREE.PlaneGeometry(5.6, 2.9).rotateX(-Math.PI / 2).rotateY(Math.PI / 2));
       const Uk = FUK[F.start] || (FUK[F.start] = { value: new THREE.Vector4(F.fart, F.varv, F.syns, F.start) });
       const sk = new THREE.Mesh(skuggGeoZ, forbiSkugga(Uk)); sk.position.y = 0.012; sk.renderOrder = 2; sk.frustumCulled = false; g.add(sk);
+      sk.onBeforeRender = valj;
       try { window.dispatchEvent(new Event('husritare:nytt')); } catch (e) { /* utan fönster */ }
     }).catch(e => console.warn('bil-lod.bin kunde inte laddas', e));
+    // den fulla modellen: står synlig första rutan (programmen kompileras då, bilen är oftast under marken i
+    // pausen), därefter väljer valj()
+    const fullKlar = typ === 'volvo' ? hamtaVolvo().then(forberedVolvo).then(() => VS ? riggVolvo(F, F.farg) : null) : laddning.then(() => MOD ? rigg(F) : null);
+    fullKlar.then(r => {
+      if (dod || !r) return;
+      const sk = r.userData.skugga; if (sk) r.remove(sk);       // kontaktskuggan finns redan (LOD-nivåns)
+      r.name = 'elbil-forbi-full'; full = r; nara = true; if (lo) lo.visible = false; g.add(r);
+      try { window.dispatchEvent(new Event('husritare:nytt')); } catch (e) { /* utan fönster */ }
+    }).catch(e => console.warn('bilen på gatan: den fulla modellen kunde inte laddas', e));
     return g;
   }
 
@@ -1064,7 +1095,7 @@ export function skapaBil(THREE, rot, VU) {
   // Delarna heter efter materialet (lack, glas, ruta, krom, falg, gummi …); hjulen är egna noder med navet i
   // origo (hjul_ftl, hjul_ftr, hjul_bkl, hjul_bkr), så de rullar och styr med nodens vridning.
   let VOLVO = null, VS = null;
-  const hamtaVolvo = () => VOLVO || (VOLVO = new Promise((ok, fel) => new GLTFLoader().load(new URL('images/3d/volvo.glb?v=7', import.meta.url).href, g => ok(g.scene), undefined, fel)));
+  const hamtaVolvo = () => VOLVO || (VOLVO = new Promise((ok, fel) => new GLTFLoader().load(new URL('images/3d/volvo.glb?v=8', import.meta.url).href, g => ok(g.scene), undefined, fel)));
   const VM = {};
   function vMat(kat) {
     if (VM[kat]) return VM[kat];
@@ -1470,7 +1501,7 @@ export function skapaBil(THREE, rot, VU) {
   // kör förbi: ett instansierat nät per modell (ett ritanrop) i stället för 88–150k trianglar per bil.
   let LODP = null;
   const LOD = {};
-  const hamtaLod = () => LODP || (LODP = fetch(new URL('images/3d/bil-lod.bin?v=1', import.meta.url).href).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); }).then(buf => {
+  const hamtaLod = () => LODP || (LODP = fetch(new URL('images/3d/bil-lod.bin?v=2', import.meta.url).href).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); }).then(buf => {
     const jl = new DataView(buf).getUint32(0, true), J = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 4, jl))), b0 = 4 + jl;
     for (const k of Object.keys(J)) {
       const d = J[k], g = new THREE.BufferGeometry();
@@ -1488,19 +1519,26 @@ export function skapaBil(THREE, rot, VU) {
   function lodMat(forbi = null) {
     const k = forbi ? 'f' + forbi.start : 'p';
     if (LODM[k]) return LODM[k];
-    const m = spara(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.55, metalness: 0.1 }));
+    // som de fulla modellerna: metallic lack med klarlack som speglar miljön, blanka mörka rutor (mörkt och högt
+    // upp på karossen), fälgar och krom (ljust och utan lack) metalliska, gummi och plast matta
+    const m = spara(new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.55, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.06, envMapIntensity: 1.1 }));
     const Uk = forbi ? { value: new THREE.Vector4(forbi.fart, forbi.varv, forbi.syns, forbi.start) } : null, F = forbi ? { value: new THREE.Color(forbi.farg) } : null;
     m.onBeforeCompile = s => {
       s.uniforms.uNatt = VU.uNatt;
       if (forbi) { s.uniforms.uTid = VU.uTid; s.uniforms.uKor = Uk; s.uniforms.uLodF = F; }
-      s.vertexShader = 'varying float vLack;\n' + (forbi ? 'uniform float uTid;\nuniform vec4 uKor;\nuniform vec3 uLodF;\n' : '') + s.vertexShader
-        .replace('#include <color_vertex>', '#include <color_vertex>\n vLack = color.a;\n vColor = vec4( mix( color.rgb, ' + (forbi ? 'uLodF' : '( instanceColor.rgb )') + ', color.a ), 1.0 );')
+      s.vertexShader = 'varying float vLack;\nvarying float vLy;\n' + (forbi ? 'uniform float uTid;\nuniform vec4 uKor;\nuniform vec3 uLodF;\n' : '') + s.vertexShader
+        .replace('#include <color_vertex>', '#include <color_vertex>\n vLack = color.a;\n vLy = position.y;\n vColor = vec4( mix( color.rgb, ' + (forbi ? 'uLodF' : '( instanceColor.rgb )') + ', color.a ), 1.0 );')
         .replace('#include <begin_vertex>', '#include <begin_vertex>' + (forbi ? '\n float bS = mod( uTid * uKor.x + uKor.w, uKor.y ) - 0.5 * uKor.y; transformed.z += bS; if ( abs( bS ) > uKor.z ) transformed.y -= 400.0;' : ''));
-      s.fragmentShader = 'varying float vLack;\n' + s.fragmentShader
-        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n roughnessFactor = mix( 0.62, 0.3, vLack );')
-        .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\n metalnessFactor = mix( 0.05, 0.35, vLack );');
+      s.fragmentShader = 'varying float vLack;\nvarying float vLy;\n' + s.fragmentShader
+        .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+          float lL = dot( vColor.rgb, vec3( 0.3333 ) );
+          float lRuta = ( 1.0 - vLack ) * ( 1.0 - smoothstep( 0.03, 0.09, lL ) ) * smoothstep( 0.86, 0.98, vLy );
+          float lMet = ( 1.0 - vLack ) * ( 1.0 - lRuta ) * smoothstep( 0.22, 0.45, lL );
+          roughnessFactor = mix( mix( mix( 0.66, 0.34, lMet ), 0.06, lRuta ), 0.32, vLack );`)
+        .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\n metalnessFactor = mix( mix( 0.04, 0.75, lMet ), 0.4, vLack ) * ( 1.0 - lRuta );')
+        .replace('#include <lights_physical_fragment>', '#include <lights_physical_fragment>\n material.clearcoat *= max( vLack, lRuta );');
     };
-    m.customProgramCacheKey = () => forbi ? 'bil-lod-forbi' : 'bil-lod';
+    m.customProgramCacheKey = () => forbi ? 'bil-lod-forbi-2' : 'bil-lod-2';
     return (LODM[k] = m);
   }
   // lodBilar([{ x, y, z, ry, typ: 'tesla' | 'volvo', farg }]) → Group: ett instansierat nät per modell och

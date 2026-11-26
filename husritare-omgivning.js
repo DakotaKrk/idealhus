@@ -112,6 +112,11 @@ export function skapaOmgivning(H) {
   const TROJA = [[0.62, 0.12, 0.1], [0.1, 0.24, 0.5], [0.85, 0.72, 0.2], [0.18, 0.4, 0.26], [0.82, 0.8, 0.76], [0.45, 0.2, 0.5], [0.9, 0.42, 0.18], [0.25, 0.25, 0.27]];
   const BYXOR = [[0.12, 0.14, 0.22], [0.2, 0.2, 0.21], [0.32, 0.26, 0.2], [0.18, 0.22, 0.36]];
   const HAR = [[0.12, 0.08, 0.05], [0.45, 0.3, 0.14], [0.72, 0.58, 0.32], [0.2, 0.14, 0.1]];
+  // riktiga animerade människor (husritare-folk.js): poster samlas här och hämtas av miljön (folk). Klossfiguren som
+  // posten ersätter drar ändå sina slumptal (folkUt), så att resten av kvarteret står kvar som förr.
+  const FOLK = [], siktkil0 = H.iSiktkil || (() => false), siktkil = (x, z, m) => Math.hypot(x, z) < 34 && siktkil0(x, z, m);   // (bakom startvyns kamera, längre ut i kilen, syns de inte)
+  const folkUt = (farg = {}) => { if (!farg.troja) r(); if (!farg.byxor) r(); r(); r(); };
+  const folk = (post, farg) => { folkUt(farg); const p = post.p || post.p0 || (post.bana && post.bana[0]); if (post.t !== 'ga' && p && siktkil(p[0], p[p.length - 1], 1)) return; FOLK.push(post); };
   function figur(p, dir, s, an, pose = 'sta', farg = {}) {
     const F = nrm([dir[0], 0, dir[2]]), S = crs(UPP, F), AX = [S, UPP, F];   // S × UPP = F (högerhänt)
     const at = (x, y, z) => [p[0] + S[0] * x * s + F[0] * z * s, p[1] + y * s, p[2] + S[2] * x * s + F[2] * z * s];
@@ -227,7 +232,7 @@ export function skapaOmgivning(H) {
       figur(P(u - 0.05, GW + 0.05, 0.62 - 0.5 * 0.62), X, 0.62, an, 'sitt');
     }
     // förälder som står och puttar
-    figur(P(GU - 0.55, GW - 1.5, 0.0), Z, 1.0, STILL, 'sta', { fram: true, troja: [0.86, 0.84, 0.8] });
+    { const p = P(GU - 0.55, GW - 2.5, 0.03); folk({ t: 'sta', p, dir: [Z[0], Z[2]], typ: 1, pal: 0, klipp: 'sta' }, { troja: 1 }); }
     // gungdjur (häst och anka) på fjäder
     const gungdjur = (u, w, f, fas) => {
       const bas = P(u, w, 0), an = { piv: [...bas, 1], ro: [...X, 0.16], fa: [fas, 3.1, 0, 0] };
@@ -247,11 +252,12 @@ export function skapaOmgivning(H) {
       figur(P(ku + 0.6, kw - 0.2, 0.31), X, 0.66, an, 'sta', { fram: true });
     }
     // barn i sandlådan och vid rutschkanan, förälder på bänken
-    figur(P(-4.4, 3.0, 0.12 - 0.5 * 0.6 + 0.2), Z.map(v => -v), 0.6, STILL, 'sitt');
-    figur(P(-1.2, 6.1, 0.47 - 0.5), Z.map(v => -v), 1.0, STILL, 'sitt', { troja: [0.2, 0.32, 0.3] });
+    // (riktiga människor: en pojke står i sandlådan, en pappa pratar i telefon vid bänken)
+    folk({ t: 'sta', p: P(-4.4, 3.0, 0.2), dir: [-Z[0] + X[0] * 0.5, -Z[2] + X[2] * 0.5], typ: 5, pal: 1, klipp: 'sta' });
+    folk({ t: 'sta', p: P(-1.9, 5.3, 0.03), dir: [-Z[0], -Z[2]], typ: 3, pal: 2, klipp: 'tel' }, { troja: 1 });
     // ett barn springer fram och tillbaka mellan karusellen och gungdjuren
-    { const p0 = P(-0.5, 0.0, 0), p1 = P(4.5, -0.5, 0), d = nrm(sub(p1, p0)), L = Math.hypot(p1[0] - p0[0], p1[2] - p0[2]);
-      figur(p0, d, 0.68, { piv: [...p0, 3], ro: [...d, L], fa: [0.2, 1.9, 0, 0] }); }
+    { const p0 = P(-0.5, 0.0, 0), p1 = P(4.5, -0.5, 0);
+      folk({ t: 'ga', bana: [[p0[0], p0[2]], [p1[0], p1[2]]], klipp: 'jogg', typ: 6, pal: 4, dy: 0.03 }); }
     basketplan();
   }
 
@@ -300,10 +306,11 @@ export function skapaOmgivning(H) {
     R.staket(-FU, BW - FW, -FU, BW + FW, 1.2, GR, [], 0.3, Y - 0.05, 2.5); R.staket(FU, BW - FW, FU, BW + FW, 1.2, GR, [], 0.3, Y - 0.05, 2.5);
     // bänk vid sidan och två ungdomar: en studsar bollen, en springer mot korgen
     { const [x, y, z] = Pf(-6, BW + FW - 0.7, 0, Y); const D0 = R.ax(0); lada3(VD, [x, y + 0.44, z], D0, [0.9, 0.025, 0.2], [0.42, 0.28, 0.16]); for (const k of [-0.75, 0.75]) lada3(VD, [x + D0[0][0] * k, y + 0.22, z + D0[0][2] * k], D0, [0.03, 0.22, 0.18], [0.15, 0.15, 0.16]); }
-    figur(Pf(-6.3, BW + FW - 0.75, 0.47 - 0.5, Y), R.Z.map(v => -v), 1.0, STILL, 'sitt', { troja: [0.1, 0.1, 0.12] });
-    { const p0 = Pf(-2, BW + 1, 0, Y), p1 = Pf(Lh - 3, BW - 0.5, 0, Y), d = nrm(sub(p1, p0)), L = Math.hypot(p1[0] - p0[0], p1[2] - p0[2]);
-      figur(p0, d, 1.0, { piv: [...p0, 3], ro: [...d, L], fa: [0.1, 2.6, 0, 0] }, 'sta', { troja: [0.85, 0.55, 0.1] }); }
-    { const p = Pf(-Lh + 5, BW - 1.5, 0, Y); figur(p, R.X.map(v => -v), 0.98, STILL, 'sta', { troja: [0.1, 0.3, 0.6], fram: true });
+    // (riktiga människor: en värmer upp framför bänken, en joggar mot korgen, en står vid bollen)
+    folk({ t: 'sta', p: Pf(-6.3, BW + FW - 2.0, 0.0, Y), dir: [-R.Z[0], -R.Z[2]], typ: 2, pal: 3, klipp: 'varm', s: 0.96 }, { troja: 1 });
+    { const p0 = Pf(-2, BW + 1, 0, Y), p1 = Pf(Lh - 3, BW - 0.5, 0, Y);
+      folk({ t: 'ga', bana: [[p0[0], p0[2]], [p1[0], p1[2]]], y0: Y, klipp: 'jogg', typ: 3, pal: 5, s: 0.95 }, { troja: 1 }); }
+    { const p = Pf(-Lh + 5, BW - 1.5, 0, Y); folk({ t: 'sta', p, dir: [-R.X[0] - R.Z[0] * 0.6, -R.X[2] - R.Z[2] * 0.6], typ: 1, pal: 1, klipp: 'sta', s: 0.95 }, { troja: 1 });
       const bp = Pf(-Lh + 5 - 0.35, BW - 1.5 - 0.35, 0.13, Y), an = { piv: [...bp, 5], ro: [0, 1, 0, 0.75], fa: [0, 4.2, 0, 0] };
       aRor([bp[0], bp[1] - 0.12, bp[2]], [bp[0], bp[1] + 0.12, bp[2]], 0.12, [0.85, 0.32, 0.08], an, 8); }
   }
@@ -340,7 +347,7 @@ export function skapaOmgivning(H) {
   }
   // radhusens färgsättningar per länga: två närliggande fasadkulörer som växlar per lägenhet, snickerier, tak, taktyp
   const RADFARG = [
-    [['#e9e5db', '#d9cfb4'], '#f4f2ec', '#38393b', 0], [['#8a2c22', '#9a3a2c'], '#efece4', '#2b2b2c', 0], [['#c4c7c1', '#8796a3'], '#f2f0ea', '#3b3c3e', 0],
+    [['#e9e5db', '#d9cfb4'], '#f4f2ec', '#5a5d60', 0], [['#8a2c22', '#9a3a2c'], '#efece4', '#6b2a21', 1], [['#c4c7c1', '#8796a3'], '#f2f0ea', '#4f5357', 0],
     [['#e2c886', '#e8dfc4'], '#f2efe7', '#6b2a21', 1], [['#7c8a6a', '#9ba58b'], '#f1efe8', '#3a3b3c', 1], [['#cdb89a', '#e6e2d8'], '#ffffff', '#4b3f36', 1],
   ];
   const TRAF = [[0.42, 0.3, 0.19], [0.3, 0.3, 0.29], [0.5, 0.42, 0.3], [0.35, 0.1, 0.07]];
@@ -352,6 +359,13 @@ export function skapaOmgivning(H) {
     ror(VD, [[...at(0.42, 0.78), 0.014], [...at(0.52, 0.33), 0.014]], 4, UG, 1, () => RAM);
     ror(VD, [[...at(0.42, 0.78), 0.014], [...at(0.45, 0.98), 0.014]], 4, UG, 1, () => [0.2, 0.2, 0.2]);
     ror(VD, [[...at(-0.14, 0.78), 0.014], [...at(-0.16, 0.9), 0.014]], 4, UG, 1, () => RAM);
+  };
+  // trädäck på marken: plankmönster (gatunätets trall), kantbräda runt om; uc/wc mitt, hu/hw halva mått i ramen R
+  const DACK_Y = 0.07;
+  const dack = (R, uc, wc, hu, hw, f = [1.3, 0.98, 0.7]) => {
+    const [a0, b0] = R.svlat(uc - hu, wc), [a1, b1] = R.svlat(uc + hu, wc); yta(a0, b0, a1, b1, 2 * hw, DACK_Y, f, 2);
+    const KB = [0.36, 0.25, 0.16];
+    for (const [u, w, a, b] of [[uc, wc - hw, hu + 0.04, 0.025], [uc, wc + hw, hu + 0.04, 0.025], [uc - hu, wc, 0.025, hw], [uc + hu, wc, 0.025, hw]]) { const [x, y, z] = R.P(u, w); lada3(VD, [x, y + 0.04, z], R.ax(0), [a, 0.045, b], KB); }
   };
   const kruka = (p, f) => { ror(VD, [[p[0], p[1], p[2], 0.15], [p[0], p[1] + 0.34, p[2], 0.2], [p[0], p[1] + 0.32, p[2], 0.17]], 7, UG, 1, () => [0.55, 0.26, 0.14]); planta('blomma', p[0], p[2], 0.45 + r() * 0.2, f); };
   function radhus(v, sd, s, n, rmax) {
@@ -381,12 +395,19 @@ export function skapaOmgivning(H) {
       // låg häck mellan förgårdarna (3D-häck nära, enkel låda längre bort)
       if (k < n - 1) { if (nara) hack(1, lok, u + typ.L / 2, F + 0.6, u + typ.L / 2, F + 4.6); else { const [hx2, hy2, hz2] = R.P(u + typ.L / 2, F + 2.6); lada3(VD, [hx2, hy2 + 0.5, hz2], R.ax(0), [0.3, 0.5, 2.0], [0.04, 0.09, 0.03]); } }
       // baksidan: uteplats i trä, plank mot grannen, förråd längst ner på tomten, utemöbler och krukor
-      { const [a0, b0] = lok(u + (sp ? -0.7 : 0.7), -F - 0.05), [a1, b1] = lok(u + (sp ? -0.7 : 0.7), -F - 3.1); yta(a0, b0, a1, b1, 4.4, 0.16, [1.25, 0.95, 0.68], 2); }
+      { const [a0, b0] = lok(u + (sp ? -0.7 : 0.7), -F - 0.05), [a1, b1] = lok(u + (sp ? -0.7 : 0.7), -F - 3.1); void a0; void b0; void a1; void b1; dack(R, u + (sp ? -0.7 : 0.7), -F - 1.6, 2.2, 1.5); }
       if (k < n - 1) {
         const [px, py, pz] = R.P(u + typ.L / 2, -F - 1.7);
-        lada3(VD, [px, py + 0.9, pz], R.ax(0), [0.025, 0.9, 1.7], plank);
-        lada3(VD, [px, py + 1.83, pz], R.ax(0), [0.05, 0.03, 1.72], plank.map(c => c * 0.8));
-        for (const w of [-1.65, 0, 1.65]) { const [qx, qy, qz] = R.P(u + typ.L / 2, -F - 1.7 + w); lada3(VD, [qx, qy + 0.9, qz], R.ax(0), [0.045, 0.92, 0.045], plank.map(c => c * 0.75)); }
+        // riktigt plank: stolpar, två reglar, stående brädor med springor (tunna kort åt båda håll) och en överliggare
+        void px; void py; void pz;
+        const A3 = R.ax(0), sd = A3[0];
+        for (const w of [-1.65, 0, 1.65]) { const [qx, qy, qz] = R.P(u + typ.L / 2, -F - 1.7 + w); lada3(VD, [qx, qy + 0.92, qz], A3, [0.045, 0.94, 0.045], plank.map(c => c * 0.75)); }
+        for (const yy of [0.35, 1.45]) { const [qx, qy, qz] = R.P(u + typ.L / 2, -F - 1.7); lada3(VD, [qx, qy + yy, qz], A3, [0.02, 0.035, 1.68], plank.map(c => c * 0.7)); }
+        for (let j = 0; j < 27; j++) {
+          const w = -1.6 + j * 0.123, [qx, qy, qz] = R.P(u + typ.L / 2 + 0.03, -F - 1.7 + w), ton = 0.88 + 0.2 * ((j * 37) % 7) / 7;
+          for (const sg of [1, -1]) vkvad(VD, [qx, qy + 0.92, qz], A3[2].map(v => v * 0.052), [0, 0.88, 0], sd.map(v => v * sg), plank.map(c => c * ton));
+        }
+        { const [qx, qy, qz] = R.P(u + typ.L / 2, -F - 1.7); lada3(VD, [qx, qy + 1.84, qz], A3, [0.06, 0.025, 1.72], plank.map(c => c * 0.85)); }
       }
       {
         // förrådet: litet trähus med stående panel (läkt), pulpettak med utsprång, dörr mot huset och ett fönster
@@ -399,7 +420,7 @@ export function skapaOmgivning(H) {
         { const p = at(0.3, -0.86); lada3(VD, [p[0], p[1] + 1.4, p[2]], A3, [0.3, 0.22, 0.02], [0.85, 0.85, 0.82]); lada3(VD, [p[0], p[1] + 1.4, p[2]], A3, [0.25, 0.17, 0.025], [0.05, 0.06, 0.07]); }
       }
       if (nara) {
-        { const [tx, ty, tz] = R.P(u + (sp ? -0.9 : 0.9), -F - 1.9); lagg(TS, ting(k % 2 ? 'utegruppSvart' : 'utegrupp'), tx, ty + 0.16, tz, 1, R.ry, 8, 0); }   // bord och stolar med dynor
+        { const [tx, ty, tz] = R.P(u + (sp ? -0.9 : 0.9), -F - 1.9); lagg(TS, ting(k % 2 ? 'utegruppSvart' : 'utegrupp'), tx, ty + DACK_Y, tz, 1, R.ry, 8, 0); }   // bord och stolar med dynor
         kruka(R.P(u + (sp ? -2.6 : 2.6), -F - 2.8, 0.16), [[1.05, 0.5, 0.6], [1.0, 0.9, 0.4]][k % 2]);
       }
       if (r() < 0.35) { const [bx, by, bz] = R.P(u - (sp ? 1.2 : -1.2) * 0.2, F + 7.5); if (bilOk(bx, bz)) parkBil(bx, by, bz, R.ry + Math.PI / 2, BF[r() * BF.length | 0]); }
@@ -425,6 +446,38 @@ export function skapaOmgivning(H) {
     for (let x = 0.5; x <= 22; x += 0.5) { if (![-HD + 0.3, 0, HD - 0.3].every(w => fri2(-x, w))) break; U0 = -x; }
     for (let x = 0.5; x <= 22; x += 0.5) { if (![-HD + 0.3, 0, HD - 0.3].every(w => fri2(x, w))) break; U1 = x; }
     if (U1 - U0 < 8) return;
+    tradgardInnehall(R, U0, U1, HD, sc, lc);
+    globalThis.__grannTomt = { tradgard: true, U0, U1, HD };
+  }
+  // tomma tomtplatser i kvarteret (siktgator där inget hus får stå): en låg trädgårdstomt i stället för tom gräsmatta
+  function tomTomt(tm) {
+    const T = H.VRAM && H.VRAM.tomt, Wt = 9.2, Wb = -11.0, wc = (Wt + Wb) / 2, HD = (Wt - Wb) / 2;
+    const [sc, lc] = tm.lok(0, wc), R = ram(sc, lc, tm.f[0], tm.f[1]);
+    const fri2 = (u, w) => { const [a, b] = R.svlat(u, w); return ledig(a, b, 0.4) && !(T && a > T.svB - 1.2 && a < T.svF + 1.2 && b > T.lat0 - 1.2 && b < T.lat1 + 1.2) && !RES.some(([c, d, rr]) => Math.hypot(a - c, b - d) < rr); };
+    let U0 = 0, U1 = 0;
+    for (let x = 0.5; x <= 12.5; x += 0.5) { if (![-HD + 0.3, 0, HD - 0.3].every(w => fri2(-x, w))) break; U0 = -x; }
+    for (let x = 0.5; x <= 12.5; x += 0.5) { if (![-HD + 0.3, 0, HD - 0.3].every(w => fri2(x, w))) break; U1 = x; }
+    if (U1 - U0 < 8) return false;
+    tradgardInnehall(R, U0, U1, HD, sc, lc);
+    return true;
+  }
+  // större tomma gräsytor nära vår tomt (som inte är tomtplatser): rutnät i kvarterets ram, fyll varje ledig 20 × 20 m-ruta
+  // med en låg trädgårdstomt vänd mot närmaste gata. Inte i startvyns siktkil.
+  function fyllLuckor() {
+    const T = H.VRAM && H.VRAM.tomt, gator = vagar.filter(v => v.dir === 'lat');
+    const fri2 = (a, b) => ledig(a, b, 0.6) && !(T && a > T.svB - 1.5 && a < T.svF + 1.5 && b > T.lat0 - 1.5 && b < T.lat1 + 1.5) && !RES.some(([c, d, rr]) => Math.hypot(a - c, b - d) < rr + 0.5);
+    for (let sv = -40; sv <= 44; sv += 4) for (let lat = -48; lat <= 48; lat += 4) {
+      const [x, z] = pt(sv, lat); if (Math.hypot(x, z) > 60 || (H.iSiktkil && H.iSiktkil(x, z, 4))) continue;
+      let ok = true;
+      for (let a = -9; a <= 9 && ok; a += 3) for (let b = -9; b <= 9 && ok; b += 3) if (!fri2(sv + a, lat + b)) ok = false;
+      if (!ok) continue;
+      const g = gator.reduce((m, v) => Math.abs(v.c - sv) < Math.abs(m.c - sv) ? v : m, gator[0]), fsv = Math.sign(g.c - sv) || 1;
+      const R = ram(sv, lat, fsv, 0);
+      tradgardInnehall(R, -9, 9, 9, sv, lat);
+    }
+  }
+  function tradgardInnehall(R, U0, U1, HD, sc, lc) {
+    const kil = (x, z) => H.iSiktkil && H.iSiktkil(x, z, 1);
     const um = (U0 + U1) / 2, lok = (u, w) => R.svlat(u, w), GRUS = [1.5, 1.38, 1.15], TRA = [0.42, 0.28, 0.16], VIT = [0.86, 0.86, 0.83];
     RES.push([sc, lc, Math.max(HD, (U1 - U0) / 2)]);
     // häck mot gatan med en öppning och grindstolpar; låg häck längs sidorna
@@ -437,7 +490,7 @@ export function skapaOmgivning(H) {
     // äppel- och päronträd i rader (låga), rabatter längs mittgången, bänkar vid korsningen, lekstuga i ett hörn
     for (let u = U0 + 2.5; u < U1 - 1.5; u += 4.2) for (const w of [-HD * 0.55, HD * 0.5]) {
       if (Math.abs(u - um) < 2 || (Math.abs(u - (U1 - 2.6)) < 2.8 && w < 0)) continue;
-      const [x, , z] = R.P(u + (r() - 0.5) * 0.6, w + (r() - 0.5) * 0.6); trad('frukt', x, z, 2.8 + r() * 1.0, 2.0);
+      const [x, , z] = R.P(u + (r() - 0.5) * 0.6, w + (r() - 0.5) * 0.6); if (!kil(x, z)) trad('frukt', x, z, 2.8 + r() * 1.0, 2.0);
     }
     for (const sx of [-1, 1]) {
       const [a0, b0] = lok(um + sx * 1.2, HD - 1.5), [a1, b1] = lok(um + sx * 1.2, 1.2); yta(a0, b0, a1, b1, 0.8, 0.02, [0.5, 0.4, 0.31], 5);
@@ -452,7 +505,6 @@ export function skapaOmgivning(H) {
     if (U1 - U0 > 16) { const [x, y, z] = R.P(U0 + 3.2, -HD + 2.6); lagg(TS, ting('studsmatta'), x, y, z, 1, 0, 8, 0); }
     // ängsblommor och högre gräs längs häcken
     for (let u = U0 + 0.6; u < U1 - 0.4; u += 0.7) { const [x, , z] = R.P(u, -HD + 0.4 + r() * 0.5); if (r() < 0.6) planta('gras', x, z, 0.4 + r() * 0.3, [0.66, 0.7, 0.42]); else planta('blomma', x, z, 0.35, [1.0, 1.0, 0.92]); }
-    globalThis.__grannTomt = { tradgard: true, U0, U1, HD };
   }
 
   function grannTomt() {
@@ -518,9 +570,9 @@ export function skapaOmgivning(H) {
     }
     // uteplats i trä på baksidan med bord, stolar och parasoll
     const uc = sp * typ.L * 0.12, wb = -F - 1.3;
-    { const [a0, b0] = lok(uc - 2.2, wb), [a1, b1] = lok(uc + 2.2, wb); yta(a0, b0, a1, b1, 2.5, 0.14, [1.2, 0.9, 0.62], 2); const [x, y, z] = R.P(uc, wb); lada3(VD, [x, y + 0.06, z], R.ax(0), [2.2, 0.06, 1.25], [0.22, 0.15, 0.1]); }
+    dack(R, uc, wb, 2.2, 1.3);
     {
-      const [tx, ty, tz] = R.P(uc + 0.5, wb - 0.1), Y = ty + 0.14;
+      const [tx, ty, tz] = R.P(uc + 0.5, wb - 0.1), Y = ty + DACK_Y;
       lagg(TS, ting('utegrupp'), tx, Y, tz, 1, R.ry, 8, 0);   // bord, stolar och dynor
       ror(VD, [[tx, Y, tz, 0.022], [tx, Y + 2.4, tz, 0.018]], 5, UG, 1, () => [0.75, 0.75, 0.73]);
       ror(VD, [[tx, Y + 2.4, tz, 0.03], [tx, Y + 2.1, tz, 1.3], [tx, Y + 2.06, tz, 1.3]], 10, UG, 1, () => [0.22, 0.36, 0.26]);
@@ -549,6 +601,7 @@ export function skapaOmgivning(H) {
   // ---- bygg(): gator, hus, parkstråket, liv och bakgrund ----
   function bygg() {
     grannTomt();
+    fyllLuckor();
     // nya gator: en parallell gata bortom parken (+sv) och en bakom bakgatans kvarter (−sv)
     const FRAM = 98, BAKRE = BAK - 58;
     const nyF = { dir: 'lat', c: FRAM, a0: -150, a1: 150, linje: true }, nyB = { dir: 'lat', c: BAKRE, a0: -150, a1: 150 };
@@ -575,7 +628,9 @@ export function skapaOmgivning(H) {
       if (bilOk(x, z)) parkBil(x, hy(x, z), z, ryMot(0, 1), BF[r() * BF.length | 0]);   // (BF: slumpen dras som förr, så att kvarteret står kvar)
     }
     // busshållplats och återvinningsstation vid den nya gatan
-    { const [x, z] = pt(FRAM - GHW - GTR + 0.9, 30); lagg(TS, ting('kur'), x, hy(x, z), z, 1, ryMot(1, 0), 8, 0); const [x2, z2] = pt(FRAM - GHW - 0.5, 26.5); lagg(TS, ting('hallplats'), x2, hy(x2, z2), z2, 1, ryMot(1, 0), 8, 0); }
+    { const [x, z] = pt(FRAM - GHW - GTR + 0.9, 30); lagg(TS, ting('kur'), x, hy(x, z), z, 1, ryMot(1, 0), 8, 0); const [x2, z2] = pt(FRAM - GHW - 0.5, 26.5); lagg(TS, ting('hallplats'), x2, hy(x2, z2), z2, 1, ryMot(1, 0), 8, 0);
+      // någon väntar på bussen och pratar i telefon (husritare-folk.js)
+      if (!siktkil(...pt(FRAM - GHW - GTR / 2, 27.8), 1)) FOLK.push({ t: 'sta', p: pt(FRAM - GHW - GTR / 2, 27.8), dir: [VN[0] + VT[0] * 0.3, VN[2] + VT[2] * 0.3], typ: 0, pal: 3, klipp: 'tel' }); }
     {
       // återvinning: plattan och fyra containrar (glas, papper, plast, metall)
       let lat0 = null; for (const l of [-46, -20, 58, 6, -70]) if (ledig(FRAM - GHW - GTR - 5, l, 4) && ledig(FRAM - GHW - GTR - 5, l + 7, 4)) { lat0 = l; break; }
@@ -621,8 +676,8 @@ export function skapaOmgivning(H) {
         R.lada(gu + s * 0.55, 0, 0.9, 0.004, 0.75, 1.45, [0.35, 0.36, 0.36], s * 0.55 * 0);
       }
       // två barn som springer på planen
-      { const p0 = R.P(-10, -2), p1 = R.P(9, 3), d = nrm(sub(p1, p0)); figur(p0, d, 0.75, { piv: [...p0, 3], ro: [...d, Math.hypot(p1[0] - p0[0], p1[2] - p0[2])], fa: [0.6, 2.4, 0, 0] }, 'sta', { troja: [0.9, 0.85, 0.15] }); }
-      { const p0 = R.P(8, -4), p1 = R.P(-6, 2), d = nrm(sub(p1, p0)); figur(p0, d, 0.78, { piv: [...p0, 3], ro: [...d, Math.hypot(p1[0] - p0[0], p1[2] - p0[2])], fa: [0.1, 2.2, 0, 0] }, 'sta', { troja: [0.1, 0.2, 0.6] }); }
+      { const p0 = R.P(-10, -2), p1 = R.P(9, 3); folk({ t: 'ga', bana: [[p0[0], p0[2]], [p1[0], p1[2]]], klipp: 'jogg', typ: 5, pal: 2, prio: 2 }, { troja: 1 }); }
+      { const p0 = R.P(8, -4), p1 = R.P(-6, 2); folk({ t: 'ga', bana: [[p0[0], p0[2]], [p1[0], p1[2]]], klipp: 'jogg', typ: 6, pal: 3, prio: 2 }, { troja: 1 }); }
       break;
     }
     // damm med vass och ankor på andra sidan
@@ -698,7 +753,19 @@ export function skapaOmgivning(H) {
       }
     }
     // ---- liv på gatorna: hundägare, en som går, cyklister ----
-    const gaPa = (sv, l0, l1, s, sp, fas, extra) => {
+    const gaPa = (sv, l0, l1, s, sp, fas, extra, typ = 2) => {
+      if (extra !== 'cykel') {
+        // inga människor i siktkilen mot vårt hus: den längsta biten av sträckan utanför kilen (minst 8 m)
+        const sg = Math.sign(l1 - l0) || 1, bit = []; let a = null, bast = null;
+        for (let l = l0; sg * (l1 - l) >= 0; l += sg) {
+          const ok = !siktkil(...pt(sv, l), 2.0);
+          if (ok && a === null) a = l;
+          if ((!ok || sg * (l1 - l - sg) < 0) && a !== null) { const b = ok ? l : l - sg; bit.push([a, b]); a = null; }
+        }
+        bit.forEach(([a0, b0]) => { if (!bast || Math.abs(b0 - a0) > Math.abs(bast[1] - bast[0])) bast = [a0, b0]; });
+        if (!bast || Math.abs(bast[1] - bast[0]) < 8) { folkUt(); return; }
+        [l0, l1] = bast;
+      }
       const [x0, z0] = pt(sv, l0), [x1, z1] = pt(sv, l1), p0 = [x0, hy(x0, z0), z0], d = nrm([x1 - x0, 0, z1 - z0]), L = Math.hypot(x1 - x0, z1 - z0);
       const an = { piv: [...p0, 3], ro: [...d, L], fa: [fas, sp, 0, 0] };
       if (extra === 'cykel') {
@@ -709,7 +776,17 @@ export function skapaOmgivning(H) {
         figur([p0[0] - d[0] * 0.2, p0[1] - 0.05, p0[2] - d[2] * 0.2], d, 1.0, an, 'cykel', { mossa: [0.9, 0.9, 0.88] });
         return;
       }
-      figur(p0, d, s, an, 'sta');
+      if (extra === 'hund') folk({ t: 'hund', p0: [p0[0], p0[1] + 0.03, p0[2]], d, L, sp, fas, typ, pal: (fas * 10 | 0) % 6, klipp: 'ga' });
+      else {
+        // utan hund: en egen rutt längs trottoaren; finns en tvärgata på vägen svänger rutten runt hörnet in på den
+        const bana = [pt(sv, l0)], v = vagar.find(q => q.dir === 'sv' && q.c > Math.min(l0, l1) + 3 && q.c < Math.max(l0, l1) - 3 && sv > q.a0 - tr - 1 && sv < q.a1 + tr + 1 && (q.a1 > sv + 12 || q.a0 < sv - 12));
+        if (v) {
+          const sg = Math.sign(v.c - l0), lk = v.c - sg * tr, ut = v.a1 > sv + 12 ? 1 : -1, sv2 = sv + ut * 18;
+          const ok = [0.25, 0.5, 0.75, 1].every(f => !siktkil(...pt(sv + (sv2 - sv) * f, lk), 2));
+          if (ok) bana.push(pt(sv, lk), pt(sv2, lk)); else bana.push(pt(sv, l1));
+        } else bana.push(pt(sv, l1));
+        folk({ t: 'ga', bana, klipp: 'ga', typ, pal: (fas * 10 | 0) % 6 });
+      }
       if (extra === 'hund') {
         const S = crs(UPP, d), q = [p0[0] + d[0] * 1.3 + S[0] * 0.3, p0[1], p0[2] + d[2] * 1.3 + S[2] * 0.3], AX = [S, UPP, d], HB = [0.55, 0.38, 0.2];
         const ah = (ben, h) => ({ piv: an.piv, ro: an.ro, fa: [an.fa[0], an.fa[1], ben, h] });
@@ -720,13 +797,19 @@ export function skapaOmgivning(H) {
       }
     };
     const tr = GHW + GTR / 2;
-    gaPa(BAK - tr, -55, 25, 1.0, 1.2, 0.0, 'hund');               // bakgatans trottoar (syns i startvyn)
-    gaPa(HU + tr, -40, 35, 0.98, 1.3, 0.4, 'hund');               // huvudgatans bortre trottoar (lekplatsvyn)
-    gaPa(HU + tr, 50, -10, 1.02, 1.4, 0.7);
-    gaPa(BAK + tr, 40, -30, 0.95, 1.25, 0.2);
+    gaPa(BAK - tr, -55, 25, 1.0, 1.2, 0.0, 'hund', 1);            // bakgatans trottoar (syns i startvyn)
+    gaPa(HU + tr, -40, 35, 0.98, 1.3, 0.4, 'hund', 3);            // huvudgatans bortre trottoar (lekplatsvyn)
+    gaPa(HU + tr, 50, -10, 1.02, 1.4, 0.7, null, 'man');          // den realistiska mannen (folk-man.glb)
+    gaPa(BAK + tr, 40, -30, 0.95, 1.25, 0.2, null, 4);            // äldre dam, svänger runt hörnet om det finns en tvärgata
     gaPa(BAK - 1.6, -90, 90, 1, 4.6, 0.3, 'cykel');               // cyklist på bakgatan
     gaPa(PS + 0.6, -90, 90, 1, 4.2, 0.65, 'cykel');                // och på parkvägen
-    gaPa(PS - 0.6, 30, -60, 1.0, 1.15, 0.5, 'hund');
+    gaPa(PS - 0.6, 30, -60, 1.0, 1.15, 0.5, 'hund', 0);
+    // en granne står ute på sin uppfart (vid infarten, framför en ev. bil) och vinkar mot vårt hus
+    {
+      const kand = uppfarter.map(([a0, b0, a1, b1]) => { const sv = a0 + (a1 - a0) * 0.88, lat = b0 + (b1 - b0) * 0.88, [x, z] = pt(sv, lat); return { x, z, d: Math.hypot(x, z) }; })
+        .filter(q => q.d > 30 && q.d < 62 && !siktkil(q.x, q.z, 2)).sort((a, b) => a.d - b.d);
+      if (kand.length) { const q = kand[0]; FOLK.push({ t: 'sta', p: [q.x, q.z], dir: [-q.x, -q.z], typ: 3, pal: 4, klipp: 'vinka' }); }
+    }
     // ---- fjärran: tak och skorstenar i skogsbrynets gläntor, kyrktorn och vattentorn på kullarna ----
     for (const [g, b] of GLANTOR) for (let k = 0; k < 7; k++) {
       const a = (g + (r() - 0.5) * b * 1.5) * Math.PI / 180, d = 140 + r() * 70, x = Math.cos(a) * d, z = Math.sin(a) * d;
@@ -847,5 +930,5 @@ export function skapaOmgivning(H) {
     return ut;
   }
 
-  return { lekplats, bygg, liv };
+  return { lekplats, bygg, liv, tomTomt, fyllLuckor, folk: FOLK };
 }

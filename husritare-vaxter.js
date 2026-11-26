@@ -94,14 +94,24 @@ export function skapaVaxtPaket(THREE, { VU, LJUS, ANISO = 4, renderer = null }) 
 
   // poster: [{ x, y, z, s, sy, ry, typ, c: [r, g, b] }] → grupp som fylls med ett instansat nät per typ
   const M4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), V = new THREE.Vector3(), S = new THREE.Vector3(), C = new THREE.Color();
-  function grupp(poster) {
+  // lod: [nära, långt, minsta andel] → posterna delas i rutor om 9 m (eget nät per ruta och art, så att rutor utanför bilden
+  // gallras bort) och varje ruta ritar färre instanser ju längre bort kameran är (instanserna ligger i slumpad ordning)
+  function grupp(poster, lod = null) {
     const g = new THREE.Group(); g.name = 'markvaxter';
     if (!poster.length || AV) return g;
+    if (lod && KVAL < 1) lod = [lod[0] * 0.7, lod[1] * 0.75, lod[2] * 0.7];   // svaga enheter: glesare tidigare
+    try { if (/[?&]prov=1/.test(location.search)) (window.__vaxt = window.__vaxt || []).push(g); } catch (e) { /* utan fönster */ }   // för provbilder
     console.info('miljö: markväxter', poster.length, 'st,', trianglar(poster), 'trianglar');
     ladda(({ geo, mat }) => {
       for (let t = 0; t < geo.length; t++) {
-        const L = poster.filter(p => p.typ === t);
-        if (!L.length) continue;
+        const L0 = poster.filter(p => p.typ === t);
+        if (!L0.length) continue;
+        const rutor = {};
+        if (lod) for (const p of L0) { const k = Math.floor(p.x / 9) + ',' + Math.floor(p.z / 9); (rutor[k] || (rutor[k] = [])).push(p); }
+        else rutor.alla = L0;
+        for (const k in rutor) {
+        const L = rutor[k];
+        if (lod) L.sort((a, b) => hash2(a.x, a.z) - hash2(b.x, b.z));
         const m = new THREE.InstancedMesh(geo[t], mat, L.length);
         m.name = 'markvaxter-' + t;
         L.forEach((p, i) => {
@@ -112,7 +122,16 @@ export function skapaVaxtPaket(THREE, { VU, LJUS, ANISO = 4, renderer = null }) 
         m.castShadow = false; m.receiveShadow = true; m.matrixAutoUpdate = false;
         m.userData.egen = false;              // geometrin delas mellan miljöerna och släpps inte vid miljöbyte
         m.computeBoundingSphere();
+        if (lod) {
+          const n = L.length, c = new THREE.Vector3(), rad = m.boundingSphere.radius;
+          m.onBeforeRender = (ren, sc, cam) => {
+            c.copy(m.boundingSphere.center).applyMatrix4(m.matrixWorld);
+            const d = Math.max(0, cam.position.distanceTo(c) - rad * 0.6), f = d <= lod[0] ? 1 : Math.max(lod[2], 1 - (d - lod[0]) / (lod[1] - lod[0]) * (1 - lod[2]));
+            m.count = Math.ceil(n * f);   // (0 långt bort: inga kvarlämnade enstaka tuvor)
+          };
+        }
         g.add(m);
+        }
       }
       try { window.dispatchEvent(new Event('husritare:nytt')); } catch (e) { /* utan fönster */ }   // motorn ritar bara vid behov
     });
@@ -126,6 +145,7 @@ export function skapaVaxtPaket(THREE, { VU, LJUS, ANISO = 4, renderer = null }) 
       return (f(i, j) * (1 - su) + f(i + 1, j) * su) * (1 - sv) + (f(i, j + 1) * (1 - su) + f(i + 1, j + 1) * su) * sv; };
     return o(x, z, 0.17) * 0.65 + o(x + 9.1, z - 3.7, 0.45) * 0.35;
   };
+  const hash2 = (x, z) => { const s = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return s - Math.floor(s); };
   const kantAv = (mal, x, z) => Math.hypot(Math.max(Math.abs(x) - mal.L / 2, 0), Math.max(Math.abs(z) - mal.W / 2, 0));
   const grundBredd = ({ L, W }) => Math.min(0.6, Math.max(0.35, 0.3 + 0.011 * (L + W)));
   // husgrundens fyra sidor som linjer (d m ut från väggen)
@@ -209,13 +229,49 @@ export function skapaVaxtPaket(THREE, { VU, LJUS, ANISO = 4, renderer = null }) 
       kantArter: [[3, 4], [5, 3], [2, 2], [0, 1]], ytArter: [[3, 2], [0, 2], [5, 2], [1, 1]], tri: 70000, torr: 0.35 });
   }
   // vid sjön: rajgräs och hirs på land, sandrör i strandkanten. strand(x, z) → 0 på land … 1 vid vattnet (null = utanför gräset)
-  function kust({ mal, hy, strand, r = slumpFro(5050) }) {
+  function kust({ mal, hy, strand, stig = null, r = slumpFro(5050) }) {
     const gb = grundBredd(mal), land = (x, z) => { const q = strand(x, z); return q !== null && q < 0.55 && kantAv(mal, x, z) < GRAN; };
-    const ut = sprid({ r, hy, fri: bas(mal, land), linjer: [...husLinjer(mal, gb + 1.15), ...framLinje(mal, gb + 1.15)], yta: ytaRunt(mal), fram: framYta(mal, r), nK: 34, kantAndel: 0.55,
+    const ut = sprid({ r, hy, fri: bas(mal, land), linjer: [...husLinjer(mal, gb + 1.15), ...framLinje(mal, gb + 1.15)], yta: ytaRunt(mal), fram: framYta(mal, r), nK: 0, kantAndel: 0.55,
       kantArter: [[2, 3], [0, 3], [3, 2], [4, 1]], ytArter: [[0, 4], [1, 3], [4, 2], [2, 2]], tri: 60000, torr: 0.35 });
-    const sand = (x, z) => { const q = strand(x, z); return q !== null && q > 0.45 && kantAv(mal, x, z) < GRAN + 6; };
+    const sand = (x, z) => { const q = strand(x, z); return q !== null && q > 0.45 && kantAv(mal, x, z) < GRAN + 6 && (!stig || stig(x, z) > 0.9); };   // (sandröret är upp till 1,7 m brett)   // (aldrig genom bryggor, boden, bastun)
     let tri = ut.reduce((s, p) => s + TRI[p.typ], 0);
-    return ut.concat(sprid({ r, hy, fri: bas(mal, sand), yta: ytaRunt(mal, GRAN + 6), nK: 26, kantAndel: 0, ytArter: [[6, 5], [2, 1]], per: [2, 6], sprid: 1.0, skala: 1.15, tri: Math.max(0, 110000 - tri), torr: 0.5 }));
+    return ut.concat(sprid({ r, hy, fri: bas(mal, sand), yta: ytaRunt(mal, GRAN + 6), nK: 26, kantAndel: 0, ytArter: [[6, 5], [2, 1]], per: [2, 6], sprid: 1.0, skala: 1.15, tri: Math.max(0, 110000 - tri), torr: 0.5 }),
+      kustAng({ mal, hy, strand, stig, r: slumpFro(5252) }));
+  }
+  // ängen vid sjön: ett tätt fält av riktiga tuvor över hela tomten (jitterrutnät, tätheten följer bruset i fläckar),
+  // kort gräs nära huset och framför det, högre ängsgräs (kavelhirs, starr, sandrör) i tuvor mot stranden och glest vid stigarna.
+  // Ritas med lod i grupp(): rutor nära kameran fulla, långt bort glesa.
+  function kustAng({ mal, hy, strand, stig, r }) {
+    const ut = [], gb = grundBredd(mal), steg = 0.64 / Math.sqrt(KVAL), R = 34;
+    for (let x = -R; x < R; x += steg) for (let z = -R; z < R; z += steg) {
+      const px = x + (r() - 0.5) * steg * 0.95, pz = z + (r() - 0.5) * steg * 0.95, k = kantAv(mal, px, pz);
+      if (k > 30 || k < gb + 0.55) continue;
+      const s = strand(px, pz);
+      if (s === null) continue;
+      // ut i sanden (s > 1, q 9,2–11,3): gräset glesnar ut till enstaka strandgräs- och sandrörstuvor
+      if (s > 1.0) {
+        const g = (1.29 - s) / 0.29;
+        if (r() > g * g * 0.5 || mal.blockerad(px, pz, 0.12) || (stig && stig(px, pz) < 0.9)) continue;
+        const typ = r() < 0.35 ? 6 : r() < 0.6 ? 2 : 0, sk = typ === 6 ? 0.6 + r() * 0.4 : 1.6 + r() * 0.7;
+        ut.push({ x: px, y: hy(px, pz) - 0.03, z: pz, s: sk, sy: 0.9 + r() * 0.5, ry: r() * 6.283, lx: (r() - 0.5) * 0.2, lz: (r() - 0.5) * 0.2, typ, c: ton(r, 0.35).map((v, i) => v * [1.02, 1.04, 0.8][i]) });
+        continue;
+      }
+      const b = brus(px, pz), b2 = brus(px * 2.7 + 31, pz * 2.7 - 17);
+      if (r() > 0.86 + b * 0.14) continue;
+      if (k < 5.5 && r() < 0.75) continue;   // klippt gräsmatta närmast huset: fotomarken bär den, bara enstaka låga tuvor   // nästan jämn täthet: en sammanhängande gräsmatta, inga glesa fläckar
+      const st = stig ? stig(px, pz) : 99;
+      if (st < 0.32) continue;
+      if (mal.blockerad(px, pz, 0.12) || (mal.trappa && mal.trappa(px, pz, 0.25)) || (mal.sidodorrar || []).some(d => Math.hypot(px - d.x, pz - d.z) < 1.2)) continue;
+      // högt: mot stranden (s), i tuvor (b2), aldrig närmast huset eller tätt vid stigen
+      const hog = s > 0.3 && b2 > 0.7 - s * 0.45 && k > 6 && st > 1.1;   // (färre spridda höga tuvor: de lästes som ogräs)
+      let typ, sk, sy;
+      // (tuvornas egna mått: rajgräs 0,27 × 0,24 m, liten 0,16 × 0,16, kavelhirs 0,38 × 0,5, starr 0,5 × 0,38, sandrör 1,5 × 0,75)
+      if (hog) { typ = valj(r, s > 0.55 ? [[6, 3], [3, 3], [2, 3]] : [[2, 4], [3, 3], [0, 3], [6, 1]]); sk = typ === 6 ? 0.9 + r() * 0.5 : 2.0 + r() * 0.9; sy = (typ === 6 ? 1.1 : 1.25) + r() * 0.5 + s * 0.3; }
+      // klippt gräsmatta närmast huset (k < 7: låga, jämna tuvor), sedan mjukt högre ängsgräs utåt; inga mörka starrtuvor i mattan
+      else { const ang = Math.min(1, Math.max(0, (k - 6) / 9)); typ = valj(r, k < 7 ? [[1, 8], [0, 2]] : [[1, 8], [0, 3], [4, 2]]); sk = ((typ === 1 || typ === 4) ? 2.7 + r() * 0.8 : 2.0 + r() * 0.5) * (st < 0.9 ? 0.75 : 1); sy = (0.5 + 0.12 * r()) * (1 - ang) + (0.85 + r() * 0.45) * ang; }
+      ut.push({ x: px, y: hy(px, pz) - 0.03, z: pz, s: sk, sy, ry: r() * 6.283, lx: (r() - 0.5) * 0.16, lz: (r() - 0.5) * 0.16, typ, c: ton(r, hog ? 0.18 : 0.03).map((v, i) => (0.95 + 0.2 * v) * [1.04, 1.1, 0.74][i]) });   // (jämnare ton: inga enstaka mörka eller ljusa prickar)   // friskt gulgrönt sommargräs
+    }
+    return ut;
   }
   // villaområdet: vår tomt (husgrunden) och grannarnas tomter (husgrunder och staket mot gatan), aldrig på gata,
   // trottoar, uppfarter, gångar, altaner eller grus. V = data från villaNara (se anropet där).
