@@ -2026,7 +2026,8 @@ export function kopplaSprang({ ritare, scen, knapp, tillUte, lage }) {
   }, true);
   // studion byggs i förväg när datorn är ledig (då går bytet nästan direkt)
   const forStudio = () => { try { if (I.miljoForbered) I.miljoForbered('studio'); } catch (e) { /* bara en förberedelse */ } };
-  if (typeof requestIdleCallback === 'function') requestIdleCallback(forStudio, { timeout: 4000 }); else setTimeout(forStudio, 3000);
+  // (efter starten: studion byggd under introt gav hack medan huset började snurra; pekaren över knappen förbereder direkt)
+  setTimeout(() => { if (typeof requestIdleCallback === 'function') requestIdleCallback(forStudio, { timeout: 4000 }); else forStudio(); }, 12000);
   // studion i sprängvyn: ljusare och mjukare. Inget nytt ljus läggs till (ett nytt ljus ändrar
   // alla materials program: förut kompilerades ~40 program om när vyn öppnades). I stället höjs
   // scenens eget himmelsljus en aning medan vyn är öppen i studion; motorns eget värde (som den kan
@@ -2331,7 +2332,7 @@ export function kopplaSprang({ ritare, scen, knapp, tillUte, lage }) {
     // huset (första i listan) via motorns rutnät: Raycaster mot husets halva miljon trianglar frös sidan i 2,5 s
     if (Array.isArray(rot) && typeof I.stral === 'function') {
       let best = I.stral(p, d, 3);
-      const h2 = snRay.intersectObjects(rot.slice(1), true).find(ok);
+      const h2 = snRay.intersectObjects(rot.slice(1), true).find(x => ok(x) && x.distance > 0.7);
       if (h2 && (best === null || h2.distance < best)) best = h2.distance;
       return best;
     }
@@ -2472,7 +2473,7 @@ export function kopplaSprang({ ritare, scen, knapp, tillUte, lage }) {
       return hLador.some(b => {
         lb.makeEmpty();
         for (let i = 0; i < 8; i++) lb.expandByPoint(c.set(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z).applyMatrix4(inv));
-        return lb.max.x > u0 - M && lb.min.x < u1 + M && lb.max.y > v0 - M && lb.min.y < v1 + M && lb.max.z > -0.3 && lb.min.z < 1.2;
+        return lb.max.x > u0 - M && lb.min.x < u1 + M && lb.max.y > v0 - M && lb.min.y < v1 + M && lb.max.z > -0.3 && lb.min.z < 0.35;
       });
     };
     const g = new THREE.Group(); g.name = 'produkt-snitt';
@@ -2485,6 +2486,8 @@ export function kopplaSprang({ ritare, scen, knapp, tillUte, lage }) {
       const R = ramar(Hm, dl), K = konturer(Hm, dl);
       const sidor = Object.keys(R).sort((a, b) => R[b].n.dot(blick) - R[a].n.dot(blick));
       w = 1.5; h = 1.35;
+      for (const strikt of [true, false]) {
+      if (M) break;
       for (const s of sidor) {
         const r = R[s], kont = K[s], len = r.len;
         const vMax = Math.min(...kont.filter(p => p[1] > 0.5).map(p => p[1]));
@@ -2498,13 +2501,14 @@ export function kopplaSprang({ ritare, scen, knapp, tillUte, lage }) {
           const u0 = uc - w / 2, u1 = uc + w / 2;
           if (u0 < 0.35 || u1 > len - 0.35) continue;
           if (hal.some(o => u1 > o[1] - 0.25 && u0 < o[1] + o[2] + 0.25)) continue;
-          if (krockar(Ms, u0, u1, v0, v0 + h)) continue;
-          const nn = snYta(hinder, Ms, u0, u1, v0, v0 + h);
+          if (strikt && krockar(Ms, u0, u1, v0, v0 + h)) continue;
+          const nn = snYta([hus], Ms, u0, u1, v0, v0 + h);   // bara huset via rutnätet (snabbt); föremålen intill väggen provas som lådor (krockar)
           if (nn === null) continue;
           M = Ms; n0 = nn; ram = { u0, u1, v0, v1: v0 + h, s };
           break;
         }
         if (M) break;
+      }
       }
       if (!M) return null;
       // lokalt: ruta centrerad i (0, 0), ytan i z = 0
@@ -2732,7 +2736,7 @@ export function kopplaSprang({ ritare, scen, knapp, tillUte, lage }) {
       r.compileAsync(g, kamera, I.scene).catch(() => {}).finally(() => geo.dispose());
     } catch (e) { /* bara en förberedelse */ }
   };
-  if (typeof requestIdleCallback === 'function') requestIdleCallback(forkompilera, { timeout: 8000 }); else setTimeout(forkompilera, 4000);
+  setTimeout(() => { if (typeof requestIdleCallback === 'function') requestIdleCallback(forkompilera, { timeout: 8000 }); else forkompilera(); }, 16000);
   I.vidSteg = api.vidSteg;
   return api;
 }

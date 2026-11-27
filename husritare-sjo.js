@@ -9,8 +9,8 @@
 //   sjo.spegla(obj)          lägg ett objekt i speglingens lager
 // Allt som rör sig gör det i vertexskuggaren (VU.uTid, VU.uVind); inget räknas på processorn per bild.
 
-import { ph, phInit } from './husritare-ph.js?v=20261126t';   // Poly Haven-rekvisita (CC0): sjömärken, boj, flytväst, stövlar, tunna, lådor, eldstad, yxa …
-import { blommor } from './husritare-blommor.js?v=20261126t';   // riktiga lupiner vid stranden
+import { ph, phInit } from './husritare-ph.js?v=20261126u';   // Poly Haven-rekvisita (CC0): sjömärken, boj, flytväst, stövlar, tunna, lådor, eldstad, yxa …
+import { blommor } from './husritare-blommor.js?v=20261126u';   // riktiga lupiner vid stranden
 
 export function skapaSjo(THREE, K) {
   const { VU, VY, KUST, kustQ, hy, fbm, slump, renderer } = K;

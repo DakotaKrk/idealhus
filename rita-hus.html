@@ -26,29 +26,29 @@
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="styles.css?v=20261126g">
-    <link rel="stylesheet" href="design.css?v=20261126t">
-    <link rel="stylesheet" href="husritare.css?v=20261126t">
-    <link rel="stylesheet" href="husritare-app.css?v=20261126t">
-    <link rel="modulepreload" href="husritare-sida.js?v=20261126t">
-    <link rel="modulepreload" href="husritare.js?v=20261126t">
+    <link rel="stylesheet" href="design.css?v=20261126u">
+    <link rel="stylesheet" href="husritare.css?v=20261126u">
+    <link rel="stylesheet" href="husritare-app.css?v=20261126u">
+    <link rel="modulepreload" href="husritare-sida.js?v=20261126u">
+    <link rel="modulepreload" href="husritare.js?v=20261126u">
     <link rel="modulepreload" href="vendor/three/three.module.min.js">
     <link rel="modulepreload" href="vendor/three/addons/controls/OrbitControls.js">
     <link rel="modulepreload" href="vendor/three/addons/utils/BufferGeometryUtils.js">
     <link rel="modulepreload" href="vendor/three/addons/geometries/RoundedBoxGeometry.js">
-    <link rel="modulepreload" href="husritare-miljo.js?v=20261126t">
-    <link rel="modulepreload" href="husritare-inne.js?v=20261126t">
-    <link rel="modulepreload" href="husritare-plan.js?v=20261126t">
-    <link rel="modulepreload" href="husritare-bil.js?v=20261126t">
-    <link rel="modulepreload" href="husritare-bebott.js?v=20261126t">
-    <link rel="modulepreload" href="husritare-pris.js?v=20261126t">
+    <link rel="modulepreload" href="husritare-miljo.js?v=20261126u">
+    <link rel="modulepreload" href="husritare-inne.js?v=20261126u">
+    <link rel="modulepreload" href="husritare-plan.js?v=20261126u">
+    <link rel="modulepreload" href="husritare-bil.js?v=20261126u">
+    <link rel="modulepreload" href="husritare-bebott.js?v=20261126u">
+    <link rel="modulepreload" href="husritare-pris.js?v=20261126u">
     <link rel="modulepreload" href="vendor/three/addons/loaders/GLTFLoader.js">
     <link rel="stylesheet" href="nya-hus.css?v=20261126g">
-    <link rel="stylesheet" href="ios.css?v=20261126t">
-    <script src="logga.js?v=20261126t"></script>
-    <script src="premium.js?v=20261126t" defer></script>
+    <link rel="stylesheet" href="ios.css?v=20261126u">
+    <script src="logga.js?v=20261126u"></script>
+    <script src="premium.js?v=20261126u" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script>var q=location.search;if(/[?&]inbaddad=1(&|$)/.test(q))document.documentElement.classList.add('inbaddad');if(/[?&]foto=1(&|$)/.test(q))document.documentElement.classList.add('foto')</script>
-    <link rel="stylesheet" href="husritare-ios.css?v=20261126t">
+    <link rel="stylesheet" href="husritare-ios.css?v=20261126u">
     <script>if(!/[?&](inbaddad|foto)=1(&|$)/.test(location.search))document.documentElement.classList.add('byggapp','bintro-pa')</script>
     <noscript><style>.bintro{display:none!important}</style></noscript>
   </head>
@@ -64,7 +64,7 @@
         <p class="bintro__status" role="status" aria-live="polite"><span data-bintro-text>Hämtar ritningen</span><span class="bintro__pct" data-bintro-pct aria-hidden="true"></span></p>
       </div>
     </div>
-    <script>(function(){var d={'sadel-30':['Kupa 30','30 m² · 7,5 × 4 m'],'sadel-40':['Kupa 40','40 m² · 10 × 4 m'],'sadel-50':['Sadel 50','50 m² · 12,5 × 4 m'],'pulpet-70':['Pulpet 70','70 m² · 10 × 7 m'],'sadel-90':['Sadel 90','90 m² · 12 × 7 m']},e=document.querySelector('[data-bintro]');if(!document.documentElement.classList.contains('byggapp')){e.remove();return}var q=new URLSearchParams(location.search).get('modell')||'',m={'kupa-30':'sadel-30','kupa-40':'sadel-40'}[q]||q;if(!d[m])m='sadel-40';e.setAttribute('data-modell',m);document.body.setAttribute('aria-busy','true');e.querySelector('[data-bintro-namn]').textContent=d[m][0];e.querySelector('[data-bintro-fakta]').textContent=d[m][1];setTimeout(function(){if(e.isConnected&&!e.classList.contains('bintro--ut')){e.remove();document.documentElement.classList.remove('bintro-pa');document.body.removeAttribute('aria-busy')}},30000);var lugn=false;try{lugn=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(x){}if(!lugn&&window.Worker&&window.OffscreenCanvas&&HTMLCanvasElement.prototype.transferControlToOffscreen){try{var svg=e.querySelector('.bintro__marke'),mitt=svg.parentNode,delar=[],tmp=document.createElementNS('http://www.w3.org/2000/svg','path'),rekt=function(n){var x=+n.getAttribute('x'),y=+n.getAttribute('y'),w=+n.getAttribute('width'),h=+n.getAttribute('height');return{d:'M'+x+' '+y+'h'+w+'v'+h+'h'+(-w)+'Z',len:2*(w+h),box:{x:x,y:y,w:w,h:h}}},lada=function(d){var t=d.match(/-?[\d.]+/g).map(Number),x=[],y=[];for(var i=0;i+1<t.length;i+=2){x.push(t[i]);y.push(t[i+1])}var a=Math.min.apply(0,x),b=Math.min.apply(0,y);return{x:a,y:b,w:Math.max.apply(0,x)-a,h:Math.max.apply(0,y)-b}},nr=function(n){return+(n.style.getPropertyValue('--i')||0)};svg.appendChild(tmp);[].forEach.call(svg.querySelectorAll('.bl-fyll>*'),function(n){var typ=n.getAttribute('class').slice(3),r=n.tagName.toLowerCase()==='rect'?rekt(n):{d:n.getAttribute('d')};delar.push({typ:typ,i:nr(n),d:r.d,box:r.box||(typ==='tak'?lada(r.d):{x:0,y:0,w:0,h:0})})});[].forEach.call(svg.querySelectorAll('.bl-streck>*'),function(n){var bitar;if(n.tagName.toLowerCase()==='rect'){var r=rekt(n);bitar=[{d:r.d,len:r.len}]}else bitar=n.getAttribute('d').split(/(?=M)/).map(function(d){tmp.setAttribute('d',d);return{d:d,len:tmp.getTotalLength()}});delar.push({typ:'streck',ord:n.getAttribute('class')==='bl-ord',i:nr(n),bitar:bitar})});svg.removeChild(tmp);var duk=document.createElement('canvas');duk.className='bintro__duk';duk.setAttribute('aria-hidden','true');mitt.insertBefore(duk,svg);var matt=function(){var k=Math.min(2,window.devicePixelRatio||1),b=mitt.getBoundingClientRect().width*k;return{b:b,h:b*316/1250}},m0=matt(),off=duk.transferControlToOffscreen(),w=new Worker('husritare-laddning.js?v=20261126t');w.onmessage=function(v){if(v.data&&v.data.typ==='ritad')e.setAttribute('data-ritad','')};w.onerror=function(){e.classList.remove('bintro--duk');duk.remove();e._arbetare=null};w.postMessage({typ:'start',duk:off,farg:getComputedStyle(svg).color,delar:delar,b:m0.b,h:m0.h},[off]);e.classList.add('bintro--duk');e._arbetare=w;requestAnimationFrame(function(){w.postMessage({typ:'kor'})});addEventListener('resize',function(){if(e._arbetare&&e.isConnected){var v=matt();e._arbetare.postMessage({typ:'storlek',b:v.b,h:v.h})}})}catch(x){e.classList.remove('bintro--duk');var c=e.querySelector('.bintro__duk');if(c)c.remove();e._arbetare=null}}})()</script>
+    <script>(function(){var d={'sadel-30':['Kupa 30','30 m² · 7,5 × 4 m'],'sadel-40':['Kupa 40','40 m² · 10 × 4 m'],'sadel-50':['Sadel 50','50 m² · 12,5 × 4 m'],'pulpet-70':['Pulpet 70','70 m² · 10 × 7 m'],'sadel-90':['Sadel 90','90 m² · 12 × 7 m']},e=document.querySelector('[data-bintro]');if(!document.documentElement.classList.contains('byggapp')){e.remove();return}var q=new URLSearchParams(location.search).get('modell')||'',m={'kupa-30':'sadel-30','kupa-40':'sadel-40'}[q]||q;if(!d[m])m='sadel-40';e.setAttribute('data-modell',m);document.body.setAttribute('aria-busy','true');e.querySelector('[data-bintro-namn]').textContent=d[m][0];e.querySelector('[data-bintro-fakta]').textContent=d[m][1];setTimeout(function(){if(e.isConnected&&!e.classList.contains('bintro--ut')){e.remove();document.documentElement.classList.remove('bintro-pa');document.body.removeAttribute('aria-busy')}},30000);var lugn=false;try{lugn=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(x){}if(!lugn&&window.Worker&&window.OffscreenCanvas&&HTMLCanvasElement.prototype.transferControlToOffscreen){try{var svg=e.querySelector('.bintro__marke'),mitt=svg.parentNode,delar=[],tmp=document.createElementNS('http://www.w3.org/2000/svg','path'),rekt=function(n){var x=+n.getAttribute('x'),y=+n.getAttribute('y'),w=+n.getAttribute('width'),h=+n.getAttribute('height');return{d:'M'+x+' '+y+'h'+w+'v'+h+'h'+(-w)+'Z',len:2*(w+h),box:{x:x,y:y,w:w,h:h}}},lada=function(d){var t=d.match(/-?[\d.]+/g).map(Number),x=[],y=[];for(var i=0;i+1<t.length;i+=2){x.push(t[i]);y.push(t[i+1])}var a=Math.min.apply(0,x),b=Math.min.apply(0,y);return{x:a,y:b,w:Math.max.apply(0,x)-a,h:Math.max.apply(0,y)-b}},nr=function(n){return+(n.style.getPropertyValue('--i')||0)};svg.appendChild(tmp);[].forEach.call(svg.querySelectorAll('.bl-fyll>*'),function(n){var typ=n.getAttribute('class').slice(3),r=n.tagName.toLowerCase()==='rect'?rekt(n):{d:n.getAttribute('d')};delar.push({typ:typ,i:nr(n),d:r.d,box:r.box||(typ==='tak'?lada(r.d):{x:0,y:0,w:0,h:0})})});[].forEach.call(svg.querySelectorAll('.bl-streck>*'),function(n){var bitar;if(n.tagName.toLowerCase()==='rect'){var r=rekt(n);bitar=[{d:r.d,len:r.len}]}else bitar=n.getAttribute('d').split(/(?=M)/).map(function(d){tmp.setAttribute('d',d);return{d:d,len:tmp.getTotalLength()}});delar.push({typ:'streck',ord:n.getAttribute('class')==='bl-ord',i:nr(n),bitar:bitar})});svg.removeChild(tmp);var duk=document.createElement('canvas');duk.className='bintro__duk';duk.setAttribute('aria-hidden','true');mitt.insertBefore(duk,svg);var matt=function(){var k=Math.min(2,window.devicePixelRatio||1),b=mitt.getBoundingClientRect().width*k;return{b:b,h:b*316/1250}},m0=matt(),off=duk.transferControlToOffscreen(),w=new Worker('husritare-laddning.js?v=20261126u');w.onmessage=function(v){if(v.data&&v.data.typ==='ritad')e.setAttribute('data-ritad','')};w.onerror=function(){e.classList.remove('bintro--duk');duk.remove();e._arbetare=null};w.postMessage({typ:'start',duk:off,farg:getComputedStyle(svg).color,delar:delar,b:m0.b,h:m0.h},[off]);e.classList.add('bintro--duk');e._arbetare=w;requestAnimationFrame(function(){w.postMessage({typ:'kor'})});addEventListener('resize',function(){if(e._arbetare&&e.isConnected){var v=matt();e._arbetare.postMessage({typ:'storlek',b:v.b,h:v.h})}})}catch(x){e.classList.remove('bintro--duk');var c=e.querySelector('.bintro__duk');if(c)c.remove();e._arbetare=null}}})()</script>
     <a class="skip" href="#innehall">Hoppa till innehållet</a>
     <header class="site-header">
       <div class="site-header__inner">
@@ -512,8 +512,8 @@
       <p class="site-footer__ord" aria-hidden="true">Legohus</p>
     </footer>
 
-    <script type="module" src="husritare-app.js?v=20261126t"></script>
-    <script type="module" src="husritare-sida.js?v=20261126t"></script>
+    <script type="module" src="husritare-app.js?v=20261126u"></script>
+    <script type="module" src="husritare-sida.js?v=20261126u"></script>
     <script>
       // En sidovergang som hoppas over avvisar sina loften. Utan
       // detta hamnar "Transition was skipped" i konsolen pa varje

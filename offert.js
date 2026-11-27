@@ -6,7 +6,7 @@
 // "Din vy" visar vinkeln kunden hade i ritaren.
 // Skicka: ingen extern tjänst, besökarens e-postprogram öppnas med förfrågan ifylld (mailto).
 // Sätts FORM_ENDPOINT någon gång skickas förfrågan i bakgrunden i stället.
-import { PAKET, prisText, giltigt, STANDARD_PAKET } from './husritare-pris.js?v=20261126t';
+import { PAKET, prisText, giltigt, STANDARD_PAKET } from './husritare-pris.js?v=20261126u';
 
 const FORM_ENDPOINT = '';
 const FORM_MOTTAGARE = 'info@legohusstockholm.se';
@@ -397,7 +397,7 @@ async function startaLive() {
   ram.insertBefore(duk, ram.querySelector('.off-scen__ljus'));
   live.duk = duk;
   try {
-    const { skapaRitare } = await import('./husritare.js?v=20261126t');
+    const { skapaRitare } = await import('./husritare.js?v=20261126u');
     if (!live.duk) return;   // sidan lämnades under laddningen
     const R = await skapaRitare(duk, { modell: M[1], montera: false, miljo: 'studio', anpassa: true });
     if (!live.duk) { try { R.sprang.renderer.dispose(); R.sprang.renderer.forceContextLoss(); } catch (e) { /* redan borta */ } return; }

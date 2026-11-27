@@ -6,12 +6,12 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261126t';
-import { PRODUKTER, GRUPPER, OMRADEN, PROD_IKON, skapaKort, skapaFokus, loggaBild, loggaReserv } from './husritare-produkt.js?v=20261126t';
-import { kopplaPris, lasPaket } from './husritare-pris.js?v=20261126t';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261126u';
+import { PRODUKTER, GRUPPER, OMRADEN, PROD_IKON, skapaKort, skapaFokus, loggaBild, loggaReserv } from './husritare-produkt.js?v=20261126u';
+import { kopplaPris, lasPaket } from './husritare-pris.js?v=20261126u';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 
-const MOTOR_V = '20261126t';
+const MOTOR_V = '20261126u';
 // Standardutseendet: utan val i adressen (och när man kommer tillbaka till sidan med bakåtknappen
 // eller laddar om den) möts man av samma bild varje gång: Kupa 40 i falurött med svart tak och
 // vita detaljer, vinter, gyllene timmen, kameran i startvyn. Adressen som sidan själv skriver
@@ -1830,7 +1830,7 @@ if (kanPlan) {
 // ---- Bilen vid huset: Tesla, Volvo eller ingen, under miljöerna i miljömenyn (adressen: bil=volvo) ----
 // Motorn byter och tonar över när modellen är laddad; Kör iväg/Kör hem gäller den valda bilen.
 const BILVAL = [['tesla', 'Tesla', '#e8e9eb'], ['volvo', 'Volvo', '#1c2c44'], ['ingen', 'Ingen bil', 'transparent']];
-var bilVal = 'tesla';   // var: spara() kan köras innan raden har nåtts
+var bilVal = 'volvo';   // var: spara() kan köras innan raden har nåtts. Volvon är standard på alla hus
 function byggBilval() {
   if (!kan('bilModell') || !mpopup || mpopup.querySelector('[data-bilval]')) return;
   mpopup.insertAdjacentHTML('beforeend', '<p class="kf__poprubrik" role="presentation">Bil</p>' + BILVAL.map(([id, namn, f]) =>
@@ -1838,7 +1838,7 @@ function byggBilval() {
 }
 function valjBil(id, tyst) {
   if (!kan('bilModell')) return;
-  bilVal = BILVAL.some(b => b[0] === id) ? id : 'tesla';
+  bilVal = BILVAL.some(b => b[0] === id) ? id : 'volvo';
   byggBilval();
   mpopup.querySelectorAll('[data-bilval]').forEach(b => b.setAttribute('aria-checked', String(b.getAttribute('data-bilval') === bilVal)));
   const knapp = document.querySelector('[data-bil]');
@@ -1967,7 +1967,7 @@ function spara() {
   if (mk.getAttribute('aria-pressed') === 'true' && !inneLage) q.set('matt', '1');
   if (oppetLage) { q.set('oppen', '1'); if (lagerVal !== 'hela') q.set('lager', lagerVal); }
   if (tomtLage) q.set('tomt', '1');
-  if (typeof bilVal === 'string' && bilVal !== 'tesla') q.set('bil', bilVal);
+  if (typeof bilVal === 'string' && bilVal !== 'volvo') q.set('bil', bilVal);
   if (planLage) q.set('plan', '1');
   q.set('paket', prisKort ? prisKort.paket() : lasPaket());   // valt paket (husritare-pris.js)
   if (fullLank) fullLank.href = 'rita-hus.html?' + q.toString();
@@ -2028,7 +2028,7 @@ window.addEventListener('pageshow', e => {
   }
   // tomt=1: möblerna dolda från början; plan=1: planlösningen när huset står klart
   if (q.get('tomt') === '1') sattTomt(true, true);
-  if (q.has('bil')) valjBil(q.get('bil'), true);
+  valjBil(q.has('bil') ? q.get('bil') : 'volvo', true);
   if (q.get('plan') === '1' && kanPlan && vy !== 'inne') {
     let forsok = 0;
     const planNar = () => {

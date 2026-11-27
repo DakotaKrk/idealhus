@@ -1464,7 +1464,7 @@ export function skapaBil(THREE, rot, VU) {
   // ---- bilval: modell('tesla' | 'volvo' | 'ingen') → Promise<namnet som gäller> ----
   // Bilen står alltid parkerad efter bytet; boxen, kabeln och ljusets färg byts med bilen.
   // 'ingen': ingen bil, kabeln hänger på boxen.
-  let modellMal = 'tesla';
+  let modellMal = 'volvo';   // Volvon är standardbilen på alla hus (byts in direkt när bilen laddats)
   function neonFarg(c) { for (const m of [neonMat, gloriaBox, gloriaPort, polMat]) m.color.set(c); }
   function bytTill(namn) {
     parkera(true);

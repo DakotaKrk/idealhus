@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261126t';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261126t';
-import { skapaPlanlager } from './husritare-plan.js?v=20261126t';
+import { skapaMiljo } from './husritare-miljo.js?v=20261126u';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261126u';
+import { skapaPlanlager } from './husritare-plan.js?v=20261126u';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -2065,18 +2065,19 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       const p = traff(x, z); if (!p) return;
       fot(p, x, z, rr * 4.6, mat.falsar);
       lagg(cyl(rr * 1.35, rr * 1.9, 0.07), mat.falsar, x, p.y + 0.035, z, null, false);   // manschett
-      lagg(cyl(rr, rr, h + T), mat.takMork, x, p.y + (h - T) / 2, z);
+      // röret och huven tar inte emot skugga: smala cylindrar i takets skuggkarta gav randig skuggakne
+      lagg(cyl(rr, rr, h + T), mat.takMork, x, p.y + (h - T) / 2, z).receiveShadow = false;
       const hh = rr * 1.4, yh = p.y + h;
-      lagg(cyl(rr * 1.55, rr * 1.55, hh, 20), mat.takMork, x, yh - hh / 2, z);
+      lagg(cyl(rr * 1.55, rr * 1.55, hh, 20), mat.takMork, x, yh - hh / 2, z).receiveShadow = false;
       lagg(cyl(rr * 1.62, rr * 1.62, 0.012, 20), mat.falsar, x, yh - hh + 0.02, z, null, false);   // nedre kant
-      lagg(cyl(0.004, rr * 1.95, rr * 0.75, 20), mat.takMork, x, yh + rr * 0.375 + 0.01, z);       // hatten
+      lagg(cyl(0.004, rr * 1.95, rr * 0.75, 20), mat.takMork, x, yh + rr * 0.375 + 0.01, z).receiveShadow = false;       // hatten
     };
     // avluftare för avloppet: smalt svart rör med liten hatt
     const avlufta = (x, z) => {
       const p = traff(x, z); if (!p) return;
       fot(p, x, z, 0.2, mat.skorsten);
       lagg(cyl(0.04, 0.075, 0.06), mat.skorsten, x, p.y + 0.03, z, null, false);
-      lagg(cyl(0.028, 0.028, 0.36 + T), mat.skorsten, x, p.y + (0.36 - T) / 2, z);
+      lagg(cyl(0.028, 0.028, 0.36 + T), mat.skorsten, x, p.y + (0.36 - T) / 2, z).receiveShadow = false;
       lagg(cyl(0.003, 0.055, 0.04, 12), mat.skorsten, x, p.y + 0.39, z, null, false);
     };
     huv(G.kok[0], G.kok[1], 0.08, 0.42);
@@ -2090,7 +2091,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       fot(p, x, z, 0.62, mat.skorsten);
       lagg(cyl(R * 1.25, R * 2.4, 0.16, 24), mat.skorsten, x, p.y + 0.08, z, null, false);   // genomföring
       lagg(cyl(R * 1.18, R * 1.18, 0.025, 24), mat.skorsten, x, p.y + 0.2, z, null, false);  // regnkrage
-      lagg(cyl(R, R, top - p.y + T, 24), mat.skorsten, x, (top + p.y - T) / 2, z);
+      lagg(cyl(R, R, top - p.y + T, 24), mat.skorsten, x, (top + p.y - T) / 2, z).receiveShadow = false;
       lagg(cyl(R * 1.06, R * 1.06, 0.03, 24), mat.skorsten, x, top - 0.02, z, null, false);  // skarvband vid mynningen
       for (let k = 0; k < 3; k++) { const a = k * 2.094; lagg(new THREE.BoxGeometry(0.012, 0.09, 0.012), mat.skorsten, x + Math.cos(a) * R * 0.95, top + 0.045, z + Math.sin(a) * R * 0.95, null, false); }
       lagg(cyl(0.005, R * 2.1, 0.09, 24), mat.skorsten, x, top + 0.13, z);                    // regnhuven
@@ -2973,7 +2974,10 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   window.addEventListener('pointerup', () => { pekarNere = false; }, { passive: true });
   window.addEventListener('pointercancel', () => { pekarNere = false; }, { passive: true });
   // inget bygge medan man drar, zoomar eller kameran åker
-  const inneVanta = () => byggT < 1 || rivGrupp || aka || pekarNere || zoomMal !== null || tona.pa || gang.glid || performance.now() - inmatSist < 400;
+  // de första sekunderna (laddningen, introts åkning och första varvet) är till för en mjuk start: inredningen
+  // byggs först därefter (det tunga bygget och dess shaders gav hack medan huset började snurra)
+  const startLugn = performance.now() + 9000;
+  const inneVanta = () => performance.now() < startLugn || byggT < 1 || rivGrupp || aka || pekarNere || zoomMal !== null || tona.pa || gang.glid || performance.now() - inmatSist < 400;
   function planeraInne(ms) {
     clearTimeout(inneTimer);
     inneBygge = null;
@@ -7021,6 +7025,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (k < 1 && dukB && dukH) { if (vyGlid.px) { kamera.setViewOffset(dukB, dukH, vyGlid.px * (1 - e), 0, dukB, dukH); vyGlid.satt = true; } begarRender(); }
     else { if (vyGlid.satt) kamera.clearViewOffset(); vyGlid = null; }
   }
+  let storlekRitar = false;
   function storlek() {
     if (storlekFryst) return;
     const r = duk.getBoundingClientRect();
