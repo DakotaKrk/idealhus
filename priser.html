@@ -25,11 +25,13 @@
 
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" as="image" href="images/stamning/gront-hus-skog.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20261010l">
-    <link rel="stylesheet" href="design.css?v=20261124a">
-    <link rel="stylesheet" href="nya-hus.css?v=20261120a">
-    <script src="premium.js?v=20261124a" defer></script>
+    <link rel="preload" as="image" href="images/stamning/gront-hus-skog.webp" imagesrcset="images/stamning/gront-hus-skog-600.webp 600w, images/stamning/gront-hus-skog.webp 1200w" imagesizes="(max-width: 900px) 94vw, 52vw" fetchpriority="high">
+    <link rel="stylesheet" href="styles.css?v=20261126g">
+    <link rel="stylesheet" href="design.css?v=20261126r">
+    <link rel="stylesheet" href="nya-hus.css?v=20261126g">
+    <link rel="stylesheet" href="ios.css?v=20261126r">
+    <script src="logga.js?v=20261126r"></script>
+    <script src="premium.js?v=20261126r" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script type="application/ld+json">
     {
@@ -108,11 +110,12 @@
     </script>
   </head>
   <body>
+    <script>if(window.LegohusLogga&&LegohusLogga.intro)LegohusLogga.intro()</script>
     <a class="skip" href="#innehall">Hoppa till innehållet</a>
     <header class="site-header">
       <div class="site-header__inner">
         <a class="logo" href="./" aria-label="Till Legohus Stockholms startsida">
-          <img class="logo__svg" src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
+          <img class="logo__svg" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
         </a>
 
         <nav class="main-nav" aria-label="Huvudmeny">
@@ -128,7 +131,7 @@
                   <em>Kupa 30, inom attefallsmåtten</em>
                 </span>
               </a>
-              <p class="main-nav__modeller"><a href="kupa-30.html">Kupa 30</a></p>
+              <p class="main-nav__modeller"><a href="kupa-30.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 30<small class="meny-pris">från 299 500 kr</small></a></p>
               <a href="fritidshus.html">
                 <img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async">
                 <span>
@@ -136,7 +139,7 @@
                   <em>Fyra modeller, 40–90 m²</em>
                 </span>
               </a>
-              <p class="main-nav__modeller"><a href="kupa-40.html">Kupa 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+              <p class="main-nav__modeller"><a href="kupa-40.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 40<small class="meny-pris">från 450 000 kr</small></a><a href="sadel-50.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Sadel 50<small class="meny-pris">från 495 000 kr</small></a><a href="pulpet-70.html" title="Priset räknas fram i en offert">Pulpet 70<small class="meny-pris">På förfrågan</small></a><a href="sadel-90.html" title="Priset räknas fram i en offert">Sadel 90<small class="meny-pris">På förfrågan</small></a></p>
               <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
               <a href="proffs.html">
                 <img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async">
@@ -185,7 +188,7 @@
             <a class="mmeny__kort" href="attefallshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-attefallshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Attefallshus</strong><em>Kupa 30, inom attefallsmåtten</em></span></a>
             <a class="mmeny__kort" href="fritidshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Fritidshus</strong><em>Fyra modeller, 40–90 m²</em></span></a>
             </div>
-            <p class="mmeny__modeller"><a href="kupa-30.html">Kupa 30</a><a href="kupa-40.html">Kupa 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+            <p class="mmeny__modeller"><a href="kupa-30.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 30<small class="meny-pris">från 299 500 kr</small></a><a href="kupa-40.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 40<small class="meny-pris">från 450 000 kr</small></a><a href="sadel-50.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Sadel 50<small class="meny-pris">från 495 000 kr</small></a><a href="pulpet-70.html" title="Priset räknas fram i en offert">Pulpet 70<small class="meny-pris">På förfrågan</small></a><a href="sadel-90.html" title="Priset räknas fram i en offert">Sadel 90<small class="meny-pris">På förfrågan</small></a></p>
             <p class="mmeny__etikett">För dig som bygger</p>
             <a class="mmeny__kort mmeny__kort--bred" href="proffs.html"><span class="mmeny__bild"><img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Proffs</strong><em>Väggar, block och moduler</em></span></a>
             <p class="mmeny__etikett">Bra att veta</p>
@@ -206,14 +209,14 @@
     <main id="innehall">
       <section class="subpage-hero helbild">
         <span class="ih-kant" aria-hidden="true"></span>
-        <img class="helbild__bak" src="images/stamning/gront-hus-skog.webp" width="900" height="600" alt="" aria-hidden="true" decoding="async">
-        <img class="subpage-hero__image" src="images/stamning/gront-hus-skog.webp" width="900" height="600" fetchpriority="high" decoding="async" alt="Mörkt småhus med stort glasparti i en tallskog, illustration">
+        <img class="helbild__bak" src="images/stamning/gront-hus-skog.webp" srcset="images/stamning/gront-hus-skog-600.webp 600w, images/stamning/gront-hus-skog.webp 1200w" sizes="(max-width: 900px) 94vw, 52vw" width="900" height="600" alt="" aria-hidden="true" decoding="async">
+        <img class="subpage-hero__image" src="images/stamning/gront-hus-skog.webp" srcset="images/stamning/gront-hus-skog-600.webp 600w, images/stamning/gront-hus-skog.webp 1200w" sizes="(max-width: 900px) 94vw, 52vw" width="900" height="600" fetchpriority="high" decoding="async" alt="Grönt trähus med rött plåttak i en glänta i skogen, illustration">
         <div class="hoffert" aria-hidden="true">
           <div class="hoffert__huvud"><span class="hoffert__typ">Offert · utkast</span><span class="hoffert__stampel">Post för post</span></div>
           <ul class="hoffert__lista">
             <li style="--i:0"><i class="hoffert__bock"></i><span>Ritningar och underlag</span><em>Ingår</em></li>
             <li style="--i:1"><i class="hoffert__bock"></i><span>Själva huset</span><em>Ingår</em></li>
-            <li style="--i:2"><i class="hoffert__bock"></i><span>Leverans till tomten</span><em>Ingår</em></li>
+            <li style="--i:2"><i class="hoffert__bock"></i><span>Leverans till tomten</span><em>Enligt zon</em></li>
             <li style="--i:3"><i class="hoffert__bock"></i><span>Montage</span><em>Ingår</em></li>
             <li style="--i:4"><i class="hoffert__bock"></i><span>Slutbesiktning</span><em>Ingår</em></li>
             <li class="hoffert__andra" style="--i:5"><i class="hoffert__prick"></i><span>Grund, el och VA, mark, avgifter</span><em>Hos andra</em></li>
@@ -225,9 +228,9 @@
           <div class="subpage-hero__content">
             <p class="ih-etikett ih-etikett--ljus sidtopp__etikett">Priser och offert</p>
             <h1 class="subpage-hero__title">Vad kostar ett hus från oss?</h1>
-            <p class="subpage-hero__meta">Ett hus från oss har inget listpris – priset sätts i en offert efter din tomt. Här ser du vad som ingår, vad som tillkommer och vad som styr summan.</p>
+            <p class="subpage-hero__meta">Här ser du paketpriserna för våra hus, vad som ingår, vad som tillkommer och vad som styr summan. Det exakta priset för din tomt får du i en offert.</p>
             <div class="subpage-hero__actions">
-              <a class="hero__link hero__link--solid" href="#ingar">Se vad som ingår</a>
+              <a class="hero__link hero__link--solid" href="#paketpriser">Se paketpriserna</a>
               <a class="hero__link" href="#kontakt">Begär offert</a>
             </div>
             <div class="heroscen heroscen--kategori heroscen--inne" aria-hidden="true">
@@ -237,13 +240,79 @@
               </div>
               <div class="heroscen__chip heroscen__chip--b">
                 <span class="heroscen__ikon"><svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5"/></svg></span>
-                <p><strong>Hus, leverans, montage</strong><span>ingår i vår del</span></p>
+                <p><strong>Hus och montage</strong><span>ingår i vår del, frakten enligt zon</span></p>
               </div>
             </div>
           </div>
         </div>
 
       </section>
+
+      <!-- paketpris -->
+      <section class="prisoversikt ih-sektion" id="paketpriser" aria-labelledby="paketpriser-rubrik">
+        <div class="ih-inre">
+          <div class="ih-huvud prisoversikt__huvud">
+            <p class="ih-etikett">Paketpriser</p>
+            <h2 class="ih-rubrik" id="paketpriser-rubrik">Fyra paket, <em>fem hus.</em></h2>
+            <p class="ih-ingress">Varje hus finns som prefab stomme, klimatskal, nyckelfärdig modul och nyckelfärdig modul med entreprenad. På husets sida ser du vad som ingår i varje paket.</p>
+          </div>
+          <div class="prisoversikt__grid">
+            <article class="prisoversikt__kort">
+              <div class="prisoversikt__topp"><h3 class="prisoversikt__namn"><a href="kupa-30.html#paket">Kupa 30</a></h3><p class="prisoversikt__meta">30 m² · Attefallshus</p></div>
+              <ul class="prisoversikt__rader">
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">1</span>Prefab stomme</span><span class="prisoversikt__belopp"><b>299 500 kr</b><em>Spara upp till 113 400 kr</em></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">2</span>Klimatskal</span><span class="prisoversikt__belopp"><b>595 000 kr</b><em>Spara upp till 186 900 kr</em></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">3</span>Nyckelfärdig modul</span><span class="prisoversikt__belopp"><b>995 000 kr</b><em>Spara upp till 139 900 kr</em></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">4</span>Nyckelfärdig modul + entreprenad</span><span class="prisoversikt__belopp"><b><small>från </small>1 250 000 kr</b><em>Spara upp till 164 895 kr</em></span></li>
+              </ul>
+              <a class="prisoversikt__lank" href="kupa-30.html#paket">Se vad som ingår<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </article>
+            <article class="prisoversikt__kort">
+              <div class="prisoversikt__topp"><h3 class="prisoversikt__namn"><a href="kupa-40.html#paket">Kupa 40</a></h3><p class="prisoversikt__meta">40 m² · Fritidshus</p></div>
+              <ul class="prisoversikt__rader">
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">1</span>Prefab stomme</span><span class="prisoversikt__belopp"><b>450 000 kr</b><em>Spara upp till 72 900 kr</em></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">2</span>Klimatskal</span><span class="prisoversikt__belopp"><b>795 000 kr</b><em>Spara upp till 199 900 kr</em></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">3</span>Nyckelfärdig modul</span><span class="prisoversikt__belopp"><b>1 250 000 kr</b><em>Spara upp till 214 900 kr</em></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">4</span>Nyckelfärdig modul + entreprenad</span><span class="prisoversikt__belopp"><b><small>från </small>1 525 000 kr</b><em>Spara upp till 254 895 kr</em></span></li>
+              </ul>
+              <a class="prisoversikt__lank" href="kupa-40.html#paket">Se vad som ingår<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </article>
+            <article class="prisoversikt__kort">
+              <div class="prisoversikt__topp"><h3 class="prisoversikt__namn"><a href="sadel-50.html#paket">Sadel 50</a></h3><p class="prisoversikt__meta">50 m² · Fritidshus</p></div>
+              <ul class="prisoversikt__rader">
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">1</span>Prefab stomme</span><span class="prisoversikt__belopp"><b>495 000 kr</b><em>Spara upp till 130 900 kr</em></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">2</span>Klimatskal</span><span class="prisoversikt__belopp"><b>850 000 kr</b><em>Spara upp till 246 900 kr</em></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">3</span>Nyckelfärdig modul</span><span class="prisoversikt__belopp"><b>1 325 000 kr</b><em>Spara upp till 264 900 kr</em></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">4</span>Nyckelfärdig modul + entreprenad</span><span class="prisoversikt__belopp"><b><small>från </small>1 695 000 kr</b><em>Spara upp till 294 895 kr</em></span></li>
+              </ul>
+              <a class="prisoversikt__lank" href="sadel-50.html#paket">Se vad som ingår<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </article>
+            <article class="prisoversikt__kort prisoversikt__kort--fraga">
+              <div class="prisoversikt__topp"><h3 class="prisoversikt__namn"><a href="pulpet-70.html#paket">Pulpet 70</a></h3><p class="prisoversikt__meta">70 m² · Fritidshus</p></div>
+              <ul class="prisoversikt__rader">
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">1</span>Prefab stomme</span><span class="prisoversikt__belopp"><b class="prisoversikt__fraga">På förfrågan</b></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">2</span>Klimatskal</span><span class="prisoversikt__belopp"><b class="prisoversikt__fraga">På förfrågan</b></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">3</span>Nyckelfärdig modul</span><span class="prisoversikt__belopp"><b class="prisoversikt__fraga">På förfrågan</b></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">4</span>Nyckelfärdig modul + entreprenad</span><span class="prisoversikt__belopp"><b class="prisoversikt__fraga">På förfrågan</b></span></li>
+              </ul>
+              <div class="prisoversikt__knappar"><a class="ih-knapp ih-knapp--virke ih-knapp--liten" href="kontakt.html?modell=pulpet-70">Begär offert</a><a class="prisoversikt__lank" href="pulpet-70.html#paket">Se paketen<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+            </article>
+            <article class="prisoversikt__kort prisoversikt__kort--fraga">
+              <div class="prisoversikt__topp"><h3 class="prisoversikt__namn"><a href="sadel-90.html#paket">Sadel 90</a></h3><p class="prisoversikt__meta">90 m² · Fritidshus</p></div>
+              <ul class="prisoversikt__rader">
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">1</span>Prefab stomme</span><span class="prisoversikt__belopp"><b class="prisoversikt__fraga">På förfrågan</b></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">2</span>Klimatskal</span><span class="prisoversikt__belopp"><b class="prisoversikt__fraga">På förfrågan</b></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">3</span>Nyckelfärdig modul</span><span class="prisoversikt__belopp"><b class="prisoversikt__fraga">På förfrågan</b></span></li>
+                <li><span class="prisoversikt__paket"><span class="paketsteg" aria-hidden="true">4</span>Nyckelfärdig modul + entreprenad</span><span class="prisoversikt__belopp"><b class="prisoversikt__fraga">På förfrågan</b></span></li>
+              </ul>
+              <div class="prisoversikt__knappar"><a class="ih-knapp ih-knapp--virke ih-knapp--liten" href="kontakt.html?modell=sadel-90">Begär offert</a><a class="prisoversikt__lank" href="sadel-90.html#paket">Se paketen<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+            </article>
+          </div>
+          <p class="paketlista__not">Priserna gäller inkl. moms. Leverans till tomten tillkommer enligt zon. Nyckelfärdig modul + entreprenad: slutpriset fastställs efter platsbesök och offert.</p>
+          <p class="paketlista__not paketlista__not--tyst">Besparingen jämför vårt pris med vad motsvarande hus kostar hos en annan husleverantör.</p>
+        </div>
+      </section>
+      <!-- /paketpris -->
 
       <section class="prisskala" id="prisnivaer" aria-labelledby="prisskala-rubrik">
         <div class="prisskala__inner">
@@ -253,8 +322,8 @@
               <h2 class="prisskala__titel" id="prisskala-rubrik">Välj storlek.<br> <em>Se vad som gäller.</em></h2>
             </div>
             <p class="prisskala__text">
-              Ett hus har inget listpris som en bil. Dra i reglaget så ser du
-              vilka hus som ligger närmast och vad som gäller för lov.
+              Dra i reglaget så ser du vilka hus som ligger närmast
+              och vad som gäller för lov.
             </p>
           </div>
 
@@ -280,11 +349,11 @@
                 </div>
               </div>
               <div class="prisskala__modeller" role="group" aria-label="Våra hus på skalan">
-                <button class="prisskala__modell" type="button" data-yta="30"><img src="images/stamning/gratt-hus-skargard-600.webp" width="192" height="144" alt="Kupa 30, illustration" loading="lazy" decoding="async"><span><b>Kupa 30</b><small>30 m² · Attefallshus</small></span></button>
-                <button class="prisskala__modell" type="button" data-yta="40"><img src="images/stamning/gront-hus-skog-600.webp" width="192" height="144" alt="Kupa 40, illustration" loading="lazy" decoding="async"><span><b>Kupa 40</b><small>40 m² · Fritidshus</small></span></button>
-                <button class="prisskala__modell" type="button" data-yta="50"><img src="images/stamning/gront-hus-solnedgang-600.webp" width="192" height="144" alt="Sadel 50, illustration" loading="lazy" decoding="async"><span><b>Sadel 50</b><small>50 m² · Fritidshus</small></span></button>
-                <button class="prisskala__modell" type="button" data-yta="70"><img src="images/stamning/svart-hus-tradgard-600.webp" width="192" height="144" alt="Pulpet 70, illustration" loading="lazy" decoding="async"><span><b>Pulpet 70</b><small>70 m² · Fritidshus</small></span></button>
-                <button class="prisskala__modell" type="button" data-yta="90"><img src="images/stamning/gront-hus-sadel90-600.webp" width="192" height="144" alt="Sadel 90, illustration" loading="lazy" decoding="async"><span><b>Sadel 90</b><small>90 m² · Fritidshus</small></span></button>
+                <button class="prisskala__modell" type="button" data-yta="30"><img src="images/stamning/gratt-hus-skargard-600.webp" srcset="images/stamning/gratt-hus-skargard-300.webp 300w, images/stamning/gratt-hus-skargard-600.webp 600w" sizes="192px" width="192" height="144" alt="" loading="lazy" decoding="async"><span><b>Kupa 30</b><small>30 m² · Attefallshus</small></span></button>
+                <button class="prisskala__modell" type="button" data-yta="40"><img src="images/stamning/gront-hus-skog-600.webp" srcset="images/stamning/gront-hus-skog-300.webp 300w, images/stamning/gront-hus-skog-600.webp 600w" sizes="192px" width="192" height="144" alt="" loading="lazy" decoding="async"><span><b>Kupa 40</b><small>40 m² · Fritidshus</small></span></button>
+                <button class="prisskala__modell" type="button" data-yta="50"><img src="images/stamning/gront-hus-solnedgang-600.webp" srcset="images/stamning/gront-hus-solnedgang-300.webp 300w, images/stamning/gront-hus-solnedgang-600.webp 600w" sizes="192px" width="192" height="144" alt="" loading="lazy" decoding="async"><span><b>Sadel 50</b><small>50 m² · Fritidshus</small></span></button>
+                <button class="prisskala__modell" type="button" data-yta="70"><img src="images/stamning/svart-hus-tradgard-600.webp" srcset="images/stamning/svart-hus-tradgard-300.webp 300w, images/stamning/svart-hus-tradgard-600.webp 600w" sizes="192px" width="192" height="144" alt="" loading="lazy" decoding="async"><span><b>Pulpet 70</b><small>70 m² · Fritidshus</small></span></button>
+                <button class="prisskala__modell" type="button" data-yta="90"><img src="images/stamning/gront-hus-sadel90-600.webp" srcset="images/stamning/gront-hus-sadel90-300.webp 300w, images/stamning/gront-hus-sadel90-600.webp 600w" sizes="192px" width="192" height="144" alt="" loading="lazy" decoding="async"><span><b>Sadel 90</b><small>90 m² · Fritidshus</small></span></button>
               </div>
             </div>
 
@@ -311,15 +380,15 @@
                 <div>
                   <dt>Närmast i storlek</dt>
                   <dd class="prisskala__chips">
-                  <a class="prisskala__chip" data-yta="30" href="kupa-30.html" hidden>Kupa 30<span>30 m²</span></a>
-                  <a class="prisskala__chip" data-yta="40" href="kupa-40.html" hidden>Kupa 40<span>40 m²</span></a>
-                  <a class="prisskala__chip" data-yta="50" href="sadel-50.html" hidden>Sadel 50<span>50 m²</span></a>
-                  <a class="prisskala__chip" data-yta="70" href="pulpet-70.html" hidden>Pulpet 70<span>70 m²</span></a>
-                  <a class="prisskala__chip" data-yta="90" href="sadel-90.html" hidden>Sadel 90<span>90 m²</span></a>
+                  <a class="prisskala__chip" data-yta="30" data-pris="från 299 500 kr" href="kupa-30.html" hidden>Kupa 30<span>30 m²</span></a>
+                  <a class="prisskala__chip" data-yta="40" data-pris="från 450 000 kr" href="kupa-40.html" hidden>Kupa 40<span>40 m²</span></a>
+                  <a class="prisskala__chip" data-yta="50" data-pris="från 495 000 kr" href="sadel-50.html" hidden>Sadel 50<span>50 m²</span></a>
+                  <a class="prisskala__chip" data-yta="70" data-pris="På förfrågan" href="pulpet-70.html" hidden>Pulpet 70<span>70 m²</span></a>
+                  <a class="prisskala__chip" data-yta="90" data-pris="På förfrågan" href="sadel-90.html" hidden>Sadel 90<span>90 m²</span></a>
                   </dd>
                 </div>
                 <div><dt>Lov</dt><dd class="prisskala__lov" data-yta-lov data-zon="a">Inget bygglov inom måtten</dd></div>
-                <div><dt>Pris</dt><dd>I offerten, post för post</dd></div>
+                <div><dt>Pris</dt><dd class="prisskala__pris" data-yta-pris title="Lägsta paketpris (Prefab stomme), inkl. moms">från 299 500 kr</dd></div>
               </dl>
             </div>
           </div>
@@ -334,7 +403,7 @@
               <p class="pkort__modeller"><span>Kupa 30</span></p>
               <dl class="pkort__rader">
                 <div><dt>Lov</dt><dd>Inget bygglov inom måtten</dd></div>
-                <div><dt>Pris</dt><dd><strong>Pris i offert</strong></dd></div>
+                <div><dt>Pris</dt><dd><strong>Från 299 500 kr</strong></dd></div>
               </dl>
               <a class="pkort__lank" href="attefallshus.html">Se modellerna<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
             </div>
@@ -348,7 +417,7 @@
               <p class="pkort__modeller"><span>Kupa 40</span> <span>Sadel 50</span> <span>Pulpet 70</span> <span>Sadel 90</span></p>
               <dl class="pkort__rader">
                 <div><dt>Lov</dt><dd>Kräver bygglov</dd></div>
-                <div><dt>Pris</dt><dd><strong>Pris i offert</strong></dd></div>
+                <div><dt>Pris</dt><dd><strong>Från 450 000 kr</strong></dd></div>
               </dl>
               <a class="pkort__lank" href="fritidshus.html">Se modellerna<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
             </div>
@@ -428,12 +497,12 @@
                 </li>
                 <li class="orad orad--ingar">
                   <span class="orad__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M3 17h13l3-4h2v4M5 17v2M17 17v2M3 13h11V7H3z"/></svg></span>
-                  <span class="orad__text"><strong>Leverans till tomten</strong><span>Transport och lyft på plats, när framkomligheten är löst.</span></span>
-                  <span class="orad__status orad__status--ingar">Ingår</span>
+                  <span class="orad__text"><strong>Leverans till tomten</strong><span>Transport och lyft på plats, när framkomligheten är löst. Frakten prissätts enligt zon.</span></span>
+                  <span class="orad__status orad__status--ingar">Enligt zon</span>
                 </li>
                 <li class="orad orad--ingar">
                   <span class="orad__ikon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M14.5 5.5l4 4-9 9H5.5v-4zM12.5 7.5l4 4"/></svg></span>
-                  <span class="orad__text"><strong>Montage</strong><span>Huset monteras av oss när det kommit fram.</span></span>
+                  <span class="orad__text"><strong>Montage</strong><span>Huset monteras av oss när det kommit fram. Ingår från paketet Klimatskal.</span></span>
                   <span class="orad__status orad__status--ingar">Ingår</span>
                 </li>
                 <li class="orad orad--ingar">
@@ -448,12 +517,12 @@
               <ul class="offert__lista">
                 <li class="orad orad--andra" data-post="grund">
                   <span class="orad__prick" aria-hidden="true"></span>
-                  <span class="orad__text"><strong>Grunden</strong><span>Plattan eller plintarna ska vara gjutna innan huset kommer. Vad grunden kostar beror på marken.</span><em class="orad__svar" data-svar></em></span>
+                  <span class="orad__text"><strong>Grunden</strong><span>Plattan eller plintarna ska vara gjutna innan huset kommer. Vad grunden kostar beror på marken. Ingår i paketet med entreprenad.</span><em class="orad__svar" data-svar></em></span>
                   <span class="orad__status" data-status>Räkna med</span>
                 </li>
                 <li class="orad orad--andra" data-post="va">
                   <span class="orad__prick" aria-hidden="true"></span>
-                  <span class="orad__text"><strong>El, vatten och avlopp</strong><span>Framdragning till huset, och anslutningsavgifter till kommunen eller föreningen.</span><em class="orad__svar" data-svar></em></span>
+                  <span class="orad__text"><strong>El, vatten och avlopp</strong><span>Framdragning till huset, och anslutningsavgifter till kommunen eller föreningen. Inkopplingen ingår i paketet med entreprenad.</span><em class="orad__svar" data-svar></em></span>
                   <span class="orad__status" data-status>Räkna med</span>
                 </li>
                 <li class="orad orad--andra" data-post="mark">
@@ -705,7 +774,7 @@
     <footer class="site-footer">
       <div class="site-footer__inner">
         <div>
-          <img class="site-footer__logo" src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
+          <img class="site-footer__logo" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
           <p class="site-footer__text">
             Attefallshus, fritidshus och byggelement, byggda under tak i Sverige.
           </p>

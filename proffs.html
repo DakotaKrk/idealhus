@@ -23,13 +23,15 @@
     <meta property="og:url" content="https://legohusstockholm.se/proffs.html">
     <meta name="twitter:card" content="summary_large_image">
 
-    <link rel="preload" as="image" href="images/foto/lyft-modul.webp?v=2" fetchpriority="high">
+    <link rel="preload" as="image" href="images/fabrik/vaggelement-montage-1200.webp" imagesrcset="images/fabrik/vaggelement-montage-800.webp 800w, images/fabrik/vaggelement-montage-1200.webp 1200w" imagesizes="(max-width: 900px) 92vw, 50vw" fetchpriority="high">
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20261010l">
-    <link rel="stylesheet" href="design.css?v=20261124a">
-    <link rel="stylesheet" href="nya-hus.css?v=20261120a">
-    <script src="premium.js?v=20261124a" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261126g">
+    <link rel="stylesheet" href="design.css?v=20261126r">
+    <link rel="stylesheet" href="nya-hus.css?v=20261126g">
+    <link rel="stylesheet" href="ios.css?v=20261126r">
+    <script src="logga.js?v=20261126r"></script>
+    <script src="premium.js?v=20261126r" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script type="application/ld+json">
     {
@@ -108,11 +110,12 @@
     </script>
   </head>
   <body>
+    <script>if(window.LegohusLogga&&LegohusLogga.intro)LegohusLogga.intro()</script>
     <a class="skip" href="#innehall">Hoppa till innehållet</a>
     <header class="site-header">
       <div class="site-header__inner">
         <a class="logo" href="./" aria-label="Till Legohus Stockholms startsida">
-          <img class="logo__svg" src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
+          <img class="logo__svg" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
         </a>
 
         <nav class="main-nav" aria-label="Huvudmeny">
@@ -128,7 +131,7 @@
                   <em>Kupa 30, inom attefallsmåtten</em>
                 </span>
               </a>
-              <p class="main-nav__modeller"><a href="kupa-30.html">Kupa 30</a></p>
+              <p class="main-nav__modeller"><a href="kupa-30.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 30<small class="meny-pris">från 299 500 kr</small></a></p>
               <a href="fritidshus.html">
                 <img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async">
                 <span>
@@ -136,7 +139,7 @@
                   <em>Fyra modeller, 40–90 m²</em>
                 </span>
               </a>
-              <p class="main-nav__modeller"><a href="kupa-40.html">Kupa 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+              <p class="main-nav__modeller"><a href="kupa-40.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 40<small class="meny-pris">från 450 000 kr</small></a><a href="sadel-50.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Sadel 50<small class="meny-pris">från 495 000 kr</small></a><a href="pulpet-70.html" title="Priset räknas fram i en offert">Pulpet 70<small class="meny-pris">På förfrågan</small></a><a href="sadel-90.html" title="Priset räknas fram i en offert">Sadel 90<small class="meny-pris">På förfrågan</small></a></p>
               <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
               <a href="proffs.html">
                 <img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async">
@@ -185,7 +188,7 @@
             <a class="mmeny__kort" href="attefallshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-attefallshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Attefallshus</strong><em>Kupa 30, inom attefallsmåtten</em></span></a>
             <a class="mmeny__kort" href="fritidshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Fritidshus</strong><em>Fyra modeller, 40–90 m²</em></span></a>
             </div>
-            <p class="mmeny__modeller"><a href="kupa-30.html">Kupa 30</a><a href="kupa-40.html">Kupa 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+            <p class="mmeny__modeller"><a href="kupa-30.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 30<small class="meny-pris">från 299 500 kr</small></a><a href="kupa-40.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 40<small class="meny-pris">från 450 000 kr</small></a><a href="sadel-50.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Sadel 50<small class="meny-pris">från 495 000 kr</small></a><a href="pulpet-70.html" title="Priset räknas fram i en offert">Pulpet 70<small class="meny-pris">På förfrågan</small></a><a href="sadel-90.html" title="Priset räknas fram i en offert">Sadel 90<small class="meny-pris">På förfrågan</small></a></p>
             <p class="mmeny__etikett">För dig som bygger</p>
             <a class="mmeny__kort mmeny__kort--bred" href="proffs.html"><span class="mmeny__bild"><img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Proffs</strong><em>Väggar, block och moduler</em></span></a>
             <p class="mmeny__etikett">Bra att veta</p>
@@ -223,7 +226,7 @@
           </div>
 
           <figure class="pf-topp__bild">
-            <span class="pf-topp__ram"><img src="images/foto/lyft-modul.webp?v=2" srcset="images/foto/lyft-modul-600.webp?v=2 600w, images/foto/lyft-modul.webp?v=2 1058w" sizes="(max-width: 900px) 92vw, 50vw" width="1058" height="992" fetchpriority="high" decoding="async" alt="En husmodul lyfts med kran på plats vid vattnet medan montörer tar emot den, illustration"></span>
+            <span class="pf-topp__ram"><img src="images/fabrik/vaggelement-montage-1200.webp" srcset="images/fabrik/vaggelement-montage-800.webp 800w, images/fabrik/vaggelement-montage-1200.webp 1200w" sizes="(max-width: 900px) 92vw, 50vw" width="1200" height="900" fetchpriority="high" decoding="async" alt="Väggelement med monterade fönster stagas upp i fabriken"></span>
             <div class="hoffert hoffert--leverans" aria-hidden="true">
               <div class="hoffert__huvud"><span class="hoffert__typ">Leverans · utkast</span><span class="hoffert__stampel">Under tak</span></div>
               <ul class="hoffert__lista">
@@ -269,7 +272,7 @@
                 </button>
               </div>
               <div class="pf-lev__delar">
-              <article class="pf-lev__del vald" id="utfackningsvaggar" role="tabpanel" aria-labelledby="pf-flik-vagg" data-del="vagg">
+              <section class="pf-lev__del vald" id="utfackningsvaggar" role="tabpanel" aria-labelledby="pf-flik-vagg" data-del="vagg">
                 <h3>Utfackningsväggar</h3>
                 <p>Färdiga väggblock som levereras till byggarbetsplatsen och monteras på plats. Isolering, ångspärr och beklädnad är gjorda under tak, i jämn temperatur och fuktnivå.</p>
                 <ul class="pf-lev__fakta">
@@ -279,8 +282,8 @@
                     <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Mått och utförande enligt er ritning</li>
                 </ul>
                 <a class="pf-lev__knapp" href="mailto:info@legohusstockholm.se?subject=F%C3%B6rfr%C3%A5gan%20byggelement%20%E2%80%93%20Utfackningsv%C3%A4ggar&amp;body=F%C3%B6retag%3A%0AProjekt%20och%20ort%3A%0AUngef%C3%A4rliga%20m%C3%A4ngder%3A%0A%C3%96nskad%20leverans%3A%0A%0ABifoga%20g%C3%A4rna%20ritningar.">Fråga om utfackningsväggar<svg class="pf-pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14" pathLength="1"/><path d="M13 6l6 6-6 6" pathLength="1"/></svg></a>
-              </article>
-              <article class="pf-lev__del" id="husblock" role="tabpanel" aria-labelledby="pf-flik-block" data-del="block">
+              </section>
+              <section class="pf-lev__del" id="husblock" role="tabpanel" aria-labelledby="pf-flik-block" data-del="block">
                 <h3>Husblock</h3>
                 <p>Större volymelement där stomme, ytskikt och delar av installationerna sitter på plats redan vid leverans. Blocken lyfts på plats och kopplas samman.</p>
                 <ul class="pf-lev__fakta">
@@ -290,8 +293,8 @@
                     <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Anpassas efter projektets mått</li>
                 </ul>
                 <a class="pf-lev__knapp" href="mailto:info@legohusstockholm.se?subject=F%C3%B6rfr%C3%A5gan%20byggelement%20%E2%80%93%20Husblock&amp;body=F%C3%B6retag%3A%0AProjekt%20och%20ort%3A%0AUngef%C3%A4rliga%20m%C3%A4ngder%3A%0A%C3%96nskad%20leverans%3A%0A%0ABifoga%20g%C3%A4rna%20ritningar.">Fråga om husblock<svg class="pf-pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14" pathLength="1"/><path d="M13 6l6 6-6 6" pathLength="1"/></svg></a>
-              </article>
-              <article class="pf-lev__del" id="moduler" role="tabpanel" aria-labelledby="pf-flik-modul" data-del="modul">
+              </section>
+              <section class="pf-lev__del" id="moduler" role="tabpanel" aria-labelledby="pf-flik-modul" data-del="modul">
                 <h3>Moduler</h3>
                 <p>Kompletta enheter för projekt där samma utförande upprepas: personalbostäder, uthyrning eller etappvis utbyggnad. Modulerna kan flyttas och byggas om.</p>
                 <ul class="pf-lev__fakta">
@@ -301,7 +304,7 @@
                     <li><svg class="pf-bock" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Levereras klara att koppla in</li>
                 </ul>
                 <a class="pf-lev__knapp" href="mailto:info@legohusstockholm.se?subject=F%C3%B6rfr%C3%A5gan%20byggelement%20%E2%80%93%20Moduler&amp;body=F%C3%B6retag%3A%0AProjekt%20och%20ort%3A%0AUngef%C3%A4rliga%20m%C3%A4ngder%3A%0A%C3%96nskad%20leverans%3A%0A%0ABifoga%20g%C3%A4rna%20ritningar.">Fråga om moduler<svg class="pf-pil" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14" pathLength="1"/><path d="M13 6l6 6-6 6" pathLength="1"/></svg></a>
-              </article>
+              </section>
               </div>
             </div>
 
@@ -323,55 +326,55 @@
       <section class="pf-band" aria-labelledby="pf-band-titel">
         <div class="pf-band__huvud">
           <div>
-            <p class="ih-etikett">Bildgalleri</p>
-            <h2 class="pf-band__titel" id="pf-band-titel">Våra hus i bild.</h2>
+            <p class="ih-etikett">Riktiga bilder</p>
+            <h2 class="pf-band__titel" id="pf-band-titel">Från vår fabrik.</h2>
           </div>
           <div class="pf-band__pilar">
             <button type="button" data-pf-band="-1" aria-label="Föregående bild"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
             <button type="button" data-pf-band="1" aria-label="Nästa bild"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
           </div>
         </div>
-        <ol class="pf-band__rad" tabindex="0" aria-label="Bilder på våra hus">
-            <li class="pf-band__bild" style="--ar:1.500">
+        <ol class="pf-band__rad" tabindex="0" aria-label="Bilder från vår fabrik">
+            <li class="pf-band__bild" style="--ar:0.750">
               <figure>
-                <span class="pf-band__ram"><img src="images/stamning/gront-hus-skog.webp" width="900" height="600" loading="lazy" decoding="async" alt="Mörkt småhus med stort glasparti i en tallskog, illustration" draggable="false"></span>
-                <figcaption><span>01</span>I tallskogen</figcaption>
+                <span class="pf-band__ram"><img src="images/fabrik/hall-1600.webp" srcset="images/fabrik/hall-800.webp 600w, images/fabrik/hall-1600.webp 1200w" sizes="(max-width: 900px) 82vw, 560px" width="1200" height="1600" loading="lazy" decoding="async" draggable="false" alt="Den ljusa produktionshallen där Legohus väggelement byggs inomhus"></span>
+                <figcaption><span>01</span>Hallen</figcaption>
               </figure>
             </li>
-            <li class="pf-band__bild" style="--ar:1.500">
+            <li class="pf-band__bild" style="--ar:0.750">
               <figure>
-                <span class="pf-band__ram"><img src="images/generated-interior-01.webp" width="1536" height="1024" loading="lazy" decoding="async" alt="Ljust vardagsrum med soffa och stora fönster mot skogen" draggable="false"></span>
-                <figcaption><span>02</span>Ljust och luftigt inuti</figcaption>
+                <span class="pf-band__ram"><img src="images/fabrik/vaggelement-produktion-1600.webp" srcset="images/fabrik/vaggelement-produktion-800.webp 600w, images/fabrik/vaggelement-produktion-1600.webp 1200w" sizes="(max-width: 900px) 82vw, 560px" width="1200" height="1600" loading="lazy" decoding="async" draggable="false" alt="Väggelement byggs på arbetsbord i Legohus fabrik, med personalen i bakgrunden"></span>
+                <figcaption><span>02</span>Väggarna byggs på bord</figcaption>
               </figure>
             </li>
-            <li class="pf-band__bild" style="--ar:1.500">
+            <li class="pf-band__bild" style="--ar:1.579">
               <figure>
-                <span class="pf-band__ram"><img src="images/stamning/gratt-hus-skargard.webp" width="1920" height="1280" loading="lazy" decoding="async" alt="Mörkt attefallshus med altan på klipporna vid vattnet, illustration" draggable="false"></span>
-                <figcaption><span>03</span>Attefallshus vid vattnet</figcaption>
+                <span class="pf-band__ram"><img src="images/fabrik/team-i-hallen-1200.webp" srcset="images/fabrik/team-i-hallen-800.webp 800w, images/fabrik/team-i-hallen-1200.webp 1200w" sizes="(max-width: 900px) 82vw, 560px" width="1200" height="760" loading="lazy" decoding="async" draggable="false" alt="Legohus personal i hjälmar och varselvästar i fabrikshallen"></span>
+                <figcaption><span>03</span>Personalen vid byggborden</figcaption>
               </figure>
             </li>
-            <li class="pf-band__bild" style="--ar:1.500">
+            <li class="pf-band__bild" style="--ar:0.750">
               <figure>
-                <span class="pf-band__ram"><img src="images/stamning/svart-hus-fjallet.webp" width="1536" height="1024" loading="lazy" decoding="async" alt="Småhus i trä med altan på en sommaräng, illustration" draggable="false"></span>
-                <figcaption><span>04</span>På sommarängen</figcaption>
+                <span class="pf-band__ram"><img src="images/fabrik/vaggstommar-1600.webp" srcset="images/fabrik/vaggstommar-800.webp 600w, images/fabrik/vaggstommar-1600.webp 1200w" sizes="(max-width: 900px) 82vw, 560px" width="1200" height="1600" loading="lazy" decoding="async" draggable="false" alt="Färdiga väggstommar i trä står lutade i Legohus fabrik"></span>
+                <figcaption><span>04</span>Färdiga stommar</figcaption>
               </figure>
             </li>
-            <li class="pf-band__bild" style="--ar:1.500">
+            <li class="pf-band__bild" style="--ar:1.333">
               <figure>
-                <span class="pf-band__ram"><img src="images/stamning/gront-hus-solnedgang.webp" width="780" height="520" loading="lazy" decoding="async" alt="Svart hus med sadeltak på en klippa vid vattnet, illustration" draggable="false"></span>
-                <figcaption><span>05</span>Sadeltak på klippan</figcaption>
+                <span class="pf-band__ram"><img src="images/fabrik/vaggelement-montage-1200.webp" srcset="images/fabrik/vaggelement-montage-800.webp 800w, images/fabrik/vaggelement-montage-1200.webp 1200w" sizes="(max-width: 900px) 82vw, 560px" width="1200" height="900" loading="lazy" decoding="async" draggable="false" alt="Väggelement med monterade fönster stagas upp i fabriken"></span>
+                <figcaption><span>05</span>Fönstren monteras</figcaption>
               </figure>
             </li>
-            <li class="pf-band__bild" style="--ar:1.500">
+            <li class="pf-band__bild" style="--ar:1.412">
               <figure>
-                <span class="pf-band__ram"><img src="images/stamning/gratt-hus-skargard.webp" width="1536" height="1024" loading="lazy" decoding="async" alt="Svart småhus med stora glaspartier på en klippa vid havet, illustration" draggable="false"></span>
-                <figcaption><span>06</span>Glaspartier mot havet</figcaption>
+                <span class="pf-band__ram"><img src="images/fabrik/vaggar-med-fonster-1200.webp" srcset="images/fabrik/vaggar-med-fonster-800.webp 800w, images/fabrik/vaggar-med-fonster-1200.webp 1200w" sizes="(max-width: 900px) 82vw, 560px" width="1200" height="850" loading="lazy" decoding="async" draggable="false" alt="Röda ytterväggar med vita spröjsade fönster, färdiga i Legohus fabrik"></span>
+                <figcaption><span>06</span>Klara ytterväggar</figcaption>
               </figure>
             </li>
-            <li class="pf-band__bild" style="--ar:1.500">
+            <li class="pf-band__bild" style="--ar:0.750">
               <figure>
-                <span class="pf-band__ram"><img src="images/stamning/svart-hus-tradgard.webp" width="900" height="600" loading="lazy" decoding="async" alt="Småhus i trä med uteplats i en grönskande trädgård, illustration" draggable="false"></span>
-                <figcaption><span>07</span>I trädgården</figcaption>
+                <span class="pf-band__ram"><img src="images/fabrik/vaggelement-lager-1600.webp" srcset="images/fabrik/vaggelement-lager-800.webp 600w, images/fabrik/vaggelement-lager-1600.webp 1200w" sizes="(max-width: 900px) 82vw, 560px" width="1200" height="1600" loading="lazy" decoding="async" draggable="false" alt="Inplastade väggelement står på rad i Legohus lager, redo att levereras"></span>
+                <figcaption><span>07</span>Inplastat och redo för leverans</figcaption>
               </figure>
             </li>
         </ol>
@@ -379,7 +382,7 @@
       </section>
 
       <section class="pf-tak">
-        <img class="pf-tak__bild" src="images/stamning/gront-hus-solnedgang.webp" width="780" height="520" loading="lazy" decoding="async" alt="">
+        <img class="pf-tak__bild" src="images/fabrik/hall-langsida-1600.webp" width="900" height="1600" loading="lazy" decoding="async" alt="">
         <div class="pf-tak__inre">
           <div class="pf-tak__ord">
             <p class="ih-etikett ih-etikett--ljus">Varför element</p>
@@ -389,6 +392,7 @@
               och fuktnivå. Kvar på byggarbetsplatsen är att lyfta, koppla samman
               och täta – och det går fort.
             </p>
+            <figure class="pf-tak__foto"><img class="fb-bild" src="images/fabrik/vaggelement-rod-1600.webp" srcset="images/fabrik/vaggelement-rod-800.webp 600w, images/fabrik/vaggelement-rod-1600.webp 1200w" sizes="(max-width: 900px) 92vw, 480px" width="1200" height="1600" loading="lazy" decoding="async" style="--pos: 50% 42%" alt="Färdigt rött väggelement med fönsteröppningar, klart för leverans"><figcaption>Ett ytterväggselement, färdigt i vår fabrik.</figcaption></figure>
           </div>
 
           <div class="pf-flytt" data-pf-in>
@@ -589,7 +593,7 @@
     <footer class="site-footer">
       <div class="site-footer__inner">
         <div>
-          <img class="site-footer__logo" src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
+          <img class="site-footer__logo" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
           <p class="site-footer__text">
             Attefallshus, fritidshus och byggelement, byggda under tak i Sverige.
           </p>

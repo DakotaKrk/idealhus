@@ -407,7 +407,7 @@ MAIN = f'''    <main id="innehall">
           </div>
 
           <figure class="pf-topp__bild">
-            <span class="pf-topp__ram"><img src="images/foto/lyft-modul.webp?v=2" srcset="images/foto/lyft-modul-600.webp?v=2 600w, images/foto/lyft-modul.webp?v=2 1058w" sizes="(max-width: 900px) 92vw, 50vw" width="1058" height="992" fetchpriority="high" decoding="async" alt="En husmodul lyfts med kran på plats vid vattnet medan montörer tar emot den, illustration"></span>
+            <span class="pf-topp__ram"><img src="images/fabrik/vaggelement-montage-1200.webp" srcset="images/fabrik/vaggelement-montage-800.webp 800w, images/fabrik/vaggelement-montage-1200.webp 1200w" sizes="(max-width: 900px) 92vw, 50vw" width="1200" height="900" fetchpriority="high" decoding="async" alt="Väggelement med monterade fönster stagas upp i fabriken"></span>
           </figure>
         </div>
       </section>
@@ -470,6 +470,7 @@ MAIN = f'''    <main id="innehall">
               och fuktnivå. Kvar på byggarbetsplatsen är att lyfta, koppla samman
               och täta – och det går fort.
             </p>
+            <figure class="pf-tak__foto"><img class="fb-bild" src="images/fabrik/vaggelement-rod-1600.webp" srcset="images/fabrik/vaggelement-rod-800.webp 600w, images/fabrik/vaggelement-rod-1600.webp 1200w" sizes="(max-width: 900px) 92vw, 480px" width="1200" height="1600" loading="lazy" decoding="async" style="--pos: 50% 42%" alt="Färdigt rött väggelement med fönsteröppningar, klart för leverans"><figcaption>Ett ytterväggselement, färdigt i vår fabrik.</figcaption></figure>
           </div>
 
           <div class="pf-flytt" data-pf-in>

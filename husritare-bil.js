@@ -20,6 +20,8 @@
 //   bil.dispose()
 import { GLTFLoader } from './vendor/three/addons/loaders/GLTFLoader.js';
 
+// kör en generator (stegvist bygge) till slutet i ett svep
+const korG = g => { let st; while (!(st = g.next()).done); return st.value; };
 const NEON = '#3dff8a';
 let LADDA = null;                         // delas mellan alla anrop: modellerna hämtas en gång per sida
 function hamtaModeller() {
@@ -140,6 +142,13 @@ export function skapaBil(THREE, rot, VU) {
     if (TEX[namn]) return TEX[namn];
     const [c, m] = markTex[namn]();
     const t = spara(new THREE.CanvasTexture(c)); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1 / m, 1 / m); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+    // plattorna byts lat mot fotograferad betongmarksten (Poly Haven concrete_pavers, CC0; images/tex/marksten):
+    // samma textur och samma uv i världen, bara bilden byts (ingen omkompilering). 1,5 m per ruta (stenarna 22 × 11 cm).
+    if (namn === 'plattor' && !/[?&]husfoto=0/.test(location.search)) {
+      const byt = () => { const i = new Image(); i.onload = () => { t.image = i; t.repeat.set(1 / 1.5, 1 / 1.5); t.anisotropy = 8; t.needsUpdate = true; window.dispatchEvent(new Event('husritare:nytt')); }; i.src = 'images/tex/marksten-diff.webp'; };
+      const sen = () => (window.requestIdleCallback ? requestIdleCallback(byt, { timeout: 4000 }) : setTimeout(byt, 2500));
+      if (document.readyState === 'complete') setTimeout(sen, 2500); else addEventListener('load', () => setTimeout(sen, 2500), { once: true });
+    }
     return (TEX[namn] = t);
   }
   const ytMat = {};
@@ -190,15 +199,19 @@ export function skapaBil(THREE, rot, VU) {
   // tar slut, blir brant eller tar ett steg) rundas den av som en kvarts cirkel. Rutorna (mörkt i färg-
   // kartan ovanför bröstlinjen) får bara snö där de är nästan plana (glastaket) och en liten vall i
   // nederkanten, där snön glidit ned mot motorhuven/bagageluckan. Sidorna och dörrarna är för branta.
-  function snoTacke(obj) {
+  const snoTacke = obj => korG(snoTackeG(obj));
+  // stegvis (yield): en del av bilen eller några rader i rutnätet per steg (se forberedG)
+  function* snoTackeG(obj) {
     obj.updateMatrixWorld(true);
     const b = new THREE.Box3().setFromObject(obj);
     const D = 0.02, x0 = b.min.x + 0.02, z0 = b.min.z - 0.02;
     const NX = Math.ceil((b.max.x - 0.02 - x0) / D) + 1, NZ = Math.ceil((b.max.z + 0.02 - z0) / D) + 1, N = NX * NZ;
     const Y = new Float32Array(N).fill(-1), NY = new Float32Array(N), NXs = new Float32Array(N), NZs = new Float32Array(N), MORK = new Uint8Array(N);
     const a = V(), bb = V(), c = V(), na = V(), nb = V(), nc = V();
-    obj.traverse(o => {
-      if (!o.isMesh) return;
+    const delar = []; obj.traverse(o => delar.push(o));
+    for (const o of delar) {
+      if (!o.isMesh) continue;
+      yield;
       const g = o.geometry, pos = g.attributes.position, nor = g.attributes.normal, uv = g.attributes.uv, idx = g.index;
       const nm = new THREE.Matrix3().getNormalMatrix(o.matrixWorld);
       // färgkartan i liten upplösning: mörkt = ruta/plast
@@ -214,6 +227,7 @@ export function skapaBil(THREE, rot, VU) {
       }
       const T = idx ? idx.count / 3 : pos.count / 3;
       for (let t = 0; t < T; t++) {
+        if (!(t & 2047)) yield;
         const ia = idx ? idx.getX(t * 3) : t * 3, ib = idx ? idx.getX(t * 3 + 1) : t * 3 + 1, ic = idx ? idx.getX(t * 3 + 2) : t * 3 + 2;
         a.fromArray(P, ia * 3); bb.fromArray(P, ib * 3); c.fromArray(P, ic * 3);
         const ux = bb.x - a.x, uz = bb.z - a.z, vx = c.x - a.x, vz = c.z - a.z, det = ux * vz - uz * vx;
@@ -239,12 +253,13 @@ export function skapaBil(THREE, rot, VU) {
           } else MORK[k] = 0;
         }
       }
-    });
+    }
     const id = (i, j) => i * NZ + j, in_ = (i, j) => i >= 0 && j >= 0 && i < NX && j < NZ;
     // mörk andel i omgivningen (7 × 7 rutor): rutor och strålkastare är stora mörka fält, fogar och
     // lister smala; speglingar i glaset (ljusare i kartan) fylls i. Mjuk övergång, inga trappsteg.
     const GF = new Float32Array(N);
     for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) {
+      if (!j && !(i & 15)) yield;
       const k = id(i, j); if (Y[k] < 0.78) continue;
       let n = 0, m = 0;
       for (let di = -3; di <= 3; di++) for (let dj = -3; dj <= 3; dj++) if (in_(i + di, j + dj)) { n++; m += MORK[id(i + di, j + dj)]; }
@@ -263,6 +278,7 @@ export function skapaBil(THREE, rot, VU) {
     // vallen i rutornas nederkant: följ lutningen nedåt till lacken (motorhuv/baklucka) inom 16 cm
     const vall = new Float32Array(N);
     for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) {
+      if (!j && !(i & 15)) yield;
       const k = id(i, j);
       if (Y[k] < 0.95 || !glas(k) || NY[k] < 0.4 || NY[k] > 0.96) continue;
       const h = Math.hypot(NXs[k], NZs[k]) || 1, dx = NXs[k] / h, dz = NZs[k] / h;
@@ -293,6 +309,7 @@ export function skapaBil(THREE, rot, VU) {
     // avstånd till kanten (m): kant = ingen snö, utanför bilen eller ett steg > 5 cm
     const avst = new Float32Array(N).fill(9);
     for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) {
+      if (!j && !(i & 15)) yield;
       const k = id(i, j);
       if (djup[k] <= 0.004) { avst[k] = 0; continue; }
       for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
@@ -303,6 +320,7 @@ export function skapaBil(THREE, rot, VU) {
     const R2 = Math.SQRT2 * D;
     for (let v = 0; v < 2; v++) {
       for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) {
+      if (!j && !(i & 15)) yield;
         const k = id(i, j); if (!avst[k]) continue;
         for (const [di, dj, w] of v ? [[1, 0, D], [0, 1, D], [1, 1, R2], [1, -1, R2]] : [[-1, 0, D], [0, -1, D], [-1, -1, R2], [-1, 1, R2]]) {
           if (in_(i + di, j + dj)) avst[k] = Math.min(avst[k], avst[id(i + di, j + dj)] + w);
@@ -317,6 +335,7 @@ export function skapaBil(THREE, rot, VU) {
     const brus = (x, z) => 0.5 + 0.25 * Math.sin(x * 5.1 + Math.sin(z * 3.7) * 1.3) + 0.25 * Math.sin(z * 7.3 - x * 2.2 + 1.7);
     const ut = new Float32Array(N);
     for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) {
+      if (!j && !(i & 15)) yield;
       const k = id(i, j); if (djup[k] <= 0.004 || !avst[k]) continue;
       const R = Math.min(0.16, 0.08 + djup[k]), t = Math.min(1, avst[k] / R);
       ut[k] = djup[k] * t * t * (3 - 2 * t) * (0.82 + 0.3 * brus(x0 + i * D, z0 + j * D));
@@ -326,6 +345,7 @@ export function skapaBil(THREE, rot, VU) {
     // ytan: höjdfältet + snön, något utjämnat (karossens buckliga yta syns inte genom snön)
     const P = [], UV = [], SN = [], I = [], nr = new Int32Array(N).fill(-1);
     for (let i = 0; i < NX; i++) for (let j = 0; j < NZ; j++) {
+      if (!j && !(i & 15)) yield;
       const k = id(i, j); if (Y[k] < 0.78) continue;
       let s = 0, w = 0;
       for (let di = -3; di <= 3; di++) for (let dj = -3; dj <= 3; dj++) {
@@ -373,6 +393,154 @@ export function skapaBil(THREE, rot, VU) {
   // så att de inte flimrar) och utjämnad normalkarta; klarlacken speglar scenens miljö (scene.environment).
   // Vinter: lätt frost på rutorna (uFrost). (Modellen är bantad till 100 000 hörn; märken som i originalet.)
   const BU = { uFrost: { value: 0 } };
+  // Rutorna och baklyktorna som hörnattribut (aGlas, aBak 0–1) i stället för per bildpunkt: färgkartan
+  // är ett lapptäcke där rutorna har ljusa, inbakade speglingar och lapparnas kanter är taggiga, så glaset
+  // blev fläckigt (ljusa fläckar räknades som lack) med sågtandad kant, och baklyktorna (mörkt röda)
+  // räknades som ruta eller plast. Färgen provas per hörn, hörnen svetsas ihop över sömmarna och fälten
+  // sluts på ytan (vidga, krymp: speglingarna fylls) och mjukas upp. Normalerna räknas om för glaset och
+  // bakpartiet (modellen är bucklig och har trasiga normaler där, se pcaNormaler).
+  function glasKarta(g, map) {
+    const P = g.attributes.position, N = g.attributes.normal, UV = g.attributes.uv, n = P.count, ut = new Float32Array(n), utB = new Float32Array(n), utR = new Float32Array(n);
+    g.setAttribute('aGlas', new THREE.BufferAttribute(ut, 1)); g.setAttribute('aBak', new THREE.BufferAttribute(utB, 1)); g.setAttribute('aRen', new THREE.BufferAttribute(utR, 1));
+    if (!N || !UV || !g.index || !map || !map.image) return;
+    const W = 512; let pix;
+    try { const cv = document.createElement('canvas'); cv.width = cv.height = W; const cg = cv.getContext('2d', { willReadFrequently: true }); cg.drawImage(map.image, 0, 0, W, W); pix = cg.getImageData(0, 0, W, W).data; } catch (e) { return; }
+    // svetsa hörnen (sömmarna i UV delar annars ytan)
+    const id = new Int32Array(n), nyc = new Map(); let m = 0;
+    for (let i = 0; i < n; i++) {
+      const k = ((Math.round(P.getX(i) * 2000) + 16384) * 32768 + Math.round(P.getY(i) * 2000) + 16384) * 32768 + Math.round(P.getZ(i) * 2000) + 16384;   // ½ mm, tal som nyckel (snabbare än text)
+      let v = nyc.get(k); if (v === undefined) { v = m++; nyc.set(k, v); } id[i] = v;
+    }
+    // grannar (CSR)
+    const I = g.index.array, gr = new Int32Array(m + 1);
+    for (let t = 0; t < I.length; t++) gr[id[I[t]] + 1] += 2;
+    for (let i = 0; i < m; i++) gr[i + 1] += gr[i];
+    const nb = new Int32Array(gr[m]), fyll = gr.slice(0, m);
+    for (let t = 0; t < I.length; t += 3) for (let e = 0; e < 3; e++) {
+      const a = id[I[t + e]], b = id[I[t + (e + 1) % 3]], c = id[I[t + (e + 2) % 3]];
+      nb[fyll[a]++] = b; nb[fyll[a]++] = c;
+    }
+    const mj = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+    const pw = new Float32Array(m * 3);
+    for (let i = 0; i < n; i++) { const k = id[i] * 3; pw[k] = P.getX(i); pw[k + 1] = P.getY(i); pw[k + 2] = P.getZ(i); }
+    // mörkhet och rödhet per svetsad punkt (kartan i sRGB, som skuggarens bMork/bRod)
+    const mork = new Float32Array(m), rodh = new Float32Array(m), cnt = new Float32Array(m);
+    for (let i = 0; i < n; i++) {
+      let u = UV.getX(i), v = UV.getY(i); u -= Math.floor(u); v -= Math.floor(v);
+      const o4 = (Math.min(W - 1, (v * W) | 0) * W + Math.min(W - 1, (u * W) | 0)) * 4;
+      const r = pix[o4] / 255, gg = pix[o4 + 1] / 255, b = pix[o4 + 2] / 255, L = (r + gg + b) / 3;
+      const k = id[i];
+      mork[k] += (1 - mj(0.2, 0.42, L)) * (1 - mj(0.15, 0.25, r - Math.min(gg, b))); rodh[k] += mj(0.04, 0.12, r - Math.max(gg, b)); cnt[k]++;
+    }
+    for (let k = 0; k < m; k++) { mork[k] /= cnt[k] || 1; rodh[k] /= cnt[k] || 1; }
+    // sluten yta: utjämna, vidga, krymp, utjämna (bara inom zonen)
+    const sluta = (f, zon, ggr, t0 = 0.42, t1 = 0.58) => {
+      let t2 = new Float32Array(m);
+      const varv = (op, n2) => {
+        for (let s = 0; s < n2; s++) {
+          for (let k = 0; k < m; k++) {
+            if (!zon[k] && !f[k]) { t2[k] = 0; continue; }
+            let x = f[k], sum = f[k], c = 1;
+            for (let j = gr[k]; j < gr[k + 1]; j++) { const y = f[nb[j]]; if (op === 0) x = Math.max(x, y); else if (op === 1) x = Math.min(x, y); else { sum += y; c++; } }
+            t2[k] = op === 2 ? sum / c : x;
+          }
+          const tt = f; f = t2; t2 = tt;
+        }
+      };
+      varv(2, 2); varv(0, ggr); varv(1, ggr); varv(2, 3);
+      for (let k = 0; k < m; k++) f[k] = mj(t0, t1, f[k]) * zon[k];
+      varv(2, 1);
+      return f;
+    };
+    // baklyktorna: mörkt eller rött i bandet på bakpartiet (z < −1,75, y 0,8–1,1)
+    const zB = new Float32Array(m), zG = new Float32Array(m);
+    for (let k = 0; k < m; k++) {
+      const y = pw[k * 3 + 1], z = pw[k * 3 + 2];
+      zB[k] = mj(1.72, 1.82, -z) * mj(0.78, 0.83, y) * (1 - mj(1.08, 1.12, y)) * mj(0.5, 0.6, Math.abs(pw[k * 3]));   // lyktorna sitter i hörnen (|x| > 0,55)
+      const ax = Math.abs(pw[k * 3]);
+      zG[k] = mj(0.93, 1.0, y) * (1 - mj(0.9, 0.96, ax) * mj(0.22, 0.3, z) * (1 - mj(0.74, 0.82, z)))   // inte backspeglarna (|x| > 0,9 vid z 0,3–0,8)
+        * (1 - mj(1.88, 1.96, -z) * (1 - mj(1.13, 1.17, y)));                                        // eller bakluckan under bakrutan
+    }
+    let fb = new Float32Array(m); for (let k = 0; k < m; k++) fb[k] = Math.max(mork[k], rodh[k]) * zB[k];
+    fb = sluta(fb, zB, 2);
+    // rutorna: mörkt ovanför bröstlinjen, inte baklyktorna
+    let f = new Float32Array(m); for (let k = 0; k < m; k++) f[k] = mork[k] * zG[k] * (1 - fb[k]);
+    f = sluta(f, zG, GLAS_SLUT, 0.32, 0.44);   // lågt tröskelvärde: takkantens och stolparnas halvljusa remsor blir svart glaslist, inte grå smet
+    for (let k = 0; k < m; k++) f[k] *= 1 - fb[k];
+    // bakpartiets lack under lyktorna (bakluckans nederdel, stötfångarens överdel): kartan har smuts och
+    // gråa fläckar där; räknas som ren lack (aRen), så att bakpartiet blir rent vitt
+    const ren = new Float32Array(m);
+    for (let k = 0; k < m; k++) { const y = pw[k * 3 + 1], z = pw[k * 3 + 2]; ren[k] = mj(1.7, 1.8, -z) * mj(0.5, 0.55, y) * (1 - mj(0.8, 0.86, y)) * (1 - fb[k]) * (1 - f[k]); }   // under bakluckans kant (fogen och märket ovanför behålls)
+    for (let i = 0; i < n; i++) { ut[i] = f[id[i]]; utB[i] = fb[id[i]]; utR[i] = ren[id[i]]; }
+    // bakpartiets lack (baklucka, stötfångare; inte hjulen eller rutan): egna normaler med mindre omkrets
+    const wB = new Float32Array(m);
+    for (let k = 0; k < m; k++) {
+      const x = pw[k * 3], y = pw[k * 3 + 1], z = pw[k * 3 + 2];
+      const hj = Math.abs(x) > 0.5 ? mj(0.46, 0.56, Math.hypot(y - 0.4, z + 1.573)) : 1;
+      wB[k] = mj(1.45, 1.7, -z) * mj(0.42, 0.52, y) * hj * (1 - f[k]);
+    }
+    pcaNormaler(N, id, pw, f, 0.2, 0.1);
+    pcaNormaler(N, id, pw, wB, 0.12, 0.06);
+    N.needsUpdate = true;
+  }
+  // Normaler ur ytans form i stället för modellens (trasiga: fotogrammetri med veckade trianglar på samma
+  // höjd, innertak 2–3 cm under glaset, normaler som pekar framåt eller nedåt; utjämning och ytviktning
+  // räddar det inte). Ett plan anpassas till punkterna med vikt w > 0 inom R (minsta egenvektorn av
+  // kovariansen, i 5 cm celler, gaussvikt sig) och vänds utåt från kupén; hörnen blandas mot det med w.
+  // Planet bryr sig inte om veck och lager, så speglingarna blir lugna och följer bara den verkliga välvningen.
+  function pcaNormaler(N, id, pw, w, R, sig) {
+    const n = N.count, m = w.length, C = 0.05, cellNr = new Map(), cm = [];   // per cell: vikt, Σp (3), Σpp (6)
+    const ckey = (i, j, q) => (i + 512) * 1048576 + (j + 512) * 1024 + (q + 512);
+    for (let k = 0; k < m; k++) {
+      if (w[k] < 0.05) continue;
+      const x = pw[k * 3], y = pw[k * 3 + 1], z = pw[k * 3 + 2], key = ckey(Math.floor(x / C), Math.floor(y / C), Math.floor(z / C));
+      let c = cellNr.get(key); if (c === undefined) { c = cm.length / 10; cellNr.set(key, c); for (let e = 0; e < 10; e++) cm.push(0); }
+      const o = c * 10; cm[o]++; cm[o + 1] += x; cm[o + 2] += y; cm[o + 3] += z;
+      cm[o + 4] += x * x; cm[o + 5] += x * y; cm[o + 6] += x * z; cm[o + 7] += y * y; cm[o + 8] += y * z; cm[o + 9] += z * z;
+    }
+    const NC = cm.length / 10; if (!NC) return;
+    const cc = new Float32Array(NC * 3), cn = new Float32Array(NC * 3), S = new Float64Array(10);
+    const ut3 = (x, y, z) => { const lz = Math.min(1.0, Math.max(-1.0, z)); return [x, y - 0.6, z - lz]; };   // utåt: från kupéns mittlinje
+    for (let c = 0; c < NC; c++) { const o = c * 10; cc[c * 3] = cm[o + 1] / cm[o]; cc[c * 3 + 1] = cm[o + 2] / cm[o]; cc[c * 3 + 2] = cm[o + 3] / cm[o]; }
+    const RC = Math.ceil(R / C), s2 = 2 * sig * sig;
+    for (let c = 0; c < NC; c++) {
+      const px = cc[c * 3], py = cc[c * 3 + 1], pz = cc[c * 3 + 2];
+      S.fill(0);
+      const i0 = Math.floor(px / C), j0 = Math.floor(py / C), q0 = Math.floor(pz / C);
+      for (let i = i0 - RC; i <= i0 + RC; i++) for (let j = j0 - RC; j <= j0 + RC; j++) for (let q = q0 - RC; q <= q0 + RC; q++) {
+        const d = cellNr.get(ckey(i, j, q)); if (d === undefined) continue;
+        const dx = cc[d * 3] - px, dy = cc[d * 3 + 1] - py, dz = cc[d * 3 + 2] - pz, d2 = dx * dx + dy * dy + dz * dz; if (d2 > R * R) continue;
+        const ww = Math.exp(-d2 / s2), o = d * 10;
+        for (let e = 0; e < 10; e++) S[e] += cm[o + e] * ww;
+      }
+      const W = S[0], mx = S[1] / W, my = S[2] / W, mz = S[3] / W;
+      const a = S[4] / W - mx * mx, b = S[5] / W - mx * my, e2 = S[6] / W - mx * mz, d = S[7] / W - my * my, ee = S[8] / W - my * mz, ff = S[9] / W - mz * mz;
+      // minsta egenvektorn: potensmetod på (spår·I − K), start i utåtriktningen
+      const tr = a + d + ff; let [vx, vy, vz] = ut3(px, py, pz);
+      for (let it = 0; it < 24; it++) {
+        const nx2 = (tr - a) * vx - b * vy - e2 * vz, ny3 = -b * vx + (tr - d) * vy - ee * vz, nz2 = -e2 * vx - ee * vy + (tr - ff) * vz;
+        const l = Math.hypot(nx2, ny3, nz2) || 1; vx = nx2 / l; vy = ny3 / l; vz = nz2 / l;
+      }
+      const [ox, oy, oz] = ut3(px, py, pz); if (vx * ox + vy * oy + vz * oz < 0) { vx = -vx; vy = -vy; vz = -vz; }
+      cn[c * 3] = vx; cn[c * 3 + 1] = vy; cn[c * 3 + 2] = vz;
+    }
+    // hörnen: mjukt medel av cellerna runt om (σ 4 cm), blandat med vikten mot modellens normal
+    for (let i = 0; i < n; i++) {
+      const k = id[i], wk = w[k]; if (wk <= 0) continue;
+      const px = pw[k * 3], py = pw[k * 3 + 1], pz = pw[k * 3 + 2];
+      const i0 = Math.floor(px / C), j0 = Math.floor(py / C), q0 = Math.floor(pz / C);
+      let sx = 0, sy = 0, sz = 0;
+      for (let ii = i0 - 1; ii <= i0 + 1; ii++) for (let j = j0 - 1; j <= j0 + 1; j++) for (let q = q0 - 1; q <= q0 + 1; q++) {
+        const d = cellNr.get(ckey(ii, j, q)); if (d === undefined) continue;
+        const dx = cc[d * 3] - px, dy = cc[d * 3 + 1] - py, dz = cc[d * 3 + 2] - pz, ww = Math.exp(-(dx * dx + dy * dy + dz * dz) / (2 * 0.04 * 0.04));
+        sx += cn[d * 3] * ww; sy += cn[d * 3 + 1] * ww; sz += cn[d * 3 + 2] * ww;
+      }
+      const ls = Math.hypot(sx, sy, sz); if (!ls) continue;
+      let x = N.getX(i) + wk * (sx / ls - N.getX(i)), y = N.getY(i) + wk * (sy / ls - N.getY(i)), z = N.getZ(i) + wk * (sz / ls - N.getZ(i));
+      const l = Math.hypot(x, y, z) || 1; N.setXYZ(i, x / l, y / l, z / l);
+    }
+  }
+  const GLAS_SLUT = 5;
   function lackeraBil(obj) {
     obj.traverse(o => {
       if (!o.isMesh) return;
@@ -382,6 +550,7 @@ export function skapaBil(THREE, rot, VU) {
       // normalkartan är nästan helt slät och metall/råhetskartan brus: de används inte och släpps
       // (2048² + 1024² som aldrig laddas upp till grafikkortet)
       for (const t of ['normalMap', 'roughnessMap', 'metalnessMap']) if (s[t]) { const bild = s[t].image; s[t].dispose(); if (bild && bild.close) bild.close(); }
+      glasKarta(o.geometry, s.map);
       const m = bilMat(s.map);
       s.dispose(); o.material = m;
       skrap.push(o.geometry);
@@ -398,8 +567,8 @@ export function skapaBil(THREE, rot, VU) {
       if (R) m.customProgramCacheKey = () => 'elbil-rigg-' + (R.hjul ? 'h' : 'k') + (R.forbi ? 'f' : '');
       m.onBeforeCompile = sh => {
         sh.uniforms.uFrost = BU.uFrost; sh.uniforms.uNatt = VU.uNatt;
-        sh.vertexShader = 'varying vec3 vBP;\nvarying vec3 vBN;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vBP = position; vBN = normal;');
-        sh.fragmentShader = 'varying vec3 vBP;\nvarying vec3 vBN;\nuniform float uFrost;\nuniform float uNatt;\nfloat bHash( vec3 p ) { p = fract( p * 0.3183099 + 0.1 ); p *= 17.0; return fract( p.x * p.y * p.z * ( p.x + p.y + p.z ) ); }\n' + sh.fragmentShader
+        sh.vertexShader = 'attribute float aGlas;\nattribute float aBak;\nattribute float aRen;\nvarying float vGl;\nvarying float vBk;\nvarying float vRn;\nvarying vec3 vBP;\nvarying vec3 vBN;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vBP = position; vBN = normal; vGl = aGlas; vBk = aBak; vRn = aRen;');
+        sh.fragmentShader = 'varying float vGl;\nvarying float vBk;\nvarying float vRn;\nvarying vec3 vBP;\nvarying vec3 vBN;\nuniform float uFrost;\nuniform float uNatt;\nfloat bHash( vec3 p ) { p = fract( p * 0.3183099 + 0.1 ); p *= 17.0; return fract( p.x * p.y * p.z * ( p.x + p.y + p.z ) ); }\n' + sh.fragmentShader
           .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
           // rensning: registreringsskylten blank och inga märken på huv och baklucka (kartans kludd målas över med lack)
           float bSkylt = step( vBP.z, -2.0 ) * ( 1.0 - smoothstep( 0.308, 0.326, abs( vBP.x - 0.005 ) ) ) * ( 1.0 - smoothstep( 0.062, 0.076, abs( vBP.y - 0.7235 ) ) );
@@ -409,7 +578,7 @@ export function skapaBil(THREE, rot, VU) {
           float bL = dot( bS, vec3( 0.3333 ) );
           float bSat = max( bS.r, max( bS.g, bS.b ) ) - min( bS.r, min( bS.g, bS.b ) );
           float bRod = smoothstep( 0.12, 0.26, bSat ) * step( bS.g * 1.25, bS.r );
-          float bMork = ( 1.0 - smoothstep( 0.13, 0.26, bL ) ) * ( 1.0 - bRod );
+          float bMork = ( 1.0 - smoothstep( 0.13, 0.26, bL ) ) * ( 1.0 - bRod ) * ( 1.0 - clamp( vRn, 0.0, 1.0 ) );
           // hjulen (uppmätt i modellen): nav i x = ±0,83, y = 0,40, z = 1,446 fram / −1,573 bak, ytterradie 0,405,
           // fälgradie 0,315. Framhjulen står styrda 22,8° – de mäts i hjulets egen ram (bT längs axeln, utåt +).
           float bSx = vBP.x < 0.0 ? -1.0 : 1.0;
@@ -428,17 +597,19 @@ export function skapaBil(THREE, rot, VU) {
           float bEj = ( 1.0 - bHjul ) * ( 1.0 - bHus );
           float bHog = smoothstep( 0.93, 1.0, vBP.y );
           float bLykta = bMork * ( 1.0 - bHog ) * bEj * smoothstep( 1.55, 1.7, vBP.z ) * smoothstep( 0.6, 0.66, vBP.y );   // strålkastarnas glas
-          float bGlas = bMork * bHog * bEj;
-          float bPlast = bMork * ( 1.0 - bHog ) * bEj - bLykta + bHus;
-          float bLack = ( 1.0 - bMork ) * ( 1.0 - bRod ) * bEj;
-          float bRodU = bRod * bEj;                                      // lyktor och reflexer (bromsoken hör till fälgen)
+          float bGlas = clamp( vGl, 0.0, 1.0 ) * bEj;                        // rutorna: hörnattributet aGlas (glasKarta), inte kartans fläckar
+          float bBakL = clamp( vBk, 0.0, 1.0 ) * bEj;                       // baklyktorna: hörnattributet aBak (glasKarta)
+          float bPlast = ( bMork * ( 1.0 - bGlas ) * bEj - bLykta ) * ( 1.0 - bBakL ) + bHus;
+          float bLack = ( 1.0 - bMork ) * ( 1.0 - bRod ) * bEj * ( 1.0 - bGlas ) * ( 1.0 - bBakL );
+          float bRodU = bRod * bEj * ( 1.0 - bGlas ) * ( 1.0 - bBakL );                   // reflexer och sidomarkering (bromsoken hör till fälgen)
+          float bLed = smoothstep( 0.03, 0.16, bS.r - max( bS.g, bS.b ) );                // lysdioderna: de rödaste delarna i lyktan
           // glimmer: små flingor (3 mm) som bara syns nära; på avstånd jämnas de ut till ett lugnt glitter
           float bFw = length( fwidth( vBP ) );
           float bFl = bHash( floor( vBP * 330.0 ) );
           float bNara = 1.0 - smoothstep( 0.0006, 0.0025, bFw );
           // lacken: en jämn pärlvit ton; kartans fläckar och inbakade skuggor dämpas till 14 % (buckligt annars)
           float bLum = clamp( dot( diffuseColor.rgb, vec3( 0.3333 ) ) / 0.46, 0.0, 1.0 );
-          vec3 bLackF = vec3( 0.525, 0.535, 0.55 ) * mix( bLum, 1.0, 0.86 );
+          vec3 bLackF = vec3( 0.525, 0.535, 0.55 ) * mix( bLum, 1.0, mix( 0.86, 0.93, clamp( vRn, 0.0, 1.0 ) ) );
           diffuseColor.rgb = mix( diffuseColor.rgb, bLackF, bLack );
           // fälgen: ren metall i två toner (kartans ljusa ekrar mot mörka mellanrum, utan inbakade blänk),
           // röda bromsok och en slät navkåpa
@@ -453,16 +624,19 @@ export function skapaBil(THREE, rot, VU) {
           float bSida = smoothstep( 0.325, 0.34, bR ) * ( 1.0 - smoothstep( 0.37, 0.39, bR ) );
           diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.02, 0.02, 0.022 ) + 0.006 * bSida, bDack );
           diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.012, 0.012, 0.014 ), bHus );
-          diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.012, 0.014, 0.017 ), bGlas * 0.8 );    // tonade rutor
+          diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.016, 0.018, 0.021 ), bGlas );          // tonade rutor: jämnt mörka (kupén anas), speglingen gör resten
+          // baklyktorna: rökat rött glas med klarare lysdioder; reflexerna blankt rött
+          diffuseColor.rgb = mix( diffuseColor.rgb, mix( vec3( 0.07, 0.004, 0.004 ), vec3( 0.34, 0.008, 0.006 ), bLed ), bBakL );
+          diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.42, 0.012, 0.01 ), bRodU * step( vBP.z, -1.8 ) );
           // frost: ljusare, mattare rutor med ett fint mönster
           float bFrost = uFrost * bGlas * ( 0.7 + 0.3 * sin( vBP.x * 6.0 + sin( vBP.z * 5.0 + vBP.y * 7.0 ) * 2.0 ) ) * ( 1.0 - 0.5 * smoothstep( 1.3, 1.45, vBP.y ) );
           diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.3, 0.33, 0.37 ), bFrost * 0.32 );
           metalnessFactor = bLack * 0.3 + bFalg * bEker * 0.85;
-          roughnessFactor = bLack * ( 0.34 + 0.1 * ( bFl - 0.5 ) * bNara ) + bGlas * mix( 0.1, 0.5, bFrost ) + bDack * mix( 0.93, 0.74, bSida )
-            + bFalg * mix( 0.6, 0.3, bEker ) + bPlast * 0.6 + bLykta * 0.12 + bRodU * 0.18;
-          float bCc = bLack + bGlas * 0.6 * ( 1.0 - 0.8 * bFrost ) + bLykta + bRodU + bFalg * bEker * 0.35 + bPlast * 0.1;
-          // baklyktorna glöder svagt i mörker
-          totalEmissiveRadiance += vec3( 0.5, 0.012, 0.008 ) * ( bRodU * step( vBP.z, -1.8 ) * uNatt * 0.45 );`)
+          roughnessFactor = bLack * ( 0.34 + 0.1 * ( bFl - 0.5 ) * bNara ) + bGlas * mix( 0.09, 0.5, bFrost ) + bDack * mix( 0.93, 0.74, bSida )
+            + bFalg * mix( 0.6, 0.3, bEker ) + bPlast * 0.6 + bLykta * 0.12 + bRodU * 0.18 + bBakL * 0.07;
+          float bCc = bLack + bGlas * 0.6 * ( 1.0 - 0.8 * bFrost ) + bLykta + bRodU + bBakL + bFalg * bEker * 0.35 + bPlast * 0.1;
+          // baklyktorna: lätt glöd i dagsljus, tydligt i mörker (positionsljus), lysdioderna starkast
+          totalEmissiveRadiance += vec3( 0.9, 0.02, 0.012 ) * bBakL * ( 0.02 + 0.06 * bLed + uNatt * ( 0.25 + 0.6 * bLed ) );`)
           .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
           // flingorna lutar lite åt olika håll: små gnistor i solen (bara nära)
           normal = normalize( normal + bLack * bNara * 0.06 * ( vec3( bHash( floor( vBP * 330.0 ) + 7.0 ), bHash( floor( vBP * 330.0 ) + 13.0 ), bHash( floor( vBP * 330.0 ) + 29.0 ) ) - 0.5 ) );`)
@@ -505,7 +679,7 @@ export function skapaBil(THREE, rot, VU) {
     sh.fragmentShader = fh + sh.fragmentShader.replace('vec3 bLackF = vec3( 0.525, 0.535, 0.55 ) *', 'vec3 bLackF = ' + (fb ? 'bForbiF()' : 'uLackF') + ' *')
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
         float bLj = ${fb ? 'smoothstep( 0.15, 0.6, uNatt )' : 'uLjus'};
-        float bBak = bRodU * step( vBP.z, -1.8 );
+        float bBak = bBakL * ( 0.4 + 0.6 * bLed );
         float bBlk = ${fb ? '0.0' : 'step( 0.5, uBlink * ( vBP.x < 0.0 ? -1.0 : 1.0 ) ) * step( 0.6, abs( vBP.x ) )'};
         totalEmissiveRadiance += ( vec3( 1.5, 1.45, 1.3 ) * bLykta + vec3( 0.9, 0.025, 0.015 ) * bBak ) * bLj * ( 1.0 - bBlk ) + vec3( 1.9, 0.62, 0.06 ) * bBlk * max( bLykta, bBak * 1.5 );`);
   }
@@ -722,7 +896,12 @@ export function skapaBil(THREE, rot, VU) {
   }
 
   const SIDA = (nx, nz) => nz > 0.5 ? 'S' : nz < -0.5 ? 'N' : nx > 0.5 ? 'E' : 'W';
-  function planera(mal, H) {
+  // planera(mal, H) = planeraTill(planeraBer(mal, H)). planeraBer räknar bilens plats och fyller i mal (blockerad,
+  // hard, pollare …) utan att röra bilen som står; planeraTill applicerar (miljöns stegvisa bygge räknar först)
+  function planera(mal, H) { planeraTill(planeraBer(mal, H)); }
+  function planeraTill(B) { plats = B.plats; mal0 = B.mal; }
+  function planeraBer(mal, H) {
+    let plats = null;
     const { dorr, gang, L, W } = mal;
     const n = [dorr.nx, dorr.nz], t = [gang.tx, gang.tz], sd = SIDA(dorr.nx, dorr.nz);
     const vl = sd === 'S' || sd === 'N' ? L : W;
@@ -808,7 +987,7 @@ export function skapaBil(THREE, rot, VU) {
       const v = plats.vag, ex = x - v.x0, ez = z - v.z0, sv = ex * n[0] + ez * n[1];      // på uppfarten
       return sv > -0.5 && sv < VAG.L + 1 && Math.abs(ex * t[0] + ez * t[1] - vagBoj(sv) * v.sida) < VAG.B / 2 + Math.max(m, b);
     };
-    mal0 = mal;
+    return { plats, mal };
   }
 
   // ---- per hus: bilens läge, ytan, boxen, kabeln och glöden ----
@@ -832,6 +1011,7 @@ export function skapaBil(THREE, rot, VU) {
     if (namn === 'vinter' && !snoBil && snoKalla) {      // mäts i bilens egen ram: lyfts ur medan höjdfältet räknas
       bilen.remove(snoKalla); snoBil = snoTacke(snoKalla); bilen.add(snoKalla, snoBil);
     }
+    if (snoBil && !snoBil.parent) bilen.add(snoBil);   // (räknad i förväg av forberedG)
     bilen.updateMatrixWorld(true);
     if (snoBil) snoBil.visible = namn === 'vinter';
     skugga.position.y = namn === 'vinter' ? 0.028 : 0.012;            // ovanpå den packade snön (2 cm)
@@ -868,7 +1048,7 @@ export function skapaBil(THREE, rot, VU) {
     if (!BIL.klar) return;
     // boxen på fasaden
     const [bx, bz] = P.box, n = P.n, ry = Math.atan2(n[0], n[1]);
-    const bg = new THREE.Group(); bg.name = 'laddbox'; bg.position.set(bx + n[0] * 0.035, 0.98, bz + n[1] * 0.035); bg.rotation.y = ry; husGrupp.add(bg);
+    const bg = new THREE.Group(); bg.name = 'laddbox'; bg.position.set(bx + n[0] * 0.035, 0.98, bz + n[1] * 0.035); bg.rotation.y = ry; bg.userData.husFas = 'vagg'; husGrupp.add(bg);   // följer väggen när huset byggs upp
     let ut = BOXM.ut, topp = BOXM.topp;
     const bx0 = MODELL === 'volvo' ? BILAR.volvo.box : box;
     if (bx0) bg.add(bx0);
@@ -900,7 +1080,7 @@ export function skapaBil(THREE, rot, VU) {
       slut.clone().addScaledVector(rikt, 0.24).setY(Math.max(mark + 0.1, slut.y - 0.3)), slut.clone().addScaledVector(rikt, 0.07), slut,
     ];
     const kabel = new THREE.Mesh(kabelGeo(pts, mark), kabelMat);
-    kabel.userData.egen = true; kabel.castShadow = true; kabel.receiveShadow = true; husGrupp.add(kabel);
+    kabel.userData.egen = true; kabel.castShadow = true; kabel.receiveShadow = true; kabel.userData.husFas = 'ute'; husGrupp.add(kabel);   // (kommer upp med trappan, husritare.js satsBygg)
     // glorian vid laddluckan
     const gp = new THREE.Sprite(gloriaPort); gp.position.copy(BIL.portGlod.clone().applyMatrix4(bilen.matrixWorld)); gp.scale.set(0.34, 0.34, 1); husGrupp.add(gp);
     KAB = { pts, mark, ut0, bg, n, kabel, gp, ut, topp, ty: mal.hy || (() => 0), vinter: namn === 'vinter', villa: namn === 'villa', k: 0 };
@@ -1135,6 +1315,71 @@ export function skapaBil(THREE, rot, VU) {
     g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     return g;
   }
+  // Grillen: modellens egen grill (lameller med trasiga normaler, en snedställd list och märket) plockas bort
+  // och ersätts med en ritad: blank svart platta, lodräta kromlameller och en kromram som följer öppningen.
+  // Allt i modellens ram (+z fram); öppningen och frontens buktighet är uppmätta med strålar mot lacken.
+  const GR = { W: 0.452, T: 0.771, r: 0.04, B: 0.512, S: 0.62, p: 5.5 };
+  const grW = o => GR.W + o;
+  const grTopp = (x, o) => { const W = grW(o), r = GR.r, d = Math.abs(x) - (W - r); return GR.T + o - (d > 0 ? r - Math.sqrt(Math.max(0, r * r - d * d)) : 0); };
+  const grBott = (x, o) => { const u = Math.min(1, Math.abs(x) / grW(o)); return GR.B - o + (GR.S - GR.B) * Math.pow(u, GR.p); };
+  const grYta = (x, y) => 2.346 + (0.78 - y) * 0.074 - (0.17 + (y - 0.54) * 0.54) * x * x;   // lackens z vid öppningen
+  function volvoGrill(sc) {
+    // 1) bort med allt utom lacken innanför öppningen (index utan trianglarna, delas av alla kopior)
+    sc.updateMatrixWorld(true);
+    const inv = new THREE.Matrix4().copy(sc.matrixWorld).invert(), M = new THREE.Matrix4(), a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+    const inne = (x, y, z) => z > 2.12 && Math.abs(x) < grW(0.014) && y < grTopp(x, 0.014) && y > grBott(x, 0.014);
+    sc.traverse(o => {
+      if (!o.isMesh || o.userData.kat === 'lack') return;
+      for (let p = o; p; p = p.parent) if (/^hjul_/.test(p.name)) return;
+      const g = o.geometry, pos = g.attributes.position, idx = g.index; if (!pos || pos.isInterleavedBufferAttribute) return;
+      M.multiplyMatrices(inv, o.matrixWorld);
+      const n = idx ? idx.count : pos.count, kvar = []; let bort = 0;
+      for (let i = 0; i + 2 < n; i += 3) {
+        const i0 = idx ? idx.getX(i) : i, i1 = idx ? idx.getX(i + 1) : i + 1, i2 = idx ? idx.getX(i + 2) : i + 2;
+        a.fromBufferAttribute(pos, i0).applyMatrix4(M); b.fromBufferAttribute(pos, i1).applyMatrix4(M); c.fromBufferAttribute(pos, i2).applyMatrix4(M);
+        if (inne((a.x + b.x + c.x) / 3, (a.y + b.y + c.y) / 3, (a.z + b.z + c.z) / 3)) {
+          bort++;
+          if (!idx) { pos.setXYZ(i1, pos.getX(i0), pos.getY(i0), pos.getZ(i0)); pos.setXYZ(i2, pos.getX(i0), pos.getY(i0), pos.getZ(i0)); }
+        } else if (idx) kvar.push(i0, i1, i2);
+      }
+      if (!bort) return;
+      if (idx) g.setIndex(kvar); else pos.needsUpdate = true;
+    });
+    // 2) den nya grillen: öppningens kontur som en sluten slinga (överkant vänster→höger, underkant tillbaka)
+    const K = 34, xs = []; for (let i = 0; i <= K; i++) xs.push(-Math.cos(Math.PI * i / K));     // tätare vid hörnen
+    const slinga = o => { const W = grW(o), p = []; for (const u of xs) p.push([u * W, grTopp(u * W, o)]); for (let i = K; i >= 0; i--) p.push([xs[i] * W, grBott(xs[i] * W, o)]); return p; };
+    const geo = (pos, ix, platt) => {
+      let g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(ix);
+      if (platt) g = g.toNonIndexed();
+      g.computeVertexNormals(); g.computeBoundingSphere(); return spara(g);
+    };
+    const del = (g, kat) => { const m = new THREE.Mesh(g, vMat(kat)); m.userData.kat = kat; m.castShadow = true; m.receiveShadow = true; m.name = 'grill-' + kat; return m; };
+    const grupp = new THREE.Group(); grupp.name = 'grill';
+    // plattan: ett rutnät mellan under- och överkant, böjt efter fronten och indraget bakom lamellerna
+    { const pos = [], ix = [], R = 6, o = 0.008;
+      for (const u of xs) { const x = u * grW(o), y0 = grBott(x, o), y1 = grTopp(x, o); for (let j = 0; j <= R; j++) { const y = y0 + (y1 - y0) * j / R; pos.push(x, y, grYta(x, y) - 0.036); } }
+      for (let i = 0; i < K; i++) for (let j = 0; j < R; j++) { const q = i * (R + 1) + j, w = q + R + 1; ix.push(q, w, q + 1, q + 1, w, w + 1); }
+      grupp.add(del(geo(pos, ix), 'blank')); }
+    // ramen: rundad kromlist (ytterkant under lacken, krön, innerkant) och en vägg in mot plattan
+    { const prof = [[0.010, -0.014], [0.003, -0.003], [-0.006, 0], [-0.014, -0.004], [-0.017, -0.012], [-0.017, -0.04]];
+      const ringar = prof.map(([o, dz]) => slinga(o).map(([x, y]) => [x, y, grYta(x, y) + dz]));
+      const L = ringar[0].length, pos = [], ix = [];
+      for (const r of ringar) for (const v of r) pos.push(...v);
+      for (let k = 0; k + 1 < ringar.length; k++) for (let i = 0; i < L; i++) {
+        const i2 = (i + 1) % L, A = k * L + i, B = k * L + i2, C = (k + 1) * L + i, D = (k + 1) * L + i2;
+        ix.push(A, C, B, B, C, D);
+      }
+      grupp.add(del(geo(pos, ix), 'krom')); }
+    // lamellerna: smala kromprofiler med en spets framåt (två fasetter som fångar ljuset)
+    { const N = 29, steg = 0.03, prof = [[-0.0032, -0.032], [-0.0032, -0.007], [0, -0.003], [0.0032, -0.007], [0.0032, -0.032]], pos = [], ix = [];
+      for (let s = 0; s < N; s++) {
+        const x0 = (s - (N - 1) / 2) * steg, y0 = grBott(x0, -0.012), y1 = grTopp(x0, -0.012), bas = pos.length / 3;
+        for (const y of [y0, y1]) for (const [dx, dz] of prof) pos.push(x0 + dx, y, grYta(x0 + dx, y) + dz);
+        for (let i = 0; i + 1 < prof.length; i++) { const A = bas + i, B = A + 1, C = A + prof.length, D = C + 1; ix.push(A, B, C, B, D, C); }
+      }
+      grupp.add(del(geo(pos, ix, true), 'krom')); }
+    sc.add(grupp);
+  }
   function forberedVolvo(sc) {
     if (VS || dod) return;
     sc.traverse(o => {
@@ -1142,6 +1387,7 @@ export function skapaBil(THREE, rot, VU) {
       const k = o.material.name; o.userData.kat = k; o.material.dispose(); o.material = vMat(k);
       o.castShadow = k !== 'glas' && k !== 'ruta'; o.receiveShadow = true; skrap.push(o.geometry);
     });
+    volvoGrill(sc);
     VS = sc;
     const yt = new THREE.Group(), m = sc.clone(); m.rotation.y = BILAR.volvo.rot; yt.add(m);
     const spar = { langd: BIL.langd, bak: BIL.bak, port: BIL.port, portN: BIL.portN, bredd: BIL.bredd };
@@ -1512,8 +1758,49 @@ export function skapaBil(THREE, rot, VU) {
       g.computeBoundingSphere();
       LOD[k] = spara(g);
     }
+    // De förenklade modellerna saknar glaset (rutor och glastak): man såg rakt ner i sätena. Varje modell får ett slutet,
+    // mörkt tonat glasskal strax innanför karossen (taket och stolparna täcker det, rutorna och taklucka visar det).
+    // Teslans förenklade kupé rev förenklingen sönder (taket i taggar), så Teslorna långt bort och de som kör förbi
+    // använder Volvons fjärrmodell med glas; nära syns den fulla Teslan som förut.
+    for (const k of ['volvo', 'volvo-f']) if (LOD[k]) LOD[k] = spara(glasKupa(LOD[k]));
+    if (LOD['volvo-f']) LOD.tesla = LOD['volvo-f'];
     return LOD;
   }));
+  function glasKupa(g) {
+    const P = g.attributes.position.array, n = P.length / 3, S = 24;
+    let z0 = 9, z1 = -9; for (let i = 0; i < n; i++) if (P[i * 3 + 1] > 1.12) { z0 = Math.min(z0, P[i * 3 + 2]); z1 = Math.max(z1, P[i * 3 + 2]); }
+    const Z0 = z0 + 0.05, Z1 = z1 - 0.05, h = [], w = [];
+    for (let s = 0; s <= S; s++) {
+      const z = Z0 + (Z1 - Z0) * s / S; let hm = 0, wm = 0;
+      for (let i = 0; i < n; i++) { if (Math.abs(P[i * 3 + 2] - z) > 0.1) continue; hm = Math.max(hm, P[i * 3 + 1]); if (P[i * 3 + 1] > 0.95 && P[i * 3 + 1] < 1.15) wm = Math.max(wm, Math.abs(P[i * 3])); }
+      h.push(hm); w.push(Math.max(0.5, wm));
+    }
+    const jamn = a => a.map((v, i) => (a[Math.max(0, i - 1)] + 2 * v + a[Math.min(a.length - 1, i + 1)]) / 4), H = jamn(h), Wd = jamn(w);
+    // förenklingens trasiga rester av rutor och inredning (allt som inte är lack ovanför bröstlinjen, innanför kupén)
+    // läggs ner under glaset, så att bara karossen och det nya glaset syns
+    const Cl = g.attributes.color.array;
+    for (let i = 0; i < n; i++) {
+      const y = P[i * 3 + 1], z = P[i * 3 + 2]; if (y < 0.95 || z < Z0 - 0.1 || z > Z1 + 0.1 || Cl[i * 4 + 3] > 127) continue;
+      const s = Math.max(0, Math.min(S, Math.round((z - Z0) / (Z1 - Z0) * S)));
+      if (Math.abs(P[i * 3]) < Wd[s] - 0.05) P[i * 3 + 1] = 0.88;
+    }
+    const nv = 9, NP = [], NN = [], NC = [], NI = [], b = 0.9;
+    for (let s = 0; s <= S; s++) {
+      const z = Z0 + (Z1 - Z0) * s / S, top = Math.max(b + 0.04, H[s] - 0.03), wb = Wd[s] - 0.04, wt = Math.min(wb * 0.7, 0.55), r = top - b;
+      [[-wb, b], [-wb + 0.03, b + r * 0.45], [-wt - 0.04, b + r * 0.88], [-wt * 0.5, top - 0.004], [0, top], [wt * 0.5, top - 0.004], [wt + 0.04, b + r * 0.88], [wb - 0.03, b + r * 0.45], [wb, b]]
+        .forEach(([x, y], k) => { NP.push(x, y, z); NN.push(k < 4 ? -90 : k > 4 ? 90 : 0, 90, 0); NC.push(4, 5, 6, 0); });
+    }
+    for (let s = 0; s < S; s++) for (let k = 0; k < nv - 1; k++) { const a = n + s * nv + k, b2 = a + nv; NI.push(a, a + 1, b2, a + 1, b2 + 1, b2, a, b2, a + 1, a + 1, b2, b2 + 1); }   // båda sidor (glaset syns inifrån rutorna också)
+    for (const [s, fram] of [[0, false], [S, true]]) { const c = n + NP.length / 3; const k0 = n + s * nv; NP.push(0, b + 0.1, Z0 + (Z1 - Z0) * s / S); NN.push(0, 0, fram ? 127 : -127); NC.push(4, 5, 6, 0); for (let k = 0; k < nv - 1; k++) NI.push(c, k0 + k, k0 + k + 1, c, k0 + k + 1, k0 + k); }
+    const m = n + NP.length / 3, ut = new THREE.BufferGeometry();
+    const pos = new Float32Array(m * 3); pos.set(P); pos.set(NP, n * 3);
+    const nor = new Int8Array(m * 3); nor.set(g.attributes.normal.array); nor.set(NN, n * 3);
+    const col = new Uint8Array(m * 4); col.set(g.attributes.color.array); col.set(NC, n * 4);
+    const I0 = g.index.array, idx = new Uint16Array(I0.length + NI.length); idx.set(I0); idx.set(NI, I0.length);
+    ut.setAttribute('position', new THREE.BufferAttribute(pos, 3)); ut.setAttribute('normal', new THREE.BufferAttribute(nor, 3, true)); ut.setAttribute('color', new THREE.BufferAttribute(col, 4, true));
+    ut.setIndex(new THREE.BufferAttribute(idx, 1)); ut.computeBoundingSphere();
+    return ut;
+  }
   // lacken (alfa = 1) får instansens färg (eller uLodF för bilarna som kör förbi) och blankare yta
   const LODM = {};
   function lodMat(forbi = null) {
@@ -1532,13 +1819,16 @@ export function skapaBil(THREE, rot, VU) {
       s.fragmentShader = 'varying float vLack;\nvarying float vLy;\n' + s.fragmentShader
         .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
           float lL = dot( vColor.rgb, vec3( 0.3333 ) );
-          float lRuta = ( 1.0 - vLack ) * ( 1.0 - smoothstep( 0.03, 0.09, lL ) ) * smoothstep( 0.86, 0.98, vLy );
+          // rutorna: allt utom lack högt upp som inte är ljust metall (hörnfärgerna har kartans ljusa speglingar
+          // i glaset, som blev gråa fläckar); jämnt mörkt tonat som på de fulla modellerna
+          float lRuta = ( 1.0 - vLack ) * ( 1.0 - smoothstep( 0.3, 0.5, lL ) ) * smoothstep( 0.86, 0.98, vLy );
+          diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.016, 0.018, 0.021 ), lRuta );
           float lMet = ( 1.0 - vLack ) * ( 1.0 - lRuta ) * smoothstep( 0.22, 0.45, lL );
           roughnessFactor = mix( mix( mix( 0.66, 0.34, lMet ), 0.06, lRuta ), 0.32, vLack );`)
         .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\n metalnessFactor = mix( mix( 0.04, 0.75, lMet ), 0.4, vLack ) * ( 1.0 - lRuta );')
         .replace('#include <lights_physical_fragment>', '#include <lights_physical_fragment>\n material.clearcoat *= max( vLack, lRuta );');
     };
-    m.customProgramCacheKey = () => forbi ? 'bil-lod-forbi-2' : 'bil-lod-2';
+    m.customProgramCacheKey = () => forbi ? 'bil-lod-forbi-3' : 'bil-lod-3';
     return (LODM[k] = m);
   }
   // lodBilar([{ x, y, z, ry, typ: 'tesla' | 'volvo', farg }]) → Group: ett instansierat nät per modell och
@@ -1574,5 +1864,11 @@ export function skapaBil(THREE, rot, VU) {
     dod = true; stada(); rot.remove(grupp);
     skrap.forEach(o => o && o.dispose && o.dispose()); skrap.length = 0;
   }
-  return { planera, satt, dispose, laddning, plats: () => plats, forbi, kor, steg, parkera, lage: () => KOR.lage, modell, modellNu: () => MODELL, kopia, lodBilar };
+  // snön på bilen räknas i förväg i små steg (miljöns stegvisa bygge): på en kopia i egen ram, bilen står kvar
+  function* forberedG(namn) {
+    if (namn !== 'vinter' || snoBil || !snoKalla) return;
+    const kalla = snoKalla, m = yield* snoTackeG(kalla.clone());
+    if (!snoBil && snoKalla === kalla) snoBil = m;
+  }
+  return { planera, planeraBer, planeraTill, planNu: () => ({ plats, mal: mal0 }), forberedG, satt, dispose, laddning, plats: () => plats, forbi, kor, steg, parkera, lage: () => KOR.lage, modell, modellNu: () => MODELL, kopia, lodBilar };
 }

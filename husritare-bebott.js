@@ -22,7 +22,9 @@
 //   bebott.satt(namn, mal, plats)   // namn: 'studio' | 'tradgard' | 'skog' | 'vinter'
 //   bebott.dispose()
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { fab } from './husritare-fab.js?v=20261126c';   // skannade odlingsbäddar (Fab) när husritare-miljo.js startat modulen
+import { fab } from './husritare-fab.js?v=20261126r';   // skannade odlingsbäddar (Fab) när husritare-miljo.js startat modulen
+import { blommor } from './husritare-blommor.js?v=20261126r';   // riktiga pelargoner och margeriter i krukorna
+import { ph } from './husritare-ph.js?v=20261126r';   // Poly Haven-rekvisita (CC0): vattenkanna, lykta, stövlar, yxa, spade, gungstol, bänk, picknickbord …
 
 // Husens öppningar (som HUS i husritare.js, nyckel L×W): [sida, u från vänster sett utifrån, bredd,
 // underkant, dörr]. Bara för att inte ställa saker framför fönster och dörrar; okänt hus = bara dörrarna i mal.
@@ -237,8 +239,15 @@ export function skapaBebott(THREE, rot, VU) {
     const g = ny('odlingslådor'), tra = mat('#7c6b57', 0.9), kant = mat('#6d5e4c', 0.9), jord = mat('#35281e', 1);
     const SALLAD = ['#6a8c48', '#7f9c55', '#587c40'], BLAST = ['#3a5a2e', '#48693a'], V = gronska();
     const fo = fab.klar(), FM = [];   // fo: skannade odlingsbäddar (Fab, husritare-fab.js) i stället för lådorna; plantorna står kvar
+    // Poly Havens odlingslåda i gammalt trä (planter_box_02, 1,31 × 0,47 × 0,49 m) före Fab-bädden: nedsänkt 10 cm så att
+    // egen jord på 0,3 m (där plantorna står) ligger strax under kanten
+    const pl = ph.klar(), PL = [];
     [-0.5, 0.5].forEach((z, j) => {
-      if (fo) { FM.push(new THREE.Matrix4().compose(new THREE.Vector3(0, -0.01, z), new THREE.Quaternion().setFromAxisAngle(UPP, j * Math.PI), new THREE.Vector3(1.2, 1.6, 1.2))); for (let k = 0; k < 14; k++) r(); }   // (slumpen dras som förut)
+      if (pl) {
+        PL.push({ m: 'planter_box_02', x: 0, y: -0.1, z, ry: j * Math.PI + (j ? 0.015 : -0.01), s: 1.05 });   // (slumpen dras som förut: 14 gånger per låda)
+        lada(1.2, 0.02, 0.38, jord, g, 0, 0.3, z);
+        for (let k = 0; k < 7; k++) { const dz = -0.24 + k * 0.08 + (r() - 0.5) * 0.01, rz = (r() - 0.5) * 0.03; if (Math.abs(dz) < 0.15) lada(1.16, 0.015, 0.03, jord, g, 0, 0.315, z + dz, 0, rz, 0); }   // krattade fåror
+      } else if (fo) { FM.push(new THREE.Matrix4().compose(new THREE.Vector3(0, -0.01, z), new THREE.Quaternion().setFromAxisAngle(UPP, j * Math.PI), new THREE.Vector3(1.2, 1.6, 1.2))); for (let k = 0; k < 14; k++) r(); }   // (slumpen dras som förut)
       else {
       [-1, 1].forEach(s => { lada(1.24, 0.34, 0.045, tra, g, 0, 0.17, z + s * 0.3); lada(0.045, 0.34, 0.56, tra, g, s * 0.6, 0.17, z); });
       [-1, 1].forEach(s => { lada(1.3, 0.025, 0.08, kant, g, 0, 0.352, z + s * 0.29); lada(0.08, 0.025, 0.66, kant, g, s * 0.62, 0.352, z); });   // kantbräda att sitta på
@@ -275,7 +284,8 @@ export function skapaBebott(THREE, rot, VU) {
       }
     });
     if (odling && !sno) V.nat(g);
-    if (fo) g.add(fab.odlingNat(FM));
+    if (FM.length) g.add(fab.odlingNat(FM));
+    g.userData.ph = PL;   // (lokala; läggs i PHP vid placeringen, eftersom slaIhop tömmer gruppen innan filen laddats)
     return g;
   }
   // skottkärra (lokalt: hjulet mot +x): galvat tråg, grönt rör, luftgummihjul; last = 'jord' | 'ved' | null
@@ -424,6 +434,8 @@ export function skapaBebott(THREE, rot, VU) {
         };
         V.stra(ca * 0.02, y0, sa * 0.02, a, len, 0.006, (i < 3 ? 0.1 : 0.35) + r() * 0.25, 0.13 + r() * 0.05, O0, c1, 9, 0, flik);
       }
+    } else if (blommor.klar()) {
+      g.userData.blom = { y: y0, rr };   // riktig pelargon/margerit (husritare-blommor.js) läggs i satt() efter slaIhop
     } else {
       // sommarblommor: en kulle av runda blad som hänger över kanten och blomklasar på korta stjälkar
       const B0 = lin('#294020'), B1 = lin('#52703a'), B2 = lin('#7b9450'), FA = lin('#b55f76'), FB = lin('#dfa3ad'), FC = lin('#efe6da');
@@ -502,11 +514,13 @@ export function skapaBebott(THREE, rot, VU) {
     cyl(0.12, 0.14, 0.18, 12, mat('#2e3134', 0.6, 0.3), g, 0, 1.43, 0, -0.12);   // en hink som hatt
     return g;
   }
-  function yxkubbe(r) {
+  function yxkubbe(r, utanYxa = false) {   // utanYxa: Poly Havens yxa sätts i kubben i stället (husritare-ph.js)
     const g = ny('yxkubbe'), bark = mat('#5f4d3c', 0.95), ande = mat('#c7a77c', 0.9);
     nat(new THREE.CylinderGeometry(0.25, 0.27, 0.44, 10), [bark, ande, ande], g, 0, 0.22, 0);
-    lada(0.16, 0.08, 0.025, mat('#3a3c3e', 0.4, 0.7), g, 0.02, 0.47, 0, 0, 0, -0.3);   // yxhuvudet i kubben
-    stang([0.08, 0.5, 0], [0.48, 0.84, 0.05], 0.018, mat('#a98458', 0.7), g);
+    if (!utanYxa) {
+      lada(0.16, 0.08, 0.025, mat('#3a3c3e', 0.4, 0.7), g, 0.02, 0.47, 0, 0, 0, -0.3);   // yxhuvudet i kubben
+      stang([0.08, 0.5, 0], [0.48, 0.84, 0.05], 0.018, mat('#a98458', 0.7), g);
+    }
     for (let i = 0; i < 4; i++) {   // kluvna vedträn på marken
       const a = r() * 6.28, d = 0.45 + r() * 0.25;
       lada(0.34, 0.08, 0.1, mat(i % 2 ? '#c7a77c' : '#8d7458', 0.9), g, Math.cos(a) * d, 0.04, Math.sin(a) * d, 0, r() * 3, 0);
@@ -561,9 +575,16 @@ export function skapaBebott(THREE, rot, VU) {
     const kant = (x, z) => Math.hypot(Math.max(Math.abs(x) - L / 2, 0), Math.max(Math.abs(z) - W / 2, 0));
     const iDack = (x, z, m = 0) => !!dack && x > dack.x0 - m && x < dack.x1 + m && z > dack.z0 - m && z < dack.z1 + m;
     const dackAv = (x, z) => dack ? Math.hypot(Math.max(dack.x0 - x, 0, x - dack.x1), Math.max(dack.z0 - z, 0, z - dack.z1)) : 99;
-    const placera = (g, x, z, ry = 0, dy = 0) => { g.position.set(x, hy(x, z) + dy, z); g.rotation.y = ry; grupp.add(g); return g; };
+    // fas: delar vid väggen knyts till husets uppbyggnad (husritare.js satsBygg, userData.husFas)
+    let fas = null;
+    const placera = (g, x, z, ry = 0, dy = 0) => { g.position.set(x, hy(x, z) + dy, z); g.rotation.y = ry; if (fas) g.userData.husFas = fas; grupp.add(g); return g; };
     const fram = (fx, fz) => Math.atan2(fx, fz);          // vridning så att lokala +z pekar åt (fx, fz)
     skiv = [];
+    // Poly Haven-rekvisita (husritare-ph.js): samlas här och läggs i en egen grupp efter slaIhop (texturerade, laddas lat)
+    const PHP = [], phPa = ph.klar(), kust = namn === 'kust';
+    const phS = (m, x, z, ry = 0, o = {}) => PHP.push(Object.assign({ m, x, y: hy(x, z) + (o.dy || 0), z, ry, fas }, o));
+    // stövelparet: filen har två par (rena och smutsiga) 0,6 m isär; här bara det rena paret, flyttat till origo
+    const phStovlar = (x, z, ry) => phS('rubber_boots', x, z, ry, { del: 'rubber_boots_l' });
     const nf = naturKarta(hy);
     const RING = Math.max(1.6, (plats && plats.ring && plats.ring.d2 || 1.4) + 0.2);   // gången runt huset slutar vid d2
 
@@ -633,6 +654,7 @@ export function skapaBebott(THREE, rot, VU) {
 
     // 1. vid entrén: krukor, vattenkanna och lykta på var sin sida om trappan (vinter: skyffel och lykta)
     const dw = VAGG.find(w => w.sd === dsd);
+    fas = 'ute';   // (kommer upp med trappan)
     [-bilSida, bilSida].forEach((s, i) => {
       const lat = s * (tb + 0.36), uu = uAv(dsd, dorr.x + t[0] * lat, dorr.z + t[1] * lat), a = uu - 0.28, b = uu + 0.28;
       if (!vaggFri(dw, a, b, -1, true)) return;   // krukor får stå framför fönster, inte dörrar
@@ -644,15 +666,19 @@ export function skapaBebott(THREE, rot, VU) {
         else {
           placera(kruka(0.24, 0.34, '#a9694b', 'blommor', r), x, z);   // blommande pelargon i lerkruka (buxbomsklotet såg ut som en grön klump)
           placera(kruka(0.15, 0.28, '#a9694b', skog ? 'ormbunke' : 'blommor', r), lx, lz);
-          if (!skog) placera(vattenkanna(), ...vp(dsd, uu + ld * 0.52, 0.24), dw.ry - Math.PI / 2 + ld * 0.45);   // pipen ut från väggen, inte in i den
+          if (!skog && phPa) phS('watering_can_metal_01', ...vp(dsd, uu + ld * 0.52, 0.28), dw.ry + ld * 0.45, { s: 1.5 });   // (Poly Haven: pipen mot lokala +z)
+          else if (!skog) placera(vattenkanna(), ...vp(dsd, uu + ld * 0.52, 0.24), dw.ry - Math.PI / 2 + ld * 0.45);   // pipen ut från väggen, inte in i den
         }
       } else {
-        placera(lykta(sno), ...vp(dsd, uu - ld * 0.15, 0.25));
+        if (phPa) phS('wooden_lantern_01', ...vp(dsd, uu - ld * 0.15, 0.25), dw.ry + 0.3);   // trälyktan med varmt sken på kvällen
+        else placera(lykta(sno), ...vp(dsd, uu - ld * 0.15, 0.25));
         if (!sno) placera(kruka(0.17, 0.5, '#3a3b3c', 'gras', r), ...vp(dsd, uu + ld * 0.12, 0.3));
         const us = uu + ld * 0.6;
-        if (!sno && vaggFri(dw, us - 0.17, us + 0.17, -1, true)) { dw.upp.push([us - 0.2, us + 0.2]); placera(stovlar(r), ...vp(dsd, us, 0.24), dw.ry + (r() - 0.5) * 0.5); }
+        // (vid sjön står Poly Havens stövlar vid sjöboden i stället, husritare-sjo.js)
+        if (!sno && vaggFri(dw, us - 0.17, us + 0.17, -1, true)) { dw.upp.push([us - 0.2, us + 0.2]); const ryS = dw.ry + (r() - 0.5) * 0.5; if (!phPa) placera(stovlar(r), ...vp(dsd, us, 0.24), ryS); else if (!kust) phStovlar(...vp(dsd, us, 0.22), ryS); }
       }
     });
+    fas = null;
 
     // Gången runt huset (plats.ring: d1–d2 m från väggen) ska vara fri: djupa saker står fristående
     // på gräset strax utanför den, med baksidan mot huset. hittaFri ger mitten, väggens normal och läget
@@ -711,7 +737,7 @@ export function skapaBebott(THREE, rot, VU) {
     if (!sno) {
       const dc = dack ? [(dack.x0 + dack.x1) / 2, (dack.z0 + dack.z1) / 2] : [-dorr.x, -dorr.z];
       const sv = hittaVagg(0.6, 0.85, (w, uc, x, z) => Math.hypot(x - dc[0], z - dc[1]) * 0.3 + (w.sd === dsd ? 2 : 0));
-      if (sv) placera(slangvinda(), ...vid(sv, 0), sv.w.ry);
+      if (sv) { fas = 'vagg'; placera(slangvinda(), ...vid(sv, 0), sv.w.ry); fas = null; }   // (sitter på väggen)
     }
 
     // 6. brevlådan vid uppfartens yttre del, på sidan bort från huset
@@ -741,9 +767,12 @@ export function skapaBebott(THREE, rot, VU) {
     }
 
     // 8. odlingslådorna på solsidan (söder), inte i skogen
+    let odl = null;   // (läget för Poly Havens spade, kanna och handskar, steg 12)
     if (tradgard || sno) {
       const o = hittaTomt(0.95, (x, z, k) => -z * 0.25 + Math.abs(k - 3.2) * 0.6 + (lang(x, z) > 0 && Math.abs(sid(x, z)) < 4 ? 3 : 0), 2.0, 7);
-      if (o) { const [a, b] = narmsteVagg(o[0], o[1]); placera(odlingslador(tradgard, sno, r), o[0], o[1], fram(a, b) + (r() - 0.5) * 0.1); }
+      if (o) { const [a, b] = narmsteVagg(o[0], o[1]), ry = fram(a, b) + (r() - 0.5) * 0.1, og = placera(odlingslador(tradgard, sno, r), o[0], o[1], ry); odl = { x: o[0], z: o[1], ry };
+        const c = Math.cos(ry), s = Math.sin(ry);   // Poly Havens odlingslådor (lokala poster → tomtens läge)
+        (og.userData.ph || []).forEach(p => PHP.push(Object.assign({}, p, { x: o[0] + p.x * c + p.z * s, y: og.position.y + p.y, z: o[1] - p.x * s + p.z * c, ry: ry + p.ry }))); }
       if (o && tradgard) {
         const sk2 = hittaTomt(0.9, (x, z) => Math.abs(Math.hypot(x - o[0], z - o[1]) - 2.0), 1.8, 9);
         if (sk2) placera(skottkarra('jord', false, r), sk2[0], sk2[1], Math.atan2(o[1] - sk2[1], sk2[0] - o[0]) + (r() - 0.5) * 0.6);
@@ -776,12 +805,15 @@ export function skapaBebott(THREE, rot, VU) {
     }
 
     // 10. skogen: yxkubbe vid veden, en bänk och en hängmatta
+    let kubbe = null;
+    // Poly Havens yxa med eggen i kubbens ovansida (0,44 m), skaftet snett uppåt (modellens egg ligger mot +z, huvudet upptill)
+    const phYxa = (x, z, ry) => phS('wooden_axe', x + Math.sin(ry) * 0.05, z + Math.cos(ry) * 0.05, ry, { rx: Math.PI / 2 + 0.6, golv: false, dy: 0.44 + 0.345 - 0.06 });
     if (skog || sno) {
       if (skog && ved) {
         const vx = ved.x + ved.a * 1.3, vz = ved.z + ved.b * 1.3;
         let p = tomtFri(vx, vz, 0.5) ? [vx, vz] : null;
         if (p) boka(p[0], p[1], 0.5); else p = hittaTomt(0.5, (x, z) => Math.hypot(x - vx, z - vz), 1.8, 6);
-        if (p) placera(yxkubbe(r), p[0], p[1], r() * 6.28);
+        if (p) { const kg = yxkubbe(r, phPa), ryK = r() * 6.28; placera(kg, p[0], p[1], ryK); if (phPa) phYxa(p[0], p[1], ryK); kubbe = p; }
         const sk2 = hittaTomt(0.95, (x, z) => Math.abs(Math.hypot(x - ved.x, z - ved.z) - 2.4), 1.8, 9);   // på avstånd, på tvären: handtagen når inte in i traven
         if (sk2) placera(skottkarra('ved', false, r), sk2[0], sk2[1], Math.atan2(ved.z - sk2[1], sk2[0] - ved.x) + Math.PI / 2 + (r() - 0.5) * 0.3);
       }
@@ -803,10 +835,78 @@ export function skapaBebott(THREE, rot, VU) {
       if (sp) placera(spark(), sp[0], sp[1], Math.atan2(-t[1], t[0]) * 1 + (r() - 0.5) * 0.5, -0.02);
     }
 
+    // 12. Poly Haven-rekvisita (husritare-ph.js) som inte ersätter något: drar inga slumptal (resten behåller sin
+    // slumpföljd) och placeras sist, så att inget annat flyttar sig. Allt provas mot tomtens fria ytor.
+    if (phPa) {
+      // lit: liten fri plats; ign = mitten på den egna reservationen (odlingslådorna, kubben) som får överlappas
+      const lit = (x, z, rr, ign) => !mal.blockerad(x, z, rr + 0.1) && nf.fri(x, z, rr + 0.05) && dackAv(x, z) > rr + 0.2 && kant(x, z) > RING
+        && skiv.every(([sx, sz, sr]) => (ign && Math.hypot(sx - ign[0], sz - ign[1]) < 0.01) || (sx - x) ** 2 + (sz - z) ** 2 > (sr + rr + 0.15) ** 2);
+      const ut = (a, b) => fram(a, b);   // lokala +z ut från närmaste vägg
+      // trädgård, villa och sjötomt: spade i jorden, vattenkanna och handskar vid odlingslådorna, målad bänk, gungstol vid altanen
+      if (tradgard && odl) {
+        const c = Math.cos(odl.ry), s = Math.sin(odl.ry), W2 = (lx, lz) => [odl.x + lx * c + lz * s, odl.z - lx * s + lz * c];
+        // spaden står nedstucken i gräset vid lådornas kortände (bladet 2 dm ner), lite lutad
+        let spade = [1e3, 1e3];
+        for (const [lx, lz] of [[1.0, 0.15], [-1.0, 0.15], [1.0, -0.3]]) {
+          const [x, z] = W2(lx, lz); if (!mal.blockerad(x, z, 0.2) && nf.fri(x, z, 0.1) && dackAv(x, z) > 0.4 && kant(x, z) > RING) { phS('rusted_spade_01', x, z, odl.ry + 1.3, { rz: 0.12, golv: false, dy: 0.503 - 0.2 }); spade = [x, z]; break; }
+        }
+        for (const [lx, lz] of [[-1.05, -0.4], [-1.05, 0.6], [0.1, -1.2], [0.1, 1.2]]) {
+          const [x, z] = W2(lx, lz); if (Math.hypot(x - spade[0], z - spade[1]) > 0.8 && lit(x, z, 0.25, [odl.x, odl.z])) { phS('watering_can_metal_01', x, z, odl.ry + 2.2, { s: 1.5 }); boka(x, z, 0.25); break; }
+        }
+      }
+      if (tradgard) {
+        // målad träbänk mot huset en bit ut på gräset, med ett par trädgårdshandskar på sitsen
+        const bk = hittaTomt(0.7, (x, z, k) => Math.abs(k - 2.6) * 0.5 + (ved && Math.hypot(x - ved.x, z - ved.z) < 3.5 ? 3 : 0) + (odl ? Math.abs(Math.hypot(x - odl.x, z - odl.z) - 2.4) * 0.6 : 0) + (lang(x, z) > 1 ? 1.5 : 0) + (framforFonster(x, z, 1.2) ? 1 : 0), 2.0, 7);
+        if (bk) {
+          const [a, b] = narmsteVagg(bk[0], bk[1]), ry = ut(a, b);
+          phS('painted_wooden_bench', bk[0], bk[1], ry);
+          phS('garden_gloves_01', bk[0] + Math.cos(ry) * 0.25, bk[1] - Math.sin(ry) * 0.25, ry + 0.5, { dy: 0.735 });
+        }
+        // gungstolen på gräset tätt intill altanen, vänd ut mot trädgården
+        if (dack) {
+          const gs = hittaTomt(0.55, (x, z) => Math.abs(dackAv(x, z) - 0.45) * 2 + kant(x, z) * 0.1, 1.9, 7.5);
+          if (gs) { const [a, b] = narmsteVagg(gs[0], gs[1]); phS('Rockingchair_01', gs[0], gs[1], ut(a, b) + 0.35); }
+        }
+        // sjötomten: picknickbord på gräset (långsidan mot huset)
+        if (kust) {
+          const pb = hittaTomt(1.65, (x, z, k) => Math.abs(k - 5) * 0.4 + (lang(x, z) > 0 && Math.abs(sid(x, z)) < 4 ? 3 : 0) + (dack ? Math.abs(dackAv(x, z) - 4) * 0.2 : 0), 3.2, 7.5);
+          if (pb) { const [a, b] = narmsteVagg(pb[0], pb[1]); phS('wooden_picnic_table', pb[0], pb[1], ut(a, b) + Math.PI / 2); }
+        }
+      }
+      // skog och vinter: yxkubbe vid traven (vintern hade ingen), pall och hink vid kubben
+      if ((skog || sno) && ved) {
+        if (sno && !kubbe) {
+          const vx = ved.x + ved.a * 1.3, vz = ved.z + ved.b * 1.3;
+          const p = hittaTomt(0.5, (x, z) => Math.hypot(x - vx, z - vz), 1.8, 6);
+          if (p) { const ryK = brus(p[0], p[1]) * 6.28; placera(yxkubbe(slump(Math.round(p[0] * 977 + p[1] * 131)), true), p[0], p[1], ryK); phYxa(p[0], p[1], ryK); kubbe = p; }
+        }
+        if (kubbe) {
+          for (let k = 0; k < 8; k++) {
+            const a = k * 0.785 + 0.4, x = kubbe[0] + Math.cos(a) * 1.2, z = kubbe[1] + Math.sin(a) * 1.2;
+            if (lit(x, z, 0.3, kubbe)) { phS('folding_wooden_stool', x, z, a + 1.1); boka(x, z, 0.3); break; }
+          }
+          for (let k = 0; k < 8; k++) {
+            const a = k * 0.785 + 2.2, x = kubbe[0] + Math.cos(a) * 1.05, z = kubbe[1] + Math.sin(a) * 1.05;
+            if (lit(x, z, 0.22, kubbe)) { phS('wooden_bucket_01', x, z, a); boka(x, z, 0.22); break; }
+          }
+        }
+      }
+    }
+
     grupp.updateMatrixWorld(true);
+    // blommande pelargon (stora krukan) och margerit (lilla) i krukorna: ett nät (husritare-blommor.js)
+    const BLP = [], vv = new THREE.Vector3();
+    grupp.children.forEach(o => { const b = o.userData.blom; if (!b) return; o.updateMatrix(); vv.set(0, b.y - 0.02, 0).applyMatrix4(o.matrix); const stor = b.rr > 0.2;   // (i gruppens rum)
+      BLP.push({ art: stor ? 'pelargon' : 'margerit', x: vv.x, y: vv.y, z: vv.z, s: b.rr * (stor ? 4.6 : 5.2), ry: r() * 6.28, f: [[1.0, 0.18, 0.16], [1.0, 0.32, 0.45]][r() * 2 | 0], viktig: true }); });
     slaIhop();
     grupp.traverse(o => { o.updateMatrix(); o.matrixAutoUpdate = false; });
     grupp.updateMatrixWorld(true);
+    // Poly Haven-sakerna vid väggen i en egen grupp (följer husets uppbyggnad), resten för sig
+    const PHv = PHP.filter(p => p.fas), PHo = PHP.filter(p => !p.fas);
+    if (PHo.length) grupp.add(ph.grupp(PHo, 'ph-bebott'));
+    if (PHv.length) { const g = ph.grupp(PHv, 'ph-bebott-vagg'); if (g) { g.userData.husFas = 'ute'; grupp.add(g); } }
+    if (BLP.length) { const m = blommor.grupp(BLP, 'blommor-krukor'); if (m) { m.userData.husFas = 'ute'; grupp.add(m); } }   // (blommorna står i krukorna vid entrén)
+    try { if (/[?&]prov=1/.test(location.search)) window.__krukor = BLP.map(p => [p.x, p.y, p.z, dorr.nx, dorr.nz]); } catch (e) { /* */ }
   }
 
   // Alla enkla nät med samma material (och skuggflagga) bakas till ett nät i gruppens rum:
@@ -824,12 +924,13 @@ export function skapaBebott(THREE, rot, VU) {
     grupp.traverse(o => {
       if (!o.isMesh) return;
       M.multiplyMatrices(inv, o.matrixWorld);
-      if (o.isInstancedMesh || Array.isArray(o.material)) { kvar.push([o, M.clone()]); return; }
+      if (o.isInstancedMesh || Array.isArray(o.material)) { for (let a = o; a && a !== grupp; a = a.parent) if (a.userData.husFas) { o.userData.husFas = a.userData.husFas; break; } kvar.push([o, M.clone()]); return; }
       // enkla material (bara färg, råhet, metall, glöd) delas efter råhet och metall: färgen bakas in som
       // hörnfärg, så att ~50 ritanrop blir ~10 (team-prestanda)
       const om = o.material, en = enkel(om), m = en ? hornMat(om) : om;
-      const k = (en ? m.uuid : om.uuid) + (o.castShadow ? '+' : '-');
-      if (!hinkar.has(k)) hinkar.set(k, { m, kast: o.castShadow, pos: [], nor: [], col: [] });
+      let fas = null; for (let a = o; a && a !== grupp; a = a.parent) if (a.userData.husFas) { fas = a.userData.husFas; break; }
+      const k = (en ? m.uuid : om.uuid) + (o.castShadow ? '+' : '-') + (fas || '');
+      if (!hinkar.has(k)) hinkar.set(k, { m, kast: o.castShadow, fas, pos: [], nor: [], col: [] });
       const h = hinkar.get(k), g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry, fc = en ? om.color : null;
       const P = g.attributes.position, Nn = g.attributes.normal, Cc = g.attributes.color, v = new THREE.Vector3();
       N3.getNormalMatrix(M);
@@ -851,7 +952,7 @@ export function skapaBebott(THREE, rot, VU) {
       g.setAttribute('normal', new THREE.Float32BufferAttribute(h.nor, 3));
       if (h.m.vertexColors) g.setAttribute('color', new THREE.Float32BufferAttribute(h.col, 3));
       g.computeBoundingSphere();
-      const o = new THREE.Mesh(g, h.m); o.userData.egen = true; o.castShadow = h.kast; o.receiveShadow = true; grupp.add(o);
+      const o = new THREE.Mesh(g, h.m); o.userData.egen = true; o.castShadow = h.kast; o.receiveShadow = true; if (h.fas) o.userData.husFas = h.fas; grupp.add(o);
     });
     kvar.forEach(([o, m]) => { m.decompose(o.position, o.quaternion, o.scale); grupp.add(o); });
   }
@@ -874,7 +975,7 @@ export function skapaBebott(THREE, rot, VU) {
           o.getMatrixAt(i, M4); M4.decompose(P, Q, Sk);
           if (Math.abs(P.x) < H && Math.abs(P.z) < H) mark(P.x, P.z, Math.max(Sk.x, Sk.z) * (trad ? 0.2 : 0.6));
         }
-      } else if (/^(bark|lov)(-fjarr)?$/.test(nm)) {
+      } else if (/^(bark|lov)(-fjarr)?$|^rabatt-jord|^blommor-/.test(nm)) {   // (även rabatterna och blommorna, husritare-blommor.js)
         const p = o.geometry.attributes.position;
         for (let i = 0; i < p.count; i++) {
           const x = p.getX(i), z = p.getZ(i);
@@ -899,4 +1000,165 @@ export function skapaBebott(THREE, rot, VU) {
     Object.values(MAT).forEach(m => m.dispose()); if (glasMat) glasMat.dispose();
   }
   return { satt, dispose };
+}
+
+// ---- uteplatsens sittgrupp (villaområdets grannar): bord, fyra karmstolar med dynor och parasoll ----
+// Teak, gråbetsat eller målat trä (ekfaner i images/tex/lucka-ek, tonat per stil), dynor och parasolldukar i
+// bomullsväv (images/tex/tyg-bomull), parasollens stång, ekrar och spröt i lackad metall. Alla grupper i miljön
+// slås ihop till tre nät (trä, tyg, metall): tre ritanrop. Lokala +x längs bordet, stolarna på ±z.
+// Måtten (m): bord 1,6 × 0,9 × 0,74; sitthöjd 0,44; stolarnas framkant 0,12 m från bordsskivans kant, så att
+// stolarna aldrig går in i bordet (räknas i uteKoll: varje stols rektangel i planet mot bordets och mot grannstolen).
+export const UTE_STIL = {
+  tra: [[0.98, 0.7, 0.5], [0.95, 0.98, 1.02], [0.2, 0.2, 0.21], [1.55, 1.6, 1.62]],     // teak, gråbetsad, svartmålad, vitmålad (gånger ekens ljusbruna ton)
+  dyna: [[1.12, 1.18, 1.15], [0.68, 0.86, 0.74], [0.3, 0.42, 0.66], [0.98, 0.62, 0.5]],      // linne, salvia, marinblå, terrakotta (gånger vävens beigerosa ton)
+  duk: [[1.2, 1.26, 1.26], [0.4, 0.6, 0.5], [1.05, 1.08, 1.0], [0.32, 0.43, 0.68]],     // ecru, skogsgrön, sand, marin
+};
+export const uteKoll = { grupper: 0, krockar: 0 };
+export function uteGrupper(THREE, poster, { VU, LJUS, ANISO = 4 } = {}) {
+  const g = new THREE.Group(); g.name = 'uteplatser';
+  if (!poster.length) return g;
+  const D = { tra: { P: [], N: [], U: [], C: [], I: [] }, tyg: { P: [], N: [], U: [], C: [], I: [] }, met: { P: [], N: [], U: [], C: [], I: [] } };
+  const M3 = new THREE.Matrix3(), V = new THREE.Vector3(), Q = new THREE.Quaternion(), E = new THREE.Euler(), S1 = new THREE.Vector3(1, 1, 1);
+  // lägg en geometri i D[mat] med matrisen m och färgen f; uv skalas med uvS
+  const lagg = (mat, geo, m, f, uvS = 1) => {
+    const A = D[mat], bas = A.P.length / 3, p = geo.attributes.position, n = geo.attributes.normal, u = geo.attributes.uv;
+    M3.getNormalMatrix(m);
+    for (let i = 0; i < p.count; i++) {
+      V.fromBufferAttribute(p, i).applyMatrix4(m); A.P.push(V.x, V.y, V.z);
+      V.fromBufferAttribute(n, i).applyMatrix3(M3).normalize(); A.N.push(V.x, V.y, V.z);
+      A.U.push(u ? u.getX(i) * uvS : 0, u ? u.getY(i) * uvS : 0); A.C.push(f[0], f[1], f[2]);
+    }
+    if (geo.index) for (let i = 0; i < geo.index.count; i++) A.I.push(geo.index.getX(i) + bas); else for (let i = 0; i < p.count; i++) A.I.push(i + bas);
+  };
+  // låda med träets fiber längs det längsta måttet (uv i meter / 0,8; ekfaneret har fibern längs v)
+  const BOX = new THREE.BoxGeometry(1, 1, 1);
+  const lada = (mat, Mb, c, h, f, rot = null) => {
+    const geo = BOX.clone(), uv = geo.attributes.uv, n = geo.attributes.normal, s = [h[0] * 2, h[1] * 2, h[2] * 2], fas = Math.abs(c[0] * 3.1 + c[2] * 1.7 + c[1] * 2.3) % 1;
+    for (let i = 0; i < uv.count; i++) {
+      const ax = Math.abs(n.getX(i)) > 0.5 ? 0 : Math.abs(n.getY(i)) > 0.5 ? 1 : 2, a = [0, 1, 2].filter(k => k !== ax), lang = s[a[0]] >= s[a[1]] ? 0 : 1;
+      const p0 = uv.getX(i) * s[a[0]] / 0.8, p1 = uv.getY(i) * s[a[1]] / 0.8;
+      if (lang === 0) uv.setXY(i, p1 + fas * 0.37, p0 + fas); else uv.setXY(i, p0 + fas * 0.37, p1 + fas);   // fibern (texturens v) längs brädan
+    }
+    const m = new THREE.Matrix4().compose(new THREE.Vector3(...c), rot ? Q.setFromEuler(E.set(...rot)) : Q.identity(), new THREE.Vector3(...s));
+    lagg(mat, geo, m.premultiply(Mb), f); geo.dispose();
+  };
+  const dynaGeo = {};
+  const dyna = (Mb, c, h, f, rot = null, fin = false) => {   // fin: rundare kanter (300 trianglar, annars 108)
+    const k = h.map(v => v.toFixed(3)).join() + fin, geo = dynaGeo[k] || (dynaGeo[k] = new RoundedBoxGeometry(h[0] * 2, h[1] * 2, h[2] * 2, fin ? 2 : 1, Math.min(h[1] * 0.9, 0.035)));
+    const m = new THREE.Matrix4().compose(new THREE.Vector3(...c), rot ? Q.setFromEuler(E.set(...rot)) : Q.identity(), S1);
+    lagg('tyg', geo, m.premultiply(Mb), f, 1.6);
+  };
+  const CYL = new THREE.CylinderGeometry(1, 1, 1, 7, 1);
+  const ror = (Mb, a, b, rad, f) => {
+    const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), d = B.clone().sub(A), l = d.length();
+    const m = new THREE.Matrix4().compose(A.clone().add(B).multiplyScalar(0.5), Q.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()), new THREE.Vector3(rad, l, rad));
+    lagg('met', CYL, m.premultiply(Mb), f);
+  };
+  const BORD = { hx: 0.8, hz: 0.45, h: 0.74 }, STOL = { hx: 0.29, hz: 0.27, sits: 0.44, z: 0.45 + 0.12 + 0.27 }, STOLX = [-0.42, 0.42];
+  for (const p of poster) {
+    const Mb = new THREE.Matrix4().compose(new THREE.Vector3(p.x, p.y, p.z), Q.setFromEuler(E.set(0, p.ry, 0)), S1);
+    const T = UTE_STIL.tra[p.stil | 0], TM = T.map(v => v * 0.82), DY = UTE_STIL.dyna[p.dyna | 0], DU = UTE_STIL.duk[p.duk | 0];
+    // bordet: sju skivbrädor med springor, sarg och ben
+    const nS = 7, sp = 0.012, bw = (BORD.hz * 2 - sp * (nS - 1)) / nS;
+    for (let k = 0; k < nS; k++) lada('tra', Mb, [0, BORD.h - 0.014, -BORD.hz + bw / 2 + k * (bw + sp)], [BORD.hx, 0.014, bw / 2], T.map(v => v * (0.94 + 0.12 * ((k * 37) % 7) / 7)));
+    for (const sz of [-1, 1]) lada('tra', Mb, [0, BORD.h - 0.065, sz * (BORD.hz - 0.06)], [BORD.hx - 0.08, 0.037, 0.011], TM);
+    for (const sx of [-1, 1]) lada('tra', Mb, [sx * (BORD.hx - 0.08), BORD.h - 0.065, 0], [0.011, 0.037, BORD.hz - 0.06], TM);
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) lada('tra', Mb, [sx * (BORD.hx - 0.1), (BORD.h - 0.03) / 2, sz * (BORD.hz - 0.08)], [0.028, (BORD.h - 0.03) / 2, 0.028], TM);
+    // karmstolarna, två på var långsida, vända mot bordet (ut = riktningen bort från bordet)
+    for (const ut of [-1, 1]) for (const cx of STOLX) {
+      const cz = ut * STOL.z, zF = cz - ut * (STOL.hz - 0.02), zB = cz + ut * (STOL.hz - 0.02);
+      for (const sx of [-1, 1]) {
+        const x = cx + sx * (STOL.hx - 0.025);
+        lada('tra', Mb, [x, 0.31, zF], [0.022, 0.31, 0.022], TM);                                   // framben upp till armstödet
+        lada('tra', Mb, [x, 0.21, zB], [0.022, 0.21, 0.022], TM);                                   // bakben
+        lada('tra', Mb, [x, 0.66, zB + ut * 0.06], [0.022, 0.27, 0.022], TM, [ut * 0.24, 0, 0]);     // ryggstolpe, lutar bakåt
+        lada('tra', Mb, [x, 0.635, (zF + zB) / 2 + ut * 0.02], [0.03, 0.013, STOL.hz], T);          // armstöd
+        lada('tra', Mb, [x, 0.12, cz], [0.012, 0.025, STOL.hz - 0.02], TM);                         // nedre slå
+      }
+      for (let k = 0; k < 5; k++) lada('tra', Mb, [cx, STOL.sits - 0.012, zF + ut * (0.03 + k * 0.098)], [STOL.hx - 0.05, 0.012, 0.04], T);   // sitsens ribbor
+      for (const sz of [zF, zB]) lada('tra', Mb, [cx, STOL.sits - 0.05, sz], [STOL.hx - 0.05, 0.03, 0.016], TM);
+      for (let k = 0; k < 4; k++) lada('tra', Mb, [cx, 0.56 + k * 0.095, zB + ut * (0.035 + k * 0.024)], [STOL.hx - 0.05, 0.03, 0.01], T, [ut * 0.24, 0, 0]);   // ryggens spjälor
+      // dynor: sits och rygg
+      dyna(Mb, [cx, STOL.sits + 0.035, cz - ut * 0.005], [STOL.hx - 0.065, 0.035, STOL.hz - 0.03], DY, null, p.fin);
+      dyna(Mb, [cx, 0.71, zB - ut * 0.01], [STOL.hx - 0.075, 0.19, 0.04], DY, [ut * 0.24, 0, 0], p.fin);
+    }
+    // parasoll genom bordets mitt: fot, stång, löpare med spröt, åtta ekrar och en duk i åtta fält med lätt svank och kappa
+    if (p.parasoll) {
+      const MET = [0.82, 0.82, 0.8], Ht = 2.46, R = 1.4, yR = 1.98, A = D.tyg;
+      ror(Mb, [0, 0.0, 0], [0, 0.06, 0], 0.24, [0.25, 0.25, 0.26]);
+      ror(Mb, [0, 0.06, 0], [0, Ht + 0.06, 0], 0.019, MET);
+      ror(Mb, [0, Ht + 0.04, 0], [0, Ht + 0.12, 0], 0.03, MET);
+      ror(Mb, [0, 1.74, 0], [0, 1.86, 0], 0.03, MET);
+      for (let k = 0; k < 8; k++) {
+        const a = (k + 0.5) / 8 * Math.PI * 2, c = Math.cos(a), sn = Math.sin(a);
+        ror(Mb, [0, Ht - 0.025, 0], [c * R, yR - 0.025, sn * R], 0.007, MET);
+        ror(Mb, [0, 1.8, 0], [c * R * 0.45, Ht - (Ht - yR) * 0.45 - 0.03, sn * R * 0.45], 0.006, MET);
+      }
+      const rader = p.fin ? 5 : 3, kol = p.fin ? 6 : 3;
+      M3.getNormalMatrix(Mb);
+      for (let k = 0; k < 8; k++) {
+        const a0 = (k + 0.5) / 8 * Math.PI * 2, a1 = (k + 1.5) / 8 * Math.PI * 2, bas = A.P.length / 3, ljus = k % 2 ? 1 : 0.95;
+        const pkt = (i, j) => {
+          const t = i / rader, u = j / kol, a = a0 + (a1 - a0) * u, mitt = Math.sin(u * Math.PI);
+          const rr = R * t * (1 - 0.035 * mitt), y = Ht - (Ht - yR) * t - 0.05 * mitt * t * (1.2 - t);
+          return [Math.cos(a) * rr, y, Math.sin(a) * rr];
+        };
+        for (let i = 0; i <= rader; i++) for (let j = 0; j <= kol; j++) {
+          const q = pkt(i, j), qa = pkt(Math.min(rader, i + 1), j), qb = pkt(i, Math.min(kol, j + 1)), qc = pkt(Math.max(0, i - 1), j), qd = pkt(i, Math.max(0, j - 1));
+          const e1 = new THREE.Vector3(qa[0] - qc[0], qa[1] - qc[1], qa[2] - qc[2]), e2 = new THREE.Vector3(qb[0] - qd[0], qb[1] - qd[1], qb[2] - qd[2]), nn = e2.cross(e1).normalize();
+          if (!(nn.y > 0)) nn.set(-nn.x, Math.abs(nn.y) || 1, -nn.z).normalize();
+          V.set(q[0], q[1], q[2]).applyMatrix4(Mb); A.P.push(V.x, V.y, V.z);
+          nn.applyMatrix3(M3).normalize(); A.N.push(nn.x, nn.y, nn.z);
+          A.U.push(j / kol * 1.4, i / rader * 1.6); A.C.push(DU[0] * ljus, DU[1] * ljus, DU[2] * ljus);
+        }
+        for (let i = 0; i < rader; i++) for (let j = 0; j < kol; j++) { const q = bas + i * (kol + 1) + j, w = q + kol + 1; A.I.push(q, w, q + 1, q + 1, w, w + 1); }
+        // kappan: en remsa 12 cm rakt ned längs kanten
+        const b2 = A.P.length / 3;
+        for (let j = 0; j <= kol; j++) for (const dy of [0, -0.12]) {
+          const q = pkt(rader, j); V.set(q[0], q[1] + dy, q[2]).applyMatrix4(Mb); A.P.push(V.x, V.y, V.z);
+          const a = a0 + (a1 - a0) * j / kol; V.set(Math.cos(a), 0, Math.sin(a)).transformDirection(Mb); A.N.push(V.x, V.y, V.z);
+          A.U.push(j / kol * 1.4, dy ? 0.15 : 0); A.C.push(DU[0] * ljus * 0.92, DU[1] * ljus * 0.92, DU[2] * ljus * 0.92);
+        }
+        for (let j = 0; j < kol; j++) { const q = b2 + j * 2; A.I.push(q, q + 2, q + 1, q + 1, q + 2, q + 3); }
+      }
+    }
+    // kontroll i planet: varje stol (inkl. armstöd och dyna, ±hx, ±hz) mot bordsskivan och mot stolen bredvid
+    uteKoll.grupper++;
+    for (const ut of [-1, 1]) for (const cx of STOLX) {
+      const zIn = ut * STOL.z - ut * STOL.hz;   // stolens framkant
+      if (Math.abs(cx) - STOL.hx < BORD.hx && Math.abs(zIn) < BORD.hz + 0.02) uteKoll.krockar++;
+    }
+    if (STOLX[1] - STOLX[0] < STOL.hx * 2 + 0.02) uteKoll.krockar++;
+  }
+  const tex = fil => { const t = new THREE.TextureLoader().load(fil, () => { try { window.dispatchEvent(new Event('husritare:nytt')); } catch (e) { /* utan fönster */ } }); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = ANISO; return t; };
+  const material = (namn, opt) => {
+    const m = new THREE.MeshLambertMaterial(Object.assign({ vertexColors: true }, opt));
+    if (m.map) m.map.colorSpace = THREE.SRGBColorSpace;
+    m.onBeforeCompile = s => {
+      Object.assign(s.uniforms, { miljoLjus: LJUS || { value: new THREE.Color(0.3, 0.3, 0.3) }, uNatt: (VU && VU.uNatt) || { value: 0 } });
+      s.fragmentShader = 'uniform vec3 miljoLjus;\nuniform float uNatt;\n' + s.fragmentShader
+        .replace('#include <color_fragment>', '#include <color_fragment>\n diffuseColor.rgb = mix( diffuseColor.rgb, min( diffuseColor.rgb, vec3( 0.26, 0.3, 0.42 ) ), uNatt * 0.8 );')
+        .replace('#include <lights_fragment_end>', '#include <lights_fragment_end>\n\treflectedLight.indirectDiffuse += diffuseColor.rgb * miljoLjus;');
+    };
+    m.customProgramCacheKey = () => 'ute-' + namn;
+    return m;
+  };
+  const MAT = {
+    tra: material('tra', { map: tex('images/tex/lucka-ek-diff.webp'), normalMap: tex('images/tex/lucka-ek-nor.webp') }),
+    tyg: material('tyg', { map: tex('images/tex/tyg-bomull-diff.webp'), normalMap: tex('images/tex/tyg-bomull-nor.webp'), side: THREE.DoubleSide }),
+    met: material('met', {}),
+  };
+  MAT.tra.normalScale = new THREE.Vector2(0.6, 0.6); MAT.tyg.normalScale = new THREE.Vector2(0.8, 0.8);
+  for (const k of ['tra', 'tyg', 'met']) {
+    const A = D[k]; if (!A.I.length) continue;
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(A.P, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(A.N, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(A.U, 2)); geo.setAttribute('color', new THREE.Float32BufferAttribute(A.C, 3));
+    geo.setIndex(A.I); geo.computeBoundingSphere();
+    const me = new THREE.Mesh(geo, MAT[k]); me.name = 'ute-' + k; me.castShadow = true; me.receiveShadow = true; me.userData.egen = false; me.matrixAutoUpdate = false;
+    g.add(me);
+  }
+  BOX.dispose(); CYL.dispose(); Object.values(dynaGeo).forEach(q => q.dispose());
+  try { window.__ute = uteKoll; } catch (e) { /* ingen window */ }
+  return g;
 }

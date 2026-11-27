@@ -85,6 +85,10 @@ def munk():
     return "".join(delar)
 
 
+# Riktiga bilder från fabriken i stegen (2026-11-26).
+STEG_FOTO = {4: '                <figure class="berattelse__foto"><img class="fb-bild" src="images/fabrik/vaggelement-produktion-1600.webp" srcset="images/fabrik/vaggelement-produktion-800.webp 600w, images/fabrik/vaggelement-produktion-1600.webp 1200w" sizes="(max-width: 900px) 86vw, 460px" width="1200" height="1600" loading="lazy" decoding="async" style="--pos: 50% 30%" alt="Väggelement byggs på arbetsbord i Legohus fabrik, med personalen i bakgrunden"><figcaption>Ur vår fabrik</figcaption></figure>\n'}
+
+
 def steg_html(i, rubrik, vem, klass, text, fas):
     n, namn, spann, ingress = fas
     huvud = ""
@@ -103,7 +107,7 @@ def steg_html(i, rubrik, vem, klass, text, fas):
                 </div>
                 <h3>{rubrik}</h3>
                 <p>{text}</p>
-              </div>
+{STEG_FOTO.get(i, "")}              </div>
               <div class="berattelse__plats" aria-hidden="true"></div>
             </li>'''
 
@@ -309,7 +313,7 @@ KROPP = f'''    <main id="innehall">
           </div>
           <div class="segment__bildram">
             <div class="segment__media">
-              <img src="images/generated-house-forest-01.webp" width="900" height="600" loading="lazy" decoding="async" alt="Mörkt småhus med stort glasparti i en tallskog">
+              <img class="fb-bild" src="images/fabrik/team-i-hallen-1200.webp" srcset="images/fabrik/team-i-hallen-800.webp 800w, images/fabrik/team-i-hallen-1200.webp 1200w" sizes="(max-width: 1040px) 92vw, 640px" width="1200" height="760" loading="lazy" decoding="async" style="--pos: 50% 45%" alt="Legohus personal i hjälmar och varselvästar i fabrikshallen">
             </div>
 {TAKKORT}
           </div>

@@ -27,6 +27,7 @@ const URL_PAKET = 'images/3d/folk-paket.bin?v=1', URL_MAN = 'images/3d/folk-man.
 const AV = (() => { try { return new URLSearchParams(location.search).get('folk') === '0'; } catch (e) { return false; } })();   // ?folk=0 stänger av
 const MOBIL = (() => { try { return matchMedia('(pointer: coarse)').matches || Math.min(screen.width, screen.height) < 760; } catch (e) { return false; } })();
 const MAX_NARA = MOBIL ? 6 : 12;
+const TICK = {};   // tickrarnas delade osynliga nät (geometri och material)
 const KVINNA = new Set([0, 1, 4, 6]);
 
 export function skapaFolk(THREE, { VU, LJUS }) {
@@ -244,12 +245,13 @@ export function skapaFolk(THREE, { VU, LJUS }) {
         g.add(q.rot);
       });
       // tickern: ett osynligt nät som alltid ritas; flyttar och animerar folket en gång per bildruta (VU.uTid)
-      const tick = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false }));
-      tick.geometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 0, 0, 0, 0, 0, 0], 3));
+      // (geometri och material delas av alla tickrar: förr fick varje miljöbyte ett nytt par som aldrig släpptes)
+      if (!TICK.geo) { TICK.geo = new THREE.BufferGeometry(); TICK.geo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 0, 0, 0, 0, 0, 0], 3)); TICK.mat = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false }); }
+      const tick = new THREE.Mesh(TICK.geo, TICK.mat);
       tick.frustumCulled = false; tick.userData.egen = false; tick.name = 'folk-tick';
       let tSist = null, ruta = 0;
       tick.onBeforeRender = (renderer, scene, camera) => {
-        if (camera.parent && camera.parent.isCubeCamera) return;   // (spegelns kubkamera inne i huset)
+        if ((camera.parent && camera.parent.isCubeCamera) || !camera.layers.isEnabled(0)) return;   // (spegelns kubkamera inne i huset; sjöns spegelkamera ser bara sitt lager – synligheten följer huvudkameran)
         const t = VU.uTid.value;
         // (körs vid varje ritning: synligheten följer kameran även när livet står still; tiden går bara med uTid)
         const dt = tSist === null ? 0 : Math.min(0.25, Math.max(0, t - tSist)); tSist = t; ruta++;
@@ -297,7 +299,7 @@ export function skapaFolk(THREE, { VU, LJUS }) {
       };
       g.add(tick);
       console.info('miljö: folk', F.length, 'personer');
-      try { if (/[?&]prov=1/.test(location.search)) (window.__folk = window.__folk || []).push({ g, F }); } catch (e) { /* utan fönster */ }   // för provbilder
+      try { if (/[?&]prov=1/.test(location.search)) (window.__folk = (window.__folk || []).filter(f => f.g.parent)).push({ g, F }); } catch (e) { /* utan fönster */ }   // för provbilder
       try { window.dispatchEvent(new Event('husritare:nytt')); } catch (e) { /* utan fönster */ }
     });
     return g;

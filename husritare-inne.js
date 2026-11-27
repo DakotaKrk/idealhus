@@ -16,7 +16,17 @@ const LU = 2.12;     // loftets undersida
 const LT = 2.32;     // loftets golv
 const PI = Math.PI;
 
-let T = null, MAT = null, ACC = null, BAS = null, CEIL = null, HH = null, LJUS = null, RGH = 1, EFTER = null, BADRUM = null, DUSCHAR = null;
+let T = null, MAT = null, ACC = null, BAS = null, CEIL = null, HH = null, LJUS = null, RGH = 1, EFTER = null, BADRUM = null, DUSCHAR = null, WCP = null, PLAD = null;
+// produktkortens lådor: en låda (lokalt i BAS, golvet y = 0) kring en sak, i husets system, med
+// sakens framsida (lokalt +z) som riktning. Motorn ställer kameran framför lådan (se produktAnkare).
+function pLada(id, x0, y0, z0, x1, y1, z1) {
+  if (!PLAD) return;
+  const mn = V(Infinity, Infinity, Infinity), mxv = V(-Infinity, -Infinity, -Infinity);
+  for (const x of [x0, x1]) for (const y of [y0, y1]) for (const z of [z0, z1]) { const p = V(x, y, z).applyMatrix4(BAS); mn.min(p); mxv.max(p); }
+  const n = V(0, 0, 1).transformDirection(BAS).setY(0).normalize();
+  const r = v => Math.round(v * 1000) / 1000;
+  (PLAD[id] || (PLAD[id] = [])).push({ min: mn.toArray().map(r), max: mxv.toArray().map(r), n: n.toArray().map(r) });
+}
 let SPEGLAR = null, INNE = null, OPP = null, LAMPOR = null, SITT = null, BRYT = null, ID = null, NSTOL = 0, NSANG = 0;
 let VAGGAR = null, LOFT = null, HAL = null, TON = null, FARG = null, SEED = 1;
 // Lager för genomskärningen (tak / loft / botten), snitthöjder och gånghinder
@@ -95,9 +105,9 @@ const PROV = globalThis.__INNE_PROV || null;
 if (PROV && PROV.vyer) Object.entries(PROV.vyer).forEach(([id, l]) => l.forEach((v, i) => { if (v && INNE_VYER[id] && INNE_VYER[id][i]) Object.assign(INNE_VYER[id][i], v); }));
 const RUM = {
   'sadel-30': [['Allrum', 1.6, 0.2, 0, [3.5, 1.15, -0.45]], ['Kök', 2.15, -0.3, 0, [0.3, 1.5, -1.55]], ['Hall', -0.9, 0.6, 0, [3.2, 1.25, 0.3]],
-    ['Sovrum', -2.5, 0.8, 0, [-3.0, 0.95, -1.7]], ['WC/bad', -1.1, -0.6, 0, [-1.97, 1.3, -0.35]], ['Loft', -2.6, 0.5, 'loft', [-3.3, 2.5, -1.3]]],
+    ['Sovrum', -2.5, 0.6, 0, [-3.0, 0.95, -1.7]], ['WC/bad', -1.1, -0.6, 0, [-1.97, 1.3, -0.35]], ['Loft', -2.6, 0.5, 'loft', [-3.3, 2.5, -1.3]]],
   'sadel-40': [['Allrum', 1.4, 0.0, 0, [4.7, 1.2, -0.4]], ['Kök', 2.5, -0.15, 0, [-0.4, 1.5, -1.2]], ['Hall', -1.9, 0.57, 0, [3.5, 1.3, 0.4]],
-    ['Sovrum', -3.95, 1.1, 0, [-3.96, 0.95, -1.7]], ['WC/bad', -2.2, -0.6, 0, [-3.02, 1.3, -0.55]], ['Loft', -1.6, -0.5, 'loft', [-4.2, 2.45, -0.9]]],
+    ['Sovrum', -3.95, 0.66, 0, [-3.96, 0.95, -1.7]], ['WC/bad', -2.2, -0.6, 0, [-3.02, 1.3, -0.55]], ['Loft', -1.6, -0.5, 'loft', [-4.2, 2.45, -0.9]]],
   'sadel-50': [['Allrum', 2.3, 0.15, 0, [6.0, 1.2, 0.3]], ['Kök', 3.3, 0.12, 0, [0.6, 1.5, -1.0]], ['Hall', -0.55, 0.6, 0, [4.0, 1.3, 0.4]],
     ['Sovrum', -3.55, 0.45, 0, [-5.9, 1.0, -0.2]], ['WC/bad', -0.45, -0.5, 0, [0.435, 1.3, -0.44]], ['Bastu', -2.1, -0.45, 0, [-3.0, 1.0, -1.2]],
     ['Loft', -1.5, -0.6, 'loft', [-5.2, 2.45, -0.9]]],   // mal: in över loftet (förr österut över räcket)
@@ -978,24 +988,25 @@ function oppningsbar(namn, typ, axel, max, start, m, fn, rum = null) {
   return OPP.length - 1;
 }
 // närmaste rum (genomgångens ståplatser) för en punkt i husets system
-// (vägg mellan två punkter på golvnivå, dörröppningar räknas som fria)
-function blockerad(ax, az, bx, bz) {
+// (vägg mellan två punkter på golvnivå, dörröppningar räknas som fria; stangd: dörrarnas
+// öppningar räknas som vägg, bara öppningar utan dörr är fria)
+function blockerad(ax, az, bx, bz, stangd = false) {
   return VAGGAR.some(w => {
     if (w.bunn > 0) return false;
     const [pa, pb, sa, sb] = w.axel === 'x' ? [az, bz, ax, bx] : [ax, bx, az, bz];
     if ((pa - w.c) * (pb - w.c) >= 0) return false;
     const s = sa + (sb - sa) * (w.c - pa) / (pb - pa);
-    return s > w.lo - 0.02 && s < w.hi + 0.02 && !w.hal.some(h => h.h > 1.8 && s > h.a && s < h.b);
+    return s > w.lo - 0.02 && s < w.hi + 0.02 && !w.hal.some(h => h.h > 1.8 && !(stangd && h.dorr) && s > h.a && s < h.b);
   });
 }
-function rumVid(x, z, y = null) {
+function rumVid(x, z, y = null, stangd = false) {
   const loft = y != null ? (y > LT - 0.05 && iLoft(x, z)) : LAGER === 'loft';
   let b = null, bd = 1e9;
   // i badrummet hör allt till badrummets egen punkt (väggarna kan vara ritade först senare)
   const br = !loft && BADRUM ? BADRUM.find(r => x > r.x0 && x < r.x1 && z > r.z0 && z < r.z1) : null;
   (RUM[ID] || []).forEach(([namn, rx, rz, nv]) => {
     if ((nv === 'loft') !== loft) return;
-    const d = Math.hypot(rx - x, rz - z) + (!loft && blockerad(x, z, rx, rz) ? 50 : 0) + (br && !(rx > br.x0 && rx < br.x1 && rz > br.z0 && rz < br.z1) ? 20 : 0);
+    const d = Math.hypot(rx - x, rz - z) + (!loft && blockerad(x, z, rx, rz, stangd) ? 50 : 0) + (br && !(rx > br.x0 && rx < br.x1 && rz > br.z0 && rz < br.z1) ? 20 : 0);
     if (d < bd) { bd = d; b = namn; }
   });
   return b;
@@ -1292,7 +1303,8 @@ function golvYta(x0, x1, z0, z1, y = 0.004, sk = 2.4) {
   const bad = y < 0.1 ? BADRUM : [];
   bad.forEach(b => { kx.push(b.x0, b.x1); kz.push(b.z0, b.z1); });
   const xs = bryt(x0, x1, kx.filter(v => v > x0 && v < x1), 0.45), zs = bryt(z0, z1, kz.filter(v => v > z0 && v < z1), 0.45);
-  yta('golv', (u, v) => V(u, y, v), V(0, 1, 0), xs, zs, () => z1, bad.map(b => ({ u0: b.x0 + 0.002, u1: b.x1 - 0.002, v0: b.z0 + 0.002, v1: b.z1 - 0.002 })), p => [p.x / sk, p.z / sk]);
+  const gm = golvMk(), gs = gm === 'golv' ? sk : golvSkala(gm);   // fotogolvet i verklig skala (FOTO[].m)
+  yta(gm, (u, v) => V(u, y, v), V(0, 1, 0), xs, zs, () => z1, bad.map(b => ({ u0: b.x0 + 0.002, u1: b.x1 - 0.002, v0: b.z0 + 0.002, v1: b.z1 - 0.002 })), p => [p.x / gs, p.z / gs]);
 }
 
 // Plant tak mellan två räta kanter (a0 -> a1 längs x vid z0, b0 -> b1 vid z1), y från f(x, z).
@@ -1340,13 +1352,13 @@ function ramMatris(f, djup) {
 // normal ut mot rummet är k·z (k = ±1), greppet pekar åt sx (±1) längs x. Allt läggs i mk.
 function trycke(mk, M, x, y, z, k, sx, vred = true) {
   iRam(M, () => {
-    const ros = (r, yy) => lagg(mk, new T.LatheGeometry([[0, 0], [r, 0], [r + 0.0012, 0.0025], [r, 0.006], [r - 0.004, 0.008], [0, 0.008]].map(q => new T.Vector2(q[0], q[1])), 16).rotateX(k * PI / 2), mx(x, yy, z));
+    const ros = (r, yy) => lagg(mk, new T.LatheGeometry([[0, 0], [r, 0], [r + 0.0012, 0.0025], [r, 0.006], [r - 0.004, 0.008], [0, 0.008]].map(q => new T.Vector2(q[0], q[1])), 28).rotateX(k * PI / 2), mx(x, yy, z));
     ros(0.025, y);
-    lagg(mk, new T.CylinderGeometry(0.0085, 0.009, 0.046, 10, 1, true).rotateX(PI / 2), mx(x, y, z + k * 0.03));
+    lagg(mk, new T.CylinderGeometry(0.0085, 0.009, 0.046, 18, 1, true).rotateX(PI / 2), mx(x, y, z + k * 0.03));
     const P = [V(x, y, z + k * 0.046), V(x + sx * 0.012, y, z + k * 0.0575), V(x + sx * 0.04, y, z + k * 0.0605), V(x + sx * 0.09, y - 0.002, z + k * 0.0605), V(x + sx * 0.128, y - 0.004, z + k * 0.059)];
-    tub(mk, P, 0.0098, 0.0078, 12, 8);
-    lagg(mk, new T.SphereGeometry(0.0078, 8, 4, 0, 2 * PI, 0, PI / 2).rotateZ(-sx * PI / 2), mx(P[4].x, P[4].y, P[4].z));   // rundad ände
-    lagg(mk, new T.SphereGeometry(0.0098, 8, 4), mx(P[0].x, P[0].y, P[0].z));
+    tub(mk, P, 0.0098, 0.0078, 20, 14);
+    lagg(mk, new T.SphereGeometry(0.0078, 14, 7, 0, 2 * PI, 0, PI / 2).rotateZ(-sx * PI / 2), mx(P[4].x, P[4].y, P[4].z));   // rundad ände
+    lagg(mk, new T.SphereGeometry(0.0098, 16, 8), mx(P[0].x, P[0].y, P[0].z));
     if (vred === false) return;
     ros(0.019, y - 0.13);
     // nyckelskylt: ett mörkt nyckelhål (rund topp och smal spalt) i skylten
@@ -1369,11 +1381,13 @@ function eluttag(x, y, z, nx, nz, n = 2) {
     ton('#ebe9e4', () => rbx('vit', W, 0.08, 0.009, 0, 0, 0.0045, 0.0045, 0, 0, 1));
     for (let i = 0; i < n; i++) { const cx = n === 2 ? (i - 0.5) * 0.072 : 0;
       // (insatsen ligger framför ramens framsida: tidigare låg den inne i ramen och syntes inte)
-      // en rund kant som står upp runt en gråare, lite försänkt botten, två mörka hål och jordblecksskåror
-      ton('#f4f3ef', () => lagg('vit', new T.CylinderGeometry(0.0215, 0.0235, 0.0035, 12, 1, true).rotateX(PI / 2), mx(cx, 0, 0.0105)));
-      ton('#cfccc4', () => lagg('vit', new T.CircleGeometry(0.0215, 12), mx(cx, 0, 0.0098)));
-      ton('#1f1e1c', () => { for (const s of [-1, 1]) lagg('vit', new T.CircleGeometry(0.0036, 8), mx(cx + s * 0.0095, 0, 0.0104)); });
-      ton('#4a4844', () => { for (const s of [-1, 1]) box('vit', 0.01, 0.0028, 0.001, cx, s * 0.0175, 0.0104); });
+      // en rund kant som står upp runt en gråare, lite försänkt botten, två mörka hål och jordblecksskåror.
+      // Varje lager minst 1 mm från nästa: med 0,8 mm förlorade botten mot ramen på håll (djupbuffertens
+      // upplösning) och bara hålen och de mörka blecken syntes, som svarta streck på en vit platta.
+      ton('#f4f3ef', () => lagg('vit', new T.CylinderGeometry(0.0215, 0.0235, 0.0036, 12, 1, true).rotateX(PI / 2), mx(cx, 0, 0.0118)));
+      ton('#cfccc4', () => lagg('vit', new T.CircleGeometry(0.0215, 12), mx(cx, 0, 0.0112)));
+      ton('#1f1e1c', () => { for (const s of [-1, 1]) lagg('vit', new T.CircleGeometry(0.0036, 8), mx(cx + s * 0.0095, 0, 0.0123)); });
+      ton('#8d8a83', () => { for (const s of [-1, 1]) box('vit', 0.009, 0.0024, 0.0006, cx, s * 0.0172, 0.0124); });
     }
   });
 }
@@ -1386,11 +1400,18 @@ function elbrytare(x, y, z, nx, nz) {
   BRYT.push(V(x + nx * 0.006, y, z + nz * 0.006));
 }
 // Brandvarnare i taket (husets ram): rund, låg kupa med fasad kant och en liten röd lysdiod.
-function brandvarnare(x, z, tak) {
+// takFn(x, z) ger takets höjd: under ett snett innertak lutas varnaren efter taket (förut satt
+// den vågrätt och halva försvann upp i det sneda taket).
+function brandvarnare(x, z, takFn) {
+  const e = 0.06, tak = takFn(x, z);
+  const sx = (takFn(x + e, z) - takFn(x - e, z)) / (2 * e), sz = (takFn(x, z + e) - takFn(x, z - e)) / (2 * e);
+  const n = V(-sx, 1, -sz).normalize();
+  const bas = BAS.clone().multiply(new T.Matrix4().compose(V(x, tak - 0.001, z), new T.Quaternion().setFromUnitVectors(V(0, 1, 0), n), V(1, 1, 1)));
+  const lok = (geo, px, py, pz, ry = 0) => lagg('vagg', geo, bas.clone().multiply(new T.Matrix4().compose(V(px, py, pz), new T.Quaternion().setFromEuler(new T.Euler(0, ry, 0)), V(1, 1, 1))));
   iLager('tak', () => {
-    ton('#f3f2ee', () => svarv('vagg', [[0, 0], [0.05, 0], [0.052, -0.006], [0.048, -0.03], [0.04, -0.036], [0, -0.038]], x, tak, z, 14));
-    ton('#d9d7d1', () => { for (let i = 0; i < 4; i++) { const a = i * PI / 3; box('vagg', 0.012, 0.003, 0.0035, x + Math.cos(a) * 0.03, tak - 0.022, z + Math.sin(a) * 0.03, -a); } });
-    ton('#b8402f', () => cyl('vagg', 0.002, 0.002, 0.002, x + 0.014, tak - 0.0385, z, 6));
+    ton('#f3f2ee', () => lok(new T.LatheGeometry([[0, 0], [0.05, 0], [0.052, -0.006], [0.048, -0.03], [0.04, -0.036], [0, -0.038]].map(p => new T.Vector2(p[0], p[1])), 14), 0, 0, 0));
+    ton('#d9d7d1', () => { for (let i = 0; i < 4; i++) { const a = i * PI / 3; lok(new T.BoxGeometry(0.012, 0.003, 0.0035), Math.cos(a) * 0.03, -0.022, Math.sin(a) * 0.03, -a); } });
+    ton('#b8402f', () => lok(new T.CylinderGeometry(0.002, 0.002, 0.002, 6), 0.014, -0.0385, 0));
   });
 }
 // Uttag på närmaste vägg (husets ram) intill punkten (x, z), i höjden y: körs när alla möbler
@@ -1569,11 +1590,19 @@ function oppningsDetaljer(H) {
       const rw = ru1 - ru0, rcu = (ru0 + ru1) / 2, rh = rv1 - rv0, rcv = (rv0 + rv1) / 2;
       const kd = 0.038, kn = -0.105;  // täcker även motorns färgade karmkant mot glaset
       if (typ === 'f' || typ === 'sk') {
-        boxM('vit', m0, rw, 0.062, kd, rcu, rv1 - 0.031, kn);
-        boxM('vit', m0, rw, 0.062, kd, rcu, rv0 + 0.031, kn);
-        boxM('vit', m0, 0.062, rh, kd, ru0 + 0.031, rcv, kn);
-        boxM('vit', m0, 0.062, rh, kd, ru1 - 0.031, rcv, kn);
-        for (let i = 1; i < rutor; i++) boxM('vit', m0, 0.08, rh, kd, ru0 + (rw * i) / rutor, rcv, kn);
+        // karm och båge med profil: rundade kanter (6 mm), en glaslist som står ut 9 mm mot rummet
+        // längs kanten mot glaset och en smal skuggfog mellan dem (förr platta lådor)
+        const kp = (lw, lh, x, y, ix, iy) => iRam(m0, () => {
+          rbx('vit', lw, lh, kd, x, y, kn, 0.006, 0, 0, 3);
+          const gb = 0.016, gx = ix ? x + ix * (lw / 2 - gb / 2) : x, gy = iy ? y + iy * (lh / 2 - gb / 2) : y;
+          rbx('vit', ix ? gb : lw - 0.05, iy ? gb : lh - 0.05, 0.012, gx, gy, kn - kd / 2 - 0.004, 0.004, 0, 0, 2);
+          ton('#cfcac0', () => box('vit', ix ? 0.003 : lw - 0.05, iy ? 0.003 : lh - 0.05, 0.002, ix ? gx - ix * (gb / 2 + 0.0015) : x, iy ? gy - iy * (gb / 2 + 0.0015) : y, kn - kd / 2 - 0.0005));
+        });
+        kp(rw, 0.062, rcu, rv1 - 0.031, 0, -1);
+        kp(rw, 0.062, rcu, rv0 + 0.031, 0, 1);
+        kp(0.062, rh, ru0 + 0.031, rcv, 1, 0);
+        kp(0.062, rh, ru1 - 0.031, rcv, -1, 0);
+        for (let i = 1; i < rutor; i++) iRam(m0, () => rbx('vit', 0.08, rh, kd, ru0 + (rw * i) / rutor, rcv, kn, 0.008, 0, 0, 3));
         // (handtagen förr: raka svarta lådor; nu rundad rosett, bas och avrundat grepp)
         if (typ === 'sk') skjutGrepp('svart', m0, rcu - rw * 0.02, 1.05, kn - kd / 2, -1);
         else if (LAGER === 'botten') fonsterHandtag('svart', m0, ru0 + rw / rutor - 0.1, rcv, kn - kd / 2, -1);
@@ -1594,7 +1623,9 @@ function oppningsDetaljer(H) {
         } else boxM('vit', m0, bw, bh, dd, rcu, b0 + bh / 2, dn);
         const sida = s === 'N' || s === 'W' || s === 'E' ? -1 : 1;   // låssidan (gångjärnen som i motorns oppning())
         // trycke och låsvred (förr raka svarta lådor): samma modell som innerdörrarna
-        trycke('svart', m0, rcu + sida * (rw / 2 - 0.07), 1.0, dn - dd / 2, -1, -sida);
+        // (mitt 6 cm in från bladets låskant: på 7 cm från öppningens kant låg rosett och vred
+        // halvt bakom karmsidan, 5,6 cm bred, och syntes som halva skivor)
+        trycke('diskstal', m0, rcu + sida * (bw / 2 - 0.06), 1.0, dn - dd / 2, -1, -sida);   // borstat stål, som innerdörrarna
         // strömbrytare på väggen vid låssidan, utanför fodret (fodret är 6 cm brett)
         { const us = (sida > 0 ? h.u1 : h.u0) + sida * 0.13;
           if (us > ua + 0.1 && us < ub - 0.1 && !hal.some(h2 => h2 !== h && us > h2.u0 - 0.15 && us < h2.u1 + 0.15)) { const p = V(us, 1.1, -I).applyMatrix4(m0), nn = V(0, 0, -1).transformDirection(m0); elbrytare(p.x, 1.1, p.z, nn.x, nn.z); } }
@@ -1631,7 +1662,7 @@ function vagg(axel, c, s0, s1, op = {}) {
     if (typeof op.topp === 'number') return op.topp;
     return axel === 'x' ? Math.max(CEIL(s, c - t / 2), CEIL(s, c + t / 2)) : Math.max(CEIL(c - t / 2, s), CEIL(c + t / 2, s));
   };
-  const hal = [...(op.dorrar || []), ...(op.oppna || [])].map(d => ({ a: d.a, b: d.b, h: d.h ?? 2.1 })).sort((p, q) => p.a - q.a);
+  const hal = [...(op.dorrar || []).map(d => ({ a: d.a, b: d.b, h: d.h ?? 2.1, dorr: true })), ...(op.oppna || []).map(d => ({ a: d.a, b: d.b, h: d.h ?? 2.1 }))].sort((p, q) => p.a - q.a);
   VAGGAR.push({ axel, c, lo, hi, t, topp, bunn, hal });
   const P = (sd, s, v) => (axel === 'x' ? V(s, v, c + sd * t / 2) : V(c + sd * t / 2, v, s));
   const N = sd => (axel === 'x' ? V(0, 0, sd) : V(sd, 0, 0));
@@ -1718,7 +1749,7 @@ function vagg(axel, c, s0, s1, op = {}) {
     const tj = d.mk === 'glas' ? 0.032 : 0.04, zb = (tj / 2 + 0.0005) * s;   // bladets mitt (lokalt z), inåt i öppningen
     // dörren heter efter rummet den hör till: rummet på andra sidan om hallen, korridoren eller
     // allrummet (sovrummet den slår in i, badet den slår ut från); annars sidan den inte slår mot
-    const glasd = d.mk === 'glas', rumSida = sd => { const q = P(sd, (d.a + d.b) / 2, 0).addScaledVector(N(sd), 0.5); return rumVid(q.x, q.z) || ''; };
+    const glasd = d.mk === 'glas', rumSida = sd => { const q = P(sd, (d.a + d.b) / 2, 0).addScaledVector(N(sd), 0.5); return rumVid(q.x, q.z, null, true) || ''; };
     const gemen = r => /hall|korridor|allrum|vardagsrum|kök/i.test(r), rIn = rumSida(d.sida), rUt = rumSida(-d.sida);
     const dRum = rIn && gemen(rUt) && !gemen(rIn) ? rIn : rUt || rIn;
     const namn = glasd ? 'Bastudörr' : 'Dörr ' + dRum.toLowerCase();
@@ -2364,6 +2395,7 @@ function soffa0(w, d0 = 0.86, o = {}) {
   [-1, 1].forEach(k => sitt('Soffan', [k * w * 0.22, 1.1, 0.02], [k * w * 0.1, 0.95, 2.6], [w * 0.4, 0.45, d * 0.8, k * w * 0.22, 0.3, 0.05]));
   skugga(0, 0, w, d, 0, 0.2, 0.6);
   hind(w, d);
+  if (PHM) sidobordVidSoffa(w, d);
   // vägguttag vid soffans ena gavel (lampa och laddare)
   if (LAGER !== 'loft') for (const sx of [1, -1]) { const p = V(sx * (w / 2 + 0.18), 0, -d / 2).applyMatrix4(BAS); eluttagVid(p.x, p.z, 0.25); }
   ton('#7a5a3c', () => {
@@ -2425,6 +2457,8 @@ function stol(sittplats = true) {
   if (sittplats && NSTOL++ < 2) sitt('Matplatsen', [0, 1.15, -0.02], [0, 0.78, 0.9], [0.44, 0.5, 0.43, 0, 0.25, 0]);
   skugga(0, 0, 0.44, 0.44, 0, 0.1, 0.32);
   hind(0.44, 0.44);
+  // vitmålad pinnstol från Poly Haven (laddas när man går in); annars den egna i ek
+  if (phMobel('painted_wooden_chair_01', BAS, { h: 0.9, w: 0.44, liten: false })) return;
   rbx('ek', 0.44, 0.035, 0.43, 0, 0.455, 0, 0.012, 0, 0, 1);
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) lagg('ek', new T.CylinderGeometry(0.016, 0.012, 0.44, 8), mx(sx * 0.18, 0.22, sz * 0.17, 0, sz * 0.05, -sx * 0.05));
   for (const sx of [-1, 1]) cyl('ek', 0.012, 0.012, 0.38, sx * 0.19, 0.66, -0.2, 8);
@@ -2453,7 +2487,8 @@ function bordsdukning(y, sk = 0.11) {
   ton('#d9d2c6', () => svarv('keramik', [[0, 0], [0.05, 0], [0.09, 0.02], [sk, 0.06], [sk - 0.005, 0.065], [0.08, 0.03], [0, 0.025]], -0.12, y, 0.02, 44));   // 44 segment: kanten var kantig på nära håll
   frukter(-0.12, y + 0.03, 0.02, 0.7);
   vas(0.16, y, -0.04, '#8c8f80', 0.2, true);
-  // ljusstake i mässing med ett kronljus
+  // ljuslykta i mässing och glas (Poly Haven) eller ljusstake i mässing med ett kronljus
+  if (phMobel('Lantern_01', mx(0.04, y, 0.15, 0.4), { h: 0.27, glod: true, liten: true })) return;
   ton('#b08d57', () => glans(0.8, () => svarv('keramik', [[0, 0], [0.035, 0], [0.036, 0.006], [0.012, 0.014], [0.01, 0.06], [0.016, 0.065], [0.016, 0.08], [0, 0.08]], 0.04, y, 0.15, 24)));
   ljus(0.04, y + 0.08, 0.15, 0.011, 0.2);
 }
@@ -3195,6 +3230,9 @@ function paraply(x, z, ry, fg = '#2d3440') {
 // Vägghängd toalett framför ett kaklat installationsschakt (dold cistern) med ekhylla.
 // Lokalt: väggen vid z = -0.33, schaktets framsida vid z = -0.13.
 function toalett() {
+  // var WC:n står (husets system), för husritarens produktkort
+  if (WCP) WCP.push(V(0, 0.42, 0.12).applyMatrix4(BAS).toArray().map(v => Math.round(v * 1000) / 1000));
+  pLada('wc', -0.22, 0, -0.23, 0.22, 1.13, 0.36);
   skugga(0, 0.08, 0.34, 0.5, 0, 0.12, 0.26);
   hind(0.64, 0.74, 0, 0.04);
   ton('#e8e3da', () => kakelLada(0.64, 1.1, 0.2, 0, 0.55, -0.23));
@@ -3244,31 +3282,32 @@ function toalett() {
   smavaxt(0.2, -0.22, 1.13);
 }
 
-// Vägghängt kommodskåp i ek med skålhandfat, rund spegel, vägglampa, tvålpumpar och växt;
+// Vägghängt kommodskåp i ek (55 × 35 cm, som kalkylens Svedbergs Bloc 55) med skålhandfat, rund spegel, vägglampa, tvålpumpar och växt;
 // handdukstork med handdukar vid sidan (o.sida = +1/-1) och matta framför. Väggen vid z = -0.23.
 function handfat(o = {}) {
-  skugga(0, 0, 0.6, 0.46, 0, 0.12, 0.3);
-  hind(0.6, 0.46);
-  rbx('ek', 0.6, 0.38, 0.42, 0, 0.66, -0.02, 0.01, 0, 0, 2);
+  skugga(0, -0.02, 0.55, 0.4, 0, 0.12, 0.3);
+  hind(0.55, 0.46);
+  rbx('ek', 0.55, 0.38, 0.35, 0, 0.66, -0.055, 0.01, 0, 0, 2);
+  pLada('komod', -0.275, 0.47, -0.23, 0.275, 0.86, 0.13);
   // greppfri låda i ek med en mörk grepplist; lådkorgen följer med ut
-  oppningsbar('Kommodlåda', 'lada', 'z', 0.3, 0, BAS.clone().multiply(new T.Matrix4().makeTranslation(0, 0.66, 0.2)), () => {
-    rbx('ek', 0.598, 0.376, 0.02, 0, 0, 0, 0.008, 0, 0, 2);
-    ton('#5b4330', () => box('ek', 0.56, 0.006, 0.004, 0, -0.02, 0.011));
-    ton('#d9c4a4', () => { box('ek', 0.54, 0.01, 0.36, 0, -0.15, -0.19); for (const sx of [-1, 1]) box('ek', 0.012, 0.2, 0.36, sx * 0.27, -0.06, -0.19); box('ek', 0.54, 0.2, 0.012, 0, -0.06, -0.37); });
+  oppningsbar('Kommodlåda', 'lada', 'z', 0.3, 0, BAS.clone().multiply(new T.Matrix4().makeTranslation(0, 0.66, 0.13)), () => {
+    rbx('ek', 0.548, 0.376, 0.02, 0, 0, 0, 0.008, 0, 0, 2);
+    ton('#5b4330', () => box('ek', 0.51, 0.006, 0.004, 0, -0.02, 0.011));
+    ton('#d9c4a4', () => { box('ek', 0.49, 0.01, 0.3, 0, -0.15, -0.16); for (const sx of [-1, 1]) box('ek', 0.012, 0.2, 0.3, sx * 0.245, -0.06, -0.16); box('ek', 0.49, 0.2, 0.012, 0, -0.06, -0.31); });
     // vikta handdukar, toalettartiklar, en liten korg och toalettrullar
     ['#f1ece3', '#d9cbb2', '#8c9a8a'].forEach((fg, j) => ton(fg, () => rbx('ek', 0.22, 0.04, 0.17, -0.14, -0.125 + j * 0.041, -0.16, 0.015, 0, 0, 1)));
     [['#e9e4da', 0.13], ['#6f7a66', 0.11], ['#c7a27c', 0.09]].forEach(([fg, h], j) => ton(fg, () => svarv('ek', [[0, 0], [0.022, 0], [0.024, h * 0.85], [0.01, h], [0, h]], 0.06 + j * 0.05, -0.145, -0.1, 24)));
     // liten mjuk korg med tre upprullade gästhanddukar
-    ton('#cdb595', () => svarv('tyg', [[0, 0], [0.058, 0], [0.066, 0.006], [0.072, 0.04], [0.073, 0.066], [0.076, 0.072], [0.072, 0.077], [0.068, 0.072], [0.067, 0.04], [0.06, 0.008], [0, 0.006]], 0.15, -0.145, -0.27, 32));
+    ton('#cdb595', () => svarv('tyg', [[0, 0], [0.058, 0], [0.066, 0.006], [0.072, 0.04], [0.073, 0.066], [0.076, 0.072], [0.072, 0.077], [0.068, 0.072], [0.067, 0.04], [0.06, 0.008], [0, 0.006]], 0.15, -0.145, -0.225, 32));
     vav('frotte', () => [['#f4f1ea', 0], ['#dfe3d8', 2.094], ['#ebe2d2', 4.189]].forEach(([fg, a]) =>
-      rullat(fg, 0.027, 0.09, mx(0.15 + Math.cos(a) * 0.032, -0.093, -0.27 + Math.sin(a) * 0.032, a, 0.06 * Math.sin(a), 0.06 * Math.cos(a)))));
+      rullat(fg, 0.027, 0.09, mx(0.15 + Math.cos(a) * 0.032, -0.093, -0.225 + Math.sin(a) * 0.032, a, 0.06 * Math.sin(a), 0.06 * Math.cos(a)))));
   });
   // fristående skålhandfat i blank vit keramik, jämnt svarvat
-  ton('#f6f5f1', () => glans(0.5, () => svarv('keramik', [[0, 0], [0.09, 0], [0.13, 0.012], [0.158, 0.04], [0.17, 0.08], [0.173, 0.112], [0.17, 0.125], [0.163, 0.125], [0.158, 0.1], [0.145, 0.06], [0.11, 0.032], [0.05, 0.024], [0, 0.023]], 0, 0.85, 0.02, 44)));
+  ton('#f6f5f1', () => glans(0.5, () => svarv('keramik', [[0, 0], [0.09, 0], [0.13, 0.012], [0.158, 0.04], [0.17, 0.08], [0.173, 0.112], [0.17, 0.125], [0.163, 0.125], [0.158, 0.1], [0.145, 0.06], [0.11, 0.032], [0.05, 0.024], [0, 0.023]], 0, 0.85, -0.02, 44)));
   // bottenventil i krom med en mörk springa runt proppen
-  cyl('spegel', 0.021, 0.021, 0.003, 0, 0.8745, 0.02, 20);
-  ton('#5a5855', () => cyl('vit', 0.0135, 0.0135, 0.0034, 0, 0.8745, 0.02, 14));
-  cyl('spegel', 0.012, 0.012, 0.0045, 0, 0.8752, 0.02, 14);
+  cyl('spegel', 0.021, 0.021, 0.003, 0, 0.8745, -0.02, 20);
+  ton('#5a5855', () => cyl('vit', 0.0135, 0.0135, 0.0034, 0, 0.8745, -0.02, 14));
+  cyl('spegel', 0.012, 0.012, 0.0045, 0, 0.8752, -0.02, 14);
   // väggblandare i mattsvart: rosett, pip och spak
   // (rosett mot kaklet, vågrät pip 21 cm ut över skålens mitt 10 cm över kanten, perlator;
   // spaken på en egen rosett bredvid)
@@ -3406,6 +3445,7 @@ function dusch(x0, z0, x1, z1, glas, vaggSida) {
   const p = { N: [cx, z0], S: [cx, z1], W: [x0, cz], E: [x1, cz] }[vaggSida];
   const inn = V(cx - p[0], 0, cz - p[1]).normalize(), ry = Math.atan2(inn.x, inn.z);
   const nsAxel = vaggSida === 'N' || vaggSida === 'S';
+  if (PLAD) (PLAD.dusch || (PLAD.dusch = [])).push({ min: [x0, 0.45, z0], max: [x1, 1.75, z1], n: [inn.x, 0, inn.z].map(v => Math.round(v * 1000) / 1000 || 0) });
   DUSCHAR.push({ x0, x1, z0, z1, cx, cz, axel: nsAxel ? 'z' : 'x', linje: nsAxel ? p[1] + inn.z * 0.12 : p[0] + inn.x * 0.12, max: (nsAxel ? z1 - z0 : x1 - x0) - 0.12 });
   const andar = glas.flatMap(([ax, az, bx, bz]) => [[ax, az], [bx, bz]]);
   glas.forEach(([ax, az, bx, bz]) => {
@@ -3513,6 +3553,8 @@ function vaxt(x, z, stor = true, y = 0, typ = null) {
   const t = typ ?? ['monstera', 'fikus', 'oliv'][VAXTNR++ % 3];
   skugga(x, z, 0.34, 0.34, 0, 0.16, 0.45, y + 0.021);
   { const hs = t === 'sansevieria' || t === 'zz' ? 0.34 : 0.42; hind(hs, hs, x, z); }
+  // monsteran: Poly Havens krukväxt i terrakotta (bladen hålls innanför väggarna)
+  if (t === 'monstera' && PHM && phMobel('potted_plant_02', mx(x, y, z, rnd() * 2 * PI), { h: 0.95, fri: phFriRadie(V(x, 0, z).applyMatrix4(BAS).x, V(x, 0, z).applyMatrix4(BAS).z) - 0.04 })) return;
   if (t === 'monstera') {
     // matt keramikkruka med jord; 9 blad på välvda, avsmalnande skaft som växer ur jorden
     // på flera ställen; de unga bladen är mindre och ljusare och sitter nära mitten
@@ -3826,6 +3868,8 @@ function spotKagla(li, x, z) {
 // Köksinredning längs en vägg. axel: vilken axel bänken löper längs, vagg: väggens
 // koordinat (baksidan), ut: +1/-1 framsidans riktning, s0..s1: utsträckning.
 // hog/over/hylla: [[a, b]] i världskoordinater längs bänken, spis/disk: mittpunkt.
+// köksluckor och lådfronter i ekfaner (foto); utan Poly Haven de målade
+const LUCKA = () => (PH_AV ? 'front' : 'fLucka');
 function kok(k) {
   const sc = (k.s0 + k.s1) / 2, len = Math.abs(k.s1 - k.s0);
   const ry = k.axel === 'z' ? (k.ut > 0 ? PI / 2 : -PI / 2) : (k.ut > 0 ? 0 : PI);
@@ -3836,6 +3880,7 @@ function kok(k) {
   med(cx, cz, ry, () => {
     skugga(0, 0.02, len, 0.62, 0, 0.16, 0.5);
     hind(len, 0.62);
+    pLada('kok', -len / 2, 0, -0.3, len / 2, 0.95, 0.3);
     const hog = (k.hog || []).map(span);
     let reg = [[-len / 2, len / 2]];
     hog.forEach(([a, b]) => {
@@ -3889,7 +3934,7 @@ function kok(k) {
         if (!ho && !bl) {
           // utdragbar låda: front, handtag och lådkorg följer med
           oppningsbar('Låda', 'lada', 'z', 0.38, 0, BAS.clone().multiply(new T.Matrix4().makeTranslation(x, 0.787, 0.2795)), () => {
-            rbx('front', w - 0.004, 0.164, 0.019, 0, 0, 0, 0.004, 0, 0, 1);
+            rbx(LUCKA(), w - 0.004, 0.164, 0.019, 0, 0, 0, 0.004, 0, 0, 1);
             ton('#2a2928', () => rbx('vit', Math.min(0.26, w * 0.45), 0.012, 0.02, 0, 0.033, 0.019, 0.005, 0, 0, 1));
             ton('#e9e6df', () => {
               box('vit', w - 0.07, 0.01, 0.44, 0, -0.06, -0.235);
@@ -3899,18 +3944,18 @@ function kok(k) {
             ladaInnehall(w, i);
           });
         } else {
-          rbx('front', w - 0.004, 0.164, 0.019, x, 0.787, 0.2795, 0.004, 0, 0, 1);
+          rbx(LUCKA(), w - 0.004, 0.164, 0.019, x, 0.787, 0.2795, 0.004, 0, 0, 1);
           // (diskbänksskåpets fasta övre front har inget eget handtag: ett handtag per lucka)
         }
         // blindhörnet: fast lucka utan handtag (den andra bänken ligger framför)
-        if (bl) { rbx('front', w - 0.004, 0.592, 0.019, x, 0.4005, 0.2795, 0.004, 0, 0, 1); continue; }
+        if (bl) { rbx(LUCKA(), w - 0.004, 0.592, 0.019, x, 0.4005, 0.2795, 0.004, 0, 0, 1); continue; }
         // underskåpets lucka med grepplist i överkant: gångjärn växelvis vänster/höger
         {
           const hs = i % 2 ? -1 : 1, Xa = V(hs, 0, 0), Za = V(0, 0, 0).crossVectors(Xa, V(0, 1, 0)), zs = Za.z;
           // gångjärnet mitt i luckans kant (i plan): öppen lucka ligger an mot stommens framkant
           const m = BAS.clone().multiply(new T.Matrix4().makeBasis(Xa, V(0, 1, 0), Za).setPosition(x - hs * (w / 2 - 0.002 - 0.0095), 0, 0.2795));
           oppningsbar(ho ? 'Diskbänksskåp' : 'Underskåp', 'lucka', 'y', (zs < 0 ? 1 : -1) * 1.55, 0, m, () => forskjut(-0.0095, 0, zs * 0.0095, () => {
-            rbx('front', w - 0.004, 0.592, 0.019, (w - 0.004) / 2, 0.4005, -zs * 0.0095, 0.004, 0, 0, 1);
+            rbx(LUCKA(), w - 0.004, 0.592, 0.019, (w - 0.004) / 2, 0.4005, -zs * 0.0095, 0.004, 0, 0, 1);
             // ett handtag per lucka (den mörka grepplisten i överkant såg ut som ett andra handtag)
             ton('#2a2928', () => rbx('vit', 0.014, 0.16, 0.02, w - 0.054, 0.6, zs * 0.0095, 0.005, 0, 0, 1));
           }));
@@ -3926,7 +3971,7 @@ function kok(k) {
         if (sx0 != null && sx0 - 0.3 > p + 0.01 && sx0 + 0.3 < q - 0.01) s.holes.push(rundRektPath(sx0, 0.02, 0.56, 0.49, 0.006, b));
         const g = new T.ExtrudeGeometry(s, { depth: 0.034 - 2 * b, bevelEnabled: true, bevelThickness: b, bevelSize: b, bevelSegments: 2, curveSegments: 6 });
         g.rotateX(PI / 2).translate(0, 0.902 - b, 0);
-        lagg('ek', g, mx(0, 0, 0));
+        lagg(PH_AV ? 'ek' : 'fBank', g, mx(0, 0, 0));   // massiv träskiva (foto)
       }
       // fog mot stänkskyddet
       ton('#8d857a', () => box('vagg', L2, 0.005, 0.005, (p + q) / 2, 0.904, -0.286));
@@ -4080,7 +4125,7 @@ function kok(k) {
         // gångjärnet mitt i luckans kant (i plan): öppen lucka ligger an mot stommens framkant
         const m = BAS.clone().multiply(new T.Matrix4().makeBasis(Xa, V(0, 1, 0), Za).setPosition(xc - hs * (w / 2 - 0.003 - 0.0095), 0, 0.0305));
         oppningsbar('Överskåp', 'lucka', 'y', (zs < 0 ? 1 : -1) * 1.55, 0, m, () => forskjut(-0.0095, 0, zs * 0.0095, () => {
-          rbx('front', w - 0.006, 0.64, 0.019, (w - 0.006) / 2, 1.775, -zs * 0.0095, 0.004, 0, 0, 1);
+          rbx(LUCKA(), w - 0.006, 0.64, 0.019, (w - 0.006) / 2, 1.775, -zs * 0.0095, 0.004, 0, 0, 1);
           // handtaget nertill vid låskanten, helt inom luckan (luckan 1,455–2,095)
           ton('#2a2928', () => rbx('vit', 0.014, 0.18, 0.02, w - 0.053, 1.575, zs * 0.0095, 0.005, 0, 0, 1));
         }));
@@ -4109,6 +4154,8 @@ function kok(k) {
 function flakt(k, sx0, span, cx, cz) {
   if (sx0 == null) return;
   const under = (k.over || []).map(span).some(([p, q]) => sx0 > p + 0.15 && sx0 < q - 0.15);
+  if (under) pLada('flakt', sx0 - 0.3, 0.92, -0.3, sx0 + 0.3, 1.45, 0.012);   // med hällen under
+  else pLada('flakt', sx0 - 0.3, 0.92, -0.3, sx0 + 0.3, 1.95, 0.2);
   if (under) {
     ton('#c9c9c6', () => stalBox(0.6, 0.045, 0.3, sx0, 1.425, -0.15, 0.003));
     ton('#2c2e31', () => glans(0.25, () => rbx('keramik', 0.6, 0.03, 0.012, sx0, 1.418, 0.0055, 0.003, 0, 0, 1)));
@@ -4131,6 +4178,7 @@ function flakt(k, sx0, span, cx, cz) {
 // Inbyggd ugn under hällen: mörkt ugnsrum, kontrollpanel i svart glas med två vred i
 // stål och en display, och en nedfällbar lucka med fönster och handtag. Lokalt i bänken.
 function ugnEnhet(x, w) {
+  pLada('ugn', x - w / 2, 0.1, -0.29, x + w / 2, 0.93, 0.3);
   // ugnsrummet: ihålig låda i mörkgrå emalj (insidan syns, framsidan öppen), en varm
   // ugnslampa uppe i bakre hörnet och en plåt på nedre falsen
   {
@@ -4196,7 +4244,7 @@ function diskmaskin(x, w) {
   for (let j = 0; j < 6; j++) lagg('glas', new T.CylinderGeometry(0.031, 0.036, 0.1, 16, 1, true), mx(x - 0.16 + (j % 3) * 0.08, 0.575, -0.14 + Math.floor(j / 3) * 0.1));
   ton('#c8b9a2', () => { for (let j = 0; j < 2; j++) lagg('keramik', new T.CylinderGeometry(0.04, 0.038, 0.09, 18), mx(x + 0.13, 0.57, -0.12 + j * 0.11)); });
   oppningsbar('Diskmaskin', 'lucka', 'x', 1.45, 0, BAS.clone().multiply(new T.Matrix4().makeTranslation(x, 0.105, 0.2795)), () => {
-    rbx('front', w - 0.004, 0.762, 0.019, 0, 0.381, 0, 0.004, 0, 0, 1);
+    rbx(LUCKA(), w - 0.004, 0.762, 0.019, 0, 0.381, 0, 0.004, 0, 0, 1);
     ton('#2a2928', () => rbx('vit', Math.min(0.26, w * 0.45), 0.012, 0.02, 0, 0.715, 0.02, 0.005, 0, 0, 1));
     ton('#cfcfcc', () => stalBox(w - 0.06, 0.68, 0.008, 0, 0.38, -0.0135, 0.002));
     // knappar och display på luckans överkant (integrerad maskin) och diskmedelsfack på insidan
@@ -4213,6 +4261,7 @@ function diskmaskin(x, w) {
 const KYLVIT = '#f3f3f1';
 function kylFrys(x, w) {
   const W = w - 0.006, wi = W - 0.036, xe = x - W / 2;
+  pLada('kylfrys', x - W / 2, 0.1, -0.29, x + W / 2, 2.09, 0.3);
   stomme('front', W, 1.99, 0.58, x, 0.1, -0.01, GAVEL, { inre: KYLVIT });
   // mellanbotten mellan kyl och frys, bakvägg, belysning och termostat under taket
   ton(KYLVIT, () => box('vit', wi, 0.04, 0.56, x, 0.82, -0.02));
@@ -4228,6 +4277,7 @@ function kylFrys(x, w) {
 // Integrerad bänkkyl med frysfack (små kök): bakom en lucka i frontens färg, i bänkens rad.
 function kylUnder(x, w) {
   const W = w - 0.004, wi = w - 0.002 - 0.036, xe = x - W / 2;
+  pLada('kylfrys', x - W / 2, 0.1, -0.29, x + W / 2, 0.87, 0.3);
   stomme('front', w - 0.002, 0.77, 0.565, x, 0.1, -0.0125, null, { utanTak: true, inre: KYLVIT });
   ton(KYLVIT, () => box('vit', wi, 0.018, 0.56, x, 0.861, -0.015));
   // frysfack upptill med en frostad lucka och ett grepp
@@ -4371,7 +4421,7 @@ function kylLucka(namn, xe, hs, zb, W, y0, y1, o = {}) {
   const t = 0.019, h = y1 - y0, ym = (y0 + y1) / 2;
   gangjarnsLucka(namn, xe, hs, zb, t, zs => {
     const Z = d => zs * d;   // framåt i världen räknat från luckans mitt
-    rbx('front', W, h, t, W / 2, ym, 0, 0.004, 0, 0, 1);
+    rbx(LUCKA(), W, h, t, W / 2, ym, 0, 0.004, 0, 0, 1);
     ton('#d2d2ce', () => rbx('vit', W - 0.04, h - 0.04, 0.009, W / 2, ym, Z(-0.014), 0.004, 0, 0, 1));
     ton(KYLVIT, () => rbx('vit', W - 0.06, h - 0.06, 0.022, W / 2, ym, Z(-0.0295), 0.006, 0, 0, 1));
     (o.fack || []).forEach(([yf, typ]) => {
@@ -4481,13 +4531,14 @@ function skafferi(x, w) {
   });
   // luckorna (nedre 0,105–1,1 och övre 1,48–2,09) med handtag vid låskanten
   [[0.105, 1.1, 0.93], [1.48, 2.09, 1.63]].forEach(([y0, y1, yh], j) => gangjarnsLucka(j ? 'Skafferi uppe' : 'Skafferi', xe, 1, 0.281, 0.019, zs => {
-    rbx('front', W, y1 - y0, 0.019, W / 2, (y0 + y1) / 2, 0, 0.004, 0, 0, 1);
+    rbx(LUCKA(), W, y1 - y0, 0.019, W / 2, (y0 + y1) / 2, 0, 0.004, 0, 0, 1);
     ton('#2a2928', () => rbx('vit', 0.014, 0.3, 0.02, W - 0.047, yh, zs * 0.019, 0.005, 0, 0, 1));
   }));
 }
 // Inbyggd mikrovågsugn: ram i stål, sidohängd lucka i grafitglas med fönster och handtag,
 // kontrollpanel med display och vred, och ett ljust ugnsrum med glastallrik och en skål.
 function mikro(x, W, y0, y1) {
+  pLada('mikro', x - W / 2, y0, -0.29, x + W / 2, y1, 0.3);
   const h = y1 - y0, ym = (y0 + y1) / 2, pb = 0.13, Wd = W - pb, xe = x - W / 2, xc = xe + Wd / 2;
   // ugnsrummet: ihålig låda (öppen framåt) i ljusgrå emalj
   {
@@ -4826,7 +4877,11 @@ function badGolv(x0, x1, z0, z1) {
   const xs = bryt(x0, x1, kx.filter(v => v > x0 && v < x1), 0.3, [0.035]), zs = bryt(z0, z1, kz.filter(v => v > z0 && v < z1), 0.3, [0.035]);
   // klinker 60 x 60 centrerat i rummet (egen textur: fogarna lika breda åt båda hållen)
   const K = kakelSattning(x0, x1, z0, z1, 0.016);
-  ton('#b3aca2', () => glans(2, () => yta('klinker', (u, v) => V(u, hojd(u, v), v), V(0, 1, 0), xs, zs, () => z1, [], p => [(p.x - K.gx) / 1.2, (p.z - K.gz) / 1.2])));
+  if (PH_AV) { ton('#b3aca2', () => glans(2, () => yta('klinker', (u, v) => V(u, hojd(u, v), v), V(0, 1, 0), xs, zs, () => z1, [], p => [(p.x - K.gx) / 1.2, (p.z - K.gz) / 1.2]))); return; }
+  // fotoklinker (3 x 3 plattor per textur, 60 cm) och mosaik i duschen, båda med fallet mot brunnen
+  const km = FOTO.fKlinker.m, mm = FOTO.fMosaik.m, P = (u, v) => V(u, hojd(u, v), v);
+  yta('fKlinker', P, V(0, 1, 0), xs, zs, () => z1, du.map(d => ({ u0: d.x0, u1: d.x1, v0: d.z0, v1: d.z1 })), p => [(p.x - K.gx) / km, (p.z - K.gz) / km]);
+  du.forEach(d => yta('fMosaik', P, V(0, 1, 0), xs.filter(x => x > d.x0 - 1e-4 && x < d.x1 + 1e-4), zs.filter(z => z > d.z0 - 1e-4 && z < d.z1 + 1e-4), () => d.z1, [], p => [p.x / mm, p.z / mm]));
 }
 
 // ---- Växter av bladkort ----
@@ -4886,6 +4941,7 @@ function ranka(pts, ut = V(0, 0, 1)) {
 // Liten krukväxt (pothos) på bord och hyllor: tät krona och två korta rankor över kanten.
 function smavaxt(x, z, y = 0) {
   skugga(x, z, 0.12, 0.12, 0, 0.07, 0.35, y + 0.021);
+  if (PHM && phMobel('potted_plant_04', mx(x, y, z, rnd() * 2 * PI), { w: 0.15, liten: true })) return;
   kruka(x, y, z, 0.065, 0.11, '#e2dbcf');
   // Bladen växer ur jorden på egna skaft: de yttre lutar ut över krukans kant (ovanför den,
   // aldrig genom godset), de inre står mer upprätt och är mindre och ljusare (nya blad).
@@ -5013,7 +5069,7 @@ function skarm(x, y, z, r0, r1, h, fg = '#efe7d9', mk = 'skarm', namn = 'Lampa')
 // Bordslampa: svarvad fot (keramik, eller ek med fot 'ek'), mässingshals och linneskärm.
 // fot 'ek': ekfot med mässingshals; skärmen i lampmaterialet i taklagret (loftet har inga
 // egna ritanrop över för skärm och sken)
-function bordslampa(x, y, z, s = 1, fot = '#c9b8a0') {
+function bordslampa(x, y, z, s = 1, fot = '#c9b8a0', namn = 'Sänglampa') {
   const P = [[0, 0], [0.055, 0], [0.068, 0.012], [0.075, 0.05], [0.068, 0.1], [0.048, 0.15], [0.026, 0.19], [0.016, 0.21], [0.014, 0.225], [0, 0.225]].map(([a, b]) => [a * s, b * s]);
   if (fot === 'ek') svarv('ek', P, x, y, z, 28); else ton(fot, () => glans(0.8, () => svarv('keramik', P, x, y, z, 28)));
   if (fot === 'ek') {
@@ -5022,7 +5078,7 @@ function bordslampa(x, y, z, s = 1, fot = '#c9b8a0') {
     return;
   }
   ton('#b08d57', () => cyl('keramik', 0.005, 0.005, 0.1 * s, x, y + 0.27 * s, z, 12));
-  const li = skarm(x, y + 0.27 * s, z, 0.115 * s, 0.09 * s, 0.17 * s, undefined, 'skarm', 'Sänglampa');
+  const li = skarm(x, y + 0.27 * s, z, 0.115 * s, 0.09 * s, 0.17 * s, undefined, 'skarm', namn);
   sken(li, x, y + 0.002, z, 0.1 * s, 0.1 * s, 0.5, false, 0.07);   // varm ljuspöl på skivan
   // skärmen lyser också upp väggen bakom bordet (sovrummen var dunkla på kvällen)
   const c = V(x, 0, z).applyMatrix4(BAS), yv = V(x, y + 0.36 * s, z).applyMatrix4(BAS).y;
@@ -5591,7 +5647,7 @@ function bastu(x0, x1, z0, z1) {
 // ---- Husen ----
 const MODELL = {
   *'sadel-30'() {
-    vagg('z', -2.02, -1.75, 1.75, { topp: LU, dorrar: [{ a: 0.2, b: 1.0, h: 2.1, gang: 'b', sida: 1, vinkel: 88 }] });
+    vagg('z', -2.02, -1.75, 1.75, { topp: LU, dorrar: [{ a: 0.2, b: 1.0, h: 2.1, gang: 'b', sida: -1, vinkel: 88 }] });   // slår in i sovrummet: öppen mot hallen stod bladet utmed trappan, som en vit skiva i trapphålet
     vagg('x', 0.035, -1.97, 0.25, { topp: LU, dorrar: [{ a: -1.55, b: -0.75, h: 2.1, gang: 'a', sida: 1, vinkel: 75 }] });
     vagg('z', 0.30, -1.75, 0.09, { topp: LU });
     yield;   // (väggar, trappa och loft i var sitt steg)
@@ -5643,7 +5699,7 @@ const MODELL = {
   },
 
   *'sadel-40'() {
-    vagg('z', -3.07, -1.75, 1.75, { topp: LU, dorrar: [{ a: 0.18, b: 0.98, h: 2.1, gang: 'b', sida: 1, vinkel: 88 }] });
+    vagg('z', -3.07, -1.75, 1.75, { topp: LU, dorrar: [{ a: 0.18, b: 0.98, h: 2.1, gang: 'b', sida: -1, vinkel: 88 }] });   // slår in i sovrummet: öppen mot hallen stod bladet utmed trappan, som en vit skiva i trapphålet
     vagg('x', 0.02, -3.02, -0.82, { topp: LU, dorrar: [{ a: -2.67, b: -1.94, h: 2.1, gang: 'a', sida: 1, vinkel: 75 }] });
     vagg('z', -0.765, -1.75, 0.08, { topp: LU });
     yield;   // (väggar, trappa och loft i var sitt steg)
@@ -5707,7 +5763,7 @@ const MODELL = {
   },
 
   *'sadel-50'() {
-    vagg('z', -3.23, -1.75, 1.75, { topp: LU, dorrar: [{ a: 0.18, b: 0.98, h: 2.1, gang: 'b', sida: 1, vinkel: 88 }] });
+    vagg('z', -3.23, -1.75, 1.75, { topp: LU, dorrar: [{ a: 0.18, b: 0.98, h: 2.1, gang: 'b', sida: -1, vinkel: 88 }] });   // slår in i sovrummet: öppen mot hallen stod bladet utmed trappan, som en vit skiva i trapphålet
     vagg('x', 0.02, -3.17, 0.43, { topp: LU, dorrar: [{ a: -1.15, b: -0.38, h: 2.1, gang: 'a', sida: 1, vinkel: 78 }] });
     vagg('z', -1.92, -1.75, -0.03, { topp: LU, dorrar: [{ a: -0.78, b: -0.13, h: 2.0, gang: 'b', sida: 1, vinkel: 80, mk: 'glas' }] });
     vagg('z', 0.485, -1.75, 0.48, { topp: LU });
@@ -6037,10 +6093,245 @@ function lagaAO(H) {
   };
 }
 
+// ---- Poly Haven (CC0): fototexturer och möbler ----
+// Fototexturerna (images/tex, 1024² webp + normalkarta) ger golv, klinker, duschens mosaik,
+// bänkskivan och köksluckorna. Texturens färg normaliseras mot sitt eget medelvärde och
+// tonas till en ljus, dov nordisk ton (ton), med kontrast k: samma foto, ljusare och mindre
+// mättat. Materialen finns från första bygget med en 1 x 1-platshållare (inget nytt program
+// när fotot kommer). Möblerna (images/3d/ph/inne) laddas först när man går in (Se inne eller
+// dockskåpet) och bara de modeller huset använder. ?ph=0 ger de egna, enklare varianterna.
+// (?inneph=0 stänger bara av inredningens del, för jämförelser)
+const PH_AV = (() => { try { return /[?&](inne)?ph=0(&|$)/.test(location.search); } catch (e) { return false; } })();
+// m: meter per textur (verklig skala), nor: normalkartans styrka, rgh: grundglans
+const FOTO = {
+  fGolvEk: { fil: 'golv-ek', ton: '#c99d6c', k: 0.8, rgh: 0.74, nor: 0.7, m: 1.5 },
+  fGolvFisk: { fil: 'golv-fiskben', ton: '#c49866', k: 0.85, rgh: 0.72, nor: 0.7, m: 1.25 },
+  fKlinker: { fil: 'klinker', ton: '#cfcac2', k: 0.55, rgh: 0.68, nor: 0.9, m: 1.8 },
+  fMosaik: { fil: 'mosaik', ton: '#ddd7ce', k: 0.6, rgh: 0.5, nor: 1, m: 0.6 },
+  fBank: { fil: 'bank-furu', ton: '#d1b28c', k: 0.55, rgh: 0.62, nor: 0.5, m: 0.9 },
+  fLucka: { fil: 'lucka-ek', ton: '#d9c2a2', k: 0.6, rgh: 0.5, nor: 0.35, m: 0.9 },
+};
+// trägolv: fiskben i de större husen, ek i stugorna
+const FISKBEN = ['sadel-90', 'pulpet-70'];
+const golvMk = () => (PH_AV ? 'golv' : FISKBEN.includes(ID) ? 'fGolvFisk' : 'fGolvEk');
+const golvSkala = mk => (FOTO[mk] ? FOTO[mk].m : 2.4);
+const FOTO_TEX = {};
+function snittFarg(im) {
+  try {
+    const c = DUK(16), x = c.getContext('2d'); x.drawImage(im, 0, 0, 16, 16);
+    const d = x.getImageData(0, 0, 16, 16).data, s = [0, 0, 0], lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    for (let i = 0; i < d.length; i += 4) for (let k = 0; k < 3; k++) s[k] += lin(d[i + k]);
+    return new T.Color(s[0] / 256, s[1] / 256, s[2] / 256);
+  } catch (e) { return null; }
+}
+// Textur med platshållare (1 x 1: medelfärg resp. plan normal) tills fotot är laddat
+function fotoTextur(fil, farg, u) {
+  const nyckel = fil + (farg ? '-diff' : '-nor');
+  if (FOTO_TEX[nyckel]) return FOTO_TEX[nyckel];
+  const c = DUK(1);
+  if (c) { const x = c.getContext('2d'); x.fillStyle = farg ? '#ffffff' : '#8080ff'; x.fillRect(0, 0, 1, 1); }
+  const t = c ? new T.CanvasTexture(c) : new T.Texture();
+  t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = 8;
+  if (farg) t.colorSpace = T.SRGBColorSpace;
+  if (typeof Image !== 'undefined') {
+    const im = new Image();
+    // avkodas utanför huvudtråden (decode) innan den blir textur: annars avkodades bilden
+    // synkront i texSubImage2D, när texturen laddades upp (0,1–0,3 s per foto)
+    im.onload = () => {
+      const klar = () => {
+        t.dispose(); t.image = im; t.needsUpdate = true;
+        if (farg && u) { const s = snittFarg(im); if (s) { u.snitt.value.copy(s); u.kontrast.value = u.k; } }
+      };
+      if (typeof im.decode === 'function') im.decode().then(klar, klar); else klar();
+    };
+    let forsok = 0;   // ett nytt försök efter en sekund (tillfälligt nätfel)
+    im.onerror = () => { if (forsok++ < 1) setTimeout(() => { im.src = 'images/tex/' + nyckel + '.webp?f=1'; }, 1000); else console.warn('inne: texturen saknas', nyckel); };
+    im.src = 'images/tex/' + nyckel + '.webp';
+  }
+  return FOTO_TEX[nyckel] = t;
+}
+function fotoMaterial(o) {
+  // kontrasten 0 tills fotot (och dess medelfärg) finns: då är ytan jämnt tonad
+  const u = { snitt: { value: new T.Color(1, 1, 1) }, ton: { value: new T.Color(o.ton) }, kontrast: { value: 0 }, k: o.k };
+  const mt = new T.MeshStandardMaterial({ vertexColors: true, color: 0xffffff, map: fotoTextur(o.fil, true, u), normalMap: fotoTextur(o.fil, false),
+    normalScale: new T.Vector2(o.nor, o.nor), roughness: o.rgh, envMapIntensity: 0.7 });
+  mt.userData.foto = u;
+  mt.onBeforeCompile = sh => {
+    sh.uniforms.fSnitt = u.snitt; sh.uniforms.fTon = u.ton; sh.uniforms.fKontrast = u.kontrast;
+    sh.fragmentShader = 'uniform vec3 fSnitt;\nuniform vec3 fTon;\nuniform float fKontrast;\n' + sh.fragmentShader.replace('#include <map_fragment>', `#ifdef USE_MAP
+  { vec4 sampledDiffuseColor = texture2D( map, vMapUv );
+    vec3 fq = sampledDiffuseColor.rgb / max( fSnitt, vec3( 0.003 ) );
+    diffuseColor.rgb *= fTon * mix( vec3( 1.0 ), fq, fKontrast ); }
+#endif`);
+  };
+  mt.customProgramCacheKey = () => 'inne-foto';
+  return mt;
+}
+function fotoMaterialen() {
+  if (PH_AV || !MAT || MAT.fGolvEk) return;
+  for (const [k, o] of Object.entries(FOTO)) MAT[k] = fotoMaterial(o);
+}
+
+// Möblerna: poster under bygget (husets system), placeras när modellerna laddats
+let PHM = null;
+// m: modellen (utan ph-), M: ram (lokalt +z = framsidan, y = 0 golvet/ytan), o: { w, d, h }
+// målmått i meter (minsta skalan gäller), hy: egen höjd (sträcks i y), fri: största halva
+// bredd (krymps annars), glod: glaset lyser med lamporna på kvällen
+function phMobel(m, M, o = {}) {
+  if (!PHM) return false;
+  PHM.push({ m, M: M.clone(), lager: LAGER, los: LOS, ...o });
+  return true;
+}
+// Fritt golv för en ny möbel (husets system): andra möbler (m), väggar, dörrars svängrum,
+// trappor och golvlånga fönster/glasdörrar
+function phFritt(x0, x1, z0, z1, m = 0.05) {
+  const loft = LAGER === 'loft';
+  if (HINDER.some(h => {
+    if (!(h.niva === 'alla' || h.niva === (loft ? 'loft' : 'botten'))) return false;
+    const e = h.dorr != null ? 0.95 : m;
+    return x1 + e > h.x0 && x0 - e < h.x1 && z1 + e > h.z0 && z0 - e < h.z1;
+  })) return false;
+  if (!loft && TRAPPOR.some(t => x1 + 0.3 > Math.min(t.xL, t.xH) && x0 - 0.3 < Math.max(t.xL, t.xH) && z1 + 0.3 > t.z0 && z0 - 0.3 < t.z1)) return false;
+  return !HAL.some(h => {
+    if (!h.f || h.v0 > 1.0) return false;
+    const a = h.f.o.clone().addScaledVector(h.f.u, h.u0), b = h.f.o.clone().addScaledVector(h.f.u, h.u1), e = h.v0 < 0.05 ? 0.9 : 0.45;
+    return x1 > Math.min(a.x, b.x) - e && x0 < Math.max(a.x, b.x) + e && z1 > Math.min(a.z, b.z) - e && z0 < Math.max(a.z, b.z) + e;
+  });
+}
+// största fria radie runt (x, z) (husets system) mot väggarna, för växternas blad
+function phFriRadie(x, z) {
+  let r = Math.min(HH.L / 2 - I - Math.abs(x), HH.W / 2 - I - Math.abs(z));
+  VAGGAR.forEach(w => {
+    const [s, p] = w.axel === 'z' ? [z, x] : [x, z];
+    if (s > w.lo - 0.3 && s < w.hi + 0.3) r = Math.min(r, Math.abs(p - w.c) - w.t / 2);
+  });
+  return Math.max(0.12, r);
+}
+// Sidobord med bordslampa vid soffans ena gavel (den lediga): läggs sist, när allt annat
+// står på plats (EFTER), som löst (Tomt hus)
+function sidobordVidSoffa(w, d) {
+  const bas = BAS.clone(), lg = LAGER;
+  EFTER.push(() => {
+    const fB = BAS, fL = LAGER, fLos = LOS;
+    BAS = bas; LAGER = lg; LOS = true;
+    try {
+      for (const sx of [1, -1]) {
+        const x = sx * (w / 2 + 0.07 + 0.23), z = -d / 2 + 0.25;
+        let a0 = 1e9, a1 = -1e9, b0 = 1e9, b1 = -1e9;
+        for (const ex of [-0.23, 0.23]) for (const ez of [-0.23, 0.23]) { const p = V(x + ex, 0, z + ez).applyMatrix4(BAS); a0 = Math.min(a0, p.x); a1 = Math.max(a1, p.x); b0 = Math.min(b0, p.z); b1 = Math.max(b1, p.z); }
+        if (!phFritt(a0, a1, b0, b1)) continue;
+        med(x, z, 0, () => {
+          skugga(0, 0, 0.46, 0.46, 0, 0.1, 0.4);
+          hind(0.46, 0.46);
+          phMobel('side_table_01', BAS, { w: 0.46, d: 0.46, hy: 0.52 });
+          bordslampa(0, 0.52, -0.03, 1.15, '#d8d0c4', 'Bordslampa');
+        });
+        return;
+      }
+    } finally { BAS = fB; LAGER = fL; LOS = fLos; }
+  });
+}
+
+// Laddningen: GLTFLoader och meshopt hämtas först när de behövs
+const PH_LADDAT = {};
+let PH_LOADER = null;
+function phHamta(m) {
+  if (!PH_LOADER) PH_LOADER = Promise.all([import('./vendor/three/addons/loaders/GLTFLoader.js'), import('./vendor/three/addons/libs/meshopt_decoder.module.js')])
+    .then(([a, b]) => { const L = new a.GLTFLoader(); L.setMeshoptDecoder(b.MeshoptDecoder); return L; });
+  return PH_LADDAT[m] || (PH_LADDAT[m] = PH_LOADER.then(L => new Promise(ok => L.load('images/3d/ph/inne/ph-' + m + '.glb', g => {
+    const s = g.scene;
+    s.updateMatrixWorld(true);
+    s.traverse(o => { if (!o.isMesh) return;
+      const mt = o.material;
+      ['map', 'normalMap', 'roughnessMap', 'metalnessMap'].forEach(k => { if (mt[k]) mt[k].anisotropy = 8; });
+      if (mt.metalness > 0.4 && !mt.metalnessMap) mt.metalness = 0.4;
+      // glas utan transmission: transmission ritar hela scenen en gång till (dubbla trianglar)
+      if (mt.transmission > 0) { mt.transmission = 0; mt.transparent = true; mt.opacity = 0.3; mt.depthWrite = false; mt.roughness = Math.min(mt.roughness, 0.1); }
+      mt.envMapIntensity = 0.7;
+      if (PH_TON[m]) mt.color.multiply(new T.Color(...PH_TON[m]));
+      o.castShadow = o.receiveShadow = true;
+    });
+    ok({ s, bb: new T.Box3().setFromObject(s) });
+  }, undefined, e => { console.warn('inne: ph', m, e); ok(null); }))));
+}
+// färgjustering per modell (gånger fotots färg): ljusare och mindre mättat
+const PH_TON = { side_table_01: [1.12, 1.08, 1.04], potted_plant_02: [1.0, 0.98, 0.96] };
+// Egen kopia av ett delat material (MAT, Poly Haven-modellerna). Motorn hänger klipplanen vid
+// förra husets ytterväggar på materialet (userData.inneKlipp, clippingPlanes, klippSatt);
+// clone() gör userData till JSON (planen blir lösa objekt, forberedInne kraschade på p.copy)
+// och kopierar förra husets plan, så kopian börjar ren och får det nya husets plan.
+function egenMat(m) {
+  const c = m.clone();
+  delete c.userData.inneKlipp; delete c.userData.klippSatt;
+  c.clippingPlanes = null;
+  return c;
+}
+// lyktans glas: varmt sken som följer kvällens lampor
+function phGlod(mt) {
+  const g = egenMat(mt);
+  g.emissive = new T.Color('#ffb35c'); g.emissiveIntensity = 0;
+  return g;
+}
+function phPlacera(grupp, poster, rend) {
+  const lager = grupp.userData.lager, losa = grupp.userData.losa || (grupp.userData.losa = []);
+  return Promise.all(poster.map(p => phHamta(p.m).then(r => {
+    if (!r || !lager[p.lager]) return;
+    const { s, bb } = r, bx = bb.max.x - bb.min.x, by = bb.max.y - bb.min.y, bz = bb.max.z - bb.min.z;
+    const k = [p.w ? p.w / bx : 0, p.d ? p.d / bz : 0, p.h ? p.h / by : 0].filter(v => v > 0);
+    let sk = k.length ? Math.min(...k) : 1;
+    if (p.fri) sk = Math.min(sk, (2 * p.fri) / Math.max(bx, bz));
+    const sy = p.hy ? p.hy / by : sk;
+    const o = s.clone(true);
+    o.scale.set(sk, sy, sk);
+    o.position.set(-(bb.min.x + bb.max.x) / 2 * sk, -bb.min.y * sy, -(bb.min.z + bb.max.z) / 2 * sk);
+    const ram = new T.Group();
+    ram.name = 'ph-' + p.m;
+    p.M.decompose(ram.position, ram.quaternion, ram.scale);
+    ram.add(o);
+    // tomt hus: lösa möbler döljs med ritintervallet som resten (fastN 0)
+    const tomt = losa.some(x => x !== null && x.geometry && x.userData.fastN != null && x.geometry.drawRange.count !== Infinity && x.geometry.drawRange.count <= x.userData.fastN);
+    o.traverse(x => {
+      if (!x.isMesh) return;
+      if (p.glod && /glass/i.test(x.material.name)) {
+        // glaset lyser i takt med husets lampor (motorn styr MAT.lampa efter kvällen)
+        const g = x.material = phGlod(x.material); x.castShadow = false;
+        x.onBeforeRender = () => { g.emissiveIntensity = 1.8 * Math.min(1, MAT.lampa.emissiveIntensity / 2.5); };
+      }
+      if (p.liten) x.castShadow = false;
+      if (p.los) { x.userData.fastN = 0; losa.push(x); if (tomt) x.geometry.setDrawRange(0, 0); }
+    });
+    lager[p.lager].add(ram);
+    // motorn ger delen husets klipplan och stencil (se forberedInne i husritare.js)
+    if (typeof grupp.userData.nyDel === 'function') grupp.userData.nyDel(ram);
+  }))).then(() => {
+    if (rend && rend.shadowMap) rend.shadowMap.needsUpdate = true;
+    grupp.userData.phKlar = true;
+  });
+}
+// Vakten: en osynlig yta (ritas utan färg och djup) som startar laddningen första gången
+// inredningen ritas inifrån (kamerans lager = 1) eller i dockskåpet (taklagret dolt)
+function phVakt(grupp, poster) {
+  const g = new T.PlaneGeometry(0.01, 0.01);
+  const vakt = new T.Mesh(g, new T.MeshBasicMaterial({ colorWrite: false, depthWrite: false, depthTest: false }));
+  vakt.name = 'ph-vakt'; vakt.frustumCulled = false; vakt.castShadow = vakt.receiveShadow = false;
+  vakt.position.y = -0.5;
+  let igang = false;
+  vakt.onBeforeRender = (r, sc, kam) => {
+    if (igang) return;
+    const L = grupp.userData.lager;
+    if (!(kam.layers.mask === 1 || (L && L.tak && !L.tak.visible))) return;
+    igang = true;
+    phPlacera(grupp, poster, r).catch(e => console.warn(e)).finally(() => { if (vakt.parent) vakt.parent.remove(vakt); g.dispose(); vakt.material.dispose(); });
+  };
+  grupp.add(vakt);
+  grupp.userData.phLadda = () => { if (!igang) { igang = true; return phPlacera(grupp, poster, null); } return Promise.resolve(); };
+}
+
 // ---- Ihopslagning per lager och material ----
 // omgivningsljusets andel per material (gånger scenens environmentIntensity)
-const ENV = { golv: 0.42, vagg: 0.34, ek: 0.48, tyg: 0.34, vit: 0.45, svart: 0.7, keramik: 0.65, kakel: 0.6, klinker: 0.6, blad: 0.4, tryck: 0.3, skarm: 0.34 };
-const UTAN_SKUGGA = ['glas', 'lampa', 'skugga', 'sken', 'golv', 'tryck', 'spegel', 'flamma', 'eld'];
+const ENV = { golv: 0.42, vagg: 0.34, ek: 0.48, tyg: 0.34, vit: 0.45, svart: 0.7, keramik: 0.65, kakel: 0.6, klinker: 0.6, blad: 0.4, tryck: 0.3, skarm: 0.34,
+  fGolvEk: 0.3, fGolvFisk: 0.3, fKlinker: 0.45, fMosaik: 0.5, fBank: 0.36, fLucka: 0.45 };
+const UTAN_SKUGGA = ['glas', 'lampa', 'skugga', 'sken', 'golv', 'tryck', 'spegel', 'flamma', 'eld', 'fGolvEk', 'fGolvFisk', 'fKlinker', 'fMosaik'];
 function* slaIhopSteg(grupp, H) {
   const ao = lagaAO(H);
   const fc = new Map();
@@ -6081,14 +6372,14 @@ function* slaIhopSteg(grupp, H) {
       // ek: ådringen i verklig skala (0,6 m per ruta), längs den längsta riktningen
       // (delens längsta mått avgör: stående ben och spjälor får stående ådring, skivor längs
       // sin längd; varje del börjar på sitt eget ställe i mönstret, så att benen inte är kopior)
-      if (mk === 'ek') { const u = k.attributes.uv; k.computeBoundingBox(); const bb = k.boundingBox, ex = bb.max.x - bb.min.x, ey = bb.max.y - bb.min.y, ez = bb.max.z - bb.min.z;
+      if (mk === 'ek' || mk === 'fBank' || mk === 'fLucka') { const u = k.attributes.uv, sk = FOTO[mk] ? FOTO[mk].m : 0.6, byt = mk === 'fBank'; k.computeBoundingBox(); const bb = k.boundingBox, ex = bb.max.x - bb.min.x, ey = bb.max.y - bb.min.y, ez = bb.max.z - bb.min.z;
         const L = ey > ex * 1.15 && ey > ez * 1.15 ? 1 : ez > ex ? 2 : 0, fo = ((bb.min.x * 7.31 + bb.min.z * 3.17 + bb.min.y * 1.93) % 1 + 1) % 1;
         for (let i = 0; i < n; i++) { const X = p[i * 3], Y = p[i * 3 + 1], Z = p[i * 3 + 2], ax = Math.abs(nr[i * 3]), ay = Math.abs(nr[i * 3 + 1]), az = Math.abs(nr[i * 3 + 2]);
           let a, b;
           if (ay >= ax && ay >= az) { if (L === 2) { a = Z + X * 0.13; b = X; } else { a = X + Z * 0.13; b = Z; } }
           else if (ax >= az) { if (L === 1) { a = Y; b = Z; } else { a = Z; b = Y; } }
           else if (L === 1) { a = Y; b = X; } else { a = X; b = Y; }
-          u.setXY(i, a / 0.6, b / 0.6 + fo); } }
+          if (byt) u.setXY(i, b / sk + fo, a / sk); else u.setXY(i, a / sk, b / sk + fo); } }
       if (mk === 'tyg' || mk === 'gardin') {
         const u = k.attributes.uv, tu = new Float32Array(n * 3), sk = 1 / VAVM[lag];
         for (let i = 0; i < n; i++) { const X = p[i * 3], Y = p[i * 3 + 1], Z = p[i * 3 + 2], ax = Math.abs(nr[i * 3]), ay = Math.abs(nr[i * 3 + 1]), az = Math.abs(nr[i * 3 + 2]);
@@ -6129,7 +6420,7 @@ function* slaIhopSteg(grupp, H) {
     if (minv) ihop.applyMatrix4(minv);
     ihop.computeBoundingSphere();
     tris += ihop.attributes.position.count / 3; anrop++;
-    const mat = mk === 'sken' ? skenMat : (mk === 'flamma' || mk === 'eld') ? MAT[mk].clone() : klon && (mk === 'lampa' || mk === 'skarm') ? MAT[mk].clone() : MAT[mk];
+    const mat = mk === 'sken' ? skenMat : (mk === 'flamma' || mk === 'eld') ? egenMat(MAT[mk]) : klon && (mk === 'lampa' || mk === 'skarm') ? egenMat(MAT[mk]) : MAT[mk];
     const m = new T.Mesh(ihop, mat);
     m.name = 'inne-' + lg + '-' + mk;
     if (nFast < ihop.attributes.position.count) { m.userData.fastN = nFast; LOSA.push(m); }
@@ -6247,8 +6538,10 @@ export function byggInne(THREE, id, H) {
 export function* byggInneSteg(THREE, id, H) {
   T = THREE;
   yield* lagaMaterialSteg();
+  fotoMaterialen();
+  PHM = PH_AV ? null : [];
   ACC = new Map(); BAS = new T.Matrix4(); HH = H; CEIL = lagaTak(H); LJUS = null;
-  VAGGAR = []; LOFT = []; HAL = []; TON = null; RGH = 1; EFTER = []; BADRUM = []; DUSCHAR = [];
+  VAGGAR = []; LOFT = []; HAL = []; TON = null; RGH = 1; EFTER = []; BADRUM = []; DUSCHAR = []; WCP = []; PLAD = {};
   SPEGLAR = []; OPP = []; LAMPOR = []; SITT = []; BRYT = []; ID = id; NSTOL = 0; NSANG = 0; SEED = 7; LAGER = 'botten'; VAXTNR = 0; ELPLATS.length = 0;
   HARLOFT = ['sadel-30', 'sadel-40', 'sadel-50'].includes(id);
   HINDER = []; TRAPPOR = []; VAVL = null; LJUSL = []; ELD = null; MATTOR = [];
@@ -6266,7 +6559,7 @@ export function* byggInneSteg(THREE, id, H) {
   LOS = false;
   // brandvarnare i taket i hall, sovrum och på loftet (fast, syns i Tomt hus)
   (RUM[id] || []).forEach(([namn, x, z, nv]) => { if (!/hall|sovrum|loft|korridor/i.test(namn)) return;
-    const px = x + 0.42, pz = z; iLager(nv === 'loft' ? 'loft' : 'botten', () => brandvarnare(px, pz, nv === 'loft' ? CEIL(px, pz) : takVid(px, pz))); });
+    const px = x + 0.42, pz = z; iLager(nv === 'loft' ? 'loft' : 'botten', () => brandvarnare(px, pz, nv === 'loft' ? CEIL : takVid)); });
   yield;
   golvOchTak(H);
   yield;
@@ -6275,6 +6568,7 @@ export function* byggInneSteg(THREE, id, H) {
   oppningsDetaljer(H);
   yield;
   yield* slaIhopSteg(grupp, H);
+  { const ph = PHM; PHM = null; if (ph && ph.length) phVakt(grupp, ph); }
   grupp.userData.golvYtor = gangYtor(grupp, H);
   grupp.userData.hinder = HINDER;
   grupp.userData.trappor = TRAPPOR.map(t => ({ ...t }));
@@ -6311,7 +6605,9 @@ export function* byggInneSteg(THREE, id, H) {
   if (ELD) grupp.userData.eld = { pos: ELD.pos, material: ELD.mat, mesh: ELD.mesh };
   grupp.userData.skarmMaterial = MAT.skarm;
   SPEGLAR = null; OPP = null; LAMPOR = null; SITT = null; BRYT = null;
-  ACC = null; VAGGAR = null; HAL = null; HINDER = null; EFTER = null; BADRUM = null; DUSCHAR = null;
+  // produktkorten i husritaren: var WC och duschar står (husets system, golvet y = 0)
+  grupp.userData.produktAnkare = { wc: WCP.slice(), dusch: DUSCHAR.map(d => [d.cx, 1.1, d.cz]), lador: PLAD };
+  ACC = null; VAGGAR = null; HAL = null; HINDER = null; EFTER = null; BADRUM = null; DUSCHAR = null; WCP = null; PLAD = null;
   if (LJUS) {
     const l = new T.PointLight(0xffd6a0, 1.4, 7, 2);
     l.castShadow = false;

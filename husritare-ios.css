@@ -1,0 +1,446 @@
+/* Bygg online i iOS 26-stil ("Liquid Glass"), 2026-11-26. Laddas sist på rita-hus.html (bygg_app.py).
+   Mjukt rundat överallt (kapslar, 20–28 px hörn), panelerna svävar med luft från kanterna, glas med
+   blur + saturate och en ljus kant upptill, mjuka skuggor i lager i stället för hårlinjer, primärknappar
+   i virke-tonen. Bara transform och opacity animeras (utom flikmarkörens befintliga bredd), aldrig ease-in;
+   reducerad rörelse utan studs. Utan backdrop-filter blir glaset en tät yta. Paletten: --ben, --kol,
+   --virke, --virke-djup, --skog (design.css) och husritarens --k-*. */
+
+/* ---------- Tokens ---------- */
+body.ritsidan {
+  --i-luft: 10px;
+  --i-r-kort: 22px; --i-r-panel: 28px;
+  --i-ut: cubic-bezier(0.23, 1, 0.32, 1);
+  --i-fjader: cubic-bezier(0.34, 1.32, 0.64, 1);
+  --i-studs: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --i-blur: blur(24px) saturate(1.8);
+  --i-glas: color-mix(in srgb, var(--k-kort) 78%, transparent);
+  --i-glas-tat: color-mix(in srgb, var(--k-kort) 90%, transparent);
+  --i-ton: color-mix(in srgb, var(--k-svag) 62%, transparent);
+  --i-ton-2: color-mix(in srgb, var(--k-svag-2) 70%, transparent);
+  --i-kant: inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 0 0 0.5px rgba(27, 25, 21, 0.07);
+  --i-skugga: 0 1px 2px rgba(27, 25, 21, 0.05), 0 10px 24px -14px rgba(27, 25, 21, 0.2), 0 34px 70px -34px rgba(27, 25, 21, 0.3);
+  --i-skugga-liten: 0 1px 2px rgba(27, 25, 21, 0.06), 0 6px 16px -10px rgba(27, 25, 21, 0.28);
+  /* mörkt glas över scenen: tonat nog för vit text (≥ 4,5:1) även mot ljus snö */
+  --i-mork: rgba(24, 22, 19, 0.7);
+  --i-mork-kant: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 0.5px rgba(255, 255, 255, 0.1);
+  --i-mork-skugga: 0 1px 2px rgba(0, 0, 0, 0.18), 0 22px 48px -22px rgba(0, 0, 0, 0.6);
+  --i-prim: var(--virke-djup, #8f5424);
+  --i-prim-hover: color-mix(in srgb, var(--virke-djup, #8f5424) 88%, #000);
+  --i-prim-text: #fff;
+  --k-r-s: 12px; --k-r-m: 16px; --k-r-l: 22px; --k-r-xl: 28px;
+  --kfv-glas: var(--i-mork);
+}
+html[data-tema="mork"] body.ritsidan {
+  --i-glas: color-mix(in srgb, var(--k-kort) 80%, transparent);
+  --i-glas-tat: color-mix(in srgb, var(--k-kort) 92%, transparent);
+  --i-kant: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+  --i-skugga: 0 1px 2px rgba(0, 0, 0, 0.24), 0 12px 28px -14px rgba(0, 0, 0, 0.5), 0 34px 70px -30px rgba(0, 0, 0, 0.7);
+  --i-skugga-liten: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 16px -10px rgba(0, 0, 0, 0.6);
+  --i-mork: rgba(30, 27, 23, 0.74);
+  --i-prim: var(--virke, #f0b56e);
+  --i-prim-hover: color-mix(in srgb, var(--virke, #f0b56e) 86%, #fff);
+  --i-prim-text: #1b1915;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  body.ritsidan { --i-glas: var(--k-kort); --i-glas-tat: var(--k-kort); --i-mork: rgba(24, 22, 19, 0.94); }
+  html[data-tema="mork"] body.ritsidan { --i-mork: rgba(30, 27, 23, 0.96); }
+}
+
+/* ---------- Ramen: allt svävar på en mjuk yta ---------- */
+html.byggapp body.ritsidan { --b-topp: calc(66px + env(safe-area-inset-top, 0px)); --b-panel: clamp(372px, 26vw, 420px); }
+html.byggapp main.ritsida { background: radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--k-yta) 70%, #fff) 0%, var(--k-yta) 60%); }
+html[data-tema="mork"].byggapp main.ritsida { background: radial-gradient(120% 80% at 50% 0%, #1f1c18 0%, var(--k-yta) 60%); }
+html.byggapp .kf__yta { padding: var(--i-luft) var(--i-luft) max(var(--i-luft), env(safe-area-inset-bottom, 0px)); column-gap: var(--i-luft); }
+html.byggapp.bpanel-dold .kf__yta { column-gap: 0; }
+html.byggapp .kf__scen { border-radius: var(--i-r-panel); box-shadow: var(--i-skugga-liten); }
+html.byggapp .kf__scen:fullscreen, html.ritare-fyll .kf__scen, html.byggapp.bapp-hel .kf__scen { border-radius: 0 !important; }
+html.byggapp.bapp-hel .kf__yta { padding: 0; }
+
+/* ---------- Topraden: en svävande glaslist ---------- */
+html.byggapp .btopp { margin: max(var(--i-luft), env(safe-area-inset-top, 0px)) var(--i-luft) 0; padding: 0 8px 0 18px; border-radius: 24px;
+  background: var(--i-glas); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-kant), var(--i-skugga-liten); }
+.btopp__etikett { font-weight: 500; letter-spacing: 0.1em; }
+.btopp__namn { font-weight: 500; }
+.btopp__streck { width: 4px; height: 4px; border-radius: 50%; background: var(--k-linje-2); }
+html.byggapp .btopp .kf__lank { border-radius: 999px; }
+html.byggapp .btopp .kf__lank[data-byt] { padding: 0 14px 0 12px; background: var(--i-ton); }
+html.byggapp .btopp .kf__lank[data-byt]:hover { background: var(--i-ton-2); }
+html.byggapp .btopp .kf__lank:not([data-byt]):hover { background: var(--i-ton); }
+html.byggapp .btopp .kf__lank[data-tips]:not([data-byt])::after { border-radius: 999px; }
+.btopp__offert { height: 42px; padding: 0 18px 0 20px; border-radius: 999px; background: var(--i-prim); color: var(--i-prim-text); font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 8px 18px -10px color-mix(in srgb, var(--i-prim) 80%, transparent); }
+.btopp__offert:hover { background: var(--i-prim-hover); }
+:is(.btopp__stang, .btopp__hel) { width: 40px; height: 40px; background: var(--i-ton); color: var(--k-text-2); }
+:is(.btopp__stang, .btopp__hel):hover { background: var(--i-ton-2); color: var(--k-text); }
+html.byggapp .btopp__hoger { gap: 8px; }
+/* priskortet i raden: en kapsel; väljaren ett glaskort som växer ur den */
+html.byggapp .kpris--topp .kpris__knapp { height: 42px; min-height: 42px; padding: 0 14px 0 6px; border-radius: 999px; background: var(--i-ton); }
+html.byggapp .kpris--topp .kpris__knapp:hover, html.byggapp .kpris--topp.kpris--oppen .kpris__knapp { background: var(--i-ton-2); }
+html.byggapp .kpris--topp .kpris__namn { font-weight: 500; }
+html.byggapp .kpris--topp .kpris__val { padding: 10px; border-radius: 26px; background: var(--i-glas-tat); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur);
+  box-shadow: var(--i-kant), var(--i-skugga); transform-origin: top right; animation: ios-pop 0.24s var(--i-ut) both; }
+html[data-tema="mork"].byggapp .kpris--topp .kpris__val { box-shadow: var(--i-kant), var(--i-skugga); }
+html.byggapp .kpris--topp .kpris__paket { border-radius: 18px; }
+html.byggapp .kpris--topp :is(.kpris__vad, .kpris__offert) { border-radius: 999px; }
+html.byggapp .kpris--topp .kpris__offert { background: var(--i-prim); color: var(--i-prim-text); }
+@keyframes ios-pop { from { opacity: 0; transform: translateY(-4px) scale(0.96); } }
+/* listorna ur raden (Mina hus, menyn) */
+html.byggapp .kf__lista { padding: 8px; border-radius: 24px; background: var(--i-glas-tat); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-kant), var(--i-skugga); }
+html.byggapp .kf__lista li { border-radius: 16px; }
+html.byggapp .kf__lista li:hover { background: var(--i-ton); }
+html.byggapp .kf__lista li img { border-radius: 12px; }
+
+/* ---------- Sidopanelen: ett svävande glaskort ---------- */
+html.byggapp .kf__panel { border-radius: var(--i-r-panel); background: var(--i-glas-tat); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-kant), var(--i-skugga); }
+html.byggapp .bpanel__huvud { padding: 12px 12px 8px; background: transparent; box-shadow: none; }
+html.byggapp .bpanel__fot { padding: 10px 14px 14px; background: transparent; box-shadow: none; }
+.bpanel__forlopp { left: 22px; right: 22px; height: 3px; border-radius: 999px; background: var(--i-ton); }
+.bpanel__forlopp i { border-radius: inherit; }
+html.byggapp .bpanel__steg { padding: 14px 16px 24px; }
+/* flikarna: en glaskapsel, markören en droppe som fjädrar till det valda steget */
+.bflikar { padding: 4px; border-radius: 999px; background: var(--i-ton); box-shadow: inset 0 0.5px 1px rgba(27, 25, 21, 0.06); }
+.bflik { border-radius: 999px; font-weight: 500; }
+.bflik b { font-weight: 600; }
+.bflik[aria-selected="true"] b { background: var(--i-prim); color: var(--i-prim-text); }
+.bflikar__markor { top: 4px; bottom: 4px; border-radius: 999px; background: var(--k-kort); box-shadow: var(--i-kant), 0 1px 2px rgba(27, 25, 21, 0.08), 0 6px 14px -8px rgba(27, 25, 21, 0.32);
+  transition: transform 0.46s var(--i-fjader), width 0.46s var(--i-fjader); }
+html[data-tema="mork"] .bflikar__markor { background: var(--k-svag-2); }
+.bflikar__pil { width: 28px; height: 28px; margin-top: -14px; background: var(--i-glas-tat); box-shadow: var(--i-kant), var(--i-skugga-liten); }
+.bflik:focus-visible { outline-offset: -3px; }
+/* stegens text: lugnare vikter */
+.bsteg__nr { font-weight: 500; letter-spacing: 0.1em; }
+html.byggapp .bsteg__rubrik { font-weight: 500; letter-spacing: -0.025em; }
+.bgrupp__rubrik { font-weight: 500; letter-spacing: 0.04em; text-transform: none; font-size: 0.8125rem; color: var(--k-text-3); }
+/* korten i stegen: tonade ytor, inga linjer */
+html.byggapp .bsteg .kgrupp, html.byggapp .kgrupp { border-radius: var(--i-r-kort); box-shadow: none; background: var(--k-kort); }
+html.byggapp .kmodell__kort { border-radius: 18px; }
+html.byggapp :is(.kf__nyckel, .kplan__siffror) { gap: 6px; background: none; box-shadow: none; border-radius: 0; overflow: visible; }
+html.byggapp :is(.kf__nyckel, .kplan__siffror) > div { border-radius: 18px; background: var(--i-ton); }
+html.byggapp .bsteg .kplan__bild { border-radius: var(--i-r-kort); box-shadow: none; }
+/* paketen */
+.bpaket { gap: 10px; }
+.bpaket__val { border-radius: var(--i-r-kort); background: var(--k-kort); box-shadow: var(--i-skugga-liten); transition: transform 0.18s var(--i-ut), box-shadow 0.2s ease, background-color 0.2s ease; }
+.bpaket__val:hover { box-shadow: 0 1px 2px rgba(27, 25, 21, 0.06), 0 10px 22px -12px rgba(27, 25, 21, 0.34); }
+.bpaket__val[aria-checked="true"] { box-shadow: inset 0 0 0 2px var(--i-prim), var(--i-skugga-liten); }
+.bpaket__val[aria-checked="true"] :is(.bpaket__nr, .bpaket__bock) { background: var(--i-prim); color: var(--i-prim-text); }
+.bpaket__val[aria-checked="true"] .bpaket__bock svg { stroke: var(--i-prim-text); }
+.bpaket__namn { font-weight: 500; }
+/* verktygskorten: ikonen i en rund glasbubbla */
+.bverktyg { gap: 10px; }
+.bverktyg__knapp { grid-template-columns: 38px minmax(0, 1fr); gap: 12px; min-height: 64px; padding: 12px 14px 12px 12px; border-radius: var(--i-r-kort); background: var(--k-kort); box-shadow: var(--i-skugga-liten); transition: transform 0.18s var(--i-ut), box-shadow 0.2s ease, background-color 0.2s ease; }
+.bverktyg__knapp:hover { box-shadow: 0 1px 2px rgba(27, 25, 21, 0.06), 0 10px 22px -12px rgba(27, 25, 21, 0.34); }
+.bverktyg__knapp > svg { box-sizing: border-box; width: 38px; height: 38px; padding: 9px; border-radius: 50%; background: var(--i-ton); box-shadow: var(--i-kant); }
+.bverktyg__knapp b { font-weight: 500; }
+.bverktyg__knapp[aria-pressed="true"] { background: color-mix(in srgb, var(--i-prim) 12%, var(--k-kort)); color: var(--k-text); box-shadow: inset 0 0 0 2px var(--i-prim); }
+.bverktyg__knapp[aria-pressed="true"] small { color: var(--k-text-2); }
+.bverktyg__knapp[aria-pressed="true"] > svg { background: var(--i-prim); color: var(--i-prim-text); box-shadow: none; }
+.bverktyg__lage { top: 12px; right: 12px; }
+/* miljöer, ljus, bilar, klockan */
+.bmiljoer, .bljus, .bbilar { gap: 10px; }
+:is(.bmiljoer, .bljus, .bbilar) button { box-shadow: var(--i-skugga-liten); transition: transform 0.18s var(--i-ut), box-shadow 0.2s ease; }
+.bmiljoer button { padding: 6px 6px 10px; border-radius: var(--i-r-kort); }
+.bmiljo__bild { border-radius: 16px; }
+.bljus button { border-radius: 20px; }
+.bbilar button { border-radius: 999px; }
+:is(.bmiljoer, .bljus, .bbilar) button:hover { box-shadow: 0 1px 2px rgba(27, 25, 21, 0.06), 0 10px 22px -12px rgba(27, 25, 21, 0.34); }
+:is(.bmiljoer, .bljus, .bbilar) button[aria-checked="true"] { box-shadow: inset 0 0 0 2px var(--i-prim), var(--i-skugga-liten); }
+.btid { border-radius: 999px; padding: 12px 18px; box-shadow: var(--i-skugga-liten); }
+.btid input { accent-color: var(--i-prim); }
+/* färgproverna: runda, med en ring runt det valda */
+html.byggapp .kfarg__prov { border-radius: 50%; }
+html.byggapp .kfarg input:checked + .kfarg__prov { box-shadow: 0 0 0 2px var(--i-prim); }
+html.byggapp .kfarg__prov::after { box-shadow: inset 0 0 0 3px var(--k-kort); }
+@media (hover: hover) {
+  html.byggapp .kfarg:hover .kfarg__prov { transform: translateY(-2px) scale(1.06); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1), 0 10px 16px -10px rgba(27, 25, 21, 0.55); }
+  html.byggapp .kfarg:hover input:checked + .kfarg__prov { box-shadow: 0 0 0 2px var(--i-prim), 0 10px 16px -10px rgba(27, 25, 21, 0.55); }
+}
+html.byggapp .kfarg__namn { border-radius: 999px; }
+html.byggapp .kpaletter button, html.byggapp .kpalett { border-radius: 999px; }
+/* vinklarna */
+html.byggapp .bsteg .kf__tumme, html.byggapp .bsteg .kf__tummar > * { border-radius: 18px; }
+/* listorna (sammanfattningen i steget): grupperade rader på tonad yta, luft i stället för linjer */
+html.byggapp :is(.ksumma dl, .bsumma) { display: grid; gap: 2px; margin-bottom: 14px; border: 0; }
+html.byggapp .bsumma { margin-top: 0; }
+html.byggapp :is(.ksumma dl, .bsumma) > div { padding: 12px 16px; border: 0; background: var(--i-ton); border-radius: 6px; }
+html.byggapp :is(.ksumma dl, .bsumma) > div:first-child { border-top-left-radius: 18px; border-top-right-radius: 18px; }
+html.byggapp :is(.ksumma dl, .bsumma) > div:last-child { border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; }
+html.byggapp :is(.ksumma, .ksam__lista) dd i { border-radius: 50%; }
+html.byggapp .ksumma { border-radius: var(--i-r-kort); box-shadow: none; }
+/* knappar i panelen: kapslar, primär i virke-tonen */
+html.byggapp :is(.kf__knapp, .kdela) { border-radius: 999px; }
+html.byggapp .kf__knapp:not(.kf__knapp--ljus) { background: var(--i-prim); color: var(--i-prim-text); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 8px 18px -10px color-mix(in srgb, var(--i-prim) 80%, transparent); }
+html.byggapp .kf__knapp:not(.kf__knapp--ljus):hover { background: var(--i-prim-hover); }
+html.byggapp .kf__knapp--ljus { background: var(--i-ton); color: var(--k-text); box-shadow: none; }
+html.byggapp .kf__knapp--ljus:hover { background: var(--i-ton-2); }
+html.byggapp .kdela { box-shadow: none; background: var(--i-ton); }
+html.byggapp .kdela:hover { background: var(--i-ton-2); }
+/* foten: tillbaka som rund glasbubbla, nästa som kapsel */
+.bfot__forra { width: 48px; min-height: 48px; padding: 0; border-radius: 50%; background: var(--i-ton); box-shadow: var(--i-kant); }
+.bfot__forra:hover { background: var(--i-ton-2); }
+.bfot__nasta { min-height: 48px; border-radius: 999px; background: var(--i-prim); color: var(--i-prim-text); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 10px 22px -12px color-mix(in srgb, var(--i-prim) 85%, transparent); }
+.bfot__nasta:hover { background: var(--i-prim-hover); }
+.bfot__offert { background: var(--i-prim); color: var(--i-prim-text); }
+.bfot__offert:hover { background: var(--i-prim-hover); }
+.bfot__nasta [data-bnasta-text] b { font-weight: 600; }
+
+/* ---------- Mjuk press och fjädrande återgång ---------- */
+html.byggapp :is(.bflik, .bpaket__val, .bverktyg__knapp, .bfot__forra, .bfot__nasta, .btopp__offert, .btopp__stang, .btopp__hel, .bmiljoer button, .bljus button, .bbilar button, .bhel-ut, .btopp .kf__lank, .kf__knapp, .kdela, .kpris__knapp, .kpris__paket, .kf__vk, .kprod__knapp, .kspr__pil, .kspr__flik, .bangra button, .kdialog__stang, .ksam__planknapp):active { transform: scale(0.96); }
+html.byggapp :is(.btopp__offert, .btopp__stang, .btopp__hel, .btopp .kf__lank, .kf__knapp, .kdela, .kpris__knapp, .kprod__knapp, .kspr__pil, .bangra button, .bfot__forra, .bfot__nasta) { transition: transform 0.2s var(--i-fjader), background-color 0.18s ease, color 0.18s ease, box-shadow 0.2s ease; }
+
+/* ---------- Handtaget mellan panel och scen (iPadOS): kapsel i vila, rund glasknapp nära ---------- */
+html.byggapp .bpanel__fall--kant { --h-x: calc(var(--b-panel) + var(--i-luft) * 1.5);
+  top: calc(50% + var(--i-luft) / 2); right: var(--h-x); width: 44px; height: 64px; margin: 0; translate: 50% -50%; padding: 0; border-radius: 999px;
+  background: none; box-shadow: none; color: var(--k-text); -webkit-backdrop-filter: none; backdrop-filter: none; }
+html.byggapp .bpanel__fall--kant:hover { background: none; }
+html.byggapp .bpanel__fall--kant::before, html.byggapp .bpanel__fall--kant::after { content: ""; position: absolute; left: 50%; top: 50%; border-radius: 999px; pointer-events: none;
+  -webkit-backdrop-filter: blur(12px) saturate(1.6); backdrop-filter: blur(12px) saturate(1.6); }
+/* vilan: en tydlig glaskapsel (8 × 52) som alltid syns */
+html.byggapp .bpanel__fall--kant::before { width: 8px; height: 52px; margin: -26px 0 0 -4px; background: color-mix(in srgb, var(--k-text) 26%, transparent);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.35), 0 2px 8px -2px rgba(27, 25, 21, 0.3);
+  transition: transform 0.42s var(--i-studs), opacity 0.22s ease; }
+/* nära: en rund glasknapp (30 px) fjädrar ut */
+html.byggapp .bpanel__fall--kant::after { width: 30px; height: 30px; margin: -15px 0 0 -15px; background: var(--i-glas-tat);
+  box-shadow: var(--i-kant), 0 1px 2px rgba(27, 25, 21, 0.14), 0 8px 20px -8px rgba(27, 25, 21, 0.4);
+  opacity: 0; transform: scale(0.27, 1.6); transition: transform 0.42s var(--i-studs), opacity 0.2s ease; }
+html.byggapp .bpanel__fall--kant svg { position: relative; z-index: 1; width: 14px; height: 14px; stroke-width: 2.6; opacity: 0; transform: rotate(-90deg) scale(0.4);
+  transition: opacity 0.2s ease, transform 0.42s var(--i-studs); }
+html.byggapp:not(.bpanel-dold):not(.bpanel-ut) .bpanel__fall--kant:is(:hover, [data-nara], :focus-visible)::before { opacity: 0; transform: scale(1, 0.58); }
+html.byggapp:not(.bpanel-dold):not(.bpanel-ut) .bpanel__fall--kant:is(:hover, [data-nara], :focus-visible)::after { opacity: 1; transform: none; }
+html.byggapp:not(.bpanel-dold):not(.bpanel-ut) .bpanel__fall--kant:is(:hover, [data-nara], :focus-visible) svg { opacity: 1; transform: none; }
+html.byggapp:not(.bpanel-dold):not(.bpanel-ut) .bpanel__fall--kant:active::after { transform: scale(0.87); }
+html.byggapp:not(.bpanel-dold):not(.bpanel-ut) .bpanel__fall--kant:active svg { transform: scale(0.8); }
+html.byggapp .bpanel__fall--kant:active { transform: none; }
+html.byggapp .bpanel__fall--kant:focus-visible { outline: none; }
+html.byggapp .bpanel__fall--kant:focus-visible::after { outline: 2px solid var(--k-fokus); outline-offset: 2px; }
+/* infälld panel: alltid den runda knappen vid kanten, pilen har vänt ett halvt varv (med studs) */
+html.byggapp:is(.bpanel-dold, .bpanel-ut) .bpanel__fall--kant { right: calc(var(--i-luft) + 26px); }
+html.byggapp:is(.bpanel-dold, .bpanel-ut) .bpanel__fall--kant::before { opacity: 0; transform: scale(1, 0.58); }
+html.byggapp:is(.bpanel-dold, .bpanel-ut) .bpanel__fall--kant::after { width: 40px; height: 40px; margin: -20px 0 0 -20px; opacity: 1; transform: none; }
+html.byggapp:is(.bpanel-dold, .bpanel-ut) .bpanel__fall--kant svg { width: 16px; height: 16px; opacity: 1; transform: rotate(180deg); }
+html.byggapp.bpanel-dold .bpanel__fall--kant:is(:hover, [data-nara])::after { transform: scale(1.08); }
+html.byggapp.bpanel-dold .bpanel__fall--kant:active::after { transform: scale(0.9); }
+/* pekskärm: alltid den runda knappen */
+@media (hover: none) {
+  html.byggapp .bpanel__fall--kant::before { opacity: 0; }
+  html.byggapp .bpanel__fall--kant::after { opacity: 1; transform: none; }
+  html.byggapp .bpanel__fall--kant svg { opacity: 1; transform: none; }
+  html.byggapp:is(.bpanel-dold, .bpanel-ut) .bpanel__fall--kant svg { transform: rotate(180deg); }
+}
+html.byggapp:not(.bpanel-dold) .kf__scen .kf__verktyg { max-width: calc(100% - 32px); }
+
+/* ---------- Scenens glas: verktygsraden, tips, ångra, produktkortet, sprängvyn ---------- */
+html.byggapp .kf__verktyg { bottom: 18px; height: 60px; padding: 8px; border-radius: 999px; background: var(--i-mork); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-mork-kant), var(--i-mork-skugga); }
+html.byggapp .kf__verktyg .kf__vk { border-radius: 999px; font-weight: 500; }
+html.byggapp .kf__verktyg .kf__streck { width: 4px; height: 4px; border-radius: 50%; margin: 0 6px; background: rgba(255, 255, 255, 0.28); }
+html.byggapp .kf__verktyg .kf__vk[data-helskarm] { border-radius: 999px; }
+html.byggapp .kf__popup { padding: 8px; border-radius: 24px; background: var(--i-mork); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-mork-kant), var(--i-mork-skugga); }
+html.byggapp .kf__popup button { border-radius: 16px; }
+html.byggapp .ritare__tips { top: 18px; padding: 10px 16px 10px 12px; border-radius: 999px; background: var(--i-mork); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-mork-kant), var(--i-mork-skugga); font-weight: 500; }
+html.byggapp .kf__vand { background: var(--i-mork); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-mork-kant), var(--i-mork-skugga); }
+.btips { padding: 8px 12px; border-radius: 999px; background: var(--i-mork, rgba(24, 22, 19, 0.9)); color: #fff; -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-mork-kant), var(--i-mork-skugga); }
+.bangra { padding: 6px 6px 6px 16px; background: var(--i-mork); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-mork-kant), var(--i-mork-skugga); }
+.bangra button { min-height: 34px; padding: 0 14px; background: rgba(255, 255, 255, 0.16); }
+.bangra button:hover { background: rgba(255, 255, 255, 0.24); }
+.bhel-ut { border-radius: 999px; background: var(--i-mork); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-mork-kant), var(--i-mork-skugga); }
+/* produktkortet */
+html.byggapp .kprod { padding: 16px 18px 18px 20px; border-radius: var(--i-r-panel); background: var(--i-mork); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-mork-kant), var(--i-mork-skugga); scrollbar-width: none; }
+html.byggapp .kprod::-webkit-scrollbar { display: none; }
+html.byggapp .kprod__knapp { background: rgba(255, 255, 255, 0.1); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+html.byggapp .kprod__knapp:hover { background: rgba(255, 255, 255, 0.2); }
+html.byggapp .kprod__platta { border-radius: 16px; }
+html.byggapp .kprod__lankar a { border-radius: 999px; }
+html.byggapp .kprod.kprod--panel { border-radius: var(--i-r-panel); background: var(--i-mork); }
+/* sprängvyns panel */
+html.byggapp .kspr { padding: 14px 16px 16px; border-radius: var(--i-r-panel); background: var(--i-mork); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-mork-kant), var(--i-mork-skugga); }
+html.byggapp .kspr .kspr__flikar { gap: 4px; padding: 5px; border-radius: 18px; background: rgba(255, 255, 255, 0.07); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05); }
+html.byggapp .kspr .kspr__flik { gap: 4px; padding: 8px 3px 7px; border-radius: 13px; font-size: 0.65625rem; letter-spacing: -0.012em; }
+html.byggapp .kspr .kspr__flik:focus-visible { outline: 1.5px solid rgba(255, 255, 255, 0.45); outline-offset: -2px; }
+html.byggapp .kspr:not(.kspr--under) { width: min(348px, calc(100% - 28px)); }   /* plats för hela flikorden (Nyckelfärdig, Entreprenad) */
+html.byggapp .kspr .kspr__markor { top: 5px; bottom: 5px; border-radius: 13px; background: rgba(255, 255, 255, 0.15); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 2px 8px rgba(0, 0, 0, 0.14); transition: transform 0.46s var(--i-fjader), width 0.46s var(--i-fjader); }
+html.byggapp .kspr .kspr__pil, html.byggapp .kspr .kspr__stang { border-radius: 999px; }
+html.byggapp .kspr .kspr__not { border-radius: 14px; }
+html.byggapp .kspr .kspr__kort { border-radius: 14px; }
+html.byggapp .kspr .kspr__text { scrollbar-width: none; }
+html.byggapp .kf__vanster > .kspr.kspr--under { border-radius: var(--i-r-panel); }
+
+/* ---------- Laddningen: förloppet en mjuk kapsel ---------- */
+.bintro__linje { height: 4px; border-radius: 999px; }
+
+/* ---------- Mobil: arket svävar med rundade hörn, stort grepp ---------- */
+@media (max-width: 860px) {
+  html.byggapp body.ritsidan { --b-topp: calc(56px + env(safe-area-inset-top, 0px)); --i-luft: 8px; }
+  html.byggapp .btopp { margin: 0; border-radius: 0; padding-top: env(safe-area-inset-top, 0px); box-shadow: 0 10px 24px -20px rgba(27, 25, 21, 0.4); }
+  html.byggapp .kf__yta { padding: 0; column-gap: 0; }
+  html.byggapp .kf__scen { border-radius: 0; box-shadow: none; }
+  html.byggapp .kf__panel { margin: -24px 8px max(8px, env(safe-area-inset-bottom, 0px)); height: calc(100% + 24px - max(8px, env(safe-area-inset-bottom, 0px))); border-radius: var(--i-r-panel); background: var(--i-glas-tat); box-shadow: var(--i-kant), 0 -8px 30px -16px rgba(27, 25, 21, 0.35), var(--i-skugga-liten); }
+  html.byggapp .bpanel__huvud { padding: 20px 10px 8px; border-radius: var(--i-r-panel) var(--i-r-panel) 0 0; }
+  html.byggapp .bpanel__grepp { top: 7px; width: 48px; height: 5px; margin-left: -24px; border-radius: 999px; background: color-mix(in srgb, var(--k-text) 24%, transparent); }
+  html.byggapp .bpanel__fot { padding: 8px 10px 10px; }
+  html.byggapp .bpanel__fall--mobil { border-radius: 50%; background: var(--i-ton); }
+  html.byggapp .bpanel__mobil .btopp__offert, html.byggapp .kpris--topp .kpris__knapp { border-radius: 999px; }
+  html.byggapp .kpris--topp .kpris__val { transform-origin: bottom left; }
+  html.byggapp .kf__scen .kf__verktyg { bottom: 34px; height: 56px; padding: 6px; }
+  html.byggapp .kf__scen .kf__lager { bottom: 102px; }
+  html.byggapp .bpanel__steg { padding: 12px 12px 20px; }
+  html.byggapp .kf__vanster > .kspr.kspr--under { left: 8px; right: 8px; bottom: max(8px, env(safe-area-inset-bottom, 0px)); }
+  html.byggapp .bpanel__fall--kant { display: none; }
+}
+/* liggande telefon: panelen till höger svävar som på datorn */
+@media (max-width: 960px) and (max-height: 500px) and (orientation: landscape) {
+  html.byggapp body.ritsidan { --b-topp: calc(52px + env(safe-area-inset-top, 0px)); --i-luft: 6px; }
+  html.byggapp .btopp { margin: max(6px, env(safe-area-inset-top, 0px)) max(6px, env(safe-area-inset-right, 0px)) 0 max(6px, env(safe-area-inset-left, 0px)); border-radius: 22px; padding-top: 0; }
+  html.byggapp .kf__yta { padding: 6px max(6px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px)); column-gap: 6px; }
+  html.byggapp .kf__scen { border-radius: 22px; }
+  html.byggapp .kf__panel { margin: 0; height: 100%; border-radius: 22px; box-shadow: var(--i-kant), var(--i-skugga-liten); }
+  html.byggapp .bpanel__huvud { padding-top: 8px; }
+  html.byggapp .kf__scen .kf__verktyg { bottom: 8px; }
+  html.byggapp .kf__vanster > .kspr.kspr--under { left: auto; right: max(6px, env(safe-area-inset-right, 0px)); top: calc(var(--b-topp) + 6px); bottom: 6px; border-radius: 22px; }
+}
+
+/* ---------- Sammanfattningen (dialogen): svävande glaskort, mobil ett helskärmsark ---------- */
+body.ritsidan .kdialog::backdrop { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+body.ritsidan .kdialog[open]::backdrop { background: rgba(18, 16, 13, 0.42); }
+body.ritsidan .kdialog { border-radius: var(--i-r-panel); }
+body.ritsidan .kdialog__stang { width: 40px; height: 40px; background: var(--i-glas-tat); color: var(--k-text); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-kant), var(--i-skugga-liten);
+  transition: transform 0.2s var(--i-fjader), background-color 0.18s ease; }
+body.ritsidan .kdialog__stang:hover { background: var(--k-kort); transform: scale(1.06); }
+body.ritsidan .kdialog__stang:active { transform: scale(0.94); }
+body.ritsidan .kdialog__stang:focus-visible { outline: 2px solid var(--k-fokus); outline-offset: 3px; }
+body.ritsidan .ksam { position: fixed; inset: 0; margin: auto; width: min(1120px, 100vw - 48px); height: min(760px, 100dvh - 48px); max-height: calc(100dvh - 48px); overflow: hidden;
+  background: var(--i-glas-tat); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-kant), 0 40px 90px -40px rgba(0, 0, 0, 0.55);
+  opacity: 0; translate: none; scale: 0.96; transform-origin: 50% 50%;
+  transition: opacity 0.22s var(--i-ut), scale 0.32s var(--i-fjader), overlay 0.32s var(--i-ut) allow-discrete, display 0.32s var(--i-ut) allow-discrete; }
+body.ritsidan .ksam[open] { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr); grid-template-rows: minmax(0, 1fr); opacity: 1; scale: 1; }
+@starting-style { body.ritsidan .ksam[open] { opacity: 0; scale: 0.96; } }
+body.ritsidan .ksam > .kdialog__stang { position: absolute; top: 16px; right: 16px; z-index: 4; }
+body.ritsidan .ksam__bild { position: relative; min-height: 0; margin: 10px 0 10px 10px; border-radius: 20px; overflow: hidden; background: linear-gradient(180deg, #f6f3ee, #e9e4db); }
+html[data-tema="mork"] body.ritsidan .ksam__bild { background: #2a2621; }
+body.ritsidan .ksam__bild canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
+body.ritsidan .ksam__text { min-height: 0; display: grid; align-content: start; gap: 26px; padding: 28px 28px 32px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none;
+  -webkit-mask: linear-gradient(180deg, transparent 0, #000 22px, #000 calc(100% - 30px), transparent 100%); mask: linear-gradient(180deg, transparent 0, #000 22px, #000 calc(100% - 30px), transparent 100%); }
+body.ritsidan .ksam__text::-webkit-scrollbar { display: none; }
+body.ritsidan .ksam__del { display: grid; gap: 12px; margin: 0; }
+body.ritsidan .ksam__del--hus { gap: 0; padding-right: 48px; }
+html body.ritsidan .ksam__namn { margin: 0; font: 500 clamp(2rem, 3vw, 2.75rem)/1.02 var(--sans); letter-spacing: -0.035em; color: var(--k-text); }
+body.ritsidan .ksam__fakta { margin: 10px 0 16px; font: 400 1rem/1.3 var(--sans); color: var(--k-text-2); font-variant-numeric: tabular-nums; }
+body.ritsidan .ksam__chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+body.ritsidan .ksam__chips > div { display: flex; align-items: baseline; gap: 8px; padding: 9px 14px; border-radius: 999px; background: var(--i-ton); }
+body.ritsidan .ksam__chips dt { font: 400 0.8125rem/1 var(--sans); color: var(--k-text-3); }
+body.ritsidan .ksam__chips dd { margin: 0; font: 600 0.875rem/1 var(--sans); color: var(--k-text); font-variant-numeric: tabular-nums; }
+html body.ritsidan .ksam__rubrik { margin: 0 4px; font: 600 0.9375rem/1.2 var(--sans); letter-spacing: -0.01em; color: var(--k-text); }
+body.ritsidan .ksam__lista { display: grid; gap: 2px; margin: 0; border: 0; }
+body.ritsidan .ksam__lista[hidden] { display: none; }
+body.ritsidan .ksam__lista > div { padding: 13px 16px; border: 0; border-radius: 6px; background: var(--i-ton); }
+body.ritsidan .ksam__lista > div:first-child { border-top-left-radius: 18px; border-top-right-radius: 18px; }
+body.ritsidan .ksam__lista > div:last-child { border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; }
+body.ritsidan .ksam__lista dt { color: var(--k-text-2); }
+body.ritsidan .ksam__lista dd i { width: 18px; height: 18px; border-radius: 50%; }
+body.ritsidan .ksam__prisrad dd { display: grid; justify-items: end; gap: 4px; }
+body.ritsidan .ksam__prisrad b { font: 600 1.125rem/1.1 var(--sans); font-variant-numeric: tabular-nums; }
+body.ritsidan .ksam__prisrad small { font: 400 0.75rem/1.2 var(--sans); color: var(--k-text-3); }
+body.ritsidan .ksam__knappar { display: grid; gap: 8px; margin-top: 4px; }
+body.ritsidan .ksam__smaknappar { gap: 8px; }
+body.ritsidan .ksam .kf__knapp { min-height: 50px; border-radius: 999px; background: var(--i-prim); color: var(--i-prim-text); font-weight: 600; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 10px 22px -12px color-mix(in srgb, var(--i-prim) 85%, transparent); }
+body.ritsidan .ksam .kf__knapp:hover { background: var(--i-prim-hover); }
+body.ritsidan .ksam .kdela { min-height: 44px; border-radius: 999px; background: var(--i-ton); box-shadow: none; color: var(--k-text); }
+body.ritsidan .ksam .kdela:hover { background: var(--i-ton-2); }
+body.ritsidan .ksam :is(.kf__knapp, .kdela, .ksam__planknapp) { transition: transform 0.2s var(--i-fjader), background-color 0.18s ease; }
+body.ritsidan .ksam :is(.kf__knapp, .kdela, .ksam__planknapp):active { transform: scale(0.96); }
+body.ritsidan .ksam :is(.kf__knapp, .kdela):focus-visible { outline: 2px solid var(--k-fokus); outline-offset: 3px; }
+body.ritsidan .ksam__plan { margin: 0; padding: 0; background: none; box-shadow: none; }
+body.ritsidan .ksam__planknapp { position: relative; display: block; width: 100%; padding: 14px; border: 0; border-radius: 20px; background: #fff; cursor: zoom-in; box-shadow: var(--i-skugga-liten); }
+body.ritsidan .ksam__planknapp img { display: block; width: 100%; height: auto; }
+body.ritsidan .ksam__planknapp:focus-visible { outline: 2px solid var(--k-fokus); outline-offset: 3px; }
+body.ritsidan .ksam__lupp { position: absolute; right: 10px; bottom: 10px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.8); color: #1b1915;
+  -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: inset 0 1px 0 #fff, 0 0 0 0.5px rgba(27, 25, 21, 0.1), 0 6px 14px -8px rgba(27, 25, 21, 0.45); transition: transform 0.24s var(--i-fjader); }
+body.ritsidan .ksam__lupp svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+@media (hover: hover) { body.ritsidan .ksam__planknapp:hover .ksam__lupp { transform: scale(1.1); } }
+body.ritsidan .ksam__plan figcaption { margin: 8px 4px 0; font-size: 0.75rem; color: var(--k-text-3); }
+body.ritsidan .ksam__not { margin: 0 4px; font-size: 0.8125rem; line-height: 1.5; color: var(--k-text-3); }
+html[data-tema="mork"] body.ritsidan .ksam__planknapp { background: #efebe3; }
+/* mobil och smalt: ett helskärmsark nerifrån, bilden överst, allt rullar */
+@media (max-width: 760px) {
+  body.ritsidan .ksam { inset: auto 0 0 0; margin: 0; width: 100vw; max-width: 100vw; height: calc(100dvh - max(12px, env(safe-area-inset-top, 0px))); max-height: none; border-radius: var(--i-r-panel) var(--i-r-panel) 0 0;
+    scale: 1; translate: 0 100%; transition: opacity 0.2s var(--i-ut), translate 0.4s cubic-bezier(0.32, 0.72, 0, 1), overlay 0.4s var(--i-ut) allow-discrete, display 0.4s var(--i-ut) allow-discrete; }
+  body.ritsidan .ksam[open] { display: flex; flex-direction: column; translate: 0 0; scale: 1; }
+  @starting-style { body.ritsidan .ksam[open] { translate: 0 100%; opacity: 1; scale: 1; } }
+  body.ritsidan .ksam::before { content: ""; position: absolute; z-index: 5; top: 7px; left: 50%; width: 48px; height: 5px; margin-left: -24px; border-radius: 999px; background: rgba(27, 25, 21, 0.28); }
+  body.ritsidan .ksam__bild { flex: none; height: 34dvh; margin: 18px 10px 0; }
+  body.ritsidan .ksam__text { flex: 1 1 auto; gap: 22px; padding: 22px 18px calc(28px + env(safe-area-inset-bottom, 0px)); }
+  body.ritsidan .ksam > .kdialog__stang { top: 26px; right: 18px; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  body.ritsidan .ksam { width: calc(100vw - 24px); height: calc(100dvh - 24px); max-height: calc(100dvh - 24px); }
+  body.ritsidan .ksam[open] { grid-template-columns: minmax(0, 1fr) minmax(300px, 1fr); }
+  body.ritsidan .ksam__text { padding: 20px 20px 24px; }
+}
+/* Sammanfattningen: bara texten till höger rullar (mjuka toningar i kanterna), knapparna står fast
+   under den och syns alltid hela (förut låg de sist i texten och klipptes av rutans runda kant) */
+body.ritsidan .ksam__hoger { position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+body.ritsidan .ksam__hoger > .ksam__text { flex: 1 1 auto; padding-bottom: 20px; }
+body.ritsidan .ksam__hoger > .ksam__knappar { flex: none; margin: 0; padding: 6px 28px max(22px, env(safe-area-inset-bottom, 0px)); }
+/* 3D i bilden (husritare-sida.js, summa3d): dra för att vrida */
+body.ritsidan .ksam__bild--3d canvas { cursor: grab; outline: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+body.ritsidan .ksam__bild--3d canvas:active { cursor: grabbing; }
+body.ritsidan .ksam__bild--3d canvas:focus-visible { outline: 2px solid var(--k-fokus); outline-offset: -4px; border-radius: 20px; }
+body.ritsidan .ksam__tips { position: absolute; left: 14px; bottom: 14px; z-index: 2; display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 14px 0 11px;
+  border-radius: 999px; pointer-events: none; background: rgba(255, 255, 255, 0.86); color: #3b352d; font: 600 0.8125rem/1 var(--sans); box-shadow: 0 6px 18px -10px rgba(27, 25, 21, 0.4);
+  transition: opacity 0.3s var(--i-ut), translate 0.3s var(--i-ut); animation: k-upp 0.3s var(--i-ut) 0.25s both; }
+body.ritsidan .ksam__tips svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+body.ritsidan .ksam__tips[hidden] { display: none; }
+body.ritsidan .ksam__tips--ut { opacity: 0; translate: 0 4px; }
+@media (max-width: 760px) {
+  body.ritsidan .ksam__hoger { flex: 1 1 auto; }
+  body.ritsidan .ksam__hoger > .ksam__text { padding-bottom: 16px; }
+  body.ritsidan .ksam__hoger > .ksam__knappar { padding: 6px 18px max(14px, env(safe-area-inset-bottom, 0px)); }
+  body.ritsidan .ksam__tips { left: 10px; bottom: 10px; }
+}
+@media (max-height: 620px) {
+  body.ritsidan .ksam__hoger > .ksam__knappar { gap: 6px; padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
+  body.ritsidan .ksam .ksam__knappar .kf__knapp { min-height: 44px; }
+  body.ritsidan .ksam .ksam__knappar .kdela { min-height: 40px; }
+}
+@media (max-height: 520px) and (orientation: landscape) { body.ritsidan .ksam__hoger > .ksam__knappar { padding: 4px 20px 10px; } }
+
+/* ---------- Reducerad rörelse: inga studsar, bara toningar ---------- */
+@media (prefers-reduced-motion: reduce) {
+  body.ritsidan { --i-fjader: var(--i-ut); --i-studs: var(--i-ut); }
+  .bflikar__markor, html.byggapp .kspr .kspr__markor { transition-duration: 0.01s; }
+  html.byggapp .bpanel__fall--kant::before, html.byggapp .bpanel__fall--kant::after, html.byggapp .bpanel__fall--kant svg { transition-duration: 0.01s, 0.15s; }
+  html.byggapp :is(.bflik, .bpaket__val, .bverktyg__knapp, .bfot__forra, .bfot__nasta, .btopp__offert, .kf__knapp, .kdela, .kdialog__stang, .ksam__planknapp):active { transform: none; }
+  body.ritsidan .ksam, body.ritsidan .ksam[open] { scale: 1; translate: none; transition: opacity 0.2s ease, overlay 0.2s allow-discrete, display 0.2s allow-discrete; }
+  @starting-style { body.ritsidan .ksam[open] { scale: 1; translate: none; opacity: 0; } }
+  html.byggapp .kpris--topp .kpris__val { animation: none; }
+}
+
+/* dialogerna centreras (appens "main > * { margin: 0 }" tog annars marginalen) */
+html body.ritsidan .kdialog.kdialog.kdialog { margin: auto; }
+@media (max-width: 760px) { html body.ritsidan .kdialog.kdialog.ksam { margin: 0; } }
+
+/* Glaset på topraden och panelen ligger i ett ::before: ett element med backdrop-filter blir
+   bakgrundsrot för sina barn, så att priskortets väljare och listorna annars inte såg sidan bakom
+   (de blev genomskinliga utan oskärpa). Väljaren och listorna själva är täta kort. */
+html.byggapp :is(.btopp, .kf__panel) { background: none; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; isolation: isolate; }
+html.byggapp :is(.btopp, .kf__panel)::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: var(--i-glas); -webkit-backdrop-filter: var(--i-blur); backdrop-filter: var(--i-blur); box-shadow: var(--i-yta-skugga, var(--i-kant), var(--i-skugga-liten)); }
+html.byggapp .kf__panel::before { background: var(--i-glas-tat); }
+html.byggapp .kf__panel { --i-yta-skugga: var(--i-kant), var(--i-skugga); }
+html.byggapp :is(.kpris--topp .kpris__val, .kf__lista) { background: var(--k-kort); -webkit-backdrop-filter: none; backdrop-filter: none; }
+html.byggapp .kpris--topp .kpris__pnamn { white-space: normal; line-height: 1.25; }
+/* paketnamnet radbryts i alla lägen (förut gick långa namn som "Nyckelfärdig + entreprenad" in under priset) */
+html.byggapp .kpris__pnamn, .kpris__pnamn { white-space: normal; line-height: 1.25; text-wrap: balance; }
+.kpris__paket em { padding-left: 4px; }
+body.ritsidan .ksam :is(.kdialog__stang, .ksam__lupp) { -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.ritsidan .ksam .kdialog__stang { background: var(--k-kort); }
+@media (max-width: 860px) {
+  html.byggapp .btopp { --i-yta-skugga: 0 10px 24px -20px rgba(27, 25, 21, 0.4); }
+  html.byggapp .kf__panel { --i-yta-skugga: var(--i-kant), 0 -8px 30px -16px rgba(27, 25, 21, 0.35), var(--i-skugga-liten); }
+}
+@media (max-width: 960px) and (max-height: 500px) and (orientation: landscape) {
+  html.byggapp .btopp { --i-yta-skugga: var(--i-kant), var(--i-skugga-liten); }
+  html.byggapp .kf__panel { --i-yta-skugga: var(--i-kant), var(--i-skugga-liten); }
+}
+/* produktgrupperna: luft och tonade rader i stället för linjer */
+html.byggapp .kprodgrupp { border-top: 0; margin-top: 4px; border-radius: 18px; }
+html.byggapp .kprodgrupp + .kprodgrupp { margin-top: 6px; }
+html.byggapp .kprodval { border-radius: 16px; }

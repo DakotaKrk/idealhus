@@ -23,14 +23,17 @@
     <meta property="og:url" content="https://legohusstockholm.se/">
     <meta name="twitter:card" content="summary_large_image">
 
-    <link rel="preload" as="image" href="images/stamning/gront-hus-havet.webp" imagesrcset="images/stamning/gront-hus-havet-600.webp 600w, images/stamning/gront-hus-havet.webp 1200w" imagesizes="(max-width: 900px) 94vw, 98vw" fetchpriority="high">
+    <link rel="preload" as="image" href="images/fabrik/hero-fabrik-mobil-1000.webp" media="(max-width: 900px)" fetchpriority="high">
+    <link rel="preload" as="image" href="images/fabrik/hero-fabrik-2000.webp" imagesrcset="images/fabrik/hero-fabrik-1200.webp 1200w, images/fabrik/hero-fabrik-2000.webp 2400w" imagesizes="98vw" media="(min-width: 901px)" fetchpriority="high">
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/poppins-700.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20261010l">
-    <link rel="stylesheet" href="design.css?v=20261124a">
-    <link rel="stylesheet" href="nya-hus.css?v=20261120a">
-    <script src="premium.js?v=20261124a" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261126g">
+    <link rel="stylesheet" href="design.css?v=20261126r">
+    <link rel="stylesheet" href="nya-hus.css?v=20261126g">
+    <link rel="stylesheet" href="ios.css?v=20261126r">
+    <script src="logga.js?v=20261126r"></script>
+    <script src="premium.js?v=20261126r" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script type="application/ld+json">
     {
@@ -94,11 +97,12 @@
     </script>
   </head>
   <body>
+    <script>if(window.LegohusLogga&&LegohusLogga.intro)LegohusLogga.intro()</script>
     <a class="skip" href="#innehall">Hoppa till innehållet</a>
     <header class="site-header">
       <div class="site-header__inner">
         <a class="logo" href="./" aria-label="Till Legohus Stockholms startsida">
-          <img class="logo__svg" src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
+          <img class="logo__svg" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
         </a>
 
         <nav class="main-nav" aria-label="Huvudmeny">
@@ -114,7 +118,7 @@
                   <em>Kupa 30, inom attefallsmåtten</em>
                 </span>
               </a>
-              <p class="main-nav__modeller"><a href="kupa-30.html">Kupa 30</a></p>
+              <p class="main-nav__modeller"><a href="kupa-30.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 30<small class="meny-pris">från 299 500 kr</small></a></p>
               <a href="fritidshus.html">
                 <img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async">
                 <span>
@@ -122,7 +126,7 @@
                   <em>Fyra modeller, 40–90 m²</em>
                 </span>
               </a>
-              <p class="main-nav__modeller"><a href="kupa-40.html">Kupa 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+              <p class="main-nav__modeller"><a href="kupa-40.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 40<small class="meny-pris">från 450 000 kr</small></a><a href="sadel-50.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Sadel 50<small class="meny-pris">från 495 000 kr</small></a><a href="pulpet-70.html" title="Priset räknas fram i en offert">Pulpet 70<small class="meny-pris">På förfrågan</small></a><a href="sadel-90.html" title="Priset räknas fram i en offert">Sadel 90<small class="meny-pris">På förfrågan</small></a></p>
               <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
               <a href="proffs.html">
                 <img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async">
@@ -171,7 +175,7 @@
             <a class="mmeny__kort" href="attefallshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-attefallshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Attefallshus</strong><em>Kupa 30, inom attefallsmåtten</em></span></a>
             <a class="mmeny__kort" href="fritidshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Fritidshus</strong><em>Fyra modeller, 40–90 m²</em></span></a>
             </div>
-            <p class="mmeny__modeller"><a href="kupa-30.html">Kupa 30</a><a href="kupa-40.html">Kupa 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+            <p class="mmeny__modeller"><a href="kupa-30.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 30<small class="meny-pris">från 299 500 kr</small></a><a href="kupa-40.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 40<small class="meny-pris">från 450 000 kr</small></a><a href="sadel-50.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Sadel 50<small class="meny-pris">från 495 000 kr</small></a><a href="pulpet-70.html" title="Priset räknas fram i en offert">Pulpet 70<small class="meny-pris">På förfrågan</small></a><a href="sadel-90.html" title="Priset räknas fram i en offert">Sadel 90<small class="meny-pris">På förfrågan</small></a></p>
             <p class="mmeny__etikett">För dig som bygger</p>
             <a class="mmeny__kort mmeny__kort--bred" href="proffs.html"><span class="mmeny__bild"><img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Proffs</strong><em>Väggar, block och moduler</em></span></a>
             <p class="mmeny__etikett">Bra att veta</p>
@@ -239,19 +243,16 @@
 
     <main id="innehall">
 
-      <section class="platstopp gar" data-plats="havet" aria-labelledby="topp-rubrik">
+      <section class="platstopp gar" data-plats="fabriken" aria-labelledby="topp-rubrik">
         <div class="platstopp__scen">
           <div class="platstopp__bilder">
-            <div class="platstopp__lager aktiv" data-plats="havet"><img src="images/stamning/gront-hus-havet.webp" srcset="images/stamning/gront-hus-havet-600.webp 600w, images/stamning/gront-hus-havet.webp 1200w" sizes="(max-width: 900px) 94vw, 98vw" width="1200" height="800" alt="Grönt trähus med grönt plåttak och trädäck på klippor vid havet, illustration" fetchpriority="high" decoding="async"></div>
-            <div class="platstopp__lager" data-plats="skogen"><img data-src="images/stamning/gront-hus-skog.webp" data-srcset="images/stamning/gront-hus-skog-600.webp 600w, images/stamning/gront-hus-skog.webp 1200w" sizes="(max-width: 900px) 94vw, 98vw" width="1200" height="800" alt="Grönt trähus med rött plåttak i en glänta i skogen, illustration" decoding="async"></div>
-            <div class="platstopp__lager" data-plats="fjallet"><img data-src="images/stamning/svart-hus-fjallet.webp" data-srcset="images/stamning/svart-hus-fjallet-600.webp 600w, images/stamning/svart-hus-fjallet.webp 1200w" sizes="(max-width: 900px) 94vw, 98vw" width="1200" height="800" alt="Svart trähus med stora fönster på en fjällhed med snöklädda berg bakom, illustration" decoding="async"></div>
-            <div class="platstopp__lager" data-plats="tradgarden"><img data-src="images/stamning/svart-hus-tradgard.webp" data-srcset="images/stamning/svart-hus-tradgard-600.webp 600w, images/stamning/svart-hus-tradgard.webp 1200w" sizes="(max-width: 900px) 94vw, 98vw" width="1200" height="800" alt="Svart trähus med trädäck och utemöbler i en blommande trädgård, illustration" decoding="async"></div>
+            <div class="platstopp__lager platstopp__lager--fabrik aktiv" data-plats="fabriken"><picture><source media="(max-width: 900px)" srcset="images/fabrik/hero-fabrik-mobil-1000.webp 1000w" sizes="94vw" width="1000" height="667"><img src="images/fabrik/hero-fabrik-2000.webp" srcset="images/fabrik/hero-fabrik-1200.webp 1200w, images/fabrik/hero-fabrik-2000.webp 2400w" sizes="98vw" width="2400" height="1018" alt="Legohus husfabrik: en stor röd fabrikshall med Legohus-skylt på gaveln, under blå himmel" fetchpriority="high"></picture></div>
           </div>
           <span class="platstopp__sloja" aria-hidden="true"></span>
 
           <div class="platstopp__topp">
             <p class="platstopp__etikett">Attefallshus · fritidshus · 30–90 m²</p>
-            <p class="platstopp__not"><span><b data-plats-nr>01</b> / 04</span><span>Illustration</span></p>
+            <p class="platstopp__not"><span data-plats-typ>Vår fabrik</span></p>
           </div>
 
           <div class="platstopp__fot">
@@ -263,17 +264,6 @@
                   <a class="platstopp__knapp platstopp__knapp--fylld" href="rita-hus.html">Rita ditt hus<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
                   <a class="platstopp__knapp" href="kontakt.html">Börja här</a>
                 </div>
-              </div>
-              <div class="platstopp__val" role="group" aria-labelledby="plats-fraga">
-                <p class="platstopp__fraga" id="plats-fraga">Var ska huset stå?</p>
-                <button type="button" class="platstopp__paus" aria-pressed="false" aria-label="Pausa bildväxlingen" hidden><svg class="pausa" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/></svg><svg class="spela" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.5 2.5v11l9-5.5z"/></svg></button>
-                <div class="platstopp__platser" role="radiogroup" aria-labelledby="plats-fraga"><span class="platstopp__markor" aria-hidden="true"></span>
-                  <button type="button" class="platstopp__plats" data-plats="havet" data-varde="Vid havet" role="radio" aria-checked="true" tabindex="0"><span class="platstopp__tumme" aria-hidden="true"><img data-src="images/stamning/gront-hus-havet-600.webp" data-srcset="images/stamning/gront-hus-havet-240.webp 240w, images/stamning/gront-hus-havet-600.webp 600w" sizes="(max-width: 900px) 48px, 164px" width="600" height="400" alt="" decoding="async"></span><span class="platstopp__namn"><b aria-hidden="true">01</b>Vid havet</span><i aria-hidden="true"></i></button>
-                  <button type="button" class="platstopp__plats" data-plats="skogen" data-varde="I skogen" role="radio" aria-checked="false" tabindex="-1"><span class="platstopp__tumme" aria-hidden="true"><img data-src="images/stamning/gront-hus-skog-600.webp" data-srcset="images/stamning/gront-hus-skog-240.webp 240w, images/stamning/gront-hus-skog-600.webp 600w" sizes="(max-width: 900px) 48px, 164px" width="600" height="400" alt="" decoding="async"></span><span class="platstopp__namn"><b aria-hidden="true">02</b>I skogen</span><i aria-hidden="true"></i></button>
-                  <button type="button" class="platstopp__plats" data-plats="fjallet" data-varde="På fjället" role="radio" aria-checked="false" tabindex="-1"><span class="platstopp__tumme" aria-hidden="true"><img data-src="images/stamning/svart-hus-fjallet-600.webp" data-srcset="images/stamning/svart-hus-fjallet-240.webp 240w, images/stamning/svart-hus-fjallet-600.webp 600w" sizes="(max-width: 900px) 48px, 164px" width="600" height="400" alt="" decoding="async"></span><span class="platstopp__namn"><b aria-hidden="true">03</b>På fjället</span><i aria-hidden="true"></i></button>
-                  <button type="button" class="platstopp__plats" data-plats="tradgarden" data-varde="I trädgården" role="radio" aria-checked="false" tabindex="-1"><span class="platstopp__tumme" aria-hidden="true"><img data-src="images/stamning/svart-hus-tradgard-600.webp" data-srcset="images/stamning/svart-hus-tradgard-240.webp 240w, images/stamning/svart-hus-tradgard-600.webp 600w" sizes="(max-width: 900px) 48px, 164px" width="600" height="400" alt="" decoding="async"></span><span class="platstopp__namn"><b aria-hidden="true">04</b>I&nbsp;trädgården</span><i aria-hidden="true"></i></button>
-                </div>
-                <span class="field__dold" role="status" aria-live="polite" data-plats-status></span>
               </div>
             </div>
           </div>
@@ -318,7 +308,7 @@
             </a>
 
             <a class="vag" href="proffs.html">
-              <img class="vag__bild" src="images/foto/lyft-modul.webp?v=2" srcset="images/foto/lyft-modul-600.webp?v=2 600w, images/foto/lyft-modul.webp?v=2 1058w" sizes="(max-width: 900px) 92vw, 600px" width="1058" height="992" loading="lazy" decoding="async" alt="En husmodul lyfts med kran på plats vid vattnet medan montörer tar emot den, illustration">
+              <img class="vag__bild" src="images/fabrik/vaggar-med-fonster-1200.webp" srcset="images/fabrik/vaggar-med-fonster-800.webp 800w, images/fabrik/vaggar-med-fonster-1200.webp 1200w" sizes="(max-width: 900px) 92vw, 600px" width="1200" height="850" loading="lazy" decoding="async" alt="Röda ytterväggar med vita spröjsade fönster, färdiga i Legohus fabrik">
               <span class="vag__topp">
                 <span class="ih-chip ih-chip--glas">För dig som bygger åt andra</span>
                 <span class="vag__pil" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
@@ -333,6 +323,57 @@
             </a>
           </div>
         </div>
+      </section>
+
+      <section class="fabrik ih-sektion" id="fabriken" aria-labelledby="fabrik-rubrik" data-fabrik>
+        <div class="ih-inre fabrik__grid">
+          <div class="fabrik__ord">
+            <p class="ih-etikett">Vår fabrik</p>
+            <h2 class="ih-rubrik" id="fabrik-rubrik">Så byggs <em>ditt hus.</em></h2>
+            <p class="ih-ingress">
+              Husen byggs inomhus i vår egen fabrik i Sverige. Väggarna sätts ihop
+              på byggbord, fönstren monteras och elementen plastas in innan de
+              lämnar hallen. Bilderna och filmen är tagna där.
+            </p>
+            <a class="ih-knapp ih-knapp--mork fabrik__knapp" href="images/fabrik/fabrik-film.mp4" data-fabrik-film><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z"/></svg>Se filmen från hallen<span class="fabrik__tid">2 min</span></a>
+          </div>
+
+          <figure class="fabrik__film">
+            <video class="fabrik__loop" muted loop playsinline preload="none" poster="images/fabrik/fabrik-loop-poster.webp" width="576" height="1024" aria-label="Klipp från fabriken: en travers lyfter ett färdigt väggelement genom hallen" data-fabrik-loop>
+              <source src="images/fabrik/fabrik-loop.webm" type="video/webm">
+              <source src="images/fabrik/fabrik-loop.mp4" type="video/mp4">
+            </video>
+            <button class="fabrik__paus" type="button" aria-pressed="false" aria-label="Pausa klippet" data-fabrik-paus><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="fabrik__paus-ikon" d="M9 6v12M15 6v12"/><path class="fabrik__spela-ikon" d="M8 5.5v13l10.5-6.5z"/></svg></button>
+            <figcaption class="fabrik__bricka">Ett färdigt väggelement lyfts genom hallen</figcaption>
+          </figure>
+
+          <ol class="fabrik__bilder">
+            <li>
+              <figure>
+                <span class="fabrik__ram"><img class="fb-bild" src="images/fabrik/hall-1600.webp" srcset="images/fabrik/hall-800.webp 600w, images/fabrik/hall-1600.webp 1200w" sizes="(max-width: 900px) 64vw, 260px" width="1200" height="1600" loading="lazy" decoding="async" style="--pos: 50% 55%" alt="Den ljusa produktionshallen där Legohus väggelement byggs inomhus"></span>
+                <figcaption><b>01</b>Hallen</figcaption>
+              </figure>
+            </li>
+            <li>
+              <figure>
+                <span class="fabrik__ram"><img class="fb-bild" src="images/fabrik/vaggelement-produktion-1600.webp" srcset="images/fabrik/vaggelement-produktion-800.webp 600w, images/fabrik/vaggelement-produktion-1600.webp 1200w" sizes="(max-width: 900px) 64vw, 260px" width="1200" height="1600" loading="lazy" decoding="async" style="--pos: 50% 50%" alt="Väggelement byggs på arbetsbord i Legohus fabrik, med personalen i bakgrunden"></span>
+                <figcaption><b>02</b>Väggarna byggs på bord</figcaption>
+              </figure>
+            </li>
+            <li>
+              <figure>
+                <span class="fabrik__ram"><img class="fb-bild" src="images/fabrik/vaggelement-stallning-1600.webp" srcset="images/fabrik/vaggelement-stallning-800.webp 600w, images/fabrik/vaggelement-stallning-1600.webp 1200w" sizes="(max-width: 900px) 64vw, 260px" width="1200" height="1600" loading="lazy" decoding="async" style="--pos: 50% 55%" alt="Väggelement med fönster står i transportställning, inplastade inför leverans"></span>
+                <figcaption><b>03</b>Inplastat inför leverans</figcaption>
+              </figure>
+            </li>
+          </ol>
+        </div>
+
+        <dialog class="fabrik__dialog" aria-label="Film från Legohus fabrik">
+          <div class="fabrik__spelare" data-fabrik-spelare></div>
+          <p class="fabrik__dialogtext">Film från vår fabrik: väggelement byggs och lyfts med travers i produktionshallen.</p>
+          <button class="fabrik__stang" type="button" aria-label="Stäng filmen" data-fabrik-stang><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </dialog>
       </section>
 
       <section class="husval ih-sektion" data-husval aria-labelledby="husval-rubrik">
@@ -352,15 +393,15 @@
             <img sizes="(max-width: 900px) 92vw, 760px" srcset="images/stamning/gratt-hus-skargard-600.webp 600w, images/stamning/gratt-hus-skargard.webp 1200w" class="husval__bild aktiv" src="images/stamning/gratt-hus-skargard-600.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Grått trähus med sadeltak och trädäck i skärgården, illustration" data-hus="0">
             <img sizes="(max-width: 900px) 92vw, 760px" srcset="images/stamning/gront-hus-skog-600.webp 600w, images/stamning/gront-hus-skog.webp 1200w" class="husval__bild" src="images/stamning/gront-hus-skog-600.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Grönt trähus med rött plåttak i en glänta i skogen, illustration" data-hus="1">
             <img sizes="(max-width: 900px) 92vw, 760px" srcset="images/stamning/gront-hus-solnedgang-600.webp 600w, images/stamning/gront-hus-solnedgang.webp 1200w" class="husval__bild" src="images/stamning/gront-hus-solnedgang-600.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Grönt trähus med stora glaspartier vid havet i solnedgång, illustration" data-hus="2">
-            <img sizes="(max-width: 900px) 92vw, 760px" srcset="images/stamning/svart-hus-tradgard-600.webp 600w, images/stamning/svart-hus-tradgard.webp 1200w" class="husval__bild" src="images/stamning/svart-hus-tradgard-600.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Pulpet 70, illustration" data-hus="3">
+            <img sizes="(max-width: 900px) 92vw, 760px" srcset="images/stamning/svart-hus-tradgard-600.webp 600w, images/stamning/svart-hus-tradgard.webp 1200w" class="husval__bild" src="images/stamning/svart-hus-tradgard-600.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Svart trähus med uteplats i en grönskande trädgård, illustration" data-hus="3">
             <img sizes="(max-width: 900px) 92vw, 760px" srcset="images/stamning/gront-hus-sadel90-600.webp 600w, images/stamning/gront-hus-sadel90.webp 1200w" class="husval__bild" src="images/stamning/gront-hus-sadel90-600.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Sadel 90 i grönt trä med sadeltak och stort trädäck vid havet, illustration" data-hus="4">
             <span class="husval__ton" aria-hidden="true"></span>
             <div class="husval__val" role="tablist" aria-label="Välj hus">
-            <button type="button" role="tab" aria-selected="true" tabindex="0" data-hus="0"><img src="images/stamning/gratt-hus-skargard-600.webp" width="96" height="64" alt="Kupa 30, illustration" loading="lazy" decoding="async"><span><b>Kupa 30</b><small>30 m²</small></span></button>
-            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-hus="1"><img src="images/stamning/gront-hus-skog-600.webp" width="96" height="64" alt="Kupa 40, illustration" loading="lazy" decoding="async"><span><b>Kupa 40</b><small>40 m²</small></span></button>
-            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-hus="2"><img src="images/stamning/gront-hus-solnedgang-600.webp" width="96" height="64" alt="Sadel 50, illustration" loading="lazy" decoding="async"><span><b>Sadel 50</b><small>50 m²</small></span></button>
-            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-hus="3"><img src="images/stamning/svart-hus-tradgard-600.webp" width="96" height="64" alt="" loading="lazy" decoding="async"><span><b>Pulpet 70</b><small>70 m²</small></span></button>
-            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-hus="4"><img src="images/stamning/gront-hus-sadel90-600.webp" width="96" height="64" alt="Sadel 90, illustration" loading="lazy" decoding="async"><span><b>Sadel 90</b><small>90 m²</small></span></button>
+            <button type="button" role="tab" aria-selected="true" tabindex="0" data-hus="0"><img src="images/stamning/gratt-hus-skargard-300.webp" srcset="images/stamning/gratt-hus-skargard-300.webp 300w, images/stamning/gratt-hus-skargard-600.webp 600w" sizes="96px" width="96" height="64" alt="" loading="lazy" decoding="async"><span><b>Kupa 30</b><small>30 m²</small></span></button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-hus="1"><img src="images/stamning/gront-hus-skog-300.webp" srcset="images/stamning/gront-hus-skog-300.webp 300w, images/stamning/gront-hus-skog-600.webp 600w" sizes="96px" width="96" height="64" alt="" loading="lazy" decoding="async"><span><b>Kupa 40</b><small>40 m²</small></span></button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-hus="2"><img src="images/stamning/gront-hus-solnedgang-300.webp" srcset="images/stamning/gront-hus-solnedgang-300.webp 300w, images/stamning/gront-hus-solnedgang-600.webp 600w" sizes="96px" width="96" height="64" alt="" loading="lazy" decoding="async"><span><b>Sadel 50</b><small>50 m²</small></span></button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-hus="3"><img src="images/stamning/svart-hus-tradgard-300.webp" srcset="images/stamning/svart-hus-tradgard-300.webp 300w, images/stamning/svart-hus-tradgard-600.webp 600w" sizes="96px" width="96" height="64" alt="" loading="lazy" decoding="async"><span><b>Pulpet 70</b><small>70 m²</small></span></button>
+            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-hus="4"><img src="images/stamning/gront-hus-sadel90-300.webp" srcset="images/stamning/gront-hus-sadel90-300.webp 300w, images/stamning/gront-hus-sadel90-600.webp 600w" sizes="96px" width="96" height="64" alt="" loading="lazy" decoding="async"><span><b>Sadel 90</b><small>90 m²</small></span></button>
             </div>
             </div>
             <div class="husval__info">
@@ -368,6 +409,7 @@
               <p class="husval__kat"><span>Attefallshus</span><span class="husval__nr">01 / 05</span></p>
               <h3 class="husval__namn">Kupa 30</h3>
               <p class="husval__text">Allrum, sovrum och WC/bad, och loft under taket med takkupa.</p>
+              <p class="husval__pris" title="Lägsta paketpris (Prefab stomme), inkl. moms">från 299 500 kr <small>inkl. moms</small></p>
               <dl class="husval__fakta"><div><dt>Byggyta</dt><dd>30 m²</dd></div><div><dt>Rum</dt><dd>1 sovrum + loft</dd></div><div><dt>Mått</dt><dd>7,5 × 4 m</dd></div><div><dt>Nockhöjd</dt><dd>4,0 m</dd></div></dl>
               <div class="husval__knappar"><a class="ih-knapp ih-knapp--virke" href="kupa-30.html">Se Kupa 30<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="ih-knapp ih-knapp--kontur" href="attefallshus.html">Alla attefallshus</a></div>
             </div>
@@ -375,6 +417,7 @@
               <p class="husval__kat"><span>Fritidshus</span><span class="husval__nr">02 / 05</span></p>
               <h3 class="husval__namn">Kupa 40</h3>
               <p class="husval__text">Stort allrum, sovrum och WC/bad, och loft under taket med takkupa.</p>
+              <p class="husval__pris" title="Lägsta paketpris (Prefab stomme), inkl. moms">från 450 000 kr <small>inkl. moms</small></p>
               <dl class="husval__fakta"><div><dt>Byggyta</dt><dd>40 m²</dd></div><div><dt>Rum</dt><dd>1 sovrum + loft</dd></div><div><dt>Mått</dt><dd>10 × 4 m</dd></div><div><dt>Nockhöjd</dt><dd>4,0 m</dd></div></dl>
               <div class="husval__knappar"><a class="ih-knapp ih-knapp--virke" href="kupa-40.html">Se Kupa 40<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="ih-knapp ih-knapp--kontur" href="fritidshus.html">Alla fritidshus</a></div>
             </div>
@@ -382,6 +425,7 @@
               <p class="husval__kat"><span>Fritidshus</span><span class="husval__nr">03 / 05</span></p>
               <h3 class="husval__namn">Sadel 50</h3>
               <p class="husval__text">Allrum, sovrum, WC/bad och bastu, och loft under taket.</p>
+              <p class="husval__pris" title="Lägsta paketpris (Prefab stomme), inkl. moms">från 495 000 kr <small>inkl. moms</small></p>
               <dl class="husval__fakta"><div><dt>Byggyta</dt><dd>50 m²</dd></div><div><dt>Rum</dt><dd>1 sovrum + loft</dd></div><div><dt>Mått</dt><dd>12,5 × 4 m</dd></div><div><dt>Nockhöjd</dt><dd>4,0 m</dd></div></dl>
               <div class="husval__knappar"><a class="ih-knapp ih-knapp--virke" href="sadel-50.html">Se Sadel 50<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="ih-knapp ih-knapp--kontur" href="fritidshus.html">Alla fritidshus</a></div>
             </div>
@@ -389,6 +433,7 @@
               <p class="husval__kat"><span>Fritidshus</span><span class="husval__nr">04 / 05</span></p>
               <h3 class="husval__namn">Pulpet 70</h3>
               <p class="husval__text">Vardagsrum med kök, tre sovrum, WC/bad och hall på ett plan.</p>
+              <p class="husval__pris" title="Priset räknas fram i en offert">På förfrågan</p>
               <dl class="husval__fakta"><div><dt>Byggyta</dt><dd>70 m²</dd></div><div><dt>Rum</dt><dd>3 sovrum</dd></div><div><dt>Mått</dt><dd>10 × 7 m</dd></div><div><dt>Nockhöjd</dt><dd>4,0 m</dd></div></dl>
               <div class="husval__knappar"><a class="ih-knapp ih-knapp--virke" href="pulpet-70.html">Se Pulpet 70<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="ih-knapp ih-knapp--kontur" href="fritidshus.html">Alla fritidshus</a></div>
             </div>
@@ -396,6 +441,7 @@
               <p class="husval__kat"><span>Fritidshus</span><span class="husval__nr">05 / 05</span></p>
               <h3 class="husval__namn">Sadel 90</h3>
               <p class="husval__text">Stort allrum, tre sovrum och WC/bad på ett plan.</p>
+              <p class="husval__pris" title="Priset räknas fram i en offert">På förfrågan</p>
               <dl class="husval__fakta"><div><dt>Byggyta</dt><dd>90 m²</dd></div><div><dt>Rum</dt><dd>3 sovrum</dd></div><div><dt>Mått</dt><dd>12 × 7 m</dd></div><div><dt>Nockhöjd</dt><dd>4,0 m</dd></div></dl>
               <div class="husval__knappar"><a class="ih-knapp ih-knapp--virke" href="sadel-90.html">Se Sadel 90<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="ih-knapp ih-knapp--kontur" href="fritidshus.html">Alla fritidshus</a></div>
             </div>
@@ -413,7 +459,8 @@
             </div>
             <p class="ih-ingress">
               Sedan december 2025 behövs varken bygglov eller anmälan för ett
-              attefallshus inom måtten. Svara på fem frågor, så ser du hur stort
+              attefallshus inom måtten. Vatten, avlopp och eldstad anmäls
+              fortfarande. Svara på fem frågor, så ser du hur stort
               hus som ryms hos dig och vilka av våra modeller som passar.
             </p>
           </div>
@@ -590,7 +637,7 @@
     <footer class="site-footer">
       <div class="site-footer__inner">
         <div>
-          <img class="site-footer__logo" src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
+          <img class="site-footer__logo" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
           <p class="site-footer__text">
             Attefallshus, fritidshus och byggelement, byggda under tak i Sverige.
           </p>
@@ -645,7 +692,7 @@
       <p class="site-footer__ord" aria-hidden="true">Legohus</p>
     </footer>
 
-    <div class="cta-bar" id="cta-bar" aria-hidden="true">
+    <div class="cta-bar" id="cta-bar" aria-hidden="true" inert>
       <p class="cta-bar__text">Fundera vidare tillsammans med oss</p>
       <a class="cta-bar__button" href="#kontakt">Begär offert</a>
     </div>
@@ -670,6 +717,7 @@
           var visa = heroUte && !kontaktInne && !forbi;
           bar.classList.toggle('cta-bar--synlig', visa);
           bar.setAttribute('aria-hidden', visa ? 'false' : 'true');
+          bar.inert = !visa;
         }
 
         new IntersectionObserver(function (poster) {
@@ -850,15 +898,19 @@
       // toppen inte syns, när fliken är dold och med pausknappen. Vid
       // lugn rörelse växlar ingenting av sig självt och bytet sker direkt.
       // Det man väljer här fylls i som svar på samma fråga i formuläret.
+      // Första bilden är fabriken (lager 0). Den är ingen plats att välja,
+      // så platsknapp j hör till lager j + 1; fabriken står lite längre.
       (function () {
         var topp = document.querySelector('.platstopp');
         if (!topp) return;
         var lager = Array.prototype.slice.call(topp.querySelectorAll('.platstopp__lager'));
+        if (lager.length < 2) return;   // bara fabriken: ingen bildväxling
         var knappar = Array.prototype.slice.call(topp.querySelectorAll('.platstopp__plats'));
         var paus = topp.querySelector('.platstopp__paus');
         var nr = topp.querySelector('[data-plats-nr]');
         var status = topp.querySelector('[data-plats-status]');
-        var N = lager.length, nu = 0, TAKT = 7000, SVEP = 950;
+        var typ = topp.querySelector('[data-plats-typ]');
+        var N = lager.length, nu = 0, TAKT = 7000, TAKT_FABRIK = 10000, SVEP = 950;
         var tid = 0, stad = 0, pausad = false, inne = false, syns = true;
         var lugn = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         topp.style.setProperty('--takt', TAKT + 'ms');
@@ -892,9 +944,11 @@
           clearTimeout(tid);
           topp.classList.toggle('vilar', vilar());
           if (vilar()) return;
+          var ms = nu === 0 ? TAKT_FABRIK : TAKT;
+          topp.style.setProperty('--takt', ms + 'ms');
           // Linjen börjar om från noll varje gång klockan startas.
           topp.classList.remove('gar'); void topp.offsetWidth; topp.classList.add('gar');
-          tid = setTimeout(function () { visa(nu + 1, 1, false); }, TAKT);
+          tid = setTimeout(function () { visa(nu + 1, 1, false); }, ms);
         }
 
         function visa(i, riktning, vald) {
@@ -919,15 +973,17 @@
           nu = i;
           topp.setAttribute('data-plats', inn.getAttribute('data-plats'));
           knappar.forEach(function (k, j) {
-            k.setAttribute('aria-checked', String(j === i));
-            k.tabIndex = j === i ? 0 : -1;
+            k.setAttribute('aria-checked', String(j + 1 === i));
+            k.tabIndex = (i === 0 ? j === 0 : j + 1 === i) ? 0 : -1;
           });
           flyttaMarkor(true);
           if (nr) nr.textContent = '0' + (i + 1);
-          if (vald) {
-            if (status) status.textContent = knappar[i].getAttribute('data-varde');
+          if (typ) typ.textContent = i === 0 ? 'Vår fabrik' : 'Illustration';
+          if (vald && i > 0) {
+            var k = knappar[i - 1];
+            if (status) status.textContent = k.getAttribute('data-varde');
             // Samma fråga finns i formuläret längre ner: svaret följer med dit.
-            var svar = document.querySelector('#kontaktformular input[name="miljo"][value="' + knappar[i].getAttribute('data-varde') + '"]');
+            var svar = document.querySelector('#kontaktformular input[name="miljo"][value="' + k.getAttribute('data-varde') + '"]');
             if (svar && !svar.checked) {
               svar.checked = true;
               svar.dispatchEvent(new Event('change', { bubbles: true }));
@@ -943,7 +999,9 @@
         var markorPos = null;
         function flyttaMarkor(mjukt) {
           if (!markor) return;
-          var k = knappar[nu];
+          // På fabriken är ingen plats vald: markören tonar bort.
+          if (nu === 0) { markor.classList.remove('syns'); markorPos = null; return; }
+          var k = knappar[nu - 1];
           if (!k.offsetWidth || getComputedStyle(markor).display === 'none') { markorPos = null; return; }
           // Läget räknas från kortets ruta relativt väljarens ruta (inte
           // offsetLeft), så det stämmer i alla rutnät och efter varje ändring.
@@ -972,14 +1030,14 @@
         window.addEventListener('load', function () { flyttaMarkor(false); });
 
         knappar.forEach(function (k, i) {
-          k.addEventListener('click', function () { visa(i, i < nu ? -1 : 1, true); });
+          k.addEventListener('click', function () { visa(i + 1, i + 1 < nu ? -1 : 1, true); });
           k.addEventListener('keydown', function (e) {
             var d = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0;
             if (!d) return;
             e.preventDefault();
-            var j = (i + d + N) % N;
+            var j = (i + d + knappar.length) % knappar.length;
             knappar[j].focus();
-            visa(j, d, true);
+            visa(j + 1, d, true);
           });
         });
 

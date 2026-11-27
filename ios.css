@@ -1,0 +1,202 @@
+/* iOS-känslan (2026-11-26, användaren: "snygg iOS-känsla i designen på hela hemsidan, men förstör inget").
+   Ett tunt lager ovanpå design.css (laddas sist, via _avslut.py). Paletten och typsnitten rörs inte – bara
+   det som gör att sidan känns som en app i handen: inga blå tryckblinkningar, tryck som svarar direkt,
+   hovring bara där det finns en mus, glas med reserv där blur saknas, hårlinjer, mjukare mobilmeny,
+   16 px i fälten (iPhone zoomar annars in), 44 px träffytor, safe-area och mjuk snäppning i sidled.
+   Bara transform, opacity och scale rör sig; ingen ease-in; prefers-reduced-motion gäller överallt. */
+
+:root {
+  --ios-ut: cubic-bezier(0.23, 1, 0.32, 1);
+  --ios-ark: cubic-bezier(0.32, 0.72, 0, 1);
+  --ios-linje: rgba(27, 25, 21, 0.08);
+  --ios-linje-ljus: rgba(255, 255, 255, 0.1);
+}
+
+/* ---- 1. Grunden: tryck utan blått sken, ingen dubbeltrycks-zoom, ingen textförstoring vid vridning ---- */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+:where(a, button, input, select, textarea, label, summary, [role="button"]) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* ---- 2. Fokusring som reserv: bara där sidans egna regler inte redan ritar en (noll specificitet) ---- */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--virke-djup, #8f5424);
+  outline-offset: 3px;
+}
+
+html[data-tema="mork"] :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline-color: var(--virke, #f0b56e);
+}
+
+/* ---- 3. Tryck: knappar och rader som inte redan krymper får samma svar (scale, inte transform,
+        så det aldrig krockar med hovringens lyft). Övergångarna är sidans egna plus scale 150 ms. ---- */
+@media (prefers-reduced-motion: no-preference) {
+  html body :is(.husval__val button, .paketlista__rad, .main-nav__sub > a:not(.main-nav__tips)):active {
+    scale: 0.97;
+  }
+
+  html body .husval__val button {
+    transition: background-color 0.25s, color 0.25s, transform 0.35s, scale 0.15s var(--ios-ut);
+  }
+
+  html body .paketlista__rad {
+    transition: background-color 0.25s, box-shadow 0.25s, scale 0.15s var(--ios-ut);
+  }
+
+  html body .main-nav__sub > a:not(.main-nav__tips) {
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.35s var(--mjuk), scale 0.15s var(--ios-ut);
+  }
+}
+
+/* ---- 4. Hovring bara med mus: på pekskärm blir hovringens lyft annars kvar efter trycket ---- */
+@media (hover: none) {
+  html body :is(.ih-knapp, .hero__link, .knapp-fylld, .knapp-linje, .kontaktkort__knapp, .site-footer__button,
+    .contact-form button[type="submit"], .contact-form__nasta, .house-types__all, .about-text__link,
+    .quiet-break__link, .production__link, .model-price__button, .resa__lank):hover {
+    transform: none;
+  }
+
+  html body .katsida .model-grid .model-card:hover {
+    transform: none;
+  }
+}
+
+/* ---- 6. Glas: sidhuvudet, menyerna och dialogerna har redan blur i design.css. Där blur saknas
+        (äldre webbläsare, Firefox utan stöd) blir ytorna nästan täta i stället för genomskinliga. ---- */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  html:not([data-tema="mork"]) body .main-nav__sub,
+  html:not([data-tema="mork"]) body .site-header__inner {
+    background: rgba(255, 253, 249, 0.97);
+  }
+
+  html[data-tema="mork"] body .main-nav__sub,
+  html[data-tema="mork"] body .site-header__inner {
+    background: rgba(27, 25, 21, 0.97);
+  }
+}
+
+/* Dialoger (<dialog>) och deras bakgrund: tonad och lätt suddig, som ett ark i iOS. */
+dialog::backdrop {
+  background: rgba(12, 11, 9, 0.42);
+  -webkit-backdrop-filter: blur(6px) saturate(1.1);
+  backdrop-filter: blur(6px) saturate(1.1);
+}
+
+/* ---- 7. Hårlinjer: rullgardinen och mobilmenyn får en halv pixels kant i stället för att bara
+        lita på den tunga skuggan (skuggan ligger kvar men mjukare). ---- */
+html:not([data-tema="mork"]) body .main-nav__sub {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    0 0 0 0.5px rgba(27, 25, 21, 0.12),
+    0 30px 70px -40px rgba(60, 40, 15, 0.42),
+    0 12px 28px -24px rgba(60, 40, 15, 0.28);
+}
+
+/* ---- 8. Mobilmenyn som ett iOS-ark: kortet glider fram med fjädrande ease-out (Ionics lådkurva),
+        bakgrunden tonas och suddas lite mer. Samma rörelse som förut, bara mjukare landning. ---- */
+@media (max-width: 1040px) and (prefers-reduced-motion: no-preference) {
+  html body .mmeny {
+    transition: opacity 0.32s var(--ios-ut);
+  }
+
+  html body .mmeny .mmeny__panel {
+    transition: transform 0.5s var(--ios-ark), opacity 0.28s var(--ios-ut);
+  }
+
+  html body .mmeny:not(.mmeny--oppen) .mmeny__panel {
+    transform: translateY(-18px) scale(0.965);
+  }
+}
+
+@media (max-width: 1040px) {
+  html body .mmeny {
+    -webkit-backdrop-filter: blur(10px) saturate(1.15);
+    backdrop-filter: blur(10px) saturate(1.15);
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  /* menyns rader: minst 44 px att trycka på */
+  html body .mmeny :is(.mmeny__modeller, .mmeny__guider) a {
+    min-height: 44px;
+  }
+
+  /* raderna i sidled snäpper mjukt och studsar inte vidare in i sidan */
+  html body .mmeny .mmeny__guider {
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+  }
+
+  html body .mmeny .mmeny__guider > a {
+    scroll-snap-align: start;
+  }
+}
+
+/* ---- 9. Listor i sidled: ingen bakåtsvepning av misstag, mjuk snäppning där den saknades ---- */
+:where(.husen__bana, .kulisser__bana, .pf-band__rad, .fabrik__bilder, .husval__val, .rg-tabell) {
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.husval__val {
+  scroll-snap-type: x proximity;
+}
+
+.husval__val > button {
+  scroll-snap-align: start;
+}
+
+/* ---- 10. Träffytor: små ikonknappar i sidhuvudet minst 44 × 44 på pekskärm ---- */
+@media (pointer: coarse) {
+  html body .site-header :is(.temaknapp, .menu-button) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* ---- 12. Rörelsekänsliga: inga av lagrets rörelser ---- */
+@media (prefers-reduced-motion: reduce) {
+  html body .mmeny,
+  html body .mmeny .mmeny__panel {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* ---- Rullister i iOS-stil på hela sajten (2026-11-26) ----
+   Tunna, rundade och halvgenomskinliga: syns svagt i vila, tydligare när man hovrar. Inga pilknappar och ingen vit
+   ränna. Gäller sidan, dialoger, paneler och listor; där rullisten redan är dold (scrollbar-width: none) gäller det. */
+@supports (scrollbar-color: auto) {
+  html { scrollbar-color: rgb(27 25 21 / .28) transparent; }
+  html[data-tema="mork"] { scrollbar-color: rgb(255 255 255 / .26) transparent; }
+  :where(*) { scrollbar-width: thin; scrollbar-color: rgb(27 25 21 / .22) transparent; }
+  html[data-tema="mork"] :where(*) { scrollbar-color: rgb(255 255 255 / .22) transparent; }
+}
+::-webkit-scrollbar { width: 10px; height: 10px; background: transparent; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent; border-radius: 999px; background-clip: padding-box;
+  background-color: rgb(27 25 21 / .2); min-height: 40px;
+}
+::-webkit-scrollbar-thumb:hover { background-color: rgb(27 25 21 / .38); }
+::-webkit-scrollbar-thumb:active { background-color: rgb(143 84 36 / .55); }
+html[data-tema="mork"] ::-webkit-scrollbar-thumb { background-color: rgb(255 255 255 / .2); }
+html[data-tema="mork"] ::-webkit-scrollbar-thumb:hover { background-color: rgb(255 255 255 / .36); }
+
+/* ---- Sidbytet till och från CRM:et (2026-11-27, tillägg från crm/vt.css): märket heter lh-logga på hemsidan, inloggningen och CRM:et
+   och glider mellan dem. Kommer man tillbaka från CRM:et eller inloggningen (logga.js sätter typen 'bak') känns det som att backa:
+   den gamla sidan sjunker, hemsidan kommer ovanifrån. Högst 0,45 s, bara transform och opacity. ---- */
+html body .site-header .logo__svg { view-transition-name: lh-logga; }
+::view-transition-group(lh-logga) { animation-duration: .45s; animation-timing-function: cubic-bezier(.32, .72, 0, 1); }
+html:active-view-transition-type(bak)::view-transition-old(root) { animation: ios-vt-ut-bak .26s cubic-bezier(.4, 0, 1, 1) both; }
+html:active-view-transition-type(bak)::view-transition-new(root) { animation: ios-vt-in-bak .42s var(--ios-ut) both; }
+@keyframes ios-vt-ut-bak { to { opacity: 0; transform: translateY(10px); } }
+@keyframes ios-vt-in-bak { from { opacity: 0; transform: scale(1.012) translateY(-12px); } }
+@media (prefers-reduced-motion: reduce) { ::view-transition-group(lh-logga) { animation: none; } }

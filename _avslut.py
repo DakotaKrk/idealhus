@@ -35,7 +35,7 @@ import _bygg as B  # noqa: E402
 PROVA = "--prova" in sys.argv
 HOPPA = {"rita-hus.html"}
 # Byt när design.css eller premium.js ändras.
-VERSION = "20261124a"
+VERSION = "20261126r"
 
 A0, A1 = "      <!-- avslut: gemensamt slut, se _avslut.py -->\n", "      <!-- /avslut -->\n"
 S0, S1 = "    <!-- avslutskript, se _avslut.py -->\n", "    <!-- /avslutskript -->\n"
@@ -88,8 +88,31 @@ def stampla(fil):
         if m and 'href="rita-hus.html"' not in m.group(0):
             s = s[:m.end() - 4] + '<a href="rita-hus.html">Rita ditt hus</a>' + s[m.end() - 4:]
 
+    # 2b2. iOS-lagret och den animerade loggan (2026-11-26): ios.css sist bland
+    #      stilmallarna, logga.js direkt efter (synkront, liten - döljer bilden
+    #      innan första ritningen och byter den mot SVG:n). Loggans <img> märks
+    #      med data-lh-logga; utan JS syns bilden som förut.
+    if 'href="ios.css' not in s:
+        h = s.index("</head>")
+        m = list(re.finditer(r'\n( *)<link rel="stylesheet" href="[^"]+">', s[:h]))[-1]
+        s = (s[:m.end()] + '\n%s<link rel="stylesheet" href="ios.css?v=%s">\n%s<script src="logga.js?v=%s"></script>'
+             % (m.group(1), VERSION, m.group(1), VERSION) + s[m.end():])
+    for klass in ("logo__svg", "site-footer__logo"):
+        s = s.replace('<img class="%s" src="images/legohus_logo.svg"' % klass,
+                      '<img class="%s" data-lh-logga src="images/legohus_logo.svg"' % klass)
+
+    # 2b3. Entrén (2026-11-27): första sidvisningen under besöket ritar loggan på
+    #      en ben-färgad botten och flyger upp till sidhuvudet (logga.js, intro()).
+    #      Första raden i <body>, så att lagret finns före första målningen. Bara
+    #      ett anrop - reglerna (sessionStorage, robotar, reducerad rörelse, bakåt)
+    #      och allt annat bor i logga.js. Utan JS: ingenting.
+    INTRO = "<script>if(window.LegohusLogga&&LegohusLogga.intro)LegohusLogga.intro()</script>"
+    if INTRO not in s and "logga.js" in s:
+        m = re.search(r"<body[^>]*>\n", s)
+        s = s[:m.end()] + "    " + INTRO + "\n" + s[m.end():]
+
     # 2c. Ny version på det som ändrats, så ingen sitter kvar med gammal cache.
-    s = re.sub(r'(design\.css|premium\.js)\?v=\w+', r'\1?v=' + VERSION, s)
+    s = re.sub(r'(design\.css|premium\.js|ios\.css|logga\.js)\?v=\w+', r'\1?v=' + VERSION, s)
 
     # 3. Formulärets skript: en gång, sist före </body>. Den gamla kopian
     #    inne i startsidans och kontaktsidans skript tas bort.

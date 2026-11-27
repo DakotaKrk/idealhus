@@ -25,11 +25,13 @@
 
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" as="image" href="images/stamning/gront-hus-solnedgang.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20261010l">
-    <link rel="stylesheet" href="design.css?v=20261124a">
-    <link rel="stylesheet" href="nya-hus.css?v=20261120a">
-    <script src="premium.js?v=20261124a" defer></script>
+    <link rel="preload" as="image" href="images/stamning/gront-hus-solnedgang.webp" imagesrcset="images/stamning/gront-hus-solnedgang-600.webp 600w, images/stamning/gront-hus-solnedgang.webp 1200w" imagesizes="(max-width: 900px) 94vw, 57vw" fetchpriority="high">
+    <link rel="stylesheet" href="styles.css?v=20261126g">
+    <link rel="stylesheet" href="design.css?v=20261126r">
+    <link rel="stylesheet" href="nya-hus.css?v=20261126g">
+    <link rel="stylesheet" href="ios.css?v=20261126r">
+    <script src="logga.js?v=20261126r"></script>
+    <script src="premium.js?v=20261126r" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script type="application/ld+json">
     {
@@ -114,11 +116,12 @@
     </script>
   </head>
   <body>
+    <script>if(window.LegohusLogga&&LegohusLogga.intro)LegohusLogga.intro()</script>
     <a class="skip" href="#innehall">Hoppa till innehållet</a>
     <header class="site-header">
       <div class="site-header__inner">
         <a class="logo" href="./" aria-label="Till Legohus Stockholms startsida">
-          <img class="logo__svg" src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
+          <img class="logo__svg" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
         </a>
 
         <nav class="main-nav" aria-label="Huvudmeny">
@@ -134,7 +137,7 @@
                   <em>Kupa 30, inom attefallsmåtten</em>
                 </span>
               </a>
-              <p class="main-nav__modeller"><a href="kupa-30.html">Kupa 30</a></p>
+              <p class="main-nav__modeller"><a href="kupa-30.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 30<small class="meny-pris">från 299 500 kr</small></a></p>
               <a href="fritidshus.html">
                 <img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async">
                 <span>
@@ -142,7 +145,7 @@
                   <em>Fyra modeller, 40–90 m²</em>
                 </span>
               </a>
-              <p class="main-nav__modeller"><a href="kupa-40.html">Kupa 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+              <p class="main-nav__modeller"><a href="kupa-40.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 40<small class="meny-pris">från 450 000 kr</small></a><a href="sadel-50.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Sadel 50<small class="meny-pris">från 495 000 kr</small></a><a href="pulpet-70.html" title="Priset räknas fram i en offert">Pulpet 70<small class="meny-pris">På förfrågan</small></a><a href="sadel-90.html" title="Priset räknas fram i en offert">Sadel 90<small class="meny-pris">På förfrågan</small></a></p>
               <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
               <a href="proffs.html">
                 <img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async">
@@ -191,7 +194,7 @@
             <a class="mmeny__kort" href="attefallshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-attefallshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Attefallshus</strong><em>Kupa 30, inom attefallsmåtten</em></span></a>
             <a class="mmeny__kort" href="fritidshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Fritidshus</strong><em>Fyra modeller, 40–90 m²</em></span></a>
             </div>
-            <p class="mmeny__modeller"><a href="kupa-30.html">Kupa 30</a><a href="kupa-40.html">Kupa 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+            <p class="mmeny__modeller"><a href="kupa-30.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 30<small class="meny-pris">från 299 500 kr</small></a><a href="kupa-40.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 40<small class="meny-pris">från 450 000 kr</small></a><a href="sadel-50.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Sadel 50<small class="meny-pris">från 495 000 kr</small></a><a href="pulpet-70.html" title="Priset räknas fram i en offert">Pulpet 70<small class="meny-pris">På förfrågan</small></a><a href="sadel-90.html" title="Priset räknas fram i en offert">Sadel 90<small class="meny-pris">På förfrågan</small></a></p>
             <p class="mmeny__etikett">För dig som bygger</p>
             <a class="mmeny__kort mmeny__kort--bred" href="proffs.html"><span class="mmeny__bild"><img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Proffs</strong><em>Väggar, block och moduler</em></span></a>
             <p class="mmeny__etikett">Bra att veta</p>
@@ -212,8 +215,8 @@
     <main id="innehall">
       <section class="subpage-hero helbild">
         <span class="ih-kant" aria-hidden="true"></span>
-        <img class="helbild__bak" src="images/stamning/gront-hus-solnedgang.webp" width="780" height="520" alt="" aria-hidden="true" decoding="async">
-        <img class="subpage-hero__image" src="images/stamning/gront-hus-solnedgang.webp" width="780" height="520" fetchpriority="high" decoding="async" alt="Grönt trähus med stora glaspartier vid havet i solnedgång, illustration">
+        <img class="helbild__bak" src="images/stamning/gront-hus-solnedgang.webp" srcset="images/stamning/gront-hus-solnedgang-600.webp 600w, images/stamning/gront-hus-solnedgang.webp 1200w" sizes="(max-width: 900px) 94vw, 57vw" width="780" height="520" alt="" aria-hidden="true" decoding="async">
+        <img class="subpage-hero__image" src="images/stamning/gront-hus-solnedgang.webp" srcset="images/stamning/gront-hus-solnedgang-600.webp 600w, images/stamning/gront-hus-solnedgang.webp 1200w" sizes="(max-width: 900px) 94vw, 57vw" width="780" height="520" fetchpriority="high" decoding="async" alt="Grönt trähus med stora glaspartier vid havet i solnedgång, illustration">
         <div class="hoffert hoffert--fakta" aria-hidden="true">
           <div class="hoffert__huvud"><span class="hoffert__typ">I korthet</span><span class="hoffert__stampel">Platsen först</span></div>
           <ul class="hoffert__lista">
@@ -291,7 +294,7 @@
             <p>Ett litet hus ska kännas generöst i vardagen. Det handlar mindre om antal kvadratmeter och mer om var väggarna står, var ljuset kommer in och vad man ser när man kommer in genom dörren.</p>
           </div>
           <div class="segment__media">
-            <img src="images/stamning/gront-hus-solnedgang.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Grönt trähus med glasgavel i solnedgång vid vattnet, illustration">
+            <img src="images/stamning/gront-hus-havet.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Grönt trähus med grönt plåttak och trädäck på klipporna vid havet, illustration">
           </div>
         </article>
 
@@ -301,13 +304,13 @@
             <p>Vi väljer naturliga material som åldras vackert i stället för ytskikt som ska bytas. Trä som gråar jämnt, beslag som håller, detaljer som ser bättre ut om tio år än dagen de monterades.</p>
           </div>
           <div class="segment__media">
-            <img src="images/generated-interior-01.webp" width="1536" height="1024" loading="lazy" decoding="async" alt="Ljust vardagsrum med soffa och stora fönster mot skogen">
+            <img class="fb-bild" src="images/fabrik/vaggstommar-1600.webp" srcset="images/fabrik/vaggstommar-800.webp 600w, images/fabrik/vaggstommar-1600.webp 1200w" sizes="(max-width: 1040px) 92vw, 560px" width="1200" height="1600" loading="lazy" decoding="async" style="--pos: 50% 42%" alt="Färdiga väggstommar i trä står lutade i Legohus fabrik">
           </div>
         </article>
       </section>
 
       <section class="virke">
-        <img class="virke__bild" src="images/stamning/svart-hus-fjallet.webp" width="900" height="600" loading="lazy" decoding="async" alt="Mörkt småhus med uteplats i en snöig skog, illustration">
+        <img class="virke__bild fb-bild" src="images/fabrik/fasad-1600.webp" srcset="images/fabrik/fasad-800.webp 600w, images/fabrik/fasad-1600.webp 1200w" sizes="(max-width: 900px) 92vw, 560px" width="1200" height="1600" loading="lazy" decoding="async" style="--pos: 50% 16%" alt="Legohus fabrik: röd träfasad med Legohus-skylt under blå himmel">
         <div class="virke__inre">
           <p class="ih-etikett ih-etikett--ljus">Bakom varje hus</p>
           <h2 class="virke__rubrik">Från verkstad <em>till tomt.</em></h2>
@@ -496,7 +499,7 @@
     <footer class="site-footer">
       <div class="site-footer__inner">
         <div>
-          <img class="site-footer__logo" src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
+          <img class="site-footer__logo" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
           <p class="site-footer__text">
             Attefallshus, fritidshus och byggelement, byggda under tak i Sverige.
           </p>

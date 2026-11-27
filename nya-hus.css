@@ -326,7 +326,7 @@ html body .katsida .model-grid .model-card.model-card .model-card__data div:nth-
 html body .katsida .model-grid .model-card.model-card .model-card__data div:nth-child(3)::before { -webkit-mask-image: var(--ik-matt); mask-image: var(--ik-matt); }
 html body .katsida .model-grid .model-card.model-card .model-card__data div:nth-child(4)::before { -webkit-mask-image: var(--ik-hojd); mask-image: var(--ik-hojd); }
 html body .katsida .model-grid .model-card.model-card .model-card__data dt { grid-column: 2; font: 600 0.625rem/1 var(--knappfont, inherit); letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); }
-html body .katsida .model-grid .model-card.model-card .model-card__data dd { grid-column: 2; margin: 0; overflow: hidden; text-overflow: ellipsis; font: 600 0.875rem/1.25 var(--knappfont, inherit); white-space: nowrap; color: var(--text); }
+html body .katsida .model-grid .model-card.model-card .model-card__data dd { grid-column: 2; margin: 0; overflow-wrap: anywhere; font: 600 0.875rem/1.25 var(--knappfont, inherit); color: var(--text); } /* bryter rad i stället för "…" på smal skärm (granskningen 2026-11-26) */
 
 /* Foten: Pris / I offert, Se huset och Rita ditt hus */
 html body .model-grid .model-card.model-card .model-card__fot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 0; margin-bottom: 0; padding: 18px 0 22px; border: 0; }

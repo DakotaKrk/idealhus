@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261126c';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261126c';
-import { skapaPlanlager } from './husritare-plan.js?v=20261126c';
+import { skapaMiljo } from './husritare-miljo.js?v=20261126r';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261126r';
+import { skapaPlanlager } from './husritare-plan.js?v=20261126r';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -336,6 +336,91 @@ function betongTextur() {
   return t;
 }
 
+// ---- Poly Haven (CC0): fototexturer och HDRI, laddas lat efter första bilden ----
+// Fotot ger ådring, fogar och små ojämnheter; färgen kommer från användarens kulör. bildGra gör om
+// ett foto till en gråskala (linjär data) med medelvärdet medel och detaljen förstärkt k gånger;
+// stora fläckar (smuts, väder) dämpas med ett högpass (lag: andel av det grova som får vara kvar).
+// beskar: [x0, y0, x1, y1] i 0..1 (en del av bilden, t.ex. en dörrhalva utan tvärslån).
+function bildGra(bild, { medel = 0.85, k = 1, lag = 0.3, beskar = null, ut = 0 } = {}) {
+  const [x0, y0, x1, y1] = beskar || [0, 0, 1, 1];
+  const sw = bild.width * (x1 - x0), sh = bild.height * (y1 - y0);
+  const N = ut || Math.min(1024, Math.round(Math.max(sw, sh)));
+  const c = document.createElement('canvas'); c.width = c.height = N;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(bild, bild.width * x0, bild.height * y0, sw, sh, 0, 0, N, N);
+  const d = g.getImageData(0, 0, N, N), p = d.data, L = new Float32Array(N * N);
+  let sum = 0;
+  for (let i = 0; i < N * N; i++) {
+    const r = p[i * 4] / 255, gg = p[i * 4 + 1] / 255, b = p[i * 4 + 2] / 255;
+    L[i] = Math.pow(0.299 * r + 0.587 * gg + 0.114 * b, 2.2); sum += L[i];
+  }
+  const m = sum / (N * N) || 1;
+  // grovt medel i en stor ruta (summerad tabell, sömlöst runt kanterna)
+  const R = Math.max(4, N >> 4), S = new Float64Array((N + 1) * (N + 1));
+  for (let y = 0; y < N; y++) { let rad = 0; for (let x = 0; x < N; x++) { rad += L[y * N + x]; S[(y + 1) * (N + 1) + x + 1] = S[y * (N + 1) + x + 1] + rad; } }
+  const ruta = (xa, ya, xb, yb) => S[yb * (N + 1) + xb] - S[ya * (N + 1) + xb] - S[yb * (N + 1) + xa] + S[ya * (N + 1) + xa];
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const xa = Math.max(0, x - R), xb = Math.min(N, x + R + 1), ya = Math.max(0, y - R), yb = Math.min(N, y + R + 1);
+    const grov = ruta(xa, ya, xb, yb) / ((xb - xa) * (yb - ya));
+    const v = medel * (1 + k * ((L[y * N + x] - grov) / m + lag * (grov - m) / m));
+    const b = Math.max(0, Math.min(255, Math.round(v * 255))), i = (y * N + x) * 4;
+    p[i] = p[i + 1] = p[i + 2] = b; p[i + 3] = 255;
+  }
+  g.putImageData(d, 0, 0);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.NoColorSpace;
+  return t;
+}
+// laddar en bild (webp) som ett löfte; null om den saknas
+function hamtaBild(url) {
+  // avkodad innan den blir textur (decode), annars avkodas den synkront i uppladdningen
+  return new Promise(ok => { const i = new Image(); i.decoding = 'async'; i.onload = () => (typeof i.decode === 'function' ? i.decode().then(() => ok(i), () => ok(i)) : ok(i)); i.onerror = () => { console.warn('saknas', url); ok(null); }; i.src = url; });
+}
+function hamtaNormal(url, renderer) {
+  return hamtaBild(url).then(i => {
+    if (!i) return null;
+    const t = new THREE.Texture(i); t.needsUpdate = true;
+    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.NoColorSpace;
+    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    return t;
+  });
+}
+// Radiance .hdr (RGBE, ny RLE eller platt) → { w, h, data: Float32Array RGB }. Raderna i filens ordning (överst först).
+function lasRGBE(buf) {
+  const b = new Uint8Array(buf);
+  let pos = 0;
+  const rad = () => { let s = ''; while (pos < b.length && b[pos] !== 10) s += String.fromCharCode(b[pos++]); pos++; return s; };
+  if (!/^#\?/.test(rad())) throw new Error('inte en .hdr');
+  for (let s = rad(); s !== ''; s = rad()) if (pos >= b.length) throw new Error('trasigt huvud');
+  const mt = /-Y (\d+) \+X (\d+)/.exec(rad());
+  if (!mt) throw new Error('okänd orientering');
+  const h = +mt[1], w = +mt[2], rgbe = new Uint8Array(w * h * 4), lina = new Uint8Array(w * 4);
+  for (let y = 0; y < h; y++) {
+    const ut = y * w * 4;
+    if (w < 8 || w > 0x7fff || b[pos] !== 2 || b[pos + 1] !== 2 || (b[pos + 2] & 0x80)) {
+      // platt (ingen RLE): resten läses rakt av
+      rgbe.set(b.subarray(pos, pos + (h - y) * w * 4), ut); break;
+    }
+    if (((b[pos + 2] << 8) | b[pos + 3]) !== w) throw new Error('fel radlängd');
+    pos += 4;
+    for (let k = 0; k < 4; k++) {
+      let x = k * w; const slut = (k + 1) * w;
+      while (x < slut) {
+        let n = b[pos++];
+        if (n > 128) { n -= 128; const v = b[pos++]; lina.fill(v, x, x + n); x += n; }
+        else { lina.set(b.subarray(pos, pos + n), x); pos += n; x += n; }
+      }
+    }
+    for (let x = 0; x < w; x++) { rgbe[ut + x * 4] = lina[x]; rgbe[ut + x * 4 + 1] = lina[w + x]; rgbe[ut + x * 4 + 2] = lina[2 * w + x]; rgbe[ut + x * 4 + 3] = lina[3 * w + x]; }
+  }
+  const data = new Float32Array(w * h * 3);
+  for (let i = 0; i < w * h; i++) {
+    const e = rgbe[i * 4 + 3], f = e ? Math.pow(2, e - 136) : 0;
+    data[i * 3] = rgbe[i * 4] * f; data[i * 3 + 1] = rgbe[i * 4 + 1] * f; data[i * 3 + 2] = rgbe[i * 4 + 2] * f;
+  }
+  return { w, h, data };
+}
+
 // Himlen som speglas i glas och plåt: en mjuk gradient med trädrand vid horisonten
 const HIMMEL = {
   studio: { top: '#b7c4d2', hor: '#f0ede7', mark: '#bdb7ad' },
@@ -363,6 +448,11 @@ export async function skapaRitare(duk, alternativ = {}) {
   const SVAG = !FOTO && (() => { try { return matchMedia('(pointer: coarse)').matches || Math.min(screen.width, screen.height) < 760; } catch (e) { return false; } })();
   const SKARP = FOTO ? 1.5 : Math.min(window.devicePixelRatio || 1, SVAG ? 1.5 : 2);
   renderer.setPixelRatio(SKARP);
+  // Shaderfelen kontrolleras bara med ?debug=1: kontrollen läser getProgramInfoLog/getShaderInfoLog
+  // för varje nytt program, vilket väntar synkront på länkningen (2–5 s i första Se inne).
+  // Parallell kompilering (KHR_parallel_shader_compile): då kan många program skickas i taget.
+  try { renderer.debug.checkShaderErrors = /[?&]debug=1(&|$)/.test(location.search); } catch (e) { /* utan adress */ }
+  const PARALLELL = (() => { try { return renderer.extensions.has('KHR_parallel_shader_compile'); } catch (e) { return false; } })();
   // en paus som släpper fram en ritad ruta (i en dold flik: högst 80 ms); fotoläget väntar inte
   const paus = FOTO ? () => Promise.resolve() : () => new Promise(r => {
     let k = false; const f = () => { if (!k) { k = true; r(); } };
@@ -376,11 +466,15 @@ export async function skapaRitare(duk, alternativ = {}) {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate = false;
   let nySkugga = true;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  // Vid sjön: sommargradering ovanpå ACES (CustomToneMapping, sätts i satMiljo): lite mer mättnad,
-  // svalt blå skuggor och varma högdagrar, en mjuk S-kontrast. Himlen (toneMapped: false) berörs inte.
-  if (!THREE.ShaderChunk.tonemapping_pars_fragment.includes('sommargradering')) THREE.ShaderChunk.tonemapping_pars_fragment = THREE.ShaderChunk.tonemapping_pars_fragment.replace('vec3 CustomToneMapping( vec3 color ) { return color; }', `vec3 CustomToneMapping( vec3 color ) {   // sommargradering
-	vec3 c = ACESFilmicToneMapping( color );
+  // Tonmappningen är alltid CustomToneMapping: ren ACES i alla miljöer, och vid sjön en
+  // sommargradering ovanpå (lite mer mättnad, svalt blå skuggor och varma högdagrar, en mjuk
+  // S-kontrast). Graderingen slås på med exponeringens tecken (negativ = vid sjön, se lageLjus),
+  // så att alla miljöer har samma program: förut kompilerades hela husets och inredningens
+  // program om (70–90 st, flera sekunder) vid byte till och från sjön. Himlen (toneMapped: false) berörs inte.
+  renderer.toneMapping = THREE.CustomToneMapping;
+  if (!THREE.ShaderChunk.tonemapping_pars_fragment.includes('sommargradering')) THREE.ShaderChunk.tonemapping_pars_fragment = THREE.ShaderChunk.tonemapping_pars_fragment.replace('vec3 CustomToneMapping( vec3 color ) { return color; }', `vec3 CustomToneMapping( vec3 color ) {   // sommargradering (bara när toneMappingExposure < 0)
+	if ( toneMappingExposure >= 0.0 ) return ACESFilmicToneMapping( color );
+	vec3 c = ACESFilmicToneMapping( - color );   // (exponeringen är negativ: tecknet tar ut sig)
 	float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );
 	c = max( mix( vec3( l ), c, 1.14 ), 0.0 );
 	c *= mix( vec3( 0.96, 0.99, 1.05 ), vec3( 1.045, 1.01, 0.94 ), smoothstep( 0.04, 0.55, l ) );
@@ -437,11 +531,94 @@ export async function skapaRitare(duk, alternativ = {}) {
   }
   // vid sjön: omgivningskartan med solen där den står (byts bara när riktningen ändrats märkbart)
   const ENV_SOLF = new THREE.Color(0xfff0d8);
+  let envSolNu = null;
   function solEnv(kvall) {
-    if (miljoNamn !== 'kust') return;
-    const dir = sol.position.clone().normalize(), k = (1 - mjuk(0.3, 0.85, kvall)) * mjuk(-0.02, 0.12, dir.y);
-    const e = k > 0.02 ? himmelEnv('kust', { d: dir, f: ENV_SOLF, k }) : himmelEnv('kust');
+    envSolNu = null;
+    if (miljoNamn === 'kust') {
+      const dir = sol.position.clone().normalize(), k = (1 - mjuk(0.3, 0.85, kvall)) * mjuk(-0.02, 0.12, dir.y);
+      envSolNu = k > 0.02 ? himmelEnv('kust', { d: dir, f: ENV_SOLF, k }) : himmelEnv('kust');
+    }
+    valjEnv();
+  }
+  // HDRI per miljö (Poly Haven, 1k Radiance): ljus och reflektioner utomhus (glas, lack, plåt, vatten).
+  // Bakgrunden är fortfarande vår egen himmel. Laddas först efter första bilden, en miljö i taget;
+  // inifrån och innan filen finns gäller den målade kartan (himmelEnv). ?hdri=0 stänger av (jämförelser).
+  // Ljusheten normeras till ungefär den målade kartans (HDR_MAL), solen klipps (vi har en egen sol) och
+  // kartan vrids så att dess sol står där vår sol står.
+  const HDR_AV = /[?&]hdri=0/.test(location.search);
+  const HDR_FIL = { studio: 'studio', tradgard: 'tradgard', skog: 'skog', vinter: 'vinter', kust: 'kust', villa: 'villa' };
+  const HDR_MAL = { studio: 0.5, tradgard: 0.42, skog: 0.4, vinter: 0.5, kust: 0.44, villa: 0.42 };
+  const hdr = { tex: {}, laddar: {}, sol: {}, klar: false };
+  function hdrLadda(namn) {
+    if (HDR_AV || !hdr.klar || hdr.tex[namn] || hdr.laddar[namn] || !HDR_FIL[namn]) return;
+    hdr.laddar[namn] = fetch('images/hdri/' + HDR_FIL[namn] + '-1k.hdr')
+      .then(r => (r.ok ? r.arrayBuffer() : Promise.reject(new Error('hdri ' + r.status))))
+      .then(buf => new Promise(ok => ledigt(() => ok(buf), 600)))
+      .then(buf => {
+        const { w, h, data } = lasRGBE(buf);
+        // medelljushet viktad med rymdvinkeln; två varv så att solen inte drar upp medlet
+        const lum = i => 0.2126 * data[i * 3] + 0.7152 * data[i * 3 + 1] + 0.0722 * data[i * 3 + 2];
+        let tak = Infinity, medel = 1, max = 0, mi = 0;
+        const rgb = [0, 0, 0];
+        for (let varv = 0; varv < 2; varv++) {
+          let s = 0, vs = 0; rgb.fill(0);
+          for (let y = 0; y < h; y++) {
+            const c = Math.cos(((y + 0.5) / h - 0.5) * Math.PI);
+            for (let x = 0; x < w; x++) {
+              const i = y * w + x, l = lum(i), k = l > tak ? tak / l : 1;
+              if (l > max) { max = l; mi = i; }
+              s += l * k * c; vs += c; rgb[0] += data[i * 3] * k * c; rgb[1] += data[i * 3 + 1] * k * c; rgb[2] += data[i * 3 + 2] * k * c;
+            }
+          }
+          medel = s / vs || 1; tak = medel * 6; rgb.forEach((v, j) => { rgb[j] = v / vs || medel; });
+        }
+        // vitbalans: bildens färgstick (kvällsguld, blått dis) tas till största delen bort, så att
+        // tiden på dygnet bestäms av vår sol och himmel och inte av när fotot togs
+        const VB = rgb.map(v => 1 + 0.8 * (medel / v - 1));
+        // marken i fotot (fält i kvällsskugga, grå asfalt) är ofta mörkare än vår solbelysta tomt: fönstren
+        // speglade då bruna hål. Under horisonten lyfts den till minst 0,3 av himlens medel (mjukt över 4°).
+        let sH = 0, vH = 0, sM = 0, vM = 0;
+        for (let y = 0; y < h; y++) {
+          const c = Math.cos(((y + 0.5) / h - 0.5) * Math.PI);
+          for (let x = 0; x < w; x += 4) { const l = Math.min(lum(y * w + x), tak); if (y < h / 2) { sH += l * c; vH += c; } else { sM += l * c; vM += c; } }
+        }
+        const himM = sH / vH || medel, markM = sM / vM || medel, LYFT = Math.min(3, Math.max(1, 0.3 * himM / markM));
+        const lyft = y => 1 + (LYFT - 1) * mjuk(0, 4 / 180, (y + 0.5) / h - 0.5);
+        const f = (HDR_MAL[namn] || 0.42) / medel, KLIPP = 40;
+        // solen (om bilden har en tydlig): kolumnens vinkel i three:s ekvirektangulära karta
+        hdr.sol[namn] = max > medel * 25 ? (((mi % w) + 0.5) / w - 0.5) * Math.PI * 2 : null;
+        // flyttal direkt där grafikkortet kan filtrera dem (datorer), annars halva flyttal (omvandlingen kostar)
+        const F32 = renderer.extensions.has('OES_texture_float_linear');
+        const hf = F32 ? new Float32Array(w * h * 4) : new Uint16Array(w * h * 4), T = F32 ? (v => v) : THREE.DataUtils.toHalfFloat, ETT = T(1);
+        for (let i = 0; i < w * h; i++) {
+          const l = lum(i) * f, k = (l > KLIPP ? (KLIPP / l) * f : f) * (LYFT > 1 ? lyft((i / w) | 0) : 1);
+          hf[i * 4] = T(data[i * 3] * k * VB[0]); hf[i * 4 + 1] = T(data[i * 3 + 1] * k * VB[1]); hf[i * 4 + 2] = T(data[i * 3 + 2] * k * VB[2]); hf[i * 4 + 3] = ETT;
+        }
+        const t = new THREE.DataTexture(hf, w, h, THREE.RGBAFormat, F32 ? THREE.FloatType : THREE.HalfFloatType);
+        t.mapping = THREE.EquirectangularReflectionMapping; t.flipY = true; t.colorSpace = THREE.LinearSRGBColorSpace;
+        t.minFilter = t.magFilter = THREE.LinearFilter; t.generateMipmaps = false; t.needsUpdate = true;
+        const rt = pmrem.fromEquirectangular(t);
+        t.dispose();
+        hdr.tex[namn] = rt.texture;
+        // högst två kartor sparas (den som visas och den förra)
+        Object.keys(hdr.tex).forEach(n => { if (n !== namn && n !== miljoNamn && Object.keys(hdr.tex).length > 2) { hdr.tex[n].dispose(); delete hdr.tex[n]; delete hdr.laddar[n]; } });
+        valjEnv(); begarRender();
+      })
+      .catch(e => { console.warn('hdri', namn, e); });
+  }
+  // utomhus: HDRI:n när den finns (annars himlen, vid sjön med solen); inne: alltid den målade himlen
+  function valjEnv() {
+    const h = !inneLage && !HDR_AV ? hdr.tex[miljoNamn] : null;
+    const e = h || envSolNu || himmelEnv(miljoNamn);
+    const s = h ? hdr.sol[miljoNamn] : null;
+    scene.environmentRotation.y = s == null ? 0 : s - Math.atan2(sol.position.z, sol.position.x);
     if (scene.environment !== e) { scene.environment = e; begarRender(); }
+    envStyrka();
+  }
+  // HDRI:n är en dagsbild: på kvällen och natten dras den ned mer än den målade himlen
+  function envStyrka() {
+    if (inneLage || !scene.environment || scene.environment !== hdr.tex[miljoNamn]) return;
+    scene.environmentIntensity = ljus.env * (1 - 0.5 * mjuk(0.15, 0.85, ljus.kvall));
   }
   marke('rit-motor');
   await paus();
@@ -559,6 +736,25 @@ export async function skapaRitare(duk, alternativ = {}) {
   const rahet = rahetTextur(renderer);
   // fasaden: svagare fläckar i råheten (målad panel; med 0,35 blev det mörka fläckar i släpljus)
   const rahetFasad = rahetTextur(renderer, 0.14);
+  // Fasadens foto (Poly Haven white_planks_clean / weathered_plank_siding, laddas lat): tills det finns
+  // står en neutral 1×1-ruta i samplern, så att programmet aldrig kompileras om när fotot kommer.
+  // uFotoS: meter per fotoruta (21 brädor à 0,2 m = 4,2 m); uFotoRot: liggande foto vrids till stående;
+  // fogarna i fotot hamnar mitt under locklisten (2,4 cm in i varje 20-cm-fack).
+  const ettPx = (r, g, b) => { const t = new THREE.DataTexture(new Uint8Array([r, g, b, 255]), 1, 1); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.needsUpdate = true; return t; };
+  const NEUTRAL = ettPx(128, 128, 128), PLAN_N = ettPx(128, 128, 255);
+  const FOTO_U = { uFoto: { value: NEUTRAL }, uFotoN: { value: PLAN_N }, uFotoS: { value: 4.2 }, uFotoRot: { value: 0 }, uFotoK: { value: 0 }, uFotoNk: { value: 0 }, uFotoFas: { value: 0 } };
+  const FOTO_GLSL = `uniform sampler2D uFoto;
+uniform sampler2D uFotoN;
+uniform float uFotoS;
+uniform float uFotoRot;
+uniform float uFotoK;
+uniform float uFotoNk;
+uniform float uFotoFas;
+vec2 fotoUv( vec2 m ) {
+  vec2 p = vec2( m.x - 0.024, m.y ) / uFotoS;
+  return uFotoRot > 0.5 ? vec2( p.y, p.x + uFotoFas ) : vec2( p.x + uFotoFas, p.y );
+}
+`;
   const mat = {
     fasad: new THREE.MeshStandardMaterial({ map: panel.karta, normalMap: panel.normal, normalScale: new THREE.Vector2(0.75, 0.75), roughnessMap: rahetFasad, roughness: 0.9, metalness: 0 }),
     // lackad plåt: lite mattare (0,64) så att solsidan inte bleks till rosa/grått uppifrån mitt på dagen
@@ -694,7 +890,16 @@ export async function skapaRitare(duk, alternativ = {}) {
   // var fjärde underbräda en skarv (mörk fog, 3 mm) på egen höjd. Räknas ur väggens uv
   // (meter, 5 brädor per meter): ingen ny textur och inget ritanrop.
   mat.fasad.onBeforeCompile = sh => {
-    sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
+    Object.assign(sh.uniforms, FOTO_U);
+    sh.fragmentShader = FOTO_GLSL + sh.fragmentShader.replace('#include <normal_fragment_maps>', THREE.ShaderChunk.normal_fragment_maps.replace('mapN.xy *= normalScale;', `mapN.xy *= normalScale;
+  {
+    // fotots normalkarta ovanpå panelens (fibrer och små ojämnheter i brädan)
+    vec3 fN = texture2D( uFotoN, fotoUv( vMapUv ) ).xyz * 2.0 - 1.0;
+    if ( uFotoRot > 0.5 ) fN.xy = vec2( fN.y, -fN.x );
+    mapN = normalize( vec3( mapN.xy + fN.xy * uFotoNk, mapN.z ) );
+  }`)).replace('#include <map_fragment>', `#include <map_fragment>
+  // fotots ådring under färgen: gråskala med medel 0,5 (bildGra), sömlös över hela väggen
+  diffuseColor.rgb *= mix( 1.0, texture2D( uFoto, fotoUv( vMapUv ) ).r * 2.0, uFotoK );
   {
     float pBi = floor(vMapUv.x * 5.0), pLok = fract(vMapUv.x * 5.0);
     float pH = fract(sin(pBi * 12.9898) * 43758.5453), pH2 = fract(sin(pBi * 78.233 + 2.1) * 24634.6345);
@@ -709,7 +914,7 @@ export async function skapaRitare(duk, alternativ = {}) {
     }
   }`);
   };
-  mat.fasad.customProgramCacheKey = () => 'fasad-brador';
+  mat.fasad.customProgramCacheKey = () => 'fasad-brador-foto';
   // Kupans östvägg (gaveltriangeln ovanför huvudtaket) är den enda fasadytan vars utsida
   // vetter in mot rummen: inifrån, snett uppåt mot innertaket, ligger den bakom innertaket men
   // framför kameran. Med stencilmärket ritades den först och innertaket hoppades över där:
@@ -770,6 +975,116 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     m.customProgramCacheKey = () => (k ? k.call(m) : '') + '|sno' + styrka;
   }
   snoPa(mat.tak, 0.95); snoPa(mat.falsar, 0.9); snoPa(mat.takMork, 0.9); snoPa(mat.detalj, 0.85);
+
+  // ---- Fototexturer från Poly Haven (images/tex, CC0) ----
+  // Allt hämtas först efter första bilden (efterForsta) och byts in i färdiga program (ingen omkompilering).
+  // Svaga enheter hoppar över fasadens och dörrens normalkartor.
+  let forstaKlar = null;
+  const efterForsta = new Promise(r => { forstaKlar = r; });
+  // ?husfoto=0: husets egna, ritade texturer som förut (för jämförelser)
+  const FOTO_AV = /[?&]husfoto=0/.test(location.search);
+  const ANISO = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  const FOTO_CACHE = {};
+  function fotoGra(fil, opt) {
+    const k = fil + JSON.stringify(opt);
+    return FOTO_CACHE[k] || (FOTO_CACHE[k] = efterForsta.then(() => hamtaBild('images/tex/' + fil + '.webp')).then(i => { if (!i) return null; const t = bildGra(i, opt); t.anisotropy = ANISO; return t; }));
+  }
+  function fotoNor(fil, beskar = null) {
+    const k = fil + '|n' + (beskar || '');
+    return FOTO_CACHE[k] || (FOTO_CACHE[k] = efterForsta.then(() => {
+      if (!beskar) return hamtaNormal('images/tex/' + fil + '.webp', renderer);
+      return hamtaBild('images/tex/' + fil + '.webp').then(i => {
+        if (!i) return null;
+        const [x0, y0, x1, y1] = beskar, N = 512, c = document.createElement('canvas'); c.width = c.height = N;
+        c.getContext('2d').drawImage(i, i.width * x0, i.height * y0, i.width * (x1 - x0), i.height * (y1 - y0), 0, 0, N, N);
+        const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.NoColorSpace; t.anisotropy = ANISO; return t;
+      });
+    }));
+  }
+  // Fasaden: vita brädor (white_planks_clean) tonade i vald kulör; grånad gran får väderbitna brädor
+  // (weathered_plank_siding, liggande i fotot, vrids). k: detaljens styrka i gråskalan, K: inblandning.
+  const FASAD_FOTO = {
+    vit: { fil: 'fasad-vit', S: 4.2, rot: 0, fas: 0, opt: { medel: 0.5, k: 1.3, lag: 0.12 }, K: 1, nk: 0.55 },
+    grand: { fil: 'fasad-grand', S: 2.8, rot: 1, fas: 0.039, opt: { medel: 0.5, k: 0.75, lag: 0.2 }, K: 0.85, nk: 0.5 },
+  };
+  let fasadFotoNu = null;
+  function satFasadFoto() {
+    const id = (val.fasad || HUS[val.modell].farg.fasad) === 'gran' ? 'grand' : 'vit';
+    if (id === fasadFotoNu || FOTO_AV) return;
+    fasadFotoNu = id;
+    const P = FASAD_FOTO[id];
+    fotoGra(P.fil + '-diff', P.opt).then(t => {
+      if (!t || fasadFotoNu !== id) return;
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      FOTO_U.uFoto.value = t;
+      FOTO_U.uFotoS.value = P.S; FOTO_U.uFotoRot.value = P.rot; FOTO_U.uFotoFas.value = P.fas; FOTO_U.uFotoK.value = P.K;
+      begarRender();
+    });
+    if (SVAG) return;
+    fotoNor(P.fil + '-nor').then(t => { if (!t || fasadFotoNu !== id) return; FOTO_U.uFotoN.value = t; FOTO_U.uFotoNk.value = P.nk; begarRender(); });
+  }
+  // Taket: falsad bandplåt (ritad i kod, standard) eller foto: betongpannor (grey_roof_01), tegel
+  // (clay_roof_tiles_02) eller profilplåt (box_profile_metal_sheet). S = meter per fotoruta, så att
+  // pannorna blir ca 30–35 cm (betong: 27 rader, tegel: 23 kupor per ruta). uv1: u = fals (ca 0,5 m), v = meter.
+  // Välj med satt('taktyp', id) eller ?taktyp= i adressen.
+  const TAK_FOTO = {
+    betong: { fil: 'tak-betong', S: 8.8, rough: 0.74, metal: 0, ns: 1.0, opt: { medel: 0.78, k: 0.9, lag: 0.15 } },
+    tegel: { fil: 'tak-tegel', S: 7.2, rough: 0.66, metal: 0, ns: 1.0, opt: { medel: 0.8, k: 0.6, lag: 0.1 } },
+    plat: { fil: 'tak-plat', S: 2.6, rough: 0.5, metal: 0.3, ns: 1.2, opt: { medel: 0.9, k: 1, lag: 0.1 } },
+  };
+  const TAKTYP_URL = (() => { try { return new URLSearchParams(location.search).get('taktyp'); } catch (e) { return null; } })();
+  let takFals = null, takTypNu = 'fals';
+  function satTakFoto() {
+    const v = val.taktyp != null ? val.taktyp : TAKTYP_URL, id = TAK_FOTO[v] && !FOTO_AV ? v : 'fals';
+    if (id === takTypNu) return;
+    takTypNu = id;
+    if (!takFals) takFals = { map: mat.tak.map, normal: mat.tak.normalMap, ns: mat.tak.normalScale.clone(), rough: mat.tak.roughness, metal: mat.tak.metalness };
+    if (id === 'fals') {
+      Object.assign(mat.tak, { map: takFals.map, normalMap: takFals.normal, roughness: takFals.rough, metalness: takFals.metal });
+      mat.tak.normalScale.copy(takFals.ns); begarRender(); return;
+    }
+    const P = TAK_FOTO[id];
+    Promise.all([fotoGra(P.fil + '-diff', P.opt), fotoNor(P.fil + '-nor')]).then(([t, n]) => {
+      if (!t || !n || takTypNu !== id) return;
+      [t, n].forEach(x => { x.wrapS = x.wrapT = THREE.RepeatWrapping; x.channel = 1; x.repeat.set(0.5 / P.S, 1 / P.S); x.anisotropy = ANISO; x.needsUpdate = true; });
+      Object.assign(mat.tak, { map: t, normalMap: n, roughness: P.rough, metalness: P.metal });
+      mat.tak.normalScale.set(P.ns, P.ns);
+      begarRender();
+    });
+  }
+  // Ytterdörrens blad: målad furu (rough_pine_door, ena dörrhalvan ovanför tvärslån, speglad i upprepning)
+  // som ådring under färgen. Bladets uv sätts i meter (dorrUv). Kartan är gråskala med medel 0,5.
+  mat.dorr = new THREE.MeshStandardMaterial({ roughness: 0.5, metalness: 0.04, map: NEUTRAL, normalMap: PLAN_N, normalScale: new THREE.Vector2(0.35, 0.35) });
+  mat.dorr.shadowSide = THREE.DoubleSide;
+  mat.dorr.onBeforeCompile = sh => {
+    sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', '#ifdef USE_MAP\n  diffuseColor.rgb *= mix( 1.0, texture2D( map, vMapUv ).r * 2.0, 0.4 );\n#endif');
+  };
+  mat.dorr.customProgramCacheKey = () => 'dorr-furu';
+  snoPa(mat.dorr, 0.85);
+  const DORR_BESKAR = [0.01, 0.01, 0.43, 0.46];
+  function dorrFoto() {
+    if (FOTO_AV) return;
+    fotoGra('dorr-furu-diff', { medel: 0.5, k: 0.6, lag: 0.05, beskar: DORR_BESKAR, ut: 512 }).then(t => {
+      if (!t) return;
+      t.wrapS = t.wrapT = THREE.MirroredRepeatWrapping; t.repeat.set(1 / 0.45, 1 / 1.1); t.needsUpdate = true;
+      mat.dorr.map = t; begarRender();
+    });
+    if (!SVAG) fotoNor('dorr-furu-nor', DORR_BESKAR).then(n => {
+      if (!n) return;
+      n.wrapS = n.wrapT = THREE.MirroredRepeatWrapping; n.repeat.set(1 / 0.45, 1 / 1.1); n.needsUpdate = true;
+      mat.dorr.normalMap = n; begarRender();
+    });
+  }
+  // uv i meter i väggens plan (u längs väggen, v uppåt), så att ådringen löper lika över bladets alla delar
+  function dorrUv(m, cu, cv, cn) {
+    const g = m.geometry, p = g.attributes.position, n = g.attributes.normal, uv = g.attributes.uv;
+    for (let i = 0; i < p.count; i++) {
+      const X = p.getX(i) + cu, Y = p.getY(i) + cv, Z = p.getZ(i) + cn;
+      if (Math.abs(n.getZ(i)) > 0.5) uv.setXY(i, X, Y); else if (Math.abs(n.getX(i)) > 0.5) uv.setXY(i, Z, Y); else uv.setXY(i, X, Z);
+    }
+    uv.needsUpdate = true;
+    return m;
+  }
 
   let husGrupp = null, matGrupp = null, aktuell = null, lampSken = 0;
   // dockskåpet: pa = önskat läge, t = 0 stängt .. 1 öppet (animeras)
@@ -883,16 +1198,26 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       lada(grupp, mtx, w, KARM, 0.07, cu, v1 - KARM / 2, z, mat.detalj);
       lada(grupp, mtx, KARM, h - 0.025, 0.07, u0 + KARM / 2, (h + 0.025) / 2, z, mat.detalj);
       lada(grupp, mtx, KARM, h - 0.025, 0.07, u1 - KARM / 2, (h + 0.025) / 2, z, mat.detalj);
+      // karmens profil: en list ytterst och ett mörkt anslag mot bladet, så att karmen får
+      // djup och två skugglinjer i stället för att vara en platt ram
+      const KL = 0.014, KA = 0.01;
+      lada(grupp, mtx, KL, h - 0.025, 0.012, u0 + KL / 2, (h + 0.025) / 2, z + 0.039, mat.detalj);
+      lada(grupp, mtx, KL, h - 0.025, 0.012, u1 - KL / 2, (h + 0.025) / 2, z + 0.039, mat.detalj);
+      lada(grupp, mtx, w, KL, 0.012, cu, v1 - KL / 2, z + 0.039, mat.detalj);
+      lada(grupp, mtx, KA, h - KARM - 0.025, 0.004, u0 + KARM - KA / 2, (h - KARM + 0.025) / 2, z + 0.037, mat.detaljMork, false);
+      lada(grupp, mtx, KA, h - KARM - 0.025, 0.004, u1 - KARM + KA / 2, (h - KARM + 0.025) / 2, z + 0.037, mat.detaljMork, false);
+      lada(grupp, mtx, w - 2 * KARM, KA, 0.004, cu, v1 - KARM + KA / 2, z + 0.037, mat.detaljMork, false);
       const bh = h - KARM - 0.034;
       const bw = w - 2 * KARM - 0.008, by0 = 0.029, by1 = by0 + bh;
       if (typ === 'dg') {
         // glasdörren: bladet i fyra delar runt ett riktigt hål, så att man ser igenom rutan
         // (förut var bladet massivt och visade sin färgade baksida inifrån)
         const gw = w * 0.42, gh = h * 0.62, gy = cv + h * 0.08, sb = (bw - gw) / 2, ga = gy - gh / 2, gb = gy + gh / 2;
-        lada(grupp, mtx, sb, bh, 0.05, cu - gw / 2 - sb / 2, by0 + bh / 2, z, mat.detalj);
-        lada(grupp, mtx, sb, bh, 0.05, cu + gw / 2 + sb / 2, by0 + bh / 2, z, mat.detalj);
-        lada(grupp, mtx, gw, ga - by0, 0.05, cu, (by0 + ga) / 2, z, mat.detalj);
-        if (by1 - gb > 0.005) lada(grupp, mtx, gw, by1 - gb, 0.05, cu, (by1 + gb) / 2, z, mat.detalj);
+        // bladet i målad furu (mat.dorr, uv i meter: ådringen löper obruten över delarna)
+        dorrUv(lada(grupp, mtx, sb, bh, 0.05, cu - gw / 2 - sb / 2, by0 + bh / 2, z, mat.dorr), cu - gw / 2 - sb / 2, by0 + bh / 2, z);
+        dorrUv(lada(grupp, mtx, sb, bh, 0.05, cu + gw / 2 + sb / 2, by0 + bh / 2, z, mat.dorr), cu + gw / 2 + sb / 2, by0 + bh / 2, z);
+        dorrUv(lada(grupp, mtx, gw, ga - by0, 0.05, cu, (by0 + ga) / 2, z, mat.dorr), cu, (by0 + ga) / 2, z);
+        if (by1 - gb > 0.005) dorrUv(lada(grupp, mtx, gw, by1 - gb, 0.05, cu, (by1 + gb) / 2, z, mat.dorr), cu, (by1 + gb) / 2, z);
         // hålets kanter kläs ljusa (vitmålad insida, som bågarna), annars lyser detaljfärgen runt rutan inifrån
         const FO = 0.004, fz = z - 0.004, fd = 0.05;
         lada(grupp, mtx, FO, gh, fd, cu - gw / 2 + FO / 2, gy, fz, mat.bagInsida, false);
@@ -900,7 +1225,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         lada(grupp, mtx, gw, FO, fd, cu, ga + FO / 2, fz, mat.bagInsida, false);
         lada(grupp, mtx, gw, FO, fd, cu, gb - FO / 2, fz, mat.bagInsida, false);
         lada(grupp, mtx, gw, gh, 1.3, cu, gy, -DJUP - 0.65, mat.rum, false);   // mörkt rum bakom rutan, som i fönstren
-      } else lada(grupp, mtx, bw, bh, 0.05, cu, by0 + bh / 2, z, mat.detalj);
+      } else dorrUv(lada(grupp, mtx, bw, bh, 0.05, cu, by0 + bh / 2, z, mat.dorr), cu, by0 + bh / 2, z);
       // tre gångjärn på bladets gångjärnssida (mot trycket)
       const gs = o.sida === 'N' || o.sida === 'W' || o.sida === 'E' ? 1 : -1, gx = cu + gs * (w / 2 - KARM - 0.002);
       [0.22, bh / 2 + 0.03, bh - 0.18].forEach(gy => lada(grupp, mtx, 0.022, 0.1, 0.022, gx, gy, z + 0.03, mat.detaljMork));
@@ -914,9 +1239,14 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         lada(grupp, mtx, GL, gh, 0.014, cu - gw / 2 - GL / 2, gy, z + 0.031, mat.bagYtter, false);
         lada(grupp, mtx, GL, gh, 0.014, cu + gw / 2 + GL / 2, gy, z + 0.031, mat.bagYtter, false);
       } else {
-        // två frästa spår i det släta bladet
-        lada(grupp, mtx, w - 0.24, 0.012, 0.006, cu, cv + h * 0.18, z + 0.026, mat.detaljMork, false);
-        lada(grupp, mtx, w - 0.24, 0.012, 0.006, cu, cv - h * 0.22, z + 0.026, mat.detaljMork, false);
+        // tre frästa v-spår i det släta bladet: mörk botten och två fasade kanter i bladets
+        // färg som fångar ljuset olika (övre kanten ljus, undre i skugga)
+        const sl = w - 0.26;
+        [cv + h * 0.24, cv, cv - h * 0.24].forEach(sy => {
+          lada(grupp, mtx, sl, 0.006, 0.004, cu, sy, z + 0.0255, mat.detaljMork, false);
+          dorrUv(lada(grupp, mtx, sl, 0.009, 0.003, cu, sy + 0.0058, z + 0.0262, mat.dorr, false, 0.75), cu, sy + 0.0058, z + 0.0262);
+          dorrUv(lada(grupp, mtx, sl, 0.009, 0.003, cu, sy - 0.0058, z + 0.0262, mat.dorr, false, -0.75), cu, sy - 0.0058, z + 0.0262);
+        });
       }
       // trycke: skylt, hals och handtag, plus låscylinder
       const sida = o.sida === 'N' || o.sida === 'W' || o.sida === 'E' ? -1 : 1;
@@ -941,10 +1271,10 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     lada(grupp, mtx, KARM, h, 0.07, u0 + KARM / 2, cv, z, mat.detalj);
     lada(grupp, mtx, KARM, h, 0.07, u1 - KARM / 2, cv, z, mat.detalj);
     // mittposten står djupare ut än karmen och kastar en tydlig skugglinje
-    for (let i = 1; i < rutor; i++) lada(grupp, mtx, KARM * 1.4, h, 0.1, u0 + (w * i) / rutor, cv, z + 0.02, mat.detalj);
+    for (let i = 1; i < rutor; i++) lada(grupp, mtx, KARM * 1.15, h, 0.1, u0 + (w * i) / rutor, cv, z + 0.02, mat.detalj);
     // bågar: en smalare ram per ruta, 1 cm indragen bakom karmens framkant,
     // så att profilen syns som ett steg i ljuset
-    const SB = 0.042, pw = (w - 2 * KARM) / rutor, zb = z - 0.012;
+    const SB = 0.036, GL = 0.012, pw = (w - 2 * KARM) / rutor, zb = z - 0.012;
     for (let i = 0; i < rutor; i++) {
       const a = u0 + KARM + pw * i, bu = a + pw;
       const pa = a + (i ? KARM * 0.7 : 0), pb = bu - (i < rutor - 1 ? KARM * 0.7 : 0), pc = (pa + pb) / 2, pww = pb - pa;
@@ -957,6 +1287,12 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         t(lada(grupp, mtx, SB, h - 2 * KARM, dd, pa + SB / 2, cv, zb + dz, mm, false));
         t(lada(grupp, mtx, SB, h - 2 * KARM, dd, pb - SB / 2, cv, zb + dz, mm, false));
       });
+      // glaslist runt rutan, ett steg bakom bågens framkant: profilen får två skugglinjer
+      const gt = v1 - KARM - SB, gb = v0 + KARM + SB * 1.25, gh2 = gt - gb;
+      t(lada(grupp, mtx, pww - 2 * SB, GL, GL, pc, gt - GL / 2, zb + 0.009, mat.bagYtter, false));
+      t(lada(grupp, mtx, pww - 2 * SB, GL, GL, pc, gb + GL / 2, zb + 0.009, mat.bagYtter, false));
+      t(lada(grupp, mtx, GL, gh2, GL, pa + SB + GL / 2, (gt + gb) / 2, zb + 0.009, mat.bagYtter, false));
+      t(lada(grupp, mtx, GL, gh2, GL, pb - SB - GL / 2, (gt + gb) / 2, zb + 0.009, mat.bagYtter, false));
     }
     const g = tagga(lada(grupp, mtx, w - KARM, h - KARM, 0.01, cu, cv, z - 0.01, o[7] === 'frost' ? mat.frostGlas : mat.glas, false));
     g.userData.glas = true; g.renderOrder = 2;
@@ -965,7 +1301,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (fid >= 0) {
       const hb = lada(grupp, mtx, w - 0.02, h - 0.02, 0.14, cu, cv, z, FONSTER_TRAFF, false);
       hb.renderOrder = 1; hb.userData.fonsterTraff = fid; hb.name = 'fonster-traff';
-      fonsterBygg.push({ mtx: mtx.clone(), typ, u0, w, cu, cv, v0, v1, h, rutor, KARM, SB, pw, z, zb, bitar: [], traff: hb, o: null });
+      fonsterBygg.push({ mtx: mtx.clone(), typ, u0, w, cu, cv, v0, v1, h, rutor, KARM, SB, GL, pw, z, zb, bitar: [], traff: hb, o: null });
     }
   }
 
@@ -982,13 +1318,13 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // och stuprör. Allt läggs direkt i takgruppen så att det slås ihop per material.
   // op: { ranna, stupror: [x...], hogKant (bräda i övre änden), utanVind: -1|1, y0 }
   const VT = 0.028, VH = 0.22;
-  // Falsarna (bandplåt var 50:e cm) är bakade i en normalkarta med mipmaps (ingen flimmer på
+  // Falsarna (som Plannja Trend 475: klickfals var 47,5 cm, 30 mm hög profil) är bakade i en normalkarta med mipmaps (ingen flimmer på
   // avstånd); riktig geometri bara i kanterna (vindskivor, plåtar). En ruta = en fals,
   // läst ur uv1 (u = fals nummer, v = meter längs taket).
   const falsKarta = (() => {
     const W = 128, H = 4, c = document.createElement('canvas'); c.width = W; c.height = H;
-    const g = c.getContext('2d'), d = g.createImageData(W, H), SP = 0.5;
-    const h = u => { const dm = Math.min(u, 1 - u) * SP; return 0.032 * (1 - mjuk(0.009, 0.017, dm)); };
+    const g = c.getContext('2d'), d = g.createImageData(W, H), SP = 0.475;
+    const h = u => { const dm = Math.min(u, 1 - u) * SP; return 0.03 * (1 - mjuk(0.009, 0.017, dm)); };
     for (let x = 0; x < W; x++) {
       const u = (x + 0.5) / W, du = 1 / W / 4, dh = (h((u + du) % 1) - h((u - du + 1) % 1)) / (2 * du * SP);
       const l = Math.hypot(dh, 1), nx = -dh / l, nz = 1 / l;
@@ -1041,14 +1377,14 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       const m = new THREE.Mesh(geo, material); m.position.set(x, y, z);
       m.castShadow = skugga; m.receiveShadow = true; skiva.add(m); return m;
     };
-    const n = Math.max(1, Math.floor(bredd / 0.5));
+    const n = Math.max(1, Math.floor(bredd / 0.475));
     const skivGeo = new THREE.BoxGeometry(bredd, T, L), sp = skivGeo.attributes.position, uv1 = new Float32Array(sp.count * 2);
     for (let i = 0; i < sp.count; i++) { uv1[i * 2] = (sp.getX(i) + bredd / 2) * n / bredd; uv1[i * 2 + 1] = sp.getZ(i); }
     skivGeo.setAttribute('uv1', new THREE.BufferAttribute(uv1, 2));
     del(utanBotten(skivGeo), mat.tak, 0, 0, 0);
     const under = new THREE.PlaneGeometry(bredd, L); under.rotateX(Math.PI / 2);
     del(under, mat.takUnder, 0, -T / 2, 0, false);
-    // falsarna (var 50:e cm, 32 mm höga) ligger i normalkartan, se falsKarta
+    // falsarna (var 47,5 cm, 30 mm höga, som Plannja Trend 475) ligger i normalkartan, se falsKarta
     // vindskivor med plåt ovanpå
     // Sadeltak: vindskivorna och deras plåt geras lodrätt i nocken (z = p1[0]). Rakt avkapade
     // (vinkelrätt mot takfallet) lämnade de en V-formad kil under nocken där de två möttes.
@@ -1186,6 +1522,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (!ihop) return;
       const ny = new THREE.Mesh(ihop, lista[0].material);
       ny.castShadow = lista[0].castShadow; ny.receiveShadow = true;
+      ny.userData.bitar = bitStart(geos);   // var varje ursprunglig del börjar (sprängvyn)
       minnsFonster(lista, geos, ny);
       lista.forEach(m => { grupp.remove(m); m.geometry.dispose(); });
       grupp.add(ny);
@@ -1199,6 +1536,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       geos.forEach(g => g.dispose());
       if (ihop) {
         const ny = new THREE.Mesh(ihop, mat.glas); ny.renderOrder = 2;
+        ny.userData.bitar = bitStart(geos);
         minnsFonster(glas, geos, ny);
         glas.forEach(m => { grupp.remove(m); m.geometry.dispose(); });
         grupp.add(ny);
@@ -1206,6 +1544,13 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     }
     // märkta delar som inte slogs ihop: hela meshen göms när fönstret byggs om
     if (fonsterBygg) grupp.children.forEach(m => { const f = m.userData.fonster; if (m.isMesh && f !== undefined && fonsterBygg[f]) fonsterBygg[f].bitar.push({ mesh: m, hela: true }); });
+  }
+  // första hörnet för varje ihopslagen del (hörnen ligger i följd): sprängvyn flyttar delarna var för sig
+  function bitStart(geos) {
+    const ut = new Uint32Array(geos.length);
+    let off = 0;
+    geos.forEach((g, j) => { ut[j] = off; off += g.attributes.position.count; });
+    return ut;
   }
   // var fönstrets bågar och glas hamnade i den hopslagna geometrin (hörnen i följd)
   function minnsFonster(lista, geos, ny) {
@@ -1221,6 +1566,31 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // Detaljerna utanför väggarna: trappsteg och dörrmatta vid varje ytterdörr,
   // vägglampa vid entrén, skuggrand under takfoten och (om ritningen har det) ett däck.
   // Trappor och däck ligger i 'ute' (står på marken), lampan och randen i väggarna.
+  // Vägglampan vid entrén (Poly Haven industrial_wall_lamp, CC0, images/3d/ph/inne): laddas en gång efter
+  // första bilden. Glaset (transmission i filen) blir ett enkelt matt glas och lyser med lampGlas; metallen
+  // speglar miljön. Modellen står med ryggen i z = 0 och är 43 cm hög, mitt på y = 0.
+  let vaggLampaP = null;
+  function vaggLampa() {
+    return vaggLampaP || (vaggLampaP = efterForsta.then(async () => {
+      if (FOTO_AV) return null;
+      const [{ GLTFLoader }, { MeshoptDecoder }] = await Promise.all([import('./vendor/three/addons/loaders/GLTFLoader.js'), import('./vendor/three/addons/libs/meshopt_decoder.module.js')]);
+      const l = new GLTFLoader(); l.setMeshoptDecoder(MeshoptDecoder);
+      const g = await l.loadAsync('images/3d/ph/inne/ph-industrial_wall_lamp.glb');
+      g.scene.traverse(o => {
+        if (!o.isMesh) return;
+        o.castShadow = true; o.receiveShadow = true;
+        if (/glass/i.test(o.material.name)) { o.material = mat.lampGlas; o.castShadow = false; return; }
+        const m = o.material;
+        if (m.emissiveMap || m.emissive.getHex()) {
+          // lampans eget sken följer kvällen (satSol) i stället för att lysa jämt
+          m.userData.vaggLampa = true; m.emissiveIntensity = lampSken * 2;
+        }
+        m.envMapIntensity = 1;
+      });
+      g.scene.updateMatrixWorld(true);
+      return g.scene;
+    }).catch(e => { console.warn('vägglampan', e); return null; }));
+  }
   function utsida(vaggar, ute, H, omb, mtxer, m) {
     const { Y0, L, hN, hS, xw, xk } = m;
     const tra = H.trappa !== 'betong';
@@ -1278,11 +1648,21 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (krock(lu)) lu = sida > 0 ? hoger : vanster;
     if (krock(lu)) return { glod: null, altan: altanUt };
     const lv = 1.96;
-    lada(vaggar, mtx, 0.085, 0.2, 0.016, lu, lv, 0.008, mat.detaljMork);
-    lada(vaggar, mtx, 0.1, 0.15, 0.12, lu, lv, 0.076, mat.detaljMork);
-    lada(vaggar, mtx, 0.11, 0.012, 0.135, lu, lv + 0.081, 0.078, mat.detaljMork);
-    lada(vaggar, mtx, 0.078, 0.01, 0.098, lu, lv - 0.08, 0.078, mat.lampGlas, false);
-    lada(vaggar, mtx, 0.06, 0.05, 0.004, lu, lv - 0.035, 0.138, mat.lampGlas, false);
+    // lampan: den ritade lådan i en egen grupp (slås inte ihop med väggen), som byts mot Poly Havens
+    // industrial_wall_lamp när den laddats (lat, efter första bilden)
+    const kropp = new THREE.Group(); kropp.name = 'vagglampa'; vaggar.add(kropp);
+    lada(kropp, mtx, 0.085, 0.2, 0.016, lu, lv, 0.008, mat.detaljMork);
+    lada(kropp, mtx, 0.1, 0.15, 0.12, lu, lv, 0.076, mat.detaljMork);
+    lada(kropp, mtx, 0.11, 0.012, 0.135, lu, lv + 0.081, 0.078, mat.detaljMork);
+    lada(kropp, mtx, 0.078, 0.01, 0.098, lu, lv - 0.08, 0.078, mat.lampGlas, false);
+    lada(kropp, mtx, 0.06, 0.05, 0.004, lu, lv - 0.035, 0.138, mat.lampGlas, false);
+    vaggLampa().then(m => {
+      if (!m || !kropp.parent) return;
+      const ny = m.clone(); ny.matrixAutoUpdate = false;
+      ny.matrix.copy(mtx).multiply(new THREE.Matrix4().makeTranslation(lu, lv - 0.02, 0.004));
+      kropp.children.forEach(c => c.geometry && c.geometry.dispose()); kropp.clear(); kropp.add(ny); kropp.updateMatrixWorld(true);
+      nySkugga = true; begarRender();
+    });
     // falskt sken: en additiv bild som inte behöver något ljus
     const c = document.createElement('canvas'); c.width = c.height = 64;
     const gx = c.getContext('2d'), gr = gx.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -1769,7 +2149,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     }
     // insidan stängd: ett mörkt "tak" i väggtoppen så att man aldrig ser igenom
     const inner = new THREE.Mesh(new THREE.BoxGeometry(L - 0.02, 0.02, W - 0.02), mat.insida);
-    inner.position.set(0, Math.min(hN, hS) - 0.02, 0); vaggar.add(inner);
+    inner.position.set(0, Math.min(hN, hS) - 0.02, 0);   // (läggs i taket nedan: kommer med taket i uppbyggnaden, inget vitt lock på väggarna innan)
 
     // droppbleck runt om där panelen slutar över sockeln
     const yd = -NED + 0.008;
@@ -1805,6 +2185,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
 
     // tak
     const tak = new THREE.Group(); tak.position.y = Y0; g.add(tak);
+    tak.add(inner);
     // Stuprörens plats vid varje hörn: på långväggen strax innanför hörnbrädan, annars runt
     // hörnet på gaveln, annars längre in på långväggen. Aldrig framför fönster, dörrar,
     // dörrlampan, trappsteg eller altanen (röret och utkastaren går hela vägen till marken).
@@ -1904,12 +2285,14 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // takutsprångets undersida målas som vindskivorna och takfotsbrädan: i ljust krämvitt syntes den
     // som en vit strimma mellan gavelns överkant och vindskivan (bara på den bortre sluttningen)
     malFarg.takUnder.copy(malFarg.detalj);
+    malFarg.dorr.copy(malFarg.detalj);
+    satFasadFoto(); satTakFoto();
     tonar = true;
     begarRender();
   }
   const hsl = { h: 0, s: 0, l: 0 };
   function dampa(c, k) { c.getHSL(hsl); c.setHSL(hsl.h, hsl.s * k, hsl.l); return c; }
-  const malFarg = { fasad: new THREE.Color(), fasadKupa: new THREE.Color(), tak: new THREE.Color(), falsar: new THREE.Color(), takMork: new THREE.Color(), detalj: new THREE.Color(), detaljMork: new THREE.Color(), stupror: new THREE.Color(), takUnder: new THREE.Color() };
+  const malFarg = { fasad: new THREE.Color(), fasadKupa: new THREE.Color(), tak: new THREE.Color(), falsar: new THREE.Color(), takMork: new THREE.Color(), detalj: new THREE.Color(), detaljMork: new THREE.Color(), stupror: new THREE.Color(), takUnder: new THREE.Color(), dorr: new THREE.Color() };
   let tonar = false, forstaFarg = true;
   function tonaFarger(f) {
     if (!tonar) return false;
@@ -1963,8 +2346,10 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // utsikten inte bränns ut; rummet bärs av sin egen AO och lampan.
     // inne på dagen: lägre exponering och mer ljus i rummet, så att utsikten inte bränns ut
     // medan rummet blir lika ljust; på kvällen går exponeringen upp till fullt
-    renderer.toneMappingExposure = inneLage ? EXPO * (0.88 + k * 0.16) : EXPO * (1 - k * 0.06) * (miljoNamn === 'kust' ? 1 + 0.07 * (1 - k) : 1);   // vid sjön lite ljusare dag
+    // (negativ vid sjön = sommargraderingen på, även inne som förut; se CustomToneMapping ovan)
+    renderer.toneMappingExposure = (miljoNamn === 'kust' ? -1 : 1) * (inneLage ? EXPO * (0.88 + k * 0.16) : EXPO * (1 - k * 0.06) * (miljoNamn === 'kust' ? 1 + 0.07 * (1 - k) : 1));   // vid sjön lite ljusare dag
     scene.environmentIntensity = inneLage ? 0.9 : ljus.env;
+    valjEnv();   // utomhus HDRI:n (dämpas mer på kvällen), inne den målade himlen
     himmel.intensity = inneLage ? ljus.him * 1.3 : ljus.him;
     // utifrån: speglande glas som ändå släpper in blicken (0,42 dag, tunnare på kvällen)
     // på natten: miljön dras ned för hela scenen, men glaset behåller en (dämpad) spegling
@@ -2241,6 +2626,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     lampSken = mjuk(0.3, 0.65, kvall);
     lamporFoljTid();
     mat.lampGlas.emissiveIntensity = lampSken * 2.6;
+    if (vaggLampaP) vaggLampaP.then(m => { if (m) m.traverse(o => { if (o.isMesh && o.material.userData.vaggLampa) o.material.emissiveIntensity = lampSken * 2; }); });
     if (husGrupp && husGrupp.userData.glod) husGrupp.userData.glod.material.opacity = lampSken * 0.75;
     if (husGrupp && husGrupp.userData.lyktGlod) husGrupp.userData.lyktGlod.material.opacity = lampSken * 0.8;
     mat.pol.opacity = lampSken * 0.5; mat.pol.visible = lampSken > 0.01;
@@ -2276,14 +2662,44 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (o.isSprite || o.isLine) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); }
     });
   }
-  function satMiljo() {
+  // Miljöbytet: husritare-miljo.js bygger den nya miljön stegvis (omgivning.vantar() ger namnet
+  // medan den byggs). Till dess står den gamla miljön kvar med sitt eget ljus, sin HDR, himmel,
+  // dimma och exponering; allt det byts först när bygget är klart ('husritare:miljoklar'), med en
+  // kort toning från sista bilden av den gamla miljön. Förut fick den gamla miljön den nyas ljus
+  // under hela bygget (3,5 s vid sjön). Svarar true när bytet är gjort, false när det väntar.
+  let miljoVill = null;
+  function satMiljo(namn = miljoVill || miljoNamn) {
     vakna();
+    omgivning.satt(namn, HUS[val.modell]);
+    if (namn !== miljoNamn && typeof omgivning.vantar === 'function' && omgivning.vantar() === namn) { miljoVill = namn; begarRender(); return false; }
+    miljoVill = null;
+    miljoNamn = namn;
+    tillampaMiljo();
+    return true;
+  }
+  function tillampaMiljo() {
     snoU.value = miljoNamn === 'vinter' ? 1 : 0;
-    omgivning.satt(miljoNamn, HUS[val.modell]);
-    scene.environment = himmelEnv(miljoNamn);
-    renderer.toneMapping = miljoNamn === 'kust' ? THREE.CustomToneMapping : THREE.ACESFilmicToneMapping;
+    envSolNu = null; valjEnv(); hdrLadda(miljoNamn);
     satSol();                                // miljöns eget sommarljus (vid sjön) följer med direkt
   }
+  // hovring eller fokus på en miljöknapp (sidans [data-miljo]): bygget börjar i förväg
+  if (typeof omgivning.forbered === 'function') {
+    const forM = e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-miljo]') : null, namn = b && b.getAttribute('data-miljo');
+      if (namn && namn !== miljoNamn && namn !== miljoVill && omgivning.lista.some(m => m[0] === namn)) { try { omgivning.forbered(namn, HUS[val.modell]); } catch (err) { console.warn(err); } }
+    };
+    ['pointerover', 'focusin', 'touchstart'].forEach(h => document.addEventListener(h, forM, { passive: true, capture: true }));
+  }
+  window.addEventListener('husritare:miljoklar', e => {
+    const namn = e && e.detail && e.detail.namn;
+    if (!miljoVill || namn !== miljoVill) return;
+    // (sista bilden av den gamla miljön finns på grafikkortet: se kopieraRuta i ram)
+    if (!lugn) { try { fangaOvergang(); tona.tid = 0.3; } catch (err) { console.warn(err); } }
+    miljoVill = null; miljoNamn = namn;
+    tillampaMiljo();
+    if (husGrupp) { try { byggMobler(husGrupp.userData.delar.ute); } catch (err) { console.warn(err); } }
+    nySkugga = true; satSol(); begarRender();
+  });
   function visa(id, montera = true) {
     vakna();
     planBryt();
@@ -2444,8 +2860,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     try { renderer.copyFramebufferToTexture(tonTextur()); tona.farsk = true; } catch (e) { tona.farsk = false; }
   }
   // fångar bilden som syns nu och startar toningen; renderar bara om bilden inte redan finns
-  function fangaOvergang() {
-    if (lugn || !husGrupp) return;
+  function fangaOvergang(tvinga) {
+    if ((lugn && !tvinga) || !husGrupp) return;
     slutforIa();   // dörrar och lampor hoppar till sitt slutläge, så att bilden inte fångas mitt i
     tonTextur();
     if (!tona.farsk) {
@@ -2486,7 +2902,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // (Se inne, dockskåpet) körs resten av stegen på en gång.
   let inneBygge = null;
   function forberedInne(g) {
-    const d = husGrupp.userData;
+    const hus = husGrupp, d = hus.userData;
     const l = g.userData.lampa;
     if (l) { d.lampPos = l.position.clone(); l.parent.remove(l); }
     g.visible = false;
@@ -2497,16 +2913,34 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       new THREE.Plane(new THREE.Vector3(1, 0, 0), H.L / 2 - m), new THREE.Plane(new THREE.Vector3(-1, 0, 0), H.L / 2 - m),
       new THREE.Plane(new THREE.Vector3(0, 0, 1), H.W / 2 - m), new THREE.Plane(new THREE.Vector3(0, 0, -1), H.W / 2 - m),
     ];
-    g.traverse(o => {
+    const prep = o => {
       if (!o.isMesh) return;
       (Array.isArray(o.material) ? o.material : [o.material]).forEach(mm => {
+        // en kopia gjord med clone() har userData som JSON (lösa objekt, inga Plane) och förra
+        // husets plan i clippingPlanes: börja om från rent (annars kraschade p.copy nedan)
+        const ik = mm.userData.inneKlipp;
+        if (ik && ik.length && !(ik[0] instanceof THREE.Plane)) { delete mm.userData.inneKlipp; delete mm.userData.klippSatt; mm.clippingPlanes = null; }
         if (!mm.userData.inneKlipp) { mm.userData.inneKlipp = plan.map(p => p.clone()); mm.clippingPlanes = (mm.clippingPlanes || []).concat(mm.userData.inneKlipp); }
         mm.userData.inneKlipp.forEach((p, i) => p.copy(plan[i]));
         mm.clipShadows = true;
         // aldrig över fasaden: bara där fasaden inte har märkt stencilen (se mat.fasad)
         mm.stencilWrite = true; mm.stencilWriteMask = 0; mm.stencilRef = 1; mm.stencilFunc = THREE.NotEqualStencilFunc;
       });
-    });
+    };
+    g.traverse(prep);
+    // det som läggs in senare (Poly Haven-möblerna, phPlacera i husritare-inne.js) får samma
+    // plan och stencil; förut fick de varken klipplan eller stencilprov (kunde ritas över fasaden)
+    // De syns först när deras program är kompilerade (parallellt); förut länkades de synkront i
+    // nästa ruta (1–3 s stopp, ofta medan kameran åkte mot dörren).
+    g.userData.nyDel = o => {
+      if (husGrupp !== hus) return;
+      o.traverse(prep); if (oppen.pa || oppen.t > 0 || d.oppenVarm) klippAlla();
+      o.visible = false;
+      const visa = () => { o.visible = true; nySkugga = true; begarRender(); };
+      const giltig = () => husGrupp === hus, sk = skuggStandin(o);
+      Promise.all([kompKlipp([o], giltig, PARALLELL ? Infinity : 8), sk.children.length ? kompKlipp([sk], giltig, PARALLELL ? Infinity : 8, skuggRT()) : null]).then(visa, visa)
+        .then(() => setTimeout(() => sk.traverse(s => { if (s.material) s.material.dispose(); }), 3000));
+    };
     renderer.localClippingEnabled = true;
     if (d.lampPos) inneLjus.position.copy(d.lampPos).add(new THREE.Vector3(0, d.delar.Y0, 0));
     if (oppen.pa || oppen.t > 0) klippAlla();
@@ -2565,7 +2999,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         // dockskåpets snitt och takkopior kompileras samtidigt (annars vid första lyftet).
         // Inredningen blir synlig (lageLjus) först när allt är kompilerat.
         inneForbered(hus);
-        forvarmOppen(hus, 1).then(syns, syns);   // ett program i taget (se kompKlipp)
+        forvarmOppen(hus, PARALLELL ? Infinity : 1).then(syns, syns);   // utan parallell kompilering ett program i taget (se kompKlipp)
       }, 1200);
     }, ms);
   }
@@ -2773,10 +3207,41 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     spegelRT = new THREE.WebGLCubeRenderTarget(512, { type: THREE.HalfFloatType, generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter });
     spegelKam = new THREE.CubeCamera(0.05, 40, spegelRT);
   }
+  // Kubkartans programvarianter (render target: ingen tonmappning, linjär färg) är en hel
+  // uppsättning till av husets program (3–4 s grafikkompilering). De kompileras parallellt i
+  // bakgrunden; till dess visar spegeln den målade omgivningen och reflexen fångas när de är klara.
+  function spegelKlar(hus, ri) {
+    const d = hus && hus.userData;
+    if (!d || d.spegelVarm) return true;
+    if (!d.spegelKomp) {
+      spegelRigg();
+      // spegelglaset får en PMREM-karta (CubeUV) när reflexen fångats: ett nytt program, som
+      // annars länkades synkront i rutan efter fångsten. Stand-ins med en karta av samma storlek.
+      let attrapp = null, stand = [];
+      try {
+        const glas = ((d.inne && d.inne.userData.speglar) || []).filter(m => m && m.isMesh && m.material && !Array.isArray(m.material));
+        if (glas.length) {
+          attrapp = pmrem.fromCubemap(spegelRT.texture);
+          stand = glas.map(m => { const c = klonaMat(m.material); c.envMap = attrapp.texture; const s = new THREE.Mesh(m.geometry, c); s.castShadow = m.castShadow; s.receiveShadow = m.receiveShadow; return s; });
+        }
+      } catch (e) { console.warn(e); }
+      const klar = () => {
+        d.spegelKomp = null;
+        if (attrapp) { attrapp.dispose(); attrapp = null; }
+        setTimeout(() => stand.forEach(s => s.material.dispose()), 3000);
+        if (husGrupp !== hus) return;
+        d.spegelVarm = true;
+        if (inneLage) { fangaSpeglar(ri); begarRender(); }
+      };
+      d.spegelKomp = Promise.all([kompKlipp([scene], () => husGrupp === hus, PARALLELL ? Infinity : 8, spegelRT), stand.length ? kompKlipp(stand, () => husGrupp === hus, PARALLELL ? Infinity : 8) : null]).then(klar, klar);
+    }
+    return false;
+  }
   function fangaSpeglar(ri) {
     const d = husGrupp && husGrupp.userData, ig = d && d.inne;
     const l = ig && ig.userData && Array.isArray(ig.userData.speglar) ? ig.userData.speglar.filter(m => m && m.isMesh && m.geometry && m.material) : [];
     if (!l.length) return;
+    if (!spegelKlar(husGrupp, ri)) return;
     const nyckel = ri + '|' + val.tid;
     if (d.spegelEnv && d.spegelNyckel === nyckel) return;
     const dolda = [];
@@ -3231,11 +3696,22 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       T.forEach(tt => { const d = Math.hypot((tt.xL + tt.xH) / 2 - P.x, (tt.z0 + tt.z1) / 2 - P.z); if (d < bd) { bd = d; t = tt; } });
       const dir = Math.sign(t.xH - t.xL) || 1, zc = (t.z0 + t.z1) / 2, upp = niva > gang.niva;
       const fot = { x: t.xL - dir * 0.35, z: zc, g: upp ? gang.golvY : g, nv: 0, tr: false };
-      const topp = { x: t.xH + dir * 0.4, z: zc, g: Y0 + t.h, nv: 1, tr: false };
+      // trappan når loftet vid takfoten, där taket är lägst: efter översta steget går vägen
+      // snett in mot nocken (en punkt bredvid trappans topp, på nocksidan) innan den går vidare,
+      // så att ögat inte kryper längs takfoten (förr 0,3–0,5 m över loftgolvet i Sadel 50)
+      const zi = zc > 0 ? t.z0 - 0.25 : t.z1 + 0.25, inn = { x: t.xH + dir * 0.55, z: zi, g: Y0 + t.h, nv: 1, tr: false };
+      const medInn = fri(inn.x, inn.z, 1) >= RADIE && !inuti(inn.x, inn.z, 1);
+      const topp = { x: t.xH + dir * (medInn ? 0.2 : 0.4), z: zc, g: Y0 + t.h, nv: 1, tr: false };
       const a = upp ? fot : topp, b = upp ? topp : fot;
-      if (!trappaVid(P.x, P.z)) { via(rutt(P.x, P.z, a.x, a.z, gang.niva), gang.golvY, gang.niva); p.push(a); }
+      if (!trappaVid(P.x, P.z)) {
+        const a0 = !upp && medInn ? inn : a;
+        via(rutt(P.x, P.z, a0.x, a0.z, gang.niva), gang.golvY, gang.niva); p.push(a0);
+        if (a0 !== a) p.push(a);
+      }
       p.push({ ...b, tr: true });
-      via(rutt(b.x, b.z, x, z, niva), g, niva);
+      const b1 = upp && medInn ? inn : b;
+      if (b1 !== b) p.push(b1);
+      via(rutt(b1.x, b1.z, x, z, niva), g, niva);
     } else {
       const r = rutt(P.x, P.z, x, z, niva);
       if (!r && strikt) return null;
@@ -3877,7 +4353,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       p.needsUpdate = true;
     });
     const vaggar = husGrupp.userData.delar.vaggar, delar = [], skjut = f.typ === 'sk';
-    const { mtx, rutor, KARM, SB, pw, u0, v0, v1, cv, h, zb } = f, hh = h - 2 * KARM;
+    const { mtx, rutor, KARM, SB, GL, pw, u0, v0, v1, cv, h, zb } = f, hh = h - 2 * KARM;
     const box = (w2, h2, d2, x, y, z) => new THREE.BoxGeometry(w2, h2, d2).translate(x, y, z);
     const lagg = (geo, material, foralder) => { const m = new THREE.Mesh(geo, material); m.receiveShadow = true; foralder.add(m); return m; };
     const fastGlas = [];
@@ -3897,6 +4373,11 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       [[0.03, 0.01, mat.bagYtter], [0.02, -0.015, mat.bagInsida]].forEach(([dd, dz, mm]) => lagg(mergeGeometries([
         box(pww, SB, dd, ox, v1 - KARM - SB / 2 - cv, dz), box(pww, SB * 1.25, dd, ox, v0 + KARM + SB * 0.625 - cv, dz),
         box(SB, hh, dd, pa + SB / 2 - hu, 0, dz), box(SB, hh, dd, pb - SB / 2 - hu, 0, dz)]), mm, obj));
+      { // glaslisten, som i oppning()
+        const gt = v1 - KARM - SB - cv, gb = v0 + KARM + SB * 1.25 - cv, gh2 = gt - gb;
+        lagg(mergeGeometries([box(pww - 2 * SB, GL, GL, ox, gt - GL / 2, 0.009), box(pww - 2 * SB, GL, GL, ox, gb + GL / 2, 0.009),
+          box(GL, gh2, GL, pa + SB + GL / 2 - hu, (gt + gb) / 2, 0.009), box(GL, gh2, GL, pb - SB - GL / 2 - hu, (gt + gb) / 2, 0.009)]), mat.bagYtter, obj);
+      }
       const gl = lagg(box(pww - 0.01, hh, 0.01, ox, 0, 0.002), mat.glas, obj); gl.renderOrder = 2; gl.userData.glas = true;
       if (skjut) lagg(box(0.03, 0.55, 0.03, f.cu + f.w * 0.18 - hu, 1.05 - cv, f.z + 0.05 - zb + 0.05), mat.handtag, obj);
       vaggar.add(fast); fast.updateMatrixWorld(true);
@@ -4189,7 +4670,10 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (!s || !inneLage || !husGrupp) return false;
     if (gang.sitter < 0) gang.stod = { x: kamera.position.x, z: kamera.position.z, golvY: gang.golvY, niva: gang.niva };
     const Y0 = husGrupp.userData.delar.Y0, st = gang.stod;
-    const y = SITT_Y + (st.golvY - Y0);   // ögat 1,15 m över golvet när man sitter
+    // ögat där sittplatsen säger (s.pos[1], över husets golv): bastulaven sitter man högt på,
+    // 0,75 m över den övre laven. Förr togs alltid 1,15 m över golvet man stod på, och i bastun
+    // hamnade ögat då under den övre lavens ribbor (och med ett inaktuellt golv ännu lägre).
+    const y = s.pos[1] > 0.5 && s.pos[1] < 4 ? s.pos[1] : SITT_Y + (st.golvY - Y0);
     gang.sitter = i;
     glidTill(s.pos[0], st.golvY, s.pos[2], st.niva, s.mal, { y: y + Y0, tid: lugn ? 0.01 : 0.9, satt: 'sitt' });
     gang.sitter = i;   // glidTill nollar inte en sittande som sätter sig, men var tydlig
@@ -4533,7 +5017,12 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (!tryck || !husGrupp) return;
       gang.px = e.clientX; gang.py = e.clientY; gang.pekar = true;
       pekaUte();
-      if (ia.mal && (ia.mal.sort === 'fonster' || ia.mal.sort === 'ytter')) { gorMal(ia.mal); if (e.pointerType === 'touch') satMal(null); }
+      // taket, hängrännan eller stupröret framför allt annat: produktkortet (sidan åker dit, se
+      // produkt). Taket ligger på lager 1 och skymmer inte dörrarna i pekaUte, så avståndet avgör.
+      let del = null;
+      try { del = takTraff(); } catch (err) { console.warn(err); }
+      if (del && !(ia.mal && ia.mal.d < del.d)) { satMal(null); meddela('vidDel', del.id); return; }
+      if (ia.mal && (ia.mal.sort === 'fonster' || ia.mal.sort === 'ytter')) { gorMal(ia.mal); if (e.pointerType === 'touch') satMal(null); return; }
       return;
     }
     if (!tryck || !inneLage) return;
@@ -4701,9 +5190,15 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       kompAtt.frustumCulled = false;
       kompRT = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false });
     }
-    const grupper = new Map();
+    const grupper = new Map(), sedda = new Set();
     rotter.forEach(r => r && r.traverse(x => {
       if (!(x.isMesh || x.isLine || x.isPoints) || !x.material) return;
+      // ett objekt per material och programvariant räcker (samma material på många nät gav
+      // hundratals compile-anrop à några ms, 12 ms per ruta: flera sekunder vid dörren)
+      const g = x.geometry, sig = (Array.isArray(x.material) ? x.material.map(m => m && m.uuid).join('+') : x.material.uuid) + '|' + (x.isInstancedMesh ? 'i' + (x.instanceColor ? 'c' : '') : x.isSkinnedMesh ? 's' : x.isLine ? 'l' : x.isPoints ? 'p' : 'm')
+        + (x.receiveShadow ? 'r' : '') + (x.castShadow ? 'k' : '') + (g && g.attributes && g.attributes.tangent ? 't' : '') + (g && g.morphAttributes && Object.keys(g.morphAttributes).length ? 'f' : '') + (g && g.attributes && g.attributes.color ? 'v' + g.attributes.color.itemSize : '') + (g && g.attributes && g.attributes.uv1 ? 'u' : '');
+      if (sedda.has(sig)) return;
+      sedda.add(sig);
       (Array.isArray(x.material) ? x.material : [x.material]).forEach(m => {
         const n = renderer.localClippingEnabled && m && m.clippingPlanes ? m.clippingPlanes.length : 0;
         if (!grupper.has(n)) grupper.set(n, new Set());
@@ -4713,14 +5208,24 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     const fore = renderer.getRenderTarget(), sov = ms => new Promise(r => setTimeout(r, ms));
     // ett objekt i taget med klippläget satt precis innan (ett nytt program kan nollställa det
     // för resten av omgången, sett i Edge/D3D11); fick det ändå fel antal plan tas det om
+    // renderer.compile går igenom hela målscenen efter ljus för varje anrop (tusentals objekt, en
+    // halv sekund per inträde): här en scen med bara ljusen (samlade per bit) och scenens miljö
+    let ljus = [];
+    const samlaLjus = () => { ljus = []; scene.traverseVisible(o => { if (o.isLight) ljus.push(o); }); };
+    const ljusScen = { isScene: true, traverseVisible: f => ljus.forEach(f), get environment() { return scene.environment; }, get fog() { return scene.fog; }, get background() { return scene.background; } };
+    samlaLjus();
     const ettObjekt = (x, n, mats) => {
       const skugga = renderer.shadowMap.needsUpdate;
+      // inredningens nät sätter miljökartan i onBeforeRender (scenens PMREM-karta i stället för
+      // materialets egen): utan det kompilerades fel variant och den rätta länkades synkront
+      // i första rutan (krom och stål, ca 0,2 s). Bara inredningens hopslagna nät: de bara sätter värden.
+      if (typeof x.onBeforeRender === 'function' && /^inne-/.test(x.name)) { try { x.onBeforeRender(renderer, scene, kamera, x.geometry, x.material, null); } catch (e) { /* sätts i ritningen */ } }
       try {
         for (let varv = 0; varv < 3; varv++) {
           kompAtt.material.clippingPlanes = n ? kompPlan.slice(0, n) : null;
           renderer.shadowMap.needsUpdate = false;
           renderer.setRenderTarget(kompRT); renderer.render(kompAtt, kamera); renderer.setRenderTarget(mal || fore);
-          renderer.compile({ traverse: f => f(x), traverseVisible() {} }, kamera, scene).forEach(m => mats.add(m));
+          renderer.compile({ traverse: f => f(x), traverseVisible() {} }, kamera, ljusScen).forEach(m => mats.add(m));
           const fel = (Array.isArray(x.material) ? x.material : [x.material]).some(m => m && !(m.isShaderMaterial && !m.clipping) && renderer.properties.get(m).numClippingPlanes !== undefined && renderer.properties.get(m).numClippingPlanes !== n);
           if (!fel) break;
         }
@@ -4747,7 +5252,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
           // kompilering (Safari) låser varje program sidan, och flera i rad gav sekundlånga stopp
           // (står kameran still framför dörren: flera program per bit om ~40 ms, ingen ruta emellan)
           const pk = parkerad();
-          if (performance.now() > skiva || (!pk && renderer.info.programs.length > pf)) { await (pk ? sov(0) : nastaRuta()); skiva = performance.now() + (parkerad() ? 40 : 12); if (giltig && !giltig()) return; }
+          if (performance.now() > skiva || (!pk && !PARALLELL && renderer.info.programs.length > pf)) { await (pk ? sov(0) : nastaRuta()); skiva = performance.now() + (parkerad() ? 40 : 12); if (giltig && !giltig()) return; samlaLjus(); }
           if (renderer.info.programs.length - p0 >= sats) {
             const slut = performance.now() + 3000;
             while (!redo(nya) && performance.now() < slut) await sov(12);            nya.forEach(m => alla.add(m)); nya = new Set(); p0 = renderer.info.programs.length;
@@ -4762,8 +5267,13 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (typeof renderer.initTexture !== 'function') return;
       const tex = new Set();
       alla.forEach(m => { for (const k in m) { const v = m[k]; if (v && v.isTexture && !v.isRenderTargetTexture) tex.add(v); } });
-      const lista = [...tex];
+      // (bara oladdade, och medan grafikprocessen inte kompilerar: en uppladdning köades annars bakom
+      // kompileringen och låste sidan 0,2–0,5 s)
+      const lista = [...tex].filter(t => !renderer.properties.get(t).__webglTexture || t.version !== renderer.properties.get(t).__version);
+      const kompilerar = () => PARALLELL && renderer.info.programs.some(p => typeof p.isReady === 'function' && !p.isReady());
       while (lista.length) {
+        if (giltig && !giltig()) return;
+        for (const slut = performance.now() + 4000; kompilerar() && performance.now() < slut;) await sov(30);
         if (giltig && !giltig()) return;
         const s = performance.now() + 6;
         while (lista.length && performance.now() < s) { try { renderer.initTexture(lista.shift()); } catch (e) { /* laddas när den syns */ } }
@@ -4782,6 +5292,34 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     try { if (!hus.userData.inne) inneKlar(); iaData(); } catch (e) { console.warn(e); }
     // ytterdörrens blad lyfts ut till sin pivå nu, så att dess material kompileras med resten
     try { ytterdorr(); byggPunkter(); } catch (e) { console.warn(e); }
+  }
+  // Skuggpassets djupmaterial (WebGLShadowMap.getDepthMaterial i three r170) som stand-ins, en per
+  // programvariant: samma packning, sida, karta, alfatest, klipplan och instansning
+  const SKUGG_SIDA = [THREE.BackSide, THREE.FrontSide, THREE.DoubleSide];
+  let skuggRTx = null;
+  const skuggRT = () => skuggRTx || (skuggRTx = new THREE.WebGLRenderTarget(1, 1));
+  function skuggStandin(rot) {
+    const g = new THREE.Group(), sett = new Set();
+    rot.traverse(o => {
+      if (!o.isMesh || o.isSkinnedMesh || !o.castShadow || !o.material) return;
+      (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => {
+        if (!m || m.visible === false) return;
+        const klipp = renderer.localClippingEnabled && m.clipShadows === true && Array.isArray(m.clippingPlanes) ? m.clippingPlanes.length : 0;
+        if (!(klipp || (m.displacementMap && m.displacementScale !== 0) || (m.alphaMap && m.alphaTest > 0) || (m.map && m.alphaTest > 0))) return;
+        const sida = m.shadowSide !== null && m.shadowSide !== undefined ? m.shadowSide : SKUGG_SIDA[m.side];
+        const sig = [klipp, sida, !!m.map, !!m.alphaMap, m.alphaTest > 0, !!m.displacementMap, !!o.isInstancedMesh, !!o.instanceColor, !!m.clipIntersection].join();
+        if (sett.has(sig)) return;
+        sett.add(sig);
+        const d = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
+        d.side = sida; d.map = m.map; d.alphaMap = m.alphaMap; d.alphaTest = m.alphaTest;
+        d.clipShadows = m.clipShadows; d.clippingPlanes = m.clippingPlanes; d.clipIntersection = m.clipIntersection;
+        d.displacementMap = m.displacementMap; d.displacementScale = m.displacementScale; d.displacementBias = m.displacementBias;
+        const s = o.isInstancedMesh ? new THREE.InstancedMesh(o.geometry, d, o.count) : new THREE.Mesh(o.geometry, d);
+        if (o.isInstancedMesh) { s.instanceMatrix = o.instanceMatrix; s.instanceColor = o.instanceColor; }
+        g.add(s);
+      });
+    });
+    return g;
   }
   function forvarmOppen(hus, sats) {
     if (husGrupp !== hus || !hus.userData.delar) return Promise.resolve();
@@ -4803,13 +5341,20 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (o.isInstancedMesh) { s.instanceMatrix = o.instanceMatrix; s.instanceColor = o.instanceColor; }
       s.receiveShadow = o.receiveShadow; s.castShadow = o.castShadow; stand.add(s);
     });
-    const varm = () => { hus.userData.oppenVarm = true; };
+    const varm = () => { hus.userData.oppenVarm = true; try { performance.mark('oppen-varm'); } catch (e) { /* utan mätning */ } };
     const p = (async () => {
       try {
         await Promise.all([forkompTak(hus), kompKlipp([stand], giltig, sats)]);
         if (!giltig()) return;
         klippAlla();
-        nySkugga = true; begarRender();   // skuggpassets djupmaterial med det nya planet (små)
+        // skuggpassets djupmaterial med det nya planet: kompileras parallellt först (förut
+        // synkront i skuggpasset, 1–2 s stopp medan kameran stod vid dörren)
+        const sk = skuggStandin(hus);
+        if (sk.children.length) { try { await kompKlipp([sk], giltig, sats, skuggRT()); } catch (e) { console.warn(e); } }
+        if (!giltig()) return;
+        nySkugga = true; begarRender();
+        // (släpps först när skuggpasset har tagit programmen i bruk, annars raderas de)
+        setTimeout(() => sk.traverse(s => { if (s.material) s.material.dispose(); }), 3000);
         await kompKlipp([hus], giltig, sats);   // det som återstår (oftast inget)
       } catch (e) { console.warn(e); }
       stand.traverse(s => { if (s.material) s.material.dispose(); });
@@ -4840,9 +5385,10 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         if (!r.done) { if (bit < 40 && !stilla) requestAnimationFrame(() => setTimeout(steg, 0)); else setTimeout(steg, 0); return; }
         inneBygge = null;
         try { forberedInne(r.value); } catch (e) { console.warn(e); klar(); return; }
+        try { performance.mark('inne-byggd'); } catch (e) { /* utan mätning */ }
       }
       inneForbered(hus);
-      forvarmOppen(hus, bit < 40 ? 1 : 8).then(klar, klar);
+      forvarmOppen(hus, PARALLELL ? Infinity : bit < 40 ? 1 : 8).then(klar, klar);
     };
     // korta bitar (Se inne): första biten först efter två ritade rutor, så att trycket syns och
     // kameran hinner börja röra sig (inredningens första steg kan ta en sekund på mobil)
@@ -5407,7 +5953,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       const lada = new THREE.Box3(new THREE.Vector3(Math.min(xa, xb), 0.026, -0.2 - PZ), new THREE.Vector3(Math.max(xa, xb), h - KARM + 0.003, 0.04 - PZ));
       const kalla = [];
       vaggar.traverse(m => { if (m.isMesh && !m.isInstancedMesh && m.geometry && m.geometry.attributes.position && m.material && !Array.isArray(m.material) && m.material.visible !== false) kalla.push(m); });
-      const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), bb = new THREE.Box3(), M = new THREE.Matrix4(), kopior = new Map();
+      const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), bb = new THREE.Box3(), M = new THREE.Matrix4(), kopior = new Map(), dolda = [];
       let skugga = false;
       kalla.forEach(m => {
         const g = m.geometry;
@@ -5454,6 +6000,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
           mm = k;
         }
         const dm = new THREE.Mesh(ny, mm);
+        if (mm !== m.material) dolda.push(dm);
         dm.castShadow = m.castShadow; dm.receiveShadow = m.receiveShadow; dm.renderOrder = m.renderOrder; dm.layers.mask = m.layers.mask;
         if (typeof m.onBeforeRender === 'function') dm.onBeforeRender = m.onBeforeRender;
         dm.name = 'ytterdorr-blad';
@@ -5462,6 +6009,13 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       });
       if (!piv.children.length) { vaggar.remove(fast); return null; }
       fast.updateMatrixWorld(true);
+      // bladets insida (egna materialkopior, nya program) syns först när programmen är kompilerade:
+      // förut länkades de synkront i nästa ruta (0,2–0,3 s stopp medan kameran åkte mot dörren)
+      if (dolda.length) {
+        const hus = husGrupp, visa = () => { dolda.forEach(x => { x.visible = true; }); begarRender(); };
+        dolda.forEach(x => { x.visible = false; });
+        kompKlipp(dolda, () => husGrupp === hus, PARALLELL ? Infinity : 8).then(visa, visa);
+      }
       // öppningens mitt i väggarnas koordinater (3 cm från gångjärnssidan, där det öppna bladet står)
       const mitt = new THREE.Vector3(cu - gs * 0.03, 0, 0).applyMatrix4(mtx);
       d.ydorr = { fast, piv, gs, t: 0, n: nA, u: uA, mitt, w, h, kopior: [...kopior.values()], skugga };
@@ -5606,8 +6160,18 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (!giltig()) return false;
       try { const Y = dorrInfo(), Y0 = d.delar.Y0; if (Y) inneVag(Y.mitt.x - Y.n.x * 0.6, Y.mitt.z - Y.n.z * 0.6, v.pos[0], v.pos[2]); } catch (e) { console.warn(e); }
       await sov(0);
+      // Poly Haven-möblerna (husritare-inne.js phVakt) laddades förut först i första rutan inne och
+      // kompilerades då synkront (1–2 s stopp i dörren): nu här (högst 2,5 s väntan på nätet)
+      const phL = d.inne.userData && d.inne.userData.phLadda;
+      if (typeof phL === 'function') {
+        try { await Promise.race([phL(), sov(2500)]); } catch (e) { console.warn(e); }
+        if (!giltig()) return false;
+        try { await kompKlipp([d.inne], giltig, PARALLELL ? Infinity : 8); } catch (e) { console.warn(e); }
+        if (!giltig()) return false;
+      }
       const speglar = d.inne.userData && Array.isArray(d.inne.userData.speglar) && d.inne.userData.speglar.length;
-      if (speglar) { spegelRigg(); try { await kompKlipp([scene], giltig, 8, spegelRT); } catch (e) { console.warn(e); } }
+      // (står åkningen vid dörren väntar den inte på spegelns program: de kompileras efteråt, se spegelKlar)
+      if (speglar && !d.spegelVarm && !vantarPaKomp()) { try { if (!spegelKlar(hus, rumFor(v))) await d.spegelKomp; } catch (e) { console.warn(e); } }
       if (!giltig()) return false;
       for (let i = 0; i < 400 && giltig() && !varmFar(); i++) { if (inneLage) { d.inneVarm = true; return true; } await sov(250); }
       if (!giltig()) return false;
@@ -5625,6 +6189,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (!J) return false;
     if (J.hus !== husGrupp) { varmJobb = null; J.klar(false); return false; }
     // väntar (något annat pågår, eller man har just tryckt): ett nytt försök lite senare
+    // (det uppskjutna taklyftet väntar utan egna rutor medan man är inne: nästa ruta ute tar det)
+    if (J.senare && (inneLage || flyg)) return false;
     if (!varmFar() || (performance.now() - inmatSist < 400 && !vantarPaKomp())) { setTimeout(begarRender, 300); return false; }
     const d = J.hus.userData, skugga = renderer.shadowMap.needsUpdate;
     renderer.shadowMap.needsUpdate = false;
@@ -5640,7 +6206,11 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
           const pr = renderer.getPixelRatio(), sida = 8 / pr;
           renderer.setScissorTest(true); renderer.setViewport(0, 0, sida, sida); renderer.setScissor(0, 0, sida, sida);
           try {
+            // med skuggpasset: skuggornas djupprogram (inredningens klippta material) kompilerades
+            // annars synkront i första rutan inne (en ruta på 1–2 s); skuggan ritas om efteråt
+            renderer.shadowMap.needsUpdate = true; nySkugga = true;
             renderer.render(scene, varmKam);
+            renderer.shadowMap.needsUpdate = false;
             // toningens program och textur (bytet i dörröppningen)
             tonTextur(); tonMat.uniforms.alfa.value = 0; renderer.autoClear = false; renderer.render(tonScen, tonKam); renderer.autoClear = true;
           } finally {
@@ -5651,7 +6221,19 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
         J.steg = 1; tona.farsk = false; marke('varm-ruta');
         return true;
       }
-      if (J.steg === 1) { iInnelaget(J.v, ri => fangaSpeglar(ri)); J.steg = 2; marke('varm-spegel'); return true; }
+      if (J.steg === 1) {
+        iInnelaget(J.v, ri => fangaSpeglar(ri)); J.steg = 2; marke('varm-spegel');
+        // Står åkningen och väntar vid dörren behövs inte taklyftets ruta (steg 2) nu: dockskåpets
+        // ljus ger nya programvarianter av allt, som länkades synkront (ca 2 s vid dörren).
+        // Inneläget räknas som varmt och lyftet värms senare, när man är ute igen.
+        if (vantarPaKomp()) {
+          const hus = J.hus;
+          varmJobb = null; J.klar(true);
+          ledigt(() => { if (husGrupp === hus && !varmJobb && !hus.userData.lyftVarm) { varmJobb = { hus, v: J.v, steg: 2, senare: true, klar: () => {} }; begarRender(); } }, 3000);
+          return false;
+        }
+        return true;
+      }
       // 5. taklyftet: en ruta mitt i lyftet (takets genomskinliga kopior, snittet, snittkanten och
       // dockskåpets ljus) i samma lilla hörn, så att första lyftet inte tar programmen i bruk
       const spar = Object.assign({}, oppen), sparVis = Object.assign({}, oppen.vis), sparLager = Object.assign({}, oppen.lager);
@@ -5676,6 +6258,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       }
     } catch (e) { console.warn(e); }
     finally { renderer.shadowMap.needsUpdate = skugga; }
+    J.hus.userData.lyftVarm = true;
     varmJobb = null; J.klar(true);
     return false;
   }
@@ -5914,7 +6497,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // på 1,0 s, eller hoppar med hopp: true.
   // Ett tal som andra argument tolkas som den gamla farten per ruta.
   let aka = null;
+  let prodMin = null;   // produktkortets närbild ute: zoomgränsen före (se visaProdukt)
   function akTill(vy, opts) {
+    prodGrans(false);
     startLage = vy === 'runt' && !!(opts && opts.hopp);   // en vald vinkel ligger kvar; startvyn med hopp följer storleken igen
     const o = opts && typeof opts === 'object' ? opts : {};
     planBryt();
@@ -5984,22 +6569,84 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   const rorSkarpa = { lag: false, full: 1 };
   const lugn = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const del = (t, a, b) => Math.min(1, Math.max(0, (t - a) / (b - a)));
+  let byggProvT = null;
+  const BYGG_TID = 1.6;
   const utC = x => 1 - (1 - x) ** 3;
   const utBak = x => { const c = 1.25; return 1 + (c + 1) * (x - 1) ** 3 + c * (x - 1) ** 2; };
   const inUt = x => x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2;
   // Monteringen: sockeln gjuts, väggmodulerna reser sig ur marken och taket läggs på
+  // Uppbyggnaden, t = 0 … 1 (BYGG_TID s): grunden växer upp, väggarna (med fönster, dörrar och allt
+  // som sitter på dem) reser sig ur marken, trappa, altan och det som står vid husets fot kommer upp,
+  // sist sjunker taket (med rännor, stuprör, skorsten och genomföringar) på plats. Bara ease-out,
+  // ingen studs. Andra moduler knyter sina delar till en fas med userData.husFas på ett objekt i
+  // scenen: 'vagg' följer väggarna (husnummer, laddbox på väggen), 'ute' kommer upp med trappan
+  // (krukor, lykta och annat vid väggen); objektet flyttas bara i höjdled under bygget.
+  let husFasLista = [], husFasTid = -1e9;
+  function husFasObj() {
+    const nu = performance.now();
+    if (nu - husFasTid < 200) return husFasLista;
+    husFasTid = nu; husFasLista = [];
+    scene.traverse(o => {
+      const f = o.userData && o.userData.husFas;
+      if (!f || (husGrupp && o.parent === husGrupp)) return;
+      if (o.userData.husFasY === undefined) {
+        o.userData.husFasY = o.position.y;
+        // höjden (för att gömmas helt under marken): objektets låda i världen
+        try { const b = new THREE.Box3().setFromObject(o); o.userData.husFasH = b.isEmpty() ? 2 : Math.max(0.2, b.max.y - Math.min(b.min.y, 0)) + 0.15; } catch (e) { o.userData.husFasH = 2; }
+      }
+      husFasLista.push(o);
+    });
+    return husFasLista;
+  }
   function satsBygg(t) {
     const d = husGrupp.userData.delar, H = husGrupp.userData.hojd;
     const s = Math.max(0.001, utC(del(t, 0, 0.2)));
     d.so.scale.y = s; d.so.position.y = d.Y0 * s / 2;
-    d.vaggar.position.y = d.Y0 - (H + 0.3) * (1 - utC(del(t, 0.1, 0.6)));
-    const tk = del(t, 0.52, 1);
-    d.tak.position.y = d.Y0 + 2.6 * (1 - utBak(tk));
+    const kv = utC(del(t, 0.1, 0.56)), dyV = -(H + 0.3) * (1 - kv);
+    d.vaggar.position.y = d.Y0 + dyV;
+    // trappa och altan: upp ur marken när väggarna nästan står (förut syntes de direkt); altanens
+    // möbler växer sedan upp från däcket (förut stack parasollet upp ur gräsmattan)
+    const ku = utC(del(t, 0.42, 0.66)), km = utC(del(t, 0.6, 0.84));
+    if (d.ute) {
+      const mb = d.ute.getObjectByName('mobler');
+      // (höjden mäts om under bygget: möblerna läggs till efter huset, se byggMobler)
+      if (ku < 1 || d.ute.userData.byggH === undefined) {
+        try {
+          const b = new THREE.Box3(), bb = new THREE.Box3();
+          d.ute.children.forEach(c => { if (c !== mb) { bb.setFromObject(c); if (!bb.isEmpty()) b.union(bb); } });
+          d.ute.userData.byggH = b.isEmpty() ? 0 : Math.max(0, b.max.y - b.min.y) + 0.2;
+        } catch (e) { d.ute.userData.byggH = 2; }
+      }
+      d.ute.position.y = d.Y0 - (d.ute.userData.byggH || 0) * (1 - ku);
+      d.ute.visible = ku > 0;
+      if (mb) {
+        if (mb.userData.pivot === undefined) {
+          mb.scale.y = 1; mb.position.y = 0;
+          try { const b = new THREE.Box3().setFromObject(mb); mb.userData.pivot = b.isEmpty() ? 0 : b.min.y - d.ute.position.y - husGrupp.position.y; } catch (e) { mb.userData.pivot = 0; }
+        }
+        const k = Math.max(0.001, km);
+        mb.scale.y = k; mb.position.y = mb.userData.pivot * (1 - k);
+        mb.visible = km > 0;
+      }
+    }
+    // taket sjunker ned de sista 1,8 m (mjukt in, ingen studs)
+    const tk = del(t, 0.54, 0.92);
+    d.tak.position.y = d.Y0 + 1.8 * (1 - utC(tk));
     d.tak.visible = tk > 0 && oppen.t < 1;
-    if (d.ute) d.ute.visible = t > 0.12;
+    // andra modulers delar (husritare-miljo.js, husritare-bebott.js …)
+    for (const o of husFasObj()) {
+      const y0 = o.userData.husFasY, f = o.userData.husFas;
+      if (t >= 1) { o.position.y = y0; if (!o.matrixAutoUpdate) o.updateMatrix(); if (o.userData.husFasSyns !== undefined) { o.visible = o.userData.husFasSyns; delete o.userData.husFasSyns; } continue; }
+      if (o.userData.husFasSyns === undefined) o.userData.husFasSyns = o.visible;
+      const k = f === 'vagg' ? kv : ku;
+      o.position.y = y0 - (f === 'vagg' ? (H + 0.3) : o.userData.husFasH) * (1 - k);
+      if (!o.matrixAutoUpdate) o.updateMatrix();   // (husritare-bebott.js låser matriserna)
+      o.visible = o.userData.husFasSyns && k > 0;
+    }
   }
   // En enda rAF åt gången (iRam/ramId). behov = någon har bett om en ny bild.
   let iRam = false, behov = false, pekRay = false, rorForra = false;
+  let sprangSteg = null;   // sprängvyn (husritare-sprang.js): krok före varje bild, true = rör sig
   function schema() { if (iRam || ramId || !aktiv) return; ramId = requestAnimationFrame(ram); }
   function begarRender() { behov = true; schema(); }
   let forra = 0;
@@ -6167,8 +6814,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       rivGrupp.position.y = -(rivGrupp.userData.hojd + 0.6) * rivT ** 2;
       if (rivT >= 1) { sluta(rivGrupp); rivGrupp = null; }
     }
-    if (byggT < 1) {
-      byggT = Math.min(1, byggT + dt / 1.6);
+    if (byggProvT !== null) { byggT = byggProvT; satsBygg(Math.max(0, byggT)); }
+    else if (byggT < 1) {
+      byggT = Math.min(1, byggT + dt / BYGG_TID);
       satsBygg(Math.max(0, byggT));
     }
     // dockskåpet: taket lyfts på 1,15 s och sänks på 1,0 s (lyftKurva), snittet glider vid
@@ -6269,6 +6917,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     }
     // grannarnas fulla bilar byts mot de förenklade efter kamerans avstånd (husritare-miljo.js)
     if (typeof omgivning.narBilar === 'function') { try { omgivning.narBilar(kamera.position); } catch (e) { console.warn(e); } }
+    let sprRor = false;
+    if (sprangSteg) { try { sprRor = !!sprangSteg(dt, nu); } catch (e) { console.warn(e); sprangSteg = null; } }
     if (nySkugga || byggT < 1 || rivGrupp) { renderer.shadowMap.needsUpdate = true; nySkugga = false; }
     // Yttertaket (lager 1) ritas inte inifrån, men skuggpasset testar lagren mot huvudkameran:
     // i en ruta där skuggkartan räknas om är taket med (det syns ändå inte bakom innertaket)
@@ -6308,7 +6958,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       if (tona.t >= 1) { tona.pa = false; tona.tid = 0.5; } else tonaKor = true;
     }
     if (inneLage && (gar || rorde)) flytt.smuts = true;
-    const rorSig = senK >= 0 || rorde || flyger || planRor || aka || helRor || zoomar ||styr.autoRotate || tonade || byggT < 1 || rivGrupp || lyfter || gar || tonaKor || ringRor || iaRor || ljusRor || spel.skuld || bilRor;
+    const rorSig = senK >= 0 || rorde || flyger || planRor || aka || helRor || zoomar ||styr.autoRotate || tonade || byggT < 1 || rivGrupp || lyfter || gar || tonaKor || ringRor || iaRor || ljusRor || spel.skuld || bilRor || sprRor;
     rorForra = !!rorSig;
     liv.ritade = true;
     const fortsatt = !!(rorSig || varmKor || livKor() || punktFart(nu) === 1 || tummeKo.length) && aktiv && !vantaStart;
@@ -6316,7 +6966,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // sista rutan före stillastående sparas på grafikkortet till nästa övergång
     // (och rutan just före bytet ute/inne i dörröppningen, så att bytet inte behöver rita om den)
     const snartByte = flyg && flyg.bana && !flyg.vantar && Math.abs(flyg.s - flyg.bana.sT) < 0.05 && (flyg.s < flyg.bana.sT) === (flyg.v > 0);
-    if ((!fortsatt && !lugn) || snartByte) kopieraRuta(); else tona.farsk = false;
+    // (och varje ruta medan en ny miljö byggs: bytet tonar från den gamla miljöns sista bild)
+    if ((!fortsatt && !lugn) || snartByte || (miljoVill && !lugn)) kopieraRuta(); else tona.farsk = false;
     // mätning (inga objekt skapas)
     const ms = performance.now() - t0;
     perf.ms = perf.ms ? perf.ms + (ms - perf.ms) * 0.1 : ms;
@@ -6621,6 +7272,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // rutan still tills sidan anropar starta().
   vantaStart = !FOTO && !lugn && alternativ.montera !== false;
   const redo = new Promise(r => { forstaRuta = r; });
+  // HDRI:n laddas först när första bilden är ritad (och datorn är ledig)
+  redo.then(() => { hdr.klar = true; ledigt(() => { forstaKlar(); dorrFoto(); hdrLadda(miljoNamn); }, 1500); });
   if (FOTO) ritKlar = true;
   else {
     (async () => {
@@ -6744,6 +7397,551 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // autorotationen i början stängs av efter 7 s, utom om man själv slagit på den
   let snurrTid = setTimeout(() => { styr.autoRotate = false; }, 7000);
 
+  // ---- Produktkorten (husritare-sida.js) ----
+  // produkt(id, opt) åker till en del av huset så att den syns hel, fri och i fokus. Målet är en
+  // låda (prodMal): ute ett fönster, entrédörren, taket, ett hörn med ränna och stuprör, eller
+  // sidans genomskärning (opt.ram = { min, max, n } för isoleringen och underlagsduken); inne en sak
+  // ur inredningens produktAnkare.lador, en innerdörr, trappan, golvet eller en vägg.
+  // Ute flyger kameran i en båge (aka) till en vinkel där lådan fyller ungefär halva den fria
+  // delen av bilden (opt.fri: andelar { x0, x1, y0, y1 } som kortet inte täcker) och sikten är fri.
+  // Inne går man dit (glidTill) och ställer sig där lådan syns hel, helst framifrån, utan vägg,
+  // dörr eller möbel emellan. Svaret: { ute } eller false; prodNu minns målet (fokusramen, provet).
+  const prodKam = new THREE.PerspectiveCamera();
+  const prV = new THREE.Vector3(), prW = new THREE.Vector3(), pRay = new THREE.Raycaster(), pTraff = [];
+  let prodNu = null;
+  function prodGrans(pa) {
+    if (pa) { if (prodMin === null) prodMin = styr.minDistance; styr.minDistance = Math.min(prodMin, 1.2); }
+    else if (prodMin !== null) { styr.minDistance = prodMin; prodMin = null; }
+  }
+  const V3 = a => new THREE.Vector3(a[0], a[1], a[2]);
+  const ladaHorn = b => { const l = []; for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) l.push(new THREE.Vector3(x, y, z)); return l; };
+  // fem punkter i lådan (mitten och fyra mot hörnen): siktprovet
+  const ladaPunkter = b => {
+    const c = b.getCenter(new THREE.Vector3()), s = b.getSize(new THREE.Vector3()).multiplyScalar(0.28);
+    return [c, ...[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, d]) => c.clone().add(new THREE.Vector3(a * s.x, d * s.y, (a * d) * s.z)))];
+  };
+  // nät som kan skymma: synliga, ogenomskinliga och skrivande i djupet (inte gräs och blommor
+  // i tusental, glöd, skuggfläckar eller glas). Listan gäller en åkning (prodListor töms i visaProdukt).
+  let prodListor = new Map();
+  function prodLista(rot) {
+    let l = prodListor.get(rot);
+    if (l) return l;
+    l = [];
+    rot.traverseVisible(o => {
+      if (!o.isMesh || (o.isInstancedMesh && o.count > 400)) return;
+      const m = Array.isArray(o.material) ? o.material[0] : o.material;
+      if (!m || m.visible === false || m.depthWrite === false || (m.transparent && m.opacity < 0.25)) return;
+      l.push(o);
+    });
+    prodListor.set(rot, l);
+    return l;
+  }
+  // Siktprovet mot huset: en halv miljon trianglar i några stora hopslagna nät (60 ms per stråle
+  // med Raycaster). Husets fasta nät läggs i ett rutnät (0,4 m) i världen en gång per hus och läge;
+  // strålen stegar ruta för ruta (3D-DDA) och slutar vid första träffen (under 1 ms per stråle).
+  // Rörliga delar (dörrar, luckor, lådor) och nät utanför huset provas som vanligt.
+  let prodNat = null;
+  function prodRorliga() {
+    const s = new Set(), opp = inneData().oppningsbara;
+    if (Array.isArray(opp)) opp.forEach(x => { if (x && x.obj && x.obj.isObject3D) x.obj.traverse(o => s.add(o)); });
+    return s;
+  }
+  function prodNatFor() {
+    const alla = prodLista(husGrupp), nyckel = husGrupp.uuid + '|' + inneLage + '|' + alla.length + '|' + (alla[0] && alla[0].uuid) + '|' + (alla[alla.length - 1] && alla[alla.length - 1].uuid);
+    if (prodNat && prodNat.nyckel === nyckel) return prodNat;
+    const ror = prodRorliga(), fasta = [], rorliga = [];
+    alla.forEach(o => ((o.isInstancedMesh || ror.has(o)) ? rorliga : fasta).push(o));
+    let n = 0;
+    fasta.forEach(o => { const g = o.geometry; n += (g.index ? g.index.count : g.attributes.position.count) / 3 | 0; });
+    const V = new Float32Array(n * 9), N = new Float32Array(n * 3), M = new Uint16Array(n);
+    const box = new THREE.Box3(), va = new THREE.Vector3(), vb = new THREE.Vector3(), vc = new THREE.Vector3();
+    let k = 0;
+    fasta.forEach((o, mi) => {
+      o.updateMatrixWorld();
+      const g = o.geometry, P = g.attributes.position, I = g.index, mw = o.matrixWorld, cnt = (I ? I.count : P.count) / 3 | 0;
+      for (let t = 0; t < cnt; t++) {
+        const i0 = I ? I.getX(t * 3) : t * 3, i1 = I ? I.getX(t * 3 + 1) : t * 3 + 1, i2 = I ? I.getX(t * 3 + 2) : t * 3 + 2;
+        va.fromBufferAttribute(P, i0).applyMatrix4(mw); vb.fromBufferAttribute(P, i1).applyMatrix4(mw); vc.fromBufferAttribute(P, i2).applyMatrix4(mw);
+        const q = k * 9;
+        V[q] = va.x; V[q + 1] = va.y; V[q + 2] = va.z; V[q + 3] = vb.x; V[q + 4] = vb.y; V[q + 5] = vb.z; V[q + 6] = vc.x; V[q + 7] = vc.y; V[q + 8] = vc.z;
+        box.expandByPoint(va); box.expandByPoint(vb); box.expandByPoint(vc);
+        M[k] = mi; k++;
+      }
+    });
+    const C = 0.4, o0 = box.min.clone().subScalar(0.01);
+    const nx = Math.max(1, Math.ceil((box.max.x - o0.x) / C) + 1), ny = Math.max(1, Math.ceil((box.max.y - o0.y) / C) + 1), nz = Math.max(1, Math.ceil((box.max.z - o0.z) / C) + 1);
+    const rutor = nx * ny * nz, antal = new Uint32Array(rutor + 1);
+    const span = (t, f) => {
+      const q = t * 9;
+      const ax = (Math.min(V[q], V[q + 3], V[q + 6]) - o0.x) / C | 0, bx = (Math.max(V[q], V[q + 3], V[q + 6]) - o0.x) / C | 0;
+      const ay = (Math.min(V[q + 1], V[q + 4], V[q + 7]) - o0.y) / C | 0, by = (Math.max(V[q + 1], V[q + 4], V[q + 7]) - o0.y) / C | 0;
+      const az = (Math.min(V[q + 2], V[q + 5], V[q + 8]) - o0.z) / C | 0, bz = (Math.max(V[q + 2], V[q + 5], V[q + 8]) - o0.z) / C | 0;
+      for (let x = ax; x <= bx; x++) for (let y = ay; y <= by; y++) for (let z = az; z <= bz; z++) f((x * ny + y) * nz + z);
+    };
+    for (let t = 0; t < n; t++) span(t, c => { antal[c + 1]++; });
+    for (let c = 0; c < rutor; c++) antal[c + 1] += antal[c];
+    const lista = new Uint32Array(antal[rutor]), pos = antal.slice(0, rutor);
+    for (let t = 0; t < n; t++) span(t, c => { lista[pos[c]++] = t; });
+    for (let t = 0; t < n; t++) {
+      const q = t * 9, ex = V[q + 3] - V[q], ey = V[q + 4] - V[q + 1], ez = V[q + 5] - V[q + 2], fx = V[q + 6] - V[q], fy = V[q + 7] - V[q + 1], fz = V[q + 8] - V[q + 2];
+      N[t * 3] = ey * fz - ez * fy; N[t * 3 + 1] = ez * fx - ex * fz; N[t * 3 + 2] = ex * fy - ey * fx;
+    }
+    prodNat = { nyckel, V, N, M, fasta, rorliga, o0, C, nx, ny, nz, antal, lista, stampel: new Uint32Array(n), id: 0, scenUtom: null };
+    return prodNat;
+  }
+  // stråle från a i riktningen d (enhetsvektor) högst L: närmaste träff { t, tri } eller null
+  function prodNatStrale(G, a, d, L) {
+    const { V, o0, C, nx, ny, nz, antal, lista, stampel } = G;
+    G.id = (G.id + 1) >>> 0 || 1;
+    const id = G.id;
+    let t0 = 0, t1 = L;
+    const lo = [o0.x, o0.y, o0.z], hi = [o0.x + nx * C, o0.y + ny * C, o0.z + nz * C], A = [a.x, a.y, a.z], D = [d.x, d.y, d.z];
+    for (let i = 0; i < 3; i++) {
+      if (Math.abs(D[i]) < 1e-12) { if (A[i] < lo[i] || A[i] > hi[i]) return null; continue; }
+      let u = (lo[i] - A[i]) / D[i], w = (hi[i] - A[i]) / D[i];
+      if (u > w) { const q = u; u = w; w = q; }
+      t0 = Math.max(t0, u); t1 = Math.min(t1, w);
+      if (t0 > t1) return null;
+    }
+    const n3 = [nx, ny, nz], cell = [0, 0, 0], steg = [0, 0, 0], tMax = [0, 0, 0], tDelta = [0, 0, 0];
+    for (let i = 0; i < 3; i++) {
+      const p = A[i] + D[i] * t0;
+      cell[i] = Math.min(n3[i] - 1, Math.max(0, Math.floor((p - lo[i]) / C)));
+      steg[i] = D[i] > 0 ? 1 : D[i] < 0 ? -1 : 0;
+      tMax[i] = steg[i] ? (lo[i] + (cell[i] + (steg[i] > 0 ? 1 : 0)) * C - A[i]) / D[i] : Infinity;
+      tDelta[i] = steg[i] ? C / Math.abs(D[i]) : Infinity;
+    }
+    let bast = Infinity, bt = -1;
+    for (let varv = 0; varv < 6000; varv++) {
+      const c = (cell[0] * ny + cell[1]) * nz + cell[2];
+      for (let j = antal[c]; j < antal[c + 1]; j++) {
+        const t = lista[j];
+        if (stampel[t] === id) continue;
+        stampel[t] = id;
+        // Möller–Trumbore (båda sidorna)
+        const q = t * 9, ax = V[q], ay = V[q + 1], az = V[q + 2];
+        const e1x = V[q + 3] - ax, e1y = V[q + 4] - ay, e1z = V[q + 5] - az, e2x = V[q + 6] - ax, e2y = V[q + 7] - ay, e2z = V[q + 8] - az;
+        const px = D[1] * e2z - D[2] * e2y, py = D[2] * e2x - D[0] * e2z, pz = D[0] * e2y - D[1] * e2x;
+        const det = e1x * px + e1y * py + e1z * pz;
+        if (det > -1e-12 && det < 1e-12) continue;
+        const inv = 1 / det, sx = A[0] - ax, sy = A[1] - ay, sz = A[2] - az;
+        const u = (sx * px + sy * py + sz * pz) * inv;
+        if (u < 0 || u > 1) continue;
+        const qx = sy * e1z - sz * e1y, qy = sz * e1x - sx * e1z, qz = sx * e1y - sy * e1x;
+        const v = (D[0] * qx + D[1] * qy + D[2] * qz) * inv;
+        if (v < 0 || u + v > 1) continue;
+        const tt = (e2x * qx + e2y * qy + e2z * qz) * inv;
+        if (tt > 1e-4 && tt <= L && tt < bast) { bast = tt; bt = t; }
+      }
+      const i = tMax[0] < tMax[1] ? (tMax[0] < tMax[2] ? 0 : 2) : (tMax[1] < tMax[2] ? 1 : 2);
+      if (bast <= tMax[i] || tMax[i] > t1) break;
+      cell[i] += steg[i];
+      if (cell[i] < 0 || cell[i] >= n3[i]) break;
+      tMax[i] += tDelta[i];
+    }
+    return bt >= 0 ? { t: bast, tri: bt } : null;
+  }
+  const IDENT = new THREE.Matrix4();
+  // första träffen på väg från a mot b (hela scenen eller bara huset), null = fri sikt
+  function prodTraff(a, b, bara) {
+    const d = prW.copy(b).sub(a).clone(), L = d.length();
+    if (L < 1e-4) return null;
+    d.multiplyScalar(1 / L);
+    let G = null;
+    try { G = husGrupp ? prodNatFor() : null; } catch (e) { console.warn(e); G = null; }
+    let bast = null;
+    if (G) {
+      const h = prodNatStrale(G, a, d, L);
+      if (h) {
+        const nn = new THREE.Vector3(G.N[h.tri * 3], G.N[h.tri * 3 + 1], G.N[h.tri * 3 + 2]).normalize();
+        if (nn.dot(d) > 0) nn.negate();
+        const m = G.fasta[G.M[h.tri]];
+        bast = { distance: h.t, point: a.clone().addScaledVector(d, h.t), face: { normal: nn }, object: { matrixWorld: IDENT, material: m.material, mesh: m } };
+      }
+    }
+    // rörliga delar, och miljön utanför huset när hela scenen provas
+    let ovr;
+    if (!G) ovr = prodLista(bara || scene);
+    else {
+      ovr = G.rorliga;
+      if (!bara || bara === scene) {
+        if (!G.scenUtom) G.scenUtom = prodLista(scene).filter(o => { for (let p = o; p; p = p.parent) if (p === husGrupp) return false; return true; });
+        ovr = ovr.concat(G.scenUtom);
+      }
+    }
+    pRay.set(a, d); pRay.far = bast ? bast.distance : L; pRay.layers.enableAll(); pRay.camera = kamera;
+    pTraff.length = 0;
+    pRay.intersectObjects(ovr, false, pTraff);
+    const t = pTraff[0] || null;
+    pTraff.length = 0;
+    return t && (!bast || t.distance < bast.distance) ? t : bast;
+  }
+  // syns punkten p i lådan från a? (träffen ligger i lådan, med 6 cm marginal, eller ingen träff alls)
+  function prodSer(a, p, box, bara) {
+    const t = prodTraff(a, p, bara);
+    return !t || box.distanceToPoint(t.point) < 0.06;
+  }
+  const AXLAR = (L, W) => ({ S: [[-L / 2, 0, W / 2], [1, 0, 0], [0, 0, 1]], N: [[L / 2, 0, -W / 2], [-1, 0, 0], [0, 0, -1]], E: [[L / 2, 0, W / 2], [0, 0, -1], [1, 0, 0]], W: [[-L / 2, 0, -W / 2], [0, 0, 1], [-1, 0, 0]] });
+  function prodMalUte(id, ram) {
+    const dl = husGrupp.userData.delar, H = HUS[val.modell], Y0 = dl.Y0, L = H.L, W = H.W, AX = AXLAR(L, W);
+    const blick = kamera.position.clone().sub(hem).setY(0);
+    if (blick.lengthSq() < 1e-6) blick.set(0.3, 0, 1);
+    blick.normalize();
+    if (ram && ram.min && ram.max) {
+      // snittet: snett från sidan och lite ovanifrån, så att skiktens djup syns
+      const n = V3(ram.n || [0, 0, 1]).normalize(), h = new THREE.Vector3(n.x, 0, n.z);
+      const sida = h.lengthSq() > 0.01 ? new THREE.Vector3(-h.z, 0, h.x).normalize() : new THREE.Vector3(1, 0, 0);
+      const s = Math.sign(sida.dot(blick)) || 1;
+      const d = n.clone().addScaledVector(sida, 0.45 * s).add(new THREE.Vector3(0, 0.22, 0)).normalize();
+      return { box: new THREE.Box3(V3(ram.min), V3(ram.max)), n: d, fyll: ram.fyll || 0.5 };
+    }
+    if (id === 'fonster' || id === 'ytterdorr') {
+      // det största fönstret (eller entrédörren) på bottenvåningen, helst på sidan kameran ser
+      let bast = null, bp = -Infinity;
+      H.oppningar.forEach(o => {
+        const dorr = o[5] === 'd' || o[5] === 'dg';
+        // fönster: bröstning 0,3–1,6 m (inte glaspartier ned till golvet eller kupans fönster)
+        if (id === 'fonster' ? o[5] !== 'f' || o[3] > 1.6 || o[3] < 0.3 : !dorr) return;
+        const a = AX[o[0]];
+        if (!a) return;
+        const p = o[2] * o[4] * (o[5] === 'd' ? 2 : 1) + 3 * V3(a[2]).dot(blick);
+        if (p > bp) { bp = p; bast = o; }
+      });
+      if (!bast && id === 'fonster') {
+        // inga fönster med bröstning (bara glaspartier): det största fönstret på sidan kameran ser
+        H.oppningar.forEach(o => { if ((o[5] !== 'f' && o[5] !== 'sk') || !AX[o[0]]) return; const p = o[2] * o[4] + 3 * V3(AX[o[0]][2]).dot(blick); if (p > bp) { bp = p; bast = o; } });
+      }
+      if (!bast) return null;
+      const a = AX[bast[0]], O = V3(a[0]), u = V3(a[1]), n = V3(a[2]), b = new THREE.Box3();
+      [bast[1], bast[1] + bast[2]].forEach(uu => [bast[3], bast[3] + bast[4]].forEach(v => [-0.08, 0.12].forEach(nn => b.expandByPoint(O.clone().addScaledVector(u, uu).addScaledVector(n, nn).setY(Y0 + v)))));
+      // snett framifrån (cirka 26° åt sidan), på den sida kameran redan står, lite ovanifrån
+      const s = Math.sign(u.dot(blick)) || 1;
+      return { box: b, n: n.clone().multiplyScalar(Math.cos(0.45)).addScaledVector(u, s * Math.sin(0.45)).setY(0.16).normalize(), fyll: 0.46 };
+    }
+    if (id === 'tak') {
+      const b = new THREE.Box3();
+      dl.tak.updateMatrixWorld(true);
+      dl.tak.traverse(o => { const mm = o.userData && o.userData.orig || o.material; if (o.isMesh && (mm === mat.tak || mm === mat.falsar)) { if (!o.geometry.boundingBox) o.geometry.computeBoundingBox(); b.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld)); } });
+      if (b.isEmpty()) return null;
+      b.min.y = Math.max(b.min.y, Y0 + Math.min(dl.hS, dl.hN) - 0.35);   // takfoten, inte rör eller fästen ned mot marken
+      // takfallet som vetter mot kameran, snett ovanifrån så att falsarna syns
+      let n;
+      if (H.tak === 'sadel') { const sz = Math.sign(blick.z) || 1; n = new THREE.Vector3(0, W / 2, sz * (dl.hR - (sz > 0 ? dl.hS : dl.hN))); }
+      else n = new THREE.Vector3(0, W, -(dl.hS - dl.hN));
+      n.normalize();
+      const d = n.clone().setY(0).normalize().multiplyScalar(0.9).addScaledVector(new THREE.Vector3(blick.x, 0, 0), 0.55).setY(0.55).normalize();
+      return { box: b, n: d, fyll: 0.78 };
+    }
+    if (id === 'takavvattning') {
+      // stuprören (eget material i takets grupp): röret närmast kameran, med rännan intill
+      const pts = [];
+      dl.tak.updateMatrixWorld(true);
+      dl.tak.traverse(o => {
+        if (!o.isMesh || (o.userData.orig || o.material) !== mat.stupror || !o.visible) return;
+        const p = o.geometry.attributes.position, steg = Math.max(1, Math.floor(p.count / 6000));
+        for (let i = 0; i < p.count; i += steg) pts.push(new THREE.Vector3().fromBufferAttribute(p, i).applyMatrix4(o.matrixWorld));
+      });
+      const fot = [];
+      pts.forEach(p => { if (p.y > 0.7) return; if (!fot.some(q => Math.hypot(q.x - p.x, q.z - p.z) < 0.6)) fot.push(p.clone()); });
+      if (!fot.length) return null;
+      let f = fot[0], bd = -Infinity;
+      fot.forEach(q => { const v = prV.set(q.x, 0, q.z).normalize().dot(blick); if (v > bd) { bd = v; f = q; } });
+      const b = new THREE.Box3();
+      pts.forEach(p => { if (Math.hypot(p.x - f.x, p.z - f.z) < 1.25) b.expandByPoint(p); });
+      // ut från hörnet, mest längs väggen röret sitter på
+      const vS = Math.abs(f.z) > W / 2 - 0.02 && Math.abs(f.x) < L / 2 + 0.01, sx = Math.sign(f.x) || 1, sz = Math.sign(f.z) || 1;
+      const n = (vS ? new THREE.Vector3(sx * 0.55, 0, sz) : new THREE.Vector3(sx, 0, sz * 0.55)).normalize().setY(0.22).normalize();
+      return { box: b, n, fyll: 0.55 };
+    }
+    return null;
+  }
+  // golvet eller en vägg i huvudrummet: en yta utan hål eller möbler, 2–4 m bort
+  function prodYta(id) {
+    const vyer = (INNE_VYER[val.modell] || []).filter(v => !nivaTal(v.niva)), Y0 = husGrupp.userData.delar.Y0, hus = husGrupp;
+    // rummen i tur och ordning (huvudrummet först), 16 riktningar från vyns ståplats
+    for (const v of vyer) {
+      const oga = new THREE.Vector3(v.pos[0], Y0 + OGON, v.pos[2]);
+      const bas = Math.atan2(v.mal[2] - v.pos[2], v.mal[0] - v.pos[0]);
+      for (let k = 0; k < 16; k++) {
+        const a = bas + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (Math.PI / 8), dx = Math.cos(a), dz = Math.sin(a);
+        if (id === 'golv') {
+          for (const r of [2.1, 1.7, 2.6]) {
+            const p = new THREE.Vector3(oga.x + dx * r, Y0, oga.z + dz * r);
+            if (Math.abs(p.x) > HUS[val.modell].L / 2 - 0.5 || Math.abs(p.z) > HUS[val.modell].W / 2 - 0.5 || fri(p.x, p.z, 0) < 0.4) continue;
+            const b = new THREE.Box3(p.clone().add(new THREE.Vector3(-0.55, -0.02, -0.55)), p.clone().add(new THREE.Vector3(0.55, 0.05, 0.55)));
+            if (ladaPunkter(b).filter(q => prodSer(oga, q.setY(p.y + 0.01), b, hus)).length < 4) continue;
+            return { box: b, n: new THREE.Vector3(-dx, 0, -dz), fyll: 0.7 };
+          }
+          continue;
+        }
+        const t = prodTraff(oga, oga.clone().add(new THREE.Vector3(dx * 6, 0, dz * 6)), hus);
+        if (!t || !t.face || t.distance < 1.3 || t.distance > 5) continue;
+        const nn = t.face.normal.clone().transformDirection(t.object.matrixWorld).setY(0);
+        if (nn.lengthSq() < 0.5) continue;
+        nn.normalize();
+        if (nn.dot(new THREE.Vector3(dx, 0, dz)) > -0.5) continue;   // en vägg man ser framifrån
+        const tg = new THREE.Vector3(-nn.z, 0, nn.x), c = t.point.clone().setY(Y0 + 1.35);
+        // samma vägg (samma djup) i hela rutan 1,2 × 1,1 m: inga fönster, dörrar eller skåp
+        let hel = true;
+        for (const [su, sv] of [[-0.6, -0.55], [0.6, -0.55], [-0.6, 0.55], [0.6, 0.55], [0, 0]]) {
+          const q = c.clone().addScaledVector(tg, su).setY(c.y + sv), fr = q.clone().addScaledVector(nn, 1.2);
+          const h = prodTraff(fr, q.clone().addScaledVector(nn, -0.3), hus);
+          if (!h || Math.abs(h.distance - 1.2) > 0.06) { hel = false; break; }
+        }
+        if (!hel) continue;
+        const b0 = new THREE.Box3().setFromPoints([c.clone().addScaledVector(tg, -0.6).setY(c.y - 0.55).addScaledVector(nn, -0.03), c.clone().addScaledVector(tg, 0.6).setY(c.y + 0.55).addScaledVector(nn, 0.03)]);
+        if (ladaPunkter(b0).filter(q => prodSer(oga, q, b0, hus)).length < 5) continue;   // inga möbler framför
+        const b = new THREE.Box3().setFromPoints([c.clone().addScaledVector(tg, -0.6).setY(c.y - 0.55).addScaledVector(nn, -0.03), c.clone().addScaledVector(tg, 0.6).setY(c.y + 0.55).addScaledVector(nn, 0.03)]);
+        return { box: b, n: nn, fyll: 0.55 };
+      }
+    }
+    return null;
+  }
+  function prodMalInne(id) {
+    const ud = inneData(), Y0 = husGrupp.userData.delar.Y0, K = kamera.position;
+    const ank = ud.produktAnkare || {}, L = ank.lador && ank.lador[id];
+    const nara = l => { let b = null, bd = Infinity; l.forEach(x => { const d = x.box.distanceToPoint(K); if (d < bd) { bd = d; b = x; } }); return b; };
+    if (Array.isArray(L) && L.length) {
+      const l = L.filter(x => x && Array.isArray(x.min) && Array.isArray(x.max)).map(x => ({
+        box: new THREE.Box3(new THREE.Vector3(x.min[0], x.min[1] + Y0, x.min[2]), new THREE.Vector3(x.max[0], x.max[1] + Y0, x.max[2])),
+        n: Array.isArray(x.n) && Math.hypot(x.n[0], x.n[2]) > 0.5 ? new THREE.Vector3(x.n[0], 0, x.n[2]).normalize() : null,
+      }));
+      if (!l.length) return null;
+      // köket: den längsta bänken; annars den närmaste (rätt badrum i hus med två)
+      if (id === 'kok') { const kl = l.map(x => ({ ...x, fyll: 0.36 })).sort((a, b) => (b.box.getSize(prV).x + prV.z) - (a.box.getSize(prW).x + prW.z)); return { ...kl[0], alla: kl }; }
+      return nara(l);
+    }
+    if (id === 'innerdorr') {
+      const opp = Array.isArray(ud.oppningsbara) ? ud.oppningsbara : [], l = [];
+      // dörrbladet i stängt läge (öppet står det på kant): hela dörren framifrån, från den sida man står
+      const ia0 = iaData();
+      opp.forEach((x, i) => {
+        if (!x || !x.obj || !x.obj.isObject3D || !/^Dörr /.test(x.namn || '') || !x.obj.visible) return;
+        const o = ia0 && ia0.opp[i], q = x.obj.quaternion.clone();
+        if (o && o.q0) { x.obj.quaternion.copy(o.q0); x.obj.updateMatrix(); x.obj.updateMatrixWorld(true); }
+        const box = new THREE.Box3().setFromObject(x.obj);
+        box.min.y = Math.max(box.min.y, box.max.y - 1.75);   // bladets övre del med trycket: hela höjden ryms inte i en smal hall
+        if (o && o.q0) { x.obj.quaternion.copy(q); x.obj.updateMatrix(); x.obj.updateMatrixWorld(true); }
+        const sz = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+        const n = sz.x < sz.z ? new THREE.Vector3(Math.sign(K.x - c.x) || 1, 0, 0) : new THREE.Vector3(0, 0, Math.sign(K.z - c.z) || 1);
+        box.expandByVector(n.clone().set(Math.abs(n.x), 0, Math.abs(n.z)).multiplyScalar(0.06));
+        l.push({ box, n, fyll: 0.5, dorr: o || null }, { box, n: n.clone().negate(), fyll: 0.5, dorr: o || null });   // båda sidorna
+      });
+      if (!l.length) return null;
+      l.sort((a, b) => a.box.distanceToPoint(K) - b.box.distanceToPoint(K));
+      return { ...l[0], alla: l.slice(0, 8) };
+    }
+    if (id === 'trappa') {
+      const t = trappor()[0];
+      if (!t) return null;
+      const b = new THREE.Box3(new THREE.Vector3(Math.min(t.xL, t.xH), Y0, t.z0), new THREE.Vector3(Math.max(t.xL, t.xH), Y0 + t.h, t.z1));
+      // snett från rummet: trappan står längs en vägg, hela loppet och vangstycket syns från sidan
+      const zc = (t.z0 + t.z1) / 2;
+      return { box: b, n: new THREE.Vector3(0.6 * (Math.sign(t.xL - t.xH) || 1), 0, -(Math.sign(zc) || 1)).normalize(), niva: 0, fyll: 0.5 };
+    }
+    if (id === 'golv' || id === 'panel') return prodYta(id);
+    return null;
+  }
+  // önskat avstånd: lådan (sedd från riktningen d) fyller andelen fyll av bildens fria del
+  function prodPassa(box, d, fyll, inne, fri) {
+    const c = box.getCenter(new THREE.Vector3()), H = ladaHorn(box);
+    prodKam.fov = fovFor(inne); prodKam.aspect = kamera.aspect; prodKam.near = 0.05; prodKam.far = 500; prodKam.updateProjectionMatrix();
+    const fx = fri ? fri.x1 - fri.x0 : 1, fy = fri ? fri.y1 - fri.y0 : 1;
+    let r = Math.max(1, box.getSize(prV).length() * 1.4);
+    for (let k = 0; k < 5; k++) {
+      prodKam.position.copy(c).addScaledVector(d, r); prodKam.lookAt(c); prodKam.updateMatrixWorld();
+      let x0 = 1, x1 = -1, y0 = 1, y1 = -1;
+      H.forEach(p => { prV.copy(p).project(prodKam); x0 = Math.min(x0, prV.x); x1 = Math.max(x1, prV.x); y0 = Math.min(y0, prV.y); y1 = Math.max(y1, prV.y); });
+      const s = Math.max((x1 - x0) / 2 / fx, (y1 - y0) / 2 / fy);
+      if (!(s > 0)) break;
+      r *= Math.pow(s / fyll, k < 2 ? 1 : 0.8);
+    }
+    return Math.max(inne ? 0.8 : 2, r);
+  }
+  // skärmförskjutning: lådans mitt i den fria delens mitt (andelar av bilden) → vridning av blicken
+  function prodForskjut(pos, c, fri, inne) {
+    if (!fri) return c.clone();
+    const mx = (fri.x0 + fri.x1) - 1, my = (fri.y0 + fri.y1) - 1;   // NDC
+    if (Math.abs(mx) < 0.02 && Math.abs(my) < 0.02) return c.clone();
+    const vf = Math.tan(THREE.MathUtils.degToRad(fovFor(inne)) / 2), hf = vf * kamera.aspect;
+    const d = c.clone().sub(pos), L = d.length();
+    d.normalize();
+    const hoger = d.clone().cross(UPP).normalize(), upp = hoger.clone().cross(d).normalize();
+    // blicken flyttas åt motsatt håll, så att lådan hamnar vid (mx, my)
+    return pos.clone().addScaledVector(d, L).addScaledVector(hoger, -mx * hf * L).addScaledVector(upp, -my * vf * L);
+  }
+  function prodUteVy(m, fri) {
+    const c = m.box.getCenter(new THREE.Vector3()), byt = [0, 0.32, -0.32, 0.62, -0.62, 0.95, -0.95];
+    let bast = null;
+    for (const lyft of [0, 0.25, 0.5]) {
+      for (const a of byt) {
+        const d = m.n.clone().applyAxisAngle(UPP, a);
+        d.y += lyft; d.normalize();
+        const r = prodPassa(m.box, d, m.fyll || 0.5, false, fri), pos = c.clone().addScaledVector(d, r);
+        if (pos.y < 0.5) pos.y = 0.5;
+        const syn = ladaPunkter(m.box).filter(p => prodSer(pos, p, m.box)).length;
+        if (!bast || syn > bast.syn) bast = { pos, syn };
+        if (syn >= 5) break;
+      }
+      if (bast.syn >= 5) break;
+    }
+    return { pos: bast.pos, mal: prodForskjut(bast.pos, c, fri, false) };
+  }
+  // inne: en ståplats på samma våning där lådan syns hel, framifrån, inte för nära
+  // hur långt lådan sticker ut ur bildens fria del (NDC) sedd från oga mot mal; 0 = hel i bild
+  function prodUtanfor(oga, mal, box, fy) {
+    prodKam.fov = fovFor(true); prodKam.aspect = kamera.aspect; prodKam.near = 0.05; prodKam.far = 500; prodKam.updateProjectionMatrix();
+    prodKam.position.copy(oga); prodKam.lookAt(mal); prodKam.updateMatrixWorld();
+    const f = fy || { x0: 0, x1: 1, y0: 0, y1: 1 }, X0 = f.x0 * 2 - 1, X1 = f.x1 * 2 - 1, Yu = 1 - f.y0 * 2, Yn = 1 - f.y1 * 2;
+    let ut = 0;
+    ladaHorn(box).forEach(p => { prV.copy(p).project(prodKam); if (prV.z > 1) { ut += 2; return; } ut = Math.max(ut, X0 - prV.x, prV.x - X1, prV.y - Yu, Yn - prV.y); });
+    return Math.max(0, ut);
+  }
+  function prodStall(m, fy) {
+    const Y0 = husGrupp.userData.delar.Y0, c = m.box.getCenter(new THREE.Vector3());
+    const niva = m.niva !== undefined ? m.niva : (m.box.min.y - Y0 > 2.0 ? 1 : 0);
+    let ref = null, bd = Infinity;
+    punkter().forEach(q => { if (nivaTal(q.niva) !== niva) return; const d = Math.hypot(q.pos[0] - c.x, q.pos[2] - c.z); if (d < bd) { bd = d; ref = q; } });
+    if (!ref) return null;
+    const golvY = punktGolv(ref) + Y0, HH = HUS[val.modell];
+    const kand = [];
+    for (let k = 0; k < 32; k++) {
+      const a = k / 32 * Math.PI * 2, dx = Math.cos(a), dz = Math.sin(a), dir = new THREE.Vector3(dx, 0, dz);
+      const fram = m.n ? dir.dot(m.n) : 0.6;
+      if (m.n && fram < 0.15) continue;
+      const oY = ogonVid(c.x + dx, c.z + dz, golvY, niva);
+      const d = new THREE.Vector3(dx, (oY - c.y) / 2, dz).normalize();
+      const r0 = Math.min(3.6, Math.max(1.0, prodPassa(m.box, d, m.fyll || 0.55, true, fy)));
+      for (const f of [1, 1.2, 0.85, 1.45, 0.7, 1.8, 0.55, 0.45]) {
+        const r = Math.max(0.6, r0 * f), b = Math.max(m.box.max.x - m.box.min.x, m.box.max.z - m.box.min.z) / 2;
+        const x = c.x + dx * r, z = c.z + dz * r;
+        if (Math.hypot(x - c.x, z - c.z) < b * 0.6 + 0.4) continue;
+        if (Math.abs(x) > HH.L / 2 - 0.15 || Math.abs(z) > HH.W / 2 - 0.15) continue;   // inne i huset
+        if (fri(x, z, niva) < 0.2) continue;
+        kand.push({ x, z, r, poang: fram * 2.2 - Math.abs(Math.log(r / r0)) * 2.5 });
+      }
+    }
+    kand.sort((a, b) => b.poang - a.poang);
+    let bast = null, provade = 0;
+    for (const k of kand) {
+      if (provade > 26) break;
+      if (bast && k.poang + 2 < bast.poang) break;
+      const oga = new THREE.Vector3(k.x, ogonVid(k.x, k.z, golvY, niva), k.z);
+      if (!prodSer(oga, c, m.box, husGrupp)) continue;
+      provade++;
+      const syn = ladaPunkter(m.box).slice(1).filter(p => prodSer(oga, p, m.box, husGrupp)).length;
+      const p = k.poang + syn * 0.9 - prodUtanfor(oga, prodForskjut(oga, c, fy, true), m.box, fy) * 14;
+      if (!bast || p > bast.poang) bast = { ...k, poang: p, oga, syn };
+      if (syn === 4 && k === kand[0]) break;
+    }
+    if (!bast) return null;
+    // blicken rättas så att lådans ruta på skärmen (inte bara mitten, perspektivet) hamnar mitt i den fria delen
+    let mal = prodForskjut(bast.oga, c, fy, true);
+    for (let k = 0; k < 2; k++) {
+      prodKam.fov = fovFor(true); prodKam.aspect = kamera.aspect; prodKam.updateProjectionMatrix();
+      prodKam.position.copy(bast.oga); prodKam.lookAt(mal); prodKam.updateMatrixWorld();
+      let x0 = 9, x1 = -9, y0 = 9, y1 = -9;
+      ladaHorn(m.box).forEach(q => { prV.copy(q).project(prodKam); x0 = Math.min(x0, prV.x); x1 = Math.max(x1, prV.x); y0 = Math.min(y0, prV.y); y1 = Math.max(y1, prV.y); });
+      const f = fy || { x0: 0, x1: 1, y0: 0, y1: 1 }, ex = (x0 + x1) / 2 - ((f.x0 + f.x1) - 1), ey = (y0 + y1) / 2 - (1 - (f.y0 + f.y1));
+      const dv = mal.clone().sub(bast.oga), L = dv.length(), vf = Math.tan(THREE.MathUtils.degToRad(prodKam.fov) / 2), hf = vf * prodKam.aspect;
+      dv.normalize();
+      const hoger = dv.clone().cross(UPP).normalize(), upp = hoger.clone().cross(dv).normalize();
+      mal.addScaledVector(hoger, ex * hf * L).addScaledVector(upp, ey * vf * L);
+    }
+    return { x: bast.x, z: bast.z, golvY, niva, mal, syn: bast.syn, poang: bast.poang - Math.hypot(bast.x - kamera.position.x, bast.z - kamera.position.z) * 0.15 };
+  }
+  function visaProdukt(id, opt) {
+    prodNu = null;
+    if (!husGrupp || flyg || plan.pa || plan.t > 0 || byggT < 1) return false;
+    const o = opt || {}, fy = o.fri && o.fri.x1 > o.fri.x0 && o.fri.y1 > o.fri.y0 ? o.fri : null;
+    prodListor = new Map();
+    if (!inneLage) {
+      if (oppen.pa || oppen.t > 0) return false;
+      let m = null;
+      try { m = prodMalUte(id, o.ram); } catch (e) { console.warn(e); }
+      if (!m) return false;
+      const v = prodUteVy(m, fy);
+      prodNu = { id, box: m.box };
+      styr.autoRotate = false; zoomMal = null; zoomRa = null;
+      prodGrans(true);
+      styr.maxDistance = Math.max(styr.maxDistance, v.pos.distanceTo(v.mal) * 1.3);
+      // tiden efter vinkeln: ett kvarts varv 1,0 s, ett halvt 1,4 s
+      const sA = new THREE.Spherical().setFromVector3(kamera.position.clone().sub(styr.target)), sB = new THREE.Spherical().setFromVector3(v.pos.clone().sub(v.mal));
+      let vd = Math.abs(sB.theta - sA.theta); if (vd > Math.PI) vd = Math.PI * 2 - vd;
+      const flytt = kamera.position.distanceTo(v.pos);
+      if (lugn || o.direkt || flytt < 0.02) {
+        if (lugn && flytt > 0.02) { fangaOvergang(true); tona.tid = 0.25; }
+        aka = null; kamera.position.copy(v.pos); styr.target.copy(v.mal); styrNu();
+      } else aka = { fran: kamera.position.clone(), till: v.pos, t: 0, tid: Math.min(1.4, Math.max(0.9, 0.9 + 0.5 * vd / Math.PI + 0.02 * flytt)), mf: styr.target.clone(), mt: v.mal };
+      begarRender();
+      return { ute: true };
+    }
+    let m = null;
+    try { m = prodMalInne(id); } catch (e) { console.warn(e); }
+    if (!m) return false;
+    // flera kandidater (innerdörrarna): den som syns bäst och helast
+    let s = null;
+    const kandM = m.alla || [m];
+    for (const mm of kandM) {
+      const dq = mm.dorr && mm.dorr.obj && mm.dorr.q0 ? mm.dorr.obj.quaternion.clone() : null;
+      if (dq) { mm.dorr.obj.quaternion.copy(mm.dorr.q0); mm.dorr.obj.updateMatrix(); mm.dorr.obj.updateMatrixWorld(true); }   // siktprovet mot den stängda dörren
+      let st = null;
+      try { st = prodStall(mm, fy) || (mm.n ? prodStall({ ...mm, n: null }, fy) : null); } catch (e) { console.warn(e); }
+      finally { if (dq) { mm.dorr.obj.quaternion.copy(dq); mm.dorr.obj.updateMatrix(); mm.dorr.obj.updateMatrixWorld(true); } }
+      if (st && (!s || st.poang > s.poang)) { s = st; m = mm; }
+      if (s && s.syn === 4 && kandM.length === 1) break;
+    }
+    if (!s) return false;
+    prodNu = { id, box: m.box };
+    // innerdörren: stängs (om den står öppen) så att hela bladet med handtaget syns
+    if (m.dorr && m.dorr.mal > 0.5) { try { vaxlaO(m.dorr); } catch (e) { console.warn(e); } }
+    const malP = [s.mal.x, s.mal.y - husGrupp.userData.delar.Y0, s.mal.z];
+    if (lugn) { fangaOvergang(true); tona.tid = 0.25; }
+    if (!glidTill(s.x, s.golvY, s.z, s.niva, malP, lugn ? { tid: 0.01 } : undefined)) glidTill(s.x, s.golvY, s.z, s.niva, malP, { tid: lugn ? 0.01 : 1.1, satt: 'res' });
+    return { ute: false };
+  }
+  function produktSlut() {
+    prodNu = null;
+    if (prodMin === null) return;
+    prodGrans(false);
+    if (!inneLage && !flyg) zoomTillbaka();
+  }
+  // målets ruta på skärmen (bildens pixlar, CSS) och provet: syns lådan hel och fri?
+  function produktRuta() {
+    if (!prodNu) return null;
+    const H = ladaHorn(prodNu.box);
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity, bakom = false;
+    kamera.updateMatrixWorld();
+    H.forEach(p => { prV.copy(p).project(kamera); if (prV.z > 1) bakom = true; x0 = Math.min(x0, prV.x); x1 = Math.max(x1, prV.x); y0 = Math.min(y0, prV.y); y1 = Math.max(y1, prV.y); });
+    return { x0: (x0 + 1) / 2, x1: (x1 + 1) / 2, y0: (1 - y1) / 2, y1: (1 - y0) / 2, bakom };
+  }
+  function produktProv() {
+    if (!prodNu) return null;
+    prodListor = new Map();
+    const r = produktRuta(), P = kamera.position.clone(), pk = ladaPunkter(prodNu.box);
+    const syn = pk.map(p => prodSer(P, p, prodNu.box));
+    return { id: prodNu.id, ruta: r, mitt: syn[0], syn: syn.filter(Boolean).length, inne: inneLage, box: [prodNu.box.min.toArray(), prodNu.box.max.toArray()].map(a => a.map(v => +v.toFixed(2))), kamera: P.toArray().map(v => +v.toFixed(2)) };
+  }
+  // ett klick utifrån på taket, hängrännan eller stupröret (de ligger på lager 1)
+  function takTraff() {
+    const tak = husGrupp && husGrupp.userData.delar.tak;
+    if (!tak || aka || flyg || plan.pa || oppen.pa || oppen.t > 0) return null;
+    if (rektSmuts) lasRekt();
+    ndc.set((gang.px - dukV) / dukB * 2 - 1, -((gang.py - dukT) / dukH) * 2 + 1);
+    ray.setFromCamera(ndc, kamera); ray.layers.enableAll();
+    traffar.length = 0;
+    try { ray.intersectObject(husGrupp, true, traffar); } finally { ray.layers.set(0); }
+    const syns = o => { for (; o; o = o.parent) if (!o.visible) return false; return true; };
+    const t = traffar.find(h => h.object.isMesh && !(h.object.material && h.object.material.transparent && h.object.material.opacity < 0.2) && syns(h.object));
+    traffar.length = 0;
+    if (!t) return null;
+    let pa = false;
+    for (let o = t.object; o; o = o.parent) if (o === tak) { pa = true; break; }
+    if (!pa) return null;
+    // stuprören har ett eget material, hängrännan är den extruderade halvrunda profilen
+    return { id: t.object.material === mat.stupror || (t.object.geometry && t.object.geometry.type === 'ExtrudeGeometry') ? 'takavvattning' : 'tak', d: t.distance };
+  }
+
   return {
     // redo: löfte som blir klart när första bilden är ritad; starta(): introt börjar (slöjan öppnas)
     redo, starta,
@@ -6802,6 +8000,11 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     },
     ljusPresets: () => ({ ...LJUS_PRESET }),
     vy: akTill,
+    // produktkorten: åk till en del (fonster, tak, kylfrys …) och släpp närbilden
+    produkt: visaProdukt, produktSlut, produktRuta, produktProv,
+    // siktnätet byggs i förväg (sidan: när pekaren når produktlistan), annars vid första valet
+    produktForbered() { try { if (husGrupp && byggT >= 1) { prodListor = new Map(); prodNatFor(); } } catch (e) { console.warn(e); } },
+    gar: () => !!gang.glid,
     // övergången till nästa byte: förra bilden tonas bort på grafikkortet
     tona: fangaOvergang,
     val: () => ({ ...val, modell: val.modell }),
@@ -6834,6 +8037,26 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       return duk2d;
     },
     tema(mork) { morktTema = !!mork; satSol(); },
+    // sprängvyn (husritare-sprang.js): motorns delar och kroken före varje bild
+    sprang: {
+      THREE, scene, kamera, styr, mat, HUS, lugn, renderer,
+      hus: () => husGrupp, matt: () => matGrupp, inneData,
+      steg(fn) { sprangSteg = typeof fn === 'function' ? fn : null; begarRender(); },
+      begarRender, skugga() { nySkugga = true; }, ljus() { try { lageLjus(); } catch (e) { console.warn(e); } },
+      akTill(pos, mal, tid = 1.4) {
+        zoomMal = null; styr.autoRotate = false;
+        styr.maxDistance = Math.max(styr.maxDistance, pos.distanceTo(mal) * 1.3);
+        if (lugn || !tid) { aka = null; kamera.position.copy(pos); styr.target.copy(mal); styr.update(); begarRender(); return; }
+        aka = { fran: kamera.position.clone(), till: pos.clone(), t: 0, tid, mf: styr.target.clone(), mt: mal.clone() };
+        begarRender();
+      },
+      avstand: r => avstand(r),
+      sno: snoU, skuggRam() { passaSkugga(); nySkugga = true; begarRender(); },
+      // sprängvyn byter till studion och tillbaka: vilken miljö som gäller (namn) och vilken som
+      // byggs (vill, annars null); miljoForbered(namn) bygger en miljö i förväg när datorn är ledig
+      miljo: () => ({ namn: miljoNamn, vill: miljoVill }),
+      miljoForbered(namn) { if (namn !== miljoNamn && namn !== miljoVill && typeof omgivning.forbered === 'function' && omgivning.lista.some(m => m[0] === namn)) { try { omgivning.forbered(namn, HUS[val.modell]); } catch (e) { console.warn(e); } } },
+    },
     snurra(pa) { clearTimeout(snurrTid); styr.autoRotate = !!pa; begarRender(); return styr.autoRotate; },
     upptagen: () => tonar || byggT < 1 || !!rivGrupp || !!aka || !!flyg || tona.pa,
     // allt byggt och stilla: inredningen klar, inga åkningar eller toningar, ingen ruta på väg
@@ -6841,7 +8064,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     miljo(namn) {
       namn = GAMLA_NAMN[namn] || namn;
       if (!omgivning.lista.some(m => m[0] === namn)) return;
-      miljoNamn = namn; satMiljo();
+      if (!satMiljo(namn)) return;   // byggs stegvis: bytet görs vid 'husritare:miljoklar'
       if (husGrupp) { try { byggMobler(husGrupp.userData.delar.ute); } catch (e) { console.warn(e); } }
       nySkugga = true; satSol();
     },
@@ -6855,6 +8078,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // för kontroll i bildverktygen: ytterdörrens läge (0 stängd … 1 öppen) och kamerans plats
     dorrOppen: () => { const Y = husGrupp && husGrupp.userData.ydorr; return Y ? Y.t : 0; },
     // taklyftet för bildverktygen: takProv(t) fryser lyftet vid t (0 stängt … 1 öppet), takProv(null) släpper
+    // uppbyggnaden för bildverktygen: byggProv(t) fryser den vid t (0 … 1), byggProv(null) släpper
+    byggProv(t) { byggProvT = t === null || t === undefined ? null : Math.min(1, Math.max(0, +t)); if (byggProvT === null && byggT < 1) byggT = 1; begarRender(); return byggT; },
     takProv(t) { oppen.prov = t === null || t === undefined ? null : +t; begarRender(); return { t: oppen.t, pa: oppen.pa, vantar: oppen.vantar }; },
     // grafikminnet: nya program eller texturer under en åkning betyder att något inte var förberett
     grafik: () => ({ program: renderer.info.programs.length, texturer: renderer.info.memory.textures, geometrier: renderer.info.memory.geometries, inneVarm: !!(husGrupp && husGrupp.userData.inneVarm) }),
@@ -6873,6 +8098,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     kanSpel: () => typeof duk.requestPointerLock === 'function',
     // sitta och resa sig, lamporna, dörrarna som öppnas när man går in i dem
     resDig,
+    sattDig: i => sattDig(i | 0),   // för bildverktygen: sätt dig på sittplats i (provSitt() listar dem)
     sitter: () => gang.sitter >= 0,
     allaLampor,
     lampor: () => { const ut = iaData(), l = ut ? ut.lampor.filter(Boolean) : []; return { antal: l.length, tanda: l.filter(L => L.pa).length }; },
@@ -6889,7 +8115,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       renderer.render(scene, kamera);
       let hus = 0;
       if (husGrupp) husGrupp.traverseVisible(o => { if ((o.isMesh || o.isSprite) && o.material && o.material.visible !== false) hus++; });
-      return { anrop: renderer.info.render.calls, trianglar: renderer.info.render.triangles, hus, inne: !!(husGrupp && husGrupp.userData.inne), liv: liv.pa, livFps: liv.fps };
+      return { anrop: renderer.info.render.calls, trianglar: renderer.info.render.triangles, hus, inne: !!(husGrupp && husGrupp.userData.inne), liv: liv.pa, livFps: liv.fps, hdri: !!hdr.tex[miljoNamn] && scene.environment === hdr.tex[miljoNamn] };
     },
     // mätningen för ?prestanda=1, utan att rita något: senaste rutans anrop och trianglar,
     // rutor sedan förra anropet, snitt och max ms per ruta och tiden mellan rutorna

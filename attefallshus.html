@@ -25,11 +25,13 @@
 
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" as="image" href="images/stamning/gratt-hus-skargard.webp" fetchpriority="high">
-    <link rel="stylesheet" href="styles.css?v=20261010l">
-    <link rel="stylesheet" href="design.css?v=20261124a">
-    <link rel="stylesheet" href="nya-hus.css?v=20261120a">
-    <script src="premium.js?v=20261124a" defer></script>
+    <link rel="preload" as="image" href="images/stamning/gratt-hus-skargard.webp" imagesrcset="images/stamning/gratt-hus-skargard-600.webp 600w, images/stamning/gratt-hus-skargard.webp 1200w" imagesizes="(max-width: 900px) 92vw, 52vw" fetchpriority="high">
+    <link rel="stylesheet" href="styles.css?v=20261126g">
+    <link rel="stylesheet" href="design.css?v=20261126r">
+    <link rel="stylesheet" href="nya-hus.css?v=20261126g">
+    <link rel="stylesheet" href="ios.css?v=20261126r">
+    <script src="logga.js?v=20261126r"></script>
+    <script src="premium.js?v=20261126r" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script type="application/ld+json">
     {
@@ -162,7 +164,7 @@
               "name": "Hur lång tid tar det?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Leveranstiden är 10–12 veckor beroende på modell. Själva montaget på tomten tar några dagar."
+                "text": "Leveranstiden beror på modell och paket, och du får den i offerten. Själva montaget på tomten tar några dagar."
               }
             },
             {
@@ -170,7 +172,7 @@
               "name": "Vad ingår i priset?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Priset sätts i en offert efter din tomt. I vår del ingår ritningar och underlag, själva huset, leverans till tomten, montage och slutbesiktning. Grunden, el, vatten och avlopp, markarbete och kommunens avgifter betalas till andra, och tillval tillkommer."
+                "text": "Det beror på paketet: från prefab stomme till nyckelfärdig modul med entreprenad, där vi även tar hand om mark, grund och inkoppling. På husets sida står vad som ingår i varje paket. Frakten till tomten prissätts enligt zon."
               }
             }
           ]
@@ -180,11 +182,12 @@
     </script>
   </head>
   <body>
+    <script>if(window.LegohusLogga&&LegohusLogga.intro)LegohusLogga.intro()</script>
     <a class="skip" href="#innehall">Hoppa till innehållet</a>
     <header class="site-header">
       <div class="site-header__inner">
         <a class="logo" href="./" aria-label="Till Legohus Stockholms startsida">
-          <img class="logo__svg" src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
+          <img class="logo__svg" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
         </a>
 
         <nav class="main-nav" aria-label="Huvudmeny">
@@ -200,7 +203,7 @@
                   <em>Kupa 30, inom attefallsmåtten</em>
                 </span>
               </a>
-              <p class="main-nav__modeller"><a href="kupa-30.html">Kupa 30</a></p>
+              <p class="main-nav__modeller"><a href="kupa-30.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 30<small class="meny-pris">från 299 500 kr</small></a></p>
               <a href="fritidshus.html">
                 <img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async">
                 <span>
@@ -208,7 +211,7 @@
                   <em>Fyra modeller, 40–90 m²</em>
                 </span>
               </a>
-              <p class="main-nav__modeller"><a href="kupa-40.html">Kupa 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+              <p class="main-nav__modeller"><a href="kupa-40.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 40<small class="meny-pris">från 450 000 kr</small></a><a href="sadel-50.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Sadel 50<small class="meny-pris">från 495 000 kr</small></a><a href="pulpet-70.html" title="Priset räknas fram i en offert">Pulpet 70<small class="meny-pris">På förfrågan</small></a><a href="sadel-90.html" title="Priset räknas fram i en offert">Sadel 90<small class="meny-pris">På förfrågan</small></a></p>
               <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
               <a href="proffs.html">
                 <img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async">
@@ -257,7 +260,7 @@
             <a class="mmeny__kort" href="attefallshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-attefallshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Attefallshus</strong><em>Kupa 30, inom attefallsmåtten</em></span></a>
             <a class="mmeny__kort" href="fritidshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Fritidshus</strong><em>Fyra modeller, 40–90 m²</em></span></a>
             </div>
-            <p class="mmeny__modeller"><a href="kupa-30.html">Kupa 30</a><a href="kupa-40.html">Kupa 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+            <p class="mmeny__modeller"><a href="kupa-30.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 30<small class="meny-pris">från 299 500 kr</small></a><a href="kupa-40.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 40<small class="meny-pris">från 450 000 kr</small></a><a href="sadel-50.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Sadel 50<small class="meny-pris">från 495 000 kr</small></a><a href="pulpet-70.html" title="Priset räknas fram i en offert">Pulpet 70<small class="meny-pris">På förfrågan</small></a><a href="sadel-90.html" title="Priset räknas fram i en offert">Sadel 90<small class="meny-pris">På förfrågan</small></a></p>
             <p class="mmeny__etikett">För dig som bygger</p>
             <a class="mmeny__kort mmeny__kort--bred" href="proffs.html"><span class="mmeny__bild"><img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Proffs</strong><em>Väggar, block och moduler</em></span></a>
             <p class="mmeny__etikett">Bra att veta</p>
@@ -294,7 +297,7 @@
                 <div style="--i:0"><dt><i class="hoffert__bock"></i>Byggnadsarea</dt><dd><em>30 m²</em></dd></div>
                 <div style="--i:1"><dt><i class="hoffert__bock"></i>Planlösning</dt><dd><em>1 sovrum + loft</em></dd></div>
                 <div class="hoffert__stampel"><dt>Inom måtten</dt><dd>Inget bygglov</dd></div>
-                <div class="hoffert__fot"><dt>Pris</dt><dd>I offert</dd></div>
+                <div class="hoffert__fot"><dt>Pris</dt><dd>Från 299 500 kr</dd></div>
               </dl>
             </div>
           </figure>
@@ -332,7 +335,7 @@
             <p class="model-card__tag">Allrum, sovrum och WC/bad, och loft under taket med takkupa.</p>
             <dl class="model-card__data"><div><dt>Tak</dt><dd>Sadeltak, kupa</dd></div><div><dt>Rum</dt><dd>1 sovrum + loft</dd></div><div><dt>Mått</dt><dd>7,5 × 4 m</dd></div><div><dt>Nockhöjd</dt><dd>4,0 m</dd></div></dl>
             <div class="model-card__fot">
-              <p class="model-card__pris"><span>Pris</span>I offert</p>
+              <p class="model-card__pris"><span>Pris</span>Från 299 500 kr</p>
               <span class="model-card__knappar"><a class="model-card__se" href="kupa-30.html">Se huset</a><a class="model-card__rita" href="rita-hus.html?modell=kupa-30">Rita ditt hus</a></span>
             </div>
           </article>
@@ -401,7 +404,7 @@
             <p class="ih-ingress">Vrid och zooma i modellen. Vill du ändra huset öppnar du det i Rita ditt hus.</p>
           </div>
           <div class="nyhus-3d__ram">
-            <iframe data-nyhus-ram src="rita-hus.html?modell=kupa-30&amp;inbaddad=1" title="Kupa 30 i 3D" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
+            <iframe data-nyhus-ram data-src="rita-hus.html?modell=kupa-30&amp;inbaddad=1" title="Kupa 30 i 3D" loading="lazy" allow="fullscreen"></iframe>
           </div>
           <p class="nyhus-3d__knappar"><a class="ih-knapp ih-knapp--virke" data-nyhus-rita href="rita-hus.html?modell=kupa-30">Rita ditt hus<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
         </div>
@@ -416,15 +419,15 @@
           </div>
           <div class="at-foto__rad">
             <figure class="at-foto__bild">
-              <span class="at-foto__ram"><img src="images/stamning/gront-hus-skog.webp" width="900" height="600" loading="lazy" decoding="async" alt="Mörkt småhus med stort glasparti i en tallskog, illustration"></span>
+              <span class="at-foto__ram"><img class="fb-bild" src="images/fabrik/vaggelement-produktion-1600.webp" srcset="images/fabrik/vaggelement-produktion-800.webp 600w, images/fabrik/vaggelement-produktion-1600.webp 1200w" sizes="(max-width: 900px) 92vw, 400px" width="1200" height="1600" loading="lazy" decoding="async" style="--pos: 50% 55%" alt="Väggelement byggs på arbetsbord i Legohus fabrik, med personalen i bakgrunden"></span>
               <figcaption><b>01 · Verkstaden</b><span>Stommarna byggs regel för regel, under tak.</span></figcaption>
             </figure>
             <figure class="at-foto__bild">
-              <span class="at-foto__ram"><img src="images/stamning/svart-hus-fjallet.webp" width="1536" height="1024" loading="lazy" decoding="async" alt="Småhus i trä med altan på en sommaräng, illustration"></span>
-              <figcaption><b>02 · Leveransen</b><span>Väggarna kommer färdiga till tomten på lastbil.</span></figcaption>
+              <span class="at-foto__ram"><img class="fb-bild" src="images/fabrik/vaggelement-stallning-1600.webp" srcset="images/fabrik/vaggelement-stallning-800.webp 600w, images/fabrik/vaggelement-stallning-1600.webp 1200w" sizes="(max-width: 900px) 92vw, 400px" width="1200" height="1600" loading="lazy" decoding="async" style="--pos: 50% 55%" alt="Väggelement med fönster står i transportställning, inplastade inför leverans"></span>
+              <figcaption><b>02 · Leveransen</b><span>Väggarna plastas in och körs färdiga till tomten.</span></figcaption>
             </figure>
             <figure class="at-foto__bild">
-              <span class="at-foto__ram"><img src="images/stamning/gratt-hus-skargard.webp" width="1536" height="1024" loading="lazy" decoding="async" alt="Svart småhus med stora glaspartier på en klippa vid havet, illustration"></span>
+              <span class="at-foto__ram"><img class="fb-bild" src="images/foto/dronare-montage.webp" srcset="images/foto/dronare-montage-1000.webp 1000w, images/foto/dronare-montage.webp 1600w" sizes="(max-width: 900px) 123vw, 540px" width="1600" height="900" loading="lazy" decoding="async" style="--pos: 45% 50%" alt="Inplastade väggelement står resta runt en gjuten platta, med kranbilens arm över bygget"></span>
               <figcaption><b>03 · Montaget</b><span>Kranen lyfter dem på plats, en vägg i taget.</span></figcaption>
             </figure>
           </div>
@@ -475,11 +478,11 @@
             </details>
             <details class="ih-fraga">
               <summary>Hur lång tid tar det?</summary>
-              <p>Leveranstiden är 10–12 veckor beroende på modell. Själva montaget på tomten tar några dagar.</p>
+              <p>Leveranstiden beror på modell och paket, och du får den i offerten. Själva montaget på tomten tar några dagar.</p>
             </details>
             <details class="ih-fraga">
               <summary>Vad ingår i priset?</summary>
-              <p>Priset sätts i en offert efter din tomt. I vår del ingår ritningar och underlag, själva huset, leverans till tomten, montage och slutbesiktning. Grunden, el, vatten och avlopp, markarbete och kommunens avgifter betalas till andra, och tillval tillkommer. <a href="priser.html">Så sätts priset</a>.</p>
+              <p>Det beror på paketet: från prefab stomme till nyckelfärdig modul med entreprenad, där vi även tar hand om mark, grund och inkoppling. På husets sida står vad som ingår i varje paket. Frakten till tomten prissätts enligt zon. <a href="priser.html">Så sätts priset</a>.</p>
             </details>
           </div>
         </div>
@@ -636,7 +639,7 @@
     <footer class="site-footer">
       <div class="site-footer__inner">
         <div>
-          <img class="site-footer__logo" src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
+          <img class="site-footer__logo" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
           <p class="site-footer__text">
             Attefallshus, fritidshus och byggelement, byggda under tak i Sverige.
           </p>

@@ -6,9 +6,12 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261126c';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261126r';
+import { PRODUKTER, GRUPPER, OMRADEN, PROD_IKON, skapaKort, skapaFokus, loggaBild, loggaReserv } from './husritare-produkt.js?v=20261126r';
+import { kopplaPris, lasPaket } from './husritare-pris.js?v=20261126r';
+import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 
-const MOTOR_V = '20261126c';
+const MOTOR_V = '20261126r';
 // Standardutseendet: utan val i adressen (och när man kommer tillbaka till sidan med bakåtknappen
 // eller laddar om den) möts man av samma bild varje gång: Kupa 40 i falurött med svart tak och
 // vita detaljer, vinter, gyllene timmen, kameran i startvyn. Adressen som sidan själv skriver
@@ -119,6 +122,8 @@ function tonaSjalv() {
 }
 
 let ritare = null;
+var prisKort = null;   // var: uppdatera() och spara() kan köras innan kortet är uppsatt
+var skickaText = '';
 // Laddningen i ordning: logotypen ritar sig först (sidan är stilla under tiden, bara modulerna
 // hämtas), sedan byggs scenen i steg med pauser emellan och dess program kompileras utan att
 // låsa sidan. När första bilden finns öppnas slöjan, och först då börjar monteringen och
@@ -175,6 +180,8 @@ try {
     vidFlyg: i => visaFlyg(i),
     // klick eller tryck på ytterdörren utifrån: samma som Se inne (åkningen genom dörren)
     vidDorrIn: () => { dorrTipsSett(); if (vyLage() === 'ute') bytLage('inne'); },
+    // klick på taket, hängrännan eller stupröret utifrån: produktkortet
+    vidDel: id => oppnaProdukt(id, null),
   });
   ritare.tema(document.documentElement.getAttribute('data-tema') === 'mork');
   // slöjan öppnas när logotypen har ritat sig (cirka 1,4 s) och scenens första bild är klar;
@@ -200,6 +207,7 @@ try {
 const kan = namn => !!(ritare && typeof ritare[namn] === 'function');
 // ?prov=1 (bildverktygen): motorn nås som window.__ritare
 if (Q0.get('prov') === '1') window.__ritare = ritare;
+if (ritare) { duk.__ritare = ritare; duk.__produktbild = produktbild; }   // Bygg online (husritare-app.js): studiobilden till offerten
 
 const val = { modell: START_MODELL, fasad: null, tak: null, detalj: null };
 const aktiv = g => val[g] || MODELLER[val.modell].farg[g];
@@ -332,6 +340,7 @@ function aka(vy, opt) {
   if (inneLage) { sattInne(false, undefined, opt).then(() => { nuVy = null; aka(vy, opt); }); return; }
   // från dockskåpet: taket läggs på innan kameran åker
   if (oppetLage) { sattOppen(false); nuVy = null; }
+  if (typeof stangProdukt === 'function' && !prodAker) stangProdukt(true);
   if (vy === nuVy) return;
   nuVy = vy;
   if (opt) ritare.vy(vy, opt); else ritare.vy(vy);
@@ -340,7 +349,7 @@ function aka(vy, opt) {
   markeraTumme(vy);
   spara();
 }
-document.querySelectorAll('.kgrupp').forEach(g => {
+document.querySelectorAll('.kgrupp[data-kamera]').forEach(g => {
   // inne i huset (eller i dockskåpet) ändrar ett färgval bara färgen, kameran står kvar
   g.addEventListener('toggle', () => { if (g.open && g.dataset.klar && !inneLage && !oppetLage) aka(g.getAttribute('data-kamera')); g.dataset.klar = '1'; });
   // bara med mus: på pekskärm börjar en rullning i panelen också med pointerdown
@@ -527,11 +536,18 @@ function beskrivning(v) {
 }
 function fakta(H) { return H.yta + ' m² · ' + nf(H.L) + ' × ' + nf(H.W) + ' m'; }
 const rumsyta = H => H.rum.reduce((a, r) => a + r[1], 0);
-function rader(v) {
+// rummen som modellsidornas faktaruta säger dem (kupa-30.html, sadel-90.html …)
+const RUM_ETIKETT = { 'sadel-30': '1 sovrum + loft', 'sadel-40': '1 sovrum + loft', 'sadel-50': '1 sovrum + loft', 'pulpet-70': '3 sovrum', 'sadel-90': '3 sovrum' };
+const rumEtikett = id => RUM_ETIKETT[id] || (MODELLER[id] ? MODELLER[id].rum.filter(r => r[0] === 'Sovrum').length + ' sovrum' : '');
+// bara = true: bara kulörerna (sammanfattningen visar hus, storlek och rum för sig)
+function rader(v, bara = false) {
   const { H, f, t, d } = beskrivning(v);
   const rad = (dt, dd, hex) => '<div><dt>' + dt + '</dt><dd>' + (hex ? '<i style="--f:' + hex + '"></i>' : '') + esc(dd) + '</dd></div>';
-  return rad('Hus', H.namn) + rad('Storlek', fakta(H)) + rad('Fasad', f[0], f[1]) + rad('Tak', t[0], t[1]) + rad('Fönster och plåt', d[0], d[1]) +
-    rad('Rum', H.rum.length + ' st, ' + nf(rumsyta(H).toFixed(1)) + ' m²' + (H.rum.some(r => /loft/i.test(r[0])) ? ' inkl. loft' : ''));
+  const kulorer = rad('Fasad', f[0], f[1]) + rad('Tak', t[0], t[1]) + rad('Fönster och plåt', d[0], d[1]);
+  if (bara) return kulorer;
+  // rummen som på modellsidan ("3 sovrum"), ytan ur ritningen efter
+  return rad('Hus', H.namn) + rad('Storlek', fakta(H)) + kulorer +
+    rad('Rum', rumEtikett(v.modell) + ' · ' + nf(rumsyta(H).toFixed(1)) + ' m²' + (H.rum.some(r => /loft/i.test(r[0])) ? ' inkl. loft' : ''));
 }
 
 // ---- texter, sammanfattning och plan ----
@@ -572,15 +588,28 @@ function uppdatera() {
   if (bar) bar.textContent = H.namn;
   raknaUpp(document.querySelector('[data-yta]'), H.yta, 0, ' m²');
   raknaUpp(document.querySelector('[data-k-yta]'), H.yta);
-  raknaUpp(document.querySelector('[data-k-rum]'), H.rum.length);
+  // samma rumsetikett som modellsidornas faktaruta (H.rum räknar även WC, bastu, hall och loft)
+  const kRum = document.querySelector('[data-k-rum]');
+  if (kRum) { kRum.textContent = rumEtikett(val.modell); kRum.classList.add('kf__rumtext'); }
   const dec = x => (Number.isInteger(x) ? 0 : 1);
   raknaUpp(document.querySelector('[data-k-l]'), H.L, dec(H.L));
   raknaUpp(document.querySelector('[data-k-w]'), H.W, dec(H.W));
   document.querySelector('[data-summa-lista]').innerHTML = rader(val);
   const { f, t, d } = beskrivning(val);
   const meddelande = 'Från husritaren: ' + H.namn + ' (' + fakta(H) + '). Fasad: ' + f[0] + '. Tak: ' + t[0] + '. Fönster och plåt: ' + d[0] + '.';
-  document.querySelectorAll('[data-skicka]').forEach(a => { a.href = 'kontakt.html?ritat=' + encodeURIComponent(meddelande) + '#kontaktformular'; });
+  skickaText = meddelande;
+  ritaSkicka();
+  if (prisKort) prisKort.rita();
   if (!INB && !FOTO) ritaPlan(H);
+}
+
+// Skicka förfrågan: det ritade huset och det valda paketet följer med till kontaktsidan.
+function ritaSkicka() {
+  if (!skickaText) return;
+  const m = MODELL_UT[val.modell] || val.modell;
+  const text = skickaText + (prisKort ? ' Paket: ' + prisKort.namn() + '.' : '');
+  const q = 'modell=' + encodeURIComponent(m) + (prisKort ? '&paket=' + encodeURIComponent(prisKort.paket()) : '') + '&ritat=' + encodeURIComponent(text);
+  document.querySelectorAll('[data-skicka]').forEach(a => { a.href = 'kontakt.html?' + q + '#kontaktformular'; });
 }
 
 // ---- Planen: flikar, nyckeltal och rum med stapel för andel av ytan ----
@@ -613,7 +642,8 @@ function ritaPlan(H) {
   sif.innerHTML = siffra('Byggyta', H.yta, 0, 'm²') +
     '<div><dt>Mått</dt><dd><b>' + nf(H.L) + ' × ' + nf(H.W) + '</b><small>m</small></dd></div>' +
     // rumsytan räknar med loftet och kan då bli större än byggytan: säg det
-    siffra(H.rum.some(r => /loft/i.test(r[0])) ? 'Rumsyta inkl. loft' : 'Rumsyta', rumsyta(H), 1, 'm²') + siffra('Rum', H.rum.length, 0, '');
+    siffra(H.rum.some(r => /loft/i.test(r[0])) ? 'Rumsyta inkl. loft' : 'Rumsyta', rumsyta(H), 1, 'm²') +
+    '<div><dt>Rum</dt><dd><b class="kf__rumtext">' + esc(rumEtikett(Object.keys(MODELLER).find(k => MODELLER[k] === H) || val.modell)) + '</b></dd></div>';
   const storst = Math.max(...H.rum.map(r => r[1]));
   const rum = document.querySelector('[data-rum]');
   rum.innerHTML = H.rum.map((r, i) =>
@@ -1490,6 +1520,7 @@ function sattInne(pa, vyIndex, opt) {
   if (vyIndex != null) vyIndex = Math.min(Math.max(0, vyIndex | 0), Math.max(0, inneVyer().length - 1));
   const byterRum = pa && inneLage && vyIndex != null && vyIndex !== inneVy;
   if (pa === inneLage && !byterRum) return inneJobb;
+  if (!prodAker) stangProdukt(true);   // Se inne / Se ute för hand: produktkortet går bort
   const forra = inneLage;
   inneLage = pa;
   if (vyIndex != null) inneVy = vyIndex; else if (pa && !forra) inneVy = 0;
@@ -1760,6 +1791,7 @@ function ritaLagesknappar() {
   if (planKnapp) planKnapp.setAttribute('aria-pressed', String(l === 'plan'));
 }
 function bytLage(mal) {
+  stangProdukt(true);
   const fran = vyLage();
   if (mal === fran) { ritaLagesknappar(); return; }
   if (mal === 'plan') {
@@ -1925,6 +1957,7 @@ function spara() {
   const q = new URLSearchParams();
   q.set('modell', MODELL_UT[val.modell] || val.modell);
   ['fasad', 'tak', 'detalj'].forEach(g => { if (val[g]) q.set(g, val[g]); });
+  if (Q0.get('taktyp')) q.set('taktyp', Q0.get('taktyp'));   // takmaterial (motorn: betong, tegel, plat; standard falsad plåt)
   const tv = Math.round(+tid.value * 100) / 100;
   if (tv !== STANDARD_TID) q.set('tid', String(tv));
   const m = valdMiljo();
@@ -1936,6 +1969,7 @@ function spara() {
   if (tomtLage) q.set('tomt', '1');
   if (typeof bilVal === 'string' && bilVal !== 'tesla') q.set('bil', bilVal);
   if (planLage) q.set('plan', '1');
+  q.set('paket', prisKort ? prisKort.paket() : lasPaket());   // valt paket (husritare-pris.js)
   if (fullLank) fullLank.href = 'rita-hus.html?' + q.toString();
   // inbäddad: iframens adress lämnas i fred, bara länken till hela husritaren följer med
   if (INB) return;
@@ -2189,19 +2223,331 @@ function oppnaSumma() {
   const { H } = beskrivning(val);
   document.querySelector('[data-summa-namn]').textContent = H.namn;
   document.querySelector('[data-summa-fakta]').textContent = fakta(H);
-  document.querySelector('[data-summa-dl]').innerHTML = rader(val);
+  const chips = document.querySelector('[data-summa-chips]');
+  if (chips) chips.innerHTML = '<div><dt>Rum</dt><dd>' + esc(rumEtikett(val.modell)) + '</dd></div>' +
+    '<div><dt>' + (H.rum.some(r => /loft/i.test(r[0])) ? 'Rumsyta inkl. loft' : 'Rumsyta') + '</dt><dd>' + nf(rumsyta(H).toFixed(1)) + ' m²</dd></div>';
+  document.querySelector('[data-summa-dl]').innerHTML = rader(val, !!chips);
+  // paketet och priset: samma som priskortet visar
+  const prisDl = document.querySelector('[data-summa-pris]');
+  if (prisDl) {
+    const k = document.querySelector('.kpris'), v = k && k.querySelector('[data-kpris-paket][aria-checked="true"]');
+    const fran = v && v.querySelector('[data-kpris-fran]'), belopp = v && v.querySelector('[data-kpris-belopp]'), moms = k && k.querySelector('[data-kpris-moms]');
+    prisDl.innerHTML = v ? '<div><dt>Paket</dt><dd>' + esc(((v.querySelector('.kpris__pnamn') || v).firstChild || {}).textContent || '') + '</dd></div>' +
+      '<div class="ksam__prisrad"><dt>Pris</dt><dd><b>' + (fran && !fran.hidden ? 'från ' : '') + esc(belopp ? belopp.textContent : '') + '</b>' + (moms && moms.textContent ? '<small>' + esc(moms.textContent) + '</small>' : '') + '</dd></div>' : '';
+    prisDl.hidden = !v;
+  }
   const plan = document.querySelector('[data-summa-plan]');
   plan.src = 'images/plan/' + PLANER[val.modell][0][0] + '.webp';
   plan.alt = 'Plan för ' + H.namn;
-  // bilden är en 1×-kopia av duken i en <canvas> (ingen PNG, ingen storleksändring)
+  const rull = document.querySelector('[data-summa-rull]');
+  if (rull) rull.scrollTop = 0;
+  summaDialog.showModal();
+  // bilden: bara huset, utan miljön (snö, staket, bil), mot en ljus studiobakgrund; annars en 1×-kopia av duken
+  // (efter showModal: rutan har sin storlek, så att bilden ritas i rätt format)
   const bild = document.querySelector('[data-summa-bild]');
   if (ritare && bild) {
-    if (bild.tagName === 'CANVAS' && kan('bildTill')) ritare.bildTill(bild); else if (bild.tagName === 'IMG') bild.src = ritare.nedladdning();
-    bild.setAttribute('aria-label', H.namn + (inneLage ? ' inifrån' : ' i 3D'));
+    if (bild.tagName === 'CANVAS') { if (!summa3dStart(bild) && !produktbild(bild) && kan('bildTill')) ritare.bildTill(bild); }
+    else if (bild.tagName === 'IMG') bild.src = ritare.nedladdning();
+    bild.setAttribute('aria-label', H.namn + ', fasad ' + beskrivning(val).f[0].toLowerCase() + ', tak ' + beskrivning(val).t[0].toLowerCase());
   }
-  summaDialog.showModal();
+}
+// Produktbilden: huset ensamt (miljön, bilen och måtten döljs en enda bildruta), ritat från
+// kamerans håll runt huset i en lugn vinkel, inpassat i rutan, med en mjuk skugga under.
+// Allt återställs direkt efteråt och scenen ritas om som förut. false om motorn saknar delarna.
+// opt (offertens studiobild, husritare-app.js via duk.__produktbild): bredd/hojd i px (annars rutans
+// storlek), vinkel (radianer runt huset från framsidan, annars kamerans håll), ljus (ljus botten även
+// i mörkt tema), studio (fast eftermiddagsljus, ingen snö, inga utemöbler) och skarp (ritas i full
+// storlek i stället för att skalas upp från duken).
+let produktLada = null;
+function produktbild(duk, opt = {}) {
+  const S = ritare && ritare.sprang;
+  if (!S || !S.THREE || !S.renderer || typeof S.hus !== 'function') return false;
+  const { THREE, scene, kamera, renderer } = S, hus = S.hus();
+  if (!hus) return false;
+  const yta = duk.parentElement ? { width: duk.parentElement.offsetWidth, height: duk.parentElement.offsetHeight } : { width: 0, height: 0 };
+  const pr = Math.min(2, window.devicePixelRatio || 1);
+  const W = opt.bredd || Math.max(320, Math.round((yta.width || 640) * pr)), Hh = opt.hojd || Math.max(240, Math.round((yta.height || 480) * pr));
+  if (duk.width !== W || duk.height !== Hh) { duk.width = W; duk.height = Hh; }
+  const behall = new Set();
+  for (let o = hus; o; o = o.parent) behall.add(o);
+  const dolda = [];
+  const dolj = grupp => grupp.children.forEach(c => {
+    if (behall.has(c)) { if (c !== hus) dolj(c); return; }
+    if (c.isLight) return;
+    let ljus = false; c.traverse(x => { if (x.isLight) ljus = true; });
+    if (ljus) { dolj(c); return; }
+    if (c.visible) { c.visible = false; dolda.push(c); }
+  });
+  const mork = !opt.ljus && document.documentElement.getAttribute('data-tema') === 'mork';
+  const dimma0Lage = scene.fog ? [scene.fog.near, scene.fog.far, scene.fog.density] : null;
+  const bg0 = scene.background, dimma0 = scene.fog, vp = new THREE.Vector4(), sc = new THREE.Vector4(), sct = renderer.getScissorTest();
+  renderer.getViewport(vp); renderer.getScissor(sc);
+  const matt = typeof S.matt === 'function' ? S.matt() : null, mattSyns = matt && matt.visible;
+  const mobler = opt.studio ? hus.getObjectByName('mobler') : null, moblerSyns = mobler && mobler.visible;
+  const studio0 = opt.studio ? { tid: ritare.val().tid, expo: renderer.toneMappingExposure, sno: S.sno ? S.sno.value : 0 } : null;
+  // studio: 'latt' (sammanfattningens 3D, varje bildruta): ingen snö och inga utemöbler, men kundens eget ljus
+  // (ljusbytet ritar om solens skuggkarta två gånger per bild; det görs bara för de skarpa bilderna)
+  const tungStudio = !!opt.studio && opt.studio !== 'latt';
+  let pr0 = null;
+  try {
+    dolj(scene);
+    if (mattSyns) matt.visible = false;
+    if (studio0) {
+      if (tungStudio && kan('satt')) ritare.satt('tid', 15);
+      renderer.toneMappingExposure = Math.abs(renderer.toneMappingExposure);   // vid sjön är den negativ (sommargraderingen)
+      if (S.sno) S.sno.value = 0;
+      if (moblerSyns) mobler.visible = false;
+      if (tungStudio) {
+        if (S.skuggRam) S.skuggRam();   // solens skuggor efter det nya ljuset
+        renderer.shadowMap.needsUpdate = true;
+      }
+    }
+    hus.updateMatrixWorld(true);
+    // lådan runt huset räknas en gång per hus (sammanfattningens 3D ritar många bilder i rad)
+    const lada = produktLada && produktLada.hus === hus && produktLada.studio === !!opt.studio ? produktLada : null;
+    const box = lada ? lada.box.clone() : new THREE.Box3(), b = new THREE.Box3();
+    if (!lada) {
+    hus.traverseVisible(o => {
+      if (!o.isMesh || !o.geometry || o.isInstancedMesh) return;
+      if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+      box.union(b.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld));
+    });
+    // bara själva huset: lådan kapas vid husets mått (L, W, höjd) med lite luft för takfot och trappor
+    const ud = hus.userData || {};
+    if (ud.L && ud.W && ud.hojd) {
+      const hx = ud.L / 2 + 0.8, hz = ud.W / 2 + 1.2;   // L längs x, W längs z
+      box.intersect(new THREE.Box3(new THREE.Vector3(-hx, -0.3, -hz).add(hus.position), new THREE.Vector3(hx, ud.hojd + 0.6, hz).add(hus.position)));
+    }
+    produktLada = { hus, studio: !!opt.studio, box: box.clone() };
+    }
+    const storlek = box.getSize(new THREE.Vector3());
+    if (box.isEmpty() || storlek.length() > 80) throw new Error('ingen ram');
+    const mitt = box.getCenter(new THREE.Vector3());
+    const dir = typeof opt.vinkel === 'number' ? new THREE.Vector3(Math.sin(opt.vinkel), 0, Math.cos(opt.vinkel)) : kamera.position.clone().sub(mitt); dir.y = 0;
+    if (dir.lengthSq() < 1e-4) dir.set(1, 0, 1);
+    dir.normalize();
+    const hojd = THREE.MathUtils.degToRad(15);
+    dir.multiplyScalar(Math.cos(hojd)); dir.y = Math.sin(hojd);
+    // opt.rikt: ett eget håll (från huset mot kameran), t.ex. sammanfattningens 3D-vinkel, med sin egen höjd
+    if (opt.rikt && opt.rikt.lengthSq() > 1e-6) dir.copy(opt.rikt).normalize();
+    // opt.kam: en egen kamera som följer med mellan bilderna (sammanfattningens 3D, nedladdningen därifrån).
+    // Första gången passas den in här; sedan styrs den utifrån och ritas som den står.
+    const kamKlar = opt.kam && opt.kam.userData && opt.kam.userData.klar;
+    const kam = kamKlar ? opt.kam : new THREE.PerspectiveCamera(28, W / Hh, 0.1, 400);
+    kam.layers.mask = 3;   // taket ligger i lager 1 (dockskåpet): alltid med på produktbilden
+    if (kamKlar) { kam.aspect = W / Hh; kam.updateProjectionMatrix(); kam.updateMatrixWorld(); }
+    else {
+    const vf = THREE.MathUtils.degToRad(kam.fov) / 2, hf = Math.atan(Math.tan(vf) * kam.aspect);
+    const radie = storlek.length() / 2;
+    let avst = radie * 1.04 / Math.sin(Math.min(vf, hf));
+    // inpassning: huset (lådans hörn) fyller ~78 % av bredden eller höjden, två varv
+    const horn = [];
+    for (let i = 0; i < 8; i++) horn.push(new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z));
+    const pv = new THREE.Vector3();
+    for (let varv = 0; varv < 3; varv++) {
+      kam.position.copy(mitt).addScaledVector(dir, avst);
+      kam.near = Math.max(0.1, avst / 40); kam.far = avst * 4;
+      kam.lookAt(mitt); kam.updateProjectionMatrix(); kam.updateMatrixWorld();
+      if (varv === 2) break;
+      const ut = Math.max(...horn.map(h => { pv.copy(h).project(kam); return Math.max(Math.abs(pv.x), Math.abs(pv.y)); }));
+      if (ut > 0.05) avst *= ut / 0.78;
+    }
+    if (opt.kam) {
+      opt.kam.fov = kam.fov; opt.kam.near = kam.near; opt.kam.far = kam.far; opt.kam.aspect = kam.aspect; opt.kam.layers.mask = 3;
+      opt.kam.position.copy(kam.position); opt.kam.quaternion.copy(kam.quaternion); opt.kam.updateProjectionMatrix(); opt.kam.updateMatrixWorld();
+      opt.kam.userData = { klar: true, mal: mitt.toArray(), avst };
+    }
+    }
+    // dimman skjuts bort i stället för att tas bort: fog = null kompilerar om alla material (sekunder)
+    scene.background = new THREE.Color(mork ? 0x2a2621 : 0xffffff);
+    if (dimma0 && 'near' in dimma0) { dimma0.near = 1e4; dimma0.far = 2e4; } else if (dimma0 && 'density' in dimma0) dimma0.density = 0;
+    let buf = renderer.getDrawingBufferSize(new THREE.Vector2()), rpr = renderer.getPixelRatio();
+    if (opt.skarp && (buf.x < W || buf.y < Hh)) {
+      pr0 = rpr; rpr = Math.min(3, rpr * Math.max(W / buf.x, Hh / buf.y));
+      renderer.setPixelRatio(rpr); buf = renderer.getDrawingBufferSize(new THREE.Vector2());
+    }
+    const k = Math.min(1, buf.x / W, buf.y / Hh), pw = Math.floor(W * k), ph = Math.floor(Hh * k);
+    renderer.setScissorTest(true);
+    renderer.setViewport(0, 0, pw / rpr, ph / rpr); renderer.setScissor(0, 0, pw / rpr, ph / rpr);
+    renderer.render(scene, kam);
+    const x = duk.getContext('2d');
+    x.save();
+    if (mork) {
+      x.drawImage(renderer.domElement, 0, buf.y - ph, pw, ph, 0, 0, W, Hh);
+    } else {
+      // studioljus: ljus botten, skuggan under huset, huset multiplicerat ovanpå (vitt blir botten)
+      const g = x.createLinearGradient(0, 0, 0, Hh);
+      g.addColorStop(0, '#f6f3ee'); g.addColorStop(1, '#e9e4db');
+      x.fillStyle = g; x.fillRect(0, 0, W, Hh);
+      const fot = new THREE.Vector3(mitt.x, box.min.y, mitt.z).project(kam);
+      let sx = (fot.x + 1) / 2 * W, sy = (1 - fot.y) / 2 * Hh, rx = W * 0.4, ky = 0.09;
+      if (opt.studio) {
+        // 3/4-vinkeln: skuggan följer husets fotavtryck sett snett ovanifrån (bredare och djupare)
+        let x0 = W, x1 = 0, y0 = Hh, y1 = 0;
+        [[box.min.x, box.min.z], [box.max.x, box.min.z], [box.min.x, box.max.z], [box.max.x, box.max.z]].forEach(([fx, fz]) => {
+          const q = new THREE.Vector3(fx, box.min.y, fz).project(kam), px = (q.x + 1) / 2 * W, py = (1 - q.y) / 2 * Hh;
+          x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py);
+        });
+        sx = (x0 + x1) / 2; sy = (y0 + y1) / 2 + (y1 - y0) * 0.08; rx = (x1 - x0) * 0.62; ky = Math.min(0.6, Math.max(0.12, (y1 - y0) * 0.75 / rx));
+      }
+      x.translate(sx, sy); x.scale(1, ky);
+      const s = x.createRadialGradient(0, 0, 0, 0, 0, rx);
+      s.addColorStop(0, 'rgba(60, 50, 38, 0.38)'); s.addColorStop(0.6, 'rgba(60, 50, 38, 0.14)'); s.addColorStop(1, 'rgba(60, 50, 38, 0)');
+      x.fillStyle = s; x.beginPath(); x.arc(0, 0, rx, 0, Math.PI * 2); x.fill();
+      x.setTransform(1, 0, 0, 1, 0, 0);
+      x.globalCompositeOperation = 'multiply';
+      x.drawImage(renderer.domElement, 0, buf.y - ph, pw, ph, 0, 0, W, Hh);
+    }
+    x.restore();
+    return true;
+  } catch (e) {
+    return false;
+  } finally {
+    dolda.forEach(o => { o.visible = true; });
+    if (mattSyns) matt.visible = true;
+    if (studio0) {
+      if (moblerSyns) mobler.visible = true;
+      if (S.sno) S.sno.value = studio0.sno;
+      if (tungStudio) {
+        if (kan('satt')) ritare.satt('tid', studio0.tid);
+        if (S.skuggRam) S.skuggRam();
+        renderer.shadowMap.needsUpdate = true;
+      }
+      renderer.toneMappingExposure = studio0.expo;
+    }
+    if (pr0 !== null) renderer.setPixelRatio(pr0);
+    scene.background = bg0; scene.fog = dimma0;
+    if (dimma0) { if ('near' in dimma0) { dimma0.near = dimma0Lage[0]; dimma0.far = dimma0Lage[1]; } else if ('density' in dimma0) dimma0.density = dimma0Lage[2]; }
+    renderer.setScissorTest(sct); renderer.setViewport(vp); renderer.setScissor(sc);
+    renderer.render(scene, kamera);
+  }
+}
+
+// Sammanfattningens 3D: samma motor och scen som ritaren, ingen andra motor. Varje bildruta är en
+// produktbild (studio 'latt') från en egen kamera som en egen OrbitControls styr på rutans duk;
+// huvudvyn återställs och ritas om i samma uppgift, så den är orörd när rutan stängs. Bilden ritas
+// bara när något rör sig: autorotation tills man tar i huset, dämpning, åkningen tillbaka.
+// Pekskärm: ett finger i sidled vrider, lodrätt rullar (touch-action: pan-y), två fingrar nyper.
+// Dubbelklick/dubbeltryck och 0 återställer, piltangenterna vrider, +/− zoomar.
+const summa3d = { kam: null, styr: null, duk: null, ram: 0, oppen: false, start: null, aka: null, tips: null };
+function summa3dBegar() { if (summa3d.oppen && !summa3d.ram) summa3d.ram = requestAnimationFrame(summa3dRuta); }
+function summa3dRuta(nu) {
+  summa3d.ram = 0;
+  if (!summa3d.oppen) return;
+  const { kam, styr } = summa3d;
+  let ror = false;
+  if (summa3d.aka) {
+    const A = summa3d.aka, t = Math.min(1, (nu - A.t0) / A.tid), e = 1 - Math.pow(1 - t, 3);
+    kam.position.lerpVectors(A.fran, A.till, e); styr.target.lerpVectors(A.mf, A.mt, e);
+    if (t >= 1) summa3d.aka = null; else ror = true;
+  }
+  if (styr.update()) ror = true;
+  produktbild(summa3d.duk, { kam, studio: 'latt' });
+  if (ror || styr.autoRotate) summa3dBegar();
+}
+function summa3dAka(pos, mal, tid = 600) {
+  const { kam, styr } = summa3d;
+  if (lugn() || !tid) { kam.position.copy(pos); styr.target.copy(mal); styr.update(); summa3dBegar(); return; }
+  summa3d.aka = { fran: kam.position.clone(), till: pos.clone(), mf: styr.target.clone(), mt: mal.clone(), t0: performance.now(), tid };
+  summa3dBegar();
+}
+function summa3dTagit() {
+  if (!summa3d.styr) return;
+  summa3d.styr.autoRotate = false;
+  const t = summa3d.tips;
+  if (t && !t.hidden) { t.classList.add('ksam__tips--ut'); setTimeout(() => { t.hidden = true; }, 300); }
+}
+function summa3dStart(duk) {
+  const S = ritare && ritare.sprang;
+  if (!S || !S.THREE || !S.renderer) return false;
+  const T = S.THREE;
+  if (!summa3d.kam) {
+    summa3d.duk = duk;
+    summa3d.kam = new T.PerspectiveCamera(28, 1, 0.1, 400);
+    const st = new OrbitControls(summa3d.kam, duk);
+    st.enableDamping = true; st.dampingFactor = 0.08; st.enablePan = false; st.rotateSpeed = 0.7; st.zoomSpeed = 0.8;
+    st.minPolarAngle = 0.2; st.maxPolarAngle = Math.PI * 0.49; st.autoRotateSpeed = 0.6;
+    st.addEventListener('start', summa3dTagit);
+    st.addEventListener('change', summa3dBegar);
+    summa3d.styr = st;
+    duk.style.touchAction = 'pan-y';   // OrbitControls sätter none: då gick arket inte att rulla på mobilen
+    duk.tabIndex = 0;
+    const aterstall = () => { summa3dTagit(); if (summa3d.start) summa3dAka(summa3d.start.pos, summa3d.start.mal); };
+    duk.addEventListener('dblclick', e => { e.preventDefault(); aterstall(); });
+    let sist = null;
+    duk.addEventListener('pointerup', e => {
+      if (e.pointerType !== 'touch') return;
+      const n = { t: e.timeStamp, x: e.clientX, y: e.clientY };
+      if (sist && n.t - sist.t < 320 && Math.hypot(n.x - sist.x, n.y - sist.y) < 30) { aterstall(); sist = null; return; }
+      sist = n;
+    });
+    duk.addEventListener('keydown', e => {
+      const steg = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+      const zoom = e.key === '+' || e.key === '=' ? 0.85 : e.key === '-' || e.key === '_' ? 1.18 : 0;
+      if (e.key === '0' || e.key === 'Home') { e.preventDefault(); aterstall(); return; }
+      if (!steg && !zoom) return;
+      e.preventDefault(); summa3dTagit();
+      const sf = new T.Spherical().setFromVector3(summa3d.kam.position.clone().sub(st.target));
+      if (steg) { sf.theta += steg[0] * 0.26; sf.phi = Math.min(st.maxPolarAngle, Math.max(st.minPolarAngle, sf.phi + steg[1] * 0.14)); }
+      if (zoom) sf.radius = Math.min(st.maxDistance, Math.max(st.minDistance, sf.radius * zoom));
+      summa3dAka(new T.Vector3().setFromSpherical(sf).add(st.target), st.target.clone(), 300);
+    });
+    const tips = document.createElement('span');
+    tips.className = 'ksam__tips'; tips.id = 'ksam-tips';
+    tips.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14.3-4.9M20 12a8 8 0 0 1-14.3 4.9M18.6 3.2v4.2h-4.2M5.4 20.8v-4.2h4.2"/></svg><span></span>';
+    duk.parentElement.appendChild(tips);
+    duk.setAttribute('aria-describedby', 'ksam-tips');
+    summa3d.tips = tips;
+    summaDialog.addEventListener('close', summa3dStopp);
+  }
+  // ny inpassning varje gång: från huvudkamerans håll, som förut
+  summa3d.kam.userData = {};
+  summa3d.aka = null;
+  if (!produktbild(duk, { kam: summa3d.kam, studio: 'latt' })) return false;
+  const u = summa3d.kam.userData, st = summa3d.styr;
+  st.target.fromArray(u.mal);
+  st.minDistance = u.avst * 0.55; st.maxDistance = u.avst * 1.8;
+  st.update();
+  summa3d.start = { pos: summa3d.kam.position.clone(), mal: st.target.clone() };
+  st.autoRotate = !lugn();
+  summa3d.tips.hidden = false; summa3d.tips.classList.remove('ksam__tips--ut');
+  summa3d.tips.lastChild.textContent = matchMedia('(pointer: coarse)').matches ? 'Dra i sidled för att vrida' : 'Dra för att vrida · dubbelklicka för att börja om';
+  duk.parentElement.classList.add('ksam__bild--3d');
+  summa3d.oppen = true;
+  summa3dBegar();
+  return true;
+}
+// rutan stängd: ingen bildruta till, huvudvyn ritas om av motorn (inget annat att släppa: samma motor)
+function summa3dStopp() {
+  summa3d.oppen = false; summa3d.aka = null;
+  if (summa3d.ram) { cancelAnimationFrame(summa3d.ram); summa3d.ram = 0; }
+  if (summa3d.styr) summa3d.styr.autoRotate = false;
+  const S = ritare && ritare.sprang;
+  if (S && S.begarRender) S.begarRender();
+}
+// Ladda ned bild i sammanfattningen: en skarp studiobild (2400 × 1600) från rutans vinkel just nu
+function summa3dNedladdning() {
+  if (!summa3d.oppen || !summa3d.kam || !summa3d.kam.userData.klar) return false;
+  // samma håll som i rutan, men huset passas in på nytt i bildens format (fyller ca 78 %)
+  const rikt = summa3d.kam.position.clone().sub(summa3d.styr.target);
+  const c = document.createElement('canvas');
+  if (!produktbild(c, { rikt, bredd: 2400, hojd: 1600, studio: true, ljus: true, skarp: true })) return false;
+  const a = document.createElement('a');
+  a.href = c.toDataURL('image/png');
+  a.download = 'legohus-' + val.modell + '.png';
+  document.body.appendChild(a); a.click(); a.remove();
+  summa3dBegar();   // rutans bild igen (den skarpa bilden ritades med studioljus)
+  return true;
 }
 document.querySelector('[data-oppna-summa]').addEventListener('click', oppnaSumma);
+// planritningen i sammanfattningen förstoras i planens egen helskärmsdialog
+const summaPlanKnapp = document.querySelector('[data-summa-planstor]');
+if (summaPlanKnapp) summaPlanKnapp.addEventListener('click', () => {
+  const plan = document.querySelector('[data-summa-plan]'), stor = document.querySelector('[data-plan-stor]');
+  if (!plan.src || !stor) return;
+  stor.src = plan.src; stor.alt = plan.alt;
+  planDialog.showModal();
+});
 
 // ==== Kortkommandon: ?-knappen i verktygsraden eller tangenten ? ====
 const tangentDialog = document.querySelector('[data-tangent-dialog]');
@@ -2245,9 +2591,22 @@ function ritaEtikett() {
   duk.setAttribute('aria-label', H.namn + ' i 3D' + (inneLage ? ', inifrån' : '') + (oppetLage ? ', taket av' : '') + ', ' + ljusText + '. ' +
     (inneLage ? 'Gå med W A S D eller piltangenterna.' : 'Dra för att vrida, scrolla eller nyp för att zooma. Piltangenterna byter väderstreck.'));
 }
-document.querySelector('[data-ladda-summa]').addEventListener('click', () => document.querySelector('[data-ladda]').click());
+document.querySelector('[data-ladda-summa]').addEventListener('click', () => { if (!summa3dNedladdning()) document.querySelector('[data-ladda]').click(); });
 document.querySelector('[data-spara-summa]').addEventListener('click', e => sparaNu(e.currentTarget));
 ritaMina();
+// ---- Priskortet (husritare-pris.js): valt paket, pris och Begär offert, synkat med sprängvyn ----
+// Inbäddad och foto: inget kort, men paketet följer med i länken till hela husritaren.
+const TAKTYP_TILLVAL = { betong: 'Betongpannor', tegel: 'Tegeltak' };
+prisKort = kopplaPris({
+  scen, visa: !INB && !FOTO,
+  modell: () => MODELL_UT[val.modell] || val.modell,
+  namn: () => MODELLER[val.modell].namn,
+  sprang: () => (ritare && ritare.sprangVy) || null,
+  tillval: () => TAKTYP_TILLVAL[Q0.get('taktyp')] || '',
+  upptagen: () => !!(ritare && kan('upptagen') && ritare.upptagen()),
+  // adressen (spara) först: produktlistan läser ?paket= när den får händelsen
+  vidByt: id => { ritaSkicka(); spara(); dispatchEvent(new CustomEvent('husritare:paket', { detail: { paket: id } })); },
+});
 byggProver();
 uppdatera();
 startar = false;
@@ -2532,9 +2891,21 @@ if (kan('spak') && !FOTO) {
   // korrektionen (px) som behövdes sist, för samma scenbredd och samma läge: en ny mätning
   // börjar där, annars växlade raden fram och tillbaka (flytten mätte om utan korrektionen)
   let korr = 0, korrNyckel = '';
+  // Resultatet sparas per (bredd, läge, vilka knappar som syns och deras text): samma läge igen
+  // (t.ex. Se inne fram och tillbaka) sätts direkt, utan kopian och dess mätningar (de tvingade
+  // omlayout i en slinga, 150–550 ms per byte). Typsnittet som laddas klart tömmer minnet.
+  const minnet = new Map();
+  const knappSig = () => [...rad.querySelectorAll('.kf__vk')].map(e => (e.hidden ? '-' : '+') + e.textContent.trim()).sort().join('/');
   function passa(minus = null, varv = 0) {
     vantar = 0;
     const kn = rad.parentNode.clientWidth + '|' + lageNu();
+    const sig = kn + '|' + knappSig();
+    if (minus === null && minnet.has(sig)) {
+      const m = minnet.get(sig);
+      if (m.nyckel !== nuUt) { nuUt = m.nyckel; satt(m.ut, m.steg, m.tomma); }
+      korr = m.korr; korrNyckel = kn;
+      return;
+    }
     if (minus === null) minus = kn === korrNyckel ? korr : 0;
     const cs = getComputedStyle(rad), spand = cs.translate === 'none' || cs.translate === '';
     const plats = rad.parentNode.clientWidth - (spand ? 2 * (parseFloat(cs.left) || 8) : 32) + 0.5 - minus;
@@ -2592,6 +2963,7 @@ if (kan('spak') && !FOTO) {
     lagen.forEach((r, i) => { over = Math.max(over, r.right - hoger); if (i) over = Math.max(over, lagen[i - 1].right - r.left - 6); });
     if (over > 1 && varv < 4) { passa(minus + over + 2, varv + 1); return; }
     korr = minus; korrNyckel = kn;
+    minnet.set(sig, { nyckel, ut, steg, tomma, korr: minus });
   }
   function satt(ut, steg, tomma) {
     STEG.forEach(c => { const pa = steg.includes(c); if (rad.classList.contains(c) !== pa) rad.classList.toggle(c, pa); });
@@ -2606,13 +2978,23 @@ if (kan('spak') && !FOTO) {
     hall.hidden = !ut.length;
     if (hall.hidden) oppna(false);
   }
-  const snart = () => { if (!vantar) vantar = requestAnimationFrame(() => passa()); };
+  // inte medan kameran åker (Se inne, produktkort): efter landningen, när datorn är ledig
+  const snart = () => {
+    if (vantar) return;
+    vantar = 1;
+    const kor = () => {
+      if (ritare && kan('flyger') && ritare.flyger()) { setTimeout(kor, 180); return; }
+      if (typeof requestIdleCallback === 'function') requestIdleCallback(() => passa(), { timeout: 400 });
+      else requestAnimationFrame(() => passa());
+    };
+    kor();
+  };
   new ResizeObserver(snart).observe(rad.parentNode);
   // gruppernas egen bredd (typsnittet laddas, Se inne blir Se ute, en knapp döljs): mät om.
   // Resultatet är stabilt, så flyttningarna här ger ingen ny omgång.
   const grpObs = new ResizeObserver(snart);
   rad.querySelectorAll('.kf__vgrupp').forEach(g => grpObs.observe(g));
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(snart);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { minnet.clear(); snart(); });
   new MutationObserver(() => { const n = lageNu(); if (n !== sistLage) { sistLage = n; snart(); } }).observe(scen, { attributes: true, attributeFilter: ['class'] });
   // en knapp som döljs eller visas (Spel, Lampor, Hjälp inne) kan ändra vad som ryms
   new MutationObserver(l => { if (l.some(r => r.target !== hall && r.target !== lista && r.target.classList && r.target.classList.contains('kf__vk'))) snart(); }).observe(rad, { attributes: true, attributeFilter: ['hidden'], subtree: true });
@@ -2651,4 +3033,278 @@ if (kan('spak') && !FOTO) {
   addEventListener('scroll', kolla, { passive: true });   // billigt: bara scrollY och en klass
   // fokus i raden (tangentbord) visar den alltid
   rad.addEventListener('focusin', () => visa(true));
+})();
+
+// ---- Vad ingår?: sprängvyn med paketen (husritare-sprang.js) ----
+// Modulen tar knappen, panelen och etiketterna; Se inne, Öppna tak och Planlösning stänger den.
+if (ritare && ritare.sprang && !FOTO && !INB) {
+  import('./husritare-sprang.js?v=' + MOTOR_V)
+    .then(m => m.kopplaSprang({ ritare, scen, knapp: document.querySelector('[data-vadingar]'), tillUte: () => bytLage('ute'), lage: vyLage }))
+    .catch(e => console.warn('sprängvyn', e));
+}
+
+// ---- Produktkorten: välj en del (listan i panelen, taket i bilden), kameran åker dit ----
+// Ute: närbild i motorn (ritare.produkt). Inne: in genom dörren till rätt rum, sedan fram till
+// saken. Kortet visas när kameran närmar sig och stängs med X, Esc eller ett klick utanför.
+var prodAker = false;   // var: aka() frågar innan raden körts
+let prodKort = null, prodSenast = null, prodJobb = 0;
+let prodListaVisa = null;   // sätts av produktLista(): markerar raden och öppnar dess grupp
+const PROD_RUMVY = { wc: /bad/i, dusch: /bad/i, komod: /bad/i, kylfrys: /kök/i, ugn: /kök/i, flakt: /kök/i, mikro: /kök/i, kok: /kök/i, innerdorr: /hall|korridor/i, trappa: /kök|allrum/i };
+const prodSynlig = P => (!P.loft || harLoft()) && (!P.modeller || P.modeller.includes(val.modell));   // trappan bara i hus med loft, mikron bara där den finns
+let prodFok = null, prodPa = false;
+// Esc medan kameran ännu åker dit (kortet syns inte än): avbryt valet
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && prodPa && prodKort && !prodKort.oppen()) { e.stopPropagation(); e.preventDefault(); stangProdukt(false); } }, true);
+// genomskärningen (isolering, underlagsduk) och fokusramen bort
+function prodStad(snittOcksa = true) {
+  if (prodFok) prodFok.gom();
+  const sv = ritare && ritare.sprangVy;
+  if (snittOcksa && sv && sv.snittStang) { try { sv.snittStang(); } catch (e) { console.warn(e); } }
+}
+// bildens fria del (andelar): kortet ligger nere till vänster i bilden på bred skärm, verktygsraden nederst
+function prodFri() {
+  const W = scen.clientWidth, H = scen.clientHeight;
+  if (!W || !H) return null;
+  const y0 = Math.min(0.2, 64 / H), y1 = Math.max(0.7, (H - 96) / H);
+  if (matchMedia('(max-width: 600px)').matches || W < 760) return { x0: 0.04, x1: 0.96, y0, y1 };
+  return { x0: Math.min(0.5, (Math.min(360, W - 32) + 36) / W), x1: 1 - 20 / W, y0, y1 };
+}
+// fokusramen när kameran landat
+function prodFokus(jobb) {
+  if (!prodFok) prodFok = skapaFokus(scen);
+  const t0 = performance.now();
+  const f = () => {
+    if (jobb !== prodJobb) return;
+    const ror = (kan('flyger') && ritare.flyger()) || (kan('upptagen') && ritare.upptagen()) || (kan('gar') && ritare.gar());
+    if (ror) { if (performance.now() - t0 < 7000) setTimeout(f, 90); return; }
+    const r = kan('produktRuta') && ritare.produktRuta();
+    if (r && !r.bakom) prodFok.visa(r);
+  };
+  setTimeout(f, 150);
+}
+// listans ordning (grupperna Ute, Stomme, Inne, Kök, Badrum) och dess filter styr Föregående/Nästa
+const prodOrdning = () => {
+  const rader = [...document.querySelectorAll('[data-produkter] .kprodval:not([hidden])')].map(b => b.getAttribute('data-produkt'));
+  const alla = OMRADEN.flatMap(o => o[2]).map(id => PRODUKTER.find(p => p.id === id)).filter(p => p && prodSynlig(p)).map(p => p.id);
+  return rader.length && prodKort && rader.includes(prodKort.id()) ? rader : alla;
+};
+const vantaMotor = (max = 12000) => new Promise(r => {
+  const t0 = performance.now();
+  const f = () => { if (performance.now() - t0 > max || !(kan('flyger') && ritare.flyger()) && !(kan('arOppen') && ritare.arOppen()) && !(kan('upptagen') && ritare.upptagen())) r(); else setTimeout(f, 120); };
+  f();
+});
+function stangProdukt(tyst) {
+  prodJobb++;
+  prodStad();
+  // på väg (kortet syns ännu inte): målet släpps ändå, kameran stannar där den är
+  if (prodPa && !(prodKort && prodKort.oppen())) { prodPa = false; if (kan('produktSlut')) { try { ritare.produktSlut(); } catch (e) { console.warn(e); } } document.querySelectorAll('[data-produkt]').forEach(b => b.setAttribute('aria-pressed', 'false')); }
+  prodPa = false;
+  if (!prodKort || !prodKort.oppen()) return;
+  prodKort.dolj();
+  if (kan('produktSlut')) { try { ritare.produktSlut(); } catch (e) { console.warn(e); } }
+  document.querySelectorAll('[data-produkt]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  if (!tyst && prodSenast && prodSenast.isConnected) prodSenast.focus({ preventScroll: true });
+}
+async function oppnaProdukt(id, kalla) {
+  const P = PRODUKTER.find(p => p.id === id);
+  if (!P || !ritare || !kan('produkt') || FOTO) return;
+  if (!prodKort) {
+    prodKort = skapaKort(scen, {
+      vidStang: () => stangProdukt(false),
+      vidByt: steg => { const l = prodOrdning(), i = l.indexOf(prodKort.id()), n = l[(i + steg + l.length) % l.length]; if (n) oppnaProdukt(n, document.querySelector('[data-produkter] .kprodval[data-produkt="' + n + '"]') || prodSenast); },
+    });
+  }
+  const jobb = ++prodJobb;
+  prodPa = true;
+  prodKort.halla();
+  prodStad(!P.snitt);   // byte till en annan del: snittet stängs (till en annan dold del: byts i ett svep)
+  if (kalla) prodSenast = kalla;
+  document.querySelectorAll('[data-produkt]').forEach(b => b.setAttribute('aria-pressed', String(b.getAttribute('data-produkt') === id)));
+  if (prodListaVisa) prodListaVisa(id, !!(kalla && kalla.closest && kalla.closest('[data-produkter]')));
+  // på mobil ligger listan under bilden: bilden upp i fönstret först
+  // (smal skärm: bilden överst, kortet är en bottenpanel under den)
+  const r = scen.getBoundingClientRect(), smalSk = matchMedia('(max-width: 600px)').matches;
+  if (kalla && (smalSk ? Math.abs(r.top - 72) > 24 : r.bottom < 120 || r.top > innerHeight - 160)) {
+    if (smalSk) window.scrollTo({ top: Math.max(0, scrollY + r.top - 72), behavior: lugn() ? 'auto' : 'smooth' });
+    else scen.scrollIntoView({ behavior: lugn() ? 'auto' : 'smooth', block: 'center' });
+  }
+  snurrPa = false; sn.setAttribute('aria-pressed', 'false'); if (kan('snurra')) ritare.snurra(false);
+  if (planLage) { sattPlan(false, true); ritaLagesknappar(); }
+  if (P.plats === 'inne' && kanInne) {
+    if (!inneLage) {
+      if (oppetLage) sattOppen(false, true);
+      const l = inneVyer(), re = PROD_RUMVY[id], i = re ? l.findIndex(v => v && re.test(v.namn || '')) : -1;
+      prodAker = true;
+      try { await sattInne(true, i >= 0 ? i : 0, DORR); } finally { prodAker = false; }
+      ritaLagesknappar();
+    }
+  } else if (inneLage) {
+    prodAker = true;
+    try { await sattInne(false, undefined, TONA); } finally { prodAker = false; }
+    ritaLagesknappar();
+  } else if (oppetLage) { sattOppen(false); ritaLagesknappar(); }
+  await vantaMotor();
+  if (jobb !== prodJobb) return;
+  let svar = false;
+  const opt = { fri: prodFri() };
+  // dolda delar: en genomskärning i väggen eller taket öppnas, kameran åker till den
+  if (P.snitt && ritare.sprangVy && ritare.sprangVy.snitt) { try { const r = ritare.sprangVy.snitt(id); if (r) opt.ram = r; } catch (e) { console.warn(e); } }
+  try { svar = ritare.produkt(id, opt); } catch (e) { console.warn(e); }
+  if (svar) prodFokus(jobb);
+  if (svar && svar.ute) { nuVy = null; markeraTumme(null); }
+  // kortet när kameran närmar sig (åkningen tar cirka 1,2 s)
+  setTimeout(() => { if (jobb === prodJobb) prodKort.visa(P, !!kalla); }, lugn() ? 0 : svar ? 520 : 0);
+}
+(function produktLista() {
+  const ruta = document.querySelector('[data-produkter]');
+  if (!ruta || FOTO || !kan('produkt')) { if (ruta) ruta.closest('.kgrupp').hidden = true; return; }
+  const PKORT = { klimat: 'Klimatskal', nyckel: 'Nyckelfärdig' };
+  const PVALT = { stomme: 'Prefab stomme', klimat: 'Klimatskal', nyckel: 'Nyckelfärdig', entreprenad: 'Nyckelfärdig entreprenad' };
+  const PILH = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg>';
+  const PILN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+  const minne = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
+  const smal = () => matchMedia('(max-width: 860px)').matches;
+  // valt paket från pristeamet: ?paket= i adressen eller sparat val (prefab-stomme, klimatskal,
+  // nyckelfardig, nyckelfardig-entreprenad, och de gamla korta klimat/nyckel)
+  const valtPaketNamn = () => {
+    let v = null;
+    try { v = new URLSearchParams(location.search).get('paket'); } catch (e) {}
+    if (!v) v = minne('idealhus-paket');
+    v = String(v || '').toLowerCase();
+    return /^(prefab|stomme)/.test(v) ? 'stomme' : /^klimat/.test(v) ? 'klimat' : /^nyckel.*entrepren/.test(v) ? 'entreprenad' : /^nyckel/.test(v) ? 'nyckel' : null;
+  };
+  // för listan räcker tre nivåer: entreprenaden innehåller allt som nyckelfärdigt
+  const valtPaket = () => { const n = valtPaketNamn(); return n === 'entreprenad' ? 'nyckel' : n; };
+  // prefab stomme: allt i listan är tillval; klimatskal: det nyckelfärdiga är tillval
+  const arTillval = (P, vp) => vp === 'stomme' || (vp === 'klimat' && P.paket === 'nyckel');
+  let filter = 'alla', oppen = minne('idealhus-prodgrupp') || 'ute';
+  const omradeFor = id => (OMRADEN.find(o => o[2].includes(id)) || [])[0];
+  // paketetiketten för en rad: [klass, text]
+  const taggFor = P => {
+    const vp = valtPaket(), tillval = arTillval(P, vp);
+    return [tillval ? 'tillval' : P.paket, vp ? (tillval ? 'Tillval' : 'Ingår') : PKORT[P.paket]];
+  };
+  const taggHtml = ([k, t]) => '<span class="kprodval__tagg kprodval__tagg--' + k + '">' + t + '</span>';
+  const rad = P => {
+    const vp = valtPaket(), tillval = arTillval(P, vp);
+    const logga = P.marke ? loggaBild(P.marke, 'kprodval__logga') : '';
+    return '<button type="button" class="kprodval' + (tillval ? ' kprodval--tillval' : '') + '" data-produkt="' + P.id + '" data-paket="' + P.paket + '" aria-pressed="false">' +
+      '<span class="kprodval__ikon">' + (PROD_IKON[P.id] || '') + '</span>' +
+      '<span class="kprodval__text"><b>' + esc(P.del) + '</b>' + (P.marke ? (logga ? '<small class="kprodval__marke" data-logga-hel>' + logga + '</small>' : '<small>' + esc(P.marke) + '</small>') : '<small class="kprodval__ingar">' + (tillval ? 'Tillval' : 'Ingår i ' + PKORT[P.paket]) + '</small>') + '</span>' +
+      taggHtml(taggFor(P)) +
+      '<span class="kprodval__pil">' + PILH + '</span></button>';
+  };
+  const filtrera = () => {
+    ruta.querySelectorAll('.kprodval__filter').forEach(b => b.setAttribute('aria-pressed', String(b.getAttribute('data-filter') === filter)));
+    ruta.querySelectorAll('.kprodgrupp').forEach(g => {
+      let n = 0;
+      g.querySelectorAll('.kprodval').forEach(b => { const syns = filter === 'alla' || b.getAttribute('data-paket') === filter; b.hidden = !syns; if (syns) n++; });
+      g.hidden = !n;
+      const t = g.querySelector('[data-antal]'); if (t) t.textContent = n;
+    });
+  };
+  const oppna = (o, spara) => {
+    oppen = o;
+    if (spara) minne('idealhus-prodgrupp', o);
+    ruta.querySelectorAll('.kprodgrupp').forEach(g => {
+      const ja = g.getAttribute('data-omrade') === o;
+      g.classList.toggle('kprodgrupp--oppen', ja);
+      const rb = g.querySelector('.kprodgrupp__rubrik');
+      rb.setAttribute('aria-expanded', String(ja || smal()));
+      rb.tabIndex = smal() ? -1 : 0;   // smal skärm: rubriken är bara en etikett över chip-raden
+    });
+  };
+  const rita = () => {
+    const vp = valtPaket();
+    ruta.innerHTML =
+      '<div class="kprodval__filtren" role="group" aria-label="Visa paket">' +
+        [['alla', 'Alla'], ['klimat', 'Klimatskal'], ['nyckel', 'Nyckelfärdig']].map(([f, t]) => '<button type="button" class="kprodval__filter" data-filter="' + f + '" aria-pressed="false">' + t + '</button>').join('') + '</div>' +
+      (vp ? '<p class="kprodval__paketnot">Du har valt <b>' + PVALT[valtPaketNamn()] + '</b>' + (vp === 'stomme' ? '. Allt i listan är tillval.' : vp === 'klimat' ? '. Det nedtonade är tillval.' : '. Allt i listan ingår.') + '</p>' : '') +
+      OMRADEN.map(([o, namn, ids]) => {
+        const lista = ids.map(id => PRODUKTER.find(p => p.id === id)).filter(p => p && prodSynlig(p));
+        if (!lista.length) return '';
+        const marken = [...new Set(lista.map(p => p.marke).filter(Boolean))].join(' · ');
+        // samma paket på alla rader: etiketten en gång i rubriken i stället för på varje rad
+        const taggar = lista.map(taggFor), en = taggar.every(t => t[0] === taggar[0][0] && t[1] === taggar[0][1]);
+        return '<section class="kprodgrupp' + (en ? ' kprodgrupp--entagg' : '') + '" data-omrade="' + o + '">' +
+          '<button type="button" class="kprodgrupp__rubrik" aria-expanded="false" aria-controls="kprod-' + o + '"><span class="kprodgrupp__namn">' + esc(namn) + '</span>' +
+          '<span class="kprodgrupp__marken">' + esc(marken) + '</span>' + (en ? taggHtml(taggar[0]).replace('kprodval__tagg ', 'kprodval__tagg kprodgrupp__tagg ') : '') + '<span class="kprodgrupp__antal" data-antal>' + lista.length + '</span>' + PILN + '</button>' +
+          '<div class="kprodval__rad" id="kprod-' + o + '" role="group" aria-label="' + esc(namn) + '">' + lista.map(rad).join('') + '</div></section>';
+      }).join('');
+    loggaReserv(ruta, m => { const e = document.createElement('small'); e.textContent = m; return e; });
+    filtrera();
+    if (!ruta.querySelector('.kprodgrupp[data-omrade="' + oppen + '"]')) oppen = 'ute';
+    oppna(oppen);
+  };
+  rita();
+  // siktnätet för kameran (motorn) byggs när pekaren når listan, när datorn är ledig
+  ruta.addEventListener('pointerenter', () => { const f = () => { if (kan('produktForbered')) ritare.produktForbered(); }; if ('requestIdleCallback' in window) requestIdleCallback(f, { timeout: 800 }); else setTimeout(f, 200); });
+  // markera öppen produkt: öppna dess grupp och scrolla raden in i vy
+  // (smal skärm: bara sidledes i chip-raden, sidan ligger still så bilden syns)
+  prodListaVisa = (id, franListan) => {
+    const o = omradeFor(id), b = ruta.querySelector('.kprodval[data-produkt="' + id + '"]');
+    if (!b || !o) return;
+    if (b.hidden) { filter = 'alla'; filtrera(); }
+    if (o !== oppen) oppna(o, true); else minne('idealhus-prodgrupp', o);
+    const r = b.parentElement, beteende = lugn() ? 'auto' : 'smooth';
+    requestAnimationFrame(() => {
+      if (smal()) {
+        const v = b.offsetLeft - r.offsetLeft;
+        if (v < r.scrollLeft || v + b.offsetWidth > r.scrollLeft + r.clientWidth) r.scrollTo({ left: Math.max(0, v - (r.clientWidth - b.offsetWidth) / 2), behavior: beteende });
+      } else if (!franListan) {
+        const br = b.getBoundingClientRect(), topp = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--k-topp')) || 96;
+        if (br.top < topp || br.bottom > innerHeight - 16) b.scrollIntoView({ block: 'nearest', behavior: beteende });
+      }
+    });
+  };
+  ruta.addEventListener('click', e => {
+    const f = e.target.closest('.kprodval__filter');
+    if (f) { filter = f.getAttribute('data-filter'); filtrera(); return; }
+    const g = e.target.closest('.kprodgrupp__rubrik');
+    if (g) { if (smal()) return; const o = g.closest('.kprodgrupp').getAttribute('data-omrade'); oppna(o === oppen ? '' : o, true); return; }
+    const b = e.target.closest('[data-produkt]'); if (b) oppnaProdukt(b.getAttribute('data-produkt'), b);
+  });
+  // tangentbord: pilarna går mellan rubriker och rader i listans ordning, Enter/mellanslag öppnar
+  ruta.addEventListener('keydown', e => {
+    if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key) || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target.closest('.kprodval__filtren')) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const fl = [...ruta.querySelectorAll('.kprodval__filter')], i = fl.indexOf(e.target);
+      fl[(i + (e.key === 'ArrowRight' ? 1 : -1) + fl.length) % fl.length].focus(); e.preventDefault(); return;
+    }
+    const alla = [...ruta.querySelectorAll('.kprodgrupp__rubrik, .kprodval')].filter(x => x.offsetParent !== null && getComputedStyle(x).visibility !== 'hidden' && x.tabIndex >= 0);
+    const i = alla.indexOf(document.activeElement);
+    if (i < 0) return;
+    // på datorn öppnar höger och stänger vänster en grupp från dess rubrik
+    if (!smal() && e.target.classList.contains('kprodgrupp__rubrik') && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+      const o = e.target.closest('.kprodgrupp').getAttribute('data-omrade');
+      oppna(e.key === 'ArrowRight' ? o : (o === oppen ? '' : oppen), true); e.preventDefault(); return;
+    }
+    const fram = e.key === 'ArrowDown' || e.key === 'ArrowRight';
+    const n = e.key === 'Home' ? 0 : e.key === 'End' ? alla.length - 1 : Math.min(alla.length - 1, Math.max(0, i + (fram ? 1 : -1)));
+    const m = alla[n];
+    m.focus({ preventScroll: smal() });
+    if (smal()) { const r = m.closest('.kprodval__rad'); if (r) { const v = m.offsetLeft - r.offsetLeft; if (v < r.scrollLeft || v + m.offsetWidth > r.scrollLeft + r.clientWidth) r.scrollLeft = v - 16; } }
+    e.preventDefault();
+  });
+  // pristeamets paketval: läs om när det ändras (eget event, annan flik eller bakåt i historiken)
+  const omPaket = () => {
+    const pa = prodKort && prodKort.oppen() ? prodKort.id() : null;
+    rita();
+    if (pa) { document.querySelectorAll('[data-produkt]').forEach(b => b.setAttribute('aria-pressed', String(b.getAttribute('data-produkt') === pa))); prodListaVisa(pa, true); }
+  };
+  ['husritare:paket', 'popstate'].forEach(t => addEventListener(t, omPaket));
+  addEventListener('storage', e => { if (e.key === 'idealhus-paket') omPaket(); });
+  matchMedia('(max-width: 860px)').addEventListener('change', () => oppna(oppen));
+  // taket och fönstren: en genväg i deras färggrupper
+  [['tak', 'tak', 'Om takplåten'], ['detalj', 'fonster', 'Om fönstren']].forEach(([g, id, text]) => {
+    const sek = document.querySelector('.kgrupp[data-grupp="' + g + '"] .kgrupp__text'), P = PRODUKTER.find(p => p.id === id);
+    if (!sek || !P) return;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'kgrupp__produkt'; b.setAttribute('data-produkt', id);
+    b.innerHTML = '<span>' + text + ':</span> <b>' + esc(P.marke + (P.modell ? ' ' + P.modell : '')) + '</b>';
+    b.addEventListener('click', () => oppnaProdukt(id, b));
+    sek.after(b);
+  });
+  // husbyte: trappan finns bara i hus med loft
+  document.querySelectorAll('input[name="modell"]').forEach(r => r.addEventListener('change', () => { stangProdukt(true); setTimeout(rita, 0); }));
 })();

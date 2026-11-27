@@ -1,0 +1,17 @@
+Mejlsignatur – Ahmed Ragragui, Legohus
+
+Filer
+- signatur-legohus-animerad.gif  Den animerade signaturen. Använd den här.
+- signatur-legohus.png           Stillbild, om ett program inte visar GIF.
+- signatur-legohus@2x.png        Stillbild i dubbel upplösning (för tryck eller skarpa skärmar).
+
+Outlook (nya Outlook och Outlook på webben)
+1. Inställningar > Konton > Signaturer > Ny signatur.
+2. Klicka på bildikonen och välj signatur-legohus-animerad.gif.
+3. Spara och välj den som standardsignatur.
+Obs: äldre Outlook för Windows visar bara första bilden, alltså en stillbild.
+
+Gmail
+1. Ladda upp GIF:en till Google Drive.
+2. Inställningar > Visa alla inställningar > Signatur > Skapa ny.
+3. Klicka på bildikonen, välj filen från Google Drive och spara längst ner.

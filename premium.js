@@ -160,24 +160,6 @@
     if (document.fonts) document.fonts.ready.then(function () { flytta(true); });
   }
 
-  /* --- Målgruppsväxeln på startsidan ----------------------------- */
-  var hero = $('.hero[data-malgrupp], .ihtopp[data-malgrupp]');
-  if (hero) {
-    var knappar = $$('.malgrupp button', hero);
-    var satt = function (varde, spara) {
-      hero.setAttribute('data-malgrupp', varde);
-      knappar.forEach(function (b) {
-        b.setAttribute('aria-pressed', String(b.getAttribute('data-malgrupp') === varde));
-      });
-      if (spara) lagra.spara('idealhus-malgrupp', varde);
-    };
-    knappar.forEach(function (b) {
-      b.addEventListener('click', function () { satt(b.getAttribute('data-malgrupp'), true); });
-    });
-    if (lagra.hamta('idealhus-malgrupp') === 'proffs') satt('proffs', false);
-    pausaUtanforVy(hero);
-  }
-
   // Filmen i heron spelas bara när den syns - avkodningen kostar
   // annars bildrutor hela vägen ner genom sidan. Den startas härifrån
   // (inte autoplay), så i telefonens sparläge och vid lugn rörelse
@@ -510,7 +492,7 @@
           '<div><dt>Yta</dt><dd>' + stapel(tal(k, 'yta'), storstYta, 'm²') + '</dd></div>' +
           '<div><dt>Rum</dt><dd>' + stapel(tal(k, 'rum'), storstRum, 'rum') + '</dd></div>' +
           '<div><dt>Leverans</dt><dd>' + stapel(tal(k, 'lev'), storstLev, 'v', true) + '</dd></div>' +
-          '<div><dt>Pris</dt><dd><strong>I offert</strong></dd></div>' +
+          '<div><dt>Pris</dt><dd><strong>' + ({'kupa-30.html':'Från 299 500 kr','kupa-40.html':'Från 450 000 kr','sadel-50.html':'Från 495 000 kr'}[lank] || 'På förfrågan') + '</strong></dd></div>' +
           '</dl>' +
           '<a class="jamforruta__lank" href="' + lank + '">Se ' + k.getAttribute('data-namn') + '</a>' +
           '</article>';
@@ -555,7 +537,7 @@
      husen med bild - klick flyttar reglaget dit. Golvytan ritas i
      isometri (samma sätt som byggscenen på startsidan) med en ruta per
      kvadratmeter, en bil på sin bilplats och en person för skalan, och
-     växer mjukt till den valda ytan. Inga belopp.
+     växer mjukt till den valda ytan. Priset: lägsta paketpris för närmaste hus.
      Stil i design.css 18, märkning i _sidor3.py. */
   (function () {
     var reglage = $('#onskad-yta');
@@ -755,6 +737,9 @@
       modeller.forEach(function (m) { m.classList.toggle('aktiv', nara(m)); });
       hak.forEach(function (m) { m.classList.toggle('aktiv', nara(m)); });
       chips.forEach(function (c) { c.hidden = !nara(c); });
+      // Pris: lägsta paketpriset (Prefab stomme) för närmaste hus, eller På förfrågan.
+      var prisRad = $('[data-yta-pris]', skala), naraChip = chips.filter(nara)[0];
+      if (prisRad && naraChip && naraChip.getAttribute('data-pris')) prisRad.textContent = naraChip.getAttribute('data-pris');
 
       var zon = y <= 30 ? 'a' : y <= 50 ? 'b' : 'c';
       zoner.forEach(function (z) { z.classList.toggle('aktiv', z.classList.contains('zon--' + zon)); });
@@ -2279,303 +2264,6 @@
     byggILugn(sek, bygg, '0px 0px 600px 0px');
   })();
 
-  /* --- 3D-studion på kategorisidorna ---------------------------------
-     De riktiga modellerna (modeller/hus-r*.glb) i model-viewer, i samma
-     skala: kameran står på ett avstånd som passar kategorins största
-     hus, så att ett mindre hus ser mindre ut. Måttlinjer och en människa
-     på 1,8 m ritas ovanpå och följer modellen när man vrider - deras
-     ändpunkter är hotspots i modellen som model-viewer räknar om till
-     skärmen vid varje kamerarörelse. Tre vyer, zoom med knappar (inte
-     med hjulet - då fastnar sidan) och talen räknas fram vid byte.
-     Märkning och mått i _sidor.py (studio3d), stil i design.css 17. */
-  (function () {
-    var sek = $('[data-studio3d]');
-    if (!sek) return;
-    var scen = $('[data-3d-scen]', sek);
-    var knappar = $$('[data-3d-val]', sek);
-    var vyKnappar = $$('[data-vy]', sek);
-    var progress = $('[data-3d-progress]', sek);
-    var person = $('[data-3d-person]', sek);
-    var tips = $('.studio3d__tips', sek);
-    var mattKnapp = $('[data-3d-matt]', sek);
-    var talEl = $$('[data-3d-tal]', sek);
-    var linjer = {}, etiketter = {};
-    ['l', 'b', 'h'].forEach(function (k) {
-      linjer[k] = $$('[data-linje="' + k + '"] line', sek);
-      etiketter[k] = $('[data-etikett="' + k + '"]', sek);
-    });
-    var komma = function (v, dec) { return v.toFixed(dec).replace('.', ','); };
-    var alla = knappar.map(function (b) {
-      var a = function (n) { return b.getAttribute('data-' + n); };
-      return { knapp: b, id: a('id'), namn: a('namn'), yta: +a('yta'), rum: +a('rum'),
-        l: +a('l'), b: +a('b'), h: +a('h') };
-    });
-    if (!alla.length) return;
-    var aktiv = alla[0];
-
-    // Samma kameraavstånd för alla hus i kategorin.
-    var storst = Math.max.apply(null, alla.map(function (d) { return Math.sqrt(d.l * d.l + d.b * d.b); }));
-    var R = storst * 1.2 + 5;
-    var VYER = { horn: [-34, 70, 1], fasad: [0, 84, 0.95], ovan: [0, 0, 1.5] };
-    var vy = 'horn', zoom = 1;
-    // En smal ruta (mobilen) ser mindre på bredden - kameran backar.
-    var rad = function () {
-      var r = scen.getBoundingClientRect();
-      return R * Math.max(1, 1.5 / ((r.width / r.height) || 1.5));
-    };
-    var orbit = function () {
-      var v = VYER[vy];
-      return v[0] + 'deg ' + v[1] + 'deg ' + (rad() * v[2] * zoom).toFixed(2) + 'm';
-    };
-
-    // Måttlinjerna ligger 0,7 m utanför väggarna, på de sidor kameran
-    // ser (sx: vilken gavel, sz: fram- eller baksida): längden längs den
-    // synliga långsidan, bredden längs den synliga gaveln, nockhöjden i
-    // det bortre hörnet och människan framför huset.
-    var PUNKTER = ['l0', 'l1', 'b0', 'b1', 'h0', 'h1', 'p0', 'p1'];
-    function positioner(d, sx, sz) {
-      var L = d.l / 2, B = d.b / 2, u = 0.7, pz = sz * (B + u + 1.3);
-      return {
-        l0: [-L, 0, sz * (B + u)], l1: [L, 0, sz * (B + u)],
-        b0: [sx * (L + u), 0, -B], b1: [sx * (L + u), 0, B],
-        h0: [-sx * (L + u), 0, sz * (B + u)], h1: [-sx * (L + u), d.h, sz * (B + u)],
-        p0: [sx * (L - 1.4), 0, pz], p1: [sx * (L - 1.4), 1.8, pz]
-      };
-    }
-    var sida = '', lager = $('.studio3d__lager', sek);
-
-    // Talen räknas fram från förra huset till nästa.
-    var nu = { yta: aktiv.yta, l: aktiv.l, b: aktiv.b, h: aktiv.h, rum: aktiv.rum };
-    var talRaf = null;
-    function raknaTal(d) {
-      var fran = {}, till = { yta: d.yta, l: d.l, b: d.b, h: d.h, rum: d.rum };
-      Object.keys(nu).forEach(function (k) { fran[k] = nu[k]; });
-      var start = performance.now(), T = lugn ? 0 : 750;
-      cancelAnimationFrame(talRaf);
-      function steg(t) {
-        var x = T ? Math.min(1, Math.max(0, (t - start) / T)) : 1;
-        var e = 1 - Math.pow(1 - x, 3);
-        talEl.forEach(function (el) {
-          var k = el.getAttribute('data-3d-tal');
-          nu[k] = x === 1 ? till[k] : fran[k] + (till[k] - fran[k]) * e;
-          el.textContent = komma(nu[k], Number(el.getAttribute('data-dec')));
-        });
-        if (x < 1) talRaf = requestAnimationFrame(steg);
-      }
-      talRaf = requestAnimationFrame(steg);
-    }
-
-    var mv = null, laddad = false, bokad = false;
-    function satt(el, x1, y1, x2, y2) {
-      el.setAttribute('x1', x1.toFixed(1));
-      el.setAttribute('y1', y1.toFixed(1));
-      el.setAttribute('x2', x2.toFixed(1));
-      el.setAttribute('y2', y2.toFixed(1));
-    }
-    function rita() {
-      bokad = false;
-      if (!mv || !laddad) return;
-      var q = function (n) {
-        var h = mv.queryHotspot('hotspot-' + n);
-        return h && h.canvasPosition;
-      };
-      var orb = mv.getCameraOrbit(), phi = orb.phi;
-      var ny = (Math.sin(orb.theta) < -0.001 ? '-' : '+') + (Math.cos(orb.theta) < 0 ? '-' : '+');
-      if (ny !== sida) {
-        // Kameran har gått runt ett hörn: måtten byter sida med en toning.
-        sida = ny;
-        flyttaPunkter();
-        lager.classList.add('studio3d__lager--byt');
-        setTimeout(function () { lager.classList.remove('studio3d__lager--byt'); boka(); }, 90);
-        return;
-      }
-      // Golvrutnätet är ritat snett; rakt uppifrån tonar det bort.
-      scen.classList.toggle('studio3d--uppifran', phi < 0.6);
-      [['l', 'l0', 'l1'], ['b', 'b0', 'b1'], ['h', 'h0', 'h1']].forEach(function (x) {
-        var a = q(x[1]), b = q(x[2]);
-        var g = linjer[x[0]], et = etiketter[x[0]];
-        var dx = a && b ? b.x - a.x : 0, dy = a && b ? b.y - a.y : 0;
-        var len = Math.sqrt(dx * dx + dy * dy);
-        // Rakt uppifrån syns ingen höjd, och en linje som ses från änden
-        // blir en prick - då döljs den.
-        var dold = !a || !b || len < 36 || (x[0] === 'h' && phi < 0.5);
-        g[0].parentNode.style.opacity = dold ? '0' : '';
-        et.style.opacity = dold ? '0' : '';
-        if (dold) return;
-        satt(g[0], a.x, a.y, b.x, b.y);
-        var nx = -dy / len * 6, ny = dx / len * 6;
-        satt(g[1], a.x - nx, a.y - ny, a.x + nx, a.y + ny);
-        satt(g[2], b.x - nx, b.y - ny, b.x + nx, b.y + ny);
-        et.style.transform = 'translate(' + ((a.x + b.x) / 2).toFixed(1) + 'px,' +
-          ((a.y + b.y) / 2).toFixed(1) + 'px) translate(-50%,-50%)';
-      });
-      var fot = q('p0'), huvud = q('p1');
-      if (fot && huvud && phi > 0.7) {
-        var hojd = Math.sqrt(Math.pow(huvud.x - fot.x, 2) + Math.pow(huvud.y - fot.y, 2));
-        person.style.opacity = '';
-        person.style.transform = 'translate(' + (fot.x - 17.35).toFixed(1) + 'px,' + (fot.y - 100).toFixed(1) +
-          'px) scale(' + (hojd / 100).toFixed(3) + ')';
-      } else {
-        person.style.opacity = '0';
-      }
-    }
-    function boka() {
-      if (bokad) return;
-      bokad = true;
-      requestAnimationFrame(rita);
-    }
-    function flyttaPunkter() {
-      var p = positioner(aktiv, sida.charAt(0) === '-' ? -1 : 1, sida.charAt(1) === '-' ? -1 : 1);
-      PUNKTER.forEach(function (n) {
-        mv.updateHotspot({
-          name: 'hotspot-' + n,
-          position: p[n].map(function (v) { return v.toFixed(3) + 'm'; }).join(' ')
-        });
-      });
-    }
-
-    function byt(d) {
-      if (d === aktiv && laddad) return;
-      aktiv = d;
-      knappar.forEach(function (b) { b.setAttribute('aria-pressed', String(b === d.knapp)); });
-      $('[data-3d-namn]', sek).textContent = d.namn;
-      etiketter.l.textContent = komma(d.l, 2) + ' m';
-      etiketter.b.textContent = komma(d.b, 2) + ' m';
-      etiketter.h.textContent = 'Nock ' + komma(d.h, 2) + ' m';
-      raknaTal(d);
-      if (!mv) return;
-      scen.classList.add('studio3d--byter');
-      setTimeout(function () {
-        if (aktiv === d) mv.src = 'modeller/hus-' + d.id + '.glb';
-      }, lugn ? 0 : 260);
-    }
-    alla.forEach(function (d) {
-      d.knapp.addEventListener('click', function () { byt(d); });
-    });
-    glidandeMarkering($('.studio3d__val', sek));
-    glidandeMarkering($('.studio3d__vyer', sek));
-
-    // Kameran går sakta runt huset tills man själv tar i det. (model-
-    // viewers egen auto-rotate vrider modellen i stället för kameran, och
-    // då hamnar vyerna och måttens sidor fel.)
-    var snurrar = !lugn, synlig = false, snurrRaf = null, senast = 0;
-    function snurra(t) {
-      snurrRaf = null;
-      if (!snurrar || !mv || !laddad || !synlig || document.hidden) { senast = 0; return; }
-      if (senast) {
-        var o = mv.getCameraOrbit();
-        var d = Math.min(64, t - senast) / 1000 * 7 * Math.PI / 180;
-        mv.cameraOrbit = (o.theta + d) + 'rad ' + o.phi + 'rad ' + o.radius + 'm';
-      }
-      senast = t;
-      snurrRaf = requestAnimationFrame(snurra);
-    }
-    function startaSnurr() {
-      if (!snurrRaf && snurrar) snurrRaf = requestAnimationFrame(snurra);
-    }
-    function stoppaSnurr() {
-      snurrar = false;
-      if (tips) tips.classList.add('studio3d__tips--borta');
-    }
-    vyKnappar.forEach(function (b) {
-      b.addEventListener('click', function () {
-        vy = b.getAttribute('data-vy');
-        vyKnappar.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
-        stoppaSnurr();
-        if (mv) mv.cameraOrbit = orbit();
-      });
-    });
-    $$('[data-zoom]', sek).forEach(function (b) {
-      b.addEventListener('click', function () {
-        zoom = Math.max(0.6, Math.min(1.45, zoom * (b.getAttribute('data-zoom') === '1' ? 1.18 : 0.85)));
-        stoppaSnurr();
-        if (!mv) return;
-        var o = mv.getCameraOrbit();
-        mv.cameraOrbit = o.theta + 'rad ' + o.phi + 'rad ' + (rad() * VYER[vy][2] * zoom).toFixed(2) + 'm';
-      });
-    });
-    $('[data-3d-aterstall]', sek).addEventListener('click', function () {
-      vy = 'horn';
-      zoom = 1;
-      vyKnappar.forEach(function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-vy') === 'horn')); });
-      if (mv) mv.cameraOrbit = orbit();
-    });
-    mattKnapp.addEventListener('click', function () {
-      var pa = mattKnapp.getAttribute('aria-pressed') !== 'true';
-      mattKnapp.setAttribute('aria-pressed', String(pa));
-      sek.classList.toggle('studio3d--utan-matt', !pa);
-    });
-
-    function bygg() {
-      laddaModelViewer().then(rullningenVilar).then(function () {
-        mv = document.createElement('model-viewer');
-        var attr = {
-          src: 'modeller/hus-' + aktiv.id + '.glb',
-          loading: 'eager',
-          alt: '3D-modell av ' + aktiv.namn + ' i skala 1:1',
-          'camera-controls': '',
-          'disable-zoom': '',
-          'touch-action': 'pan-y',
-          'camera-orbit': orbit(),
-          'camera-target': '0m 1.1m 0m',
-          'field-of-view': '30deg',
-          'min-camera-orbit': 'auto 0deg ' + (rad() * 0.5).toFixed(1) + 'm',
-          'max-camera-orbit': 'auto 88deg ' + (rad() * 1.6).toFixed(1) + 'm',
-          'min-field-of-view': '30deg',
-          'max-field-of-view': '30deg',
-          'interpolation-decay': '160',
-          'shadow-intensity': '1.15',
-          'shadow-softness': '0.55',
-          'environment-image': 'neutral',
-          'tone-mapping': 'neutral',
-          exposure: '1.05',
-          'interaction-prompt': 'none'
-        };
-        Object.keys(attr).forEach(function (k) { mv.setAttribute(k, attr[k]); });
-        PUNKTER.forEach(function (n) {
-          var h = document.createElement('div');
-          h.slot = 'hotspot-' + n;
-          h.className = 'studio3d__punkt';
-          h.setAttribute('data-position', '0m 0m 0m');
-          h.setAttribute('data-normal', '0 1 0');
-          mv.appendChild(h);
-        });
-        mv.addEventListener('progress', function (e) {
-          if (progress) progress.style.transform = 'scaleX(' + (e.detail.totalProgress || 0).toFixed(3) + ')';
-        });
-        mv.addEventListener('load', function () {
-          laddad = true;
-          flyttaPunkter();
-          mv.setAttribute('alt', '3D-modell av ' + aktiv.namn + ' i skala 1:1');
-          sek.classList.add('studio3d--laddad');
-          scen.classList.remove('studio3d--byter');
-          requestAnimationFrame(function () { requestAnimationFrame(rita); });
-          startaSnurr();
-        });
-        mv.addEventListener('camera-change', function (e) {
-          if (e.detail && e.detail.source === 'user-interaction') stoppaSnurr();
-          boka();
-        });
-        window.addEventListener('resize', boka);
-        scen.insertBefore(mv, scen.firstChild);
-        if (window.IntersectionObserver) {
-          new IntersectionObserver(function (poster) {
-            synlig = poster[0].isIntersecting && poster[0].intersectionRatio >= 0.45;
-            startaSnurr();
-          }, { threshold: [0, 0.45, 0.5] }).observe(scen);
-        } else {
-          synlig = true;
-        }
-        document.addEventListener('visibilitychange', startaSnurr);
-      }).catch(function () {
-        sek.classList.add('studio3d--fel');
-        var t = $('[data-3d-laddar] span', sek);
-        if (t) t.textContent = '3D-modellen kunde inte laddas.';
-      });
-    }
-    byggILugn(sek, bygg, '0px 0px 1200px 0px');
-  })();
-
   // Korten för husen som finns i 3D får en liten märkning.
   $$('.model-card[data-bild^="hus-r"] .model-card__media').forEach(function (a) {
     var m = document.createElement('span');
@@ -2800,8 +2488,9 @@
             if (!p.isIntersecting && i >= 0) iVagen.splice(i, 1);
           });
           clearTimeout(tipsTimer);
-          if (iVagen.length) tips.classList.add('tipsruta--undan');
-          else tipsTimer = setTimeout(function () { tips.classList.remove('tipsruta--undan'); }, 500);
+          // Undanskjutet (osynligt) tips ska inte heller nås med tangentbordet.
+          if (iVagen.length) { tips.classList.add('tipsruta--undan'); tips.inert = true; }
+          else tipsTimer = setTimeout(function () { tips.classList.remove('tipsruta--undan'); tips.inert = false; }, 500);
         }, { rootMargin: '0px 0px -20% 0px' });
         undan.forEach(function (u) { io.observe(u); });
       }
@@ -2833,92 +2522,6 @@
     new MutationObserver(function () { bak.src = img.getAttribute('src'); })
       .observe(img, { attributes: true, attributeFilter: ['src'] });
   });
-  /* --- Vägen dit: resan i tre skeden -----------------------------
-     Scenen till vänster bygger huset i takt med skedet: ritning,
-     stomme under tak, klart på tomten. Skedena bläddrar själva när
-     de syns, pausar när man pekar på dem och slutar bläddra när man
-     väljer själv. Vi/Du/Tillsammans markerar vem som gör vad. */
-  (function () {
-    var resa = $('[data-resa]');
-    if (!resa) return;
-    var scen = $('.resa3d', resa);
-    var skeden = $$('.resa__skede', resa);
-    var etikett = $('[data-resa-etikett]', resa);
-    var etikettNr = $('.resa__etikett-nr', resa);
-    var ETIKETT = ['Ritning och underlag', 'Stommen reses under tak', 'Klart på tomten'];
-    var TID = 7000;
-    var aktiv = 0, spelar = !lugn, synlig = false, pekar = false, timer;
-
-    resa.style.setProperty('--resatid', TID + 'ms');
-    resa.classList.add('resa--klar');
-
-    function visa(i) {
-      aktiv = i;
-      scen.setAttribute('data-skede', String(i + 1));
-      resa.setAttribute('data-skede', String(i + 1));
-      etikett.textContent = ETIKETT[i];
-      etikettNr.textContent = '0' + (i + 1);
-      skeden.forEach(function (s, j) {
-        $('.resa__knapp', s).setAttribute('aria-expanded', String(j === i));
-        s.classList.toggle('resa__skede--aktiv', j === i);
-        s.classList.toggle('resa__skede--klar', j < i);
-      });
-      starta();
-    }
-
-    // Tidslinjen startar om för varje skede; när den är full kommer nästa.
-    function starta() {
-      clearTimeout(timer);
-      resa.classList.remove('resa--spelar');
-      if (!spelar || !synlig || pekar) return;
-      void resa.offsetWidth;
-      resa.classList.add('resa--spelar');
-      timer = setTimeout(function () { visa((aktiv + 1) % skeden.length); }, TID);
-    }
-
-    skeden.forEach(function (s, i) {
-      $('.resa__knapp', s).addEventListener('click', function () {
-        spelar = false;
-        visa(i);
-      });
-    });
-
-    resa.addEventListener('pointerenter', function (e) {
-      if (e.pointerType === 'mouse') { pekar = true; starta(); }
-    });
-    resa.addEventListener('pointerleave', function (e) {
-      if (e.pointerType === 'mouse') { pekar = false; starta(); }
-    });
-    resa.addEventListener('focusin', function () { spelar = false; starta(); });
-
-    if (window.IntersectionObserver) {
-      new IntersectionObserver(function (poster) {
-        synlig = poster[0].isIntersecting;
-        starta();
-      }, { threshold: 0.35 }).observe(resa);
-    }
-    pausaUtanforVy(resa);
-    lutaI3D($('.resa__scen', resa), 10);
-
-    var vemKnappar = $$('.resa__vem button', resa);
-    vemKnappar.forEach(function (b) {
-      b.addEventListener('click', function () {
-        var pa = b.getAttribute('aria-pressed') !== 'true';
-        vemKnappar.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b && pa)); });
-        var vem = pa ? b.getAttribute('data-vem') : '';
-        if (vem) resa.setAttribute('data-vem', vem); else resa.removeAttribute('data-vem');
-        // Hur många moment i varje skede som är ens - syns på knappen.
-        skeden.forEach(function (s) {
-          var antal = $('.resa__antal', s);
-          var n = vem ? $$('.resa__moment [data-vem="' + vem + '"]', s).length : 0;
-          antal.textContent = String(n);
-          antal.hidden = !n;
-        });
-      });
-    });
-
-    visa(0);
-  })();
   /* --- Menyerna: var man är, Esc och bakåtknappen ---------------
      Länken till sidan man står på märks med aria-current, så att både
      skärmläsare och mobilmenyn visar var man är. Esc stänger mobil-
@@ -2951,7 +2554,9 @@
       // Sidan bakom menyn går inte att nå med tangentbord eller skärmläsare.
       ['main', '.site-footer', '.tipsruta', '#cta-bar'].forEach(function (s) {
         var e = $(s);
-        if (e) e.inert = oppna;
+        // Den fasta raden är inert även när den är dold (sidans eget skript).
+        if (e) e.inert = oppna || (s === '#cta-bar' && !e.classList.contains('cta-bar--synlig')) ||
+          (s === '.tipsruta' && e.classList.contains('tipsruta--undan'));
       });
       if (oppna) {
         panel.hidden = false;
@@ -3020,382 +2625,6 @@
      stängs av vid prefers-reduced-motion.
      ============================================================ */
 
-  /* --- Toppen: filmen i rubriken ---------------------------------
-     Rullningen genom toppen driver ett tal p från 0 till 1:
-       0 - 0,45  ytan med rubriken zoomar in genom "l":et, filmen tar över
-       0,40 - 0,6  en mörk toning läggs över filmen
-       0,48 - 0,7  budskapet tonar fram
-     Ytan med de urklippta bokstäverna ritas på en canvas och bara bilden
-     skalas (att skala en HTML-yta med mix-blend-mode ritade om texten i
-     varje bildruta och hackade kraftigt). När sidan öppnas ritas
-     rubriken fram: konturerna dras som med en penna och bokstäverna
-     fylls en i taget med filmen medan de glider på plats. Därefter
-     sveper en färgvåg i virke och bärnsten genom bokstäverna
-     (.film__farg, ren CSS-förflyttning), och filmen i bokstäverna
-     följer pekaren en aning. HTML-rubriken står kvar för skärmläsare.
-     Vid lugn rörelse står toppen kvar som en vanlig film med rubriken. */
-  (function () {
-    var topp = $('[data-film]');
-    if (!topp || lugn || !window.requestAnimationFrame) return;
-    var spar = $('.film__spar', topp);
-    var fast = $('.film__fast', topp);
-    var mask = $('.film__mask', topp);
-    var rubrik = $('.film__rubrik', topp);
-    var video = $('.film__video', topp);
-    var ui = $('.film__ui', topp);
-    var efter = $('.film__efter', topp);
-    var slojor = $('.film__slojor', topp);
-    var ton = $('.film__ton', topp);
-    var farg = $('.film__farg', topp);
-    if (!spar || !mask || !rubrik) return;
-    topp.classList.add('film--zoom');
-
-    var vagg = document.createElement('div');
-    vagg.className = 'film__dukvagg';
-    vagg.setAttribute('aria-hidden', 'true');
-    var duk = document.createElement('canvas');
-    duk.className = 'film__duk';
-    vagg.appendChild(duk);
-    mask.parentNode.insertBefore(vagg, mask.nextSibling);
-    var bak = document.createElement('canvas');
-    var overlager = [], introAnim = [];
-
-    var RADER = ['Från virke', 'till verklighet.'];
-    // "l":et i "verklighet" - rad 2, efter "till verk".
-    var ZOOM_RAD = 1, ZOOM_FORE = 'till verk';
-    var maxS = 40, bokad = false, klar = false, forraP = -1;
-    var skrivet = new Map();
-    var L = null;          // uppmätt layout: bredd, höjd, tecken och deras lägen
-    function klamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
-    function mjuk(t) { return 1 - Math.pow(1 - t, 3); }
-
-    // Skriver bara när värdet ändrats - varje skrivning kostar.
-    function satt(el, egenskap, varde) {
-      var nyckel = skrivet.get(el);
-      if (!nyckel) { nyckel = {}; skrivet.set(el, nyckel); }
-      if (nyckel[egenskap] === varde) return;
-      nyckel[egenskap] = varde;
-      el.style[egenskap] = varde;
-    }
-
-    function glod(c, x, y, r, f) {
-      var g = c.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, f);
-      g.addColorStop(1, 'rgba(0,0,0,0)');
-      c.fillStyle = g;
-      c.fillRect(x - r, y - r, r * 2, r * 2);
-    }
-
-    // Mäter upp allt en gång och ritar bakgrunden (yta, glöd, rutnät)
-    // på en egen canvas som sedan bara kopieras in.
-    function mat() {
-      var w = fast.clientWidth, h = fast.clientHeight;
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      [duk, bak].forEach(function (d) {
-        d.width = Math.round(w * dpr);
-        d.height = Math.round(h * dpr);
-      });
-      duk.style.width = w + 'px';
-      duk.style.height = h + 'px';
-      var mork = document.documentElement.getAttribute('data-tema') === 'mork';
-
-      var b = bak.getContext('2d');
-      b.setTransform(dpr, 0, 0, dpr, 0, 0);
-      b.fillStyle = mork ? '#141310' : '#f7f5f0';
-      b.fillRect(0, 0, w, h);
-      var st = Math.max(w, h);
-      glod(b, w * 0.06, h * 0.04, st * 0.55, mork ? 'rgba(184,205,224,0.10)' : 'rgba(184,205,224,0.55)');
-      glod(b, w * 0.98, h * 0.18, st * 0.5, mork ? 'rgba(240,181,110,0.12)' : 'rgba(240,181,110,0.32)');
-      b.strokeStyle = mork ? 'rgba(247,245,240,0.05)' : 'rgba(27,25,21,0.06)';
-      b.lineWidth = 1;
-      b.beginPath();
-      for (var x = (w / 2) % 44; x < w; x += 44) { b.moveTo(Math.round(x) + 0.5, 0); b.lineTo(Math.round(x) + 0.5, h); }
-      for (var y = (h / 2) % 44; y < h; y += 44) { b.moveTo(0, Math.round(y) + 0.5); b.lineTo(w, Math.round(y) + 0.5); }
-      b.stroke();
-
-      var c = duk.getContext('2d');
-      var fs = parseFloat(getComputedStyle(rubrik).fontSize);
-      var sparr = -0.055 * fs;
-      c.setTransform(dpr, 0, 0, dpr, 0, 0);
-      c.font = '700 ' + fs + 'px Poppins';
-      if ('letterSpacing' in c) c.letterSpacing = '0px';
-      c.textBaseline = 'alphabetic';
-      var m = c.measureText('Hg');
-      var upp = m.actualBoundingBoxAscent || fs * 0.72;
-      var ner = m.actualBoundingBoxDescent || fs * 0.2;
-      var lh = fs * 0.9;
-      var blockTopp = h / 2 - (lh * RADER.length) / 2;
-      var tecken = [];
-      var ox = w / 2, oy = h / 2, stam = 8;
-      RADER.forEach(function (rad, i) {
-        var x = 0, pos = [];
-        for (var j = 0; j < rad.length; j++) {
-          var bb = c.measureText(rad[j]).width;
-          pos.push([x, x + bb]);
-          x += bb + sparr;
-        }
-        var x0 = w / 2 - pos[pos.length - 1][1] / 2;
-        var bas = blockTopp + lh * i + lh / 2 + (upp - ner) / 2;
-        pos.forEach(function (t, j) {
-          if (rad[j] !== ' ') tecken.push({ t: rad[j], x: x0 + t[0], y: bas, rad: i, b: t[1] - t[0] });
-        });
-        if (i === ZOOM_RAD) {
-          var l = pos[ZOOM_FORE.length];
-          ox = x0 + (l[0] + l[1]) / 2;
-          oy = bas - upp * 0.5;
-          stam = Math.max(3, (l[1] - l[0]) * 0.42);
-        }
-      });
-      L = { w: w, h: h, dpr: dpr, fs: fs, tecken: tecken, mork: mork };
-      maxS = Math.min(90, Math.hypot(w, h) * 2.2 / stam);
-      vagg.style.transformOrigin = ox.toFixed(1) + 'px ' + oy.toFixed(1) + 'px';
-      skrivet.delete(vagg);
-    }
-
-    // Ritar ytan EN gång: bakgrunden med bokstäverna urklippta, och
-    // konturen i vilotillståndet (kontur = dess opacitet, 0 = ingen).
-    function konturFarg() { return L.mork ? 'rgba(247,245,240,0.85)' : 'rgba(27,25,21,0.85)'; }
-    function rita_duk(kontur) {
-      // En dold flik kan ge ytan storleken 0 – då finns inget att rita.
-      if (!L || !bak.width || !bak.height || !duk.width || !duk.height) return;
-      var c = duk.getContext('2d');
-      c.setTransform(1, 0, 0, 1, 0, 0);
-      c.globalCompositeOperation = 'copy';
-      c.globalAlpha = 1;
-      c.drawImage(bak, 0, 0);
-      c.setTransform(L.dpr, 0, 0, L.dpr, 0, 0);
-      c.font = '700 ' + L.fs + 'px Poppins';
-      c.textBaseline = 'alphabetic';
-      c.globalCompositeOperation = 'destination-out';
-      c.fillStyle = '#000';
-      L.tecken.forEach(function (tk) { c.fillText(tk.t, tk.x, tk.y); });
-      if (kontur) {
-        c.globalCompositeOperation = 'source-over';
-        c.globalAlpha = kontur;
-        c.strokeStyle = konturFarg();
-        c.lineWidth = Math.max(1, L.fs * 0.012);
-        L.tecken.forEach(function (tk) { c.strokeText(tk.t, tk.x, tk.y); });
-      }
-      c.globalCompositeOperation = 'source-over';
-      c.globalAlpha = 1;
-    }
-
-    /* Introt - helt på grafikkortet. Förra versionen ritade om hela ytan
-       (full skärm, dubbel upplösning, streckade konturer) i varje
-       bildruta i 2,2 s medan filmen och typsnitten laddade, och hackade.
-       Nu ritas allt en gång innan det börjar: ytan med hålen, en liten
-       täckbit per bokstav (bokstaven fylld med bakgrunden precis där) och
-       konturerna per rad. Sedan rör sig bara lagren med transform och
-       opacitet (Web Animations), som går på kompositorn även när
-       huvudtråden är upptagen: konturen sveps fram rad för rad bakom en
-       mjuk kant, täckbitarna krymper uppåt en i taget så att filmen fyller
-       bokstaven nerifrån, och konturen tonar ner. Till sist bakas den
-       tunna konturen in i ytan och lagren tas bort. */
-    function rensaIntro() {
-      introAnim.forEach(function (a) { a.cancel(); });
-      introAnim = [];
-      overlager.forEach(function (el) { el.remove(); });
-      overlager = [];
-    }
-    function avslutaIntro() {
-      rensaIntro();
-      rita_duk(0.22);
-    }
-    function spelaIntro() {
-      if (!L || !vagg.animate) { avslutaIntro(); return; }
-      rensaIntro();
-      rita_duk(0);
-      var dpr = L.dpr, fs = L.fs, lw = Math.max(1, fs * 0.012), pad = Math.ceil(lw + 3);
-      var font = '700 ' + fs + 'px Poppins';
-      var matare = duk.getContext('2d');
-      matare.setTransform(dpr, 0, 0, dpr, 0, 0);
-      matare.font = font;
-      var frag = document.createDocumentFragment();
-
-      function lager(klass, x0, y0, x1, y1) {
-        var cv = document.createElement('canvas');
-        cv.className = klass;
-        cv.width = Math.round((x1 - x0) * dpr);
-        cv.height = Math.round((y1 - y0) * dpr);
-        var g = cv.getContext('2d');
-        g.setTransform(dpr, 0, 0, dpr, -x0 * dpr, -y0 * dpr);
-        g.font = font;
-        g.textBaseline = 'alphabetic';
-        return { cv: cv, g: g };
-      }
-      function placera(el, x0, y0, x1, y1) {
-        el.style.left = x0 + 'px';
-        el.style.top = y0 + 'px';
-        el.style.width = (x1 - x0) + 'px';
-        el.style.height = (y1 - y0) + 'px';
-      }
-
-      // Täckbitarna: bokstaven fylld med bakgrunden där den sitter.
-      L.tecken.forEach(function (tk) {
-        var m = matare.measureText(tk.t);
-        var x0 = Math.floor(tk.x - (m.actualBoundingBoxLeft || 0) - pad);
-        var x1 = Math.ceil(tk.x + (m.actualBoundingBoxRight || tk.b) + pad);
-        var y0 = Math.floor(tk.y - (m.actualBoundingBoxAscent || fs * 0.8) - pad);
-        var y1 = Math.ceil(tk.y + (m.actualBoundingBoxDescent || fs * 0.2) + pad);
-        var l = lager('film__tacke', x0, y0, x1, y1);
-        // Bokstaven plus en tunn kant, så att täckbiten också täcker
-        // hålets mjuka kant - annars syns filmen som en skugga runt den.
-        l.g.fillText(tk.t, tk.x, tk.y);
-        l.g.lineWidth = 2;
-        l.g.lineJoin = 'round';
-        l.g.strokeText(tk.t, tk.x, tk.y);
-        l.g.setTransform(1, 0, 0, 1, 0, 0);
-        l.g.globalCompositeOperation = 'source-in';
-        l.g.drawImage(bak, Math.round(x0 * dpr), Math.round(y0 * dpr), l.cv.width, l.cv.height, 0, 0, l.cv.width, l.cv.height);
-        placera(l.cv, x0, y0, x1, y1);
-        frag.appendChild(l.cv);
-        overlager.push(l.cv);
-        tk.tacke = l.cv;
-      });
-
-      // Konturerna: en duk per rad i ett fönster med mjuk högerkant.
-      var rader = [];
-      L.tecken.forEach(function (tk) { (rader[tk.rad] = rader[tk.rad] || []).push(tk); });
-      rader = rader.filter(Boolean).map(function (lista) {
-        var sist = lista[lista.length - 1];
-        var x0 = Math.floor(lista[0].x - fs * 0.08), x1 = Math.ceil(sist.x + sist.b + fs * 0.08 + 90);
-        var y0 = Math.floor(lista[0].y - fs * 1.02), y1 = Math.ceil(lista[0].y + fs * 0.32);
-        var fonster = document.createElement('div');
-        fonster.className = 'film__konturfonster';
-        placera(fonster, x0, y0, x1, y1);
-        var l = lager('film__kontur', x0, y0, x1, y1);
-        l.g.strokeStyle = konturFarg();
-        l.g.lineWidth = lw;
-        l.g.lineJoin = 'round';
-        lista.forEach(function (tk) { l.g.strokeText(tk.t, tk.x, tk.y); });
-        // Dolda från start - rörelsen börjar två bildrutor senare.
-        fonster.style.transform = 'translateX(-100%)';
-        l.cv.style.transform = 'translateX(100%)';
-        fonster.appendChild(l.cv);
-        frag.appendChild(fonster);
-        overlager.push(fonster);
-        return { fonster: fonster, duk: l.cv };
-      });
-      vagg.appendChild(frag);
-
-      // Två bildrutor senare, när lagren finns på skärmen, börjar rörelsen.
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () {
-          if (!overlager.length) return;
-          var n = L.tecken.length;
-          rader.forEach(function (r, i) {
-            var d = 60 + i * 280;
-            introAnim.push(r.fonster.animate([{ transform: 'translateX(-100%)' }, { transform: 'none' }],
-              { duration: 1200, delay: d, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', fill: 'both' }));
-            introAnim.push(r.duk.animate([{ transform: 'translateX(100%)' }, { transform: 'none' }],
-              { duration: 1200, delay: d, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', fill: 'both' }));
-            introAnim.push(r.fonster.animate([{ opacity: 1 }, { opacity: 0.22 }],
-              { duration: 900, delay: 1650 + i * 140, easing: 'ease-out', fill: 'both' }));
-          });
-          L.tecken.forEach(function (tk, k) {
-            introAnim.push(tk.tacke.animate([
-              { transform: 'scaleY(1)', opacity: 1 },
-              { transform: 'scaleY(0)', opacity: 0.35 }
-            ], { duration: 1000, delay: 380 + (k / n) * 950, easing: 'cubic-bezier(0.7, 0, 0.25, 1)', fill: 'both' }));
-          });
-          Promise.all(introAnim.map(function (a) { return a.finished; }))
-            .then(avslutaIntro, function () {});
-        });
-      });
-    }
-
-    function rita() {
-      bokad = false;
-      var r = spar.getBoundingClientRect();
-      var langd = spar.offsetHeight - fast.offsetHeight;
-      var p = langd > 0 ? klamp(-r.top / langd) : 0;
-      if (p === forraP) return;
-      forraP = p;
-
-      var z = klamp(p / 0.45);
-      var e = z * z * z;
-      if (klar) {
-        satt(vagg, 'transform', 'scale(' + (1 + e * (maxS - 1)).toFixed(3) + ')');
-        satt(vagg, 'opacity', z > 0.82 ? (1 - (z - 0.82) / 0.18).toFixed(3) : '1');
-        satt(vagg, 'visibility', z >= 1 ? 'hidden' : 'visible');
-      }
-
-      var u = klamp(p / 0.12);
-      satt(ui, 'opacity', (1 - u).toFixed(3));
-      satt(ui, 'transform', 'translate3d(0,' + (-u * 40).toFixed(1) + 'px,0)');
-      satt(ui, 'visibility', u >= 1 ? 'hidden' : 'visible');
-
-      var tona = (1 - klamp((z - 0.55) / 0.4)).toFixed(3);
-      satt(ton, 'opacity', tona);
-      if (farg) {
-        satt(farg, 'opacity', tona);
-        satt(farg, 'visibility', tona === '0.000' ? 'hidden' : 'visible');
-      }
-      satt(slojor, 'opacity', klamp((p - 0.4) / 0.2).toFixed(3));
-
-      var ef = klamp((p - 0.48) / 0.22);
-      satt(efter, 'opacity', ef.toFixed(3));
-      satt(efter, 'transform', 'translate3d(0,' + ((1 - ef) * 40).toFixed(1) + 'px,0)');
-      satt(efter, 'visibility', ef <= 0 ? 'hidden' : 'visible');
-    }
-
-    function boka() {
-      if (bokad) return;
-      bokad = true;
-      requestAnimationFrame(rita);
-    }
-
-    rita();
-    // Canvasen ritas när rubrikens typsnitt finns, annars blir
-    // bokstäverna i reservtypsnittet.
-    var typsnitt = document.fonts && document.fonts.load
-      ? document.fonts.load('700 100px Poppins').catch(function () {}) : Promise.resolve();
-    typsnitt.then(function () {
-      mat();
-      klar = true;
-      // Introt spelas bara om man står i toppen - kommer man tillbaka
-      // till sidan halvvägs ner är rubriken redan klar.
-      if (window.scrollY < window.innerHeight * 0.3) spelaIntro();
-      else avslutaIntro();
-      topp.classList.add('film--duk');
-      forraP = -1;
-      rita();
-    });
-
-    var storlek = window.innerWidth + 'x' + window.innerHeight;
-    window.addEventListener('resize', function () {
-      // Mobilens adressfält ändrar höjden lite när man rullar - rita
-      // bara om när bredden ändras eller höjden ändras mycket.
-      var gammal = storlek.split('x');
-      if (+gammal[0] === window.innerWidth && Math.abs(+gammal[1] - window.innerHeight) < 140) return;
-      storlek = window.innerWidth + 'x' + window.innerHeight;
-      if (klar) { mat(); avslutaIntro(); }
-      forraP = -1;
-      rita();
-    });
-    window.addEventListener('scroll', boka, { passive: true });
-    // Byter man tema ritas ytan om i rätt färg.
-    new MutationObserver(function () { if (klar) { mat(); avslutaIntro(); } })
-      .observe(document.documentElement, { attributes: true, attributeFilter: ['data-tema'] });
-
-    // Filmen i bokstäverna följer pekaren en aning - som fönster.
-    if (finPekare && video) {
-      var mx = 0, my = 0, vx = 0, vy = 0, gar = false;
-      topp.addEventListener('pointermove', function (ev) {
-        mx = ev.clientX / window.innerWidth - 0.5;
-        my = ev.clientY / window.innerHeight - 0.5;
-        if (!gar) { gar = true; requestAnimationFrame(glid); }
-      });
-      function glid() {
-        vx += (mx - vx) * 0.08;
-        vy += (my - vy) * 0.08;
-        video.style.transform = 'translate3d(' + (-vx * 28).toFixed(2) + 'px,' + (-vy * 18).toFixed(2) + 'px,0) scale(1.06)';
-        if (Math.abs(mx - vx) > 0.001 || Math.abs(my - vy) > 0.001) requestAnimationFrame(glid);
-        else gar = false;
-      }
-    }
-  })();
-
   // De mörka elitkorten och kantstrimman pausas när de inte syns.
   $$('.siffror, .film__fast').forEach(pausaUtanforVy);
   $$('#innehall > section, #innehall > div, .site-footer').forEach(pausaUtanforVy);
@@ -3403,240 +2632,6 @@
   /* --- Bildkorten lutar i 3D och ljuset följer pekaren ----------- */
   $$('.vag').forEach(function (k) { lutaI3D(k, 7); });
   $$('.skal').forEach(function (k) { lutaI3D(k, 9); });
-
-  /* --- Banorna: husen och bakom kulisserna -----------------------
-     Korten vrider sig efter var de står i banan - det i mitten står
-     rakt, de vid kanterna vänder sig inåt som i en karusell. Pilarna
-     bläddrar ett kort i taget, och med mus kan man dra banan. */
-  $$('[data-bana]').forEach(function (bana) {
-    var sektion = bana.closest('section');
-    var kort = $$(':scope > li', bana);
-    if (!kort.length) return;
-
-    function steg() {
-      var a = kort[0].getBoundingClientRect();
-      var b = kort[1] ? kort[1].getBoundingClientRect() : a;
-      return Math.max(200, b.left - a.left);
-    }
-    var bak = $('[data-bana-bak]', sektion);
-    var fram = $('[data-bana-fram]', sektion);
-    if (bak) bak.addEventListener('click', function () { bana.scrollBy({ left: -steg(), behavior: lugn ? 'auto' : 'smooth' }); });
-    if (fram) fram.addEventListener('click', function () { bana.scrollBy({ left: steg(), behavior: lugn ? 'auto' : 'smooth' }); });
-
-    function uppdateraPilar() {
-      if (bak) bak.disabled = bana.scrollLeft < 4;
-      if (fram) fram.disabled = bana.scrollLeft > bana.scrollWidth - bana.clientWidth - 4;
-    }
-
-    var bokad = false;
-    function vrid() {
-      bokad = false;
-      uppdateraPilar();
-      if (lugn) return;
-      var mitt = window.innerWidth / 2;
-      kort.forEach(function (k) {
-        var r = k.getBoundingClientRect();
-        var d = (r.left + r.width / 2 - mitt) / window.innerWidth;
-        d = Math.max(-1, Math.min(1, d));
-        k.style.setProperty('--vinkel', (-d * 16).toFixed(2) + 'deg');
-        k.style.setProperty('--djup', (-Math.abs(d) * 80).toFixed(1) + 'px');
-      });
-    }
-    function boka() {
-      if (bokad) return;
-      bokad = true;
-      requestAnimationFrame(vrid);
-    }
-    bana.addEventListener('scroll', boka, { passive: true });
-    window.addEventListener('resize', boka);
-    vrid();
-
-    // Dra med musen (pekskärmar sveper själva).
-    if (bana.hasAttribute('data-dra') && finPekare) {
-      var drar = false, startX = 0, startL = 0, flyttat = 0;
-      bana.addEventListener('pointerdown', function (e) {
-        if (e.pointerType !== 'mouse' || e.button !== 0) return;
-        drar = true;
-        flyttat = 0;
-        startX = e.clientX;
-        startL = bana.scrollLeft;
-        bana.classList.add('drar');
-      });
-      window.addEventListener('pointermove', function (e) {
-        if (!drar) return;
-        flyttat = Math.abs(e.clientX - startX);
-        bana.scrollLeft = startL - (e.clientX - startX);
-      });
-      window.addEventListener('pointerup', function () {
-        if (!drar) return;
-        drar = false;
-        bana.classList.remove('drar');
-      });
-      bana.addEventListener('click', function (e) {
-        if (flyttat > 6) { e.preventDefault(); e.stopPropagation(); }
-      }, true);
-      bana.addEventListener('dragstart', function (e) { e.preventDefault(); });
-    }
-  });
-
-  /* --- Bygget: bildberättelsen -----------------------------------
-     Rullningen genom sektionen driver ett tal från 0 till 4. Nästa bild
-     avslöjas nerifrån som en ridå: fönstret (kortet) glider upp och
-     bilden inuti glider tillbaka lika mycket, så bilden står still
-     medan kanten sveper över - med en guldlinje i kanten. Bilden som
-     täcks glider lite uppåt och mörknar, och den som visas zoomar
-     långsamt ut. Till vänster rullar siffran fram som ett räkneverk,
-     stegets ord reser sig ur en mask (uppifrån när man rullar tillbaka)
-     och staplarna fylls - de går att klicka på. Bara transform och
-     opacitet per bildruta. Smalt eller lugnt: lista och bildkarusell. */
-  (function () {
-    var bygget = $('[data-bygget]');
-    if (!bygget) return;
-    var spar = $('.bygget__spar', bygget);
-    var kort = $$('.bygget__kort', bygget);
-    var steg = $$('.bygget__steg', bygget);
-    var rulle = $('.bygget__rulle', bygget);
-    var staplar = $$('[data-bygget-hopp]', bygget);
-    var fyllning = staplar.map(function (b) { return $('b', b); });
-    var n = kort.length;
-    var bred = window.matchMedia('(min-width: 901px)');
-    var aktivt = -1, bokad = false, pa = false, forraAndel = -1;
-
-    var bilder = [], skuggor = [], svep = [];
-    function lager(k, klass) {
-      var el = document.createElement('i');
-      el.className = klass;
-      el.setAttribute('aria-hidden', 'true');
-      k.appendChild(el);
-      return el;
-    }
-    kort.forEach(function (k) {
-      bilder.push($('img', k));
-      skuggor.push(lager(k, 'bygget__skugga'));
-      svep.push(lager(k, 'bygget__svep'));
-    });
-
-    // Varje ord i en egen mask.
-    steg.forEach(function (s) {
-      $$('.bygget__titel, .bygget__text', s).forEach(function (el) {
-        var ord = el.textContent.trim().split(/\s+/);
-        el.textContent = '';
-        ord.forEach(function (o, k) {
-          var mask = document.createElement('span');
-          mask.className = 'bw';
-          var inne = document.createElement('span');
-          inne.style.setProperty('--w', k);
-          inne.textContent = o;
-          mask.appendChild(inne);
-          if (k) el.appendChild(document.createTextNode(' '));
-          el.appendChild(mask);
-        });
-      });
-    });
-
-    function klamp(v) {
-      return Math.min(1, Math.max(0, v));
-    }
-
-    function rita() {
-      bokad = false;
-      if (!pa) return;
-      var r = spar.getBoundingClientRect();
-      var langd = r.height - window.innerHeight;
-      var andel = langd > 0 ? Math.min(1, Math.max(0, -r.top / langd)) : 0;
-      if (andel === forraAndel) return;
-      forraAndel = andel;
-      // Varje steg står still en stor del av sträckan och byter i mitten.
-      var q = andel * (n - 1);
-      var hel = Math.floor(q);
-      var t0 = klamp((q - hel - 0.25) / 0.5);
-      var p = Math.min(n - 1, hel + t0 * t0 * (3 - 2 * t0));
-
-      kort.forEach(function (k, i) {
-        var d = i - p;
-        var zoom = 1.1 - 0.1 * klamp((q - i + 1) / 2);
-        var yk = 0, yb = 0, sk = 0, sv = 0, syns = true;
-        if (d >= 1) {
-          syns = false;
-        } else if (d > 0) {
-          yk = d * 100;
-          yb = -d * 100;
-          sv = Math.min(1, d * 6, (1 - d) * 6);
-        } else if (d > -1) {
-          yb = d * 14;
-          sk = -d * 0.7;
-        } else {
-          syns = false;
-        }
-        k.style.visibility = syns ? '' : 'hidden';
-        if (!syns) return;
-        k.style.transform = 'translate3d(0,' + yk.toFixed(2) + '%,0)';
-        bilder[i].style.transform = 'translate3d(0,' + yb.toFixed(2) + '%,0) scale(' + zoom.toFixed(4) + ')';
-        skuggor[i].style.opacity = sk.toFixed(3);
-        svep[i].style.opacity = sv.toFixed(3);
-      });
-
-      var akt = Math.min(n - 1, Math.round(p));
-      if (akt !== aktivt) {
-        aktivt = akt;
-        steg.forEach(function (s, j) {
-          s.classList.toggle('aktiv', j === akt);
-          s.classList.toggle('klar', j < akt);
-        });
-        staplar.forEach(function (b, j) {
-          b.classList.toggle('aktiv', j === akt);
-          if (j === akt) b.setAttribute('aria-current', 'step');
-          else b.removeAttribute('aria-current');
-        });
-        if (rulle) rulle.style.transform = 'translate3d(0,' + (-akt * 100 / n).toFixed(3) + '%,0)';
-      }
-      // Varje stapel fylls medan dess steg är det aktiva.
-      fyllning.forEach(function (b, j) {
-        if (!b) return;
-        var fran = Math.max(0, j - 0.5), till = Math.min(n - 1, j + 0.5);
-        b.style.transform = 'scaleX(' + klamp((q - fran) / (till - fran)).toFixed(3) + ')';
-      });
-    }
-    function boka() {
-      if (bokad) return;
-      bokad = true;
-      requestAnimationFrame(rita);
-    }
-
-    // Staplarna hoppar till sitt steg.
-    staplar.forEach(function (b) {
-      b.addEventListener('click', function () {
-        if (!pa) return;
-        var i = Number(b.getAttribute('data-bygget-hopp'));
-        var r = spar.getBoundingClientRect();
-        var langd = r.height - window.innerHeight;
-        window.scrollTo({ top: window.scrollY + r.top + langd * (i / (n - 1)), behavior: 'smooth' });
-      });
-    });
-
-    function lage() {
-      pa = bred.matches && !lugn;
-      bygget.classList.toggle('bygget--3d', pa);
-      aktivt = -1;
-      forraAndel = -1;
-      kort.forEach(function (k, i) {
-        k.style.zIndex = String(i + 1);
-        if (!pa) {
-          k.style.transform = '';
-          k.style.visibility = '';
-          bilder[i].style.transform = '';
-          skuggor[i].style.opacity = '';
-          svep[i].style.opacity = '';
-        }
-      });
-      if (pa) rita();
-      else steg.forEach(function (s) { s.classList.add('aktiv'); s.classList.remove('klar'); });
-    }
-    window.addEventListener('scroll', boka, { passive: true });
-    window.addEventListener('resize', boka);
-    if (bred.addEventListener) bred.addEventListener('change', lage);
-    lage();
-  })();
 
   /* --- Elitlagret -------------------------------------------------
      Bilder som avslöjas, etikettstreck som ritas, kort som glider in,
@@ -3770,378 +2765,6 @@
     if (lugn) { ord.classList.add('ord-synlig'); return; }
     narSynligt(ord, function () { ord.classList.add('ord-synlig'); }, 0.25);
     pausaUtanforVy(ord);
-  })();
-
-  /* --- Vägen dit: bygget i isometri --------------------------------
-     En byggscen ritad som vektorgrafik i isometrisk projektion: tomten,
-     verkstaden, grunden, lastbilen, kranen och huset. Scenen byggs upp
-     genom de sju stegen (samma steg och vem-gör-vad som på processidan).
-     Varje del av scenen är en grupp med data-fran/data-till - den syns i
-     de stegen och tonar/glider in när den kommer. Hustypen ändrar husets
-     mått, lovet och leveranstiden. Tidslinjen spelar själv när sektionen
-     syns, pausar när man pekar på den och slutar när man väljer själv. */
-  (function () {
-    var rot = $('[data-resan]');
-    if (!rot) return;
-    var svg = $('.resan__svg', rot);
-    var knappar = $$('.resan__tidslinje button', rot);
-    var typKnappar = $$('.resan__hustyp button', rot);
-    var vemKnappar = $$('.resan__vem button', rot);
-    var infoRuta = $('.resan__info', rot);
-    var I = {
-      skede: $('[data-resan-skede]', rot), nr: $('[data-resan-nr]', rot),
-      titel: $('[data-resan-titel]', rot), vem: $('[data-resan-vem]', rot),
-      text: $('[data-resan-text]', rot), meta: $('[data-resan-meta]', rot),
-      lank: $('[data-resan-lank]', rot)
-    };
-
-    var TYP = {
-      attefallshus: { L: 7.14, B: 4.2, nock: 4.0, lev: '10–12', sida: 'attefallshus.html',
-        matt: ['7,14 m', '4,20 m'], lov: 'Anmälan · installationer' },
-      fritidshus: { L: 10.83, B: 3.9, nock: 4.35, lev: '12–14', sida: 'fritidshus.html',
-        matt: ['10,83 m', '3,90 m'], lov: 'Bygglov' }
-    };
-    var SKEDE = ['Skede 1 · Innan bygget', 'Skede 2 · Medan huset byggs', 'Skede 3 · På plats'];
-    var VEMTEXT = { vi: 'Vi gör det', du: 'Du gör det', bada: 'Tillsammans' };
-    var STEG = [
-      { titel: 'Första samtalet', skede: 0, vem: 'bada', vemText: 'Tillsammans',
-        text: 'Du berättar om tomten, hur huset ska användas och ungefär när du vill vara i gång. Vi säger vad som är möjligt och vad som inte är det. Kostar ingenting och förpliktigar inte till något.',
-        meta: function () { return 'Kostar ingenting · förpliktigar inte till något'; },
-        lank: function () { return ['kontakt.html', 'Boka första samtalet']; } },
-      { titel: 'Modell och anpassning', skede: 0, vem: 'bada', vemText: 'Tillsammans',
-        text: 'Vi går igenom modellerna och gör de anpassningar som betyder något för just din plats. Du får en offert där det står vad som ingår och vad som tillkommer.',
-        meta: function (t) { return 'Offert post för post · planritning ' + t.matt[0] + ' × ' + t.matt[1]; },
-        lank: function (t) { return [t.sida, 'Se modellerna']; } },
-      { titel: 'Bygglov eller anmälan', skede: 0, vem: 'du', vemText: 'Du lämnar in',
-        text: 'Mindre komplementhus behöver sedan december 2025 varken bygglov eller anmälan för själva byggnaden, men installationerna anmäls ändå. Övriga hus kräver bygglov. Vi tar fram ritningar och underlag, men det är du som är byggherre och lämnar in till din kommun.',
-        meta: function (t) {
-          return t === TYP.attefallshus
-            ? 'Attefallshus: inget bygglov för byggnaden inom måtten'
-            : 'Fritidshus: bygglov krävs - vi tar fram underlaget';
-        },
-        lank: function (t) {
-          return t === TYP.attefallshus ? ['attefallshus-regler.html', 'Reglerna för attefallshus']
-            : ['sa-fungerar-det.html', 'Så går lovet till'];
-        } },
-      { titel: 'Tillverkning', skede: 1, vem: 'vi', vemText: 'Vi gör det',
-        text: 'Huset byggs i Sverige, under tak. Väggar, golv och tak monteras i jämn temperatur och fuktnivå i stället för ute i väder och vind. Du får veta var i processen huset befinner sig.',
-        meta: function (t) { return 'Leverans ' + t.lev + ' veckor · byggt under tak i Sverige'; },
-        lank: function () { return ['proffs.html', 'Se produktionen']; } },
-      { titel: 'Grund och anslutningar', skede: 1, vem: 'du', vemText: 'Du ordnar',
-        text: 'Grunden ska vara gjuten och el, vatten och avlopp framdragna innan huset kommer. Vi säger vad som krävs och när det ska vara klart, så att inget står och väntar på varandra.',
-        meta: function () { return 'Grund, el, vatten och avlopp klart innan huset kommer'; },
-        lank: function () { return ['vad-far-jag-bygga.html', 'Kolla din tomt och mark']; } },
-      { titel: 'Leverans och montage', skede: 2, vem: 'vi', vemText: 'Vi gör det',
-        text: 'Huset transporteras till tomten och monteras. Framkomlighet för lastbil och kranbil är det vanligaste som behöver lösas i förväg.',
-        meta: function () { return 'Montaget tar dagar i stället för månader'; },
-        lank: function () { return ['sa-fungerar-det.html', 'Se hela processen']; } },
-      { titel: 'Slutbesiktning', skede: 2, vem: 'bada', vemText: 'Tillsammans',
-        text: 'Genomgång av huset, punktlista på det som ska rättas, och överlämning. Du har haft samma kontakt hela vägen och vet vem du pratar med.',
-        meta: function () { return 'Samma kontakt hela vägen'; },
-        lank: function () { return ['kontakt.html', 'Börja med ett samtal']; } }
-    ];
-
-    /* Isometrisk projektion: x åt höger-ner, y åt vänster-ner, z uppåt. */
-    var S = 30, OX = 500, OY = 445, C = 0.8660254;
-    function P(x, y, z) { return [OX + (x - y) * S * C, OY + (x + y) * S * 0.5 - (z || 0) * S]; }
-    function pts(a) { return a.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' '); }
-    function poly(a, fill, extra) { return '<polygon points="' + pts(a) + '" fill="' + fill + '"' + (extra || '') + '/>'; }
-    function lin(a, farg, b, extra) {
-      return '<polyline points="' + pts(a) + '" fill="none" stroke="' + farg + '" stroke-width="' + b +
-        '" stroke-linecap="round" stroke-linejoin="round"' + (extra || '') + '/>';
-    }
-    function rita(a, farg, b, extra) { return lin(a, farg, b, ' pathLength="1" class="rs-rita"' + (extra || '')); }
-    function box(x, y, z, dx, dy, dz, f) {
-      var x1 = x + dx, y1 = y + dy, z1 = z + dz;
-      return poly([P(x1, y, z), P(x1, y1, z), P(x1, y1, z1), P(x1, y, z1)], f.x) +
-        poly([P(x, y1, z), P(x1, y1, z), P(x1, y1, z1), P(x, y1, z1)], f.y) +
-        poly([P(x, y, z1), P(x1, y, z1), P(x1, y1, z1), P(x, y1, z1)], f.t);
-    }
-    function del(fran, till, inne, stil, klass) {
-      return '<g class="rs-del ' + (klass || '') + '" data-fran="' + fran + '" data-till="' + till + '"' +
-        (stil ? ' style="' + stil + '"' : '') + '>' + inne + '</g>';
-    }
-    function etikett(p, text, klass) {
-      var b = Math.round(text.length * 7.1 + 26);
-      return '<g class="rs-etikett ' + (klass || '') + '" transform="translate(' + p[0].toFixed(1) + ',' + p[1].toFixed(1) + ')">' +
-        '<rect x="' + (-b / 2) + '" y="-15" width="' + b + '" height="30" rx="15"/>' +
-        '<text x="0" y="5" text-anchor="middle">' + text + '</text></g>';
-    }
-    function gran(x, y, h) {
-      var bas = P(x, y, 0), topp = P(x, y, h), mitt = P(x, y, h * 0.25), b = S * 0.62 * (h / 3);
-      return '<ellipse cx="' + bas[0].toFixed(1) + '" cy="' + (bas[1] + 2).toFixed(1) + '" rx="' + (b * 1.1).toFixed(1) +
-        '" ry="' + (b * 0.45).toFixed(1) + '" fill="rgba(0,0,0,.28)"/>' +
-        poly([[bas[0] - 2.2, bas[1]], [bas[0] + 2.2, bas[1]], [mitt[0] + 2.2, mitt[1]], [mitt[0] - 2.2, mitt[1]]], '#5b4632') +
-        poly([topp, [mitt[0] - b, mitt[1]], [mitt[0], mitt[1] + b * 0.32]], '#4d7d5c') +
-        poly([topp, [mitt[0], mitt[1] + b * 0.32], [mitt[0] + b, mitt[1]]], '#2e5541');
-    }
-    // Rektangel i ett väggplan: planet y=yv (framsidan) eller x=xv (gaveln).
-    function iY(yv, x0, x1, z0, z1) { return [P(x0, yv, z0), P(x1, yv, z0), P(x1, yv, z1), P(x0, yv, z1)]; }
-    function iX(xv, y0, y1, z0, z1) { return [P(xv, y0, z0), P(xv, y1, z0), P(xv, y1, z1), P(xv, y0, z1)]; }
-
-    var FASAD = { t: '#57504a', x: '#2d2823', y: '#3b352e' };
-    var BETONG = { t: '#c9c3b8', x: '#8d877d', y: '#a39d92' };
-    var VIRKE = { t: '#f1d3a2', x: '#c79a5f', y: '#dcb57c' };
-
-    function bygg(t) {
-      var L = t.L, B = t.B, x0 = -L / 2, x1 = L / 2, y0 = -B / 2, y1 = B / 2;
-      var zs = 0.35, H = 2.5, ze = zs + H, zr = t.nock + 0.2, o = 0.35;
-      var h = '';
-      h += '<defs>' +
-        '<linearGradient id="rs-gras" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5f8062"/><stop offset="1" stop-color="#344f3c"/></linearGradient>' +
-        '<linearGradient id="rs-glas" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0d6"/><stop offset="1" stop-color="#f0b56e"/></linearGradient>' +
-        '<radialGradient id="rs-sken"><stop offset="0" stop-color="#ffcf8a" stop-opacity=".55"/><stop offset="1" stop-color="#ffcf8a" stop-opacity="0"/></radialGradient>' +
-        '<radialGradient id="rs-skugga"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>' +
-        '</defs>';
-
-      // Tomten och verkstaden (verkstaden flyger in i steg 4).
-      h += box(-9, -6.5, -0.7, 18, 13, 0.7, { t: 'url(#rs-gras)', x: '#2a231c', y: '#382e24' });
-      var hall = box(-15, -6.3, -0.5, 4.6, 4.6, 0.5, { t: '#4c4740', x: '#2a2622', y: '#353029' }) +
-        poly([P(-14.6, -5.9, 0), P(-10.8, -5.9, 0), P(-10.8, -5.9, 2.6), P(-14.6, -5.9, 2.6)], 'rgba(247,245,240,.05)', ' stroke="rgba(247,245,240,.22)" stroke-width="1"') +
-        poly([P(-14.6, -5.9, 0), P(-14.6, -2.1, 0), P(-14.6, -2.1, 2.6), P(-14.6, -5.9, 2.6)], 'rgba(247,245,240,.04)', ' stroke="rgba(247,245,240,.18)" stroke-width="1"');
-      var hallTak = poly([P(-14.6, -5.9, 2.6), P(-10.8, -5.9, 2.6), P(-10.8, -2.1, 2.6), P(-14.6, -2.1, 2.6)], 'rgba(247,245,240,.07)', ' stroke="rgba(247,245,240,.3)" stroke-width="1"');
-      var paneler = '';
-      for (var i = 0; i < 4; i++) {
-        var px = -14.1 + i * 0.9, pa = [];
-        pa.push(poly(iX(px, -5.5, -2.6, 0.05, 2.1), 'rgba(241,211,162,.14)', ' stroke="#e2bf8a" stroke-width="1.6"'));
-        for (var s = -5.5 + 0.58; s < -2.6; s += 0.58) pa.push(lin([P(px, s, 0.05), P(px, s, 2.1)], '#e2bf8a', 1.1));
-        pa.push(lin([P(px, -5.5, 1.1), P(px, -2.6, 1.1)], '#e2bf8a', 1.1));
-        paneler += del(4, 6, pa.join(''), '--in-y:-28px;--d:' + (0.35 + i * 0.22) + 's');
-      }
-      h += del(4, 99, hall + paneler + hallTak + etikett(P(-12.7, -4, 3.9), 'Verkstaden · under tak'), '--in-y:-50px');
-
-      // Steg 1: tomtgränsen ritas och nålen landar.
-      var gr = [P(-8.3, -5.8, 0.02), P(8.3, -5.8, 0.02), P(8.3, 5.8, 0.02), P(-8.3, 5.8, 0.02), P(-8.3, -5.8, 0.02)];
-      var pinnar = [[-8.3, -5.8], [8.3, -5.8], [8.3, 5.8], [-8.3, 5.8]].map(function (k) {
-        return lin([P(k[0], k[1], 0), P(k[0], k[1], 0.9)], '#f0b56e', 2.4) +
-          '<circle cx="' + P(k[0], k[1], 0.9)[0].toFixed(1) + '" cy="' + P(k[0], k[1], 0.9)[1].toFixed(1) + '" r="3" fill="#f0b56e"/>';
-      }).join('');
-      h += del(1, 99, rita(gr, 'rgba(240,181,110,.75)', 1.6) + pinnar, '--in-y:0px');
-      h += del(1, 2, etikett(P(-6.2, 5.8, 0.2), 'Din tomt', 'rs-etikett--ljus'), '--in-y:10px;--d:.7s');
-
-      // Steg 2: planritningen på marken, med mått.
-      var ritn = rita([P(x0, y0, 0.03), P(x1, y0, 0.03), P(x1, y1, 0.03), P(x0, y1, 0.03), P(x0, y0, 0.03)], '#f0b56e', 2.2) +
-        rita([P(x0 + L * 0.4, y0, 0.03), P(x0 + L * 0.4, y1, 0.03)], '#f0b56e', 1.4, ' style="--d:.5s"') +
-        poly([P(x0, y0, 0.03), P(x1, y0, 0.03), P(x1, y1, 0.03), P(x0, y1, 0.03)], 'rgba(240,181,110,.1)') +
-        rita([P(x0, y1 + 1, 0.03), P(x1, y1 + 1, 0.03)], 'rgba(247,245,240,.7)', 1.2, ' style="--d:.8s"') +
-        rita([P(x1 + 1, y0, 0.03), P(x1 + 1, y1, 0.03)], 'rgba(247,245,240,.7)', 1.2, ' style="--d:.9s"') +
-        etikett(P(0, y1 + 1.9, 0.03), t.matt[0], 'rs-etikett--matt') +
-        etikett(P(x1 + 2.2, 0, 0.03), t.matt[1], 'rs-etikett--matt');
-      h += del(2, 5, ritn, '--in-y:0px');
-
-      // Steg 5: ledningar fram till grunden.
-      var led = rita([P(9, -1.2, 0.02), P(x1 + 0.3, -1.2, 0.02)], '#f2b33d', 2.6) +
-        rita([P(9, -0.5, 0.02), P(x1 + 0.3, -0.5, 0.02)], '#6aa7d8', 2.6, ' style="--d:.2s"') +
-        rita([P(9, 0.2, 0.02), P(x1 + 0.3, 0.2, 0.02)], '#a8a196', 2.6, ' style="--d:.4s"');
-      h += del(5, 99, led, '--in-y:0px');
-
-      // Träd bakom huset.
-      var baktrad = [[-7.8, -4.6, 3.4], [7.6, -5.3, 3.8], [8.2, -2.4, 2.9], [-8.1, 1.4, 2.6]];
-      var framtrad = [[-6.8, 5.3, 2.3], [2.8, 5.6, 2.0]];
-      h += baktrad.map(function (g) { return gran(g[0], g[1], g[2]); }).join('');
-
-      // Steg 1-4: nålen.
-      var c = P(0, 0, 0);
-      var nal = '<ellipse class="rs-puls" cx="' + c[0].toFixed(1) + '" cy="' + c[1].toFixed(1) + '" rx="22" ry="11" fill="none" stroke="#f0b56e" stroke-width="2"/>' +
-        '<g class="rs-nal"><path d="M' + c[0] + ' ' + c[1] + 'c-13-20-19-28-19-38a19 19 0 1 1 38 0c0 10-6 18-19 38z" fill="#f0b56e"/>' +
-        '<circle cx="' + c[0] + '" cy="' + (c[1] - 38) + '" r="7" fill="#1b1915"/></g>';
-      h += del(1, 5, nal, '--in-y:-60px;--d:.35s');
-
-      // Steg 3: handlingarna, stämplade.
-      var d = P(4.8, -3.6, 3.4);
-      var dok = '<g class="rs-dok" transform="translate(' + d[0].toFixed(1) + ',' + d[1].toFixed(1) + ') rotate(-6)">' +
-        '<rect x="-38" y="-48" width="76" height="96" rx="8" fill="#f7f5f0"/>' +
-        '<path d="M-24 -30h48M-24 -18h48M-24 -6h32M-24 6h40" stroke="#b9b1a4" stroke-width="3" stroke-linecap="round"/>' +
-        '<circle class="rs-stampel" cx="14" cy="28" r="17" fill="none" stroke="#8f5424" stroke-width="3"/>' +
-        '<path class="rs-stampel" d="M6 28l6 6 11-12" fill="none" stroke="#8f5424" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></g>';
-      h += del(3, 5, dok + etikett([d[0], d[1] + 70], t.lov), '--in-y:-40px');
-
-      // Steg 5: grunden reser sig, med en mjuk skugga.
-      var sk = P(0.3, 0.3, 0);
-      h += del(5, 99, '<ellipse cx="' + sk[0].toFixed(1) + '" cy="' + (sk[1] + 6).toFixed(1) + '" rx="' + (L * S * 0.95).toFixed(1) +
-        '" ry="' + (L * S * 0.42).toFixed(1) + '" fill="url(#rs-skugga)"/>' +
-        box(x0 - 0.3, y0 - 0.3, 0, L + 0.6, B + 0.6, zs, BETONG), '--in-y:22px');
-      h += del(5, 6, etikett(P(8.2, -2.6, 0.4), 'El · vatten · avlopp', 'rs-etikett--liten'), '--in-y:10px;--d:.6s');
-
-      // Steg 6: kranen.
-      var kb = P(5.8, -4.4, 0), kt = P(5.8, -4.4, 8.2), km = P(-0.5, 0.2, 8.2), kk = P(-0.5, 0.2, 5.2);
-      var kran = box(5.3, -4.9, 0, 1, 1, 0.5, { t: '#f2c14e', x: '#b8891f', y: '#d6a534' }) +
-        lin([kb, kt], '#f2c14e', 4) + lin([P(5.8, -4.4, 7.2), km], '#f2c14e', 3) +
-        lin([kt, km], '#f2c14e', 2) + lin([km, kk], 'rgba(247,245,240,.7)', 1.2) +
-        '<rect x="' + (kk[0] - 4) + '" y="' + kk[1] + '" width="8" height="7" rx="2" fill="#f2c14e"/>';
-      h += del(6, 7, kran, '--in-y:-80px');
-
-      // Steg 6-7: väggarna reses (bakifrån) och taket läggs på.
-      var vagg = '';
-      vagg += del(6, 99, box(x0, y0, zs, L, 0.2, H, FASAD), '--in-y:-70px;--d:.2s');
-      vagg += del(6, 99, box(x0, y0, zs, 0.2, B, H, FASAD), '--in-y:-70px;--d:.45s');
-      var gavel = box(x1 - 0.2, y0, zs, 0.2, B, H, FASAD) +
-        poly(iX(x1 + 0.01, -0.45, 0.45, zs + 0.9, zs + 2.0), '#1c2a33', ' stroke="#8a8074" stroke-width="1"');
-      vagg += del(6, 99, gavel, '--in-y:-70px;--d:.7s');
-      var fram = box(x0, y1 - 0.2, zs, L, 0.2, H, FASAD);
-      for (var bx = x0 + 0.45; bx < x1; bx += 0.45) fram += lin([P(bx, y1 + 0.005, zs), P(bx, y1 + 0.005, ze)], 'rgba(255,255,255,.07)', 1);
-      var f1 = [x0 + L * 0.12, x0 + L * 0.12 + 1.3], f2 = [x1 - L * 0.12 - 2.0, x1 - L * 0.12];
-      var dorr = [x0 + L * 0.46, x0 + L * 0.46 + 0.95];
-      fram += poly(iY(y1 + 0.01, f1[0], f1[1], zs + 0.8, zs + 2.0), '#1c2a33', ' stroke="#8a8074" stroke-width="1"');
-      fram += poly(iY(y1 + 0.01, f2[0], f2[1], zs + 0.25, zs + 2.15), '#1c2a33', ' stroke="#8a8074" stroke-width="1"');
-      fram += poly(iY(y1 + 0.01, dorr[0], dorr[1], zs, zs + 2.1), '#2a1f17', ' stroke="#8a8074" stroke-width="1"');
-      vagg += del(6, 99, fram, '--in-y:-70px;--d:.95s');
-      var tak = poly([P(x1, y0, ze), P(x1, y1, ze), P(x1, 0, zr - 0.2)], '#25211d') +
-        poly([P(x0 - o, 0, zr), P(x1 + o, 0, zr), P(x1 + o, y0 - o, ze - 0.2), P(x0 - o, y0 - o, ze - 0.2)], '#4a4f55') +
-        poly([P(x0 - o, 0, zr), P(x1 + o, 0, zr), P(x1 + o, y1 + o, ze - 0.2), P(x0 - o, y1 + o, ze - 0.2)], '#2c3034') +
-        lin([P(x0 - o, 0, zr), P(x1 + o, 0, zr)], 'rgba(255,255,255,.35)', 1.4);
-      for (var tx = x0; tx <= x1 + 0.01; tx += 0.55) tak += lin([P(tx, 0.05, zr - 0.02), P(tx, y1 + o - 0.05, ze - 0.18)], 'rgba(255,255,255,.06)', 1);
-      vagg += del(6, 99, tak, '--in-y:-110px;--d:1.3s');
-      h += vagg;
-
-      // Steg 7: ljuset tänds, trall, skylt och bock.
-      var glod = poly(iY(y1 + 0.02, f1[0], f1[1], zs + 0.8, zs + 2.0), 'url(#rs-glas)') +
-        poly(iY(y1 + 0.02, f2[0], f2[1], zs + 0.25, zs + 2.15), 'url(#rs-glas)') +
-        poly(iX(x1 + 0.02, -0.45, 0.45, zs + 0.9, zs + 2.0), 'url(#rs-glas)');
-      var sp = P((f2[0] + f2[1]) / 2, y1 + 2, 0);
-      glod = '<ellipse cx="' + sp[0].toFixed(1) + '" cy="' + sp[1].toFixed(1) + '" rx="120" ry="44" fill="url(#rs-sken)"/>' + glod;
-      h += del(7, 99, glod, '--in-y:0px;--d:.2s', 'rs-ljus');
-      var trall = box(dorr[0] - 0.9, y1, 0, dorr[1] - dorr[0] + 1.8, 1.3, 0.2, VIRKE);
-      var skylt = lin([P(x0 - 0.8, y1 + 1.6, 0), P(x0 - 0.8, y1 + 1.6, 1.1)], '#2b241d', 2.4) +
-        lin([P(x0 + 0.9, y1 + 1.6, 0), P(x0 + 0.9, y1 + 1.6, 1.1)], '#2b241d', 2.4) +
-        poly(iY(y1 + 1.6, x0 - 1.0, x0 + 1.1, 0.8, 1.55), '#c9a06a');
-      var sm = P(x0 + 0.05, y1 + 1.6, 1.12);
-      skylt += '<text class="rs-skylttext" x="' + sm[0].toFixed(1) + '" y="' + (sm[1] + 3).toFixed(1) + '" text-anchor="middle" transform="rotate(-30 ' + sm[0].toFixed(1) + ' ' + sm[1].toFixed(1) + ')">Legohus</text>';
-      h += del(7, 99, trall + skylt, '--in-y:14px;--d:.5s');
-      var bm = P(0, 0, zr + 2.6);
-      var bock = '<g class="rs-bock" transform="translate(' + bm[0].toFixed(1) + ',' + bm[1].toFixed(1) + ')">' +
-        '<circle r="24" fill="#22a35a"/><path d="M-10 0l7 7 13-14" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></g>' +
-        etikett([bm[0], bm[1] + 46], 'Slutbesiktning klar', 'rs-etikett--ljus');
-      h += del(7, 99, bock, '--in-y:-30px;--d:.9s');
-
-      // Steg 6: lastbilen med väggelement.
-      var bil = box(3.4, 3.9, 0.45, 3.6, 1.5, 0.22, { t: '#3a3632', x: '#211e1b', y: '#2c2925' }) +
-        box(3.6, 4.1, 0.67, 3.1, 1.1, 0.55, VIRKE) +
-        box(7.1, 3.9, 0.3, 1.3, 1.5, 1.45, { t: '#f5c690', x: '#b27a3e', y: '#e0a45f' }) +
-        poly(iX(8.41, 4.1, 5.2, 1.05, 1.6), '#1c2a33');
-      [[4.2, 5.4], [6.2, 5.4], [7.7, 5.4]].forEach(function (w) {
-        var p = P(w[0], w[1] + 0.01, 0.3);
-        bil += '<ellipse cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" rx="8" ry="9" fill="#141210" stroke="#57504a" stroke-width="2"/>';
-      });
-      h += del(6, 7, bil, '--in-x:140px;--in-y:80px');
-
-      // Träd framför huset, sist.
-      h += framtrad.map(function (g) { return gran(g[0], g[1], g[2]); }).join('');
-      return h;
-    }
-
-    var steg = 0, typ = 'attefallshus', spelar = !lugn, synlig = false, pekar = false, timer, vald = false;
-    var TID = 5200;
-    rot.style.setProperty('--resatid', TID + 'ms');
-
-    function visaSteg(n) {
-      steg = n;
-      rot.setAttribute('data-steg', String(n));
-      $$('.rs-del', svg).forEach(function (g) {
-        var pa = +g.getAttribute('data-fran') <= n && n < +g.getAttribute('data-till');
-        g.classList.toggle('pa', pa);
-      });
-      knappar.forEach(function (b, i) {
-        if (i + 1 === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
-        b.classList.toggle('klar', i + 1 < n);
-      });
-      var t = TYP[typ], s = STEG[n - 1];
-      I.skede.textContent = SKEDE[s.skede];
-      I.nr.textContent = '0' + n;
-      I.titel.textContent = s.titel;
-      I.vem.setAttribute('data-vem', s.vem);
-      I.vem.innerHTML = '<i class="prick prick--' + s.vem + '"></i><span>' + s.vemText + '</span>';
-      I.text.textContent = s.text;
-      I.meta.textContent = s.meta(t);
-      var l = s.lank(t);
-      I.lank.setAttribute('href', l[0]);
-      I.lank.firstChild.nodeValue = l[1];
-      if (!lugn) {
-        infoRuta.classList.remove('resan__info--byt');
-        void infoRuta.offsetWidth;
-        infoRuta.classList.add('resan__info--byt');
-      }
-      starta();
-    }
-
-    function starta() {
-      clearTimeout(timer);
-      rot.classList.remove('resan--spelar');
-      if (!spelar || !synlig || pekar) return;
-      void rot.offsetWidth;
-      rot.classList.add('resan--spelar');
-      timer = setTimeout(function () { visaSteg(steg % 7 + 1); }, TID);
-    }
-
-    function valjSjalv() {
-      spelar = false;
-      if (!vald) { vald = true; infoRuta.setAttribute('aria-live', 'polite'); }
-    }
-
-    function rendera() {
-      svg.innerHTML = bygg(TYP[typ]);
-      if (steg) {
-        // Nya grupper ska tona in - ge webbläsaren en bildruta först. Steget
-        // läses när bildrutan kommer, inte nu: hinner man klicka på ett
-        // steg under tiden är det det steget som gäller.
-        requestAnimationFrame(function () { requestAnimationFrame(function () { visaSteg(steg); }); });
-      }
-    }
-
-    knappar.forEach(function (b, i) {
-      b.addEventListener('click', function () { valjSjalv(); visaSteg(i + 1); });
-      b.addEventListener('keydown', function (e) {
-        var n = null;
-        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = Math.min(7, i + 2);
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = Math.max(1, i);
-        if (n === null) return;
-        e.preventDefault();
-        valjSjalv();
-        visaSteg(n);
-        knappar[n - 1].focus();
-      });
-    });
-
-    typKnappar.forEach(function (b) {
-      b.addEventListener('click', function () {
-        var ny = b.getAttribute('data-typ');
-        if (ny === typ) return;
-        typ = ny;
-        typKnappar.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
-        valjSjalv();
-        rendera();
-      });
-    });
-
-    vemKnappar.forEach(function (b) {
-      b.addEventListener('click', function () {
-        var pa = b.getAttribute('aria-pressed') !== 'true';
-        vemKnappar.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b && pa)); });
-        if (pa) rot.setAttribute('data-vem', b.getAttribute('data-vem'));
-        else rot.removeAttribute('data-vem');
-      });
-    });
-
-    rot.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') { pekar = true; starta(); } });
-    rot.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') { pekar = false; starta(); } });
-    rot.addEventListener('focusin', function () { valjSjalv(); starta(); });
-
-    rendera();
-    if (!window.IntersectionObserver || lugn) {
-      synlig = true;
-      visaSteg(1);
-    } else {
-      new IntersectionObserver(function (poster) {
-        synlig = poster[0].isIntersecting;
-        if (synlig && !steg) {
-          requestAnimationFrame(function () { visaSteg(1); });
-        } else {
-          starta();
-        }
-      }, { threshold: 0.3 }).observe(rot);
-    }
-    pausaUtanforVy(rot);
-    glidandeMarkering($('.resan__hustyp', rot));
   })();
 
   /* --- Regelsidan: guiden om attefallshus --------------------------
@@ -4581,105 +3204,6 @@
       }, { rootMargin: '200px 0px' }).observe(hv);
     } else spela();
   }
-
-  /* Sprängskissen: model-viewer laddas när sektionen närmar sig, och
-     rullningen spolar animationen "sprang" (tak upp, grund ner). */
-  var sp = document.querySelector('[data-sprang]');
-  if (!sp) return;
-  var scen = sp.querySelector('[data-sprang-scen]');
-  var delar = Array.prototype.slice.call(sp.querySelectorAll('.sprang__del'));
-  var matare = sp.querySelector('.sprang__matare i');
-  var spar = sp.querySelector('.sprang__spar');
-  var mv = null, klar = false, p = -1, bokad = false, inne = false;
-  var smal = window.matchMedia('(max-width: 900px)');
-
-  function laddaMV() {
-    if (window.customElements && customElements.get('model-viewer')) return Promise.resolve();
-    return new Promise(function (ok, fel) {
-      var s = document.createElement('script');
-      s.type = 'module';
-      s.src = 'vendor/model-viewer.min.js';
-      s.onload = ok;
-      s.onerror = fel;
-      document.head.appendChild(s);
-    });
-  }
-
-  function bygg() {
-    if (mv) return;
-    mv = document.createElement('model-viewer');
-    var attr = {
-      src: 'modeller/hus-r1-sprang.glb?v=20261004q',
-      alt: 'Sadel 30 Bred i sprängskiss: grund, väggar och tak',
-      'animation-name': 'sprang',
-      'camera-orbit': '34deg 72deg 16m',
-      'camera-target': '0m 1.7m 0m',
-      'field-of-view': '30deg',
-      'shadow-intensity': '1.2',
-      'shadow-softness': '0.7',
-      'environment-image': 'legacy',
-      'tone-mapping': 'neutral',
-      exposure: '1.1',
-      'interaction-prompt': 'none',
-      'disable-zoom': '',
-      'disable-pan': '',
-      'disable-tap': ''
-    };
-    Object.keys(attr).forEach(function (k) { mv.setAttribute(k, attr[k]); });
-    mv.addEventListener('load', function () {
-      mv.play();
-      mv.pause();
-      klar = true;
-      mv.classList.add('syns');
-      p = -1;
-      rita();
-    });
-    mv.addEventListener('error', function () { sp.classList.add('sprang--utan3d'); });
-    scen.appendChild(mv);
-  }
-
-  function progress() {
-    var vh = window.innerHeight;
-    if (smal.matches) {
-      var r = scen.getBoundingClientRect();
-      return Math.max(0, Math.min(1, (vh * 0.95 - r.top) / (vh * 0.9)));
-    }
-    var sr = spar.getBoundingClientRect();
-    var langd = sr.height - vh;
-    return langd > 0 ? Math.max(0, Math.min(1, -sr.top / langd)) : 1;
-  }
-
-  function rita() {
-    bokad = false;
-    var ny = lugn ? 1 : progress();
-    if (Math.abs(ny - p) < 0.002) return;
-    p = ny;
-    // Mjuk start och slut.
-    var e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
-    if (klar && mv) {
-      mv.currentTime = Math.min(0.999, Math.max(0, e));
-      mv.cameraOrbit = (34 + e * 24).toFixed(2) + 'deg ' + (72 - e * 8).toFixed(2) + 'deg ' + (16 + e * 7).toFixed(2) + 'm';
-      mv.cameraTarget = '0m ' + (1.7 + e * 1.4).toFixed(2) + 'm 0m';
-    }
-    var steg = p < 0.34 ? 0 : p < 0.67 ? 1 : 2;
-    delar.forEach(function (d, n) { d.classList.toggle('aktiv', n === steg); });
-    if (matare) matare.style.setProperty('--p', e.toFixed(3));
-  }
-
-  function boka() {
-    if (!inne || bokad) return;
-    bokad = true;
-    requestAnimationFrame(rita);
-  }
-
-  if (window.IntersectionObserver) {
-    new IntersectionObserver(function (poster) {
-      inne = poster.some(function (x) { return x.isIntersecting; });
-      if (inne) { laddaMV().then(bygg, function () { sp.classList.add('sprang--utan3d'); }); boka(); }
-    }, { rootMargin: '120% 0px' }).observe(sp);
-  } else { laddaMV().then(bygg); inne = true; }
-  window.addEventListener('scroll', boka, { passive: true });
-  window.addEventListener('resize', function () { p = -1; boka(); }, { passive: true });
 })();
 
 
@@ -4770,4 +3294,305 @@
     });
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
   kort.forEach(function (k) { io.observe(k); });
+})();
+
+/* Fabriken på startsidan (2026-11-26). Loopen spelar bara när den syns
+   och aldrig för den som valt mindre rörelse (då visas stillbilden), och
+   kan pausas. Hela filmen (15 MB, med ljud) laddas först vid klick och
+   spelas i en dialog med kontroller. Utan skript öppnar länken mp4-filen. */
+(function () {
+  var sek = document.querySelector('[data-fabrik]');
+  if (!sek) return;
+  var lugn = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var loop = sek.querySelector('[data-fabrik-loop]');
+  var paus = sek.querySelector('[data-fabrik-paus]');
+  var pausad = lugn, synlig = false;
+  function spela() {
+    if (!loop || pausad || !synlig) return;
+    var p = loop.play();
+    if (p && p.catch) p.catch(function () {});
+  }
+  if (loop) {
+    if (lugn) { loop.removeAttribute('autoplay'); loop.pause(); }
+    // Klippet (2 MB) hämtas först när man närmar sig fabriken, inte vid
+    // sidladdningen (index.html har preload="none" och ingen autoplay).
+    if (!lugn && window.IntersectionObserver) {
+      var nara = new IntersectionObserver(function (poster) {
+        if (!poster[0].isIntersecting) return;
+        nara.disconnect();
+        if (loop.preload !== 'auto') { loop.preload = 'auto'; loop.load(); spela(); }
+      }, { rootMargin: '600px 0px' });
+      nara.observe(loop);
+    }
+    if (window.IntersectionObserver) {
+      new IntersectionObserver(function (poster) {
+        synlig = poster[0].isIntersecting;
+        if (synlig) spela(); else if (!loop.paused) loop.pause();
+      }).observe(loop);
+    } else { synlig = true; spela(); }
+    if (paus) paus.addEventListener('click', function () {
+      pausad = !pausad;
+      if (pausad) loop.pause(); else spela();
+      paus.setAttribute('aria-pressed', pausad ? 'true' : 'false');
+      paus.setAttribute('aria-label', pausad ? 'Spela klippet' : 'Pausa klippet');
+    });
+  }
+
+  var dlg = sek.querySelector('.fabrik__dialog');
+  var plats = sek.querySelector('[data-fabrik-spelare]');
+  var knapp = sek.querySelector('[data-fabrik-film]');
+  if (!dlg || !plats || !knapp || typeof dlg.showModal !== 'function') return;
+  var MAPP = 'images/fabrik/';
+  knapp.addEventListener('click', function (e) {
+    e.preventDefault();
+    var v = document.createElement('video');
+    v.controls = true;
+    v.playsInline = true;
+    v.preload = 'auto';
+    v.poster = MAPP + 'fabrik-film-poster.webp';
+    v.setAttribute('width', '576');
+    v.setAttribute('height', '1024');
+    [['webm', 'video/webm'], ['mp4', 'video/mp4']].forEach(function (k) {
+      var s = document.createElement('source');
+      s.src = MAPP + 'fabrik-film.' + k[0];
+      s.type = k[1];
+      v.appendChild(s);
+    });
+    plats.textContent = '';
+    plats.appendChild(v);
+    if (loop && !loop.paused) loop.pause();
+    dlg.showModal();
+    var p = v.play();
+    if (p && p.catch) p.catch(function () {});
+  });
+  dlg.addEventListener('close', function () {
+    var v = plats.querySelector('video');
+    if (v) { v.pause(); plats.textContent = ''; }
+    spela();
+    knapp.focus();
+  });
+  dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+  var stang = sek.querySelector('[data-fabrik-stang]');
+  if (stang) stang.addEventListener('click', function () { dlg.close(); });
+})();
+
+/* Paketpriserna (2026-11-26). Modellsidornas paketlista: valt paket
+   följer med i "Begär offert"-länken. (i) öppnar panelen (<dialog>) med
+   alla paket till vänster och beskrivningen av det valda till höger;
+   stängs med X, Esc eller klick utanför. På kontaktsidan skrivs modell
+   och paket från adressen in i meddelandet. Stil i design.css 60. */
+(function () {
+  'use strict';
+  var MODELLER = { 'kupa-30': 'Kupa 30', 'kupa-40': 'Kupa 40', 'sadel-50': 'Sadel 50', 'pulpet-70': 'Pulpet 70', 'sadel-90': 'Sadel 90' };
+  var PAKET = { 'prefab-stomme': 'Prefab stomme', 'klimatskal': 'Klimatskal', 'nyckelfardig': 'Nyckelfärdig modul', 'nyckelfardig-entreprenad': 'Nyckelfärdig modul + entreprenad' };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  // Valt paket delas med 3D-ritaren (husritare-pris.js, samma nyckel): ?paket= i adressen
+  // går först, annars det man senast valde här eller i ritaren.
+  var NYCKEL = 'idealhus-paket';
+  function lasPaket() {
+    var q = null;
+    try { q = new URLSearchParams(location.search).get('paket'); } catch (e) { /* gammal webbläsare */ }
+    if (q && PAKET[q]) return q;
+    try { var v = localStorage.getItem(NYCKEL); if (v && PAKET[v]) return v; } catch (e) { /* privat läge */ }
+    return null;
+  }
+  function sparaPaket(p) { try { localStorage.setItem(NYCKEL, p); } catch (e) { /* privat läge */ } }
+
+  $$('[data-paketlista]').forEach(function (lista) {
+    var modell = lista.getAttribute('data-modell');
+    var offert = lista.querySelector('[data-paketlista-offert]');
+    var val = lista.querySelector('[data-paketlista-val]');
+    var rader = $$('.paketlista__rad', lista);
+
+    function uppdatera() {
+      var vald = lista.querySelector('.paketlista__radio:checked');
+      rader.forEach(function (r) { r.classList.toggle('ar-vald', !!vald && r.contains(vald)); });
+      if (!vald) return;
+      if (offert) offert.href = 'kontakt.html?modell=' + encodeURIComponent(modell) + '&paket=' + encodeURIComponent(vald.value);
+      // Rita ditt hus (i toppen och vid 3D-bilden) öppnar ritaren med samma paket.
+      $$('a[href^="rita-hus.html?modell=' + modell + '"]').forEach(function (a) {
+        a.href = 'rita-hus.html?modell=' + encodeURIComponent(modell) + '&paket=' + encodeURIComponent(vald.value);
+      });
+      if (val) {
+        val.textContent = 'Valt: ';
+        var b = document.createElement('b');
+        b.textContent = PAKET[vald.value] || vald.value;
+        val.appendChild(b);
+      }
+    }
+    function valjPaPage(p) {
+      var radio = lista.querySelector('.paketlista__radio[value="' + p + '"]');
+      if (radio && !radio.checked) {
+        radio.checked = true;
+        radio.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      return radio;
+    }
+
+    lista.addEventListener('change', function (e) {
+      if (e.target.classList.contains('paketlista__radio')) { uppdatera(); if (e.target.checked) sparaPaket(e.target.value); }
+    });
+
+    // Panelen.
+    var dlg = lista.querySelector('[data-paketinfo-dialog]');
+    var oppnare = null;
+    function visa(p) {
+      $$('.paketinfo__paket', dlg).forEach(function (a) { a.hidden = a.getAttribute('data-paket') !== p; });
+      var r = dlg.querySelector('[data-paketinfo-val][value="' + p + '"]');
+      if (r) r.checked = true;
+      var o = dlg.querySelector('[data-paketinfo-offert]');
+      if (o) o.href = 'kontakt.html?modell=' + encodeURIComponent(modell) + '&paket=' + encodeURIComponent(p);
+      var t = dlg.querySelector('[data-paketinfo-text]');
+      if (t) t.scrollTop = 0;
+    }
+    function stang() { if (dlg.open) dlg.close(); }
+
+    if (dlg && dlg.showModal) {
+      lista.addEventListener('click', function (e) {
+        var knapp = e.target.closest('.paketlista__info');
+        if (!knapp) return;
+        e.preventDefault();
+        oppnare = knapp;
+        visa(knapp.getAttribute('data-paketinfo'));
+        dlg.showModal();
+        document.documentElement.classList.add('paketinfo-oppen');
+        var vald = dlg.querySelector('[data-paketinfo-val]:checked');
+        if (vald) vald.focus();
+      });
+      dlg.addEventListener('change', function (e) {
+        if (e.target.matches('[data-paketinfo-val]')) visa(e.target.value);
+      });
+      dlg.addEventListener('click', function (e) {
+        // Klick på bakgrunden (själva dialogen, utanför ramen) stänger.
+        if (e.target === dlg) { stang(); return; }
+        if (e.target.closest('[data-paketinfo-stang]')) { stang(); return; }
+        if (e.target.closest('[data-paketinfo-valj]')) {
+          var v = dlg.querySelector('[data-paketinfo-val]:checked');
+          var radio = v && valjPaPage(v.value);
+          stang();
+          if (radio) { oppnare = null; radio.focus(); }
+        }
+      });
+      // Fokusfälla: Tab går runt inne i panelen.
+      dlg.addEventListener('keydown', function (e) {
+        if (e.key !== 'Tab') return;
+        var f = $$('button, a[href], input:checked, [tabindex="0"]', dlg).filter(function (el) {
+          return el.offsetParent !== null || el === document.activeElement;
+        });
+        if (!f.length) return;
+        var forst = f[0], sist = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === forst) { e.preventDefault(); sist.focus(); }
+        else if (!e.shiftKey && document.activeElement === sist) { e.preventDefault(); forst.focus(); }
+      });
+      dlg.addEventListener('close', function () {
+        document.documentElement.classList.remove('paketinfo-oppen');
+        if (oppnare) oppnare.focus();
+        oppnare = null;
+      });
+    } else if (dlg) {
+      dlg.remove();
+    }
+
+    // Hela raden väljer paketet, inte bara rundeln och namnet.
+    lista.addEventListener('click', function (e) {
+      if (e.target.closest('input, label, a, button, dialog, .paketlista__ingar')) return;
+      var rad = e.target.closest('.paketlista__rad');
+      if (!rad) return;
+      var radio = valjPaPage(rad.getAttribute('data-paket'));
+      if (radio) radio.focus({ preventScroll: true });
+    });
+
+    // Förval: paketet från adressen, ritaren eller förra besöket.
+    function forval() {
+      var p = lasPaket();
+      var radio = p && lista.querySelector('.paketlista__radio[value="' + p + '"]');
+      if (radio) radio.checked = true;
+      uppdatera();
+    }
+    forval();
+    // Tillbaka från ritaren med bakåtknappen (sidan ur minnet) eller val i en annan flik.
+    window.addEventListener('pageshow', function (e) { if (e.persisted) forval(); });
+    window.addEventListener('storage', function (e) { if (e.key === NYCKEL) forval(); });
+  });
+
+  // Kontaktsidan: kontakt.html?modell=kupa-40&paket=klimatskal
+  var falt = document.getElementById('field-message');
+  if (!falt || !/kontakt\.html$/.test(location.pathname)) return;
+  var q;
+  try { q = new URLSearchParams(location.search); } catch (e) { return; }
+  var m = MODELLER[q.get('modell')];
+  var p = PAKET[q.get('paket')];
+  if (!m) return;
+  if (!falt.value) {
+    falt.value = 'Jag är intresserad av ' + m + (p ? ', paketet ' + p : '') + '.\n\n';
+  }
+  var typ = document.querySelector('#kontaktformular input[name="hustyp"][value="' + (q.get('modell') === 'kupa-30' ? 'Attefallshus' : 'Fritidshus') + '"]');
+  if (typ && !document.querySelector('#kontaktformular input[name="hustyp"]:checked')) {
+    typ.checked = true;
+    typ.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+})();
+
+/* Bildrader som går att svepa i sidled (2026-11-26, granskningen): när raden
+   faktiskt rullar (mobil) kan den nås med tangentbordet och rullas med
+   piltangenterna. På bred skärm, där allt syns, blir den inget extra tabbstopp. */
+(function () {
+  var rader = Array.prototype.slice.call(document.querySelectorAll('.fabrik__bilder, .at-foto__rad'));
+  if (!rader.length) return;
+  function kolla() {
+    rader.forEach(function (r) {
+      if (r.scrollWidth > r.clientWidth + 1) {
+        r.setAttribute('tabindex', '0');
+        if (!r.hasAttribute('aria-label')) r.setAttribute('aria-label', 'Bilder, rulla i sidled');
+      } else {
+        r.removeAttribute('tabindex');
+      }
+    });
+  }
+  kolla();
+  var t;
+  window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(kolla, 150); });
+})();
+
+/* Fokusring på inbäddade ramar (3D-huset) när man tabbar in (2026-11-26,
+   granskningen). Fokus hamnar då i ramens eget dokument och sidan visar
+   ingen ring och rullar inte fram ramen; här märks ramen och rullas in. */
+(function () {
+  if (!document.querySelector('iframe')) return;
+  var tangent = false;
+  document.addEventListener('keydown', function (e) { if (e.key === 'Tab') tangent = true; }, true);
+  document.addEventListener('pointerdown', function () { tangent = false; }, true);
+  window.addEventListener('blur', function () {
+    setTimeout(function () {
+      var a = document.activeElement;
+      if (!tangent || !a || a.tagName !== 'IFRAME') return;
+      a.classList.add('ram-fokus');
+      a.scrollIntoView({ block: 'nearest' });
+    }, 0);
+  });
+  window.addEventListener('focus', function () {
+    Array.prototype.forEach.call(document.querySelectorAll('iframe.ram-fokus'), function (f) { f.classList.remove('ram-fokus'); });
+  });
+})();
+
+/* 3D-huset i ramen laddas när man närmar sig det (2026-11-26, granskningen).
+   Med loading="lazy" hämtade webbläsaren hela 3D-ritaren (ca 5 MB, bland
+   annat elbil.glb) direkt vid sidladdningen, eftersom ramen låg inom dess
+   egen marginal. Ramen har data-src och får sin src här. */
+(function () {
+  var ramar = Array.prototype.slice.call(document.querySelectorAll('iframe[data-src]'));
+  if (!ramar.length) return;
+  function ladda(f) {
+    if (!f.getAttribute('src')) f.setAttribute('src', f.getAttribute('data-src'));
+    f.removeAttribute('data-src');
+  }
+  if (!window.IntersectionObserver) { ramar.forEach(ladda); return; }
+  var io = new IntersectionObserver(function (poster) {
+    poster.forEach(function (p) {
+      if (!p.isIntersecting) return;
+      io.unobserve(p.target);
+      ladda(p.target);
+    });
+  }, { rootMargin: '500px 0px' });
+  ramar.forEach(function (f) { io.observe(f); });
 })();

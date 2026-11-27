@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 # Bygger 404-sidan, sitemap.xml och robots.txt. Kor: python _extra.py
+# Bara publiceringslistan: python _extra.py --bara-lista
+# (2026-11-26: 404-mallen och SIDOR här är äldre än de publicerade 404.html
+# och sitemap.xml - kör hela skriptet först när de är uppdaterade, annars
+# skrivs nyare sidor över.)
 import io
+import sys
+
+BARA_LISTA = "--bara-lista" in sys.argv
 
 import _bygg as B
 
@@ -86,7 +93,8 @@ ut = ut.replace("</body>", """    <script>
       });
     </script>
   </body>""", 1)
-io.open("404.html", "w", encoding="utf-8", newline="").write(ut.replace("\n", "\r\n"))
+if not BARA_LISTA:
+    io.open("404.html", "w", encoding="utf-8", newline="").write(ut.replace("\n", "\r\n"))
 
 # --- sitemap --------------------------------------------------------------
 rader = "\n".join(
@@ -100,13 +108,15 @@ rader = "\n".join(
 sitemap = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
            + rader + "\n</urlset>\n")
-io.open("sitemap.xml", "w", encoding="utf-8", newline="\r\n").write(sitemap)
+if not BARA_LISTA:
+    io.open("sitemap.xml", "w", encoding="utf-8", newline="\r\n").write(sitemap)
 
 # --- robots ---------------------------------------------------------------
 robots = ("User-agent: *\n"
           "Allow: /\n\n"
           "Sitemap: %ssitemap.xml\n" % B.BAS)
-io.open("robots.txt", "w", encoding="utf-8", newline="\r\n").write(robots)
+if not BARA_LISTA:
+    io.open("robots.txt", "w", encoding="utf-8", newline="\r\n").write(robots)
 
 # --- Filerna som ska upp på webbhotellet ----------------------------------
 # Bara det sajten faktiskt använder. images/ har gamla bilder kvar (bland
@@ -116,7 +126,7 @@ import os
 import re
 
 SIDFILER = sorted(f for f in os.listdir(".") if f.endswith(".html") and not f.startswith("_")) + [
-    "styles.css", "design.css", "premium.js", "sitemap.xml", "robots.txt", "llms.txt",
+    "styles.css", "design.css", "premium.js", "ios.css", "logga.js", "sitemap.xml", "robots.txt", "llms.txt",
     "favicon.ico", "apple-touch-icon.png", ".htaccess"]
 text = "".join(io.open(f, encoding="utf-8", errors="ignore").read()
                for f in SIDFILER if f.endswith((".html", ".css", ".js")))
@@ -127,9 +137,32 @@ for namn in re.findall(r"['\"]([\w-]+\.(?:webp|png|jpg|svg|mp4|glb))['\"]", text
 media |= {"modeller/hus-r%d.glb" % i for i in range(1, 6)}
 media |= {"vendor/model-viewer.min.js", "vendor/leaflet/leaflet.js", "vendor/leaflet/leaflet.css"}
 media = sorted(m for m in media if os.path.isfile(m))
+
+# Slås ihop med förra listan (2026-11-26). Listan har också fått filer från
+# andra håll - 3D-ritaren (husritare*.js bygger sökvägarna till texturer,
+# modeller och miljöer i koden, så skanningen ovan hittar dem inte),
+# nya-hus.css, delningsbilder - och en omkörning tappade dem. Nu tas allt med
+# som stod i förra listan och finns kvar på disk, plus husritare*.js och vad
+# de nämner, plus hela fabriksmappen (utom FABRIK.md). Ska en fil bort ur
+# listan: radera den från disk eller ta bort raden för hand.
+RITARE = r"husritare[\w-]*\.(?:js|css)"
+RITARFILER = sorted(f for f in os.listdir(".") if re.fullmatch(RITARE, f))
+ritartext = "".join(io.open(f, encoding="utf-8", errors="ignore").read() for f in RITARFILER)
+ritarref = set(re.findall(RITARE, ritartext + text))
+extra = set(m.rstrip(".") for m in re.findall(r"(?:images|modeller|vendor)/[\w./-]+", ritartext))
+extra |= {f for f in RITARFILER if f in ritarref}
+for rot, _mappar, filer in os.walk("images/fabrik"):
+    extra |= {os.path.join(rot, f).replace("\\", "/") for f in filer if not f.endswith(".md")}
+if os.path.isfile("publicera-filer.txt"):
+    for rad in io.open("publicera-filer.txt", encoding="utf-8").read().splitlines():
+        rad = rad.strip()
+        if rad and not rad.startswith("#"):
+            extra.add(rad)
+media = sorted((set(media) | {m for m in extra if os.path.isfile(m)}) - set(SIDFILER))
 saknas = [f for f in SIDFILER if not os.path.isfile(f)]
 assert not saknas, saknas
 io.open("publicera-filer.txt", "w", encoding="utf-8", newline="\r\n").write(
     "# Skrivs av _extra.py - ändra inte för hand.\n" + "\n".join(SIDFILER + media) + "\n")
 
-print("404.html\nsitemap.xml\nrobots.txt\npublicera-filer.txt (%d filer)" % (len(SIDFILER) + len(media)))
+print(("" if BARA_LISTA else "404.html\nsitemap.xml\nrobots.txt\n")
+      + "publicera-filer.txt (%d filer)" % (len(SIDFILER) + len(media)))

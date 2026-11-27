@@ -1,0 +1,227 @@
+/* Sprängvyn "Vad ingår?" (husritare-sprang.js): panelen med paketen och etiketterna i bilden.
+   Samma glas som verktygsradens menyer; på smal skärm en bottenpanel, och i bilden bara
+   numrerade prickar (listan i panelen har samma nummer). */
+
+.kf__scen--sprang .ritare__tips, .kf__scen--sprang .kf__karta, .kf__scen--sprang .kf__rum,
+.kf__scen--sprang .kf__lager, .kf__scen--sprang .kf__mal, .kf__scen--sprang .kf__gang { display: none !important; }
+
+.kspr { position: absolute; z-index: 6; top: 14px; left: 14px; width: 316px; max-height: calc(100% - 104px); display: flex; flex-direction: column; overflow: hidden;
+  padding: 10px 12px 12px; border-radius: 20px; background: rgba(22, 20, 17, 0.84); color: #fff; font-family: var(--sans);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 24px 48px -24px rgba(0, 0, 0, 0.8);
+  transform-origin: top left; animation: kspr-in 0.28s var(--k-ut, cubic-bezier(0.22, 1, 0.36, 1)) both; }
+.kspr[hidden] { display: none; }
+@keyframes kspr-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } }
+.kspr__topp { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 8px; }
+.kspr__etikett { margin: 0; font: 600 0.6875rem/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.62); }
+.kspr__stang { display: grid; place-items: center; width: 32px; height: 32px; margin: -4px -4px -4px 0; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: #fff; cursor: pointer; transition: background-color 0.16s; }
+.kspr__stang:hover { background: rgba(255, 255, 255, 0.2); }
+.kspr__stang svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+.kspr__flikar { flex: none; position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 3px; border-radius: 12px; background: rgba(255, 255, 255, 0.07); }
+.kspr__flik { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; padding: 7px 2px 6px; border: 0; border-radius: 9px; background: none; color: rgba(255, 255, 255, 0.66); font: 500 0.6875rem/1.1 var(--sans); cursor: pointer; transition: color 0.16s; }
+.kspr__flik b { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(255, 255, 255, 0.12); font-size: 0.6875rem; font-weight: 600; transition: background-color 0.2s, color 0.2s; }
+.kspr__flik span { max-width: 100%; text-align: center; letter-spacing: -0.01em; line-height: 1.15; white-space: normal; hyphens: manual; }
+.kspr__flik:hover { color: #fff; }
+.kspr__flik[aria-selected="true"] { color: #fff; }
+.kspr__flik[aria-selected="true"] b { background: var(--k-accent, #f0b56e); color: #1b1915; }
+.kspr__flik:focus-visible, .kspr__stang:focus-visible, .kspr__pil:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.kspr__markor { position: absolute; z-index: 0; top: 3px; bottom: 3px; left: 0; width: 0; border-radius: 9px; background: rgba(255, 255, 255, 0.12); transition: transform 0.28s var(--k-ut, cubic-bezier(0.22, 1, 0.36, 1)), width 0.28s var(--k-ut, cubic-bezier(0.22, 1, 0.36, 1)); }
+
+/* scrollbaren (om raderna inte ryms): diskret och mörk, rubriken och flikarna står kvar */
+.kspr__text::-webkit-scrollbar { width: 6px; }
+.kspr__text::-webkit-scrollbar-thumb { border-radius: 3px; background: rgba(255, 255, 255, 0.22); }
+.kspr__text::-webkit-scrollbar-track { background: transparent; }
+.kspr__text { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin: 0 -6px 0 0; padding-right: 6px;
+  scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.22) transparent; animation: kspr-text 0.24s var(--k-ut, cubic-bezier(0.22, 1, 0.36, 1)) both; }
+@keyframes kspr-text { from { opacity: 0; transform: translateY(4px); } }
+.kspr__namn { margin: 10px 0 1px; font: 300 1.1875rem/1.15 var(--sans); letter-spacing: -0.01em; }
+.kspr__intro { margin: 0 0 6px; font: 400 0.75rem/1.35 var(--sans); color: rgba(255, 255, 255, 0.68); }
+.kspr__lista { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.kspr__lista li { display: grid; grid-template-columns: 20px 1fr; align-items: start; gap: 8px; padding: 4px 0; border-top: 1px solid rgba(255, 255, 255, 0.07); }
+.kspr__lista li:first-child { border-top: 0; }
+.kspr__lista i { display: grid; place-items: center; width: 20px; height: 20px; margin-top: -1px; border-radius: 50%; background: var(--k-accent, #f0b56e); color: #1b1915; font: 600 0.6875rem/1 var(--sans); font-style: normal; }
+.kspr__lista .kspr__utan i { width: 6px; height: 6px; margin: 6px 0 0 7px; background: rgba(255, 255, 255, 0.4); }
+.kspr__lista b { display: block; font: 500 0.8125rem/1.25 var(--sans); }
+.kspr__lista small { display: block; margin-top: 0; font: 400 0.6875rem/1.3 var(--sans); color: rgba(255, 255, 255, 0.62); }
+.kspr__not { margin: 6px 0 0; padding: 6px 9px; border-radius: 10px; background: rgba(255, 255, 255, 0.07); font: 400 0.75rem/1.4 var(--sans); color: rgba(255, 255, 255, 0.78); }
+.kspr__pilar { display: flex; gap: 6px; margin-top: 8px; }
+.kspr__pil { flex: 1; min-height: 32px; padding: 0 10px; border: 0; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: #fff; font: 500 0.8125rem/1 var(--sans); cursor: pointer; transition: background-color 0.16s, opacity 0.16s; }
+.kspr__pil:hover:not(:disabled) { background: rgba(255, 255, 255, 0.18); }
+.kspr__pil--nasta { background: var(--k-accent, #f0b56e); color: #1b1915; }
+.kspr__pil--nasta:hover:not(:disabled) { background: #f5c486; }
+.kspr__pil:disabled { opacity: 0.35; cursor: default; }
+
+/* etiketterna i bilden */
+.kspr__lappar { position: absolute; z-index: 5; inset: 0; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity 0.22s; }
+.kspr__lappar--syns { opacity: 1; transition: opacity 0.4s 0.05s; }
+.kspr__lapp { position: absolute; left: 0; top: 0; will-change: transform; }
+/* etiketternas läge, ton och glidning sköts i skriptet (bara transform och opacitet) */
+.kspr__prick, .kspr__kort, .kspr__streck { opacity: 0; will-change: opacity, transform; }
+/* etiketterna tar inga pekarhändelser (de hindrar aldrig att man vrider huset): bilden provar själv om pekaren är över ett kort eller en prick */
+.kspr__prick { transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s; }
+.kspr__lapp--aktiv .kspr__prick { transform: scale(1.18); box-shadow: 0 0 0 4px rgba(240, 181, 110, 0.45), 0 0 18px 2px rgba(255, 181, 98, 0.55), 0 4px 10px -3px rgba(0, 0, 0, 0.6); }
+.kspr__lapp--aktiv .kspr__kort { box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.75), 0 12px 28px -14px rgba(0, 0, 0, 0.75); }
+.kspr__lapp--aktiv .kspr__streck { background: var(--k-accent, #f0b56e); }
+.kspr__prick { position: absolute; left: -9px; top: -9px; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--k-accent, #f0b56e); color: #1b1915; font: 600 0.625rem/1 var(--sans); font-style: normal;
+  box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.3), 0 4px 10px -3px rgba(0, 0, 0, 0.6); }
+.kspr__streck { position: absolute; left: 0; top: 0; height: 1px; background: rgba(255, 255, 255, 0.85); transform-origin: 0 50%; box-shadow: 0 0 2px rgba(0, 0, 0, 0.5); }
+.kspr__kort { position: absolute; left: 0; top: 0; display: block; width: max-content; max-width: 210px; padding: 6px 10px 7px; border-radius: 11px; background: rgba(22, 20, 17, 0.84); color: #fff;
+  -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 24px -14px rgba(0, 0, 0, 0.7); }
+.kspr__kort b { display: block; font: 500 0.8125rem/1.2 var(--sans); }
+.kspr__kort small { display: block; margin-top: 2px; font: 400 0.6875rem/1.2 var(--sans); color: rgba(255, 255, 255, 0.7); }
+
+/* smal skärm: bottenpanel, verktygsraden göms medan vyn är öppen */
+/* smal skärm: bottenpanel under bilden (husritare-sprang.js flyttar den dit) */
+.kspr.kspr--under { position: relative; inset: auto; width: auto; max-height: none; overflow: visible; display: block; margin: 8px 0 0; padding: 10px 12px 12px; border-radius: 18px; background: #1d1b17; transform-origin: top center; animation-name: kspr-upp; }
+@keyframes kspr-upp { from { opacity: 0; transform: translateY(-8px); } }
+.kspr--under .kspr__text { overflow: visible; }
+.kspr--under .kspr__namn { margin-top: 10px; font-size: 1.125rem; }
+.kspr--under .kspr__lista { grid-template-columns: 1fr 1fr; column-gap: 10px; }
+.kspr--under .kspr__lista li { padding: 5px 0; border-top: 0; }
+.kspr--under .kspr__lista b { font-size: 0.8125rem; }
+.kspr--under .kspr__lista small { font-size: 0.6875rem; }
+.kspr--under .kspr__flik { font-size: 0.625rem; }
+@media (max-width: 699px) {
+  .kf__scen--sprang .kf__verktyg { visibility: hidden; }
+}
+/* sidans fasta list (Skicka förfrågan) längst ned på mobil göms medan vyn är öppen, så att panelen syns hel */
+@media (max-width: 860px) {
+  html.kspr-oppen body.ritsidan .kf__handling { visibility: hidden; pointer-events: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kspr, .kspr__text { animation: none; }
+  .kspr__markor { transition: none; }
+}
+/* stängd panel under bilden (smal skärm): [hidden] gäller även här (kspr--under satte display: block) */
+.kspr.kspr--under[hidden] { display: none; }
+
+/* ---------- Premium (2026-11-26): rubrik, bockar, Begär offert på sista paketet, glidande text ---------- */
+.kspr { padding: 12px 14px 14px; border-radius: 22px; background: rgba(26, 24, 21, 0.9); }
+.kspr__etikett { font: 600 0.9375rem/1.2 var(--knappfont, var(--sans)); letter-spacing: -0.01em; text-transform: none; color: #fff; }
+.kspr__stang { transition: background-color 0.15s ease, transform 0.15s cubic-bezier(0.23, 1, 0.32, 1); }
+.kspr__stang:active, .kspr__flik:active, .kspr__pil:active:not(:disabled) { transform: scale(0.97); }
+.kspr__flik { transition: color 0.16s ease, transform 0.15s cubic-bezier(0.23, 1, 0.32, 1); }
+.kspr__markor { background: rgba(255, 255, 255, 0.14); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
+.kspr__namn { margin: 14px 0 3px; font: 600 1.1875rem/1.15 var(--knappfont, var(--sans)); letter-spacing: -0.015em; text-wrap: balance; }
+.kspr__intro { margin-bottom: 8px; }
+.kspr__lista li { grid-template-columns: 22px 1fr; gap: 10px; padding: 6px 0; }
+.kspr__lista i { width: 22px; height: 22px; font-variant-numeric: tabular-nums; }
+.kspr__lista .kspr__utan i { width: 22px; height: 22px; margin: -1px 0 0; background: rgba(143, 192, 160, 0.16); color: #8fc0a0; }
+.kspr__lista .kspr__utan i svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.kspr__pilar { gap: 8px; margin-top: 12px; }
+.kspr__pil { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; border-radius: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.15s cubic-bezier(0.23, 1, 0.32, 1); }
+.kspr__pil svg { flex: none; width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+.kspr__pil--nasta:hover svg { transform: translateX(2px); }
+.kspr__pil:disabled { opacity: 0.3; }
+.kspr__pil--offert { flex: 1.4; }
+.kspr__pil--offert:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.kspr__text.kspr__text--fram { animation: kspr-fram 0.26s cubic-bezier(0.23, 1, 0.32, 1) both; }
+.kspr__text.kspr__text--bak { animation: kspr-bak 0.26s cubic-bezier(0.23, 1, 0.32, 1) both; }
+@keyframes kspr-fram { from { opacity: 0; transform: translateX(14px); } }
+@keyframes kspr-bak { from { opacity: 0; transform: translateX(-14px); } }
+.kspr--under { background: #1d1b17; }
+.kspr--under .kspr__lista { grid-template-columns: 1fr; }
+.kspr--under .kspr__lista li { padding: 6px 0; border-top: 1px solid rgba(255, 255, 255, 0.07); }
+.kspr--under .kspr__lista li:first-child { border-top: 0; }
+@media (prefers-reduced-motion: reduce) { .kspr__text.kspr__text--fram, .kspr__text.kspr__text--bak { animation: none; } }
+
+/* ---------- Listans rader (2026-11-27): en mjuk, inskjuten rad (iOS) med jämn luft runt numret ----------
+   Raden ligger helt inom listan (inga negativa marginaler: rullytan klippte förr bort radens
+   vänsterkant och halva numret). Pekare, markerad och vald delar samma stil, bara tonen skiljer.
+   Numrets ring och sken ryms i radens luft och klipps aldrig. */
+.kspr .kspr__lista { gap: 2px; padding: 2px 0; }
+.kspr .kspr__lista li { grid-template-columns: 22px 1fr; column-gap: 10px; align-items: center; margin: 0; padding: 7px 10px; border: 0; border-radius: 12px;
+  background: transparent; box-shadow: inset 0 0 0 1px transparent; transition: background-color 0.18s ease, box-shadow 0.18s ease; }
+.kspr .kspr__lista li i { margin: 0; transition: box-shadow 0.18s ease, transform 0.18s cubic-bezier(0.23, 1, 0.32, 1); }
+.kspr .kspr__lista li[data-kspr-nr] { cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; }
+.kspr .kspr__lista li[data-kspr-nr]:hover { background: rgba(255, 255, 255, 0.06); }
+.kspr .kspr__lista li.kspr__rad--aktiv { background: rgba(240, 181, 110, 0.12); box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.28); }
+.kspr .kspr__lista li.kspr__rad--aktiv i { box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.3), 0 0 8px rgba(255, 181, 98, 0.45); }
+.kspr .kspr__lista li[data-kspr-nr]:focus-visible { box-shadow: inset 0 0 0 1.5px rgba(240, 181, 110, 0.8); }
+.kspr .kspr__lista li[data-kspr-nr]:active { background: rgba(255, 255, 255, 0.09); }
+.kspr--under .kspr__lista li, .kspr--under .kspr__lista li:first-child { border-top: 0; }
+@media (prefers-reduced-motion: reduce) { .kspr .kspr__lista li, .kspr .kspr__lista li i { transition: none; } }
+
+/* ---------- Isärdragningen (2026-11-27): ett reglage i iOS-stil med lägena Ihop, Lite, Helt ---------- */
+.kspr__mangd { margin: 12px 0 2px; padding: 10px 12px 8px; border-radius: 14px; background: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
+.kspr__mangd-topp { display: flex; align-items: baseline; justify-content: space-between; font: 500 0.75rem/1.2 var(--sans); color: rgba(255, 255, 255, 0.72); }
+.kspr__mangd-varde { font: 600 0.75rem/1.2 var(--sans); font-variant-numeric: tabular-nums; color: #fff; }
+.kspr__reglage { --v: 1; position: relative; height: 30px; margin: 4px 0 0; cursor: pointer; touch-action: none; outline: none; -webkit-tap-highlight-color: transparent; }
+.kspr__spar { position: absolute; left: 11px; right: 11px; top: 50%; height: 6px; margin-top: -3px; border-radius: 3px; background: rgba(255, 255, 255, 0.14); overflow: hidden; }
+.kspr__fyll { position: absolute; inset: 0; border-radius: 3px; background: linear-gradient(90deg, #e9a35a, var(--k-accent, #f0b56e)); transform-origin: 0 50%; transform: scaleX(var(--v)); }
+.kspr__mark { position: absolute; top: 50%; left: calc(11px + (100% - 22px) * var(--m)); width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(255, 255, 255, 0.5); pointer-events: none; }
+.kspr__knopp { position: absolute; top: 50%; left: calc(11px + (100% - 22px) * var(--v)); width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 4px 12px -2px rgba(0, 0, 0, 0.45), inset 0 0 0 0.5px rgba(0, 0, 0, 0.08); transition: transform 0.18s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.18s ease; pointer-events: none; }
+.kspr__reglage--drar .kspr__knopp, .kspr__reglage:active .kspr__knopp { transform: scale(1.14); }
+.kspr__reglage:focus-visible .kspr__knopp { box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.45); }
+.kspr__mangd-lagen { position: relative; height: 18px; margin: 0 11px; }
+.kspr__mangd-lagen button { position: absolute; top: 0; left: calc(100% * var(--m)); transform: translateX(-50%); padding: 1px 6px; border: 0; border-radius: 6px; background: none; color: rgba(255, 255, 255, 0.55); font: 500 0.6875rem/1.3 var(--sans); cursor: pointer; transition: color 0.15s ease, background-color 0.15s ease; }
+.kspr__mangd-lagen button:first-child { transform: none; left: -6px; }
+.kspr__mangd-lagen button:last-child { transform: none; left: auto; right: -6px; }
+.kspr__mangd-lagen button:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.kspr__mangd-lagen button.kspr__lage--pa { color: var(--k-accent, #f0b56e); }
+.kspr--under .kspr__mangd { margin-top: 10px; }
+.kspr--under .kspr__reglage { height: 36px; }   /* större tumyta på mobil */
+@media (prefers-reduced-motion: reduce) { .kspr__knopp, .kspr__mangd-lagen button { transition: none; } }
+
+/* ---------- Panelens layout (2026-11-27): rubrik och flikar, listan (rullar ensam), reglaget, foten ----------
+   Foten klipptes förr av panelens rundade kant när innehållet blev högre än panelen. Nu krymper bara
+   listan (min-height: 0, rullar, mjuka toningar i kanterna); reglaget och foten krymper aldrig. */
+.kspr { max-height: calc(100% - 100px); }
+.kspr__mangd, .kspr__fot { flex: none; }
+.kspr__fot .kspr__pilar { margin-top: 10px; }
+.kspr__text { flex: 1 1 auto; min-height: 0; -webkit-mask-image: none; mask-image: none; }
+.kspr__text.kspr__text--topp { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18px); mask-image: linear-gradient(to bottom, transparent 0, #000 18px); }
+.kspr__text.kspr__text--botten { -webkit-mask-image: linear-gradient(to top, transparent 0, #000 18px); mask-image: linear-gradient(to top, transparent 0, #000 18px); }
+.kspr__text.kspr__text--topp.kspr__text--botten { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%); }
+.kspr .kspr__mangd { margin: 10px 0 0; }
+/* låg bild: tätare rubrik, flikar och reglage (listan får ändå plats att rulla) */
+@media (max-height: 760px) {
+  .kspr:not(.kspr--under) { max-height: calc(100% - 92px); padding-top: 8px; padding-bottom: 10px; }
+  .kspr:not(.kspr--under) .kspr__topp { margin-bottom: 6px; }
+  .kspr:not(.kspr--under) .kspr__flik { padding: 5px 2px 4px; gap: 2px; }
+  .kspr:not(.kspr--under) .kspr__namn { margin-top: 8px; font-size: 1.0625rem; }
+  .kspr:not(.kspr--under) .kspr__mangd { padding: 7px 10px 4px; }
+  .kspr:not(.kspr--under) .kspr__reglage { height: 26px; }
+  .kspr:not(.kspr--under) .kspr__pil { min-height: 36px; }
+  .kspr:not(.kspr--under) .kspr__fot .kspr__pilar { margin-top: 8px; }
+}
+@media (max-height: 560px) {
+  .kspr:not(.kspr--under) .kspr__flik span { display: none; }
+  .kspr:not(.kspr--under) .kspr__mangd-lagen { display: none; }
+  .kspr:not(.kspr--under) .kspr__intro { display: none; }
+}
+/* mobil (bottenpanelen): samma uppdelning som på datorn. Arket under bilden har en bestämd höjd,
+   så panelen är en flexkolumn där bara listan rullar; rubrik, flikar, reglage och fot står kvar
+   och foten har säker marginal nedtill (hemindikatorn). */
+.kspr.kspr--under { display: flex; flex-direction: column; overflow: hidden; max-height: 100%; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+.kspr.kspr--under[hidden] { display: none; }
+.kspr--under .kspr__text { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+
+/* ---------- Knappen "Vad ingår?" i verktygsraden (2026-11-27): mjuk accent när vyn är öppen ---------- */
+.kf__verktyg .kf__vk[data-vadingar] { transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease; }
+.kf__verktyg .kf__vk[data-vadingar][aria-pressed="true"] { background: rgba(240, 181, 110, 0.2); color: #fff; box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.kf__verktyg .kf__vk[data-vadingar][aria-pressed="true"] svg { color: var(--k-accent, #f0b56e); }
+.kf__verktyg .kf__vk[data-vadingar][aria-pressed="true"]::before { animation: kspr-prick 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes kspr-prick { from { opacity: 0; transform: scale(0.2); } }
+/* medan studion byggs (vyn öppnas): en lugn puls i stället för att knappen ser död ut */
+.kf__verktyg .kf__vk[data-vadingar][aria-busy="true"] { animation: kspr-vantar 1.1s ease-in-out infinite; }
+@keyframes kspr-vantar { 50% { background-color: rgba(240, 181, 110, 0.14); } }
+@media (prefers-reduced-motion: reduce) { .kf__verktyg .kf__vk[data-vadingar][aria-pressed="true"]::before, .kf__verktyg .kf__vk[data-vadingar][aria-busy="true"] { animation: none; } }
+/* mobil med lågt ark: tätare flikar (bara siffran och ett kort namn under), reglaget utan lägesraden
+   (värdet står ovanför) och lägre knappar, så att listan alltid får några rader att visa */
+@media (max-height: 820px) {
+  .kspr--under .kspr__topp { margin-bottom: 4px; }
+  .kspr--under .kspr__etikett { font-size: 0.8125rem; }
+  .kspr--under .kspr__stang { width: 28px; height: 28px; }
+  .kspr--under .kspr__flik { padding: 4px 2px 3px; gap: 1px; font-size: 0.625rem; }
+  .kspr--under .kspr__flik b { width: 16px; height: 16px; font-size: 0.625rem; }
+  .kspr--under .kspr__namn { margin-top: 6px; font-size: 1rem; }
+  .kspr--under .kspr__intro { display: none; }
+  .kspr--under .kspr .kspr__mangd, .kspr.kspr--under .kspr__mangd { margin-top: 6px; padding: 6px 10px 4px; }
+  .kspr.kspr--under .kspr__mangd-lagen { display: none; }
+  .kspr.kspr--under .kspr__reglage { height: 30px; }
+  .kspr.kspr--under .kspr__pil { min-height: 38px; }
+  .kspr.kspr--under .kspr__fot .kspr__pilar { margin-top: 6px; }
+}

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Din offert | Legohus Stockholm</title>
+    <meta name="description" content="Skicka en offertförfrågan på huset du ritade i Bygg online: modell, paket, pris och alla val.">
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#161411" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="images/legohus.svg?v=3" type="image/svg+xml">
+    <link rel="icon" href="favicon.ico?v=3" sizes="16x16 32x32 48x48">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+    <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="design.css?v=20261126r">
+    <link rel="stylesheet" href="ios.css?v=20261126r">
+    <link rel="stylesheet" href="offert.css?v=20261126r">
+    <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script>
+    <script src="logga.js?v=20261126r"></script>
+  </head>
+  <body class="offsidan">
+    <a class="off-hopp" href="#off-form">Hoppa till formuläret</a>
+    <header class="off-topp">
+      <a class="off-topp__hem" href="./" aria-label="Legohus Stockholm, till startsidan"><img src="images/legohus_logo.svg" width="1024" height="279" alt="" data-lh-logga></a>
+      <span class="off-topp__streck" aria-hidden="true"></span>
+      <p class="off-topp__titel">Din offert</p>
+      <a class="off-topp__tillbaka" href="rita-hus.html" data-off-tillbaka><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span>Tillbaka till ditt hus</span></a>
+    </header>
+
+    <main class="off" id="innehall">
+      <section class="off-hus" aria-labelledby="off-namn">
+        <figure class="off-scen" data-off-scen>
+          <div class="off-scen__ram">
+            <img class="off-scen__bild" data-off-bild width="1600" height="1200" alt="" decoding="async" fetchpriority="high">
+            <img class="off-scen__bild off-scen__bild--ny" data-off-bild-ny width="1600" height="1200" alt="" decoding="async" hidden>
+            <span class="off-scen__ljus" aria-hidden="true"></span>
+          </div>
+          <figcaption class="off-scen__text">
+            <span class="off-scen__tips" data-off-tips hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14.3-4.9M20 12a8 8 0 0 1-14.3 4.9M18.6 3.2v4.2h-4.2M5.4 20.8v-4.2h4.2"/></svg><span>Dra för att vrida</span></span>
+            <span class="off-scen__vyer" role="group" aria-label="Bild" data-off-vyer hidden>
+              <button type="button" aria-pressed="true" data-off-vy="produkt">Ditt hus</button>
+              <button type="button" aria-pressed="false" data-off-vy="kund">Din vy</button>
+            </span>
+          </figcaption>
+        </figure>
+
+        <div class="off-sam">
+          <h1 class="off-sam__namn" id="off-namn" data-off-namn>Ditt hus</h1>
+          <p class="off-sam__matt" data-off-matt></p>
+
+          <div class="off-pris">
+            <div class="off-pris__paket">
+              <span class="off-pris__etikett">Paket</span>
+              <b data-off-paket></b>
+            </div>
+            <p class="off-pris__belopp"><small data-off-fran hidden>från</small><span data-off-pris></span></p>
+            <p class="off-pris__moms" data-off-moms></p>
+          </div>
+
+          <section class="off-del" aria-labelledby="off-ingar-rubrik">
+            <h2 class="off-del__rubrik" id="off-ingar-rubrik">Detta ingår</h2>
+            <p class="off-del__intro" data-off-ingar-intro></p>
+            <ul class="off-ingar" data-off-ingar></ul>
+          </section>
+
+          <section class="off-del" aria-labelledby="off-kulor-rubrik" data-off-kulor-del>
+            <h2 class="off-del__rubrik" id="off-kulor-rubrik">Dina kulörer</h2>
+            <ul class="off-kulorer" data-off-kulorer></ul>
+            <dl class="off-ovrigt" data-off-ovrigt hidden></dl>
+          </section>
+
+          <a class="off-andra" href="rita-hus.html" data-off-andra><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/></svg><span>Ändra i ritaren</span></a>
+
+          <aside class="off-tillit" aria-label="Om priset och bygget">
+            <img src="images/fabrik/vaggelement-montage-800.webp" width="800" height="600" alt="Väggelement monteras i vår fabrik" decoding="async">
+            <div>
+              <p class="off-tillit__rubrik">Byggs i vår egen fabrik</p>
+              <ul class="off-tillit__lista">
+                <li>Priser inkl. moms</li>
+                <li>Frakt enligt zon</li>
+                <li><a href="integritetspolicy.html">Så hanterar vi dina uppgifter</a></li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="off-kort" aria-labelledby="off-form-rubrik" data-off-kort>
+          <form class="off-form" id="off-form" novalidate data-off-form>
+            <h2 class="off-form__rubrik" id="off-form-rubrik">Begär din offert</h2>
+            <p class="off-form__intro">Det du valt i ritaren följer med. Fält med <span class="off-krav" aria-hidden="true">*</span><span class="off-dold">stjärna</span> behöver fyllas i.</p>
+            <p class="off-form__fel" data-off-fel role="alert" hidden></p>
+
+            <fieldset class="off-grupp">
+              <legend>Kontakt</legend>
+              <div class="off-falt">
+                <label for="off-fnamn">Namn <span class="off-krav" aria-hidden="true">*</span></label>
+                <input id="off-fnamn" name="namn" type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next" required aria-required="true">
+              </div>
+              <div class="off-rad">
+                <div class="off-falt">
+                  <label for="off-epost">E-post <span class="off-krav" aria-hidden="true">*</span></label>
+                  <input id="off-epost" name="epost" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" enterkeyhint="next" required aria-required="true">
+                </div>
+                <div class="off-falt">
+                  <label for="off-tel">Telefon</label>
+                  <input id="off-tel" name="telefon" type="tel" autocomplete="tel" inputmode="tel" enterkeyhint="next">
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="off-grupp">
+              <legend>Tomten</legend>
+              <div class="off-rad">
+                <div class="off-falt">
+                  <label for="off-plats">Kommun eller adress</label>
+                  <input id="off-plats" name="plats" type="text" autocomplete="address-level2" enterkeyhint="next">
+                </div>
+                <div class="off-falt">
+                  <label for="off-start">Önskad byggstart</label>
+                  <input id="off-start" name="start" type="month">
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="off-grupp">
+              <legend>Önskemål</legend>
+              <div class="off-falt">
+                <label for="off-medd">Berätta gärna mer <span class="off-valfri">valfritt</span></label>
+                <textarea id="off-medd" name="meddelande" rows="3" placeholder="Om tomten, tillval eller frågor"></textarea>
+              </div>
+            </fieldset>
+
+            <div class="off-falt off-falt--check">
+              <input id="off-samtycke" name="samtycke" type="checkbox" required aria-required="true">
+              <label for="off-samtycke">Ni får kontakta mig om förfrågan enligt <a href="integritetspolicy.html">integritetspolicyn</a>. <span class="off-krav" aria-hidden="true">*</span></label>
+            </div>
+            <div class="off-honung" aria-hidden="true"><label for="off-honung">Lämna tomt</label><input id="off-honung" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
+
+            <button class="off-skicka" type="submit" data-off-skicka>
+              <span class="off-skicka__text">Skicka förfrågan</span>
+              <span class="off-skicka__laddar" aria-hidden="true"></span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <p class="off-form__not">Ditt e-postprogram öppnas med förfrågan ifylld. Du trycker skicka där.</p>
+            <p class="off-dold" aria-live="polite" data-off-lage></p>
+          </form>
+
+          <div class="off-tack" data-off-tack hidden tabindex="-1" aria-labelledby="off-tack-rubrik">
+            <svg class="off-tack__bock" viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="25"/><path d="m17 29 7.5 7.5L40 21"/></svg>
+            <h2 class="off-tack__rubrik" id="off-tack-rubrik" data-off-tack-rubrik>Tack!</h2>
+            <p class="off-tack__text" data-off-tack-text></p>
+            <div class="off-tack__hjalp">
+              <p>Öppnades inget? Mejla oss på <a href="mailto:info@legohusstockholm.se">info@legohusstockholm.se</a> och klistra in förfrågan.</p>
+              <button type="button" class="off-kopiera" data-off-kopiera><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8"/></svg><span data-off-kopiera-text>Kopiera förfrågan</span></button>
+            </div>
+            <div class="off-tack__knappar">
+              <a class="off-knapp off-knapp--ljus" href="rita-hus.html" data-off-andra>Tillbaka till ditt hus</a>
+              <a class="off-knapp off-knapp--text" href="./">Till startsidan</a>
+            </div>
+          </div>
+      </section>
+
+      <section class="off-sen" aria-labelledby="off-sen-rubrik">
+        <h2 class="off-sen__rubrik" id="off-sen-rubrik">Så går det vidare</h2>
+        <ol class="off-sen__steg">
+          <li><b>Vi går igenom förfrågan</b><span>Ditt hus, paketet och det du skrivit om tomten.</span></li>
+          <li><b>Platsbesök och offert</b><span>Vi tittar på tomten med dig och räknar fram offerten post för post.</span></li>
+          <li><b>Bygget</b><span>Säger du ja planerar vi tillverkning, frakt och montage tillsammans.</span></li>
+        </ol>
+      </section>
+    </main>
+
+    <script type="module" src="offert.js?v=20261126r"></script>
+  </body>
+</html>

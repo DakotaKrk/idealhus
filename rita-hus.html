@@ -2,7 +2,7 @@
 <html lang="sv">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Rita ditt hus i 3D | Legohus Stockholm</title>
     <meta name="description" content="Välj modell och färger och se huset i 3D, i morgonljus eller kvällsljus. Måtten och planerna kommer från bygglovsritningarna.">
     <meta name="theme-color" content="#1b1915">
@@ -25,32 +25,51 @@
 
     <link rel="preload" href="fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20261010l">
-    <link rel="stylesheet" href="design.css?v=20261124a">
-    <link rel="stylesheet" href="husritare.css?v=20261126c">
-    <link rel="modulepreload" href="husritare-sida.js?v=20261126c">
-    <link rel="modulepreload" href="husritare.js?v=20261126c">
+    <link rel="stylesheet" href="styles.css?v=20261126g">
+    <link rel="stylesheet" href="design.css?v=20261126r">
+    <link rel="stylesheet" href="husritare.css?v=20261126r">
+    <link rel="stylesheet" href="husritare-app.css?v=20261126r">
+    <link rel="modulepreload" href="husritare-sida.js?v=20261126r">
+    <link rel="modulepreload" href="husritare.js?v=20261126r">
     <link rel="modulepreload" href="vendor/three/three.module.min.js">
     <link rel="modulepreload" href="vendor/three/addons/controls/OrbitControls.js">
     <link rel="modulepreload" href="vendor/three/addons/utils/BufferGeometryUtils.js">
     <link rel="modulepreload" href="vendor/three/addons/geometries/RoundedBoxGeometry.js">
-    <link rel="modulepreload" href="husritare-miljo.js?v=20261126c">
-    <link rel="modulepreload" href="husritare-inne.js?v=20261126c">
-    <link rel="modulepreload" href="husritare-plan.js?v=20261126c">
-    <link rel="modulepreload" href="husritare-bil.js?v=20261126c">
-    <link rel="modulepreload" href="husritare-bebott.js?v=20261126c">
+    <link rel="modulepreload" href="husritare-miljo.js?v=20261126r">
+    <link rel="modulepreload" href="husritare-inne.js?v=20261126r">
+    <link rel="modulepreload" href="husritare-plan.js?v=20261126r">
+    <link rel="modulepreload" href="husritare-bil.js?v=20261126r">
+    <link rel="modulepreload" href="husritare-bebott.js?v=20261126r">
+    <link rel="modulepreload" href="husritare-pris.js?v=20261126r">
     <link rel="modulepreload" href="vendor/three/addons/loaders/GLTFLoader.js">
-    <link rel="stylesheet" href="nya-hus.css?v=20261120a">
-    <script src="premium.js?v=20261124a" defer></script>
+    <link rel="stylesheet" href="nya-hus.css?v=20261126g">
+    <link rel="stylesheet" href="ios.css?v=20261126r">
+    <script src="logga.js?v=20261126r"></script>
+    <script src="premium.js?v=20261126r" defer></script>
     <script>try{var t=new URLSearchParams(location.search).get('tema')||localStorage.getItem('idealhus-tema');if(t==='mork'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-tema','mork')}catch(e){}</script><script>try{var s=sessionStorage,h=/(^|\/)(index\.html)?$/.test(location.pathname);if(s.getItem('idealhus-meny')&&!h)document.documentElement.classList.add('meny-stilla');s.setItem('idealhus-meny','1')}catch(e){}</script><script>(function(){function n(){var h=document.querySelector('.site-header');if(h)h.style.viewTransitionName='sidhuvud';return h}addEventListener('pageswap',function(e){if(e.viewTransition)n()});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;document.documentElement.classList.add('meny-stilla');var h=n(),t=function(){if(h)h.style.viewTransitionName=''};e.viewTransition.finished.then(t,t)})})()</script>
     <script>var q=location.search;if(/[?&]inbaddad=1(&|$)/.test(q))document.documentElement.classList.add('inbaddad');if(/[?&]foto=1(&|$)/.test(q))document.documentElement.classList.add('foto')</script>
+    <link rel="stylesheet" href="husritare-ios.css?v=20261126r">
+    <script>if(!/[?&](inbaddad|foto)=1(&|$)/.test(location.search))document.documentElement.classList.add('byggapp','bintro-pa')</script>
+    <noscript><style>.bintro{display:none!important}</style></noscript>
   </head>
   <body class="ritsidan">
+    <div class="bintro" data-bintro>
+      <div class="bintro__papper" aria-hidden="true"></div>
+      <div class="bintro__inne">
+        <div class="bintro__mitt"><i class="bintro__glod" aria-hidden="true"></i><svg class="bintro__marke" viewBox="-6 -6 1250 316" width="1250" height="316" fill="currentColor" aria-hidden="true" focusable="false"><g class="bl-fyll"><path class="bl-tak" d="M0 112 L145 0 L260 103 L260 129 L145 27 L0 138 Z"/><rect class="bl-vagg" style="--i:0" x="30" y="100" width="30" height="152"/><rect class="bl-vagg" style="--i:1" x="95" y="80" width="30" height="172"/><rect class="bl-vagg" style="--i:2" x="95" y="222" width="165" height="30"/><rect class="bl-ruta" style="--i:0" x="170" y="138" width="22" height="22"/><rect class="bl-ruta" style="--i:1" x="198" y="138" width="22" height="22"/><rect class="bl-ruta" style="--i:2" x="170" y="166" width="22" height="22"/><rect class="bl-ruta" style="--i:3" x="198" y="166" width="22" height="22"/><path class="bl-bokstav" style="--i:0" d="M368.2 252V88H385.6V235.3H463.2V252Z"/><path class="bl-bokstav" style="--i:1" d="M530.8 255.4Q512.9 255.4 499.6 247.5Q486.4 239.5 479 225Q471.7 210.5 471.7 191.1Q471.7 170.9 478.9 156.2Q486.2 141.5 499.3 133.6Q512.4 125.6 530.2 125.6Q548.4 125.6 561.3 134Q574.3 142.4 580.9 158Q587.5 173.7 586.7 195.4H569V189.2Q568.6 165.5 558.9 153.5Q549.3 141.5 530.7 141.5Q511 141.5 500.6 154.2Q490.3 166.9 490.3 190.5Q490.3 213.5 500.6 226.1Q511 238.8 530.2 238.8Q543.2 238.8 552.8 232.7Q562.5 226.7 568.1 215.5L584.5 221.6Q577.2 237.7 563 246.6Q548.7 255.4 530.8 255.4ZM484.1 195.4V180.9H577.5V195.4Z"/><path class="bl-bokstav" style="--i:2" d="M657.1 310.1Q647.6 310.1 638.4 307.3Q629.3 304.4 621.5 298.5Q613.8 292.5 608.5 283L624.4 274.3Q629.4 284.3 638.5 288.7Q647.5 293.1 657.1 293.1Q670.1 293.1 678.3 288.3Q686.4 283.5 690.1 274.1Q693.9 264.6 693.8 250.6V217.6H695.8V129H711.4V250.8Q711.4 256 711.1 260.8Q710.8 265.6 710 270.3Q707.7 283.9 700.9 292.7Q694.1 301.5 683.1 305.8Q672 310.1 657.1 310.1ZM655.9 255.4Q638.7 255.4 626.4 246.8Q614.2 238.3 607.7 223.5Q601.2 208.8 601.2 190.4Q601.2 172 607.7 157.3Q614.2 142.7 626.3 134.1Q638.4 125.6 655.3 125.6Q672.7 125.6 684.5 134Q696.4 142.5 702.4 157.1Q708.5 171.8 708.5 190.4Q708.5 208.7 702.5 223.5Q696.4 238.2 684.7 246.8Q672.9 255.4 655.9 255.4ZM657.7 239.3Q670.7 239.3 679.1 232.9Q687.6 226.6 691.7 215.5Q695.8 204.5 695.8 190.4Q695.8 176.1 691.7 165.1Q687.5 154.1 679.2 147.9Q670.8 141.7 658.2 141.7Q645.1 141.7 636.5 148.2Q628 154.6 623.9 165.6Q619.7 176.6 619.7 190.4Q619.7 204.2 624 215.3Q628.2 226.3 636.6 232.8Q645.1 239.3 657.7 239.3Z"/><path class="bl-bokstav" style="--i:3" d="M790.8 255.4Q772.5 255.4 759.4 247.1Q746.3 238.8 739.4 224.1Q732.4 209.4 732.4 190.4Q732.4 171 739.5 156.4Q746.6 141.8 759.7 133.7Q772.8 125.6 790.8 125.6Q809.2 125.6 822.3 133.9Q835.4 142.1 842.4 156.7Q849.3 171.3 849.3 190.4Q849.3 209.7 842.3 224.3Q835.3 239 822.2 247.2Q809.1 255.4 790.8 255.4ZM790.8 238.8Q811 238.8 820.9 225.3Q830.8 211.8 830.8 190.4Q830.8 168.4 820.8 155.3Q810.9 142.2 790.8 142.2Q777.2 142.2 768.4 148.4Q759.6 154.5 755.2 165.4Q750.9 176.2 750.9 190.4Q750.9 212.3 761 225.5Q771.2 238.8 790.8 238.8Z"/><path class="bl-bokstav" style="--i:4" d="M959 252V189.4Q959 179.5 957.1 171Q955.3 162.5 951.1 156.1Q946.9 149.7 940.2 146.1Q933.5 142.5 923.8 142.5Q915.2 142.5 908.5 145.5Q901.8 148.4 897.2 154.1Q892.7 159.7 890.3 167.9Q887.9 176.1 887.9 186.6L875.8 183.6Q875.8 164.9 882.3 152.1Q888.9 139.2 900.5 132.6Q912.1 125.9 927.4 125.9Q938.6 125.9 946.9 129.4Q955.1 132.8 960.9 138.7Q966.6 144.6 970 152.2Q973.5 159.7 975 168Q976.6 176.2 976.6 184.3V252ZM870.3 252V88H886.1V180.2H887.9V252Z"/><path class="bl-bokstav" style="--i:5" d="M1049.1 255.1Q1037.9 255.1 1029.6 251.6Q1021.3 248.2 1015.6 242.3Q1009.9 236.4 1006.4 228.8Q1003 221.3 1001.4 213Q999.9 204.8 999.9 196.7V129H1017.5V191.6Q1017.5 201.4 1019.3 209.9Q1021.2 218.5 1025.4 224.9Q1029.6 231.3 1036.3 234.9Q1043 238.5 1052.7 238.5Q1061.3 238.5 1068 235.5Q1074.7 232.6 1079.2 226.9Q1083.8 221.3 1086.2 213.1Q1088.6 204.9 1088.6 194.4L1100.7 197.4Q1100.7 216.1 1094.1 228.9Q1087.6 241.8 1075.9 248.4Q1064.3 255.1 1049.1 255.1ZM1090.4 252V221.2H1088.6V129H1106.1V252Z"/><path class="bl-bokstav" style="--i:6" d="M1180 255.3Q1158.3 255.3 1144.3 245.9Q1130.3 236.5 1127.1 219.7L1144.9 216.8Q1147.6 227.2 1157.2 233.3Q1166.8 239.4 1180.9 239.4Q1194.6 239.4 1202.6 233.7Q1210.5 228 1210.5 218.1Q1210.5 212.5 1207.9 208.9Q1205.4 205.4 1197.6 202.4Q1189.8 199.4 1174.4 195.2Q1157.7 190.7 1148.3 186.1Q1138.8 181.5 1134.9 175.5Q1130.9 169.5 1130.9 160.8Q1130.9 150.3 1136.8 142.3Q1142.7 134.4 1153.2 130Q1163.7 125.6 1177.7 125.6Q1191.6 125.6 1202.6 130.1Q1213.6 134.5 1220.3 142.6Q1227.1 150.7 1228.3 161.5L1210.5 164.7Q1208.8 154 1200 147.9Q1191.1 141.7 1177.5 141.4Q1164.7 141.1 1156.6 146.2Q1148.5 151.4 1148.5 160Q1148.5 164.8 1151.4 168.2Q1154.3 171.7 1162.1 174.7Q1169.9 177.7 1184.4 181.3Q1201.2 185.6 1210.8 190.4Q1220.5 195.2 1224.5 201.7Q1228.6 208.3 1228.6 217.8Q1228.6 235.3 1215.6 245.3Q1202.7 255.3 1180 255.3Z"/></g><g class="bl-ljus"><rect style="--i:0" x="170" y="138" width="22" height="22"/><rect style="--i:1" x="198" y="138" width="22" height="22"/><rect style="--i:2" x="170" y="166" width="22" height="22"/><rect style="--i:3" x="198" y="166" width="22" height="22"/></g><g class="bl-streck"><path pathLength="1" style="--i:0" d="M0 112 L145 0 L260 103 L260 129 L145 27 L0 138 Z"/><rect pathLength="1" style="--i:1" x="30" y="100" width="30" height="152"/><rect pathLength="1" style="--i:2" x="95" y="80" width="30" height="172"/><rect pathLength="1" style="--i:3" x="95" y="222" width="165" height="30"/><path class="bl-ord" pathLength="1" style="--i:0" d="M368.2 252V88H385.6V235.3H463.2V252Z"/><path class="bl-ord" pathLength="1" style="--i:1" d="M530.8 255.4Q512.9 255.4 499.6 247.5Q486.4 239.5 479 225Q471.7 210.5 471.7 191.1Q471.7 170.9 478.9 156.2Q486.2 141.5 499.3 133.6Q512.4 125.6 530.2 125.6Q548.4 125.6 561.3 134Q574.3 142.4 580.9 158Q587.5 173.7 586.7 195.4H569V189.2Q568.6 165.5 558.9 153.5Q549.3 141.5 530.7 141.5Q511 141.5 500.6 154.2Q490.3 166.9 490.3 190.5Q490.3 213.5 500.6 226.1Q511 238.8 530.2 238.8Q543.2 238.8 552.8 232.7Q562.5 226.7 568.1 215.5L584.5 221.6Q577.2 237.7 563 246.6Q548.7 255.4 530.8 255.4ZM484.1 195.4V180.9H577.5V195.4Z"/><path class="bl-ord" pathLength="1" style="--i:2" d="M657.1 310.1Q647.6 310.1 638.4 307.3Q629.3 304.4 621.5 298.5Q613.8 292.5 608.5 283L624.4 274.3Q629.4 284.3 638.5 288.7Q647.5 293.1 657.1 293.1Q670.1 293.1 678.3 288.3Q686.4 283.5 690.1 274.1Q693.9 264.6 693.8 250.6V217.6H695.8V129H711.4V250.8Q711.4 256 711.1 260.8Q710.8 265.6 710 270.3Q707.7 283.9 700.9 292.7Q694.1 301.5 683.1 305.8Q672 310.1 657.1 310.1ZM655.9 255.4Q638.7 255.4 626.4 246.8Q614.2 238.3 607.7 223.5Q601.2 208.8 601.2 190.4Q601.2 172 607.7 157.3Q614.2 142.7 626.3 134.1Q638.4 125.6 655.3 125.6Q672.7 125.6 684.5 134Q696.4 142.5 702.4 157.1Q708.5 171.8 708.5 190.4Q708.5 208.7 702.5 223.5Q696.4 238.2 684.7 246.8Q672.9 255.4 655.9 255.4ZM657.7 239.3Q670.7 239.3 679.1 232.9Q687.6 226.6 691.7 215.5Q695.8 204.5 695.8 190.4Q695.8 176.1 691.7 165.1Q687.5 154.1 679.2 147.9Q670.8 141.7 658.2 141.7Q645.1 141.7 636.5 148.2Q628 154.6 623.9 165.6Q619.7 176.6 619.7 190.4Q619.7 204.2 624 215.3Q628.2 226.3 636.6 232.8Q645.1 239.3 657.7 239.3Z"/><path class="bl-ord" pathLength="1" style="--i:3" d="M790.8 255.4Q772.5 255.4 759.4 247.1Q746.3 238.8 739.4 224.1Q732.4 209.4 732.4 190.4Q732.4 171 739.5 156.4Q746.6 141.8 759.7 133.7Q772.8 125.6 790.8 125.6Q809.2 125.6 822.3 133.9Q835.4 142.1 842.4 156.7Q849.3 171.3 849.3 190.4Q849.3 209.7 842.3 224.3Q835.3 239 822.2 247.2Q809.1 255.4 790.8 255.4ZM790.8 238.8Q811 238.8 820.9 225.3Q830.8 211.8 830.8 190.4Q830.8 168.4 820.8 155.3Q810.9 142.2 790.8 142.2Q777.2 142.2 768.4 148.4Q759.6 154.5 755.2 165.4Q750.9 176.2 750.9 190.4Q750.9 212.3 761 225.5Q771.2 238.8 790.8 238.8Z"/><path class="bl-ord" pathLength="1" style="--i:4" d="M959 252V189.4Q959 179.5 957.1 171Q955.3 162.5 951.1 156.1Q946.9 149.7 940.2 146.1Q933.5 142.5 923.8 142.5Q915.2 142.5 908.5 145.5Q901.8 148.4 897.2 154.1Q892.7 159.7 890.3 167.9Q887.9 176.1 887.9 186.6L875.8 183.6Q875.8 164.9 882.3 152.1Q888.9 139.2 900.5 132.6Q912.1 125.9 927.4 125.9Q938.6 125.9 946.9 129.4Q955.1 132.8 960.9 138.7Q966.6 144.6 970 152.2Q973.5 159.7 975 168Q976.6 176.2 976.6 184.3V252ZM870.3 252V88H886.1V180.2H887.9V252Z"/><path class="bl-ord" pathLength="1" style="--i:5" d="M1049.1 255.1Q1037.9 255.1 1029.6 251.6Q1021.3 248.2 1015.6 242.3Q1009.9 236.4 1006.4 228.8Q1003 221.3 1001.4 213Q999.9 204.8 999.9 196.7V129H1017.5V191.6Q1017.5 201.4 1019.3 209.9Q1021.2 218.5 1025.4 224.9Q1029.6 231.3 1036.3 234.9Q1043 238.5 1052.7 238.5Q1061.3 238.5 1068 235.5Q1074.7 232.6 1079.2 226.9Q1083.8 221.3 1086.2 213.1Q1088.6 204.9 1088.6 194.4L1100.7 197.4Q1100.7 216.1 1094.1 228.9Q1087.6 241.8 1075.9 248.4Q1064.3 255.1 1049.1 255.1ZM1090.4 252V221.2H1088.6V129H1106.1V252Z"/><path class="bl-ord" pathLength="1" style="--i:6" d="M1180 255.3Q1158.3 255.3 1144.3 245.9Q1130.3 236.5 1127.1 219.7L1144.9 216.8Q1147.6 227.2 1157.2 233.3Q1166.8 239.4 1180.9 239.4Q1194.6 239.4 1202.6 233.7Q1210.5 228 1210.5 218.1Q1210.5 212.5 1207.9 208.9Q1205.4 205.4 1197.6 202.4Q1189.8 199.4 1174.4 195.2Q1157.7 190.7 1148.3 186.1Q1138.8 181.5 1134.9 175.5Q1130.9 169.5 1130.9 160.8Q1130.9 150.3 1136.8 142.3Q1142.7 134.4 1153.2 130Q1163.7 125.6 1177.7 125.6Q1191.6 125.6 1202.6 130.1Q1213.6 134.5 1220.3 142.6Q1227.1 150.7 1228.3 161.5L1210.5 164.7Q1208.8 154 1200 147.9Q1191.1 141.7 1177.5 141.4Q1164.7 141.1 1156.6 146.2Q1148.5 151.4 1148.5 160Q1148.5 164.8 1151.4 168.2Q1154.3 171.7 1162.1 174.7Q1169.9 177.7 1184.4 181.3Q1201.2 185.6 1210.8 190.4Q1220.5 195.2 1224.5 201.7Q1228.6 208.3 1228.6 217.8Q1228.6 235.3 1215.6 245.3Q1202.7 255.3 1180 255.3Z"/></g></svg></div>
+        <p class="bintro__etikett" aria-hidden="true">Bygg online</p>
+        <p class="bintro__namn" data-bintro-namn>Kupa 40</p>
+        <p class="bintro__fakta" data-bintro-fakta>40 m² · 10 × 4 m</p>
+        <div class="bintro__linje" role="progressbar" aria-label="Huset laddas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
+        <p class="bintro__status" role="status" aria-live="polite"><span data-bintro-text>Hämtar ritningen</span><span class="bintro__pct" data-bintro-pct aria-hidden="true"></span></p>
+      </div>
+    </div>
+    <script>(function(){var d={'sadel-30':['Kupa 30','30 m² · 7,5 × 4 m'],'sadel-40':['Kupa 40','40 m² · 10 × 4 m'],'sadel-50':['Sadel 50','50 m² · 12,5 × 4 m'],'pulpet-70':['Pulpet 70','70 m² · 10 × 7 m'],'sadel-90':['Sadel 90','90 m² · 12 × 7 m']},e=document.querySelector('[data-bintro]');if(!document.documentElement.classList.contains('byggapp')){e.remove();return}var q=new URLSearchParams(location.search).get('modell')||'',m={'kupa-30':'sadel-30','kupa-40':'sadel-40'}[q]||q;if(!d[m])m='sadel-40';e.setAttribute('data-modell',m);document.body.setAttribute('aria-busy','true');e.querySelector('[data-bintro-namn]').textContent=d[m][0];e.querySelector('[data-bintro-fakta]').textContent=d[m][1];setTimeout(function(){if(e.isConnected&&!e.classList.contains('bintro--ut')){e.remove();document.documentElement.classList.remove('bintro-pa');document.body.removeAttribute('aria-busy')}},30000);var lugn=false;try{lugn=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(x){}if(!lugn&&window.Worker&&window.OffscreenCanvas&&HTMLCanvasElement.prototype.transferControlToOffscreen){try{var svg=e.querySelector('.bintro__marke'),mitt=svg.parentNode,delar=[],tmp=document.createElementNS('http://www.w3.org/2000/svg','path'),rekt=function(n){var x=+n.getAttribute('x'),y=+n.getAttribute('y'),w=+n.getAttribute('width'),h=+n.getAttribute('height');return{d:'M'+x+' '+y+'h'+w+'v'+h+'h'+(-w)+'Z',len:2*(w+h),box:{x:x,y:y,w:w,h:h}}},lada=function(d){var t=d.match(/-?[\d.]+/g).map(Number),x=[],y=[];for(var i=0;i+1<t.length;i+=2){x.push(t[i]);y.push(t[i+1])}var a=Math.min.apply(0,x),b=Math.min.apply(0,y);return{x:a,y:b,w:Math.max.apply(0,x)-a,h:Math.max.apply(0,y)-b}},nr=function(n){return+(n.style.getPropertyValue('--i')||0)};svg.appendChild(tmp);[].forEach.call(svg.querySelectorAll('.bl-fyll>*'),function(n){var typ=n.getAttribute('class').slice(3),r=n.tagName.toLowerCase()==='rect'?rekt(n):{d:n.getAttribute('d')};delar.push({typ:typ,i:nr(n),d:r.d,box:r.box||(typ==='tak'?lada(r.d):{x:0,y:0,w:0,h:0})})});[].forEach.call(svg.querySelectorAll('.bl-streck>*'),function(n){var bitar;if(n.tagName.toLowerCase()==='rect'){var r=rekt(n);bitar=[{d:r.d,len:r.len}]}else bitar=n.getAttribute('d').split(/(?=M)/).map(function(d){tmp.setAttribute('d',d);return{d:d,len:tmp.getTotalLength()}});delar.push({typ:'streck',ord:n.getAttribute('class')==='bl-ord',i:nr(n),bitar:bitar})});svg.removeChild(tmp);var duk=document.createElement('canvas');duk.className='bintro__duk';duk.setAttribute('aria-hidden','true');mitt.insertBefore(duk,svg);var matt=function(){var k=Math.min(2,window.devicePixelRatio||1),b=mitt.getBoundingClientRect().width*k;return{b:b,h:b*316/1250}},m0=matt(),off=duk.transferControlToOffscreen(),w=new Worker('husritare-laddning.js?v=20261126r');w.onmessage=function(v){if(v.data&&v.data.typ==='ritad')e.setAttribute('data-ritad','')};w.onerror=function(){e.classList.remove('bintro--duk');duk.remove();e._arbetare=null};w.postMessage({typ:'start',duk:off,farg:getComputedStyle(svg).color,delar:delar,b:m0.b,h:m0.h},[off]);e.classList.add('bintro--duk');e._arbetare=w;requestAnimationFrame(function(){w.postMessage({typ:'kor'})});addEventListener('resize',function(){if(e._arbetare&&e.isConnected){var v=matt();e._arbetare.postMessage({typ:'storlek',b:v.b,h:v.h})}})}catch(x){e.classList.remove('bintro--duk');var c=e.querySelector('.bintro__duk');if(c)c.remove();e._arbetare=null}}})()</script>
     <a class="skip" href="#innehall">Hoppa till innehållet</a>
     <header class="site-header">
       <div class="site-header__inner">
         <a class="logo" href="./" aria-label="Till Legohus Stockholms startsida">
-          <img class="logo__svg" src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
+          <img class="logo__svg" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" alt="Legohus Stockholm">
         </a>
 
         <nav class="main-nav" aria-label="Huvudmeny">
@@ -66,7 +85,7 @@
                   <em>Kupa 30, inom attefallsmåtten</em>
                 </span>
               </a>
-              <p class="main-nav__modeller"><a href="kupa-30.html">Kupa 30</a></p>
+              <p class="main-nav__modeller"><a href="kupa-30.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 30<small class="meny-pris">från 299 500 kr</small></a></p>
               <a href="fritidshus.html">
                 <img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async">
                 <span>
@@ -74,7 +93,7 @@
                   <em>Fyra modeller, 40–90 m²</em>
                 </span>
               </a>
-              <p class="main-nav__modeller"><a href="kupa-40.html">Kupa 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+              <p class="main-nav__modeller"><a href="kupa-40.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 40<small class="meny-pris">från 450 000 kr</small></a><a href="sadel-50.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Sadel 50<small class="meny-pris">från 495 000 kr</small></a><a href="pulpet-70.html" title="Priset räknas fram i en offert">Pulpet 70<small class="meny-pris">På förfrågan</small></a><a href="sadel-90.html" title="Priset räknas fram i en offert">Sadel 90<small class="meny-pris">På förfrågan</small></a></p>
               <p class="main-nav__sub-etikett main-nav__sub-etikett--delad">För dig som bygger</p>
               <a href="proffs.html">
                 <img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async">
@@ -123,7 +142,7 @@
             <a class="mmeny__kort" href="attefallshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-attefallshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Attefallshus</strong><em>Kupa 30, inom attefallsmåtten</em></span></a>
             <a class="mmeny__kort" href="fritidshus.html"><span class="mmeny__bild"><img src="images/tumme/meny-fritidshus.webp?v=2" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Fritidshus</strong><em>Fyra modeller, 40–90 m²</em></span></a>
             </div>
-            <p class="mmeny__modeller"><a href="kupa-30.html">Kupa 30</a><a href="kupa-40.html">Kupa 40</a><a href="sadel-50.html">Sadel 50</a><a href="pulpet-70.html">Pulpet 70</a><a href="sadel-90.html">Sadel 90</a></p>
+            <p class="mmeny__modeller"><a href="kupa-30.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 30<small class="meny-pris">från 299 500 kr</small></a><a href="kupa-40.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Kupa 40<small class="meny-pris">från 450 000 kr</small></a><a href="sadel-50.html" title="Lägsta paketpris (Prefab stomme), inkl. moms">Sadel 50<small class="meny-pris">från 495 000 kr</small></a><a href="pulpet-70.html" title="Priset räknas fram i en offert">Pulpet 70<small class="meny-pris">På förfrågan</small></a><a href="sadel-90.html" title="Priset räknas fram i en offert">Sadel 90<small class="meny-pris">På förfrågan</small></a></p>
             <p class="mmeny__etikett">För dig som bygger</p>
             <a class="mmeny__kort mmeny__kort--bred" href="proffs.html"><span class="mmeny__bild"><img src="images/tumme/meny-proffs.webp" width="480" height="320" alt="" loading="lazy" decoding="async"></span><span class="mmeny__korttext"><strong>Proffs</strong><em>Väggar, block och moduler</em></span></a>
             <p class="mmeny__etikett">Bra att veta</p>
@@ -142,6 +161,18 @@
     </header>
 
     <main id="innehall" class="ritsida">
+      <header class="btopp" data-btopp>
+        <a class="btopp__hem" href="./" aria-label="Legohus Stockholm, till startsidan"><img class="btopp__logga" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" alt=""><img class="btopp__mark" src="images/legohus.svg?v=3" width="32" height="32" alt=""></a>
+        <span class="btopp__streck" aria-hidden="true"></span>
+        <div class="btopp__hus"><p class="btopp__etikett">Bygg online</p><p class="btopp__namn" data-namn>Kupa 40</p></div>
+        <div class="btopp__plats btopp__plats--lankar" data-bplats="lankar"></div>
+        <div class="btopp__hoger">
+          <div class="btopp__plats btopp__plats--pris" data-bplats="pris"></div>
+          <a class="btopp__offert" href="kontakt.html#kontaktformular" data-skicka data-boffert><span>Begär offert</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <button type="button" class="btopp__hel" data-bhel aria-pressed="false" aria-label="Helskärm" title="Helskärm"><svg class="btopp__hel-in" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><svg class="btopp__hel-ut" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
+          <button type="button" class="btopp__stang" data-bstang aria-label="Stäng Bygg online" title="Stäng"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+      </header>
       <section class="kf" aria-labelledby="kf-namn">
         <div class="kf__rad">
           <div class="kf__lankar" role="group" aria-label="Ditt hus">
@@ -225,6 +256,7 @@
                   <button type="button" class="kf__vk" data-plan aria-pressed="false" hidden data-tips="Planlösning ovanifrån" data-kort="P" aria-keyshortcuts="P"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M3.5 11H9M12.5 11h8M12.5 3.5v4.5M12.5 14v6.5"/></svg><span class="sr">Planlösning</span></button>
                   <button type="button" class="kf__vk" data-tomt aria-pressed="false" hidden data-tips="Tomt hus: dölj möblerna" data-kort="B" aria-keyshortcuts="B"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 11V8.6A2.6 2.6 0 0 1 9.1 6h5.8a2.6 2.6 0 0 1 2.6 2.6V11"/><path d="M4.5 17.5v-4a2 2 0 0 1 4 0V15h7v-1.5a2 2 0 0 1 4 0v4z"/><path d="M6.5 17.5V19.5M17.5 17.5V19.5"/><path d="M4 4l16 16"/></svg><span class="sr">Tomt hus</span></button>
                   <button type="button" class="kf__vk" data-bil aria-pressed="false" hidden data-tips="Kör iväg med bilen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 15.5v-2.3c0-.7.4-1.3 1.1-1.5l2.1-.8 1.9-2.9a2 2 0 0 1 1.7-.9h4.4a2 2 0 0 1 1.6.8l2.3 3 1.5.4c.7.2 1.2.8 1.2 1.5v2.7"/><path d="M8.8 15.5h6.4"/><circle cx="6.6" cy="15.8" r="1.9"/><circle cx="17.4" cy="15.8" r="1.9"/><path d="M7.4 11h11.1"/></svg><span>Kör iväg</span></button>
+                  <button type="button" class="kf__vk" data-vadingar aria-pressed="false" hidden data-tips="Se vad som ingår i varje paket"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 8.5 12 3.5l7.5 5"/><path d="M4 12.5v7M20 12.5v7M8.5 20.5h7"/><path d="M12 9.5v5.5M9.8 12.8 12 15l2.2-2.2"/></svg><span>Vad ingår?</span></button>
                   <div class="kf__lager" data-lager role="group" aria-label="Våningar" hidden><button type="button" data-lager-val="hela" aria-pressed="true">Hela huset</button><button type="button" data-lager-val="botten" aria-pressed="false">Bottenvåning</button><button type="button" data-lager-val="loft" aria-pressed="false">Loft</button></div>
                 </div>
                 <span class="kf__streck" aria-hidden="true"></span>
@@ -297,6 +329,11 @@
               <div class="kfarger" data-lista="fler"></div>
             </details>
 
+            <details class="kgrupp kgrupp--produkter" id="kgrupp-produkter" open>
+              <summary><span>Produkter i huset</span><em>Tillverkare</em><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <p class="kgrupp__text">Välj en del så åker kameran dit och visar vem som gör den. Leverantörer enligt kalkylen, eller likvärdigt.</p>
+              <div class="kprodval__lista" data-produkter></div>
+            </details>
             <section class="ksumma" id="sammanfattning" aria-labelledby="summa-rubrik">
               <p class="k-etikett">Klart?</p>
               <h2 id="summa-rubrik">Sammanfattning</h2>
@@ -309,22 +346,37 @@
       </section>
 
       <dialog class="kdialog ksam" data-summa-dialog aria-labelledby="ksam-namn">
+        <button type="button" class="kdialog__stang" data-stang aria-label="Stäng"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
         <div class="ksam__bild"><canvas data-summa-bild role="img" aria-label=""></canvas></div>
-        <div class="ksam__text">
-          <button type="button" class="kdialog__stang" data-stang aria-label="Stäng"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-          <p class="k-etikett">Ditt hus</p>
-          <h2 class="ksam__namn" id="ksam-namn" data-summa-namn>Kupa 40</h2>
-          <p class="ksam__fakta" data-summa-fakta></p>
-          <dl class="ksam__lista" data-summa-dl></dl>
-          <figure class="ksam__plan"><img data-summa-plan alt="" loading="lazy"><figcaption>Planritning ur bygglovsritningen</figcaption></figure>
-          <div class="ksam__knappar">
-            <a class="kf__knapp kf__knapp--bred" href="kontakt.html#kontaktformular" data-skicka>Skicka förfrågan</a>
-            <div class="ksam__smaknappar">
-              <button type="button" class="kdela" data-ladda-summa>Ladda ned bild</button>
-              <button type="button" class="kdela" data-spara-summa>Spara huset</button>
-            </div>
-          </div>
+        <div class="ksam__hoger">
+        <div class="ksam__text" data-summa-rull>
+          <section class="ksam__del ksam__del--hus">
+            <h2 class="ksam__namn" id="ksam-namn" data-summa-namn>Kupa 40</h2>
+            <p class="ksam__fakta" data-summa-fakta></p>
+            <dl class="ksam__chips" data-summa-chips></dl>
+          </section>
+          <section class="ksam__del" aria-labelledby="ksam-val">
+            <h3 class="ksam__rubrik" id="ksam-val">Dina val</h3>
+            <dl class="ksam__lista" data-summa-dl></dl>
+          </section>
+          <section class="ksam__del ksam__del--pris" aria-labelledby="ksam-pris" data-summa-prisdel>
+            <h3 class="ksam__rubrik" id="ksam-pris">Paket och pris</h3>
+            <dl class="ksam__lista ksam__lista--pris" data-summa-pris></dl>
+          </section>
+          <section class="ksam__del" aria-labelledby="ksam-plan">
+            <h3 class="ksam__rubrik" id="ksam-plan">Planritning</h3>
+            <figure class="ksam__plan"><button type="button" class="ksam__planknapp" data-summa-planstor aria-label="Förstora planritningen"><img data-summa-plan alt="" loading="lazy"><span class="ksam__lupp" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5M11 8.5v5M8.5 11h5"/></svg></span></button><figcaption>Ur bygglovsritningen</figcaption></figure>
+          </section>
           <p class="ksam__not">Vi hör av oss med pris och tider. Ytorna kommer från ritningen; exakta mått bekräftas i offerten.</p>
+        </div>
+        <!-- knapparna står fast under den rullande texten och syns alltid hela -->
+        <div class="ksam__knappar">
+          <a class="kf__knapp kf__knapp--bred ksam__offert" href="kontakt.html#kontaktformular" data-skicka>Begär offert</a>
+          <div class="ksam__smaknappar">
+            <button type="button" class="kdela" data-ladda-summa>Ladda ned bild</button>
+            <button type="button" class="kdela" data-spara-summa>Spara huset</button>
+          </div>
+        </div>
         </div>
       </dialog>
 
@@ -405,7 +457,7 @@
     <footer class="site-footer">
       <div class="site-footer__inner">
         <div>
-          <img class="site-footer__logo" src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
+          <img class="site-footer__logo" data-lh-logga src="images/legohus_logo.svg" width="1024" height="279" loading="lazy" decoding="async" alt="Legohus Stockholm">
           <p class="site-footer__text">
             Attefallshus, fritidshus och byggelement, byggda under tak i Sverige.
           </p>
@@ -460,7 +512,8 @@
       <p class="site-footer__ord" aria-hidden="true">Legohus</p>
     </footer>
 
-    <script type="module" src="husritare-sida.js?v=20261126c"></script>
+    <script type="module" src="husritare-app.js?v=20261126r"></script>
+    <script type="module" src="husritare-sida.js?v=20261126r"></script>
     <script>
       // En sidovergang som hoppas over avvisar sina loften. Utan
       // detta hamnar "Transition was skipped" i konsolen pa varje
