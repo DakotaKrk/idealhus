@@ -11,6 +11,22 @@
    - rörelse: gränssnittet 0.16–0.28 s med var(--k-ut), aldrig ease-in; bara scenens egna
      glidningar (kamera, ljus, laddningen) får vara längre. Inget som går hela tiden. */
 
+/* ---------- Rörelse: en gemensam uppsättning kurvor och tider (2026-11-27) ----------
+   Alla fyra filerna (husritare.css, -app, -sprang, -ios) läser dessa. Ingen ease-in i gränssnittet.
+   --m-ut     ut-kurvan: knappar, kort, menyer, paneler som kommer in
+   --m-ios    iOS-arket (lådan): bottenark, sammanfattningen på mobil
+   --m-fjader lätt fjäder: markörer och val som glider till det nya (flikar, paket, flikarna i sprängvyn)
+   --m-mjuk   in-ut för det som flyttar sig på skärmen (svep, toningar mellan lägen)
+   Tider: tryck 120, snabb 160 (hover, färg), ui 240 (menyer, dialoger in), val 300 (markörer),
+   ark 380 (bottenark), ut 180 (allt som stänger: lite snabbare än in). */
+:root {
+  --m-ut: cubic-bezier(0.23, 1, 0.32, 1);
+  --m-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --m-fjader: cubic-bezier(0.34, 1.32, 0.64, 1);
+  --m-mjuk: cubic-bezier(0.65, 0, 0.35, 1);
+  --m-tryck: 0.12s; --m-snabb: 0.16s; --m-ui: 0.24s; --m-val: 0.3s; --m-ark: 0.38s; --m-stang: 0.18s;
+}
+
 /* ---------- Tokens ---------- */
 body.ritsidan {
   --k-kant: clamp(16px, 2.4vw, 40px);
@@ -24,7 +40,7 @@ body.ritsidan {
   --k-r-s: 8px; --k-r-m: 12px; --k-r-l: 20px; --k-r-xl: 24px;
   --k-glas: rgba(24, 22, 19, 0.88);
   --k-skugga: 0 1px 2px rgba(27, 25, 21, 0.04), 0 18px 40px -30px rgba(27, 25, 21, 0.4);
-  --k-ut: cubic-bezier(0.22, 1, 0.36, 1);
+  --k-ut: var(--m-ut);
   --k-fokus: var(--k-accent-djup);
   background: var(--k-yta);
 }
@@ -926,7 +942,7 @@ html body .ktang h3 { margin: 0 0 4px; font: 600 0.75rem/1.2 var(--sans); letter
    Mörkt glas över scenen (blur + en tunn ljuskant), samma 44 px-knappar som förut,
    ett ljus som följer musen, Se inne som ett piller som glider in, en klockbubbla
    vid reglaget och mikrorörelser i ikonerna. Bara transform och opacity animeras. */
-body.ritsidan { --kfv-ut: cubic-bezier(0.23, 1, 0.32, 1); --kfv-inut: cubic-bezier(0.77, 0, 0.175, 1); --kfv-glas: rgba(22, 20, 17, 0.74); }
+body.ritsidan { --kfv-ut: var(--m-ut); --kfv-inut: cubic-bezier(0.77, 0, 0.175, 1); --kfv-glas: rgba(22, 20, 17, 0.74); }
 html[data-tema="mork"] body.ritsidan { --kfv-glas: rgba(30, 27, 23, 0.72); }
 
 .kf__verktyg { isolation: isolate; gap: 2px; border-radius: 18px; background: var(--kfv-glas);
@@ -1072,7 +1088,7 @@ html .kf__verktyg input.ritare__reglage { background-color: transparent; }
    Sifferraden i tre lika breda, centrerade celler. Husraderna har fasta kolumner
    (ritning, text, tal, plan, val) och samma höjd; ett fält glider bakom det valda
    huset och ritningens tak tonas i accentfärg. Ihopfälld visar rubriken husets ritning. */
-body.ritsidan { --kp-ut: cubic-bezier(0.2, 0.9, 0.25, 1); --kp-glid: cubic-bezier(0.65, 0, 0.25, 1); --kp-rad: 76px; }
+body.ritsidan { --kp-ut: var(--m-ut); --kp-glid: cubic-bezier(0.65, 0, 0.25, 1); --kp-rad: 76px; }
 
 /* knapparna ovanför panelen: lika breda, Skicka får en pil som skjuts fram */
 .kf__knapp--skicka svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.22s var(--kp-ut); }
@@ -1172,15 +1188,15 @@ html[data-tema="mork"] .kmodeller__falt { background: var(--k-svag); box-shadow:
 /* ---------- Raden ovanför 3D-vyn 2026-11-16: glas, fem lika breda knappar ----------
    Raden går kant i kant med scenen. Spara visar om huset redan finns i Mina hus,
    Kopiera länk och Börja om bekräftar med en bock, Börja om frågar först om något är ändrat. */
-body.ritsidan { --kr-ut: cubic-bezier(0.2, 0.9, 0.25, 1); --kr-glas: rgba(255, 255, 255, 0.72); }
+body.ritsidan { --kr-ut: var(--m-ut); --kr-glas: rgba(255, 255, 255, 0.72); }
 html[data-tema="mork"] body.ritsidan { --kr-glas: rgba(31, 28, 24, 0.72); }
 .kf__lankar { justify-self: stretch; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; height: 48px; padding: 4px; border-radius: 14px; background: var(--kr-glas);
   -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 0 0 1px var(--k-linje), 0 1px 2px rgba(27, 25, 21, 0.05), 0 14px 30px -24px rgba(27, 25, 21, 0.45);
-  animation: kr-in 0.28s var(--kr-ut) 0.05s both; }
+  animation: kr-in 0.28s var(--kr-ut) 0.05s backwards; }
 html[data-tema="mork"] .kf__lankar { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), inset 0 0 0 1px var(--k-linje), 0 14px 30px -22px rgba(0, 0, 0, 0.8); }
 @keyframes kr-in { from { opacity: 0; transform: translateY(-6px); } }
-.kf__lankar > * { animation: kr-knapp 0.26s var(--kr-ut) both; }
+.kf__lankar > * { animation: kr-knapp 0.26s var(--kr-ut) backwards; }
 .kf__lankar > :nth-child(1) { animation-delay: 0.08s; } .kf__lankar > :nth-child(2) { animation-delay: 0.11s; } .kf__lankar > :nth-child(3) { animation-delay: 0.14s; } .kf__lankar > :nth-child(4) { animation-delay: 0.17s; } .kf__lankar > :nth-child(5) { animation-delay: 0.2s; }
 @keyframes kr-knapp { from { opacity: 0; transform: translateY(4px); } }
 .kf__lankar .kf__adress { animation: none; }
@@ -1370,10 +1386,10 @@ html.inbaddad .kf__scen--inne .kf__rum { top: 58px; }
 .kfarg--detalj .kfarg__prov { background: radial-gradient(120% 90% at 26% 16%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 46%), linear-gradient(150deg, transparent 55%, rgba(0, 0, 0, 0.16)), var(--f); }
 .kfarg--fasad .kfarg__prov::before, .kfarg--tak .kfarg__prov::before { background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 40%); }
 /* vald: accentring och en vit bock som ritas in; den förra släpper mjukt */
-.kfarg__prov { transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
+.kfarg__prov { transition: transform 0.22s var(--m-ut), box-shadow 0.22s var(--m-ut); }
 .kfarg input:checked + .kfarg__prov { box-shadow: 0 0 0 2px var(--k-kort), 0 0 0 4px var(--k-accent, #f0b56e), 0 10px 18px -12px rgba(27, 25, 21, 0.55); animation: none; transform: translateY(-1px); }
 .kfarg__bock { position: absolute; z-index: 2; right: 6px; top: 6px; width: 20px; height: 20px; padding: 2px; border-radius: 50%; background: rgba(255, 255, 255, 0.96); box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.5); fill: none; stroke: #1b1915; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transform: scale(0.5); transition: opacity 0.16s ease, transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1); }
-.kfarg__bock path { stroke: #1b1915; fill: none; stroke-dasharray: 20; stroke-dashoffset: 20; transition: stroke-dashoffset 0.22s cubic-bezier(0.22, 1, 0.36, 1) 0.06s; }
+.kfarg__bock path { stroke: #1b1915; fill: none; stroke-dasharray: 20; stroke-dashoffset: 20; transition: stroke-dashoffset 0.22s var(--m-ut) 0.06s; }
 :root[data-theme="dark"] .kfarg__bock path, html[data-tema="mork"] .kfarg__bock path { stroke: #1b1915; }
 .kfarg input:checked + .kfarg__prov .kfarg__bock { opacity: 1; transform: none; }
 .kfarg input:checked + .kfarg__prov .kfarg__bock path { stroke-dashoffset: 0; }
@@ -1381,11 +1397,11 @@ html.inbaddad .kf__scen--inne .kf__rum { top: 58px; }
 /* pekskärm: håll inne för att se namnet */
 @media (hover: none) { .kfarg:active .kfarg__namn { opacity: 1; translate: -50% 0; } }
 /* rubrikens kulörnamn byter med en kort toning */
-.kgrupp__bytt { animation: kgrupp-bytt 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
+.kgrupp__bytt { animation: kgrupp-bytt 0.24s var(--m-ut); }
 @keyframes kgrupp-bytt { from { opacity: 0; transform: translateY(4px); } }
 /* "Rekommenderad" vid ritningens kulör, och knappen som återställer till den */
 .kgrupp__rek { display: inline-block; margin-left: 6px; padding: 3px 8px; border-radius: 999px; background: rgba(240, 181, 110, 0.2); color: var(--k-text); font: 600 0.625rem/1 var(--sans); letter-spacing: 0.04em; text-transform: none; vertical-align: 1px; }
-.kgrupp__aterstall { display: inline-flex; align-items: center; gap: 7px; margin: -8px 20px 16px; min-height: 40px; padding: 0 14px 0 12px; border: 0; border-radius: 999px; background: var(--k-svag, rgba(27, 25, 21, 0.06)); color: var(--k-text); font: 500 0.8125rem/1 var(--sans); cursor: pointer; animation: k-upp 0.24s var(--k-ut); transition: background-color 0.18s ease, transform 0.16s cubic-bezier(0.22, 1, 0.36, 1); }
+.kgrupp__aterstall { display: inline-flex; align-items: center; gap: 7px; margin: -8px 20px 16px; min-height: 40px; padding: 0 14px 0 12px; border: 0; border-radius: 999px; background: var(--k-svag, rgba(27, 25, 21, 0.06)); color: var(--k-text); font: 500 0.8125rem/1 var(--sans); cursor: pointer; animation: k-upp 0.24s var(--k-ut); transition: background-color 0.18s ease, transform 0.16s var(--m-ut); }
 .kgrupp__aterstall[hidden] { display: none; }
 .kgrupp__aterstall svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .kgrupp__aterstall:active { transform: scale(0.97); }
@@ -1394,7 +1410,7 @@ html.inbaddad .kf__scen--inne .kf__rum { top: 58px; }
 /* färdiga kombinationer: ett eget kort ovanför fasaden, tre knappar med fasad, tak och detaljer */
 .kpaletter { margin-bottom: 12px; padding-top: 16px; border-radius: var(--k-r-l, 20px); background: var(--k-kort); box-shadow: inset 0 0 0 1px var(--k-linje); }
 .kpaletter__rad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0 20px 18px; }
-.kpalett { display: grid; justify-items: center; gap: 8px; min-height: 44px; padding: 10px 6px 10px; border: 0; border-radius: 14px; background: transparent; color: var(--k-text); font: 500 0.75rem/1.2 var(--sans); text-align: center; cursor: pointer; box-shadow: inset 0 0 0 1px var(--k-linje); animation: k-upp 0.28s var(--k-ut) both; animation-delay: calc(var(--i, 0) * 30ms); transition: box-shadow 0.2s ease, transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease; }
+.kpalett { display: grid; justify-items: center; gap: 8px; min-height: 44px; padding: 10px 6px 10px; border: 0; border-radius: 14px; background: transparent; color: var(--k-text); font: 500 0.75rem/1.2 var(--sans); text-align: center; cursor: pointer; box-shadow: inset 0 0 0 1px var(--k-linje); animation: k-upp 0.28s var(--k-ut) both; animation-delay: calc(var(--i, 0) * 30ms); transition: box-shadow 0.2s ease, transform 0.18s var(--m-ut), background-color 0.2s ease; }
 .kpalett__prov { display: flex; width: 100%; max-width: 76px; height: 28px; border-radius: 9px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1); }
 .kpalett__prov i { flex: 1; background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(0, 0, 0, 0.1)), var(--f); }
 .kpalett__prov i:first-child { flex: 2; }
@@ -1407,10 +1423,10 @@ html.inbaddad .kf__scen--inne .kf__rum { top: 58px; }
 
 /* ---- Verktygsraden på pekskärm: det läge som är på får en smal etikett under ikonen ---- */
 @media (hover: none), (pointer: coarse) {
-  .kf__verktyg .kf__vk[data-etikett] svg { transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
+  .kf__verktyg .kf__vk[data-etikett] svg { transition: transform 0.22s var(--m-ut); }
   .kf__verktyg .kf__vk[data-etikett][aria-pressed="true"] svg { transform: translateY(-5px); }
   .kf__verktyg .kf__vk[data-etikett][aria-pressed="true"]::before { display: none; }
-  .kf__verktyg .kf__vk[data-etikett][aria-pressed="true"]::after { content: attr(data-etikett); display: block !important; position: absolute; left: 50%; right: auto; top: auto; bottom: 6px; translate: -50% 0; transform: none; opacity: 1; padding: 0; border-radius: 0; background: none; box-shadow: none; color: var(--k-accent, #f0b56e); font: 600 0.53125rem/1 var(--sans); letter-spacing: 0.02em; white-space: nowrap; pointer-events: none; animation: kf-etikett 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
+  .kf__verktyg .kf__vk[data-etikett][aria-pressed="true"]::after { content: attr(data-etikett); display: block !important; position: absolute; left: 50%; right: auto; top: auto; bottom: 6px; translate: -50% 0; transform: none; opacity: 1; padding: 0; border-radius: 0; background: none; box-shadow: none; color: var(--k-accent, #f0b56e); font: 600 0.53125rem/1 var(--sans); letter-spacing: 0.02em; white-space: nowrap; pointer-events: none; animation: kf-etikett 0.22s var(--m-ut); }
   /* trycket: ikonen ger en liten studs (taket lyfter en aning, huset "öppnas") */
   .kf__verktyg .kf__vk[data-oppna]:active svg { transform: translateY(-2px) scale(0.96); }
   .kf__verktyg .kf__vk--inne:active svg { transform: scale(0.92); }
@@ -1422,8 +1438,8 @@ html.inbaddad .kf__scen--inne .kf__rum { top: 58px; }
    (husritare-sida.js placerar den med transform; flikarna själva är genomskinliga) */
 .kf__rum > div { position: relative; }
 .kf__rum-markor { position: absolute; left: 0; top: 0; z-index: 0; border-radius: 999px; background: #fff; box-shadow: 0 2px 8px -3px rgba(0, 0, 0, 0.45), inset 0 -1px 0 rgba(27, 25, 21, 0.06); pointer-events: none; opacity: 0; will-change: transform;
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), width 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease; }
-.kf__rum button { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s ease, transform 0.16s cubic-bezier(0.22, 1, 0.36, 1); -webkit-tap-highlight-color: transparent; }
+  transition: transform 0.28s var(--m-ut), width 0.28s var(--m-ut), opacity 0.18s ease; }
+.kf__rum button { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s ease, transform 0.16s var(--m-ut); -webkit-tap-highlight-color: transparent; }
 .kf__rum button[aria-pressed="true"], .kf__rum button[aria-pressed="true"]:hover { background: transparent; color: #1b1915; }
 .kf__rum button:active { transform: scale(0.97); }
 .kf__rum button svg { flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
@@ -1577,8 +1593,8 @@ html.ritare-fyll .kf__helrad { position: absolute; z-index: 4; top: var(--hel-t)
 .kf__helnamn small { flex: none; padding-left: 10px; border-left: 1px solid rgba(27, 25, 21, 0.14); color: rgba(27, 25, 21, 0.6); font: 500 0.8125rem/1 var(--sans); }
 .kf__helnamn small:empty { display: none; }
 .kf__helstang { flex: none; gap: 8px; padding: 0 18px 0 14px; font: 500 0.875rem/1 var(--sans); cursor: pointer; -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.2s cubic-bezier(0.22, 1, 0.36, 1), transform 0.16s cubic-bezier(0.22, 1, 0.36, 1); }
-.kf__helstang svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+  transition: background-color 0.2s var(--m-ut), transform 0.16s var(--m-ut); }
+.kf__helstang svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; transition: transform 0.3s var(--m-ut); }
 @media (hover: hover) { .kf__helstang:hover { background: #fff; } .kf__helstang:hover svg { transform: rotate(90deg); } }
 .kf__helstang:active { transform: scale(0.96); }
 .kf__helstang:focus-visible { outline: 2px solid var(--k-accent, #f0b56e); outline-offset: 2px; }
@@ -1634,7 +1650,7 @@ html.ritare-vila .kf__scen > .kf__helrad * { pointer-events: none !important; }
 .kf__verktyg.kf__verktyg--utanmiljo .kf__meny:has(> [data-miljo-knapp]) { display: none; }
 .kf__verktyg .kf__popup.kf__merlista { left: auto; right: -6px; bottom: calc(100% + 14px); translate: none; display: grid; gap: 2px; min-width: 208px; max-height: none; overflow: visible; transform-origin: bottom right;
   background: #1a1815; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 20px 40px -16px rgba(0, 0, 0, 0.85);
-  animation: kf-mer-in 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both; will-change: opacity, transform; contain: layout paint; }
+  animation: kf-mer-in 0.18s var(--m-ut) both; will-change: opacity, transform; contain: layout paint; }
 @keyframes kf-mer-in { from { opacity: 0; transform: translateY(4px) scale(0.98); } }
 /* stängd är stängd (display: grid ovan vann annars över [hidden], och listan stod alltid öppen) */
 .kf__verktyg .kf__popup.kf__merlista[hidden], .kf__verktyg .kf__mer[hidden] { display: none; }
@@ -1727,9 +1743,9 @@ html.ritare-vila .kf__scen > .kf__helrad * { pointer-events: none !important; }
 /* Mjukt byte in i och ut ur helskärm (husritare-sida.js: mjuktByte, helFram) */
 .kf__hel-sloja { position: absolute; inset: 0; z-index: 60; opacity: 0; pointer-events: none; border-radius: inherit;
   background: radial-gradient(120% 90% at 50% 45%, #2a251f 0%, #14120f 60%, #0c0b09 100%);
-  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1); will-change: opacity; }
+  transition: opacity 0.6s var(--m-ut); will-change: opacity; }
 .kf__hel-sloja--pa { opacity: 1; transition: opacity 0.24s cubic-bezier(0.65, 0, 0.35, 1); }
-.kf__scen--hel-in > canvas { animation: kf-hel-in 0.7s cubic-bezier(0.22, 1, 0.36, 1); transform-origin: 50% 50%; }
+.kf__scen--hel-in > canvas { animation: kf-hel-in 0.7s var(--m-ut); transform-origin: 50% 50%; }
 @keyframes kf-hel-in { from { transform: scale(1.035); opacity: 0.35; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .kf__hel-sloja { display: none; } .kf__scen--hel-in > canvas { animation: none; } }
 
@@ -1965,7 +1981,7 @@ body:has(.kprod:not([hidden])) .kf__gang { opacity: 0; transition: opacity 0.2s 
 .kpris__val { order: -1; width: 320px; max-width: 100%; box-sizing: border-box; padding: 12px; border-radius: 20px; background: rgba(22, 20, 17, 0.86);
   -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 24px 48px -24px rgba(0, 0, 0, 0.8);
-  transform-origin: bottom right; animation: kpris-in 0.22s var(--kfv-ut, cubic-bezier(0.23, 1, 0.32, 1)) both; }
+  transform-origin: bottom right; animation: kpris-in 0.22s var(--kfv-ut, var(--m-ut)) both; }
 .kpris__val[hidden] { display: none; }
 @keyframes kpris-in { from { opacity: 0; transform: translateY(6px) scale(0.97); } }
 .kpris__rubrik { margin: 2px 4px 8px; font: 600 0.6875rem/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.62); }
@@ -2014,7 +2030,7 @@ html.ritare-fyll .kf__scen .kpris { right: var(--hel-h); bottom: calc(var(--hel-
 .kpris__fran { font: 600 0.625rem/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); }
 .kpris__paket em { font-size: 0.875rem; text-align: right; }
 /* priskortet kommer fram med verktygsraden (kf__scen--klar, samma kurva) och tonas ut/in vid husbyte */
-.kpris { transition: opacity 0.45s var(--kfv-ut, cubic-bezier(0.23, 1, 0.32, 1)) 0.36s, translate 0.45s var(--kfv-ut, cubic-bezier(0.23, 1, 0.32, 1)) 0.36s; }
+.kpris { transition: opacity 0.45s var(--kfv-ut, var(--m-ut)) 0.36s, translate 0.45s var(--kfv-ut, var(--m-ut)) 0.36s; }
 .kf__scen:not(.kf__scen--klar) .kpris, .kpris.kpris--byter { opacity: 0; translate: 0 10px; pointer-events: none; }
 .kf__scen:not(.kf__scen--klar) .kpris > *, .kpris.kpris--byter > * { pointer-events: none; }
 .kpris.kpris--byter { transition-delay: 0s; transition-duration: 0.25s; }
@@ -2040,13 +2056,13 @@ html.ritare-fyll .kf__scen .kpris { right: var(--hel-h); bottom: calc(var(--hel-
 .kpris__val { width: 352px; padding: 10px; border-radius: 22px; background: rgba(26, 24, 21, 0.95);
   -webkit-backdrop-filter: blur(28px) saturate(1.8); backdrop-filter: blur(28px) saturate(1.8);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 2px 6px -2px rgba(0, 0, 0, 0.3), 0 28px 60px -24px rgba(0, 0, 0, 0.75);
-  animation: kpris-in 0.2s cubic-bezier(0.23, 1, 0.32, 1) both; }
+  animation: kpris-in 0.2s var(--m-ut) both; }
 @keyframes kpris-in { from { opacity: 0; transform: scale(0.96); } }
 @keyframes kpris-ut { to { opacity: 0; transform: scale(0.98); } }
-html body .kpris.kpris--stanger .kpris__val { animation: kpris-ut 0.14s cubic-bezier(0.23, 1, 0.32, 1) forwards; pointer-events: none; }
+html body .kpris.kpris--stanger .kpris__val { animation: kpris-ut 0.14s var(--m-ut) forwards; pointer-events: none; }
 .kpris__rubrik { margin: 4px 8px 8px; }
 .kpris__lista { gap: 2px; }
-.kpris__paket { min-height: 52px; padding: 8px 12px 8px 8px; border-radius: 14px; transition: background-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s cubic-bezier(0.23, 1, 0.32, 1); }
+.kpris__paket { min-height: 52px; padding: 8px 12px 8px 8px; border-radius: 14px; transition: background-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s var(--m-ut); }
 @media (hover: hover) { .kpris__paket:hover { background: rgba(255, 255, 255, 0.05); } }
 .kpris__paket:active { transform: scale(0.985); }
 .kpris__paket[aria-checked="true"], .kpris__paket[aria-checked="true"]:hover { background: rgba(240, 181, 110, 0.13); box-shadow: inset 0 0 0 1.5px rgba(240, 181, 110, 0.55); }
@@ -2056,7 +2072,7 @@ html body .kpris.kpris--stanger .kpris__val { animation: kpris-ut 0.14s cubic-be
 .kpris__belopp em, .kpris__pris { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 .kpris__fran { font-weight: 500; letter-spacing: 0.06em; }
 .kpris__lankar { margin-top: 8px; }
-.kpris__vad, .kpris__offert { min-height: 42px; border-radius: 13px; transition: background-color 0.15s ease, transform 0.15s cubic-bezier(0.23, 1, 0.32, 1); }
+.kpris__vad, .kpris__offert { min-height: 42px; border-radius: 13px; transition: background-color 0.15s ease, transform 0.15s var(--m-ut); }
 .kpris__vad { background: rgba(255, 255, 255, 0.12); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
 .kpris__moms { margin: 8px 8px 2px; }
 @media (max-width: 860px) { .kpris__val { width: min(352px, calc(100vw - 24px)); } }

@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261126r';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261126r';
-import { skapaPlanlager } from './husritare-plan.js?v=20261126r';
+import { skapaMiljo } from './husritare-miljo.js?v=20261126s';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261126s';
+import { skapaPlanlager } from './husritare-plan.js?v=20261126s';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]

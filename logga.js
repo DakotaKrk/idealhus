@@ -7,7 +7,8 @@
    Märkning: data-lh-logga på en <img> (eller på ett element som ska få loggan inuti). Bilden byts mot SVG:n och behåller sina
    klasser, så sajtens storlek och färgfilter (ljust/mörkt tema) gäller som förut. Utan JS syns bilden som vanligt.
    För Bygg online m.fl.: window.LegohusLogga.montera(rot) monterar alla [data-lh-logga] under rot,
-   window.LegohusLogga.svg({ klass, etikett, rita }) ger SVG-koden som text. */
+   window.LegohusLogga.svg({ klass, etikett, rita }) ger SVG-koden som text.
+   Entrén (2026-11-27): window.LegohusLogga.intro(), anropad först i <body> av sajtens sidor (_avslut.py), se intro() nedan. */
 (function () {
   'use strict';
   var NYCKEL = 'legohus-logga-ritad';
@@ -150,13 +151,13 @@
   // Bara ett visuellt lager: sidan under laddas och målas som vanligt (hjältebilden med full prioritet), lagret är
   // aria-hidden och tar inga klick. Uppritningen sker i en egen tråd (husritare-laddning.js, OffscreenCanvas), så att
   // sidans skript inte får den att hacka. Utgången börjar när loggan är ritad (cirka 0,85 s) och hjältebilden är avkodad,
-  // senast 1,0 s in i sidan, och är klar 0,55 s senare (allt borta före 1,6 s). Säkerhet: lagret tonar bort av sig självt efter 2 s.
+  // senast 1,0 s in i sidan, och är klar 0,55 s senare (allt borta före 1,6 s). Säkerhet: lagret tonar bort av sig självt (CSS).
   // Anropas av sidornas första skript i <body> (_avslut.py). Aldrig: andra sidvisningen, sidbyte inom sajten (t.ex. från
   // CRM:et med vy-övergång), bakåt/framåt, omladdning, i en ram, för sökrobotar, vid reducerad rörelse eller utan JS.
   var INTRO = 'legohus-intro';
   var IFARG = '#82776b', IFARG_MORK = '#ece7df';
   STIL += ''
-    + '.lhi{position:fixed;inset:0;z-index:2147483000;pointer-events:none;animation:lhi-sakert .3s ease 2s forwards}'
+    + '.lhi{position:fixed;inset:0;z-index:2147483000;pointer-events:none;animation:lhi-sakert .4s ease 1.2s forwards}'
     + '.lhi__bak{position:absolute;inset:0;background:var(--ben,#f7f5f0);will-change:opacity}'
     + 'html[data-tema="mork"] .lhi__bak{background:#161411}'
     + '.lhi__marke{position:absolute;left:50%;top:46%;width:min(280px,62vw);aspect-ratio:1250/316;translate:-50% -50%;transform-origin:0 0;will-change:transform,opacity}'
@@ -196,6 +197,10 @@
     el.setAttribute('aria-hidden', 'true');
     el.innerHTML = '<div class="lhi__bak"></div><div class="lhi__marke">' + svg({}) + '</div><span class="lhi__linje"><i></i></span>';
     b.insertBefore(el, b.firstChild);
+    // frist: utgången börjar senast här (1,0 s in i sidan). Säkerheten är en CSS-animation (går på grafikkortet): står
+    // huvudtråden still när fristen passerat tonar lagret ändå bort, klart strax före 1,6 s.
+    var frist = Math.max(980, t0 + 600);
+    el.style.animationDelay = Math.round(frist - t0 + 180) + 'ms';
     var bak = el.firstChild, marke = bak.nextSibling, linje = marke.nextSibling, s = marke.firstChild;
     var arb = null, ritad = false;
 
@@ -241,7 +246,7 @@
           tider: { ritad: 760, klar: 900, bort: [600, 260], tjock: [7, 4.5] } }, [off]);
         el.classList.add('lhi--duk');
         // första målningen: ritningen (760 ms) ska hinna bli klar före utgången (senast 1,0 s in i sidan); målas sidan sent ritas den fortare
-        requestAnimationFrame(function () { if (arb) arb.postMessage({ typ: 'kor', fart: 760 / Math.max(220, Math.max(1000, t0 + 600) - performance.now() - 40) }); });
+        requestAnimationFrame(function () { if (arb) arb.postMessage({ typ: 'kor', fart: 760 / Math.max(220, frist - performance.now() - 40) }); });
       } catch (e) { el.classList.remove('lhi--duk'); var c = el.querySelector('.lhi__duk'); if (c) c.remove(); arb = null; }
     }
     if (!arb) ritad = true;    // SVG:n tonar in (lhi-in)
@@ -263,7 +268,7 @@
       var gatt = performance.now() - t0;
       var bild = bildKlar();
       // ritad (tråden: ytorna står klara) och bilden avkodad; senast 1,0 s in i sidan (minst 0,6 s synlig), så att allt är borta före 1,6 s
-      if ((ritad && bild && gatt >= 500) || performance.now() >= Math.max(1000, t0 + 600)) { ut(); return; }
+      if ((ritad && bild && gatt >= 500) || performance.now() >= frist) { ut(); return; }
       setTimeout(koll, 40);
     }
     setTimeout(koll, 300);
@@ -279,6 +284,9 @@
     // loggan växer en aning och tonar bort (som Bygg online). Allt med Web Animations: transform och opacity.
     function ut() {
       slut = true;
+      // huvudtråden kom för sent: säkerhetstoningen har redan börjat, låt den gå klart
+      if (performance.now() > frist + 180) { setTimeout(stang, Math.max(0, frist + 600 - performance.now())); return; }
+      el.style.animation = 'none';
       html.classList.add('lh-intro-ut');
       var E = 'cubic-bezier(.32,.72,0,1)', mal = document.querySelector('.site-header .logo__svg, .site-header .logo img');
       var m = marke.getBoundingClientRect(), r = mal ? mal.getBoundingClientRect() : null, k;
@@ -300,7 +308,7 @@
         setTimeout(function () { html.classList.add('lh-intro-landat'); }, nyck.length > 2 ? 455 : 0);
         linje.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: 'ease-out', fill: 'forwards' });
       } catch (e) { stang(); return; }
-      setTimeout(stang, 560);
+      setTimeout(stang, 550);
     }
     // bakåt till en sida som låg i minnet mitt i entrén: inget lager kvar
     addEventListener('pageshow', function (e) { if (e.persisted) stang(); });
@@ -309,8 +317,14 @@
 
   // Tillägg 2026-11-27 (crm/vt.js): kommer man tillbaka till hemsidan från CRM:et eller inloggningen är sidbytet "bakåt" (ios.css),
   // och märket ritas inte fram igen – det glider hit från förra sidan.
+  if ('onpageswap' in window) addEventListener('pageswap', function (e) {
+    if (!e.viewTransition) return;
+    var f = function () {}; [e.viewTransition.ready, e.viewTransition.finished, e.viewTransition.updateCallbackDone].forEach(function (l) { if (l && l.then) l.then(f, f); });
+  });
   if ('onpagereveal' in window) addEventListener('pagereveal', function (e) {
     if (!e.viewTransition) return;
+    // Alla övergångens löften fångas (sidans eget skript i <head> lyssnar bara på finished) – en avbruten övergång blir inget fel
+    var f = function () {}; [e.viewTransition.ready, e.viewTransition.updateCallbackDone].forEach(function (l) { if (l && l.then) l.then(f, f); });
     var fran = window.navigation && navigation.activation && navigation.activation.from;
     if (!fran || !/\/crm\//.test(new URL(fran.url, location.href).pathname)) return;
     try { e.viewTransition.types.add('bak'); } catch (x) { /* äldre webbläsare */ }

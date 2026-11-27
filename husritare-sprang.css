@@ -9,7 +9,7 @@
   padding: 10px 12px 12px; border-radius: 20px; background: rgba(22, 20, 17, 0.84); color: #fff; font-family: var(--sans);
   -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 24px 48px -24px rgba(0, 0, 0, 0.8);
-  transform-origin: top left; animation: kspr-in 0.28s var(--k-ut, cubic-bezier(0.22, 1, 0.36, 1)) both; }
+  transform-origin: top left; animation: kspr-in 0.28s var(--k-ut, var(--m-ut)) both; }
 .kspr[hidden] { display: none; }
 @keyframes kspr-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } }
 .kspr__topp { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 8px; }
@@ -26,14 +26,14 @@
 .kspr__flik[aria-selected="true"] { color: #fff; }
 .kspr__flik[aria-selected="true"] b { background: var(--k-accent, #f0b56e); color: #1b1915; }
 .kspr__flik:focus-visible, .kspr__stang:focus-visible, .kspr__pil:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
-.kspr__markor { position: absolute; z-index: 0; top: 3px; bottom: 3px; left: 0; width: 0; border-radius: 9px; background: rgba(255, 255, 255, 0.12); transition: transform 0.28s var(--k-ut, cubic-bezier(0.22, 1, 0.36, 1)), width 0.28s var(--k-ut, cubic-bezier(0.22, 1, 0.36, 1)); }
+.kspr__markor { position: absolute; z-index: 0; top: 3px; bottom: 3px; left: 0; width: 0; border-radius: 9px; background: rgba(255, 255, 255, 0.12); transition: transform 0.28s var(--k-ut, var(--m-ut)), width 0.28s var(--k-ut, var(--m-ut)); }
 
 /* scrollbaren (om raderna inte ryms): diskret och mörk, rubriken och flikarna står kvar */
 .kspr__text::-webkit-scrollbar { width: 6px; }
 .kspr__text::-webkit-scrollbar-thumb { border-radius: 3px; background: rgba(255, 255, 255, 0.22); }
 .kspr__text::-webkit-scrollbar-track { background: transparent; }
 .kspr__text { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin: 0 -6px 0 0; padding-right: 6px;
-  scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.22) transparent; animation: kspr-text 0.24s var(--k-ut, cubic-bezier(0.22, 1, 0.36, 1)) both; }
+  scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.22) transparent; animation: kspr-text 0.24s var(--k-ut, var(--m-ut)) both; }
 @keyframes kspr-text { from { opacity: 0; transform: translateY(4px); } }
 .kspr__namn { margin: 10px 0 1px; font: 300 1.1875rem/1.15 var(--sans); letter-spacing: -0.01em; }
 .kspr__intro { margin: 0 0 6px; font: 400 0.75rem/1.35 var(--sans); color: rgba(255, 255, 255, 0.68); }
@@ -59,7 +59,7 @@
 /* etiketternas läge, ton och glidning sköts i skriptet (bara transform och opacitet) */
 .kspr__prick, .kspr__kort, .kspr__streck { opacity: 0; will-change: opacity, transform; }
 /* etiketterna tar inga pekarhändelser (de hindrar aldrig att man vrider huset): bilden provar själv om pekaren är över ett kort eller en prick */
-.kspr__prick { transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s; }
+.kspr__prick { transition: transform 0.22s var(--m-ut), box-shadow 0.22s; }
 .kspr__lapp--aktiv .kspr__prick { transform: scale(1.18); box-shadow: 0 0 0 4px rgba(240, 181, 110, 0.45), 0 0 18px 2px rgba(255, 181, 98, 0.55), 0 4px 10px -3px rgba(0, 0, 0, 0.6); }
 .kspr__lapp--aktiv .kspr__kort { box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.75), 0 12px 28px -14px rgba(0, 0, 0, 0.75); }
 .kspr__lapp--aktiv .kspr__streck { background: var(--k-accent, #f0b56e); }
@@ -99,9 +99,9 @@
 /* ---------- Premium (2026-11-26): rubrik, bockar, Begär offert på sista paketet, glidande text ---------- */
 .kspr { padding: 12px 14px 14px; border-radius: 22px; background: rgba(26, 24, 21, 0.9); }
 .kspr__etikett { font: 600 0.9375rem/1.2 var(--knappfont, var(--sans)); letter-spacing: -0.01em; text-transform: none; color: #fff; }
-.kspr__stang { transition: background-color 0.15s ease, transform 0.15s cubic-bezier(0.23, 1, 0.32, 1); }
+.kspr__stang { transition: background-color 0.15s ease, transform 0.15s var(--m-ut); }
 .kspr__stang:active, .kspr__flik:active, .kspr__pil:active:not(:disabled) { transform: scale(0.97); }
-.kspr__flik { transition: color 0.16s ease, transform 0.15s cubic-bezier(0.23, 1, 0.32, 1); }
+.kspr__flik { transition: color 0.16s ease, transform 0.15s var(--m-ut); }
 .kspr__markor { background: rgba(255, 255, 255, 0.14); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
 .kspr__namn { margin: 14px 0 3px; font: 600 1.1875rem/1.15 var(--knappfont, var(--sans)); letter-spacing: -0.015em; text-wrap: balance; }
 .kspr__intro { margin-bottom: 8px; }
@@ -110,14 +110,14 @@
 .kspr__lista .kspr__utan i { width: 22px; height: 22px; margin: -1px 0 0; background: rgba(143, 192, 160, 0.16); color: #8fc0a0; }
 .kspr__lista .kspr__utan i svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .kspr__pilar { gap: 8px; margin-top: 12px; }
-.kspr__pil { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; border-radius: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.15s cubic-bezier(0.23, 1, 0.32, 1); }
-.kspr__pil svg { flex: none; width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+.kspr__pil { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; border-radius: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.15s var(--m-ut); }
+.kspr__pil svg { flex: none; width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s var(--m-ut); }
 .kspr__pil--nasta:hover svg { transform: translateX(2px); }
 .kspr__pil:disabled { opacity: 0.3; }
 .kspr__pil--offert { flex: 1.4; }
 .kspr__pil--offert:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
-.kspr__text.kspr__text--fram { animation: kspr-fram 0.26s cubic-bezier(0.23, 1, 0.32, 1) both; }
-.kspr__text.kspr__text--bak { animation: kspr-bak 0.26s cubic-bezier(0.23, 1, 0.32, 1) both; }
+.kspr__text.kspr__text--fram { animation: kspr-fram 0.26s var(--m-ut) both; }
+.kspr__text.kspr__text--bak { animation: kspr-bak 0.26s var(--m-ut) both; }
 @keyframes kspr-fram { from { opacity: 0; transform: translateX(14px); } }
 @keyframes kspr-bak { from { opacity: 0; transform: translateX(-14px); } }
 .kspr--under { background: #1d1b17; }
@@ -133,7 +133,7 @@
 .kspr .kspr__lista { gap: 2px; padding: 2px 0; }
 .kspr .kspr__lista li { grid-template-columns: 22px 1fr; column-gap: 10px; align-items: center; margin: 0; padding: 7px 10px; border: 0; border-radius: 12px;
   background: transparent; box-shadow: inset 0 0 0 1px transparent; transition: background-color 0.18s ease, box-shadow 0.18s ease; }
-.kspr .kspr__lista li i { margin: 0; transition: box-shadow 0.18s ease, transform 0.18s cubic-bezier(0.23, 1, 0.32, 1); }
+.kspr .kspr__lista li i { margin: 0; transition: box-shadow 0.18s ease, transform 0.18s var(--m-ut); }
 .kspr .kspr__lista li[data-kspr-nr] { cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; }
 .kspr .kspr__lista li[data-kspr-nr]:hover { background: rgba(255, 255, 255, 0.06); }
 .kspr .kspr__lista li.kspr__rad--aktiv { background: rgba(240, 181, 110, 0.12); box-shadow: inset 0 0 0 1px rgba(240, 181, 110, 0.28); }
@@ -152,7 +152,7 @@
 .kspr__fyll { position: absolute; inset: 0; border-radius: 3px; background: linear-gradient(90deg, #e9a35a, var(--k-accent, #f0b56e)); transform-origin: 0 50%; transform: scaleX(var(--v)); }
 .kspr__mark { position: absolute; top: 50%; left: calc(11px + (100% - 22px) * var(--m)); width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(255, 255, 255, 0.5); pointer-events: none; }
 .kspr__knopp { position: absolute; top: 50%; left: calc(11px + (100% - 22px) * var(--v)); width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 4px 12px -2px rgba(0, 0, 0, 0.45), inset 0 0 0 0.5px rgba(0, 0, 0, 0.08); transition: transform 0.18s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.18s ease; pointer-events: none; }
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 4px 12px -2px rgba(0, 0, 0, 0.45), inset 0 0 0 0.5px rgba(0, 0, 0, 0.08); transition: transform 0.18s var(--m-ut), box-shadow 0.18s ease; pointer-events: none; }
 .kspr__reglage--drar .kspr__knopp, .kspr__reglage:active .kspr__knopp { transform: scale(1.14); }
 .kspr__reglage:focus-visible .kspr__knopp { box-shadow: 0 0 0 3px rgba(240, 181, 110, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.45); }
 .kspr__mangd-lagen { position: relative; height: 18px; margin: 0 11px; }

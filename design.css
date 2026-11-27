@@ -31347,3 +31347,189 @@ html body .rg-matt__rad dd.rg-matt__fot {
   html body .berattelse__steg:not(.aktiv):not(.dampad) .berattelse__nr { opacity: 0.45; }
   html body .berattelse__steg:not(.aktiv):not(.dampad) .flode__vem { filter: saturate(0.4); }
 }
+
+/* === Snabbare svar (2026-11-27, kundtestet) ==============================
+   Allt som öppnas av ett klick ska svara inom 0,1 s och stå färdigt inom
+   ungefär 0,3 s. Här kortas bara tiderna; samma rörelser, samma egenskaper
+   (transform och opacitet). Tidigare regler ligger kvar ovanför. */
+
+/* Mobilmenyn: panelen och raderna på plats inom ca 0,3 s, ikonen ritas
+   fram under tiden i stället för efter. Stängningen går fortare än
+   öppningen (premium.js döljer menyn efter 0,23 s). nav.mmeny väger lite
+   tyngre än ios.css 8, som laddas efter den här filen. */
+@media (max-width: 1040px) {
+  html body nav.mmeny {
+    transition: opacity 0.22s ease;
+  }
+  html body nav.mmeny .mmeny__panel {
+    transition: transform 0.2s var(--mjuk), opacity 0.16s ease;
+  }
+  html body .mmeny.mmeny--oppen .mmeny__panel {
+    transition: transform 0.3s var(--mjuk), opacity 0.18s ease;
+  }
+  html body .mmeny .mmeny__panel > * {
+    transition: opacity 0.14s ease, transform 0.2s var(--mjuk);
+  }
+  html body .mmeny.mmeny--oppen .mmeny__panel > * {
+    transition:
+      opacity 0.2s ease calc(0.02s + var(--i, 0) * 0.008s),
+      transform 0.26s var(--mjuk) calc(0.02s + var(--i, 0) * 0.008s);
+  }
+  html body .menu-button__line {
+    transition-duration: 0.25s;
+  }
+}
+@media (max-width: 1040px) and (prefers-reduced-motion: no-preference) {
+  html body .mmeny--oppen .mmeny__tipsbild path {
+    animation-duration: 0.24s;
+  }
+  html body .mmeny--oppen .mmeny__tipsbild path:nth-child(1) { animation-delay: 0.02s; }
+  html body .mmeny--oppen .mmeny__tipsbild path:nth-child(2) { animation-delay: 0.05s; }
+  html body .mmeny--oppen .mmeny__tipsbild path:nth-child(3) { animation-delay: 0.08s; }
+}
+
+/* Temaknappen: ikonen byts och sidan tonar på 0,25 s. */
+html body .temaknapp svg {
+  transition: translate 0.28s cubic-bezier(0.34, 1.4, 0.64, 1), rotate 0.28s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.18s ease;
+}
+html.tema-vt::view-transition-new(root) {
+  animation-duration: 0.25s;
+}
+
+/* Husväljaren på startsidan: nya bilden täcker på 0,3 s, kortet byts på
+   0,25 s. Den långsamma inzoomningen (8 s) får vara kvar - den är vila,
+   inte väntan. */
+html body .husval__ruta .husval__bild {
+  transition: opacity 0.25s ease 0.3s, transform 0.25s var(--mjuk) 0.3s;
+}
+html body .husval__ruta .husval__bild.aktiv {
+  transition: opacity 0.3s ease, transform 8s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+html body .husval .husval__info .husval__panel {
+  transition: opacity 0.2s ease 0.05s, transform 0.26s var(--mjuk) 0.05s, visibility 0s;
+}
+html body .husval .husval__info .husval__panel[hidden] {
+  transition: opacity 0.12s ease, transform 0.12s ease, visibility 0s 0.12s;
+}
+
+/* Kontaktformulärets steg och stapel. */
+@media (prefers-reduced-motion: no-preference) {
+  html body .contact-form[data-steg] .contact-form__del:not([hidden]) {
+    animation-duration: 0.28s;
+  }
+}
+html body .contact-form__faser i::after {
+  transition-duration: 0.35s;
+}
+
+/* Paketdialogen och frågorna. */
+html body .paketinfo[open] {
+  animation-duration: 0.24s;
+}
+@supports (interpolate-size: allow-keywords) {
+  html body .ih-fraga::details-content,
+  html body .rg-fraga::details-content {
+    transition-duration: 0.28s;
+  }
+}
+html body .ih-fraga summary::after,
+html body .rg-fraga__plus,
+html body .rg-fraga__plus::before,
+html body .rg-fraga__plus::after {
+  transition-duration: 0.25s;
+}
+html body .rg-fraga__svar {
+  transition: opacity 0.22s ease 0.04s, transform 0.28s var(--mjuk);
+}
+
+/* Sektioner som tonar in när de rullas fram: 0,5 s i stället för 0,85 s. */
+html.js-reveal body .reveal {
+  transition-duration: 0.5s;
+}
+
+/* Sidbytet: den nya sidan på plats inom 0,3 s. */
+::view-transition-old(root) {
+  animation-duration: 0.16s;
+}
+::view-transition-new(root) {
+  animation-duration: 0.28s;
+}
+
+/* "Vad ingår?"-knappen i paketlistan är 20 px. Träffytan växer till 40 px
+   utan att knappen ser annorlunda ut. */
+html body .paketlista__info {
+  position: relative;
+}
+html body .paketlista__info::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+}
+
+/* Prissidans "Se vad som ingår" och "Se paketen" är 18 px höga. Träffytan
+   växer till ca 42 px, utseendet är detsamma. */
+html body .prisoversikt__lank {
+  position: relative;
+}
+html body .prisoversikt__lank::before {
+  content: "";
+  position: absolute;
+  inset: -12px -4px;
+}
+
+/* Prisskalan: hacken, modellknapparna, zonerna och gränsstapeln följer
+   valet inom 0,3 s. */
+html body .granser__spar i {
+  transition: transform 0.3s var(--mjuk), background 0.25s ease;
+}
+html body .zon::after,
+html body .prisskala__hak,
+html body .prisskala__modell,
+html body .prisskala__tips {
+  transition-duration: 0.25s;
+}
+
+/* Prisskalans kort och bocken på vald modell, frågornas kantskugga. */
+html body .pkort {
+  transition-duration: 0.3s, 0.25s, 0.25s, 0.25s;
+}
+html body .pkort__passar {
+  transition-duration: 0.2s, 0.28s;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html body .prisskala__modell.aktiv::after {
+    animation-duration: 0.28s;
+  }
+}
+html body .ih-fraga,
+html body .rg-fraga {
+  transition-duration: 0.25s;
+}
+
+/* Temabytet: vy-övergången tonar mellan två bilder av sidan, så elementens
+   egna färgövergångar (0,2-0,45 s på hundratals element) behövs inte under
+   tiden. Utan dem står den nya bilden färdig direkt och bytet är klart när
+   tonningen är klar (0,25 s). Bara medan .tema-vt sitter på <html>. */
+html.tema-vt *,
+html.tema-vt *::before,
+html.tema-vt *::after {
+  transition: none !important;
+}
+
+/* Rubriker som reser sig ord för ord: 0,5 s per ord och 30 ms mellan
+   orden (förut 0,95 s och 55 ms, en rubrik på sex ord tog 1,2 s). */
+html body .rorelse.delad .ord > span {
+  transition: translate 0.5s var(--ease) calc(var(--i) * 30ms);
+}
+html body .rorelse.stiger {
+  transition-duration: 0.5s;
+}
+
+/* Prisskalans chip med närmaste hus och zonens rubrik. */
+html body .prisskala__chip {
+  animation-duration: 0.25s;
+}
+html body .zon b {
+  transition-duration: 0.25s;
+}

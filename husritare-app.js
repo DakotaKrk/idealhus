@@ -310,7 +310,7 @@ function bygg() {
     const bild = () => {
       if (jobb !== markorJobb) return;
       satsMarkor();
-      if (performance.now() - t0 < 340) requestAnimationFrame(bild);
+      if (performance.now() - t0 < 250) requestAnimationFrame(bild);   // namnets glidning: var(--m-ui), 240 ms
       else centrera(true);
     };
     bild();
@@ -683,17 +683,22 @@ function bygg() {
   let drag = null;
   huvud.addEventListener('pointerdown', e => {
     if (!mobil.matches || e.pointerType === 'mouse' || e.target.closest('.bflikar, button')) return;
-    drag = { y: e.clientY, t: performance.now(), dy: 0, id: e.pointerId };
+    drag = { y: e.clientY, t: performance.now(), dy: 0, id: e.pointerId, prov: [[performance.now(), e.clientY]] };
   });
+  // gummiband: åt "fel" håll följer arket allt trögare (som iOS), högst ca 40 px
+  const gummi = x => Math.sign(x) * 40 * (1 - 1 / (Math.abs(x) / 120 + 1));
   huvud.addEventListener('pointermove', e => {
     if (!drag || e.pointerId !== drag.id) return;
     drag.dy = e.clientY - drag.y;
-    const d = panelOppen ? Math.max(0, drag.dy) : Math.min(0, drag.dy) * 0.35;
+    drag.prov.push([performance.now(), e.clientY]); if (drag.prov.length > 6) drag.prov.shift();
+    const d = panelOppen ? (drag.dy > 0 ? drag.dy : gummi(drag.dy)) : (drag.dy < 0 ? drag.dy * 0.35 : gummi(drag.dy));
     if (Math.abs(d) > 3) { panel.style.transition = 'none'; panel.style.transform = 'translateY(' + d.toFixed(1) + 'px)'; }
   });
   const slapp = e => {
     if (!drag || (e && e.pointerId !== drag.id)) return;
-    const dy = drag.dy, fart = dy / Math.max(1, performance.now() - drag.t);
+    // farten de sista ~100 ms (inte medel över hela draget): en snabb snärt i slutet räknas
+    const nu = performance.now(), pr = drag.prov.filter(q => nu - q[0] < 110), f0 = pr[0] || drag.prov[0], f1 = drag.prov[drag.prov.length - 1];
+    const dy = drag.dy, fart = f1 && f0 && f1[0] > f0[0] ? (f1[1] - f0[1]) / (f1[0] - f0[0]) : dy / Math.max(1, nu - drag.t);
     drag = null;
     panel.style.transition = ''; panel.style.transform = '';
     if (panelOppen && (dy > 70 || fart > 0.5)) visaPanel(false);

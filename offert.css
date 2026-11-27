@@ -3,6 +3,9 @@
    skärmen är hög nog). Mobil: huset, sammanfattningen, formuläret, sedan stegen.
    Rörelse: kurvan ut (0.23, 1, 0.32, 1), 150–400 ms, bara transform, opacity och clip-path.
    Tacket: bocken ritas, huset lyfts i ett varmt ljus, rubriken kommer ord för ord. */
+/* Sidbytet från Bygg online: samma övergång som resten av sajten (styles.css). Utan opt-in här avvisas
+   ritarens påbörjade övergång med "opt-in disabled" som ett ohanterat fel på offertsidan. */
+@view-transition { navigation: auto; }
 html body.offsidan {
   --o-bg: var(--ben, #f7f5f0); --o-yta: #fff; --o-text: var(--kol, #1b1915); --o-text-2: #57514a; --o-text-3: #6e675d;
   --o-linje: rgba(27, 25, 21, 0.09); --o-linje-2: rgba(27, 25, 21, 0.18); --o-falt: #f6f3ee; --o-svag: #ece8e1;

@@ -753,7 +753,7 @@
       svar.textContent = zon === 'a'
         ? 'Vid ' + y + ' m² passar ett attefallshus. Inom detaljplan får det vara 30 m² utan bygglov.'
         : zon === 'b'
-          ? 'Våra fritidshus på 40 och 50 m² kräver bygglov. Som komplementbostadshus utanför detaljplan kan ett hus upp till 50 m² vara lovfritt.'
+          ? 'Inom detaljplan kräver våra fritidshus på 40 och 50 m² bygglov. Som komplementbostadshus utanför detaljplan kan ett hus upp till 50 m² vara lovfritt.'
           : 'Vid ' + y + ' m² krävs bygglov.';
 
       // Gränsmätaren och zonen på svarskortet.
@@ -2541,8 +2541,21 @@
     var knapp = gammal.cloneNode(true);
     gammal.parentNode.replaceChild(knapp, gammal);
     var html = document.documentElement;
-    var timer = 0;
+    var timer = 0, inertTimer = 0;
     function oppen() { return knapp.getAttribute('aria-expanded') === 'true'; }
+    // Sidan bakom menyn går inte att nå med tangentbord eller skärmläsare.
+    // inert på <main> räknar om stilen för hela sidan (30-40 ms på en
+    // telefon), så det görs när menyns rörelse redan är igång, inte i
+    // samma bildruta som klicket (kundtestet 2026-11-27). Tab-fällan nedan
+    // håller fokus i menyn under tiden.
+    function lasSidan(oppna) {
+      ['main', '.site-footer', '.tipsruta', '#cta-bar'].forEach(function (s) {
+        var e = $(s);
+        // Den fasta raden är inert även när den är dold (sidans eget skript).
+        if (e) e.inert = oppna || (s === '#cta-bar' && !e.classList.contains('cta-bar--synlig')) ||
+          (s === '.tipsruta' && e.classList.contains('tipsruta--undan'));
+      });
+    }
     function satt(oppna, direkt) {
       knapp.setAttribute('aria-expanded', String(oppna));
       knapp.setAttribute('aria-label', oppna ? 'Stäng meny' : 'Öppna meny');
@@ -2551,13 +2564,9 @@
       // Sidans rullelement är <html>; utan lås rullar sidan bakom menyn.
       html.style.overflow = oppna ? 'hidden' : '';
       clearTimeout(timer);
-      // Sidan bakom menyn går inte att nå med tangentbord eller skärmläsare.
-      ['main', '.site-footer', '.tipsruta', '#cta-bar'].forEach(function (s) {
-        var e = $(s);
-        // Den fasta raden är inert även när den är dold (sidans eget skript).
-        if (e) e.inert = oppna || (s === '#cta-bar' && !e.classList.contains('cta-bar--synlig')) ||
-          (s === '.tipsruta' && e.classList.contains('tipsruta--undan'));
-      });
+      clearTimeout(inertTimer);
+      if (direkt || lugn) lasSidan(oppna);
+      else inertTimer = setTimeout(function () { lasSidan(oppna); }, oppna ? 320 : 240);
       if (oppna) {
         panel.hidden = false;
         void panel.offsetWidth;
@@ -2567,7 +2576,7 @@
       } else {
         panel.classList.remove('mmeny--oppen');
         if (direkt || lugn) panel.hidden = true;
-        else timer = setTimeout(function () { panel.hidden = true; }, 460);
+        else timer = setTimeout(function () { panel.hidden = true; }, 230);
       }
     }
     knapp.addEventListener('click', function () { satt(!oppen()); });

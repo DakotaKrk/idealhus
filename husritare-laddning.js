@@ -5,6 +5,7 @@
 // Tidslinjen är densamma som SVG-reserven i husritare-app.css: konturerna dras (taket, väggarna, ordet bokstav för
 // bokstav), ytorna fylls, konturerna tonar bort. Delarna, längderna och färgen mäts på sidan (rita-hus.html, skriptet
 // efter .bintro) och skickas hit; när ytorna står klara svarar tråden 'ritad'.
+// Sajtens entré (logga.js, intro()) använder samma tråd med egna, kortare tider (p.t och m.tider) och en fart vid sen målning.
 'use strict';
 let duk = null, ctx = null, kor = false, fart = 1, delar = null, farg = '#1b1915', skala = 1, start = 0, raf = 0, svarat = false, stopp = false;
 const NU = () => performance.now();

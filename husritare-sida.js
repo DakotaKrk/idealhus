@@ -6,12 +6,12 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261126r';
-import { PRODUKTER, GRUPPER, OMRADEN, PROD_IKON, skapaKort, skapaFokus, loggaBild, loggaReserv } from './husritare-produkt.js?v=20261126r';
-import { kopplaPris, lasPaket } from './husritare-pris.js?v=20261126r';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261126s';
+import { PRODUKTER, GRUPPER, OMRADEN, PROD_IKON, skapaKort, skapaFokus, loggaBild, loggaReserv } from './husritare-produkt.js?v=20261126s';
+import { kopplaPris, lasPaket } from './husritare-pris.js?v=20261126s';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 
-const MOTOR_V = '20261126r';
+const MOTOR_V = '20261126s';
 // Standardutseendet: utan val i adressen (och när man kommer tillbaka till sidan med bakåtknappen
 // eller laddar om den) möts man av samma bild varje gång: Kupa 40 i falurött med svart tak och
 // vita detaljer, vinter, gyllene timmen, kameran i startvyn. Adressen som sidan själv skriver
