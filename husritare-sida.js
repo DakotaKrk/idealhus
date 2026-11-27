@@ -6,12 +6,12 @@
 // ritare.inneVyer, ritare.miljoLista); annars syns sidan som förut.
 // Inbäddat läge (?inbaddad=1, för husens egna sidor i en iframe): bara scenen och en
 // kort verktygsrad, länk till hela husritaren, och 3D:n startar först när den syns.
-import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261126s';
-import { PRODUKTER, GRUPPER, OMRADEN, PROD_IKON, skapaKort, skapaFokus, loggaBild, loggaReserv } from './husritare-produkt.js?v=20261126s';
-import { kopplaPris, lasPaket } from './husritare-pris.js?v=20261126s';
+import { skapaRitare, FARGER, MODELLER } from './husritare.js?v=20261126t';
+import { PRODUKTER, GRUPPER, OMRADEN, PROD_IKON, skapaKort, skapaFokus, loggaBild, loggaReserv } from './husritare-produkt.js?v=20261126t';
+import { kopplaPris, lasPaket } from './husritare-pris.js?v=20261126t';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 
-const MOTOR_V = '20261126s';
+const MOTOR_V = '20261126t';
 // Standardutseendet: utan val i adressen (och när man kommer tillbaka till sidan med bakåtknappen
 // eller laddar om den) möts man av samma bild varje gång: Kupa 40 i falurött med svart tak och
 // vita detaljer, vinter, gyllene timmen, kameran i startvyn. Adressen som sidan själv skriver
@@ -3148,7 +3148,14 @@ async function oppnaProdukt(id, kalla) {
   const opt = { fri: prodFri() };
   // dolda delar: en genomskärning i väggen eller taket öppnas, kameran åker till den
   if (P.snitt && ritare.sprangVy && ritare.sprangVy.snitt) { try { const r = ritare.sprangVy.snitt(id); if (r) opt.ram = r; } catch (e) { console.warn(e); } }
-  try { svar = ritare.produkt(id, opt); } catch (e) { console.warn(e); }
+  // motorn tackar nej medan kameran fortfarande åker (förra klicket) eller huset byggs: försök igen tills den
+  // är ledig (högst ~2,5 s) i stället för att klicket försvinner ("ibland händer inget")
+  for (let f = 0; f < 32 && jobb === prodJobb; f++) {
+    try { svar = ritare.produkt(id, opt); } catch (e) { console.warn(e); }
+    if (svar || !((ritare.flyger && ritare.flyger()) || (ritare.upptagen && ritare.upptagen()))) break;
+    await new Promise(r => setTimeout(r, 80));
+  }
+  if (jobb !== prodJobb) return;
   if (svar) prodFokus(jobb);
   if (svar && svar.ute) { nuVy = null; markeraTumme(null); }
   // kortet när kameran närmar sig (åkningen tar cirka 1,2 s)

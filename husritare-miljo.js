@@ -23,17 +23,17 @@
 //   miljo.lista                                  // [['studio','Studio'], ...]
 //   miljo.statistik()                            // { anrop, trianglar } för den aktiva miljön
 //   miljo.dispose();
-import { skapaBil } from './husritare-bil.js?v=20261126s';   // elbilen med laddbox vid entrén
+import { skapaBil } from './husritare-bil.js?v=20261126t';   // elbilen med laddbox vid entrén
 import { GLTFLoader } from './vendor/three/addons/loaders/GLTFLoader.js';   // 3D-grästuvorna (images/3d/gras-tuvor.glb)
-import { skapaBebott, uteGrupper } from './husritare-bebott.js?v=20261126s';   // spår av folk som bor där: brevlåda, cykel, grill …
-import { skapaVaxtPaket } from './husritare-vaxter.js?v=20261126s';   // fotoskannade gräs och markväxter (images/3d/vaxt-paket.bin)
-import { skapaOmgivning, villaSkog } from './husritare-omgivning.js?v=20261126s';   // lekplats, park, fler kvarter, liv och skogsbryn i villaområdet
-import { skapaFab } from './husritare-fab.js?v=20261126s';   // fria Fab-modeller: björkar, eka, odlingsbädd, uteplats, kantsten (CC BY)
-import { skapaNatur } from './husritare-natur.js?v=20261126s';   // fotoskannad skogsmark (Poly Haven, CC0): ormbunkar, mossa, stenblock, stubbar, stockar
-import { skapaBlommor } from './husritare-blommor.js?v=20261126s';   // riktiga trädgårdsblommor och rabatter (målad atlas, ett ritanrop)
-import { ph } from './husritare-ph.js?v=20261126s';   // Poly Haven-rekvisita (CC0) i villaområdet: gatlyktor, brunnslock, sopkärl, slang, krukor, nisse, utemöbler
-import { skapaFolk } from './husritare-folk.js?v=20261126s';   // riktiga animerade människor (City People, The Sound Guy), laddas lat
-import { skapaSjo } from './husritare-sjo.js?v=20261126s';   // vid sjön: vattnet (spegling, vågor, djup), holmarna och sjötomtens detaljer
+import { skapaBebott, uteGrupper } from './husritare-bebott.js?v=20261126t';   // spår av folk som bor där: brevlåda, cykel, grill …
+import { skapaVaxtPaket } from './husritare-vaxter.js?v=20261126t';   // fotoskannade gräs och markväxter (images/3d/vaxt-paket.bin)
+import { skapaOmgivning, villaSkog } from './husritare-omgivning.js?v=20261126t';   // lekplats, park, fler kvarter, liv och skogsbryn i villaområdet
+import { skapaFab } from './husritare-fab.js?v=20261126t';   // fria Fab-modeller: björkar, eka, odlingsbädd, uteplats, kantsten (CC BY)
+import { skapaNatur } from './husritare-natur.js?v=20261126t';   // fotoskannad skogsmark (Poly Haven, CC0): ormbunkar, mossa, stenblock, stubbar, stockar
+import { skapaBlommor } from './husritare-blommor.js?v=20261126t';   // riktiga trädgårdsblommor och rabatter (målad atlas, ett ritanrop)
+import { ph } from './husritare-ph.js?v=20261126t';   // Poly Haven-rekvisita (CC0) i villaområdet: gatlyktor, brunnslock, sopkärl, slang, krukor, nisse, utemöbler
+import { skapaFolk } from './husritare-folk.js?v=20261126t';   // riktiga animerade människor (City People, The Sound Guy), laddas lat
+import { skapaSjo } from './husritare-sjo.js?v=20261126t';   // vid sjön: vattnet (spegling, vågor, djup), holmarna och sjötomtens detaljer
 
 // ---- små hjälpare (utan THREE) -------------------------------------------
 function slump(fro) {

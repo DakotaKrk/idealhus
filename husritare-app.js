@@ -430,6 +430,10 @@ function bygg() {
 
   // ---- panelen fälls ihop och ut ----
   const fallKnappar = () => $$('[data-bfall]');
+  // 3D-duken och dess motor (husritare-sida.js sätter duk.__ritare)
+  const panelDuk = () => [...document.querySelectorAll('canvas')].find(c => c.__ritare);
+  const panelMotor = () => { const d = panelDuk(); return d ? d.__ritare : null; };
+  const dukBredd = () => { const d = panelDuk(); return d ? d.getBoundingClientRect().width : 0; };
   let panelOppen = true;
   function visaPanel(pa) {
     if (pa === panelOppen) return;
@@ -438,13 +442,17 @@ function bygg() {
       b.setAttribute('aria-expanded', String(pa));
       b.setAttribute('aria-label', pa ? (b.classList.contains('bpanel__fall--mobil') ? 'Fäll ihop valen' : 'Fäll ihop panelen') : (b.classList.contains('bpanel__fall--mobil') ? 'Visa valen' : 'Visa panelen'));
     });
-    // dator: panelen glider undan först, sedan växer scenen (en enda storleksändring av bilden)
-    if (!pa && !mobil.matches && !lugn()) {
+    // dator: panelen glider undan först, sedan växer scenen (en enda storleksändring av bilden). Huset hoppar inte:
+    // motorn förskjuter vyn så att huset står kvar där det stod och glider sedan mjukt till den nya mitten (glidVy)
+    const glid = !mobil.matches && !lugn(), w0 = glid ? dukBredd() : 0;
+    const glidNu = () => { if (!glid) return; const r = panelMotor(), w1 = dukBredd(); if (r && typeof r.glidVy === 'function' && w0 && w1 && Math.abs(w1 - w0) > 2) { try { r.glidVy((w1 - w0) / 2, 520); } catch (e) { /* äldre motor */ } } };
+    if (!pa && glid) {
       H.classList.add('bpanel-ut');
-      setTimeout(() => { if (!panelOppen) { H.classList.add('bpanel-dold'); H.classList.remove('bpanel-ut'); } }, 260);
+      setTimeout(() => { if (!panelOppen) { H.classList.add('bpanel-dold'); H.classList.remove('bpanel-ut'); glidNu(); } }, 260);
     } else {
       H.classList.remove('bpanel-ut');
       H.classList.toggle('bpanel-dold', !pa);
+      glidNu();
       if (pa && !lugn()) { panel.classList.remove('bpanel--in'); void panel.offsetWidth; panel.classList.add('bpanel--in'); }
     }
     if (pa) requestAnimationFrame(() => flyttaMarkor(true));

@@ -22,9 +22,9 @@
 //   bebott.satt(namn, mal, plats)   // namn: 'studio' | 'tradgard' | 'skog' | 'vinter'
 //   bebott.dispose()
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { fab } from './husritare-fab.js?v=20261126s';   // skannade odlingsbäddar (Fab) när husritare-miljo.js startat modulen
-import { blommor } from './husritare-blommor.js?v=20261126s';   // riktiga pelargoner och margeriter i krukorna
-import { ph } from './husritare-ph.js?v=20261126s';   // Poly Haven-rekvisita (CC0): vattenkanna, lykta, stövlar, yxa, spade, gungstol, bänk, picknickbord …
+import { fab } from './husritare-fab.js?v=20261126t';   // skannade odlingsbäddar (Fab) när husritare-miljo.js startat modulen
+import { blommor } from './husritare-blommor.js?v=20261126t';   // riktiga pelargoner och margeriter i krukorna
+import { ph } from './husritare-ph.js?v=20261126t';   // Poly Haven-rekvisita (CC0): vattenkanna, lykta, stövlar, yxa, spade, gungstol, bänk, picknickbord …
 
 // Husens öppningar (som HUS i husritare.js, nyckel L×W): [sida, u från vänster sett utifrån, bredd,
 // underkant, dörr]. Bara för att inte ställa saker framför fönster och dörrar; okänt hus = bara dörrarna i mal.

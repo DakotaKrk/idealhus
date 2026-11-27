@@ -2327,7 +2327,15 @@ export function kopplaSprang({ ritare, scen, knapp, tillUte, lage }) {
   // avståndet längs riktningen d från p till första ytan i rot (eller null)
   function snAvst(rot, p, d) {
     snRay.set(p, d); snRay.far = 3; snRay.layers.enableAll(); snRay.camera = kamera;
-    const h = (Array.isArray(rot) ? snRay.intersectObjects(rot, true) : snRay.intersectObject(rot, true)).find(x => x.object.isMesh && x.object.visible && x.object.material && !(x.object.material.transparent && x.object.material.opacity < 0.3));
+    const ok = x => x.object.isMesh && x.object.visible && x.object.material && !(x.object.material.transparent && x.object.material.opacity < 0.3);
+    // huset (första i listan) via motorns rutnät: Raycaster mot husets halva miljon trianglar frös sidan i 2,5 s
+    if (Array.isArray(rot) && typeof I.stral === 'function') {
+      let best = I.stral(p, d, 3);
+      const h2 = snRay.intersectObjects(rot.slice(1), true).find(ok);
+      if (h2 && (best === null || h2.distance < best)) best = h2.distance;
+      return best;
+    }
+    const h = (Array.isArray(rot) ? snRay.intersectObjects(rot, true) : snRay.intersectObject(rot, true)).find(ok);
     return h ? h.distance : null;
   }
   // en ruta (u0..u1, v0..v1) på en plan yta i ramen M (u, v i planet, +n ut): ytans läge n0 om hela

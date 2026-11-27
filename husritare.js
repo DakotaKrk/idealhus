@@ -6,9 +6,9 @@ import * as THREE from './vendor/three/three.module.min.js';
 import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
 import { mergeGeometries } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from './vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { skapaMiljo } from './husritare-miljo.js?v=20261126s';
-import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261126s';
-import { skapaPlanlager } from './husritare-plan.js?v=20261126s';
+import { skapaMiljo } from './husritare-miljo.js?v=20261126t';
+import { byggInne, byggInneSteg, INNE_VYER } from './husritare-inne.js?v=20261126t';
+import { skapaPlanlager } from './husritare-plan.js?v=20261126t';
 
 // ---- Husen enligt ritningarna ------------------------------------------
 // Öppningar: [sida, x från vänster sett utifrån, bredd, underkant, höjd, typ, rutor]
@@ -6939,6 +6939,7 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
       renderer.shadowMap.needsUpdate = true;
       if (senTona.t >= 1) { senTona = null; senK = -1; }
     }
+    stegVyGlid();
     const skuggRuta = renderer.shadowMap.needsUpdate;
     kamera.layers.mask = !inneLage || skuggRuta ? 3 : 1;
     renderer.render(scene, kamera);
@@ -7000,6 +7001,26 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
   // fryst under sidans helskärmsövergång: duken sträcks med CSS medan den glider ut, och
   // bildbufferten byts först när rörelsen har stannat (annars en tung ruta mitt i rörelsen)
   let storlekFryst = false;
+  // Vyglidningen (sidopanelen fälls ihop/ut): bilden byter storlek en gång, och vyn förskjuts så att huset först
+  // står kvar där det stod och glider sedan mjukt till mitten (setViewOffset; ingen storleksändring per ruta)
+  let vyGlid = null, glidKommer = false, glidPos = null;
+  function glidVy(px, ms) {
+    const pos = glidPos; glidPos = null;
+    if ((!px && !pos) || lugn) { vyGlid = null; if (pos) { kamera.position.copy(pos.till); styrNu(); begarRender(); } return; }
+    vyGlid = { px, pos, t0: performance.now(), ms: ms || 480, satt: false };
+    begarRender();
+  }
+  function stegVyGlid() {
+    if (!vyGlid) return;
+    // någon annan förskjutning (sprängvyn, vinkelbilderna) har företräde
+    if (kamera.view && kamera.view.enabled && !vyGlid.satt) { vyGlid = null; return; }
+    const k = Math.min(1, (performance.now() - vyGlid.t0) / vyGlid.ms), e = 1 - Math.pow(1 - k, 3);
+    // startvyn passas in i den nya storleken: kameran glider dit i samma rörelse i stället för att hoppa
+    const P = vyGlid.pos;
+    if (P && startLage && !flyg && !aka) { kamera.position.lerpVectors(P.fran, P.till, k < 1 ? e : 1); styrNu(); }
+    if (k < 1 && dukB && dukH) { if (vyGlid.px) { kamera.setViewOffset(dukB, dukH, vyGlid.px * (1 - e), 0, dukB, dukH); vyGlid.satt = true; } begarRender(); }
+    else { if (vyGlid.satt) kamera.clearViewOffset(); vyGlid = null; }
+  }
   function storlek() {
     if (storlekFryst) return;
     const r = duk.getBoundingClientRect();
@@ -7344,7 +7365,11 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     if (!startLage || !husGrupp || helMarg || helO) return;
     const p = mal('runt', kamera, hem);
     if (aka && aka.intro) aka.till.copy(p);
-    else if (!aka && !inneLage && !flyg && !oppen.pa && oppen.t === 0) { styr.target.copy(hem); kamera.position.copy(p); styrNu(); begarRender(); }
+    else if (!aka && !inneLage && !flyg && !oppen.pa && oppen.t === 0) {
+      // sidopanelen (glidVy): kameran glider till den nya startvyn i stället för att hoppa dit
+      if (glidKommer) { styr.target.copy(hem); glidPos = { fran: kamera.position.clone(), till: p.clone() }; return; }
+      styr.target.copy(hem); kamera.position.copy(p); styrNu(); begarRender();
+    }
   }
   styr.addEventListener('start', () => { startLage = false; });
   duk.addEventListener('wheel', () => { startLage = false; }, { passive: true });
@@ -7946,6 +7971,8 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     // redo: löfte som blir klart när första bilden är ritad; starta(): introt börjar (slöjan öppnas)
     redo, starta,
     fryStorlek(pa) { storlekFryst = !!pa; if (!pa) storlek(); },
+    // sidopanelen: storleken nu (en gång) och vyn glider px (CSS-pixlar) till mitten, se glidVy
+    glidVy(px, ms) { storlekFryst = false; glidKommer = true; try { storlek(); } finally { glidKommer = false; } glidVy(px, ms); },
     // sidans helskärm (husritare-sida.js): övergången och kontrollernas marginaler i helskärm
     helStart,
     helMarg(m) { helMarg = m || null; if (!helO) storlek(); },
@@ -8041,6 +8068,9 @@ float snoBrus(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 
     sprang: {
       THREE, scene, kamera, styr, mat, HUS, lugn, renderer,
       hus: () => husGrupp, matt: () => matGrupp, inneData,
+      // snabb stråle mot husets fasta nät (rutnätet ovan, under 1 ms): avståndet till första träffen eller null.
+      // Genomskärningen letar en fri plats med ~70 strålar per prövad ruta; med Raycaster tog det 2,5 s (sidan frös)
+      stral(a, d, L) { if (!husGrupp) return null; const h = prodNatStrale(prodNatFor(), a, d, L); return h ? h.t : null; },
       steg(fn) { sprangSteg = typeof fn === 'function' ? fn : null; begarRender(); },
       begarRender, skugga() { nySkugga = true; }, ljus() { try { lageLjus(); } catch (e) { console.warn(e); } },
       akTill(pos, mal, tid = 1.4) {
